@@ -6,7 +6,6 @@ import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { BigNumber } from '@ethersproject/bignumber';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -22,7 +21,7 @@ describe('BtcSendReview', () => {
 					sendTokenId: readable(BTC_MAINNET_TOKEN.id),
 					sendTokenStandard: readable(BTC_MAINNET_TOKEN.standard),
 					sendTokenSymbol: readable(BTC_MAINNET_TOKEN.symbol),
-					sendBalance: readable(BigNumber.from(balance))
+					sendBalance: readable(balance)
 				}
 			]
 		]);

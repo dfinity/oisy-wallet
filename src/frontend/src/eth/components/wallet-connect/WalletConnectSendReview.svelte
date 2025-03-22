@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
@@ -17,14 +16,14 @@
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
 
-	export let amount: BigNumber;
+	export let amount: bigint;
 	export let destination: string;
 	export let data: string | undefined;
 	export let erc20Approve: boolean;
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 
-	let amountDisplay: BigNumber;
+	let amountDisplay: bigint;
 	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data) : amount;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -32,7 +31,7 @@
 
 <ContentWithToolbar>
 	<SendData
-		amount={formatToken({ value: amountDisplay.toBigInt() })}
+		amount={formatToken({ value: amountDisplay })}
 		{destination}
 		token={$sendToken}
 		balance={$balance}

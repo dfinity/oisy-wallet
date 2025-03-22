@@ -10,7 +10,6 @@ import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
-import type { BigNumber } from '@ethersproject/bignumber';
 
 export const initTransactionsListener = ({
 	token,
@@ -33,7 +32,7 @@ export const initTransactionsListener = ({
 
 	return initErc20PendingTransactionsListenerProvider({
 		address,
-		listener: async (params: { hash: string; value: BigNumber }) =>
+		listener: async (params: { hash: string; value: bigint }) =>
 			await processErc20Transaction({ token, ...params, type: 'mined' }),
 		contract: token as Erc20Token
 	});

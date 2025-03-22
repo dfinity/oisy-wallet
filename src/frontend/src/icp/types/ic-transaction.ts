@@ -34,11 +34,11 @@ export interface IcTransactionUi {
 	type: IcTransactionType;
 	// e.g. BTC Received
 	typeLabel?: string;
-	from?: string;
+	from?: string | null;
 	// e.g. From: BTC Network
 	fromLabel?: string;
 	fromExplorerUrl?: string;
-	to?: string;
+	to?: string | null;
 	// e.g. To: BTC Network
 	toLabel?: string;
 	toExplorerUrl?: string;

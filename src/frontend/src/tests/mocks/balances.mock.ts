@@ -11,6 +11,7 @@ export const bn1Bi = 1n;
 export const bn2Bi = 2n;
 export const bn3Bi = 3n;
 
+// TODO: remove these, unnecessary anymore since they are all bigint
 export const bn1 = BigNumber.from(bn1Bi);
 export const bn2 = BigNumber.from(bn2Bi);
 export const bn3 = BigNumber.from(bn3Bi);

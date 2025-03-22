@@ -13,7 +13,7 @@
 	export let token: OptionToken;
 
 	let from: string;
-	let to: string | undefined;
+	let to: string | null;
 	let type: SolTransactionType;
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
