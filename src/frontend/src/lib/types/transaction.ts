@@ -31,8 +31,7 @@ export type EthersTransaction = Pick<
 >;
 
 export type Transaction = Omit<EthersTransaction, 'data'> &
-	Pick<TransactionResponse, 'from' | 'to'> &
-	Partial<Pick<TransactionResponse, 'blockNumber'>> & {
+	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to'> & {
 		timestamp?: number;
 		pendingTimestamp?: number;
 		displayTimestamp?: number;
@@ -53,12 +52,13 @@ export type TransactionType = z.infer<typeof TransactionTypeSchema>;
 
 export type TransactionStatus = z.infer<typeof TransactionStatusSchema>;
 
-export type TransactionUiCommon = Pick<Transaction, 'from' | 'to'> & {
-	timestamp?: bigint;
-	txExplorerUrl?: string;
-	toExplorerUrl?: string;
-	fromExplorerUrl?: string;
-};
+export type TransactionUiCommon = Pick<Transaction, 'from' | 'to'> &
+	Partial<Pick<Transaction, 'blockNumber'>> & {
+		timestamp?: bigint;
+		txExplorerUrl?: string;
+		toExplorerUrl?: string;
+		fromExplorerUrl?: string;
+	};
 
 export type AnyTransactionUi =
 	| BtcTransactionUi
