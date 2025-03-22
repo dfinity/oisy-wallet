@@ -1,4 +1,4 @@
-import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
+import type { BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
 export const parseToken = ({
@@ -7,4 +7,4 @@ export const parseToken = ({
 }: {
 	value: string;
 	unitName?: string | BigNumberish;
-}): BigNumber => Utils.parseUnits(value, unitName);
+}): bigint => Utils.parseUnits(value, unitName).toBigInt();
