@@ -7,12 +7,11 @@ TestnetCases.forEach(({ networkSymbol, tokenSymbol }) => {
 	});
 
 	testWithII(`should enable ${networkSymbol} network`, async ({ page, iiPage, isMobile }) => {
-		const testnetsPage = new TestnetsPage({ page, iiPage });
+		const testnetsPage = new TestnetsPage({ page, iiPage, isMobile });
 		await testnetsPage.waitForReady();
 		await testnetsPage.enableTestnets({ networkSymbol, tokenSymbol });
 		const tokenCardTestId = testnetsPage.getTokenCardTestId({ tokenSymbol, networkSymbol });
 		await testnetsPage.takeScreenshot({
-			isMobile,
 			freezeCarousel: true,
 			centeredElementTestId: tokenCardTestId
 		});

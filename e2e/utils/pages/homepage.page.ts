@@ -36,6 +36,7 @@ import {
 interface HomepageParams {
 	page: Page;
 	viewportSize?: ViewportSize;
+	isMobile?: boolean;
 }
 
 export type HomepageLoggedInParams = {
@@ -57,7 +58,6 @@ interface WaitForModalParams {
 }
 
 interface TakeScreenshotParams {
-	isMobile?: boolean;
 	freezeCarousel?: boolean;
 	centeredElementTestId?: string;
 	screenshotTarget?: Locator;
@@ -83,11 +83,14 @@ interface ShowSelectorParams {
 abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
+	readonly #isMobile?: boolean;
+
 	private promotionCarousel?: PromotionCarousel;
 
-	protected constructor({ page, viewportSize }: HomepageParams) {
+	protected constructor({ page, viewportSize, isMobile }: HomepageParams) {
 		this.#page = page;
 		this.#viewportSize = viewportSize;
+		this.#isMobile = isMobile;
 	}
 
 	protected async clickByTestId({
@@ -460,13 +463,7 @@ abstract class Homepage {
 	}
 
 	async takeScreenshot(
-		{
-			isMobile = false,
-			freezeCarousel = false,
-			centeredElementTestId,
-			screenshotTarget
-		}: TakeScreenshotParams = {
-			isMobile: false,
+		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
 			freezeCarousel: false
 		}
 	): Promise<void> {
@@ -483,8 +480,6 @@ abstract class Homepage {
 
 		const element = screenshotTarget ?? this.#page;
 
-		await this.#page.mouse.move(0, 0);
-
 		if (freezeCarousel) {
 			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
 			await this.#page.clock.pauseAt(Date.now());
@@ -492,13 +487,15 @@ abstract class Homepage {
 			await this.#page.clock.pauseAt(Date.now());
 		}
 
-		if (!isMobile) {
+		if (!this.#isMobile) {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
 		}
 
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
+
+		await this.#page.mouse.move(0, 0);
 
 		const colorSchemes = ['light', 'dark'] as const;
 		for (const scheme of colorSchemes) {
@@ -508,7 +505,7 @@ abstract class Homepage {
 			await this.expectToHaveScreenshot({ element, centeredElementTestId });
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
-			if (isMobile) {
+			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
 				await this.expectToHaveScreenshot({ element, centeredElementTestId, fullPage: true });
 				await this.showMobileNavigationMenu();
