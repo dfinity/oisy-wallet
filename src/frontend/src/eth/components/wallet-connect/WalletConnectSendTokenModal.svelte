@@ -138,7 +138,7 @@
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	let amount: bigint;
-	$: amount = firstTransaction?.value ?? '0';
+	$: amount = BigInt(firstTransaction?.value ?? '0');
 
 	const send = async () => {
 		const { success } = await sendServices({

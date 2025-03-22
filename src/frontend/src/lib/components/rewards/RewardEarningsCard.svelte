@@ -26,7 +26,7 @@
 
 {#if nonNullish(token)}
 	<div
-		class={`relative w-1/3 rounded-xl p-2 text-center text-sm text-primary-inverted md:text-base ${amount.gt(0n) ? 'bg-success-primary' : 'bg-tertiary-inverted'}`}
+		class={`relative w-1/3 rounded-xl p-2 text-center text-sm text-primary-inverted md:text-base ${amount > ZERO_BI ? 'bg-success-primary' : 'bg-tertiary-inverted'}`}
 		class:transition={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
