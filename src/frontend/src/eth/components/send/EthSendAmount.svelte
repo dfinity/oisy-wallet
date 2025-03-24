@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { Utils } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -15,6 +14,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
@@ -39,14 +39,14 @@
 
 		// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
 		const parsedSendBalance = nonNullish($sendBalance)
-			? Utils.parseUnits(
-					formatToken({
+			? parseToken({
+					value: formatToken({
 						value: $sendBalance,
 						unitName: $sendTokenDecimals,
 						displayDecimals: $sendTokenDecimals
 					}),
-					$sendTokenDecimals
-				).toBigInt()
+					unitName: $sendTokenDecimals
+				})
 			: ZERO_BI;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
