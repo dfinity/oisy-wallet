@@ -3,14 +3,13 @@ import ConvertAmountDestination from '$lib/components/convert/ConvertAmountDesti
 import { TOKEN_INPUT_AMOUNT_EXCHANGE } from '$lib/constants/test-ids.constants';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import { render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 import { readable } from 'svelte/store';
 
 describe('ConvertAmountDestination', () => {
 	const sendAmount = 20;
 	const receiveAmount = sendAmount;
 	const exchangeRate = 0.01;
-	const balance = BigNumber.from(10000n);
+	const balance = 10000n;
 
 	const props = {
 		sendAmount
