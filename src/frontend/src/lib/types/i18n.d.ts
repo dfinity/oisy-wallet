@@ -224,19 +224,16 @@ interface I18nHero {
 interface I18nSettings {
 	text: {
 		title: string;
-		general: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
-		session_duration: string;
-		session_expires_in: string;
+		session: string;
 		session_description: string;
 		networks: string;
 		test_networks: string;
 		enable_testnets: string;
-		active_networks: string;
-		active_networks_description: string;
 		hide_zero_balances_description: string;
+		active_networks: string;
 		credentials_title: string;
 		pouh_credential: string;
 		pouh_credential_description: string;
@@ -263,6 +260,7 @@ interface I18nNetworks {
 	more: string;
 	chain_fusion: string;
 	network: string;
+	testnet: string;
 	number_of_enabled: string;
 }
 
@@ -757,6 +755,7 @@ interface I18nTransactions {
 		transaction_history_unavailable: string;
 		missing_index_canister_explanation: string;
 		index_canister_not_working_explanation: string;
+		token_needs_enabling: string;
 	};
 	error: {
 		loading_transactions: string;

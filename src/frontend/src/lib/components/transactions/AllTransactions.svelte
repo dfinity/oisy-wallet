@@ -7,7 +7,6 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
-	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';

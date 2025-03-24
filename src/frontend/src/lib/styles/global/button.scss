@@ -410,38 +410,3 @@ a.as-button {
 		@apply px-2;
 	}
 }
-
-// DROPDOWN ITEM
-.dropdown-item:not(.loading) {
-	@apply relative;
-	@apply text-primary;
-	@apply rounded-lg;
-	@apply px-2;
-	@apply py-2;
-
-	&:hover:not(.disabled):not([disabled]) {
-		@apply bg-brand-subtle-10;
-	}
-
-	&.selected {
-		//@apply bg-brand-subtle-10;
-
-		& > span > svg {
-			color: var(--color-foreground-brand-primary-alt);
-		}
-	}
-
-	&:after {
-		content: "";
-		height: 1px;
-		@apply bg-brand-subtle-20;
-		@apply inset-2;
-		@apply absolute;
-		@apply top-full;
-	}
-}
-
-.dropdown-item.disabled:not(.loading),
-.dropdown-item[disabled]:not(.loading) {
-	@apply text-tertiary-inverted;
-}

@@ -1,26 +1,25 @@
 <script lang="ts">
+	import { IconSettings } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import { goto } from '$app/navigation';
+	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
 	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import { nonNullish } from '@dfinity/utils';
-	import Logo from '$lib/components/ui/Logo.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { IconSettings } from '@dfinity/gix-components';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { SettingsModalType } from '$lib/enums/settings-modal-types';
-	import { goto } from '$app/navigation';
-	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isMobile } from '$lib/utils/device.utils';
 
 	export let disabled = false;
 
@@ -37,8 +36,6 @@
 	bind:this={dropdown}
 	ariaLabel={$i18n.networks.title}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
-	anchor={document.getElementsByTagName('header')?.[0]?.children[1]}
-	direction={isMobile() ? 'rtl' : 'ltr'}
 	{disabled}
 >
 	{#if nonNullish($selectedNetwork)}
@@ -69,23 +66,25 @@
 			{/each}
 		{/if}
 
-		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between text-nowrap">
+		<div
+			class="mb-2 ml-2 mt-5 flex flex-col items-center justify-between text-nowrap md:flex-row md:items-start"
+		>
 			<span class="flex">
 				<Button
 					link
 					on:click={() => {
 						goto('/settings');
 						dropdown?.close();
-						// a small delay is enough for the opening of the modal to happen after page switching
+						// a small delay is needed for the opening of the modal after page switching
 						setTimeout(() => modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS), 1);
 					}}
 					><IconSettings /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button
 				>
 			</span>
-			<span class="text-md ml-4 mr-2 flex text-right text-sm">
+			<span class="ml-0 mr-2 flex text-nowrap text-right text-base text-sm md:ml-4">
 				{replacePlaceholders($i18n.networks.number_of_enabled, {
-					$numNetworksEnabled: $networksMainnets.length + $networksTestnets.length + '',
-					$numNetworksTotal: SUPPORTED_NETWORKS.length + ''
+					$numNetworksEnabled: `${$networksMainnets.length + $networksTestnets.length}`,
+					$numNetworksTotal: `${SUPPORTED_NETWORKS.length}`
 				})}</span
 			>
 		</div>

@@ -253,10 +253,9 @@
 			"networks": "Networks",
 			"test_networks": "Test networks",
 			"enable_testnets": "Enable test networks",
-			"active_networks": "Active networks ",
-			"active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions of inactive networks will not show or be included in your available balance.",
-			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance.",
-			"active_networks": "Active networks",
+          "active_networks": "Active networks ",
+          "active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions of inactive networks will not show or be included in your available balance.",
+          "hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance.",
 			"credentials_title": "Credentials",
 			"pouh_credential": "Humanity Credential",
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
@@ -284,6 +283,7 @@
 		"more": "More networks coming soon...",
 		"chain_fusion": "All networks",
 		"network": "Network",
+		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled"
 	},
 	"receive": {
@@ -823,7 +823,8 @@
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
 			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
-			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual."
+			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
+			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history."
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
