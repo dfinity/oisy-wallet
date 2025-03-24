@@ -9,7 +9,6 @@
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
-	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 </script>
 
 <header
