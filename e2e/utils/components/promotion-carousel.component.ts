@@ -11,7 +11,7 @@ export class PromotionCarousel {
 	public async freezeCarouselToSlide(): Promise<void> {
 		// TODO: the carousel is too flaky for the E2E tests, so we need completely hide it and work on freezing it in a permanent state in another PR.
 
-		const selector = `[data-tid="${CAROUSEL_CONTAINER}"]`;
+		const selector = `[data-tid="${CAROUSEL_CONTAINER}"]:visible`;
 		const isVisible = await this.#page.isVisible(selector);
 		if (!isVisible) {
 			await this.#page.locator(selector).evaluate((element) => (element.style.display = 'none'));
