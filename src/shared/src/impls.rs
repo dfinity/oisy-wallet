@@ -10,7 +10,7 @@ use crate::{
     types::{
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
-        networks::{NetworksSettings, SaveTestnetsSettingsError},
+        network::{NetworksSettings, SaveTestnetsSettingsError},
         settings::Settings,
         token::UserToken,
         user_profile::{

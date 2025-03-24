@@ -1,7 +1,7 @@
 use ic_cdk::api::time;
 use shared::types::{
     dapp::AddDappSettingsError,
-    networks::SaveTestnetsSettingsError,
+    network::SaveTestnetsSettingsError,
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
     CredentialType, Version,
 };

@@ -30,7 +30,7 @@ use shared::{
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
+        network::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},

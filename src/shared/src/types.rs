@@ -120,58 +120,6 @@ pub trait TokenVersion: Debug {
 /// The default maximum length of a token symbol.
 pub const MAX_SYMBOL_LENGTH: usize = 20;
 
-pub mod networks {
-    use std::collections::BTreeMap;
-
-    use candid::{CandidType, Deserialize};
-
-    use crate::types::Version;
-
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
-    pub struct NetworkSettings {
-        pub enabled: bool,
-        pub is_testnet: bool,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default, Ord, PartialOrd)]
-    pub enum NetworkSettingsFor {
-        #[default]
-        InternetComputer,
-        BitcoinMainnet,
-        BitcoinTestnet,
-        BitcoinRegtest,
-        EthereumMainnet,
-        EthereumSepolia,
-        SolanaMainnet,
-        SolanaTestnet,
-        SolanaDevnet,
-        SolanaLocal,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
-    pub struct TestnetsSettings {
-        pub show_testnets: bool,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
-    pub struct NetworksSettings {
-        pub networks: BTreeMap<NetworkSettingsFor, NetworkSettings>,
-        pub testnets: TestnetsSettings,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub enum SaveTestnetsSettingsError {
-        UserNotFound,
-        VersionMismatch,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct SetShowTestnetsRequest {
-        pub show_testnets: bool,
-        pub current_user_version: Option<Version>,
-    }
-}
-
 pub mod dapp {
     use candid::{CandidType, Deserialize};
 
@@ -219,7 +167,7 @@ pub mod dapp {
 pub mod settings {
     use candid::{CandidType, Deserialize};
 
-    use crate::types::{dapp::DappSettings, networks::NetworksSettings};
+    use crate::types::{dapp::DappSettings, network::NetworksSettings};
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct Settings {
