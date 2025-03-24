@@ -28,6 +28,7 @@ import {
 	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
 import { bn1Bi, bn2, bn2Bi, bn3, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
+import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
@@ -327,7 +328,7 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 	it('should return a dictionary with correct balances for the list of mainnet and testnet tokens', () => {
 		const balances = {
 			...mockBalances,
-			[BTC_TESTNET_TOKEN.id]: { data: bn3, certified }
+			[BTC_TESTNET_TOKEN.id]: { data: bn3Bi, certified }
 		};
 		const tokens = [...mockTokens, BTC_TESTNET_TOKEN];
 
@@ -367,7 +368,7 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 	it('should return an empty dictionary if no mainnet tokens are in the list', () => {
 		const balances = {
 			...mockBalances,
-			[BTC_TESTNET_TOKEN.id]: { data: bn2, certified }
+			[BTC_TESTNET_TOKEN.id]: { data: bn2Bi, certified }
 		};
 		const tokens = [BTC_TESTNET_TOKEN];
 
