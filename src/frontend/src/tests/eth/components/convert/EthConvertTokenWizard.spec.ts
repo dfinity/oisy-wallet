@@ -13,7 +13,16 @@ import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { initCertifiedSetterStore } from '$lib/stores/certified-setter.store';
-import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
+import {
+	CONVERT_CONTEXT_KEY,
+	initConvertContext,
+	type ConvertContext
+} from '$lib/stores/convert.store';
+import {
+	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
+	type TokenActionValidationErrorsContext
+} from '$lib/stores/token-action-validation-errors.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
@@ -26,7 +35,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import type { MinterInfo } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 import { get, readable, writable } from 'svelte/store';
 import { type MockInstance } from 'vitest';
 
@@ -53,20 +61,18 @@ describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
 	const mockContext = () =>
-		new Map([
+		new Map<symbol, ConvertContext | TokenActionValidationErrorsContext>([
 			[
 				CONVERT_CONTEXT_KEY,
-				{
-					sourceToken: readable(ETHEREUM_TOKEN),
-					destinationToken: readable(SEPOLIA_TOKEN)
-				}
-			]
+				initConvertContext({ sourceToken: ETHEREUM_TOKEN, destinationToken: SEPOLIA_TOKEN })
+			],
+			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 	const mockMinterInfo = mockCkMinterInfo;
 	const mockFees = {
-		gas: BigNumber.from(100n),
-		maxFeePerGas: BigNumber.from(100n),
-		maxPriorityFeePerGas: BigNumber.from(100n)
+		gas: 100n,
+		maxFeePerGas: 100n,
+		maxPriorityFeePerGas: 100n
 	};
 	const props = {
 		currentStep: {
