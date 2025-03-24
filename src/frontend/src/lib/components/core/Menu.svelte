@@ -8,6 +8,7 @@
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
+	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
@@ -19,7 +20,8 @@
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
-		NAVIGATION_MENU_VIP_BUTTON, NAVIGATION_MENU_REFERRAL_BUTTON
+		NAVIGATION_MENU_VIP_BUTTON,
+		NAVIGATION_MENU_REFERRAL_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isVipUser } from '$lib/services/reward-code.services';
@@ -31,7 +33,6 @@
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
-	import IconShare from "$lib/components/icons/lucide/IconShare.svelte";
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -84,9 +85,9 @@
 		{/if}
 
 		<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.refer_a_friend}
-				testId={NAVIGATION_MENU_REFERRAL_BUTTON}
-				on:click={modalStore.openReferralCode}
+			ariaLabel={$i18n.navigation.alt.refer_a_friend}
+			testId={NAVIGATION_MENU_REFERRAL_BUTTON}
+			on:click={modalStore.openReferralCode}
 		>
 			<IconShare size="20" />
 			{$i18n.navigation.text.refer_a_friend}
