@@ -1,7 +1,7 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
-import { kongSwapTokenPrice } from '$lib/rest/kongswap.rest';
+import { fetchBatchKongSwapPrices, kongSwapTokenPrice } from '$lib/rest/kongswap.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
 	CoingeckoSimplePriceResponse,
@@ -26,15 +26,7 @@ const fetchIcrcPricesFromKongSwap = async (
 	missingIds: LedgerCanisterIdText[]
 ): Promise<CoingeckoSimpleTokenPriceResponse> => {
 	if (missingIds.length === 0) return {};
-
-	const tokens = await Promise.all(
-		missingIds.map((id) =>
-			kongSwapTokenPrice({ id: id.toLowerCase() }).catch((error) => {
-				console.warn(`KongSwap fallback failed for ${id}`, error);
-				return null;
-			})
-		)
-	);
+	const tokens = await fetchBatchKongSwapPrices(missingIds);
 
 	return formatKongSwapToCoingeckoPrices(tokens);
 };
