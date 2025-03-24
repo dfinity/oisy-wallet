@@ -446,29 +446,11 @@ abstract class Homepage {
 		await this.#page.setViewportSize({ height: stablePageHeight, width });
 	}
 
-	private async expectToHaveScreenshot({
-		element,
-		centeredElementTestId,
-		fullPage = false
-	}: {
-		element: Page | Locator;
-		centeredElementTestId?: string;
-		fullPage?: boolean;
-	}): Promise<void> {
-		// if (nonNullish(centeredElementTestId)) {
-		// 	await this.scrollIntoViewCentered(centeredElementTestId);
-		// }
-
-		await expect(element).toHaveScreenshot({ fullPage });
-	}
-
 	async takeScreenshot(
 		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
 			freezeCarousel: false
 		}
 	): Promise<void> {
-		// await this.#page.waitForTimeout(1000);
-
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
@@ -502,12 +484,12 @@ abstract class Homepage {
 			await this.#page.emulateMedia({ colorScheme: scheme });
 			await this.#page.waitForTimeout(1000);
 
-			await this.expectToHaveScreenshot({ element, centeredElementTestId });
+			await expect(element).toHaveScreenshot();
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
-				await this.expectToHaveScreenshot({ element, centeredElementTestId, fullPage: true });
+				await expect(element).toHaveScreenshot({ fullPage: true });
 				await this.showMobileNavigationMenu();
 			}
 		}
