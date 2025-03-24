@@ -20,6 +20,7 @@
 	import { goto } from '$app/navigation';
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isMobile } from '$lib/utils/device.utils';
 
 	export let disabled = false;
 
@@ -36,6 +37,8 @@
 	bind:this={dropdown}
 	ariaLabel={$i18n.networks.title}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
+	anchor={document.getElementsByTagName('header')?.[0]?.children[1]}
+	direction={isMobile() ? 'rtl' : 'ltr'}
 	{disabled}
 >
 	{#if nonNullish($selectedNetwork)}
