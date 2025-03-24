@@ -6,7 +6,7 @@ import {
 	getUserInfo,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
-import { MILLISECONDS_IN_DAY, ZERO, ZERO_BI } from '$lib/constants/app.constants';
+import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
@@ -16,7 +16,6 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 const queryVipUser = async (params: {
@@ -235,15 +234,15 @@ export const getUserRewardsTokenAmounts = async ({
 	icpToken: IcToken;
 	identity: Identity;
 }): Promise<{
-	ckBtcReward: BigNumber;
-	ckUsdcReward: BigNumber;
-	icpReward: BigNumber;
+	ckBtcReward: bigint;
+	ckUsdcReward: bigint;
+	icpReward: bigint;
 	amountOfRewards: number;
 }> => {
 	const initialRewards = {
-		ckBtcReward: ZERO,
-		ckUsdcReward: ZERO,
-		icpReward: ZERO,
+		ckBtcReward: ZERO_BI,
+		ckUsdcReward: ZERO_BI,
+		icpReward: ZERO_BI,
 		amountOfRewards: 0
 	};
 
@@ -260,15 +259,15 @@ export const getUserRewardsTokenAmounts = async ({
 		return ckBtcToken.ledgerCanisterId === canisterId
 			? {
 					...acc,
-					ckBtcReward: acc.ckBtcReward.add(amount),
+					ckBtcReward: acc.ckBtcReward + amount,
 					amountOfRewards: acc.amountOfRewards + 1
 				}
 			: icpToken.ledgerCanisterId === canisterId
-				? { ...acc, icpReward: acc.icpReward.add(amount), amountOfRewards: acc.amountOfRewards + 1 }
+				? { ...acc, icpReward: acc.icpReward + amount, amountOfRewards: acc.amountOfRewards + 1 }
 				: ckUsdcToken.ledgerCanisterId === canisterId
 					? {
 							...acc,
-							ckUsdcReward: acc.ckUsdcReward.add(amount),
+							ckUsdcReward: acc.ckUsdcReward + amount,
 							amountOfRewards: acc.amountOfRewards + 1
 						}
 					: acc;
