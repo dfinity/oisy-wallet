@@ -8,13 +8,12 @@ import {
 import { mockCkBtcMinterInfo } from '$tests/mocks/ckbtc.mock';
 import type { MinterInfo as CkBtcMinterInfo } from '@dfinity/ckbtc';
 import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
-import { BigNumber } from 'alchemy-sdk';
 
 describe('asserts-amount.utils', () => {
 	describe('assertAmount', () => {
 		const params = {
-			userAmount: BigNumber.from(1000n),
-			balance: BigNumber.from(2000n),
+			userAmount: 1000n,
+			balance: 2000n,
 			fee: 100n
 		};
 
@@ -22,7 +21,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertAmount({
 					...params,
-					balance: BigNumber.from(900n)
+					balance: 900n
 				})
 			).toBe('insufficient-funds');
 		});
@@ -31,7 +30,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertAmount({
 					...params,
-					balance: BigNumber.from(1050n)
+					balance: 1050n
 				})
 			).toBe('insufficient-funds-for-fee');
 		});
@@ -43,9 +42,9 @@ describe('asserts-amount.utils', () => {
 
 	describe('assertErc20Amount', () => {
 		const params = {
-			userAmount: BigNumber.from(1000n),
-			balance: BigNumber.from(2000n),
-			balanceForFee: BigNumber.from(1000n),
+			userAmount: 1000n,
+			balance: 2000n,
+			balanceForFee: 1000n,
 			fee: 100n
 		};
 
@@ -53,7 +52,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertErc20Amount({
 					...params,
-					balance: BigNumber.from(900n)
+					balance: 900n
 				})
 			).toBe('insufficient-funds');
 		});
@@ -62,7 +61,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertErc20Amount({
 					...params,
-					balanceForFee: BigNumber.from(50n)
+					balanceForFee: 50n
 				})
 			).toBe('insufficient-funds-for-fee');
 		});
@@ -74,8 +73,8 @@ describe('asserts-amount.utils', () => {
 
 	describe('assertCkBtcAmount', () => {
 		const params = {
-			userAmount: BigNumber.from(1000n),
-			balance: BigNumber.from(2000n),
+			userAmount: 1000n,
+			balance: 2000n,
 			fee: 100n,
 			minterInfo: { data: mockCkBtcMinterInfo, certified: true }
 		};
@@ -84,7 +83,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertCkBtcAmount({
 					...params,
-					balance: BigNumber.from(900n)
+					balance: 900n
 				})
 			).toBe('insufficient-funds');
 		});
@@ -93,7 +92,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertCkBtcAmount({
 					...params,
-					balance: BigNumber.from(1050n)
+					balance: 1050n
 				})
 			).toBe('insufficient-funds-for-fee');
 		});
@@ -141,8 +140,8 @@ describe('asserts-amount.utils', () => {
 
 	describe('assertCkEthAmount', () => {
 		const params = {
-			userAmount: BigNumber.from(1000n),
-			balance: BigNumber.from(2000n),
+			userAmount: 1000n,
+			balance: 2000n,
 			fee: 100n,
 			minterInfo: {
 				data: { minimum_withdrawal_amount: [500n] } as CkEthMinterInfo,
@@ -154,7 +153,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertCkEthAmount({
 					...params,
-					balance: BigNumber.from(900n)
+					balance: 900n
 				})
 			).toBe('insufficient-funds');
 		});
@@ -163,7 +162,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertCkEthAmount({
 					...params,
-					balance: BigNumber.from(1050n)
+					balance: 1050n
 				})
 			).toBe('insufficient-funds-for-fee');
 		});
@@ -172,7 +171,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertCkEthAmount({
 					...params,
-					userAmount: BigNumber.from(50n)
+					userAmount: 50n
 				})
 			).toBe('minimum-amount-not-reached');
 		});
@@ -220,9 +219,9 @@ describe('asserts-amount.utils', () => {
 
 	describe('assertCkErc20Amount', () => {
 		const params = {
-			userAmount: BigNumber.from(1000n),
-			balance: BigNumber.from(2000n),
-			balanceForFee: BigNumber.from(1000n),
+			userAmount: 1000n,
+			balance: 2000n,
+			balanceForFee: 1000n,
 			ethereumEstimateFee: 500n,
 			fee: 100n
 		};
@@ -231,7 +230,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertCkErc20Amount({
 					...params,
-					balance: BigNumber.from(900n)
+					balance: 900n
 				})
 			).toBe('insufficient-funds');
 		});
@@ -240,7 +239,7 @@ describe('asserts-amount.utils', () => {
 			expect(
 				assertCkErc20Amount({
 					...params,
-					balance: BigNumber.from(1050n)
+					balance: 1050n
 				})
 			).toBe('insufficient-funds-for-fee');
 		});

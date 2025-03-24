@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fromNullable, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IcTokenFees from '$icp/components/fee/IcTokenFees.svelte';
@@ -12,9 +11,14 @@
 	import DestinationValue from '$lib/components/address/DestinationValue.svelte';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { IC_CONVERT_FORM_TEST_ID } from '$lib/constants/test-ids.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+		type TokenActionValidationErrorsContext
+	} from '$lib/stores/token-action-validation-errors.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -29,23 +33,25 @@
 	const { sourceToken, sourceTokenExchangeRate, destinationToken, balanceForFee } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	const dispatch = createEventDispatcher();
+	const {
+		insufficientFunds,
+		insufficientFundsForFee,
+		amountLessThanLedgerFee,
+		minimumAmountNotReached,
+		unknownMinimumAmount,
+		minterInfoNotCertified
+	} = getContext<TokenActionValidationErrorsContext>(TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY);
 
-	let insufficientFunds: boolean;
-	let insufficientFundsForFee: boolean;
-	let amountLessThanLedgerFee: boolean;
-	let minimumAmountNotReached: boolean;
-	let unknownMinimumAmount: boolean;
-	let minterInfoNotCertified: boolean;
+	const dispatch = createEventDispatcher();
 
 	let invalid: boolean;
 	$: invalid =
-		insufficientFunds ||
-		insufficientFundsForFee ||
-		amountLessThanLedgerFee ||
-		minimumAmountNotReached ||
-		unknownMinimumAmount ||
-		minterInfoNotCertified ||
+		$insufficientFunds ||
+		$insufficientFundsForFee ||
+		$amountLessThanLedgerFee ||
+		$minimumAmountNotReached ||
+		$unknownMinimumAmount ||
+		$minterInfoNotCertified ||
 		invalidAmount(sendAmount) ||
 		isNullishOrEmpty(destination);
 
@@ -54,13 +60,11 @@
 
 	let formattedMinterMinimumAmount: string | undefined;
 	$: formattedMinterMinimumAmount = formatToken({
-		value: BigNumber.from(
-			isCkBtc
-				? ($ckBtcMinterInfoStore?.[$sourceToken.id]?.data.retrieve_btc_min_amount ?? 0n)
-				: (fromNullable(
-						$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.minimum_withdrawal_amount ?? []
-					) ?? 0n)
-		),
+		value: isCkBtc
+			? ($ckBtcMinterInfoStore?.[$sourceToken.id]?.data.retrieve_btc_min_amount ?? ZERO_BI)
+			: (fromNullable(
+					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.minimum_withdrawal_amount ?? []
+				) ?? ZERO_BI),
 		unitName: $sourceToken.decimals,
 		displayDecimals: $sourceToken.decimals
 	});
@@ -73,25 +77,25 @@
 	$: tokenForFee = isCkBtc ? $sourceToken : ($ethereumFeeTokenCkEth ?? $ckEthereumNativeToken);
 
 	let errorMessage: string | undefined;
-	$: errorMessage = insufficientFundsForFee
+	$: errorMessage = $insufficientFundsForFee
 		? replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 				$symbol: tokenForFee.symbol,
 				$balance: formatToken({
-					value: $balanceForFee ?? ZERO,
+					value: $balanceForFee ?? ZERO_BI,
 					unitName: tokenForFee.decimals,
 					displayDecimals: tokenForFee.decimals
 				})
 			})
-		: unknownMinimumAmount
+		: $unknownMinimumAmount
 			? replacePlaceholders($i18n.send.assertion.unknown_minimum_ckbtc_amount, {
 					$sourceTokenSymbol: $sourceToken.symbol,
 					$destinationTokenSymbol: $destinationToken.symbol
 				})
-			: amountLessThanLedgerFee
+			: $amountLessThanLedgerFee
 				? replacePlaceholders($i18n.send.assertion.minimum_ledger_fees, {
 						$symbol: $sourceToken.symbol
 					})
-				: minimumAmountNotReached
+				: $minimumAmountNotReached
 					? replacePlaceholders($i18n.send.assertion.minimum_amount, {
 							$symbol: $sourceToken.symbol,
 							$amount: formattedMinterMinimumAmount
@@ -99,7 +103,7 @@
 					: undefined;
 
 	let infoMessage: string | undefined;
-	$: infoMessage = minterInfoNotCertified
+	$: infoMessage = $minterInfoNotCertified
 		? isCkBtc
 			? $i18n.send.info.ckbtc_certified
 			: $i18n.send.info.cketh_certified
@@ -110,16 +114,11 @@
 	on:icNext
 	bind:sendAmount
 	bind:receiveAmount
-	bind:insufficientFunds
-	bind:insufficientFundsForFee
-	bind:amountLessThanLedgerFee
-	bind:minimumAmountNotReached
-	bind:unknownMinimumAmount
-	bind:minterInfoNotCertified
 	{ethereumEstimateFee}
 	totalFee={totalSourceTokenFee}
 	destinationTokenFee={totalDestinationTokenFee}
 	disabled={invalid}
+	testId={IC_CONVERT_FORM_TEST_ID}
 >
 	<svelte:fragment slot="message">
 		{#if nonNullish(errorMessage) || nonNullish(infoMessage)}
