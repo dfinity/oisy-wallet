@@ -66,7 +66,9 @@
 			{/each}
 		{/if}
 
-		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between text-nowrap">
+		<div
+			class="mb-2 ml-2 mt-5 flex flex-col items-center justify-between text-nowrap md:flex-row md:items-start"
+		>
 			<span class="flex">
 				<Button
 					link
