@@ -264,6 +264,7 @@ interface I18nNetworks {
 	more: string;
 	chain_fusion: string;
 	network: string;
+	number_of_enabled: string;
 }
 
 interface I18nReceive {
