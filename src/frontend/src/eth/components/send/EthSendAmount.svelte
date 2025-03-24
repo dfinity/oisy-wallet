@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { Utils } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -15,6 +14,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
@@ -39,19 +39,19 @@
 
 		// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
 		const parsedSendBalance = nonNullish($sendBalance)
-			? Utils.parseUnits(
-					formatToken({
+			? parseToken({
+					value: formatToken({
 						value: $sendBalance,
 						unitName: $sendTokenDecimals,
 						displayDecimals: $sendTokenDecimals
 					}),
-					$sendTokenDecimals
-				).toBigInt()
+					unitName: $sendTokenDecimals
+				})
 			: ZERO_BI;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId)) {
-			const total = userAmount + ($minGasFee?.toBigInt() ?? ZERO_BI);
+			const total = userAmount + ($minGasFee ?? ZERO_BI);
 
 			if (total > parsedSendBalance) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
@@ -67,7 +67,7 @@
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
 		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO_BI;
-		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee.toBigInt()) {
+		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees
 			);

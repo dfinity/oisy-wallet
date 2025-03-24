@@ -50,7 +50,7 @@ export const validateUserAmount = ({
 					displayDecimals: token.decimals
 				}),
 				unitName: token.decimals
-			}).toBigInt()
+			})
 		: ZERO_BI;
 
 	// if the function called in the swap flow, we only need to check the basic assertAmount condition
