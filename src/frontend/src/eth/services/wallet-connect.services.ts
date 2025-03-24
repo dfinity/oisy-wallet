@@ -26,7 +26,6 @@ import type { OptionEthAddress } from '$lib/types/address';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 type WalletConnectSendParams = WalletConnectExecuteParams & {
@@ -34,7 +33,7 @@ type WalletConnectSendParams = WalletConnectExecuteParams & {
 	address: OptionEthAddress;
 	fee: FeeStoreData;
 	modalNext: () => void;
-	amount: BigNumber;
+	amount: bigint;
 } & SendParams;
 
 type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
@@ -150,7 +149,7 @@ export const send = ({
 					progress,
 					lastProgressStep: ProgressStepsSend.APPROVE,
 					token,
-					amount: amount.toBigInt(),
+					amount,
 					maxFeePerGas,
 					maxPriorityFeePerGas,
 					gas: nonNullish(gasWC) ? gasWC : gas,
