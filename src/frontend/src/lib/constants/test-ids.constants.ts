@@ -55,6 +55,10 @@ export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_AIRDROPS = 'navigation-item-rewards';
 
+export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
+
+export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
+
 export const AMOUNT_DATA = 'amount-data';
 export const AMOUNT_INPUT = 'amount-input';
 export const DESTINATION_INPUT = 'destination-input';
@@ -96,6 +100,7 @@ export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
 export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
+export const MANAGE_TOKENS_MODAL_CLOSE = 'manage-tokens-modal-close';
 export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
@@ -113,3 +118,7 @@ export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 
 export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
+
+export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
+export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
+export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';

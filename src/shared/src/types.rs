@@ -6,6 +6,12 @@ use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 
 pub type Timestamp = u64;
 
+pub mod account;
+pub mod network;
+pub mod number;
+pub mod snapshot;
+pub mod token_id;
+
 #[cfg(test)]
 mod tests;
 
@@ -93,6 +99,30 @@ pub struct Config {
 
 pub mod transaction {
     use candid::{CandidType, Deserialize, Nat};
+    use serde::Serialize;
+
+    use super::account::AccountId;
+    use crate::types::network::marker_trait::Network;
+
+    #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+    #[repr(u8)]
+    pub enum TransactionType {
+        Send = 0,
+        Receive = 1,
+    }
+
+    #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+    pub struct Transaction<N, A>
+    where
+        A: AccountId<N>,
+        N: Network,
+    {
+        pub network: N,
+        pub transaction_type: TransactionType,
+        pub amount: u64,
+        pub timestamp: u64,
+        pub counterparty: A,
+    }
 
     #[derive(CandidType, Deserialize)]
     pub struct SignRequest {
@@ -113,11 +143,11 @@ pub trait TokenVersion: Debug {
     #[must_use]
     fn get_version(&self) -> Option<Version>;
     #[must_use]
-    fn clone_with_incremented_version(&self) -> Self
+    fn with_incremented_version(&self) -> Self
     where
         Self: Sized + Clone;
     #[must_use]
-    fn clone_with_initial_version(&self) -> Self
+    fn with_initial_version(&self) -> Self
     where
         Self: Sized + Clone;
 }
@@ -362,6 +392,58 @@ pub mod signer {
     }
 }
 
+pub mod networks {
+    use std::collections::BTreeMap;
+
+    use candid::{CandidType, Deserialize};
+
+    use crate::types::Version;
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct NetworkSettings {
+        pub enabled: bool,
+        pub is_testnet: bool,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default, Ord, PartialOrd)]
+    pub enum NetworkSettingsFor {
+        #[default]
+        InternetComputer,
+        BitcoinMainnet,
+        BitcoinTestnet,
+        BitcoinRegtest,
+        EthereumMainnet,
+        EthereumSepolia,
+        SolanaMainnet,
+        SolanaTestnet,
+        SolanaDevnet,
+        SolanaLocal,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct TestnetsSettings {
+        pub show_testnets: bool,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct NetworksSettings {
+        pub networks: BTreeMap<NetworkSettingsFor, NetworkSettings>,
+        pub testnets: TestnetsSettings,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum SaveTestnetsSettingsError {
+        UserNotFound,
+        VersionMismatch,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct SetShowTestnetsRequest {
+        pub show_testnets: bool,
+        pub current_user_version: Option<Version>,
+    }
+}
+
 pub mod dapp {
     use candid::{CandidType, Deserialize};
 
@@ -409,10 +491,11 @@ pub mod dapp {
 pub mod settings {
     use candid::{CandidType, Deserialize};
 
-    use crate::types::dapp::DappSettings;
+    use crate::types::{dapp::DappSettings, networks::NetworksSettings};
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct Settings {
+        pub networks: NetworksSettings,
         pub dapp: DappSettings,
     }
 }

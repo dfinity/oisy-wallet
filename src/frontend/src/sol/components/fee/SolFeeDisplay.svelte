@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
@@ -26,7 +25,7 @@
 			<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
 			<ExchangeAmountDisplay
-				amount={BigNumber.from($fee)}
+				amount={$fee}
 				decimals={$decimals}
 				symbol={$symbol}
 				exchangeRate={$sendTokenExchangeRate}
@@ -39,7 +38,7 @@
 				<svelte:fragment slot="label">{$i18n.fee.text.ata_fee}</svelte:fragment>
 
 				<ExchangeAmountDisplay
-					amount={BigNumber.from($ataFee)}
+					amount={$ataFee}
 					decimals={$decimals}
 					symbol={$symbol}
 					exchangeRate={$sendTokenExchangeRate}

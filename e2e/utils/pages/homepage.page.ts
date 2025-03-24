@@ -7,6 +7,7 @@ import {
 	MANAGE_TOKENS_MODAL_BUTTON,
 	MANAGE_TOKENS_MODAL_SAVE,
 	MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
+	MOBILE_NAVIGATION_MENU,
 	NAVIGATION_ITEM_HOMEPAGE,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
@@ -16,6 +17,7 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	SIDEBAR_NAVIGATION_MENU,
 	TESTNET_TOGGLE,
 	TOKEN_BALANCE,
 	TOKEN_CARD
@@ -34,6 +36,7 @@ import {
 interface HomepageParams {
 	page: Page;
 	viewportSize?: ViewportSize;
+	isMobile?: boolean;
 }
 
 export type HomepageLoggedInParams = {
@@ -73,14 +76,21 @@ interface WaitForLocatorOptions {
 	timeout?: number;
 }
 
+interface ShowSelectorParams {
+	display?: 'block' | 'flex';
+}
+
 abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
+	readonly #isMobile?: boolean;
+
 	private promotionCarousel?: PromotionCarousel;
 
-	protected constructor({ page, viewportSize }: HomepageParams) {
+	protected constructor({ page, viewportSize, isMobile }: HomepageParams) {
 		this.#page = page;
 		this.#viewportSize = viewportSize;
+		this.#isMobile = isMobile;
 	}
 
 	protected async clickByTestId({
@@ -119,9 +129,31 @@ abstract class Homepage {
 		return await this.#page.isVisible(selector);
 	}
 
+	private async isSelectorNotVisible({ selector }: SelectorOperationParams): Promise<boolean> {
+		const isVisible = await this.isSelectorVisible({ selector });
+
+		return !isVisible;
+	}
+
 	private async hideSelector({ selector }: SelectorOperationParams): Promise<void> {
 		if (await this.isSelectorVisible({ selector })) {
 			await this.#page.locator(selector).evaluate((element) => (element.style.display = 'none'));
+		}
+	}
+
+	private async showSelector({
+		selector,
+		display = 'block'
+	}: SelectorOperationParams & ShowSelectorParams): Promise<void> {
+		if (await this.isSelectorNotVisible({ selector })) {
+			const locator = this.#page.locator(selector);
+
+			if (display === 'flex') {
+				await locator.evaluate((element) => (element.style.display = 'flex'));
+				return;
+			}
+
+			await locator.evaluate((element) => (element.style.display = 'block'));
 		}
 	}
 
@@ -297,10 +329,7 @@ abstract class Homepage {
 		if (isNullish(this.promotionCarousel)) {
 			this.promotionCarousel = new PromotionCarousel(this.#page);
 		}
-
-		await this.promotionCarousel.navigateToSlide(1);
-		await this.promotionCarousel.freezeCarousel();
-
+		await this.promotionCarousel.freezeCarouselToSlide(1);
 		await this.waitForLoadState();
 	}
 
@@ -324,10 +353,31 @@ abstract class Homepage {
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 
+	private async scrollToTop(testId: string): Promise<void> {
+		if (await this.isVisibleByTestId(testId)) {
+			const selector = `[data-tid="${testId}"]`;
+			const locator = this.#page.locator(selector);
+			await locator.evaluate((element) => {
+				element.scrollTo(0, 0);
+			});
+		}
+	}
+
 	private async scrollIntoViewCentered(testId: string): Promise<void> {
 		const selector = `[data-tid="${testId}"]`;
 		const locator = this.#page.locator(selector);
 		await locator.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'center' }));
+	}
+
+	private async hideMobileNavigationMenu(): Promise<void> {
+		await this.hideSelector({ selector: `[data-tid="${MOBILE_NAVIGATION_MENU}"]` });
+	}
+
+	private async showMobileNavigationMenu(): Promise<void> {
+		await this.showSelector({
+			selector: `[data-tid="${MOBILE_NAVIGATION_MENU}"]`,
+			display: 'flex'
+		});
 	}
 
 	protected async waitForManageTokensModal(options?: WaitForLocatorOptions): Promise<void> {
@@ -357,32 +407,43 @@ abstract class Homepage {
 		await this.waitForManageTokensModal({ state: 'hidden', timeout: 60000 });
 	}
 
-	getTokenCardLocator({
+	getTokenCardTestId({
 		tokenSymbol,
 		networkSymbol
 	}: {
 		tokenSymbol: string;
 		networkSymbol: string;
-	}): Locator {
-		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
+	}): string {
+		return `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`;
+	}
+
+	getTokenCardLocator(params: { tokenSymbol: string; networkSymbol: string }): Locator {
+		return this.#page.locator(`[data-tid="${this.getTokenCardTestId(params)}"]`);
+	}
+
+	async getStableViewportHeight(): Promise<number> {
+		let previousHeight: number;
+		let currentHeight: number = await this.#page.evaluate(
+			() => document.documentElement.scrollHeight
+		);
+
+		do {
+			previousHeight = currentHeight;
+			await this.#page.waitForTimeout(1000);
+			currentHeight = await this.#page.evaluate(() => document.documentElement.scrollHeight);
+		} while (currentHeight !== previousHeight);
+
+		return currentHeight;
 	}
 
 	private async viewportAdjuster(): Promise<void> {
-		const maxPageHeight = await this.#page.evaluate(() =>
-			Math.max(
-				document.body.scrollHeight,
-				document.documentElement.scrollHeight,
-				document.body.offsetHeight,
-				document.documentElement.offsetHeight,
-				document.body.clientHeight,
-				document.documentElement.clientHeight
-			)
-		);
+		await this.waitForLoadState();
+		const stablePageHeight = await this.getStableViewportHeight();
 
 		const currentViewport = this.#page.viewportSize();
 		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
 
-		await this.#page.setViewportSize({ height: maxPageHeight, width });
+		await this.#page.setViewportSize({ height: stablePageHeight, width });
 	}
 
 	async takeScreenshot(
@@ -390,9 +451,22 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
+		if (isNullish(screenshotTarget) && !this.#isMobile) {
+			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
+			await this.viewportAdjuster();
+		}
+
+		const element = screenshotTarget ?? this.#page;
+
 		if (freezeCarousel) {
+			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
+			await this.#page.clock.pauseAt(Date.now());
 			await this.setCarouselFirstSlide();
-			await this.waitForLoadState();
+			await this.#page.clock.pauseAt(Date.now());
+		}
+
+		if (!this.#isMobile) {
+			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
 		}
 
 		if (nonNullish(centeredElementTestId)) {
@@ -404,21 +478,23 @@ abstract class Homepage {
 		const colorSchemes = ['light', 'dark'] as const;
 		for (const scheme of colorSchemes) {
 			await this.#page.emulateMedia({ colorScheme: scheme });
+			await this.#page.waitForTimeout(1000);
 
-			if (screenshotTarget) {
-				await expect(screenshotTarget).toHaveScreenshot({
-					timeout: 5 * 60 * 1000
-				});
-			} else {
-				await this.viewportAdjuster();
-				await expect(this.#page).toHaveScreenshot({
-					// creates a snapshot as a fullPage and not just certain parts.
-					// playwright can retry flaky tests in the amount of time set below.
-					timeout: 5 * 60 * 1000
-				});
+			await expect(element).toHaveScreenshot();
+
+			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
+			if (this.#isMobile) {
+				await this.hideMobileNavigationMenu();
+				await expect(element).toHaveScreenshot({ fullPage: true });
+				await this.showMobileNavigationMenu();
 			}
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
+
+		if (freezeCarousel) {
+			// Resuming the time that we froze because of the carousel animations.
+			await this.#page.clock.resume();
+		}
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
@@ -525,8 +601,6 @@ export class HomepageLoggedIn extends Homepage {
 		await this.waitForTokensInitialization();
 
 		await this.waitForLoadState();
-
-		await this.setCarouselFirstSlide();
 
 		await this.extendWaitForReady();
 	}
