@@ -79,7 +79,7 @@
 					><IconSettings /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button
 				>
 			</span>
-			<span class="text-md ml-0 mr-2 flex text-nowrap text-right text-sm md:ml-4">
+			<span class="ml-0 mr-2 flex text-nowrap text-right text-base text-sm md:ml-4">
 				{replacePlaceholders($i18n.networks.number_of_enabled, {
 					$numNetworksEnabled: `${$networksMainnets.length + $networksTestnets.length}`,
 					$numNetworksTotal: `${SUPPORTED_NETWORKS.length}`

@@ -41,7 +41,7 @@
 			<span class="flex items-center">
 				<span class="pr-2"><slot name="logo" /></span>
 				<span class="flex flex-col text-left">
-					<span class="text-md">
+					<span class="text-base">
 						{#if hasTitleSlot}
 							<span class="float-left font-bold"><slot name="title" /></span>
 						{/if}
@@ -63,7 +63,7 @@
 			<span class="flex items-center">
 				<span class="flex flex-col text-right">
 					{#if hasTitleEndSlot}
-						<span class="text-md font-bold">
+						<span class="text-base font-bold">
 							<slot name="title-end" />
 						</span>
 					{/if}
