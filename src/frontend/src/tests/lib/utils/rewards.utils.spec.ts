@@ -1,6 +1,6 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
@@ -10,9 +10,8 @@ import {
 	loadRewardResult
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { BigNumber } from '@ethersproject/bignumber';
 
-describe('rewards utils', () => {
+describe('rewards.utils', () => {
 	describe('loadRewardResult', () => {
 		beforeEach(() => {
 			sessionStorage.clear();
@@ -184,7 +183,7 @@ describe('rewards utils', () => {
 
 			const result = getRewardsBalance(mockedRewards);
 
-			expect(result).toEqual(BigNumber.from(600));
+			expect(result).toEqual(600n);
 		});
 
 		it('should return the correct rewards balance of a single airdrop', () => {
@@ -192,7 +191,7 @@ describe('rewards utils', () => {
 
 			const result = getRewardsBalance(mockedRewards);
 
-			expect(result).toEqual(BigNumber.from(100));
+			expect(result).toEqual(100n);
 		});
 
 		it('should return zero for an empty list of rewards', () => {
@@ -200,7 +199,7 @@ describe('rewards utils', () => {
 
 			const result = getRewardsBalance(mockedRewards);
 
-			expect(result).toEqual(ZERO);
+			expect(result).toEqual(ZERO_BI);
 		});
 	});
 });
