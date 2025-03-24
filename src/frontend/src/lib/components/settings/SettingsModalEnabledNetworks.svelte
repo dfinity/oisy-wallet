@@ -59,7 +59,7 @@
 
 <ContentWithToolbar>
 	<SettingsList>
-		<svelte:fragment slot="title">{$i18n.settings.text.mainnets}</svelte:fragment>
+		<svelte:fragment slot="title">{$i18n.settings.text.networks}</svelte:fragment>
 		<svelte:fragment slot="title-action"
 			><div class="font-bold"
 				><Checkbox
@@ -92,7 +92,7 @@
 
 	{#if enabledTestnet}
 		<SettingsList>
-			<svelte:fragment slot="title">{$i18n.settings.text.testnets}</svelte:fragment>
+			<svelte:fragment slot="title">{$i18n.settings.text.test_networks}</svelte:fragment>
 
 			{#each testnetsList as network}
 				<SettingsListItem>
