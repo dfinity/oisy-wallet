@@ -823,8 +823,8 @@ interface I18nReferral {
 			content_text: string;
 			share: string;
 			open_wallet: string;
-		}
-	}
+		};
+	};
 }
 
 interface I18nSigner {
