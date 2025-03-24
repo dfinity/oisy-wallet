@@ -34,7 +34,12 @@ describe('BtcConvertForm', () => {
 					destinationToken: readable(ICP_TOKEN)
 				}
 			],
-			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, { setErrorType: () => {} }]
+			[
+				TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+				{
+					setErrorType: () => {}
+				}
+			]
 		]);
 	const props = {
 		source: mockBtcAddress,
