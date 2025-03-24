@@ -139,7 +139,7 @@ impl BackendBuilder {
     ///
     /// To override, please use `with_arg()`.
     pub fn default_arg() -> Vec<u8> {
-        encode_one(&init_arg()).unwrap()
+        encode_one(init_arg()).unwrap()
     }
 
     /// The default controllers of the backend canister.
@@ -180,18 +180,18 @@ impl BackendBuilder {
 impl BackendBuilder {
     /// Reads the backend Wasm bytes from the configured path.
     fn wasm_bytes(&self) -> Vec<u8> {
-        read(self.wasm_path.clone()).expect(&format!(
-            "Could not find the backend wasm: {}",
-            self.wasm_path
-        ))
+        read(self.wasm_path.clone())
+            .unwrap_or_else(|_| panic!("Could not find the backend wasm: {}", self.wasm_path))
     }
 
     /// Reads the bitcoin Wasm bytes from the configured path.
     fn bitcoin_wasm_bytes(&self) -> Vec<u8> {
-        read(self.bitcoin_wasm_path.clone()).expect(&format!(
-            "Could not find the bitcoin wasm: {}",
-            self.bitcoin_wasm_path
-        ))
+        read(self.bitcoin_wasm_path.clone()).unwrap_or_else(|_| {
+            panic!(
+                "Could not find the bitcoin wasm: {}",
+                self.bitcoin_wasm_path
+            )
+        })
     }
 }
 // Builder
@@ -239,7 +239,7 @@ impl BackendBuilder {
     /// Set controllers of the backend canister.
     fn set_controllers(&mut self, pic: &PocketIc) {
         let canister_id = self.canister_id(pic);
-        pic.set_controllers(canister_id.clone(), None, self.controllers.clone())
+        pic.set_controllers(canister_id, None, self.controllers.clone())
             .expect("Test setup error: Failed to set controllers");
     }
 
@@ -294,12 +294,10 @@ impl PicBackend {
         backend_wasm_path: &String,
         encoded_arg: Option<Vec<u8>>,
     ) -> Result<(), String> {
-        let wasm_bytes = read(backend_wasm_path.clone()).expect(&format!(
-            "Could not find the backend wasm: {}",
-            backend_wasm_path
-        ));
+        let wasm_bytes = read(backend_wasm_path.clone())
+            .unwrap_or_else(|_| panic!("Could not find the backend wasm: {backend_wasm_path}"));
 
-        let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
+        let arg = encoded_arg.unwrap_or(encode_one(init_arg()).unwrap());
 
         // Upgrades burn a lot of cycles.
         // If too many cycles are burnt in a short time, the canister will be throttled, so we
@@ -328,21 +326,20 @@ impl PicBackend {
 
 pub(crate) fn init_arg() -> Arg {
     Arg::Init(InitArg {
-        ecdsa_key_name: format!("test_key_1"),
+        ecdsa_key_name: "test_key_1".to_string(),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: None,
         supported_credentials: Some(vec![SupportedCredential {
-            ii_canister_id: Principal::from_text(II_CANISTER_ID.to_string())
-                .expect("wrong ii canister id"),
+            ii_canister_id: Principal::from_text(II_CANISTER_ID).expect("wrong ii canister id"),
             ii_origin: II_ORIGIN.to_string(),
-            issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID.to_string())
+            issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
                 .expect("wrong issuer canister id"),
             issuer_origin: ISSUER_ORIGIN.to_string(),
             credential_type: CredentialType::ProofOfUniqueness,
         }]),
         api: None,
         cfs_canister_id: Some(
-            Principal::from_text(SIGNER_CANISTER_ID.to_string()).expect("wrong cfs canister id"),
+            Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
         ),
         derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
     })
@@ -360,7 +357,7 @@ impl PicCanisterTrait for PicBackend {
     }
 
     fn canister_id(&self) -> Principal {
-        self.canister_id.clone()
+        self.canister_id
     }
 }
 impl PicBackend {

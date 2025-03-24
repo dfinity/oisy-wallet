@@ -14,6 +14,7 @@ impl PartialEq for ComparableFloat {
 }
 impl Eq for ComparableFloat {}
 impl ComparableFloat {
+    #[must_use]
     pub fn value(&self) -> f64 {
         self.0
     }

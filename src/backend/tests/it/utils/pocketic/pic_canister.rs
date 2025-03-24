@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 /// Common methods for interacting with a canister using `PocketIc`.
 pub trait PicCanisterTrait {
-    /// A shared PocketIc instance.
+    /// A shared `PocketIc` instance.
     ///
     /// Note: `PocketIc` uses interior mutability for query and update calls.  No external mut
     /// annotation or locks appear to be necessary.

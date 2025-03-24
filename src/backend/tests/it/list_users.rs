@@ -239,5 +239,5 @@ fn test_list_users_returns_pouh_credential() {
     };
     expected_users.push(expected_vc_holder_user);
 
-    assert_user_profiles_eq(results_users, expected_users.to_vec());
+    assert_user_profiles_eq(results_users, expected_users.clone());
 }

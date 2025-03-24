@@ -38,11 +38,10 @@ fn config_is_available_to_allowed_users_only() {
     // Try an allowed user.
     let allowed_user = expected_config
         .allowed_callers
-        .iter()
-        .next()
+        .first()
         .expect("Test setup error: No allowed users found in the config.");
     assert_eq!(
-        pic_setup.update::<Config>(allowed_user.clone(), "config", ()),
+        pic_setup.update::<Config>(*allowed_user, "config", ()),
         Ok(expected_config),
         "Allowed user should be able to call config and get the right answer."
     );
