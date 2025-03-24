@@ -19,7 +19,8 @@
 					"test_fe_3": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_4": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"audit": "tdxud-2yaaa-aaaad-aadiq-cai",
-					"staging": "tdxud-2yaaa-aaaad-aadiq-cai"
+					"staging": "tdxud-2yaaa-aaaad-aadiq-cai",
+					"e2e": "tdxud-2yaaa-aaaad-aadiq-cai"
 				}
 			}
 		},
@@ -40,7 +41,8 @@
 					"test_fe_3": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"test_fe_4": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"audit": "2ipq2-uqaaa-aaaar-qailq-cai",
-					"staging": "2ipq2-uqaaa-aaaar-qailq-cai"
+					"staging": "2ipq2-uqaaa-aaaar-qailq-cai",
+					"e2e": "2ipq2-uqaaa-aaaar-qailq-cai"
 				}
 			}
 		},
@@ -106,7 +108,8 @@
 					"audit": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"staging": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"beta": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+					"e2e": "rdmx6-jaaaa-aaaaa-aaadq-cai"
 				}
 			}
 		},
@@ -126,7 +129,8 @@
 					"audit": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"staging": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"beta": "um5iw-rqaaa-aaaaq-qaaba-cai",
-					"ic": "um5iw-rqaaa-aaaaq-qaaba-cai"
+					"ic": "um5iw-rqaaa-aaaaq-qaaba-cai",
+					"e2e": "um5iw-rqaaa-aaaaq-qaaba-cai"
 				}
 			}
 		},
@@ -146,7 +150,8 @@
 					"audit": "2vxsx-fae",
 					"staging": "2vxsx-fae",
 					"beta": "2vxsx-fae",
-					"ic": "2vxsx-fae"
+					"ic": "2vxsx-fae",
+					"e2e": "2vxsx-fae"
 				}
 			}
 		},
@@ -166,7 +171,8 @@
 					"audit": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"staging": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"beta": "qgxyr-pyaaa-aaaah-qdcwq-cai",
-					"ic": "qgxyr-pyaaa-aaaah-qdcwq-cai"
+					"ic": "qgxyr-pyaaa-aaaah-qdcwq-cai",
+					"e2e": "qgxyr-pyaaa-aaaah-qdcwq-cai"
 				}
 			}
 		},
@@ -187,7 +193,8 @@
 					"audit": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"staging": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"beta": "ryjl3-tyaaa-aaaaa-aaaba-cai",
-					"ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+					"ic": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+					"e2e": "ryjl3-tyaaa-aaaaa-aaaba-cai"
 				}
 			}
 		},
@@ -209,7 +216,8 @@
 					"audit": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"staging": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"beta": "qhbym-qaaaa-aaaaa-aaafq-cai",
-					"ic": "qhbym-qaaaa-aaaaa-aaafq-cai"
+					"ic": "qhbym-qaaaa-aaaaa-aaafq-cai",
+					"e2e": "qhbym-qaaaa-aaaaa-aaafq-cai"
 				}
 			}
 		},
@@ -227,7 +235,8 @@
 					"test_fe_3": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"test_fe_4": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"audit": "ml52i-qqaaa-aaaar-qaaba-cai",
-					"staging": "ml52i-qqaaa-aaaar-qaaba-cai"
+					"staging": "ml52i-qqaaa-aaaar-qaaba-cai",
+					"e2e": "ml52i-qqaaa-aaaar-qaaba-cai"
 				}
 			}
 		},
@@ -245,7 +254,8 @@
 					"test_fe_3": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"test_fe_4": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"audit": "mc6ru-gyaaa-aaaar-qaaaq-cai",
-					"staging": "mc6ru-gyaaa-aaaar-qaaaq-cai"
+					"staging": "mc6ru-gyaaa-aaaar-qaaaq-cai",
+					"e2e": "mc6ru-gyaaa-aaaar-qaaaq-cai"
 				}
 			}
 		},
@@ -263,7 +273,8 @@
 					"test_fe_3": "mm444-5iaaa-aaaar-qaabq-cai",
 					"test_fe_4": "mm444-5iaaa-aaaar-qaabq-cai",
 					"audit": "mm444-5iaaa-aaaar-qaabq-cai",
-					"staging": "mm444-5iaaa-aaaar-qaabq-cai"
+					"staging": "mm444-5iaaa-aaaar-qaabq-cai",
+					"e2e": "mm444-5iaaa-aaaar-qaabq-cai"
 				}
 			}
 		},
@@ -281,7 +292,8 @@
 					"test_fe_3": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"test_fe_4": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"audit": "pvm5g-xaaaa-aaaar-qaaia-cai",
-					"staging": "pvm5g-xaaaa-aaaar-qaaia-cai"
+					"staging": "pvm5g-xaaaa-aaaar-qaaia-cai",
+					"e2e": "pvm5g-xaaaa-aaaar-qaaia-cai"
 				}
 			}
 		},
@@ -301,7 +313,8 @@
 					"test_fe_3": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"test_fe_4": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"audit": "jzenf-aiaaa-aaaar-qaa7q-cai",
-					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai"
+					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai",
+					"e2e": "jzenf-aiaaa-aaaar-qaa7q-cai"
 				}
 			}
 		},
@@ -322,7 +335,8 @@
 					"test_fe_3": "apia6-jaaaa-aaaar-qabma-cai",
 					"test_fe_4": "apia6-jaaaa-aaaar-qabma-cai",
 					"audit": "apia6-jaaaa-aaaar-qabma-cai",
-					"staging": "apia6-jaaaa-aaaar-qabma-cai"
+					"staging": "apia6-jaaaa-aaaar-qabma-cai",
+					"e2e": "apia6-jaaaa-aaaar-qabma-cai"
 				}
 			}
 		},
@@ -343,7 +357,8 @@
 					"test_fe_3": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"test_fe_4": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"audit": "sh5u2-cqaaa-aaaar-qacna-cai",
-					"staging": "sh5u2-cqaaa-aaaar-qacna-cai"
+					"staging": "sh5u2-cqaaa-aaaar-qacna-cai",
+					"e2e": "sh5u2-cqaaa-aaaar-qacna-cai"
 				}
 			}
 		},
@@ -371,6 +386,7 @@
 					"test_fe_2": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"test_fe_3": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"test_fe_4": "vi6cu-aiaaa-aaaad-aad7q-cai",
+					"e2e": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"audit": "vi6cu-aiaaa-aaaad-aad7q-cai"
 				}
 			}
@@ -417,6 +433,10 @@
 			"type": "persistent"
 		},
 		"beta": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"e2e": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
 		},
