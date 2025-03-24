@@ -6,6 +6,12 @@ use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 
 pub type Timestamp = u64;
 
+pub mod account;
+pub mod network;
+pub mod number;
+pub mod snapshot;
+pub mod token_id;
+
 #[cfg(test)]
 mod tests;
 
@@ -93,6 +99,30 @@ pub struct Config {
 
 pub mod transaction {
     use candid::{CandidType, Deserialize, Nat};
+    use serde::Serialize;
+
+    use super::account::AccountId;
+    use crate::types::network::marker_trait::Network;
+
+    #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+    #[repr(u8)]
+    pub enum TransactionType {
+        Send = 0,
+        Receive = 1,
+    }
+
+    #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+    pub struct Transaction<N, A>
+    where
+        A: AccountId<N>,
+        N: Network,
+    {
+        pub network: N,
+        pub transaction_type: TransactionType,
+        pub amount: u64,
+        pub timestamp: u64,
+        pub counterparty: A,
+    }
 
     #[derive(CandidType, Deserialize)]
     pub struct SignRequest {
@@ -113,11 +143,11 @@ pub trait TokenVersion: Debug {
     #[must_use]
     fn get_version(&self) -> Option<Version>;
     #[must_use]
-    fn clone_with_incremented_version(&self) -> Self
+    fn with_incremented_version(&self) -> Self
     where
         Self: Sized + Clone;
     #[must_use]
-    fn clone_with_initial_version(&self) -> Self
+    fn with_initial_version(&self) -> Self
     where
         Self: Sized + Clone;
 }
@@ -378,7 +408,7 @@ pub mod networks {
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default, Ord, PartialOrd)]
     pub enum NetworkSettingsFor {
         #[default]
-        Icp,
+        InternetComputer,
         BitcoinMainnet,
         BitcoinTestnet,
         BitcoinRegtest,
