@@ -176,7 +176,7 @@ describe('reward-code', () => {
 
 		const mockedReward: RewardInfo = {
 			timestamp: lastTimestamp,
-			amount: BigInt(1000000),
+			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: ['jackpot']
 		};
@@ -189,7 +189,7 @@ describe('reward-code', () => {
 		};
 		const expectedReward: RewardResponseInfo = {
 			timestamp: lastTimestamp,
-			amount: BigInt(1000000),
+			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: 'jackpot'
 		};
