@@ -24,19 +24,19 @@
 			token.name === $routeToken && $routeNetwork && token.network.id.description === $routeNetwork
 	);
 
-	let timeout: NodeJS.Timeout | undefined;
+	let timer: NodeJS.Timeout | undefined;
 
 	onMount(() => {
 		// Since we do not have the change to check whether the data fetching is completed or not, we need to use this fallback timeout.
 		// After the timeout, we assume that the fetch has failed and open the token modal.
-		timeout = setTimeout(() => {
+		timer = setTimeout(() => {
 			if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
 				modalStore.openManageTokens();
 			}
 		}, FALLBACK_TIMEOUT);
 	});
 
-	onDestroy(() => clearTimeout(timeout));
+	onDestroy(() => clearTimeout(timer));
 
 	const handleClose = async () => {
 		if (isNullish($pageToken)) {
