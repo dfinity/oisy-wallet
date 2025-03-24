@@ -232,9 +232,8 @@ interface I18nSettings {
 		session_expires_in: string;
 		session_description: string;
 		networks: string;
+		test_networks: string;
 		enable_testnets: string;
-		mainnets: string;
-		testnets: string;
 		active_networks: string;
 		active_networks_description: string;
 		hide_zero_balances_description: string;
