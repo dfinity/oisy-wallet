@@ -37,6 +37,7 @@ export interface Modal<T> {
 		| 'receive-bitcoin'
 		| 'about-why-oisy'
 		| 'vip-qr-code'
+		| 'referral-code'
 		| 'dapp-details'
 		| 'vip-reward-state'
 		| 'reward-details'
@@ -82,6 +83,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReceiveBitcoin: () => void;
 	openAboutWhyOisy: () => void;
 	openVipQrCode: () => void;
+	openReferralCode: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
 	openVipRewardState: <D extends T>(data: D) => void;
 	openRewardDetails: <D extends T>(data: D) => void;
@@ -137,6 +139,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: setType('vip-qr-code'),
+		openReferralCode: setType('referral-code'),
 		openDappDetails: setTypeWithData('dapp-details'),
 		openVipRewardState: setTypeWithData('vip-reward-state'),
 		openRewardDetails: setTypeWithData('reward-details'),

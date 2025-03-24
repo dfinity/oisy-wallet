@@ -47,6 +47,7 @@ interface I18nNavigation {
 		support: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
+		refer_a_friend: string;
 	};
 	alt: {
 		tokens: string;
@@ -61,6 +62,7 @@ interface I18nNavigation {
 		support: string;
 		open_twitter: string;
 		vip_qr_code: string;
+		refer_a_friend: string;
 	};
 	short: { documentation: string };
 }
@@ -804,6 +806,17 @@ interface I18nVip {
 	};
 }
 
+interface I18nReferral {
+	invitation: {
+		text: {
+			title: string;
+			invitation_link_copied: string;
+			information: string;
+			not_referred_yet: string;
+		}
+	}
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -896,6 +909,7 @@ interface I18n {
 	transactions: I18nTransactions;
 	about: I18nAbout;
 	vip: I18nVip;
+	referral: I18nReferral;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;

@@ -10,8 +10,10 @@
 		modalHideToken,
 		modalIcHideToken,
 		modalVipQrCode,
-		modalRewardDetails
+		modalRewardDetails,
+		modalReferralCode
 	} from '$lib/derived/modal.derived';
+	import ReferralCodeModal from "$lib/components/referral/ReferralCodeModal.svelte";
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
@@ -29,5 +31,7 @@
 		<AirdropModalDetails />
 	{:else if $modalVipQrCode}
 		<VipQrCodeModal />
+	{:else if $modalReferralCode}
+		<ReferralCodeModal />
 	{/if}
 {/if}
