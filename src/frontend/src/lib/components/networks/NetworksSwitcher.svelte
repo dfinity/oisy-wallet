@@ -47,31 +47,23 @@
 	<span class="hidden md:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 
 	<div slot="items">
-		<ul class="flex list-none flex-col font-normal">
-			<li class="border-brand-subtle-20">
-				<NetworkButton
-					id={undefined}
-					name={$i18n.networks.chain_fusion}
-					icon={chainFusion}
-					usdBalance={mainnetTokensUsdBalance}
-					on:icSelected={dropdown.close}
-				/>
-			</li>
+		<NetworkButton
+			id={undefined}
+			name={$i18n.networks.chain_fusion}
+			icon={chainFusion}
+			usdBalance={mainnetTokensUsdBalance}
+			on:icSelected={dropdown.close}
+		/>
 
-			{#each $networksMainnets as network}
-				<li class="border-brand-subtle-20">
-					<MainnetNetwork {network} on:icSelected={dropdown.close} />
-				</li>
+		{#each $networksMainnets as network}
+			<MainnetNetwork {network} on:icSelected={dropdown.close} />
+		{/each}
+
+		{#if $testnets}
+			{#each $networksTestnets as network}
+				<Network {network} on:icSelected={dropdown.close} />
 			{/each}
-
-			{#if $testnets}
-				{#each $networksTestnets as network}
-					<li class="border-brand-subtle-20">
-						<Network {network} on:icSelected={dropdown.close} />
-					</li>
-				{/each}
-			{/if}
-		</ul>
+		{/if}
 
 		<Button
 			link

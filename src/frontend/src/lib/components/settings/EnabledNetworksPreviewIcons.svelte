@@ -24,19 +24,19 @@
 			isTestnet: true
 		},
 		[SOLANA_MAINNET_NETWORK_ID]: {
-			enabled: true,
+			enabled: false,
 			isTestnet: false
 		},
 		[SOLANA_DEVNET_NETWORK_ID]: {
-			enabled: true,
+			enabled: false,
 			isTestnet: true
 		},
 		[BTC_MAINNET_NETWORK_ID]: {
-			enabled: true,
+			enabled: false,
 			isTestnet: false
 		},
 		[BTC_TESTNET_NETWORK_ID]: {
-			enabled: true,
+			enabled: false,
 			isTestnet: true
 		}
 	};

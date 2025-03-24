@@ -10,6 +10,7 @@
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 
 	export let id: NetworkId | undefined;
 	export let name: string;
@@ -31,33 +32,10 @@
 	};
 </script>
 
-<button
-	data-tid={testId}
-	class="dropdown-item flex w-full items-start justify-between"
-	class:selected={id === $networkId}
-	on:click={onClick}
->
-	<!--
-	<TextWithLogo
-		{name}
-		{icon}
-		logo="start"
-		description={nonNullish(usdBalance) ? formatUSD({ value: usdBalance }) : undefined}
-	/>
-	-->
-
-	<span class="flex flex-row text-left"
-		><Logo src={icon} />
-		<span class="ml-2">{name}</span></span
+<LogoButton on:click={onClick} selectable selected={id === $networkId}>
+	<Logo slot="logo" src={icon} />
+	<span slot="title" class="mr-2 font-normal">{name}</span>
+	<span slot="description-end"
+		>{nonNullish(usdBalance) ? formatUSD({ value: usdBalance }) : ''}</span
 	>
-
-	<span class="flex flex-row">
-		<span class="text-tertiary"
-			>{nonNullish(usdBalance) ? formatUSD({ value: usdBalance }) : ''}</span
-		>
-
-		{#if id === $networkId}
-			<span class="ml-2 pt-0.5 text-brand-primary" in:fade><IconCheck size="20px" /></span>
-		{/if}
-	</span>
-</button>
+</LogoButton>
