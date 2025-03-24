@@ -58,7 +58,7 @@ lazy_static! {
             },
         );
         map.insert(
-            NetworkSettingsFor::Icp,
+            NetworkSettingsFor::InternetComputer,
             NetworkSettings {
                 enabled: false,
                 is_testnet: false,
@@ -97,7 +97,7 @@ lazy_static! {
             },
         );
         map.insert(
-            NetworkSettingsFor::Icp,
+            NetworkSettingsFor::InternetComputer,
             NetworkSettings {
                 enabled: false,
                 is_testnet: false,
