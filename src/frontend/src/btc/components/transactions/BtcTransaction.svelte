@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import type { BtcTransactionStatus, BtcTransactionUi } from '$btc/types/btc';
 	import type { BtcTransactionType } from '$btc/types/btc-transaction';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
@@ -22,10 +21,8 @@
 	let label: string;
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
 
-	let amount: BigNumber | undefined;
-	$: amount = nonNullish(value)
-		? BigNumber.from(type === 'send' ? value * BigInt(-1) : value)
-		: undefined;
+	let amount: bigint | undefined;
+	$: amount = nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined;
 </script>
 
 <Transaction

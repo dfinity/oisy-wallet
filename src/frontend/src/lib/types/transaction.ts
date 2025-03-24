@@ -9,8 +9,6 @@ import {
 import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { FeeData } from '@ethersproject/providers';
 import { ethers } from 'ethers';
 import * as z from 'zod';
 
@@ -38,8 +36,18 @@ export type Transaction = Omit<EthersTransaction, 'data'> &
 		displayTimestamp?: number;
 	};
 
-export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
-	gas: BigNumber;
+// TODO: use FeeData type again once we upgrade to ethers v6
+export interface TransactionFeeData {
+	maxFeePerGas: bigint | null;
+	maxPriorityFeePerGas: bigint | null;
+	gas: bigint;
+}
+
+export type RequiredTransactionFeeData = {
+	[K in keyof Pick<
+		TransactionFeeData,
+		'gas' | 'maxFeePerGas' | 'maxPriorityFeePerGas'
+	>]: NonNullable<TransactionFeeData[K]>;
 };
 
 export type TransactionType = z.infer<typeof TransactionTypeSchema>;

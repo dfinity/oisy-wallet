@@ -4,7 +4,6 @@ import type {
 	MetamaskSendTransactionRequestParams,
 	MetamaskTransactionHash
 } from '$eth/types/metamask';
-import type { BigNumber } from '@ethersproject/bignumber';
 import { ethers } from 'ethers';
 
 // Documentation: https://docs.metamask.io/wallet/how-to/send-transactions/
@@ -19,7 +18,7 @@ export const sendMetamaskTransaction = ({
 	value,
 	...rest
 }: Omit<MetamaskSendTransactionRequestParams, 'value'> & {
-	value: BigNumber;
+	value: bigint;
 }): Promise<MetamaskTransactionHash> =>
 	window.ethereum.request({
 		method: 'eth_sendTransaction',

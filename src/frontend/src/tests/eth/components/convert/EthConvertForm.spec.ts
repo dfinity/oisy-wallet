@@ -13,15 +13,19 @@ import {
 	initConvertContext,
 	type ConvertContext
 } from '$lib/stores/convert.store';
+import {
+	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
+	type TokenActionValidationErrorsContext
+} from '$lib/stores/token-action-validation-errors.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 import { writable } from 'svelte/store';
 
 describe('EthConvertForm', () => {
 	let store: FeeStore;
 	const mockContext = ({ feeStore }: { feeStore: FeeStore }) =>
-		new Map<symbol, ConvertContext | FeeContext>([
+		new Map<symbol, ConvertContext | FeeContext | TokenActionValidationErrorsContext>([
 			[
 				FEE_CONTEXT_KEY,
 				initFeeContext({
@@ -38,7 +42,8 @@ describe('EthConvertForm', () => {
 					sourceToken: ETHEREUM_TOKEN,
 					destinationToken: ICP_TOKEN
 				})
-			]
+			],
+			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 
 	const props = {
@@ -47,10 +52,10 @@ describe('EthConvertForm', () => {
 		destination: 'address'
 	};
 	const mockFeeStore = {
-		maxFeePerGas: BigNumber.from(1000n),
-		gas: BigNumber.from(1000n),
-		maxPriorityFeePerGas: BigNumber.from(1000n),
-		maxGasFee: BigNumber.from(1000n)
+		maxFeePerGas: 1000n,
+		gas: 1000n,
+		maxPriorityFeePerGas: 1000n,
+		maxGasFee: 1000n
 	};
 
 	const buttonTestId = 'convert-form-button-next';

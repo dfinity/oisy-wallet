@@ -60,8 +60,8 @@
 					? $i18n.send.text.send
 					: $i18n.receive.text.receive;
 
-	let amount: BigNumber;
-	$: amount = type === 'send' || type === 'deposit' ? value.mul(BigNumber.from(-1)) : value;
+	let amount: bigint;
+	$: amount = value.toBigInt() * (type === 'send' || type === 'deposit' ? -1n : 1n);
 
 	let transactionDate: number | undefined;
 	$: transactionDate = timestamp ?? displayTimestamp;

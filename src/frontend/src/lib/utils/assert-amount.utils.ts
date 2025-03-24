@@ -1,5 +1,6 @@
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { Balance } from '$lib/types/balance';
 import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
@@ -52,7 +53,7 @@ const assertMinterInfo = ({
 		'retrieve_btc_min_amount' in data
 			? data.retrieve_btc_min_amount
 			: 'minimum_withdrawal_amount' in data
-				? (fromNullable(data.minimum_withdrawal_amount) ?? 0n)
+				? (fromNullable(data.minimum_withdrawal_amount) ?? ZERO_BI)
 				: undefined;
 
 	if (nonNullish(minimumAmount) && userAmount < minimumAmount) {

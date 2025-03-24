@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
 	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
@@ -64,7 +63,7 @@
 		<span class="mt-2 block w-full max-w-[140px]"><SkeletonText /></span>
 	{:else}
 		<ExchangeAmountDisplay
-			amount={BigNumber.from(utxosFee.feeSatoshis)}
+			amount={utxosFee.feeSatoshis}
 			decimals={$sendTokenDecimals}
 			symbol={$sendTokenSymbol}
 			exchangeRate={$sendTokenExchangeRate}
