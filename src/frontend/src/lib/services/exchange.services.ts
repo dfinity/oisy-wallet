@@ -10,6 +10,25 @@ import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { nonNullish } from '@dfinity/utils';
 
+const fetchIcrcPricesFromCoingecko = async (
+	ledgerCanisterIds: LedgerCanisterIdText[]
+): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
+	simpleTokenPrice({
+		id: 'internet-computer',
+		vs_currencies: 'usd',
+		contract_addresses: ledgerCanisterIds.map((id) => id.toLowerCase()),
+		include_market_cap: true
+	});
+
+const fetchIcrcPricesFromKongSwap = async (
+	missingIds: LedgerCanisterIdText[]
+): Promise<CoingeckoSimpleTokenPriceResponse> => {
+	if (missingIds.length === 0) return {};
+	const tokens = await fetchBatchKongSwapPrices(missingIds);
+
+	return formatKongSwapToCoingeckoPrices(tokens);
+};
+
 export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'ethereum',
@@ -46,13 +65,23 @@ export const exchangeRateERC20ToUsd = (
 
 export const exchangeRateICRCToUsd = (
 	ledgerCanisterIds: LedgerCanisterIdText[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
-	simpleTokenPrice({
-		id: 'internet-computer',
-		vs_currencies: 'usd',
-		contract_addresses: ledgerCanisterIds.map((ledgerCanisterId) => ledgerCanisterId.toLowerCase()),
-		include_market_cap: true
-	});
+): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
+	if (ledgerCanisterIds.length === 0) return null;
+
+	const coingeckoPrices = await fetchIcrcPricesFromCoingecko(ledgerCanisterIds);
+
+	const missingIds = findMissingCanisterIds(ledgerCanisterIds, coingeckoPrices);
+	if (missingIds.length === 0) return coingeckoPrices;
+
+	const kongSwapPrices = await fetchIcrcPricesFromKongSwap(missingIds);
+
+	const exchangeRatePrices: CoingeckoSimpleTokenPriceResponse = {
+		...(coingeckoPrices ?? {}),
+		...(kongSwapPrices ?? {})
+	};
+
+	return exchangeRatePrices;
+};
 
 export const exchangeRateSPLToUsd = (
 	tokenAddresses: SplTokenAddress[]
