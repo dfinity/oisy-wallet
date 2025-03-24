@@ -7,6 +7,7 @@
 		"test_fe_4": "https://fe4.oisy.com",
 		"staging": "https://staging.oisy.com",
 		"beta": "https://beta.oisy.com",
-		"audit": "https://audit.oisy.com"
+		"audit": "https://audit.oisy.com",
+		"e2e": "https://e2e.oisy.com"
 	}
 }
