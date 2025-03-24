@@ -122,7 +122,6 @@ export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
 export const REFERRAL_STATE_MODAL_SHARE_BUTTON = 'referral-state-modal-share-button';
 
-
 export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
 
