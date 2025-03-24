@@ -13,28 +13,26 @@ use crate::utils::{
 
 lazy_static! {
     static ref ICRC_TOKEN: IcrcToken = IcrcToken {
-        ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai".to_string()).unwrap(),
-        index_id: Some(Principal::from_text("dnqcx-eyaaa-aaaaq-aacrq-cai".to_string()).unwrap()),
+        ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai").unwrap(),
+        index_id: Some(Principal::from_text("dnqcx-eyaaa-aaaaq-aacrq-cai").unwrap()),
     };
     static ref USER_TOKEN: CustomToken = CustomToken {
         token: Token::Icrc(ICRC_TOKEN.clone()),
         enabled: true,
         version: None,
     };
-    static ref USER_TOKEN_ID: CustomTokenId = CustomTokenId::Icrc(ICRC_TOKEN.ledger_id.clone());
+    static ref USER_TOKEN_ID: CustomTokenId = CustomTokenId::Icrc(ICRC_TOKEN.ledger_id);
     static ref ANOTHER_USER_TOKEN: CustomToken = CustomToken {
         token: Token::Icrc(IcrcToken {
-            ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),
-            index_id: Some(
-                Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap()
-            ),
+            ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai").unwrap(),
+            index_id: Some(Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai").unwrap()),
         }),
         enabled: true,
         version: None,
     };
     static ref USER_TOKEN_NO_INDEX: CustomToken = CustomToken {
         token: Token::Icrc(IcrcToken {
-            ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai".to_string()).unwrap(),
+            ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai").unwrap(),
             index_id: None,
         }),
         enabled: true,
@@ -115,7 +113,7 @@ fn test_update_custom_token(user_token: &CustomToken) {
     let update_token: CustomToken = CustomToken {
         enabled: false,
         token: user_token.token.clone(),
-        version: results.unwrap().get(0).unwrap().version,
+        version: results.unwrap().first().unwrap().version,
     };
 
     let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
@@ -203,7 +201,7 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
     let update_token: CustomToken = CustomToken {
         enabled: false,
         token: user_token.token.clone(),
-        version: results.clone().unwrap().get(0).unwrap().version,
+        version: results.clone().unwrap().first().unwrap().version,
     };
 
     let update_another_token: CustomToken = CustomToken {

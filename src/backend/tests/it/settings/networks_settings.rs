@@ -266,7 +266,7 @@ fn test_set_user_network_settings_cannot_update_wrong_version() {
         (),
     );
 
-    assert_eq!(
+    assert!(
         get_profile_response
             .expect("Call to get profile failed")
             .expect("Get profile failed")
