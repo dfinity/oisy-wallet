@@ -16,8 +16,8 @@ export class PromotionCarousel {
 			if (slide) {
 				slide.setAttribute(
 					'style',
-					'width: 1584px; ' +
-						'transform: translate3d(-264px, 0px, 0px) !important; ' +
+					// 'width: 1584px; ' +
+					'transform: translate3d(-264px, 0px, 0px) !important; ' +
 						'transition: none !important; ' +
 						'animation: none !important;'
 				);
