@@ -21,7 +21,6 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { bn1Bi, bn2Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { BigNumber } from 'alchemy-sdk';
 
 const tokens = [
 	{
@@ -62,7 +61,7 @@ const tokens = [
 	},
 	{
 		...ICP_TOKEN,
-		balance: BigNumber.from(50),
+		balance: 50n,
 		usdBalance: 1000
 	}
 ];
@@ -81,7 +80,7 @@ const tokensWithMismatchedDecimals = [
 			env: 'mainnet'
 		},
 		twinTokenSymbol: 'ckFOO',
-		balance: BigNumber.from(100),
+		balance: 100n,
 		usdBalance: 1000,
 		standard: 'ethereum',
 		category: 'default',
@@ -94,7 +93,7 @@ const tokensWithMismatchedDecimals = [
 		id: parseTokenId('ckFOO'),
 		symbol: 'ckFOO',
 		network: ICP_NETWORK,
-		balance: BigNumber.from(200),
+		balance: 200n,
 		usdBalance: 2000,
 		standard: 'icrc',
 		category: 'default',
