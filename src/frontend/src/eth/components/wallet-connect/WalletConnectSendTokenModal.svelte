@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -37,6 +36,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let request: WalletKitTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -138,8 +138,8 @@
 
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
-	let amount: BigNumber;
-	$: amount = BigNumber.from(firstTransaction?.value ?? '0');
+	let amount: bigint;
+	$: amount = BigInt(firstTransaction?.value ?? ZERO_BI);
 
 	const send = async () => {
 		const { success } = await sendServices({
@@ -165,7 +165,7 @@
 	{@const data = firstTransaction.data}
 
 	<WalletConnectModalTitle slot="title"
-		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
+	>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
 	>
 
 	<FeeContext

@@ -17,22 +17,22 @@
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
 
-	export let amount: BigNumber;
+	export let amount: bigint;
 	export let destination: string;
 	export let data: string | undefined;
 	export let erc20Approve: boolean;
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 
-	let amountDisplay: BigNumber;
-	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data) : amount;
+	let amountDisplay: bigint;
+	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data).toBigInt() : amount;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
 	<SendData
-		amount={formatToken({ value: amountDisplay.toBigInt() })}
+		amount={formatToken({ value: amountDisplay })}
 		{destination}
 		token={$sendToken}
 		balance={$balance}
