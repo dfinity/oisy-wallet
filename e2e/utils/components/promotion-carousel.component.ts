@@ -11,10 +11,14 @@ export class PromotionCarousel {
 	public async freezeCarouselToSlide(): Promise<void> {
 		// TODO: the carousel is too flaky for the E2E tests, so we need completely hide it and work on freezing it in a permanent state in another PR.
 
-		const selector = `[data-tid="${CAROUSEL_CONTAINER}"]:visible`;
-		const isVisible = await this.#page.isVisible(selector);
-		if (!isVisible) {
-			await this.#page.locator(selector).evaluate((element) => (element.style.display = 'none'));
+		const selector = `[data-tid="${CAROUSEL_CONTAINER}"]`;
+		const elements = this.#page.locator(selector);
+		const count = await elements.count();
+		for (let i = 0; i < count; i++) {
+			const isVisible = await elements.nth(i).isVisible();
+			if (!isVisible) {
+				await elements.nth(i).evaluate((element) => (element.style.display = 'none'));
+			}
 		}
 
 		// const navigationSelector1 = `[data-tid="${CAROUSEL_SLIDE_NAVIGATION}${slideNumber}"]:visible`;
