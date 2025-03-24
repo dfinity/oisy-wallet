@@ -1,24 +1,24 @@
 <script lang="ts">
+	import { IconSettings } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import { goto } from '$app/navigation';
+	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
 	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import { nonNullish } from '@dfinity/utils';
-	import Logo from '$lib/components/ui/Logo.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { IconSettings } from '@dfinity/gix-components';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { SettingsModalType } from '$lib/enums/settings-modal-types';
-	import { goto } from '$app/navigation';
-	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let disabled = false;
@@ -66,10 +66,8 @@
 			{/each}
 		{/if}
 
-		<div
-			class="mb-2 ml-2 mt-5 flex flex-col items-center md:flex-row md:items-start md:justify-between"
-		>
-			<span class="flex text-nowrap text-left">
+		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between text-nowrap">
+			<span class="flex">
 				<Button
 					link
 					on:click={() => {
@@ -83,8 +81,8 @@
 			</span>
 			<span class="text-md ml-0 mr-2 flex text-nowrap text-right text-sm md:ml-4">
 				{replacePlaceholders($i18n.networks.number_of_enabled, {
-					$numNetworksEnabled: $networksMainnets.length + $networksTestnets.length + '',
-					$numNetworksTotal: SUPPORTED_NETWORKS.length + ''
+					$numNetworksEnabled: `${$networksMainnets.length + $networksTestnets.length}`,
+					$numNetworksTotal: `${SUPPORTED_NETWORKS.length}`
 				})}</span
 			>
 		</div>
