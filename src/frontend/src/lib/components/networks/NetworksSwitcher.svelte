@@ -84,8 +84,8 @@
 			</span>
 			<span class="text-md ml-4 mr-2 flex text-right text-sm">
 				{replacePlaceholders($i18n.networks.number_of_enabled, {
-					$numNetworksEnabled: `${$networksMainnets.length + $networksTestnets.length  }`,
-					$numNetworksTotal: `${SUPPORTED_NETWORKS.length  }`
+					$numNetworksEnabled: `${$networksMainnets.length + $networksTestnets.length}`,
+					$numNetworksTotal: `${SUPPORTED_NETWORKS.length}`
 				})}</span
 			>
 		</div>
