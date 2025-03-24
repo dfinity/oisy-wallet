@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import {onDestroy, onMount} from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import BtcTransactions from '$btc/components/transactions/BtcTransactions.svelte';
 	import EthTransactions from '$eth/components/transactions/EthTransactions.svelte';
