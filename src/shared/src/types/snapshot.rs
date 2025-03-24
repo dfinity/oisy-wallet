@@ -167,7 +167,9 @@ impl AccountSnapshotFor {
 impl AccountSnapshotFor {
     #[must_use]
     pub fn approx_usd_valuation(&self) -> f64 {
-        self.approx_usd_per_token().value() * (self.amount() as f64)
+        #[allow(clippy::cast_precision_loss)]
+        self.approx_usd_per_token().value()
+            * (self.amount() as f64)
             / 10_f64.powf(f64::from(self.decimals()))
     }
 

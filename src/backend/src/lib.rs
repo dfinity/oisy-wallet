@@ -780,7 +780,7 @@ pub fn set_snapshot(_snapshot: UserSnapshot) {
 }
 /// Gets the caller's last snapshot.
 #[query(guard = "may_read_user_data")]
-pub fn get_snapshot() -> Option<UserSnapshot> {
+#[must_use] pub fn get_snapshot() -> Option<UserSnapshot> {
     todo!()
 }
 

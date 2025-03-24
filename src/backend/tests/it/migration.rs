@@ -78,9 +78,9 @@ impl MigrationTestEnv {
         // Create custom tokens
         let custom_tokens = vec![CustomToken {
             token: Token::Icrc(IcrcToken {
-                ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),
+                ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai").unwrap(),
                 index_id: Some(
-                    Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap(),
+                    Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai").unwrap(),
                 ),
             }),
             enabled: true,
@@ -110,7 +110,7 @@ impl MigrationTestEnv {
     fn step_migration(&self) {
         self.old_backend
             .update::<()>(controller(), "step_migration", ())
-            .expect("Failed to stop migration timer")
+            .expect("Failed to stop migration timer");
     }
 
     /// Verifies that the migration is in an expected state.
@@ -138,8 +138,7 @@ impl MigrationTestEnv {
                 .expect("Failed to get config")
                 .api,
             old,
-            "Old canister locks are not as expected {}",
-            context
+            "Old canister locks are not as expected {context}"
         );
         assert_eq!(
             self.new_backend
@@ -147,8 +146,7 @@ impl MigrationTestEnv {
                 .expect("Failed to get config")
                 .api,
             new,
-            "New canister locks are not as expected {}",
-            context
+            "New canister locks are not as expected {context}"
         );
     }
 }
