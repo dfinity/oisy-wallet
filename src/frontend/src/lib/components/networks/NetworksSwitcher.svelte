@@ -21,6 +21,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { SettingsModalType } from '$lib/enums/settings-modal-types';
 	import { goto } from '$app/navigation';
+	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 
 	export let disabled = false;
 
@@ -59,21 +60,30 @@
 			<MainnetNetwork {network} on:icSelected={dropdown.close} />
 		{/each}
 
+		<span class="my-5 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
+
 		{#if $testnets}
 			{#each $networksTestnets as network}
 				<Network {network} on:icSelected={dropdown.close} />
 			{/each}
 		{/if}
 
-		<Button
-			link
-			styleClass="mt-5 ml-2 mb-2"
-			on:click={() => {
-				goto('/settings');
-				dropdown?.close();
-				// a small delay is enough for the opening of the modal to happen after page switching
-				setTimeout(() => modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS), 1);
-			}}><IconSettings /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button
-		>
+		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between">
+			<span class="flex">
+				<Button
+					link
+					on:click={() => {
+						goto('/settings');
+						dropdown?.close();
+						// a small delay is enough for the opening of the modal to happen after page switching
+						setTimeout(() => modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS), 1);
+					}}
+					><IconSettings /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button
+				>
+			</span>
+			<span class="text-md ml-4 mr-2 flex text-right text-sm"
+				>{$networksMainnets.length + $networksTestnets.length} of {SUPPORTED_NETWORKS.length} displayed</span
+			>
+		</div>
 	</div>
 </Dropdown>
