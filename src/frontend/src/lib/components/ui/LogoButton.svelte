@@ -17,13 +17,13 @@
 	$: hasSubtitleSlot = nonNullish($$slots['subtitle']);
 
 	let hasTitleEndSlot: boolean;
-	$: hasTitleEndSlot = nonNullish($$slots['titleEnd']);
+	$: hasTitleEndSlot = nonNullish($$slots['title-end']);
 
 	let hasDescriptionSlot: boolean;
 	$: hasDescriptionSlot = nonNullish($$slots['description']);
 
 	let hasDescriptionEndSlot: boolean;
-	$: hasDescriptionEndSlot = nonNullish($$slots['descriptionEnd']);
+	$: hasDescriptionEndSlot = nonNullish($$slots['description-end']);
 
 	let hasActionSlot: boolean;
 	$: hasActionSlot = nonNullish($$slots['action']);
@@ -62,12 +62,12 @@
 				<span class="flex flex-col text-right">
 					{#if hasTitleEndSlot}
 						<span class="text-md font-bold">
-							<slot name="titleEnd" />
+							<slot name="title-end" />
 						</span>
 					{/if}
 					{#if hasDescriptionEndSlot}
 						<span class="text-sm text-tertiary">
-							<slot name="descriptionEnd" />
+							<slot name="description-end" />
 						</span>
 					{/if}
 				</span>
