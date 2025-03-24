@@ -26,6 +26,8 @@ use crate::utils::mock::CALLER;
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
 const DEFAULT_BITCOIN_WASM: &str = "../../ic-btc-canister.wasm.gz";
 const BITCOIN_CANISTER_ID: &str = "g4xu7-jiaaa-aaaan-aaaaq-cai";
+const DEFAULT_CYCLES_LEDGER_WASM: &str = "../../ic-cycles-ledger-canister.wasm.gz";
+const CYCLES_LEDGER_CANISTER_ID: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
 
 // This is necessary to deploy the bitcoin canister.
 // This is a struct based on the `InitConfig` from the Bitcoin canister.
@@ -45,6 +47,19 @@ struct BitcoinInitConfig {
     watchdog_canister: Option<Principal>,
     burn_cycles: Option<String>,
     lazily_evaluate_fee_percentiles: Option<String>,
+}
+
+// This is necessary to deploy the cycles ledger canister.
+// This is a struct based on the `InitConfig` from the cycles ledger canister.
+// Reference: https://github.com/dfinity/cycles-ledger/blob/cycles-ledger-v0.6.0/cycles-ledger/src/config.rs
+//
+#[derive(CandidType)]
+struct CyclesLedgerInitConfig {
+    /// The maximum number of blocks returned by the [icrc3_get_blocks] endpoint
+    pub max_blocks_per_request: Option<u64>,
+
+    /// The principal of the index canister for this ledger
+    pub index_id: Option<Principal>,
 }
 
 /// Backend canister installer, using the builder pattern, for use in test environmens using
@@ -86,6 +101,8 @@ pub struct BackendBuilder {
     wasm_path: String,
     /// Path to the bitcoin canister wasm file.
     bitcoin_wasm_path: String,
+    /// Path to the cycles ledger canister wasm file.
+    cycles_ledger_wasm_path: String,
     /// Argument to pass to the backend canister.
     arg: Vec<u8>,
     /// Controllers of the backend canister.
@@ -116,6 +133,17 @@ impl BackendBuilder {
         env::var("BITCOIN_CANISTER_WASM_FILE").unwrap_or_else(|_| DEFAULT_BITCOIN_WASM.to_string())
     }
 
+    /// The default Wasm file to deploy the cycles canister:
+    /// - If the environment variable `CYCLES_LEDGER_CANISTER_WASM_FILE` is set, it will use that
+    ///   path.
+    /// - Otherwise, it will use the `DEFAULT_CYCLES_LEDGER_WASM` constant.
+    ///
+    /// To override, please use `with_wasm()`.
+    pub fn default_cycles_ledger_wasm_path() -> String {
+        env::var("CYCLES_LEDGER_CANISTER_WASM_FILE")
+            .unwrap_or_else(|_| DEFAULT_CYCLES_LEDGER_WASM.to_string())
+    }
+
     /// The default arguments to deploy the bitcoin canister.
     pub fn default_bitcoin_arg() -> Vec<u8> {
         let init_config = BitcoinInitConfig {
@@ -129,6 +157,15 @@ impl BackendBuilder {
             watchdog_canister: None,
             burn_cycles: None,
             lazily_evaluate_fee_percentiles: None,
+        };
+        encode_one(init_config).unwrap()
+    }
+
+    /// The default arguments to deploy the bitcoin canister.
+    pub fn default_cycles_ledger_arg() -> Vec<u8> {
+        let init_config = CyclesLedgerInitConfig {
+            max_blocks_per_request: Some(9_999),
+            index_id: None,
         };
         encode_one(init_config).unwrap()
     }
@@ -157,6 +194,7 @@ impl Default for BackendBuilder {
             cycles: Self::DEFAULT_CYCLES,
             wasm_path: Self::default_wasm_path(),
             bitcoin_wasm_path: Self::default_bitcoin_wasm_path(),
+            cycles_ledger_wasm_path: Self::default_cycles_ledger_wasm_path(),
             arg: Self::default_arg(),
             controllers: Self::default_controllers(),
         }
@@ -193,6 +231,14 @@ impl BackendBuilder {
             )
         })
     }
+
+    /// Reads the cycles ledger Wasm bytes from the configured path.
+    fn cycles_ledger_wasm_bytes(&self) -> Vec<u8> {
+        read(self.cycles_ledger_wasm_path.clone()).expect(&format!(
+            "Could not find the cycles ledger wasm: {}",
+            self.cycles_ledger_wasm_path
+        ))
+    }
 }
 // Builder
 impl BackendBuilder {
@@ -227,6 +273,21 @@ impl BackendBuilder {
         pic.install_canister(canister_id, wasm_bytes, arg, None);
     }
 
+    /// Install the ledger canister.
+    fn install_ledger_canister(&mut self, pic: &PocketIc) {
+        let canister_id = Principal::from_text(CYCLES_LEDGER_CANISTER_ID)
+            .expect("Unexpected cycles ledger canister id");
+        pic.create_canister_with_id(None, None, canister_id)
+            .expect("Failed creating bitcoin canister");
+        let wasm_bytes = self.cycles_ledger_wasm_bytes();
+        pic.install_canister(
+            canister_id,
+            wasm_bytes,
+            Self::default_cycles_ledger_arg(),
+            None,
+        );
+    }
+
     fn install_bitcoin(&mut self, pic: &PocketIc) {
         let canister_id =
             Principal::from_text(BITCOIN_CANISTER_ID).expect("Unexpected bitcoin canister id");
@@ -253,6 +314,7 @@ impl BackendBuilder {
 
     /// Setup the backend canister.
     pub fn deploy_to(&mut self, pic: &PocketIc) -> Principal {
+        self.install_ledger_canister(pic);
         self.install_bitcoin(pic);
         self.deploy_backend(pic)
     }

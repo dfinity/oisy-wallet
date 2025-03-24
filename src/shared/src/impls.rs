@@ -1,9 +1,10 @@
+use std::{collections::BTreeMap, fmt};
+
 use candid::{Deserialize, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use ic_cdk::api::time;
 use ic_stable_structures::{Memory, StableBTreeMap, Storable};
 use serde::{de, Deserializer};
-use std::{collections::BTreeMap, fmt};
 #[cfg(test)]
 use strum::IntoEnumIterator;
 
