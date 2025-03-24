@@ -3,7 +3,8 @@ use shared::types::{
     dapp::AddDappSettingsError,
     network::SaveTestnetsSettingsError,
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
-    CredentialType, Version,
+    verifiable_credential::CredentialType,
+    Version,
 };
 
 use crate::{user_profile_model::UserProfileModel, StoredPrincipal};

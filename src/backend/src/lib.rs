@@ -22,6 +22,7 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
+        backend_config::{Arg, Config, Guards, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
@@ -30,6 +31,7 @@ use shared::{
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
+        migration::{Migration, MigrationProgress, MigrationReport},
         network::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
         snapshot::UserSnapshot,
@@ -39,8 +41,7 @@ use shared::{
             ListUserCreationTimestampsResponse, ListUsersRequest, ListUsersResponse, OisyUser,
             UserProfile,
         },
-        Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
-        Timestamp,
+        Stats, Timestamp,
     },
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};

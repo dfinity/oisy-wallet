@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use candid::{CandidType, Deserialize, Principal};
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
 
-use super::{CredentialType, Timestamp};
+use super::{verifiable_credential::CredentialType, Timestamp};
 use crate::types::{settings::Settings, Version};
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

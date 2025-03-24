@@ -1,8 +1,6 @@
 use std::fmt::Debug;
 
-use candid::{CandidType, Deserialize, Principal};
-use ic_cdk_timers::TimerId;
-use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
+use candid::{CandidType, Deserialize};
 
 pub type Timestamp = u64;
 

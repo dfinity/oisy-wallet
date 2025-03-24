@@ -1,4 +1,8 @@
-use candid::Principal;
+use std::fmt::Debug;
+
+use candid::{CandidType, Deserialize, Principal};
+
+use crate::types::{migration::ApiEnabled, verifiable_credential::SupportedCredential};
 
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
