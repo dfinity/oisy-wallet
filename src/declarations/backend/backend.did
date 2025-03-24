@@ -425,8 +425,8 @@ service : (Arg) -> {
   set_guards : (Guards) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
   set_many_user_tokens : (vec UserToken) -> ();
-  set_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_9);
   set_snapshot : (UserSnapshot) -> ();
+  set_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_9);
   set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_9);
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;

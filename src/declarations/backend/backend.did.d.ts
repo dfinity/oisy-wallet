@@ -456,8 +456,8 @@ export interface _SERVICE {
 	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
-	set_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_9>;
 	set_snapshot: ActorMethod<[UserSnapshot], undefined>;
+	set_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_9>;
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_9>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
