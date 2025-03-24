@@ -36,6 +36,7 @@ import {
 interface HomepageParams {
 	page: Page;
 	viewportSize?: ViewportSize;
+	isMobile?: boolean;
 }
 
 export type HomepageLoggedInParams = {
@@ -57,7 +58,6 @@ interface WaitForModalParams {
 }
 
 interface TakeScreenshotParams {
-	isMobile?: boolean;
 	freezeCarousel?: boolean;
 	centeredElementTestId?: string;
 	screenshotTarget?: Locator;
@@ -83,11 +83,14 @@ interface ShowSelectorParams {
 abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
+	readonly #isMobile?: boolean;
+
 	private promotionCarousel?: PromotionCarousel;
 
-	protected constructor({ page, viewportSize }: HomepageParams) {
+	protected constructor({ page, viewportSize, isMobile }: HomepageParams) {
 		this.#page = page;
 		this.#viewportSize = viewportSize;
+		this.#isMobile = isMobile;
 	}
 
 	protected async clickByTestId({
@@ -355,7 +358,7 @@ abstract class Homepage {
 			const selector = `[data-tid="${testId}"]`;
 			const locator = this.#page.locator(selector);
 			await locator.evaluate((element) => {
-				element.scrollTop = 0;
+				element.scrollTo(0, 0);
 			});
 		}
 	}
@@ -404,14 +407,18 @@ abstract class Homepage {
 		await this.waitForManageTokensModal({ state: 'hidden', timeout: 60000 });
 	}
 
-	getTokenCardLocator({
+	getTokenCardTestId({
 		tokenSymbol,
 		networkSymbol
 	}: {
 		tokenSymbol: string;
 		networkSymbol: string;
-	}): Locator {
-		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
+	}): string {
+		return `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`;
+	}
+
+	getTokenCardLocator(params: { tokenSymbol: string; networkSymbol: string }): Locator {
+		return this.#page.locator(`[data-tid="${this.getTokenCardTestId(params)}"]`);
 	}
 
 	async getStableViewportHeight(): Promise<number> {
@@ -440,30 +447,16 @@ abstract class Homepage {
 	}
 
 	async takeScreenshot(
-		{
-			isMobile = false,
-			freezeCarousel = false,
-			centeredElementTestId,
-			screenshotTarget
-		}: TakeScreenshotParams = {
-			isMobile: false,
+		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
 			freezeCarousel: false
 		}
 	): Promise<void> {
-		await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
-
-		if (nonNullish(centeredElementTestId)) {
-			await this.scrollIntoViewCentered(centeredElementTestId);
-		}
-
-		if (isNullish(screenshotTarget) && !isMobile) {
+		if (isNullish(screenshotTarget) && !this.#isMobile) {
 			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
 			await this.viewportAdjuster();
 		}
 
 		const element = screenshotTarget ?? this.#page;
-
-		await this.#page.mouse.move(0, 0);
 
 		if (freezeCarousel) {
 			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
@@ -472,17 +465,27 @@ abstract class Homepage {
 			await this.#page.clock.pauseAt(Date.now());
 		}
 
+		if (!this.#isMobile) {
+			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
+		}
+
+		if (nonNullish(centeredElementTestId)) {
+			await this.scrollIntoViewCentered(centeredElementTestId);
+		}
+
+		await this.#page.mouse.move(0, 0);
+
 		const colorSchemes = ['light', 'dark'] as const;
 		for (const scheme of colorSchemes) {
 			await this.#page.emulateMedia({ colorScheme: scheme });
+			await this.#page.waitForTimeout(1000);
 
-			// Playwright can retry flaky tests in the amount of time set below.
-			await expect(element).toHaveScreenshot({ timeout: 5 * 60 * 1000 });
+			await expect(element).toHaveScreenshot();
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
-			if (isMobile) {
+			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
-				await expect(element).toHaveScreenshot({ fullPage: true, timeout: 5 * 60 * 1000 });
+				await expect(element).toHaveScreenshot({ fullPage: true });
 				await this.showMobileNavigationMenu();
 			}
 		}
