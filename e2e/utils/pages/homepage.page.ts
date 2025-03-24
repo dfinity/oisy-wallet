@@ -451,10 +451,6 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
-		if (nonNullish(centeredElementTestId)) {
-			await this.scrollIntoViewCentered(centeredElementTestId);
-		}
-
 		if (isNullish(screenshotTarget) && !this.#isMobile) {
 			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
 			await this.viewportAdjuster();
