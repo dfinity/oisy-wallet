@@ -229,8 +229,9 @@ interface I18nSettings {
 		principal_description: string;
 		session: string;
 		session_description: string;
-		testnets: string;
-		testnets_description: string;
+		networks: string;
+		test_networks: string;
+		enable_testnets: string;
 		hide_zero_balances_description: string;
 		active_networks: string;
 		credentials_title: string;
@@ -259,6 +260,8 @@ interface I18nNetworks {
 	more: string;
 	chain_fusion: string;
 	network: string;
+	testnet: string;
+	number_of_enabled: string;
 }
 
 interface I18nReceive {
