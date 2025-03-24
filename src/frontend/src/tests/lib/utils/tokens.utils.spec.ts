@@ -27,7 +27,6 @@ import {
 	sumMainnetTokensUsdBalancesPerNetwork,
 	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
-import { bn1Bi, bn2, bn2Bi, bn3, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
