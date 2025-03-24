@@ -1,13 +1,12 @@
 import { KONGSWAP_API_URL } from '$env/rest/kongswap.env';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { KongSwapToken, KongSwapTokens } from '$lib/types/kongswap';
 
 const fetchKongSwap = async <T extends KongSwapTokens | KongSwapToken>({
-	endpointPath,
-	queryParams
+	endpointPath
 }: {
 	endpointPath: string;
-	queryParams?: string;
-}): Promise<T| null> => {
+}): Promise<T | null> => {
 	const response = await fetch(`${KONGSWAP_API_URL}/${endpointPath}`, {
 		method: 'GET',
 		headers: {
@@ -22,12 +21,18 @@ const fetchKongSwap = async <T extends KongSwapTokens | KongSwapToken>({
 	return response.json();
 };
 
-export const kongSwapTokenPrice = ({
-	id
-}: {
-	id: string;
-}): Promise<KongSwapToken | null> => {
+export const kongSwapTokenPrice = ({ id }: { id: string }): Promise<KongSwapToken | null> => {
 	return fetchKongSwap({
 		endpointPath: `tokens/${id}`
 	});
+};
+
+export const fetchAllKongSwapPrices = async (
+	ledgerCanisterIds: LedgerCanisterIdText[]
+): Promise<(KongSwapToken | null)[]> => {
+	return Promise.all(
+		ledgerCanisterIds.map(async (canisterId) => {
+			return await kongSwapTokenPrice({ id: canisterId.toLowerCase() });
+		})
+	);
 };

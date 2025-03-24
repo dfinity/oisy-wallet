@@ -5,10 +5,9 @@ const NumberAsStringSchema = z.string().refine((val) => !isNaN(Number(val)), {
 	message: 'Invalid number string'
 });
 
-const DateTimeSchema = z.string().refine(
-	(val) => !isNaN(new Date(val).getTime()),
-	{ message: 'Invalid ISO date' }
-);
+const DateTimeSchema = z
+	.string()
+	.refine((val) => !isNaN(new Date(val).getTime()), { message: 'Invalid ISO date' });
 
 const KongSwapTokenMetricsSchema = z.object({
 	token_id: z.number(),
@@ -41,16 +40,16 @@ const KongSwapTokenBaseSchema = z.object({
 	token_type: z.string()
 });
 
- const KongSwapTokenSchema = z.object({
+const KongSwapTokenSchema = z.object({
 	token: KongSwapTokenBaseSchema,
 	metrics: KongSwapTokenMetricsSchema
 });
 
- const KongSwapTokenWithMetricsSchema = KongSwapTokenBaseSchema.extend({
+const KongSwapTokenWithMetricsSchema = KongSwapTokenBaseSchema.extend({
 	metrics: KongSwapTokenMetricsSchema
 });
 
- const KongSwapTokensSchema = z.object({
+const KongSwapTokensSchema = z.object({
 	items: z.array(KongSwapTokenWithMetricsSchema),
 	total_pages: z.number(),
 	total_count: z.number(),
@@ -58,5 +57,6 @@ const KongSwapTokenBaseSchema = z.object({
 	limit: z.number()
 });
 
+export type KongSwapTokenMetrics = z.infer<typeof KongSwapTokenMetricsSchema>;
 export type KongSwapTokens = z.infer<typeof KongSwapTokensSchema>;
 export type KongSwapToken = z.infer<typeof KongSwapTokenSchema>;
