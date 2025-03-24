@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import BtcTransactions from '$btc/components/transactions/BtcTransactions.svelte';
 	import EthTransactions from '$eth/components/transactions/EthTransactions.svelte';
@@ -24,15 +24,19 @@
 			token.name === $routeToken && $routeNetwork && token.network.id.description === $routeNetwork
 	);
 
+	let timer: NodeJS.Timeout | undefined;
+
 	onMount(() => {
 		// Since we do not have the change to check whether the data fetching is completed or not, we need to use this fallback timeout.
 		// After the timeout, we assume that the fetch has failed and open the token modal.
-		setTimeout(() => {
+		timer = setTimeout(() => {
 			if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
 				modalStore.openManageTokens();
 			}
 		}, FALLBACK_TIMEOUT);
 	});
+
+	onDestroy(() => clearTimeout(timer));
 
 	const handleClose = async () => {
 		if (isNullish($pageToken)) {
