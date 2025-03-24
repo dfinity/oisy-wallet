@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
