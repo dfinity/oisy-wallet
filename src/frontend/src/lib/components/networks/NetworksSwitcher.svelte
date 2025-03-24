@@ -20,7 +20,6 @@
 	import { goto } from '$app/navigation';
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isMobile } from '$lib/utils/device.utils';
 
 	export let disabled = false;
 
@@ -37,8 +36,6 @@
 	bind:this={dropdown}
 	ariaLabel={$i18n.networks.title}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
-	anchor={document.getElementsByTagName('header')?.[0]?.children[1]}
-	direction={isMobile() ? 'rtl' : 'ltr'}
 	{disabled}
 >
 	{#if nonNullish($selectedNetwork)}
@@ -69,8 +66,10 @@
 			{/each}
 		{/if}
 
-		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between text-nowrap">
-			<span class="flex">
+		<div
+			class="mb-2 ml-2 mt-5 flex flex-col items-center md:flex-row md:items-start md:justify-between"
+		>
+			<span class="flex text-nowrap text-left">
 				<Button
 					link
 					on:click={() => {
@@ -82,7 +81,7 @@
 					><IconSettings /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button
 				>
 			</span>
-			<span class="text-md ml-4 mr-2 flex text-right text-sm">
+			<span class="text-md ml-0 mr-2 flex text-nowrap text-right text-sm md:ml-4">
 				{replacePlaceholders($i18n.networks.number_of_enabled, {
 					$numNetworksEnabled: $networksMainnets.length + $networksTestnets.length + '',
 					$numNetworksTotal: SUPPORTED_NETWORKS.length + ''

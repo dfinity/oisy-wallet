@@ -34,7 +34,7 @@
 
 <LogoButton {testId} on:click={onClick} selectable selected={id === $networkId} dividers>
 	<Logo slot="logo" src={icon} />
-	<span slot="title" class="mr-2 font-normal">
+	<span slot="title" class="md:text-md mr-2 text-sm font-normal">
 		{name}
 	</span>
 
@@ -42,7 +42,7 @@
 		{nonNullish(usdBalance) ? formatUSD({ value: usdBalance }) : ''}
 
 		{#if isTestnet}
-			<span class="ml-2 inline-flex">
+			<span class="inline-flex">
 				<Badge styleClass="pt-0 pb-0">{$i18n.networks.testnet}</Badge>
 			</span>
 		{/if}
