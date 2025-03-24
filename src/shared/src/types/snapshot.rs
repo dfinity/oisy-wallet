@@ -1,6 +1,6 @@
 //! A moment-in-time summary of an account.
 
-use candid::{CandidType, Deserialize};
+use candid::{CandidType, Deserialize, Principal};
 use serde::Serialize;
 
 use crate::types::{
@@ -260,11 +260,14 @@ impl AccountSnapshotFor {
 
 #[test]
 fn can_calculate_approx_usd_valuation() {
-    let snapshot = AccountSnapshotFor::Icrc(AccountSnapshot {
-        timestamp: 1712345678,
-        network: Icrc {},
-        token_address: Principal::from_text("aaaaa-aa").unwrap(),
-        account: IcrcAccountId(Principal::from_text("aaaaa-aa").unwrap()),
+    let snapshot = AccountSnapshotFor::Icrcv2(AccountSnapshot {
+        timestamp: 1_712_345_678,
+        network: InternetComputer {},
+        token_address: IcrcTokenId::Native,
+        account: Icrcv2AccountId::WithPrincipal {
+            owner: Principal::from_text("aaaaa-aa").unwrap(),
+            subaccount: None,
+        },
         decimals: 6,
         approx_usd_per_token: ComparableFloat(10.99),
         amount: 1_000_000,
