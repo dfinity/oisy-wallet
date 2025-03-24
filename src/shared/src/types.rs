@@ -12,6 +12,7 @@ pub mod custom_token;
 pub mod dapp;
 pub mod network;
 pub mod number;
+pub mod settings;
 pub mod signer;
 pub mod snapshot;
 pub mod token;
@@ -120,18 +121,6 @@ pub trait TokenVersion: Debug {
 
 /// The default maximum length of a token symbol.
 pub const MAX_SYMBOL_LENGTH: usize = 20;
-
-pub mod settings {
-    use candid::{CandidType, Deserialize};
-
-    use crate::types::{dapp::DappSettings, network::NetworksSettings};
-
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
-    pub struct Settings {
-        pub networks: NetworksSettings,
-        pub dapp: DappSettings,
-    }
-}
 
 /// Types specifics to the user profile.
 pub mod user_profile {

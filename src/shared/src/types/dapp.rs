@@ -1,4 +1,3 @@
-
 use candid::{CandidType, Deserialize};
 
 use crate::types::Version;
