@@ -1,6 +1,6 @@
 //! A moment-in-time summary of an account.
 
-use candid::{CandidType, Deserialize, Principal};
+use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
 use crate::types::{
@@ -61,84 +61,100 @@ pub enum AccountSnapshotFor {
 impl AccountSnapshotFor {
     pub fn timestamp(&self) -> u64 {
         match self {
-            AccountSnapshotFor::Icrcv2(snapshot)
-            | AccountSnapshotFor::SolDevnet(snapshot)
-            | AccountSnapshotFor::SolMainnet(snapshot)
-            | AccountSnapshotFor::SolTestnet(snapshot)
-            | AccountSnapshotFor::SolLocal(snapshot)
-            | AccountSnapshotFor::SplMainnet(snapshot)
-            | AccountSnapshotFor::SplDevnet(snapshot)
-            | AccountSnapshotFor::SplTestnet(snapshot)
-            | AccountSnapshotFor::SplLocal(snapshot)
-            | AccountSnapshotFor::BtcMainnet(snapshot)
-            | AccountSnapshotFor::BtcTestnet(snapshot)
-            | AccountSnapshotFor::BtcRegtest(snapshot)
-            | AccountSnapshotFor::EthMainnet(snapshot)
-            | AccountSnapshotFor::EthSepolia(snapshot)
-            | AccountSnapshotFor::Erc20Mainnet(snapshot)
+            AccountSnapshotFor::Icrcv2(snapshot) => snapshot.timestamp,
+            AccountSnapshotFor::SolDevnet(snapshot) | AccountSnapshotFor::SplDevnet(snapshot) => {
+                snapshot.timestamp
+            }
+            AccountSnapshotFor::SolMainnet(snapshot) | AccountSnapshotFor::SplMainnet(snapshot) => {
+                snapshot.timestamp
+            }
+            AccountSnapshotFor::SolTestnet(snapshot) | AccountSnapshotFor::SplTestnet(snapshot) => {
+                snapshot.timestamp
+            }
+            AccountSnapshotFor::SolLocal(snapshot) | AccountSnapshotFor::SplLocal(snapshot) => {
+                snapshot.timestamp
+            }
+            AccountSnapshotFor::BtcMainnet(snapshot) => snapshot.timestamp,
+            AccountSnapshotFor::BtcTestnet(snapshot) => snapshot.timestamp,
+            AccountSnapshotFor::BtcRegtest(snapshot) => snapshot.timestamp,
+            AccountSnapshotFor::EthMainnet(snapshot)
+            | AccountSnapshotFor::Erc20Mainnet(snapshot) => snapshot.timestamp,
+            AccountSnapshotFor::EthSepolia(snapshot)
             | AccountSnapshotFor::Erc20Sepolia(snapshot) => snapshot.timestamp,
         }
     }
 
     pub fn decimals(&self) -> u8 {
         match self {
-            AccountSnapshotFor::Icrcv2(snapshot)
-            | AccountSnapshotFor::SolDevnet(snapshot)
-            | AccountSnapshotFor::SolMainnet(snapshot)
-            | AccountSnapshotFor::SolTestnet(snapshot)
-            | AccountSnapshotFor::SolLocal(snapshot)
-            | AccountSnapshotFor::SplMainnet(snapshot)
-            | AccountSnapshotFor::SplDevnet(snapshot)
-            | AccountSnapshotFor::SplTestnet(snapshot)
-            | AccountSnapshotFor::SplLocal(snapshot)
-            | AccountSnapshotFor::BtcMainnet(snapshot)
-            | AccountSnapshotFor::BtcTestnet(snapshot)
-            | AccountSnapshotFor::BtcRegtest(snapshot)
-            | AccountSnapshotFor::EthMainnet(snapshot)
-            | AccountSnapshotFor::EthSepolia(snapshot)
-            | AccountSnapshotFor::Erc20Mainnet(snapshot)
+            AccountSnapshotFor::Icrcv2(snapshot) => snapshot.decimals,
+            AccountSnapshotFor::SolDevnet(snapshot) | AccountSnapshotFor::SplDevnet(snapshot) => {
+                snapshot.decimals
+            }
+            AccountSnapshotFor::SolMainnet(snapshot) | AccountSnapshotFor::SplMainnet(snapshot) => {
+                snapshot.decimals
+            }
+            AccountSnapshotFor::SolTestnet(snapshot) | AccountSnapshotFor::SplTestnet(snapshot) => {
+                snapshot.decimals
+            }
+            AccountSnapshotFor::SolLocal(snapshot) | AccountSnapshotFor::SplLocal(snapshot) => {
+                snapshot.decimals
+            }
+            AccountSnapshotFor::BtcMainnet(snapshot) => snapshot.decimals,
+            AccountSnapshotFor::BtcTestnet(snapshot) => snapshot.decimals,
+            AccountSnapshotFor::BtcRegtest(snapshot) => snapshot.decimals,
+            AccountSnapshotFor::EthMainnet(snapshot)
+            | AccountSnapshotFor::Erc20Mainnet(snapshot) => snapshot.decimals,
+            AccountSnapshotFor::EthSepolia(snapshot)
             | AccountSnapshotFor::Erc20Sepolia(snapshot) => snapshot.decimals,
         }
     }
 
     pub fn approx_usd_per_token(&self) -> ComparableFloat {
         match self {
-            AccountSnapshotFor::Icrcv2(snapshot)
-            | AccountSnapshotFor::SolDevnet(snapshot)
-            | AccountSnapshotFor::SolMainnet(snapshot)
-            | AccountSnapshotFor::SolTestnet(snapshot)
-            | AccountSnapshotFor::SolLocal(snapshot)
-            | AccountSnapshotFor::SplMainnet(snapshot)
-            | AccountSnapshotFor::SplDevnet(snapshot)
-            | AccountSnapshotFor::SplTestnet(snapshot)
-            | AccountSnapshotFor::SplLocal(snapshot)
-            | AccountSnapshotFor::BtcMainnet(snapshot)
-            | AccountSnapshotFor::BtcTestnet(snapshot)
-            | AccountSnapshotFor::BtcRegtest(snapshot)
-            | AccountSnapshotFor::EthMainnet(snapshot)
-            | AccountSnapshotFor::EthSepolia(snapshot)
-            | AccountSnapshotFor::Erc20Mainnet(snapshot)
+            AccountSnapshotFor::Icrcv2(snapshot) => snapshot.approx_usd_per_token,
+            AccountSnapshotFor::SolDevnet(snapshot) | AccountSnapshotFor::SplDevnet(snapshot) => {
+                snapshot.approx_usd_per_token
+            }
+            AccountSnapshotFor::SolMainnet(snapshot) | AccountSnapshotFor::SplMainnet(snapshot) => {
+                snapshot.approx_usd_per_token
+            }
+            AccountSnapshotFor::SolTestnet(snapshot) | AccountSnapshotFor::SplTestnet(snapshot) => {
+                snapshot.approx_usd_per_token
+            }
+            AccountSnapshotFor::SolLocal(snapshot) | AccountSnapshotFor::SplLocal(snapshot) => {
+                snapshot.approx_usd_per_token
+            }
+            AccountSnapshotFor::BtcMainnet(snapshot) => snapshot.approx_usd_per_token,
+            AccountSnapshotFor::BtcTestnet(snapshot) => snapshot.approx_usd_per_token,
+            AccountSnapshotFor::BtcRegtest(snapshot) => snapshot.approx_usd_per_token,
+            AccountSnapshotFor::EthMainnet(snapshot)
+            | AccountSnapshotFor::Erc20Mainnet(snapshot) => snapshot.approx_usd_per_token,
+            AccountSnapshotFor::EthSepolia(snapshot)
             | AccountSnapshotFor::Erc20Sepolia(snapshot) => snapshot.approx_usd_per_token,
         }
     }
 
     pub fn amount(&self) -> u64 {
         match self {
-            AccountSnapshotFor::Icrcv2(snapshot)
-            | AccountSnapshotFor::SolDevnet(snapshot)
-            | AccountSnapshotFor::SolMainnet(snapshot)
-            | AccountSnapshotFor::SolTestnet(snapshot)
-            | AccountSnapshotFor::SolLocal(snapshot)
-            | AccountSnapshotFor::SplMainnet(snapshot)
-            | AccountSnapshotFor::SplDevnet(snapshot)
-            | AccountSnapshotFor::SplTestnet(snapshot)
-            | AccountSnapshotFor::SplLocal(snapshot)
-            | AccountSnapshotFor::BtcMainnet(snapshot)
-            | AccountSnapshotFor::BtcTestnet(snapshot)
-            | AccountSnapshotFor::BtcRegtest(snapshot)
-            | AccountSnapshotFor::EthMainnet(snapshot)
-            | AccountSnapshotFor::EthSepolia(snapshot)
-            | AccountSnapshotFor::Erc20Mainnet(snapshot)
+            AccountSnapshotFor::Icrcv2(snapshot) => snapshot.amount,
+            AccountSnapshotFor::SolDevnet(snapshot) | AccountSnapshotFor::SplDevnet(snapshot) => {
+                snapshot.amount
+            }
+            AccountSnapshotFor::SolMainnet(snapshot) | AccountSnapshotFor::SplMainnet(snapshot) => {
+                snapshot.amount
+            }
+            AccountSnapshotFor::SolTestnet(snapshot) | AccountSnapshotFor::SplTestnet(snapshot) => {
+                snapshot.amount
+            }
+            AccountSnapshotFor::SolLocal(snapshot) | AccountSnapshotFor::SplLocal(snapshot) => {
+                snapshot.amount
+            }
+            AccountSnapshotFor::BtcMainnet(snapshot) => snapshot.amount,
+            AccountSnapshotFor::BtcTestnet(snapshot) => snapshot.amount,
+            AccountSnapshotFor::BtcRegtest(snapshot) => snapshot.amount,
+            AccountSnapshotFor::EthMainnet(snapshot)
+            | AccountSnapshotFor::Erc20Mainnet(snapshot) => snapshot.amount,
+            AccountSnapshotFor::EthSepolia(snapshot)
             | AccountSnapshotFor::Erc20Sepolia(snapshot) => snapshot.amount,
         }
     }
