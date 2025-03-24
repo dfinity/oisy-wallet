@@ -10,6 +10,7 @@ pub mod account;
 pub mod network;
 pub mod number;
 pub mod snapshot;
+pub mod token;
 pub mod token_id;
 pub mod transaction;
 
@@ -111,32 +112,6 @@ pub trait TokenVersion: Debug {
     fn with_initial_version(&self) -> Self
     where
         Self: Sized + Clone;
-}
-
-/// ERC20 specific user defined tokens
-pub mod token {
-    use candid::{CandidType, Deserialize};
-    use serde::Serialize;
-
-    use crate::types::Version;
-
-    pub type ChainId = u64;
-
-    #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct UserToken {
-        pub contract_address: String,
-        pub chain_id: ChainId,
-        pub symbol: Option<String>,
-        pub decimals: Option<u8>,
-        pub version: Option<Version>,
-        pub enabled: Option<bool>,
-    }
-
-    #[derive(CandidType, Deserialize, Clone)]
-    pub struct UserTokenId {
-        pub contract_address: String,
-        pub chain_id: ChainId,
-    }
 }
 
 /// The default maximum length of a token symbol.

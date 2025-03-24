@@ -1,4 +1,3 @@
-
 use candid::{CandidType, Deserialize, Nat};
 use serde::Serialize;
 
