@@ -1,16 +1,18 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
+import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
+import { findMissingCanisterIds, formatKongSwapToCoingeckoPrices } from '$lib/utils/exchange.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { nonNullish } from '@dfinity/utils';
 
-const fetchIcrcPricesFromCoingecko = async (
+const fetchIcrcPricesFromCoingecko = (
 	ledgerCanisterIds: LedgerCanisterIdText[]
 ): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
 	simpleTokenPrice({
@@ -23,7 +25,9 @@ const fetchIcrcPricesFromCoingecko = async (
 const fetchIcrcPricesFromKongSwap = async (
 	missingIds: LedgerCanisterIdText[]
 ): Promise<CoingeckoSimpleTokenPriceResponse> => {
-	if (missingIds.length === 0) return {};
+	if (missingIds.length === 0) {
+		return {};
+	}
 	const tokens = await fetchBatchKongSwapPrices(missingIds);
 
 	return formatKongSwapToCoingeckoPrices(tokens);
@@ -63,18 +67,23 @@ export const exchangeRateERC20ToUsd = (
 		include_market_cap: true
 	});
 
-export const exchangeRateICRCToUsd = (
+export const exchangeRateICRCToUsd = async (
 	ledgerCanisterIds: LedgerCanisterIdText[]
 ): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
-	if (ledgerCanisterIds.length === 0) return null;
+	if (ledgerCanisterIds.length === 0) {
+		return null;
+	}
 
 	const coingeckoPrices = await fetchIcrcPricesFromCoingecko(ledgerCanisterIds);
-
-	const missingIds = findMissingCanisterIds(ledgerCanisterIds, coingeckoPrices);
-	if (missingIds.length === 0) return coingeckoPrices;
+	const missingIds = findMissingCanisterIds({
+		allIds: ledgerCanisterIds,
+		coingeckoResponse: coingeckoPrices
+	});
+	if (missingIds.length === 0) {
+		return coingeckoPrices;
+	}
 
 	const kongSwapPrices = await fetchIcrcPricesFromKongSwap(missingIds);
-
 	const exchangeRatePrices: CoingeckoSimpleTokenPriceResponse = {
 		...(coingeckoPrices ?? {}),
 		...(kongSwapPrices ?? {})

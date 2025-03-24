@@ -15,16 +15,13 @@ const fetchKongSwap = async <T>(endpoint: string): Promise<T | null> => {
 	return response.json();
 };
 
-export const getKongSwapTokenById = async (
-	id: LedgerCanisterIdText
-): Promise<KongSwapToken | null> => {
-	return fetchKongSwap<KongSwapToken>(`tokens/${id.toLowerCase()}`);
-};
+export const getKongSwapTokenById = (id: LedgerCanisterIdText): Promise<KongSwapToken | null> =>
+	fetchKongSwap<KongSwapToken>(`tokens/${id.toLowerCase()}`);
 
-export const fetchBatchKongSwapPrices = async (
+export const fetchBatchKongSwapPrices = (
 	canisterIds: LedgerCanisterIdText[]
-): Promise<(KongSwapToken | null)[]> => {
-	return Promise.all(
+): Promise<(KongSwapToken | null)[]> =>
+	Promise.all(
 		canisterIds.map((id) =>
 			getKongSwapTokenById(id).catch((error) => {
 				console.warn(`KongSwap fallback failed for ${id}`, error);
@@ -32,4 +29,3 @@ export const fetchBatchKongSwapPrices = async (
 			})
 		)
 	);
-};

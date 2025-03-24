@@ -10,13 +10,15 @@ export const mockExchanges: ExchangesData = mockTokens.reduce<ExchangesData>((ac
 	return acc;
 }, {});
 
-export const createMockKongSwapToken = (
-	canisterId: string = 'test-canister-1',
-	options: {
-		token?: Partial<KongSwapToken['token']>;
-		metrics?: Partial<KongSwapTokenMetrics>;
-	} = {}
-): KongSwapToken => {
+export const createMockKongSwapToken = ({
+	canisterId = 'test-canister-1',
+	token = {},
+	metrics = {}
+}: {
+	canisterId?: string;
+	token?: Partial<KongSwapToken['token']>;
+	metrics?: Partial<KongSwapTokenMetrics>;
+}): KongSwapToken => {
 	const tokenDefaults = {
 		canister_id: canisterId,
 		address: canisterId,
@@ -49,14 +51,8 @@ export const createMockKongSwapToken = (
 	};
 
 	return {
-		token: {
-			...tokenDefaults,
-			...(options.token ?? {})
-		},
-		metrics: {
-			...metricsDefaults,
-			...(options.metrics ?? {})
-		}
+		token: { ...tokenDefaults, ...token },
+		metrics: { ...metricsDefaults, ...metrics }
 	};
 };
 

@@ -30,17 +30,18 @@ export const usdValue = ({
 
 export const formatKongSwapToCoingeckoPrices = (
 	tokens: (KongSwapToken | null)[]
-): CoingeckoSimpleTokenPriceResponse => {
-	return tokens.reduce<CoingeckoSimpleTokenPriceResponse>((acc, tokenData) => {
+): CoingeckoSimpleTokenPriceResponse =>
+	tokens.reduce<CoingeckoSimpleTokenPriceResponse>((acc, tokenData) => {
 		const token = tokenData?.token;
 		const metrics = tokenData?.metrics;
 
-		if (isNullish(token) || isNullish(metrics?.price) || isNullish(token.canister_id)) return acc;
+		if (isNullish(token) || isNullish(metrics?.price) || isNullish(token.canister_id)) {
+			return acc;
+		}
 
 		acc[token.canister_id.toLowerCase()] = mapMetricsToCoingeckoPrice(metrics);
 		return acc;
 	}, {});
-};
 
 const mapMetricsToCoingeckoPrice = (metrics: KongSwapTokenMetrics): CoingeckoSimpleTokenPrice => {
 	const { price, market_cap, volume_24h, price_change_24h, updated_at } = metrics;
@@ -53,10 +54,13 @@ const mapMetricsToCoingeckoPrice = (metrics: KongSwapTokenMetrics): CoingeckoSim
 	};
 };
 
-export const findMissingCanisterIds = (
-	allIds: LedgerCanisterIdText[],
-	coingeckoResponse: CoingeckoSimpleTokenPriceResponse | null
-): LedgerCanisterIdText[] => {
+export const findMissingCanisterIds = ({
+	allIds,
+	coingeckoResponse
+}: {
+	allIds: LedgerCanisterIdText[];
+	coingeckoResponse: CoingeckoSimpleTokenPriceResponse | null;
+}): LedgerCanisterIdText[] => {
 	const found = new Set(Object.keys(coingeckoResponse ?? {}));
 	return allIds.filter((id) => !found.has(id.toLowerCase()));
 };

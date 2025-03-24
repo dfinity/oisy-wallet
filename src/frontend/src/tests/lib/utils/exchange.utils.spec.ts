@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('formatKongSwapToCoingeckoPrices', () => {
 	it('formats a valid token correctly', () => {
-		const token = createMockKongSwapToken('test-canister-1');
+		const token = createMockKongSwapToken({ canisterId: 'test-canister-1' });
 		const result = formatKongSwapToCoingeckoPrices([token]);
 
 		expect(result).toHaveProperty('test-canister-1');
@@ -23,7 +23,8 @@ describe('formatKongSwapToCoingeckoPrices', () => {
 	});
 
 	it('skips tokens with missing canister_id', () => {
-		const token = createMockKongSwapToken('test', {
+		const token = createMockKongSwapToken({
+			canisterId: 'test-invalid',
 			token: { canister_id: '' }
 		});
 		const result = formatKongSwapToCoingeckoPrices([token]);
@@ -31,7 +32,8 @@ describe('formatKongSwapToCoingeckoPrices', () => {
 	});
 
 	it('skips tokens with missing price', () => {
-		const token = createMockKongSwapToken('test-canister-2', {
+		const token = createMockKongSwapToken({
+			canisterId: 'test-missing-price',
 			metrics: { price: null as unknown as string }
 		});
 		const result = formatKongSwapToCoingeckoPrices([token]);
@@ -39,7 +41,7 @@ describe('formatKongSwapToCoingeckoPrices', () => {
 	});
 
 	it('normalizes canister_id to lowercase', () => {
-		const token = createMockKongSwapToken('TeSt-CaNiStEr-3');
+		const token = createMockKongSwapToken({ canisterId: 'TeSt-CaNiStEr-3' });
 		const result = formatKongSwapToCoingeckoPrices([token]);
 
 		expect(result).toHaveProperty('test-canister-3');
@@ -53,13 +55,20 @@ describe('findMissingCanisterIds', () => {
 			'can-1': createMockCoingeckoTokenPrice()
 		};
 
-		const result = findMissingCanisterIds(allIds, coingecko);
+		const result = findMissingCanisterIds({
+			allIds,
+			coingeckoResponse: coingecko
+		});
+
 		expect(result).toEqual(['can-2', 'can-3']);
 	});
 
 	it('returns all IDs if response is null', () => {
 		const ids: LedgerCanisterIdText[] = ['can-4', 'can-5'];
-		const result = findMissingCanisterIds(ids, null);
+		const result = findMissingCanisterIds({
+			allIds: ids,
+			coingeckoResponse: null
+		});
 		expect(result).toEqual(ids);
 	});
 
@@ -68,7 +77,12 @@ describe('findMissingCanisterIds', () => {
 		const coingecko: CoingeckoSimpleTokenPriceResponse = {
 			'can-1': createMockCoingeckoTokenPrice()
 		};
-		const result = findMissingCanisterIds(ids, coingecko);
+
+		const result = findMissingCanisterIds({
+			allIds: ids,
+			coingeckoResponse: coingecko
+		});
+
 		expect(result).toEqual(['can-2']);
 	});
 });
