@@ -384,17 +384,18 @@ a.as-button {
 	@apply font-medium;
 	@apply leading-5;
 
-
-
-	transition: border 0.25s ease-out;
+	transition: all 0.25s ease-out;
 
 	&::placeholder {
 		@apply text-tertiary;
 	}
 
-	&:hover:not(.disabled):not([disabled]),
+	&:hover:not(.disabled):not([disabled]) {
+		@apply bg-brand-subtle-20;
+	}
+
 	&.opened {
-		@apply bg-primary;
+		@apply bg-brand-subtle-30;
 	}
 }
 
