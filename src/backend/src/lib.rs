@@ -7,7 +7,7 @@ use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
     btc_user_pending_tx_state::StoredPendingTransaction, state::with_btc_pending_transactions,
 };
-use ic_cdk::{api::time, eprintln};
+use ic_cdk::{api::time, caller, eprintln};
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{clear_timer, set_timer, set_timer_interval};
 use ic_stable_structures::{
@@ -32,21 +32,24 @@ use shared::{
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
         security_pow::{
-            CreateChallengeError, CreateChallengeResponse, TestAllowSigningError,
-            TestAllowSigningRequest, TestAllowSigningResponse,
+            AllowSigningStatus, ChallengeCompletion, ChallengeCompletionError,
+            CreateChallengeError, CreateChallengeResponse,
         },
-        signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        signer::{
+            topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+            AllowSigningRequest, AllowSigningResponse,
+        },
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
             ListUserCreationTimestampsResponse, ListUsersRequest, ListUsersResponse, OisyUser,
             UserProfile,
         },
-        Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
-        Timestamp,
+        AllowSigningError, Arg, Config, Guards, InitArg, Migration, MigrationProgress,
+        MigrationReport, Stats, Timestamp,
     },
 };
-use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
+use signer::btc_principal_to_p2wpkh_address;
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
@@ -58,6 +61,7 @@ use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
+    security_pow::DIFFICULTY_TO_CYCLE_FACTOR,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets},
@@ -624,9 +628,9 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        let mut user_profile_model =
+        let user_profile_model =
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        match find_profile(stored_principal, &mut user_profile_model) {
+        match find_profile(stored_principal, &user_profile_model) {
             Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
             Err(err) => Err(err),
         }
@@ -655,25 +659,6 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
     })
 }
 
-/// Temp.function to emulate the approve_signer function.
-///
-/// # Errors
-/// Errors are enumerated by: `TestAllowSigningError`.
-///
-/// # Returns
-///
-/// * `Ok(TestAllowSigningResponse)` - On successful.
-/// * `Err(TestAllowSigningError)` - If a signer approval fails due to invalid parameters or
-///   internal errors.
-#[update(guard = "may_write_user_data")]
-#[allow(clippy::needless_pass_by_value)]
-pub fn test_allow_signing(
-    request: TestAllowSigningRequest,
-) -> Result<TestAllowSigningResponse, TestAllowSigningError> {
-    let response: TestAllowSigningResponse = security_pow::test_allow_signing(request.nonce)?;
-    Ok(response)
-}
-
 /// An endpoint to be called by users on first login, to enable them to
 /// use the chain fusion signer together with Oisy.
 ///
@@ -684,8 +669,37 @@ pub fn test_allow_signing(
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "may_read_user_data")]
-pub async fn allow_signing() -> Result<(), AllowSigningError> {
-    signer::allow_signing().await
+pub async fn allow_signing(
+    request: AllowSigningRequest,
+) -> Result<AllowSigningResponse, AllowSigningError> {
+    let principal = caller();
+
+    let challenge_completion: ChallengeCompletion =
+        crate::security_pow::complete_challenge(request.nonce).map_err(|e| match e {
+            ChallengeCompletionError::MissingUserProfile => AllowSigningError::PowChallenge(e),
+            ChallengeCompletionError::InvalidNonce => AllowSigningError::PowChallenge(e),
+            ChallengeCompletionError::MissingChallenge => AllowSigningError::PowChallenge(e),
+        })?;
+
+    // Grant cycles proportional to difficulty
+    let allowed_cycles =
+        (challenge_completion.current_difficulty as u64) * DIFFICULTY_TO_CYCLE_FACTOR;
+
+    // Here we would proceed with granting signer permissions and record the granted cycles for
+    ic_cdk::println!(
+        "Allowing principle {} to spend {} cycles on signer operations",
+        principal.to_string(),
+        allowed_cycles,
+    );
+    signer::allow_signing(allowed_cycles)
+        .await
+        .expect("Get Result");
+
+    Ok(AllowSigningResponse {
+        status: AllowSigningStatus::Executed,
+        allowed_cycles,
+        challenge_completion,
+    })
 }
 
 #[query(guard = "caller_is_allowed")]

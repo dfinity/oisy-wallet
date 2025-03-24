@@ -21,10 +21,17 @@ type AddUserCredentialRequest = record {
 };
 type AllowSigningError = variant {
   ApproveError : ApproveError;
+  PowChallenge : ChallengeCompletionError;
   Other : text;
   FailedToContactCyclesLedger;
 };
-type AllowSigningStatus = variant { EXECUTED; FAILED; SKIPPED };
+type AllowSigningRequest = record { nonce : nat64 };
+type AllowSigningResponse = record {
+  status : AllowSigningStatus;
+  challenge_completion : ChallengeCompletion;
+  allowed_cycles : nat64;
+};
+type AllowSigningStatus = variant { Skipped; Failed; Executed };
 type ApiEnabled = variant { ReadOnly; Enabled; Disabled };
 type ApproveError = variant {
   GenericError : record { message : text; error_code : nat };
@@ -73,6 +80,11 @@ type ChallengeCompletion = record {
   next_allowance_ns : nat64;
   next_difficulty : nat32;
   current_difficulty : nat32;
+};
+type ChallengeCompletionError = variant {
+  InvalidNonce;
+  MissingChallenge;
+  MissingUserProfile;
 };
 type Config = record {
   api : opt Guards;
@@ -202,14 +214,10 @@ type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok; Err : AddDappSettingsError };
 type Result_10 = variant { Ok; Err : SaveTestnetsSettingsError };
 type Result_11 = variant {
-  Ok : TestAllowSigningResponse;
-  Err : TestAllowSigningError;
-};
-type Result_12 = variant {
   Ok : TopUpCyclesLedgerResponse;
   Err : TopUpCyclesLedgerError;
 };
-type Result_2 = variant { Ok; Err : AllowSigningError };
+type Result_2 = variant { Ok : AllowSigningResponse; Err : AllowSigningError };
 type Result_3 = variant { Ok; Err : BtcAddPendingTransactionError };
 type Result_4 = variant {
   Ok : BtcGetPendingTransactionsReponse;
@@ -263,17 +271,6 @@ type SupportedCredential = record {
   ii_origin : text;
   credential_type : CredentialType;
 };
-type TestAllowSigningError = variant {
-  PowInvalidNonce;
-  MissingUserProfile;
-  PowMissingChallange;
-};
-type TestAllowSigningRequest = record { nonce : nat64 };
-type TestAllowSigningResponse = record {
-  status : AllowSigningStatus;
-  challenge_completion : ChallengeCompletion;
-  allowed_cycles : nat64;
-};
 type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
   Icrc : IcrcToken;
@@ -323,7 +320,7 @@ type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
   add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (Result_1);
-  allow_signing : () -> (Result_2);
+  allow_signing : (AllowSigningRequest) -> (Result_2);
   btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (Result_3);
   btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
       Result_4,
@@ -354,6 +351,5 @@ service : (Arg) -> {
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
   step_migration : () -> ();
-  test_allow_signing : (TestAllowSigningRequest) -> (Result_11);
-  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_12);
+  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_11);
 }

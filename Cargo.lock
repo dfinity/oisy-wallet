@@ -3238,6 +3238,7 @@ dependencies = [
  "ic-cdk 0.16.0",
  "ic-cdk-macros 0.16.0",
  "ic-cdk-timers",
+ "ic-cycles-ledger-client",
  "ic-metrics-encoder",
  "ic-stable-structures",
  "ic-verifiable-credentials",

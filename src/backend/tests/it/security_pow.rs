@@ -6,27 +6,64 @@ use candid::Principal;
 use sha2::{Digest, Sha256};
 use shared::types::{
     security_pow::{
-        CreateChallengeError, CreateChallengeResponse, TestAllowSigningError,
-        TestAllowSigningRequest, TestAllowSigningResponse,
+        AllowSigningStatus, ChallengeCompletionError, CreateChallengeError, CreateChallengeResponse,
     },
+    signer::{AllowSigningRequest, AllowSigningResponse},
     user_profile::UserProfile,
+    AllowSigningError,
 };
 
 use crate::utils::{
     mock::CALLER,
     pocketic::{setup, PicBackend, PicCanisterTrait},
 };
+
+pub const TARGET_DURATION_NS: u64 = 5000 * 1_000_000;
 // -------------------------------------------------------------------------------------------------
 // - General Utility methods used for testing
 // -------------------------------------------------------------------------------------------------
 
+#[allow(dead_code)]
+pub fn assert_greater_than<T: PartialOrd + std::fmt::Debug>(a: T, b: T) {
+    assert!(
+        a > b,
+        "Expected left value ({:?}) to be greater than right value ({:?})",
+        a,
+        b
+    );
+}
+
+#[allow(dead_code)]
+pub fn assert_less_than<T: PartialOrd + std::fmt::Debug>(a: T, b: T) {
+    assert!(
+        a < b,
+        "Expected left value ({:?}) to be less than right value ({:?})",
+        a,
+        b
+    );
+}
+
+pub fn assert_in_range<T>(value: T, min: T, max: T)
+where
+    T: PartialOrd + std::fmt::Debug,
+{
+    assert!(
+        value >= min && value <= max,
+        "Value {:?} not in range [{:?}, {:?}]",
+        value,
+        min,
+        max
+    );
+}
+
 // This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
 // frontend.
-fn get_timestamp_ns() -> u64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_nanos() as u64
+fn get_timestamp_now_ns() -> u64 {
+    return get_timestamp_ns(std::time::SystemTime::now());
+}
+
+fn get_timestamp_ns(st: std::time::SystemTime) -> u64 {
+    return st.duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos() as u64;
 }
 
 // This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
@@ -41,7 +78,7 @@ pub fn helper_solve_challenge(pic_setup: &PicBackend, timestamp: u64, difficulty
     let mut nonce: u64 = 0;
     let target: u32 = (0xFFFFFFFFu32) / difficulty;
 
-    let start_timestamp = get_timestamp_ns();
+    let start_timestamp = get_timestamp_now_ns();
     loop {
         // Serialize challenge object + nonce
         let challenge_str = timestamp.to_string() + "." + &nonce.to_string();
@@ -60,7 +97,7 @@ pub fn helper_solve_challenge(pic_setup: &PicBackend, timestamp: u64, difficulty
         }
         nonce += 1;
     }
-    let solve_timestamp_ns = get_timestamp_ns() - start_timestamp;
+    let solve_timestamp_ns = get_timestamp_now_ns() - start_timestamp;
     pic_setup
         .pic
         .advance_time(Duration::from_nanos(solve_timestamp_ns));
@@ -80,19 +117,18 @@ pub fn call_create_pow_challenge(
     wrapped_result.expect("that create_pow_challenge succeeds")
 }
 
-pub fn call_test_allow_signing(
+pub fn call_allow_signing(
     pic_setup: &PicBackend,
     caller: Principal,
     nonce: u64,
-) -> Result<TestAllowSigningResponse, TestAllowSigningError> {
-    let wrapped_result = pic_setup
-        .update::<Result<TestAllowSigningResponse, TestAllowSigningError>>(
-            caller,
-            "test_allow_signing",
-            TestAllowSigningRequest { nonce: nonce },
-        );
+) -> Result<AllowSigningResponse, AllowSigningError> {
+    let wrapped_result = pic_setup.update::<Result<AllowSigningResponse, AllowSigningError>>(
+        caller,
+        "allow_signing",
+        AllowSigningRequest { nonce: nonce },
+    );
 
-    return wrapped_result.expect("that create_pow_challenge exists");
+    wrapped_result.expect("that create_pow_challenge exists")
 }
 
 pub fn call_create_user_profile(
@@ -109,7 +145,7 @@ pub fn call_create_user_profile(
 // -------------------------------------------------------------------------------------------------
 
 #[test]
-fn test_pow_challenge_should_succeed_with_user_profile() {
+fn test_create_pow_challenge_should_succeed_with_user_profile() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
@@ -118,7 +154,7 @@ fn test_pow_challenge_should_succeed_with_user_profile() {
     assert!(result.is_ok());
 }
 #[test]
-fn test_pow_challenge_should_fail_without_user_profile() {
+fn test_create_pow_challenge_should_fail_without_user_profile() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -131,7 +167,7 @@ fn test_pow_challenge_should_fail_without_user_profile() {
 }
 
 #[test]
-fn test_pow_challenge_should_succeed_if_expired() {
+fn test_create_pow_challenge_should_succeed_again_if_expired() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
@@ -139,15 +175,21 @@ fn test_pow_challenge_should_succeed_if_expired() {
     let err_1th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_1th_call.is_ok());
 
-    // TODO use err_1th_call.unwrap().expiry_timestamp_ns to get the expiry timestamp
-    pic_setup.pic.advance_time(Duration::from_secs(6));
+    let now_ns = get_timestamp_ns(pic_setup.pic.get_time()); // system time is not in sync with canister time --> get_timestamp_ns();
+    let expiry_ns = err_1th_call.unwrap().expiry_timestamp_ns;
+
+    assert_greater_than(expiry_ns, now_ns);
+
+    pic_setup
+        .pic
+        .advance_time(Duration::from_nanos(expiry_ns - now_ns));
 
     let err_2th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_2th_call.is_ok());
 }
 
 #[test]
-fn test_pow_challenge_should_fail_if_not_expired() {
+fn test_create_pow_challenge_should_fail_if_not_expired() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
@@ -174,11 +216,13 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
     let nonce =
         helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
 
-    let result_allow_signing = call_test_allow_signing(&pic_setup, caller, nonce);
+    let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
 
     assert!(result_allow_signing.is_ok());
+    let allow_signing_response = result_allow_signing.unwrap();
+    assert_eq!(allow_signing_response.status, AllowSigningStatus::Executed);
 
-    // let reponse = result_allow_signing.unwrap();
+    //
     // assert_eq!(reponse.status, AllowSigningStatus.EXECUTED)
 }
 
@@ -200,10 +244,10 @@ fn test_allow_signing_should_fail_with_invalid_nonce() {
     // we can always assume the previously iterated nonce is invalid
     let invalid_nonce = nonce - 1;
 
-    let result_allow_signing = call_test_allow_signing(&pic_setup, caller, invalid_nonce);
+    let result_allow_signing = call_allow_signing(&pic_setup, caller, invalid_nonce);
     assert_eq!(
         result_allow_signing.unwrap_err(),
-        TestAllowSigningError::PowInvalidNonce
+        AllowSigningError::PowChallenge(ChallengeCompletionError::InvalidNonce)
     );
 }
 
@@ -222,10 +266,10 @@ fn test_allow_signing_should_approve_the_correct_cycles_amount() {
     let nonce =
         helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
 
-    let result_allow_signing = call_test_allow_signing(&pic_setup, caller, nonce);
+    let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
 
     assert!(result_allow_signing.is_ok());
-    let response: TestAllowSigningResponse = result_allow_signing.unwrap();
+    let response: AllowSigningResponse = result_allow_signing.unwrap();
     assert_eq!(response.allowed_cycles, 280000000)
 }
 
@@ -242,7 +286,7 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
         result.expect("Failed to retrieve CreateChallengeResponse");
     let nonce =
         helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
-    let result_allow_signing = call_test_allow_signing(&pic_setup, caller, nonce);
+    let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
     assert!(result_allow_signing.is_ok());
 
     // ---------------------------------------------------------------------------------------------
@@ -253,6 +297,16 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
         result.expect("Failed to retrieve CreateChallengeResponse");
     let nonce =
         helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
-    let result_allow_signing = call_test_allow_signing(&pic_setup, caller, nonce);
+    let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
     assert!(result_allow_signing.is_ok());
+
+    let allow_signing_response = result_allow_signing.unwrap();
+
+    assert_in_range(
+        allow_signing_response
+            .challenge_completion
+            .solved_duration_ns,
+        TARGET_DURATION_NS - 100000000u64,
+        TARGET_DURATION_NS + 100000000u64,
+    );
 }

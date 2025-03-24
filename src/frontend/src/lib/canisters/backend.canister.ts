@@ -171,6 +171,16 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
+	powCreateChallenge = async (): Promise<void> => {
+		const { allow_signing } = this.caller({ certified: true });
+
+		const response = await create_challenge();
+
+		if ('Err' in response) {
+			throw mapAllowSigningError(response.Err);
+		}
+	};
+
 	allowSigning = async (): Promise<void> => {
 		const { allow_signing } = this.caller({ certified: true });
 

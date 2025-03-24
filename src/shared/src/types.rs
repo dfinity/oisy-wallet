@@ -2,8 +2,12 @@ use std::fmt::Debug;
 
 use candid::{CandidType, Deserialize, Principal};
 use ic_cdk_timers::TimerId;
+use ic_cycles_ledger_client::ApproveError;
 use ic_stable_structures::{Memory, StableBTreeMap, Storable};
 use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
+
+use crate::types::security_pow::ChallengeCompletionError;
+
 pub type Timestamp = u64;
 
 #[cfg(test)]
@@ -284,14 +288,6 @@ pub mod bitcoin {
 
 pub mod security_pow {
     use super::{CandidType, Debug, Deserialize};
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct StoredChallenge {
-        pub nonce: u64,
-        pub start_timestamp_ns: u64,
-        pub expiry_timestamp_ns: u64,
-        pub difficulty: u32,
-        pub solved: bool,
-    }
 
     /// A simple key-value store where each entry expires after a fixed TTL (Time To Live).
     ///
@@ -301,6 +297,9 @@ pub mod security_pow {
     // TODO: since this type is implemented so it can be used by other modules
     //       it makes sense to move it to a module containing collections
 
+    // ---------------------------------------------------------------------------------------------
+    // - Error-structures and -enums
+    // ---------------------------------------------------------------------------------------------
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum CreateChallengeError {
         ChallengeInProgress,
@@ -309,6 +308,35 @@ pub mod security_pow {
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum ChallengeCompletionError {
+        MissingChallenge,
+        InvalidNonce,
+        MissingUserProfile,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum AllowSigningStatus {
+        Executed,
+        Skipped,
+        Failed,
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // - State related structures
+    // ---------------------------------------------------------------------------------------------
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct StoredChallenge {
+        pub nonce: u64,
+        pub start_timestamp_ns: u64,
+        pub expiry_timestamp_ns: u64,
+        pub difficulty: u32,
+        pub solved: bool,
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // - Request-Response data structures (Exposed Candid API's)
+    // ---------------------------------------------------------------------------------------------
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct CreateChallengeResponse {
         pub nonce: u64,
         pub difficulty: u32,
@@ -316,50 +344,6 @@ pub mod security_pow {
         pub expiry_timestamp_ns: u64,
     }
 
-    // -------------------------------------------------------------------------------------------------
-    // - TODO: Remove this testing structures and implementations
-    // -------------------------------------------------------------------------------------------------
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub enum TestAllowSigningError {
-        PowMissingChallange,
-        PowInvalidNonce,
-        MissingUserProfile,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct TestAllowSigningRequest {
-        pub nonce: u64,
-    }
-
-    impl TestAllowSigningRequest {
-        /// Checks whether the request model is valid
-        ///
-        /// # Errors
-        /// - If the nonce is 0.
-        pub fn check(&self) -> Result<(), TestAllowSigningError> {
-            (self.nonce > 0)
-                .then_some(())
-                .ok_or(TestAllowSigningError::PowInvalidNonce)
-        }
-    }
-
-    impl TestAllowSigningResponse {}
-
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct TestAllowSigningResponse {
-        pub status: AllowSigningStatus,
-        pub allowed_cycles: u64,
-        pub challenge_completion: ChallengeCompletion,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub enum AllowSigningStatus {
-        EXECUTED,
-        SKIPPED,
-        FAILED,
-    }
-
-    impl ChallengeCompletion {}
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct ChallengeCompletion {
         pub next_allowance_ns: u64,
@@ -367,12 +351,43 @@ pub mod security_pow {
         pub current_difficulty: u32,
         pub next_difficulty: u32,
     }
+
+    // ---------------------------------------------------------------------------------------------
+    // - TODO: Remove this and implementations
+    // ---------------------------------------------------------------------------------------------
+
+    impl ChallengeCompletion {}
+}
+
+// Marco Issue: in which modules do we need to move this enum?
+
+#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub enum AllowSigningError {
+    Other(String),
+    FailedToContactCyclesLedger,
+    ApproveError(ApproveError),
+    PowChallenge(ChallengeCompletionError),
 }
 
 /// Types related to the signer & topping up the cycles ledger account for use with the signer.
 pub mod signer {
+
     use super::{CandidType, Debug, Deserialize};
+    use crate::types::security_pow::{AllowSigningStatus, ChallengeCompletion};
     /// Types related to topping up the cycles ledger account for use with the signer.
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct AllowSigningRequest {
+        pub nonce: u64,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct AllowSigningResponse {
+        pub status: AllowSigningStatus,
+        pub allowed_cycles: u64,
+        pub challenge_completion: ChallengeCompletion,
+    }
+
     pub mod topup {
         use candid::Nat;
 

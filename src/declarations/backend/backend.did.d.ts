@@ -23,9 +23,18 @@ export interface AddUserCredentialRequest {
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
+	| { PowChallenge: ChallengeCompletionError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
-export type AllowSigningStatus = { EXECUTED: null } | { FAILED: null } | { SKIPPED: null };
+export interface AllowSigningRequest {
+	nonce: bigint;
+}
+export interface AllowSigningResponse {
+	status: AllowSigningStatus;
+	challenge_completion: ChallengeCompletion;
+	allowed_cycles: bigint;
+}
+export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type ApproveError =
 	| {
@@ -76,6 +85,10 @@ export interface ChallengeCompletion {
 	next_difficulty: number;
 	current_difficulty: number;
 }
+export type ChallengeCompletionError =
+	| { InvalidNonce: null }
+	| { MissingChallenge: null }
+	| { MissingUserProfile: null };
 export interface Config {
 	api: [] | [Guards];
 	derivation_origin: [] | [string];
@@ -223,9 +236,8 @@ export interface PendingTransaction {
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: null } | { Err: AddDappSettingsError };
 export type Result_10 = { Ok: null } | { Err: SaveTestnetsSettingsError };
-export type Result_11 = { Ok: TestAllowSigningResponse } | { Err: TestAllowSigningError };
-export type Result_12 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
-export type Result_2 = { Ok: null } | { Err: AllowSigningError };
+export type Result_11 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
+export type Result_2 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type Result_3 = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type Result_4 =
 	| { Ok: BtcGetPendingTransactionsReponse }
@@ -273,18 +285,6 @@ export interface SupportedCredential {
 	issuer_canister_id: Principal;
 	ii_origin: string;
 	credential_type: CredentialType;
-}
-export type TestAllowSigningError =
-	| { PowInvalidNonce: null }
-	| { MissingUserProfile: null }
-	| { PowMissingChallange: null };
-export interface TestAllowSigningRequest {
-	nonce: bigint;
-}
-export interface TestAllowSigningResponse {
-	status: AllowSigningStatus;
-	challenge_completion: ChallengeCompletion;
-	allowed_cycles: bigint;
 }
 export interface TestnetsSettings {
 	show_testnets: boolean;
@@ -346,7 +346,7 @@ export interface Utxo {
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result_1>;
-	allow_signing: ActorMethod<[], Result_2>;
+	allow_signing: ActorMethod<[AllowSigningRequest], Result_2>;
 	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_3>;
 	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_4>;
 	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_5>;
@@ -376,8 +376,7 @@ export interface _SERVICE {
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
-	test_allow_signing: ActorMethod<[TestAllowSigningRequest], Result_11>;
-	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_12>;
+	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_11>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
