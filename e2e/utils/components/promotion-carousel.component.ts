@@ -16,7 +16,7 @@ export class PromotionCarousel {
 		const count = await elements.count();
 		for (let i = 0; i < count; i++) {
 			const isVisible = await elements.nth(i).isVisible();
-			if (!isVisible) {
+			if (isVisible) {
 				await elements.nth(i).evaluate((element) => (element.style.display = 'none'));
 			}
 		}
