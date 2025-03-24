@@ -12,7 +12,7 @@ describe('btc-transactions.derived', () => {
 			id,
 			timestamp: nowInBigIntNanoSeconds(),
 			type: 'send',
-			value: BigInt(100),
+			value: 100n,
 			from: 'sender',
 			to: 'receiver',
 			status: 'pending'
