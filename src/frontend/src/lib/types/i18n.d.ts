@@ -814,8 +814,8 @@ interface I18nReferral {
 			information: string;
 			not_referred_yet: string;
 			learn_more: string;
-		}
-	}
+		};
+	};
 }
 
 interface I18nSigner {
