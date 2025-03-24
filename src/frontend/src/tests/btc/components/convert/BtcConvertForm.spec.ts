@@ -13,7 +13,6 @@ import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 import { readable } from 'svelte/store';
 
 describe('BtcConvertForm', () => {
@@ -31,11 +30,16 @@ describe('BtcConvertForm', () => {
 				CONVERT_CONTEXT_KEY,
 				{
 					sourceToken: readable(BTC_MAINNET_TOKEN),
-					sourceTokenBalance: readable(BigNumber.from(sourceTokenBalance)),
+					sourceTokenBalance: readable(sourceTokenBalance),
 					destinationToken: readable(ICP_TOKEN)
 				}
 			],
-			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, { setErrorType: () => {} }]
+			[
+				TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+				{
+					setErrorType: () => {}
+				}
+			]
 		]);
 	const props = {
 		source: mockBtcAddress,
