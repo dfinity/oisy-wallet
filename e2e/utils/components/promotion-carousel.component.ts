@@ -8,7 +8,7 @@ export class PromotionCarousel {
 		this.#page = page;
 	}
 
-	public async freezeCarouselToSlide(slideNumber: number): Promise<void> {
+	public async freezeCarouselToSlide(): Promise<void> {
 		// TODO: the carousel is too flaky for the E2E tests, so we need completely hide it and work on freezing it in a permanent state in another PR.
 
 		const selector = `[data-tid="${CAROUSEL_CONTAINER}"]`;
