@@ -8,6 +8,6 @@
 		"staging": "https://staging.oisy.com",
 		"beta": "https://beta.oisy.com",
 		"audit": "https://audit.oisy.com",
-		"e2e": "https://e2e.oisy.com",
+		"e2e": "https://e2e.oisy.com"
 	}
 }
