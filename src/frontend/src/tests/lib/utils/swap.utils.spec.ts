@@ -2,6 +2,7 @@ import type { SwapAmountsTxReply } from '$declarations/kong_backend/kong_backend
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import {
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
@@ -12,24 +13,24 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 
 describe('swap utils', () => {
-	const ICP_LP_FEE = BigInt(4271);
-	const ICP_GAS_FEE = BigInt(0);
+	const ICP_LP_FEE = 4271n;
+	const ICP_GAS_FEE = ZERO_BI;
 
-	const ETH_LP_FEE = BigInt(4267);
-	const ETH_GAS_FEE = BigInt(10000);
+	const ETH_LP_FEE = 4267n;
+	const ETH_GAS_FEE = 10000n;
 
 	const transactions: SwapAmountsTxReply[] = [
 		{
 			gas_fee: ICP_GAS_FEE,
 			lp_fee: ICP_LP_FEE,
 			pay_address: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
-			pay_amount: BigInt(52334806),
+			pay_amount: 52334806n,
 			pay_chain: 'IC',
 			pay_symbol: 'ICP',
 			pool_symbol: 'ICP_ckUSDT',
 			price: 5.43339933,
 			receive_address: 'cngnf-vqaaa-aaaar-qag4q-cai',
-			receive_amount: BigInt(2843559),
+			receive_amount: 2843559n,
 			receive_chain: 'IC',
 			receive_symbol: ICP_SYMBOL
 		},
@@ -37,13 +38,13 @@ describe('swap utils', () => {
 			gas_fee: ETH_GAS_FEE,
 			lp_fee: ETH_LP_FEE,
 			pay_address: 'cngnf-vqaaa-aaaar-qag4q-cai',
-			pay_amount: BigInt(2843559),
+			pay_amount: 2843559n,
 			pay_chain: 'IC',
 			pay_symbol: 'ckUSDT',
 			pool_symbol: 'ckUSDC_ckUSDT',
 			price: 0.99554432,
 			receive_address: 'xevnm-gaaaa-aaaar-qafnq-cai',
-			receive_amount: BigInt(2830889),
+			receive_amount: 2830889n,
 			receive_chain: 'IC',
 			receive_symbol: 'ETH'
 		}

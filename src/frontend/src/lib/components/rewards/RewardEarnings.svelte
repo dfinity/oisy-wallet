@@ -8,6 +8,7 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import RewardEarningsCard from '$lib/components/rewards/RewardEarningsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -28,7 +29,7 @@
 	let ckBtcToken: IcToken | undefined;
 	$: ckBtcToken = findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens });
 	let ckBtcReward: bigint;
-	$: ckBtcReward = 0n;
+	$: ckBtcReward = ZERO_BI;
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
 		? (calculateTokenUsdAmount({
@@ -41,7 +42,7 @@
 	let ckUsdcToken: IcToken | undefined;
 	$: ckUsdcToken = findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $tokens });
 	let ckUsdcReward: bigint;
-	$: ckUsdcReward = 0n;
+	$: ckUsdcReward = ZERO_BI;
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
 		? (calculateTokenUsdAmount({
@@ -54,7 +55,7 @@
 	let icpToken: IcToken | undefined;
 	$: icpToken = ICP_TOKEN;
 	let icpReward: bigint;
-	$: icpReward = 0n;
+	$: icpReward = ZERO_BI;
 	let icpRewardUsd: number;
 	$: icpRewardUsd = nonNullish(icpToken)
 		? (calculateTokenUsdAmount({
