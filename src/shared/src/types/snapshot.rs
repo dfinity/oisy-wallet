@@ -1,6 +1,8 @@
 //! A moment-in-time summary of an account.
 
-use candid::{CandidType, Deserialize, Principal};
+#[cfg(test)]
+use candid::Principal;
+use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
 use crate::types::{
@@ -13,7 +15,6 @@ use crate::types::{
     token_id::{BtcTokenId, EthTokenId, IcrcTokenId, SolTokenId, TokenId},
     transaction::Transaction,
 };
-
 /// Snapshot of an account.
 ///
 /// # Generic Parameters
