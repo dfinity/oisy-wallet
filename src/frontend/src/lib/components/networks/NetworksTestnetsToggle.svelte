@@ -8,7 +8,6 @@
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { testnetsStore } from '$lib/stores/settings.store';
 	import { emit } from '$lib/utils/events.utils';
 
 	// TODO: create tests for this component once we have testId from GIX-CMP
@@ -37,8 +36,6 @@
 
 		// Do not wait for the backend to update the user profile since it can lead to unnecessary delays
 		toggleShowTestnets();
-
-		testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
 
 		// Reset network param, since the network is selectable only when testnets are enabled
 		if (checked) {

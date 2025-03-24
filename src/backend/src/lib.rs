@@ -32,6 +32,7 @@ use shared::{
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
@@ -540,6 +541,7 @@ pub fn add_user_credential(
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "may_write_user_data")]
+#[allow(clippy::needless_pass_by_value)] // canister methods are necessary
 pub fn set_user_show_testnets(
     request: SetShowTestnetsRequest,
 ) -> Result<(), SaveTestnetsSettingsError> {
@@ -769,6 +771,17 @@ pub async fn step_migration() {
             eprintln!("Migration failed: {err:?}");
         });
     };
+}
+
+/// Saves a snapshot of the user's account.
+#[update(guard = "may_write_user_data")]
+pub fn set_snapshot(_snapshot: UserSnapshot) {
+    todo!()
+}
+/// Gets the caller's last snapshot.
+#[query(guard = "may_read_user_data")]
+pub fn get_snapshot() -> Option<UserSnapshot> {
+    todo!()
 }
 
 export_candid!();

@@ -1,7 +1,6 @@
 <script lang="ts">
 	// TODO: component will be removed within migration to the new Send flow
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
@@ -38,7 +37,7 @@
 			<div>
 				{#if nonNullish(maxTransactionFee)}
 					<FeeAmountDisplay
-						fee={BigNumber.from(maxTransactionFee)}
+						fee={maxTransactionFee}
 						feeSymbol={feeToken.symbol}
 						feeTokenId={feeToken.id}
 						feeDecimals={feeToken.decimals}
