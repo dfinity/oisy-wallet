@@ -9,6 +9,7 @@
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let id: NetworkId | undefined;
 	export let name: string;
@@ -34,14 +35,16 @@
 <LogoButton on:click={onClick} selectable selected={id === $networkId} dividers>
 	<Logo slot="logo" src={icon} />
 	<span slot="title" class="mr-2 font-normal">
-		<span class="ml-2 inline-flex">
-			{#if isTestnet}
-				<Badge styleClass="pt-0 pb-0">Testnet</Badge>
-			{/if}
-		</span>
+		{name}
 	</span>
 
-	<span slot="description-end"
-		>{nonNullish(usdBalance) ? formatUSD({ value: usdBalance }) : ''}</span
-	>
+	<span slot="description-end">
+		{nonNullish(usdBalance) ? formatUSD({ value: usdBalance }) : ''}
+
+		{#if isTestnet}
+			<span class="ml-2 inline-flex">
+				<Badge styleClass="pt-0 pb-0">{$i18n.networks.testnet}</Badge>
+			</span>
+		{/if}
+	</span>
 </LogoButton>

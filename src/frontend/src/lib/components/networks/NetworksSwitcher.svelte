@@ -76,7 +76,7 @@
 					on:click={() => {
 						goto('/settings');
 						dropdown?.close();
-						// a small delay is enough for the opening of the modal to happen after page switching
+						// a small delay is needed for the opening of the modal after page switching
 						setTimeout(() => modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS), 1);
 					}}
 					><IconSettings /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button

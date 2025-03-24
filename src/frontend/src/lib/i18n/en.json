@@ -278,8 +278,10 @@
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
 		"more": "More networks coming soon...",
-		"chain_fusion": "Chain Fusion (all networks)",
-		"network": "Network"
+		"chain_fusion": "All networks",
+		"network": "Network",
+		"testnet": "Testnet",
+		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled"
 	},
 	"receive": {
 		"text": {
