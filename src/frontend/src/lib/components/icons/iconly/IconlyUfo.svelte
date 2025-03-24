@@ -1,4 +1,5 @@
 <!-- source: ICONLY PRO - The license is bought and owned by the DFINITY Foundation - Please read the documentation in the README file, or see terms and conditions here https://iconly.pro/pages/terms -->
+<!-- This icon was adjusted by the DFINITY Foundation to fulfill our needs. -->
 <div class="ufo-wrapper">
 	<svg
 		class="ufo"
