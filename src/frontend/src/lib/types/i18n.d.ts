@@ -224,16 +224,19 @@ interface I18nHero {
 interface I18nSettings {
 	text: {
 		title: string;
+		general: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
-		session: string;
+		session_duration: string;
+		session_expires_in: string;
 		session_description: string;
 		networks: string;
 		test_networks: string;
 		enable_testnets: string;
-		hide_zero_balances_description: string;
 		active_networks: string;
+		active_networks_description: string;
+		hide_zero_balances_description: string;
 		credentials_title: string;
 		pouh_credential: string;
 		pouh_credential_description: string;
