@@ -897,7 +897,8 @@
 				"title": "Refer a friend",
 				"invitation_link_copied": "Invitation link copied to clipboard.",
 				"information": "Get bonus sprinkles, every time your friends receive one!",
-				"not_referred_yet": "You haven't referred anyone yet"
+				"not_referred_yet": "You haven't referred anyone yet",
+				"learn_more": "Learn more"
 			}
 		}
 	},
