@@ -284,7 +284,8 @@
 		"test_networks": "Test networks",
 		"more": "More networks coming soon...",
 		"chain_fusion": "All networks",
-		"network": "Network"
+		"network": "Network",
+		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled"
 	},
 	"receive": {
 		"text": {

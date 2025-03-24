@@ -1,13 +1,10 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
-	import IconMorePlain from '$lib/components/icons/IconMorePlain.svelte';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
-	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
@@ -22,6 +19,7 @@
 	import { SettingsModalType } from '$lib/enums/settings-modal-types';
 	import { goto } from '$app/navigation';
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let disabled = false;
 
@@ -68,7 +66,7 @@
 			{/each}
 		{/if}
 
-		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between">
+		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between text-nowrap">
 			<span class="flex">
 				<Button
 					link
@@ -81,8 +79,11 @@
 					><IconSettings /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button
 				>
 			</span>
-			<span class="text-md ml-4 mr-2 flex text-right text-sm"
-				>{$networksMainnets.length + $networksTestnets.length} of {SUPPORTED_NETWORKS.length} displayed</span
+			<span class="text-md ml-4 mr-2 flex text-right text-sm">
+				{replacePlaceholders($i18n.networks.number_of_enabled, {
+					$numNetworksEnabled: $networksMainnets.length + $networksTestnets.length + '',
+					$numNetworksTotal: SUPPORTED_NETWORKS.length + ''
+				})}</span
 			>
 		</div>
 	</div>
