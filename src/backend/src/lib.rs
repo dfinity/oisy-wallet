@@ -32,6 +32,7 @@ use shared::{
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
@@ -770,6 +771,17 @@ pub async fn step_migration() {
             eprintln!("Migration failed: {err:?}");
         });
     };
+}
+
+/// Saves a snapshot of the user's account.
+#[update(guard = "may_write_user_data")]
+pub fn set_snapshot(_snapshot: UserSnapshot) {
+    todo!()
+}
+/// Gets the caller's last snapshot.
+#[query(guard = "may_read_user_data")]
+pub fn get_snapshot() -> Option<UserSnapshot> {
+    todo!()
 }
 
 export_candid!();
