@@ -1,5 +1,6 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
@@ -10,7 +11,7 @@ import {
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
-describe('rewards utils', () => {
+describe('rewards.utils', () => {
 	describe('loadRewardResult', () => {
 		beforeEach(() => {
 			sessionStorage.clear();
@@ -198,7 +199,7 @@ describe('rewards utils', () => {
 
 			const result = getRewardsBalance(mockedRewards);
 
-			expect(result).toEqual(0n);
+			expect(result).toEqual(ZERO_BI);
 		});
 	});
 });
