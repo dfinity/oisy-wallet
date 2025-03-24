@@ -204,7 +204,7 @@ mod tests {
 
         // Add the pending transaction
         let result = btc_user_pending_transactions.add_pending_transaction(
-            principal.clone(),
+            principal,
             ADDRESS_1.to_string(),
             tx.clone(),
         );
@@ -234,7 +234,7 @@ mod tests {
         };
 
         let result = btc_user_pending_transactions.add_pending_transaction(
-            principal1.clone(),
+            principal1,
             ADDRESS_1.to_string(),
             tx.clone(),
         );
@@ -274,18 +274,18 @@ mod tests {
 
         // Add 3 transactions (max_pending_transactions = 3)
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), ADDRESS_1.to_string(), tx1)
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), tx1)
             .unwrap();
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), ADDRESS_1.to_string(), tx2)
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), tx2)
             .unwrap();
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), ADDRESS_1.to_string(), tx3)
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), tx3)
             .unwrap();
 
         // Try adding a 4th transaction and expect an error
         let result = btc_user_pending_transactions.add_pending_transaction(
-            principal.clone(),
+            principal,
             ADDRESS_1.to_string(),
             tx4,
         );
@@ -322,18 +322,18 @@ mod tests {
 
         // Add 3 transactions (max_addresses_per_user = 3)
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), ADDRESS_1.to_string(), tx1)
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), tx1)
             .unwrap();
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), ADDRESS_2.to_string(), tx2)
+            .add_pending_transaction(principal, ADDRESS_2.to_string(), tx2)
             .unwrap();
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), ADDRESS_3.to_string(), tx3)
+            .add_pending_transaction(principal, ADDRESS_3.to_string(), tx3)
             .unwrap();
 
         // Try adding a 4th address and expect an error
         let result = btc_user_pending_transactions.add_pending_transaction(
-            principal.clone(),
+            principal,
             ADDRESS_4.to_string(),
             tx4,
         );
@@ -355,11 +355,7 @@ mod tests {
             created_at_timestamp_ns: yesterday_ns,
         };
         btc_user_pending_transactions
-            .add_pending_transaction(
-                principal.clone(),
-                ADDRESS_1.to_string(),
-                old_transaction.clone(),
-            )
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), old_transaction.clone())
             .unwrap();
 
         let valid_transaction = StoredPendingTransaction {
@@ -368,11 +364,7 @@ mod tests {
             created_at_timestamp_ns: now_ns,
         };
         btc_user_pending_transactions
-            .add_pending_transaction(
-                principal.clone(),
-                ADDRESS_1.to_string(),
-                valid_transaction.clone(),
-            )
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), valid_transaction.clone())
             .unwrap();
 
         let pending_txs =
@@ -381,11 +373,7 @@ mod tests {
 
         let all_utxos = &[UTXO_1, UTXO_2];
 
-        btc_user_pending_transactions.prune_pending_transactions(
-            principal.clone(),
-            all_utxos,
-            now_ns + 1,
-        );
+        btc_user_pending_transactions.prune_pending_transactions(principal, all_utxos, now_ns + 1);
 
         let pending_txs =
             btc_user_pending_transactions.get_pending_transactions(&principal, ADDRESS_1);
@@ -412,18 +400,10 @@ mod tests {
         };
 
         btc_user_pending_transactions
-            .add_pending_transaction(
-                principal.clone(),
-                ADDRESS_1.to_string(),
-                transaction_1.clone(),
-            )
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), transaction_1.clone())
             .unwrap();
         btc_user_pending_transactions
-            .add_pending_transaction(
-                principal.clone(),
-                ADDRESS_1.to_string(),
-                transaction_2.clone(),
-            )
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), transaction_2.clone())
             .unwrap();
 
         let pending_txs =
@@ -432,7 +412,7 @@ mod tests {
 
         let available_utxos = &[UTXO_1];
         btc_user_pending_transactions.prune_pending_transactions(
-            principal.clone(),
+            principal,
             available_utxos,
             now_ns,
         );
@@ -462,18 +442,10 @@ mod tests {
         };
 
         btc_user_pending_transactions
-            .add_pending_transaction(
-                principal.clone(),
-                ADDRESS_1.to_string(),
-                transaction_1.clone(),
-            )
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), transaction_1.clone())
             .unwrap();
         btc_user_pending_transactions
-            .add_pending_transaction(
-                principal.clone(),
-                ADDRESS_1.to_string(),
-                transaction_2.clone(),
-            )
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), transaction_2.clone())
             .unwrap();
 
         let pending_txs =
@@ -482,7 +454,7 @@ mod tests {
 
         let available_utxos = &[UTXO_1, UTXO_3];
         btc_user_pending_transactions.prune_pending_transactions(
-            principal.clone(),
+            principal,
             available_utxos,
             now_ns,
         );
