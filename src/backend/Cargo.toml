@@ -30,3 +30,6 @@ shared = { path = "../shared" }
 [dev-dependencies]
 lazy_static = { workspace = true }
 pocket-ic = { workspace = true }
+
+[lints]
+workspace = true
