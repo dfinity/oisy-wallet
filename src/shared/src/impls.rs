@@ -1,10 +1,9 @@
-use std::{collections::BTreeMap, fmt};
-
 use candid::{Deserialize, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use ic_cdk::api::time;
 use ic_stable_structures::{Memory, StableBTreeMap, Storable};
 use serde::{de, Deserializer};
+use std::{collections::BTreeMap, fmt};
 #[cfg(test)]
 use strum::IntoEnumIterator;
 
@@ -494,7 +493,7 @@ impl StoredChallenge {
 }
 impl<K, V, M> ExpiryBTreeMapWrapper<K, V, M>
 where
-    K: Storable + Ord + Clone + std::fmt::Debug,
+    K: Storable + Ord + Clone + fmt::Debug,
     V: Storable + Expirable,
     M: Memory,
 {
@@ -506,7 +505,7 @@ where
         }
     }
 
-    /// Inserts a key-value pair into the StableBTreeMap.
+    /// Inserts a key-value pair into the `StableBTreeMap`.
     pub fn insert(&mut self, key: K, value: V) {
         let _ = self.map.insert(key, value);
     }
@@ -528,7 +527,7 @@ where
 
     /// Removes a key-value pair.
     pub fn remove(&mut self, key: &K) {
-        // self.debug_key("Removing key", key);
+        self.debug_key("Removing key", key);
         let _ = self.map.remove(key);
     }
 
@@ -563,9 +562,9 @@ where
     }
 
     // ========== Conditional Debug Helpers ===========
-    fn debug_key(&self, message: &str, key: &K)
+    pub fn debug_key(&self, message: &str, key: &K)
     where
-        K: Debug,
+        K: fmt::Debug,
     {
         ic_cdk::println!("{}: {:?},", message, key);
     }
