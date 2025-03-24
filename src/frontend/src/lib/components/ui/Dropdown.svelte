@@ -4,6 +4,8 @@
 
 	export let disabled = false;
 	export let ariaLabel: string;
+	export let anchor: HTMLElement | undefined = undefined;
+	export let direction: 'ltr' | 'rtl' | undefined = 'ltr';
 	export let testId: string | undefined = undefined;
 
 	let visible = false;
@@ -23,6 +25,6 @@
 	<slot />
 </DropdownButton>
 
-<Popover bind:visible anchor={button} invisibleBackdrop>
+<Popover bind:visible anchor={anchor ?? button} {direction} invisibleBackdrop>
 	<slot name="items" />
 </Popover>
