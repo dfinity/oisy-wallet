@@ -25,6 +25,7 @@
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -36,7 +37,6 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let request: WalletKitTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -165,7 +165,7 @@
 	{@const data = firstTransaction.data}
 
 	<WalletConnectModalTitle slot="title"
-	>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
+		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
 	>
 
 	<FeeContext

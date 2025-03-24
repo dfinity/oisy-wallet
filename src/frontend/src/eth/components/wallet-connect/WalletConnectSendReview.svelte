@@ -25,7 +25,8 @@
 	export let targetNetwork: Network | undefined = undefined;
 
 	let amountDisplay: bigint;
-	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data).toBigInt() : amount;
+	$: amountDisplay =
+		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data).toBigInt() : amount;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
