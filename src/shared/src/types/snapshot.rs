@@ -1,6 +1,6 @@
 //! A moment-in-time summary of an account.
 
-use candid::{CandidType, Deserialize, Principal};
+use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
 use crate::types::{
