@@ -180,14 +180,18 @@ impl BackendBuilder {
 impl BackendBuilder {
     /// Reads the backend Wasm bytes from the configured path.
     fn wasm_bytes(&self) -> Vec<u8> {
-        read(self.wasm_path.clone()).unwrap_or_else(|_| panic!("Could not find the backend wasm: {}",
-            self.wasm_path))
+        read(self.wasm_path.clone())
+            .unwrap_or_else(|_| panic!("Could not find the backend wasm: {}", self.wasm_path))
     }
 
     /// Reads the bitcoin Wasm bytes from the configured path.
     fn bitcoin_wasm_bytes(&self) -> Vec<u8> {
-        read(self.bitcoin_wasm_path.clone()).unwrap_or_else(|_| panic!("Could not find the bitcoin wasm: {}",
-            self.bitcoin_wasm_path))
+        read(self.bitcoin_wasm_path.clone()).unwrap_or_else(|_| {
+            panic!(
+                "Could not find the bitcoin wasm: {}",
+                self.bitcoin_wasm_path
+            )
+        })
     }
 }
 // Builder
@@ -290,7 +294,8 @@ impl PicBackend {
         backend_wasm_path: &String,
         encoded_arg: Option<Vec<u8>>,
     ) -> Result<(), String> {
-        let wasm_bytes = read(backend_wasm_path.clone()).unwrap_or_else(|_| panic!("Could not find the backend wasm: {backend_wasm_path}"));
+        let wasm_bytes = read(backend_wasm_path.clone())
+            .unwrap_or_else(|_| panic!("Could not find the backend wasm: {backend_wasm_path}"));
 
         let arg = encoded_arg.unwrap_or(encode_one(init_arg()).unwrap());
 
@@ -325,8 +330,7 @@ pub(crate) fn init_arg() -> Arg {
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: None,
         supported_credentials: Some(vec![SupportedCredential {
-            ii_canister_id: Principal::from_text(II_CANISTER_ID)
-                .expect("wrong ii canister id"),
+            ii_canister_id: Principal::from_text(II_CANISTER_ID).expect("wrong ii canister id"),
             ii_origin: II_ORIGIN.to_string(),
             issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
                 .expect("wrong issuer canister id"),

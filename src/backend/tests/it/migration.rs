@@ -79,9 +79,7 @@ impl MigrationTestEnv {
         let custom_tokens = vec![CustomToken {
             token: Token::Icrc(IcrcToken {
                 ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai").unwrap(),
-                index_id: Some(
-                    Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai").unwrap(),
-                ),
+                index_id: Some(Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai").unwrap()),
             }),
             enabled: true,
             version: None,
