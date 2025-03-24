@@ -23,6 +23,6 @@
 	<slot />
 </DropdownButton>
 
-<Popover bind:visible anchor={button} invisibleBackdrop direction="ltr">
+<Popover bind:visible anchor={button} invisibleBackdrop>
 	<slot name="items" />
 </Popover>
