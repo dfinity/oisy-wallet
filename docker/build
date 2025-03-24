@@ -114,10 +114,11 @@ function build_canister() {
     ic-wasm \
       "$CARGO_TARGET_DIR/$TARGET/release/$canister.wasm" \
       -o "./$canister.wasm" \
-      shrink
+      shrink \
+      --keep-name-section
 
     # adds the content of $canister.did to the `icp:public candid:service` custom section of the public metadata in the wasm
-    ic-wasm "$canister.wasm" -o "$canister.wasm" metadata candid:service -f "$SRC_DIR/$canister.did" -v public
+    ic-wasm "$canister.wasm" -o "$canister.wasm" metadata candid:service -f "$SRC_DIR/$canister.did" -v public --keep-name-section
 
     gzip -fn "./$canister.wasm"
   fi

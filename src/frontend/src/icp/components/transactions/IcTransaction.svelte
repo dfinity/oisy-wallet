@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
@@ -33,8 +32,8 @@
 	let status: TransactionStatus;
 	$: status = pending ? 'pending' : 'confirmed';
 
-	let amount: BigNumber | undefined;
-	$: amount = nonNullish(value) ? BigNumber.from(incoming ? value : value * -1n) : value;
+	let amount: bigint | undefined;
+	$: amount = nonNullish(value) ? (incoming ? value : value * -1n) : value;
 
 	let timestamp: number | undefined;
 	$: timestamp = nonNullish(timestampNanoseconds)
