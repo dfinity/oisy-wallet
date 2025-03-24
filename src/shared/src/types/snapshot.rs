@@ -59,6 +59,7 @@ pub enum AccountSnapshotFor {
 
 // Accessors for fields common to all variants:
 impl AccountSnapshotFor {
+    #[must_use]
     pub fn timestamp(&self) -> u64 {
         match self {
             AccountSnapshotFor::Icrcv2(snapshot) => snapshot.timestamp,
@@ -84,6 +85,7 @@ impl AccountSnapshotFor {
         }
     }
 
+    #[must_use]
     pub fn decimals(&self) -> u8 {
         match self {
             AccountSnapshotFor::Icrcv2(snapshot) => snapshot.decimals,
@@ -109,6 +111,7 @@ impl AccountSnapshotFor {
         }
     }
 
+    #[must_use]
     pub fn approx_usd_per_token(&self) -> ComparableFloat {
         match self {
             AccountSnapshotFor::Icrcv2(snapshot) => snapshot.approx_usd_per_token,
@@ -134,6 +137,7 @@ impl AccountSnapshotFor {
         }
     }
 
+    #[must_use]
     pub fn amount(&self) -> u64 {
         match self {
             AccountSnapshotFor::Icrcv2(snapshot) => snapshot.amount,
@@ -161,11 +165,13 @@ impl AccountSnapshotFor {
 }
 
 impl AccountSnapshotFor {
+    #[must_use]
     pub fn approx_usd_valuation(&self) -> f64 {
         self.approx_usd_per_token().value() * (self.amount() as f64)
             / 10_f64.powf(f64::from(self.decimals()))
     }
 
+    #[must_use]
     pub fn last_transaction_timestamps(&self) -> Vec<u64> {
         match self {
             AccountSnapshotFor::Icrcv2(snapshot) => snapshot
