@@ -900,6 +900,15 @@
 				"not_referred_yet": "You haven't referred anyone yet",
 				"learn_more": "Learn more"
 			}
+		},
+		"reward": {
+			"text": {
+				"title": "Congratulations!",
+				"content_title": "Here a small thank you",
+				"content_text": "One of your referred users just got some sprinkles.",
+				"share": "Share on X",
+				"open_wallet": "Take me to the wallet"
+			}
 		}
 	},
 	"signer": {

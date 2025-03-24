@@ -816,6 +816,15 @@ interface I18nReferral {
 			learn_more: string;
 		};
 	};
+	reward: {
+		text: {
+			title: string;
+			content_title: string;
+			content_text: string;
+			share: string;
+			open_wallet: string;
+		}
+	}
 }
 
 interface I18nSigner {
