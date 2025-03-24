@@ -7,9 +7,11 @@ use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 pub type Timestamp = u64;
 
 pub mod account;
+pub mod backend_config;
 pub mod bitcoin;
 pub mod custom_token;
 pub mod dapp;
+pub mod migration;
 pub mod network;
 pub mod number;
 pub mod settings;
@@ -19,91 +21,10 @@ pub mod token;
 pub mod token_id;
 pub mod transaction;
 pub mod user_profile;
+pub mod verifiable_credential;
 
 #[cfg(test)]
 mod tests;
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
-pub enum CredentialType {
-    ProofOfUniqueness,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct SupportedCredential {
-    pub credential_type: CredentialType,
-    pub ii_origin: String,
-    pub ii_canister_id: Principal,
-    pub issuer_origin: String,
-    pub issuer_canister_id: Principal,
-}
-
-#[derive(CandidType, Deserialize)]
-pub struct InitArg {
-    pub ecdsa_key_name: String,
-    pub allowed_callers: Vec<Principal>,
-    pub supported_credentials: Option<Vec<SupportedCredential>>,
-    /// Root of trust for checking canister signatures.
-    pub ic_root_key_der: Option<Vec<u8>>,
-    /// Enables or disables APIs
-    pub api: Option<Guards>,
-    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in
-    /// `btc_select_user_utxos_fee`
-    pub cfs_canister_id: Option<Principal>,
-    /// Derivation origins when logging in the dapp with Internet Identity.
-    /// Used to validate the id alias credential which includes the derivation origin of the id
-    /// alias.
-    pub derivation_origin: Option<String>,
-}
-
-#[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
-#[repr(u8)]
-pub enum ApiEnabled {
-    Enabled,
-    ReadOnly,
-    Disabled,
-}
-
-#[derive(CandidType, Deserialize, Default, Copy, Clone, Debug, PartialEq, Eq)]
-pub struct Guards {
-    pub threshold_key: ApiEnabled,
-    pub user_data: ApiEnabled,
-}
-#[test]
-fn guards_default() {
-    assert_eq!(
-        Guards::default(),
-        Guards {
-            threshold_key: ApiEnabled::Enabled,
-            user_data: ApiEnabled::Enabled,
-        }
-    );
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum Arg {
-    Init(InitArg),
-    Upgrade,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct Config {
-    pub ecdsa_key_name: String,
-    // A list of allowed callers to restrict access to endpoints that do not particularly check or
-    // use the caller()
-    pub allowed_callers: Vec<Principal>,
-    pub supported_credentials: Option<Vec<SupportedCredential>>,
-    /// Root of trust for checking canister signatures.
-    pub ic_root_key_raw: Option<Vec<u8>>,
-    /// Enables or disables APIs
-    pub api: Option<Guards>,
-    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in
-    /// `btc_select_user_utxos_fee`
-    pub cfs_canister_id: Option<Principal>,
-    /// Derivation origins when logging in the dapp with Internet Identity.
-    /// Used to validate the id alias credential which includes the derivation origin of the id
-    /// alias.
-    pub derivation_origin: Option<String>,
-}
 
 pub type Version = u64;
 
@@ -122,79 +43,6 @@ pub trait TokenVersion: Debug {
 
 /// The default maximum length of a token symbol.
 pub const MAX_SYMBOL_LENGTH: usize = 20;
-
-/// The current state of progress of a user data migration.
-#[derive(
-    CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default, EnumCountMacro, EnumIter,
-)]
-pub enum MigrationProgress {
-    /// Migration has been requested.
-    #[default]
-    Pending,
-    /// APIs are being locked on the target canister.
-    LockingTarget,
-    /// Checking that the target canister is empty.
-    CheckingTarget,
-    /// Tokens have been migrated up to (but excluding) the given principal.
-    MigratedUserTokensUpTo(Option<Principal>),
-    /// Custom tokens have been migrated up to (but excluding) the given principal.
-    MigratedCustomTokensUpTo(Option<Principal>),
-    /// Migrated user profile timestamps up to the given principal.
-    MigratedUserTimestampsUpTo(Option<Principal>),
-    /// Migrated user profiles up to the given timestamp/user pair.
-    MigratedUserProfilesUpTo(Option<(Timestamp, Principal)>),
-    /// Checking that the target canister has all the data.
-    CheckingDataMigration,
-    /// Unlock user data operations in the target canister.
-    UnlockingTarget,
-    // Unlock signing operations in the current canister.
-    Unlocking,
-    /// Migration has been completed.
-    Completed,
-    /// Migration failed.
-    Failed(MigrationError),
-}
-
-#[derive(
-    CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default, EnumCountMacro, EnumIter,
-)]
-pub enum MigrationError {
-    #[default]
-    Unknown,
-    /// No migration is in progress.
-    NoMigrationInProgress,
-    /// Failed to lock target canister.
-    TargetLockFailed,
-    /// Could not get target stats before starting migration.
-    CouldNotGetTargetPriorStats,
-    /// There were already user profiles in the target canister.
-    TargetCanisterNotEmpty(Stats),
-    /// Failed to migrate data.
-    DataMigrationFailed,
-    /// Could not get target stats after migration.
-    CouldNotGetTargetPostStats,
-    /// Target stats do not match source stats.
-    TargetStatsMismatch(Stats, Stats),
-    /// Could not unlock target canister.
-    TargetUnlockFailed,
-}
-
-#[derive(Clone, Eq, PartialEq, Debug)]
-pub struct Migration {
-    /// The canister that data is being migrated to.
-    pub to: Principal,
-    /// The current state of progress of a user data migration.
-    pub progress: MigrationProgress,
-    /// The timer id for the migration.
-    pub timer_id: TimerId,
-}
-
-/// A serializable report of a migration.
-#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
-pub struct MigrationReport {
-    pub to: Principal,
-    pub progress: MigrationProgress,
-}
 
 #[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default)]
 pub struct Stats {
