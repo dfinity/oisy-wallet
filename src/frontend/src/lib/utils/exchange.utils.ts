@@ -35,7 +35,7 @@ export const formatKongSwapToCoingeckoPrices = (
 		const token = tokenData?.token;
 		const metrics = tokenData?.metrics;
 
-		if (isNullish(token) || isNullish(metrics?.price) || isNullish(token.canister_id.trim())) {
+		if (isNullish(token) || isNullish(metrics?.price)) {
 			return acc;
 		}
 

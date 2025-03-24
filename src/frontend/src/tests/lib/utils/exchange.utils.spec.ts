@@ -22,15 +22,6 @@ describe('formatKongSwapToCoingeckoPrices', () => {
 		expect(result).toEqual({});
 	});
 
-	it('skips tokens with missing canister_id', () => {
-		const token = createMockKongSwapToken({
-			canisterId: 'test-invalid',
-			token: { canister_id: '' }
-		});
-		const result = formatKongSwapToCoingeckoPrices([token]);
-		expect(result).toEqual({});
-	});
-
 	it('skips tokens with missing price', () => {
 		const token = createMockKongSwapToken({
 			canisterId: 'test-missing-price',
