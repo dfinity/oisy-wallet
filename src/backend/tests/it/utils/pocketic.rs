@@ -13,8 +13,9 @@ use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
 use shared::types::{
+    backend_config::{Arg, InitArg},
     user_profile::{OisyUser, UserProfile},
-    Arg, CredentialType, InitArg, SupportedCredential,
+    verifiable_credential::{CredentialType, SupportedCredential},
 };
 
 use super::mock::{

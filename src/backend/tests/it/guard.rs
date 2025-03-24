@@ -1,7 +1,10 @@
 //! Tests that the guard APIs are working as expected.
 
 use candid::Principal;
-use shared::types::{ApiEnabled, Config, Guards};
+use shared::types::{
+    backend_config::{Config, Guards},
+    migration::ApiEnabled,
+};
 
 use crate::utils::{
     mock::USER_1,

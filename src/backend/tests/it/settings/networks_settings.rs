@@ -1,6 +1,6 @@
 use candid::Principal;
 use shared::types::{
-    networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
+    network::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
     user_profile::{GetUserProfileError, UserProfile},
 };
 
