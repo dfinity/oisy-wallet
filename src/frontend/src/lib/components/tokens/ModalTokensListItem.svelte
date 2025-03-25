@@ -10,23 +10,25 @@
 
 	export let data: CardData;
 	export let logoSize: LogoSize = 'md';
+
+	const { oisyName, oisySymbol, symbol, name, network } = data;
 </script>
 
 <LogoButton on:click dividers={true}>
 	<svelte:fragment slot="title">
-		{nonNullish(data.oisySymbol) ? data.oisySymbol.oisySymbol : data.symbol}
+		{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
 	</svelte:fragment>
 
 	<svelte:fragment slot="subtitle">
-		{#if nonNullish(data.oisyName?.prefix)}
+		{#if nonNullish(oisyName?.prefix)}
 			{$i18n.tokens.text.chain_key}
 		{/if}
 
-		{data.oisyName?.oisyName ?? data.name}
+		{oisyName?.oisyName ?? name}
 	</svelte:fragment>
 
 	<svelte:fragment slot="description">
-		{data.network.name}
+		{network.name}
 	</svelte:fragment>
 
 	<TokenLogo
