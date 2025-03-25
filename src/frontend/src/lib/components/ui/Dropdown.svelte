@@ -34,18 +34,18 @@
 		<slot name="items" />
 	</Popover>
 </div>
-<!-- Mobile dropdown displayed as modal -->
-<div
-	class="absolute"
-	class:md:hidden={asModalOnMobile}
-	class:block={asModalOnMobile}
-	class:hidden={!asModalOnMobile}
->
-	{#if visible}
-		<Modal on:nnsClose={close}>
-			<slot name="title" slot="title" />
+<!--&lt;!&ndash; Mobile dropdown displayed as modal &ndash;&gt;-->
+<!--<div-->
+<!--	class="absolute"-->
+<!--	class:md:hidden={asModalOnMobile}-->
+<!--	class:block={asModalOnMobile}-->
+<!--	class:hidden={!asModalOnMobile}-->
+<!--&gt;-->
+<!--	{#if visible}-->
+<!--		<Modal on:nnsClose={close}>-->
+<!--			<slot name="title" slot="title" />-->
 
-			<slot name="items" />
-		</Modal>
-	{/if}
-</div>
+<!--			<slot name="items" />-->
+<!--		</Modal>-->
+<!--	{/if}-->
+<!--</div>-->
