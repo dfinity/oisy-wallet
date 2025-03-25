@@ -2,6 +2,8 @@ use std::{collections::BTreeMap, fmt};
 
 use candid::{Deserialize, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
+use ic_cdk::api::time;
+use ic_stable_structures::{Memory, StableBTreeMap, Storable};
 use serde::{de, Deserializer};
 #[cfg(test)]
 use strum::IntoEnumIterator;
@@ -16,17 +18,13 @@ use crate::{
             NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
             SaveTestnetsSettingsError,
         },
-        networks::{NetworksSettings, SaveTestnetsSettingsError},
-        pow::StoredChallenge,
         settings::Settings,
         token::UserToken,
         user_profile::{
             AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
         verifiable_credential::CredentialType,
-        Timestamp, TokenVersion, Version,
-        ApiEnabled, Config, CredentialType, Expirable, ExpiryBTreeMapWrapper, InitArg, Migration,
-        MigrationProgress, MigrationReport, Timestamp, TokenVersion, Version,
+        Expirable, ExpiryBTreeMapWrapper, Timestamp, TokenVersion, Version,
     },
     validate::{validate_on_deserialize, Validate},
 };
@@ -183,6 +181,49 @@ impl StoredUserProfile {
         let mut new_credentials = new_profile.credentials.clone();
         new_credentials.insert(credential_type.clone(), user_credential);
         new_profile.credentials = new_credentials;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with networks map set to the specified value.
+    ///
+    /// If overwrite is true, the networks map will be replaced with the new value.
+    /// If overwrite is false, the new value will be merged with the existing networks map.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_networks(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        networks: NetworkSettingsMap,
+        overwrite: bool,
+    ) -> Result<StoredUserProfile, SaveNetworksSettingsError> {
+        if profile_version != self.version {
+            return Err(SaveNetworksSettingsError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+
+        let new_networks = if overwrite {
+            networks // Directly assign if overwrite is true
+        } else {
+            let mut merged = settings.networks.networks.clone();
+            merged.extend(networks); // Updates existing keys and inserts new ones
+            merged
+        };
+
+        if settings.networks.networks == new_networks {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            settings.networks.networks = new_networks;
+            Some(settings)
+        };
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
@@ -484,18 +525,6 @@ impl Validate for IcrcToken {
             }
         }
         Ok(())
-    }
-}
-
-impl StoredChallenge {
-    #[allow(clippy::must_use_candidate)]
-    pub fn is_expired(&self) -> bool {
-        self.expiry_timestamp_ns <= time()
-    }
-
-    #[allow(clippy::must_use_candidate)]
-    pub fn is_solved(&self) -> bool {
-        self.solved
     }
 }
 impl<K, V, M> ExpiryBTreeMapWrapper<K, V, M>

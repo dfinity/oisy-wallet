@@ -2,20 +2,22 @@
 
 use std::{thread, time::Duration};
 
+use crate::utils::pocketic::BackendBuilder;
+use crate::utils::{
+    mock::CALLER,
+    pocketic::{setup, PicBackend, PicCanisterTrait},
+};
 use candid::Principal;
+use ic_cdk::api::management_canister::main::canister_status;
+use ic_cdk::api::management_canister::provisional::CanisterIdRecord;
 use sha2::{Digest, Sha256};
+use shared::types::signer::AllowSigningError;
 use shared::types::{
     pow::{
         AllowSigningStatus, ChallengeCompletionError, CreateChallengeError, CreateChallengeResponse,
     },
     signer::{AllowSigningRequest, AllowSigningResponse},
     user_profile::UserProfile,
-    AllowSigningError,
-};
-
-use crate::utils::{
-    mock::CALLER,
-    pocketic::{setup, PicBackend, PicCanisterTrait},
 };
 
 pub const TARGET_DURATION_NS: u64 = 5000 * 1_000_000;
@@ -59,15 +61,15 @@ where
 // This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
 // frontend.
 fn get_timestamp_now_ns() -> u64 {
-    return get_timestamp_ns(std::time::SystemTime::now());
+    get_timestamp_ns(std::time::SystemTime::now())
 }
 
 fn get_timestamp_ns(st: std::time::SystemTime) -> u64 {
-    return st.duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos() as u64;
+    st.duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos() as u64
 }
 
 fn get_timestamp_secs(st: std::time::SystemTime) -> u64 {
-    return st.duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as u64;
+    st.duration_since(std::time::UNIX_EPOCH).unwrap().as_secs()
 }
 
 fn print_canister_time(pic_setup: &PicBackend) {
@@ -77,12 +79,29 @@ fn print_canister_time(pic_setup: &PicBackend) {
     );
 }
 
-fn setup_with_progress() -> PicBackend {
-    let pic_setup = setup();
+fn setup_cycles_ledger_with_progress() -> PicBackend {
     eprintln!("Enabling auto progress for Pocket IC (Be aware that the cycle usage increases!");
-    pic_setup.pic.auto_progress();
+    let pic_setup = BackendBuilder::default()
+        .with_cycles_ledger(true)
+        .with_auto_progress(true)
+        .deploy();
     print_canister_time(&pic_setup);
     pic_setup
+}
+
+#[allow(dead_code)]
+async fn get_canister_balance() -> u64 {
+    // Call canister_status on the management canister to get status
+    canister_status(CanisterIdRecord {
+        canister_id: ic_cdk::id(),
+    })
+    .await
+    .expect("Failed to get status response")
+    .0
+    .cycles
+    .0
+    .try_into()
+    .expect("Failed to convert cycles into u64")
 }
 
 // This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
@@ -91,7 +110,7 @@ fn setup_with_progress() -> PicBackend {
 // For a better understanding how this PoW algorithm works :
 // Higher difficulty ⇒ smaller target ⇒ harder challenge (fewer valid hashes).
 // Lower difficulty ⇒ larger target ⇒ easier challenge (more valid hashes).
-pub fn helper_solve_challenge(_pic_setup: &PicBackend, timestamp: u64, difficulty: u32) -> u64 {
+pub fn helper_solve_challenge(timestamp: u64, difficulty: u32) -> u64 {
     assert!(difficulty > 0, "Difficulty must be greater than zero");
 
     let mut nonce: u64 = 0;
@@ -121,10 +140,6 @@ pub fn helper_solve_challenge(_pic_setup: &PicBackend, timestamp: u64, difficult
         "Pow Challenge: It took the client {} seconds to solve the challenge",
         Duration::from_nanos(solve_timestamp_ns).as_secs(),
     );
-
-    /*pic_setup
-    .pic
-    .advance_time(Duration::from_nanos(solve_timestamp_ns));*/
     nonce
 }
 
@@ -148,7 +163,7 @@ pub fn call_allow_signing(
     let wrapped_result = pic_setup.update::<Result<AllowSigningResponse, AllowSigningError>>(
         caller,
         "allow_signing",
-        AllowSigningRequest { nonce: nonce },
+        AllowSigningRequest { nonce },
     );
     wrapped_result.expect("that create_pow_challenge exists")
 }
@@ -194,7 +209,7 @@ fn test_create_pow_challenge_should_fail_without_user_profile() {
 
 #[test]
 fn test_create_pow_challenge_should_succeed_again_if_expired() {
-    let pic_setup = setup_with_progress();
+    let pic_setup = setup_cycles_ledger_with_progress();
 
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
@@ -218,7 +233,7 @@ fn test_create_pow_challenge_should_succeed_again_if_expired() {
 
 #[test]
 fn test_create_pow_challenge_should_fail_if_not_expired() {
-    let pic_setup = setup_with_progress();
+    let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
@@ -231,7 +246,7 @@ fn test_create_pow_challenge_should_fail_if_not_expired() {
 
 #[test]
 fn test_allow_signing_should_succeed_with_valid_nonce() {
-    let pic_setup = setup_with_progress();
+    let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
@@ -241,8 +256,7 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
         result.expect("Failed to retrieve CreateChallengeResponse");
 
     // emulates the javascript function running in the browser to create a valid nonce
-    let nonce =
-        helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
+    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
 
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
 
@@ -255,7 +269,7 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
 
 #[test]
 fn test_allow_signing_should_fail_with_valid_nonce_and_expired_challenge() {
-    let pic_setup = setup_with_progress();
+    let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
@@ -270,8 +284,7 @@ fn test_allow_signing_should_fail_with_valid_nonce_and_expired_challenge() {
         result.expect("Failed to retrieve CreateChallengeResponse");
 
     // emulates the javascript function running in the browser to create a valid nonce
-    let nonce =
-        helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
+    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
 
     // since we enabled auto progress, we can not call pic.advance_time(..) instead we need to wait
     // instead
@@ -286,7 +299,7 @@ fn test_allow_signing_should_fail_with_valid_nonce_and_expired_challenge() {
 
 #[test]
 fn test_allow_signing_should_fail_with_invalid_nonce() {
-    let pic_setup = setup_with_progress();
+    let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
@@ -296,8 +309,7 @@ fn test_allow_signing_should_fail_with_invalid_nonce() {
         result.expect("Failed to retrieve CreateChallengeResponse");
 
     // emulates the javascript function running in the browser to create a valid nonce
-    let nonce =
-        helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
+    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
 
     // we can always assume the previously iterated nonce is invalid
     let invalid_nonce = nonce - 1;
@@ -311,20 +323,20 @@ fn test_allow_signing_should_fail_with_invalid_nonce() {
 
 #[test]
 fn test_allow_signing_should_approve_the_correct_cycles_amount() {
-    let pic_setup = setup();
+    let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
+    // let _start_canister_balance: u64 = get_canister_balance();
     let result = call_create_pow_challenge(&pic_setup, caller);
-
     let response: CreateChallengeResponse =
         result.expect("Failed to retrieve CreateChallengeResponse");
 
     // emulates the javascript function running in the browser to create a valid nonce
-    let nonce =
-        helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
+    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
 
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
+    // let _end_canister_balance = get_canister_balance();
 
     assert!(result_allow_signing.is_ok());
     let response: AllowSigningResponse = result_allow_signing.unwrap();
@@ -333,7 +345,7 @@ fn test_allow_signing_should_approve_the_correct_cycles_amount() {
 
 #[test]
 fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
-    let pic_setup = setup();
+    let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
     // ---------------------------------------------------------------------------------------------
@@ -342,8 +354,7 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
     let result = call_create_pow_challenge(&pic_setup, caller);
     let response: CreateChallengeResponse =
         result.expect("Failed to retrieve CreateChallengeResponse");
-    let nonce =
-        helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
+    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
     assert!(result_allow_signing.is_ok());
 
@@ -353,8 +364,7 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
     let result = call_create_pow_challenge(&pic_setup, caller);
     let response: CreateChallengeResponse =
         result.expect("Failed to retrieve CreateChallengeResponse");
-    let nonce =
-        helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
+    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
     assert!(result_allow_signing.is_ok());
 

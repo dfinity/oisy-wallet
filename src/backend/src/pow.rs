@@ -1,3 +1,4 @@
+// -------------------------------------------------------------------------------------------------
 // PoW Challenge Constants
 // -------------------------------------------------------------------------------------------------
 // The time it takes in average to solve the challenge in milliseconds
@@ -8,19 +9,24 @@ pub const TARGET_DURATION_NS: u64 = 5000 * 1_000_000;
 // Providing a smaller duration than TARGET_DURATION_NS will result in an error
 pub const EXPIRY_DURATION_NS: u64 = TARGET_DURATION_NS * 2;
 
-// The minimum difficulty allowed
-pub const MIN_DIFFICULTY: u32 = 100_000;
-
-// Maximum difficulty
-// The auto-adjustment of the difficulty will not exceed MAX_DIFFICULTY. Be aware that this will
-// cause the ecrease away from the defined TARGET_DURATION_NS
-pub const MAX_DIFFICULTY: u32 = 5_000_000;
-
 // The difficulty used if no PoW challenge yet been solved
 // This setting must be set to a value between MIN_DIFFICULTY and MAX_DIFFICULTY
-pub const START_DIFFICULTY: u32 = 2_800_000;
+pub const START_DIFFICULTY: u32 = 400_000;
 
-// Cycles per difficulty unit a principle will receive
+// Minimum difficulty required to solve the challenge.
+// Auto-adjustment of difficulty will never fall short of MIN_DIFFICULTY.
+// Note: Limiting the difficulty may cause the actual solving duration to deviate from the defined
+// TARGET_DURATION_NS.
+pub const MIN_DIFFICULTY: u32 = 100_000;
+
+// Maximum difficulty required to solve the challenge.
+// Auto-adjustment of difficulty will never exceed MAX_DIFFICULTY.
+// Note: Limiting the difficulty may cause the actual solving duration to deviate from the defined
+// TARGET_DURATION_NS.
+pub const MAX_DIFFICULTY: u32 = 5_000_000;
+
+// The factor defining the amount of cycles per difficulty unit the caller (principle) will be allowed
+// to spend on signer operations
 pub const DIFFICULTY_TO_CYCLE_FACTOR: u64 = 100;
 
 use ic_cdk::api::{caller, time};

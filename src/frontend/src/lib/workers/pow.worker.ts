@@ -42,6 +42,4 @@ const onIdleSignOut = async () => {
 const logout = () => {
 	// Clear timer to not emit sign-out multiple times
 	stopIdleTimer();
-
-	postMessage({ msg: 'signOutIdleTimer' });
 };

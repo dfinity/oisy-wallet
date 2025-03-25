@@ -1,13 +1,9 @@
-use std::fmt::Debug;
-
 use candid::{CandidType, Deserialize, Principal};
 use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
-    user_profile::StoredUserProfile, Config, Expirable, Timestamp,
-    backend_config::Config, custom_token::CustomToken, token::UserToken,
+    backend_config::Config, custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
     user_profile::StoredUserProfile, Timestamp,
 };
 
@@ -21,7 +17,6 @@ pub type UserProfileMap =
 /// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
 pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
 pub type PowChallengeMap = StableBTreeMap<StoredPrincipal, Candid<StoredChallenge>, VMem>;
-
 #[derive(Default, Debug)]
 pub struct Candid<T>(pub T)
 where
@@ -29,9 +24,3 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct StoredPrincipal(pub Principal);
-
-impl Expirable for Candid<StoredChallenge> {
-    fn get_expiry_timestamp(&self, ttl_sec: u64) -> u64 {
-        self.start_timestamp_ns + ttl_sec * 1_000_000_000
-    }
-}

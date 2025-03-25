@@ -7,7 +7,7 @@ use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
     btc_user_pending_tx_state::StoredPendingTransaction, state::with_btc_pending_transactions,
 };
-use ic_cdk::{api::time, caller, eprintln};
+use ic_cdk::{api::time, eprintln};
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{clear_timer, set_timer, set_timer_interval};
 use ic_stable_structures::{
@@ -42,7 +42,7 @@ use shared::{
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest, AllowSigningResponse,
+            AllowSigningError, AllowSigningRequest, AllowSigningResponse,
         },
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
@@ -52,8 +52,6 @@ use shared::{
             UserProfile,
         },
         Stats, Timestamp,
-        AllowSigningError, Arg, Config, Guards, InitArg, Migration, MigrationProgress,
-        MigrationReport, Stats, Timestamp,
     },
 };
 use signer::btc_principal_to_p2wpkh_address;
@@ -740,15 +738,15 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
 pub async fn allow_signing(
     request: AllowSigningRequest,
 ) -> Result<AllowSigningResponse, AllowSigningError> {
-    let principal = caller();
+    let principal = ic_cdk::caller();
 
-    let challenge_completion: ChallengeCompletion = crate::pow::complete_challenge(request.nonce)
+    let challenge_completion: ChallengeCompletion = pow::complete_challenge(request.nonce)
         .map_err(|e| match e {
-        ChallengeCompletionError::InvalidNonce
-        | ChallengeCompletionError::MissingUserProfile
-        | ChallengeCompletionError::ExpiredChallenge
-        | ChallengeCompletionError::MissingChallenge => AllowSigningError::PowChallenge(e),
-    })?;
+            ChallengeCompletionError::InvalidNonce
+            | ChallengeCompletionError::MissingUserProfile
+            | ChallengeCompletionError::ExpiredChallenge
+            | ChallengeCompletionError::MissingChallenge => AllowSigningError::PowChallenge(e),
+        })?;
 
     // Grant cycles proportional to difficulty
     let allowed_cycles =

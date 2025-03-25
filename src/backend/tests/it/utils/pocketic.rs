@@ -30,6 +30,7 @@ const DEFAULT_BITCOIN_WASM: &str = "../../ic-btc-canister.wasm.gz";
 const BITCOIN_CANISTER_ID: &str = "g4xu7-jiaaa-aaaan-aaaaq-cai";
 const DEFAULT_CYCLES_LEDGER_WASM: &str = "../../cycles-ledger.wasm.gz";
 const CYCLES_LEDGER_CANISTER_ID: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
+const DEFAULT_CYCLES_LEDGER_CANISTER_ENABLED: &str = "false";
 
 // This is necessary to deploy the bitcoin canister.
 // This is a struct based on the `InitConfig` from the Bitcoin canister.
@@ -109,13 +110,17 @@ pub struct BackendBuilder {
     arg: Vec<u8>,
     /// Controllers of the backend canister.
     controllers: Vec<Principal>,
+    /// Enables the cycles ledger canister
+    cycles_ledger_enabled: bool,
+    /// Enables auto progress before deployment
+    auto_progress_enabled: bool,
 }
 // Defaults
 impl BackendBuilder {
     /// The default number of cycles to add to the backend canister on deployment.
     ///
     /// To override, please use `with_cycles()`.
-    pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000_000;
+    pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000;
 
     /// The default Wasm file to deploy:
     /// - If the environment variable `BACKEND_WASM_PATH` is set, it will use that path.
@@ -189,6 +194,23 @@ impl BackendBuilder {
         vec![Principal::from_text(CONTROLLER)
             .expect("Test setup error: Failed to parse controller principal")]
     }
+
+    /// The default cycles canister activation.
+    ///
+    /// To override, please use `with_cycles_ledger()`.
+    pub fn default_cycles_ledger_enabled() -> bool {
+        env::var("CYCLES_LEDGER_CANISTER_ENABLED")
+            .unwrap_or_else(|_| DEFAULT_CYCLES_LEDGER_CANISTER_ENABLED.to_string())
+            .parse()
+            .expect("Test setup error: Failed to parse boolean defined by env variable 'CYCLES_LEDGER_CANISTER_ENABLED'")
+    }
+
+    /// The default cycles canister activation.
+    ///
+    /// To override, please use `with_cycles_ledger()`.
+    pub fn default_auto_progress_enabled() -> bool {
+        false
+    }
 }
 impl Default for BackendBuilder {
     fn default() -> Self {
@@ -200,6 +222,8 @@ impl Default for BackendBuilder {
             cycles_ledger_wasm_path: Self::default_cycles_ledger_wasm_path(),
             arg: Self::default_arg(),
             controllers: Self::default_controllers(),
+            cycles_ledger_enabled: Self::default_cycles_ledger_enabled(),
+            auto_progress_enabled: Self::default_auto_progress_enabled(),
         }
     }
 }
@@ -317,7 +341,9 @@ impl BackendBuilder {
 
     /// Setup the backend canister.
     pub fn deploy_to(&mut self, pic: &PocketIc) -> Principal {
-        self.install_ledger_canister(pic);
+        if self.cycles_ledger_enabled {
+            self.install_ledger_canister(pic);
+        }
         self.install_bitcoin(pic);
         self.deploy_backend(pic)
     }
@@ -328,11 +354,31 @@ impl BackendBuilder {
             .with_ii_subnet()
             .with_fiduciary_subnet()
             .build();
+        // Since the timestamp of the first block starts 4 years earlier, we must enable
+        // auto-progress before deployment to avoid burning cycles for this entire duration.
+        if self.auto_progress_enabled {
+            pic.auto_progress();
+        }
+
         let canister_id = self.deploy_to(&pic);
         PicBackend {
             pic: Arc::new(pic),
             canister_id,
         }
+    }
+}
+
+impl BackendBuilder {
+    /// Enables the cycles ledger canister
+    #[allow(unused_parens)]
+    pub fn with_cycles_ledger(mut self, cycle_ledger_enabled: bool) -> Self {
+        self.cycles_ledger_enabled = cycle_ledger_enabled;
+        self
+    }
+    #[allow(unused_parens)]
+    pub fn with_auto_progress(mut self, auto_progress_enabled: bool) -> Self {
+        self.auto_progress_enabled = auto_progress_enabled;
+        self
     }
 }
 

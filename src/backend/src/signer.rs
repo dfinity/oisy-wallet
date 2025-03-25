@@ -14,8 +14,8 @@ use ic_cycles_ledger_client::{
 };
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
-use shared::types::{
-    signer::topup::{
+use shared::types::signer::{
+    topup::{
         TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
         TopUpCyclesLedgerResult,
     },

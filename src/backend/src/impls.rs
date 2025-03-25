@@ -3,7 +3,7 @@ use std::borrow::Cow;
 
 use candid::{CandidType, Deserialize, Principal};
 use ic_stable_structures::storable::{Blob, Bound, Storable};
-use shared::types::Stats;
+use shared::types::{pow::StoredChallenge, Expirable, Stats};
 
 use crate::{
     types::{Candid, StoredPrincipal},
@@ -63,5 +63,11 @@ impl Storable for StoredPrincipal {
         Self(Principal::from_slice(
             Blob::<29>::from_bytes(bytes).as_slice(),
         ))
+    }
+}
+
+impl Expirable for Candid<StoredChallenge> {
+    fn get_expiry_timestamp(&self, ttl_sec: u64) -> u64 {
+        self.start_timestamp_ns + ttl_sec * 1_000_000_000
     }
 }
