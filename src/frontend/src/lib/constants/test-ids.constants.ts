@@ -86,6 +86,7 @@ export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
 
 export const REFERRAL_CODE_COPY_BUTTON = 'referral-code-copy-button';
+export const REFERRAL_CODE_SHARE_BUTTON = 'referral-code-share-button';
 
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 

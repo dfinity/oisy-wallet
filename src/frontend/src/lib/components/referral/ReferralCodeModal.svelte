@@ -13,7 +13,7 @@
 	import SkeletonQRCode from '$lib/components/ui/SkeletonQRCode.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
-	import { REFERRAL_CODE_COPY_BUTTON } from '$lib/constants/test-ids.constants';
+	import {REFERRAL_CODE_COPY_BUTTON, REFERRAL_CODE_SHARE_BUTTON} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
@@ -49,10 +49,10 @@
 			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2">
 				<output class="break-all">{referralCodeUrl}</output>
 				<div class="flex gap-4">
-					<ShareButton shareAriaLabel={referralCodeUrl} />
+					<ShareButton shareAriaLabel={referralCodeUrl} testId={REFERRAL_CODE_SHARE_BUTTON} />
 					<ReceiveCopy
 						address={referralCodeUrl}
-						copyAriaLabel={$i18n.referral.invitation.text.invitation_link_copied}
+						copyAriaLabel={$i18n.referral.invitation.text.referral_link_copied}
 						testId={REFERRAL_CODE_COPY_BUTTON}
 					/>
 				</div>
@@ -77,7 +77,7 @@
 				<ExternalLink
 					href={OISY_REWARDS_URL}
 					ariaLabel={$i18n.referral.invitation.text.learn_more}
-					styleClass={`font-semibold min-w-30`}
+					styleClass={`font-semibold min-w-30 flex-row-reverse`}
 				>
 					{$i18n.referral.invitation.text.learn_more}
 				</ExternalLink>

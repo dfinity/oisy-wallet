@@ -895,7 +895,7 @@
 		"invitation": {
 			"text": {
 				"title": "Refer a friend",
-				"invitation_link_copied": "Invitation link copied to clipboard.",
+				"referral_link_copied": "Referral link copied to clipboard.",
 				"information": "Get bonus sprinkles, every time your friends receive one!",
 				"not_referred_yet": "You haven't referred anyone yet",
 				"learn_more": "Learn more"

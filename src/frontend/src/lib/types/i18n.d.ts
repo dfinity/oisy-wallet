@@ -810,7 +810,7 @@ interface I18nReferral {
 	invitation: {
 		text: {
 			title: string;
-			invitation_link_copied: string;
+			referral_link_copied: string;
 			information: string;
 			not_referred_yet: string;
 			learn_more: string;
