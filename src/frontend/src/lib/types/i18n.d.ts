@@ -259,7 +259,6 @@ interface I18nNetworks {
 	more: string;
 	chain_fusion: string;
 	network: string;
-	testnet: string;
 	filter: string;
 }
 
