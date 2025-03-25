@@ -18,7 +18,7 @@ describe('ReferralCodeModal', () => {
 		value: vi.fn()
 	});
 
-	it('should render the referral code modal items', async () => {
+	it('should render the referral code modal items', () => {
 		const { container } = render(ReferralCodeModal);
 
 		const qrCode: HTMLDivElement | null = container.querySelector(qrCodeSelector);
