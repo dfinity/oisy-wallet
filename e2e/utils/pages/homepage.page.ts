@@ -1,5 +1,6 @@
 import {
 	AMOUNT_DATA,
+	CAROUSEL_CONTAINER,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
@@ -458,12 +459,24 @@ abstract class Homepage {
 
 		const element = screenshotTarget ?? this.#page;
 
-		if (freezeCarousel) {
-			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
-			await this.#page.clock.pauseAt(Date.now());
-			await this.setCarouselFirstSlide();
-			await this.#page.clock.pauseAt(Date.now());
+		// if (freezeCarousel) {
+		// 	// Freezing the time because the carousel has a timer that resets the animations and the transitions.
+		// 	await this.#page.clock.pauseAt(Date.now());
+		// 	await this.setCarouselFirstSlide();
+		// 	await this.#page.clock.pauseAt(Date.now());
+		// }
+
+		const carouselSelectors = `[data-tid="${CAROUSEL_CONTAINER}"]`;
+		const elements = this.#page.locator(carouselSelectors);
+		const count = await elements.count();
+		let carouselSelector: Locator | undefined;
+		for (let i = 0; i < count; i++) {
+			const isVisible = await elements.nth(i).isVisible();
+			if (isVisible) {
+				carouselSelector = elements.nth(i);
+			}
 		}
+		const mask = nonNullish(carouselSelector) ? [carouselSelector] : [];
 
 		if (!this.#isMobile) {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
@@ -480,21 +493,21 @@ abstract class Homepage {
 			await this.#page.emulateMedia({ colorScheme: scheme });
 			await this.#page.waitForTimeout(1000);
 
-			await expect(element).toHaveScreenshot();
+			await expect(element).toHaveScreenshot({ mask });
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
-				await expect(element).toHaveScreenshot({ fullPage: true });
+				await expect(element).toHaveScreenshot({ fullPage: true, mask });
 				await this.showMobileNavigationMenu();
 			}
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
 
-		if (freezeCarousel) {
-			// Resuming the time that we froze because of the carousel animations.
-			await this.#page.clock.resume();
-		}
+		// if (freezeCarousel) {
+		// 	// Resuming the time that we froze because of the carousel animations.
+		// 	await this.#page.clock.resume();
+		// }
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
