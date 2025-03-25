@@ -12,7 +12,10 @@ use crate::{
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
         migration::{ApiEnabled, Migration, MigrationProgress, MigrationReport},
-        network::{NetworksSettings, SaveTestnetsSettingsError},
+        network::{
+            NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
+            SaveTestnetsSettingsError,
+        },
         settings::Settings,
         token::UserToken,
         user_profile::{
@@ -180,6 +183,49 @@ impl StoredUserProfile {
         Ok(new_profile)
     }
 
+    /// Returns a copy with networks map set to the specified value.
+    ///
+    /// If overwrite is true, the networks map will be replaced with the new value.
+    /// If overwrite is false, the new value will be merged with the existing networks map.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_networks(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        networks: NetworkSettingsMap,
+        overwrite: bool,
+    ) -> Result<StoredUserProfile, SaveNetworksSettingsError> {
+        if profile_version != self.version {
+            return Err(SaveNetworksSettingsError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+
+        let new_networks = if overwrite {
+            networks // Directly assign if overwrite is true
+        } else {
+            let mut merged = settings.networks.networks.clone();
+            merged.extend(networks); // Updates existing keys and inserts new ones
+            merged
+        };
+
+        if settings.networks.networks == new_networks {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            settings.networks.networks = new_networks;
+            Some(settings)
+        };
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
     /// Returns a copy with `show_testnets` set to the specified value.
     ///
     /// # Errors
@@ -310,12 +356,12 @@ impl ApiEnabled {
 }
 #[test]
 fn test_api_enabled() {
-    assert_eq!(ApiEnabled::Enabled.readable(), true);
-    assert_eq!(ApiEnabled::Enabled.writable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.readable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.writable(), false);
-    assert_eq!(ApiEnabled::Disabled.readable(), false);
-    assert_eq!(ApiEnabled::Disabled.writable(), false);
+    assert!(ApiEnabled::Enabled.readable());
+    assert!(ApiEnabled::Enabled.writable());
+    assert!(ApiEnabled::ReadOnly.readable());
+    assert!(!ApiEnabled::ReadOnly.writable());
+    assert!(!ApiEnabled::Disabled.readable());
+    assert!(!ApiEnabled::Disabled.writable());
 }
 
 impl MigrationProgress {
