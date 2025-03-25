@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Modal, Popover } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
 	import DropdownButton from '$lib/components/ui/DropdownButton.svelte';
 
 	export let title: string | undefined;
@@ -44,8 +43,8 @@
 	class:hidden={!asModalOnMobile}
 >
 	{#if visible}
-		<Modal on:nnsClose={() => close()}>
-			<svelte:fragment slot="title">{nonNullish(title) ? title : ''}</svelte:fragment>
+		<Modal on:nnsClose={close}>
+			<slot name="title" slot="title" />
 
 			<slot name="items" />
 		</Modal>

@@ -517,6 +517,7 @@ interface I18nTokens {
 		exchange_is_not_available: string;
 		source_token_title: string;
 		destination_token_title: string;
+		chain_key: string;
 	};
 	details: {
 		title: string;
@@ -766,6 +767,8 @@ interface I18nTransactions {
 		loading_pending_ck_ethereum_transactions: string;
 		get_transaction_for_hash: string;
 		unexpected_transaction_for_hash: string;
+		loading_token_with_network: string;
+		loading_token: string;
 	};
 }
 

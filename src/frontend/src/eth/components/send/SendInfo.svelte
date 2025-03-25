@@ -8,8 +8,9 @@
 
 	const { sendToken, sendPurpose } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let displayInfo: boolean;
-	$: displayInfo = ['convert-eth-to-cketh', 'convert-erc20-to-ckerc20'].includes(sendPurpose);
+	const displayInfo: boolean = ['convert-eth-to-cketh', 'convert-erc20-to-ckerc20'].includes(
+		sendPurpose
+	);
 
 	let sendTokenAsErc20: Erc20Token | undefined;
 	$: sendTokenAsErc20 = $sendToken.standard === 'erc20' ? ($sendToken as Erc20Token) : undefined;

@@ -47,6 +47,7 @@
 	{/if}
 	<span class="hidden md:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 
+	<svelte:fragment slot="title">{$i18n.networks.filter}</svelte:fragment>
 	<div slot="items">
 		<NetworkButton
 			id={undefined}
