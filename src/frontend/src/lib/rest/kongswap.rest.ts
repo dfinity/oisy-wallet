@@ -21,11 +21,4 @@ export const getKongSwapTokenById = (id: LedgerCanisterIdText): Promise<KongSwap
 export const fetchBatchKongSwapPrices = (
 	canisterIds: LedgerCanisterIdText[]
 ): Promise<(KongSwapToken | null)[]> =>
-	Promise.all(
-		canisterIds.map((id) =>
-			getKongSwapTokenById(id).catch((error) => {
-				console.warn(`KongSwap fallback failed for ${id}`, error);
-				return null;
-			})
-		)
-	);
+	Promise.all(canisterIds.map((id) => getKongSwapTokenById(id).catch(() => null)));
