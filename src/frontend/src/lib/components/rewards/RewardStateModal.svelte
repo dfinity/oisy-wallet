@@ -22,8 +22,9 @@
 	export let jackpot = false;
 
 	// TODO At the moment the selected campaign is hardcoded. In the future this should be configurable from the outside.
-	let reward: RewardDescription | undefined;
-	$: reward = rewardCampaigns.find((campaign) => campaign.id === 'OISY Airdrop #1');
+	const reward: RewardDescription | undefined = rewardCampaigns.find(
+		(campaign) => campaign.id === 'OISY Airdrop #1'
+	);
 </script>
 
 <Sprinkles type={jackpot ? 'page-jackpot' : 'page'} />

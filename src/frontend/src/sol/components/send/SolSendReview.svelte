@@ -14,8 +14,7 @@
 	export let source: string;
 
 	// TODO: add checks for insufficient funds for fee, when we calculate the fee
-	let insufficientFundsForFee: boolean;
-	$: insufficientFundsForFee = false;
+	const insufficientFundsForFee = false;
 
 	let disableSend: boolean;
 	$: disableSend = insufficientFundsForFee || invalid;

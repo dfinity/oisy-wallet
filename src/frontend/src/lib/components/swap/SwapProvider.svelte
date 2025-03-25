@@ -32,8 +32,9 @@
 	let liquidityFees: ProviderFee[] | undefined;
 	$: liquidityFees = $swapAmountsStore?.swapAmounts?.liquidityFees;
 
-	let kongSwapDApp: OisyDappDescription | undefined;
-	$: kongSwapDApp = dAppDescriptions.find(({ id }) => id === 'kongswap');
+	const kongSwapDApp: OisyDappDescription | undefined = dAppDescriptions.find(
+		({ id }) => id === 'kongswap'
+	);
 
 	// TODO: this state - websiteURL - isn't one and should become a local variable
 	let websiteURL: Option<URL>;

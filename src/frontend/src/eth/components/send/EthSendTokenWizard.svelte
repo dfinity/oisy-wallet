@@ -71,8 +71,7 @@
 	// i.e. Ethereum or Sepolia "main" token.
 	export let nativeEthereumToken: Token;
 
-	let destinationEditable = true;
-	$: destinationEditable = sendPurpose === 'send';
+	const destinationEditable = sendPurpose === 'send';
 
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
