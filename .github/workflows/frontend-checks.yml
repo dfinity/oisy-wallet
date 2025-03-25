@@ -107,11 +107,7 @@ jobs:
     needs: ['format', 'lint', 'check', 'test', 'config']
     runs-on: ubuntu-24.04
     steps:
-      - name: Cleared for merging
-        run: |
-          if [ "${{ needs.format.result }}" == "success" ] && [ "${{ needs.lint.result }}" == "success" ] && [ "${{ needs.check.result }}" == "success" ] && [ "${{ needs.test.result }}" == "success" ] && [ "${{ needs.config.result }}" == "success" ]; then
-            echo "This PR is cleared for merging"
-          else
-            echo "This PR is not cleared for merging"
-            exit 1
-          fi
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/needs_success
+        with:
+          needs: '${{ toJson(needs) }}'
