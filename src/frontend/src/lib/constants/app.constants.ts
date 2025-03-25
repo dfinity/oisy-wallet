@@ -6,7 +6,8 @@ export const APP_VERSION = VITE_APP_VERSION;
 
 export const MODE = VITE_DFX_NETWORK;
 export const LOCAL = MODE === 'local';
-export const STAGING = MODE === 'staging' || MODE.startsWith('test_fe_') || MODE === 'audit';
+export const STAGING =
+	MODE === 'staging' || MODE.startsWith('test_fe_') || MODE === 'audit' || MODE === 'e2e';
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
