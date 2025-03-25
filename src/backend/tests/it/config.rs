@@ -1,5 +1,8 @@
 use candid::Principal;
-use shared::types::{user_profile::UserProfile, Arg, Config};
+use shared::types::{
+    backend_config::{Arg, Config},
+    user_profile::UserProfile,
+};
 
 use crate::utils::pocketic::{controller, init_arg, setup, PicCanisterTrait};
 

@@ -8,9 +8,11 @@ use strum::IntoEnumIterator;
 
 use crate::{
     types::{
+        backend_config::{Config, InitArg},
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
-        networks::{
+        migration::{ApiEnabled, Migration, MigrationProgress, MigrationReport},
+        network::{
             NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
             SaveTestnetsSettingsError,
         },
@@ -19,7 +21,7 @@ use crate::{
         user_profile::{
             AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
-        ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
+        verifiable_credential::CredentialType,
         Timestamp, TokenVersion, Version,
     },
     validate::{validate_on_deserialize, Validate},

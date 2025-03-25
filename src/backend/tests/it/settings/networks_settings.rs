@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::{
-    networks::{
+    network::{
         NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, SaveNetworksSettingsError,
         SaveNetworksSettingsRequest,
     },
@@ -266,7 +266,7 @@ fn test_set_user_network_settings_cannot_update_wrong_version() {
         (),
     );
 
-    assert!(
+    assert_eq!(
         get_profile_response
             .expect("Call to get profile failed")
             .expect("Get profile failed")
