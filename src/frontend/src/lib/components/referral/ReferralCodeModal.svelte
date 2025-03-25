@@ -12,7 +12,7 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import SkeletonQRCode from '$lib/components/ui/SkeletonQRCode.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import {OISY_REFERRAL_URL} from '$lib/constants/oisy.constants';
+	import { OISY_REFERRAL_URL } from '$lib/constants/oisy.constants';
 	import {
 		REFERRAL_CODE_COPY_BUTTON,
 		REFERRAL_CODE_LEARN_MORE,

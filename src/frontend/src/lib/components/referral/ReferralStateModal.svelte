@@ -6,13 +6,13 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
+	import { OISY_REFERRAL_TWITTER_URL } from '$lib/constants/oisy.constants';
 	import {
 		REFERRAL_STATE_MODAL_IMAGE_BANNER,
 		REFERRAL_STATE_MODAL_SHARE_ANCHOR
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {OISY_REFERRAL_TWITTER_URL} from "$lib/constants/oisy.constants";
 </script>
 
 <Sprinkles />
