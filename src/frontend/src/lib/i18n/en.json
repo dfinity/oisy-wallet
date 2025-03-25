@@ -277,7 +277,7 @@
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
 		"more": "More networks coming soon...",
-		"chain_fusion": "Chain Fusion (all networks)",
+		"chain_fusion": "All networks",
 		"network": "Network",
 		"filter": "Filter networks"
 	},
