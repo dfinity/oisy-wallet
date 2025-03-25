@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal, Popover } from '@dfinity/gix-components';
-	import DropdownButton from '$lib/components/ui/DropdownButton.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import DropdownButton from '$lib/components/ui/DropdownButton.svelte';
 
 	export let title: string | undefined;
 	export let disabled = false;
