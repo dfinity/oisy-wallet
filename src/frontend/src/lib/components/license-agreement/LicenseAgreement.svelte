@@ -27,7 +27,9 @@
 <h1 class="text-5xl">{replaceOisyPlaceholders($i18n.license_agreement.text.title)}</h1>
 
 <section class="mt-12">
-	{#each agreementList as agreement}
-		<p><Html text={replaceOisyPlaceholders(agreement)} /></p>
+	{#each agreementList as agreement, index (`agreement-${index}`)}
+		<p>
+			<Html text={replaceOisyPlaceholders(agreement)} />
+		</p>
 	{/each}
 </section>
