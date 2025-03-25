@@ -1,6 +1,7 @@
 import {
 	inferPostMessageSchema,
 	PostMessageDataRequestBtcSchema,
+	PostMessageDataRequestCreateChallengeSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
 	PostMessageDataRequestIcCkSchema,
@@ -10,6 +11,7 @@ import {
 	PostMessageDataRequestSolSchema,
 	PostMessageDataResponseAuthSchema,
 	PostMessageDataResponseBTCAddressSchema,
+	PostMessageDataResponseCreateChallengeSchema,
 	PostMessageDataResponseErrorSchema,
 	PostMessageDataResponseExchangeErrorSchema,
 	PostMessageDataResponseExchangeSchema,
@@ -30,6 +32,10 @@ export type PostMessageDataResponse = z.infer<typeof PostMessageDataResponseSche
 
 export type PostMessageDataRequestExchangeTimer = z.infer<
 	typeof PostMessageDataRequestExchangeTimerSchema
+>;
+
+export type PostMessageDataRequestPowTimer = z.infer<
+	typeof PostMessageDataRequestCreateChallengeSchema
 >;
 
 export type PostMessageDataRequestIcrc = z.infer<typeof PostMessageDataRequestIcrcSchema>;

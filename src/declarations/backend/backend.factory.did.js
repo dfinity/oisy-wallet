@@ -95,6 +95,7 @@ export const idlFactory = ({ IDL }) => {
 	const ChallengeCompletionError = IDL.Variant({
 		InvalidNonce: IDL.Null,
 		MissingChallenge: IDL.Null,
+		ExpiredChallenge: IDL.Null,
 		MissingUserProfile: IDL.Null
 	});
 	const AllowSigningError = IDL.Variant({

@@ -1,50 +1,49 @@
-import { idleSignOut } from '$lib/services/auth.services';
-import { authRemainingTimeStore } from '$lib/stores/auth.store';
+import { createPowChallenge } from '$lib/api/backend.api';
 import type {
 	PostMessage,
-	PostMessageDataRequestExchangeTimer,
+	PostMessageDataRequestPowTimer,
 	PostMessageDataResponseCreateChallenge
 } from '$lib/types/post-message';
+import { loadIdentity } from '$lib/utils/auth.utils';
 
 export interface ChallengeWorker {
-	startExchangeTimer: (params: PostMessageDataRequestExchangeTimer) => void;
-	stopExchangeTimer: () => void;
+	startPowTimer: (params: PostMessageDataRequestPowTimer) => void;
+	stopPowTimer: () => void;
 	destroy: () => void;
 }
 
 let errorMessages: { msg: string; timestamp: number }[] = [];
 
 export const initChallengeWorker = async (): Promise<ChallengeWorker> => {
-	const PowExchangeWorker = await import('$lib/workers/workers?worker');
-	const powWorker: Worker = new PowExchangeWorker.default();
+	const PowWorker = await import('$lib/workers/workers?worker');
+	const powWorker: Worker = new PowWorker.default();
 	powWorker.onmessage = async ({
 		data
 	}: MessageEvent<PostMessage<PostMessageDataResponseCreateChallenge>>) => {
 		const { msg, data: value } = data;
+		let test_identity = await loadIdentity();
 
 		switch (msg) {
-			case 'signOutIdleTimer':
-				await idleSignOut();
-				return;
-			case 'delegationRemainingTime':
-				authRemainingTimeStore.set(value?.authRemainingTime);
+			case 'createPowChallenge':
+				// @ts-ignore
+				await createPowChallenge(test_identity);
 				return;
 		}
 	};
 
 	const stopTimer = () =>
 		powWorker.postMessage({
-			msg: 'stopExchangeTimer'
+			msg: 'stopPowTimer'
 		});
 
 	return {
-		startExchangeTimer: (data: PostMessageDataRequestExchangeTimer) => {
+		startPowTimer: (data: PostMessageDataRequestPowTimer) => {
 			powWorker.postMessage({
-				msg: 'startExchangeTimer',
+				msg: 'startPowTimer',
 				data
 			});
 		},
-		stopExchangeTimer: stopTimer,
+		stopPowTimer: stopTimer,
 		destroy: () => {
 			stopTimer();
 			errorMessages = [];

@@ -1,7 +1,10 @@
 import type {
+	AllowSigningRequest,
 	_SERVICE as BackendService,
 	CustomToken,
 	PendingTransaction,
+	Result_2,
+	Result_6,
 	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserToken
@@ -171,24 +174,24 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	powCreateChallenge = async (): Promise<void> => {
+	allowSigning = async ({ request }: { request: AllowSigningRequest }): Promise<Result_2> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		const response = await create_challenge();
+		const response = await allow_signing(request);
 
 		if ('Err' in response) {
 			throw mapAllowSigningError(response.Err);
 		}
+
+		return response;
 	};
 
-	allowSigning = async (): Promise<void> => {
-		const { allow_signing } = this.caller({ certified: true });
+	createPowChallenge = (): Promise<Result_6> => {
+		const { create_pow_challenge } = this.caller({ certified: true });
 
-		const response = await allow_signing();
+		const response = create_pow_challenge();
 
-		if ('Err' in response) {
-			throw mapAllowSigningError(response.Err);
-		}
+		return response;
 	};
 
 	addUserHiddenDappId = async ({

@@ -1,15 +1,23 @@
 // PoW Challenge Constants
+// -------------------------------------------------------------------------------------------------
 // The time it takes in average to solve the challenge in milliseconds
 // Difficulty adapts aiming towards this value
 pub const TARGET_DURATION_NS: u64 = 5000 * 1_000_000;
+
+// The avoid a challenge expiring before the target time we multiply by 2
+// Providing a smaller duration than TARGET_DURATION_NS will result in an error
+pub const EXPIRY_DURATION_NS: u64 = TARGET_DURATION_NS * 2;
 
 // The minimum difficulty allowed
 pub const MIN_DIFFICULTY: u32 = 100_000;
 
 // Maximum difficulty
+// The auto-adjustment of the difficulty will not exceed MAX_DIFFICULTY. Be aware that this will
+// cause the ecrease away from the defined TARGET_DURATION_NS
 pub const MAX_DIFFICULTY: u32 = 5_000_000;
 
-// The difficulty used if no PoW challenge has been solved
+// The difficulty used if no PoW challenge yet been solved
+// This setting must be set to a value between MIN_DIFFICULTY and MAX_DIFFICULTY
 pub const START_DIFFICULTY: u32 = 2_800_000;
 
 // Cycles per difficulty unit a principle will receive
@@ -17,7 +25,7 @@ pub const DIFFICULTY_TO_CYCLE_FACTOR: u64 = 100;
 
 use ic_cdk::api::{caller, time};
 use sha2::{Digest, Sha256};
-use shared::types::security_pow::{
+use shared::types::pow::{
     ChallengeCompletion, ChallengeCompletionError, CreateChallengeError, StoredChallenge,
 };
 
@@ -66,11 +74,6 @@ fn get_pow_challenge() -> Option<Candid<StoredChallenge>> {
     let stored_principal = StoredPrincipal(caller());
     read_state(|s: &State| s.pow_challenge.get(&stored_principal))
 }
-
-// -------------------------------------------------------------------------------------------------
-// - Service models
-// -------------------------------------------------------------------------------------------------
-
 // -------------------------------------------------------------------------------------------------
 // - Service functions
 // -------------------------------------------------------------------------------------------------
@@ -127,7 +130,7 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
         nonce: random_nonce,
         difficulty,
         start_timestamp_ns: current_time_ns,
-        expiry_timestamp_ns: current_time_ns + TARGET_DURATION_NS,
+        expiry_timestamp_ns: current_time_ns + EXPIRY_DURATION_NS,
         solved: false,
     };
 
@@ -145,7 +148,7 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
 // - Internal functions
 // -------------------------------------------------------------------------------------------------
 
-/// Internal function which can be integrated to any service function that requires PoW protection
+/// Internal function which can be integrated to any service function that requires Pow protection
 pub(crate) fn complete_challenge(
     nonce: u64,
 ) -> Result<ChallengeCompletion, ChallengeCompletionError> {
@@ -162,6 +165,11 @@ pub(crate) fn complete_challenge(
         ic_cdk::println!("No stored challenge found for {}", principal);
         ChallengeCompletionError::MissingChallenge
     })?;
+
+    // A new challenge can be requested after a challenge that had been solved
+    if stored_challenge.is_expired() && !stored_challenge.is_solved() {
+        return Err(ChallengeCompletionError::ExpiredChallenge);
+    }
 
     ic_cdk::println!("StoredChallenge {:?}", stored_challenge);
     let end_timestamp_ns = time();
@@ -220,16 +228,18 @@ pub(crate) fn complete_challenge(
 // - If the client solved too quickly (duration < target), difficulty increases.
 // - If the client solved too slowly (duration > target), difficulty decreases. .
 fn adapt_difficulty(difficulty: u32, solve_duration_ns: u64) -> u32 {
-    let new_difficulty = ((difficulty as u64 * TARGET_DURATION_NS) / solve_duration_ns.max(1))
-        // make sure the difficulty is always between the defined min. and the max. difficulty
-        .clamp(MIN_DIFFICULTY as u64, MAX_DIFFICULTY as u64) as u32;
+    let new_difficulty = u32::try_from(
+        ((u64::from(difficulty) * TARGET_DURATION_NS) / solve_duration_ns.max(1))
+            // make sure the difficulty is always between the defined min. and the max. difficulty
+            .clamp(u64::from(MIN_DIFFICULTY), u64::from(MAX_DIFFICULTY)),
+    )
+    .expect("Difficulty overflow");
 
     ic_cdk::println!(
-        "Adjusted difficulty from {} to {}",
+        "Adjusted difficulty from {:?} to {:?}",
         difficulty,
         new_difficulty
     );
-
     new_difficulty
 }
 fn verify_solution(nonce: u64, difficulty: u32, timestamp: u64) -> bool {

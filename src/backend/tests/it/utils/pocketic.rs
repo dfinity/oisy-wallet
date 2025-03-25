@@ -10,6 +10,7 @@ use std::{
 
 use candid::{encode_one, CandidType, Principal};
 use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
+use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
 use shared::types::{
@@ -26,7 +27,7 @@ use crate::utils::mock::CALLER;
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
 const DEFAULT_BITCOIN_WASM: &str = "../../ic-btc-canister.wasm.gz";
 const BITCOIN_CANISTER_ID: &str = "g4xu7-jiaaa-aaaan-aaaaq-cai";
-const DEFAULT_CYCLES_LEDGER_WASM: &str = "../../ic-cycles-ledger-canister.wasm.gz";
+const DEFAULT_CYCLES_LEDGER_WASM: &str = "../../cycles-ledger.wasm.gz";
 const CYCLES_LEDGER_CANISTER_ID: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
 
 // This is necessary to deploy the bitcoin canister.
@@ -56,7 +57,7 @@ struct BitcoinInitConfig {
 #[derive(CandidType)]
 struct CyclesLedgerInitConfig {
     /// The maximum number of blocks returned by the [icrc3_get_blocks] endpoint
-    pub max_blocks_per_request: Option<u64>,
+    pub max_blocks_per_request: u64,
 
     /// The principal of the index canister for this ledger
     pub index_id: Option<Principal>,
@@ -113,7 +114,7 @@ impl BackendBuilder {
     /// The default number of cycles to add to the backend canister on deployment.
     ///
     /// To override, please use `with_cycles()`.
-    pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000;
+    pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000_000;
 
     /// The default Wasm file to deploy:
     /// - If the environment variable `BACKEND_WASM_PATH` is set, it will use that path.
@@ -163,11 +164,12 @@ impl BackendBuilder {
 
     /// The default arguments to deploy the bitcoin canister.
     pub fn default_cycles_ledger_arg() -> Vec<u8> {
-        let init_config = CyclesLedgerInitConfig {
-            max_blocks_per_request: Some(9_999),
+        let init_config = InitArgs {
+            max_blocks_per_request: 9_999u64,
             index_id: None,
         };
-        encode_one(init_config).unwrap()
+
+        encode_one(&LedgerArgs::Init(init_config)).unwrap()
     }
 
     /// The default argument to pass to the backend canister.

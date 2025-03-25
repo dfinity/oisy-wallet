@@ -6,7 +6,7 @@ use ic_cycles_ledger_client::ApproveError;
 use ic_stable_structures::{Memory, StableBTreeMap, Storable};
 use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 
-use crate::types::security_pow::ChallengeCompletionError;
+use crate::types::pow::ChallengeCompletionError;
 
 pub type Timestamp = u64;
 
@@ -316,7 +316,7 @@ pub mod bitcoin {
     }
 }
 
-pub mod security_pow {
+pub mod pow {
     use super::{CandidType, Debug, Deserialize};
 
     /// A simple key-value store where each entry expires after a fixed TTL (Time To Live).
@@ -342,6 +342,7 @@ pub mod security_pow {
         MissingChallenge,
         InvalidNonce,
         MissingUserProfile,
+        ExpiredChallenge,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -403,7 +404,7 @@ pub enum AllowSigningError {
 pub mod signer {
 
     use super::{CandidType, Debug, Deserialize};
-    use crate::types::security_pow::{AllowSigningStatus, ChallengeCompletion};
+    use crate::types::pow::{AllowSigningStatus, ChallengeCompletion};
     /// Types related to topping up the cycles ledger account for use with the signer.
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -774,7 +775,7 @@ pub struct Stats {
     pub custom_token_count: u64,
 }
 
-/// Generic wrapper around BTreeMap providing timestamp-based expiration functionality.
+/// Generic wrapper around `BTreeMap` providing timestamp-based expiration functionality.
 ///
 /// # Type Parameters:
 /// - `K`: Key type (must implement `Storable`, `Ord`, `Clone`).

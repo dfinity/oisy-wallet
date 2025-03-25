@@ -152,6 +152,7 @@ export interface ChallengeCompletion {
 export type ChallengeCompletionError =
 	| { InvalidNonce: null }
 	| { MissingChallenge: null }
+	| { ExpiredChallenge: null }
 	| { MissingUserProfile: null };
 export interface Config {
 	api: [] | [Guards];

@@ -1,3 +1,4 @@
+import type { AllowSigningRequest } from '$declarations/backend/backend.did';
 import { allowSigning } from '$lib/api/backend.api';
 import { errorSignOut } from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
@@ -23,9 +24,12 @@ import { get } from 'svelte/store';
  */
 export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
+		const request: AllowSigningRequest = {
+			nonce: 100000n
+		};
 		const { identity } = get(authStore);
 
-		await allowSigning({ identity });
+		await allowSigning({ request, identity });
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);

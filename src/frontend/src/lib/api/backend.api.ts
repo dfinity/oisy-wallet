@@ -1,6 +1,9 @@
 import type {
+	AllowSigningRequest,
+	Result_6 as CreateChallengeResult,
 	CustomToken,
 	PendingTransaction,
+	Result_2,
 	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserToken
@@ -136,10 +139,23 @@ export const selectUserUtxosFee = async ({
 	return btcSelectUserUtxosFee(params);
 };
 
-export const allowSigning = async ({ identity }: CanisterApiFunctionParams): Promise<void> => {
+export const createPowChallenge = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<CreateChallengeResult> => {
+	const { createPowChallenge } = await backendCanister({ identity });
+
+	return createPowChallenge();
+};
+
+export const allowSigning = async ({
+	request,
+	identity
+}: CanisterApiFunctionParams<{
+	request: AllowSigningRequest;
+}>): Promise<Result_2> => {
 	const { allowSigning } = await backendCanister({ identity });
 
-	return allowSigning();
+	return allowSigning({ request });
 };
 
 export const addUserHiddenDappId = async ({

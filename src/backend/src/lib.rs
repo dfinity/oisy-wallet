@@ -31,7 +31,7 @@ use shared::{
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
-        security_pow::{
+        pow::{
             AllowSigningStatus, ChallengeCompletion, ChallengeCompletionError,
             CreateChallengeError, CreateChallengeResponse,
         },
@@ -62,7 +62,7 @@ use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
-    security_pow::DIFFICULTY_TO_CYCLE_FACTOR,
+    pow::DIFFICULTY_TO_CYCLE_FACTOR,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets},
@@ -77,7 +77,7 @@ mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
-mod security_pow;
+mod pow;
 pub mod signer;
 mod state;
 mod token;
@@ -651,7 +651,7 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 ///   internal errors.
 #[update(guard = "may_write_user_data")]
 pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
-    let challenge = security_pow::create_pow_challenge().await?;
+    let challenge = pow::create_pow_challenge().await?;
 
     Ok(CreateChallengeResponse {
         nonce: challenge.nonce, //challenge.nonce,
@@ -670,22 +670,25 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
+/// # Panics
+/// To be added
 #[update(guard = "may_read_user_data")]
 pub async fn allow_signing(
     request: AllowSigningRequest,
 ) -> Result<AllowSigningResponse, AllowSigningError> {
     let principal = caller();
 
-    let challenge_completion: ChallengeCompletion =
-        crate::security_pow::complete_challenge(request.nonce).map_err(|e| match e {
-            ChallengeCompletionError::MissingUserProfile => AllowSigningError::PowChallenge(e),
-            ChallengeCompletionError::InvalidNonce => AllowSigningError::PowChallenge(e),
-            ChallengeCompletionError::MissingChallenge => AllowSigningError::PowChallenge(e),
-        })?;
+    let challenge_completion: ChallengeCompletion = crate::pow::complete_challenge(request.nonce)
+        .map_err(|e| match e {
+        ChallengeCompletionError::InvalidNonce
+        | ChallengeCompletionError::MissingUserProfile
+        | ChallengeCompletionError::ExpiredChallenge
+        | ChallengeCompletionError::MissingChallenge => AllowSigningError::PowChallenge(e),
+    })?;
 
     // Grant cycles proportional to difficulty
     let allowed_cycles =
-        (challenge_completion.current_difficulty as u64) * DIFFICULTY_TO_CYCLE_FACTOR;
+        u64::from(challenge_completion.current_difficulty) * DIFFICULTY_TO_CYCLE_FACTOR;
 
     // Here we would proceed with granting signer permissions and record the granted cycles for
     ic_cdk::println!(

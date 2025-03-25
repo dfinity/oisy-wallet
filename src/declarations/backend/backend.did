@@ -150,6 +150,7 @@ type ChallengeCompletion = record {
 type ChallengeCompletionError = variant {
   InvalidNonce;
   MissingChallenge;
+  ExpiredChallenge;
   MissingUserProfile;
 };
 type Config = record {

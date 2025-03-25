@@ -173,7 +173,7 @@ macro_rules! migrate {
             .bulk_up(migration_bytes)
             .await
             .map_err(|e| {
-                eprintln!("Failed to transfer data {e:?}");
+                ic_cdk::println!("Failed to transfer data {:?}", e);
                 MigrationError::DataMigrationFailed
             })?;
         next_state
