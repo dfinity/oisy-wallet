@@ -365,6 +365,7 @@
 			}
 		},
 		"ckusdc_ledger": {
+			"dependencies": ["cketh_minter"],
 			"type": "custom",
 			"build": "scripts/build.ckusdc_ledger.sh",
 			"candid": "target/ic/cketh_ledger.did",
@@ -385,6 +386,7 @@
 			}
 		},
 		"ckusdc_index": {
+			"dependencies": ["ckusdc_ledger"],
 			"type": "custom",
 			"build": "scripts/build.ckusdc_index.sh",
 			"candid": "target/ic/cketh_index.did",

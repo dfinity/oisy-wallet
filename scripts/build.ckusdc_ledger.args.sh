@@ -13,7 +13,7 @@ cat <<-EOF >"$ARG_FILE"
 		 token_name = "Chain key Sepolia USDC";
 		 decimals = opt 6;
 		 max_memo_length = opt 80;
-		 minting_account = record { owner = principal "$CANISTER_ID_CKUSDC_MINTER" };
+		 minting_account = record { owner = principal "$CANISTER_ID_CKETH_MINTER" };
 		 transfer_fee = 9_500;
 		 metadata = vec {};
 		 initial_balances = vec {
