@@ -222,10 +222,10 @@
 	const back = () => dispatch('icSendBack');
 
 	const onDecodeQrCode = ({
-														status,
-														code,
-														expectedToken
-													}: {
+		status,
+		code,
+		expectedToken
+	}: {
 		status: QrStatus;
 		code?: string;
 		expectedToken: OptionToken;

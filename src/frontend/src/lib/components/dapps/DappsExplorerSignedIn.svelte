@@ -47,7 +47,8 @@
 		ariaLabel={$i18n.dapps.alt.show_all}
 		on:click={() => (selectedTag = undefined)}
 		styleClass="text-nowrap max-w-fit text-sm"
-		colorStyle={selectedTag === undefined ? 'primary' : 'tertiary'}>
+		colorStyle={selectedTag === undefined ? 'primary' : 'tertiary'}
+	>
 		{$i18n.dapps.text.all_dapps}
 	</Button>
 	{#each uniqueTags as tag (tag)}
@@ -77,9 +78,9 @@
 <SubmitDappButton />
 
 <style lang="postcss">
-    @media (max-width: 360px) {
-        ul {
-            @apply grid-cols-1;
-        }
-    }
+	@media (max-width: 360px) {
+		ul {
+			@apply grid-cols-1;
+		}
+	}
 </style>
