@@ -78,5 +78,9 @@
 		"fee": {
 			"__bigint__": "1000000"
 		}
+	},
+	"NAK": {
+		"indexCanisterId": "hmav7-uaaaa-aaaam-qdhnq-cai",
+		"ledgerCanisterId": "eig2s-waaaa-aaaam-qbg5a-cai"
 	}
 }

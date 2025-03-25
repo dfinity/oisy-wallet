@@ -1,11 +1,8 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
-import {
-	BTC_MAINNET_NETWORK,
-	ETHEREUM_NETWORK,
-	ICP_NETWORK,
-	SEPOLIA_NETWORK
-} from '$env/networks/networks.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_MAINNET_NETWORK,
@@ -29,11 +26,11 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import { splUserTokensStore } from '$sol/stores/spl-user-tokens.store';
 import type { SplUserToken } from '$sol/types/spl-user-token';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { get } from 'svelte/store';
 
 describe('network-tokens.derived', () => {
@@ -55,7 +52,7 @@ describe('network-tokens.derived', () => {
 			splDefaultTokensStore.reset();
 			splUserTokensStore.resetAll();
 
-			testnetsStore.reset({ key: 'testnets' });
+			setupTestnetsStore('reset');
 
 			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
@@ -123,7 +120,7 @@ describe('network-tokens.derived', () => {
 			];
 
 			beforeEach(() => {
-				testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+				setupTestnetsStore('enabled');
 
 				erc20UserTokensStore.setAll([
 					{ data: mockErc20UserToken, certified: false },

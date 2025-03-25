@@ -17,7 +17,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let jackpot = false;
 
@@ -26,7 +26,7 @@
 	$: reward = rewardCampaigns.find((campaign) => campaign.id === 'OISY Airdrop #1');
 </script>
 
-<Sprinkles />
+<Sprinkles type={jackpot ? 'page-jackpot' : 'page'} />
 
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>

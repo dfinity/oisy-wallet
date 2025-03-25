@@ -22,6 +22,7 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
+        backend_config::{Arg, Config, Guards, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
@@ -30,15 +31,17 @@ use shared::{
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
+        migration::{Migration, MigrationProgress, MigrationReport},
+        network::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
             ListUserCreationTimestampsResponse, ListUsersRequest, ListUsersResponse, OisyUser,
             UserProfile,
         },
-        Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
-        Timestamp,
+        Stats, Timestamp,
     },
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
@@ -54,7 +57,7 @@ use crate::{
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
-    user_profile::add_hidden_dapp_id,
+    user_profile::{add_hidden_dapp_id, set_show_testnets},
 };
 
 mod assertions;
@@ -530,6 +533,34 @@ pub fn add_user_credential(
     }
 }
 
+/// Sets the user's preference to show (or hide) testnets in the interface.
+///
+/// # Returns
+/// - Returns `Ok(())` if the testnets setting was saved successfully, or if it was already set to
+///   the same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "may_write_user_data")]
+#[allow(clippy::needless_pass_by_value)] // canister methods are necessary
+pub fn set_user_show_testnets(
+    request: SetShowTestnetsRequest,
+) -> Result<(), SaveTestnetsSettingsError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        set_show_testnets(
+            stored_principal,
+            request.current_user_version,
+            request.show_testnets,
+            &mut user_profile_model,
+        )
+    })
+}
+
 /// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 ///
 /// # Arguments
@@ -587,9 +618,9 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        let mut user_profile_model =
+        let user_profile_model =
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        match find_profile(stored_principal, &mut user_profile_model) {
+        match find_profile(stored_principal, &user_profile_model) {
             Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
             Err(err) => Err(err),
         }
@@ -741,6 +772,19 @@ pub async fn step_migration() {
             eprintln!("Migration failed: {err:?}");
         });
     };
+}
+
+/// Saves a snapshot of the user's account.
+#[update(guard = "may_write_user_data")]
+#[allow(clippy::needless_pass_by_value)] // Canister API methods are always pass by value.
+pub fn set_snapshot(snapshot: UserSnapshot) {
+    todo!("TODO: Set snapshot to: {:?}", snapshot);
+}
+/// Gets the caller's last snapshot.
+#[query(guard = "may_read_user_data")]
+#[must_use]
+pub fn get_snapshot() -> Option<UserSnapshot> {
+    todo!()
 }
 
 export_candid!();

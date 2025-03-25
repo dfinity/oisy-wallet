@@ -8,14 +8,17 @@ use strum::IntoEnumIterator;
 
 use crate::{
     types::{
+        backend_config::{Config, InitArg},
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
+        migration::{ApiEnabled, Migration, MigrationProgress, MigrationReport},
+        network::{NetworksSettings, SaveTestnetsSettingsError},
         settings::Settings,
         token::UserToken,
         user_profile::{
             AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
-        ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
+        verifiable_credential::CredentialType,
         Timestamp, TokenVersion, Version,
     },
     validate::{validate_on_deserialize, Validate},
@@ -40,13 +43,13 @@ impl TokenVersion for UserToken {
         self.version
     }
 
-    fn clone_with_incremented_version(&self) -> Self {
+    fn with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
-    fn clone_with_initial_version(&self) -> Self {
+    fn with_initial_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
@@ -91,13 +94,13 @@ impl TokenVersion for CustomToken {
         self.version
     }
 
-    fn clone_with_incremented_version(&self) -> Self {
+    fn with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
-    fn clone_with_initial_version(&self) -> Self {
+    fn with_initial_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
@@ -117,13 +120,13 @@ impl TokenVersion for StoredUserProfile {
         self.version
     }
 
-    fn clone_with_incremented_version(&self) -> Self {
+    fn with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
-    fn clone_with_initial_version(&self) -> Self {
+    fn with_initial_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
@@ -134,6 +137,7 @@ impl StoredUserProfile {
     #[must_use]
     pub fn from_timestamp(now: Timestamp) -> StoredUserProfile {
         let settings = Settings {
+            networks: NetworksSettings::default(),
             dapp: DappSettings {
                 dapp_carousel: DappCarouselSettings {
                     hidden_dapp_ids: Vec::new(),
@@ -163,7 +167,7 @@ impl StoredUserProfile {
         if profile_version != self.version {
             return Err(AddUserCredentialError::VersionMismatch);
         }
-        let mut new_profile = self.clone_with_incremented_version();
+        let mut new_profile = self.with_incremented_version();
         let user_credential = UserCredential {
             credential_type: credential_type.clone(),
             verified_date_timestamp: Some(now),
@@ -172,6 +176,37 @@ impl StoredUserProfile {
         let mut new_credentials = new_profile.credentials.clone();
         new_credentials.insert(credential_type.clone(), user_credential);
         new_profile.credentials = new_credentials;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with `show_testnets` set to the specified value.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_show_testnets(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        show_testnets: bool,
+    ) -> Result<StoredUserProfile, SaveTestnetsSettingsError> {
+        if profile_version != self.version {
+            return Err(SaveTestnetsSettingsError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+
+        if settings.networks.testnets.show_testnets == show_testnets {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            settings.networks.testnets.show_testnets = show_testnets;
+            Some(settings)
+        };
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
@@ -200,7 +235,7 @@ impl StoredUserProfile {
             return Ok(self.clone());
         }
 
-        let mut new_profile = self.clone_with_incremented_version();
+        let mut new_profile = self.with_incremented_version();
         let mut new_settings = new_profile.settings.clone().unwrap_or_default();
         let mut new_dapp_settings = new_settings.dapp.clone();
         let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
