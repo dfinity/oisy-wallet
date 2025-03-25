@@ -114,4 +114,19 @@ describe('Transactions', () => {
 			{ timeout }
 		);
 	});
+
+	it('should redirect the user to the activity page if token does not exist', async () => {
+		mockPage.mock({ token: 'UNKNOWN', network: ICP_NETWORK_SYMBOL });
+
+		render(Transactions);
+
+		await new Promise<void>((resolve) =>
+			setTimeout(() => {
+				expect(get(modalStore)).toBeNull();
+				resolve();
+			}, timeout)
+		);
+
+		expect(mockGoTo).toHaveBeenCalledWith('/');
+	});
 }, 60000);

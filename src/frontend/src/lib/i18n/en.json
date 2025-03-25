@@ -828,7 +828,9 @@
 			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists.",
 			"loading_pending_ck_ethereum_transactions": "Something went wrong while fetching the pending $network transactions.",
 			"get_transaction_for_hash": "Failed to get the transaction from the provided (hash: $hash).",
-			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash."
+			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash.",
+			"loading_token_with_network": "The token $token on the $network network could not be loaded because it's not in your token list.",
+			"loading_token": "The provided link to a token is invalid."
 		}
 	},
 	"about": {
