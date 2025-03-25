@@ -319,6 +319,7 @@
 			}
 		},
 		"cketh_ledger": {
+			"description": "Sepoila testnet ckETH ledger canister",
 			"dependencies": ["cketh_minter"],
 			"type": "custom",
 			"candid": "target/ic/cketh_ledger.did",
@@ -341,6 +342,7 @@
 			}
 		},
 		"cketh_index": {
+			"description": "Sepoila testnet ckETH index canister",
 			"dependencies": ["cketh_ledger"],
 			"type": "custom",
 			"build": "scripts/build.cketh_index.sh",
@@ -365,12 +367,38 @@
 		"ckusdc_ledger": {
 			"type": "custom",
 			"candid": "target/ic/cketh_ledger.did",
-			"wasm": "target/ic/cketh_ledger.wasm"
+			"wasm": "target/ic/cketh_ledger.wasm",
+			"specified_id": "yfumr-cyaaa-aaaar-qaela-cai",
+			"remote": {
+				"id": {
+					"ic": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_be_1": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_1": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_2": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_3": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_4": "yfumr-cyaaa-aaaar-qaela-cai",
+					"audit": "yfumr-cyaaa-aaaar-qaela-cai",
+					"staging": "yfumr-cyaaa-aaaar-qaela-cai"
+				}
+			}
 		},
 		"ckusdc_index": {
 			"type": "custom",
 			"candid": "target/ic/cketh_index.did",
-			"wasm": "target/ic/cketh_index.wasm"
+			"wasm": "target/ic/cketh_index.wasm",
+			"specified_id": "ycvkf-paaaa-aaaar-qaelq-cai",
+			"remote": {
+				"id": {
+					"ic": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_be_1": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_1": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_2": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_3": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_4": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"audit": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"staging": "ycvkf-paaaa-aaaar-qaelq-cai"
+				}
+			}
 		},
 		"rewards": {
 			"type": "custom",
