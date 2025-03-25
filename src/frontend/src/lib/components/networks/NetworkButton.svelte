@@ -6,14 +6,17 @@
 	import { page } from '$app/stores';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import { networkId } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
+	import Badge from '$lib/components/ui/Badge.svelte';
 
 	export let id: NetworkId | undefined;
 	export let name: string;
 	export let icon: string | undefined;
 	export let usdBalance: number | undefined = undefined;
+	export let isTestnet = false;
 	export let testId: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
@@ -45,5 +48,11 @@
 
 	{#if id === $networkId}
 		<span in:fade><IconCheck size="20px" /></span>
+	{/if}
+
+	{#if isTestnet}
+		<span class="inline-flex">
+			<Badge styleClass="pt-0 pb-0">{$i18n.networks.testnet}</Badge>
+		</span>
 	{/if}
 </button>
