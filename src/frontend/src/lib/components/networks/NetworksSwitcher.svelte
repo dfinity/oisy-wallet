@@ -30,10 +30,10 @@
 	ariaLabel={$i18n.networks.title}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
 	{disabled}
-	title={$i18n.networks.filter}
 >
 	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
 
+	<svelte:fragment slot="title">{$i18n.networks.filter}</svelte:fragment>
 	<div slot="items">
 		<ul class="flex list-none flex-col font-normal">
 			<li>
