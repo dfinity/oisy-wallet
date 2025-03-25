@@ -38,7 +38,7 @@
 </script>
 
 <div class="flex flex-row">
-	{#each THEME_VALUES as theme}
+	{#each THEME_VALUES as theme (theme)}
 		<ThemeSelectorCard
 			label={$i18n.settings.text[`appearance_${theme}`]}
 			selected={selectedCard === theme}

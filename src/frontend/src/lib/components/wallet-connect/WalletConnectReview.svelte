@@ -57,11 +57,11 @@
 
 		<WalletConnectDomainVerification {proposal} />
 
-		{#each Object.entries(params.requiredNamespaces) as [key, value]}
+		{#each Object.entries(params.requiredNamespaces) as [key, value] (key)}
 			{@const allMethods = value.methods}
 			{@const allEvents = value.events}
 
-			{#each value.chains ?? [] as chainId}
+			{#each value.chains ?? [] as chainId (chainId)}
 				{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
 
 				<p class="mt-6 font-bold">

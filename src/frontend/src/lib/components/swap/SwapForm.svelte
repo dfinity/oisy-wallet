@@ -74,7 +74,7 @@
 
 	let totalFee: bigint | undefined;
 	// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
-	$: totalFee = (sourceTokenFee ?? ZERO_BI) * (isSourceTokenIcrc2 ? 2n : 1n);
+	$: totalFee = (sourceTokenFee ?? ZERO_BI) * ($isSourceTokenIcrc2 ? 2n : 1n);
 
 	let swapAmountsLoading = false;
 	$: swapAmountsLoading =
@@ -108,7 +108,7 @@
 		switchTokens();
 	};
 
-	$: customValidate = (userAmount: bigint): TokenActionErrorType =>
+	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		nonNullish($sourceToken)
 			? validateUserAmount({
 					userAmount,

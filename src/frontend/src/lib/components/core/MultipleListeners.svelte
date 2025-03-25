@@ -10,7 +10,7 @@
 	$: listeners = $authSignedIn ? mapListeners(tokens) : [];
 </script>
 
-{#each listeners as { token, listener }}
+{#each listeners as { token, listener } (token.id)}
 	<svelte:component this={listener} {token} />
 {/each}
 

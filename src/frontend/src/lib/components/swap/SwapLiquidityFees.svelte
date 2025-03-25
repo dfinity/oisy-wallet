@@ -11,13 +11,8 @@
 	<svelte:fragment slot="label">{$i18n.swap.text.included_liquidity_fees}</svelte:fragment>
 
 	<div slot="main-value" class="flex flex-col">
-		{#each liquidityFees as liquidityFee}
-			<FeeDisplay
-				feeAmount={liquidityFee.fee}
-				symbol={liquidityFee.token.symbol}
-				decimals={liquidityFee.token.decimals}
-				displayExchangeRate={false}
-			/>
+		{#each liquidityFees as { fee, token: { symbol, decimals, id } } (id)}
+			<FeeDisplay feeAmount={fee} {symbol} {decimals} displayExchangeRate={false} />
 		{/each}
 	</div>
 </ModalValue>

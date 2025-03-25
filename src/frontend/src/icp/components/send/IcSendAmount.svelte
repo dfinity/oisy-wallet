@@ -47,7 +47,7 @@
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
-	$: customValidate = (userAmount: bigint): Error | undefined => {
+	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (isNullish(fee) || isNullish($sendToken)) {
 			return;
 		}

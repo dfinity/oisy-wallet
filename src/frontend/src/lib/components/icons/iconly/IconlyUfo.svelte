@@ -62,6 +62,8 @@
 	</svg>
 </div>
 
+<!-- TODO: fix CSS rules by making the solution generic and scoped -->
+<!-- svelte-ignore css-unused-selector -->
 <style lang="scss">
 	:root {
 		--window-fill-color: white;

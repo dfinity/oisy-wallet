@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 
 	export let alertType: 'ok' | 'error';
 
-	let icon: ComponentType;
+	let icon: Component;
 	$: icon = alertType === 'error' ? IconClose : IconCheck;
 </script>
 

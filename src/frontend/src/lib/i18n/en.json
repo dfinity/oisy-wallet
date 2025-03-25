@@ -548,7 +548,8 @@
 			"select_token": "Select token",
 			"exchange_is_not_available": "USD value is currently not available.",
 			"source_token_title": "You pay",
-			"destination_token_title": "You receive"
+			"destination_token_title": "You receive",
+			"chain_key": "Chain Key"
 		},
 		"details": {
 			"title": "Token details",

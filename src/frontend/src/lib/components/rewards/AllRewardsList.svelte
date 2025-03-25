@@ -13,13 +13,13 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
 
-	let ongoingCampaigns: RewardDescription[];
-	$: ongoingCampaigns = rewardCampaigns.filter(({ startDate, endDate }) =>
+	const ongoingCampaigns: RewardDescription[] = rewardCampaigns.filter(({ startDate, endDate }) =>
 		isOngoingCampaign({ startDate, endDate })
 	);
 
-	let upcomingCampaigns: RewardDescription[];
-	$: upcomingCampaigns = rewardCampaigns.filter(({ startDate }) => isUpcomingCampaign(startDate));
+	const upcomingCampaigns: RewardDescription[] = rewardCampaigns.filter(({ startDate }) =>
+		isUpcomingCampaign(startDate)
+	);
 </script>
 
 <div class="relative mb-6 flex items-end md:mb-10">

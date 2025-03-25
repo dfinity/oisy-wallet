@@ -45,7 +45,7 @@
 				/>
 			</li>
 
-			{#each $networksMainnets as network}
+			{#each $networksMainnets as network (network.id)}
 				<li>
 					<MainnetNetwork {network} on:icSelected={dropdown.close} />
 				</li>
@@ -56,7 +56,7 @@
 
 		{#if $testnets}
 			<ul class="mb-2 flex list-none flex-col font-normal" transition:slide={SLIDE_EASING}>
-				{#each $networksTestnets as network}
+				{#each $networksTestnets as network (network.id)}
 					<li>
 						<Network {network} on:icSelected={dropdown.close} />
 					</li>

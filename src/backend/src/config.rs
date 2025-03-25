@@ -1,5 +1,8 @@
 use ic_verifiable_credentials::VcFlowSigners;
-use shared::types::{user_profile::AddUserCredentialRequest, Config, CredentialType};
+use shared::types::{
+    backend_config::Config, user_profile::AddUserCredentialRequest,
+    verifiable_credential::CredentialType,
+};
 
 pub fn find_credential_config(
     request: &AddUserCredentialRequest,

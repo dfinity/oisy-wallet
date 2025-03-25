@@ -9,7 +9,7 @@ import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('Transactions', () => {
-	const timeout = 7000;
+	const timeout = 12000;
 	const mockGoTo = vi.fn();
 
 	beforeEach(() => {

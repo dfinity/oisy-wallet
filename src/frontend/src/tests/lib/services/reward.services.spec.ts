@@ -18,7 +18,7 @@ import {
 	getRewards,
 	getUserRewardsTokenAmounts,
 	isVipUser
-} from '$lib/services/reward-code.services';
+} from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';

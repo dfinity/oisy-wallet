@@ -14,7 +14,7 @@
 		ariaLabel={$i18n.rewards.text.learn_more}
 		iconVisible={false}
 		color="blue"
-		styleClass={`ml-auto font-semibold`}
+		styleClass="ml-auto font-semibold"
 	>
 		{$i18n.rewards.text.learn_more}
 	</ExternalLink>

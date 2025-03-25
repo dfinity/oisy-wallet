@@ -80,18 +80,8 @@ export interface AddUserCredentialRequest {
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
-	| { PowChallenge: ChallengeCompletionError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
-export interface AllowSigningRequest {
-	nonce: bigint;
-}
-export interface AllowSigningResponse {
-	status: AllowSigningStatus;
-	challenge_completion: ChallengeCompletion;
-	allowed_cycles: bigint;
-}
-export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type ApproveError =
 	| {
@@ -143,17 +133,6 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array | number[]];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
-export interface ChallengeCompletion {
-	solved_duration_ns: bigint;
-	next_allowance_ns: bigint;
-	next_difficulty: number;
-	current_difficulty: number;
-}
-export type ChallengeCompletionError =
-	| { InvalidNonce: null }
-	| { MissingChallenge: null }
-	| { ExpiredChallenge: null }
-	| { MissingUserProfile: null };
 export interface Config {
 	api: [] | [Guards];
 	derivation_origin: [] | [string];
@@ -162,16 +141,6 @@ export interface Config {
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_raw: [] | [Uint8Array | number[]];
-}
-export type CreateChallengeError =
-	| { ChallengeInProgress: null }
-	| { MissingUserProfile: null }
-	| { RandomnessError: string };
-export interface CreateChallengeResponse {
-	difficulty: number;
-	nonce: bigint;
-	start_timestamp_ns: bigint;
-	expiry_timestamp_ns: bigint;
 }
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];
@@ -314,19 +283,22 @@ export interface PendingTransaction {
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: null } | { Err: AddDappSettingsError };
-export type Result_10 = { Ok: null } | { Err: SaveTestnetsSettingsError };
-export type Result_11 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
-export type Result_2 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
+export type Result_10 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
+export type Result_2 = { Ok: null } | { Err: AllowSigningError };
 export type Result_3 = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type Result_4 =
 	| { Ok: BtcGetPendingTransactionsReponse }
 	| { Err: BtcAddPendingTransactionError };
 export type Result_5 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
-export type Result_6 = { Ok: CreateChallengeResponse } | { Err: CreateChallengeError };
-export type Result_7 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_8 = { Ok: MigrationReport } | { Err: string };
-export type Result_9 = { Ok: null } | { Err: string };
-export type SaveTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
+export type Result_6 = { Ok: UserProfile } | { Err: GetUserProfileError };
+export type Result_7 = { Ok: MigrationReport } | { Err: string };
+export type Result_8 = { Ok: null } | { Err: string };
+export type Result_9 = { Ok: null } | { Err: SaveNetworksSettingsError };
+export type SaveNetworksSettingsError = { VersionMismatch: null } | { UserNotFound: null };
+export interface SaveNetworksSettingsRequest {
+	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
+	current_user_version: [] | [bigint];
+}
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InternalError: { msg: string } };
@@ -458,17 +430,16 @@ export interface Utxo {
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result_1>;
-	allow_signing: ActorMethod<[AllowSigningRequest], Result_2>;
+	allow_signing: ActorMethod<[], Result_2>;
 	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_3>;
 	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_4>;
 	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_5>;
 	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
 	config: ActorMethod<[], Config>;
-	create_pow_challenge: ActorMethod<[], Result_6>;
 	create_user_profile: ActorMethod<[], UserProfile>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_snapshot: ActorMethod<[], [] | [UserSnapshot]>;
-	get_user_profile: ActorMethod<[], Result_7>;
+	get_user_profile: ActorMethod<[], Result_6>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_creation_timestamps: ActorMethod<
@@ -477,20 +448,22 @@ export interface _SERVICE {
 	>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
-	migrate_user_data_to: ActorMethod<[Principal], Result_8>;
+	migrate_user_data_to: ActorMethod<[Principal], Result_7>;
 	migration: ActorMethod<[], [] | [MigrationReport]>;
-	migration_stop_timer: ActorMethod<[], Result_9>;
+	migration_stop_timer: ActorMethod<[], Result_8>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_snapshot: ActorMethod<[UserSnapshot], undefined>;
-	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_10>;
+	set_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_9>;
+	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_9>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
-	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_11>;
+	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_10>;
+	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_9>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

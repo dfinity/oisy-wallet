@@ -47,7 +47,7 @@
 				? SOLANA_LOCAL_TOKEN
 				: SOLANA_TOKEN;
 
-	$: customValidate = (userAmount: bigint): Error | undefined => {
+	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO_BI) {
 			return new SolAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}

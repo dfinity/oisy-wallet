@@ -14,8 +14,9 @@ use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
 use shared::types::{
+    backend_config::{Arg, InitArg},
     user_profile::{OisyUser, UserProfile},
-    Arg, CredentialType, InitArg, SupportedCredential,
+    verifiable_credential::{CredentialType, SupportedCredential},
 };
 
 use super::mock::{

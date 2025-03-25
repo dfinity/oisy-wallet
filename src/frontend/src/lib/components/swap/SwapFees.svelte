@@ -31,7 +31,7 @@
 	$: sourceTokenTransferFee = Number(sourceTokenTransferFeeDisplay);
 
 	let sourceTokenApproveFeeDisplay: string;
-	$: sourceTokenApproveFeeDisplay = isSourceTokenIcrc2 ? sourceTokenTransferFeeDisplay : '0';
+	$: sourceTokenApproveFeeDisplay = $isSourceTokenIcrc2 ? sourceTokenTransferFeeDisplay : '0';
 
 	let sourceTokenApproveFee: number;
 	$: sourceTokenApproveFee = Number(sourceTokenApproveFeeDisplay);

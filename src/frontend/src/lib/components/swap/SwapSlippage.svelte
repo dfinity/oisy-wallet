@@ -90,7 +90,7 @@
 					</TokenInputCurrency>
 				</TokenInputContainer>
 
-				{#each SWAP_SLIPPAGE_PRESET_VALUES as presetValue}
+				{#each SWAP_SLIPPAGE_PRESET_VALUES as presetValue (presetValue)}
 					<Button
 						on:click={() => onPresetValueClick(presetValue)}
 						colorStyle="secondary-light"

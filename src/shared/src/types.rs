@@ -5,141 +5,31 @@ use ic_cdk_timers::TimerId;
 use ic_cycles_ledger_client::ApproveError;
 use ic_stable_structures::{Memory, StableBTreeMap, Storable};
 use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
+use candid::{CandidType, Deserialize};
 
 use crate::types::pow::ChallengeCompletionError;
 
 pub type Timestamp = u64;
 
 pub mod account;
+pub mod backend_config;
+pub mod bitcoin;
+pub mod custom_token;
+pub mod dapp;
+pub mod migration;
 pub mod network;
 pub mod number;
+pub mod settings;
+pub mod signer;
 pub mod snapshot;
+pub mod token;
 pub mod token_id;
+pub mod transaction;
+pub mod user_profile;
+pub mod verifiable_credential;
 
 #[cfg(test)]
 mod tests;
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
-pub enum CredentialType {
-    ProofOfUniqueness,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct SupportedCredential {
-    pub credential_type: CredentialType,
-    pub ii_origin: String,
-    pub ii_canister_id: Principal,
-    pub issuer_origin: String,
-    pub issuer_canister_id: Principal,
-}
-
-#[derive(CandidType, Deserialize)]
-pub struct InitArg {
-    pub ecdsa_key_name: String,
-    pub allowed_callers: Vec<Principal>,
-    pub supported_credentials: Option<Vec<SupportedCredential>>,
-    /// Root of trust for checking canister signatures.
-    pub ic_root_key_der: Option<Vec<u8>>,
-    /// Enables or disables APIs
-    pub api: Option<Guards>,
-    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in
-    /// `btc_select_user_utxos_fee`
-    pub cfs_canister_id: Option<Principal>,
-    /// Derivation origins when logging in the dapp with Internet Identity.
-    /// Used to validate the id alias credential which includes the derivation origin of the id
-    /// alias.
-    pub derivation_origin: Option<String>,
-}
-
-#[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
-#[repr(u8)]
-pub enum ApiEnabled {
-    Enabled,
-    ReadOnly,
-    Disabled,
-}
-
-#[derive(CandidType, Deserialize, Default, Copy, Clone, Debug, PartialEq, Eq)]
-pub struct Guards {
-    pub threshold_key: ApiEnabled,
-    pub user_data: ApiEnabled,
-}
-#[test]
-fn guards_default() {
-    assert_eq!(
-        Guards::default(),
-        Guards {
-            threshold_key: ApiEnabled::Enabled,
-            user_data: ApiEnabled::Enabled,
-        }
-    );
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum Arg {
-    Init(InitArg),
-    Upgrade,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct Config {
-    pub ecdsa_key_name: String,
-    // A list of allowed callers to restrict access to endpoints that do not particularly check or
-    // use the caller()
-    pub allowed_callers: Vec<Principal>,
-    pub supported_credentials: Option<Vec<SupportedCredential>>,
-    /// Root of trust for checking canister signatures.
-    pub ic_root_key_raw: Option<Vec<u8>>,
-    /// Enables or disables APIs
-    pub api: Option<Guards>,
-    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in
-    /// `btc_select_user_utxos_fee`
-    pub cfs_canister_id: Option<Principal>,
-    /// Derivation origins when logging in the dapp with Internet Identity.
-    /// Used to validate the id alias credential which includes the derivation origin of the id
-    /// alias.
-    pub derivation_origin: Option<String>,
-}
-
-pub mod transaction {
-    use candid::{CandidType, Deserialize, Nat};
-    use serde::Serialize;
-
-    use super::account::AccountId;
-    use crate::types::network::marker_trait::Network;
-
-    #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-    #[repr(u8)]
-    pub enum TransactionType {
-        Send = 0,
-        Receive = 1,
-    }
-
-    #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-    pub struct Transaction<N, A>
-    where
-        A: AccountId<N>,
-        N: Network,
-    {
-        pub network: N,
-        pub transaction_type: TransactionType,
-        pub amount: u64,
-        pub timestamp: u64,
-        pub counterparty: A,
-    }
-
-    #[derive(CandidType, Deserialize)]
-    pub struct SignRequest {
-        pub chain_id: Nat,
-        pub to: String,
-        pub gas: Nat,
-        pub max_fee_per_gas: Nat,
-        pub max_priority_fee_per_gas: Nat,
-        pub value: Nat,
-        pub nonce: Nat,
-        pub data: Option<String>,
-    }
-}
 
 pub type Version = u64;
 
@@ -162,32 +52,6 @@ pub trait TokenVersion: Debug {
     fn with_initial_version(&self) -> Self
     where
         Self: Sized + Clone;
-}
-
-/// ERC20 specific user defined tokens
-pub mod token {
-    use candid::{CandidType, Deserialize};
-    use serde::Serialize;
-
-    use crate::types::Version;
-
-    pub type ChainId = u64;
-
-    #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct UserToken {
-        pub contract_address: String,
-        pub chain_id: ChainId,
-        pub symbol: Option<String>,
-        pub decimals: Option<u8>,
-        pub version: Option<Version>,
-        pub enabled: Option<bool>,
-    }
-
-    #[derive(CandidType, Deserialize, Clone)]
-    pub struct UserTokenId {
-        pub contract_address: String,
-        pub chain_id: ChainId,
-    }
 }
 
 /// The default maximum length of a token symbol.
@@ -316,109 +180,10 @@ pub mod bitcoin {
     }
 }
 
-pub mod pow {
-    use super::{CandidType, Debug, Deserialize};
-
-    /// A simple key-value store where each entry expires after a fixed TTL (Time To Live).
-    ///
-    /// # Type Parameters:
-    /// - `K`: Key type, must implement `Hash` and `Eq` (required by `HashMap`).
-    /// - `V`: Value type.
-    // TODO: since this type is implemented so it can be used by other modules
-    //       it makes sense to move it to a module containing collections
-
-    // ---------------------------------------------------------------------------------------------
-    // - Error-structures and -enums
-    // ---------------------------------------------------------------------------------------------
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub enum CreateChallengeError {
-        ChallengeInProgress,
-        RandomnessError(String),
-        MissingUserProfile,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub enum ChallengeCompletionError {
-        MissingChallenge,
-        InvalidNonce,
-        MissingUserProfile,
-        ExpiredChallenge,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub enum AllowSigningStatus {
-        Executed,
-        Skipped,
-        Failed,
-    }
-
-    // ---------------------------------------------------------------------------------------------
-    // - State related structures
-    // ---------------------------------------------------------------------------------------------
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct StoredChallenge {
-        pub nonce: u64,
-        pub start_timestamp_ns: u64,
-        pub expiry_timestamp_ns: u64,
-        pub difficulty: u32,
-        pub solved: bool,
-    }
-
-    // ---------------------------------------------------------------------------------------------
-    // - Request-Response data structures (Exposed Candid API's)
-    // ---------------------------------------------------------------------------------------------
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct CreateChallengeResponse {
-        pub nonce: u64,
-        pub difficulty: u32,
-        pub start_timestamp_ns: u64,
-        pub expiry_timestamp_ns: u64,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct ChallengeCompletion {
-        pub next_allowance_ns: u64,
-        pub solved_duration_ns: u64,
-        pub current_difficulty: u32,
-        pub next_difficulty: u32,
-    }
-
-    // ---------------------------------------------------------------------------------------------
-    // - TODO: Remove this and implementations
-    // ---------------------------------------------------------------------------------------------
-
-    impl ChallengeCompletion {}
-}
-
-// Marco Issue: in which modules do we need to move this enum?
-
-#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
-pub enum AllowSigningError {
-    Other(String),
-    FailedToContactCyclesLedger,
-    ApproveError(ApproveError),
-    PowChallenge(ChallengeCompletionError),
-}
-
 /// Types related to the signer & topping up the cycles ledger account for use with the signer.
 pub mod signer {
-
     use super::{CandidType, Debug, Deserialize};
-    use crate::types::pow::{AllowSigningStatus, ChallengeCompletion};
     /// Types related to topping up the cycles ledger account for use with the signer.
-
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct AllowSigningRequest {
-        pub nonce: u64,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct AllowSigningResponse {
-        pub status: AllowSigningStatus,
-        pub allowed_cycles: u64,
-        pub challenge_completion: ChallengeCompletion,
-    }
-
     pub mod topup {
         use candid::Nat;
 

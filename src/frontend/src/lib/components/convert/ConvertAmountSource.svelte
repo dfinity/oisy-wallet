@@ -35,7 +35,7 @@
 
 	$: errorType, setErrorType(errorType);
 
-	$: customValidate = (userAmount: bigint): TokenActionErrorType =>
+	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		validateUserAmount({
 			userAmount,
 			token: $sourceToken,

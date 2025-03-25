@@ -3,7 +3,7 @@
 use candid::{self, Principal};
 use ic_cdk::api::call::CallResult as Result;
 
-use crate::types::{Guards, Stats};
+use crate::types::{backend_config::Guards, Stats};
 
 /// Client for the backend canister, implementing a subset of the API.
 ///

@@ -14,7 +14,7 @@
 </script>
 
 <span class="flex flex-col items-center gap-2">
-	<output class={`mt-8 inline-block break-all text-5xl font-bold`}>
+	<output class="mt-8 inline-block break-all text-5xl font-bold">
 		{#if $loaded}
 			{formatUSD({ value: totalUsd })}
 		{:else}

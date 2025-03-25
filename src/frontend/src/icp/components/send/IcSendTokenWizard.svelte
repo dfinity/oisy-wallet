@@ -73,8 +73,7 @@
 	const { sendTokenDecimals, sendToken, sendTokenSymbol, sendPurpose } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let simplifiedForm = false;
-	$: simplifiedForm = sendPurpose === 'convert-cketh-to-eth';
+	const simplifiedForm = sendPurpose === 'convert-cketh-to-eth';
 
 	/**
 	 * Send

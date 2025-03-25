@@ -24,8 +24,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	let isInvalidDestination: () => boolean;
-	$: isInvalidDestination = (): boolean => {
+	const isInvalidDestination = (): boolean => {
 		if (isNullishOrEmpty(destination)) {
 			return false;
 		}

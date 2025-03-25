@@ -4,7 +4,7 @@
 	import VipRewardStateModal from '$lib/components/qr/VipRewardStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipRewardState } from '$lib/derived/modal.derived';
-	import { claimVipReward } from '$lib/services/reward-code.services';
+	import { claimVipReward } from '$lib/services/reward.services';
 	import { loading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { removeSearchParam } from '$lib/utils/nav.utils';

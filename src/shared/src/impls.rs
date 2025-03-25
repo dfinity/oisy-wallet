@@ -2,16 +2,20 @@ use std::{collections::BTreeMap, fmt};
 
 use candid::{Deserialize, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
-use ic_cdk::api::time;
-use ic_stable_structures::{Memory, StableBTreeMap, Storable};
 use serde::{de, Deserializer};
 #[cfg(test)]
 use strum::IntoEnumIterator;
 
 use crate::{
     types::{
+        backend_config::{Config, InitArg},
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
+        migration::{ApiEnabled, Migration, MigrationProgress, MigrationReport},
+        network::{
+            NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
+            SaveTestnetsSettingsError,
+        },
         networks::{NetworksSettings, SaveTestnetsSettingsError},
         pow::StoredChallenge,
         settings::Settings,
@@ -19,6 +23,8 @@ use crate::{
         user_profile::{
             AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
+        verifiable_credential::CredentialType,
+        Timestamp, TokenVersion, Version,
         ApiEnabled, Config, CredentialType, Expirable, ExpiryBTreeMapWrapper, InitArg, Migration,
         MigrationProgress, MigrationReport, Timestamp, TokenVersion, Version,
     },
@@ -311,12 +317,12 @@ impl ApiEnabled {
 }
 #[test]
 fn test_api_enabled() {
-    assert_eq!(ApiEnabled::Enabled.readable(), true);
-    assert_eq!(ApiEnabled::Enabled.writable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.readable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.writable(), false);
-    assert_eq!(ApiEnabled::Disabled.readable(), false);
-    assert_eq!(ApiEnabled::Disabled.writable(), false);
+    assert!(ApiEnabled::Enabled.readable());
+    assert!(ApiEnabled::Enabled.writable());
+    assert!(ApiEnabled::ReadOnly.readable());
+    assert!(!ApiEnabled::ReadOnly.writable());
+    assert!(!ApiEnabled::Disabled.readable());
+    assert!(!ApiEnabled::Disabled.writable());
 }
 
 impl MigrationProgress {
