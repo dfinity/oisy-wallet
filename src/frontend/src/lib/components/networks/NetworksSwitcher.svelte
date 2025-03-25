@@ -37,6 +37,8 @@
 	ariaLabel={$i18n.networks.title}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
 	{disabled}
+	title={$i18n.networks.filter}
+	asModalOnMobile
 >
 	{#if nonNullish($selectedNetwork)}
 		<NetworkLogo network={$selectedNetwork} size="xs" />
@@ -66,9 +68,7 @@
 			{/each}
 		{/if}
 
-		<div
-			class="mb-2 ml-2 mt-5 flex flex-col items-center justify-between text-nowrap md:flex-row md:items-start"
-		>
+		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between text-nowrap">
 			<span class="flex">
 				<Button
 					link
@@ -81,7 +81,7 @@
 					><IconSettings /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button
 				>
 			</span>
-			<span class="ml-0 mr-2 flex text-nowrap text-right text-base text-sm md:ml-4">
+			<span class="ml-4 mr-2 flex text-nowrap text-right text-base">
 				{replacePlaceholders($i18n.networks.number_of_enabled, {
 					$numNetworksEnabled: `${$networksMainnets.length + $networksTestnets.length}`,
 					$numNetworksTotal: `${SUPPORTED_NETWORKS.length}`
