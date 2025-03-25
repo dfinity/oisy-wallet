@@ -86,14 +86,16 @@ describe('ConvertAmountSource', () => {
 	});
 
 	it('should update sendAmount value if max button was clicked and total fee got updated', async () => {
-		const { getByTestId, component, rerender } = render(ConvertAmountSource, {
-			props: props,
+		const testProps = $state(props);
+
+		const { getByTestId, rerender } = render(ConvertAmountSource, {
+			props: testProps,
 			context: mockContext()
 		});
 
 		await fireEvent.click(getByTestId(balanceTestId));
 
-		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(maxButtonValue);
+		expect(testProps.sendAmount).toBe(maxButtonValue);
 
 		await rerender({
 			totalFee: 9000n
@@ -102,16 +104,18 @@ describe('ConvertAmountSource', () => {
 		// wait for debounced setMax to be completed
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(0.04991);
+		expect(testProps.sendAmount).toBe(0.04991);
 	});
 
 	it('should not update sendAmount value if max button was not clicked and total fee got updated', async () => {
-		const { component, rerender } = render(ConvertAmountSource, {
-			props: props,
+		const testProps = $state(props);
+
+		const { rerender } = render(ConvertAmountSource, {
+			props: testProps,
 			context: mockContext()
 		});
 
-		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(props.sendAmount);
+		expect(testProps.sendAmount).toBe(props.sendAmount);
 
 		await rerender({
 			totalFee: 9000n
@@ -120,29 +124,33 @@ describe('ConvertAmountSource', () => {
 		// wait for debounced setMax to be completed
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(props.sendAmount);
+		expect(testProps.sendAmount).toBe(props.sendAmount);
 	});
 
 	it('should set sendAmount correctly on max button click', async () => {
-		const { getByTestId, component } = render(ConvertAmountSource, {
-			props,
+		const testProps = $state(props);
+
+		const { getByTestId } = render(ConvertAmountSource, {
+			props: testProps,
 			context: mockContext()
 		});
 
 		await fireEvent.click(getByTestId(balanceTestId));
 
-		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(maxButtonValue);
+		expect(testProps.sendAmount).toBe(maxButtonValue);
 	});
 
 	it('should not change sendAmount on max button click if balance is zero', async () => {
-		const { getByTestId, component } = render(ConvertAmountSource, {
-			props,
+		const testProps = $state(props);
+
+		const { getByTestId } = render(ConvertAmountSource, {
+			props: testProps,
 			context: mockContext(ZERO_BI)
 		});
 
 		await fireEvent.click(getByTestId(balanceTestId));
 
-		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(props.sendAmount);
+		expect(testProps.sendAmount).toBe(props.sendAmount);
 	});
 
 	it('should display max button value in a correct format', () => {
