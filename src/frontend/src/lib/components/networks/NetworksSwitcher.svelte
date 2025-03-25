@@ -49,14 +49,14 @@
 			on:icSelected={dropdown.close}
 		/>
 
-		{#each $networksMainnets as network}
+		{#each $networksMainnets as network (network.id.toString())}
 			<MainnetNetwork {network} on:icSelected={dropdown.close} />
 		{/each}
 
 		<span class="my-5 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
 
 		{#if $testnets}
-			{#each $networksTestnets as network}
+			{#each $networksTestnets as network (network.id.toString())}
 				<Network {network} on:icSelected={dropdown.close} />
 			{/each}
 		{/if}
