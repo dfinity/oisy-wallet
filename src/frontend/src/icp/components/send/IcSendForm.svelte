@@ -51,7 +51,7 @@
 				on:icQRCodeScan
 			>
 				<label for="destination" slot="label" class="font-bold">
-					{$i18n.send.text.destination}]
+					{$i18n.send.text.destination}
 				</label>
 			</IcSendDestination>
 		{/if}
