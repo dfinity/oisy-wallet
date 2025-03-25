@@ -9,6 +9,6 @@
 	$: cards = Array.from({ length: rows }, (_, i) => i);
 </script>
 
-{#each cards as i}
+{#each cards as i (`${testIdPrefix ?? 'skeleton-card'}-${i}`)}
 	<SkeletonCard testId={nonNullish(testIdPrefix) ? `${testIdPrefix}-${i}` : undefined} />
 {/each}

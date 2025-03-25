@@ -108,7 +108,7 @@
 		switchTokens();
 	};
 
-	$: customValidate = (userAmount: bigint): TokenActionErrorType =>
+	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		nonNullish($sourceToken)
 			? validateUserAmount({
 					userAmount,

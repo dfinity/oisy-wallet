@@ -221,7 +221,7 @@
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
 
-	$: onDecodeQrCode = ({
+	const onDecodeQrCode = ({
 		status,
 		code,
 		expectedToken
