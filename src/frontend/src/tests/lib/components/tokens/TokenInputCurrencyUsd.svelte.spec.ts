@@ -52,17 +52,18 @@ describe('TokenInputCurrencyUsd', () => {
 	});
 
 	it('updates display value when tokenAmount changes', async () => {
-		const props = {
+		const testProps = $state({
 			...defaultProps,
 			tokenAmount: '123.456789' as OptionAmount
-		};
+		});
 
-		const { getByTestId, component } = render(TokenInputCurrencyUsd, props);
+		const { getByTestId } = render(TokenInputCurrencyUsd, { props: testProps });
 		const input = getByTestId(TOKEN_INPUT_CURRENCY_USD);
 
 		expect(input).toHaveValue('246.91');
 
-		await component.$set({ tokenAmount: '200' as OptionAmount });
-		expect(input).toHaveValue('400.00');
+		testProps.tokenAmount = '200';
+
+		await vi.waitFor(() => expect(input).toHaveValue('400.00'));
 	});
 });
