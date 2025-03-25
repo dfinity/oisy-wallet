@@ -278,7 +278,8 @@
 		"test_networks": "Test networks",
 		"more": "More networks coming soon...",
 		"chain_fusion": "Chain Fusion (all networks)",
-		"network": "Network"
+		"network": "Network",
+		"filter": "Filter networks"
 	},
 	"receive": {
 		"text": {
