@@ -476,7 +476,7 @@ abstract class Homepage {
 				carouselSelector = elements.nth(i);
 			}
 		}
-		const mask = nonNullish(carouselSelector) ? [carouselSelector] : [];
+		const mask = nonNullish(carouselSelector) && freezeCarousel ? [carouselSelector] : [];
 
 		if (!this.#isMobile) {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
