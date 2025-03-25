@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import Transactions from '$lib/components/transactions/Transactions.svelte';
-    import {NETWORK_PARAM, TOKEN_PARAM} from '$lib/constants/routes.constants';
+	import { NETWORK_PARAM, TOKEN_PARAM } from '$lib/constants/routes.constants';
 	import { networks } from '$lib/derived/networks.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
