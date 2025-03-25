@@ -65,3 +65,6 @@ export const createMockCoingeckoTokenPrice = (
 	last_updated_at: Date.now(),
 	...overrides
 });
+
+export const MOCK_CANISTER_ID_1 = 'aaaaa-aa';
+export const MOCK_CANISTER_ID_2 = 'bbbbb-bb';
