@@ -35,7 +35,7 @@
 	{#if nonNullish($selectedNetwork)}
 		<NetworkLogo network={$selectedNetwork} size="xs" />
 	{:else}
-		<Logo src={chainFusion} />
+		<Logo src={chainFusion} size="xs" />
 	{/if}
 	<span class="hidden md:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 
