@@ -262,6 +262,7 @@ interface I18nNetworks {
 	network: string;
 	testnet: string;
 	number_of_enabled: string;
+	filter: string;
 }
 
 interface I18nReceive {
