@@ -30,6 +30,8 @@
 	ariaLabel={$i18n.networks.title}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
 	{disabled}
+	title={$i18n.networks.title}
+	asModalOnMobile
 >
 	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
 
