@@ -12,6 +12,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import {OISY_REFERRAL_TWITTER_URL} from "$lib/constants/oisy.constants";
 </script>
 
 <Sprinkles />
@@ -35,7 +36,7 @@
 			<Share
 				testId={REFERRAL_STATE_MODAL_SHARE_ANCHOR}
 				text={$i18n.referral.reward.text.share}
-				href={'URL to share'}
+				href={OISY_REFERRAL_TWITTER_URL}
 			/>
 		</div>
 
