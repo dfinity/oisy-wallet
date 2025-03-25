@@ -8,7 +8,11 @@ describe('ShareButton', () => {
 	describe('Unavailable share option', () => {
 		beforeEach(() => {
 			Object.defineProperty(window, 'navigator', {
-				value: null,
+				value: {
+					userAgentData: {
+						mobile: false
+					}
+				},
 				configurable: true
 			});
 		});
