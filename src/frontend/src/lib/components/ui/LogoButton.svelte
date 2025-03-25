@@ -9,7 +9,6 @@
 	export let dividers = false;
 	export let hover = true;
 	export let rounded = true;
-
 	export let testId: string | undefined = undefined;
 
 	let hasTitleSlot: boolean;
