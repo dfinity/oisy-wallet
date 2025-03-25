@@ -96,9 +96,6 @@
 			return;
 		}
 
-		// Clean previous HTML if the frame is being re-built (e.g. in case of window resize)
-		sliderFrame.innerHTML = '';
-
 		extendCarouselSliderFrame({
 			sliderFrame,
 			slides,
