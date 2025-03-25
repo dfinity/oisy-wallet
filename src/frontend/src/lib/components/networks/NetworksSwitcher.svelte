@@ -60,28 +60,5 @@
 				<Network {network} on:icSelected={dropdown.close} />
 			{/each}
 		{/if}
-
-		<!-- todo: uncomment this part once the settings refactoring is done
-		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between text-nowrap">
-			<span class="flex">
-				<Button
-					link
-					on:click={() => {
-						goto('/settings');
-						dropdown?.close();
-						// a small delay is needed for the opening of the modal after page switching
-						setTimeout(() => modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS), 1);
-					}}
-					><IconSettings /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button
-				>
-			</span>
-			<span class="ml-4 mr-2 flex text-nowrap text-right text-base">
-				{replacePlaceholders($i18n.networks.number_of_enabled, {
-					$numNetworksEnabled: `${$networksMainnets.length + $networksTestnets.length}`,
-					$numNetworksTotal: `${SUPPORTED_NETWORKS.length}`
-				})}</span
-			>
-		</div>
-		-->
 	</div>
 </Dropdown>
