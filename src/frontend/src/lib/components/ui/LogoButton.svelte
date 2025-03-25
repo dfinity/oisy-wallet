@@ -29,7 +29,7 @@
 	$: hasActionSlot = nonNullish($$slots['action']);
 </script>
 
-<div class:hover:bg-brand-subtle-10={hover} class:rounded-lg={rounded}>
+<div class:hover:bg-brand-subtle-10={hover} class:rounded-lg={rounded} data-tid={testId}>
 	<button on:click class="flex w-full border-0 px-2">
 		<span
 			class="flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0 py-3"
