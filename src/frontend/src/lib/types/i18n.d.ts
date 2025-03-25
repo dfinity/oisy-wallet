@@ -259,6 +259,7 @@ interface I18nNetworks {
 	more: string;
 	chain_fusion: string;
 	network: string;
+	filter: string;
 }
 
 interface I18nReceive {
