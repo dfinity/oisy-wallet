@@ -513,6 +513,7 @@ interface I18nTokens {
 		exchange_is_not_available: string;
 		source_token_title: string;
 		destination_token_title: string;
+		chain_key: string;
 	};
 	details: {
 		title: string;
