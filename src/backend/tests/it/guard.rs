@@ -1,7 +1,10 @@
 //! Tests that the guard APIs are working as expected.
 
 use candid::Principal;
-use shared::types::{ApiEnabled, Config, Guards};
+use shared::types::{
+    backend_config::{Config, Guards},
+    migration::ApiEnabled,
+};
 
 use crate::utils::{
     mock::USER_1,
@@ -53,7 +56,7 @@ fn guards_can_be_changed() {
             user_data: ApiEnabled::Enabled,
         },
     ];
-    for guards in guard_configurations.iter() {
+    for guards in &guard_configurations {
         pic_setup
             .update::<()>(caller, "set_guards", guards)
             .expect("Failed to set guards");
