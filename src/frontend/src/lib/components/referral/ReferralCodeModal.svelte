@@ -21,13 +21,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	let code: string;
+	let referrerCode: string;
 
-	let referralCodeUrl;
-	$: referralCodeUrl = `${window.location.origin}/?referral=${code}`;
+	let referralUrl;
+	$: referralUrl = `${window.location.origin}/?referrer=${referrerCode}`;
 
 	onMount(() => {
-		code = 'sadasdas'; // TODO load code from rewards canister
+		referrerCode = 'sadasdas'; // TODO load code from rewards canister
 	});
 </script>
 
@@ -38,8 +38,8 @@
 
 	<ContentWithToolbar>
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
-			{#if nonNullish(code)}
-				<QRCode value={referralCodeUrl}>
+			{#if nonNullish(referrerCode)}
+				<QRCode value={referralUrl}>
 					<div slot="logo" class="flex items-center justify-center rounded-lg bg-primary p-2">
 						<IconAstronautHelmet />
 					</div>
@@ -49,13 +49,13 @@
 			{/if}
 		</div>
 
-		{#if nonNullish(code)}
+		{#if nonNullish(referrerCode)}
 			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2">
-				<output class="break-all">{referralCodeUrl}</output>
+				<output class="break-all">{referralUrl}</output>
 				<div class="flex gap-4">
-					<ShareButton shareAriaLabel={referralCodeUrl} testId={REFERRAL_CODE_SHARE_BUTTON} />
+					<ShareButton shareAriaLabel={referralUrl} testId={REFERRAL_CODE_SHARE_BUTTON} />
 					<ReceiveCopy
-						address={referralCodeUrl}
+						address={referralUrl}
 						copyAriaLabel={$i18n.referral.invitation.text.referral_link_copied}
 						testId={REFERRAL_CODE_COPY_BUTTON}
 					/>

@@ -16,7 +16,7 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { getUserRewardsTokenAmounts } from '$lib/services/reward-code.services';
+	import { getUserRewardsTokenAmounts } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { formatUSD } from '$lib/utils/format.utils';

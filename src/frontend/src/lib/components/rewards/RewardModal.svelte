@@ -24,7 +24,7 @@
 		enabledNetworkTokens
 	} from '$lib/derived/network-tokens.derived';
 	import { enabledErc20Tokens, enabledIcTokens } from '$lib/derived/tokens.derived';
-	import { getRewardRequirementsFulfilled } from '$lib/services/reward-code.services';
+	import { getRewardRequirementsFulfilled } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction';
