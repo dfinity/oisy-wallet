@@ -1,13 +1,43 @@
 import type {
 	DappSettings,
+	NetworkSettings,
+	NetworkSettingsFor,
 	NetworksSettings,
 	Settings,
 	UserProfile
 } from '$declarations/backend/backend.did';
+import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import {
+	SOLANA_DEVNET_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK_ID
+} from '$env/networks/networks.sol.env';
+import type { UserNetworks } from '$lib/types/user-networks';
 import { toNullable } from '@dfinity/utils';
 
+export const mockUserNetworks: Array<[NetworkSettingsFor, NetworkSettings]> = [
+	[{ BitcoinMainnet: null }, { enabled: true, is_testnet: false }],
+	[{ BitcoinTestnet: null }, { enabled: false, is_testnet: true }],
+	[{ EthereumMainnet: null }, { enabled: true, is_testnet: false }],
+	[{ EthereumSepolia: null }, { enabled: false, is_testnet: false }],
+	[{ InternetComputer: null }, { enabled: true, is_testnet: false }],
+	[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
+	[{ SolanaDevnet: null }, { enabled: true, is_testnet: true }]
+];
+
+export const expectedMockUserNetworks: UserNetworks = {
+	[BTC_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
+	[BTC_TESTNET_NETWORK_ID]: { enabled: false, isTestnet: true },
+	[ETHEREUM_NETWORK_ID]: { enabled: true, isTestnet: false },
+	[SEPOLIA_NETWORK_ID]: { enabled: false, isTestnet: false },
+	[ICP_NETWORK_ID]: { enabled: true, isTestnet: false },
+	[SOLANA_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
+	[SOLANA_DEVNET_NETWORK_ID]: { enabled: true, isTestnet: true }
+};
+
 export const mockNetworksSettings: NetworksSettings = {
-	networks: [],
+	networks: mockUserNetworks,
 	testnets: { show_testnets: false }
 };
 
