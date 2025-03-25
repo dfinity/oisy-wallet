@@ -279,6 +279,7 @@
 		"more": "More networks coming soon...",
 		"chain_fusion": "All networks",
 		"network": "Network",
+		"testnet": "Testnet",
 		"filter": "Filter networks"
 	},
 	"receive": {
