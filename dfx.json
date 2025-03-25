@@ -225,7 +225,6 @@
 			"type": "custom",
 			"candid": "target/ic/ckbtc_minter.did",
 			"wasm": "target/ic/ckbtc_minter.wasm",
-			"init_arg_file": "target/ic/ckbtc_minter.args.did",
 			"specified_id": "ml52i-qqaaa-aaaar-qaaba-cai",
 			"remote": {
 				"id": {
@@ -245,7 +244,6 @@
 			"type": "custom",
 			"candid": "target/ic/ckbtc_ledger.did",
 			"wasm": "target/ic/ckbtc_ledger.wasm",
-			"init_arg_file": "target/ic/ckbtc_ledger.args.did",
 			"specified_id": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 			"remote": {
 				"id": {
@@ -265,7 +263,6 @@
 			"type": "custom",
 			"candid": "target/ic/ckbtc_index.did",
 			"wasm": "target/ic/ckbtc_index.wasm",
-			"init_arg_file": "target/ic/ckbtc_index.args.did",
 			"specified_id": "mm444-5iaaa-aaaar-qaabq-cai",
 			"remote": {
 				"id": {
@@ -369,8 +366,10 @@
 		},
 		"ckusdc_ledger": {
 			"type": "custom",
+			"build": "scripts/build.ckusdc_ledger.sh",
 			"candid": "target/ic/cketh_ledger.did",
 			"wasm": "target/ic/cketh_ledger.wasm",
+			"init_arg_file": "target/ic/ckusdc_ledger.args.did",
 			"specified_id": "yfumr-cyaaa-aaaar-qaela-cai",
 			"remote": {
 				"id": {
@@ -387,8 +386,10 @@
 		},
 		"ckusdc_index": {
 			"type": "custom",
+			"build": "scripts/build.ckusdc_index.sh",
 			"candid": "target/ic/cketh_index.did",
 			"wasm": "target/ic/cketh_index.wasm",
+			"init_arg_file": "target/ic/ckusdc_index.args.did",
 			"specified_id": "ycvkf-paaaa-aaaar-qaelq-cai",
 			"remote": {
 				"id": {
