@@ -3,7 +3,7 @@ import {
 	KongSwapTokensSchema,
 	KongSwapTokenWithMetricsSchema
 } from '$lib/types/kongswap';
-import { createMockKongSwapToken } from '$tests/mocks/exchanges.mock';
+import { createMockKongSwapToken } from '$tests/mocks/kongswap.mock';
 import { describe, expect, it } from 'vitest';
 
 describe('Schema: KongSwapTokenWithMetricsSchema', () => {
