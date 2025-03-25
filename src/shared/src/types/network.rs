@@ -27,6 +27,8 @@ pub enum NetworkSettingsFor {
     SolanaLocal,
 }
 
+pub type NetworkSettingsMap = BTreeMap<NetworkSettingsFor, NetworkSettings>;
+
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct TestnetsSettings {
     pub show_testnets: bool,
@@ -34,14 +36,26 @@ pub struct TestnetsSettings {
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct NetworksSettings {
-    pub networks: BTreeMap<NetworkSettingsFor, NetworkSettings>,
+    pub networks: NetworkSettingsMap,
     pub testnets: TestnetsSettings,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SaveNetworksSettingsError {
+    UserNotFound,
+    VersionMismatch,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SaveTestnetsSettingsError {
     UserNotFound,
     VersionMismatch,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct SaveNetworksSettingsRequest {
+    pub networks: NetworkSettingsMap,
+    pub current_user_version: Option<Version>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
