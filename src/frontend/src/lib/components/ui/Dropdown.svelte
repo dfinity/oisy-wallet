@@ -42,7 +42,7 @@
 	class:hidden={!asModalOnMobile}
 >
 	{#if visible}
-		<Modal on:nnsClose={() => close()}>
+		<Modal on:nnsClose={close}>
 			<slot name="title" slot="title" />
 
 			<slot name="items" />
