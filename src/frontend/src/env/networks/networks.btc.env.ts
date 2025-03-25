@@ -55,7 +55,7 @@ export const BTC_REGTEST_NETWORK: BitcoinNetwork = {
 	explorerUrl: BTC_REGTEST_EXPLORER_URL
 };
 
-const SUPPORTED_BITCOIN_NETWORKS: BitcoinNetwork[] = [
+export const SUPPORTED_BITCOIN_NETWORKS: BitcoinNetwork[] = [
 	...(BTC_MAINNET_ENABLED ? [BTC_MAINNET_NETWORK] : []),
 	BTC_TESTNET_NETWORK,
 	...(LOCAL ? [BTC_REGTEST_NETWORK] : [])
