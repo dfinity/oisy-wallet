@@ -14,7 +14,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
 	import {
-		REFERRAL_CODE_COPY_BUTTON,
+		REFERRAL_CODE_COPY_BUTTON, REFERRAL_CODE_LEARN_MORE,
 		REFERRAL_CODE_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -81,6 +81,7 @@
 					href={OISY_REWARDS_URL}
 					ariaLabel={$i18n.referral.invitation.text.learn_more}
 					styleClass={`font-semibold min-w-30 flex-row-reverse`}
+					testId={REFERRAL_CODE_LEARN_MORE}
 				>
 					{$i18n.referral.invitation.text.learn_more}
 				</ExternalLink>

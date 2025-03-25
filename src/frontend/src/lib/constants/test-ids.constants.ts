@@ -87,6 +87,7 @@ export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
 
 export const REFERRAL_CODE_COPY_BUTTON = 'referral-code-copy-button';
 export const REFERRAL_CODE_SHARE_BUTTON = 'referral-code-share-button';
+export const REFERRAL_CODE_LEARN_MORE = 'referral-code-learn-more';
 
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
@@ -121,7 +122,7 @@ export const REWARDS_BANNER = 'rewards-banner';
 export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 
 export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
-export const REFERRAL_STATE_MODAL_SHARE_BUTTON = 'referral-state-modal-share-button';
+export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
 
 export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';

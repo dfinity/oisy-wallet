@@ -7,8 +7,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import {
-		REFERRAL_STATE_MODAL_IMAGE_BANNER,
-		REFERRAL_STATE_MODAL_SHARE_BUTTON
+		REFERRAL_STATE_MODAL_IMAGE_BANNER, REFERRAL_STATE_MODAL_SHARE_ANCHOR
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -33,7 +32,7 @@
 			</span>
 
 			<Share
-				testId={REFERRAL_STATE_MODAL_SHARE_BUTTON}
+				testId={REFERRAL_STATE_MODAL_SHARE_ANCHOR}
 				text={$i18n.referral.reward.text.share}
 				href={'URL to share'}
 			/>
