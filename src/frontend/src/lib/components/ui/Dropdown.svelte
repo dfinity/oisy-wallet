@@ -43,7 +43,7 @@
 >
 	{#if visible}
 		<Modal on:nnsClose={() => close()}>
-			<svelte:fragment slot="title"><slot name="title" /></svelte:fragment>
+			<slot name="title" slot="title" />
 
 			<slot name="items" />
 		</Modal>
