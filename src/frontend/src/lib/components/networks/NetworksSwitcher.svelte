@@ -30,7 +30,6 @@
 	ariaLabel={$i18n.networks.title}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
 	{disabled}
-	title={$i18n.networks.filter}
 	asModalOnMobile
 >
 	{#if nonNullish($selectedNetwork)}
