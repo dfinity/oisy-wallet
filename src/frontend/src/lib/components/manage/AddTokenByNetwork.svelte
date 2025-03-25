@@ -103,7 +103,7 @@
 						<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
 							>{$i18n.tokens.manage.placeholder.select_network}</option
 						>
-						{#each availableNetworks as network}
+						{#each availableNetworks as network (network.id)}
 							<DropdownItem value={network.name}>{network.name}</DropdownItem>
 						{/each}
 					</Dropdown>

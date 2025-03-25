@@ -16,13 +16,18 @@
 </script>
 
 {#if reward.requirements.length > 0}
-	<span class="text-md font-semibold"
-		>{$i18n.rewards.text.requirements_title}
-	</span>{#if isEligible}<span class="inline-flex pl-3"
-			><Badge variant="success">{$i18n.rewards.text.youre_eligible}</Badge></span
-		>{/if}
+	<span class="text-md font-semibold">
+		{$i18n.rewards.text.requirements_title}
+	</span>
+	{#if isEligible}
+		<span class="inline-flex pl-3">
+			<Badge variant="success">
+				{$i18n.rewards.text.youre_eligible}
+			</Badge>
+		</span>
+	{/if}
 	<ul class="list-none">
-		{#each reward.requirements as requirement, i}
+		{#each reward.requirements as requirement, i (requirement)}
 			<li class="flex gap-2 pt-1">
 				<span
 					class="flex w-full flex-row"
