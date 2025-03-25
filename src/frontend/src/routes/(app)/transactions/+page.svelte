@@ -8,7 +8,6 @@
 	import { networks } from '$lib/derived/networks.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	onMount(async () => {
 		// We load the network parameters imperatively because the Svelte $page store might still be uninitialized and undefined at this point.
@@ -22,9 +21,7 @@
 		if (isNullish(routeNetwork) || !notEmptyString(routeNetwork)) {
 			if (nonNullish($routeToken)) {
 				toastsShow({
-					text: replacePlaceholders($i18n.transactions.error.loading_token, {
-						$token: $routeToken
-					}),
+					text: $i18n.transactions.error.loading_token,
 					level: 'warn'
 				});
 			}
