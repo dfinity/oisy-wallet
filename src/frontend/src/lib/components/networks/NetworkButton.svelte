@@ -39,7 +39,9 @@
 	</span>
 
 	<span slot="description-end">
-		{nonNullish(usdBalance) ? formatUSD({ value: usdBalance }) : ''}
+		{#if nonNullish(usdBalance)}
+			{formatUSD({ value: usdBalance })}
+		{/if}
 
 		{#if isTestnet}
 			<span class="inline-flex">
