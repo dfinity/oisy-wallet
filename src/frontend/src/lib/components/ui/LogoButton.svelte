@@ -5,7 +5,6 @@
 
 	export let selectable = false;
 	export let selected = false;
-
 	export let dividers = false;
 	export let hover = true;
 	export let rounded = true;
