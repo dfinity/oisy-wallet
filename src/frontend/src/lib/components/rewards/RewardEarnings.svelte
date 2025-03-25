@@ -28,8 +28,7 @@
 
 	let ckBtcToken: IcToken | undefined;
 	$: ckBtcToken = findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens });
-	let ckBtcReward: bigint;
-	$: ckBtcReward = ZERO_BI;
+	let ckBtcReward: bigint = ZERO_BI;
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
 		? (calculateTokenUsdAmount({
@@ -41,8 +40,7 @@
 
 	let ckUsdcToken: IcToken | undefined;
 	$: ckUsdcToken = findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $tokens });
-	let ckUsdcReward: bigint;
-	$: ckUsdcReward = ZERO_BI;
+	let ckUsdcReward: bigint = ZERO_BI;
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
 		? (calculateTokenUsdAmount({
@@ -52,24 +50,19 @@
 			}) ?? 0)
 		: 0;
 
-	let icpToken: IcToken | undefined;
-	$: icpToken = ICP_TOKEN;
-	let icpReward: bigint;
-	$: icpReward = ZERO_BI;
+	let icpReward: bigint = ZERO_BI;
 	let icpRewardUsd: number;
-	$: icpRewardUsd = nonNullish(icpToken)
-		? (calculateTokenUsdAmount({
-				amount: icpReward,
-				token: icpToken,
-				$exchanges: $exchanges
-			}) ?? 0)
-		: 0;
+	$: icpRewardUsd =
+		calculateTokenUsdAmount({
+			amount: icpReward,
+			token: ICP_TOKEN,
+			$exchanges: $exchanges
+		}) ?? 0;
 
 	let totalRewardUsd: number;
 	$: totalRewardUsd = ckBtcRewardUsd + ckUsdcRewardUsd + icpRewardUsd;
 
-	let loading: boolean;
-	$: loading = true;
+	let loading = true;
 
 	const loadRewards = async ({
 		ckBtcToken,
@@ -98,7 +91,7 @@
 		loading = false;
 	};
 
-	$: loadRewards({ ckBtcToken, ckUsdcToken, icpToken });
+	$: loadRewards({ ckBtcToken, ckUsdcToken, icpToken: ICP_TOKEN });
 
 	const gotoActivity = async () => {
 		await goto(
@@ -139,7 +132,7 @@
 				amount={ckUsdcReward}
 				usdAmount={ckUsdcRewardUsd}
 			/>
-			<RewardEarningsCard {loading} token={icpToken} amount={icpReward} usdAmount={icpRewardUsd} />
+			<RewardEarningsCard {loading} token={ICP_TOKEN} amount={icpReward} usdAmount={icpRewardUsd} />
 		</div>
 
 		<div class="my-5 w-full justify-items-center text-center">
