@@ -221,11 +221,11 @@
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
 
-	$: onDecodeQrCode = ({
-		status,
-		code,
-		expectedToken
-	}: {
+	const onDecodeQrCode = ({
+														status,
+														code,
+														expectedToken
+													}: {
 		status: QrStatus;
 		code?: string;
 		expectedToken: OptionToken;
