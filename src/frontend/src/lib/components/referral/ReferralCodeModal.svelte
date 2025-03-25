@@ -14,7 +14,8 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
 	import {
-		REFERRAL_CODE_COPY_BUTTON, REFERRAL_CODE_LEARN_MORE,
+		REFERRAL_CODE_COPY_BUTTON,
+		REFERRAL_CODE_LEARN_MORE,
 		REFERRAL_CODE_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
