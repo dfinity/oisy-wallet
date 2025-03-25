@@ -47,10 +47,10 @@
 		ariaLabel={$i18n.dapps.alt.show_all}
 		on:click={() => (selectedTag = undefined)}
 		styleClass="text-nowrap max-w-fit text-sm"
-		colorStyle={selectedTag === undefined ? 'primary' : 'tertiary'}
-		>{$i18n.dapps.text.all_dapps}</Button
-	>
-	{#each uniqueTags as tag}
+		colorStyle={selectedTag === undefined ? 'primary' : 'tertiary'}>
+		{$i18n.dapps.text.all_dapps}
+	</Button>
+	{#each uniqueTags as tag (tag)}
 		<Button
 			paddingSmall
 			ariaLabel={replacePlaceholders($i18n.dapps.alt.show_tag, { $tag: tag })}
@@ -62,7 +62,7 @@
 </div>
 
 <ul class="mt-10 grid list-none grid-cols-2 flex-row gap-x-4 gap-y-10 md:grid-cols-3">
-	{#each filteredDapps as dApp}
+	{#each filteredDapps as dApp (dApp.id)}
 		<li class="flex" in:fade>
 			<DappCard
 				on:click={() => {
@@ -77,9 +77,9 @@
 <SubmitDappButton />
 
 <style lang="postcss">
-	@media (max-width: 360px) {
-		ul {
-			@apply grid-cols-1;
-		}
-	}
+    @media (max-width: 360px) {
+        ul {
+            @apply grid-cols-1;
+        }
+    }
 </style>
