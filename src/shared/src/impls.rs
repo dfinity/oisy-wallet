@@ -356,12 +356,12 @@ impl ApiEnabled {
 }
 #[test]
 fn test_api_enabled() {
-    assert_eq!(ApiEnabled::Enabled.readable(), true);
-    assert_eq!(ApiEnabled::Enabled.writable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.readable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.writable(), false);
-    assert_eq!(ApiEnabled::Disabled.readable(), false);
-    assert_eq!(ApiEnabled::Disabled.writable(), false);
+    assert!(ApiEnabled::Enabled.readable());
+    assert!(ApiEnabled::Enabled.writable());
+    assert!(ApiEnabled::ReadOnly.readable());
+    assert!(!ApiEnabled::ReadOnly.writable());
+    assert!(!ApiEnabled::Disabled.readable());
+    assert!(!ApiEnabled::Disabled.writable());
 }
 
 impl MigrationProgress {
