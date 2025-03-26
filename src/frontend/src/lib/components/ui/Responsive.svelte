@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import { onDestroy } from 'svelte';
+	import { writable } from 'svelte/store';
 	import {
-		type AvailableScreen,
 		filterScreens,
 		getActiveScreen,
 		getAvailableScreens,
@@ -15,11 +15,8 @@
 	export let up: ScreensKeyType = MIN_SCREEN;
 	export let down: ScreensKeyType = MAX_SCREEN;
 
-	let innerWidth: number;
-	$: innerWidth = 0;
-
-	let debouncedWidth: number;
-	$: debouncedWidth = 0;
+	let innerWidth = 0;
+	let debouncedWidth = writable(0);
 	let timeoutHandle: ReturnType<typeof setTimeout>;
 
 	$: {
@@ -27,15 +24,17 @@
 			clearTimeout(timeoutHandle);
 		}
 		timeoutHandle = setTimeout(() => {
-			debouncedWidth = innerWidth;
-		}, 50); // debounce width on screen size change so we dont calculate all the time
+			debouncedWidth.set(innerWidth);
+		}, 50); // debounce width on screen size change so we don't calculate all the time
 	}
 
-	let screens: AvailableScreen[];
-	$: screens = getAvailableScreens();
+	let screens = getAvailableScreens();
 
 	let activeScreen: ScreensKeyType;
-	$: activeScreen = getActiveScreen({ screenWidth: debouncedWidth, availableScreens: screens });
+	$: activeScreen = getActiveScreen({
+		screenWidth: $debouncedWidth,
+		availableScreens: screens
+	});
 
 	let display = false;
 	$: display = shouldDisplayForScreen({
