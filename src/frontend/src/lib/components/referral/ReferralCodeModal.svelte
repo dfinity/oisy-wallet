@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal, QRCode } from '@dfinity/gix-components';
-	import {isNullish, nonNullish} from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
@@ -18,12 +18,12 @@
 		REFERRAL_CODE_LEARN_MORE,
 		REFERRAL_CODE_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { nullishSignOut } from '$lib/services/auth.services';
+	import { getReferrerInfo } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {getReferrerInfo} from "$lib/services/reward.services";
-	import {authIdentity} from "$lib/derived/auth.derived";
-	import {nullishSignOut} from "$lib/services/auth.services";
-	import {replacePlaceholders} from "$lib/utils/i18n.utils";
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let referralCode: string;
 	let numberOfReferrals: number;
@@ -37,7 +37,7 @@
 			return;
 		}
 
-		const {referral_code, num_referrals} = await getReferrerInfo($authIdentity);
+		const { referral_code, num_referrals } = await getReferrerInfo($authIdentity);
 		referralCode = referral_code;
 		numberOfReferrals = num_referrals;
 	});
@@ -75,9 +75,11 @@
 			</div>
 
 			<span class="mb-6 block w-full pt-3 text-center text-sm text-tertiary">
-				{nonNullish(numberOfReferrals) && numberOfReferrals > 0 ? replacePlaceholders($i18n.referral.invitation.text.referred_amount, {
-					amount: numberOfReferrals.toString()
-				}) : $i18n.referral.invitation.text.not_referred_yet}
+				{nonNullish(numberOfReferrals) && numberOfReferrals > 0
+					? replacePlaceholders($i18n.referral.invitation.text.referred_amount, {
+							amount: numberOfReferrals.toString()
+						})
+					: $i18n.referral.invitation.text.not_referred_yet}
 			</span>
 		{:else}
 			<div class="mb-6">

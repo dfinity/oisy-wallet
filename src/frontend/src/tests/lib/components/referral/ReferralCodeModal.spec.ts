@@ -1,17 +1,17 @@
+import type { ReferrerInfo } from '$declarations/rewards/rewards.did';
+import * as rewardApi from '$lib/api/reward.api';
 import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
+import { OISY_REFERRAL_URL } from '$lib/constants/oisy.constants';
 import {
 	REFERRAL_CODE_COPY_BUTTON,
 	REFERRAL_CODE_LEARN_MORE,
 	REFERRAL_CODE_SHARE_BUTTON
 } from '$lib/constants/test-ids.constants';
-import {render, waitFor} from '@testing-library/svelte';
-import type {ReferrerInfo} from "$declarations/rewards/rewards.did";
-import {mockAuthStore} from "$tests/mocks/auth.mock";
-import * as rewardApi from '$lib/api/reward.api';
-import {OISY_REFERRAL_URL} from "$lib/constants/oisy.constants";
-import {get} from "svelte/store";
-import {i18n} from "$lib/stores/i18n.store";
-import {replacePlaceholders} from "$lib/utils/i18n.utils";
+import { i18n } from '$lib/stores/i18n.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { render, waitFor } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('ReferralCodeModal', () => {
 	const qrCodeSelector = `div[data-tid="qr-code"]`;
@@ -28,10 +28,10 @@ describe('ReferralCodeModal', () => {
 	const mockedReferrerInfo: ReferrerInfo = {
 		referral_code: 6127361253,
 		num_referrals: []
-	}
+	};
 
 	it('should render the referral code modal items', async () => {
-		mockAuthStore()
+		mockAuthStore();
 		vi.spyOn(rewardApi, 'getReferrerInfo').mockResolvedValue(mockedReferrerInfo);
 
 		const { getByText, container } = render(ReferralCodeModal);
@@ -47,7 +47,7 @@ describe('ReferralCodeModal', () => {
 			expect(qrCode).toBeInTheDocument();
 
 			expect(qrCodeURL).toBeInTheDocument();
-			expect(qrCodeURL?.textContent?.includes(mockedReferrerInfo.referral_code.toString()))
+			expect(qrCodeURL?.textContent?.includes(mockedReferrerInfo.referral_code.toString()));
 
 			expect(copyButton).toBeInTheDocument();
 
@@ -61,15 +61,24 @@ describe('ReferralCodeModal', () => {
 	});
 
 	it('should render amount of referrals correctly', async () => {
-		mockAuthStore()
+		mockAuthStore();
 
 		const numberOfReferrals = 2;
-		vi.spyOn(rewardApi, 'getReferrerInfo').mockResolvedValue({...mockedReferrerInfo, num_referrals: [numberOfReferrals]});
+		vi.spyOn(rewardApi, 'getReferrerInfo').mockResolvedValue({
+			...mockedReferrerInfo,
+			num_referrals: [numberOfReferrals]
+		});
 
 		const { getByText } = render(ReferralCodeModal);
 
 		await waitFor(() => {
-			expect(getByText(replacePlaceholders(get(i18n).referral.invitation.text.referred_amount, {amount: numberOfReferrals.toString()}))).toBeInTheDocument();
+			expect(
+				getByText(
+					replacePlaceholders(get(i18n).referral.invitation.text.referred_amount, {
+						amount: numberOfReferrals.toString()
+					})
+				)
+			).toBeInTheDocument();
 		});
 	});
 });
