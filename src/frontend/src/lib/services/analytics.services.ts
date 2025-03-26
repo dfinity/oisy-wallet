@@ -1,7 +1,12 @@
+import { PLAUSIBLE_DOMAIN } from '$env/plausible.env';
 import { PROD } from '$lib/constants/app.constants';
 import type { TrackEventParams } from '$lib/types/analytics';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { initOrbiter, trackEvent as trackEventOrbiter } from '@junobuild/analytics';
+import Plausible from 'plausible-tracker';
+
+const domain = PLAUSIBLE_DOMAIN;
+let plausibleTracker: ReturnType<typeof Plausible> | null = null;
 
 export const initAnalytics = async () => {
 	if (!PROD) {
@@ -27,7 +32,22 @@ export const initAnalytics = async () => {
 	});
 };
 
+export const initPlausibleAnalytics = () => {
+	if (isNullish(plausibleTracker)) {
+		plausibleTracker = Plausible({
+			domain,
+			hashMode: false,
+			trackLocalhost: false
+		});
+		plausibleTracker.enableAutoPageviews();
+	}
+};
+
 export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
+	if (nonNullish(plausibleTracker)) {
+		plausibleTracker.trackEvent(name, { props: metadata });
+	}
+
 	if (!PROD) {
 		return;
 	}
