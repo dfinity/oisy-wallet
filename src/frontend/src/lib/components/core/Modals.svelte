@@ -3,6 +3,7 @@
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
+	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import AirdropModalDetails from '$lib/components/rewards/RewardModalDetails.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
@@ -10,7 +11,8 @@
 		modalHideToken,
 		modalIcHideToken,
 		modalVipQrCode,
-		modalRewardDetails
+		modalRewardDetails,
+		modalReferralCode
 	} from '$lib/derived/modal.derived';
 
 	/**
@@ -29,5 +31,7 @@
 		<AirdropModalDetails />
 	{:else if $modalVipQrCode}
 		<VipQrCodeModal />
+	{:else if $modalReferralCode}
+		<ReferralCodeModal />
 	{/if}
 {/if}
