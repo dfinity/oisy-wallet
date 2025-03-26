@@ -365,9 +365,12 @@
 			}
 		},
 		"ckusdc_ledger": {
+			"dependencies": ["cketh_minter"],
 			"type": "custom",
+			"build": "scripts/build.ckusdc_ledger.sh",
 			"candid": "target/ic/cketh_ledger.did",
 			"wasm": "target/ic/cketh_ledger.wasm",
+			"init_arg_file": "target/ic/ckusdc_ledger.args.did",
 			"specified_id": "yfumr-cyaaa-aaaar-qaela-cai",
 			"remote": {
 				"id": {
@@ -383,9 +386,12 @@
 			}
 		},
 		"ckusdc_index": {
+			"dependencies": ["ckusdc_ledger"],
 			"type": "custom",
+			"build": "scripts/build.ckusdc_index.sh",
 			"candid": "target/ic/cketh_index.did",
 			"wasm": "target/ic/cketh_index.wasm",
+			"init_arg_file": "target/ic/ckusdc_index.args.did",
 			"specified_id": "ycvkf-paaaa-aaaar-qaelq-cai",
 			"remote": {
 				"id": {
