@@ -10,7 +10,6 @@ export const getAvailableScreens = () => {
 	return Object.entries(themeVariables.screens)
 		.filter(([, v]) => typeof v === 'string') // warning is wrong since we have a custom element which is an object
 		.map(([k, v]) => {
-			console.log(v, typeof v);
 			return {
 				screen: k as ScreensKeyType,
 				width: Number((v as string).replaceAll('rem', '')) * 16
@@ -56,7 +55,7 @@ export const filterScreens = ({
 	return availableScreens.slice(upIndex, downIndex + 1).map((screen) => screen.screen);
 };
 
-export const shouldDisplay = ({
+export const shouldDisplayForScreen = ({
 	filteredScreens,
 	activeScreen
 }: {

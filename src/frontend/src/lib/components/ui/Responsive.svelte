@@ -7,7 +7,7 @@
 		MAX_SCREEN,
 		MIN_SCREEN,
 		type ScreensKeyType,
-		shouldDisplay
+		shouldDisplayForScreen
 	} from '$lib/utils/screens.utils';
 
 	export let up: ScreensKeyType = MIN_SCREEN;
@@ -22,7 +22,7 @@
 	$: activeScreen = getActiveScreen({ screenWidth: innerWidth, availableScreens: screens });
 
 	let display = false;
-	$: display = shouldDisplay({
+	$: display = shouldDisplayForScreen({
 		filteredScreens: filterScreens({ availableScreens: screens, up, down }),
 		activeScreen
 	});
