@@ -155,7 +155,7 @@ impl BackendBuilder {
         encode_one(init_config).unwrap()
     }
 
-    /// The default arguments to deploy the bitcoin canister.
+    /// The default arguments to deploy the cycles ledger canister.
     pub fn default_cycles_ledger_arg() -> Vec<u8> {
         let init_config = InitArgs {
             max_blocks_per_request: 9_999u64,
@@ -357,13 +357,13 @@ impl BackendBuilder {
 
 impl BackendBuilder {
     /// Enables the cycles ledger canister
-    #[allow(unused_parens)]
+    #[allow(dead_code)]
     pub fn with_cycles_ledger(mut self, cycle_ledger_enabled: bool) -> Self {
         self.cycles_ledger_enabled = cycle_ledger_enabled;
         self
     }
 
-    #[allow(unused_parens)]
+    #[allow(dead_code)]
     pub fn with_auto_progress(mut self, auto_progress_enabled: bool) -> Self {
         self.auto_progress_enabled = auto_progress_enabled;
         self
