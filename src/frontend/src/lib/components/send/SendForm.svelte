@@ -11,7 +11,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { OptionToken } from '$lib/types/token';
 
-	export let source: string;
+	export let source: string | undefined = undefined;
 	export let disabled: boolean | undefined = false;
 	export let token: OptionToken;
 	export let balance: OptionBalance;
@@ -29,7 +29,7 @@
 
 		<slot name="destination" />
 
-		{#if !hideSource}
+		{#if !hideSource && nonNullish(source)}
 			<SendSource {token} {balance} {source} />
 		{/if}
 
@@ -38,6 +38,8 @@
 		{/if}
 
 		<slot name="fee" />
+
+		<slot name="info" />
 
 		<ButtonGroup slot="toolbar" testId="toolbar">
 			<slot name="cancel" />

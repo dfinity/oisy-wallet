@@ -17,7 +17,8 @@ dfx deploy icp_index
 dfx deploy cketh_minter
 dfx deploy cketh_ledger
 dfx deploy cketh_index
-./scripts/deploy.ckerc20.sh
+dfx deploy ckusdc_ledger
+dfx deploy ckusdc_index
 
 dfx deploy kong_backend
 

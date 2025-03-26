@@ -259,6 +259,8 @@ interface I18nNetworks {
 	more: string;
 	chain_fusion: string;
 	network: string;
+	testnet: string;
+	filter: string;
 }
 
 interface I18nReceive {
@@ -763,6 +765,8 @@ interface I18nTransactions {
 		loading_pending_ck_ethereum_transactions: string;
 		get_transaction_for_hash: string;
 		unexpected_transaction_for_hash: string;
+		loading_token_with_network: string;
+		loading_token: string;
 	};
 }
 
