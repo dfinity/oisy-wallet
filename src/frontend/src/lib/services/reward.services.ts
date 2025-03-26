@@ -1,23 +1,24 @@
-import type {ReferrerInfo, RewardInfo, VipReward} from '$declarations/rewards/rewards.did';
-import type {IcToken} from '$icp/types/ic-token';
+import type { ReferrerInfo, RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
+import type { IcToken } from '$icp/types/ic-token';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
 	getReferrerInfo as getReferrerInfoApi,
 	getUserInfo,
-	getUserInfo as getUserInfoApi, setReferrer as setReferrerApi
+	getUserInfo as getUserInfoApi,
+	setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
-import {MILLISECONDS_IN_DAY, ZERO_BI} from '$lib/constants/app.constants';
-import {i18n} from '$lib/stores/i18n.store';
-import {toastsError} from '$lib/stores/toasts.store';
-import {AlreadyClaimedError, InvalidCodeError, UserNotVipError} from '$lib/types/errors';
-import type {RewardResponseInfo, RewardsResponse} from '$lib/types/reward';
-import type {AnyTransactionUiWithCmp} from '$lib/types/transaction';
-import type {ResultSuccess} from '$lib/types/utils';
-import {formatNanosecondsToTimestamp} from '$lib/utils/format.utils';
-import type {Identity} from '@dfinity/agent';
-import {fromNullable, isNullish, nonNullish} from '@dfinity/utils';
-import {get} from 'svelte/store';
+import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
+import { i18n } from '$lib/stores/i18n.store';
+import { toastsError } from '$lib/stores/toasts.store';
+import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
+import type { RewardResponseInfo, RewardsResponse } from '$lib/types/reward';
+import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
+import type { ResultSuccess } from '$lib/types/utils';
+import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
+import type { Identity } from '@dfinity/agent';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 const queryVipUser = async (params: {
 	identity: Identity;
@@ -224,9 +225,11 @@ const queryReferrerInfo = async (params: {
  *
  * @throws {Error} Displays an error toast and returns undefined if the query fails.
  */
-export const getReferrerInfo = async (params: { identity: Identity }): Promise<ReferrerInfo | undefined> => {
+export const getReferrerInfo = async (params: {
+	identity: Identity;
+}): Promise<ReferrerInfo | undefined> => {
 	try {
-		return await queryReferrerInfo({...params, certified: false});
+		return await queryReferrerInfo({ ...params, certified: false });
 	} catch (err: unknown) {
 		const { referral } = get(i18n);
 		toastsError({
@@ -236,12 +239,12 @@ export const getReferrerInfo = async (params: { identity: Identity }): Promise<R
 
 		return undefined;
 	}
-}
+};
 
 const updateReferrer = async ({
-								   identity,
-								   referrerCode
-							   }: {
+	identity,
+	referrerCode
+}: {
 	identity: Identity;
 	referrerCode: number;
 }): Promise<void> => {

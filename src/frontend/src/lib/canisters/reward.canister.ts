@@ -1,10 +1,11 @@
 import type {
 	ClaimVipRewardResponse,
 	NewVipRewardResponse,
+	ReferrerInfo,
 	_SERVICE as RewardService,
 	UserData,
 	UserSnapshot,
-	VipReward, ReferrerInfo
+	VipReward
 } from '$declarations/rewards/rewards.did';
 import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/rewards.factory.certified.did';
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
@@ -56,14 +57,14 @@ export class RewardCanister extends Canister<RewardService> {
 	};
 
 	getReferrerInfo = ({ certified = true }: QueryParams): Promise<ReferrerInfo> => {
-		const { referrer_info } = this.caller({certified});
+		const { referrer_info } = this.caller({ certified });
 
 		return referrer_info();
-	}
+	};
 
 	setReferrer = (referralCode: number): Promise<void> => {
-		const { set_referrer } = this.caller({certified: true});
+		const { set_referrer } = this.caller({ certified: true });
 
 		return set_referrer(referralCode);
-	}
+	};
 }
