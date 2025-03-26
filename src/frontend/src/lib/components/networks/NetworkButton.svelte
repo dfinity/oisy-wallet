@@ -2,9 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { page } from '$app/stores';
+	import Badge from '$lib/components/ui/Badge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
