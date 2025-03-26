@@ -16,7 +16,7 @@
 </script>
 
 {#if reward.requirements.length > 0}
-	<span class="text-md font-semibold">
+	<span class="text-base font-semibold">
 		{$i18n.rewards.text.requirements_title}
 	</span>
 	{#if isEligible}
