@@ -1,6 +1,7 @@
 import type {
 	ClaimVipRewardResponse,
-	NewVipRewardResponse, ReferrerInfo,
+	NewVipRewardResponse,
+	ReferrerInfo,
 	RewardInfo,
 	UserData
 } from '$declarations/rewards/rewards.did';
@@ -13,11 +14,13 @@ import {
 } from '$lib/constants/app.constants';
 import {
 	claimVipReward,
-	getNewReward, getReferrerInfo,
+	getNewReward,
+	getReferrerInfo,
 	getRewardRequirementsFulfilled,
 	getRewards,
 	getUserRewardsTokenAmounts,
-	isVipUser, setReferrer
+	isVipUser,
+	setReferrer
 } from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -28,7 +31,6 @@ import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
-import type {ResultSuccess} from "$lib/types/utils";
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
@@ -217,13 +219,14 @@ describe('reward-code', () => {
 		const mockedReferrerInfo: ReferrerInfo = {
 			referral_code: 123456,
 			num_referrals: [numberOfReferrals]
-		}
+		};
 
 		it('should return referral code and number of referrals', async () => {
-			const getReferrerInfoSpy = vi.spyOn(rewardApi, 'getReferrerInfo')
+			const getReferrerInfoSpy = vi
+				.spyOn(rewardApi, 'getReferrerInfo')
 				.mockResolvedValueOnce(mockedReferrerInfo);
 
-			const result = await getReferrerInfo({identity: mockIdentity});
+			const result = await getReferrerInfo({ identity: mockIdentity });
 
 			expect(getReferrerInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -231,14 +234,15 @@ describe('reward-code', () => {
 				nullishIdentityErrorMessage
 			});
 
-			expect(result).toEqual({referralCode: mockedReferrerInfo.referral_code, numberOfReferrals});
+			expect(result).toEqual({ referralCode: mockedReferrerInfo.referral_code, numberOfReferrals });
 		});
 
 		it('should return zero for number of referrals if not provided', async () => {
-			const getReferrerInfoSpy = vi.spyOn(rewardApi, 'getReferrerInfo')
-				.mockResolvedValueOnce({...mockedReferrerInfo, num_referrals: []});
+			const getReferrerInfoSpy = vi
+				.spyOn(rewardApi, 'getReferrerInfo')
+				.mockResolvedValueOnce({ ...mockedReferrerInfo, num_referrals: [] });
 
-			const result = await getReferrerInfo({identity: mockIdentity});
+			const result = await getReferrerInfo({ identity: mockIdentity });
 
 			expect(getReferrerInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -246,7 +250,10 @@ describe('reward-code', () => {
 				nullishIdentityErrorMessage
 			});
 
-			expect(result).toEqual({referralCode: mockedReferrerInfo.referral_code, numberOfReferrals: 0});
+			expect(result).toEqual({
+				referralCode: mockedReferrerInfo.referral_code,
+				numberOfReferrals: 0
+			});
 		});
 
 		it('should display an error message', async () => {
@@ -254,7 +261,7 @@ describe('reward-code', () => {
 			const getReferrerInfoSpy = vi.spyOn(rewardApi, 'getReferrerInfo').mockRejectedValue(err);
 			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
-			await getReferrerInfo({identity: mockIdentity});
+			await getReferrerInfo({ identity: mockIdentity });
 
 			expect(getReferrerInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -272,10 +279,14 @@ describe('reward-code', () => {
 		const mockedReferrerCode = 123456;
 
 		it('should successfully set referrer', async () => {
-			const setReferrerSpy = vi.spyOn(rewardApi, 'setReferrer')
+			const setReferrerSpy = vi
+				.spyOn(rewardApi, 'setReferrer')
 				.mockResolvedValueOnce(undefined as void);
 
-			const result = await setReferrer({identity: mockIdentity, referrerCode: mockedReferrerCode});
+			const result = await setReferrer({
+				identity: mockIdentity,
+				referrerCode: mockedReferrerCode
+			});
 
 			expect(setReferrerSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -283,16 +294,15 @@ describe('reward-code', () => {
 				nullishIdentityErrorMessage
 			});
 
-			expect(result).toEqual({success: true});
+			expect(result).toEqual({ success: true });
 		});
 
 		it('should display an error message', async () => {
 			const err = new Error('test');
-			const setReferrerSpy = vi.spyOn(rewardApi, 'setReferrer')
-				.mockRejectedValue(err);
+			const setReferrerSpy = vi.spyOn(rewardApi, 'setReferrer').mockRejectedValue(err);
 			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
-			await setReferrer({identity: mockIdentity, referrerCode: mockedReferrerCode});
+			await setReferrer({ identity: mockIdentity, referrerCode: mockedReferrerCode });
 
 			expect(setReferrerSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,

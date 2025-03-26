@@ -43,18 +43,18 @@ export const claimVipReward = async ({
 };
 
 export const getReferrerInfo = async ({
-										  identity,
-										  certified
-									  }: CanisterApiFunctionParams<QueryParams>): Promise<ReferrerInfo> => {
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<ReferrerInfo> => {
 	const { getReferrerInfo } = await rewardCanister({ identity });
 
 	return getReferrerInfo({ certified });
 };
 
 export const setReferrer = async ({
-									  referrerCode,
-									  identity
-								  }: CanisterApiFunctionParams<{
+	referrerCode,
+	identity
+}: CanisterApiFunctionParams<{
 	referrerCode: number;
 }>): Promise<void> => {
 	const { setReferrer } = await rewardCanister({ identity });

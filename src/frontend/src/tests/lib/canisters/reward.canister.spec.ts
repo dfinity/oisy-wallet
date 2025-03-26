@@ -1,8 +1,9 @@
 import type {
 	NewVipRewardResponse,
+	ReferrerInfo,
 	_SERVICE as RewardService,
 	UserData,
-	UserSnapshot, ReferrerInfo
+	UserSnapshot
 } from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -121,7 +122,7 @@ describe('reward.canister', () => {
 			const mockedReferrerInfo: ReferrerInfo = {
 				referral_code: 123343,
 				num_referrals: [2]
-			}
+			};
 
 			service.referrer_info.mockResolvedValue(mockedReferrerInfo);
 
@@ -129,7 +130,7 @@ describe('reward.canister', () => {
 				serviceOverride: service
 			});
 
-			const referrerInfo = await getReferrerInfo(queryParams)
+			const referrerInfo = await getReferrerInfo(queryParams);
 			expect(service.referrer_info).toHaveBeenCalledWith();
 			expect(referrerInfo).toEqual(mockedReferrerInfo);
 		});
