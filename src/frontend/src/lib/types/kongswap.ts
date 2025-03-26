@@ -40,16 +40,16 @@ const KongSwapTokenBaseSchema = z.object({
 	token_type: z.string()
 });
 
-const _KongSwapTokenSchema = z.object({
+export const KongSwapTokenSchema = z.object({
 	token: KongSwapTokenBaseSchema,
 	metrics: KongSwapTokenMetricsSchema
 });
 
-const KongSwapTokenWithMetricsSchema = KongSwapTokenBaseSchema.extend({
+export const KongSwapTokenWithMetricsSchema = KongSwapTokenBaseSchema.extend({
 	metrics: KongSwapTokenMetricsSchema
 });
 
-const _KongSwapTokensSchema = z.object({
+export const KongSwapTokensSchema = z.object({
 	items: z.array(KongSwapTokenWithMetricsSchema),
 	total_pages: z.number(),
 	total_count: z.number(),
@@ -58,5 +58,5 @@ const _KongSwapTokensSchema = z.object({
 });
 
 export type KongSwapTokenMetrics = z.infer<typeof KongSwapTokenMetricsSchema>;
-export type KongSwapTokens = z.infer<typeof _KongSwapTokensSchema>;
-export type KongSwapToken = z.infer<typeof _KongSwapTokenSchema>;
+export type KongSwapTokens = z.infer<typeof KongSwapTokensSchema>;
+export type KongSwapToken = z.infer<typeof KongSwapTokenSchema>;
