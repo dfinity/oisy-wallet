@@ -377,7 +377,7 @@ a.as-button {
 	@apply bg-primary;
 	@apply rounded-xl;
 	@apply px-4;
-	@apply py-2;
+	@apply py-1;
 	@apply justify-between;
 	@apply gap-2;
 	@apply text-left;
@@ -390,10 +390,12 @@ a.as-button {
 		@apply text-tertiary;
 	}
 
-	&:hover:not(.disabled):not([disabled]),
+	&:hover:not(.disabled):not([disabled]) {
+		@apply bg-brand-subtle-20;
+	}
+
 	&.opened {
-		@apply bg-primary;
-		@apply border-brand-primary;
+		@apply bg-brand-subtle-30;
 	}
 }
 
