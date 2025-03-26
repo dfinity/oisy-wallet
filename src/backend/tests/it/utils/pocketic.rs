@@ -52,19 +52,6 @@ struct BitcoinInitConfig {
     lazily_evaluate_fee_percentiles: Option<String>,
 }
 
-// This is necessary to deploy the cycles ledger canister.
-// This is a struct based on the `InitConfig` from the cycles ledger canister.
-// Reference: https://github.com/dfinity/cycles-ledger/blob/cycles-ledger-v0.6.0/cycles-ledger/src/config.rs
-//
-#[derive(CandidType)]
-struct CyclesLedgerInitConfig {
-    /// The maximum number of blocks returned by the [icrc3_get_blocks] endpoint
-    pub max_blocks_per_request: u64,
-
-    /// The principal of the index canister for this ledger
-    pub index_id: Option<Principal>,
-}
-
 /// Backend canister installer, using the builder pattern, for use in test environmens using
 /// `PocketIC`.
 ///
