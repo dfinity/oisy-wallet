@@ -25,7 +25,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let referralCode: string;
+	let referralCode: number;
 	let numberOfReferrals: number;
 
 	let referralUrl;
@@ -37,11 +37,7 @@
 			return;
 		}
 
-		const referrerInfo = await getReferrerInfo({ identity: $authIdentity });
-		if (nonNullish(referrerInfo)) {
-			referralCode = referrerInfo.referral_code;
-			numberOfReferrals = referrerInfo.num_referrals;
-		}
+		({referralCode, numberOfReferrals} = await getReferrerInfo({identity: $authIdentity}));
 	});
 </script>
 
