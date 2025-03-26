@@ -538,34 +538,6 @@ pub fn add_user_credential(
     }
 }
 
-/// Sets the user's preference to enable (or disable) networks in the interface, overwriting any
-/// existing settings.
-///
-/// # Returns
-/// - Returns `Ok(())` if the network settings were saved successfully, or if they were already set
-///   to the same value.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "may_write_user_data")]
-pub fn set_user_network_settings(
-    request: SaveNetworksSettingsRequest,
-) -> Result<(), SaveNetworksSettingsError> {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        set_network_settings(
-            stored_principal,
-            request.current_user_version,
-            request.networks,
-            &mut user_profile_model,
-        )
-    })
-}
-
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
 /// existing settings.
 ///
