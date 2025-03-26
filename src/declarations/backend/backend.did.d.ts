@@ -169,7 +169,6 @@ export type CreateChallengeError =
 	| { RandomnessError: string };
 export interface CreateChallengeResponse {
 	difficulty: number;
-	nonce: bigint;
 	start_timestamp_ns: bigint;
 	expiry_timestamp_ns: bigint;
 }
@@ -314,7 +313,7 @@ export interface PendingTransaction {
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: null } | { Err: AddDappSettingsError };
-export type Result_10 = { Ok: null } | { Err: SaveTestnetsSettingsError };
+export type Result_10 = { Ok: null } | { Err: SaveNetworksSettingsError };
 export type Result_11 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
 export type Result_2 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type Result_3 = { Ok: null } | { Err: BtcAddPendingTransactionError };
@@ -326,7 +325,11 @@ export type Result_6 = { Ok: CreateChallengeResponse } | { Err: CreateChallengeE
 export type Result_7 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_8 = { Ok: MigrationReport } | { Err: string };
 export type Result_9 = { Ok: null } | { Err: string };
-export type SaveTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
+export type SaveNetworksSettingsError = { VersionMismatch: null } | { UserNotFound: null };
+export interface SaveNetworksSettingsRequest {
+	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
+	current_user_version: [] | [bigint];
+}
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InternalError: { msg: string } };
@@ -486,11 +489,13 @@ export interface _SERVICE {
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_snapshot: ActorMethod<[UserSnapshot], undefined>;
+	set_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_10>;
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_10>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_11>;
+	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_10>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

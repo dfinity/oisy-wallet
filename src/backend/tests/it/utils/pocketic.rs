@@ -375,6 +375,7 @@ impl BackendBuilder {
         self.cycles_ledger_enabled = cycle_ledger_enabled;
         self
     }
+
     #[allow(unused_parens)]
     pub fn with_auto_progress(mut self, auto_progress_enabled: bool) -> Self {
         self.auto_progress_enabled = auto_progress_enabled;

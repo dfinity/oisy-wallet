@@ -178,7 +178,6 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const CreateChallengeResponse = IDL.Record({
 		difficulty: IDL.Nat32,
-		nonce: IDL.Nat64,
 		start_timestamp_ns: IDL.Nat64,
 		expiry_timestamp_ns: IDL.Nat64
 	});
@@ -473,17 +472,21 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
-	const SetShowTestnetsRequest = IDL.Record({
-		current_user_version: IDL.Opt(IDL.Nat64),
-		show_testnets: IDL.Bool
+	const SaveNetworksSettingsRequest = IDL.Record({
+		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
+		current_user_version: IDL.Opt(IDL.Nat64)
 	});
-	const SaveTestnetsSettingsError = IDL.Variant({
+	const SaveNetworksSettingsError = IDL.Variant({
 		VersionMismatch: IDL.Null,
 		UserNotFound: IDL.Null
 	});
 	const Result_10 = IDL.Variant({
 		Ok: IDL.Null,
-		Err: SaveTestnetsSettingsError
+		Err: SaveNetworksSettingsError
+	});
+	const SetShowTestnetsRequest = IDL.Record({
+		current_user_version: IDL.Opt(IDL.Nat64),
+		show_testnets: IDL.Bool
 	});
 	const TopUpCyclesLedgerRequest = IDL.Record({
 		threshold: IDL.Opt(IDL.Nat),
@@ -541,11 +544,13 @@ export const idlFactory = ({ IDL }) => {
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_snapshot: IDL.Func([UserSnapshot], [], []),
+		set_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_10], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_10], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats]),
 		step_migration: IDL.Func([], [], []),
-		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_11], [])
+		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_11], []),
+		update_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_10], [])
 	});
 };
 // @ts-ignore

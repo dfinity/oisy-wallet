@@ -1,45 +1,51 @@
-import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
+import { createPowChallenge } from '$lib/api/backend.api';
+import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
+import type {
+	PostMessage,
+	PostMessageDataRequest,
+	PostMessageDataRequestExchangeTimer
+} from '$lib/types/post-message';
+import { loadIdentity } from '$lib/utils/auth.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const FIRST_TIMER_INTERVAL = 5000;
-export const onChallengeMessage = async ({
+export const onPowMessage = async ({
 	data
 	// eslint-disable-next-line require-await
 }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
-	const { msg } = data;
+	const { msg, data: payload } = data;
 
 	switch (msg) {
-		case 'startIdleTimer':
-			startIdleTimer();
+		case 'stopPowTimer':
+			stopTimer();
 			return;
-		case 'stopIdleTimer':
-			stopIdleTimer();
+		case 'startPowTimer':
+			await startPowTimer(payload);
 			return;
 	}
 };
 
 let timer: NodeJS.Timeout | undefined = undefined;
 
-/**
- * The timer is executed only if user has signed in
- */
-const startIdleTimer = () =>
-	(timer = setInterval(async () => await onIdleSignOut(), FIRST_TIMER_INTERVAL));
+const startPowTimer = async (data: PostMessageDataRequestExchangeTimer | undefined) => {
+	// This worker has already been started
+	if (nonNullish(timer)) {
+		return;
+	}
 
-const stopIdleTimer = () => {
-	if (!timer) {
+	let identity = await loadIdentity();
+	const allow_signer = async () => await createPowChallenge(identity);
+
+	await createPowChallenge(test_identity);
+
+	timer = setInterval(allow_signer, SYNC_EXCHANGE_TIMER_INTERVAL);
+};
+
+const stopTimer = () => {
+	if (isNullish(timer)) {
 		return;
 	}
 
 	clearInterval(timer);
 	timer = undefined;
-};
-
-const onIdleSignOut = async () => {
-	logout();
-};
-
-// We do the logout on the client side because we reload the window to reload stores afterwards
-const logout = () => {
-	// Clear timer to not emit sign-out multiple times
-	stopIdleTimer();
 };

@@ -25,8 +25,8 @@ pub const MIN_DIFFICULTY: u32 = 100_000;
 // TARGET_DURATION_NS.
 pub const MAX_DIFFICULTY: u32 = 5_000_000;
 
-// The factor defining the amount of cycles per difficulty unit the caller (principle) will be allowed
-// to spend on signer operations
+// The factor defining the amount of cycles per difficulty unit the caller (principle) will be
+// allowed to spend on signer operations
 pub const DIFFICULTY_TO_CYCLE_FACTOR: u64 = 100;
 
 use ic_cdk::api::{caller, time};

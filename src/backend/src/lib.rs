@@ -716,7 +716,6 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
     let challenge = pow::create_pow_challenge().await?;
 
     Ok(CreateChallengeResponse {
-        nonce: challenge.nonce, //challenge.nonce,
         difficulty: challenge.difficulty,
         start_timestamp_ns: challenge.start_timestamp_ns,
         expiry_timestamp_ns: challenge.expiry_timestamp_ns,

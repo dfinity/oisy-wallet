@@ -169,7 +169,6 @@ type CreateChallengeError = variant {
 };
 type CreateChallengeResponse = record {
   difficulty : nat32;
-  nonce : nat64;
   start_timestamp_ns : nat64;
   expiry_timestamp_ns : nat64;
 };
@@ -288,7 +287,7 @@ type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok; Err : AddDappSettingsError };
-type Result_10 = variant { Ok; Err : SaveTestnetsSettingsError };
+type Result_10 = variant { Ok; Err : SaveNetworksSettingsError };
 type Result_11 = variant {
   Ok : TopUpCyclesLedgerResponse;
   Err : TopUpCyclesLedgerError;
@@ -310,7 +309,11 @@ type Result_6 = variant {
 type Result_7 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_8 = variant { Ok : MigrationReport; Err : text };
 type Result_9 = variant { Ok; Err : text };
-type SaveTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
+type SaveNetworksSettingsError = variant { VersionMismatch; UserNotFound };
+type SaveNetworksSettingsRequest = record {
+  networks : vec record { NetworkSettingsFor; NetworkSettings };
+  current_user_version : opt nat64;
+};
 type SelectedUtxosFeeError = variant {
   PendingTransactions;
   InternalError : record { msg : text };
@@ -458,9 +461,11 @@ service : (Arg) -> {
   set_many_custom_tokens : (vec CustomToken) -> ();
   set_many_user_tokens : (vec UserToken) -> ();
   set_snapshot : (UserSnapshot) -> ();
+  set_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_10);
   set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_10);
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
   step_migration : () -> ();
   top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_11);
+  update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_10);
 }

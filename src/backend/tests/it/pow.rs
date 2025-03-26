@@ -2,25 +2,24 @@
 
 use std::{thread, time::Duration};
 
-use crate::utils::pocketic::BackendBuilder;
-use crate::utils::{
-    mock::CALLER,
-    pocketic::{setup, PicBackend, PicCanisterTrait},
-};
 use candid::Principal;
-use ic_cdk::api::management_canister::main::canister_status;
-use ic_cdk::api::management_canister::provisional::CanisterIdRecord;
+use ic_cdk::api::management_canister::{main::canister_status, provisional::CanisterIdRecord};
 use sha2::{Digest, Sha256};
-use shared::types::signer::AllowSigningError;
 use shared::types::{
     pow::{
         AllowSigningStatus, ChallengeCompletionError, CreateChallengeError, CreateChallengeResponse,
     },
-    signer::{AllowSigningRequest, AllowSigningResponse},
+    signer::{AllowSigningError, AllowSigningRequest, AllowSigningResponse},
     user_profile::UserProfile,
 };
 
+use crate::utils::{
+    mock::CALLER,
+    pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
+};
+
 pub const TARGET_DURATION_NS: u64 = 5000 * 1_000_000;
+pub const START_DIFFICULTY: u32 = 400_000;
 // -------------------------------------------------------------------------------------------------
 // - General Utility methods used for testing
 // -------------------------------------------------------------------------------------------------
@@ -205,6 +204,20 @@ fn test_create_pow_challenge_should_fail_without_user_profile() {
         result.unwrap_err(),
         CreateChallengeError::MissingUserProfile
     );
+}
+
+#[test]
+fn test_create_pow_challenge_should_return_valid_values() {
+    let pic_setup = setup_cycles_ledger_with_progress();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+    let _ = call_create_user_profile(&pic_setup, caller);
+
+    let result = call_create_pow_challenge(&pic_setup, caller);
+    assert!(result.is_ok());
+    let response = result.expect("Failed to call create user profile");
+
+    assert_eq!(response.difficulty, START_DIFFICULTY);
+    assert_greater_than(response.expiry_timestamp_ns, response.start_timestamp_ns);
 }
 
 #[test]
