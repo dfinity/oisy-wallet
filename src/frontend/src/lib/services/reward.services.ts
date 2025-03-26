@@ -234,9 +234,9 @@ export const getReferrerInfo = async (params: {
 		const referrerInfo = await queryReferrerInfo({ ...params, certified: false });
 
 		return {
-            referralCode: referrerInfo.referral_code,
-            numberOfReferrals: fromNullable(referrerInfo.num_referrals) ?? 0
-        };
+			referralCode: referrerInfo.referral_code,
+			numberOfReferrals: fromNullable(referrerInfo.num_referrals) ?? 0
+		};
 	} catch (err: unknown) {
 		const { referral } = get(i18n);
 		toastsError({
@@ -244,7 +244,7 @@ export const getReferrerInfo = async (params: {
 			err
 		});
 
-		return {referralCode: undefined, numberOfReferrals: undefined};
+		return { referralCode: undefined, numberOfReferrals: undefined };
 	}
 };
 
