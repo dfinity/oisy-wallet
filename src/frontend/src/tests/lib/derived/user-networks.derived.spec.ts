@@ -1,5 +1,5 @@
 import { SUPPORTED_MAINNET_NETWORKS_IDS } from '$env/networks/networks.env';
-import { userNetworks, userNetworksSettings } from '$lib/derived/user-networks.derived';
+import { userNetworks, userSettingsNetworks } from '$lib/derived/user-networks.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { UserNetworks } from '$lib/types/user-networks';
 import {
@@ -9,9 +9,6 @@ import {
 	mockUserSettings
 } from '$tests/mocks/user-profile.mock';
 import { toNullable } from '@dfinity/utils';
-import { userSettingsNetworks } from '$lib/derived/user-networks.derived';
-import { userProfileStore } from '$lib/stores/user-profile.store';
-import { mockNetworksSettings, mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { get } from 'svelte/store';
 
 describe('user-networks.derived', () => {
