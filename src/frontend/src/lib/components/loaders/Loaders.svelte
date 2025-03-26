@@ -21,11 +21,9 @@
 						<LoaderWallets>
 							<ExchangeWorker>
 								<LoaderMetamask>
-
 									<UserSnapshotWorker>
 										<slot />
 									</UserSnapshotWorker>
-
 								</LoaderMetamask>
 							</ExchangeWorker>
 						</LoaderWallets>
