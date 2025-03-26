@@ -820,9 +820,7 @@ interface I18nReferral {
 			not_referred_yet: string;
 			learn_more: string;
 		};
-		error: {
-			loading_referrer_info: string;
-		}
+		error: { loading_referrer_info: string };
 	};
 	reward: {
 		text: {
