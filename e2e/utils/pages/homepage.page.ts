@@ -326,11 +326,12 @@ abstract class Homepage {
 		await this.takeScreenshot({ screenshotTarget: modal });
 	}
 
+	// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
 	async setCarouselFirstSlide(): Promise<void> {
 		if (isNullish(this.promotionCarousel)) {
 			this.promotionCarousel = new PromotionCarousel(this.#page);
 		}
-		await this.promotionCarousel.freezeCarouselToSlide();
+		await this.promotionCarousel.freezeCarouselToSlide(1);
 		await this.waitForLoadState();
 	}
 
