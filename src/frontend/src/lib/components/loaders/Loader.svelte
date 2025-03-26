@@ -34,6 +34,7 @@
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -126,6 +127,15 @@
 	const validateAddresses = () => emit({ message: 'oisyValidateAddresses' });
 
 	onMount(async () => {
+		// The user profile settings will define the enabled/disabled networks.
+		// So we need to load it first to enable/disable the rest of the services.
+		const { success: userProfileSuccess } = await loadUserProfile({ identity: $authIdentity });
+
+		if (!userProfileSuccess) {
+			await signOut({});
+			return;
+		}
+
 		const { success: addressIdbSuccess, err } = await loadIdbAddresses();
 
 		if (addressIdbSuccess) {
@@ -186,9 +196,9 @@
 {/if}
 
 <style>
-	:root:has(.login-modal) {
-		--alert-max-width: 90vw;
-		--alert-max-height: initial;
-		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
-	}
+    :root:has(.login-modal) {
+        --alert-max-width: 90vw;
+        --alert-max-height: initial;
+        --dialog-border-radius: calc(var(--border-radius-sm) * 3);
+    }
 </style>
