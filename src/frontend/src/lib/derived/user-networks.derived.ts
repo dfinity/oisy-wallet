@@ -18,8 +18,11 @@ import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
+import type { NetworksSettings } from '$declarations/backend/backend.did';
+import { userSettings } from '$lib/derived/user-profile.derived';
+import { derived, type Readable } from 'svelte/store';
 
-export const userNetworksSettings: Readable<NetworksSettings | undefined> = derived(
+export const userSettingsNetworks: Readable<NetworksSettings | undefined> = derived(
 	[userSettings],
 	([$userSettings]) => $userSettings?.networks
 );

@@ -16,7 +16,7 @@ import {
 import type { UserNetworks } from '$lib/types/user-networks';
 import { toNullable } from '@dfinity/utils';
 
-export const mockUserNetworks: Array<[NetworkSettingsFor, NetworkSettings]> = [
+export const mockUserNetworksMap: Array<[NetworkSettingsFor, NetworkSettings]> = [
 	[{ BitcoinMainnet: null }, { enabled: true, is_testnet: false }],
 	[{ BitcoinTestnet: null }, { enabled: false, is_testnet: true }],
 	[{ EthereumMainnet: null }, { enabled: true, is_testnet: false }],
@@ -26,18 +26,11 @@ export const mockUserNetworks: Array<[NetworkSettingsFor, NetworkSettings]> = [
 	[{ SolanaDevnet: null }, { enabled: true, is_testnet: true }]
 ];
 
-export const expectedMockUserNetworks: UserNetworks = {
-	[BTC_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
-	[BTC_TESTNET_NETWORK_ID]: { enabled: false, isTestnet: true },
-	[ETHEREUM_NETWORK_ID]: { enabled: true, isTestnet: false },
-	[SEPOLIA_NETWORK_ID]: { enabled: false, isTestnet: false },
-	[ICP_NETWORK_ID]: { enabled: true, isTestnet: false },
-	[SOLANA_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
-	[SOLANA_DEVNET_NETWORK_ID]: { enabled: true, isTestnet: true }
-};
+
+
 
 export const mockNetworksSettings: NetworksSettings = {
-	networks: mockUserNetworks,
+	networks: mockUserNetworksMap,
 	testnets: { show_testnets: false }
 };
 

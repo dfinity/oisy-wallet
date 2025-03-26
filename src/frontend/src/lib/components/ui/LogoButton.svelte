@@ -5,10 +5,10 @@
 
 	export let selectable = false;
 	export let selected = false;
-
 	export let dividers = false;
 	export let hover = true;
 	export let rounded = true;
+	export let testId: string | undefined = undefined;
 
 	let hasTitleSlot: boolean;
 	$: hasTitleSlot = nonNullish($$slots['title']);
@@ -30,7 +30,7 @@
 </script>
 
 <div class:hover:bg-brand-subtle-10={hover} class:rounded-lg={rounded}>
-	<button on:click class="flex w-full border-0 px-2">
+	<button on:click class="flex w-full border-0 px-2" data-tid={testId}>
 		<span
 			class="flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0 py-3"
 			class:border-brand-subtle-20={dividers}
@@ -39,7 +39,7 @@
 			<span class="flex items-center">
 				<span class="mr-4"><slot name="logo" /></span>
 				<span class="flex flex-col text-left">
-					<span class="text-md">
+					<span class="text-base">
 						{#if hasTitleSlot}
 							<span class="float-left font-bold"><slot name="title" /></span>
 						{/if}
@@ -61,7 +61,7 @@
 			<span class="flex items-center">
 				<span class="flex flex-col text-right">
 					{#if hasTitleEndSlot}
-						<span class="text-md font-bold">
+						<span class="text-base font-bold">
 							<slot name="title-end" />
 						</span>
 					{/if}
