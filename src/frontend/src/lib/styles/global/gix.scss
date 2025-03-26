@@ -185,6 +185,8 @@ div.modal {
 	div.wrapper.dialog > div.container-wrapper {
 		margin: 0 !important;
 
+		align-items: center;
+
 		& > div.container {
 			border-radius: 0;
 		}
@@ -239,16 +241,12 @@ div.popover {
 	--background-contrast: var(--overlay-background-contrast);
 
 	.wrapper {
-		padding: var(--padding-0_75x);
-		--padding: var(--padding-0_75x);
+		padding: var(--padding-0_5x);
+		--padding: var(--padding-0_5x);
 
 		--border-radius: 16px;
 
 		max-width: calc(100vw - (2 * var(--padding)));
-
-		@media (width >= theme(--breakpoint-sm)) {
-			max-width: 300px !important;
-		}
 	}
 }
 
