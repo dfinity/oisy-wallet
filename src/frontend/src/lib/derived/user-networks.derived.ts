@@ -25,9 +25,9 @@ export const userSettingsNetworks: Readable<NetworksSettings | undefined> = deri
 );
 
 export const userNetworks: Readable<UserNetworks> = derived(
-	[userNetworksSettings],
-	([$userNetworksSettings]) => {
-		const userNetworks = $userNetworksSettings?.networks;
+	[userSettingsNetworks],
+	([$userSettingsNetworks]) => {
+		const userNetworks = $userSettingsNetworks?.networks;
 
 		if (isNullish(userNetworks) || userNetworks.length === 0) {
 			// Returning all mainnets enabled by default

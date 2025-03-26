@@ -2,8 +2,8 @@ import { SUPPORTED_MAINNET_NETWORKS_IDS } from '$env/networks/networks.env';
 import { userNetworks, userSettingsNetworks } from '$lib/derived/user-networks.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { UserNetworks } from '$lib/types/user-networks';
+import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import {
-	expectedMockUserNetworks,
 	mockNetworksSettings,
 	mockUserProfile,
 	mockUserSettings
@@ -14,7 +14,7 @@ import { get } from 'svelte/store';
 describe('user-networks.derived', () => {
 	const certified = true;
 
-	describe('userNetworksSettings', () => {
+	describe('userSettingsNetworks', () => {
 		it('should return undefined when user profile is not set', () => {
 			userProfileStore.reset();
 			expect(get(userSettingsNetworks)).toBeUndefined();
@@ -56,7 +56,7 @@ describe('user-networks.derived', () => {
 
 		it('should return the user networks if they are set', () => {
 			userProfileStore.set({ certified, profile: mockUserProfile });
-			expect(get(userNetworks)).toEqual(expectedMockUserNetworks);
+			expect(get(userNetworks)).toEqual(mockUserNetworks);
 		});
 	});
 });
