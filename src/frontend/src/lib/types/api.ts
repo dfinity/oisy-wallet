@@ -15,6 +15,7 @@ import type {
 } from '$declarations/signer/signer.did';
 import type { Address, BtcAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
+import type { UserNetworks } from '$lib/types/user-networks';
 import { Principal } from '@dfinity/principal';
 
 export interface AddUserCredentialParams {
@@ -62,6 +63,11 @@ export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
 
 export interface AddUserHiddenDappIdParams {
 	dappId: string;
+	currentUserVersion?: bigint;
+}
+
+export interface SaveUserNetworksSettings {
+	networks: UserNetworks;
 	currentUserVersion?: bigint;
 }
 
