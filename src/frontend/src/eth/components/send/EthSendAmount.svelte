@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import { Utils } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -16,6 +14,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
@@ -33,28 +32,28 @@
 	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	$: customValidate = (userAmount: BigNumber): Error | undefined => {
+	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (isNullish($storeFeeData)) {
 			return;
 		}
 
 		// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
 		const parsedSendBalance = nonNullish($sendBalance)
-			? Utils.parseUnits(
-					formatToken({
+			? parseToken({
+					value: formatToken({
 						value: $sendBalance,
 						unitName: $sendTokenDecimals,
 						displayDecimals: $sendTokenDecimals
 					}),
-					$sendTokenDecimals
-				)
-			: ZERO;
+					unitName: $sendTokenDecimals
+				})
+			: ZERO_BI;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId)) {
-			const total = userAmount.add($minGasFee ?? ZERO);
+			const total = userAmount + ($minGasFee ?? ZERO_BI);
 
-			if (total.gt(parsedSendBalance)) {
+			if (total > parsedSendBalance) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
 			}
 
@@ -62,12 +61,12 @@
 		}
 
 		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the user
-		if (userAmount.gt(parsedSendBalance)) {
+		if (userAmount > parsedSendBalance) {
 			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount);
 		}
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
-		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
+		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO_BI;
 		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees

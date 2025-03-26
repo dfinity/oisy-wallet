@@ -2,7 +2,6 @@ import { maxGasFee as maxGasFeeUtils, minGasFee as minGasFeeUtils } from '$eth/u
 import type { TokenId } from '$lib/types/token';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export type FeeStoreData = TransactionFeeData | undefined;
@@ -28,8 +27,8 @@ export interface FeeContext {
 	feeSymbolStore: Writable<string | undefined>;
 	feeTokenIdStore: Writable<TokenId | undefined>;
 	feeDecimalsStore: Writable<number | undefined>;
-	maxGasFee: Readable<BigNumber | undefined>;
-	minGasFee: Readable<BigNumber | undefined>;
+	maxGasFee: Readable<bigint | undefined>;
+	minGasFee: Readable<bigint | undefined>;
 	feeExchangeRateStore?: Writable<number | undefined>;
 	evaluateFee?: () => void;
 }

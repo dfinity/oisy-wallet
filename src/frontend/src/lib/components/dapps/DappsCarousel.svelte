@@ -14,6 +14,7 @@
 	} from '$lib/derived/user-profile.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
 		type CarouselSlideOisyDappDescription,
 		type OisyDappDescription
@@ -35,8 +36,9 @@
 		...temporaryHiddenDappsIds
 	];
 
-	let featuredAirdrop: RewardDescription | undefined;
-	$: featuredAirdrop = rewardCampaigns.find(({ id }) => id === FEATURED_REWARD_CAROUSEL_SLIDE_ID);
+	const featuredAirdrop: RewardDescription | undefined = rewardCampaigns.find(
+		({ id }) => id === FEATURED_REWARD_CAROUSEL_SLIDE_ID
+	);
 
 	let featureAirdropSlide: CarouselSlideOisyDappDescription | undefined;
 	$: featureAirdropSlide = nonNullish(featuredAirdrop)
@@ -88,7 +90,7 @@
 			return;
 		}
 
-		if (isNullish($userProfileVersion)) {
+		if (isNullish($userProfileStore)) {
 			return;
 		}
 

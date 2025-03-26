@@ -14,8 +14,8 @@ testWithII.beforeEach(async ({ page }) => {
 	await page.clock.install();
 });
 
-testWithII('should display homepage in logged in state', async ({ page, iiPage }) => {
-	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage });
+testWithII('should display homepage in logged in state', async ({ page, iiPage, isMobile }) => {
+	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage, isMobile });
 
 	await homepageLoggedIn.waitForReady();
 

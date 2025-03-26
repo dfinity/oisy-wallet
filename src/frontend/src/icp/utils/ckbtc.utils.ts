@@ -32,7 +32,7 @@ export const assertCkBTCUserInputAmount = ({
 		certified: infoCertified
 	} = minterInfo;
 
-	if ((amount ?? 0n) < retrieveBtcMinAmount) {
+	if ((amount ?? ZERO_BI) < retrieveBtcMinAmount) {
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_ckbtc_amount, {
 				$amount: formatToken({

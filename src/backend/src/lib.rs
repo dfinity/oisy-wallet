@@ -22,6 +22,7 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
+        backend_config::{Arg, Config, Guards, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
@@ -30,16 +31,20 @@ use shared::{
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
+        migration::{Migration, MigrationProgress, MigrationReport},
+        network::{
+            SaveNetworksSettingsError, SaveNetworksSettingsRequest, SaveTestnetsSettingsError,
+            SetShowTestnetsRequest,
+        },
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
             ListUserCreationTimestampsResponse, ListUsersRequest, ListUsersResponse, OisyUser,
             UserProfile,
         },
-        Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
-        Timestamp,
+        Stats, Timestamp,
     },
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
@@ -55,7 +60,9 @@ use crate::{
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
-    user_profile::{add_hidden_dapp_id, set_show_testnets},
+    user_profile::{
+        add_hidden_dapp_id, set_network_settings, set_show_testnets, update_network_settings,
+    },
 };
 
 mod assertions;
@@ -531,6 +538,62 @@ pub fn add_user_credential(
     }
 }
 
+/// Sets the user's preference to enable (or disable) networks in the interface, overwriting any
+/// existing settings.
+///
+/// # Returns
+/// - Returns `Ok(())` if the network settings were saved successfully, or if they were already set
+///   to the same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "may_write_user_data")]
+pub fn set_user_network_settings(
+    request: SaveNetworksSettingsRequest,
+) -> Result<(), SaveNetworksSettingsError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        set_network_settings(
+            stored_principal,
+            request.current_user_version,
+            request.networks,
+            &mut user_profile_model,
+        )
+    })
+}
+
+/// Updates the user's preference to enable (or disable) networks in the interface, merging with any
+/// existing settings.
+///
+/// # Returns
+/// - Returns `Ok(())` if the network settings were updated successfully, or if they were already
+///   set to the same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "may_write_user_data")]
+pub fn update_user_network_settings(
+    request: SaveNetworksSettingsRequest,
+) -> Result<(), SaveNetworksSettingsError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        update_network_settings(
+            stored_principal,
+            request.current_user_version,
+            request.networks,
+            &mut user_profile_model,
+        )
+    })
+}
+
 /// Sets the user's preference to show (or hide) testnets in the interface.
 ///
 /// # Returns
@@ -540,6 +603,7 @@ pub fn add_user_credential(
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "may_write_user_data")]
+#[allow(clippy::needless_pass_by_value)] // canister methods are necessary
 pub fn set_user_show_testnets(
     request: SetShowTestnetsRequest,
 ) -> Result<(), SaveTestnetsSettingsError> {
@@ -769,6 +833,19 @@ pub async fn step_migration() {
             eprintln!("Migration failed: {err:?}");
         });
     };
+}
+
+/// Saves a snapshot of the user's account.
+#[update(guard = "may_write_user_data")]
+#[allow(clippy::needless_pass_by_value)] // Canister API methods are always pass by value.
+pub fn set_snapshot(snapshot: UserSnapshot) {
+    todo!("TODO: Set snapshot to: {:?}", snapshot);
+}
+/// Gets the caller's last snapshot.
+#[query(guard = "may_read_user_data")]
+#[must_use]
+pub fn get_snapshot() -> Option<UserSnapshot> {
+    todo!()
 }
 
 export_candid!();
