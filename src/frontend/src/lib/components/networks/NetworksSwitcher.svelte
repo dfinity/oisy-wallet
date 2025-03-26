@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
-	import IconMorePlain from '$lib/components/icons/IconMorePlain.svelte';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
 	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
@@ -30,50 +32,43 @@
 	ariaLabel={$i18n.networks.title}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
 	{disabled}
+	asModalOnMobile
 >
-	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
+	{#if nonNullish($selectedNetwork)}
+		<NetworkLogo network={$selectedNetwork} size="xs" />
+	{:else}
+		<Logo src={chainFusion} size="xs" />
+	{/if}
+	<span class="hidden md:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 
 	<svelte:fragment slot="title">{$i18n.networks.filter}</svelte:fragment>
 	<div slot="items">
-		<ul class="flex list-none flex-col font-normal">
-			<li>
-				<NetworkButton
-					id={undefined}
-					name={$i18n.networks.chain_fusion}
-					icon={chainFusion}
-					usdBalance={mainnetTokensUsdBalance}
-					on:icSelected={dropdown.close}
-				/>
-			</li>
+		<NetworkButton
+			id={undefined}
+			name={$i18n.networks.chain_fusion}
+			icon={chainFusion}
+			usdBalance={mainnetTokensUsdBalance}
+			on:icSelected={dropdown.close}
+		/>
 
+		<ul class="flex list-none flex-col">
 			{#each $networksMainnets as network (network.id)}
-				<li>
-					<MainnetNetwork {network} on:icSelected={dropdown.close} />
-				</li>
+				<li transition:slide={SLIDE_EASING}
+					><MainnetNetwork {network} on:icSelected={dropdown.close} /></li
+				>
 			{/each}
 		</ul>
 
-		<span class="mb-5 mt-8 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
+		<span class="my-5 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
 
 		{#if $testnets}
-			<ul class="mb-2 flex list-none flex-col font-normal" transition:slide={SLIDE_EASING}>
+			<ul class="flex list-none flex-col">
 				{#each $networksTestnets as network (network.id)}
-					<li>
-						<Network {network} on:icSelected={dropdown.close} />
-					</li>
+					<li transition:slide={SLIDE_EASING}
+						><Network {network} on:icSelected={dropdown.close} /></li
+					>
 				{/each}
 			</ul>
 		{/if}
-
-		<hr class="mx-3 w-11/12 opacity-10" style="border: 0.05rem solid" />
-
-		<ul class="flex list-none flex-col gap-4 font-normal">
-			<li class="flex items-center justify-between">
-				<div class="dropdown-item disabled flex items-center gap-2">
-					<IconMorePlain />
-					<span>{$i18n.networks.more}</span>
-				</div>
-			</li>
-		</ul>
 	</div>
 </Dropdown>

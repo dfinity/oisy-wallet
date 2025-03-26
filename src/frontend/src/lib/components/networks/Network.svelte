@@ -18,6 +18,7 @@
 	{name}
 	{usdBalance}
 	{icon}
+	isTestnet={network.env === 'testnet'}
 	testId={`${testIdPrefix}-${id.description}`}
 	on:icSelected
 />
