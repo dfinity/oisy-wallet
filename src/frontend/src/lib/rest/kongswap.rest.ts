@@ -1,6 +1,7 @@
 import { KONGSWAP_API_URL } from '$env/rest/kongswap.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { KongSwapToken } from '$lib/types/kongswap';
+import { nonNullish } from '@dfinity/utils';
 
 const fetchKongSwap = async <T>(endpoint: string): Promise<T | null> => {
 	const response = await fetch(`${KONGSWAP_API_URL}/${endpoint}`, {
@@ -23,9 +24,10 @@ export const fetchBatchKongSwapPrices = async (
 ): Promise<KongSwapToken[]> => {
 	const results = await Promise.allSettled(canisterIds.map(getKongSwapTokenById));
 
-	return results
-		.filter(
-			(result): result is PromiseFulfilledResult<KongSwapToken> => result.status === 'fulfilled'
-		)
-		.map((result) => result.value);
+	return results.reduce<KongSwapToken[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+		return acc;
+	}, []);
 };
