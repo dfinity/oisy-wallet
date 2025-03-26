@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
