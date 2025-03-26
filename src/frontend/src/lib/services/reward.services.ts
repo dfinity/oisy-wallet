@@ -229,7 +229,7 @@ export const getReferrerInfo = async (params: {
 }): Promise<{
 	referralCode: number | undefined;
 	numberOfReferrals: number | undefined;
-}> => {
+} | undefined> => {
 	try {
 		const referrerInfo = await queryReferrerInfo({ ...params, certified: false });
 
@@ -244,7 +244,7 @@ export const getReferrerInfo = async (params: {
 			err
 		});
 
-		return { referralCode: undefined, numberOfReferrals: undefined };
+		return undefined;
 	}
 };
 
