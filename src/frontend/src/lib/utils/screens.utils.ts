@@ -9,8 +9,8 @@ export interface AvailableScreen {
 export const MIN_SCREEN: ScreensKeyType = 'xs';
 export const MAX_SCREEN: ScreensKeyType = '2.5xl';
 
-export const getAvailableScreens: () => AvailableScreen[] = () => {
-	return Object.entries(themeVariables.screens)
+export const getAvailableScreens: () => AvailableScreen[] = () =>
+	Object.entries(themeVariables.screens)
 		.filter(([, v]) => typeof v === 'string') // warning is wrong since we have a custom element which is an object
 		.map(([k, v]) => {
 			return {
@@ -19,7 +19,6 @@ export const getAvailableScreens: () => AvailableScreen[] = () => {
 			};
 		})
 		.sort((a, b) => a.width - b.width);
-};
 
 export const getActiveScreen = ({
 	screenWidth,
