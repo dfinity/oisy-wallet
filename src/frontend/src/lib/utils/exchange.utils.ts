@@ -31,10 +31,7 @@ export const usdValue = ({
 export const formatKongSwapToCoingeckoPrices = (
 	tokens: KongSwapToken[]
 ): CoingeckoSimpleTokenPriceResponse =>
-	tokens.reduce<CoingeckoSimpleTokenPriceResponse>((acc, tokenData) => {
-		const token = tokenData?.token;
-		const metrics = tokenData?.metrics;
-
+	tokens.reduce<CoingeckoSimpleTokenPriceResponse>((acc, { token, metrics }) => {
 		if (isNullish(metrics.price)) {
 			return acc;
 		}
@@ -43,24 +40,27 @@ export const formatKongSwapToCoingeckoPrices = (
 		return acc;
 	}, {});
 
-const mapMetricsToCoingeckoPrice = (metrics: KongSwapTokenMetrics): CoingeckoSimpleTokenPrice => {
-	const { price, market_cap, volume_24h, price_change_24h, updated_at } = metrics;
-	return {
-		usd: Number(price),
-		usd_market_cap: Number(market_cap),
-		usd_24h_vol: Number(volume_24h),
-		usd_24h_change: Number(price_change_24h),
-		last_updated_at: new Date(updated_at).getTime()
-	};
-};
+const mapMetricsToCoingeckoPrice = ({
+	price,
+	market_cap,
+	volume_24h,
+	price_change_24h,
+	updated_at
+}: KongSwapTokenMetrics): CoingeckoSimpleTokenPrice => ({
+	usd: Number(price),
+	usd_market_cap: Number(market_cap),
+	usd_24h_vol: Number(volume_24h),
+	usd_24h_change: Number(price_change_24h),
+	last_updated_at: new Date(updated_at).getTime()
+});
 
-export const findMissingCanisterIds = ({
-	allIds,
+export const findMissingLedgerCanisterIds = ({
+	allLedgerCanisterIds,
 	coingeckoResponse
 }: {
-	allIds: LedgerCanisterIdText[];
+	allLedgerCanisterIds: LedgerCanisterIdText[];
 	coingeckoResponse: CoingeckoSimpleTokenPriceResponse | null;
 }): LedgerCanisterIdText[] => {
 	const found = new Set(Object.keys(coingeckoResponse ?? {}));
-	return allIds.filter((id) => !found.has(id.toLowerCase()));
+	return allLedgerCanisterIds.filter((id) => !found.has(id.toLowerCase()));
 };

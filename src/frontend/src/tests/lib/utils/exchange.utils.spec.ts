@@ -1,5 +1,8 @@
 import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
-import { findMissingCanisterIds, formatKongSwapToCoingeckoPrices } from '$lib/utils/exchange.utils';
+import {
+	findMissingLedgerCanisterIds,
+	formatKongSwapToCoingeckoPrices
+} from '$lib/utils/exchange.utils';
 import { MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2 } from '$tests/mocks/exchanges.mock';
 import { createMockKongSwapToken } from '$tests/mocks/kongswap.mock';
 
@@ -64,8 +67,8 @@ describe('findMissingCanisterIds', () => {
 			}
 		};
 
-		const result = findMissingCanisterIds({
-			allIds: [MOCK_CANISTER_ID_1],
+		const result = findMissingLedgerCanisterIds({
+			allLedgerCanisterIds: [MOCK_CANISTER_ID_1],
 			coingeckoResponse: response
 		});
 
@@ -83,8 +86,8 @@ describe('findMissingCanisterIds', () => {
 			}
 		};
 
-		const result = findMissingCanisterIds({
-			allIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
+		const result = findMissingLedgerCanisterIds({
+			allLedgerCanisterIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
 			coingeckoResponse: response
 		});
 
@@ -92,17 +95,17 @@ describe('findMissingCanisterIds', () => {
 	});
 
 	it('returns all IDs if response is null', () => {
-		const result = findMissingCanisterIds({
-			allIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
+		const result = findMissingLedgerCanisterIds({
+			allLedgerCanisterIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
 			coingeckoResponse: null
 		});
 
 		expect(result).toEqual([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
 	});
 
-	it('returns empty array if allIds is empty', () => {
-		const result = findMissingCanisterIds({
-			allIds: [],
+	it('returns empty array if allLedgerCanisterIds is empty', () => {
+		const result = findMissingLedgerCanisterIds({
+			allLedgerCanisterIds: [],
 			coingeckoResponse: null
 		});
 
@@ -120,8 +123,8 @@ describe('findMissingCanisterIds', () => {
 			}
 		};
 
-		const result = findMissingCanisterIds({
-			allIds: ['AAAAA-AA'],
+		const result = findMissingLedgerCanisterIds({
+			allLedgerCanisterIds: ['AAAAA-AA'],
 			coingeckoResponse: response
 		});
 
@@ -139,8 +142,8 @@ describe('findMissingCanisterIds', () => {
 			}
 		};
 
-		const result = findMissingCanisterIds({
-			allIds: [MOCK_CANISTER_ID_1],
+		const result = findMissingLedgerCanisterIds({
+			allLedgerCanisterIds: [MOCK_CANISTER_ID_1],
 			coingeckoResponse: response
 		});
 
