@@ -42,11 +42,11 @@
 		{#if nonNullish(usdBalance)}
 			{formatUSD({ value: usdBalance })}
 		{/if}
-	</span>
 
-	{#if isTestnet}
-		<span class="inline-flex">
-			<Badge styleClass="pt-0 pb-0">{$i18n.networks.testnet}</Badge>
-		</span>
-	{/if}
+		{#if isTestnet}
+			<span class="inline-flex">
+				<Badge styleClass="pt-0 pb-0">{$i18n.networks.testnet}</Badge>
+			</span>
+		{/if}
+	</span>
 </LogoButton>
