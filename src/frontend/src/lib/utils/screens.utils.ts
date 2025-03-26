@@ -12,12 +12,10 @@ export const MAX_SCREEN: ScreensKeyType = '2.5xl';
 export const getAvailableScreens: () => AvailableScreen[] = () =>
 	Object.entries(themeVariables.screens)
 		.filter(([, v]) => typeof v === 'string') // warning is wrong since we have a custom element which is an object
-		.map(([k, v]) => {
-			return {
-				screen: k as ScreensKeyType,
-				width: Number((v as string).replaceAll('rem', '')) * 16
-			};
-		})
+		.map(([k, v]) => ({
+			screen: k as ScreensKeyType,
+			width: Number((v as string).replaceAll('rem', '')) * 16
+		}))
 		.sort((a, b) => a.width - b.width);
 
 export const getActiveScreen = ({
