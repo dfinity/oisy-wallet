@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { slide } from 'svelte/transition';
 	import { nonNullish } from '@dfinity/utils';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
@@ -8,6 +9,7 @@
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
+	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
@@ -49,16 +51,24 @@
 			on:icSelected={dropdown.close}
 		/>
 
-		{#each $networksMainnets as network (network.id.toString())}
-			<MainnetNetwork {network} on:icSelected={dropdown.close} />
-		{/each}
+		<ul class="flex list-none flex-col">
+			{#each $networksMainnets as network (network.id)}
+				<li transition:slide={SLIDE_EASING}
+					><MainnetNetwork {network} on:icSelected={dropdown.close} /></li
+				>
+			{/each}
+		</ul>
 
 		<span class="my-5 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
 
 		{#if $testnets}
-			{#each $networksTestnets as network (network.id.toString())}
-				<Network {network} on:icSelected={dropdown.close} />
-			{/each}
+			<ul class="flex list-none flex-col">
+				{#each $networksTestnets as network (network.id)}
+					<li transition:slide={SLIDE_EASING}
+						><Network {network} on:icSelected={dropdown.close} /></li
+					>
+				{/each}
+			</ul>
 		{/if}
 	</div>
 </Dropdown>
