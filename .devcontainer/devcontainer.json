@@ -1,0 +1,33 @@
+{
+  "name": "Internet Computer Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/universal:latest",
+  
+  // Specify the machine type: 8-core with 32GB RAM
+  "hostRequirements": {
+    "cpus": 8,
+    "memory": "32gb",
+    "storage": "64gb"
+  },
+  
+  // Install Node.js version 22
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    },
+    "ghcr.io/devcontainers/features/rust:1": {
+      "version": "latest"
+    }
+  },
+  
+  // Run commands after container is created - just install dfx
+  "postCreateCommand": "sh -c 'export DFXVM_INIT_YES=1 && curl -fsSL https://internetcomputer.org/install.sh | sh && source \"$HOME/.local/share/dfx/env\" && dfxvm install 0.23.0'",
+  
+  // Run any custom script for Rust setup if needed
+  "postAttachCommand": "./scripts/setup-rust && . \"$HOME/.cargo/env\"",
+  
+  // Environment variables to set
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:${containerEnv:HOME}/.local/share/dfx:${containerEnv:HOME}/.cargo/bin",
+    "DFXVM_INIT_YES": "1"
+  }
+}
