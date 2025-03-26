@@ -37,7 +37,7 @@
 			return;
 		}
 
-		({referralCode, numberOfReferrals} = await getReferrerInfo({identity: $authIdentity}));
+		({ referralCode, numberOfReferrals } = await getReferrerInfo({ identity: $authIdentity }));
 	});
 </script>
 
