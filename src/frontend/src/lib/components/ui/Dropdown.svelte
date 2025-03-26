@@ -2,7 +2,6 @@
 	import { Modal, Popover } from '@dfinity/gix-components';
 	import DropdownButton from '$lib/components/ui/DropdownButton.svelte';
 
-	export let title: string | undefined;
 	export let disabled = false;
 	export let asModalOnMobile = false;
 	export let ariaLabel: string;
