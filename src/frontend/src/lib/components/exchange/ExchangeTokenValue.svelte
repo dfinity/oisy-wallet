@@ -9,7 +9,11 @@
 	let balance: TokenUi['balance'];
 	let usdBalance: TokenUi['usdBalance'];
 
-	$: ({ balance, usdBalance } = data);
+	$: {
+		({ balance, usdBalance } = data);
+
+		console.log({ balance, usdBalance });
+	}
 </script>
 
 <TokenExchangeValueSkeleton {data}>
