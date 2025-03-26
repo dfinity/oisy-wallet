@@ -5,10 +5,10 @@
 
 	export let selectable = false;
 	export let selected = false;
-
 	export let dividers = false;
 	export let hover = true;
 	export let rounded = true;
+	export let testId: string | undefined = undefined;
 
 	export let testId: string | undefined = undefined;
 
