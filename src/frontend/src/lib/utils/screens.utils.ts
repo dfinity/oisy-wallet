@@ -28,7 +28,6 @@ export const getActiveScreen = ({
 	screenWidth: number;
 	availableScreens: AvailableScreen[];
 }) => {
-	console.log('ACTIVE');
 	for (const { width, screen } of availableScreens) {
 		if (screenWidth < width) {
 			return screen;
