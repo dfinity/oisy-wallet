@@ -100,7 +100,7 @@ abstract class Homepage {
 		testId: string;
 		scrollIntoView?: boolean;
 	}): Promise<void> {
-		const locator = this.#page.getByTestId(testId);
+		const locator = this.#page.getByTestId(testId).filter({ visible: true });
 
 		if (scrollIntoView) {
 			// Method `click` auto-scrolls into view if needed.
@@ -469,7 +469,7 @@ abstract class Homepage {
 		if (isNullish(this.promotionCarousel)) {
 			this.promotionCarousel = new PromotionCarousel(this.#page);
 		}
-		const carouselSelector = await this.promotionCarousel.getCarouselSelector();
+		const carouselSelector = this.promotionCarousel.getCarouselSelector();
 		const mask = nonNullish(carouselSelector) && freezeCarousel ? [carouselSelector] : [];
 
 		if (!this.#isMobile) {

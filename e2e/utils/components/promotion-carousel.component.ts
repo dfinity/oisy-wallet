@@ -8,18 +8,8 @@ export class PromotionCarousel {
 		this.#page = page;
 	}
 
-	public async getCarouselSelector(): Promise<Locator | undefined> {
-		const carouselSelectors = `[data-tid="${CAROUSEL_CONTAINER}"]`;
-		const elements = this.#page.locator(carouselSelectors);
-		const count = await elements.count();
-		let carouselSelector: Locator | undefined;
-		for (let i = 0; i < count; i++) {
-			const isVisible = await elements.nth(i).isVisible();
-			if (isVisible) {
-				carouselSelector = elements.nth(i);
-			}
-		}
-		return carouselSelector;
+	public getCarouselSelector(): Locator {
+		return this.#page.getByTestId(CAROUSEL_CONTAINER).filter({ visible: true });
 	}
 
 	public async freezeCarouselToSlide(slideNumber: number): Promise<void> {
