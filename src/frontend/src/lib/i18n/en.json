@@ -904,6 +904,9 @@
 				"information": "Get bonus sprinkles, every time your friends receive one!",
 				"not_referred_yet": "You haven't referred anyone yet",
 				"learn_more": "Learn more"
+			},
+			"error": {
+				"loading_referrer_info": "Error while loading referral info"
 			}
 		},
 		"reward": {

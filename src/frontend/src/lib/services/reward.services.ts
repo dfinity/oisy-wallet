@@ -1,22 +1,23 @@
-import type { RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
-import type { IcToken } from '$icp/types/ic-token';
+import type {ReferrerInfo, RewardInfo, VipReward} from '$declarations/rewards/rewards.did';
+import type {IcToken} from '$icp/types/ic-token';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
+	getReferrerInfo as getReferrerInfoApi,
 	getUserInfo,
-	getUserInfo as getUserInfoApi
+	getUserInfo as getUserInfoApi, setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
-import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
-import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
-import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
-import type { RewardResponseInfo, RewardsResponse } from '$lib/types/reward';
-import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
-import type { ResultSuccess } from '$lib/types/utils';
-import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
-import type { Identity } from '@dfinity/agent';
-import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
+import {MILLISECONDS_IN_DAY, ZERO_BI} from '$lib/constants/app.constants';
+import {i18n} from '$lib/stores/i18n.store';
+import {toastsError} from '$lib/stores/toasts.store';
+import {AlreadyClaimedError, InvalidCodeError, UserNotVipError} from '$lib/types/errors';
+import type {RewardResponseInfo, RewardsResponse} from '$lib/types/reward';
+import type {AnyTransactionUiWithCmp} from '$lib/types/transaction';
+import type {ResultSuccess} from '$lib/types/utils';
+import {formatNanosecondsToTimestamp} from '$lib/utils/format.utils';
+import type {Identity} from '@dfinity/agent';
+import {fromNullable, isNullish, nonNullish} from '@dfinity/utils';
+import {get} from 'svelte/store';
 
 const queryVipUser = async (params: {
 	identity: Identity;
@@ -190,6 +191,86 @@ export const claimVipReward = async (params: {
 }): Promise<ResultSuccess> => {
 	try {
 		await updateVipReward(params);
+		return { success: true };
+	} catch (err: unknown) {
+		const { vip } = get(i18n);
+		toastsError({
+			msg: { text: vip.reward.error.claiming_reward },
+			err
+		});
+		return { success: false, err };
+	}
+};
+
+const queryReferrerInfo = async (params: {
+	identity: Identity;
+	certified: boolean;
+}): Promise<ReferrerInfo> => {
+	return await getReferrerInfoApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+};
+
+/**
+ * Gets the referrer info of the user.
+ *
+ * This function performs **always** a query (not certified) to get the referrer info of a user.
+ *
+ * @async
+ * @param {Object} params - The parameters required to load the referrer info.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @returns {Promise<ReferrerInfo>} - Resolves with the received referral code and the number of referrals.
+ *
+ * @throws {Error} Displays an error toast and returns undefined if the query fails.
+ */
+export const getReferrerInfo = async (params: { identity: Identity }): Promise<ReferrerInfo | undefined> => {
+	try {
+		return await queryReferrerInfo({...params, certified: false});
+	} catch (err: unknown) {
+		const { referral } = get(i18n);
+		toastsError({
+			msg: { text: referral.invitation.error.loading_referrer_info },
+			err
+		});
+
+		return undefined;
+	}
+}
+
+const updateReferrer = async ({
+								   identity,
+								   referrerCode
+							   }: {
+	identity: Identity;
+	referrerCode: number;
+}): Promise<void> => {
+	return await setReferrerApi({
+		identity,
+		referrerCode,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+};
+
+/**
+ * Establish a referral connection using a provided referral code.
+ *
+ * This function **always** makes an **update** call and cannot be a query.
+ *
+ * @async
+ * @param {Object} params - The parameters required to establish the connection.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @param {string} params.referrerCode - The referral code to establish the connection.
+ * @returns {Promise<ResultSuccess>} - Resolves with the result if successful.
+ *
+ * @throws {Error} Throws an error if the update call fails or if the connection cannot be established.
+ */
+export const setReferrer = async (params: {
+	identity: Identity;
+	referrerCode: number;
+}): Promise<ResultSuccess> => {
+	try {
+		await updateReferrer(params);
 		return { success: true };
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
