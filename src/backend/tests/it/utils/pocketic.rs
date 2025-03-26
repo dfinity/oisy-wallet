@@ -155,7 +155,7 @@ impl BackendBuilder {
         encode_one(init_config).unwrap()
     }
 
-    /// The default arguments to deploy the bitcoin canister.
+    /// The default arguments to deploy the cycles ledger canister.
     pub fn default_cycles_ledger_arg() -> Vec<u8> {
         let init_config = InitArgs {
             max_blocks_per_request: 9_999u64,
