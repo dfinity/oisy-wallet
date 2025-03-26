@@ -377,16 +377,14 @@ a.as-button {
 	@apply bg-primary;
 	@apply rounded-xl;
 	@apply px-4;
-	@apply py-3;
-	@apply min-w-72;
+	@apply py-2;
 	@apply justify-between;
 	@apply gap-2;
 	@apply text-left;
 	@apply font-medium;
 	@apply leading-5;
-	@apply border-primary;
 
-	transition: border 0.25s ease-out;
+	transition: all 0.25s ease-out;
 
 	&::placeholder {
 		@apply text-tertiary;
@@ -405,29 +403,8 @@ a.as-button {
 	@apply bg-disabled;
 }
 
-// DROPDOWN ITEM
-.dropdown-item:not(.loading) {
-	@apply text-primary;
-	@apply rounded-xl;
-	@apply px-3;
-	@apply py-2;
-
-	margin-bottom: 1px;
-
-	&:hover:not(.disabled):not([disabled]) {
-		@apply bg-secondary;
+@media (width <= theme(--breakpoint-sm)) {
+	.dropdown-button:not(.loading) {
+		@apply px-2;
 	}
-
-	&.selected {
-		@apply bg-brand-subtle-10;
-
-		& > span > svg {
-			color: var(--color-foreground-brand-primary-alt);
-		}
-	}
-}
-
-.dropdown-item.disabled:not(.loading),
-.dropdown-item[disabled]:not(.loading) {
-	@apply text-tertiary-inverted;
 }
