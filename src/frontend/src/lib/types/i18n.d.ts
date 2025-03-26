@@ -821,7 +821,7 @@ interface I18nReferral {
 			referred_amount: string;
 			learn_more: string;
 		};
-		error: { loading_referrer_info: string; setting_referrer: string; };
+		error: { loading_referrer_info: string; setting_referrer: string };
 	};
 	reward: {
 		text: {
