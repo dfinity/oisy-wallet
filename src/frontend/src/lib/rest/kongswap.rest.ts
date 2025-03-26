@@ -18,15 +18,14 @@ const fetchKongSwap = async <T>(endpoint: string): Promise<T | null> => {
 export const getKongSwapTokenById = (id: LedgerCanisterIdText): Promise<KongSwapToken | null> =>
 	fetchKongSwap<KongSwapToken>(`tokens/${id.toLowerCase()}`);
 
-export const fetchBatchKongSwapPrices = (
+export const fetchBatchKongSwapPrices = async (
 	canisterIds: LedgerCanisterIdText[]
-): Promise<(KongSwapToken | null)[]> =>
-	Promise.all(
-		canisterIds.map(async (id) => {
-			try {
-				return await getKongSwapTokenById(id);
-			} catch {
-				return null;
-			}
-		})
-	);
+): Promise<KongSwapToken[]> => {
+	const results = await Promise.allSettled(canisterIds.map(getKongSwapTokenById));
+
+	return results
+		.filter(
+			(result): result is PromiseFulfilledResult<KongSwapToken> => result.status === 'fulfilled'
+		)
+		.map((result) => result.value);
+};

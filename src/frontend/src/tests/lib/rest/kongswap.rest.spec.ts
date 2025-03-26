@@ -22,6 +22,7 @@ describe('KongSwap REST client', () => {
 			} as unknown as Response);
 
 			const result = await getKongSwapTokenById(MOCK_CANISTER_ID_1);
+
 			expect(fetch).toHaveBeenCalledWith(EXPECTED_ENDPOINT, {
 				method: 'GET',
 				headers: { 'Content-Type': 'application/json' }
@@ -58,21 +59,23 @@ describe('KongSwap REST client', () => {
 			expect(result).toEqual([mockTokenResponse, mockTokenResponse]);
 		});
 
-		it('handles partial failures and returns null for failed tokens', async () => {
+		it('excludes failed responses from result array', async () => {
 			vi.mocked(fetch)
 				.mockResolvedValueOnce({
 					ok: true,
-					json: () => mockTokenResponse
+					json: () => Promise.resolve(mockTokenResponse)
 				} as unknown as Response)
 				.mockResolvedValueOnce({
 					ok: false
-				} as Response);
+				} as unknown as Response);
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
-			expect(result).toEqual([mockTokenResponse, null]);
+
+			expect(fetch).toHaveBeenCalledTimes(2);
+			expect(result).toEqual([mockTokenResponse]);
 		});
 
-		it('returns null if JSON parsing fails', async () => {
+		it('excludes tokens if JSON parsing fails', async () => {
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
 				json: () => {
@@ -81,7 +84,24 @@ describe('KongSwap REST client', () => {
 			} as unknown as Response);
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
-			expect(result).toEqual([null]);
+
+			expect(fetch).toHaveBeenCalledTimes(1);
+			expect(result).toEqual([]);
+		});
+
+		it('returns an empty array if all requests fail', async () => {
+			vi.mocked(fetch)
+				.mockResolvedValueOnce({
+					ok: false
+				} as unknown as Response)
+				.mockResolvedValueOnce({
+					ok: false
+				} as unknown as Response);
+
+			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
+
+			expect(fetch).toHaveBeenCalledTimes(2);
+			expect(result).toEqual([]);
 		});
 	});
 });
