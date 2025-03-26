@@ -206,12 +206,10 @@ export const claimVipReward = async (params: {
 const queryReferrerInfo = async (params: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<ReferrerInfo> => {
-	return await getReferrerInfoApi({
+}): Promise<ReferrerInfo> => await getReferrerInfoApi({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
-};
 
 /**
  * Gets the referrer info of the user.
@@ -247,13 +245,11 @@ const updateReferrer = async ({
 }: {
 	identity: Identity;
 	referrerCode: number;
-}): Promise<void> => {
-	return await setReferrerApi({
+}): Promise<void> => await setReferrerApi({
 		identity,
 		referrerCode,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
-};
 
 /**
  * Establish a referral connection using a provided referral code.
