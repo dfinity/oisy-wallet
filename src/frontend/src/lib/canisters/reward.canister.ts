@@ -50,12 +50,6 @@ export class RewardCanister extends Canister<RewardService> {
 		return claim_vip_reward(vipReward);
 	};
 
-	registerAirdropRecipient = (userSnapshot: UserSnapshot): Promise<void> => {
-		const { register_airdrop_recipient } = this.caller({ certified: true });
-
-		return register_airdrop_recipient(userSnapshot);
-	};
-
 	getReferrerInfo = ({ certified = true }: QueryParams): Promise<ReferrerInfo> => {
 		const { referrer_info } = this.caller({ certified });
 
@@ -66,5 +60,11 @@ export class RewardCanister extends Canister<RewardService> {
 		const { set_referrer } = this.caller({ certified: true });
 
 		return set_referrer(referralCode);
+	};
+
+	registerAirdropRecipient = (userSnapshot: UserSnapshot): Promise<void> => {
+		const { register_airdrop_recipient } = this.caller({ certified: true });
+
+		return register_airdrop_recipient(userSnapshot);
 	};
 }

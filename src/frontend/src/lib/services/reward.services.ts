@@ -285,9 +285,9 @@ export const setReferrer = async (params: {
 		await updateReferrer(params);
 		return { success: true };
 	} catch (err: unknown) {
-		const { vip } = get(i18n);
+		const { referral } = get(i18n);
 		toastsError({
-			msg: { text: vip.reward.error.claiming_reward },
+			msg: { text: referral.invitation.error.setting_referrer },
 			err
 		});
 		return { success: false, err };
