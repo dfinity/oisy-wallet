@@ -1,11 +1,25 @@
-import { CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
-import type { Page } from '@playwright/test';
+import { CAROUSEL_CONTAINER, CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
+import type { Locator, Page } from '@playwright/test';
 
 export class PromotionCarousel {
 	#page: Page;
 
 	constructor(page: Page) {
 		this.#page = page;
+	}
+
+	public async getCarouselSelector(): Promise<Locator | undefined> {
+		const carouselSelectors = `[data-tid="${CAROUSEL_CONTAINER}"]`;
+		const elements = this.#page.locator(carouselSelectors);
+		const count = await elements.count();
+		let carouselSelector: Locator | undefined;
+		for (let i = 0; i < count; i++) {
+			const isVisible = await elements.nth(i).isVisible();
+			if (isVisible) {
+				carouselSelector = elements.nth(i);
+			}
+		}
+		return carouselSelector;
 	}
 
 	public async freezeCarouselToSlide(slideNumber: number): Promise<void> {

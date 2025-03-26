@@ -1,6 +1,5 @@
 import {
 	AMOUNT_DATA,
-	CAROUSEL_CONTAINER,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
@@ -460,23 +459,17 @@ abstract class Homepage {
 
 		const element = screenshotTarget ?? this.#page;
 
+		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
 		// if (freezeCarousel) {
 		// 	// Freezing the time because the carousel has a timer that resets the animations and the transitions.
 		// 	await this.#page.clock.pauseAt(Date.now());
 		// 	await this.setCarouselFirstSlide();
 		// 	await this.#page.clock.pauseAt(Date.now());
 		// }
-
-		const carouselSelectors = `[data-tid="${CAROUSEL_CONTAINER}"]`;
-		const elements = this.#page.locator(carouselSelectors);
-		const count = await elements.count();
-		let carouselSelector: Locator | undefined;
-		for (let i = 0; i < count; i++) {
-			const isVisible = await elements.nth(i).isVisible();
-			if (isVisible) {
-				carouselSelector = elements.nth(i);
-			}
+		if (isNullish(this.promotionCarousel)) {
+			this.promotionCarousel = new PromotionCarousel(this.#page);
 		}
+		const carouselSelector = await this.promotionCarousel.getCarouselSelector();
 		const mask = nonNullish(carouselSelector) && freezeCarousel ? [carouselSelector] : [];
 
 		if (!this.#isMobile) {
@@ -505,6 +498,7 @@ abstract class Homepage {
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
 
+		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
 		// if (freezeCarousel) {
 		// 	// Resuming the time that we froze because of the carousel animations.
 		// 	await this.#page.clock.resume();
