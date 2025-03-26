@@ -206,7 +206,8 @@ export const claimVipReward = async (params: {
 const queryReferrerInfo = async (params: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<ReferrerInfo> => await getReferrerInfoApi({
+}): Promise<ReferrerInfo> =>
+	await getReferrerInfoApi({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
@@ -245,7 +246,8 @@ const updateReferrer = async ({
 }: {
 	identity: Identity;
 	referrerCode: number;
-}): Promise<void> => await setReferrerApi({
+}): Promise<void> =>
+	await setReferrerApi({
 		identity,
 		referrerCode,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
