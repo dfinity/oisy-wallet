@@ -22,6 +22,7 @@
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 	import { signOut } from '$lib/services/auth.services';
+	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
@@ -34,7 +35,6 @@
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -196,9 +196,9 @@
 {/if}
 
 <style>
-    :root:has(.login-modal) {
-        --alert-max-width: 90vw;
-        --alert-max-height: initial;
-        --dialog-border-radius: calc(var(--border-radius-sm) * 3);
-    }
+	:root:has(.login-modal) {
+		--alert-max-width: 90vw;
+		--alert-max-height: initial;
+		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
+	}
 </style>
