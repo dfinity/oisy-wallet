@@ -195,18 +195,6 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 	};
 
-	setUserNetworkSettings = async ({
-		networks,
-		currentUserVersion
-	}: SaveUserNetworksSettings): Promise<void> => {
-		const { set_user_network_settings } = this.caller({ certified: true });
-
-		await set_user_network_settings({
-			networks: mapUserNetworks(networks),
-			current_user_version: toNullable(currentUserVersion)
-		});
-	};
-
 	setUserShowTestnets = async ({
 		showTestnets,
 		currentUserVersion

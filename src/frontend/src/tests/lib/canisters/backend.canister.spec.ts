@@ -731,45 +731,6 @@ describe('backend.canister', () => {
 		});
 	});
 
-	describe('setUserNetworkSettings', () => {
-		it('should set user network settings', async () => {
-			const response = { Ok: null };
-
-			service.set_user_network_settings.mockResolvedValue(response);
-
-			const { setUserNetworkSettings } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = await setUserNetworkSettings({
-				networks: mockUserNetworks
-			});
-
-			expect(service.set_user_network_settings).toHaveBeenCalledWith({
-				networks: mockUserNetworksMap,
-				current_user_version: []
-			});
-			expect(res).toBeUndefined();
-		});
-
-		it('should throw an error if set_user_network_settings throws', async () => {
-			service.set_user_network_settings.mockImplementation(async () => {
-				await Promise.resolve();
-				throw mockResponseError;
-			});
-
-			const { setUserNetworkSettings } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = setUserNetworkSettings({
-				networks: mockUserNetworks
-			});
-
-			await expect(res).rejects.toThrow(mockResponseError);
-		});
-	});
-
 	describe('setUserShowTestnets', () => {
 		it('should set user show testnets', async () => {
 			const response = { Ok: null };
