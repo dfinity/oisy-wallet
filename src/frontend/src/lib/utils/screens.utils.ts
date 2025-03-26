@@ -1,7 +1,10 @@
 import { themeVariables } from '$lib/styles/tailwind/theme-variables';
 
 export type ScreensKeyType = keyof typeof themeVariables.screens;
-export type AvailableScreen = { screen: ScreensKeyType; width: number };
+export interface AvailableScreen {
+	screen: ScreensKeyType;
+	width: number;
+}
 
 export const MIN_SCREEN: ScreensKeyType = 'xs';
 export const MAX_SCREEN: ScreensKeyType = '2.5xl';
@@ -25,6 +28,7 @@ export const getActiveScreen = ({
 	screenWidth: number;
 	availableScreens: AvailableScreen[];
 }) => {
+	console.log('ACTIVE');
 	for (const { width, screen } of availableScreens) {
 		if (screenWidth < width) {
 			return screen;
