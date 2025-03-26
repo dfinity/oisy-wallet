@@ -10,8 +10,11 @@
 		modalHideToken,
 		modalIcHideToken,
 		modalVipQrCode,
-		modalRewardDetails
+		modalRewardDetails,
+		modalDropdown
 	} from '$lib/derived/modal.derived';
+	import { Modal } from '@dfinity/gix-components';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
@@ -29,5 +32,13 @@
 		<AirdropModalDetails />
 	{:else if $modalVipQrCode}
 		<VipQrCodeModal />
+	{:else if $modalDropdown}
+		<Responsive down="md">
+			<Modal on:nnsClose={modalStore.close}>
+				<slot name="title" slot="title" />
+
+				<slot name="items" />
+			</Modal>
+		</Responsive>
 	{/if}
 {/if}

@@ -165,3 +165,8 @@ export const modalSettingsData: Readable<SettingsModalType> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.data as SettingsModalType
 );
+
+export const modalDropdown: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'dropdown'
+);
