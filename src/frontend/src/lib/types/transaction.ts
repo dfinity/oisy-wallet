@@ -54,12 +54,15 @@ export type TransactionType = z.infer<typeof TransactionTypeSchema>;
 
 export type TransactionStatus = z.infer<typeof TransactionStatusSchema>;
 
-export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to'> & {
+export interface TransactionUiCommon {
+	from: string;
+	to?: string;
 	timestamp?: bigint;
 	txExplorerUrl?: string;
 	toExplorerUrl?: string;
 	fromExplorerUrl?: string;
-};
+	blockNumber?: number;
+}
 
 export type AnyTransactionUi =
 	| BtcTransactionUi
