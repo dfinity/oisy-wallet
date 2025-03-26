@@ -280,7 +280,6 @@
 		"chain_fusion": "All networks",
 		"network": "Network",
 		"testnet": "Testnet",
-		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled",
 		"filter": "Filter networks"
 	},
 	"receive": {
