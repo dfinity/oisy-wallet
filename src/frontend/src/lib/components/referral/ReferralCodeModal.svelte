@@ -81,7 +81,7 @@
 				<ExternalLink
 					href={OISY_REFERRAL_URL}
 					ariaLabel={$i18n.referral.invitation.text.learn_more}
-					styleClass={`font-semibold min-w-30 flex-row-reverse`}
+					styleClass="font-semibold min-w-30 flex-row-reverse"
 					testId={REFERRAL_CODE_LEARN_MORE}
 				>
 					{$i18n.referral.invitation.text.learn_more}
