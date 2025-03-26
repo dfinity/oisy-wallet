@@ -903,6 +903,7 @@
 				"referral_link_copied": "Referral link copied to clipboard.",
 				"information": "Get bonus sprinkles, every time your friends receive one!",
 				"not_referred_yet": "You haven't referred anyone yet",
+				"referred_amount": "You already referred $amount people",
 				"learn_more": "Learn more"
 			},
 			"error": {

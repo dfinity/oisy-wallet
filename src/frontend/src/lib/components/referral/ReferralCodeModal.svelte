@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal, QRCode } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
+	import {isNullish, nonNullish} from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
@@ -20,14 +20,26 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import {getReferrerInfo} from "$lib/services/reward.services";
+	import {authIdentity} from "$lib/derived/auth.derived";
+	import {nullishSignOut} from "$lib/services/auth.services";
+	import {replacePlaceholders} from "$lib/utils/i18n.utils";
 
-	let referrerCode: string;
+	let referralCode: string;
+	let numberOfReferrals: number;
 
 	let referralUrl;
-	$: referralUrl = `${window.location.origin}/?referrer=${referrerCode}`;
+	$: referralUrl = `${window.location.origin}/?referrer=${referralCode}`;
 
-	onMount(() => {
-		referrerCode = 'sadasdas'; // TODO load code from rewards canister
+	onMount(async () => {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
+
+		const {referral_code, num_referrals} = await getReferrerInfo($authIdentity);
+		referralCode = referral_code;
+		numberOfReferrals = num_referrals;
 	});
 </script>
 
@@ -38,7 +50,7 @@
 
 	<ContentWithToolbar>
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
-			{#if nonNullish(referrerCode)}
+			{#if nonNullish(referralCode)}
 				<QRCode value={referralUrl}>
 					<div slot="logo" class="flex items-center justify-center rounded-lg bg-primary p-2">
 						<IconAstronautHelmet />
@@ -49,7 +61,7 @@
 			{/if}
 		</div>
 
-		{#if nonNullish(referrerCode)}
+		{#if nonNullish(referralCode)}
 			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2">
 				<output class="break-all">{referralUrl}</output>
 				<div class="flex gap-4">
@@ -63,7 +75,9 @@
 			</div>
 
 			<span class="mb-6 block w-full pt-3 text-center text-sm text-tertiary">
-				{$i18n.referral.invitation.text.not_referred_yet}
+				{nonNullish(numberOfReferrals) && numberOfReferrals > 0 ? replacePlaceholders($i18n.referral.invitation.text.referred_amount, {
+					amount: numberOfReferrals.toString()
+				}) : $i18n.referral.invitation.text.not_referred_yet}
 			</span>
 		{:else}
 			<div class="mb-6">
