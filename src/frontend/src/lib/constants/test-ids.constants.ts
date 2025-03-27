@@ -56,7 +56,7 @@ export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_AIRDROPS = 'navigation-item-rewards';
 
 export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
-
+export const NAVIGATION_FOOTER = 'navigation-footer';
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
 export const AMOUNT_DATA = 'amount-data';

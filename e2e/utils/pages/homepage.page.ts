@@ -32,6 +32,7 @@ import {
 	getReceiveTokensModalAddressLabelSelector,
 	getReceiveTokensModalQrCodeButtonSelector
 } from '../selectors.utils';
+import { ViewportAdjuster } from '../helpers/viewport-utils';
 
 interface HomepageParams {
 	page: Page;
@@ -456,6 +457,9 @@ abstract class Homepage {
 			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
 			await this.viewportAdjuster();
 		}
+
+		const viewportAdjuster = new ViewportAdjuster(this.#page);
+		await viewportAdjuster.checkAndAdjustViewport();
 
 		const element = screenshotTarget ?? this.#page;
 
