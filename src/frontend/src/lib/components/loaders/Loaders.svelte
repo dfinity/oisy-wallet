@@ -12,27 +12,27 @@
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 </script>
 
-<AddressGuard>
-	<Loader>
-		<VipRewardGuard>
-			<RewardGuard>
-				<LoaderEthBalances>
-					<LoaderWallets>
-						<ExchangeWorker>
-							<LoaderMetamask>
-								<LoaderUserProfile>
+<LoaderUserProfile>
+	<AddressGuard>
+		<Loader>
+			<VipRewardGuard>
+				<RewardGuard>
+					<LoaderEthBalances>
+						<LoaderWallets>
+							<ExchangeWorker>
+								<LoaderMetamask>
 									<UserSnapshotWorker>
 										<slot />
 									</UserSnapshotWorker>
-								</LoaderUserProfile>
-							</LoaderMetamask>
-						</ExchangeWorker>
-					</LoaderWallets>
-				</LoaderEthBalances>
-			</RewardGuard>
-		</VipRewardGuard>
-	</Loader>
-</AddressGuard>
+								</LoaderMetamask>
+							</ExchangeWorker>
+						</LoaderWallets>
+					</LoaderEthBalances>
+				</RewardGuard>
+			</VipRewardGuard>
+		</Loader>
+	</AddressGuard>
+</LoaderUserProfile>
 
 <!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->
 <CkBTCUpdateBalanceListener />
