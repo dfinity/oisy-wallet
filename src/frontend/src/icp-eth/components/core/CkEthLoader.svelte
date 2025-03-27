@@ -10,6 +10,7 @@
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { loadCkEthMinterInfo } from '$icp-eth/services/cketh.services';
 	import { LOCAL } from '$lib/constants/app.constants';
+	import { networkICPDisabled } from '$lib/derived/networks.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { TokenId } from '$lib/types/token';
@@ -17,6 +18,10 @@
 	export let nativeTokenId: TokenId;
 
 	const load = async () => {
+		if ($networkICPDisabled) {
+			return;
+		}
+
 		if (!$ethToCkETHEnabled && !$erc20ToCkErc20Enabled) {
 			return;
 		}
@@ -49,7 +54,8 @@
 		});
 	};
 
-	$: $ethToCkETHEnabled,
+	$: $networkICPDisabled,
+		$ethToCkETHEnabled,
 		$erc20ToCkErc20Enabled,
 		$icrcDefaultTokensStore,
 		nativeTokenId,
