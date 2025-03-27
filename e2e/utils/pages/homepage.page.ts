@@ -453,13 +453,6 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
-<<<<<<< HEAD
-		const viewportAdjuster = new ViewportAdjuster(this.#page);
-		await viewportAdjuster.checkAndAdjustViewport();
-		if (freezeCarousel) {
-			await this.setCarouselFirstSlide();
-			await this.waitForLoadState();
-=======
 		if (isNullish(screenshotTarget) && !this.#isMobile) {
 			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
 			await this.viewportAdjuster();
@@ -482,7 +475,6 @@ abstract class Homepage {
 
 		if (!this.#isMobile) {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
->>>>>>> 3ad38d6d421008926a48a01d02b664e920963edd
 		}
 
 		if (nonNullish(centeredElementTestId)) {
