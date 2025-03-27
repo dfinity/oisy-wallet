@@ -10,8 +10,6 @@
 	export let rounded = true;
 	export let testId: string | undefined = undefined;
 
-	export let testId: string | undefined = undefined;
-
 	let hasTitleSlot: boolean;
 	$: hasTitleSlot = nonNullish($$slots['title']);
 
