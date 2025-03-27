@@ -334,9 +334,7 @@ const parseTokens = (tokens) => {
 
 	testnetTokens.forEach(({ symbol, erc20ContractAddress }) => {
 		const mainSymbol = symbol.replace('Sepolia', '').slice(2);
-		if (!acc[mainSymbol]) {
-			acc[mainSymbol] = { mainSymbol };
-		}
+		acc[mainSymbol] ??= { mainSymbol };
 		acc[mainSymbol].testnetContractAddress = erc20ContractAddress;
 	});
 

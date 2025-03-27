@@ -245,10 +245,6 @@ div.popover {
 		--border-radius: 16px;
 
 		max-width: calc(100vw - (2 * var(--padding)));
-
-		@media (width >= theme(--breakpoint-sm)) {
-			max-width: 300px !important;
-		}
 	}
 }
 

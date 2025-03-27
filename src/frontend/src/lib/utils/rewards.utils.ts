@@ -1,5 +1,5 @@
 import { ZERO_BI } from '$lib/constants/app.constants';
-import { getRewards } from '$lib/services/reward-code.services';
+import { getRewards } from '$lib/services/reward.services';
 import type { RewardResponseInfo, RewardResult } from '$lib/types/reward';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
