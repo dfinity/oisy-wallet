@@ -22,7 +22,7 @@
 	import { emit } from '$lib/utils/events.utils';
 
 	const enabledNetworks: UserNetworks = $userNetworks;
-	const enabledNetworksInitial = $userNetworks;
+	const enabledNetworksInitial = { ...$userNetworks };
 
 	let enabledTestnet = $testnets;
 	const enabledTestnetInitial = $testnets;
@@ -37,10 +37,10 @@
 		if (enabledTestnet !== enabledTestnetInitial) {
 			return true;
 		}
-		const symbols = Object.getOwnPropertySymbols(enabledNetworks ?? {});
-		for (const k of symbols) {
-			const value = enabledNetworks[k as keyof typeof enabledNetworks];
-			const initialValue = enabledNetworksInitial[k as keyof typeof enabledNetworks];
+		for (const k of SUPPORTED_NETWORKS) {
+			const value = enabledNetworks[k.id];
+			const initialValue = enabledNetworksInitial[k.id];
+
 			if (value?.enabled !== initialValue?.enabled) {
 				return true;
 			}

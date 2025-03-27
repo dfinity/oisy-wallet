@@ -4,7 +4,7 @@ import {
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
 } from '$env/networks/networks.btc.env';
-import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+import { SUPPORTED_MAINNET_NETWORKS_IDS } from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
@@ -26,10 +26,10 @@ export const userNetworks: Readable<UserNetworks> = derived(
 
 		if (isNullish(userNetworks) || userNetworks.length === 0) {
 			// Returning all mainnets enabled by default
-			return SUPPORTED_NETWORKS.reduce<UserNetworks>(
-				(acc, { id, env }) => ({
+			return SUPPORTED_MAINNET_NETWORKS_IDS.reduce<UserNetworks>(
+				(acc, id) => ({
 					...acc,
-					[id]: { enabled: env !== 'testnet', isTestnet: env === 'testnet' }
+					[id]: { enabled: true, isTestnet: false }
 				}),
 				{}
 			);
