@@ -15,6 +15,13 @@
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { goto } from '$app/navigation';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { SettingsModalType } from '$lib/enums/settings-modal-types';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 
 	export let disabled = false;
 
@@ -70,5 +77,25 @@
 				{/each}
 			</ul>
 		{/if}
+
+		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between text-nowrap">
+			<span class="flex">
+				<Button
+					link
+					on:click={() => {
+						goto('/settings');
+						dropdown?.close();
+						// a small delay is needed for the opening of the modal after page switching
+						setTimeout(() => modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS), 1);
+					}}><IconManage /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button
+				>
+			</span>
+			<span class="ml-4 mr-2 flex text-nowrap text-right text-base">
+				{replacePlaceholders($i18n.networks.number_of_enabled, {
+					$numNetworksEnabled: `${$networksMainnets.length + $networksTestnets.length}`,
+					$numNetworksTotal: `${SUPPORTED_NETWORKS.length}`
+				})}</span
+			>
+		</div>
 	</div>
 </Dropdown>
