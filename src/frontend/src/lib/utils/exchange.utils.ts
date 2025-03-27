@@ -1,5 +1,4 @@
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { ZERO } from '$lib/constants/app.constants';
 import type { OptionBalance } from '$lib/types/balance';
 import type {
 	CoingeckoSimpleTokenPrice,
