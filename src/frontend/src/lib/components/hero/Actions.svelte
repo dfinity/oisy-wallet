@@ -32,7 +32,6 @@
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
-	import { networkICPEnabled } from '$lib/derived/networks.derived';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -41,17 +40,17 @@
 	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
 
 	let convertCkBtc = false;
-	$: convertCkBtc = $networkICPEnabled && $tokenCkBtcLedger && $erc20UserTokensInitialized;
+	$: convertCkBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
 
 	let convertBtc = false;
-	$: convertBtc = $networkICPEnabled && isNetworkIdBTCMainnet($networkId);
+	$: convertBtc = isNetworkIdBTCMainnet($networkId);
 
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
 
 	let swapAction = false;
 	$: swapAction =
-		SWAP_ACTION_ENABLED && $networkICPEnabled && (!isTransactionsPage || (isTransactionsPage && $networkICP));
+		SWAP_ACTION_ENABLED && (!isTransactionsPage || (isTransactionsPage && $networkICP));
 
 	let sendAction = true;
 	$: sendAction = !$allBalancesZero || isTransactionsPage;

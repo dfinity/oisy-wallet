@@ -56,6 +56,7 @@
 		solAddressMainnet,
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
+	import { networkICPEnabled } from '$lib/derived/networks.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -63,7 +64,6 @@
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
-	import { networkICPEnabled } from '$lib/derived/networks.derived';
 
 	const dispatch = createEventDispatcher();
 
@@ -218,18 +218,18 @@
 	let receiveAddressList: Omit<ReceiveAddressProps, 'token' | 'qrCodeAriaLabel' | 'label'>[];
 	$: receiveAddressList = receiveAddressCoreList.map(
 		({
-			 address,
-			 token: addressToken,
-			 qrCodeAriaLabel,
-			 label: addressLabel,
-			 copyAriaLabel,
-			 labelRef,
-			 network,
-			 testId,
-			 title,
-			 text,
-			 condition
-		 }) => ({
+			address,
+			token: addressToken,
+			qrCodeAriaLabel,
+			label: addressLabel,
+			copyAriaLabel,
+			labelRef,
+			network,
+			testId,
+			title,
+			text,
+			condition
+		}) => ({
 			labelRef,
 			address,
 			network,
@@ -258,18 +258,7 @@
 
 <ContentWithToolbar>
 	<div class="flex flex-col gap-2">
-		{#each receiveAddressList as {
-			title,
-			text,
-			condition,
-			on,
-			labelRef,
-			address,
-			network,
-			testId,
-			copyAriaLabel,
-			qrCodeAction
-		} (labelRef)}
+		{#each receiveAddressList as { title, text, condition, on, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
 			{#if condition !== false}
 				{#if nonNullish(text)}
 					<ReceiveAddress
