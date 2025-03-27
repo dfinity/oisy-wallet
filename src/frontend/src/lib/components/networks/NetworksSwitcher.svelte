@@ -84,7 +84,7 @@
 					on:click={() => {
 						dropdown?.close();
 						modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS);
-					}}><IconManage />{$i18n.tokens.manage.text.manage_list}</Button
+					}}><IconManage />{$i18n.networks.manage}</Button
 				>
 			</span>
 			<span class="ml-4 mr-2 flex text-nowrap text-right text-base">

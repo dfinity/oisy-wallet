@@ -281,7 +281,8 @@
 		"network": "Network",
 		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled",
-		"filter": "Filter networks"
+		"filter": "Filter networks",
+		"manage": "Manage networks"
 	},
 	"receive": {
 		"text": {
