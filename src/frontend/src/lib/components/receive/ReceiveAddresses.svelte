@@ -151,7 +151,8 @@
 			label: $i18n.receive.icp.text.principal,
 			copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied,
 			qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr,
-			text: $i18n.receive.icp.text.use_for_icrc_deposit
+			text: $i18n.receive.icp.text.use_for_icrc_deposit,
+			condition: $networkICPEnabled
 		},
 		{
 			labelRef: 'icpTokenAddress',
