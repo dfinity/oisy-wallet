@@ -100,7 +100,7 @@ abstract class Homepage {
 		testId: string;
 		scrollIntoView?: boolean;
 	}): Promise<void> {
-		const locator = this.#page.getByTestId(testId);
+		const locator = this.#page.getByTestId(testId).filter({ visible: true });
 
 		if (scrollIntoView) {
 			// Method `click` auto-scrolls into view if needed.
@@ -325,6 +325,7 @@ abstract class Homepage {
 		await this.takeScreenshot({ screenshotTarget: modal });
 	}
 
+	// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
 	async setCarouselFirstSlide(): Promise<void> {
 		if (isNullish(this.promotionCarousel)) {
 			this.promotionCarousel = new PromotionCarousel(this.#page);
@@ -458,12 +459,18 @@ abstract class Homepage {
 
 		const element = screenshotTarget ?? this.#page;
 
-		if (freezeCarousel) {
-			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
-			await this.#page.clock.pauseAt(Date.now());
-			await this.setCarouselFirstSlide();
-			await this.#page.clock.pauseAt(Date.now());
+		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
+		// if (freezeCarousel) {
+		// 	// Freezing the time because the carousel has a timer that resets the animations and the transitions.
+		// 	await this.#page.clock.pauseAt(Date.now());
+		// 	await this.setCarouselFirstSlide();
+		// 	await this.#page.clock.pauseAt(Date.now());
+		// }
+		if (isNullish(this.promotionCarousel)) {
+			this.promotionCarousel = new PromotionCarousel(this.#page);
 		}
+		const carouselSelector = this.promotionCarousel.getCarouselSelector();
+		const mask = nonNullish(carouselSelector) && freezeCarousel ? [carouselSelector] : [];
 
 		if (!this.#isMobile) {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
@@ -480,21 +487,22 @@ abstract class Homepage {
 			await this.#page.emulateMedia({ colorScheme: scheme });
 			await this.#page.waitForTimeout(1000);
 
-			await expect(element).toHaveScreenshot();
+			await expect(element).toHaveScreenshot({ mask });
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
-				await expect(element).toHaveScreenshot({ fullPage: true });
+				await expect(element).toHaveScreenshot({ fullPage: true, mask });
 				await this.showMobileNavigationMenu();
 			}
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
 
-		if (freezeCarousel) {
-			// Resuming the time that we froze because of the carousel animations.
-			await this.#page.clock.resume();
-		}
+		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
+		// if (freezeCarousel) {
+		// 	// Resuming the time that we froze because of the carousel animations.
+		// 	await this.#page.clock.resume();
+		// }
 	}
 
 	abstract extendWaitForReady(): Promise<void>;

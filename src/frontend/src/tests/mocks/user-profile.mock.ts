@@ -1,13 +1,25 @@
 import type {
 	DappSettings,
+	NetworkSettings,
+	NetworkSettingsFor,
 	NetworksSettings,
 	Settings,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { toNullable } from '@dfinity/utils';
 
+export const mockUserNetworksMap: Array<[NetworkSettingsFor, NetworkSettings]> = [
+	[{ BitcoinMainnet: null }, { enabled: true, is_testnet: false }],
+	[{ BitcoinTestnet: null }, { enabled: false, is_testnet: true }],
+	[{ EthereumMainnet: null }, { enabled: true, is_testnet: false }],
+	[{ EthereumSepolia: null }, { enabled: false, is_testnet: false }],
+	[{ InternetComputer: null }, { enabled: true, is_testnet: false }],
+	[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
+	[{ SolanaDevnet: null }, { enabled: true, is_testnet: true }]
+];
+
 export const mockNetworksSettings: NetworksSettings = {
-	networks: [],
+	networks: mockUserNetworksMap,
 	testnets: { show_testnets: false }
 };
 

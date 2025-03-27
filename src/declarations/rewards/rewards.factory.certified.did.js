@@ -67,6 +67,24 @@ export const idlFactory = ({ IDL }) => {
 		Success: IDL.Null,
 		InvalidCode: IDL.Null
 	});
+	const LastActivityHistogramRequest = IDL.Record({
+		bucket_count: IDL.Nat32,
+		bucket_duration: CandidDuration
+	});
+	const LastActivityHistogramBucket = IDL.Record({
+		start_ns: IDL.Nat64,
+		count: IDL.Nat32
+	});
+	const LastActivityHistogram = IDL.Record({
+		older: IDL.Nat32,
+		unknown: IDL.Nat32,
+		buckets: IDL.Vec(LastActivityHistogramBucket)
+	});
+	const LastActivityHistogramResponse = IDL.Record({
+		request_time: IDL.Nat64,
+		request: LastActivityHistogramRequest,
+		response: LastActivityHistogram
+	});
 	const NewVipRewardResponse = IDL.Variant({
 		Anonymous: IDL.Null,
 		NotImportantPerson: IDL.Null,
@@ -89,6 +107,10 @@ export const idlFactory = ({ IDL }) => {
 	const PublicRewardsInfo = IDL.Record({
 		airdrop: IDL.Opt(PublicAirdropStatus),
 		last_sprinkle: IDL.Opt(PublicSprinkleInfo)
+	});
+	const ReferrerInfo = IDL.Record({
+		referral_code: IDL.Nat32,
+		num_referrals: IDL.Opt(IDL.Nat32)
 	});
 	const TransactionType = IDL.Variant({
 		Send: IDL.Null,
@@ -137,17 +159,12 @@ export const idlFactory = ({ IDL }) => {
 		accounts: IDL.Vec(AccountSnapshotFor),
 		timestamp: IDL.Opt(IDL.Nat64)
 	});
-	const LedgerConfig = IDL.Record({
-		ledger_index: IDL.Principal,
-		ledger: IDL.Principal,
-		ledger_account: Account
+	const UsageAndHolding = IDL.Record({
+		approx_usd_valuation: IDL.Float64,
+		last_activity_ns: IDL.Opt(IDL.Nat64)
 	});
-	const SetSprinkleTimestampArg = IDL.Record({
-		total_sprinkle_amount: IDL.Nat,
-		min_account_amount: IDL.Nat,
-		user_sprinkle_amount: IDL.Nat,
-		timestamp: IDL.Nat64,
-		ledger_config: LedgerConfig
+	const UsageVsHoldingStats = IDL.Record({
+		holdings: IDL.Vec(UsageAndHolding)
 	});
 	const SprinkleEvent = IDL.Record({
 		n_sprinkled_users: IDL.Nat64,
@@ -169,10 +186,26 @@ export const idlFactory = ({ IDL }) => {
 	const UsageAwardStats = IDL.Record({
 		user_count: IDL.Nat64,
 		eligible_user_count: IDL.Nat64,
+		assets_usd: IDL.Float64,
 		snapshot_count: IDL.Nat64,
 		awarded_count: IDL.Nat64,
 		award_events: IDL.Nat64,
 		eligible_snapshots: IDL.Nat64
+	});
+	const UserDbKey = IDL.Record({
+		pouh_verified: IDL.Bool,
+		oisy_user: IDL.Principal
+	});
+	const UsageWinnersRequest = IDL.Record({
+		to_ns: IDL.Nat64,
+		from_ns: IDL.Nat64,
+		limit: IDL.Nat32,
+		after_user: IDL.Opt(UserDbKey)
+	});
+	const UsageWinnersResponse = IDL.Record({
+		last: IDL.Opt(UserDbKey),
+		num_checked: IDL.Nat32,
+		winners: IDL.Vec(IDL.Principal)
 	});
 	const RewardInfo = IDL.Record({
 		name: IDL.Opt(IDL.Text),
@@ -199,16 +232,25 @@ export const idlFactory = ({ IDL }) => {
 		config: IDL.Func([], [Config]),
 		configure_usage_awards: IDL.Func([UsageAwardConfig], [], []),
 		configure_vip: IDL.Func([VipConfig], [], []),
+		last_activity_histogram: IDL.Func(
+			[LastActivityHistogramRequest],
+			[LastActivityHistogramResponse]
+		),
 		new_vip_reward: IDL.Func([], [NewVipRewardResponse], []),
 		public_rewards_info: IDL.Func([], [PublicRewardsInfo]),
+		referrer_info: IDL.Func([], [ReferrerInfo], []),
+		referrer_info_for: IDL.Func([IDL.Principal], [IDL.Opt(ReferrerInfo)]),
 		register_airdrop_recipient: IDL.Func([UserSnapshot], [], []),
 		register_snapshot_for: IDL.Func([IDL.Principal, UserSnapshot], [], []),
-		set_sprinkle_timestamp: IDL.Func([SetSprinkleTimestampArg], [], []),
+		set_referrer: IDL.Func([IDL.Nat32], [], []),
+		stats_usage_vs_holding: IDL.Func([], [UsageVsHoldingStats]),
 		status: IDL.Func([], [StatusResponse]),
 		trigger_usage_award_event: IDL.Func([UsageAwardEvent], [], []),
-		usage_eligible: IDL.Func([IDL.Principal], [IDL.Bool]),
+		usage_eligible: IDL.Func([IDL.Principal], [IDL.Bool, IDL.Bool]),
 		usage_stats: IDL.Func([], [UsageAwardStats]),
+		usage_winners: IDL.Func([IDL.Opt(UsageWinnersRequest)], [UsageWinnersResponse]),
 		user_info: IDL.Func([], [UserData]),
+		user_info_for: IDL.Func([IDL.Principal], [UserData]),
 		user_stats: IDL.Func([IDL.Principal], [UsageAwardState]),
 		vip_stats: IDL.Func([], [VipStats])
 	});

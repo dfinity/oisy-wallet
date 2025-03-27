@@ -1,6 +1,6 @@
 type Account = record {
     owner : principal;
-    subaccount : opt blob
+    subaccount : opt blob;
 };
 
 type AccountSnapshotFor = variant {
@@ -49,18 +49,18 @@ type BatchSizes = record {
 type CandidDuration = variant {
   Minutes : nat64;
   Seconds : nat64;
-  Nanoseconds : nat64;
   Days : nat64;
   Forever;
   Hours : nat64;
+  Nanoseconds : nat64;
 };
 type ClaimVipRewardResponse = variant {
+    /// The code has been claimed already
+    AlreadyClaimed;
     /// The reward code
     Success;
     /// The code is invalid
     InvalidCode;
-    /// The code has been claimed already
-    AlreadyClaimed;
 };
 
 type Config = record {
@@ -80,6 +80,24 @@ type Config = record {
     readonly_admins: vec principal;
     /// Oisy canister to fetch users from
     oisy_canister: opt principal;
+};
+type LastActivityHistogram = record {
+  older : nat32;
+  unknown : nat32;
+  buckets : vec LastActivityHistogramBucket;
+};
+type LastActivityHistogramBucket = record {
+  start_ns : nat64;
+  count : nat32;
+};
+type LastActivityHistogramRequest = record {
+  bucket_count : nat32;
+  bucket_duration : CandidDuration;
+};
+type LastActivityHistogramResponse = record {
+  request_time : nat64;
+  request : LastActivityHistogramRequest;
+  response : LastActivityHistogram;
 };
 
 /// The ledger configuration used for sending funds and checking balances
@@ -133,6 +151,13 @@ type PublicSprinkleInfo = record {
     /// Ledger canister id of the token that was sprinkled
     ledger: principal;
 };
+/// A user's own referral code & basic stats.
+type ReferrerInfo = record {
+    /// A short pseudonymous identifier for the referrer.
+    referral_code : nat32;
+    /// The number of times the referral code has been used.
+    num_referrals : opt nat32;
+};
 type RewardInfo = record {
     /// The name of the reward
     name : opt text;
@@ -181,11 +206,17 @@ type StatusResponse = record {
     /// The latest last_updated timestamp of a fetched Oisy user
     latest_oisy_user_timestamp: opt nat64;
     /// Timestamps when the last successful fetch from each index canister was initiated.
-    last_block_fetch_timestamp: vec record { principal; nat64 };
+    last_block_fetch_timestamp: vec record {
+      principal;
+      nat64;
+    };
     /// The number of blocks that are currently in the block buffer
     num_buffered_blocks: nat64;
     /// Processed block height per ledger index canister
-    processed_block_height: vec record { principal; nat64 };
+    processed_block_height: vec record {
+      principal;
+      nat64;
+    };
     /// The sprinkle status
     sprinkle_status: SprinkleStatus;
 };
@@ -205,13 +236,20 @@ type Transaction_Icrc = record {
   timestamp : nat64;
   amount : nat64;
 };
-type TransactionType = variant { Send; Receive };
+type TransactionType = variant {
+  Send;
+  Receive;
+};
 type Transaction_Spl = record {
   transaction_type : TransactionType;
   network : record {};
   counterparty : text;
   timestamp : nat64;
   amount : nat64;
+};
+type UsageAndHolding = record {
+  approx_usd_valuation : float64;
+  last_activity_ns : opt nat64;
 };
 type UsageAwardConfig = record {
   cycle_duration : CandidDuration;
@@ -224,10 +262,13 @@ type UsageAwardEvent = record {
   awards : vec TokenConfig;
   num_users_per_event : nat32;
 };
-type UsageAwardState = record { snapshots : vec UserSnapshot };
+type UsageAwardState = record {
+  snapshots : vec UserSnapshot;
+};
 type UsageAwardStats = record {
   user_count : nat64;
   eligible_user_count : nat64;
+  assets_usd : float64;
   snapshot_count : nat64;
   awarded_count : nat64;
   award_events : nat64;
@@ -238,6 +279,24 @@ type UsageCriteria = record {
   min_transactions : nat32;
   min_logins : nat32;
   min_valuation_usd : nat64;
+};
+    ///
+type UsageVsHoldingStats = record {
+    ///
+    holdings : vec UsageAndHolding;
+    ///
+};
+    ///
+type UsageWinnersRequest = record {
+  to_ns : nat64;
+  from_ns : nat64;
+  limit : nat32;
+  after_user : opt UserDbKey;
+};
+type UsageWinnersResponse = record {
+  last : opt UserDbKey;
+  num_checked : nat32;
+  winners : vec principal;
 };
 type UserData = record {
     /// Airdrops the user has received
@@ -250,6 +309,10 @@ type UserData = record {
     is_vip : opt bool;
     /// Sprinkles the user has received
     sprinkles : vec RewardInfo;
+};
+type UserDbKey = record {
+pouh_verified : bool;
+oisy_user : principal;
 };
 type UserSnapshot = record {
     accounts : vec AccountSnapshotFor;
@@ -281,29 +344,40 @@ service : (opt Config) -> {
     configure_usage_awards : (UsageAwardConfig) -> ();
     /// Configures VIP rewards
     configure_vip : (VipConfig) -> ();
+    /// A histogram of when users were last active
+    last_activity_histogram : (LastActivityHistogramRequest) -> (
+      LastActivityHistogramResponse,
+    ) query;
     /// Gets a VIP reward token.
     new_vip_reward : () -> (NewVipRewardResponse);
     /// Public endpoint to query general information with regards to rewards distributed by this canister.
     public_rewards_info : () -> (PublicRewardsInfo) query;
+    /// Get or create referrer info for the caller.
+    referrer_info : () -> (ReferrerInfo);
+    /// Get the referrer info for a user.
+    referrer_info_for : (principal) -> (opt ReferrerInfo) query;
     /// Provides a user's account IDs for airdrop.
     register_airdrop_recipient : (UserSnapshot) -> ();
     register_snapshot_for : (principal, UserSnapshot) -> ();
+    stats_usage_vs_holding : () -> (UsageVsHoldingStats) query;
     /// Sets a timestamp for a sprinkle event in the future. The sprinkle will be executed
+  set_referrer : (nat32) -> ();
     /// as soon as possible after the timestamp.
-    /// The timestamp is in nanoseconds. Traps if the timestamp is in the past (from the canister's
-    /// POV) or if the canister already has a sprinkle event ongoing or planned.
-    set_sprinkle_timestamp : (SetSprinkleTimestampArg) -> ();
     /// Gives information about the current status of the canister.
     status : () -> (StatusResponse) query;
     /// Runs the provided award event.  This is normally done automatically.  It can be useful
     /// to trigger an event directly when testing.
     trigger_usage_award_event : (UsageAwardEvent) -> ();
     /// Usage Awards: User is eligible.
-    usage_eligible : (principal) -> (bool) query;
+    usage_eligible : (principal) -> (bool, bool) query;
     /// Aggregate usage stats.
     usage_stats : () -> (UsageAwardStats) query;
+    /// Finds winners
+    usage_winners : (opt UsageWinnersRequest) -> (UsageWinnersResponse) query;
     /// Endpoint for users to query their information with regards to rewards distributed by this canister.
     user_info : () -> (UserData) query;
+    /// Endpoint for admins to query information about a specific user with regards to rewards distributed by this canister.
+    user_info_for : (principal) -> (UserData) query;
     /// Stats for an individual user
     user_stats : (principal) -> (UsageAwardState) query;
     /// Gets rewards stats
