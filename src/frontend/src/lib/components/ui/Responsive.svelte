@@ -28,7 +28,7 @@
 		}, 50); // debounce width on screen size change so we don't calculate all the time
 	}
 
-	let screens = getAvailableScreens();
+	const screens = getAvailableScreens();
 
 	let activeScreen: ScreensKeyType;
 	$: activeScreen = getActiveScreen({
