@@ -1,50 +1,17 @@
 <script lang="ts">
-	import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import {
-		SOLANA_MAINNET_NETWORK_ID,
-		SOLANA_DEVNET_NETWORK_ID
-	} from '$env/networks/networks.sol.env';
-	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
-	import { BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env.js';
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
-	import type { Network } from '$lib/types/network';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
+	import type { Network } from '$lib/types/network';
+	import type { UserNetworks } from '$lib/types/user-networks';
 
-	export let numberOfIcons: number = 4;
+	export let numberOfIcons = 4;
 
-	// todo: take from store
-	const networks = {
-		[ETHEREUM_NETWORK_ID]: {
-			enabled: true,
-			isTestnet: false
-		},
-		[SEPOLIA_NETWORK_ID]: {
-			enabled: true,
-			isTestnet: true
-		},
-		[SOLANA_MAINNET_NETWORK_ID]: {
-			enabled: false,
-			isTestnet: false
-		},
-		[SOLANA_DEVNET_NETWORK_ID]: {
-			enabled: false,
-			isTestnet: true
-		},
-		[BTC_MAINNET_NETWORK_ID]: {
-			enabled: false,
-			isTestnet: false
-		},
-		[BTC_TESTNET_NETWORK_ID]: {
-			enabled: false,
-			isTestnet: true
-		}
-	};
+	export let enabledNetworks: UserNetworks = {};
 
-	// todo: type networks correcty
-	const getEnabledList = (networks: any) => {
+	const getEnabledList = (networks: UserNetworks) => {
 		const enabled = Object.getOwnPropertySymbols(networks ?? {})
-			.map((k) => ({ key: k, value: networks[k] }))
+			.map((k) => ({ key: k, value: networks[k as keyof typeof enabledNetworks] }))
 			.filter(({ value }) => value.enabled);
 
 		return enabled.map((n) => {
@@ -54,14 +21,14 @@
 	};
 
 	let enabledList: Network[];
-	$: enabledList = getEnabledList(networks);
+	$: enabledList = getEnabledList(enabledNetworks);
 
 	let previewList: Network[];
 	$: previewList = enabledList.slice(0, numberOfIcons);
 </script>
 
 <div class="mr-2 mt-1 flex flex-row">
-	{#each previewList as network}
+	{#each previewList as network (network.id)}
 		<div class="-ml-1 flex">
 			<NetworkLogo size="xxs" {network} blackAndWhite />
 		</div>
