@@ -79,6 +79,8 @@
 			currentUserVersion: $userProfileVersion
 		});
 
+		console.log('SAVING', enabledNetworks);
+
 		await updateUserNetworkSettings({
 			identity: $authIdentity,
 			networks: enabledNetworks,
@@ -114,7 +116,9 @@
 				>
 				<svelte:fragment slot="value"
 					><Toggle
-						ariaLabel="Enable/Disable"
+						ariaLabel={enabledNetworks[network.id]?.enabled
+							? $i18n.settings.text.disable_network
+							: $i18n.settings.text.enable_network}
 						checked={enabledNetworks[network.id]?.enabled ?? false}
 						on:nnsToggle={() => toggleNetwork(network)}
 						disabled={network.id === ICP_NETWORK_ID}
@@ -136,7 +140,9 @@
 					>
 					<svelte:fragment slot="value"
 						><Toggle
-							ariaLabel="Enable/Disable"
+							ariaLabel={enabledNetworks[network.id]?.enabled
+								? $i18n.settings.text.disable_network
+								: $i18n.settings.text.enable_network}
 							checked={enabledNetworks[network.id]?.enabled ?? false}
 							on:nnsToggle={() => toggleNetwork(network)}
 						/></svelte:fragment
@@ -148,8 +154,11 @@
 
 	<ButtonGroup slot="toolbar">
 		<ButtonCloseModal />
-		<Button loading={saveLoading} colorStyle="primary" on:click={save} disabled={!isModified}
-			>{$i18n.core.text.save}</Button
+		<Button
+			loading={saveLoading}
+			colorStyle="primary"
+			on:click={save}
+			disabled={!isModified || saveLoading}>{$i18n.core.text.save}</Button
 		>
 	</ButtonGroup>
 </ContentWithToolbar>
