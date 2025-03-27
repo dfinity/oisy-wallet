@@ -24,7 +24,6 @@ import {
 	allKongSwapCompatibleIcrcTokens,
 	allTokens
 } from '$lib/derived/all-tokens.derived';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
@@ -32,6 +31,7 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { get } from 'svelte/store';
 
 describe('all-tokens.derived', () => {
@@ -172,7 +172,7 @@ describe('all-tokens.derived', () => {
 		});
 
 		it('should include testnet tokens when testnets are enabled', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);
@@ -190,7 +190,7 @@ describe('all-tokens.derived', () => {
 		});
 
 		it('should include local tokens when testnets are enabled and it is local env', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			const tokens = get(allTokens);

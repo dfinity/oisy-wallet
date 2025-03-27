@@ -7,8 +7,7 @@ import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { mockSolCertifiedTransactions } from '$tests/mocks/sol-transactions.mock';
 import { jsonReplacer } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
-import { lamports } from '@solana/web3.js';
+import { lamports } from '@solana/kit';
 import { get } from 'svelte/store';
 
 describe('sol-listener.services', () => {
@@ -45,7 +44,7 @@ describe('sol-listener.services', () => {
 				const balance = get(balancesStore);
 
 				expect(balance?.[tokenId]).toEqual({
-					data: BigNumber.from(mockBalance),
+					data: mockBalance,
 					certified: true
 				});
 			});
@@ -69,8 +68,6 @@ describe('sol-listener.services', () => {
 		});
 
 		describe('syncWalletError', () => {
-			const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
 			it('should reset balanceStore on error', () => {
 				syncWallet({ data: mockPostMessage({}), tokenId });
 
@@ -95,7 +92,7 @@ describe('sol-listener.services', () => {
 			it('should log a warning if hideToast is true', () => {
 				syncWalletError({ error: 'test error', tokenId, hideToast: true });
 
-				expect(consoleWarnSpy).toHaveBeenCalled();
+				expect(console.warn).toHaveBeenCalled();
 			});
 		});
 	});

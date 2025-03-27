@@ -1,16 +1,18 @@
-import * as networkEnv from '$env/networks/networks.env';
+import * as btcNetworkEnv from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK,
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
+import {
 	ETHEREUM_NETWORK,
 	ETHEREUM_NETWORK_ID,
-	ICP_NETWORK,
-	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK,
 	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.env';
+} from '$env/networks/networks.eth.env';
+import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import {
 	SOLANA_DEVNET_NETWORK,
@@ -18,9 +20,9 @@ import {
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_NETWORKS,
-	SOLANA_NETWORKS_IDS,
-	SOLANA_TESTNET_NETWORK_ID
+	SOLANA_TESTNET_NETWORK_ID,
+	SUPPORTED_SOLANA_NETWORKS,
+	SUPPORTED_SOLANA_NETWORKS_IDS
 } from '$env/networks/networks.sol.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -60,7 +62,7 @@ describe('network utils', () => {
 	});
 
 	describe('isNetworkSolana', () => {
-		it.each(SOLANA_NETWORKS)('should return true for Solana network $name', (network) => {
+		it.each(SUPPORTED_SOLANA_NETWORKS)('should return true for Solana network $name', (network) => {
 			expect(isNetworkSolana(network)).toBe(true);
 		});
 
@@ -85,7 +87,7 @@ describe('network utils', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(networkEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
+			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
 				() => allEthereumNetworkIds
 			);
 		});
@@ -96,12 +98,6 @@ describe('network utils', () => {
 
 		it('should return false for non-Ethereum network IDs', () => {
 			expect(isNetworkIdEthereum(BTC_MAINNET_NETWORK_ID)).toBe(false);
-		});
-
-		it('should return false for Ethereum mainnet network ID when mainnet is disabled', () => {
-			vi.spyOn(networkEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementationOnce(
-				() => allEthereumNetworkIds
-			);
 		});
 	});
 
@@ -125,10 +121,9 @@ describe('network utils', () => {
 		});
 
 		it('should return false for Bitcoin regtest network ID when it is not LOCAL env', () => {
-			vi.spyOn(networkEnv, 'BITCOIN_NETWORKS_IDS', 'get').mockImplementationOnce(() => [
-				BTC_MAINNET_NETWORK_ID,
-				BTC_TESTNET_NETWORK_ID
-			]);
+			vi.spyOn(btcNetworkEnv, 'SUPPORTED_BITCOIN_NETWORKS_IDS', 'get').mockImplementationOnce(
+				() => [BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID]
+			);
 
 			expect(isNetworkIdBitcoin(BTC_REGTEST_NETWORK_ID)).toBe(false);
 		});
@@ -177,7 +172,7 @@ describe('network utils', () => {
 	});
 
 	describe('isNetworkIdSolana', () => {
-		it.each(SOLANA_NETWORKS_IDS)('should return true for Solana network ID %s', (id) => {
+		it.each(SUPPORTED_SOLANA_NETWORKS_IDS)('should return true for Solana network ID %s', (id) => {
 			expect(isNetworkIdSolana(id)).toBe(true);
 		});
 
