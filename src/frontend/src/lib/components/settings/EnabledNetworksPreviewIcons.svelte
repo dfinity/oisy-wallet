@@ -28,7 +28,7 @@
 </script>
 
 <div class="mr-2 mt-1 flex flex-row">
-	{#each previewList as network}
+	{#each previewList as network (network.id)}
 		<div class="-ml-1 flex">
 			<NetworkLogo size="xxs" {network} blackAndWhite />
 		</div>
