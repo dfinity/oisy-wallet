@@ -1,25 +1,25 @@
 <script lang="ts">
 	import { Checkbox, Toggle } from '@dfinity/gix-components';
+	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+	import { setUserShowTestnets, updateUserNetworkSettings } from '$lib/api/backend.api';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import SettingsList from '$lib/components/settings/SettingsList.svelte';
 	import SettingsListItem from '$lib/components/settings/SettingsListItem.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { userProfileVersion } from '$lib/derived/user-profile.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import type { Network } from '$lib/types/network';
-	import { setUserShowTestnets, updateUserNetworkSettings } from '$lib/api/backend.api';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { emit } from '$lib/utils/events.utils';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { userNetworks } from '$lib/derived/user-networks.derived';
-	import type { UserNetworks } from '$lib/types/user-networks';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { Network } from '$lib/types/network';
+	import type { UserNetworks } from '$lib/types/user-networks';
+	import { emit } from '$lib/utils/events.utils';
 
 	const enabledNetworks: UserNetworks = $userNetworks;
 	const enabledNetworksInitial = $userNetworks;
