@@ -17,7 +17,6 @@ import {
 	SOLANA_TESTNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
 import { testnets } from '$lib/derived/testnets.derived';
-import { userSettings } from '$lib/derived/user-profile.derived';
 import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';

@@ -2,8 +2,6 @@ import {
 	SUPPORTED_MAINNET_NETWORKS_IDS,
 	SUPPORTED_TESTNET_NETWORKS_IDS
 } from '$env/networks/networks.env';
-import { userNetworks, userSettingsNetworks } from '$lib/derived/user-networks.derived';
-import { SUPPORTED_MAINNET_NETWORKS_IDS } from '$env/networks/networks.env';
 import { userNetworks } from '$lib/derived/user-networks.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { UserNetworks } from '$lib/types/user-networks';
