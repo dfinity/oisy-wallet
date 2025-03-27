@@ -248,6 +248,7 @@
 			"principal_description": "Your ID for the $oisy_name. Created by your Internet Identity.",
 			"session": "Your session expires in",
 			"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
+			"testnets": "Show test networks",
 			"networks": "Networks",
 			"test_networks": "Test networks",
 			"enable_testnets": "Enable test networks",
