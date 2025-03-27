@@ -19,9 +19,9 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 
-	let enabledNetworks: UserNetworks;
-	$: enabledNetworks = $userNetworks;
+	const enabledNetworks: UserNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...$userNetworks };
 
 	let enabledTestnet: boolean;
@@ -79,7 +79,7 @@
 			currentUserVersion: $userProfileVersion
 		});
 
-		console.log('SAVING', enabledNetworks);
+		await loadUserProfile({ identity: $authIdentity, reload: true });
 
 		await updateUserNetworkSettings({
 			identity: $authIdentity,
