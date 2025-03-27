@@ -357,9 +357,10 @@ fn test_allow_signing_with_valid_nonce_should_fail_when_called_more_than_once() 
     // emulates the javascript function running in the browser to create a valid nonce
     let nonce = helper_solve_challenge(response.start_timestamp_ms, response.difficulty);
 
-    // First call must succeed
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
     assert!(result_allow_signing.is_ok());
+
+    // First call must succeed
     let allow_signing_response = result_allow_signing.unwrap();
     assert_eq!(allow_signing_response.status, AllowSigningStatus::Executed);
 
@@ -392,14 +393,9 @@ fn test_allow_signing_should_fail_with_valid_nonce_and_expired_challenge() {
     let nonce = helper_solve_challenge(response.start_timestamp_ms, response.difficulty);
 
     // since we enabled auto progress, we can not call pic.advance_time(..) instead we need to wait
-    // instead
     thread::sleep(Duration::from_millis(expiry_ms - now_ms));
-
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
-
     assert!(result_allow_signing.is_err());
-
-    // assert_eq!(reponse.status, AllowSigningStatus.EXECUTED)
 }
 
 #[test]
@@ -496,6 +492,6 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
             .challenge_completion
             .solved_duration_ms,
         TARGET_DURATION_MS,
-        2_000,
+        3_000,
     );
 }

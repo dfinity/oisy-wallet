@@ -2,7 +2,8 @@ use ic_cdk::api::caller;
 use sha2::{Digest, Sha256};
 use shared::types::pow::{
     ChallengeCompletion, ChallengeCompletionError, CreateChallengeError, StoredChallenge,
-    EXPIRY_DURATION_MS, MAX_DIFFICULTY, MIN_DIFFICULTY, START_DIFFICULTY, TARGET_DURATION_MS,
+    DIFFICULTY_AUTO_ADJUSTMENT, EXPIRY_DURATION_MS, MAX_DIFFICULTY, MIN_DIFFICULTY,
+    START_DIFFICULTY, TARGET_DURATION_MS,
 };
 
 use crate::{
@@ -32,6 +33,7 @@ async fn get_random_u64() -> Result<u64, String> {
 
     // Check if we have at least 8 bytes which are required for u64
     if random_bytes.len() < 8 {
+        ic_cdk::println!("Not enough random bytes returned!");
         return Err("Not enough random bytes returned!".to_string());
     }
 
@@ -100,6 +102,7 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
     // TODO remove message to not leak any security related information in case function fails
     let random_nonce = get_random_u64()
         .await
+        // TODO remove mapping in order avoid leaking any information about the system/algorithm
         .map_err(CreateChallengeError::RandomnessError)?;
 
     let current_time_ms: u64 = get_time_ms();
@@ -167,7 +170,7 @@ pub(crate) fn complete_challenge(
     let end_timestamp_ms = get_time_ms();
     let solve_duration_ms: u64 = end_timestamp_ms - stored_challenge.start_timestamp_ms;
 
-    if verify_solution(
+    if verify_nonce(
         nonce,
         stored_challenge.difficulty,
         stored_challenge.start_timestamp_ms,
@@ -184,7 +187,7 @@ pub(crate) fn complete_challenge(
         return Err(ChallengeCompletionError::InvalidNonce);
     }
 
-    let new_difficulty = adapt_difficulty(stored_challenge.difficulty, solve_duration_ms);
+    let new_difficulty = adjust_difficulty(stored_challenge.difficulty, solve_duration_ms);
 
     let stored_challenge = StoredChallenge {
         nonce,
@@ -221,22 +224,46 @@ pub(crate) fn complete_challenge(
 // This ensures:
 // - If the client solved too quickly (duration < target), difficulty increases.
 // - If the client solved too slowly (duration > target), difficulty decreases. .
-fn adapt_difficulty(difficulty: u32, solve_duration_ms: u64) -> u32 {
-    let new_difficulty = u32::try_from(
-        ((u64::from(difficulty) * TARGET_DURATION_MS) / solve_duration_ms.max(1))
-            // make sure the difficulty is always between the defined min. and the max. difficulty
-            .clamp(u64::from(MIN_DIFFICULTY), u64::from(MAX_DIFFICULTY)),
-    )
-    .expect("Difficulty overflow");
+fn adjust_difficulty(difficulty: u32, solve_duration_ms: u64) -> u32 {
+    if DIFFICULTY_AUTO_ADJUSTMENT {
+        let new_difficulty = u32::try_from(
+            ((u64::from(difficulty) * TARGET_DURATION_MS) / solve_duration_ms.max(1))
+                // make sure the difficulty is always between the defined min. and the max.
+                // difficulty
+                .clamp(u64::from(MIN_DIFFICULTY), u64::from(MAX_DIFFICULTY)),
+        )
+        .expect("Difficulty overflow");
 
-    ic_cdk::println!(
-        "Adjusted difficulty from {:?} to {:?}",
-        difficulty,
-        new_difficulty
-    );
-    new_difficulty
+        ic_cdk::println!(
+            "Adjusted difficulty from {:?} to {:?}",
+            difficulty,
+            new_difficulty
+        );
+        return new_difficulty;
+    }
+    // retrieve initial difficulty if auto-adjustment is disabled
+    difficulty
 }
-fn verify_solution(nonce: u64, difficulty: u32, timestamp: u64) -> bool {
+
+/// Verifies if the given `nonce` provided by the client is valid (`PoW` verification).
+///
+/// # Arguments
+///
+/// * `nonce` - The nonce value being verified.
+/// * `difficulty` - The difficulty level, indicating how hard it is to find a valid nonce. Higher
+///   difficulty values mean it's harder to find a valid nonce.
+/// * `timestamp` - The timestamp associated with the nonce, typically representing the moment at
+///   which the nonce is generated or verified.
+///
+/// # Returns
+///
+/// Returns `true` if the computed hash of the concatenated timestamp and nonce is valid
+/// according to the provided difficulty, or `false` otherwise.
+///
+///  # Note
+/// The constant `u32::MAX` (`4294967295`) defines the upper limit of the difficulty is used here to
+/// scale the target threshold based on the specified difficulty.
+fn verify_nonce(nonce: u64, difficulty: u32, timestamp: u64) -> bool {
     let hash = Sha256::digest((timestamp.to_string() + "." + &*nonce.to_string()).as_bytes());
     let hash_prefix = u32::from_be_bytes([hash[0], hash[1], hash[2], hash[3]]);
     hash_prefix <= u32::MAX / difficulty

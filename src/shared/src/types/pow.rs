@@ -3,17 +3,21 @@ use super::{CandidType, Debug, Deserialize};
 // -------------------------------------------------------------------------------------------------
 // PoW Challenge Constants
 // -------------------------------------------------------------------------------------------------
+
+pub const DIFFICULTY_AUTO_ADJUSTMENT: bool = false;
+
 // The time it takes in average to solve the challenge in milliseconds
-// Difficulty adapts aiming towards this value
-pub const TARGET_DURATION_MS: u64 = 5000;
+// Difficulty adapts aiming towards this value.
+// This setting only applies if auto-adjustment is enabled
+pub const TARGET_DURATION_MS: u64 = 3000;
 
 // The avoid a challenge expiring before the target time we multiply by 2
 // Providing a smaller duration than TARGET_DURATION_MS will result in an error
-pub const EXPIRY_DURATION_MS: u64 = TARGET_DURATION_MS * 2;
+pub const EXPIRY_DURATION_MS: u64 = TARGET_DURATION_MS * 4;
 
 // The difficulty used if no PoW challenge yet been solved
 // This setting must be set to a value between MIN_DIFFICULTY and MAX_DIFFICULTY
-pub const START_DIFFICULTY: u32 = 400_000;
+pub const START_DIFFICULTY: u32 = 100_000;
 
 // Minimum difficulty required to solve the challenge.
 // Auto-adjustment of difficulty will never fall short of MIN_DIFFICULTY.
