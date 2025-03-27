@@ -60,9 +60,7 @@ use crate::{
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
-    user_profile::{
-        add_hidden_dapp_id, set_network_settings, set_show_testnets, update_network_settings,
-    },
+    user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
 
 mod assertions;
