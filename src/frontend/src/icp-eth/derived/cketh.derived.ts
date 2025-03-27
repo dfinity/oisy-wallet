@@ -12,6 +12,7 @@ import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
+import { networkICPEnabled } from '$lib/derived/networks.derived';
 import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionEthAddress } from '$lib/types/address';
@@ -26,9 +27,10 @@ import { derived, type Readable } from 'svelte/store';
  * - on network ICP if the token is ckETH
  */
 export const ethToCkETHEnabled: Readable<boolean> = derived(
-	[tokenStandard, tokenWithFallbackAsIcToken],
-	([$tokenStandard, $tokenWithFallbackAsIcToken]) =>
-		$tokenStandard === 'ethereum' || isTokenCkEthLedger($tokenWithFallbackAsIcToken)
+	[networkICPEnabled, tokenStandard, tokenWithFallbackAsIcToken],
+	([$networkICPEnabled, $tokenStandard, $tokenWithFallbackAsIcToken]) =>
+		$networkICPEnabled &&
+		($tokenStandard === 'ethereum' || isTokenCkEthLedger($tokenWithFallbackAsIcToken))
 );
 
 /**
@@ -37,10 +39,11 @@ export const ethToCkETHEnabled: Readable<boolean> = derived(
  * - on network ICP if the token is ckErc20
  */
 export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
-	[tokenWithFallbackAsIcToken],
-	([$tokenWithFallbackAsIcToken]) =>
-		ERC20_TWIN_TOKENS_IDS.includes($tokenWithFallbackAsIcToken.id) ||
-		isTokenCkErc20Ledger($tokenWithFallbackAsIcToken)
+	[networkICPEnabled, tokenWithFallbackAsIcToken],
+	([$networkICPEnabled, $tokenWithFallbackAsIcToken]) =>
+		$networkICPEnabled &&
+		(ERC20_TWIN_TOKENS_IDS.includes($tokenWithFallbackAsIcToken.id) ||
+			isTokenCkErc20Ledger($tokenWithFallbackAsIcToken))
 );
 
 /**
