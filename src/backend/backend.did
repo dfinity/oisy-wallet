@@ -142,8 +142,8 @@ type CanisterStatusResultV2 = record {
 };
 type CanisterStatusType = variant { stopped; stopping; running };
 type ChallengeCompletion = record {
-  solved_duration_ns : nat64;
-  next_allowance_ns : nat64;
+  solved_duration_ms : nat64;
+  next_allowance_ms : nat64;
   next_difficulty : nat32;
   current_difficulty : nat32;
 };
@@ -152,6 +152,7 @@ type ChallengeCompletionError = variant {
   MissingChallenge;
   ExpiredChallenge;
   MissingUserProfile;
+  ChallengeAlreadySolved;
 };
 type Config = record {
   api : opt Guards;
@@ -169,8 +170,8 @@ type CreateChallengeError = variant {
 };
 type CreateChallengeResponse = record {
   difficulty : nat32;
-  start_timestamp_ns : nat64;
-  expiry_timestamp_ns : nat64;
+  start_timestamp_ms : nat64;
+  expiry_timestamp_ms : nat64;
 };
 type CredentialSpec = record {
   arguments : opt vec record { text; ArgumentValue };

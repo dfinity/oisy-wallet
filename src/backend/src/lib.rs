@@ -38,7 +38,7 @@ use shared::{
         },
         pow::{
             AllowSigningStatus, ChallengeCompletion, ChallengeCompletionError,
-            CreateChallengeError, CreateChallengeResponse,
+            CreateChallengeError, CreateChallengeResponse, DIFFICULTY_TO_CYCLE_FACTOR,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -66,7 +66,6 @@ use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
-    pow::DIFFICULTY_TO_CYCLE_FACTOR,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::{
@@ -717,8 +716,8 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
 
     Ok(CreateChallengeResponse {
         difficulty: challenge.difficulty,
-        start_timestamp_ns: challenge.start_timestamp_ns,
-        expiry_timestamp_ns: challenge.expiry_timestamp_ns,
+        start_timestamp_ms: challenge.start_timestamp_ms,
+        expiry_timestamp_ms: challenge.expiry_timestamp_ms,
     })
 }
 
@@ -744,7 +743,10 @@ pub async fn allow_signing(
             ChallengeCompletionError::InvalidNonce
             | ChallengeCompletionError::MissingUserProfile
             | ChallengeCompletionError::ExpiredChallenge
-            | ChallengeCompletionError::MissingChallenge => AllowSigningError::PowChallenge(e),
+            | ChallengeCompletionError::MissingChallenge
+            | ChallengeCompletionError::ChallengeAlreadySolved => {
+                AllowSigningError::PowChallenge(e)
+            }
         })?;
 
     // Grant cycles proportional to difficulty
@@ -757,9 +759,8 @@ pub async fn allow_signing(
         principal.to_string(),
         allowed_cycles,
     );
-    signer::allow_signing(allowed_cycles)
-        .await
-        .expect("Get Result");
+
+    signer::allow_signing(allowed_cycles).await?;
 
     Ok(AllowSigningResponse {
         status: AllowSigningStatus::Executed,

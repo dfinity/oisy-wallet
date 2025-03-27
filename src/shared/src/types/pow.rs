@@ -1,15 +1,35 @@
-use ic_cdk::api::time;
-
 use super::{CandidType, Debug, Deserialize};
 
-/// A simple key-value store where each entry expires after a fixed TTL (Time To Live).
-///
-/// # Type Parameters:
-/// - `K`: Key type, must implement `Hash` and `Eq` (required by `HashMap`).
-/// - `V`: Value type.
-// TODO: since this type is implemented so it can be used by other modules
-//       it makes sense to move it to a module containing collections
+// -------------------------------------------------------------------------------------------------
+// PoW Challenge Constants
+// -------------------------------------------------------------------------------------------------
+// The time it takes in average to solve the challenge in milliseconds
+// Difficulty adapts aiming towards this value
+pub const TARGET_DURATION_MS: u64 = 5000;
 
+// The avoid a challenge expiring before the target time we multiply by 2
+// Providing a smaller duration than TARGET_DURATION_MS will result in an error
+pub const EXPIRY_DURATION_MS: u64 = TARGET_DURATION_MS * 2;
+
+// The difficulty used if no PoW challenge yet been solved
+// This setting must be set to a value between MIN_DIFFICULTY and MAX_DIFFICULTY
+pub const START_DIFFICULTY: u32 = 400_000;
+
+// Minimum difficulty required to solve the challenge.
+// Auto-adjustment of difficulty will never fall short of MIN_DIFFICULTY.
+// Note: Limiting the difficulty may cause the actual solving duration to deviate from the defined
+// TARGET_DURATION_MS.
+pub const MIN_DIFFICULTY: u32 = 100_000;
+
+// Maximum difficulty required to solve the challenge.
+// Auto-adjustment of difficulty will never exceed MAX_DIFFICULTY.
+// Note: Limiting the difficulty may cause the actual solving duration to deviate from the defined
+// TARGET_DURATION_MS.
+pub const MAX_DIFFICULTY: u32 = 5_000_000;
+
+// The factor defining the amount of cycles per difficulty unit the caller (principle) will be
+// allowed to spend on signer operations
+pub const DIFFICULTY_TO_CYCLE_FACTOR: u64 = 10_000;
 // ---------------------------------------------------------------------------------------------
 // - Error-structures and -enums
 // ---------------------------------------------------------------------------------------------
@@ -26,6 +46,7 @@ pub enum ChallengeCompletionError {
     InvalidNonce,
     MissingUserProfile,
     ExpiredChallenge,
+    ChallengeAlreadySolved,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -41,8 +62,8 @@ pub enum AllowSigningStatus {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct StoredChallenge {
     pub nonce: u64,
-    pub start_timestamp_ns: u64,
-    pub expiry_timestamp_ns: u64,
+    pub start_timestamp_ms: u64,
+    pub expiry_timestamp_ms: u64,
     pub difficulty: u32,
     pub solved: bool,
 }
@@ -50,7 +71,7 @@ pub struct StoredChallenge {
 impl StoredChallenge {
     #[allow(clippy::must_use_candidate)]
     pub fn is_expired(&self) -> bool {
-        self.expiry_timestamp_ns <= time()
+        self.expiry_timestamp_ms <= (ic_cdk::api::time() / 1_000_000)
     }
 
     #[allow(clippy::must_use_candidate)]
@@ -65,14 +86,14 @@ impl StoredChallenge {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct CreateChallengeResponse {
     pub difficulty: u32,
-    pub start_timestamp_ns: u64,
-    pub expiry_timestamp_ns: u64,
+    pub start_timestamp_ms: u64,
+    pub expiry_timestamp_ms: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct ChallengeCompletion {
-    pub next_allowance_ns: u64,
-    pub solved_duration_ns: u64,
+    pub next_allowance_ms: u64,
+    pub solved_duration_ms: u64,
     pub current_difficulty: u32,
     pub next_difficulty: u32,
 }

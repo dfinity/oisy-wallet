@@ -527,6 +527,12 @@ impl Validate for IcrcToken {
         Ok(())
     }
 }
+
+/// A simple key-value store where each entry expires after a fixed TTL (Time To Live).
+///
+/// # Type Parameters:
+/// - `K`: Key type, must implement `Hash` and `Eq` (required by `HashMap`).
+/// - `V`: Value type.
 impl<K, V, M> ExpiryBTreeMapWrapper<K, V, M>
 where
     K: Storable + Ord + Clone + fmt::Debug,

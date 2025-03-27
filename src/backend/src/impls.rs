@@ -68,6 +68,6 @@ impl Storable for StoredPrincipal {
 
 impl Expirable for Candid<StoredChallenge> {
     fn get_expiry_timestamp(&self, ttl_sec: u64) -> u64 {
-        self.start_timestamp_ns + ttl_sec * 1_000_000_000
+        self.start_timestamp_ms + ttl_sec * 1_000_000_000
     }
 }

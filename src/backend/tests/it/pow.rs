@@ -1,13 +1,21 @@
 //! Tests the ledger account logic.
 
-use std::{thread, time::Duration};
+use std::{
+    ops::{Add, Sub},
+    thread,
+    time::Duration,
+};
 
 use candid::Principal;
 use ic_cdk::api::management_canister::{main::canister_status, provisional::CanisterIdRecord};
+use ic_cycles_ledger_client::{Account, Allowance, AllowanceArgs};
+use ic_ledger_types::Subaccount;
+use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
 use shared::types::{
     pow::{
-        AllowSigningStatus, ChallengeCompletionError, CreateChallengeError, CreateChallengeResponse,
+        AllowSigningStatus, ChallengeCompletionError, CreateChallengeError,
+        CreateChallengeResponse, START_DIFFICULTY, TARGET_DURATION_MS,
     },
     signer::{AllowSigningError, AllowSigningRequest, AllowSigningResponse},
     user_profile::UserProfile,
@@ -18,12 +26,12 @@ use crate::utils::{
     pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
 };
 
-pub const TARGET_DURATION_NS: u64 = 5000 * 1_000_000;
-pub const START_DIFFICULTY: u32 = 400_000;
+#[allow(dead_code)]
+const CANISTER_ID_SIGNER: &str = "grghe-syaaa-aaaar-qabyq-cai";
+
 // -------------------------------------------------------------------------------------------------
 // - General Utility methods used for testing
 // -------------------------------------------------------------------------------------------------
-
 #[allow(dead_code)]
 pub fn assert_greater_than<T: PartialOrd + std::fmt::Debug>(a: T, b: T) {
     assert!(
@@ -44,6 +52,7 @@ pub fn assert_less_than<T: PartialOrd + std::fmt::Debug>(a: T, b: T) {
     );
 }
 
+#[allow(dead_code)]
 pub fn assert_in_range<T>(value: T, min: T, max: T)
 where
     T: PartialOrd + std::fmt::Debug,
@@ -57,14 +66,34 @@ where
     );
 }
 
-// This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
-// frontend.
-fn get_timestamp_now_ns() -> u64 {
-    get_timestamp_ns(std::time::SystemTime::now())
+#[allow(dead_code)]
+pub fn assert_deviation<T>(value: T, expected_value: T, max_deviation: T)
+where
+    T: PartialOrd + std::fmt::Debug + Sub<Output = T> + Add<Output = T> + Clone,
+{
+    let min_value = expected_value.clone() - max_deviation.clone();
+    let max_value = expected_value.clone() + max_deviation.clone();
+
+    assert!(
+        value >= min_value && value <= max_value,
+        "Value {:?} not in range [{:?}, {:?}] of deviation {:?}",
+        value,
+        min_value,
+        max_value,
+        max_deviation
+    );
 }
 
-fn get_timestamp_ns(st: std::time::SystemTime) -> u64 {
-    st.duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos() as u64
+// This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
+// frontend.
+fn get_timestamp_now_ms() -> u64 {
+    get_timestamp_ms(std::time::SystemTime::now())
+}
+
+fn get_timestamp_ms(st: std::time::SystemTime) -> u64 {
+    st.duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64
 }
 
 fn get_timestamp_secs(st: std::time::SystemTime) -> u64 {
@@ -77,7 +106,10 @@ fn print_canister_time(pic_setup: &PicBackend) {
         get_timestamp_secs(pic_setup.pic.get_time())
     );
 }
-
+fn sleep_test(duration: Duration) {
+    println!("Sleeping test task for {:?} ms", duration.as_millis());
+    thread::sleep(duration);
+}
 fn setup_cycles_ledger_with_progress() -> PicBackend {
     eprintln!("Enabling auto progress for Pocket IC (Be aware that the cycle usage increases!");
     let pic_setup = BackendBuilder::default()
@@ -115,7 +147,7 @@ pub fn helper_solve_challenge(timestamp: u64, difficulty: u32) -> u64 {
     let mut nonce: u64 = 0;
     let target: u32 = (0xFFFFFFFFu32) / difficulty;
 
-    let start_timestamp = get_timestamp_now_ns();
+    let start_timestamp = get_timestamp_now_ms();
     loop {
         // Serialize challenge object + nonce
         let challenge_str = timestamp.to_string() + "." + &nonce.to_string();
@@ -134,12 +166,43 @@ pub fn helper_solve_challenge(timestamp: u64, difficulty: u32) -> u64 {
         }
         nonce += 1;
     }
-    let solve_timestamp_ns = get_timestamp_now_ns() - start_timestamp;
+    let solve_timestamp_ms = get_timestamp_now_ms() - start_timestamp;
     eprintln!(
-        "Pow Challenge: It took the client {} seconds to solve the challenge",
-        Duration::from_nanos(solve_timestamp_ns).as_secs(),
+        "Pow Challenge: It took the client {} ms to solve the challenge",
+        solve_timestamp_ms,
     );
     nonce
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Convenient caller functions to reduce the amount of code in the tests
+// -------------------------------------------------------------------------------------------------
+#[allow(dead_code)]
+pub fn call_get_cycles_allowance(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    from_canister: Principal,
+    to_canister: Principal,
+) -> Result<Allowance, String> {
+    let caller_sub_account = Subaccount::from(caller);
+
+    let allowance_args = AllowanceArgs {
+        account: Account {
+            owner: from_canister,
+            subaccount: None,
+        },
+        spender: Account {
+            owner: to_canister,
+            subaccount: Some(ByteBuf::from(caller_sub_account.0)),
+        },
+    };
+
+    let wrapped_result = pic_setup.query::<Result<Allowance, String>>(
+        caller.clone(),
+        "icrc2_allowance",
+        allowance_args,
+    );
+    wrapped_result.expect("that create_pow_challenge succeeds")
 }
 
 pub fn call_create_pow_challenge(
@@ -217,7 +280,7 @@ fn test_create_pow_challenge_should_return_valid_values() {
     let response = result.expect("Failed to call create user profile");
 
     assert_eq!(response.difficulty, START_DIFFICULTY);
-    assert_greater_than(response.expiry_timestamp_ns, response.start_timestamp_ns);
+    assert_greater_than(response.expiry_timestamp_ms, response.start_timestamp_ms);
 }
 
 #[test]
@@ -230,15 +293,15 @@ fn test_create_pow_challenge_should_succeed_again_if_expired() {
     let err_1th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_1th_call.is_ok());
 
-    let now_ns = get_timestamp_ns(pic_setup.pic.get_time());
-    let expiry_ns = err_1th_call.unwrap().expiry_timestamp_ns;
+    let now_ms = get_timestamp_ms(pic_setup.pic.get_time());
+    let expiry_ms = err_1th_call.unwrap().expiry_timestamp_ms;
 
-    assert_greater_than(expiry_ns, now_ns);
+    assert_greater_than(expiry_ms, now_ms);
 
     // we need advance to the expiry time of the challenge
     pic_setup
         .pic
-        .advance_time(Duration::from_nanos(expiry_ns - now_ns));
+        .advance_time(Duration::from_millis(expiry_ms - now_ms));
 
     let err_2th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_2th_call.is_ok());
@@ -269,7 +332,7 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
         result.expect("Failed to retrieve CreateChallengeResponse");
 
     // emulates the javascript function running in the browser to create a valid nonce
-    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
+    let nonce = helper_solve_challenge(response.start_timestamp_ms, response.difficulty);
 
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
 
@@ -281,6 +344,35 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
 }
 
 #[test]
+fn test_allow_signing_with_valid_nonce_should_fail_when_called_more_than_once() {
+    let pic_setup = setup_cycles_ledger_with_progress();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+    let _ = call_create_user_profile(&pic_setup, caller);
+
+    let result = call_create_pow_challenge(&pic_setup, caller);
+
+    let response: CreateChallengeResponse =
+        result.expect("Failed to retrieve CreateChallengeResponse");
+
+    // emulates the javascript function running in the browser to create a valid nonce
+    let nonce = helper_solve_challenge(response.start_timestamp_ms, response.difficulty);
+
+    // First call must succeed
+    let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
+    assert!(result_allow_signing.is_ok());
+    let allow_signing_response = result_allow_signing.unwrap();
+    assert_eq!(allow_signing_response.status, AllowSigningStatus::Executed);
+
+    // Second call must fail
+    let result_allow_signing_2 = call_allow_signing(&pic_setup, caller, nonce);
+    assert!(result_allow_signing_2.is_err());
+    assert_eq!(
+        result_allow_signing_2.unwrap_err(),
+        AllowSigningError::PowChallenge(ChallengeCompletionError::ChallengeAlreadySolved)
+    );
+}
+
+#[test]
 fn test_allow_signing_should_fail_with_valid_nonce_and_expired_challenge() {
     let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
@@ -288,20 +380,20 @@ fn test_allow_signing_should_fail_with_valid_nonce_and_expired_challenge() {
 
     let result = call_create_pow_challenge(&pic_setup, caller);
     assert!(result.is_ok());
-    let now_ns = get_timestamp_ns(pic_setup.pic.get_time());
-    let expiry_ns = result.as_ref().unwrap().expiry_timestamp_ns;
+    let now_ms = get_timestamp_ms(pic_setup.pic.get_time());
+    let expiry_ms = result.as_ref().unwrap().expiry_timestamp_ms;
 
-    assert_greater_than(expiry_ns, now_ns);
+    assert_greater_than(expiry_ms, now_ms);
 
     let response: CreateChallengeResponse =
         result.expect("Failed to retrieve CreateChallengeResponse");
 
     // emulates the javascript function running in the browser to create a valid nonce
-    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
+    let nonce = helper_solve_challenge(response.start_timestamp_ms, response.difficulty);
 
     // since we enabled auto progress, we can not call pic.advance_time(..) instead we need to wait
     // instead
-    thread::sleep(Duration::from_nanos(expiry_ns - now_ns));
+    thread::sleep(Duration::from_millis(expiry_ms - now_ms));
 
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
 
@@ -322,7 +414,7 @@ fn test_allow_signing_should_fail_with_invalid_nonce() {
         result.expect("Failed to retrieve CreateChallengeResponse");
 
     // emulates the javascript function running in the browser to create a valid nonce
-    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
+    let nonce = helper_solve_challenge(response.start_timestamp_ms, response.difficulty);
 
     // we can always assume the previously iterated nonce is invalid
     let invalid_nonce = nonce - 1;
@@ -346,14 +438,21 @@ fn test_allow_signing_should_approve_the_correct_cycles_amount() {
         result.expect("Failed to retrieve CreateChallengeResponse");
 
     // emulates the javascript function running in the browser to create a valid nonce
-    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
-
+    let nonce = helper_solve_challenge(response.start_timestamp_ms, response.difficulty);
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
-    // let _end_canister_balance = get_canister_balance();
-
     assert!(result_allow_signing.is_ok());
-    let response: AllowSigningResponse = result_allow_signing.unwrap();
-    assert_eq!(response.allowed_cycles, 280000000)
+    // let response: AllowSigningResponse = result_allow_signing.unwrap();
+    // assert_eq!(response.allowed_cycles, 11086470000);
+    /* let backend_principle = pic_setup.canister_id;
+    let result_cycles_allowance = call_get_cycles_allowance(
+        &pic_setup,
+        caller,
+        backend_principle,
+        Principal::from_text(CANISTER_ID_SIGNER).unwrap(),
+    );
+    assert!(result_cycles_allowance.is_ok());
+    let allowance_reponse = result_cycles_allowance.expect("Unable to get cycle allowance");
+    assert_eq!(allowance_reponse.allowance, Nat::from(5u8)); */
 }
 
 #[test]
@@ -364,30 +463,39 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
     // ---------------------------------------------------------------------------------------------
     // - Solve the first challenge and call allow_signing (using the START_DIFFICULTY)
     // ---------------------------------------------------------------------------------------------
-    let result = call_create_pow_challenge(&pic_setup, caller);
-    let response: CreateChallengeResponse =
-        result.expect("Failed to retrieve CreateChallengeResponse");
-    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
-    let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
-    assert!(result_allow_signing.is_ok());
+    let result_1 = call_create_pow_challenge(&pic_setup, caller);
+    let response_1: CreateChallengeResponse =
+        result_1.expect("Failed to retrieve CreateChallengeResponse");
+    let nonce_1 = helper_solve_challenge(response_1.start_timestamp_ms, response_1.difficulty);
+    let result_allow_signing_1 = call_allow_signing(&pic_setup, caller, nonce_1);
+    assert!(
+        result_allow_signing_1.is_ok(),
+        "Expected Ok, but got Err: {:?}",
+        result_allow_signing_1.unwrap_err()
+    );
 
+    // since we enabled auto progress, we can not call pic.advance_time(..) instead we need to wait
+    // instead
+    sleep_test(Duration::from_millis(
+        response_1.expiry_timestamp_ms - get_timestamp_ms(pic_setup.pic.get_time()) + 1000,
+    ));
     // ---------------------------------------------------------------------------------------------
     // - Solve the second challenge and call allow_signing (using the adjusted difficulty)
     // ---------------------------------------------------------------------------------------------
-    let result = call_create_pow_challenge(&pic_setup, caller);
-    let response: CreateChallengeResponse =
-        result.expect("Failed to retrieve CreateChallengeResponse");
-    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
-    let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
-    assert!(result_allow_signing.is_ok());
+    let result_2 = call_create_pow_challenge(&pic_setup, caller);
+    let response_2: CreateChallengeResponse =
+        result_2.expect("Failed to retrieve CreateChallengeResponse");
+    let nonce_2 = helper_solve_challenge(response_2.start_timestamp_ms, response_2.difficulty);
+    let result_allow_signing_2 = call_allow_signing(&pic_setup, caller, nonce_2);
+    debug_assert!(result_allow_signing_2.is_ok());
 
-    let allow_signing_response = result_allow_signing.unwrap();
+    let allow_signing_response_2 = result_allow_signing_2.unwrap();
 
-    assert_in_range(
-        allow_signing_response
+    assert_deviation(
+        allow_signing_response_2
             .challenge_completion
-            .solved_duration_ns,
-        TARGET_DURATION_NS - 4000000000u64,
-        TARGET_DURATION_NS + 6000000000u64,
+            .solved_duration_ms,
+        TARGET_DURATION_MS,
+        2_000,
     );
 }

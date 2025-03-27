@@ -68,8 +68,8 @@ export const idlFactory = ({ IDL }) => {
 		Executed: IDL.Null
 	});
 	const ChallengeCompletion = IDL.Record({
-		solved_duration_ns: IDL.Nat64,
-		next_allowance_ns: IDL.Nat64,
+		solved_duration_ms: IDL.Nat64,
+		next_allowance_ms: IDL.Nat64,
 		next_difficulty: IDL.Nat32,
 		current_difficulty: IDL.Nat32
 	});
@@ -96,7 +96,8 @@ export const idlFactory = ({ IDL }) => {
 		InvalidNonce: IDL.Null,
 		MissingChallenge: IDL.Null,
 		ExpiredChallenge: IDL.Null,
-		MissingUserProfile: IDL.Null
+		MissingUserProfile: IDL.Null,
+		ChallengeAlreadySolved: IDL.Null
 	});
 	const AllowSigningError = IDL.Variant({
 		ApproveError: ApproveError,
@@ -178,8 +179,8 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const CreateChallengeResponse = IDL.Record({
 		difficulty: IDL.Nat32,
-		start_timestamp_ns: IDL.Nat64,
-		expiry_timestamp_ns: IDL.Nat64
+		start_timestamp_ms: IDL.Nat64,
+		expiry_timestamp_ms: IDL.Nat64
 	});
 	const CreateChallengeError = IDL.Variant({
 		ChallengeInProgress: IDL.Null,

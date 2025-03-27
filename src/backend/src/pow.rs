@@ -1,38 +1,8 @@
-// -------------------------------------------------------------------------------------------------
-// PoW Challenge Constants
-// -------------------------------------------------------------------------------------------------
-// The time it takes in average to solve the challenge in milliseconds
-// Difficulty adapts aiming towards this value
-pub const TARGET_DURATION_NS: u64 = 5000 * 1_000_000;
-
-// The avoid a challenge expiring before the target time we multiply by 2
-// Providing a smaller duration than TARGET_DURATION_NS will result in an error
-pub const EXPIRY_DURATION_NS: u64 = TARGET_DURATION_NS * 2;
-
-// The difficulty used if no PoW challenge yet been solved
-// This setting must be set to a value between MIN_DIFFICULTY and MAX_DIFFICULTY
-pub const START_DIFFICULTY: u32 = 400_000;
-
-// Minimum difficulty required to solve the challenge.
-// Auto-adjustment of difficulty will never fall short of MIN_DIFFICULTY.
-// Note: Limiting the difficulty may cause the actual solving duration to deviate from the defined
-// TARGET_DURATION_NS.
-pub const MIN_DIFFICULTY: u32 = 100_000;
-
-// Maximum difficulty required to solve the challenge.
-// Auto-adjustment of difficulty will never exceed MAX_DIFFICULTY.
-// Note: Limiting the difficulty may cause the actual solving duration to deviate from the defined
-// TARGET_DURATION_NS.
-pub const MAX_DIFFICULTY: u32 = 5_000_000;
-
-// The factor defining the amount of cycles per difficulty unit the caller (principle) will be
-// allowed to spend on signer operations
-pub const DIFFICULTY_TO_CYCLE_FACTOR: u64 = 100;
-
-use ic_cdk::api::{caller, time};
+use ic_cdk::api::caller;
 use sha2::{Digest, Sha256};
 use shared::types::pow::{
     ChallengeCompletion, ChallengeCompletionError, CreateChallengeError, StoredChallenge,
+    EXPIRY_DURATION_MS, MAX_DIFFICULTY, MIN_DIFFICULTY, START_DIFFICULTY, TARGET_DURATION_MS,
 };
 
 use crate::{
@@ -80,28 +50,31 @@ fn get_pow_challenge() -> Option<Candid<StoredChallenge>> {
     let stored_principal = StoredPrincipal(caller());
     read_state(|s: &State| s.pow_challenge.get(&stored_principal))
 }
+
+fn get_time_ms() -> u64 {
+    ic_cdk::api::time() / 1_000_000
+}
+
 // -------------------------------------------------------------------------------------------------
 // - Service functions
 // -------------------------------------------------------------------------------------------------
 
 pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeError> {
-    ic_cdk::println!("update:create_pow_challenge -> Start");
-
     let principal = caller();
     let stored_principal = StoredPrincipal(principal);
 
     // we reject any request from a principle without a user profile
     if !exists_profile(stored_principal) {
-        ic_cdk::println!("No user profile exists for {}", principal.to_text());
+        ic_cdk::println!(
+            "create_pow_challenge() -> No user profile exists for {}",
+            principal.to_text()
+        );
         return Err(CreateChallengeError::MissingUserProfile);
     }
 
     let difficulty: u32;
     if let Some(stored_challenge) = get_pow_challenge() {
-        ic_cdk::println!(
-            "Retrieved existing StoredChallenge:  {:?}",
-            stored_challenge
-        );
+        ic_cdk::println!("create_pow_challenge() -> Retrieved {:?}", stored_challenge);
 
         // we re-use the previous challenge so we can dynamically adapt the difficulty
         difficulty = stored_challenge.difficulty;
@@ -111,15 +84,13 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
         // one challenge can be active when opening multiple windows/taps on the same or different
         // this also ensures that only one pow challenge is active
         if stored_challenge.is_expired() {
-            ic_cdk::println!(
-                "The previous challenge has expired therefore a new one can be requested",
-            );
+            ic_cdk::println!("create_pow_challenge() -> The challenge request is valid",);
         } else {
-            ic_cdk::println!("The challenge which has started at {} has not expired yet. The next challenge can be requested at {}", stored_challenge.start_timestamp_ns, stored_challenge.expiry_timestamp_ns);
+            ic_cdk::println!("create_pow_challenge() -> The challenge started at {} has not yet expired. The next challenge can be requested at {}", stored_challenge.start_timestamp_ms, stored_challenge.expiry_timestamp_ms);
             return Err(CreateChallengeError::ChallengeInProgress);
         }
     } else {
-        ic_cdk::println!("No ChallengeStore found");
+        ic_cdk::println!("create_pow_challenge() -> No ChallengeStore found");
 
         // if the challenge is requested the first time we use the start difficulty
         difficulty = START_DIFFICULTY;
@@ -131,12 +102,12 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
         .await
         .map_err(CreateChallengeError::RandomnessError)?;
 
-    let current_time_ns: u64 = time();
+    let current_time_ms: u64 = get_time_ms();
     let stored_challenge = StoredChallenge {
         nonce: random_nonce,
         difficulty,
-        start_timestamp_ns: current_time_ns,
-        expiry_timestamp_ns: current_time_ns + EXPIRY_DURATION_NS,
+        start_timestamp_ms: current_time_ms,
+        expiry_timestamp_ms: current_time_ms + EXPIRY_DURATION_MS,
         solved: false,
     };
 
@@ -145,7 +116,7 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
         pow_challenge_map.insert(stored_principal, Candid(stored_challenge.clone()));
     });
 
-    ic_cdk::println!("update:create_pow_challenge -> End: {:?}", stored_challenge);
+    ic_cdk::println!("create_pow_challenge() -> Stored {:?}", stored_challenge);
 
     Ok(stored_challenge)
 }
@@ -163,59 +134,76 @@ pub(crate) fn complete_challenge(
 
     // we reject any request from a principle without a user profile
     if !exists_profile(stored_principal) {
-        ic_cdk::println!("No user profile exists for {}", principal.to_text());
+        ic_cdk::println!(
+            "complete_challenge(nonce) -> No user profile exists for {}",
+            principal.to_text()
+        );
         return Err(ChallengeCompletionError::MissingUserProfile);
     }
 
     let stored_challenge = get_pow_challenge().ok_or_else(|| {
-        ic_cdk::println!("No stored challenge found for {}", principal);
+        ic_cdk::println!(
+            "complete_challenge(nonce) -> No stored challenge found for {}",
+            principal
+        );
         ChallengeCompletionError::MissingChallenge
     })?;
 
-    // A new challenge can be requested after a challenge that had been solved
-    if stored_challenge.is_expired() && !stored_challenge.is_solved() {
+    ic_cdk::println!("complete_challenge() -> Retrieved {:?}", stored_challenge);
+
+    // A new challenge can be requested after the current challenge has expired
+    if stored_challenge.is_expired() {
+        ic_cdk::println!("complete_challenge(nonce) -> The current challenge has already expired");
         return Err(ChallengeCompletionError::ExpiredChallenge);
     }
+    // a challenge can only be solved once
+    if stored_challenge.is_solved() {
+        ic_cdk::println!(
+            "complete_challenge(nonce) -> The current challenge has already been solved"
+        );
+        return Err(ChallengeCompletionError::ChallengeAlreadySolved);
+    }
 
-    ic_cdk::println!("StoredChallenge {:?}", stored_challenge);
-    let end_timestamp_ns = time();
-    let solve_duration_ns: u64 = end_timestamp_ns - stored_challenge.start_timestamp_ns;
+    let end_timestamp_ms = get_time_ms();
+    let solve_duration_ms: u64 = end_timestamp_ms - stored_challenge.start_timestamp_ms;
 
     if verify_solution(
         nonce,
         stored_challenge.difficulty,
-        stored_challenge.start_timestamp_ns,
+        stored_challenge.start_timestamp_ms,
     ) {
         ic_cdk::println!(
-            "The provided nonce is valid (solve_duration={}ms)",
-            solve_duration_ns
+            "complete_challenge(nonce) -> The provided nonce is valid (solve_duration={}ms)",
+            solve_duration_ms
         );
     } else {
         ic_cdk::println!(
-            "The provided nonce is invalid (solve_duration={}ms)",
-            solve_duration_ns
+            "complete_challenge(nonce) -> The provided nonce is invalid (solve_duration={}ms)",
+            solve_duration_ms
         );
         return Err(ChallengeCompletionError::InvalidNonce);
     }
 
-    let new_difficulty = adapt_difficulty(stored_challenge.difficulty, solve_duration_ns);
+    let new_difficulty = adapt_difficulty(stored_challenge.difficulty, solve_duration_ms);
+
+    let stored_challenge = StoredChallenge {
+        nonce,
+        difficulty: new_difficulty,
+        start_timestamp_ms: stored_challenge.start_timestamp_ms,
+        expiry_timestamp_ms: stored_challenge.expiry_timestamp_ms,
+        solved: true,
+    };
 
     mutate_state(|state| {
-        state.pow_challenge.insert(
-            stored_principal,
-            Candid(StoredChallenge {
-                nonce,
-                difficulty: new_difficulty,
-                start_timestamp_ns: stored_challenge.start_timestamp_ns,
-                expiry_timestamp_ns: stored_challenge.expiry_timestamp_ns,
-                solved: true,
-            }),
-        );
+        let pow_challenge_map = &mut state.pow_challenge;
+        pow_challenge_map.insert(stored_principal, Candid(stored_challenge.clone()));
     });
 
+    ic_cdk::println!("complete_challenge() -> Stored: {:?}", stored_challenge);
+
     Ok(ChallengeCompletion {
-        next_allowance_ns: 0,
-        solved_duration_ns: solve_duration_ns,
+        next_allowance_ms: 0,
+        solved_duration_ms: solve_duration_ms,
         current_difficulty: stored_challenge.difficulty,
         next_difficulty: new_difficulty,
     })
@@ -224,18 +212,18 @@ pub(crate) fn complete_challenge(
 // Calculate the new difficulty for a PoW Challenge:
 //
 // Adjust the current difficulty proportionally based on how long the client took
-// to solve the previous challenge (`solve_duration_ns`) compared to the solving duration
+// to solve the previous challenge (`solve_duration_ms`) compared to the solving duration
 // (`TARGET_DURATION_MS`).
 //
 // Formula:
-// new_difficulty = (current_difficulty * TARGET_DURATION_MS * ) / solve_duration_ns
+// new_difficulty = (current_difficulty * TARGET_DURATION_MS * ) / solve_duration_ms
 //
 // This ensures:
 // - If the client solved too quickly (duration < target), difficulty increases.
 // - If the client solved too slowly (duration > target), difficulty decreases. .
-fn adapt_difficulty(difficulty: u32, solve_duration_ns: u64) -> u32 {
+fn adapt_difficulty(difficulty: u32, solve_duration_ms: u64) -> u32 {
     let new_difficulty = u32::try_from(
-        ((u64::from(difficulty) * TARGET_DURATION_NS) / solve_duration_ns.max(1))
+        ((u64::from(difficulty) * TARGET_DURATION_MS) / solve_duration_ms.max(1))
             // make sure the difficulty is always between the defined min. and the max. difficulty
             .clamp(u64::from(MIN_DIFFICULTY), u64::from(MAX_DIFFICULTY)),
     )

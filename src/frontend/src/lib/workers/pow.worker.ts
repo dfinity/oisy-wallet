@@ -34,9 +34,7 @@ const startPowTimer = async (data: PostMessageDataRequestExchangeTimer | undefin
 	}
 
 	let identity = await loadIdentity();
-	const allow_signer = async () => await createPowChallenge(identity);
-
-	await createPowChallenge(test_identity);
+	const allow_signer = async () => await createPowChallenge({ identity });
 
 	timer = setInterval(allow_signer, SYNC_EXCHANGE_TIMER_INTERVAL);
 };

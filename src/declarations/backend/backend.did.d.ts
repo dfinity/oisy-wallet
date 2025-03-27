@@ -144,8 +144,8 @@ export interface CanisterStatusResultV2 {
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
 export interface ChallengeCompletion {
-	solved_duration_ns: bigint;
-	next_allowance_ns: bigint;
+	solved_duration_ms: bigint;
+	next_allowance_ms: bigint;
 	next_difficulty: number;
 	current_difficulty: number;
 }
@@ -153,7 +153,8 @@ export type ChallengeCompletionError =
 	| { InvalidNonce: null }
 	| { MissingChallenge: null }
 	| { ExpiredChallenge: null }
-	| { MissingUserProfile: null };
+	| { MissingUserProfile: null }
+	| { ChallengeAlreadySolved: null };
 export interface Config {
 	api: [] | [Guards];
 	derivation_origin: [] | [string];
@@ -169,8 +170,8 @@ export type CreateChallengeError =
 	| { RandomnessError: string };
 export interface CreateChallengeResponse {
 	difficulty: number;
-	start_timestamp_ns: bigint;
-	expiry_timestamp_ns: bigint;
+	start_timestamp_ms: bigint;
+	expiry_timestamp_ms: bigint;
 }
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];

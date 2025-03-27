@@ -25,12 +25,12 @@ use super::mock::{
 };
 use crate::utils::mock::CALLER;
 
-const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
-const DEFAULT_BITCOIN_WASM: &str = "../../ic-btc-canister.wasm.gz";
-const BITCOIN_CANISTER_ID: &str = "g4xu7-jiaaa-aaaan-aaaaq-cai";
-const DEFAULT_CYCLES_LEDGER_WASM: &str = "../../cycles-ledger.wasm.gz";
-const CYCLES_LEDGER_CANISTER_ID: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
-const DEFAULT_CYCLES_LEDGER_CANISTER_ENABLED: &str = "false";
+pub const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
+pub const DEFAULT_BITCOIN_WASM: &str = "../../ic-btc-canister.wasm.gz";
+pub const BITCOIN_CANISTER_ID: &str = "g4xu7-jiaaa-aaaan-aaaaq-cai";
+pub const DEFAULT_CYCLES_LEDGER_WASM: &str = "../../cycles-ledger.wasm.gz";
+pub const CYCLES_LEDGER_CANISTER_ID: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
+pub const DEFAULT_CYCLES_LEDGER_CANISTER_ENABLED: &str = "false";
 
 // This is necessary to deploy the bitcoin canister.
 // This is a struct based on the `InitConfig` from the Bitcoin canister.
