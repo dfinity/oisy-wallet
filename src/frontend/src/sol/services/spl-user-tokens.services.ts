@@ -1,10 +1,9 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
 import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
-import type { TokenId } from '$lib/types/token';
+import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
-import { isNetworkIdSOLDevnet, isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
+import { isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
 import { get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { loadSplUserTokens, loadUserTokens } from '$sol/services/spl.services';
 import {
@@ -13,7 +12,6 @@ import {
 	type SplAddressMap
 } from '$sol/stores/spl-user-tokens.store';
 import type { SplTokenAddress } from '$sol/types/spl';
-import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 import type { Identity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -25,7 +23,7 @@ export const saveUserTokens = async ({
 }: {
 	progress: (step: ProgressStepsAddToken) => void;
 	identity: Identity;
-	tokens: SaveSplUserToken[];
+	tokens: SaveCustomTokenWithKey[];
 }) => {
 	progress(ProgressStepsAddToken.SAVE);
 
@@ -65,24 +63,32 @@ export const saveUserTokens = async ({
 		}
 	});
 
-	const customTokens: CustomToken[] = tokens.map((token) =>
-		toCustomToken({
-			...token,
-			networkKey: isNetworkIdSOLDevnet(token.network.id) ? 'SplDevnet' : 'SplMainnet'
-		})
-	);
-
 	await setManyCustomTokens({
 		identity,
-		tokens: customTokens,
+		tokens: tokens.map(toCustomToken),
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
 	progress(ProgressStepsAddToken.UPDATE_UI);
 
 	// Hide tokens that have been disabled
-	const disabledTokens = tokens.filter(({ enabled, id }) => !enabled && nonNullish(id));
-	disabledTokens.forEach(({ id }) => splUserTokensStore.reset(id as TokenId));
+	const disabledTokens = tokens.filter(({ enabled }) => !enabled);
+	const splUserTokens = get(splUserTokensStore);
+	if (nonNullish(splUserTokens)) {
+		disabledTokens.forEach((token) => {
+			if (token.networkKey !== 'SplMainnet') {
+				return;
+			}
+
+			const existingToken = splUserTokens.find(
+				({ data: { address } }) => address === token.address
+			)?.data;
+
+			if (nonNullish(existingToken)) {
+				splUserTokensStore.reset(existingToken.id);
+			}
+		});
+	}
 
 	// Reload all user tokens for simplicity reason.
 	await loadSplUserTokens({ identity });
