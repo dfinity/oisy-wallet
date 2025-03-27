@@ -24,15 +24,7 @@ export const getActiveScreen = ({
 }: {
 	screenWidth: number;
 	availableScreens: AvailableScreen[];
-}) => {
-	for (const { width, screen } of availableScreens) {
-		if (screenWidth < width) {
-			return screen;
-		}
-	}
-	// if nothing matches it must be the largest screen size
-	return MAX_SCREEN;
-};
+}) => availableScreens.find(({ width }) => screenWidth < width)?.screen ?? MAX_SCREEN;
 
 export const filterScreens = ({
 	availableScreens,
