@@ -87,7 +87,7 @@
 						dropdown?.close();
 						// a small delay is needed for the opening of the modal after page switching
 						setTimeout(() => modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS), 1);
-					}}><IconManage /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button
+					}}><IconManage />{$i18n.tokens.manage.text.manage_list}</Button
 				>
 			</span>
 			<span class="ml-4 mr-2 flex text-nowrap text-right text-base">
