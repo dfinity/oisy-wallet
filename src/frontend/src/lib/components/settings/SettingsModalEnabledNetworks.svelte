@@ -51,13 +51,11 @@
 	let isModified: boolean;
 	$: isModified = checkModified({ enabledTestnet, enabledNetworks });
 
-	let mainnetsList: Network[];
-	$: mainnetsList = SUPPORTED_NETWORKS.filter((n) => n.env === 'mainnet');
+	const mainnetsList = SUPPORTED_NETWORKS.filter((n) => n.env === 'mainnet');
 
-	let testnetsList: Network[];
-	$: testnetsList = SUPPORTED_NETWORKS.filter((n) => n.env === 'testnet');
+	const testnetsList = SUPPORTED_NETWORKS.filter((n) => n.env === 'testnet');
 
-	const toggleTestnets = async () => {
+	const toggleTestnets = () => {
 		enabledTestnet = !enabledTestnet;
 	};
 
@@ -68,8 +66,7 @@
 		};
 	};
 
-	let saveLoading: boolean;
-	$: saveLoading = false;
+	let saveLoading = false;
 
 	const save = async () => {
 		saveLoading = true;
@@ -108,7 +105,7 @@
 			</div></svelte:fragment
 		>
 
-		{#each mainnetsList as network}
+		{#each mainnetsList as network (network.id)}
 			<SettingsListItem>
 				<svelte:fragment slot="key"
 					><NetworkLogo {network} blackAndWhite size="xxs" />
@@ -132,7 +129,7 @@
 		<SettingsList>
 			<svelte:fragment slot="title">{$i18n.settings.text.test_networks}</svelte:fragment>
 
-			{#each testnetsList as network}
+			{#each testnetsList as network (network.id)}
 				<SettingsListItem>
 					<svelte:fragment slot="key"
 						><span><NetworkLogo {network} blackAndWhite size="xxs" /></span>
