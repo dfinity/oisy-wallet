@@ -26,7 +26,7 @@
 	export let sendToLabel: string | undefined;
 
 	let from: string;
-	let to: string | null;
+	let to: string | undefined;
 	let timestamp: bigint | undefined;
 	let blockNumber: Option<number>;
 	let txExplorerUrl: string | undefined;

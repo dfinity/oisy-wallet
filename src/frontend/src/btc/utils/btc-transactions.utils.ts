@@ -79,7 +79,7 @@ export const mapBtcTransaction = ({
 		blockNumber: block_index ?? undefined,
 		type: isTypeSend ? 'send' : 'receive',
 		from: isTypeSend ? btcAddress : inputs[0].prev_out.addr,
-		to: to ?? null,
+		to,
 		confirmations
 	};
 };
