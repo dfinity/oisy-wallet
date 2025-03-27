@@ -1,4 +1,4 @@
-import type { NetworkSettingsFor, NetworksSettings } from '$declarations/backend/backend.did';
+import type { NetworkSettingsFor } from '$declarations/backend/backend.did';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -13,16 +13,11 @@ import {
 	SOLANA_MAINNET_NETWORK_ID,
 	SOLANA_TESTNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
-import { userSettings } from '$lib/derived/user-profile.derived';
+import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
-
-export const userSettingsNetworks: Readable<NetworksSettings | undefined> = derived(
-	[userSettings],
-	([$userSettings]) => $userSettings?.networks
-);
 
 export const userNetworks: Readable<UserNetworks> = derived(
 	[userSettingsNetworks],
