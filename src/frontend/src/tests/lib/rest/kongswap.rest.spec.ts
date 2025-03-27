@@ -103,5 +103,19 @@ describe('KongSwap REST client', () => {
 			expect(fetch).toHaveBeenCalledTimes(2);
 			expect(result).toEqual([]);
 		});
+
+		it('skips tokens with null token or null metrics', async () => {
+			const invalidResponse = { token: null, metrics: null };
+
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: true,
+				json: () => Promise.resolve(invalidResponse)
+			} as unknown as Response);
+
+			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
+
+			expect(fetch).toHaveBeenCalledTimes(1);
+			expect(result).toEqual([]);
+		});
 	});
 });
