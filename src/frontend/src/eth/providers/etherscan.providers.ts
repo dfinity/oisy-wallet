@@ -25,13 +25,33 @@ export class EtherscanProvider {
 		this.provider = new EtherscanProviderLib(this.network, ETHERSCAN_API_KEY);
 	}
 
+	// There is no `getHistory` in ethers v6
+	// Issue report: https://github.com/ethers-io/ethers.js/issues/4303
+	// Workaround: https://ethereum.stackexchange.com/questions/147756/read-transaction-history-with-ethers-v6-1-0/150836#150836
+	// eslint-disable-next-line local-rules/prefer-object-params
+	private async getHistory(
+		address: string,
+		startBlock?: BlockTag,
+		endBlock?: BlockTag
+	): Promise<Array<TransactionResponse>> {
+		const params = {
+			action: 'txlist',
+			address,
+			startblock: startBlock ?? 0,
+			endblock: endBlock ?? 99999999,
+			sort: 'asc'
+		};
+
+		return await this.provider.fetch('account', params);
+	}
+
 	transactions = ({
 		address,
 		startBlock
 	}: {
 		address: EthAddress;
 		startBlock?: BlockTag;
-	}): Promise<TransactionResponse[]> => this.provider.getHistory(address, startBlock);
+	}): Promise<TransactionResponse[]> => this.getHistory(address, startBlock);
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = {
