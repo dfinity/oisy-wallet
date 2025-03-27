@@ -233,6 +233,8 @@ interface I18nSettings {
 		networks: string;
 		test_networks: string;
 		enable_testnets: string;
+		enable_network: string;
+		disable_network: string;
 		testnets_description: string;
 		hide_zero_balances_description: string;
 		active_networks: string;
