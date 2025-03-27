@@ -15,8 +15,7 @@ export const getAvailableScreens: () => AvailableScreen[] = () =>
 		.map(([k, v]) => ({
 			screen: k as ScreensKeyType,
 			width: Number((v as string).replaceAll('rem', '')) * 16
-		}))
-		.sort((a, b) => a.width - b.width);
+		}));
 
 export const getActiveScreen = ({
 	screenWidth,
@@ -24,7 +23,9 @@ export const getActiveScreen = ({
 }: {
 	screenWidth: number;
 	availableScreens: AvailableScreen[];
-}) => availableScreens.find(({ width }) => screenWidth < width)?.screen ?? MAX_SCREEN;
+}) =>
+	availableScreens.sort((a, b) => a.width - b.width).find(({ width }) => screenWidth < width)
+		?.screen ?? MAX_SCREEN;
 
 export const filterScreens = ({
 	availableScreens,
