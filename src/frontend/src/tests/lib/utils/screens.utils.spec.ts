@@ -35,19 +35,19 @@ describe('screens.utils tests', () => {
 
 	describe('getActiveScreen', () => {
 		it('should return the correct active screen based on screen width', () => {
-			const availableScreens = getAvailableScreens();
+			const availableScreensSortedByWidth = getAvailableScreens();
 
 			// Test case when screenWidth is smaller than the first screen width
 			let screenWidth = remToPx('28rem') - 1; // Just below 'xs'
-			expect(getActiveScreen({ screenWidth, availableScreens })).toBe('xs');
+			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toBe('xs');
 
 			// Test case when screenWidth is in between 'md' and 'lg'
 			screenWidth = remToPx('56rem'); // Between 'md' (48rem) and 'lg' (64rem)
-			expect(getActiveScreen({ screenWidth, availableScreens })).toBe('lg');
+			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toBe('lg');
 
 			// Test case when screenWidth is larger than the largest screen width
 			screenWidth = remToPx('160rem'); // Beyond '2.5xl'
-			expect(getActiveScreen({ screenWidth, availableScreens })).toBe('2.5xl');
+			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toBe('2.5xl');
 		});
 	});
 
