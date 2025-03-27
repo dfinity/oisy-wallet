@@ -38,10 +38,10 @@
 			return true;
 		}
 		for (const k of SUPPORTED_NETWORKS) {
-			const value = enabledNetworks[k.id];
-			const initialValue = enabledNetworksInitial[k.id];
+			const value = enabledNetworks[k.id]?.enabled ?? false;
+			const initialValue = enabledNetworksInitial[k.id]?.enabled ?? false;
 
-			if (value?.enabled !== initialValue?.enabled) {
+			if (value !== initialValue) {
 				return true;
 			}
 		}
