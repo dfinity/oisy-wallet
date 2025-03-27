@@ -104,8 +104,22 @@ describe('KongSwap REST client', () => {
 			expect(result).toEqual([]);
 		});
 
-		it('skips tokens with null token or null metrics', async () => {
-			const invalidResponse = { token: null, metrics: null };
+		it('skips token when token field is null', async () => {
+			const invalidResponse = { token: null, metrics: { price: '1.23' } };
+
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: true,
+				json: () => Promise.resolve(invalidResponse)
+			} as unknown as Response);
+
+			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
+
+			expect(fetch).toHaveBeenCalledTimes(1);
+			expect(result).toEqual([]);
+		});
+
+		it('skips token when metrics field is null', async () => {
+			const invalidResponse = { token: { canister_id: MOCK_CANISTER_ID_1 }, metrics: null };
 
 			vi.mocked(fetch).mockResolvedValueOnce({
 				ok: true,
