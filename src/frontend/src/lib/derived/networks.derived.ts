@@ -39,3 +39,12 @@ export const networksTestnets: Readable<Network[]> = derived(
 	[networksEnvs],
 	([{ testnets }]) => testnets
 );
+
+export const networkICPEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === ICP_NETWORK.id)
+);
+
+export const networkICPDisabled: Readable<boolean> = derived(
+	[networkICPEnabled],
+	([$networkICPEnabled]) => !$networkICPEnabled
+);
