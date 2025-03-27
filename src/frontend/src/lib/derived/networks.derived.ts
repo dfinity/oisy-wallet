@@ -7,17 +7,12 @@ import { derived, type Readable } from 'svelte/store';
 
 export const networks: Readable<Network[]> = derived(
 	[enabledBitcoinNetworks, enabledEthereumNetworks, enabledSolanaNetworks],
-	([$enabledBitcoinNetworks, $enabledEthereumNetworks, $enabledSolanaNetworks]) => {
-		const networks: Network[] = [
-			...$enabledBitcoinNetworks,
-			...$enabledEthereumNetworks,
-			ICP_NETWORK,
-			...$enabledSolanaNetworks
-		];
-
-		// We do not allow the user to have no networks enabled, so we return ICP network if no networks are enabled.
-		return networks.length > 0 ? networks : [ICP_NETWORK];
-	}
+	([$enabledBitcoinNetworks, $enabledEthereumNetworks, $enabledSolanaNetworks]) => [
+		...$enabledBitcoinNetworks,
+		...$enabledEthereumNetworks,
+		ICP_NETWORK,
+		...$enabledSolanaNetworks
+	]
 );
 
 interface NetworksEnvs {
