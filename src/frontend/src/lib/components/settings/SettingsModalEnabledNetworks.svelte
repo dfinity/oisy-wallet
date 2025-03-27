@@ -21,11 +21,10 @@
 	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 
-	const enabledNetworks: UserNetworks = { ...$userNetworks };
-	const enabledNetworksInitial = { ...$userNetworks };
+	const enabledNetworks: UserNetworks = $userNetworks;
+	const enabledNetworksInitial = $userNetworks;
 
-	let enabledTestnet: boolean;
-	$: enabledTestnet = $testnets;
+	let enabledTestnet = $testnets;
 	const enabledTestnetInitial = $testnets;
 
 	const checkModified = ({
