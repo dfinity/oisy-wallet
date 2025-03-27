@@ -1,3 +1,4 @@
+import * as networksEnv from '$env/networks/networks.env';
 import {
 	SUPPORTED_MAINNET_NETWORKS_IDS,
 	SUPPORTED_TESTNET_NETWORKS_IDS
@@ -33,6 +34,12 @@ describe('user-networks.derived', () => {
 			}),
 			{}
 		);
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			vi.spyOn(networksEnv, 'USER_NETWORKS_FEATURE_ENABLED', 'get').mockImplementation(() => true);
+		});
 
 		it('should return only mainnets when user profile is not set', () => {
 			userProfileStore.reset();
@@ -70,6 +77,15 @@ describe('user-networks.derived', () => {
 				}
 			});
 			expect(get(userNetworks)).toEqual({ ...expectedMainnets, ...expectedTestnets });
+		});
+
+		it('should return the default when user networks feature is disabled', () => {
+			vi.spyOn(networksEnv, 'USER_NETWORKS_FEATURE_ENABLED', 'get').mockImplementationOnce(
+				() => false
+			);
+
+			userProfileStore.set({ certified, profile: mockUserProfile });
+			expect(get(userNetworks)).toEqual(expectedMainnets);
 		});
 	});
 });
