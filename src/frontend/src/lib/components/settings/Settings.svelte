@@ -2,12 +2,9 @@
 	import type { Principal } from '@dfinity/principal';
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import type { NetworksSettings } from '$declarations/backend/backend.did';
-	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
-	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -16,7 +13,6 @@
 	import { SETTINGS_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
-	import { modalSettingsState } from '$lib/derived/modal.derived';
 	import {
 		type SettingsModalType,
 		SettingsModalType as SettingsModalEnum
@@ -141,7 +137,3 @@
 </SettingsCard>
 
 <SettingsVersion />
-
-{#if $modalSettingsState}
-	<SettingsModal />
-{/if}

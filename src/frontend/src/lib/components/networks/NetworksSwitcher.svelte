@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import { goto } from '$app/navigation';
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
@@ -83,10 +82,8 @@
 				<Button
 					link
 					on:click={() => {
-						goto('/settings');
 						dropdown?.close();
-						// a small delay is needed for the opening of the modal after page switching
-						setTimeout(() => modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS), 1);
+						modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS);
 					}}><IconManage />{$i18n.tokens.manage.text.manage_list}</Button
 				>
 			</span>
