@@ -260,6 +260,7 @@ interface I18nNetworks {
 	chain_fusion: string;
 	network: string;
 	testnet: string;
+	number_of_enabled: string;
 	filter: string;
 }
 
