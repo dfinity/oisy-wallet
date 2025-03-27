@@ -53,20 +53,22 @@
 
 		<ul class="flex list-none flex-col">
 			{#each $networksMainnets as network (network.id)}
-				<li transition:slide={SLIDE_EASING}
-					><MainnetNetwork {network} on:icSelected={dropdown.close} /></li
-				>
+				<li transition:slide={SLIDE_EASING}>
+					<MainnetNetwork {network} on:icSelected={dropdown.close} />
+				</li>
 			{/each}
 		</ul>
 
-		<span class="my-5 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
+		{#if $testnets && $networksTestnets.length > 0}
+			<span class="my-5 flex px-3 font-bold" transition:slide={SLIDE_EASING}>
+				{$i18n.networks.test_networks}
+			</span>
 
-		{#if $testnets}
 			<ul class="flex list-none flex-col">
 				{#each $networksTestnets as network (network.id)}
-					<li transition:slide={SLIDE_EASING}
-						><Network {network} on:icSelected={dropdown.close} /></li
-					>
+					<li transition:slide={SLIDE_EASING}>
+						<Network {network} on:icSelected={dropdown.close} />
+					</li>
 				{/each}
 			</ul>
 		{/if}
