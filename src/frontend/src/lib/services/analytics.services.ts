@@ -33,6 +33,10 @@ export const initAnalytics = async () => {
 };
 
 export const initPlausibleAnalytics = () => {
+	if (!PROD) {
+		return;
+	}
+
 	if (isNullish(plausibleTracker)) {
 		plausibleTracker = Plausible({
 			domain,
@@ -44,12 +48,12 @@ export const initPlausibleAnalytics = () => {
 };
 
 export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
-	if (nonNullish(plausibleTracker)) {
-		plausibleTracker.trackEvent(name, { props: metadata });
-	}
-
 	if (!PROD) {
 		return;
+	}
+
+	if (nonNullish(plausibleTracker)) {
+		plausibleTracker.trackEvent(name, { props: metadata });
 	}
 
 	await trackEventOrbiter({

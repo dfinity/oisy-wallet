@@ -12,6 +12,10 @@ vi.mock('plausible-tracker', () => ({
 	}))
 }));
 
+vi.mock('$lib/constants/app.constants', () => ({
+	PROD: true
+}));
+
 describe('plausible analytics service', () => {
 	beforeEach(() => {
 		vi.resetModules();
@@ -56,5 +60,27 @@ describe('plausible analytics service', () => {
 		expect(trackEventMock).toHaveBeenCalledWith('test_event_name', {
 			props: { eventName: 'eventValue' }
 		});
+	});
+
+	it('should NOT call trackEvent or init anything if PROD is false', async () => {
+		vi.doMock('$lib/constants/app.constants', () => ({
+			PROD: false
+		}));
+
+		const { initPlausibleAnalytics, trackEvent } = await import('$lib/services/analytics.services');
+
+		initPlausibleAnalytics();
+
+		expect(Plausible).not.toHaveBeenCalled();
+		expect(enableAutoPageviews).not.toHaveBeenCalled();
+
+		const params: TrackEventParams = {
+			name: 'test_event_name',
+			metadata: { eventName: 'eventValue' }
+		};
+
+		await trackEvent(params);
+
+		expect(trackEventMock).not.toHaveBeenCalled();
 	});
 });

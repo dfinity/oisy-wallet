@@ -1,1 +1,1 @@
-export const PLAUSIBLE_DOMAIN = 'fe1.oisy.com';
+export const PLAUSIBLE_DOMAIN = 'oisy.com';
