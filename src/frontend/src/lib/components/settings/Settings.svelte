@@ -2,6 +2,9 @@
 	import type { Principal } from '@dfinity/principal';
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import type { NetworksSettings } from '$declarations/backend/backend.did';
+	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
@@ -28,9 +31,6 @@
 	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
-	import type { NetworksSettings } from '$declarations/backend/backend.did';
-	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
