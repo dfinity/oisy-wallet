@@ -62,6 +62,7 @@ export class ManageTokensPage extends HomepageLoggedIn {
 			})
 		).toBeVisible();
 		await this.waitForLoadState();
+		await this.waitForTimeout(5000);
 		await this.takeScreenshot({
 			freezeCarousel: true,
 			centeredElementTestId: `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`
