@@ -7,11 +7,11 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
 	import { OISY_REPO_URL, OISY_TWITTER_URL } from '$lib/constants/oisy.constants';
+	import { NAVIGATION_FOOTER } from '$lib/constants/test-ids.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
-	import { NAVIGATION_FOOTER } from '$lib/constants/test-ids.constants';
 
 	$: isHomePage = isRouteTokens($page);
 </script>
