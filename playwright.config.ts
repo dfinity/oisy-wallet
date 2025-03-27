@@ -72,15 +72,18 @@ export default defineConfig({
 			caret: 'hide'
 		}
 	},
-	webServer: {
-		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
-		reuseExistingServer: true,
-		port: DEV ? 5173 : 4173,
-		timeout: TIMEOUT
-	},
+	...(DEV && {
+		webServer: {
+			command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
+			reuseExistingServer: true,
+			port: DEV ? 5173 : 4173,
+			timeout: TIMEOUT
+		}
+	}),
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	use: {
+		baseURL: DEV ? 'http://localhost:5173' : 'https://e2e.oisy.com',
 		testIdAttribute: 'data-tid',
 		trace: 'on',
 		actionTimeout: TIMEOUT,
