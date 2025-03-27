@@ -18,7 +18,7 @@ import {
 	getRewards,
 	getUserRewardsTokenAmounts,
 	isVipUser
-} from '$lib/services/reward-code.services';
+} from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
@@ -176,7 +176,7 @@ describe('reward-code', () => {
 
 		const mockedReward: RewardInfo = {
 			timestamp: lastTimestamp,
-			amount: BigInt(1000000),
+			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: ['jackpot']
 		};
@@ -189,7 +189,7 @@ describe('reward-code', () => {
 		};
 		const expectedReward: RewardResponseInfo = {
 			timestamp: lastTimestamp,
-			amount: BigInt(1000000),
+			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: 'jackpot'
 		};

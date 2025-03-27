@@ -21,7 +21,7 @@ describe('sol-wallet.scheduler', () => {
 	let spyLoadSplBalance: MockInstance;
 
 	const mockSolBalance = lamports(100n);
-	const mockSplBalance = BigInt(123);
+	const mockSplBalance = 123n;
 	const mockSolTransactions = createMockSolTransactionsUi(2);
 
 	const expectedSoLTransactions = mockSolTransactions.map((transaction) => ({

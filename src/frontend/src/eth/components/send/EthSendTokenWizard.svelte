@@ -71,8 +71,7 @@
 	// i.e. Ethereum or Sepolia "main" token.
 	export let nativeEthereumToken: Token;
 
-	let destinationEditable = true;
-	$: destinationEditable = sendPurpose === 'send';
+	const destinationEditable = sendPurpose === 'send';
 
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
@@ -222,7 +221,7 @@
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
 
-	$: onDecodeQrCode = ({
+	const onDecodeQrCode = ({
 		status,
 		code,
 		expectedToken
@@ -276,7 +275,6 @@
 			bind:network={targetNetwork}
 			{nativeEthereumToken}
 			{destinationEditable}
-			{sourceNetwork}
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}

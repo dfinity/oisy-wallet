@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import AllRewardsList from '$lib/components/rewards/AllRewardsList.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
@@ -14,7 +14,7 @@
 		ariaLabel={$i18n.rewards.text.learn_more}
 		iconVisible={false}
 		color="blue"
-		styleClass={`ml-auto font-semibold`}
+		styleClass="ml-auto font-semibold"
 	>
 		{$i18n.rewards.text.learn_more}
 	</ExternalLink>
