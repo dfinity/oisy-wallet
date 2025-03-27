@@ -3,16 +3,15 @@
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import type { Network } from '$lib/types/network';
 	import { logoSizes } from '$lib/constants/components.constants';
+	import type { UserNetworks } from '$lib/types/user-networks';
 
 	export let numberOfIcons: number = 4;
 
-	// todo: type networks correcty
-	export let enabledNetworks: any = {};
+	export let enabledNetworks: UserNetworks = {};
 
-	// todo: type networks correcty
-	const getEnabledList = (networks: any) => {
+	const getEnabledList = (networks: UserNetworks) => {
 		const enabled = Object.getOwnPropertySymbols(networks ?? {})
-			.map((k) => ({ key: k, value: networks[k] }))
+			.map((k) => ({ key: k, value: networks[k as keyof typeof enabledNetworks] }))
 			.filter(({ value }) => value.enabled);
 
 		return enabled.map((n) => {
