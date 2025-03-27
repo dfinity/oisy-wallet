@@ -1,11 +1,11 @@
 <script lang="ts">
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
-	import type { Network } from '$lib/types/network';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
+	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 
-	export let numberOfIcons: number = 4;
+	export let numberOfIcons = 4;
 
 	export let enabledNetworks: UserNetworks = {};
 
