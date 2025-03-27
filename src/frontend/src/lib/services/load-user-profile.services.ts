@@ -5,6 +5,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { UserProfileNotFoundError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -65,13 +66,13 @@ export const loadUserProfile = async ({
 }: {
 	identity: OptionIdentity;
 	reload?: boolean;
-}): Promise<void> => {
+}): Promise<ResultSuccess> => {
 	// We just want to verify that the store is empty, without being interested in the data.
 	// So we fetch it imperatively, instead of passing as parameter.
 	// If it is not empty, and we don't want to reload, we can return early.
 	// In any case, if `reload` is true, we will always fetch the profile.
 	if (nonNullish(get(userProfileStore)) && !reload) {
-		return;
+		return { success: true };
 	}
 
 	try {
@@ -95,5 +96,8 @@ export const loadUserProfile = async ({
 			msg: { text: settings.error.loading_profile },
 			err
 		});
+		return { success: false };
 	}
+
+	return { success: true };
 };
