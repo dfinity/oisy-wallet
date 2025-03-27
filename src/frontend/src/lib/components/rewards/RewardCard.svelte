@@ -24,10 +24,7 @@
 		/>
 	</span>
 	<span class="absolute right-4 top-3">
-		<RewardDateBadge
-			date={reward.endDate}
-			testId="rewards-date-badge"
-		/>
+		<RewardDateBadge date={reward.endDate} testId="rewards-date-badge" />
 	</span>
 	<article class="h-full">
 		<section>
@@ -38,7 +35,9 @@
 			</p>
 		</section>
 		<section class="bottom-4 left-4 mt-3 flex">
-			<div data-tid="reward-status-button" class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
+			<div
+				data-tid="reward-status-button"
+				class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
 				>{$i18n.rewards.text.check_status}
 			</div></section
 		>
