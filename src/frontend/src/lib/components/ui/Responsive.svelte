@@ -33,7 +33,7 @@
 	let activeScreen: ScreensKeyType;
 	$: activeScreen = getActiveScreen({
 		screenWidth: $debouncedWidth,
-		availableScreens: screens
+		availableScreensSortedByWidth: screens
 	});
 
 	let display = false;
