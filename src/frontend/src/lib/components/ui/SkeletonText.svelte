@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { TOKEN_SKELETON_TEXT } from '$lib/constants/test-ids.constants';
 </script>
 
