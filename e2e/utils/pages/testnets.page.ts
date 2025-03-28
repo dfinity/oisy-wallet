@@ -1,6 +1,6 @@
+import { TOKEN_BALANCE, TOKEN_SKELETON_TEXT } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
-import { TOKEN_BALANCE, TOKEN_SKELETON_TEXT } from '$lib/constants/test-ids.constants';
 
 type TestnetsPageParams = HomepageLoggedInParams;
 
