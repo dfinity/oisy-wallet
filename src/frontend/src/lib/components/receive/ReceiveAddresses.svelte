@@ -58,6 +58,12 @@
 	} from '$lib/derived/address.derived';
 	import { networkICPEnabled } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import {
+		networkEthereumEnabled,
+		networkICPEnabled,
+		networkSepoliaEnabled
+	} from '$lib/derived/networks.derived';
+	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
@@ -139,7 +145,8 @@
 			label: $i18n.receive.ethereum.text.ethereum_address,
 			copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied,
 			qrCodeAriaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr,
-			text: $i18n.receive.icp.text.your_private_eth_address
+			text: $i18n.receive.icp.text.your_private_eth_address,
+			condition: $networkEthereumEnabled || $networkSepoliaEnabled
 		},
 		{
 			labelRef: 'icrcTokenAddress',
