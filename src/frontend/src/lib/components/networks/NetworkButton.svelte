@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import { page } from '$app/stores';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -8,6 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { formatUSD } from '$lib/utils/format.utils';
+	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 
 	export let id: NetworkId | undefined;
 	export let name: string;
@@ -18,9 +20,15 @@
 
 	const dispatch = createEventDispatcher();
 
-	const onClick = () => {
+	const onClick = async () => {
+		await switchNetwork(id);
+
+		if (isRouteTransactions($page)) {
+			await gotoReplaceRoot();
+		}
+
 		// A small delay to give the user a visual feedback that the network is checked
-		setTimeout(() => dispatch('icSelected', id), 500);
+		setTimeout(() => dispatch('icSelected'), 500);
 	};
 </script>
 
