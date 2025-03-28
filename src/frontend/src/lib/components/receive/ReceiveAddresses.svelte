@@ -57,7 +57,7 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { networkICPEnabled } from '$lib/derived/networks.derived';
-	import { testnets } from '$lib/derived/testnets.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
@@ -115,7 +115,7 @@
 			label: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
 			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
-			condition: $testnets
+			condition: $testnetsEnabled
 		},
 		{
 			labelRef: 'btcAddressRegtest',
@@ -127,7 +127,7 @@
 			label: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
 			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
-			condition: $testnets && LOCAL
+			condition: $testnetsEnabled && LOCAL
 		},
 		{
 			labelRef: 'ethAddress',
@@ -187,7 +187,7 @@
 			label: $i18n.receive.solana.text.solana_testnet_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: $testnets
+			condition: $testnetsEnabled
 		},
 		{
 			labelRef: 'solAddressDevnet',
@@ -199,7 +199,7 @@
 			label: $i18n.receive.solana.text.solana_devnet_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: $testnets
+			condition: $testnetsEnabled
 		},
 		{
 			labelRef: 'solAddressLocal',
@@ -211,7 +211,7 @@
 			label: $i18n.receive.solana.text.solana_local_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: $testnets && LOCAL
+			condition: $testnetsEnabled && LOCAL
 		}
 	];
 
