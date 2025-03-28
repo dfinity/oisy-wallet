@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import { erc20UserTokens } from '$eth/derived/erc20.derived';
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
@@ -14,7 +15,11 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { networkICP } from '$lib/derived/network.derived';
-	import { networkICPDisabled } from '$lib/derived/networks.derived';
+	import {
+		networkEthereumDisabled,
+		networkICPDisabled,
+		networkSepoliaDisabled
+	} from '$lib/derived/networks.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
@@ -28,6 +33,8 @@
 
 	const isDisabled = (): boolean =>
 		$networkICPDisabled ||
+		(nativeTokenId === ETHEREUM_TOKEN_ID && $networkEthereumDisabled) ||
+		(nativeTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaDisabled) ||
 		$ethAddressNotLoaded ||
 		// We can convert to ETH - i.e. we can convert to Ethereum or Sepolia, not an ERC20 token
 		isNotSupportedEthTokenId(nativeTokenId) ||

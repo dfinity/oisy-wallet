@@ -2,7 +2,7 @@
 	import { type WizardStep } from '@dfinity/gix-components';
 	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
-	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { selectedEthereumNetworkWithFallback } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
@@ -31,7 +31,7 @@
 		<EthSendTokenWizard
 			{currentStep}
 			{formCancelAction}
-			sourceNetwork={$selectedEthereumNetwork}
+			sourceNetwork={$selectedEthereumNetworkWithFallback}
 			nativeEthereumToken={$ethereumToken}
 			bind:destination
 			bind:targetNetwork
