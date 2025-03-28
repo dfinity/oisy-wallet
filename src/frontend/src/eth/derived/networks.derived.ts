@@ -4,8 +4,8 @@ import {
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import { userNetworks } from '$lib/derived/user-networks.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
+import { userNetworks } from '$lib/derived/user-networks.derived';
 import type { NetworkId } from '$lib/types/network';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { derived, type Readable } from 'svelte/store';

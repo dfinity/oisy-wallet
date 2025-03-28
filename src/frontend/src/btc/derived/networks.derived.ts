@@ -5,8 +5,8 @@ import {
 	BTC_TESTNET_NETWORK
 } from '$env/networks/networks.btc.env';
 import { LOCAL } from '$lib/constants/app.constants';
-import { userNetworks } from '$lib/derived/user-networks.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
+import { userNetworks } from '$lib/derived/user-networks.derived';
 import type { Network } from '$lib/types/network';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { derived, type Readable } from 'svelte/store';
