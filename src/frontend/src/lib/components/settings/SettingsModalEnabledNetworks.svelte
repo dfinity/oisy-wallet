@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { Checkbox, Toggle } from '@dfinity/gix-components';
-	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+	import {
+		SUPPORTED_MAINNET_NETWORKS,
+		SUPPORTED_NETWORKS,
+		SUPPORTED_TESTNET_NETWORKS
+	} from '$env/networks/networks.env';
 	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import { setUserShowTestnets, updateUserNetworkSettings } from '$lib/api/backend.api';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -49,10 +53,6 @@
 	};
 	let isModified: boolean;
 	$: isModified = checkModified({ enabledTestnet, enabledNetworks });
-
-	const mainnetsList = SUPPORTED_NETWORKS.filter((n) => n.env === 'mainnet');
-
-	const testnetsList = SUPPORTED_NETWORKS.filter((n) => n.env === 'testnet');
 
 	const toggleTestnets = () => {
 		enabledTestnet = !enabledTestnet;
@@ -104,7 +104,7 @@
 			</div></svelte:fragment
 		>
 
-		{#each mainnetsList as network (network.id)}
+		{#each SUPPORTED_MAINNET_NETWORKS as network (network.id)}
 			<SettingsListItem>
 				<svelte:fragment slot="key"
 					><NetworkLogo {network} blackAndWhite size="xxs" />
@@ -128,7 +128,7 @@
 		<SettingsList>
 			<svelte:fragment slot="title">{$i18n.settings.text.test_networks}</svelte:fragment>
 
-			{#each testnetsList as network (network.id)}
+			{#each SUPPORTED_TESTNET_NETWORKS as network (network.id)}
 				<SettingsListItem>
 					<svelte:fragment slot="key"
 						><span><NetworkLogo {network} blackAndWhite size="xxs" /></span>
