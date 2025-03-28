@@ -27,7 +27,7 @@ testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
 	await homepageLoggedIn.navigateTo(NAVIGATION_ITEM_REWARDS);
 });
 
-testWithII('should display receive-tokens modal', async () => {
+testWithII('should display rewards modal', async () => {
 	await homepageLoggedIn.testModalSnapshot({
 		modalOpenButtonTestId: REWARDS_STATUS_BUTTON,
 		modalTestId: REWARDS_MODAL,
