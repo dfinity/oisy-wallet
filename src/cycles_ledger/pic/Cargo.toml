@@ -10,3 +10,6 @@ ic-cycles-ledger-types = { workspace = true }
 pocket-ic = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
+
+[lints]
+workspace = true

@@ -11,6 +11,7 @@ export const LOADER_MODAL = 'loader-modal';
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
+export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
@@ -118,3 +119,7 @@ export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 
 export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
+
+export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
+export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
+export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';

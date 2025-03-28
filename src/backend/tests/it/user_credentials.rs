@@ -173,5 +173,5 @@ fn test_add_user_credential_replaces_credential_same_type() {
     assert_eq!(
         second_profile.version,
         Some(first_profile.version.map_or(1, |v| v + 1))
-    )
+    );
 }

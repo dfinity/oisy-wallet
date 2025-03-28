@@ -6,7 +6,11 @@ import type {
 } from '$declarations/rewards/rewards.did';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as rewardApi from '$lib/api/reward.api';
-import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import {
+	MILLISECONDS_IN_DAY,
+	NANO_SECONDS_IN_MILLISECOND,
+	ZERO_BI
+} from '$lib/constants/app.constants';
 import {
 	claimVipReward,
 	getNewReward,
@@ -14,7 +18,7 @@ import {
 	getRewards,
 	getUserRewardsTokenAmounts,
 	isVipUser
-} from '$lib/services/reward-code.services';
+} from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
@@ -172,7 +176,7 @@ describe('reward-code', () => {
 
 		const mockedReward: RewardInfo = {
 			timestamp: lastTimestamp,
-			amount: BigInt(1000000),
+			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: ['jackpot']
 		};
@@ -185,7 +189,7 @@ describe('reward-code', () => {
 		};
 		const expectedReward: RewardResponseInfo = {
 			timestamp: lastTimestamp,
-			amount: BigInt(1000000),
+			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: 'jackpot'
 		};
@@ -416,9 +420,9 @@ describe('reward-code', () => {
 						getMockReward({ ledgerCanisterId: null, amount: 1000n }),
 						getMockReward({ ledgerCanisterId: 'invalid', amount: 1000n }),
 						getMockReward({ ledgerCanisterId: undefined, amount: 1000n }),
-						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 0n }),
-						getMockReward({ ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId, amount: 0n }),
-						getMockReward({ ledgerCanisterId: mockIcpToken.ledgerCanisterId, amount: 0n })
+						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: ZERO_BI }),
+						getMockReward({ ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId, amount: ZERO_BI }),
+						getMockReward({ ledgerCanisterId: mockIcpToken.ledgerCanisterId, amount: ZERO_BI })
 					]
 				]
 			});
