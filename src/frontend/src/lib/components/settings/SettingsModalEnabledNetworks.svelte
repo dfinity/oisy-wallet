@@ -26,6 +26,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 	import { emit } from '$lib/utils/events.utils';
+	import ManageNetworkToggle from '$lib/components/networks/ManageNetworkToggle.svelte';
 
 	let enabledNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...$userNetworks };
@@ -123,10 +124,7 @@
 				>
 				<svelte:fragment slot="value">
 					<!-- We disable the ICP toggle, for simplicity in other components and implications we dont allow disabling ICP -->
-					<Toggle
-						ariaLabel={enabledNetworks[network.id]?.enabled
-							? $i18n.settings.text.disable_network
-							: $i18n.settings.text.enable_network}
+					<ManageNetworkToggle
 						checked={enabledNetworks[network.id]?.enabled ?? false}
 						on:nnsToggle={() => toggleNetwork(network)}
 						disabled={network.id === ICP_NETWORK_ID}
@@ -147,10 +145,7 @@
 						<span class="ml-2 flex">{network.name}</span></svelte:fragment
 					>
 					<svelte:fragment slot="value"
-						><Toggle
-							ariaLabel={enabledNetworks[network.id]?.enabled
-								? $i18n.settings.text.disable_network
-								: $i18n.settings.text.enable_network}
+						><ManageNetworkToggle
 							checked={enabledNetworks[network.id]?.enabled ?? false}
 							on:nnsToggle={() => toggleNetwork(network)}
 						/></svelte:fragment
