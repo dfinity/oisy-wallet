@@ -58,7 +58,7 @@ export class TestnetsPage extends HomepageLoggedIn {
 		).toBeVisible();
 		await this.waitForLoadState();
 
-		if (tokenSymbol !== 'BTC (Testnet)' && tokenSymbol !== 'BTC (Regtest)')	{
+		if (tokenSymbol !== 'BTC (Testnet)') {
 			const skeletons = this.getLocatorByTestId({ testId: TOKEN_SKELETON_TEXT });
 			const countSkeletons = await skeletons.count();
 			await Promise.all(
