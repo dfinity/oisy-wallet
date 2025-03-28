@@ -12,7 +12,7 @@
 	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
-	import { testnets } from '$lib/derived/testnets.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network as NetworkType, NetworkId } from '$lib/types/network';
@@ -65,20 +65,21 @@
 
 		<ul class="flex list-none flex-col">
 			{#each $networksMainnets as network (network.id)}
-				<li transition:slide={SLIDE_EASING}>
-					<MainnetNetwork {network} on:icSelected={onIcSelected} />
-				</li>
+				<li transition:slide={SLIDE_EASING}
+					><MainnetNetwork {network} on:icSelected={onIcSelected} /></li
+				>
 			{/each}
 		</ul>
 
-		<span class="my-5 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
+		{#if $testnetsEnabled}
+			<span class="my-5 flex px-3 font-bold" transition:slide={SLIDE_EASING}
+				>{$i18n.networks.test_networks}</span
+			>
 
-		{#if $testnets}
-			<ul class="flex list-none flex-col">
+			<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
 				{#each $networksTestnets as network (network.id)}
-					<li transition:slide={SLIDE_EASING}>
-						<Network {network} on:icSelected={onIcSelected} />
-					</li>
+					<li transition:slide={SLIDE_EASING}><Network {network} on:icSelected={onIcSelected} /></li
+					>
 				{/each}
 			</ul>
 		{/if}
