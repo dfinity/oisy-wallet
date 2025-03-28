@@ -1,27 +1,29 @@
 import {
-	inferPostMessageSchema,
 	PostMessageDataRequestBtcSchema,
-	PostMessageDataRequestCreateChallengeSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
 	PostMessageDataRequestIcCkSchema,
 	PostMessageDataRequestIcrcSchema,
 	PostMessageDataRequestIcrcStrictSchema,
+	PostMessageDataRequestPowAllowSignerSchema,
+	PostMessageDataRequestPowTimerSchema,
 	PostMessageDataRequestSchema,
 	PostMessageDataRequestSolSchema,
+	PostMessageDataRequestSolvePowChallengeSchema,
 	PostMessageDataResponseAuthSchema,
 	PostMessageDataResponseBTCAddressSchema,
-	PostMessageDataResponseCreateChallengeSchema,
 	PostMessageDataResponseErrorSchema,
 	PostMessageDataResponseExchangeErrorSchema,
 	PostMessageDataResponseExchangeSchema,
+	PostMessageDataResponsePowSchema,
 	PostMessageDataResponseSchema,
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
 	PostMessageJsonDataResponseSchema,
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
-	PostMessageSyncStateSchema
+	PostMessageSyncStateSchema,
+	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 
 import type { ZodType } from 'zod';
@@ -32,10 +34,6 @@ export type PostMessageDataResponse = z.infer<typeof PostMessageDataResponseSche
 
 export type PostMessageDataRequestExchangeTimer = z.infer<
 	typeof PostMessageDataRequestExchangeTimerSchema
->;
-
-export type PostMessageDataRequestPowTimer = z.infer<
-	typeof PostMessageDataRequestCreateChallengeSchema
 >;
 
 export type PostMessageDataRequestIcrc = z.infer<typeof PostMessageDataRequestIcrcSchema>;
@@ -86,9 +84,14 @@ export type PostMessage<T extends PostMessageDataRequest | PostMessageDataRespon
 	ReturnType<typeof inferPostMessageSchema<ZodType<T>>>
 >;
 
-export type PostMessageDataRequestCreateChallenge = z.infer<
-	typeof PostMessageDataRequestCreateChallengeSchema
+export type PostMessageDataRequestPowTimer = z.infer<typeof PostMessageDataRequestPowTimerSchema>;
+
+export type PostMessageDataRequestSolvePowChallenge = z.infer<
+	typeof PostMessageDataRequestSolvePowChallengeSchema
 >;
-export type PostMessageDataResponseCreateChallenge = z.infer<
-	typeof PostMessageDataResponseCreateChallengeSchema
+
+export type PostMessageDataRequestPowAllowSigner = z.infer<
+	typeof PostMessageDataRequestPowAllowSignerSchema
 >;
+
+export type PostMessageDataResponsePow = z.infer<typeof PostMessageDataResponsePowSchema>;

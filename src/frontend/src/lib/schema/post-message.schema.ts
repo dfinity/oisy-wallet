@@ -51,7 +51,10 @@ export const PostMessageRequestSchema = z.enum([
 	'triggerCkEthMinterInfoTimer',
 	'stopCkBtcMinterInfoTimer',
 	'startCkBtcMinterInfoTimer',
-	'triggerCkBtcMinterInfoTimer'
+	'triggerCkBtcMinterInfoTimer',
+	'initSignerAllowance',
+	'solvePowChallenge',
+	'allowSigner'
 ]);
 
 export const PostMessageDataRequestSchema = z.never();
@@ -200,3 +203,18 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 		msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
 		data: dataSchema.optional()
 	});
+
+export const PostMessageDataRequestPowTimerSchema = PostMessageDataResponseSchema.extend({});
+
+export const PostMessageDataResponsePowSchema = PostMessageDataResponseSchema.extend({
+	nonce: z.number()
+});
+
+export const PostMessageDataRequestSolvePowChallengeSchema = PostMessageDataResponseSchema.extend({
+	startTimestampMs: z.bigint(),
+	difficulty: z.number()
+}).strict();
+
+export const PostMessageDataRequestPowAllowSignerSchema = PostMessageDataResponseSchema.extend({
+	// todo: response type of initSignerAllowance
+});
