@@ -1,21 +1,23 @@
-import { createPowChallenge } from '$lib/api/backend.api';
-import { initSignerAllowance } from '$lib/services/loader.services';
 import { solvePowChallenge } from '$lib/services/pow.services';
-import { UserProfileNotFoundError } from '$lib/types/errors';
 import type {
 	PostMessage,
-	PostMessageDataRequest,
-	PostMessageDataRequestExchangeTimer
+	PostMessageDataRequestPowAllowSigner,
+	PostMessageDataRequestPowTimer,
+	PostMessageDataRequestSolvePowChallenge
 } from '$lib/types/post-message';
-import { loadIdentity } from '$lib/utils/auth.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const FIRST_TIMER_INTERVAL = 5000;
 
 export const onPowMessage = async ({
 	data
-	// eslint-disable-next-line require-await
-}: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
+}: MessageEvent<
+	PostMessage<
+		| PostMessageDataRequestPowTimer
+		| PostMessageDataRequestSolvePowChallenge
+		| PostMessageDataRequestPowAllowSigner
+	>
+>) => {
 	const { msg, data: payload } = data;
 
 	switch (msg) {
@@ -23,30 +25,39 @@ export const onPowMessage = async ({
 			stopTimer();
 			return;
 		case 'startPowTimer':
-			await startPowTimer(payload);
+			await startPowTimer(payload as PostMessageDataRequestPowTimer);
 			return;
+		case 'solvePowChallenge':
+			await solvePowChallengeLocal(payload as PostMessageDataRequestSolvePowChallenge);
+			return;
+		case 'allowSigner':
+			await allowSigner(payload as PostMessageDataRequestPowAllowSigner);
 	}
 };
 
 let timer: NodeJS.Timeout | undefined = undefined;
 
-const allowPowSigning = async () => {
-	let identity = await loadIdentity();
-	let response = await createPowChallenge({ identity });
-	console.log(JSON.stringify(response));
-	if ('Ok' in response) {
-		let nonce = await solvePowChallenge(response.Ok.start_timestamp_ms, response.Ok.difficulty);
-		await initSignerAllowance(BigInt(nonce));
-		return response.Ok;
+const solvePowChallengeLocal = async (
+	data: PostMessageDataRequestSolvePowChallenge | undefined
+) => {
+	if (data?.startTimestampMs && data.difficulty) {
+		const nonce = await solvePowChallenge(data.startTimestampMs, data.difficulty);
+
+		postMessage('initSignerAllowance', nonce);
+	} else {
+		// todo: what if data is undefined?
 	}
-	const err = response.Err;
-	if ('NotFound' in err) {
-		throw new UserProfileNotFoundError();
-	}
-	throw new Error('Unknown error');
 };
 
-const startPowTimer = async (data: PostMessageDataRequestExchangeTimer | undefined) => {
+const allowPowSigning = async () => {
+	postMessage('createPowChallenge');
+};
+
+const allowSigner = async (data: PostMessageDataRequestPowAllowSigner | undefined) => {
+	// todo: handle
+};
+
+const startPowTimer = async (data: PostMessageDataRequestPowTimer | undefined) => {
 	// This worker has already been started
 	if (nonNullish(timer)) {
 		return;
