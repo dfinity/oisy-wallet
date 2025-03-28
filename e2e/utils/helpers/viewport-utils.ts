@@ -7,7 +7,7 @@ export class ViewportAdjuster {
 	constructor(page: Page) {
 		this.#page = page;
 	}
-	
+
 	private async waitForLoadState(): Promise<void> {
 		await this.#page.waitForLoadState('load');
 	}
@@ -24,9 +24,7 @@ export class ViewportAdjuster {
 		do {
 			previousHeight = currentHeight;
 			await this.#page.waitForTimeout(1000);
-			currentHeight = await this.#page.evaluate(
-				() => document.documentElement.scrollHeight
-			);
+			currentHeight = await this.#page.evaluate(() => document.documentElement.scrollHeight);
 		} while (currentHeight !== previousHeight);
 
 		return currentHeight;
@@ -40,9 +38,7 @@ export class ViewportAdjuster {
 		await this.waitForLoadState();
 
 		const currentViewport = this.#page.viewportSize();
-		const width =
-			currentViewport?.width ??
-			(await this.#page.evaluate(() => window.innerWidth));
+		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
 
 		let baseHeight = await this.getStableViewportHeight();
 		let adjustedHeight = baseHeight;
