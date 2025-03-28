@@ -65,20 +65,21 @@
 
 		<ul class="flex list-none flex-col">
 			{#each $networksMainnets as network (network.id)}
-				<li transition:slide={SLIDE_EASING}>
-					<MainnetNetwork {network} on:icSelected={onIcSelected} />
-				</li>
+				<li transition:slide={SLIDE_EASING}
+					><MainnetNetwork {network} on:icSelected={onIcSelected} /></li
+				>
 			{/each}
 		</ul>
 
-		<span class="my-5 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
-
 		{#if $testnetsEnabled}
-			<ul class="flex list-none flex-col">
+			<span class="my-5 flex px-3 font-bold" transition:slide={SLIDE_EASING}
+				>{$i18n.networks.test_networks}</span
+			>
+
+			<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
 				{#each $networksTestnets as network (network.id)}
-					<li transition:slide={SLIDE_EASING}>
-						<Network {network} on:icSelected={onIcSelected} />
-					</li>
+					<li transition:slide={SLIDE_EASING}><Network {network} on:icSelected={onIcSelected} /></li
+					>
 				{/each}
 			</ul>
 		{/if}
