@@ -25,7 +25,10 @@
 		/>
 	</span>
 	<span class="absolute right-4 top-3">
-		<RewardDateBadge date={reward.endDate} testId={nonNullish(testId) ? `${testId}-badge` : undefined} />
+		<RewardDateBadge
+			date={reward.endDate}
+			testId={nonNullish(testId) ? `${testId}-badge` : undefined}
+		/>
 	</span>
 	<article class="h-full">
 		<section>
@@ -39,7 +42,7 @@
 			<div
 				data-tid={REWARDS_STATUS_BUTTON}
 				class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
-			>{$i18n.rewards.text.check_status}
+				>{$i18n.rewards.text.check_status}
 			</div>
 		</section>
 	</article>
