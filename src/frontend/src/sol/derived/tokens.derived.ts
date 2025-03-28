@@ -6,13 +6,16 @@ import {
 	SOLANA_TOKEN
 } from '$env/tokens/tokens.sol.env';
 import { LOCAL } from '$lib/constants/app.constants';
-import { testnets } from '$lib/derived/testnets.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import type { RequiredToken } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
-export const enabledSolanaTokens: Readable<RequiredToken[]> = derived([testnets], ([$testnets]) => [
-	...(SOL_MAINNET_ENABLED ? [SOLANA_TOKEN] : []),
-	...($testnets
-		? [SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN, ...(LOCAL ? [SOLANA_LOCAL_TOKEN] : [])]
-		: [])
-]);
+export const enabledSolanaTokens: Readable<RequiredToken[]> = derived(
+	[testnetsEnabled],
+	([$testnetsEnabled]) => [
+		...(SOL_MAINNET_ENABLED ? [SOLANA_TOKEN] : []),
+		...($testnetsEnabled
+			? [SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN, ...(LOCAL ? [SOLANA_LOCAL_TOKEN] : [])]
+			: [])
+	]
+);
