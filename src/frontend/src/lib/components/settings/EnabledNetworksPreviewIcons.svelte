@@ -8,11 +8,9 @@
 
 	const numberOfIcons = 4;
 
-	let enabledNetworks: UserNetworks = $userNetworks;
-
 	const getEnabledList = (networks: UserNetworks) =>
 		Object.getOwnPropertySymbols(networks ?? {}).reduce<Network[]>((enabledList, symbol) => {
-			const isEnabled = networks[symbol as keyof typeof enabledNetworks]?.enabled ?? false;
+			const isEnabled = networks[symbol as keyof typeof networks]?.enabled ?? false;
 
 			if (isEnabled) {
 				const network = SUPPORTED_NETWORKS.find((sn) => sn.id.toString() === symbol.toString());
@@ -24,8 +22,7 @@
 			return enabledList;
 		}, []);
 
-	let enabledList: Network[];
-	$: enabledList = getEnabledList(enabledNetworks);
+	let enabledList = getEnabledList($userNetworks);
 
 	let previewList: Network[];
 	$: previewList = enabledList.slice(0, numberOfIcons);
