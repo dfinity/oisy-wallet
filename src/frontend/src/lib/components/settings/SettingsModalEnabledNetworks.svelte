@@ -40,18 +40,16 @@
 		enabledTestnet: boolean;
 		enabledNetworks: UserNetworks;
 	}) => {
-		if (enabledTestnet !== enabledTestnetInitial) {
-			return true;
-		}
-		for (const k of SUPPORTED_NETWORKS) {
+		const testnetModified = enabledTestnet !== enabledTestnetInitial;
+
+		const networkModified = SUPPORTED_NETWORKS.reduce((acc, k) => {
 			const value = enabledNetworks[k.id]?.enabled ?? false;
 			const initialValue = enabledNetworksInitial[k.id]?.enabled ?? false;
 
-			if (value !== initialValue) {
-				return true;
-			}
-		}
-		return false;
+			return acc || value !== initialValue;
+		}, false);
+
+		return testnetModified || networkModified;
 	};
 	let isModified: boolean;
 	$: isModified = checkModified({ enabledTestnet, enabledNetworks });
