@@ -123,8 +123,9 @@
 					><NetworkLogo {network} blackAndWhite size="xxs" />
 					<span class="ml-2 flex">{network.name}</span></svelte:fragment
 				>
-				<svelte:fragment slot="value"
-					><Toggle
+				<svelte:fragment slot="value">
+					<!-- We disable the ICP toggle, for simplicity in other components and implications we dont allow disabling ICP -->
+					<Toggle
 						ariaLabel={enabledNetworks[network.id]?.enabled
 							? $i18n.settings.text.disable_network
 							: $i18n.settings.text.enable_network}
