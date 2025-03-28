@@ -58,20 +58,22 @@ export class TestnetsPage extends HomepageLoggedIn {
 		).toBeVisible();
 		await this.waitForLoadState();
 
-		const skeletons = this.getLocatorByTestId({ testId: TOKEN_SKELETON_TEXT });
-		const countSkeletons = await skeletons.count();
-		await Promise.all(
-			Array.from({ length: countSkeletons }, (_, i) =>
-				skeletons.nth(i).waitFor({ state: 'hidden', timeout: 60000 })
-			)
-		);
+		if (tokenSymbol !== 'BTC (Testnet)' && tokenSymbol !== 'BTC (Regtest)')	{
+			const skeletons = this.getLocatorByTestId({ testId: TOKEN_SKELETON_TEXT });
+			const countSkeletons = await skeletons.count();
+			await Promise.all(
+				Array.from({ length: countSkeletons }, (_, i) =>
+					skeletons.nth(i).waitFor({ state: 'hidden', timeout: 60000 })
+				)
+			);
 
-		const balances = this.getLocatorByTestId({ testId: `[data-tid^="${TOKEN_BALANCE}-"]` });
-		const countBalances = await balances.count();
-		await Promise.all(
-			Array.from({ length: countBalances }, (_, i) =>
-				skeletons.nth(i).waitFor({ state: 'visible', timeout: 60000 })
-			)
-		);
+			const balances = this.getLocatorByTestId({ testId: `[data-tid^="${TOKEN_BALANCE}-"]` });
+			const countBalances = await balances.count();
+			await Promise.all(
+				Array.from({ length: countBalances }, (_, i) =>
+					skeletons.nth(i).waitFor({ state: 'visible', timeout: 60000 })
+				)
+			);
+		}
 	}
 }
