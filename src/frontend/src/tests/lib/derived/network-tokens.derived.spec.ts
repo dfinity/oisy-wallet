@@ -3,6 +3,7 @@ import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_MAINNET_NETWORK,
@@ -26,6 +27,7 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+import { networks } from '$lib/derived/networks.derived';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import { splUserTokensStore } from '$sol/stores/spl-user-tokens.store';
 import type { SplUserToken } from '$sol/types/spl-user-token';
@@ -45,17 +47,18 @@ describe('network-tokens.derived', () => {
 
 			mockPage.reset();
 
+			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+			vi.spyOn(solEnv, 'SOL_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+
+			setupTestnetsStore('reset');
+
 			erc20DefaultTokensStore.reset();
 			erc20UserTokensStore.resetAll();
 			icrcDefaultTokensStore.resetAll();
 			icrcCustomTokensStore.resetAll();
 			splDefaultTokensStore.reset();
 			splUserTokensStore.resetAll();
-
-			setupTestnetsStore('reset');
-
-			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		});
 
 		it('should return all non-testnet tokens when no network is selected and testnets are disabled', () => {
@@ -143,11 +146,19 @@ describe('network-tokens.derived', () => {
 				]);
 			});
 
-			it.each(networkMap)('should return all tokens for %s', ({ network, tokens }) => {
-				mockPage.mock({ network: network.id.description });
+			it.each(networkMap)(
+				'should return all tokens for network $network.name',
+				({ network, tokens }) => {
+					vi.spyOn(networks, 'subscribe').mockImplementation((fn) => {
+						fn([network]);
+						return () => {};
+					});
 
-				expect(get(enabledNetworkTokens)).toEqual(tokens);
-			});
+					mockPage.mock({ network: network.id.description });
+
+					expect(get(enabledNetworkTokens)).toEqual(tokens);
+				}
+			);
 		});
 	});
 });
