@@ -18,7 +18,7 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { testnets } from '$lib/derived/testnets.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 	import { signOut } from '$lib/services/auth.services';
@@ -98,7 +98,7 @@
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
 	$: {
-		if ($testnets) {
+		if ($testnetsEnabled) {
 			if (isNullish($btcAddressTestnet)) {
 				debounceLoadBtcAddressTestnet();
 			}
