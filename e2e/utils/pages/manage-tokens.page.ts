@@ -78,7 +78,7 @@ export class ManageTokensPage extends HomepageLoggedIn {
 				skeletons.nth(i).waitFor({ state: 'visible', timeout: 60000 })
 			)
 		);
-		
+
 		await this.takeScreenshot({
 			freezeCarousel: true,
 			centeredElementTestId: `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`
