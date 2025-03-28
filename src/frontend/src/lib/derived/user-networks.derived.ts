@@ -33,18 +33,12 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			// Returning all mainnets (and testnets if enabled) by default
 			return {
 				...SUPPORTED_MAINNET_NETWORKS_IDS.reduce<UserNetworks>(
-					(acc, id) => ({
-						...acc,
-						[id]: { enabled: true, isTestnet: false }
-					}),
+					(acc, id) => ({ ...acc, [id]: { enabled: true, isTestnet: false } }),
 					{}
 				),
 				...($testnetsEnabled &&
 					SUPPORTED_TESTNET_NETWORKS_IDS.reduce<UserNetworks>(
-						(acc, id) => ({
-							...acc,
-							[id]: { enabled: $testnetsEnabled, isTestnet: true }
-						}),
+						(acc, id) => ({ ...acc, [id]: { enabled: $testnetsEnabled, isTestnet: true } }),
 						{}
 					))
 			};
@@ -81,12 +75,13 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			return networkId;
 		};
 
-		return userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
-			const networkId: NetworkId = keyToNetworkId(key);
-			return {
-				...acc,
-				[networkId]: { enabled, isTestnet }
-			};
-		}, {});
+		return {
+			...userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
+				const networkId: NetworkId = keyToNetworkId(key);
+				return { ...acc, [networkId]: { enabled, isTestnet } };
+			}, {}),
+			// We always enable ICP network.
+			[ICP_NETWORK_ID]: { enabled: true, isTestnet: false }
+		};
 	}
 );

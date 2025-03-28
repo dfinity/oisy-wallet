@@ -3,6 +3,8 @@ import {
 	SUPPORTED_MAINNET_NETWORKS_IDS,
 	SUPPORTED_TESTNET_NETWORKS_IDS
 } from '$env/networks/networks.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { userNetworks } from '$lib/derived/user-networks.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { UserNetworks } from '$lib/types/user-networks';
@@ -86,6 +88,29 @@ describe('user-networks.derived', () => {
 
 			userProfileStore.set({ certified, profile: mockUserProfile });
 			expect(get(userNetworks)).toEqual(expectedMainnets);
+		});
+
+		it('should always return ICP network even if it is disabled', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					settings: toNullable({
+						...mockUserSettings,
+						networks: {
+							...mockNetworksSettings,
+							networks: [
+								[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
+								[{ InternetComputer: null }, { enabled: false, is_testnet: false }]
+							]
+						}
+					})
+				}
+			});
+			expect(get(userNetworks)).toEqual({
+				[SOLANA_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
+				[ICP_NETWORK_ID]: { enabled: true, isTestnet: false }
+			});
 		});
 	});
 });
