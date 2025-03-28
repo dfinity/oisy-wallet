@@ -4,21 +4,25 @@
 	import { logoSizes } from '$lib/constants/components.constants';
 	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
+	import { userNetworks } from '$lib/derived/user-networks.derived';
 
-	export let numberOfIcons = 4;
+	const numberOfIcons = 4;
 
-	export let enabledNetworks: UserNetworks = {};
+	let enabledNetworks: UserNetworks = $userNetworks;
 
-	const getEnabledList = (networks: UserNetworks) => {
-		const enabled = Object.getOwnPropertySymbols(networks ?? {})
-			.map((k) => ({ key: k, value: networks[k as keyof typeof enabledNetworks] }))
-			.filter(({ value }) => value.enabled);
+	const getEnabledList = (networks: UserNetworks) =>
+		Object.getOwnPropertySymbols(networks ?? {}).reduce<Network[]>((enabledList, symbol) => {
+			const isEnabled = networks[symbol as keyof typeof enabledNetworks]?.enabled ?? false;
 
-		return enabled.map((n) => {
-			const { key: netId } = n;
-			return SUPPORTED_NETWORKS.find((sn) => sn.id.toString() === netId.toString());
-		}) as Network[];
-	};
+			if (isEnabled) {
+				const network = SUPPORTED_NETWORKS.find((sn) => sn.id.toString() === symbol.toString());
+				if (network) {
+					enabledList.push(network);
+				}
+			}
+
+			return enabledList;
+		}, []);
 
 	let enabledList: Network[];
 	$: enabledList = getEnabledList(enabledNetworks);
@@ -33,12 +37,12 @@
 			<NetworkLogo size="xxs" {network} blackAndWhite />
 		</div>
 	{/each}
-	{#if previewList.length < enabledList.length}
+	{#if enabledList.length > numberOfIcons}
 		<div
-			class="-ml-1 flex items-center justify-center overflow-hidden rounded-full bg-primary text-center text-xs ring-1 ring-primary"
-			style={`width: ${logoSizes.xxs}; height: ${logoSizes.xxs}; transition: opacity 0.15s ease-in;`}
+			class={`-ml-1 flex items-center justify-center overflow-hidden rounded-full bg-primary text-center text-xs ring-1 ring-primary transition-opacity duration-150`}
+			style={`width: ${logoSizes.xxs}; height: ${logoSizes.xxs}`}
 		>
-			+{enabledList.length - previewList.length}
+			+{enabledList.length - numberOfIcons}
 		</div>
 	{/if}
 </div>
