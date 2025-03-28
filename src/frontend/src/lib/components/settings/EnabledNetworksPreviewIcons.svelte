@@ -3,7 +3,7 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
 	import { userNetworks } from '$lib/derived/user-networks.derived';
-	import type { Network } from '$lib/types/network';
+	import type { Network, NetworkId } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 
 	const numberOfIcons = 4;
