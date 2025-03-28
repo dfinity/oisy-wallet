@@ -24,7 +24,7 @@
 		/>
 	</span>
 	<span class="absolute right-4 top-3">
-		<RewardDateBadge date={reward.endDate} testId="rewards-date-badge" />
+		<RewardDateBadge date={reward.endDate} testId={REWARDS_DATE_BADGE} />
 	</span>
 	<article class="h-full">
 		<section>
