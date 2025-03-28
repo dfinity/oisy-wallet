@@ -1,4 +1,5 @@
 import { themeVariables } from '$lib/styles/tailwind/theme-variables';
+import defaultTheme from 'tailwindcss/defaultTheme';
 
 export type ScreensKeyType = keyof typeof themeVariables.screens;
 export interface AvailableScreen {
@@ -9,7 +10,10 @@ export interface AvailableScreen {
 export const MIN_SCREEN: ScreensKeyType = 'xs';
 export const MAX_SCREEN: ScreensKeyType = '2.5xl';
 
-export const AVAILABLE_SCREENS: AvailableScreen[] = Object.entries(themeVariables.screens)
+export const AVAILABLE_SCREENS: AvailableScreen[] = Object.entries({
+	...defaultTheme.screens,
+	...themeVariables.screens
+})
 	.reduce<AvailableScreen[]>((acc, [k, v]) => {
 		return [
 			...acc,

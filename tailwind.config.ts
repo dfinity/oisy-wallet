@@ -8,7 +8,10 @@ export default {
 		fontFamily: {
 			sans: ['CircularXX', 'sans-serif', ...defaultTheme.fontFamily.sans]
 		},
-		screens: themeVariables.screens,
+		screens: {
+			...defaultTheme.screens,
+			...themeVariables.screens
+		},
 		colors: {
 			// base colors, can be left in
 			inherit: 'inherit',

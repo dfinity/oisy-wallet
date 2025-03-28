@@ -1,8 +1,5 @@
-import defaultTheme from 'tailwindcss/defaultTheme';
-
 export const themeVariables = {
 	screens: {
-		...defaultTheme.screens,
 		// we need to use rem instead of px because the default tailwind values changed to rem,
 		// and mixing units breaks custom screen definitions
 		xs: '28rem', // 448px
