@@ -5,7 +5,7 @@
 	import { NETWORK_PARAM } from '$lib/constants/routes.constants';
 	import { TESTNET_TOGGLE } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { testnets } from '$lib/derived/testnets.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { emit } from '$lib/utils/events.utils';
@@ -14,7 +14,7 @@
 	// PR: https://github.com/dfinity/gix-components/pull/531
 
 	let checked: boolean;
-	$: checked = $testnets;
+	$: checked = $testnetsEnabled;
 
 	const toggleShowTestnets = async () => {
 		try {

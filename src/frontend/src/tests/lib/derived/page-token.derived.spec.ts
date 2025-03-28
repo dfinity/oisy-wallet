@@ -18,7 +18,7 @@ import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import * as appConstants from '$lib/constants/app.constants';
 import { pageToken } from '$lib/derived/page-token.derived';
-import { testnets } from '$lib/derived/testnets.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -53,7 +53,7 @@ describe('page-token.derived', () => {
 	it.each([BTC_TESTNET_TOKEN, SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN, SEPOLIA_TOKEN])(
 		'should find $name token',
 		(token) => {
-			vi.spyOn(testnets, 'subscribe').mockImplementation((fn) => {
+			vi.spyOn(testnetsEnabled, 'subscribe').mockImplementation((fn) => {
 				fn(true);
 				return () => {};
 			});
@@ -64,7 +64,7 @@ describe('page-token.derived', () => {
 	);
 
 	it.each([BTC_REGTEST_TOKEN, SOLANA_LOCAL_TOKEN])('should find $name token', (token) => {
-		vi.spyOn(testnets, 'subscribe').mockImplementation((fn) => {
+		vi.spyOn(testnetsEnabled, 'subscribe').mockImplementation((fn) => {
 			fn(true);
 			return () => {};
 		});

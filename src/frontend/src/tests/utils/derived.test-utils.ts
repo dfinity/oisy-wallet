@@ -34,7 +34,7 @@ import {
 import { networks, networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
 import { hideZeroBalances, showZeroBalances } from '$lib/derived/settings.derived';
-import { testnets } from '$lib/derived/testnets.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import {
 	tokenDecimals,
 	tokenId,
@@ -93,7 +93,7 @@ const derivedList: Record<string, Readable<unknown>> = {
 	routeToken,
 	selectedNetwork,
 	showZeroBalances,
-	testnets,
+	testnetsEnabled,
 	tokenDecimals,
 	tokenId,
 	tokenStandard,

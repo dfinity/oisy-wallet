@@ -17,7 +17,7 @@ import {
 	SOLANA_MAINNET_NETWORK_ID,
 	SOLANA_TESTNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
-import { testnets } from '$lib/derived/testnets.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
@@ -25,8 +25,8 @@ import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const userNetworks: Readable<UserNetworks> = derived(
-	[userSettingsNetworks, testnets],
-	([$userSettingsNetworks, $testnets]) => {
+	[userSettingsNetworks, testnetsEnabled],
+	([$userSettingsNetworks, $testnetsEnabled]) => {
 		const userNetworks = $userSettingsNetworks?.networks;
 
 		if (isNullish(userNetworks) || userNetworks.length === 0 || !USER_NETWORKS_FEATURE_ENABLED) {
@@ -39,11 +39,11 @@ export const userNetworks: Readable<UserNetworks> = derived(
 					}),
 					{}
 				),
-				...($testnets &&
+				...($testnetsEnabled &&
 					SUPPORTED_TESTNET_NETWORKS_IDS.reduce<UserNetworks>(
 						(acc, id) => ({
 							...acc,
-							[id]: { enabled: $testnets, isTestnet: true }
+							[id]: { enabled: $testnetsEnabled, isTestnet: true }
 						}),
 						{}
 					))
