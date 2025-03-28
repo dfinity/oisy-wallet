@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Checkbox, Toggle } from '@dfinity/gix-components';
+	import { Checkbox } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import {
 		SUPPORTED_MAINNET_NETWORKS,
