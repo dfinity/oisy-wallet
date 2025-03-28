@@ -3,6 +3,7 @@ import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_MAINNET_NETWORK,
@@ -31,6 +32,7 @@ import { splUserTokensStore } from '$sol/stores/spl-user-tokens.store';
 import type { SplUserToken } from '$sol/types/spl-user-token';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('network-tokens.derived', () => {
@@ -45,17 +47,19 @@ describe('network-tokens.derived', () => {
 
 			mockPage.reset();
 
+			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+			vi.spyOn(solEnv, 'SOL_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+
+			setupTestnetsStore('reset');
+			setupUserNetworksStore('allEnabled');
+
 			erc20DefaultTokensStore.reset();
 			erc20UserTokensStore.resetAll();
 			icrcDefaultTokensStore.resetAll();
 			icrcCustomTokensStore.resetAll();
 			splDefaultTokensStore.reset();
 			splUserTokensStore.resetAll();
-
-			setupTestnetsStore('reset');
-
-			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		});
 
 		it('should return all non-testnet tokens when no network is selected and testnets are disabled', () => {
@@ -143,11 +147,14 @@ describe('network-tokens.derived', () => {
 				]);
 			});
 
-			it.each(networkMap)('should return all tokens for %s', ({ network, tokens }) => {
-				mockPage.mock({ network: network.id.description });
+			it.each(networkMap)(
+				'should return all tokens for network $network.name',
+				({ network, tokens }) => {
+					mockPage.mock({ network: network.id.description });
 
-				expect(get(enabledNetworkTokens)).toEqual(tokens);
-			});
+					expect(get(enabledNetworkTokens)).toEqual(tokens);
+				}
+			);
 		});
 	});
 });
