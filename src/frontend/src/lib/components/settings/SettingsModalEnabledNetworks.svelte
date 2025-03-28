@@ -24,6 +24,8 @@
 	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 	import { emit } from '$lib/utils/events.utils';
+	import { isNullish } from '@dfinity/utils';
+	import { nullishSignOut } from '$lib/services/auth.services';
 
 	let enabledNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...$userNetworks };
@@ -68,6 +70,15 @@
 	let saveLoading = false;
 
 	const save = async () => {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
+
+		if (!isModified) {
+			return;
+		}
+
 		saveLoading = true;
 		await setUserShowTestnets({
 			showTestnets: enabledTestnet,
