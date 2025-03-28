@@ -19,7 +19,7 @@ describe('screens.utils tests', () => {
 
 			// Test case when screenWidth is smaller than the first screen width
 			let screenWidth = remToPx('28rem') - 1; // Just below 'xs'
-			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual('xs');
+			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual(MIN_SCREEN);
 
 			// Test case when screenWidth is in between 'md' and 'lg'
 			screenWidth = remToPx('56rem'); // Between 'md' (48rem) and 'lg' (64rem)
@@ -27,10 +27,10 @@ describe('screens.utils tests', () => {
 
 			// Test case when screenWidth is larger than the largest screen width
 			screenWidth = remToPx('160rem'); // Beyond '2.5xl'
-			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual('2.5xl');
+			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual(MAX_SCREEN);
 		});
 
-		it('should return the correct screen even with invalid screen widths', () => {
+		it('should return the correct screen even with unrealistic screen widths', () => {
 			const availableScreensSortedByWidth = AVAILABLE_SCREENS;
 
 			// Test invalid screenWidth (negative or extremely large value)
@@ -45,8 +45,8 @@ describe('screens.utils tests', () => {
 			const availableScreensSortedByWidth = AVAILABLE_SCREENS;
 
 			// Test for a screenWidth smaller than any available screen (smaller than 'xs')
-			const screenWidth = remToPx('27rem'); // Smaller than smallest screen (xs)
-			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual('xs');
+			const screenWidth = remToPx('10rem'); // Smaller than smallest screen (xs)
+			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual(MIN_SCREEN);
 		});
 	});
 
@@ -131,7 +131,7 @@ describe('screens.utils tests', () => {
 			// Passing undefined or null as "up" or "down"
 			let filteredScreens = filterScreens({
 				availableScreens,
-				up: undefined as any,
+				up: undefined as unknown as ScreensKeyType,
 				down: 'xl'
 			});
 			expect(filteredScreens).toEqual([]);
@@ -139,7 +139,7 @@ describe('screens.utils tests', () => {
 			filteredScreens = filterScreens({
 				availableScreens,
 				up: 'sm',
-				down: null as any
+				down: null as unknown as ScreensKeyType
 			});
 			expect(filteredScreens).toEqual([]);
 		});
@@ -196,7 +196,7 @@ describe('screens.utils tests', () => {
 			// Test with an invalid activeScreen (undefined or null)
 			const result = shouldDisplayForScreen({
 				filteredScreens,
-				activeScreen: undefined as any
+				activeScreen: undefined as unknown as ScreensKeyType
 			});
 			expect(result).toEqual(false);
 
