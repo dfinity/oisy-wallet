@@ -6,11 +6,16 @@
 		STAGING_CKETH_MINTER_CANISTER_ID
 	} from '$env/networks/networks.icrc.env';
 	import { SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+	import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env.js';
 	import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { loadCkEthMinterInfo } from '$icp-eth/services/cketh.services';
 	import { LOCAL } from '$lib/constants/app.constants';
-	import { networkICPDisabled } from '$lib/derived/networks.derived';
+	import {
+		networkEthereumDisabled,
+		networkICPDisabled,
+		networkSepoliaDisabled
+	} from '$lib/derived/networks.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { TokenId } from '$lib/types/token';
@@ -18,7 +23,11 @@
 	export let nativeTokenId: TokenId;
 
 	const load = async () => {
-		if ($networkICPDisabled) {
+		if (
+			$networkICPDisabled ||
+			(nativeTokenId === ETHEREUM_TOKEN_ID && $networkEthereumDisabled) ||
+			(nativeTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaDisabled)
+		) {
 			return;
 		}
 
@@ -55,6 +64,8 @@
 	};
 
 	$: $networkICPDisabled,
+		$networkEthereumDisabled,
+		$networkSepoliaDisabled,
 		$ethToCkETHEnabled,
 		$erc20ToCkErc20Enabled,
 		$icrcDefaultTokensStore,
