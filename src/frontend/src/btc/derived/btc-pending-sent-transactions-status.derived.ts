@@ -5,7 +5,7 @@ import {
 	btcAddressRegtest,
 	btcAddressTestnet
 } from '$lib/derived/address.derived';
-import { testnets } from '$lib/derived/testnets.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -24,14 +24,14 @@ export const initPendingSentTransactionsStatus = (
 			btcAddressMainnet,
 			btcAddressTestnet,
 			btcAddressRegtest,
-			testnets,
+			testnetsEnabled,
 			btcPendingSentTransactionsStore
 		],
 		([
 			$btcAddressMainnet,
 			$btcAddressTestnet,
 			$btcAddressRegtest,
-			$testnets,
+			$testnetsEnabled,
 			$pendingTransactionsStore
 		]) => {
 			const pendingTransactionsData = $pendingTransactionsStore[address];
@@ -44,7 +44,7 @@ export const initPendingSentTransactionsStatus = (
 						: BtcPendingSentTransactionsStatus.NONE;
 			}
 
-			if (!$testnets) {
+			if (!$testnetsEnabled) {
 				if (nonNullish($btcAddressMainnet) && $btcAddressMainnet !== address) {
 					// If the address is not a bitcoin address, there are no pending transactions.
 					return BtcPendingSentTransactionsStatus.NONE;
