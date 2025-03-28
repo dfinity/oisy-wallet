@@ -11,6 +11,7 @@ export const LOADER_MODAL = 'loader-modal';
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
+export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
