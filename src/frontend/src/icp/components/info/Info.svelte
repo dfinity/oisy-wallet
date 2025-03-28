@@ -10,7 +10,10 @@
 	import InfoEthereum from '$icp-eth/components/info/InfoEthereum.svelte';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import InfoBoxWrapper from '$lib/components/info/InfoBoxWrapper.svelte';
-	import { networkBitcoinMainnetEnabled, networkEthereumEnabled } from '$lib/derived/networks.derived';
+	import {
+		networkBitcoinMainnetEnabled,
+		networkEthereumEnabled
+	} from '$lib/derived/networks.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { HideInfoKey } from '$lib/utils/info.utils';

@@ -58,7 +58,11 @@
 
 <ButtonHero
 	on:click={async () => await openConvert()}
-	disabled={$networkICPDisabled || $networkBitcoinMainnetDisabled || $isBusy || $outflowActionsDisabled || isNullish(ckBtcToken)}
+	disabled={$networkICPDisabled ||
+		$networkBitcoinMainnetDisabled ||
+		$isBusy ||
+		$outflowActionsDisabled ||
+		isNullish(ckBtcToken)}
 	ariaLabel={$i18n.convert.text.convert_to_ckbtc}
 	testId="convert-to-ckbtc-button"
 >

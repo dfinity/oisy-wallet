@@ -37,7 +37,10 @@
 </script>
 
 <ButtonHero
-	disabled={$networkICPDisabled || $networkBitcoinMainnetDisabled || $isBusy || $outflowActionsDisabled}
+	disabled={$networkICPDisabled ||
+		$networkBitcoinMainnetDisabled ||
+		$isBusy ||
+		$outflowActionsDisabled}
 	on:click={async () => await openConvert()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >
