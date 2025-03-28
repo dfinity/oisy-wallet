@@ -2,9 +2,9 @@
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
+	import { userNetworks } from '$lib/derived/user-networks.derived';
 	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
-	import { userNetworks } from '$lib/derived/user-networks.derived';
 
 	const numberOfIcons = 4;
 
@@ -36,7 +36,7 @@
 	{/each}
 	{#if enabledList.length > numberOfIcons}
 		<div
-			class={`-ml-1 flex items-center justify-center overflow-hidden rounded-full bg-primary text-center text-xs ring-1 ring-primary transition-opacity duration-150`}
+			class="-ml-1 flex items-center justify-center overflow-hidden rounded-full bg-primary text-center text-xs ring-1 ring-primary transition-opacity duration-150"
 			style={`width: ${logoSizes.xxs}; height: ${logoSizes.xxs}`}
 		>
 			+{enabledList.length - numberOfIcons}
