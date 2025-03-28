@@ -1,4 +1,7 @@
-import { NAVIGATION_ITEM_REWARDS, REWARDS_DATE_BADGE } from '$lib/constants/test-ids.constants';
+import {
+	NAVIGATION_ITEM_REWARDS,
+	REWARDS_ACTIVE_CAMPAIGNS_CONTAINER
+} from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
 export type RewardsPageParams = HomepageLoggedInParams;
@@ -10,7 +13,10 @@ export class RewardsPage extends HomepageLoggedIn {
 
 	override async extendWaitForReady(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_REWARDS);
-		await this.mockSelector({ selector: `[data-tid="${REWARDS_DATE_BADGE}"]` });
+		await this.mockSelector({
+			selector: `[data-tid^="${REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}-"]`,
+			hasText: '-badge'
+		});
 		await this.waitForLoadState();
 	}
 }

@@ -3,7 +3,7 @@
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import { REWARDS_DATE_BADGE, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
+	import { REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let reward: RewardDescription;
@@ -25,7 +25,7 @@
 		/>
 	</span>
 	<span class="absolute right-4 top-3">
-		<RewardDateBadge date={reward.endDate} testId={REWARDS_DATE_BADGE} />
+		<RewardDateBadge date={reward.endDate} testId={nonNullish(testId) ? `${testId}-badge` : undefined} />
 	</span>
 	<article class="h-full">
 		<section>
@@ -39,7 +39,7 @@
 			<div
 				data-tid={REWARDS_STATUS_BUTTON}
 				class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
-				>{$i18n.rewards.text.check_status}
+			>{$i18n.rewards.text.check_status}
 			</div>
 		</section>
 	</article>
