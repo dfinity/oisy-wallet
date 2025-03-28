@@ -1,5 +1,4 @@
 import { AppPath } from '$lib/constants/routes.constants';
-import { NAVIGATION_ITEM_EXPLORER } from '$lib/constants/test-ids.constants';
 import {
 	CAROUSEL_SLIDE_NAVIGATION,
 	NAVIGATION_ITEM_EXPLORER
