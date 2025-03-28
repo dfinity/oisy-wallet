@@ -1,5 +1,6 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -32,6 +33,7 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('tokens.derived', () => {
@@ -90,10 +92,11 @@ describe('tokens.derived', () => {
 			splUserTokensStore.resetAll();
 
 			setupTestnetsStore('reset');
+			setupUserNetworksStore('allEnabled');
 
 			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-
+			vi.spyOn(solEnv, 'SOL_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
 		});
 
