@@ -155,6 +155,7 @@ export const allowSigning = async ({
 }>): Promise<Result_2> => {
 	const { allowSigning } = await backendCanister({ identity });
 
+	// Conditionally call allowSigning with request or provide default logic
 	return allowSigning({ request });
 };
 

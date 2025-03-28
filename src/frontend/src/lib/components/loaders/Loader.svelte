@@ -141,12 +141,13 @@
 		// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 		progressModal = true;
 
-		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
-
-		if (!initSignerAllowanceSuccess) {
-			// Sign-out is handled within the service.
-			return;
-		}
+		/*		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
+		
+				if (!initSignerAllowanceSuccess) {
+					// Sign-out is handled within the service.
+					return;
+				}
+				*/
 
 		const { success: addressSuccess } = await loadAddresses(
 			err?.map(({ tokenId }) => tokenId) ?? []

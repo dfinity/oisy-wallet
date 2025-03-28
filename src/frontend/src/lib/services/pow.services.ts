@@ -11,25 +11,7 @@ function getTimestampNowNs(): bigint {
 	return BigInt(Date.now()) * 1_000_000n;
 }
 
-const _createPowChallenge = async ({
-	identity
-}: {
-	identity: OptionIdentity;
-}): Promise<CreateChallengeResponse> => {
-	const response: CreateChallengeResult = await createPowChallenge({
-		identity
-	});
-	if ('Ok' in response) {
-		return response.Ok;
-	}
-	const err = response.Err;
-	if ('NotFound' in err) {
-		throw new UserProfileNotFoundError();
-	}
-	throw new Error('Unknown error');
-};
-
-const pow_solve_challenge = async (timestamp: number, difficulty: number): Promise<number> => {
+export const solvePowChallenge = async (timestamp: bigint, difficulty: number): Promise<number> => {
 	if (difficulty <= 0) {
 		throw new Error('Difficulty must be greater than zero');
 	}
@@ -54,4 +36,22 @@ const pow_solve_challenge = async (timestamp: number, difficulty: number): Promi
 	);
 
 	return nonce;
+};
+
+export const _createPowChallenge = async ({
+	identity
+}: {
+	identity: OptionIdentity;
+}): Promise<CreateChallengeResponse> => {
+	const response: CreateChallengeResult = await createPowChallenge({
+		identity
+	});
+	if ('Ok' in response) {
+		return response.Ok;
+	}
+	const err = response.Err;
+	if ('NotFound' in err) {
+		throw new UserProfileNotFoundError();
+	}
+	throw new Error('Unknown error');
 };

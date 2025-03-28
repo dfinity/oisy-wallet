@@ -3233,7 +3233,6 @@ version = "0.0.2"
 dependencies = [
  "bs58",
  "candid",
- "getrandom",
  "ic-canister-sig-creation",
  "ic-cdk 0.16.0",
  "ic-cdk-macros 0.16.0",
@@ -3244,7 +3243,6 @@ dependencies = [
  "ic-verifiable-credentials",
  "serde",
  "serde_bytes",
- "sha2 0.9.9",
  "strum 0.26.3",
  "strum_macros 0.26.4",
 ]

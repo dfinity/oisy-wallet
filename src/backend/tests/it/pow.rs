@@ -326,14 +326,17 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
+    // has to be called in the svelte onMessage() context
     let result = call_create_pow_challenge(&pic_setup, caller);
 
     let response: CreateChallengeResponse =
         result.expect("Failed to retrieve CreateChallengeResponse");
 
-    // emulates the javascript function running in the browser to create a valid nonce
+    // emulates the javascript function running in the browser to create a valid nonce (hashing)
+    // wil be running in the worker itself
     let nonce = helper_solve_challenge(response.start_timestamp_ms, response.difficulty);
 
+    // has to be called in the svelte onMessage() context
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
 
     assert!(result_allow_signing.is_ok());
@@ -393,7 +396,7 @@ fn test_allow_signing_should_fail_with_valid_nonce_and_expired_challenge() {
     let nonce = helper_solve_challenge(response.start_timestamp_ms, response.difficulty);
 
     // since we enabled auto progress, we can not call pic.advance_time(..) instead we need to wait
-    thread::sleep(Duration::from_millis(expiry_ms - now_ms));
+    thread::sleep(Duration::from_millis(expiry_ms - now_ms + 1000));
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
     assert!(result_allow_signing.is_err());
 }
@@ -437,9 +440,9 @@ fn test_allow_signing_should_approve_the_correct_cycles_amount() {
     let nonce = helper_solve_challenge(response.start_timestamp_ms, response.difficulty);
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
     assert!(result_allow_signing.is_ok());
-    // let response: AllowSigningResponse = result_allow_signing.unwrap();
-    // assert_eq!(response.allowed_cycles, 11086470000);
-    /* let backend_principle = pic_setup.canister_id;
+    let response: AllowSigningResponse = result_allow_signing.unwrap();
+    assert_eq!(response.allowed_cycles, 1000000000);
+    /*    let backend_principle = pic_setup.canister_id;
     let result_cycles_allowance = call_get_cycles_allowance(
         &pic_setup,
         caller,
@@ -448,7 +451,7 @@ fn test_allow_signing_should_approve_the_correct_cycles_amount() {
     );
     assert!(result_cycles_allowance.is_ok());
     let allowance_reponse = result_cycles_allowance.expect("Unable to get cycle allowance");
-    assert_eq!(allowance_reponse.allowance, Nat::from(5u8)); */
+    assert_eq!(allowance_reponse.allowance, Nat::from(5000u32));*/
 }
 
 #[test]

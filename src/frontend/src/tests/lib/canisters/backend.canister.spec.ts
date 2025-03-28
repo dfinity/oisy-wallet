@@ -663,7 +663,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(
+			await expect(allowSigning([])).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});

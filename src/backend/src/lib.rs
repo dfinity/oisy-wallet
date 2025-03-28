@@ -1,7 +1,7 @@
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
-use candid::Principal;
+use candid::{candid_method, Principal};
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
@@ -670,7 +670,6 @@ pub fn add_user_hidden_dapp_id(
 #[must_use]
 pub fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-
     mutate_state(|s| {
         let mut user_profile_model =
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
@@ -711,6 +710,7 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 /// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
 ///   internal errors.
 #[update(guard = "may_write_user_data")]
+#[candid_method(update)]
 pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
     let challenge = pow::create_pow_challenge().await?;
 
@@ -738,6 +738,9 @@ pub async fn allow_signing(
 ) -> Result<AllowSigningResponse, AllowSigningError> {
     let principal = ic_cdk::caller();
 
+    // The Proof-of-Work (PoW) protection is explicitly enforced at the HTTP entry-point level.
+    // This ensures internal calls to the business service remain unrestricted and do not require
+    // PoW.
     let challenge_completion: ChallengeCompletion = pow::complete_challenge(request.nonce)
         .map_err(|e| match e {
             ChallengeCompletionError::InvalidNonce
@@ -760,7 +763,8 @@ pub async fn allow_signing(
         allowed_cycles,
     );
 
-    signer::allow_signing(allowed_cycles).await?;
+    // Allow the caller to pay for cycles consumed by signer operations
+    signer::allow_signing(Some(allowed_cycles)).await?;
 
     Ok(AllowSigningResponse {
         status: AllowSigningStatus::Executed,

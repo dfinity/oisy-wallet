@@ -31,6 +31,8 @@ import type {
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import { types } from 'sass';
+import Null = types.Null;
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({

@@ -27,7 +27,6 @@ use crate::{
     state::{CYCLES_LEDGER, SIGNER},
 };
 
-/*
 /// Current ledger fee in cycles.  Historically stable.
 ///
 /// <https://github.com/dfinity/cycles-ledger/blob/1de0e55c6d4fba4bde3e81547e5726df92b881dc/cycles-ledger/src/config.rs#L6>
@@ -54,7 +53,7 @@ const fn per_user_cycles_allowance() -> u64 {
     // Creating the allowance costs 1 ledger fee.
     // Every usage costs 1 ledger fee + 1 signer fee.
     LEDGER_FEE + (LEDGER_FEE + SIGNER_FEE) * SIGNING_OPS_PER_LOGIN
-}*/
+}
 
 /// Enables the user to sign transactions.
 ///
@@ -62,11 +61,13 @@ const fn per_user_cycles_allowance() -> u64 {
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`
-pub async fn allow_signing(allowed_cycles: u64) -> Result<(), AllowSigningError> {
+/// TODO Remove the Option type (that has been added for backward-compatibility)
+/// as soon as the `PoW` feature has been stabilized
+pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigningError> {
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
     let caller = ic_cdk::caller();
-    let amount = Nat::from(allowed_cycles);
+    let amount = Nat::from(allowed_cycles.unwrap_or_else(per_user_cycles_allowance));
     CyclesLedgerService(cycles_ledger)
         .icrc_2_approve(&ApproveArgs {
             spender: Account {

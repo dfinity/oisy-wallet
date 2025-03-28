@@ -47,5 +47,9 @@ export const mapAllowSigningError = (
 		return new CanisterInternalError(err.Other);
 	}
 
+	if ('PowChallenge' in err) {
+		return new CanisterInternalError('PowChallenge:- ' + JSON.stringify(err.PowChallenge));
+	}
+
 	return new CanisterInternalError('Unknown AllowSigningError');
 };
