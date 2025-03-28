@@ -223,18 +223,18 @@
 	let receiveAddressList: Omit<ReceiveAddressProps, 'token' | 'qrCodeAriaLabel' | 'label'>[];
 	$: receiveAddressList = receiveAddressCoreList.map(
 		({
-			 address,
-			 token: addressToken,
-			 qrCodeAriaLabel,
-			 label: addressLabel,
-			 copyAriaLabel,
-			 labelRef,
-			 network,
-			 testId,
-			 title,
-			 text,
-			 condition
-		 }) => ({
+			address,
+			token: addressToken,
+			qrCodeAriaLabel,
+			label: addressLabel,
+			copyAriaLabel,
+			labelRef,
+			network,
+			testId,
+			title,
+			text,
+			condition
+		}) => ({
 			labelRef,
 			address,
 			network,
@@ -263,18 +263,7 @@
 
 <ContentWithToolbar>
 	<div class="flex flex-col gap-2">
-		{#each receiveAddressList as {
-			title,
-			text,
-			condition,
-			on,
-			labelRef,
-			address,
-			network,
-			testId,
-			copyAriaLabel,
-			qrCodeAction
-		} (labelRef)}
+		{#each receiveAddressList as { title, text, condition, on, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
 			{#if condition !== false}
 				{#if nonNullish(text)}
 					<ReceiveAddress
