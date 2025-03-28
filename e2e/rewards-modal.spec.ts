@@ -1,4 +1,9 @@
-import { NAVIGATION_ITEM_REWARDS, REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	NAVIGATION_ITEM_REWARDS,
+	REWARDS_MODAL,
+	REWARDS_MODAL_DATE_BADGE,
+	REWARDS_STATUS_BUTTON
+} from '$lib/constants/test-ids.constants';
 import { testWithII } from '@dfinity/internet-identity-playwright';
 import { MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedIn } from './utils/pages/homepage.page';
@@ -28,8 +33,6 @@ testWithII('should display receive-tokens modal', async () => {
 	await homepageLoggedIn.testModalSnapshot({
 		modalOpenButtonTestId: REWARDS_STATUS_BUTTON,
 		modalTestId: REWARDS_MODAL,
-		selectorsToMock: getReceiveTokensModalAddressLabelSelectors([
-			REWARDS_MODAL_DATE_BADGE
-		])
+		selectorsToMock: getReceiveTokensModalAddressLabelSelectors([REWARDS_MODAL_DATE_BADGE])
 	});
 });
