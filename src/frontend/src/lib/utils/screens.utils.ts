@@ -11,12 +11,9 @@ export interface AvailableScreen {
 export const MIN_SCREEN: ScreensKeyType = 'xs';
 export const MAX_SCREEN: ScreensKeyType = '2.5xl';
 
-export const AVAILABLE_SCREENS: AvailableScreen[] = Object.entries({
-	...defaultTheme.screens,
-	...themeVariables.screens
-})
-	.reduce<AvailableScreen[]>((acc, [k, v]) => {
-		return [
+export const AVAILABLE_SCREENS: AvailableScreen[] = Object.entries(ALL_SCREENS)
+	.reduce<AvailableScreen[]>(
+		(acc, [k, v]) => [
 			...acc,
 			...(typeof v === 'string'
 				? [
@@ -26,8 +23,9 @@ export const AVAILABLE_SCREENS: AvailableScreen[] = Object.entries({
 						}
 					]
 				: [])
-		];
-	}, [])
+		],
+		[]
+	)
 	.sort((a, b) => a.width - b.width);
 
 export const getActiveScreen = ({
