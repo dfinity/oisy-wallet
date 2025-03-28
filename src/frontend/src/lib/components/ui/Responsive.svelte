@@ -3,9 +3,9 @@
 	import { onDestroy } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
+		AVAILABLE_SCREENS,
 		filterScreens,
 		getActiveScreen,
-		getAvailableScreens,
 		MAX_SCREEN,
 		MIN_SCREEN,
 		type ScreensKeyType,
@@ -28,17 +28,15 @@
 		}, 50); // debounce width on screen size change so we don't calculate all the time
 	}
 
-	const screens = getAvailableScreens();
-
 	let activeScreen: ScreensKeyType;
 	$: activeScreen = getActiveScreen({
 		screenWidth: $debouncedWidth,
-		availableScreensSortedByWidth: screens
+		availableScreensSortedByWidth: AVAILABLE_SCREENS
 	});
 
 	let display = false;
 	$: display = shouldDisplayForScreen({
-		filteredScreens: filterScreens({ availableScreens: screens, up, down }),
+		filteredScreens: filterScreens({ availableScreens: AVAILABLE_SCREENS, up, down }),
 		activeScreen
 	});
 
