@@ -139,7 +139,7 @@
 
 	{#if enabledTestnet}
 		<SettingsList>
-			<svelte:fragment slot="title">{$i18n.settings.text.test_networks}</svelte:fragment>
+			<svelte:fragment slot="title">{$i18n.networks.test_networks}</svelte:fragment>
 
 			{#each SUPPORTED_TESTNET_NETWORKS as network (network.id)}
 				<SettingsListItem>

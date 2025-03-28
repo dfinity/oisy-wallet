@@ -250,7 +250,6 @@
 			"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
 			"testnets": "Show test networks",
 			"networks": "Networks",
-			"test_networks": "Test networks",
 			"enable_testnets": "Enable test networks",
 			"enable_network": "Enable network",
 			"disable_network": "Disable network",
