@@ -423,31 +423,6 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${this.getTokenCardTestId(params)}"]`);
 	}
 
-	async getStableViewportHeight(): Promise<number> {
-		let previousHeight: number;
-		let currentHeight: number = await this.#page.evaluate(
-			() => document.documentElement.scrollHeight
-		);
-
-		do {
-			previousHeight = currentHeight;
-			await this.#page.waitForTimeout(1000);
-			currentHeight = await this.#page.evaluate(() => document.documentElement.scrollHeight);
-		} while (currentHeight !== previousHeight);
-
-		return currentHeight;
-	}
-
-	private async viewportAdjuster(): Promise<void> {
-		await this.waitForLoadState();
-		const stablePageHeight = await this.getStableViewportHeight();
-
-		const currentViewport = this.#page.viewportSize();
-		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
-
-		await this.#page.setViewportSize({ height: stablePageHeight, width });
-	}
-
 	async takeScreenshot(
 		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
 			freezeCarousel: false
@@ -455,12 +430,9 @@ abstract class Homepage {
 	): Promise<void> {
 		if (isNullish(screenshotTarget) && !this.#isMobile) {
 			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
-			await this.viewportAdjuster();
+			const viewportAdjuster = new ViewportAdjuster(this.#page);
+			await viewportAdjuster.adjustViewportUntilNoOverlap();
 		}
-
-		const viewportAdjuster = new ViewportAdjuster(this.#page);
-		await viewportAdjuster.checkAndAdjustViewport();
-
 		const element = screenshotTarget ?? this.#page;
 
 		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
