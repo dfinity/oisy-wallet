@@ -10,6 +10,7 @@
 	import InfoEthereum from '$icp-eth/components/info/InfoEthereum.svelte';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import InfoBoxWrapper from '$lib/components/info/InfoBoxWrapper.svelte';
+	import { networkEthereumEnabled } from '$lib/derived/networks.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { HideInfoKey } from '$lib/utils/info.utils';
@@ -24,10 +25,10 @@
 	$: ckBTC = mainnet && $tokenCkBtcLedger;
 
 	let ckETH = false;
-	$: ckETH = mainnet && $tokenCkEthLedger;
+	$: ckETH = mainnet && $networkEthereumEnabled && $tokenCkEthLedger;
 
 	let ckErc20 = false;
-	$: ckErc20 = mainnet && $tokenCkErc20Ledger;
+	$: ckErc20 = mainnet && $networkEthereumEnabled && $tokenCkErc20Ledger;
 
 	let key: HideInfoKey | undefined = undefined;
 	$: key = ckBTC
