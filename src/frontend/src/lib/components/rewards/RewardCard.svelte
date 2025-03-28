@@ -3,8 +3,8 @@
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let reward: RewardDescription;
 	export let testId: string | undefined = undefined;
@@ -39,11 +39,11 @@
 			</p>
 		</section>
 		<section class="bottom-4 left-4 mt-3 flex">
-			<div class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
-					 data-tid={REWARDS_STATUS_BUTTON}
-			>{$i18n.rewards.text.check_status}
+			<div
+				class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
+				data-tid={REWARDS_STATUS_BUTTON}
+				>{$i18n.rewards.text.check_status}
 			</div>
-		</section
-		>
+		</section>
 	</article>
 </button>
