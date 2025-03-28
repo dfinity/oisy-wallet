@@ -1,3 +1,4 @@
+import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -37,9 +38,10 @@ export interface Modal<T> {
 		| 'about-why-oisy'
 		| 'vip-qr-code'
 		| 'dapp-details'
+		| 'vip-reward-state'
+		| 'reward-details'
 		| 'reward-state'
-		| 'airdrop-details'
-		| 'airdrop-state';
+		| 'settings';
 	data?: T;
 	id?: symbol;
 }
@@ -81,9 +83,11 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAboutWhyOisy: () => void;
 	openVipQrCode: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
+	openVipRewardState: <D extends T>(data: D) => void;
+	openRewardDetails: <D extends T>(data: D) => void;
 	openRewardState: <D extends T>(data: D) => void;
-	openAirdropDetails: <D extends T>(data: D) => void;
-	openAirdropState: <D extends T>(data: D) => void;
+	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
+	openSettings: (data: SettingsModalType) => void;
 	close: () => void;
 }
 
@@ -134,9 +138,11 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: setType('vip-qr-code'),
 		openDappDetails: setTypeWithData('dapp-details'),
+		openVipRewardState: setTypeWithData('vip-reward-state'),
+		openRewardDetails: setTypeWithData('reward-details'),
 		openRewardState: setTypeWithData('reward-state'),
-		openAirdropDetails: setTypeWithData('airdrop-details'),
-		openAirdropState: setTypeWithData('airdrop-state'),
+		// todo: explicitly define type here as well
+		openSettings: <(data: SettingsModalType) => void>setTypeWithData('settings'),
 		close: () => set(null),
 		subscribe
 	};

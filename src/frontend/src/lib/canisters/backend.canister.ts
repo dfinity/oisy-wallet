@@ -21,9 +21,12 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
-	GetUserProfileResponse
+	GetUserProfileResponse,
+	SaveUserNetworksSettings,
+	SetUserShowTestnetsParams
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mapUserNetworks } from '$lib/utils/user-networks.utils';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
@@ -188,6 +191,30 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await add_user_hidden_dapp_id({
 			dapp_id: dappId,
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	setUserShowTestnets = async ({
+		showTestnets,
+		currentUserVersion
+	}: SetUserShowTestnetsParams): Promise<void> => {
+		const { set_user_show_testnets } = this.caller({ certified: true });
+
+		await set_user_show_testnets({
+			show_testnets: showTestnets,
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	updateUserNetworkSettings = async ({
+		networks,
+		currentUserVersion
+	}: SaveUserNetworksSettings): Promise<void> => {
+		const { update_user_network_settings } = this.caller({ certified: true });
+
+		await update_user_network_settings({
+			networks: mapUserNetworks(networks),
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};

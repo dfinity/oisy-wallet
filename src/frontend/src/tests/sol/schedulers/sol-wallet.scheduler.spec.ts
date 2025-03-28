@@ -11,7 +11,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { jsonReplacer, nonNullish } from '@dfinity/utils';
-import { lamports } from '@solana/rpc-types';
+import { lamports } from '@solana/kit';
 import { type MockInstance } from 'vitest';
 
 describe('sol-wallet.scheduler', () => {
@@ -21,7 +21,7 @@ describe('sol-wallet.scheduler', () => {
 	let spyLoadSplBalance: MockInstance;
 
 	const mockSolBalance = lamports(100n);
-	const mockSplBalance = BigInt(123);
+	const mockSplBalance = 123n;
 	const mockSolTransactions = createMockSolTransactionsUi(2);
 
 	const expectedSoLTransactions = mockSolTransactions.map((transaction) => ({

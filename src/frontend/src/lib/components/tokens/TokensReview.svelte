@@ -19,9 +19,9 @@
 	</SwapToken>
 
 	<div class="my-2 flex w-full items-center justify-between text-tertiary-inverted">
-		<div class="h-[1px] w-[45%] bg-tertiary text-tertiary-inverted" />
+		<div class="h-[1px] w-[45%] bg-tertiary text-tertiary-inverted"></div>
 		<IconCircleArrowDown />
-		<div class="h-[1px] w-[45%] bg-tertiary text-tertiary-inverted" />
+		<div class="h-[1px] w-[45%] bg-tertiary text-tertiary-inverted"></div>
 	</div>
 
 	<SwapToken

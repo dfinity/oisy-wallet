@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { ICP_NETWORK } from '$env/networks/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
@@ -26,6 +25,7 @@
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -38,7 +38,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
-	export let request: Web3WalletTypes.SessionRequest;
+	export let request: WalletKitTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
 	export let sourceNetwork: EthereumNetwork;
 
@@ -138,8 +138,8 @@
 
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
-	let amount: BigNumber;
-	$: amount = BigNumber.from(firstTransaction?.value ?? '0');
+	let amount: bigint;
+	$: amount = BigInt(firstTransaction?.value ?? ZERO_BI);
 
 	const send = async () => {
 		const { success } = await sendServices({

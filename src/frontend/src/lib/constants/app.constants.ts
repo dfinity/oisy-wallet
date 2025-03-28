@@ -6,7 +6,8 @@ export const APP_VERSION = VITE_APP_VERSION;
 
 export const MODE = VITE_DFX_NETWORK;
 export const LOCAL = MODE === 'local';
-export const STAGING = MODE === 'staging' || MODE.startsWith('test_fe_') || MODE === 'audit';
+export const STAGING =
+	MODE === 'staging' || MODE.startsWith('test_fe_') || MODE === 'audit' || MODE === 'e2e';
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
@@ -55,19 +56,25 @@ export const REWARDS_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_REWARDS_CANISTER_ID
 	: STAGING
 		? import.meta.env.VITE_STAGING_REWARDS_CANISTER_ID
-		: import.meta.env.VITE_IC_REWARDS_CANISTER_ID;
+		: BETA
+			? import.meta.env.VITE_BETA_REWARDS_CANISTER_ID
+			: import.meta.env.VITE_IC_REWARDS_CANISTER_ID;
 
 export const SIGNER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_SIGNER_CANISTER_ID
 	: STAGING
 		? import.meta.env.VITE_STAGING_SIGNER_CANISTER_ID
-		: import.meta.env.VITE_IC_SIGNER_CANISTER_ID;
+		: BETA
+			? import.meta.env.VITE_BETA_SIGNER_CANISTER_ID
+			: import.meta.env.VITE_IC_SIGNER_CANISTER_ID;
 
 export const KONG_BACKEND_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_KONG_BACKEND_CANISTER_ID
 	: STAGING
 		? import.meta.env.VITE_STAGING_KONG_BACKEND_CANISTER_ID
-		: import.meta.env.VITE_IC_KONG_BACKEND_CANISTER_ID;
+		: BETA
+			? import.meta.env.VITE_BETA_KONG_BACKEND_CANISTER_ID
+			: import.meta.env.VITE_IC_KONG_BACKEND_CANISTER_ID;
 
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
@@ -113,7 +120,8 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_SECOND * 60n;
 // Just a value that looks good visually.
 export const EIGHT_DECIMALS = 8;
 
-export const ZERO = BigNumber.from(0n);
+export const ZERO_BI = 0n;
+export const ZERO = BigNumber.from(ZERO_BI);
 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
@@ -128,3 +136,6 @@ export const VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
 
 // User Snapshot
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1000; // 5 minutes in milliseconds
+
+// Fallback
+export const FALLBACK_TIMEOUT = 10000;
