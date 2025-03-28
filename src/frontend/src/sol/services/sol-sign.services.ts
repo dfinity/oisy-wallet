@@ -1,8 +1,10 @@
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
-import type { Signature } from '@solana/keys';
-import { signTransactionMessageWithSigners } from '@solana/signers';
-import { getSignatureFromTransaction } from '@solana/transactions';
+import {
+	getSignatureFromTransaction,
+	signTransactionMessageWithSigners,
+	type Signature
+} from '@solana/kit';
 
 export const signTransaction = async (
 	transactionMessage: SolTransactionMessage

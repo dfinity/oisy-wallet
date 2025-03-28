@@ -1,4 +1,4 @@
-import { EnvIcTokenSchema } from '$env/schema/env-icrc-token.schema';
+import { EnvIcrcTokenMetadataSchema, EnvIcTokenSchema } from '$env/schema/env-icrc-token.schema';
 import { EnvTokenSymbolSchema } from '$env/schema/env-token-common.schema';
 import { isEthAddress } from '$lib/utils/account.utils';
 import * as z from 'zod';
@@ -11,6 +11,10 @@ const EnvErc20ContractAddressSchema = z.custom<string>(
 export const EnvCkErc20TokenDataSchema = EnvIcTokenSchema.extend({
 	erc20ContractAddress: EnvErc20ContractAddressSchema
 });
+
+export const EnvCkErc20WithMetadataSchema = EnvCkErc20TokenDataSchema.merge(
+	EnvIcrcTokenMetadataSchema
+);
 
 export const EnvCkErc20TokensRawSchema = z.record(
 	EnvTokenSymbolSchema,
@@ -26,3 +30,8 @@ export const EnvTokensCkErc20Schema = z.object({
 	production: EnvCkErc20TokensSchema,
 	staging: EnvCkErc20TokensSchema
 });
+
+export const EnvCkErc20TokensWithMetadataSchema = z.record(
+	EnvTokenSymbolSchema,
+	EnvCkErc20WithMetadataSchema
+);

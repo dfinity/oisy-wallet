@@ -1,4 +1,5 @@
-import { BTC_MAINNET_NETWORK, ICP_NETWORK } from '$env/networks/networks.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
@@ -8,8 +9,8 @@ import {
 	TOKEN_MENU_IC_BUTTON,
 	TOKEN_MENU_SOL_BUTTON
 } from '$lib/constants/test-ids.constants';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { render } from '@testing-library/svelte';
 
 describe('ContextMenu', () => {
@@ -19,7 +20,7 @@ describe('ContextMenu', () => {
 	const solTokenMenuButtonSelector = `button[data-tid="${TOKEN_MENU_SOL_BUTTON}"]`;
 
 	beforeAll(() => {
-		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+		setupTestnetsStore('enabled');
 	});
 
 	beforeEach(() => {

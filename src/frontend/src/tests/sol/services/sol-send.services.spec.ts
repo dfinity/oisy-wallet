@@ -17,46 +17,40 @@ import {
 	mockSolAddress,
 	mockSolAddress2
 } from '$tests/mocks/sol.mock';
-import { BigNumber } from '@ethersproject/bignumber';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
-import * as solanaFunctional from '@solana/functional';
-import { pipe } from '@solana/functional';
-import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
-import { appendTransactionMessageInstructions } from '@solana/transaction-messages';
+import * as solanaWeb3 from '@solana/kit';
 import {
+	appendTransactionMessageInstructions,
 	getComputeUnitEstimateForTransactionMessageFactory,
-	sendAndConfirmTransactionFactory
-} from '@solana/web3.js';
+	pipe,
+	sendAndConfirmTransactionFactory,
+	type Rpc,
+	type RpcSubscriptions,
+	type SolanaRpcApi,
+	type SolanaRpcSubscriptionsApi
+} from '@solana/kit';
 import { type MockInstance } from 'vitest';
 
-vi.mock(import('@solana/functional'), async (importOriginal) => {
+vi.mock(import('@solana/kit'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
-		pipe: actual.pipe
+		...actual,
+		appendTransactionMessageInstructions: vi.fn(),
+		assertIsTransactionPartialSigner: vi.fn(),
+		assertIsTransactionSigner: vi.fn(),
+		assertTransactionIsFullySigned: vi.fn(),
+		createTransactionMessage: vi.fn().mockReturnValue('mock-transaction-message'),
+		getComputeUnitEstimateForTransactionMessageFactory: vi.fn(),
+		getSignatureFromTransaction: vi.fn(),
+		prependTransactionMessageInstruction: vi.fn(),
+		sendAndConfirmTransactionFactory: vi.fn(),
+		setTransactionMessageFeePayer: vi.fn((message) => message),
+		setTransactionMessageFeePayerSigner: vi.fn((message) => message),
+		setTransactionMessageLifetimeUsingBlockhash: vi.fn((message) => message),
+		signTransactionMessageWithSigners: vi.fn()
 	};
 });
-
-vi.mock('@solana/signers', () => ({
-	assertIsTransactionSigner: vi.fn(),
-	assertIsTransactionPartialSigner: vi.fn(),
-	signTransactionMessageWithSigners: vi.fn(),
-	setTransactionMessageFeePayerSigner: vi.fn((message) => message)
-}));
-
-vi.mock('@solana/transactions', () => ({
-	assertTransactionIsFullySigned: vi.fn(),
-	getSignatureFromTransaction: vi.fn()
-}));
-
-vi.mock('@solana/transaction-messages', () => ({
-	createTransactionMessage: vi.fn().mockReturnValue('mock-transaction-message'),
-	setTransactionMessageFeePayer: vi.fn((message) => message),
-	setTransactionMessageLifetimeUsingBlockhash: vi.fn((message) => message),
-	prependTransactionMessageInstruction: vi.fn(),
-	appendTransactionMessageInstructions: vi.fn()
-}));
 
 vi.mock('@solana-program/system', () => ({
 	getTransferSolInstruction: vi.fn().mockReturnValue('mock-transfer-sol-instruction')
@@ -64,11 +58,6 @@ vi.mock('@solana-program/system', () => ({
 
 vi.mock('@solana-program/token', () => ({
 	getTransferInstruction: vi.fn().mockReturnValue('mock-transfer-instruction')
-}));
-
-vi.mock('@solana/web3.js', () => ({
-	getComputeUnitEstimateForTransactionMessageFactory: vi.fn(),
-	sendAndConfirmTransactionFactory: vi.fn()
 }));
 
 vi.mock('$sol/providers/sol-rpc.providers', () => ({
@@ -83,7 +72,7 @@ vi.mock('$lib/api/signer.api', () => ({
 describe('sol-send.services', () => {
 	// TODO: add more practical tests deploying the Solana local node
 	describe('sendSol', () => {
-		const mockAmount = BigNumber.from('1000000');
+		const mockAmount = 1000000n;
 		const mockSource = mockSolAddress;
 		const mockSigner = expect.objectContaining({
 			address: mockSolAddress,
@@ -137,7 +126,7 @@ describe('sol-send.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(solanaFunctional, 'pipe');
+			vi.spyOn(solanaWeb3, 'pipe');
 
 			vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 			vi.mocked(solanaWebSocketRpc).mockReturnValue(mockRpcSubscriptions);
@@ -186,7 +175,7 @@ describe('sol-send.services', () => {
 			expect(getTransferSolInstruction).toHaveBeenCalledWith({
 				source: mockSigner,
 				destination: mockDestination,
-				amount: mockAmount.toBigInt()
+				amount: mockAmount
 			});
 		});
 
@@ -211,7 +200,7 @@ describe('sol-send.services', () => {
 					source: mockAtaAddress,
 					destination: mockAtaAddress2,
 					authority: mockSigner,
-					amount: mockAmount.toBigInt()
+					amount: mockAmount
 				},
 				{ programAddress: DEVNET_USDC_TOKEN.owner }
 			);
@@ -251,7 +240,7 @@ describe('sol-send.services', () => {
 					source: mockAtaAddress,
 					destination: mockAtaAddress2,
 					authority: mockSigner,
-					amount: mockAmount.toBigInt()
+					amount: mockAmount
 				},
 				{ programAddress: DEVNET_USDC_TOKEN.owner }
 			);
@@ -303,7 +292,7 @@ describe('sol-send.services', () => {
 						address: mockSolAddress,
 						signTransactions: expect.any(Function)
 					}),
-					amount: mockAmount.toBigInt()
+					amount: mockAmount
 				},
 				{ programAddress: DEVNET_USDC_TOKEN.owner }
 			);

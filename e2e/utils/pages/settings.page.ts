@@ -1,5 +1,6 @@
 import { AppPath } from '$lib/constants/routes.constants';
 import {
+	CAROUSEL_SLIDE_NAVIGATION,
 	NAVIGATION_ITEM_SETTINGS,
 	SETTINGS_ADDRESS_LABEL
 } from '$lib/constants/test-ids.constants';
@@ -16,6 +17,10 @@ export class SettingsPage extends HomepageLoggedIn {
 		await this.navigateTo({ testId: NAVIGATION_ITEM_SETTINGS, expectedPath: AppPath.Settings });
 
 		await this.mockSelector({ selector: `[data-tid="${SETTINGS_ADDRESS_LABEL}"]` });
+
+		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({
+			state: 'hidden'
+		});
 
 		await this.waitForLoadState();
 	}

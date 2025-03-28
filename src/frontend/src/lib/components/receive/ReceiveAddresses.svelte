@@ -4,10 +4,10 @@
 	import {
 		BTC_MAINNET_NETWORK,
 		BTC_REGTEST_NETWORK,
-		BTC_TESTNET_NETWORK,
-		ETHEREUM_NETWORK,
-		ICP_NETWORK
-	} from '$env/networks/networks.env';
+		BTC_TESTNET_NETWORK
+	} from '$env/networks/networks.btc.env';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import {
 		SOLANA_MAINNET_NETWORK,
 		SOLANA_TESTNET_NETWORK,
@@ -56,7 +56,12 @@
 		solAddressMainnet,
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
-	import { testnets } from '$lib/derived/testnets.derived';
+	import {
+		networkICPEnabled,
+		networkEthereumEnabled,
+		networkSepoliaEnabled
+	} from '$lib/derived/networks.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
@@ -114,7 +119,7 @@
 			label: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
 			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
-			condition: $testnets
+			condition: $testnetsEnabled
 		},
 		{
 			labelRef: 'btcAddressRegtest',
@@ -126,7 +131,7 @@
 			label: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
 			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
-			condition: $testnets && LOCAL
+			condition: $testnetsEnabled && LOCAL
 		},
 		{
 			labelRef: 'ethAddress',
@@ -138,7 +143,8 @@
 			label: $i18n.receive.ethereum.text.ethereum_address,
 			copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied,
 			qrCodeAriaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr,
-			text: $i18n.receive.icp.text.your_private_eth_address
+			text: $i18n.receive.icp.text.your_private_eth_address,
+			condition: $networkEthereumEnabled || $networkSepoliaEnabled
 		},
 		{
 			labelRef: 'icrcTokenAddress',
@@ -150,7 +156,8 @@
 			label: $i18n.receive.icp.text.principal,
 			copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied,
 			qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr,
-			text: $i18n.receive.icp.text.use_for_icrc_deposit
+			text: $i18n.receive.icp.text.use_for_icrc_deposit,
+			condition: $networkICPEnabled
 		},
 		{
 			labelRef: 'icpTokenAddress',
@@ -161,7 +168,8 @@
 			title: $i18n.receive.icp.text.icp_account,
 			label: $i18n.receive.icp.text.icp_account,
 			copyAriaLabel: $i18n.receive.icp.text.icp_account_copied,
-			qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr
+			qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr,
+			condition: $networkICPEnabled
 		},
 		{
 			labelRef: 'solAddressMainnet',
@@ -184,7 +192,7 @@
 			label: $i18n.receive.solana.text.solana_testnet_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: $testnets
+			condition: $testnetsEnabled
 		},
 		{
 			labelRef: 'solAddressDevnet',
@@ -196,7 +204,7 @@
 			label: $i18n.receive.solana.text.solana_devnet_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: $testnets
+			condition: $testnetsEnabled
 		},
 		{
 			labelRef: 'solAddressLocal',
@@ -208,7 +216,7 @@
 			label: $i18n.receive.solana.text.solana_local_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: $testnets && LOCAL
+			condition: $testnetsEnabled && LOCAL
 		}
 	];
 

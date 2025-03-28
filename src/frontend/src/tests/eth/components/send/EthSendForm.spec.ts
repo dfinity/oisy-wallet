@@ -1,11 +1,10 @@
-import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 import { FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
 import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 import { writable } from 'svelte/store';
 
 describe('EthSendForm', () => {
@@ -29,10 +28,9 @@ describe('EthSendForm', () => {
 
 	const props = {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
-		amount: BigNumber.from(22000000),
+		amount: '22000000',
 		network: ETHEREUM_NETWORK,
-		nativeEthereumToken: ETHEREUM_TOKEN,
-		sourceNetwork: ETHEREUM_NETWORK
+		nativeEthereumToken: ETHEREUM_TOKEN
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;

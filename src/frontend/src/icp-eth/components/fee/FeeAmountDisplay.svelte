@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { debounce, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { slide } from 'svelte/transition';
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,19 +11,21 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let fee: BigNumber;
+	export let fee: bigint;
 	export let feeSymbol: string;
 	export let feeTokenId: TokenId;
 	export let feeDecimals: number;
 	export let feeExchangeRate: number | undefined = undefined;
 
 	let balance: Exclude<OptionBalance, null>;
-	$: balance = nonNullish($balancesStore) ? ($balancesStore[feeTokenId]?.data ?? ZERO) : undefined;
+	$: balance = nonNullish($balancesStore)
+		? ($balancesStore[feeTokenId]?.data ?? ZERO_BI)
+		: undefined;
 
 	let insufficientFeeFunds = false;
 
 	const debounceCheckFeeFunds = debounce(
-		() => (insufficientFeeFunds = nonNullish(balance) && balance.lt(fee))
+		() => (insufficientFeeFunds = nonNullish(balance) && balance < fee)
 	);
 
 	$: balance, fee, debounceCheckFeeFunds();
