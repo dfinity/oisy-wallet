@@ -56,12 +56,13 @@
 		solAddressMainnet,
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
-	import { networkICPEnabled ,
+	import {
+		networkICPEnabled,
 		networkEthereumEnabled,
 		networkSepoliaEnabled
 	} from '$lib/derived/networks.derived';
-	import { testnetsEnabled , testnets } from '$lib/derived/testnets.derived';
-			import { i18n } from '$lib/stores/i18n.store';
+	import { testnetsEnabled, testnets } from '$lib/derived/testnets.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
