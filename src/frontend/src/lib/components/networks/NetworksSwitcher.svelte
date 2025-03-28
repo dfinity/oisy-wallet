@@ -15,7 +15,7 @@
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
-	import { testnets } from '$lib/derived/testnets.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { SettingsModalType } from '$lib/enums/settings-modal-types';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -65,10 +65,12 @@
 			{/each}
 		</ul>
 
-		<span class="my-5 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
+		{#if $testnetsEnabled}
+			<span class="my-5 flex px-3 font-bold" transition:slide={SLIDE_EASING}
+				>{$i18n.networks.test_networks}</span
+			>
 
-		{#if $testnets}
-			<ul class="flex list-none flex-col">
+			<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
 				{#each $networksTestnets as network (network.id)}
 					<li transition:slide={SLIDE_EASING}
 						><Network {network} on:icSelected={dropdown.close} /></li
