@@ -8,7 +8,7 @@
 
 	const numberOfIcons = 4;
 
-	const getEnabledList = (networks: UserNetworks) =>
+	const getEnabledList = (networks: UserNetworks): Network[] =>
 		Object.getOwnPropertySymbols(networks ?? {}).reduce<Network[]>((enabledList, symbol) => {
 			const isEnabled = networks[symbol as keyof typeof networks]?.enabled ?? false;
 
