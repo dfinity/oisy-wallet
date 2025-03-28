@@ -16,7 +16,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { testnets } from '$lib/derived/testnets.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { userNetworks } from '$lib/derived/user-networks.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -30,8 +30,8 @@
 	let enabledNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...$userNetworks };
 
-	let enabledTestnet = $testnets;
-	const enabledTestnetInitial = $testnets;
+	let enabledTestnet = $testnetsEnabled;
+	const enabledTestnetInitial = $testnetsEnabled;
 
 	const checkModified = ({
 		enabledTestnet,
