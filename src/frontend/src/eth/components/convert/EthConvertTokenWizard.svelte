@@ -8,7 +8,7 @@
 	import EthConvertProgress from '$eth/components/convert/EthConvertProgress.svelte';
 	import EthConvertReview from '$eth/components/convert/EthConvertReview.svelte';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { selectedEthereumNetworkWithFallback } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
@@ -162,7 +162,7 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
-				sourceNetwork: $selectedEthereumNetwork,
+				sourceNetwork: $selectedEthereumNetworkWithFallback,
 				targetNetwork: ICP_NETWORK,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[$ethereumToken.id]
@@ -198,7 +198,7 @@
 	amount={sendAmount}
 	{destination}
 	observe={currentStep?.name !== WizardStepsConvert.CONVERTING}
-	sourceNetwork={$selectedEthereumNetwork}
+	sourceNetwork={$selectedEthereumNetworkWithFallback}
 	targetNetwork={ICP_NETWORK}
 	nativeEthereumToken={$ethereumToken}
 >
