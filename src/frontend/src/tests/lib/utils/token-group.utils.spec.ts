@@ -1,4 +1,4 @@
-import { ICP_NETWORK } from '$env/networks/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -6,7 +6,7 @@ import {
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import {
@@ -18,22 +18,21 @@ import {
 	updateTokenGroup
 } from '$lib/utils/token-group.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { bn1, bn2, bn3 } from '$tests/mocks/balances.mock';
+import { bn1Bi, bn2Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { BigNumber } from 'alchemy-sdk';
 
 const tokens = [
 	{
 		...BTC_MAINNET_TOKEN,
-		balance: BigNumber.from(1),
+		balance: bn1Bi,
 		usdBalance: 50000
 	},
 	{
 		...mockValidIcCkToken,
 		symbol: 'ckBTC',
 		network: ICP_NETWORK,
-		balance: BigNumber.from(2),
+		balance: bn2Bi,
 		usdBalance: 100000,
 		standard: 'icrc',
 		category: 'default',
@@ -44,14 +43,14 @@ const tokens = [
 	},
 	{
 		...ETHEREUM_TOKEN,
-		balance: BigNumber.from(10),
+		balance: 10n,
 		usdBalance: 20000
 	},
 	{
 		...mockValidIcCkToken,
 		symbol: 'ckETH',
 		network: ICP_NETWORK,
-		balance: BigNumber.from(5),
+		balance: 5n,
 		usdBalance: 15000,
 		standard: 'icrc',
 		category: 'default',
@@ -62,7 +61,7 @@ const tokens = [
 	},
 	{
 		...ICP_TOKEN,
-		balance: BigNumber.from(50),
+		balance: 50n,
 		usdBalance: 1000
 	}
 ];
@@ -81,7 +80,7 @@ const tokensWithMismatchedDecimals = [
 			env: 'mainnet'
 		},
 		twinTokenSymbol: 'ckFOO',
-		balance: BigNumber.from(100),
+		balance: 100n,
 		usdBalance: 1000,
 		standard: 'ethereum',
 		category: 'default',
@@ -94,7 +93,7 @@ const tokensWithMismatchedDecimals = [
 		id: parseTokenId('ckFOO'),
 		symbol: 'ckFOO',
 		network: ICP_NETWORK,
-		balance: BigNumber.from(200),
+		balance: 200n,
 		usdBalance: 2000,
 		standard: 'icrc',
 		category: 'default',
@@ -242,10 +241,10 @@ describe('token-group.utils', () => {
 
 		it('should re-sort groups if their total balance made them out of order', () => {
 			const reorderedTokens = [
-				{ ...tokens[0], balance: bn2, usdBalance: 0 }, // BTC
-				{ ...tokens[2], balance: bn2, usdBalance: 0 }, // ETH
-				{ ...tokens[3], balance: bn1, usdBalance: 0 }, // ckETH
-				{ ...tokens[1], balance: ZERO, usdBalance: 0 } // ckBTC
+				{ ...tokens[0], balance: bn2Bi, usdBalance: 0 }, // BTC
+				{ ...tokens[2], balance: bn2Bi, usdBalance: 0 }, // ETH
+				{ ...tokens[3], balance: bn1Bi, usdBalance: 0 }, // ckETH
+				{ ...tokens[1], balance: ZERO_BI, usdBalance: 0 } // ckBTC
 			];
 
 			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
@@ -268,9 +267,9 @@ describe('token-group.utils', () => {
 
 	describe('filterTokenGroups', () => {
 		const reorderedTokens = [
-			{ ...tokens[0], balance: ZERO, usdBalance: 0 }, // BTC
-			{ ...tokens[4], balance: ZERO, usdBalance: 0 }, // ICP
-			{ ...tokens[1], balance: ZERO, usdBalance: 0 } // ckBTC
+			{ ...tokens[0], balance: ZERO_BI, usdBalance: 0 }, // BTC
+			{ ...tokens[4], balance: ZERO_BI, usdBalance: 0 }, // ICP
+			{ ...tokens[1], balance: ZERO_BI, usdBalance: 0 } // ckBTC
 		];
 
 		it('should give me all token groups', () => {
@@ -284,8 +283,8 @@ describe('token-group.utils', () => {
 		it('should give me only token groups where at least one token has a balance', () => {
 			const customReorderedTokens = [
 				...reorderedTokens,
-				{ ...tokens[2], balance: bn2, usdBalance: 0 }, // ETH
-				{ ...tokens[3], balance: ZERO, usdBalance: 0 } // ckETH
+				{ ...tokens[2], balance: bn2Bi, usdBalance: 0 }, // ETH
+				{ ...tokens[3], balance: ZERO_BI, usdBalance: 0 } // ckETH
 			];
 			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
 
@@ -302,8 +301,8 @@ describe('token-group.utils', () => {
 		it('should give me only token groups where at least one token has a usd balance', () => {
 			const customReorderedTokens = [
 				...reorderedTokens,
-				{ ...tokens[2], balance: ZERO, usdBalance: 0 }, // ETH
-				{ ...tokens[3], balance: ZERO, usdBalance: 1 } // ckETH
+				{ ...tokens[2], balance: ZERO_BI, usdBalance: 0 }, // ETH
+				{ ...tokens[3], balance: ZERO_BI, usdBalance: 1 } // ckETH
 			];
 			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
 
@@ -319,8 +318,8 @@ describe('token-group.utils', () => {
 	});
 
 	describe('updateTokenGroup', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...SEPOLIA_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...SEPOLIA_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		const tokenGroup: TokenUiGroup = {
 			id: anotherToken.id,
@@ -333,7 +332,7 @@ describe('token-group.utils', () => {
 		const expectedGroup: TokenUiGroup = {
 			...tokenGroup,
 			tokens: [anotherToken, token],
-			balance: anotherToken.balance.add(token.balance),
+			balance: anotherToken.balance + token.balance,
 			usdBalance: anotherToken.usdBalance + token.usdBalance
 		};
 
@@ -342,7 +341,7 @@ describe('token-group.utils', () => {
 		});
 
 		it('should add a token to a token group with multiple tokens successfully', () => {
-			const thirdToken = { ...BTC_TESTNET_TOKEN, balance: bn3, usdBalance: 300 };
+			const thirdToken = { ...BTC_TESTNET_TOKEN, balance: bn3Bi, usdBalance: 300 };
 
 			const initialGroup = updateTokenGroup({ token: thirdToken, tokenGroup });
 
@@ -351,7 +350,7 @@ describe('token-group.utils', () => {
 			expect(updatedGroup).toStrictEqual({
 				...tokenGroup,
 				tokens: [anotherToken, thirdToken, token],
-				balance: anotherToken.balance.add(thirdToken.balance).add(token.balance),
+				balance: anotherToken.balance + thirdToken.balance + token.balance,
 				usdBalance: anotherToken.usdBalance + thirdToken.usdBalance + token.usdBalance
 			});
 		});
@@ -416,13 +415,13 @@ describe('token-group.utils', () => {
 	});
 
 	describe('groupMainToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const twinToken = {
 			...SEPOLIA_TOKEN,
-			balance: bn2,
+			balance: bn2Bi,
 			usdBalance: 250,
 			twinToken: ICP_TOKEN,
 			decimals: ICP_TOKEN.decimals
@@ -443,14 +442,14 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [twinToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
 			expect(groupMainToken({ token, tokenGroup })).toEqual({
 				...tokenGroup,
 				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance!.add(token.balance),
+				balance: tokenGroup.balance! + token.balance,
 				usdBalance: tokenGroup.usdBalance! + token.usdBalance
 			});
 		});
@@ -460,14 +459,14 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [twinToken, anotherToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
 			expect(groupMainToken({ token, tokenGroup })).toEqual({
 				...tokenGroup,
 				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance!.add(token.balance),
+				balance: tokenGroup.balance! + token.balance,
 				usdBalance: tokenGroup.usdBalance! + token.usdBalance
 			});
 		});
@@ -477,7 +476,7 @@ describe('token-group.utils', () => {
 				id: twinToken.id,
 				nativeToken: twinToken,
 				tokens: [twinToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -486,20 +485,20 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance!.add(token.balance),
+				balance: tokenGroup.balance! + token.balance,
 				usdBalance: tokenGroup.usdBalance! + token.usdBalance
 			});
 		});
 	});
 
 	describe('groupSecondaryToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const twinToken = {
 			...SEPOLIA_TOKEN,
-			balance: bn2,
+			balance: bn2Bi,
 			usdBalance: 250,
 			twinToken: ICP_TOKEN,
 			decimals: ICP_TOKEN.decimals
@@ -520,14 +519,14 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [token],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
 			expect(groupSecondaryToken({ token: twinToken, tokenGroup })).toEqual({
 				...tokenGroup,
 				tokens: [...tokenGroup.tokens, twinToken],
-				balance: tokenGroup.balance!.add(twinToken.balance),
+				balance: tokenGroup.balance! + twinToken.balance,
 				usdBalance: tokenGroup.usdBalance! + twinToken.usdBalance
 			});
 		});
@@ -537,22 +536,22 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [token, anotherToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
 			expect(groupSecondaryToken({ token: twinToken, tokenGroup })).toEqual({
 				...tokenGroup,
 				tokens: [...tokenGroup.tokens, twinToken],
-				balance: tokenGroup.balance!.add(twinToken.balance),
+				balance: tokenGroup.balance! + twinToken.balance,
 				usdBalance: tokenGroup.usdBalance! + twinToken.usdBalance
 			});
 		});
 	});
 
 	describe('updateTokenGroup', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...SEPOLIA_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...SEPOLIA_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		const tokenGroup: TokenUiGroup = {
 			id: anotherToken.id,
@@ -565,7 +564,7 @@ describe('token-group.utils', () => {
 		const expectedGroup: TokenUiGroup = {
 			...tokenGroup,
 			tokens: [anotherToken, token],
-			balance: anotherToken.balance.add(token.balance),
+			balance: anotherToken.balance + token.balance,
 			usdBalance: anotherToken.usdBalance + token.usdBalance
 		};
 
@@ -574,7 +573,7 @@ describe('token-group.utils', () => {
 		});
 
 		it('should add a token to a token group with multiple tokens successfully', () => {
-			const thirdToken = { ...BTC_TESTNET_TOKEN, balance: bn3, usdBalance: 300 };
+			const thirdToken = { ...BTC_TESTNET_TOKEN, balance: bn3Bi, usdBalance: 300 };
 
 			const initialGroup = updateTokenGroup({ token: thirdToken, tokenGroup });
 
@@ -583,7 +582,7 @@ describe('token-group.utils', () => {
 			expect(updatedGroup).toStrictEqual({
 				...tokenGroup,
 				tokens: [anotherToken, thirdToken, token],
-				balance: anotherToken.balance.add(thirdToken.balance).add(token.balance),
+				balance: anotherToken.balance + thirdToken.balance + token.balance,
 				usdBalance: anotherToken.usdBalance + thirdToken.usdBalance + token.usdBalance
 			});
 		});
@@ -648,13 +647,13 @@ describe('token-group.utils', () => {
 	});
 
 	describe('groupMainToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const twinToken = {
 			...SEPOLIA_TOKEN,
-			balance: bn2,
+			balance: bn2Bi,
 			usdBalance: 250,
 			twinToken: ICP_TOKEN,
 			decimals: ICP_TOKEN.decimals
@@ -675,14 +674,14 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [twinToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
 			expect(groupMainToken({ token, tokenGroup })).toEqual({
 				...tokenGroup,
 				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance!.add(token.balance),
+				balance: tokenGroup.balance! + token.balance,
 				usdBalance: tokenGroup.usdBalance! + token.usdBalance
 			});
 		});
@@ -692,14 +691,14 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [twinToken, anotherToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
 			expect(groupMainToken({ token, tokenGroup })).toEqual({
 				...tokenGroup,
 				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance!.add(token.balance),
+				balance: tokenGroup.balance! + token.balance,
 				usdBalance: tokenGroup.usdBalance! + token.usdBalance
 			});
 		});
@@ -709,7 +708,7 @@ describe('token-group.utils', () => {
 				id: twinToken.id,
 				nativeToken: twinToken,
 				tokens: [twinToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -718,20 +717,20 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance!.add(token.balance),
+				balance: tokenGroup.balance! + token.balance,
 				usdBalance: tokenGroup.usdBalance! + token.usdBalance
 			});
 		});
 	});
 
 	describe('groupSecondaryToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const twinToken = {
 			...SEPOLIA_TOKEN,
-			balance: bn2,
+			balance: bn2Bi,
 			usdBalance: 250,
 			twinToken: ICP_TOKEN,
 			decimals: ICP_TOKEN.decimals
@@ -752,14 +751,14 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [token],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
 			expect(groupSecondaryToken({ token: twinToken, tokenGroup })).toEqual({
 				...tokenGroup,
 				tokens: [...tokenGroup.tokens, twinToken],
-				balance: tokenGroup.balance!.add(twinToken.balance),
+				balance: tokenGroup.balance! + twinToken.balance,
 				usdBalance: tokenGroup.usdBalance! + twinToken.usdBalance
 			});
 		});
@@ -769,35 +768,35 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [token, anotherToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
 			expect(groupSecondaryToken({ token: twinToken, tokenGroup })).toEqual({
 				...tokenGroup,
 				tokens: [...tokenGroup.tokens, twinToken],
-				balance: tokenGroup.balance!.add(twinToken.balance),
+				balance: tokenGroup.balance! + twinToken.balance,
 				usdBalance: tokenGroup.usdBalance! + twinToken.usdBalance
 			});
 		});
 	});
 
 	describe('groupTokens', () => {
-		const mockToken = { ...SEPOLIA_TOKEN, balance: bn1, usdBalance: 100 };
-		const mockSecondToken = { ...BTC_TESTNET_TOKEN, balance: bn3, usdBalance: 300 };
-		const mockThirdToken = { ...ICP_TOKEN, balance: bn2, usdBalance: 200 };
+		const mockToken = { ...SEPOLIA_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const mockSecondToken = { ...BTC_TESTNET_TOKEN, balance: bn3Bi, usdBalance: 300 };
+		const mockThirdToken = { ...ICP_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const mockTwinToken1 = {
 			...mockValidIcToken,
-			balance: bn2,
+			balance: bn2Bi,
 			usdBalance: 250,
 			twinToken: mockToken,
 			decimals: mockToken.decimals
 		};
 		const mockTwinToken2 = {
 			...mockValidIcToken,
-			balance: bn1,
+			balance: bn1Bi,
 			usdBalance: 450,
 			twinToken: mockToken,
 			decimals: mockToken.decimals
@@ -856,7 +855,7 @@ describe('token-group.utils', () => {
 			expect(result[1].nativeToken).toBe(mockSecondToken);
 
 			expect(result[0].balance).toStrictEqual(
-				mockToken.balance.add(mockTwinToken1.balance).add(mockTwinToken2.balance)
+				mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance
 			);
 			expect(result[1].balance).toBe(mockSecondToken.balance);
 
@@ -894,7 +893,7 @@ describe('token-group.utils', () => {
 			expect(result[1].nativeToken).toBe(mockSecondToken);
 			expect(result[2].nativeToken).toBe(mockTwinToken);
 
-			expect(result[0].balance).toStrictEqual(mockToken.balance.add(mockTwinToken1.balance));
+			expect(result[0].balance).toStrictEqual(mockToken.balance + mockTwinToken1.balance);
 			expect(result[1].balance).toBe(mockSecondToken.balance);
 			expect(result[2].balance).toBe(mockTwinToken.balance);
 
@@ -923,7 +922,7 @@ describe('token-group.utils', () => {
 			expect(result[1].nativeToken).toBe(mockSecondToken);
 
 			expect(result[0].balance).toStrictEqual(
-				mockTwinToken1.balance.add(mockToken.balance).add(mockTwinToken2.balance)
+				mockTwinToken1.balance + mockToken.balance + mockTwinToken2.balance
 			);
 			expect(result[1].balance).toBe(mockSecondToken.balance);
 
@@ -979,7 +978,7 @@ describe('token-group.utils', () => {
 			expect(result[0].nativeToken).not.toBe(mockToken);
 
 			expect(result[0].balance).not.toStrictEqual(
-				mockToken.balance.add(mockTwinToken1.balance).add(mockTwinToken2.balance)
+				mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance
 			);
 		});
 

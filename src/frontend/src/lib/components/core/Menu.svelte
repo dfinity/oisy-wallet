@@ -22,7 +22,7 @@
 		NAVIGATION_MENU_VIP_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { isVipUser } from '$lib/services/reward-code.services';
+	import { isVipUser } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -70,6 +70,7 @@
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
 	colorStyle="tertiary-alt"
+	link={false}
 >
 	<IconUser size="24" slot="icon" />
 	{$i18n.navigation.alt.menu}
