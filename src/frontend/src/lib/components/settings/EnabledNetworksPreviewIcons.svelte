@@ -10,7 +10,7 @@
 
 	const getEnabledList = (networks: UserNetworks): Network[] =>
 		Object.getOwnPropertySymbols(networks ?? {}).reduce<Network[]>((enabledList, symbol) => {
-			const isEnabled = networks[symbol as keyof typeof networks]?.enabled ?? false;
+			const isEnabled = networks[symbol as NetworkId]?.enabled ?? false;
 
 			if (isEnabled) {
 				const network = SUPPORTED_NETWORKS.find((sn) => sn.id.toString() === symbol.toString());
