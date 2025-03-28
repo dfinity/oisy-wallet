@@ -81,12 +81,16 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			return networkId;
 		};
 
-		return userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
-			const networkId: NetworkId = keyToNetworkId(key);
-			return {
-				...acc,
-				[networkId]: { enabled, isTestnet }
-			};
-		}, {});
+		return {
+			...userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
+				const networkId: NetworkId = keyToNetworkId(key);
+				return {
+					...acc,
+					[networkId]: { enabled, isTestnet }
+				};
+			}, {}),
+			// We always enable ICP network.
+			[ICP_NETWORK_ID]: { enabled: true, isTestnet: false }
+		};
 	}
 );
