@@ -59,7 +59,7 @@
 	import {
 		networkICPEnabled,
 		networkEthereumEnabled,
-		networkSepoliaEnabled
+		networkSepoliaEnabled, networkBitcoinMainnetEnabled, networkBitcoinTestnetEnabled, networkBitcoinRegtestEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -107,7 +107,8 @@
 			title: $i18n.receive.bitcoin.text.bitcoin_address,
 			label: $i18n.receive.bitcoin.text.bitcoin_address,
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
-			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
+			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
+			condition: $networkBitcoinMainnetEnabled
 		},
 		{
 			labelRef: 'btcAddressTestnet',
@@ -119,7 +120,7 @@
 			label: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
 			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
-			condition: $testnetsEnabled
+			condition: $networkBitcoinTestnetEnabled && $testnetsEnabled
 		},
 		{
 			labelRef: 'btcAddressRegtest',
@@ -131,7 +132,7 @@
 			label: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied,
 			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
-			condition: $testnetsEnabled && LOCAL
+			condition: $networkBitcoinRegtestEnabled && $testnetsEnabled && LOCAL
 		},
 		{
 			labelRef: 'ethAddress',
@@ -223,18 +224,18 @@
 	let receiveAddressList: Omit<ReceiveAddressProps, 'token' | 'qrCodeAriaLabel' | 'label'>[];
 	$: receiveAddressList = receiveAddressCoreList.map(
 		({
-			address,
-			token: addressToken,
-			qrCodeAriaLabel,
-			label: addressLabel,
-			copyAriaLabel,
-			labelRef,
-			network,
-			testId,
-			title,
-			text,
-			condition
-		}) => ({
+			 address,
+			 token: addressToken,
+			 qrCodeAriaLabel,
+			 label: addressLabel,
+			 copyAriaLabel,
+			 labelRef,
+			 network,
+			 testId,
+			 title,
+			 text,
+			 condition
+		 }) => ({
 			labelRef,
 			address,
 			network,
@@ -263,7 +264,18 @@
 
 <ContentWithToolbar>
 	<div class="flex flex-col gap-2">
-		{#each receiveAddressList as { title, text, condition, on, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
+		{#each receiveAddressList as {
+			title,
+			text,
+			condition,
+			on,
+			labelRef,
+			address,
+			network,
+			testId,
+			copyAriaLabel,
+			qrCodeAction
+		} (labelRef)}
 			{#if condition !== false}
 				{#if nonNullish(text)}
 					<ReceiveAddress
