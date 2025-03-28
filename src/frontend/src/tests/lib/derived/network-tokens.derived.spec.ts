@@ -27,12 +27,12 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
-import { networks } from '$lib/derived/networks.derived';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import { splUserTokensStore } from '$sol/stores/spl-user-tokens.store';
 import type { SplUserToken } from '$sol/types/spl-user-token';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('network-tokens.derived', () => {
@@ -52,6 +52,7 @@ describe('network-tokens.derived', () => {
 			vi.spyOn(solEnv, 'SOL_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
 			setupTestnetsStore('reset');
+			setupUserNetworksStore('allEnabled');
 
 			erc20DefaultTokensStore.reset();
 			erc20UserTokensStore.resetAll();
@@ -149,11 +150,6 @@ describe('network-tokens.derived', () => {
 			it.each(networkMap)(
 				'should return all tokens for network $network.name',
 				({ network, tokens }) => {
-					vi.spyOn(networks, 'subscribe').mockImplementation((fn) => {
-						fn([network]);
-						return () => {};
-					});
-
 					mockPage.mock({ network: network.id.description });
 
 					expect(get(enabledNetworkTokens)).toEqual(tokens);
