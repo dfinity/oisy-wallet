@@ -3,7 +3,7 @@ import {
 	LOCAL_CKETH_LEDGER_CANISTER_ID,
 	LOCAL_CKUSDC_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -124,7 +124,7 @@ describe('convertStore', () => {
 			certified: true
 		};
 		ckEthMinterInfoStore.set({
-			tokenId: SEPOLIA_TOKEN_ID,
+			tokenId: ETHEREUM_TOKEN_ID,
 			data: mockCkEthMinterInfo
 		});
 
