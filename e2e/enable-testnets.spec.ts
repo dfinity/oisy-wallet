@@ -11,7 +11,6 @@ TestnetCases.forEach(({ networkSymbol, tokenSymbol }) => {
 		await testnetsPage.waitForReady();
 		await testnetsPage.enableTestnets({ networkSymbol, tokenSymbol });
 		const tokenCardTestId = testnetsPage.getTokenCardTestId({ tokenSymbol, networkSymbol });
-		await testnetsPage.waitForTimeout(5000);
 		await testnetsPage.takeScreenshot({
 			freezeCarousel: true,
 			centeredElementTestId: tokenCardTestId

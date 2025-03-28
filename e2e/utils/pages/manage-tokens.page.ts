@@ -1,4 +1,4 @@
-import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
+import { TOKEN_BALANCE, TOKEN_CARD, TOKEN_SKELETON_TEXT } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
@@ -62,7 +62,14 @@ export class ManageTokensPage extends HomepageLoggedIn {
 			})
 		).toBeVisible();
 		await this.waitForLoadState();
-		await this.waitForTimeout(5000);
+		await this.waitForByTestId({
+			testId: TOKEN_SKELETON_TEXT,
+			options: { state: 'hidden', timeout: 60000 }
+		});
+		await this.waitForByTestId({
+			testId: `[data-tid^="${TOKEN_BALANCE}-"]`,
+			options: { state: 'visible', timeout: 60000 }
+		});
 		await this.takeScreenshot({
 			freezeCarousel: true,
 			centeredElementTestId: `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`
