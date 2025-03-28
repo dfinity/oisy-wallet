@@ -2,26 +2,28 @@
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
-	import type { Network } from '$lib/types/network';
+	import { userNetworks } from '$lib/derived/user-networks.derived';
+	import type { Network, NetworkId } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 
-	export let numberOfIcons = 4;
+	const numberOfIcons = 4;
 
-	export let enabledNetworks: UserNetworks = {};
+	const getEnabledList = (networks: UserNetworks): Network[] =>
+		Object.getOwnPropertySymbols(networks ?? {}).reduce<Network[]>((enabledList, symbol) => {
+			const isEnabled = networks[symbol as NetworkId]?.enabled ?? false;
 
-	const getEnabledList = (networks: UserNetworks) => {
-		const enabled = Object.getOwnPropertySymbols(networks ?? {})
-			.map((k) => ({ key: k, value: networks[k as keyof typeof enabledNetworks] }))
-			.filter(({ value }) => value.enabled);
+			if (isEnabled) {
+				const network = SUPPORTED_NETWORKS.find((sn) => sn.id.toString() === symbol.toString());
+				if (network) {
+					enabledList.push(network);
+				}
+			}
 
-		return enabled.map((n) => {
-			const { key: netId } = n;
-			return SUPPORTED_NETWORKS.find((sn) => sn.id.toString() === netId.toString());
-		}) as Network[];
-	};
+			return enabledList;
+		}, []);
 
 	let enabledList: Network[];
-	$: enabledList = getEnabledList(enabledNetworks);
+	$: enabledList = getEnabledList($userNetworks);
 
 	let previewList: Network[];
 	$: previewList = enabledList.slice(0, numberOfIcons);
@@ -33,12 +35,12 @@
 			<NetworkLogo size="xxs" {network} blackAndWhite />
 		</div>
 	{/each}
-	{#if previewList.length < enabledList.length}
+	{#if enabledList.length > numberOfIcons}
 		<div
-			class="-ml-1 flex items-center justify-center overflow-hidden rounded-full bg-primary text-center text-xs ring-1 ring-primary"
-			style={`width: ${logoSizes.xxs}; height: ${logoSizes.xxs}; transition: opacity 0.15s ease-in;`}
+			class="-ml-1 flex items-center justify-center overflow-hidden rounded-full bg-primary text-center text-xs ring-1 ring-primary transition-opacity duration-150"
+			style={`width: ${logoSizes.xxs}; height: ${logoSizes.xxs}`}
 		>
-			+{enabledList.length - previewList.length}
+			+{enabledList.length - numberOfIcons}
 		</div>
 	{/if}
 </div>

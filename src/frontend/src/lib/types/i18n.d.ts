@@ -224,19 +224,19 @@ interface I18nHero {
 interface I18nSettings {
 	text: {
 		title: string;
-		general: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
-		session_duration: string;
-		session_expires_in: string;
+		session: string;
 		session_description: string;
+		testnets: string;
 		networks: string;
-		test_networks: string;
 		enable_testnets: string;
-		active_networks: string;
-		active_networks_description: string;
+		enable_network: string;
+		disable_network: string;
+		testnets_description: string;
 		hide_zero_balances_description: string;
+		active_networks: string;
 		credentials_title: string;
 		pouh_credential: string;
 		pouh_credential_description: string;
@@ -264,9 +264,7 @@ interface I18nNetworks {
 	chain_fusion: string;
 	network: string;
 	testnet: string;
-	number_of_enabled: string;
 	filter: string;
-	manage: string;
 }
 
 interface I18nReceive {
