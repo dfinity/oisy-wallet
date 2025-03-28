@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
@@ -10,17 +9,6 @@
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
-	import { selectedNetwork } from '$lib/derived/network.derived';
-	import type { NetworkId } from '$lib/types/network';
-	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
-
-	const onNetworkSelect = async ({ detail: networkId }: CustomEvent<NetworkId>) => {
-		await switchNetwork(networkId);
-
-		if (isRouteTransactions($page)) {
-			await gotoReplaceRoot();
-		}
-	};
 </script>
 
 <!-- todo: revert z-3 back to z-1 when the modal for mobile version dropdowns is using real modals with store etc with responsive component -->
@@ -39,7 +27,7 @@
 
 	<div class="pointer-events-auto flex justify-end gap-2 md:gap-5">
 		{#if $authSignedIn}
-			<NetworksSwitcher selectedNetwork={$selectedNetwork} on:icSelected={onNetworkSelect} />
+			<NetworksSwitcher />
 			<ThemeSwitchButton />
 			<WalletConnect />
 		{/if}
