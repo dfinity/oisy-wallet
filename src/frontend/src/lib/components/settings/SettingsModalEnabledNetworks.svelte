@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Checkbox, Toggle } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import {
 		SUPPORTED_MAINNET_NETWORKS,
 		SUPPORTED_NETWORKS,
@@ -18,14 +19,13 @@
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { userNetworks } from '$lib/derived/user-networks.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
+	import { nullishSignOut } from '$lib/services/auth.services';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 	import { emit } from '$lib/utils/events.utils';
-	import { isNullish } from '@dfinity/utils';
-	import { nullishSignOut } from '$lib/services/auth.services';
 
 	let enabledNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...$userNetworks };
