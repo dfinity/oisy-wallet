@@ -57,13 +57,21 @@ export class TestnetsPage extends HomepageLoggedIn {
 			})
 		).toBeVisible();
 		await this.waitForLoadState();
-		await this.waitForByTestId({
-			testId: TOKEN_SKELETON_TEXT,
-			options: { state: 'hidden', timeout: 60000 }
-		});
-		await this.waitForByTestId({
-			testId: `[data-tid^="${TOKEN_BALANCE}-"]`,
-			options: { state: 'visible', timeout: 60000 }
-		});
+
+		const skeletons = this.getLocatorByTestId({ testId: TOKEN_SKELETON_TEXT });
+		const countSkeletons = await skeletons.count();
+		await Promise.all(
+			Array.from({ length: countSkeletons }, (_, i) =>
+				skeletons.nth(i).waitFor({ state: 'hidden', timeout: 60000 })
+			)
+		);
+
+		const balances = this.getLocatorByTestId({ testId: `[data-tid^="${TOKEN_BALANCE}-"]` });
+		const countBalances = await balances.count();
+		await Promise.all(
+			Array.from({ length: countBalances }, (_, i) =>
+				skeletons.nth(i).waitFor({ state: 'visible', timeout: 60000 })
+			)
+		);
 	}
 }
