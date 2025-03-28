@@ -33,18 +33,12 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			// Returning all mainnets (and testnets if enabled) by default
 			return {
 				...SUPPORTED_MAINNET_NETWORKS_IDS.reduce<UserNetworks>(
-					(acc, id) => ({
-						...acc,
-						[id]: { enabled: true, isTestnet: false }
-					}),
+					(acc, id) => ({ ...acc, [id]: { enabled: true, isTestnet: false } }),
 					{}
 				),
 				...($testnets &&
 					SUPPORTED_TESTNET_NETWORKS_IDS.reduce<UserNetworks>(
-						(acc, id) => ({
-							...acc,
-							[id]: { enabled: $testnets, isTestnet: true }
-						}),
+						(acc, id) => ({ ...acc, [id]: { enabled: $testnets, isTestnet: true } }),
 						{}
 					))
 			};
