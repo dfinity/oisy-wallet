@@ -9,14 +9,21 @@ export interface AvailableScreen {
 export const MIN_SCREEN: ScreensKeyType = 'xs';
 export const MAX_SCREEN: ScreensKeyType = '2.5xl';
 
-export const getAvailableScreens: () => AvailableScreen[] = () =>
-	Object.entries(themeVariables.screens)
-		.filter(([, v]) => typeof v === 'string') // warning is wrong since we have a custom element which is an object
-		.map(([k, v]) => ({
-			screen: k as ScreensKeyType,
-			width: Number((v as string).replaceAll('rem', '')) * 16
-		}))
-		.sort((a, b) => a.width - b.width);
+export const AVAILABLE_SCREENS: AvailableScreen[] = Object.entries(themeVariables.screens)
+	.reduce<AvailableScreen[]>((acc, [k, v]) => {
+		return [
+			...acc,
+			...(typeof v === 'string'
+				? [
+						{
+							screen: k as ScreensKeyType,
+							width: Number(v.replaceAll('rem', '')) * 16
+						}
+					]
+				: [])
+		];
+	}, [])
+	.sort((a, b) => a.width - b.width);
 
 export const getActiveScreen = ({
 	screenWidth,
@@ -35,16 +42,35 @@ export const filterScreens = ({
 	up: ScreensKeyType;
 	down: ScreensKeyType;
 }) => {
-	const upIndex = availableScreens.findIndex((screen) => screen.screen === up);
-	const downIndex = availableScreens.findIndex((screen) => screen.screen === down);
+	const filteredScreens = availableScreens.reduce(
+		(acc, screen) => {
+			// If `up` is found, start collecting screens
+			if (screen.screen === up) {
+				acc.foundUp = true;
+			}
 
-	// If either key is invalid, return an empty array
-	if (upIndex === -1 || downIndex === -1) {
+			// Collect the screen if `up` has been found but not `down` yet
+			if (acc.foundUp && !acc.foundDown) {
+				acc.result.push(screen.screen);
+			}
+
+			// If `down` is found after `up`, stop collecting screens
+			if (screen.screen === down && acc.foundUp) {
+				acc.foundDown = true;
+			}
+
+			return acc;
+		},
+		{ result: [] as ScreensKeyType[], foundUp: false, foundDown: false }
+	);
+
+	// If either `up` or `down` is not found, return an empty array
+	if (!filteredScreens.foundUp || !filteredScreens.foundDown) {
 		return [];
 	}
 
-	// Return the slice of screens between `up` and `down` inclusive
-	return availableScreens.slice(upIndex, downIndex + 1).map((screen) => screen.screen);
+	// Return the collected screens between `up` and `down` (inclusive)
+	return filteredScreens.result;
 };
 
 export const shouldDisplayForScreen = ({

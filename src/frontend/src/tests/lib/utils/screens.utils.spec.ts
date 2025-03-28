@@ -1,7 +1,7 @@
 import {
+	AVAILABLE_SCREENS,
 	filterScreens,
 	getActiveScreen,
-	getAvailableScreens,
 	shouldDisplayForScreen,
 	type ScreensKeyType
 } from '$lib/utils/screens.utils';
@@ -13,8 +13,6 @@ const remToPx = (rem: string) => Number(rem.replaceAll('rem', '')) * 16;
 describe('screens.utils tests', () => {
 	describe('getAvailableScreens', () => {
 		it('should return sorted available screens by width (ascending) and ignore raw values', () => {
-			const availableScreens = getAvailableScreens();
-
 			// Expected screens sorted by width in px
 			const expectedScreens = [
 				{ screen: 'xs', width: remToPx('28rem') },
@@ -29,13 +27,13 @@ describe('screens.utils tests', () => {
 				{ screen: '2.5xl', width: remToPx('108rem') }
 			];
 
-			expect(availableScreens).toEqual(expectedScreens);
+			expect(AVAILABLE_SCREENS).toEqual(expectedScreens);
 		});
 	});
 
 	describe('getActiveScreen', () => {
 		it('should return the correct active screen based on screen width', () => {
-			const availableScreensSortedByWidth = getAvailableScreens();
+			const availableScreensSortedByWidth = AVAILABLE_SCREENS;
 
 			// Test case when screenWidth is smaller than the first screen width
 			let screenWidth = remToPx('28rem') - 1; // Just below 'xs'
@@ -53,7 +51,7 @@ describe('screens.utils tests', () => {
 
 	describe('filterScreens', () => {
 		it('should filter screens correctly based on "up" and "down" parameters', () => {
-			const availableScreens = getAvailableScreens();
+			const availableScreens = AVAILABLE_SCREENS;
 
 			// Test when filtering from 'sm' to 'xl'
 			let filteredScreens = filterScreens({
@@ -81,7 +79,7 @@ describe('screens.utils tests', () => {
 		});
 
 		it('should return an empty array if invalid "up" or "down" is provided', () => {
-			const availableScreens = getAvailableScreens();
+			const availableScreens = AVAILABLE_SCREENS;
 
 			// Test invalid up or down value
 			const filteredScreens = filterScreens({
@@ -103,7 +101,7 @@ describe('screens.utils tests', () => {
 
 	describe('shouldDisplayForScreen', () => {
 		it('should return true if the activeScreen is in the filtered screens list', () => {
-			const availableScreens = getAvailableScreens();
+			const availableScreens = AVAILABLE_SCREENS;
 			const filteredScreens = filterScreens({
 				availableScreens,
 				up: 'sm',
@@ -126,7 +124,7 @@ describe('screens.utils tests', () => {
 		});
 
 		it('should return false if the activeScreen is not in the filtered screens list', () => {
-			const availableScreens = getAvailableScreens();
+			const availableScreens = AVAILABLE_SCREENS;
 			const filteredScreens = filterScreens({
 				availableScreens,
 				up: 'md',
