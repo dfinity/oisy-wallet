@@ -1,7 +1,8 @@
 import { themeVariables } from '$lib/styles/tailwind/theme-variables';
 import defaultTheme from 'tailwindcss/defaultTheme';
 
-export type ScreensKeyType = keyof typeof themeVariables.screens;
+const ALL_SCREENS = { ...defaultTheme.screens, ...themeVariables.screens };
+export type ScreensKeyType = keyof typeof ALL_SCREENS;
 export interface AvailableScreen {
 	screen: ScreensKeyType;
 	width: number;
