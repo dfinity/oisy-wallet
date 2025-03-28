@@ -93,7 +93,7 @@ const derivedList: Record<string, Readable<unknown>> = {
 	routeToken,
 	selectedNetwork,
 	showZeroBalances,
-	testnets: testnetsEnabled,
+	testnetsEnabled,
 	tokenDecimals,
 	tokenId,
 	tokenStandard,
