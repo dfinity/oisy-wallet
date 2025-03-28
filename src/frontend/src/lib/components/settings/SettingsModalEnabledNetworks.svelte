@@ -86,7 +86,7 @@
 		});
 
 		// we need to manually reload the profile in order to get the correct $userProfileVersion for the second call to update userNetworkSettings
-		// todo: refactor this when we have a single method for both calls
+		// TODO: refactor this when we have a single method for both calls
 		await loadUserProfile({ identity: $authIdentity, reload: true });
 
 		await updateUserNetworkSettings({
