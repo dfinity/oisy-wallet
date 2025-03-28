@@ -18,7 +18,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
-	import { REWARDS_MODAL } from '$lib/constants/test-ids.constants';
+	import { REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		combinedDerivedSortedNetworkTokensUi,
