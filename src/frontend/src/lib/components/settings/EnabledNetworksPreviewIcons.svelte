@@ -24,8 +24,7 @@
 
 	let enabledList = getEnabledList($userNetworks);
 
-	let previewList: Network[];
-	$: previewList = enabledList.slice(0, numberOfIcons);
+	let previewList = enabledList.slice(0, numberOfIcons);
 </script>
 
 <div class="mr-2 mt-1 flex flex-row">
