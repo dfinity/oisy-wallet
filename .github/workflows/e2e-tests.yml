@@ -43,7 +43,6 @@ jobs:
     permissions:
       contents: write
       packages: write
-
     steps:
       - name: Checkout
         if: ${{ github.event_name != 'pull_request' }}
@@ -75,12 +74,6 @@ jobs:
       macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
 
     steps:
-      - name: Fail if branch is main
-        if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
-        run: |
-          echo "This workflow should not be triggered with workflow_dispatch on main"
-          exit 1
-
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@v1
         id: app-token
