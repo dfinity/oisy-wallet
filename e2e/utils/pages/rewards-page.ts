@@ -14,8 +14,7 @@ export class RewardsPage extends HomepageLoggedIn {
 	override async extendWaitForReady(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_REWARDS);
 		await this.mockSelector({
-			selector: `[data-tid^="${REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}-"]`,
-			hasText: '-badge'
+			selector: `[data-tid^="${REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}-"][data-tid$="-badge"]`
 		});
 		await this.waitForLoadState();
 	}

@@ -45,7 +45,6 @@ export type HomepageLoggedInParams = {
 
 interface SelectorOperationParams {
 	selector: string;
-	hasText?: string | RegExp | undefined;
 }
 
 interface TestIdOperationParams {
@@ -158,8 +157,8 @@ abstract class Homepage {
 		}
 	}
 
-	protected async mockSelector({ selector, hasText }: SelectorOperationParams): Promise<void> {
-		await this.#page.locator(selector, { hasText }).innerHTML();
+	protected async mockSelector({ selector }: SelectorOperationParams): Promise<void> {
+		await this.#page.locator(selector).innerHTML();
 
 		if (await this.isSelectorVisible({ selector })) {
 			await this.#page.locator(selector).evaluate((element) => (element.innerHTML = 'placeholder'));
