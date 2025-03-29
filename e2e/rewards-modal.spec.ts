@@ -9,10 +9,9 @@ import { RewardsPage } from './utils/pages/rewards-page';
 import { getReceiveTokensModalAddressLabelSelectors } from './utils/selectors.utils';
 
 const REWARDS_MODAL_VIEWPORT_HEIGHT = 900;
-let rewardsPage: RewardsPage;
 
-testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
-	rewardsPage = new RewardsPage({
+testWithII('should display rewards modal', async ({ page, iiPage, isMobile }) => {
+	const rewardsPage = new RewardsPage({
 		page,
 		iiPage,
 		viewportSize: !isMobile
@@ -22,10 +21,9 @@ testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
 				}
 			: undefined
 	});
-	await rewardsPage.waitForReady();
-});
 
-testWithII('should display rewards modal', async () => {
+	await rewardsPage.waitForReady();
+
 	await rewardsPage.testModalSnapshot({
 		modalOpenButtonTestId: REWARDS_STATUS_BUTTON,
 		modalTestId: REWARDS_MODAL,
