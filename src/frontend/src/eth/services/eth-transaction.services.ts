@@ -10,8 +10,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
-import type { BigNumber } from '@ethersproject/bignumber';
+import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export const processTransactionSent = async ({
@@ -40,7 +39,7 @@ export const processErc20Transaction = async ({
 	...rest
 }: {
 	hash: string;
-	value: BigNumber;
+	value: bigint;
 	token: Token;
 	type: 'pending' | 'mined';
 }) => {
@@ -59,7 +58,7 @@ const processPendingTransaction = async ({
 }: {
 	hash: string;
 	token: Token;
-	value?: BigNumber;
+	value?: bigint;
 }) => {
 	const {
 		id: tokenId,
@@ -95,7 +94,7 @@ const processPendingTransaction = async ({
 				...rest,
 				// For ERC20 pending transactions we noticed that the `to` field is not correct, since it shows the token address instead of the recipient address.
 				// To avoid confusions on the user side, we prefer not to display the `to` field for ERC20 pending transactions.
-				...(!isTokenErc20(token) && { to }),
+				to: !isTokenErc20(token) ? to : null,
 				pendingTimestamp: Date.now(),
 				...(nonNullish(value) && { value })
 			}

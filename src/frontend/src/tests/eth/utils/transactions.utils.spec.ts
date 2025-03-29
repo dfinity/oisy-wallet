@@ -3,7 +3,7 @@ import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import { mapAddressToName, mapEthTransactionUi } from '$eth/utils/transactions.utils';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
@@ -19,13 +19,18 @@ import type { MinterInfo } from '@dfinity/cketh';
 
 const transaction: Transaction = {
 	blockNumber: 123456,
+	hash: '0x123456789',
 	from: '0x1234',
 	to: '0xabcd',
 	timestamp: 1670000000,
 	nonce: 1,
-	gasLimit: ZERO,
-	value: ZERO,
-	chainId: 1
+	type: 1,
+	gasPrice: ZERO_BI,
+	gasLimit: ZERO_BI,
+	maxPriorityFeePerGas: null,
+	maxFeePerGas: null,
+	value: ZERO_BI,
+	chainId: 1n
 };
 
 const ckMinterInfoAddresses: EthAddress[] = ['0xffff'];

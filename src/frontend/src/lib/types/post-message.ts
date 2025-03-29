@@ -21,7 +21,6 @@ import {
 	PostMessageSyncStateSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
-
 import type { ZodType } from 'zod';
 import * as z from 'zod';
 

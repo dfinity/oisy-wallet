@@ -10,6 +10,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
@@ -17,8 +18,8 @@
 	export let token: OptionToken;
 
 	let id: bigint | string;
-	let from: string | undefined;
-	let to: string | undefined;
+	let from: OptionString;
+	let to: OptionString;
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let type: IcTransactionType;

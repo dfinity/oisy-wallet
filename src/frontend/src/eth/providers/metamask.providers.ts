@@ -25,7 +25,7 @@ export const sendMetamaskTransaction = ({
 		params: [
 			{
 				...rest,
-				value: ethers.utils.hexlify(value).toString()
+				value: ethers.toBeHex(value).toString()
 			}
 		]
 	});

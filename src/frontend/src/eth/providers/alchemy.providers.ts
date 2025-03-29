@@ -5,14 +5,15 @@ import {
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
-import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
+import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 const configs: Record<NetworkId, AlchemySettings> = {
@@ -26,7 +27,7 @@ const configs: Record<NetworkId, AlchemySettings> = {
 	}
 };
 
-const alchemyConfig = (networkId: NetworkId): AlchemySettings => {
+const alchemyConfig = (networkId: NetworkId): Pick<AlchemySettings, 'apiKey' | 'network'> => {
 	const provider = configs[networkId];
 
 	assertNonNullish(
@@ -110,8 +111,50 @@ export class AlchemyProvider {
 		});
 	}
 
-	getTransaction = (hash: string): Promise<TransactionResponse | null> =>
-		this.provider.core.getTransaction(hash);
+	getTransaction = async (hash: string) => {
+		const transaction = await this.provider.core.getTransaction(hash);
+
+		if (isNullish(transaction)) {
+			return transaction;
+		}
+
+		const {
+			blockNumber,
+			blockHash,
+			from,
+			to,
+			value,
+			type,
+			gasPrice,
+			gasLimit,
+			maxPriorityFeePerGas,
+			maxFeePerGas,
+			nonce,
+			data,
+			chainId,
+			wait
+		} = transaction;
+
+		const possibleUndefinedToNull = <T>(value: T | undefined): T | null => value ?? null;
+
+		return {
+			hash,
+			blockNumber: possibleUndefinedToNull(blockNumber),
+			blockHash: possibleUndefinedToNull(blockHash),
+			from,
+			to: possibleUndefinedToNull(to),
+			value: value.toBigInt(),
+			type: possibleUndefinedToNull(type),
+			gasPrice: gasPrice?.toBigInt() ?? ZERO_BI,
+			gasLimit: gasLimit.toBigInt(),
+			maxPriorityFeePerGas: possibleUndefinedToNull(maxPriorityFeePerGas?.toBigInt()),
+			maxFeePerGas: possibleUndefinedToNull(maxFeePerGas?.toBigInt()),
+			nonce,
+			data,
+			chainId: BigInt(chainId),
+			wait
+		};
+	};
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = {

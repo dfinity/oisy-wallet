@@ -7,6 +7,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken } from '$lib/types/token';
+	import type { Option } from '$lib/types/utils';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
 
 	export let transaction: BtcTransactionUi;
@@ -18,7 +19,7 @@
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let id: string;
-	let blockNumber: number | undefined;
+	let blockNumber: Option<number>;
 	let confirmations: number | undefined;
 	let status: BtcTransactionStatus;
 

@@ -8,12 +8,12 @@ import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
-import { EtherscanProvider as EtherscanProviderLib } from '@ethersproject/providers';
+import { EtherscanProvider as EtherscanProviderLib } from 'ethers/providers';
 import type { MockedClass } from 'vitest';
 
-vi.mock('@ethersproject/providers', () => {
+vi.mock('ethers/providers', () => {
 	const provider = vi.fn();
-	provider.prototype.getHistory = vi.fn().mockResolvedValue([]);
+	provider.prototype.fetch = vi.fn().mockResolvedValue([]);
 	return { EtherscanProvider: provider };
 });
 
@@ -29,7 +29,7 @@ describe('etherscan.providers', () => {
 
 		const mockGetHistory = vi.fn().mockResolvedValue([]);
 		const mockProvider = EtherscanProviderLib as MockedClass<typeof EtherscanProviderLib>;
-		mockProvider.prototype.getHistory = mockGetHistory;
+		mockProvider.prototype.fetch = mockGetHistory;
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -50,7 +50,13 @@ describe('etherscan.providers', () => {
 			const result = await provider.transactions({ address });
 
 			expect(provider).toBeDefined();
-			expect(mockGetHistory).toHaveBeenCalledWith(address, undefined);
+			expect(mockGetHistory).toHaveBeenCalledWith('account', {
+				action: 'txlist',
+				address,
+				startblock: 0,
+				endblock: 99999999,
+				sort: 'asc'
+			});
 			expect(result).toStrictEqual([]);
 		});
 	});
