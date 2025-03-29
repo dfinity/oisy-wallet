@@ -1,6 +1,9 @@
 name: E2E Tests
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
   merge_group:
   workflow_dispatch:
@@ -37,6 +40,10 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     needs: check-e2e-changes
+    permissions:
+      contents: write
+      packages: write
+
     steps:
       - name: Checkout
         if: ${{ github.event_name != 'pull_request' }}
