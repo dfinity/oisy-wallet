@@ -13,7 +13,7 @@ import { MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedIn } from './utils/pages/homepage.page';
 import { getReceiveTokensModalAddressLabelSelectors } from './utils/selectors.utils';
 
-const REWARDS_MODAL_VIEWPORT_HEIGHT = 900;
+const RECEIVE_TOKENS_MODAL_VIEWPORT_HEIGHT = 900;
 let homepageLoggedIn: HomepageLoggedIn;
 
 testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
@@ -25,7 +25,7 @@ testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
 		viewportSize: !isMobile
 			? {
 					width: MODALS_VIEWPORT_WIDTH,
-					height: REWARDS_MODAL_VIEWPORT_HEIGHT
+					height: RECEIVE_TOKENS_MODAL_VIEWPORT_HEIGHT
 				}
 			: undefined
 	});
