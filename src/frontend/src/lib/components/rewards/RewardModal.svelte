@@ -96,12 +96,12 @@
 			<Hr spacing="md" />
 		{/if}
 
-		<div class="flex w-full justify-between text-lg font-semibold"
-			><span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
-			<span class="inline-flex"
-				><RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} /></span
-			></div
-		>
+		<div class="flex w-full justify-between text-lg font-semibold">
+			<span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
+			<span class="inline-flex">
+				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
+			</span>
+		</div>
 		<p class="my-3">{reward.description}</p>
 
 		<ExternalLink
