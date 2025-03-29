@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
+	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
+	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
@@ -14,7 +17,10 @@
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
+	import { SettingsModalType } from '$lib/enums/settings-modal-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let disabled = false;
 
@@ -72,5 +78,23 @@
 				{/each}
 			</ul>
 		{/if}
+
+		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between text-nowrap">
+			<span class="flex">
+				<Button
+					link
+					on:click={() => {
+						dropdown?.close();
+						modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS);
+					}}><IconManage />{$i18n.networks.manage}</Button
+				>
+			</span>
+			<span class="ml-4 mr-2 flex text-nowrap text-right text-base">
+				{replacePlaceholders($i18n.networks.number_of_enabled, {
+					$numNetworksEnabled: `${$networksMainnets.length + $networksTestnets.length}`,
+					$numNetworksTotal: `${SUPPORTED_NETWORKS.length}`
+				})}</span
+			>
+		</div>
 	</div>
 </Dropdown>
