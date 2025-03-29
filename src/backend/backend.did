@@ -274,12 +274,12 @@ type Result_5 = variant {
 type Result_6 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_7 = variant { Ok : MigrationReport; Err : text };
 type Result_8 = variant { Ok; Err : text };
-type Result_9 = variant { Ok; Err : SaveNetworksSettingsError };
-type SaveNetworksSettingsError = variant { VersionMismatch; UserNotFound };
+type Result_9 = variant { Ok; Err : SaveTestnetsSettingsError };
 type SaveNetworksSettingsRequest = record {
   networks : vec record { NetworkSettingsFor; NetworkSettings };
   current_user_version : opt nat64;
 };
+type SaveTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
 type SelectedUtxosFeeError = variant {
   PendingTransactions;
   InternalError : record { msg : text };
@@ -426,7 +426,6 @@ service : (Arg) -> {
   set_many_custom_tokens : (vec CustomToken) -> ();
   set_many_user_tokens : (vec UserToken) -> ();
   set_snapshot : (UserSnapshot) -> ();
-  set_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_9);
   set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_9);
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
