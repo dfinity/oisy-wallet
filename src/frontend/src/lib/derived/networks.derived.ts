@@ -1,4 +1,9 @@
 import { enabledBitcoinNetworks } from '$btc/derived/networks.derived';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
@@ -66,4 +71,24 @@ export const networkEthereumDisabled: Readable<boolean> = derived(
 export const networkSepoliaDisabled: Readable<boolean> = derived(
 	[networkSepoliaEnabled],
 	([$networkSepoliaEnabled]) => !$networkSepoliaEnabled
+);
+
+export const networkBitcoinMainnetEnabled: Readable<boolean> = derived(
+	[networksMainnets],
+	([$networksMainnets]) => $networksMainnets.some(({ id }) => id === BTC_MAINNET_NETWORK_ID)
+);
+
+export const networkBitcoinTestnetEnabled: Readable<boolean> = derived(
+	[networksTestnets],
+	([$networksTestnets]) => $networksTestnets.some(({ id }) => id === BTC_TESTNET_NETWORK_ID)
+);
+
+export const networkBitcoinRegtestEnabled: Readable<boolean> = derived(
+	[networksTestnets],
+	([$networksTestnets]) => $networksTestnets.some(({ id }) => id === BTC_REGTEST_NETWORK_ID)
+);
+
+export const networkBitcoinMainnetDisabled: Readable<boolean> = derived(
+	[networkBitcoinMainnetEnabled],
+	([$networkBitcoinMainnetEnabled]) => !$networkBitcoinMainnetEnabled
 );
