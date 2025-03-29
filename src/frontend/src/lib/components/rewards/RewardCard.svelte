@@ -40,8 +40,8 @@
 		</section>
 		<section class="bottom-4 left-4 mt-3 flex">
 			<div
-				class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
 				data-tid={REWARDS_STATUS_BUTTON}
+				class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
 				>{$i18n.rewards.text.check_status}
 			</div>
 		</section>
