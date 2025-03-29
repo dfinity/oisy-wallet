@@ -230,6 +230,10 @@ interface I18nSettings {
 		session: string;
 		session_description: string;
 		testnets: string;
+		networks: string;
+		enable_testnets: string;
+		enable_network: string;
+		disable_network: string;
 		testnets_description: string;
 		hide_zero_balances_description: string;
 		active_networks: string;
