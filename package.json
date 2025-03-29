@@ -44,7 +44,7 @@
 		"playwright:install": "playwright install --with-deps",
 		"e2e": "npm run playwright:install && playwright test",
 		"e2e:dev": "npm run playwright:install && NODE_ENV=development playwright test",
-		"e2e:ci": "npm run playwright:install && playwright test --reporter=html",
+		"e2e:ci": "npm run playwright:install && playwright test --update-snapshots=changed --reporter=html,list",
 		"e2e:snapshots": "npm run playwright:install && npx playwright test --update-snapshots=changed --reporter=list",
 		"e2e:snapshots:dev": "npm run playwright:install && NODE_ENV=development npx playwright test --update-snapshots=changed --reporter=list",
 		"e2e:report": "npx playwright show-report",
