@@ -31,7 +31,8 @@ const config = {
 			$icp: './src/frontend/src/icp',
 			$sol: './src/frontend/src/sol',
 			'$icp-eth': './src/frontend/src/icp-eth',
-			$env: './src/frontend/src/env'
+			$env: './src/frontend/src/env',
+			$routes: './src/frontend/src/routes'
 		},
 
 		serviceWorker: {
