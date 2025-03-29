@@ -35,13 +35,8 @@ const erc20DefaultTokensAddresses: Readable<string[]> = derived(
  * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "user token" in the backend.
  */
 export const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
-	[erc20UserTokensStore, enabledEthereumNetworksIds],
-	([$erc20UserTokensStore, $enabledEthereumNetworksIds]) =>
-		$erc20UserTokensStore
-			?.map(({ data: token }) => token)
-			.filter(({ network: { id: networkId } }) =>
-				$enabledEthereumNetworksIds.includes(networkId)
-			) ?? []
+	[erc20UserTokensStore],
+	([$erc20UserTokensStore]) => $erc20UserTokensStore?.map(({ data: token }) => token) ?? []
 );
 
 const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
