@@ -1,74 +1,117 @@
-import { createPowChallenge } from '$lib/api/backend.api';
-import { UserProfileNotFoundError } from '$lib/types/errors';
+import {
+	PostMessageAllowSigningRequestSchema,
+	PostMessageAllowSigningStatusSchema,
+	PostMessageCreatePowChallengeRequestSchema
+} from '$lib/schema/post-message.schema';
+import { _allowSigning, _createPowChallenge } from '$lib/services/pow.services';
+import { authStore } from '$lib/stores/auth.store';
 import type {
-	PostMessage,
-	PostMessageDataRequestPowTimer,
-	PostMessageDataResponsePow
+	PostMessageAllowSigningRequest,
+	PostMessageAllowSigningResponse,
+	PostMessageCreatePowChallengeRequest,
+	PostMessageCreatePowChallengeResponse
 } from '$lib/types/post-message';
-import { loadIdentity } from '$lib/utils/auth.utils';
+import { initWorkerMessageRouter } from '$lib/utils/worker.utils';
+import { get } from 'svelte/store';
 
-export interface ChallengeWorker {
-	startPowTimer: (params: PostMessageDataRequestPowTimer) => void;
-	stopPowTimer: () => void;
-	destroy: () => void;
+export interface BaseWorker {
+	startPowWorker: () => void;
+	stopPowWorker: () => void;
+	destroyPowWorker: () => void;
 }
 
 let errorMessages: { msg: string; timestamp: number }[] = [];
 
-export const initChallengeWorker = async (): Promise<ChallengeWorker> => {
+export const initPowWorker = async (): Promise<BaseWorker> => {
 	const PowWorker = await import('$lib/workers/workers?worker');
-	const powWorker: Worker = new PowWorker.default();
-	powWorker.onmessage = async ({ data }: MessageEvent<PostMessage<PostMessageDataResponsePow>>) => {
-		const { msg, data: value } = data;
+	const worker: Worker = new PowWorker.default();
+	initWorkerMessageRouter(worker);
+	worker.onmessage = async (event) => {
+		const raw = event.data;
+		const { message } = raw;
 
-		switch (msg) {
-			case 'createPowChallenge':
-				await createPowChallengeService();
-				return;
-			case 'initSignerAllowance':
-				await initSignerAllowance(value?.nonce as number);
-				return;
+		switch (message) {
+			case 'CreatePowChallengeRequest': {
+				const requestPostMessage = PostMessageCreatePowChallengeRequestSchema.safeParse(raw);
+				if (!requestPostMessage.success) {
+					console.error('Invalid AllowSigningMessageResponse', requestPostMessage.error.format());
+					return null;
+				}
+				await handleCreatePowChallengeRequest(requestPostMessage.data);
+				break;
+			}
+
+			case 'AllowSigningMessageRequest': {
+				const requestPostMessage = PostMessageAllowSigningRequestSchema.safeParse(raw);
+				if (!requestPostMessage.success) {
+					console.error('Invalid AllowSigningMessageResponse', requestPostMessage.error.format());
+					return null;
+				}
+				await handleAllowSigningRequest(requestPostMessage.data);
+				break;
+			}
 		}
 	};
 
-	const createPowChallengeService = async () => {
-		let identity = await loadIdentity();
-		let response = await createPowChallenge({ identity });
+	const handleCreatePowChallengeRequest = async (
+		parsedPostMessage: PostMessageCreatePowChallengeRequest
+	) => {
+		const { identity } = get(authStore);
 
-		if ('Ok' in response) {
-			powWorker.postMessage('solvePowChallenge', {
-				startTimestampMs: response.Ok.start_timestamp_ms,
-				difficulty: response.Ok.difficulty
-			});
-			return response.Ok;
-		}
-		const err = response.Err;
-		if ('NotFound' in err) {
-			throw new UserProfileNotFoundError();
-		}
-		throw new Error('Unknown error');
+		let allowSigningResponse = await _createPowChallenge({ identity });
+
+		const response: PostMessageCreatePowChallengeResponse = {
+			message: 'CreatePowChallengeResponse',
+			requestId: parsedPostMessage.requestId,
+			tag: 'Ok',
+			data: {
+				difficulty: allowSigningResponse.difficulty,
+				start_timestamp_ms: allowSigningResponse.start_timestamp_ms,
+				expiry_timestamp_ms: allowSigningResponse.expiry_timestamp_ms
+			}
+		};
+
+		worker.postMessage(response);
 	};
 
-	const initSignerAllowance = async (nonce: number) => {
-		const response = await initSignerAllowance(nonce);
-		powWorker.postMessage('allowSigner', response);
+	const handleAllowSigningRequest = async (parsedPostMessage: PostMessageAllowSigningRequest) => {
+		// we call the api service to allow the requested cycles
+		// const request: AllowSigningRequest = {
+		//	nonce: nonce ?? 0n
+		//};
+		const { identity } = get(authStore);
+
+		let allowSigningResponse = await _allowSigning({ identity });
+
+		const response: PostMessageAllowSigningResponse = {
+			message: 'AllowSigningResponse',
+			requestId: parsedPostMessage.requestId,
+			tag: 'Ok',
+			data: {
+				allowed_cycles: allowSigningResponse.allowed_cycles,
+				challenge_completion: allowSigningResponse.challenge_completion,
+				status: PostMessageAllowSigningStatusSchema.parse(allowSigningResponse.status)
+			}
+		};
+
+		// send theResult_2
+		worker.postMessage(response);
 	};
 
-	const stopTimer = () =>
-		powWorker.postMessage({
+	const stopPowTimer = () =>
+		worker.postMessage({
 			msg: 'stopPowTimer'
 		});
 
 	return {
-		startPowTimer: (data: PostMessageDataRequestPowTimer) => {
-			powWorker.postMessage({
-				msg: 'startPowTimer',
-				data
+		startPowWorker: () => {
+			worker.postMessage({
+				msg: 'startPowTimer'
 			});
 		},
-		stopPowTimer: stopTimer,
-		destroy: () => {
-			stopTimer();
+		stopPowWorker: stopPowTimer,
+		destroyPowWorker: () => {
+			stopPowTimer();
 			errorMessages = [];
 		}
 	};

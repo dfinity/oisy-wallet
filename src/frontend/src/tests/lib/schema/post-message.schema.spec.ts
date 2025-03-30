@@ -413,6 +413,8 @@ describe('post-message.schema', () => {
 	describe('PostMessageDataResponseExchangeSchema', () => {
 		const mockValidPrice: CoingeckoSimplePriceResponse = { ethereum: { usd: 2000 } };
 
+		PostMessageDataResponseExchangeSchema.parse({});
+
 		it('should validate with all valid price fields', () => {
 			const validData = {
 				currentEthPrice: mockValidPrice,

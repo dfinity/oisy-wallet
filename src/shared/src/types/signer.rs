@@ -23,7 +23,7 @@ pub struct AllowSigningRequest {
 pub struct AllowSigningResponse {
     pub status: AllowSigningStatus,
     pub allowed_cycles: u64,
-    pub challenge_completion: ChallengeCompletion,
+    pub challenge_completion: Option<ChallengeCompletion>,
 }
 
 pub mod topup {

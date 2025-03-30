@@ -139,7 +139,7 @@ export const selectUserUtxosFee = async ({
 	return btcSelectUserUtxosFee(params);
 };
 
-export const createPowChallenge = async ({
+export const createPowChallengeApi = async ({
 	identity
 }: CanisterApiFunctionParams): Promise<CreateChallengeResult> => {
 	const { createPowChallenge } = await backendCanister({ identity });
@@ -147,16 +147,16 @@ export const createPowChallenge = async ({
 	return createPowChallenge();
 };
 
-export const allowSigning = async ({
+export const allowSigningApi = async ({
 	request,
 	identity
 }: CanisterApiFunctionParams<{
-	request: AllowSigningRequest;
+	request?: AllowSigningRequest;
 }>): Promise<Result_2> => {
-	const { allowSigning } = await backendCanister({ identity });
+	const { allowSigningCanister } = await backendCanister({ identity });
 
 	// Conditionally call allowSigning with request or provide default logic
-	return allowSigning({ request });
+	return allowSigningCanister(request ? { request } : { request: { nonce: BigInt(0) } });
 };
 
 export const addUserHiddenDappId = async ({

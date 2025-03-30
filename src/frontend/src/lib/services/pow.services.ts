@@ -1,20 +1,21 @@
 import type {
+	AllowSigningRequest,
+	AllowSigningResponse,
 	CreateChallengeResponse,
-	Result_6 as CreateChallengeResult
+	Result_6
 } from '$declarations/backend/backend.did';
-import { createPowChallenge } from '$lib/api/backend.api';
-import { UserProfileNotFoundError } from '$lib/types/errors';
+
+import { allowSigningApi, createPowChallengeApi } from '$lib/api/backend.api';
+import { mapAllowSigningError, mapCreateChallengeError } from '$lib/canisters/backend.errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import crypto from 'crypto';
 
 function getTimestampNowNs(): bigint {
-	return BigInt(Date.now()) * 1_000_000n;
+	return BigInt(Date.now()) * BigInt(1e6);
 }
 
 export const solvePowChallenge = async (timestamp: bigint, difficulty: number): Promise<number> => {
-	if (difficulty <= 0) {
-		throw new Error('Difficulty must be greater than zero');
-	}
+	if (difficulty <= 0) throw new Error('Difficulty must be greater than zero');
 
 	let nonce = 0;
 	const target = Math.floor(0xffffffff / difficulty);
@@ -24,17 +25,12 @@ export const solvePowChallenge = async (timestamp: bigint, difficulty: number): 
 		const challengeStr = `${timestamp}.${nonce}`;
 		const hash = crypto.createHash('sha256').update(challengeStr).digest();
 		const prefix = hash.readUInt32BE(0);
-		if (prefix <= target) {
-			break;
-		}
-		nonce += 1;
+		if (prefix <= target) break;
+		nonce++;
 	}
 
 	const solveTimestampNs = getTimestampNowNs() - startTimestamp;
-	console.error(
-		`Pow Challenge: It took the client ${Number(solveTimestampNs) / 1e9} seconds to solve the challenge`
-	);
-
+	console.error(`Pow Challenge solved in ${Number(solveTimestampNs) / 1e9} seconds.`);
 	return nonce;
 };
 
@@ -43,15 +39,28 @@ export const _createPowChallenge = async ({
 }: {
 	identity: OptionIdentity;
 }): Promise<CreateChallengeResponse> => {
-	const response: CreateChallengeResult = await createPowChallenge({
+	const response: Result_6 = await createPowChallengeApi({
 		identity
 	});
-	if ('Ok' in response) {
-		return response.Ok;
+
+	if ('Err' in response) {
+		throw mapCreateChallengeError(response.Err);
 	}
-	const err = response.Err;
-	if ('NotFound' in err) {
-		throw new UserProfileNotFoundError();
+	return response.Ok;
+};
+
+export const _allowSigning = async ({
+	identity,
+	request
+}: {
+	identity: OptionIdentity;
+	request?: AllowSigningRequest;
+}): Promise<AllowSigningResponse> => {
+	const response = await allowSigningApi({ identity });
+
+	if ('Err' in response) {
+		throw mapAllowSigningError(response.Err);
 	}
-	throw new Error('Unknown error');
+
+	return response.Ok;
 };

@@ -1,75 +1,88 @@
 import { solvePowChallenge } from '$lib/services/pow.services';
+
+export const FIRST_TIMER_INTERVAL = 60_000;
+
+import {
+	PostMessageAllowSigningResponseSchema,
+	PostMessageCreatePowChallengeResponseSchema
+} from '$lib/schema/post-message.schema';
 import type {
-	PostMessage,
-	PostMessageDataRequestPowAllowSigner,
-	PostMessageDataRequestPowTimer,
-	PostMessageDataRequestSolvePowChallenge
+	PostMessageAllowSigningResponse,
+	PostMessageCreatePowChallengeError,
+	PostMessageCreatePowChallengeResponse,
+	PostMessageCreatePowChallengeResponseData
 } from '$lib/types/post-message';
+import { isOk, sendMessageRequest } from '$lib/utils/worker.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-export const FIRST_TIMER_INTERVAL = 5000;
-
-export const onPowMessage = async ({
-	data
-}: MessageEvent<
-	PostMessage<
-		| PostMessageDataRequestPowTimer
-		| PostMessageDataRequestSolvePowChallenge
-		| PostMessageDataRequestPowAllowSigner
-	>
->) => {
+let timer: NodeJS.Timeout | undefined = undefined;
+export const onPowMessage = async ({ data }: MessageEvent) => {
 	const { msg, data: payload } = data;
 
 	switch (msg) {
 		case 'stopPowTimer':
-			stopTimer();
+			stopPowTimer();
 			return;
 		case 'startPowTimer':
-			await startPowTimer(payload as PostMessageDataRequestPowTimer);
+			await startPowTimer();
 			return;
-		case 'solvePowChallenge':
-			await solvePowChallengeLocal(payload as PostMessageDataRequestSolvePowChallenge);
-			return;
-		case 'allowSigner':
-			await allowSigner(payload as PostMessageDataRequestPowAllowSigner);
 	}
 };
 
-let timer: NodeJS.Timeout | undefined = undefined;
-
-const solvePowChallengeLocal = async (
-	data: PostMessageDataRequestSolvePowChallenge | undefined
-) => {
-	if (data?.startTimestampMs && data.difficulty) {
-		const nonce = await solvePowChallenge(data.startTimestampMs, data.difficulty);
-
-		postMessage('initSignerAllowance', nonce);
-	} else {
-		// todo: what if data is undefined?
+const stopPowTimer = () => {
+	if (isNullish(timer)) {
+		return;
 	}
+	clearInterval(timer);
+	timer = undefined;
 };
 
-const allowPowSigning = async () => {
-	postMessage('createPowChallenge');
-};
-
-const allowSigner = async (data: PostMessageDataRequestPowAllowSigner | undefined) => {
-	// todo: handle
-};
-
-const startPowTimer = async (data: PostMessageDataRequestPowTimer | undefined) => {
+const startPowTimer = async () => {
 	// This worker has already been started
 	if (nonNullish(timer)) {
 		return;
 	}
-	timer = setInterval(allowPowSigning, FIRST_TIMER_INTERVAL);
+
+	timer = setInterval(allowSigning, FIRST_TIMER_INTERVAL);
 };
 
-const stopTimer = () => {
-	if (isNullish(timer)) {
+let powInProgress = false;
+
+async function allowSigning() {
+	// Step 1: CreatePoWChallenge
+	const createPowChallengeResponse: PostMessageCreatePowChallengeResponse =
+		await sendMessageRequest<PostMessageCreatePowChallengeResponse>(
+			self as unknown as Worker,
+			'CreatePowChallengeRequest',
+			{},
+			PostMessageCreatePowChallengeResponseSchema
+		);
+
+	if (
+		isOk<PostMessageCreatePowChallengeResponseData, PostMessageCreatePowChallengeError>(
+			createPowChallengeResponse
+		)
+	) {
+		const challengeData = createPowChallengeResponse.data;
+		await solvePowChallenge(challengeData.start_timestamp_ms, challengeData.difficulty);
+	} else {
+		const error = createPowChallengeResponse.data;
+		console.error('PoW challenge error:', error);
 		return;
 	}
 
-	clearInterval(timer);
-	timer = undefined;
-};
+	// Step 2: AllowSigning
+	const allowSigningResponse: PostMessageAllowSigningResponse =
+		await sendMessageRequest<PostMessageAllowSigningResponse>(
+			self as unknown as Worker,
+			'AllowSigningRequest',
+			{ nonce: BigInt(Date.now()) },
+			PostMessageAllowSigningResponseSchema
+		);
+
+	if (isOk(allowSigningResponse)) {
+		console.info('Allow signing successful:', allowSigningResponse.data);
+	} else {
+		console.error('Allow signing failed:', allowSigningResponse.data);
+	}
+}

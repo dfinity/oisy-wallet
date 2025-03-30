@@ -489,11 +489,10 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
     debug_assert!(result_allow_signing_2.is_ok());
 
     let allow_signing_response_2 = result_allow_signing_2.unwrap();
+    let challenge_completion = allow_signing_response_2.challenge_completion.unwrap();
 
     assert_deviation(
-        allow_signing_response_2
-            .challenge_completion
-            .solved_duration_ms,
+        challenge_completion.solved_duration_ms,
         TARGET_DURATION_MS,
         3_000,
     );

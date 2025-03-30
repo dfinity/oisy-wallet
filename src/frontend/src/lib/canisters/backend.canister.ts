@@ -178,10 +178,14 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	allowSigning = async ({ request }: { request: AllowSigningRequest }): Promise<Result_2> => {
+	allowSigningCanister = async (
+		allowSigningRequest: { request: AllowSigningRequest } | undefined
+	): Promise<Result_2> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		const response = await allow_signing(request);
+		const response = await allow_signing(
+			allowSigningRequest?.request ? [allowSigningRequest.request] : []
+		);
 
 		if ('Err' in response) {
 			throw mapAllowSigningError(response.Err);

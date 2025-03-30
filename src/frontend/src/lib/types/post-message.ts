@@ -1,29 +1,38 @@
 import {
+	inferPostMessageSchema,
+	PostMessageAllowSigningErrorSchema,
+	PostMessageAllowSigningRequestSchema,
+	PostMessageAllowSigningResponseDataSchema,
+	PostMessageAllowSigningResponseSchema,
+	PostMessageAllowSigningStatusSchema,
+	PostMessageApproveErrorSchema,
+	PostMessageBaseSchema,
+	PostMessageChallengeCompletionErrorSchema,
+	PostMessageChallengeCompletionSchema,
+	PostMessageCreatePowChallengeErrorSchema,
+	PostMessageCreatePowChallengeRequestSchema,
+	PostMessageCreatePowChallengeResponseDataSchema,
+	PostMessageCreatePowChallengeResponseSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
 	PostMessageDataRequestIcCkSchema,
 	PostMessageDataRequestIcrcSchema,
 	PostMessageDataRequestIcrcStrictSchema,
-	PostMessageDataRequestPowAllowSignerSchema,
-	PostMessageDataRequestPowTimerSchema,
 	PostMessageDataRequestSchema,
 	PostMessageDataRequestSolSchema,
-	PostMessageDataRequestSolvePowChallengeSchema,
 	PostMessageDataResponseAuthSchema,
 	PostMessageDataResponseBTCAddressSchema,
 	PostMessageDataResponseErrorSchema,
 	PostMessageDataResponseExchangeErrorSchema,
 	PostMessageDataResponseExchangeSchema,
-	PostMessageDataResponsePowSchema,
 	PostMessageDataResponseSchema,
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
 	PostMessageJsonDataResponseSchema,
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
-	PostMessageSyncStateSchema,
-	inferPostMessageSchema
+	PostMessageSyncStateSchema
 } from '$lib/schema/post-message.schema';
 
 import type { ZodType } from 'zod';
@@ -84,14 +93,33 @@ export type PostMessage<T extends PostMessageDataRequest | PostMessageDataRespon
 	ReturnType<typeof inferPostMessageSchema<ZodType<T>>>
 >;
 
-export type PostMessageDataRequestPowTimer = z.infer<typeof PostMessageDataRequestPowTimerSchema>;
+// -----------------------------------------------------------------------------
+// - The post message types used by the pow.worker.ts and worker.pow.services.ts
+// -----------------------------------------------------------------------------
 
-export type PostMessageDataRequestSolvePowChallenge = z.infer<
-	typeof PostMessageDataRequestSolvePowChallengeSchema
+export type PostMessageBase = z.infer<typeof PostMessageBaseSchema>;
+export type PostMessageCreatePowChallengeRequest = z.infer<
+	typeof PostMessageCreatePowChallengeRequestSchema
+>;
+export type PostMessageCreatePowChallengeResponseData = z.infer<
+	typeof PostMessageCreatePowChallengeResponseDataSchema
 >;
 
-export type PostMessageDataRequestPowAllowSigner = z.infer<
-	typeof PostMessageDataRequestPowAllowSignerSchema
+export type PostMessageCreatePowChallengeError = z.infer<
+	typeof PostMessageCreatePowChallengeErrorSchema
 >;
-
-export type PostMessageDataResponsePow = z.infer<typeof PostMessageDataResponsePowSchema>;
+export type PostMessageCreatePowChallengeResponse = z.infer<
+	typeof PostMessageCreatePowChallengeResponseSchema
+>;
+export type PostMessageAllowSigningRequest = z.infer<typeof PostMessageAllowSigningRequestSchema>;
+export type PostMessageChallengeCompletion = z.infer<typeof PostMessageChallengeCompletionSchema>;
+export type PostMessageAllowSigningStatus = z.infer<typeof PostMessageAllowSigningStatusSchema>;
+export type PostMessageAllowSigningResponse = z.infer<typeof PostMessageAllowSigningResponseSchema>;
+export type PostMessageApproveError = z.infer<typeof PostMessageApproveErrorSchema>;
+export type PostMessageChallengeCompletionError = z.infer<
+	typeof PostMessageChallengeCompletionErrorSchema
+>;
+export type PostMessageAllowSigningError = z.infer<typeof PostMessageAllowSigningErrorSchema>;
+export type PostMessageAllowSigningResponseData = z.infer<
+	typeof PostMessageAllowSigningResponseDataSchema
+>;

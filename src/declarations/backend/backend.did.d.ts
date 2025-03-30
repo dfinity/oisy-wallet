@@ -88,7 +88,7 @@ export interface AllowSigningRequest {
 }
 export interface AllowSigningResponse {
 	status: AllowSigningStatus;
-	challenge_completion: ChallengeCompletion;
+	challenge_completion: [] | [ChallengeCompletion];
 	allowed_cycles: bigint;
 }
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
@@ -462,7 +462,7 @@ export interface Utxo {
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result_1>;
-	allow_signing: ActorMethod<[AllowSigningRequest], Result_2>;
+	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], Result_2>;
 	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_3>;
 	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_4>;
 	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_5>;

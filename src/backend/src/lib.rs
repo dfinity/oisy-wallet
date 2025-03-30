@@ -678,10 +678,11 @@ pub fn create_user_profile() -> UserProfile {
         // TODO convert create_user_profile(..) to an asychronous function and remove spawning the
         // Spawn the async task for allow_signing after returning UserProfile synchronously
         ic_cdk::spawn(async move {
-            // Upon initial user login, we have to that ensure allow_signing is called to handle cases
-            // where users lack the cycles required for signer operations. To guarantee correct functionality,
-            // create_user_profile(..) must be invoked before any signer-related calls (e.g., get_eth_address).
-            // Spawn the async task separately after returning UserProfile synchronously
+            // Upon initial user login, we have to that ensure allow_signing is called to handle
+            // cases where users lack the cycles required for signer operations. To
+            // guarantee correct functionality, create_user_profile(..) must be invoked
+            // before any signer-related calls (e.g., get_eth_address). Spawn the async
+            // task separately after returning UserProfile synchronously
             if let Err(e) = signer::allow_signing(None).await {
                 ic_cdk::println!(
                     "Error enabling signing for user {}: {:?}",
@@ -750,14 +751,28 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
 /// To be added
 #[update(guard = "may_read_user_data")]
 pub async fn allow_signing(
-    request: AllowSigningRequest,
+    request: Option<AllowSigningRequest>,
 ) -> Result<AllowSigningResponse, AllowSigningError> {
     let principal = ic_cdk::caller();
+
+    // Added for backward-compatibility
+    // TODO remove once the PoW feature once it has been stabilized
+    if request.is_none() {
+        // Abort and propagate errors
+        signer::allow_signing(None).await?;
+        // Only propagate errors, otherwise return a pseudo response which is ignored by the
+        // frontend older code
+        return Ok(AllowSigningResponse {
+            status: AllowSigningStatus::Executed,
+            allowed_cycles: 0u64,
+            challenge_completion: None,
+        });
+    }
 
     // The Proof-of-Work (PoW) protection is explicitly enforced at the HTTP entry-point level.
     // This ensures internal calls to the business service remain unrestricted and do not require
     // PoW.
-    let challenge_completion: ChallengeCompletion = pow::complete_challenge(request.nonce)
+    let challenge_completion: ChallengeCompletion = pow::complete_challenge(request.unwrap().nonce)
         .map_err(|e| match e {
             ChallengeCompletionError::InvalidNonce
             | ChallengeCompletionError::MissingUserProfile
@@ -785,7 +800,7 @@ pub async fn allow_signing(
     Ok(AllowSigningResponse {
         status: AllowSigningStatus::Executed,
         allowed_cycles,
-        challenge_completion,
+        challenge_completion: Some(challenge_completion),
     })
 }
 

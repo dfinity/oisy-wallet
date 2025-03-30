@@ -204,17 +204,77 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 		data: dataSchema.optional()
 	});
 
-export const PostMessageDataRequestPowTimerSchema = PostMessageDataResponseSchema.extend({});
+// -----------------------------------------------------------------------------
+// - The post message schemas used by the pow.worker.ts and worker.pow.services.ts
+// -----------------------------------------------------------------------------
 
-export const PostMessageDataResponsePowSchema = PostMessageDataResponseSchema.extend({
-	nonce: z.number()
+// Base message format with discriminator, request ID, and message type
+
+// Base schema with message metadata
+export const PostMessageBaseSchema = z.object({
+	message: z.string(),
+	requestId: z.string(),
+	tag: z.union([z.literal('Ok'), z.literal('Err')])
 });
 
-export const PostMessageDataRequestSolvePowChallengeSchema = PostMessageDataResponseSchema.extend({
-	startTimestampMs: z.bigint(),
-	difficulty: z.number()
-}).strict();
+export const PostMessageCreatePowChallengeRequestSchema = PostMessageBaseSchema.extend({
+	message: z.literal('CreatePowChallengeRequest')
+});
 
-export const PostMessageDataRequestPowAllowSignerSchema = PostMessageDataResponseSchema.extend({
-	// todo: response type of initSignerAllowance
+export const PostMessageCreatePowChallengeResponseDataSchema = z.object({
+	difficulty: z.number(),
+	start_timestamp_ms: z.bigint(),
+	expiry_timestamp_ms: z.bigint()
+});
+
+export const PostMessageCreatePowChallengeErrorSchema = z.union([
+	z.object({ ChallengeInProgress: z.null() }),
+	z.object({ MissingUserProfile: z.null() }),
+	z.object({ RandomnessError: z.string() })
+]);
+
+export const PostMessageCreatePowChallengeResponseSchema = PostMessageBaseSchema.extend({
+	message: z.literal('CreatePowChallengeResponse'),
+	data: z.union([
+		PostMessageCreatePowChallengeResponseDataSchema,
+		PostMessageCreatePowChallengeErrorSchema
+	])
+});
+
+export const PostMessageChallengeCompletionSchema = z.object({
+	solved_duration_ms: z.bigint(),
+	next_allowance_ms: z.bigint(),
+	next_difficulty: z.number(),
+	current_difficulty: z.number()
+});
+
+export const PostMessageAllowSigningRequestSchema = PostMessageBaseSchema.extend({
+	message: z.literal('AllowSigningRequest'),
+	data: z.object({
+		nonce: z.bigint()
+	})
+});
+
+export const PostMessageAllowSigningStatusSchema = z.enum(['Skipped', 'Failed', 'Executed']);
+
+export const PostMessageAllowSigningResponseDataSchema = z.object({
+	status: PostMessageAllowSigningStatusSchema,
+	challenge_completion: z.array(PostMessageChallengeCompletionSchema).max(1),
+	allowed_cycles: z.bigint()
+});
+
+export const PostMessageApproveErrorSchema = z.string();
+
+export const PostMessageChallengeCompletionErrorSchema = z.string();
+
+export const PostMessageAllowSigningErrorSchema = z.union([
+	z.object({ ApproveError: PostMessageApproveErrorSchema }),
+	z.object({ PowChallenge: PostMessageChallengeCompletionErrorSchema }),
+	z.object({ Other: z.string() }),
+	z.object({ FailedToContactCyclesLedger: z.null() })
+]);
+
+export const PostMessageAllowSigningResponseSchema = PostMessageBaseSchema.extend({
+	message: z.literal('AllowSigningResponse'),
+	data: z.union([PostMessageAllowSigningResponseDataSchema, PostMessageAllowSigningErrorSchema])
 });

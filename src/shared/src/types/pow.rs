@@ -3,7 +3,8 @@ use super::{CandidType, Debug, Deserialize};
 // -------------------------------------------------------------------------------------------------
 // PoW Challenge Constants
 // -------------------------------------------------------------------------------------------------
-
+// If enabled the difficulty for a principal gets adjusted with every solved challenge.
+// The difficulty starts with the difficulty defined by START_DIFFICULTY and will be
 pub const DIFFICULTY_AUTO_ADJUSTMENT: bool = false;
 
 // The time it takes in average to solve the challenge in milliseconds
