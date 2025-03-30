@@ -18,6 +18,7 @@ import type {
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
 	GetUserProfileResponse,
+	SaveUserNetworksSettings,
 	SetUserShowTestnetsParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -175,6 +176,15 @@ export const setUserShowTestnets = async ({
 	const { setUserShowTestnets } = await backendCanister({ identity });
 
 	return setUserShowTestnets(params);
+};
+
+export const updateUserNetworkSettings = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SaveUserNetworksSettings>): Promise<void> => {
+	const { updateUserNetworkSettings } = await backendCanister({ identity });
+
+	return updateUserNetworkSettings(params);
 };
 
 const backendCanister = async ({

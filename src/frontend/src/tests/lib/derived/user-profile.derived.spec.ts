@@ -2,10 +2,12 @@ import {
 	userProfile,
 	userProfileLoaded,
 	userProfileVersion,
-	userSettings
+	userSettings,
+	userSettingsNetworks
 } from '$lib/derived/user-profile.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import {
+	mockNetworksSettings,
 	mockUserProfile,
 	mockUserProfileVersion,
 	mockUserSettings
@@ -70,6 +72,18 @@ describe('user-profile.derived', () => {
 		it('should return undefined if user settings are nullish', () => {
 			userProfileStore.set({ certified, profile: { ...mockUserProfile, settings: [] } });
 			expect(get(userSettings)).toBeUndefined();
+		});
+	});
+
+	describe('userSettingsNetworks', () => {
+		it('should return undefined when user profile is not set', () => {
+			userProfileStore.reset();
+			expect(get(userSettingsNetworks)).toBeUndefined();
+		});
+
+		it('should return user profile if it is not nullish', () => {
+			userProfileStore.set({ certified, profile: mockUserProfile });
+			expect(get(userSettingsNetworks)).toEqual(mockNetworksSettings);
 		});
 	});
 });

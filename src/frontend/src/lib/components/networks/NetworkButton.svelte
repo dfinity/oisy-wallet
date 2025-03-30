@@ -34,6 +34,7 @@
 
 <LogoButton {testId} on:click={onClick} selectable selected={id === $networkId} dividers>
 	<Logo slot="logo" src={icon} />
+
 	<span slot="title" class="mr-2 text-sm font-normal md:text-base">
 		{name}
 	</span>

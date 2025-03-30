@@ -25,12 +25,12 @@ use super::mock::{
 };
 use crate::utils::mock::CALLER;
 
-pub const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
-pub const DEFAULT_BITCOIN_WASM: &str = "../../ic-btc-canister.wasm.gz";
-pub const BITCOIN_CANISTER_ID: &str = "g4xu7-jiaaa-aaaan-aaaaq-cai";
-pub const DEFAULT_CYCLES_LEDGER_WASM: &str = "../../cycles-ledger.wasm.gz";
-pub const CYCLES_LEDGER_CANISTER_ID: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
-pub const DEFAULT_CYCLES_LEDGER_CANISTER_ENABLED: &str = "false";
+const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
+const DEFAULT_BITCOIN_WASM: &str = "../../ic-btc-canister.wasm.gz";
+const BITCOIN_CANISTER_ID: &str = "g4xu7-jiaaa-aaaan-aaaaq-cai";
+const DEFAULT_CYCLES_LEDGER_WASM: &str = "../../cycles-ledger.wasm.gz";
+const CYCLES_LEDGER_CANISTER_ID: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
+const DEFAULT_CYCLES_LEDGER_CANISTER_ENABLED: &str = "false";
 
 // This is necessary to deploy the bitcoin canister.
 // This is a struct based on the `InitConfig` from the Bitcoin canister.
@@ -288,7 +288,7 @@ impl BackendBuilder {
     }
 
     /// Install the ledger canister.
-    fn install_ledger_canister(&mut self, pic: &PocketIc) {
+    fn install_cycles_ledger(&mut self, pic: &PocketIc) {
         let canister_id = Principal::from_text(CYCLES_LEDGER_CANISTER_ID)
             .expect("Unexpected cycles ledger canister id");
         pic.create_canister_with_id(None, None, canister_id)
@@ -329,7 +329,7 @@ impl BackendBuilder {
     /// Setup the backend canister.
     pub fn deploy_to(&mut self, pic: &PocketIc) -> Principal {
         if self.cycles_ledger_enabled {
-            self.install_ledger_canister(pic);
+            self.install_cycles_ledger(pic);
         }
         self.install_bitcoin(pic);
         self.deploy_backend(pic)

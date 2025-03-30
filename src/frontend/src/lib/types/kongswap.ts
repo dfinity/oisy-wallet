@@ -17,7 +17,7 @@ const KongSwapTokenMetricsSchema = z.object({
 	updated_at: DateTimeSchema,
 	volume_24h: NumberAsStringSchema,
 	tvl: NumberAsStringSchema,
-	price_change_24h: NumberAsStringSchema,
+	price_change_24h: NumberAsStringSchema.nullable(),
 	previous_price: NumberAsStringSchema.nullable()
 });
 

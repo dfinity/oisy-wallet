@@ -23,6 +23,7 @@ describe('LoaderUserProfile', () => {
 		const spy = vi.spyOn(loadUserServices, 'loadUserProfile').mockImplementationOnce(async () => {
 			userProfileStore.set({ certified: true, profile: mockUserProfile });
 			await Promise.resolve();
+			return { success: true };
 		});
 
 		render(LoaderUserProfile);
@@ -44,6 +45,7 @@ describe('LoaderUserProfile', () => {
 		spy.mockImplementationOnce(async () => {
 			userProfileStore.set({ certified: true, profile: { ...mockUserProfile, version: [2n] } });
 			await Promise.resolve();
+			return { success: true };
 		});
 
 		emit({ message: 'oisyRefreshUserProfile' });
