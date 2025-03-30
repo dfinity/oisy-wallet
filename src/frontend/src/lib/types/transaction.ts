@@ -9,33 +9,60 @@ import {
 import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { FeeData } from '@ethersproject/providers';
-import type { Transaction as EthTransaction } from '@ethersproject/transactions';
+import { ethers } from 'ethers';
 import * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
-export type Transaction = Omit<EthTransaction, 'data'> &
+export type EthersTransaction = Pick<
+	ethers.Transaction,
+	| 'hash'
+	| 'to'
+	| 'from'
+	| 'nonce'
+	| 'gasLimit'
+	| 'gasPrice'
+	| 'data'
+	| 'value'
+	| 'chainId'
+	| 'type'
+	| 'maxPriorityFeePerGas'
+	| 'maxFeePerGas'
+>;
+
+export type Transaction = Omit<EthersTransaction, 'data'> &
 	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {
 		pendingTimestamp?: number;
 		displayTimestamp?: number;
 	};
 
-export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
-	gas: BigNumber;
+// TODO: use FeeData type again once we upgrade to ethers v6
+export interface TransactionFeeData {
+	maxFeePerGas: bigint | null;
+	maxPriorityFeePerGas: bigint | null;
+	gas: bigint;
+}
+
+export type RequiredTransactionFeeData = {
+	[K in keyof Pick<
+		TransactionFeeData,
+		'gas' | 'maxFeePerGas' | 'maxPriorityFeePerGas'
+	>]: NonNullable<TransactionFeeData[K]>;
 };
 
 export type TransactionType = z.infer<typeof TransactionTypeSchema>;
 
 export type TransactionStatus = z.infer<typeof TransactionStatusSchema>;
 
-export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to'> & {
+export interface TransactionUiCommon {
+	from: string;
+	to?: string;
 	timestamp?: bigint;
 	txExplorerUrl?: string;
 	toExplorerUrl?: string;
 	fromExplorerUrl?: string;
-};
+	blockNumber?: number;
+}
 
 export type AnyTransactionUi =
 	| BtcTransactionUi

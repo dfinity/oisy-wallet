@@ -17,10 +17,9 @@ import {
 	mockSolAddress,
 	mockSolAddress2
 } from '$tests/mocks/sol.mock';
-import { BigNumber } from '@ethersproject/bignumber';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
-import * as solanaWeb3 from '@solana/web3.js';
+import * as solanaWeb3 from '@solana/kit';
 import {
 	appendTransactionMessageInstructions,
 	getComputeUnitEstimateForTransactionMessageFactory,
@@ -30,10 +29,10 @@ import {
 	type RpcSubscriptions,
 	type SolanaRpcApi,
 	type SolanaRpcSubscriptionsApi
-} from '@solana/web3.js';
+} from '@solana/kit';
 import { type MockInstance } from 'vitest';
 
-vi.mock(import('@solana/web3.js'), async (importOriginal) => {
+vi.mock(import('@solana/kit'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
@@ -73,7 +72,7 @@ vi.mock('$lib/api/signer.api', () => ({
 describe('sol-send.services', () => {
 	// TODO: add more practical tests deploying the Solana local node
 	describe('sendSol', () => {
-		const mockAmount = BigNumber.from('1000000');
+		const mockAmount = 1000000n;
 		const mockSource = mockSolAddress;
 		const mockSigner = expect.objectContaining({
 			address: mockSolAddress,
@@ -176,7 +175,7 @@ describe('sol-send.services', () => {
 			expect(getTransferSolInstruction).toHaveBeenCalledWith({
 				source: mockSigner,
 				destination: mockDestination,
-				amount: mockAmount.toBigInt()
+				amount: mockAmount
 			});
 		});
 
@@ -201,7 +200,7 @@ describe('sol-send.services', () => {
 					source: mockAtaAddress,
 					destination: mockAtaAddress2,
 					authority: mockSigner,
-					amount: mockAmount.toBigInt()
+					amount: mockAmount
 				},
 				{ programAddress: DEVNET_USDC_TOKEN.owner }
 			);
@@ -241,7 +240,7 @@ describe('sol-send.services', () => {
 					source: mockAtaAddress,
 					destination: mockAtaAddress2,
 					authority: mockSigner,
-					amount: mockAmount.toBigInt()
+					amount: mockAmount
 				},
 				{ programAddress: DEVNET_USDC_TOKEN.owner }
 			);
@@ -293,7 +292,7 @@ describe('sol-send.services', () => {
 						address: mockSolAddress,
 						signTransactions: expect.any(Function)
 					}),
-					amount: mockAmount.toBigInt()
+					amount: mockAmount
 				},
 				{ programAddress: DEVNET_USDC_TOKEN.owner }
 			);

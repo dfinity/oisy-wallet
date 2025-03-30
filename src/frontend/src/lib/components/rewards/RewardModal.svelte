@@ -18,13 +18,14 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
+	import { REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		combinedDerivedSortedNetworkTokensUi,
 		enabledNetworkTokens
 	} from '$lib/derived/network-tokens.derived';
 	import { enabledErc20Tokens, enabledIcTokens } from '$lib/derived/tokens.derived';
-	import { getRewardRequirementsFulfilled } from '$lib/services/reward-code.services';
+	import { getRewardRequirementsFulfilled } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction';
@@ -80,23 +81,27 @@
 	];
 	let isRequirementsLoading = true;
 	$: isRequirementsLoading = areTransactionsStoresLoading(transactionsStores);
+
+	let amountOfRewards = 0;
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal on:nnsClose={modalStore.close} testId={REWARDS_MODAL}>
 	<span class="text-center text-xl" slot="title">{reward.title}</span>
 
 	<ContentWithToolbar>
 		<RewardBanner />
 
-		<RewardEarnings {isEligible} />
-		{#if isEligible}
+		<RewardEarnings bind:amountOfRewards />
+		{#if amountOfRewards > 0}
 			<Hr spacing="md" />
 		{/if}
 
-		<div class="flex w-full justify-between text-lg font-semibold"
-			><span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
-			<span class="inline-flex"><RewardDateBadge date={reward.endDate} /></span></div
-		>
+		<div class="flex w-full justify-between text-lg font-semibold">
+			<span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
+			<span class="inline-flex">
+				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
+			</span>
+		</div>
 		<p class="my-3">{reward.description}</p>
 
 		<ExternalLink
@@ -104,7 +109,7 @@
 			ariaLabel={$i18n.rewards.text.learn_more}
 			iconVisible={false}
 			asButton
-			styleClass={`rounded-xl px-3 py-2 secondary-light mb-3`}
+			styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
 		>
 			{$i18n.rewards.text.learn_more}
 		</ExternalLink>

@@ -15,7 +15,7 @@
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
 	<span class="text-lg font-bold first-letter:capitalize">{title}</span>
 
-	{#each rewards as reward}
+	{#each rewards as reward (reward.id)}
 		<div in:slide={SLIDE_DURATION} class="mt-4">
 			<RewardCard
 				on:click={() => modalStore.openRewardDetails(reward)}
@@ -26,6 +26,6 @@
 	{/each}
 
 	{#if nonNullish(altText) && rewards.length === 0}
-		<span class="text-misty-rose">{altText}</span>
+		<span>{altText}</span>
 	{/if}
 </div>

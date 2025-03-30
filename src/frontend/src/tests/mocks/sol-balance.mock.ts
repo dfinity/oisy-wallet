@@ -1,5 +1,5 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
-import { lamports, type Address } from '@solana/web3.js';
+import { lamports, type Address } from '@solana/kit';
 import { mockSolAddress } from './sol.mock';
 
 export const mockTokenAccountResponse = {

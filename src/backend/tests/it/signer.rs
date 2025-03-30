@@ -28,7 +28,7 @@ fn test_topup_fails_for_percentage_out_of_bounds() {
     // A random unauthorized user.
     let caller = controller();
 
-    for percentage in [MIN_PERCENTAGE - 1, MAX_PERCENTAGE + 1].into_iter() {
+    for percentage in [MIN_PERCENTAGE - 1, MAX_PERCENTAGE + 1] {
         let response = pic_setup.update::<TopUpCyclesLedgerResult>(
             caller,
             "top_up_cycles_ledger",
