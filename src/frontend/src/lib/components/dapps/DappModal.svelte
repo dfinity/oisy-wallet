@@ -35,13 +35,11 @@
 	} = dAppDescription);
 
 	let websiteURL: Option<URL>;
-	$: {
-		try {
-			// TODO: use URL.parse
-			websiteURL = new URL(website);
-		} catch (_err: unknown) {
-			websiteURL = null;
-		}
+	$: try {
+		// TODO: use URL.parse
+		websiteURL = new URL(website);
+	} catch (_err: unknown) {
+		websiteURL = null;
 	}
 </script>
 
@@ -146,10 +144,10 @@
 					styleClass="primary padding-sm flex-1 flex-row-reverse"
 					href={websiteURL.toString()}
 					trackEvent={{ name: TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK, metadata: { dappId } }}
-					>{callToAction ??
-						replacePlaceholders($i18n.dapps.text.open_dapp, {
-							$dAppName: dAppName
-						})}</ExternalLink
+				>{callToAction ??
+				replacePlaceholders($i18n.dapps.text.open_dapp, {
+					$dAppName: dAppName
+				})}</ExternalLink
 				>
 			{/if}
 		</svelte:fragment>
