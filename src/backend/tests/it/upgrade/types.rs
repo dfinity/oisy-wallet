@@ -1,6 +1,5 @@
 use candid::{CandidType, Deserialize, Principal};
-use shared::types::token::ChainId;
-use shared::types::Version;
+use shared::types::{token::ChainId, Version};
 
 #[derive(CandidType, Deserialize, Clone)]
 pub struct UserTokenV0_0_13 {
@@ -19,10 +18,11 @@ pub struct UserTokenV0_0_19 {
     pub version: Option<Version>,
 }
 
-/// Options for unusual add_user_token behaviour.
+/// Options for unusual `add_user_token` behaviour.
 #[derive(Default)]
 pub struct AddUserTokenAfterUpgradeOptions {
-    /// The version number should be None but we can set it to Some(n) for a few small values to check that.
+    /// The version number should be None but we can set it to Some(n) for a few small values to
+    /// check that.
     pub premature_increments: u8,
 }
 

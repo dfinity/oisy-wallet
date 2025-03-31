@@ -1,26 +1,31 @@
-use crate::types::custom_token::{
-    CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token,
-};
-use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
-use crate::types::settings::Settings;
-use crate::types::token::UserToken;
-use crate::types::user_profile::{
-    AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
-};
-use crate::types::{
-    ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
-    Timestamp, TokenVersion, Version,
-};
-use crate::validate::validate_on_deserialize;
-use crate::validate::Validate;
-use candid::Deserialize;
-use candid::Principal;
+use std::{collections::BTreeMap, fmt};
+
+use candid::{Deserialize, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use serde::{de, Deserializer};
-use std::collections::BTreeMap;
-use std::fmt;
 #[cfg(test)]
 use strum::IntoEnumIterator;
+
+use crate::{
+    types::{
+        backend_config::{Config, InitArg},
+        custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
+        dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
+        migration::{ApiEnabled, Migration, MigrationProgress, MigrationReport},
+        network::{
+            NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
+            SaveTestnetsSettingsError,
+        },
+        settings::Settings,
+        token::UserToken,
+        user_profile::{
+            AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
+        },
+        verifiable_credential::CredentialType,
+        Timestamp, TokenVersion, Version,
+    },
+    validate::{validate_on_deserialize, Validate},
+};
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -41,13 +46,13 @@ impl TokenVersion for UserToken {
         self.version
     }
 
-    fn clone_with_incremented_version(&self) -> Self {
+    fn with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
-    fn clone_with_initial_version(&self) -> Self {
+    fn with_initial_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
@@ -92,13 +97,13 @@ impl TokenVersion for CustomToken {
         self.version
     }
 
-    fn clone_with_incremented_version(&self) -> Self {
+    fn with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
-    fn clone_with_initial_version(&self) -> Self {
+    fn with_initial_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
@@ -118,13 +123,13 @@ impl TokenVersion for StoredUserProfile {
         self.version
     }
 
-    fn clone_with_incremented_version(&self) -> Self {
+    fn with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
-    fn clone_with_initial_version(&self) -> Self {
+    fn with_initial_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
@@ -135,6 +140,7 @@ impl StoredUserProfile {
     #[must_use]
     pub fn from_timestamp(now: Timestamp) -> StoredUserProfile {
         let settings = Settings {
+            networks: NetworksSettings::default(),
             dapp: DappSettings {
                 dapp_carousel: DappCarouselSettings {
                     hidden_dapp_ids: Vec::new(),
@@ -164,7 +170,7 @@ impl StoredUserProfile {
         if profile_version != self.version {
             return Err(AddUserCredentialError::VersionMismatch);
         }
-        let mut new_profile = self.clone_with_incremented_version();
+        let mut new_profile = self.with_incremented_version();
         let user_credential = UserCredential {
             credential_type: credential_type.clone(),
             verified_date_timestamp: Some(now),
@@ -173,6 +179,80 @@ impl StoredUserProfile {
         let mut new_credentials = new_profile.credentials.clone();
         new_credentials.insert(credential_type.clone(), user_credential);
         new_profile.credentials = new_credentials;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with networks map set to the specified value.
+    ///
+    /// If overwrite is true, the networks map will be replaced with the new value.
+    /// If overwrite is false, the new value will be merged with the existing networks map.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_networks(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        networks: NetworkSettingsMap,
+        overwrite: bool,
+    ) -> Result<StoredUserProfile, SaveNetworksSettingsError> {
+        if profile_version != self.version {
+            return Err(SaveNetworksSettingsError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+
+        let new_networks = if overwrite {
+            networks // Directly assign if overwrite is true
+        } else {
+            let mut merged = settings.networks.networks.clone();
+            merged.extend(networks); // Updates existing keys and inserts new ones
+            merged
+        };
+
+        if settings.networks.networks == new_networks {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            settings.networks.networks = new_networks;
+            Some(settings)
+        };
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with `show_testnets` set to the specified value.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_show_testnets(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        show_testnets: bool,
+    ) -> Result<StoredUserProfile, SaveTestnetsSettingsError> {
+        if profile_version != self.version {
+            return Err(SaveTestnetsSettingsError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+
+        if settings.networks.testnets.show_testnets == show_testnets {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            settings.networks.testnets.show_testnets = show_testnets;
+            Some(settings)
+        };
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
@@ -201,7 +281,7 @@ impl StoredUserProfile {
             return Ok(self.clone());
         }
 
-        let mut new_profile = self.clone_with_incremented_version();
+        let mut new_profile = self.with_incremented_version();
         let mut new_settings = new_profile.settings.clone().unwrap_or_default();
         let mut new_dapp_settings = new_settings.dapp.clone();
         let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
@@ -268,6 +348,7 @@ impl ApiEnabled {
     pub fn readable(&self) -> bool {
         matches!(self, Self::Enabled | Self::ReadOnly)
     }
+
     #[must_use]
     pub fn writable(&self) -> bool {
         matches!(self, Self::Enabled)
@@ -275,27 +356,27 @@ impl ApiEnabled {
 }
 #[test]
 fn test_api_enabled() {
-    assert_eq!(ApiEnabled::Enabled.readable(), true);
-    assert_eq!(ApiEnabled::Enabled.writable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.readable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.writable(), false);
-    assert_eq!(ApiEnabled::Disabled.readable(), false);
-    assert_eq!(ApiEnabled::Disabled.writable(), false);
+    assert!(ApiEnabled::Enabled.readable());
+    assert!(ApiEnabled::Enabled.writable());
+    assert!(ApiEnabled::ReadOnly.readable());
+    assert!(!ApiEnabled::ReadOnly.writable());
+    assert!(!ApiEnabled::Disabled.readable());
+    assert!(!ApiEnabled::Disabled.writable());
 }
 
 impl MigrationProgress {
     /// The next phase in the migration process.
     ///
     /// Note: A given phase, such as migrating a `BTreeMap`, may need multiple steps.
-    /// The code for that phase will have to keep track of those steps by means of the data in the variant.
+    /// The code for that phase will have to keep track of those steps by means of the data in the
+    /// variant.
     ///
     /// Prior art:
-    /// - There is an `enum_iterator` crate, however it deals only with simple enums
-    ///   without variant fields.  In this implementation, `next()` always uses the default value for
-    ///   the new field, which is always None.  `next()` does NOT step through the values of the
-    ///   variant field.
-    /// - `strum` has the `EnumIter` derive macro, but that implements `.next()` on an iterator, not on the
-    ///   enum itself, so stepping from one variant to the next is not straightforward.
+    /// - There is an `enum_iterator` crate, however it deals only with simple enums without variant
+    ///   fields.  In this implementation, `next()` always uses the default value for the new field,
+    ///   which is always None.  `next()` does NOT step through the values of the variant field.
+    /// - `strum` has the `EnumIter` derive macro, but that implements `.next()` on an iterator, not
+    ///   on the enum itself, so stepping from one variant to the next is not straightforward.
     ///
     /// Note: The next state after Completed is Completed, so the the iterator will run
     /// indefinitely.  In our case returning an option and ending with None would be fine but needs
@@ -328,7 +409,8 @@ impl MigrationProgress {
     }
 }
 
-// `MigrationProgress::next(&self)` should list all the elements in the enum in order, but stop at Completed.
+// `MigrationProgress::next(&self)` should list all the elements in the enum in order, but stop at
+// Completed.
 #[test]
 fn next_matches_strum_iter() {
     let mut iter = MigrationProgress::iter();
@@ -382,7 +464,8 @@ impl Validate for SplTokenId {
 impl Validate for CustomTokenId {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
-            CustomTokenId::Icrc(_) => Ok(()), // This is a principal.  In principle we could check the exact type of principal.
+            CustomTokenId::Icrc(_) => Ok(()), /* This is a principal.  In principle we could */
+            // check the exact type of principal.
             CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
                 token_address.validate()
             }
@@ -422,7 +505,8 @@ impl Validate for IcrcToken {
     ///
     /// - Checks that the ledger principal is the type of principal used for a canister.
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
-    /// - If an index principal is present, checks that it is also the type of principal used for a canister.
+    /// - If an index principal is present, checks that it is also the type of principal used for a
+    ///   canister.
     fn validate(&self) -> Result<(), candid::Error> {
         let IcrcToken {
             ledger_id,

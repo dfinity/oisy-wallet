@@ -325,6 +325,22 @@ type RequestsResult = variant { Ok : vec RequestsReply; Err : text };
 
 type TransfersResult = variant { Ok : vec TransferIdReply; Err : text };
 
+type AddTokenArgs = record {
+    token : text;
+};
+type AddTokenReply = variant {
+    IC : ICTokenReply;
+};
+type AddTokenResult = variant { Ok : AddTokenReply; Err : text };
+
+type UpdateTokenArgs = record {
+    token : text;
+};
+type UpdateTokenReply = variant {
+    IC : ICTokenReply;
+};
+type UpdateTokenResult = variant { Ok : UpdateTokenReply; Err : text };
+
 type AddPoolArgs = record {
     token_0 : text;
     amount_0 : nat;
@@ -566,6 +582,10 @@ service : {
     // txs(opt principal_id) - return transactions filtered by principal id
     txs : (opt text) -> (TxsResult) query;
 
+    // add a new token
+    add_token : (AddTokenArgs) -> (AddTokenResult);
+    // update token details
+    update_token : (UpdateTokenArgs) -> (UpdateTokenResult);
     // add a new liquidity pool and token
     add_pool : (AddPoolArgs) -> (AddPoolResult);
 

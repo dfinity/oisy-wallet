@@ -16,7 +16,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { getNewReward } from '$lib/services/reward-code.services';
+	import { getNewReward } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -84,10 +84,10 @@
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<div class="mx-auto mb-4 aspect-square h-80 max-h-[44vh] max-w-full p-4">
+		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
-					<div slot="logo" class="flex items-center justify-center rounded-lg bg-white p-2">
+					<div slot="logo" class="flex items-center justify-center rounded-lg bg-primary p-2">
 						<IconAstronautHelmet />
 					</div>
 				</QRCode>
@@ -95,7 +95,7 @@
 		</div>
 
 		{#if nonNullish(code)}
-			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle px-3 py-2">
+			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2">
 				<output class="break-all">{qrCodeUrl}</output>
 				<ReceiveCopy
 					address={qrCodeUrl}

@@ -1,15 +1,16 @@
 use std::time::{Duration, UNIX_EPOCH};
 
-use crate::utils::{
-    assertion::assert_user_profiles_eq,
-    mock::{CALLER, ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
-    pocketic::{setup, PicCanisterTrait},
-};
 use candid::Principal;
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, ListUsersRequest, ListUsersResponse,
     OisyUser, UserProfile,
+};
+
+use crate::utils::{
+    assertion::assert_user_profiles_eq,
+    mock::{CALLER, ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
+    pocketic::{setup, PicCanisterTrait},
 };
 
 #[test]
@@ -238,5 +239,5 @@ fn test_list_users_returns_pouh_credential() {
     };
     expected_users.push(expected_vc_holder_user);
 
-    assert_user_profiles_eq(results_users, expected_users.to_vec());
+    assert_user_profiles_eq(results_users, expected_users.clone());
 }

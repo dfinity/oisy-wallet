@@ -1,4 +1,3 @@
-import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	SOLANA_DEVNET_TOKEN,
 	SOLANA_LOCAL_TOKEN,
@@ -6,8 +5,8 @@ import {
 	SOLANA_TOKEN
 } from '$env/tokens/tokens.sol.env';
 import * as appContants from '$lib/constants/app.constants';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { get } from 'svelte/store';
 
 describe('tokens.derived', () => {
@@ -15,22 +14,15 @@ describe('tokens.derived', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
 
-			testnetsStore.reset({ key: 'testnets' });
-
-			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
+			setupTestnetsStore('reset');
 		});
 
 		it('should return only mainnet token by default', () => {
 			expect(get(enabledSolanaTokens)).toEqual([SOLANA_TOKEN]);
 		});
 
-		it('should return emtpy array if feature flag false', () => {
-			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => false);
-			expect(get(enabledSolanaTokens)).toEqual([]);
-		});
-
 		it('should return testnet tokens when they are enabled', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementationOnce(() => false);
 
 			expect(get(enabledSolanaTokens)).toEqual([
@@ -41,7 +33,7 @@ describe('tokens.derived', () => {
 		});
 
 		it('should return localnet token when in local env', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementationOnce(() => true);
 
 			expect(get(enabledSolanaTokens)).toEqual([

@@ -100,7 +100,7 @@ A list of useful faucets and ERC20 tokens on Sepolia:
 
 - ETH: [Ethereum Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia) from Alchemy
 - ckERC20:
-  - USDC: [Circle faucet](https://faucet.circle.com/)
+  - USDC and EURC: [Circle faucet](https://faucet.circle.com/)
   - LINK: [Chainlink Sepolia faucet](https://faucets.chain.link/sepolia)
 - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
 - Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
@@ -132,7 +132,7 @@ This last step will generate the screenshots for the CI and add them to your PR.
 
 ## Integrate ckERC20 Tokens
 
-While the weekly GitHub Action that runs the job [./scripts/build.tokens.ckerc20.mjs] helps discover new ckERC20 tokens deployed on the IC mainnet for testnet purposes or through proposals for effective production usage, some manual steps are still required to integrate them within OISY.
+While the weekly GitHub Action that runs the job [./scripts/build.tokens.ckerc20.ts] helps discover new ckERC20 tokens deployed on the IC mainnet for testnet purposes or through proposals for effective production usage, some manual steps are still required to integrate them within OISY.
 
 The steps are as follows:
 

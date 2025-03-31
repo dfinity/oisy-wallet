@@ -3,11 +3,14 @@ import { last } from '$lib/utils/array.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolSignature } from '$sol/types/sol-transaction';
+import type {
+	SolRpcTransaction,
+	SolRpcTransactionRaw,
+	SolSignature
+} from '$sol/types/sol-transaction';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { address, address as solAddress, type Address } from '@solana/addresses';
-import { type Signature } from '@solana/keys';
-import type { Lamports } from '@solana/rpc-types';
+import { address as solAddress, type Address, type Lamports, type Signature } from '@solana/kit';
 import type { Writeable } from 'zod';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport
@@ -26,45 +29,23 @@ export const loadSolLamportsBalance = async ({
 	return balance;
 };
 
-/**
- * Fetches the SPL token balance for a wallet.
- */
-export const loadSplTokenBalance = async ({
-	address,
-	network,
-	tokenAddress
+export const loadTokenBalance = async ({
+	ataAddress,
+	network
 }: {
-	address: SolAddress;
+	ataAddress: SolAddress;
 	network: SolanaNetworkType;
-	tokenAddress: SolAddress;
-}): Promise<bigint> => {
-	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
-	const wallet = solAddress(address);
-	const relevantTokenAddress = solAddress(tokenAddress);
-
-	const response = await getTokenAccountsByOwner(
-		wallet,
-		{
-			mint: relevantTokenAddress
-		},
-		{ encoding: 'jsonParsed' }
-	).send();
-
-	if (response.value.length === 0) {
-		return BigInt(0);
-	}
+}): Promise<bigint | undefined> => {
+	const { getTokenAccountBalance } = solanaHttpRpc(network);
+	const wallet = solAddress(ataAddress);
 
 	const {
-		account: {
-			data: {
-				parsed: {
-					info: { tokenAmount }
-				}
-			}
-		}
-	} = response.value[0];
+		value: { amount }
+	} = await getTokenAccountBalance(wallet).send();
 
-	return BigInt(tokenAmount.amount);
+	if (nonNullish(amount)) {
+		return BigInt(amount);
+	}
 };
 
 /**
@@ -109,8 +90,8 @@ export const fetchSignatures = async ({
 	return await fetchSignaturesBatch(before);
 };
 
-export const fetchTransactionDetailForSignature = async ({
-	signature: { signature, confirmationStatus },
+export const getRpcTransaction = async ({
+	signature: { signature },
 	network
 }: {
 	signature: SolSignature;
@@ -118,10 +99,25 @@ export const fetchTransactionDetailForSignature = async ({
 }) => {
 	const { getTransaction } = solanaHttpRpc(network);
 
-	const rpcTransaction = await getTransaction(signature, {
+	return await getTransaction(signature, {
 		maxSupportedTransactionVersion: 0,
 		encoding: 'jsonParsed'
 	}).send();
+};
+
+export const fetchTransactionDetailForSignature = async ({
+	signature,
+	network
+}: {
+	signature: SolSignature;
+	network: SolanaNetworkType;
+}): Promise<SolRpcTransaction | null> => {
+	const { confirmationStatus } = signature;
+
+	const rpcTransaction: SolRpcTransactionRaw | null = await getRpcTransaction({
+		signature,
+		network
+	});
 
 	if (isNullish(rpcTransaction)) {
 		return null;
@@ -132,7 +128,7 @@ export const fetchTransactionDetailForSignature = async ({
 		version: rpcTransaction.version,
 		confirmationStatus,
 		id: signature.toString(),
-		signature
+		signature: signature.signature
 	};
 };
 
@@ -192,7 +188,7 @@ export const estimatePriorityFee = async ({
 }): Promise<bigint> => {
 	const { getRecentPrioritizationFees } = solanaHttpRpc(network);
 	const fees = await getRecentPrioritizationFees(
-		nonNullish(addresses) ? addresses.map(address) : undefined
+		nonNullish(addresses) ? addresses.map(solAddress) : undefined
 	).send();
 
 	return fees.reduce<bigint>(
@@ -205,7 +201,7 @@ export const getTokenDecimals = async ({
 	address,
 	network
 }: {
-	address: SolAddress;
+	address: SplTokenAddress;
 	network: SolanaNetworkType;
 }): Promise<number> => {
 	const { getAccountInfo } = solanaHttpRpc(network);
@@ -224,4 +220,60 @@ export const getTokenDecimals = async ({
 	}
 
 	return 0;
+};
+
+export const getTokenOwner = async ({
+	address,
+	network
+}: {
+	address: SplTokenAddress;
+	network: SolanaNetworkType;
+}): Promise<SplTokenAddress | undefined> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const token = solAddress(address);
+
+	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
+
+	return value?.owner?.toString();
+};
+
+export const getAccountOwner = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<SolAddress | undefined> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const account = solAddress(address);
+
+	const { value } = await getAccountInfo(account, { encoding: 'jsonParsed' }).send();
+
+	if (isNullish(value?.data) || !('parsed' in value.data)) {
+		return undefined;
+	}
+
+	if (isNullish(value.data.parsed?.info)) {
+		return undefined;
+	}
+
+	// We need to cast the type since it is not implied
+	const { owner } = value.data.parsed.info as { owner: SolAddress };
+
+	return owner;
+};
+
+export const checkIfAccountExists = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<boolean> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const account = solAddress(address);
+
+	const { value } = await getAccountInfo(account, { encoding: 'jsonParsed' }).send();
+
+	return nonNullish(value);
 };

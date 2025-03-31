@@ -7,17 +7,22 @@
 			"back": "Back",
 			"done": "Done",
 			"close": "Close",
+			"change": "Change",
+			"apply": "Apply",
 			"refresh": "Refresh",
 			"name": "Name",
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
+			"destination": "Destination",
 			"reject": "Reject",
 			"approve": "Approve",
 			"view": "View",
 			"copy": "Copy",
-			"clear_filter": "Clear filter"
+			"clear_filter": "Clear filter",
+			"not_available": "n/a",
+			"new": "New"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -37,11 +42,13 @@
 			"settings": "Settings",
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
+			"airdrops": "Rewards",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"changelog": "Changelog",
-			"support_email": "Support",
+			"documentation": "Documentation",
+			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes"
 		},
@@ -50,21 +57,26 @@
 			"settings": "Open your settings",
 			"dapp_explorer": "Open dapp explorer",
 			"activity": "Open the activity view",
+			"airdrops": "Open the Rewards view",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
-			"support_email": "Reach out to the team",
+			"documentation": "Open the $oisy_name documentation",
+			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link"
+		},
+		"short": {
+			"documentation": "Docs"
 		}
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "Your Digital Assets",
-			"title_part_2": "Safe. Seamless. Sovereign.",
+			"title_part_1": "$oisy_name",
+			"title_part_2": "100% Decentralized",
 			"logout": "Logout",
 			"authenticate": "Open or Create",
-			"asset_types": "Bitcoin, Ethereum, ICP and more",
+			"asset_types": "Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Instant and private access anywhere",
 			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
 		},
@@ -111,6 +123,35 @@
 			"website": "Image of $dAppName"
 		}
 	},
+	"rewards": {
+		"text": {
+			"title": "Rewards",
+			"active_campaigns": "Active Opportunities",
+			"upcoming_campaigns": "Upcoming Opportunities",
+			"active_date": "Due on",
+			"participate_title": "Participate and earn Sprinkles",
+			"share": "Share on X",
+			"learn_more": "Learn more",
+			"check_status": "Check Status & Eligibility",
+			"requirements_title": "Requirements",
+			"modal_button_text": "Got it",
+			"activity_button_text": "Check on Recent Activity",
+			"activity_button_text_short": "Check activity",
+			"no_balance_title": "Earn $oisy_short Sprinkles",
+			"no_balance_description": "Check back later to see your rewards",
+			"open_wallet": "Take me to the wallet",
+			"state_modal_title": "Congratulations on earning today’s $oisy_short Sprinkles!",
+			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
+			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
+			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
+			"carousel_slide_cta": "Learn more",
+			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
+			"youre_eligible": "You're eligible!"
+		},
+		"alt": {
+			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
+		}
+	},
 	"footer": {
 		"text": {
 			"incubated_with": "Incubated with",
@@ -119,8 +160,7 @@
 			"copyright": "© 2025"
 		},
 		"alt": {
-			"dfinity": "Go to DFINITY Foundation website",
-			"status": "Find more details about the current status of $oisy_short's development."
+			"dfinity": "Go to DFINITY Foundation website"
 		}
 	},
 	"wallet": {
@@ -142,9 +182,10 @@
 	},
 	"init": {
 		"text": {
-			"initializing_wallet": "Initializing your wallet",
+			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys"
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum and Solana",
+			"done": "Enjoy $oisy_short"
 		},
 		"info": {
 			"hold_loading": "Hold tight, we are loading some information...",
@@ -210,6 +251,7 @@
 			"testnets": "Show test networks",
 			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
 			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance.",
+			"active_networks": "Active networks",
 			"credentials_title": "Credentials",
 			"pouh_credential": "Humanity Credential",
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
@@ -223,7 +265,7 @@
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
 			"github_release": "$oisy_short release notes on GitHub",
-			"appearance_light": "Enabled light mode",
+			"appearance_light": "Enables light mode",
 			"appearance_dark": "Enables dark mode",
 			"appearance_system": "Enables your operating systems color mode"
 		},
@@ -235,7 +277,10 @@
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
 		"more": "More networks coming soon...",
-		"chain_fusion": "Chain Fusion (all networks)"
+		"chain_fusion": "All networks",
+		"network": "Network",
+		"testnet": "Testnet",
+		"filter": "Filter networks"
 	},
 	"receive": {
 		"text": {
@@ -354,8 +399,10 @@
 			"insufficient_funds": "Insufficient funds.",
 			"unknown_minimum_ckbtc_amount": "The minimum amount of ckBTC required for converting to BTC is unknown.",
 			"unknown_minimum_cketh_amount": "The minimum amount of ckETH required for converting to ETH is unknown.",
+			"unknown_minimum_amount": "The minimum amount of $sourceTokenSymbol required for converting to $destinationTokenSymbol is unknown.",
 			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
 			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
+			"minimum_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
 			"minimum_ledger_fees": "The amount falls below the ledger fees $symbol.",
 			"minimum_cketh_balance": "The $symbol balance falls below the estimated fee of $amount.",
 			"unknown_cketh": "The ckETH token cannot be retrieved.",
@@ -396,6 +443,8 @@
 	"convert": {
 		"text": {
 			"converting": "Converting...",
+			"conversion_destination": "Conversion destination",
+			"default_destination": "Your OISY Wallet",
 			"convert_to_btc": "Convert to BTC",
 			"convert_to_ckbtc": "Convert to ckBTC",
 			"convert_to_token": "Convert to $token",
@@ -404,7 +453,7 @@
 			"convert_eth_to_cketh": "Convert $token to $ckToken",
 			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes",
 			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes",
-			"how_to_convert_eth_to_cketh": "Here is how to can convert $token to $ckToken on $oisy_name",
+			"how_to_convert_eth_to_cketh": "Here is how you can convert $token to $ckToken on $oisy_name",
 			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
 			"set_amount": "Set amount for conversion",
@@ -424,7 +473,9 @@
 			"initializing": "Initializing transaction...",
 			"refreshing_ui": "Refreshing UI",
 			"unsupported_token_conversion": "Conversion for the selected token is not supported.",
-			"calculating_max_amount": "Calculating..."
+			"calculating_max_amount": "Calculating...",
+			"send_to": "Send converted assets to",
+			"custom_destination": "Another address"
 		},
 		"assertion": {
 			"insufficient_funds": "Insufficient balance"
@@ -448,7 +499,8 @@
 			"not_available": "n/a",
 			"value_difference": "Value difference",
 			"total_fee": "Total estimated fee",
-			"token_fee": "Token fee",
+			"network_fee": "Network fee",
+			"approval_fee": "Approval fee",
 			"gas_fee": "Gas fee",
 			"lp_fee": "LP fee",
 			"max_slippage_info": "Enter value between 0% and 50%",
@@ -460,11 +512,16 @@
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
 			"refreshing_ui": "Refreshing UI",
-			"swap_provider": "Swap provider"
+			"swap_provider": "Swap provider",
+			"swap_route": "Swap route",
+			"included_network_fees": "Included network fees",
+			"included_liquidity_fees": "Included liquidity pool fees"
 		},
 		"error": {
+			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
-			"unexpected_missing_data": "Something went wrong while initiating a swap transaction."
+			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
+			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again."
 		}
 	},
 	"buy": {
@@ -493,7 +550,8 @@
 			"select_token": "Select token",
 			"exchange_is_not_available": "USD value is currently not available.",
 			"source_token_title": "You pay",
-			"destination_token_title": "You receive"
+			"destination_token_title": "You receive",
+			"chain_key": "Chain Key"
 		},
 		"details": {
 			"title": "Token details",
@@ -546,7 +604,7 @@
 		"manage": {
 			"text": {
 				"title": "Manage tokens",
-				"manage_list": "Manage list",
+				"manage_list": "Manage tokens",
 				"do_not_see_import": "Don’t see your token? Import",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
@@ -608,7 +666,7 @@
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
 			"estimated_eth": "Estimated Ethereum Fee",
-			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>:",
+			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>",
 			"convert_fee": "Conversion fee",
 			"convert_inter_network_fee": "Inter-network fee",
 			"convert_btc_network_fee": "Bitcoin network fee",
@@ -750,8 +808,7 @@
 		},
 		"error": {
 			"get_block_number": "Cannot get block number.",
-			"failed_get_transaction": "Failed to get the transaction from the provided (hash: $hash). Please reload the wallet dapp.",
-			"failed_get_mined_transaction": "Failed to get the mined transaction (hash: $hash). Please reload the wallet dapp."
+			"failed_get_transaction": "Failed to get the transaction from the provided (hash: $hash). Please reload the wallet dapp."
 		}
 	},
 	"transactions": {
@@ -763,7 +820,8 @@
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
 			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
-			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual."
+			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
+			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history."
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
@@ -772,7 +830,9 @@
 			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists.",
 			"loading_pending_ck_ethereum_transactions": "Something went wrong while fetching the pending $network transactions.",
 			"get_transaction_for_hash": "Failed to get the transaction from the provided (hash: $hash).",
-			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash."
+			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash.",
+			"loading_token_with_network": "The token $token on the $network network could not be loaded because it's not in your token list.",
+			"loading_token": "The provided link to a token is invalid."
 		}
 	},
 	"about": {
@@ -782,7 +842,7 @@
 				"title": "Why $oisy_short",
 				"hold_crypto": {
 					"title": "Unified Management of All Your Digital Assets",
-					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
+					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Solana, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
 				},
 				"network_custody": {
 					"title": "No more private key anxiety with Network Custody",
@@ -875,7 +935,7 @@
 				"loading": "Loading consent message..."
 			},
 			"warning": {
-				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by OISY."
+				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by $oisy_short."
 			},
 			"error": {
 				"no_approve_callback": "No callback to approve the consent message, which is unexpected. Close the wallet and try again.",

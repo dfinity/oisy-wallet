@@ -1,3 +1,4 @@
+import { notEmptyString } from '@dfinity/utils';
 import { defineConfig, devices } from '@playwright/test';
 import dotenv, { type DotenvPopulateInput } from 'dotenv';
 import { join } from 'node:path';
@@ -18,12 +19,18 @@ dotenv.populate(
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
 const MATRIX_OS = process.env.MATRIX_OS ?? '';
-const isMac = MATRIX_OS.includes('macos') ?? process.platform === 'darwin';
+const isMac = notEmptyString(MATRIX_OS)
+	? MATRIX_OS.includes('macos')
+	: process.platform === 'darwin';
 
 const appleProjects = [
 	{
 		name: 'Safari',
 		use: devices['Desktop Safari']
+	},
+	{
+		name: 'Google Chrome',
+		use: devices['Desktop Chrome']
 	},
 	{
 		name: 'iPhone SE',
@@ -59,7 +66,7 @@ const TIMEOUT = 5 * 60 * 1000;
 export default defineConfig({
 	retries: 3,
 	timeout: TIMEOUT,
-	workers: DEV ? 5 : 2,
+	workers: 5,
 	expect: {
 		toHaveScreenshot: {
 			// disable any animations caught by playwright for better screenshots and less flaky tests.

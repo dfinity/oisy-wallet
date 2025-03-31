@@ -101,7 +101,7 @@
 		position: relative;
 
 		outline-offset: var(--padding-0_25x);
-		outline: var(--color-secondary) dashed var(--padding-0_5x);
+		outline: var(--color-base-black) dashed var(--padding-0_5x);
 		--primary-rgb: 59, 0, 185;
 		overflow: hidden;
 

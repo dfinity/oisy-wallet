@@ -1,13 +1,11 @@
 <script lang="ts">
-	import { Modal, type ProgressStep } from '@dfinity/gix-components';
+	import { Modal, type ProgressStep, themeStore } from '@dfinity/gix-components';
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
-	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
-	import banner from '$lib/assets/banner.svg';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -20,15 +18,17 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { testnets } from '$lib/derived/testnets.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 	import { signOut } from '$lib/services/auth.services';
+	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
@@ -49,6 +49,11 @@
 			step: ProgressStepsLoader.ADDRESSES,
 			text: $i18n.init.text.retrieving_public_keys,
 			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: ProgressStepsLoader.DONE,
+			text: replaceOisyPlaceholders($i18n.init.text.done),
+			state: 'completed'
 		} as ProgressStep
 	];
 
@@ -93,30 +98,26 @@
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
-	$: {
-		if ($testnets) {
-			if (isNullish($btcAddressTestnet)) {
-				debounceLoadBtcAddressTestnet();
+	$: if ($testnetsEnabled) {
+		if (isNullish($btcAddressTestnet)) {
+			debounceLoadBtcAddressTestnet();
+		}
+
+		if (isNullish($solAddressTestnet)) {
+			debounceLoadSolAddressTestnet();
+		}
+
+		if (isNullish($solAddressDevnet)) {
+			debounceLoadSolAddressDevnet();
+		}
+
+		if (LOCAL) {
+			if (isNullish($btcAddressRegtest)) {
+				debounceLoadBtcAddressRegtest();
 			}
 
-			if (SOLANA_NETWORK_ENABLED) {
-				if (isNullish($solAddressTestnet)) {
-					debounceLoadSolAddressTestnet();
-				}
-
-				if (isNullish($solAddressDevnet)) {
-					debounceLoadSolAddressDevnet();
-				}
-			}
-
-			if (LOCAL) {
-				if (isNullish($btcAddressRegtest)) {
-					debounceLoadBtcAddressRegtest();
-				}
-
-				if (isNullish($solAddressLocal) && SOLANA_NETWORK_ENABLED) {
-					debounceLoadSolAddressLocal();
-				}
+			if (isNullish($solAddressLocal)) {
+				debounceLoadSolAddressLocal();
 			}
 		}
 	}
@@ -124,6 +125,15 @@
 	const validateAddresses = () => emit({ message: 'oisyValidateAddresses' });
 
 	onMount(async () => {
+		// The user profile settings will define the enabled/disabled networks.
+		// So we need to load it first to enable/disable the rest of the services.
+		const { success: userProfileSuccess } = await loadUserProfile({ identity: $authIdentity });
+
+		if (!userProfileSuccess) {
+			await signOut({});
+			return;
+		}
+
 		const { success: addressIdbSuccess, err } = await loadIdbAddresses();
 
 		if (addressIdbSuccess) {
@@ -165,7 +175,9 @@
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
-						<ImgBanner src={banner} styleClass="aspect-auto" />
+						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
+							<ImgBanner {src} styleClass="aspect-auto" />
+						{/await}
 					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>

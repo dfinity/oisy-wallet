@@ -154,7 +154,7 @@ describe('BtcSendReview', () => {
 		const { getByTestId } = render(BtcSendReview, {
 			props: {
 				...props,
-				amount: defaultBalance
+				amount: defaultBalance.toString()
 			},
 			context: mockContext()
 		});

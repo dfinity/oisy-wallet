@@ -54,3 +54,10 @@ backend-v*.wasm.gz
 pocket-ic
 
 coverage/
+
+/scripts/build.ic-domains.test.actual.*
+
+# Frontend reproducibility script output folder
+tmp
+.qodo
+/cycles-ledger.wasm.gz
