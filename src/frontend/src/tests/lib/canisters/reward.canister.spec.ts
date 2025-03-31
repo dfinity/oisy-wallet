@@ -117,66 +117,6 @@ describe('reward.canister', () => {
 		});
 	});
 
-	describe('getReferrerInfo', () => {
-		it('should return referrer info', async () => {
-			const mockedReferrerInfo: ReferrerInfo = {
-				referral_code: 123343,
-				num_referrals: [2]
-			};
-
-			service.referrer_info.mockResolvedValue(mockedReferrerInfo);
-
-			const { getReferrerInfo } = await createRewardCanister({
-				serviceOverride: service
-			});
-
-			const referrerInfo = await getReferrerInfo(queryParams);
-			expect(service.referrer_info).toHaveBeenCalledWith();
-			expect(referrerInfo).toEqual(mockedReferrerInfo);
-		});
-
-		it('should throw an error if referrer_info throws', async () => {
-			service.referrer_info.mockImplementation(async () => {
-				await Promise.resolve();
-				throw mockResponseError;
-			});
-
-			const { getReferrerInfo } = await createRewardCanister({
-				serviceOverride: service
-			});
-
-			const result = getReferrerInfo(queryParams);
-			await expect(result).rejects.toThrow(mockResponseError);
-		});
-	});
-
-	describe('setReferrer', () => {
-		const mockedReferrerCode = 123456;
-
-		it('should be possible to set referrer', async () => {
-			const { setReferrer } = await createRewardCanister({
-				serviceOverride: service
-			});
-
-			await setReferrer(mockedReferrerCode);
-			expect(service.set_referrer).toHaveBeenCalledWith(mockedReferrerCode);
-		});
-
-		it('should throw an error if set_referrer throws', async () => {
-			service.set_referrer.mockImplementation(async () => {
-				await Promise.resolve();
-				throw mockResponseError;
-			});
-
-			const { setReferrer } = await createRewardCanister({
-				serviceOverride: service
-			});
-
-			const result = setReferrer(mockedReferrerCode);
-			await expect(result).rejects.toThrow(mockResponseError);
-		});
-	});
-
 	describe('claimVipReward', () => {
 		it('should be possible to claim a vip reward', async () => {
 			const mockedClaimResponse = { Success: null };
