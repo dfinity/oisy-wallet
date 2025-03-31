@@ -49,7 +49,7 @@ jobs:
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@v1
         continue-on-error: true
-        id: app-token
+        id: app-token-2
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
