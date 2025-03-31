@@ -903,6 +903,14 @@
 			}
 		}
 	},
+	"referral": {
+		"invitation": {
+			"error": {
+				"loading_referrer_info": "Error while loading referral info",
+				"setting_referrer": "Error while setting referrer"
+			}
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
