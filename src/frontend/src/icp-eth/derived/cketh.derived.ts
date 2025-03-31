@@ -1,5 +1,6 @@
 import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens/tokens.erc20.env';
-import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 import { ethereumTokenId } from '$eth/derived/token.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -12,60 +13,39 @@ import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
-import { networkEthereumEnabled, networkSepoliaEnabled } from '$lib/derived/networks.derived';
 import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
  * ETH to ckETH is supported:
- * - on network Ethereum if the token is Ethereum (and not some ERC20 token)
+ * - on network Ethereum if the token is Ethereum (and not some ERC20 token) and the network is enabled
  * - on network ICP if the token is ckETH
  */
 export const ethToCkETHEnabled: Readable<boolean> = derived(
-	[
-		tokenStandard,
-		tokenWithFallbackAsIcToken,
-		ethereumTokenId,
-		networkEthereumEnabled,
-		networkSepoliaEnabled
-	],
-	([
-		$tokenStandard,
-		$tokenWithFallbackAsIcToken,
-		$ethereumTokenId,
-		$networkEthereumEnabled,
-		$networkSepoliaEnabled
-	]) =>
-		$tokenStandard === 'ethereum' ||
-		(isTokenCkEthLedger($tokenWithFallbackAsIcToken) &&
-			// TODO: instead, use nullish checks on selectedEthereumNetwork when it will return undefined too
-			(($ethereumTokenId === ETHEREUM_TOKEN_ID && $networkEthereumEnabled) ||
-				($ethereumTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaEnabled)))
+	[tokenStandard, tokenWithFallbackAsIcToken, selectedEthereumNetwork],
+	([$tokenStandard, $tokenWithFallbackAsIcToken, $selectedEthereumNetwork]) =>
+		($tokenStandard === 'ethereum' && nonNullish($selectedEthereumNetwork)) ||
+		isTokenCkEthLedger($tokenWithFallbackAsIcToken)
 );
 
 /**
  * ERC20 to ckErc20 is supported:
- * - on network Ethereum if the token is a known Erc20 twin tokens
+ * - on network Ethereum if the token is a known Erc20 twin tokens and the network is enabled
  * - on network ICP if the token is ckErc20
+ * - when Ethereum network is selected (enabled)
  */
 export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
-	[tokenWithFallbackAsIcToken, ethereumTokenId, networkEthereumEnabled, networkSepoliaEnabled],
-	([
-		$tokenWithFallbackAsIcToken,
-		$ethereumTokenId,
-		$networkEthereumEnabled,
-		$networkSepoliaEnabled
-	]) =>
-		ERC20_TWIN_TOKENS_IDS.includes($tokenWithFallbackAsIcToken.id) ||
-		(isTokenCkErc20Ledger($tokenWithFallbackAsIcToken) &&
-			// TODO: instead, use nullish checks on selectedEthereumNetwork when it will return undefined too
-			(($ethereumTokenId === ETHEREUM_TOKEN_ID && $networkEthereumEnabled) ||
-				($ethereumTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaEnabled)))
+	[tokenWithFallbackAsIcToken, selectedEthereumNetwork],
+	([$tokenWithFallbackAsIcToken, $selectedEthereumNetwork]) =>
+		(ERC20_TWIN_TOKENS_IDS.includes($tokenWithFallbackAsIcToken.id) &&
+			nonNullish($selectedEthereumNetwork)) ||
+		isTokenCkErc20Ledger($tokenWithFallbackAsIcToken)
 );
 
 /**

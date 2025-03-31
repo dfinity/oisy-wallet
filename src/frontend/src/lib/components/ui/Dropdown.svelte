@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Modal, Popover } from '@dfinity/gix-components';
 	import DropdownButton from '$lib/components/ui/DropdownButton.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	export let disabled = false;
 	export let asModalOnMobile = false;
@@ -24,28 +25,26 @@
 	<slot />
 </DropdownButton>
 
-<div
-	class="absolute"
-	class:hidden={asModalOnMobile}
-	class:md:block={asModalOnMobile}
-	class:block={!asModalOnMobile}
->
+{#if asModalOnMobile}
+	<Responsive up="1.5md">
+		<Popover bind:visible anchor={button} invisibleBackdrop>
+			<slot name="items" />
+		</Popover>
+	</Responsive>
+
+	<!-- Mobile dropdown displayed as modal -->
+
+	<Responsive down="md">
+		{#if visible}
+			<Modal on:nnsClose={close}>
+				<slot name="title" slot="title" />
+
+				<slot name="items" />
+			</Modal>
+		{/if}
+	</Responsive>
+{:else}
 	<Popover bind:visible anchor={button} invisibleBackdrop>
 		<slot name="items" />
 	</Popover>
-</div>
-<!-- Mobile dropdown displayed as modal -->
-<div
-	class="absolute"
-	class:md:hidden={asModalOnMobile}
-	class:block={asModalOnMobile}
-	class:hidden={!asModalOnMobile}
->
-	{#if visible}
-		<Modal on:nnsClose={close}>
-			<slot name="title" slot="title" />
-
-			<slot name="items" />
-		</Modal>
-	{/if}
-</div>
+{/if}

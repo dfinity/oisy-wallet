@@ -257,7 +257,13 @@ jobs:
       matrix:
         os: [ubuntu-24.04, macos-14]
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/needs_success
-        with:
-          needs: '${{ toJson(needs) }}'
+      - name: Cleared for merging
+        run: |
+          if [ "${{ needs.check-e2e-changes.outputs.e2e-or-config-changed }}" == "false" ]; then
+            echo "No E2E or config changes detected. PR is cleared for merging."
+          elif [[ "${{ needs.e2e.result }}" == "success" ]] && [[ "${{ needs.finalize-snapshots-update.outputs.e2e-snapshots-changed }}" == "false" ]]; then
+            echo "This PR is cleared for merging"
+          else
+            echo "This PR is not cleared for merging"
+            exit 1
+          fi

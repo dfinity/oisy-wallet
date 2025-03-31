@@ -53,7 +53,7 @@
 			/>
 		</div>
 	{:else if badge?.type === 'icon'}
-		<!-- TODO: use new mapping color when merged-->
+		<!-- TODO: use new mapping color when merged -->
 		<div
 			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-primary-inverted"
 			aria-label={badge.ariaLabel}

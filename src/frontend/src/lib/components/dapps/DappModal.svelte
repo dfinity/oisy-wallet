@@ -35,13 +35,11 @@
 	} = dAppDescription);
 
 	let websiteURL: Option<URL>;
-	$: {
-		try {
-			// TODO: use URL.parse
-			websiteURL = new URL(website);
-		} catch (_err: unknown) {
-			websiteURL = null;
-		}
+	$: try {
+		// TODO: use URL.parse
+		websiteURL = new URL(website);
+	} catch (_err: unknown) {
+		websiteURL = null;
 	}
 </script>
 

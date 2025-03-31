@@ -5,7 +5,13 @@ import {
 	BTC_TESTNET_NETWORK_ID
 } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import {
+	SOLANA_DEVNET_NETWORK_ID,
+	SOLANA_LOCAL_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK_ID,
+	SOLANA_TESTNET_NETWORK_ID
+} from '$env/networks/networks.sol.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import type { Network } from '$lib/types/network';
 import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
@@ -46,15 +52,6 @@ export const networksTestnets: Readable<Network[]> = derived(
 	([{ testnets }]) => testnets
 );
 
-export const networkICPEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
-	$networks.some(({ id }) => id === ICP_NETWORK_ID)
-);
-
-export const networkICPDisabled: Readable<boolean> = derived(
-	[networkICPEnabled],
-	([$networkICPEnabled]) => !$networkICPEnabled
-);
-
 export const networkEthereumEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
 	$networks.some(({ id }) => id === ETHEREUM_NETWORK_ID)
 );
@@ -91,4 +88,20 @@ export const networkBitcoinRegtestEnabled: Readable<boolean> = derived(
 export const networkBitcoinMainnetDisabled: Readable<boolean> = derived(
 	[networkBitcoinMainnetEnabled],
 	([$networkBitcoinMainnetEnabled]) => !$networkBitcoinMainnetEnabled
+);
+
+export const networkSolanaMainnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === SOLANA_MAINNET_NETWORK_ID)
+);
+
+export const networkSolanaTestnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === SOLANA_TESTNET_NETWORK_ID)
+);
+
+export const networkSolanaDevnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === SOLANA_DEVNET_NETWORK_ID)
+);
+
+export const networkSolanaLocalEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === SOLANA_LOCAL_NETWORK_ID)
 );

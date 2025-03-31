@@ -98,28 +98,26 @@
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
-	$: {
-		if ($testnetsEnabled) {
-			if (isNullish($btcAddressTestnet)) {
-				debounceLoadBtcAddressTestnet();
+	$: if ($testnetsEnabled) {
+		if (isNullish($btcAddressTestnet)) {
+			debounceLoadBtcAddressTestnet();
+		}
+
+		if (isNullish($solAddressTestnet)) {
+			debounceLoadSolAddressTestnet();
+		}
+
+		if (isNullish($solAddressDevnet)) {
+			debounceLoadSolAddressDevnet();
+		}
+
+		if (LOCAL) {
+			if (isNullish($btcAddressRegtest)) {
+				debounceLoadBtcAddressRegtest();
 			}
 
-			if (isNullish($solAddressTestnet)) {
-				debounceLoadSolAddressTestnet();
-			}
-
-			if (isNullish($solAddressDevnet)) {
-				debounceLoadSolAddressDevnet();
-			}
-
-			if (LOCAL) {
-				if (isNullish($btcAddressRegtest)) {
-					debounceLoadBtcAddressRegtest();
-				}
-
-				if (isNullish($solAddressLocal)) {
-					debounceLoadSolAddressLocal();
-				}
+			if (isNullish($solAddressLocal)) {
+				debounceLoadSolAddressLocal();
 			}
 		}
 	}
