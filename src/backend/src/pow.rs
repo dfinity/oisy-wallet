@@ -146,7 +146,7 @@ pub(crate) fn complete_challenge(
 
     let stored_challenge = get_pow_challenge().ok_or_else(|| {
         ic_cdk::println!(
-            "complete_challenge(nonce) -> No stored challenge found for {}",
+            "complete_challenge(nonce) -> No challenge exists for {}",
             principal
         );
         ChallengeCompletionError::MissingChallenge

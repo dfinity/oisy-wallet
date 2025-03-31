@@ -2,8 +2,6 @@ use std::{collections::BTreeMap, fmt};
 
 use candid::{Deserialize, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
-use ic_cdk::api::time;
-use ic_stable_structures::{Memory, StableBTreeMap, Storable};
 use serde::{de, Deserializer};
 #[cfg(test)]
 use strum::IntoEnumIterator;
@@ -24,7 +22,7 @@ use crate::{
             AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
         verifiable_credential::CredentialType,
-        Expirable, ExpiryBTreeMapWrapper, Timestamp, TokenVersion, Version,
+        Timestamp, TokenVersion, Version,
     },
     validate::{validate_on_deserialize, Validate},
 };
@@ -525,90 +523,6 @@ impl Validate for IcrcToken {
             }
         }
         Ok(())
-    }
-}
-
-/// A simple key-value store where each entry expires after a fixed TTL (Time To Live).
-///
-/// # Type Parameters:
-/// - `K`: Key type, must implement `Hash` and `Eq` (required by `HashMap`).
-/// - `V`: Value type.
-impl<K, V, M> ExpiryBTreeMapWrapper<K, V, M>
-where
-    K: Storable + Ord + Clone + fmt::Debug,
-    V: Storable + Expirable,
-    M: Memory,
-{
-    /// Creates a new `ExpiryBTreeMapWrapper` with the specified TTL.
-    pub fn init(memory: M, ttl_sec: u64) -> Self {
-        Self {
-            map: StableBTreeMap::new(memory),
-            ttl_ns: ttl_sec * 1_000_000_000,
-        }
-    }
-
-    /// Inserts a key-value pair into the `StableBTreeMap`.
-    pub fn insert(&mut self, key: K, value: V) {
-        let _ = self.map.insert(key, value);
-    }
-
-    /// Retrieves the value associated with the specified key if not expired.
-    pub fn get(&self, key: &K) -> Option<V> {
-        let result: Option<V> = self.map.get(key);
-        if let Some(val) = result {
-            if self.is_expired(val.get_expiry_timestamp(self.ttl_ns)) {
-                self.debug_key("Key expired", key);
-                None
-            } else {
-                Some(val)
-            }
-        } else {
-            result
-        }
-    }
-
-    /// Removes a key-value pair.
-    pub fn remove(&mut self, key: &K) {
-        self.debug_key("Removing key", key);
-        let _ = self.map.remove(key);
-    }
-
-    /// Iterates over all non-expired key-value pairs.
-    /// Expired entries are removed during iteration.
-    pub fn iter_all(&mut self) {
-        ic_cdk::println!("Iterating over all key-value pairs");
-
-        // Collect keys of expired entries
-        let mut keys_to_remove: Vec<K> = vec![];
-
-        let iter = self.map.iter();
-
-        for (key, value) in iter {
-            if self.is_expired(value.get_expiry_timestamp(self.ttl_ns)) {
-                self.debug_key("Key expired, marking for removal", &key);
-                keys_to_remove.push(key.clone());
-            } else {
-                // self.debug_key_value("Active entry", &key, &value.data);
-            }
-        }
-
-        // Remove expired keys after iteration
-        for key in keys_to_remove {
-            let _ = self.map.remove(&key);
-        }
-    }
-
-    /// Checks if a timestamp is expired based on TTL.
-    fn is_expired(&self, timestamp: u64) -> bool {
-        time() > timestamp + self.ttl_ns
-    }
-
-    // ========== Conditional Debug Helpers ===========
-    pub fn debug_key(&self, message: &str, key: &K)
-    where
-        K: fmt::Debug,
-    {
-        ic_cdk::println!("{}: {:?},", message, key);
     }
 }
 

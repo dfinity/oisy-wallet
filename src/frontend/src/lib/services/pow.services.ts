@@ -5,7 +5,7 @@ import type {
 	Result_6
 } from '$declarations/backend/backend.did';
 
-import { allowSigningApi, createPowChallengeApi } from '$lib/api/backend.api';
+import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { mapAllowSigningError, mapCreateChallengeError } from '$lib/canisters/backend.errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import crypto from 'crypto';
@@ -39,7 +39,7 @@ export const _createPowChallenge = async ({
 }: {
 	identity: OptionIdentity;
 }): Promise<CreateChallengeResponse> => {
-	const response: Result_6 = await createPowChallengeApi({
+	const response: Result_6 = await createPowChallenge({
 		identity
 	});
 
@@ -56,7 +56,7 @@ export const _allowSigning = async ({
 	identity: OptionIdentity;
 	request?: AllowSigningRequest;
 }): Promise<AllowSigningResponse> => {
-	const response = await allowSigningApi({ identity });
+	const response = await allowSigning({ identity });
 
 	if ('Err' in response) {
 		throw mapAllowSigningError(response.Err);

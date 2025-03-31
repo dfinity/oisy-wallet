@@ -17,6 +17,7 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use oisy_user::oisy_users;
 use serde_bytes::ByteBuf;
+use shared::types::pow::POW_ENABLED;
 use shared::{
     http::{HttpRequest, HttpResponse},
     metrics::get_metrics,
@@ -738,17 +739,39 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
     })
 }
 
-/// An endpoint to be called by users on first login, to enable them to
-/// use the chain fusion signer together with Oisy.
+/// This function authorizes the caller to spend a specific
+//  amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
+// providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
+// cycles ledger.
 ///
-/// Note:
-/// - The chain fusion signer performs threshold key operations including providing public keys,
-///   creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
+/// When the proof-of-work (PoW) protection is enabled (see [`POW_ENABLED`]), the caller must include
+/// a valid PoW challenge nonce in the request. This function grants the caller a number of cycles
+/// proportional to the current PoW difficulty.
+///
+/// # Parameters
+///
+/// * `request` - An optional [`AllowSigningRequest`] that may contain a PoW nonce.
+///   - If [`POW_ENABLED`] is `true` and no request is provided, the call reverts to a
+///     backward-compatible path, calling the signer without the PoW requirement.
+///
+/// # Returns
+///
+/// On success, returns an [`AllowSigningResponse`] that includes:
+/// - The status of the allow-signing request.
+/// - The number of cycles granted for signer operations.
+/// - Information about the completed PoW challenge, if applicable.
 ///
 /// # Errors
-/// Errors are enumerated by: `AllowSigningError`.
+///
+/// This function returns an [`AllowSigningError.PowChallenge`] in cases such as:
+/// - The provided PoW nonce is invalid or missing.
+/// - The user's profile is missing.
+/// - The PoW challenge has expired or was already solved.
+///
 /// # Panics
-/// To be added
+///
+/// May panic if internal logic fails or if unexpected conditions occur. (To be expanded with
+/// specific panic conditions as needed.)
 #[update(guard = "may_read_user_data")]
 pub async fn allow_signing(
     request: Option<AllowSigningRequest>,
@@ -756,14 +779,14 @@ pub async fn allow_signing(
     let principal = ic_cdk::caller();
 
     // Added for backward-compatibility
-    // TODO remove once the PoW feature once it has been stabilized
-    if request.is_none() {
-        // Abort and propagate errors
+    // TODO remove this code block once the PoW feature has been stabilized
+    if request.is_none() && !POW_ENABLED {
+        // Passing None revert to the original cycle calculation logic
         signer::allow_signing(None).await?;
-        // Only propagate errors, otherwise return a pseudo response which is ignored by the
-        // frontend older code
+        // Propagate errors, otherwise return a placeholder response that frontend can temorarly
+        // ignore.
         return Ok(AllowSigningResponse {
-            status: AllowSigningStatus::Executed,
+            status: AllowSigningStatus::Skipped,
             allowed_cycles: 0u64,
             challenge_completion: None,
         });

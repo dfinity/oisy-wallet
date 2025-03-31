@@ -31,8 +31,6 @@ import type {
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
-import { types } from 'sass';
-import Null = types.Null;
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({
@@ -178,13 +176,12 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	allowSigningCanister = async (
-		allowSigningRequest: { request: AllowSigningRequest } | undefined
+	allowSigning = async (
+		allowSigningRequest: { request?: AllowSigningRequest } = {}
 	): Promise<Result_2> => {
 		const { allow_signing } = this.caller({ certified: true });
-
 		const response = await allow_signing(
-			allowSigningRequest?.request ? [allowSigningRequest.request] : []
+			allowSigningRequest.request ? [allowSigningRequest.request] : []
 		);
 
 		if ('Err' in response) {
@@ -196,9 +193,7 @@ export class BackendCanister extends Canister<BackendService> {
 
 	createPowChallenge = (): Promise<Result_6> => {
 		const { create_pow_challenge } = this.caller({ certified: true });
-
 		const response = create_pow_challenge();
-
 		return response;
 	};
 

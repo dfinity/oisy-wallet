@@ -609,7 +609,13 @@ describe('backend.canister', () => {
 
 	describe('allowSigning', () => {
 		it('should allow signing', async () => {
-			const response = { Ok: null };
+			const response: Result_2 = {
+				Ok: {
+					status: { Executed: null }, // or { Skipped: null } or { Failed: null }, depending on your scenario
+					challenge_completion: [], // Provide appropriately if challenge completion data exists
+					allowed_cycles: BigInt(0) // Replace with proper value
+				}
+			};
 
 			service.allow_signing.mockResolvedValue(response);
 
@@ -663,7 +669,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning([])).rejects.toThrow(
+			await expect(allowSigning()).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});

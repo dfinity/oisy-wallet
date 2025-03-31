@@ -1,6 +1,7 @@
-import type { AllowSigningRequest } from '$declarations/backend/backend.did';
-import { allowSigningApi } from '$lib/api/backend.api';
+import { allowSigning } from '$lib/api/backend.api';
+import { errorSignOut } from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ResultSuccess } from '$lib/types/utils';
 import { get } from 'svelte/store';
 
@@ -20,17 +21,17 @@ import { get } from 'svelte/store';
  * @returns {Promise<ResultSuccess>} Returns an object indicating success or failure of the operation.
  * @throws Will trigger a sign-out if `allow_signing` fails.
  */
-export const initSignerAllowance = async (nonce?: bigint): Promise<ResultSuccess> => {
+export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
-		const request: AllowSigningRequest = {
-			nonce: nonce ?? 0n
-		};
 		const { identity } = get(authStore);
-		await allowSigningApi({ request, identity });
+
+		await allowSigning({ identity });
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
-		console.log('error', _err);
+		await errorSignOut(get(i18n).init.error.allow_signing);
+
 		return { success: false };
 	}
+
 	return { success: true };
 };

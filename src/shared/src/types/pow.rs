@@ -3,37 +3,35 @@ use super::{CandidType, Debug, Deserialize};
 // -------------------------------------------------------------------------------------------------
 // PoW Challenge Constants
 // -------------------------------------------------------------------------------------------------
-// If enabled the difficulty for a principal gets adjusted with every solved challenge.
-// The difficulty starts with the difficulty defined by START_DIFFICULTY and will be
+// If `POW_ENABLED` is false, PoW protection remains disabled, preserving the original behavior
+// of the `allow_signing` function.
+pub const POW_ENABLED: bool = true;
+
+// If set to `true`, the difficulty for a principal auto-adjusts after each solved challenge,
+// starting at `START_DIFFICULTY`.
 pub const DIFFICULTY_AUTO_ADJUSTMENT: bool = false;
 
-// The time it takes in average to solve the challenge in milliseconds
-// Difficulty adapts aiming towards this value.
-// This setting only applies if auto-adjustment is enabled
-pub const TARGET_DURATION_MS: u64 = 3000;
+// The average time (in milliseconds) that the system aims for solving the PoW challenge.
+// Difficulty levels are adjusted to approach this target, but only if auto-adjustment is enabled.
+pub const TARGET_DURATION_MS: u64 = 10000;
 
-// The avoid a challenge expiring before the target time we multiply by 2
-// Providing a smaller duration than TARGET_DURATION_MS will result in an error
+// The challenge expires after this time (in milliseconds). Multiplying
+// `TARGET_DURATION_MS` by 4 ensures challenges remain valid longer than the targeted solve time.
 pub const EXPIRY_DURATION_MS: u64 = TARGET_DURATION_MS * 4;
 
-// The difficulty used if no PoW challenge yet been solved
-// This setting must be set to a value between MIN_DIFFICULTY and MAX_DIFFICULTY
+// The default starting difficulty for the first PoW challenge.
+// Must lie between `MIN_DIFFICULTY` and `MAX_DIFFICULTY`.
 pub const START_DIFFICULTY: u32 = 100_000;
 
-// Minimum difficulty required to solve the challenge.
-// Auto-adjustment of difficulty will never fall short of MIN_DIFFICULTY.
-// Note: Limiting the difficulty may cause the actual solving duration to deviate from the defined
-// TARGET_DURATION_MS.
+// The minimum allowed difficulty. Auto-adjustment will not reduce difficulty below this value.
+// Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
 pub const MIN_DIFFICULTY: u32 = 100_000;
 
-// Maximum difficulty required to solve the challenge.
-// Auto-adjustment of difficulty will never exceed MAX_DIFFICULTY.
-// Note: Limiting the difficulty may cause the actual solving duration to deviate from the defined
-// TARGET_DURATION_MS.
+// The maximum allowed difficulty. Auto-adjustment will not raise difficulty above this value.
+// Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
 pub const MAX_DIFFICULTY: u32 = 5_000_000;
 
-// The factor defining the amount of cycles per difficulty unit the caller (principle) will be
-// allowed to spend on signer operations
+// The number of cycles granted per difficulty unit for signer operations.
 pub const DIFFICULTY_TO_CYCLE_FACTOR: u64 = 10_000;
 // ---------------------------------------------------------------------------------------------
 // - Error-structures and -enums
