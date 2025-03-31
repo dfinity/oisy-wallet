@@ -896,7 +896,7 @@
 	},
 	"referral": {
 		"invitation": {
-			"error:": {
+			"error": {
 				"loading_referrer_info": "Error while loading referral info",
 				"setting_referrer": "Error while setting referrer"
 			}
