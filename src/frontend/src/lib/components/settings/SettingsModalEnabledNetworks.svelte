@@ -27,6 +27,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 	import { emit } from '$lib/utils/events.utils';
+	import { isBusy } from '$lib/derived/busy.derived';
 
 	let enabledNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...$userNetworks };
@@ -96,25 +97,23 @@
 		});
 
 		emit({ message: 'oisyRefreshUserProfile' });
-		modalStore.close();
+		setTimeout(() => modalStore.close(), 750);
 	};
 </script>
 
 <ContentWithToolbar>
 	<SettingsList>
 		<svelte:fragment slot="title">{$i18n.settings.text.networks}</svelte:fragment>
-		<svelte:fragment slot="title-action"
-			><div class="font-bold"
-				><Checkbox
-					text="inline"
-					inputId="smth"
-					bind:checked={enabledTestnet}
-					on:nnsChange={toggleTestnets}
-				>
-					{$i18n.settings.text.enable_testnets}
-				</Checkbox>
-			</div></svelte:fragment
-		>
+		<div class="font-bold" slot="title-action"
+			><Checkbox
+				text="inline"
+				inputId="toggle-testnets-switcher"
+				bind:checked={enabledTestnet}
+				on:nnsChange={toggleTestnets}
+			>
+				{$i18n.settings.text.enable_testnets}
+			</Checkbox>
+		</div>
 
 		{#each SUPPORTED_MAINNET_NETWORKS as network (network.id)}
 			<SettingsListItem>
@@ -122,14 +121,13 @@
 					><NetworkLogo {network} blackAndWhite size="xxs" />
 					<span class="ml-2 flex">{network.name}</span></svelte:fragment
 				>
-				<svelte:fragment slot="value">
-					<!-- We disable the ICP toggle, for simplicity in other components and implications we dont allow disabling ICP -->
-					<ManageNetworkToggle
-						checked={enabledNetworks[network.id]?.enabled ?? false}
-						on:nnsToggle={() => toggleNetwork(network)}
-						disabled={network.id === ICP_NETWORK_ID}
-					/></svelte:fragment
-				>
+				<!-- We disable the ICP toggle, for simplicity in other components and implications we dont allow disabling ICP -->
+				<ManageNetworkToggle
+					slot="value"
+					checked={enabledNetworks[network.id]?.enabled ?? false}
+					on:nnsToggle={() => toggleNetwork(network)}
+					disabled={network.id === ICP_NETWORK_ID}
+				/>
 			</SettingsListItem>
 		{/each}
 	</SettingsList>
@@ -141,15 +139,14 @@
 			{#each SUPPORTED_TESTNET_NETWORKS as network (network.id)}
 				<SettingsListItem>
 					<svelte:fragment slot="key"
-						><span><NetworkLogo {network} blackAndWhite size="xxs" /></span>
+						><NetworkLogo {network} blackAndWhite size="xxs" />
 						<span class="ml-2 flex">{network.name}</span></svelte:fragment
 					>
-					<svelte:fragment slot="value"
-						><ManageNetworkToggle
-							checked={enabledNetworks[network.id]?.enabled ?? false}
-							on:nnsToggle={() => toggleNetwork(network)}
-						/></svelte:fragment
-					>
+					<ManageNetworkToggle
+						slot="value"
+						checked={enabledNetworks[network.id]?.enabled ?? false}
+						on:nnsToggle={() => toggleNetwork(network)}
+					/>
 				</SettingsListItem>
 			{/each}
 		</SettingsList>
@@ -161,7 +158,7 @@
 			loading={saveLoading}
 			colorStyle="primary"
 			on:click={save}
-			disabled={!isModified || saveLoading}>{$i18n.core.text.save}</Button
+			disabled={!isModified || saveLoading || $isBusy}>{$i18n.core.text.save}</Button
 		>
 	</ButtonGroup>
 </ContentWithToolbar>
