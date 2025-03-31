@@ -39,23 +39,21 @@
 	// TODO: this state - websiteURL - isn't one and should become a local variable
 	let websiteURL: Option<URL>;
 	let displayURL: OptionString;
-	$: {
-		if (nonNullish(kongSwapDApp)) {
-			try {
-				const validatedWebsiteUrl = safeParse({
-					schema: UrlSchema,
-					value: kongSwapDApp?.website
-				});
-				if (nonNullish(validatedWebsiteUrl)) {
-					websiteURL = new URL(validatedWebsiteUrl);
-					displayURL = websiteURL.hostname.startsWith('www.')
-						? websiteURL.hostname.substring(4)
-						: websiteURL.hostname;
-				}
-			} catch (_err: unknown) {
-				websiteURL = null;
-				displayURL = null;
+	$: if (nonNullish(kongSwapDApp)) {
+		try {
+			const validatedWebsiteUrl = safeParse({
+				schema: UrlSchema,
+				value: kongSwapDApp?.website
+			});
+			if (nonNullish(validatedWebsiteUrl)) {
+				websiteURL = new URL(validatedWebsiteUrl);
+				displayURL = websiteURL.hostname.startsWith('www.')
+					? websiteURL.hostname.substring(4)
+					: websiteURL.hostname;
 			}
+		} catch (_err: unknown) {
+			websiteURL = null;
+			displayURL = null;
 		}
 	}
 </script>
