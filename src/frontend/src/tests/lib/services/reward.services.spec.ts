@@ -1,6 +1,7 @@
 import type {
 	ClaimVipRewardResponse,
-	NewVipRewardResponse, ReferrerInfo,
+	NewVipRewardResponse,
+	ReferrerInfo,
 	RewardInfo,
 	UserData
 } from '$declarations/rewards/rewards.did';
@@ -13,11 +14,13 @@ import {
 } from '$lib/constants/app.constants';
 import {
 	claimVipReward,
-	getNewReward, getReferrerInfo,
+	getNewReward,
+	getReferrerInfo,
 	getRewardRequirementsFulfilled,
 	getRewards,
 	getUserRewardsTokenAmounts,
-	isVipUser, setReferrer
+	isVipUser,
+	setReferrer
 } from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';

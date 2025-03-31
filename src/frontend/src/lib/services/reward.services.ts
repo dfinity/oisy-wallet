@@ -1,4 +1,4 @@
-import type { RewardInfo, VipReward, ReferrerInfo } from '$declarations/rewards/rewards.did';
+import type { ReferrerInfo, RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
 import type { IcToken } from '$icp/types/ic-token';
 import {
 	claimVipReward as claimVipRewardApi,
@@ -228,9 +228,9 @@ export const getReferrerInfo = async (params: {
 	identity: Identity;
 }): Promise<
 	| {
-	referralCode: number;
-	numberOfReferrals: number;
-}
+			referralCode: number;
+			numberOfReferrals: number;
+	  }
 	| undefined
 > => {
 	try {
@@ -252,9 +252,9 @@ export const getReferrerInfo = async (params: {
 };
 
 const updateReferrer = async ({
-								  identity,
-								  referrerCode
-							  }: {
+	identity,
+	referrerCode
+}: {
 	identity: Identity;
 	referrerCode: number;
 }): Promise<void> =>
