@@ -38,7 +38,7 @@
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
@@ -192,7 +192,13 @@
 				<div class="stretch">
 					<div class="mb-8 block">
 						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
-							<ImgBanner {src} styleClass="aspect-auto" />
+							<ImgBanner
+								{src}
+								alt={replacePlaceholders(replaceOisyPlaceholders($i18n.init.alt.loader_banner), {
+									$theme: $themeStore ?? 'light'
+								})}
+								styleClass="aspect-auto"
+							/>
 						{/await}
 					</div>
 
