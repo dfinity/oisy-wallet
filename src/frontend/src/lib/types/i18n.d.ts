@@ -818,6 +818,10 @@ interface I18nVip {
 	};
 }
 
+interface I18nReferral {
+	invitation: { error: { loading_referrer_info: string; setting_referrer: string } };
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -910,6 +914,7 @@ interface I18n {
 	transactions: I18nTransactions;
 	about: I18nAbout;
 	vip: I18nVip;
+	referral: I18nReferral;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
