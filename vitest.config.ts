@@ -69,7 +69,13 @@ export default defineConfig(
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
-				exclude: ['build', '.dfx', '**/.svelte-kit']
+				exclude: ['build', '.dfx', '**/.svelte-kit'],
+				thresholds: {
+					statements: 75,
+					branches: 75,
+					functions: 75,
+					lines: 75
+				}
 			}
 		}
 	})
