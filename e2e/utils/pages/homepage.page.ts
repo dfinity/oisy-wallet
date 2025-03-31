@@ -1,4 +1,5 @@
 import {
+	ACTIVE_NETWORKS_EDIT_BUTTON,
 	AMOUNT_DATA,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
@@ -18,7 +19,7 @@ import {
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
 	SIDEBAR_NAVIGATION_MENU,
-	TESTNET_TOGGLE,
+	TESTNET_CHECKBOX,
 	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
@@ -350,7 +351,8 @@ abstract class Homepage {
 
 	async activateTestnetSettings(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
-		await this.clickByTestId({ testId: TESTNET_TOGGLE });
+		await this.clickByTestId({ testId: ACTIVE_NETWORKS_EDIT_BUTTON });
+		await this.clickByTestId({ testId: TESTNET_CHECKBOX });
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 
