@@ -1,6 +1,6 @@
 //! Code for interacting with the chain fusion signer.
 use bitcoin::{Address, CompressedPublicKey, Network};
-use candid::{CandidType, Nat, Principal};
+use candid::{Nat, Principal};
 use ic_cdk::api::{
     call::call_with_payment128,
     management_canister::{
@@ -13,7 +13,7 @@ use ic_cycles_ledger_client::{
 };
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
-use shared::types::signer::{
+pub(crate) use shared::types::signer::{
     topup::{
         TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
         TopUpCyclesLedgerResult,
