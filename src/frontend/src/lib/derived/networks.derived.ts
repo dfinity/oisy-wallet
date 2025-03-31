@@ -99,22 +99,18 @@ export const networkBitcoinMainnetDisabled: Readable<boolean> = derived(
 	([$networkBitcoinMainnetEnabled]) => !$networkBitcoinMainnetEnabled
 );
 
-export const networkSolanaMainnetEnabled: Readable<boolean> = derived(
-	[networksMainnets],
-	([$networksMainnets]) => $networksMainnets.some(({ id }) => id === SOLANA_MAINNET_NETWORK_ID)
+export const networkSolanaMainnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === SOLANA_MAINNET_NETWORK_ID)
 );
 
-export const networkSolanaTestnetEnabled: Readable<boolean> = derived(
-	[networksTestnets],
-	([$networksTestnets]) => $networksTestnets.some(({ id }) => id === SOLANA_TESTNET_NETWORK_ID)
+export const networkSolanaTestnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === SOLANA_TESTNET_NETWORK_ID)
 );
 
-export const networkSolanaDevnetEnabled: Readable<boolean> = derived(
-	[networksTestnets],
-	([$networksTestnets]) => $networksTestnets.some(({ id }) => id === SOLANA_DEVNET_NETWORK_ID)
+export const networkSolanaDevnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === SOLANA_DEVNET_NETWORK_ID)
 );
 
-export const networkSolanaLocalEnabled: Readable<boolean> = derived(
-	[networksTestnets],
-	([$networksTestnets]) => $networksTestnets.some(({ id }) => id === SOLANA_LOCAL_NETWORK_ID)
+export const networkSolanaLocalEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === SOLANA_LOCAL_NETWORK_ID)
 );
