@@ -1,3 +1,4 @@
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	AMOUNT_DATA,
 	LOADER_MODAL,
@@ -338,7 +339,13 @@ abstract class Homepage {
 		await this.#page.waitForLoadState('networkidle');
 	}
 
-	async navigateTo(testId: string): Promise<void> {
+	async navigateTo({
+		testId,
+		expectedPath
+	}: {
+		testId: string;
+		expectedPath: AppPath;
+	}): Promise<void> {
 		if (await this.isVisibleByTestId(testId)) {
 			await this.clickByTestId({ testId });
 		} else if (await this.isVisibleByTestId(`mobile-${testId}`)) {
@@ -346,10 +353,13 @@ abstract class Homepage {
 		} else {
 			throw new Error('Cannot reach navigation menu!');
 		}
+
+		const urlRegex = new RegExp(`/${expectedPath}(\\?.*|#.*|$)`);
+		await this.#page.waitForURL(urlRegex);
 	}
 
 	async activateTestnetSettings(): Promise<void> {
-		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
+		await this.navigateTo({ testId: NAVIGATION_ITEM_SETTINGS, expectedPath: AppPath.Settings });
 		await this.clickByTestId({ testId: TESTNET_TOGGLE });
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
