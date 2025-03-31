@@ -16,7 +16,12 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { TESTNET_CHECKBOX } from '$lib/constants/test-ids.constants';
+	import {
+		SETTINGS_NETWORKS_MODAL_SAVE_BUTTON,
+		SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX,
+		SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER,
+		SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE
+	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
@@ -105,9 +110,9 @@
 <ContentWithToolbar>
 	<SettingsList>
 		<svelte:fragment slot="title">{$i18n.settings.text.networks}</svelte:fragment>
-		<div class="font-bold" slot="title-action"
-			><Checkbox
-				testId={TESTNET_CHECKBOX}
+		<div class="font-bold" slot="title-action">
+			<Checkbox
+				testId={SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX}
 				text="inline"
 				inputId="toggle-testnets-switcher"
 				bind:checked={enabledTestnet}
@@ -119,8 +124,8 @@
 
 		{#each SUPPORTED_MAINNET_NETWORKS as network (network.id)}
 			<SettingsListItem>
-				<svelte:fragment slot="key"
-					><NetworkLogo {network} blackAndWhite size="xxs" />
+				<svelte:fragment slot="key">
+					<NetworkLogo {network} blackAndWhite size="xxs" />
 					<span class="ml-2 flex">{network.name}</span></svelte:fragment
 				>
 				<!-- We disable the ICP toggle, for simplicity in other components and implications we dont allow disabling ICP -->
@@ -135,19 +140,20 @@
 	</SettingsList>
 
 	{#if enabledTestnet}
-		<SettingsList>
+		<SettingsList testId={SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER}>
 			<svelte:fragment slot="title">{$i18n.networks.test_networks}</svelte:fragment>
 
 			{#each SUPPORTED_TESTNET_NETWORKS as network (network.id)}
 				<SettingsListItem>
-					<svelte:fragment slot="key"
-						><NetworkLogo {network} blackAndWhite size="xxs" />
-						<span class="ml-2 flex">{network.name}</span></svelte:fragment
-					>
+					<svelte:fragment slot="key">
+						<NetworkLogo {network} blackAndWhite size="xxs" />
+						<span class="ml-2 flex">{network.name}</span>
+					</svelte:fragment>
 					<ManageNetworkToggle
 						slot="value"
 						checked={enabledNetworks[network.id]?.enabled ?? false}
 						on:nnsToggle={() => toggleNetwork(network)}
+						testId={`${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-${network.id.description}`}
 					/>
 				</SettingsListItem>
 			{/each}
@@ -160,7 +166,8 @@
 			loading={saveLoading}
 			colorStyle="primary"
 			on:click={save}
-			disabled={!isModified || saveLoading || $isBusy}>{$i18n.core.text.save}</Button
+			disabled={!isModified || saveLoading || $isBusy}
+			testId={SETTINGS_NETWORKS_MODAL_SAVE_BUTTON}>{$i18n.core.text.save}</Button
 		>
 	</ButtonGroup>
 </ContentWithToolbar>

@@ -48,6 +48,14 @@ export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
 
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
+export const SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON = 'settings-active-networks-edit-button';
+
+export const SETTINGS_NETWORKS_MODAL = 'settings-networks-modal';
+export const SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX = 'settings-networks-modal-testnet-checkbox';
+export const SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER =
+	'settings-networks-modal-testnets-container';
+export const SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE = 'settings-networks-modal-testnet-toggle';
+export const SETTINGS_NETWORKS_MODAL_SAVE_BUTTON = 'settings-networks-modal-save-button';
 
 export const NAVIGATION_ITEM_TOKENS = 'navigation-item-tokens';
 export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
@@ -67,8 +75,6 @@ export const DESTINATION_INPUT = 'destination-input';
 export const IN_PROGRESS_MODAL = 'in-progress-modal';
 
 export const TESTNET_TOGGLE = 'testnet-toggle';
-export const TESTNET_CHECKBOX = 'testnets-checkbox';
-export const ACTIVE_NETWORKS_EDIT_BUTTON = 'active-networks-edit-button';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
 export const CAROUSEL_SLIDE = 'carousel-slide';
