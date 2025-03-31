@@ -1,10 +1,12 @@
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import * as solanaApi from '$sol/api/solana.api';
 import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
-import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import * as solAddressUtils from '$sol/utils/sol-address.utils';
+import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -16,15 +18,14 @@ describe('SolSendForm', () => {
 	const mockAtaFeeStore = initFeeStore();
 
 	const props = {
-		destination: mockSolAddress2,
+		destination: mockAtaAddress,
 		amount: 22_000,
 		source: mockSolAddress
 	};
 
+	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
 	const destinationSelector = 'input[data-tid="destination-input"]';
-	const amountSelector = 'input[data-tid="amount-input"]';
-	const sourceSelector = 'div[id="source"]';
-	const balanceSelector = 'div[id="balance"]';
+	const networkSelector = 'div[id="network"]';
 	const feeSelector = 'p[id="fee"]';
 	const ataFeeSelector = 'p[id="ataFee"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
@@ -65,17 +66,14 @@ describe('SolSendForm', () => {
 			context: mockContext
 		});
 
-		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
-		expect(destination).not.toBeNull();
-
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
 		expect(amount).not.toBeNull();
 
-		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
-		expect(source).not.toBeNull();
+		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
+		expect(destination).not.toBeNull();
 
-		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
-		expect(balance).not.toBeNull();
+		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+		expect(network).not.toBeNull();
 
 		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
 		expect(fee).not.toBeNull();
@@ -86,6 +84,9 @@ describe('SolSendForm', () => {
 
 	describe('with SPL token', () => {
 		beforeEach(() => {
+			vi.clearAllMocks();
+			vi.resetAllMocks();
+
 			mockContext.set(
 				SEND_CONTEXT_KEY,
 				initSendContext({
@@ -93,6 +94,8 @@ describe('SolSendForm', () => {
 					token: TRUMP_TOKEN
 				})
 			);
+
+			vi.spyOn(solAddressUtils, 'isAtaAddress').mockResolvedValue(true);
 		});
 
 		it('should not render ATA creation fee if the destination is empty', () => {
@@ -105,7 +108,7 @@ describe('SolSendForm', () => {
 			expect(ataFee).toBeNull();
 		});
 
-		it('should render ATA creation fee if it is not nullushi', async () => {
+		it('should render ATA creation fee if it is not nullish', async () => {
 			const { container } = render(SolSendForm, {
 				props,
 				context: mockContext

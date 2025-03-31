@@ -7,8 +7,10 @@
 </script>
 
 <div>
-	<div class="flex items-center gap-3 font-bold">
-		<slot name="icon" />
+	<div class="flex items-center gap-3 font-bold text-primary">
+		<div class="text-primary">
+			<slot name="icon" />
+		</div>
 		<Html text={replaceOisyPlaceholders(title)} />
 	</div>
 	<p class="mb-0 mt-2 text-sm sm:text-base">

@@ -11,6 +11,7 @@ export const LOADER_MODAL = 'loader-modal';
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
+export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
@@ -53,6 +54,11 @@ export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
+export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
+
+export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
+
+export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
 export const AMOUNT_DATA = 'amount-data';
 export const AMOUNT_INPUT = 'amount-input';
@@ -63,6 +69,7 @@ export const IN_PROGRESS_MODAL = 'in-progress-modal';
 export const TESTNET_TOGGLE = 'testnet-toggle';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
+export const CAROUSEL_SLIDE = 'carousel-slide';
 export const CAROUSEL_SLIDE_NAVIGATION = 'carousel-slide-navigation-';
 
 export const TOKEN_MENU_IC = 'token-menu-ic';
@@ -97,9 +104,31 @@ export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-una
 
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
 
+export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
 export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
+export const MANAGE_TOKENS_MODAL_CLOSE = 'manage-tokens-modal-close';
 export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
+
+export const THEME_SELECTOR_CARD = 'theme-selector-card';
+
+export const REWARDS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-reward-campaigns-container';
+export const REWARDS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-reward-campaigns-container';
+export const REWARDS_MODAL = 'rewards-modal';
+export const REWARDS_MODAL_DATE_BADGE = 'rewards-modal-date-badge';
+export const REWARDS_MODAL_IMAGE_BANNER = 'rewards-modal-image-banner';
+export const REWARDS_STATE_MODAL_IMAGE_BANNER = 'reward-state-modal-image-banner';
+export const REWARDS_STATE_MODAL_SHARE_BUTTON = 'reward-state-modal-share-button';
+export const REWARDS_BANNER = 'rewards-banner';
+export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
+export const REWARDS_STATUS_BUTTON = 'reward-status-button';
+
+export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
+export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
+
+export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
+export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
+export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';

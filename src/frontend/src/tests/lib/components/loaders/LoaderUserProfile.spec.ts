@@ -1,18 +1,13 @@
 import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
-import * as authStore from '$lib/derived/auth.derived';
 import * as loadUserServices from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { emit } from '$lib/utils/events.utils';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
-import type { Identity } from '@dfinity/agent';
 import { render } from '@testing-library/svelte';
-import { get, readable } from 'svelte/store';
+import { get } from 'svelte/store';
 
 describe('LoaderUserProfile', () => {
-	const mockAuthStore = (value: Identity | null = mockIdentity) =>
-		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
-
 	beforeEach(() => {
 		vi.restoreAllMocks();
 
@@ -28,6 +23,7 @@ describe('LoaderUserProfile', () => {
 		const spy = vi.spyOn(loadUserServices, 'loadUserProfile').mockImplementationOnce(async () => {
 			userProfileStore.set({ certified: true, profile: mockUserProfile });
 			await Promise.resolve();
+			return { success: true };
 		});
 
 		render(LoaderUserProfile);
@@ -49,6 +45,7 @@ describe('LoaderUserProfile', () => {
 		spy.mockImplementationOnce(async () => {
 			userProfileStore.set({ certified: true, profile: { ...mockUserProfile, version: [2n] } });
 			await Promise.resolve();
+			return { success: true };
 		});
 
 		emit({ message: 'oisyRefreshUserProfile' });

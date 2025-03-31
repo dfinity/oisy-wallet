@@ -48,13 +48,14 @@ function install_did_files() {
 # .. downloads candid for the signer
 DFX_NETWORK=ic ./scripts/build.signer.sh
 # .. downloads candid for the kong_backend
-./scripts/build.kong_backend.sh
+DFX_NETWORK=ic ./scripts/build.kong_backend.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
 scripts/bind/rust.sh cycles_ledger
 # Generate javascript & typescript bindings for canisters with directories in `declarations`:
-for canister in $(ls src/declarations/); do
+mapfile -t canisters < <(ls src/declarations/)
+for canister in "${canisters[@]}"; do
   echo "Generating bindings for $canister"
   dfx generate "$canister"
 done

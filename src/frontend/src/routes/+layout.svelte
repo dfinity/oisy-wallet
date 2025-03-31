@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Spinner, Toasts } from '@dfinity/gix-components';
+	import { Spinner, Toasts, SystemThemeListener } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -99,3 +99,4 @@
 <Toasts maxVisible={3} />
 <Busy />
 <ModalExitHandler />
+<SystemThemeListener />

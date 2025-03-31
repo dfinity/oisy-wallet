@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
@@ -19,29 +18,36 @@
 	} from '$icp/utils/cketh.utils';
 	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { balance } from '$lib/derived/balances.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
-	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenExchangeRate, sendBalance } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let fee: bigint | undefined;
 	$: fee = ($sendToken as OptionIcToken)?.fee;
 
+	let exchangeValueUnit: DisplayUnit = 'usd';
+	let inputUnit: DisplayUnit;
+	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
-	$: customValidate = (userAmount: BigNumber): Error | undefined => {
+	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (isNullish(fee) || isNullish($sendToken)) {
 			return;
 		}
@@ -82,9 +88,9 @@
 		}
 
 		const assertBalance = (): IcAmountAssertionError | undefined => {
-			const total = userAmount.add(fee ?? ZERO);
+			const total = userAmount + (fee ?? ZERO_BI);
 
-			if (total.gt($balance ?? ZERO)) {
+			if (total > ($balance ?? ZERO_BI)) {
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
 
@@ -117,26 +123,44 @@
 
 		return assertBalance();
 	};
-
-	$: calculateMax = (): number | undefined =>
-		isNullish($sendToken)
-			? undefined
-			: getMaxTransactionAmount({
-					balance: $balance ?? ZERO,
-					fee: BigNumber.from(fee),
-					tokenDecimals: $sendToken.decimals,
-					tokenStandard: $sendToken.standard
-				});
-
-	let sendInputAmount: SendInputAmount | undefined;
-	$: $ethereumFeeStore, (() => sendInputAmount?.triggerValidate())();
 </script>
 
-<SendInputAmount
-	bind:amount
-	bind:this={sendInputAmount}
-	tokenDecimals={$sendTokenDecimals}
-	{customValidate}
-	{calculateMax}
-	bind:error={amountError}
-/>
+<div class="mb-4">
+	<TokenInput
+		token={$sendToken}
+		bind:amount
+		displayUnit={inputUnit}
+		isSelectable={false}
+		exchangeRate={$sendTokenExchangeRate}
+		bind:error={amountError}
+		customErrorValidate={customValidate}
+		autofocus={nonNullish($sendToken)}
+	>
+		<span slot="title">{$i18n.core.text.amount}</span>
+
+		<svelte:fragment slot="amount-info">
+			{#if nonNullish($sendToken)}
+				<div class="text-tertiary">
+					<TokenInputAmountExchange
+						{amount}
+						exchangeRate={$sendTokenExchangeRate}
+						token={$sendToken}
+						bind:displayUnit={exchangeValueUnit}
+					/>
+				</div>
+			{/if}
+		</svelte:fragment>
+
+		<svelte:fragment slot="balance">
+			{#if nonNullish($sendToken)}
+				<MaxBalanceButton
+					bind:amount
+					error={nonNullish(amountError)}
+					balance={$sendBalance}
+					token={$sendToken}
+					fee={fee ?? ZERO_BI}
+				/>
+			{/if}
+		</svelte:fragment>
+	</TokenInput>
+</div>

@@ -6,15 +6,14 @@ import {
 	UTXOS_FEE_CONTEXT_KEY,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
-import { BTC_MAINNET_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks/networks.env';
-import * as authStore from '$lib/derived/auth.derived';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import * as authServices from '$lib/services/auth.services';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import type { Identity } from '@dfinity/agent';
 import { render, waitFor } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
 
 describe('UtxosFeeContext', () => {
 	const amount = 10;
@@ -22,8 +21,6 @@ describe('UtxosFeeContext', () => {
 	const mockContext = (store: UtxosFeeStore) => new Map([[UTXOS_FEE_CONTEXT_KEY, { store }]]);
 	const mockBtcSendApi = () =>
 		vi.spyOn(btcSendApi, 'selectUtxosFee').mockResolvedValue(mockUtxosFee);
-	const mockAuthStore = (value: Identity | null = mockIdentity) =>
-		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 	let store: UtxosFeeStore;
 
 	const props = {

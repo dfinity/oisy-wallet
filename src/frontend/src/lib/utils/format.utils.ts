@@ -2,18 +2,22 @@ import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { AmountString } from '$lib/types/amount';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber, type BigNumberish } from '@ethersproject/bignumber';
+import { type BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
 const DEFAULT_DISPLAY_DECIMALS = 4;
 
 interface FormatTokenParams {
-	value: BigNumber;
+	value: bigint;
 	unitName?: string | BigNumberish;
 	displayDecimals?: number;
 	trailingZeros?: boolean;
 	showPlusSign?: boolean;
 }
+
+type FormatTokenAmountParams = Omit<FormatTokenParams, 'value'> & {
+	value: bigint;
+};
 
 export const formatToken = ({
 	value,
@@ -36,18 +40,15 @@ export const formatToken = ({
 	return `${showPlusSign && +res > 0 ? '+' : ''}${formatted}`;
 };
 
-export const formatTokenBigintToNumber = ({
-	value,
-	...restParams
-}: Omit<FormatTokenParams, 'value'> & {
-	value: bigint;
-}): number =>
-	Number(
-		formatToken({
-			value: BigNumber.from(value),
-			...restParams
-		})
-	);
+// TODO: remove this function since it is duplicated of formatToken
+export const formatTokenAmount = ({ value, ...restParams }: FormatTokenAmountParams): string =>
+	formatToken({
+		value,
+		...restParams
+	});
+
+export const formatTokenBigintToNumber = (params: FormatTokenAmountParams): number =>
+	Number(formatTokenAmount(params));
 
 /**
  * Shortens the text from the middle. Ex: "12345678901234567890" -> "1234567...5678901"
@@ -87,6 +88,14 @@ export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
 	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
 };
+
+export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
+	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
+	return date.getTime();
+};
+
+export const formatToShortDateString = (date: Date): string =>
+	date.toLocaleDateString('en', { month: 'long' });
 
 const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 

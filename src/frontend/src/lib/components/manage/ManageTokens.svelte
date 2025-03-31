@@ -17,7 +17,10 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
+	import {
+		MANAGE_TOKENS_MODAL_CLOSE,
+		MANAGE_TOKENS_MODAL_SAVE
+	} from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
@@ -34,6 +37,8 @@
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
+
+	export let initialSearch: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -68,7 +73,7 @@
 	const updateFilter = () => (tokensFilter = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
-	let filter = '';
+	let filter = initialSearch ?? '';
 	$: filter, debounceUpdateFilter();
 
 	let filteredTokens: Token[] = [];
@@ -150,12 +155,14 @@
 </div>
 
 {#if nonNullish($selectedNetwork)}
-	<p class="mb-4 pb-2 pt-1 text-misty-rose">
+	<p class="mb-4 pb-2 pt-1 text-tertiary">
 		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
 			$network: $selectedNetwork.name
 		})}
 	</p>
 {/if}
+
+<slot name="info-element" />
 
 {#if noTokensMatch}
 	<button
@@ -165,13 +172,13 @@
 	>
 		<span class="text-7xl">🤔</span>
 
-		<span class="py-4 text-center font-bold text-brand-primary no-underline"
+		<span class="py-4 text-center font-bold text-brand-primary-alt no-underline"
 			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
 	</button>
 {:else}
-	<div class="tokens flex flex-col overflow-y-hidden sm:max-h-[26rem]">
-		<div class="tokens-scroll my-3 overflow-y-auto overscroll-contain">
+	<div class="flex flex-col overflow-y-hidden py-3 sm:max-h-[26rem]">
+		<div class="my-3 overflow-y-auto overscroll-contain">
 			{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 				<Card>
 					<TokenName data={token} />
@@ -200,36 +207,13 @@
 
 	<button
 		data-tid="import-token-button"
-		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-brand-primary no-underline"
+		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-brand-primary-alt no-underline"
 		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
-	>
 
 	<ButtonGroup>
-		<ButtonCancel on:click={() => dispatch('icClose')} />
+		<ButtonCancel testId={MANAGE_TOKENS_MODAL_CLOSE} on:click={() => dispatch('icClose')} />
 		<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} on:click={save}>
 			{$i18n.core.text.save}
 		</Button>
 	</ButtonGroup>
 {/if}
-
-<style lang="scss">
-	.tokens {
-		padding: var(--padding-1_5x) 0;
-	}
-
-	.tokens-scroll {
-		&::-webkit-scrollbar-thumb {
-			background-color: rgba(var(--color-black-rgb), 0.2);
-		}
-
-		&::-webkit-scrollbar-track {
-			border-radius: var(--padding-2x);
-			-webkit-border-radius: var(--padding-2x);
-		}
-
-		&::-webkit-scrollbar-thumb {
-			border-radius: var(--padding-2x);
-			-webkit-border-radius: var(--padding-2x);
-		}
-	}
-</style>

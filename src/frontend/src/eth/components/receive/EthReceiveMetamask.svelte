@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { metamaskAvailable } from '$eth/derived/metamask.derived';
-	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { selectedEthereumNetworkWithFallback } from '$eth/derived/network.derived';
 	import { openMetamaskTransaction } from '$eth/services/metamask.services';
 	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -20,7 +20,7 @@
 
 		await openMetamaskTransaction({
 			address: $ethAddress,
-			network: $selectedEthereumNetwork
+			network: $selectedEthereumNetworkWithFallback
 		});
 	};
 
@@ -31,7 +31,7 @@
 </script>
 
 {#if $metamaskAvailable && $networkEthereum && tokenStandardEth}
-	<Button colorStyle="secondary" fullWidth styleClass="mt-8 mb-2" on:click={receiveModal}>
+	<Button colorStyle="primary" fullWidth styleClass="mt-8 mb-2" on:click={receiveModal}>
 		<IconMetamask />
 		<span class="text-dark-slate-blue font-bold">{$i18n.receive.ethereum.text.metamask}</span>
 	</Button>

@@ -9,8 +9,7 @@ use ic_cdk::api::management_canister::bitcoin::Utxo;
 /// # Implementation
 /// Iteratively either:
 /// - Chooses the smallest UTXO larger than the target, or, that failing,
-/// - Chooses the largest UTXO smaller than the target.
-///   Until the target value has been reached.
+/// - Chooses the largest UTXO smaller than the target. Until the target value has been reached.
 ///
 /// PROPERTY: `sum(u.value for u in available_set) ≥ target ⇒ !solution.is_empty()`
 /// POSTCONDITION: `!solution.is_empty() ⇒ sum(u.value for u in solution) ≥ target`
@@ -50,10 +49,12 @@ fn greedy(target: u64, available_utxos: &mut Vec<Utxo>) -> Vec<Utxo> {
 /// when building transactions.
 const UTXOS_COUNT_THRESHOLD: usize = 1_000;
 
-/// The algorithm greedily selects the smallest UTXO(s) with a value that is at least the given `target` in a first step.
+/// The algorithm greedily selects the smallest UTXO(s) with a value that is at least the given
+/// `target` in a first step.
 ///
-/// If the minter manages more than `UTXOS_COUNT_THRESHOLD`, it will then try to match the number of inputs with the
-/// number of outputs + 1 (where the additional output corresponds to the change output).
+/// If the minter manages more than `UTXOS_COUNT_THRESHOLD`, it will then try to match the number of
+/// inputs with the number of outputs + 1 (where the additional output corresponds to the change
+/// output).
 ///
 /// If there are no UTXOs matching the criteria, returns an empty vector.
 ///
@@ -125,8 +126,7 @@ mod tests {
         for (user, expected) in result_utxos.iter().zip(expected_utxos.iter()) {
             assert_eq!(
                 user, expected,
-                "Result utxos differs from expected user: {:?} vs {:?}",
-                user, expected
+                "Result utxos differs from expected user: {user:?} vs {expected:?}"
             );
         }
     }

@@ -2,7 +2,11 @@ import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard
 import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
 import * as btcSendApi from '$btc/services/btc-send.services';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
-import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
+import {
+	UTXOS_FEE_CONTEXT_KEY,
+	type UtxosFeeContext,
+	type UtxosFeeStore
+} from '$btc/stores/utxos-fee.store';
 import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -12,17 +16,25 @@ import { btcAddressStore } from '$icp/stores/btc.store';
 import * as backendApi from '$lib/api/backend.api';
 import * as signerApi from '$lib/api/signer.api';
 import * as addressesStore from '$lib/derived/address.derived';
-import * as authStore from '$lib/derived/auth.derived';
 import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
-import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
+import {
+	CONVERT_CONTEXT_KEY,
+	initConvertContext,
+	type ConvertContext
+} from '$lib/stores/convert.store';
+import {
+	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
+	type TokenActionValidationErrorsContext
+} from '$lib/stores/token-action-validation-errors.store';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import type { Identity } from '@dfinity/agent';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
@@ -42,15 +54,10 @@ describe('BtcConvertTokenWizard', () => {
 		sourceToken?: Token;
 		mockUtxosFeeStore: UtxosFeeStore;
 	}) =>
-		new Map([
+		new Map<symbol, ConvertContext | TokenActionValidationErrorsContext | UtxosFeeContext>([
 			[UTXOS_FEE_CONTEXT_KEY, { store: mockUtxosFeeStore }],
-			[
-				CONVERT_CONTEXT_KEY,
-				{
-					sourceToken: readable(sourceToken),
-					destinationToken: readable(ICP_TOKEN)
-				}
-			]
+			[CONVERT_CONTEXT_KEY, initConvertContext({ sourceToken, destinationToken: ICP_TOKEN })],
+			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 	const props = {
 		currentStep: {
@@ -69,8 +76,6 @@ describe('BtcConvertTokenWizard', () => {
 		vi
 			.spyOn(backendApi, 'addPendingBtcTransaction')
 			.mockResolvedValue(pendingBtcTransactionResponse);
-	const mockAuthStore = (value: Identity | null = mockIdentity) =>
-		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 	const mockBtcAddressStore = (address: string | undefined = mockBtcAddress) => {
 		btcAddressStore.set({
 			tokenId: ICP_TOKEN.id,

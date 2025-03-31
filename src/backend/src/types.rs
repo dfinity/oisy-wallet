@@ -2,9 +2,9 @@ use candid::{CandidType, Deserialize, Principal};
 use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
-use shared::types::Config;
 use shared::types::{
-    custom_token::CustomToken, token::UserToken, user_profile::StoredUserProfile, Timestamp,
+    backend_config::Config, custom_token::CustomToken, token::UserToken,
+    user_profile::StoredUserProfile, Timestamp,
 };
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;

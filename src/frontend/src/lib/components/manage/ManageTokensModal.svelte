@@ -4,20 +4,19 @@
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
+	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
+	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import {
-		saveErc20UserTokens,
-		saveIcrcCustomTokens
-	} from '$icp-eth/services/manage-tokens.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
+	import { MANAGE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -34,6 +33,9 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
+
+	export let initialSearch: string | undefined = undefined;
+	export let onClose: () => void = () => {};
 
 	const steps: WizardSteps = [
 		{
@@ -187,6 +189,7 @@
 		modalStore.close();
 
 		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
+		onClose();
 	};
 
 	let ledgerCanisterId: string | undefined;
@@ -211,6 +214,7 @@
 	bind:this={modal}
 	on:nnsClose={close}
 	disablePointerEvents={currentStep?.name === 'Saving'}
+	testId={MANAGE_TOKENS_MODAL}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
@@ -248,6 +252,13 @@
 	{:else if currentStep?.name === 'Import'}
 		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
 	{:else}
-		<ManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={saveTokens} />
+		<ManageTokens
+			on:icClose={close}
+			on:icAddToken={modal.next}
+			on:icSave={saveTokens}
+			{initialSearch}
+		>
+			<slot name="info-element" slot="info-element" />
+		</ManageTokens>
 	{/if}
 </WizardModal>

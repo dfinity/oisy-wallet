@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 	import {
 		ckEthereumNativeToken,
@@ -13,7 +13,7 @@
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -46,7 +46,7 @@
 	</div>
 
 	{#if ckErc20}
-		<div class="mb-4 mt-2 rounded-lg bg-brand-subtle p-4">
+		<div class="mb-4 mt-2 rounded-lg bg-brand-subtle-20 p-4">
 			<p class="break-normal font-bold">
 				{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
 					$token: $ckEthereumNativeToken.symbol
@@ -62,7 +62,7 @@
 			<p class="break-normal pt-4">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
-						value: $ckEthereumNativeTokenBalance ?? ZERO,
+						value: $ckEthereumNativeTokenBalance ?? ZERO_BI,
 						unitName: $ckEthereumNativeToken.decimals
 					})}
 					{$ckEthereumNativeToken.symbol}</output
@@ -74,11 +74,11 @@
 	<div class="mt-4 grid grid-cols-[1fr_auto] gap-x-4">
 		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
 				>1</span
 			>
 
-			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+			<div class="h-full w-[1.5px] bg-tertiary"></div>
 		</div>
 
 		<ReceiveAddress
@@ -101,11 +101,11 @@
 
 		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
 				>2</span
 			>
 
-			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+			<div class="h-full w-[1.5px] bg-tertiary"></div>
 		</div>
 
 		<div>
@@ -118,7 +118,7 @@
 
 				<p class="mb-6">
 					{formatToken({
-						value: $sendBalance ?? ZERO,
+						value: $sendBalance ?? ZERO_BI,
 						unitName: $sendTokenDecimals,
 						displayDecimals: $sendTokenDecimals
 					})}
@@ -129,7 +129,7 @@
 
 		<div class="flex justify-center">
 			<span
-				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
 				>3</span
 			>
 		</div>

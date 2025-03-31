@@ -68,7 +68,7 @@ const updateListInContent = ({ content, regex, elements, addAtStartIfNotFound = 
 			});
 			return {
 				content: newContent,
-				hasChanged: acc.hasChanged || hasChanged
+				hasChanged: acc.hasChanged ?? hasChanged
 			};
 		},
 		{ content, hasChanged: false }
@@ -112,7 +112,7 @@ const fetchTokenDetails = async ({ contractAddress, isTestnet }) => {
 const loadFileContentOrEmpty = (filePath) => {
 	try {
 		return readFileSync(filePath, 'utf8');
-	} catch (err) {
+	} catch (_err) {
 		console.log(`File ${filePath} does not exist, it will be created.`);
 		return '';
 	}
@@ -334,9 +334,7 @@ const parseTokens = (tokens) => {
 
 	testnetTokens.forEach(({ symbol, erc20ContractAddress }) => {
 		const mainSymbol = symbol.replace('Sepolia', '').slice(2);
-		if (!acc[mainSymbol]) {
-			acc[mainSymbol] = { mainSymbol };
-		}
+		acc[mainSymbol] ??= { mainSymbol };
 		acc[mainSymbol].testnetContractAddress = erc20ContractAddress;
 	});
 
