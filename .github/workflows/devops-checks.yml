@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install shellcheck
-        run: ./scripts/setup zizmor
+        run: ./scripts/setup cargo-binstall zizmor
 
       - name: Lint shell scripts
         run: scripts/lint.github.sh
