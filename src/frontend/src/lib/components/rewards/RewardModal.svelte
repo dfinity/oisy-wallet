@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {Html, Modal} from '@dfinity/gix-components';
+	import { Html, Modal } from '@dfinity/gix-components';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import type { RewardDescription } from '$env/types/env-reward';
