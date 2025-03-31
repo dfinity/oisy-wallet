@@ -128,8 +128,8 @@
 			"title": "Rewards",
 			"active_campaigns": "Active Opportunities",
 			"upcoming_campaigns": "Upcoming Opportunities",
-			"active_date": "Due on",
-			"participate_title": "Participate and earn Sprinkles",
+			"active_date": "Ends on",
+			"participate_title": "Earn BTC by staying active - and now by inviting others.",
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
@@ -249,6 +249,10 @@
 			"session": "Your session expires in",
 			"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
 			"testnets": "Show test networks",
+			"networks": "Networks",
+			"enable_testnets": "Enable test networks",
+			"enable_network": "Enable network",
+			"disable_network": "Disable network",
 			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
 			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance.",
 			"active_networks": "Active networks",
@@ -280,7 +284,9 @@
 		"chain_fusion": "All networks",
 		"network": "Network",
 		"testnet": "Testnet",
-		"filter": "Filter networks"
+		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled",
+		"filter": "Filter networks",
+		"manage": "Manage networks"
 	},
 	"receive": {
 		"text": {
