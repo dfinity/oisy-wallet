@@ -42,7 +42,6 @@
 	@include meta.load-css('global/position');
 	@include meta.load-css('global/links');
 	@include meta.load-css('global/scrollbar');
-	@include meta.load-css('global/animations');
 
 	// Themes
 	@include meta.load-css('theme/default-theme');
