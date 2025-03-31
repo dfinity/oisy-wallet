@@ -14,7 +14,7 @@
 		modalVipQrCode,
 		modalRewardDetails,
 		modalSettingsState,
-        modalReferralCode
+		modalReferralCode
 	} from '$lib/derived/modal.derived';
 
 	/**
