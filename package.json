@@ -132,7 +132,8 @@
 	"overrides": {
 		"ws": "^7.5.10",
 		"elliptic": "^6.6.1",
-		"cookie": "^0.7.0"
+		"cookie": "^0.7.0",
+		"axios": "^1.8.2"
 	},
 	"engines": {
 		"node": "^22"
