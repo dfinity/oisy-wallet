@@ -10,7 +10,10 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
-	import { SETTINGS_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
+	import {
+		ACTIVE_NETWORKS_EDIT_BUTTON,
+		SETTINGS_ADDRESS_LABEL
+	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
 	import {
@@ -97,7 +100,7 @@
 			<EnabledNetworksPreviewIcons />
 
 			<Button
-				testId="active-networks-edit-button"
+				testId={ACTIVE_NETWORKS_EDIT_BUTTON}
 				link
 				on:click={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
 				>{$i18n.core.text.edit} ></Button

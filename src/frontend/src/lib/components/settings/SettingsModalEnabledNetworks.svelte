@@ -28,6 +28,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 	import { emit } from '$lib/utils/events.utils';
+	import { TESTNET_CHECKBOX } from '$lib/constants/test-ids.constants';
 
 	let enabledNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...enabledNetworks };
@@ -106,7 +107,7 @@
 		<svelte:fragment slot="title">{$i18n.settings.text.networks}</svelte:fragment>
 		<div class="font-bold" slot="title-action"
 			><Checkbox
-				testId="testnets-checkbox"
+				testId={TESTNET_CHECKBOX}
 				text="inline"
 				inputId="toggle-testnets-switcher"
 				bind:checked={enabledTestnet}
