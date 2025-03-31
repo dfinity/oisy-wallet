@@ -92,7 +92,7 @@
 	<svelte:fragment slot="title">{$i18n.settings.text.networks}</svelte:fragment>
 
 	<SettingsCardItem>
-		<svelte:fragment slot="key"><span>{$i18n.settings.text.active_networks}</span></svelte:fragment>
+		<svelte:fragment slot="key">{$i18n.settings.text.active_networks}</svelte:fragment>
 		<svelte:fragment slot="value">
 			<EnabledNetworksPreviewIcons />
 
