@@ -18,6 +18,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
+	import { REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		combinedDerivedSortedNetworkTokensUi,
@@ -84,7 +85,7 @@
 	let amountOfRewards = 0;
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal on:nnsClose={modalStore.close} testId={REWARDS_MODAL}>
 	<span class="text-center text-xl" slot="title">{reward.title}</span>
 
 	<ContentWithToolbar>
@@ -95,10 +96,12 @@
 			<Hr spacing="md" />
 		{/if}
 
-		<div class="flex w-full justify-between text-lg font-semibold"
-			><span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
-			<span class="inline-flex"><RewardDateBadge date={reward.endDate} /></span></div
-		>
+		<div class="flex w-full justify-between text-lg font-semibold">
+			<span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
+			<span class="inline-flex">
+				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
+			</span>
+		</div>
 		<p class="my-3">{reward.description}</p>
 
 		<ExternalLink
