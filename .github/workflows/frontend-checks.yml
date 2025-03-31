@@ -87,7 +87,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Test
-        run: npm run test
+        run: npm run test:coverage
 
   config:
     runs-on: ubuntu-24.04
@@ -104,7 +104,7 @@ jobs:
 
   may-merge:
     if: always()
-    needs: ['format', 'lint', 'check', 'test', 'config']
+    needs: [ 'format', 'lint', 'check', 'test', 'config' ]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
