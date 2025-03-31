@@ -33,7 +33,7 @@
 	const enabledNetworksInitial = { ...enabledNetworks };
 
 	let enabledTestnet = $testnetsEnabled;
-	const enabledTestnetInitial = $testnetsEnabled;
+	const enabledTestnetInitial = enabledTestnet;
 
 	const checkModified = ({
 		enabledTestnet,
