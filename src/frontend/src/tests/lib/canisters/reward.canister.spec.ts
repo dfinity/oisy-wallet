@@ -1,8 +1,9 @@
 import type {
 	NewVipRewardResponse,
+	ReferrerInfo,
 	_SERVICE as RewardService,
 	UserData,
-	UserSnapshot, ReferrerInfo
+	UserSnapshot
 } from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
