@@ -5,6 +5,7 @@
 	import { fade } from 'svelte/transition';
 	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
+	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
@@ -13,11 +14,20 @@
 	import {
 		btcAddressRegtest,
 		btcAddressTestnet,
+		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import {
+		networkBitcoinRegtestEnabled,
+		networkBitcoinTestnetEnabled,
+		networkSepoliaEnabled,
+		networkSolanaDevnetEnabled,
+		networkSolanaLocalEnabled,
+		networkSolanaTestnetEnabled
+	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
@@ -91,6 +101,8 @@
 
 	let progressModal = false;
 
+	const debounceLoadEthAddress = debounce(loadEthAddress);
+
 	const debounceLoadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
 	const debounceLoadBtcAddressRegtest = debounce(loadBtcAddressRegtest);
 
@@ -98,28 +110,30 @@
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
-	$: {
-		if ($testnetsEnabled) {
-			if (isNullish($btcAddressTestnet)) {
-				debounceLoadBtcAddressTestnet();
+	$: if ($testnetsEnabled) {
+		if ($networkSepoliaEnabled && isNullish($ethAddress)) {
+			debounceLoadEthAddress();
+		}
+
+		if ($networkBitcoinTestnetEnabled && isNullish($btcAddressTestnet)) {
+			debounceLoadBtcAddressTestnet();
+		}
+
+		if ($networkSolanaTestnetEnabled && isNullish($solAddressTestnet)) {
+			debounceLoadSolAddressTestnet();
+		}
+
+		if ($networkSolanaDevnetEnabled && isNullish($solAddressDevnet)) {
+			debounceLoadSolAddressDevnet();
+		}
+
+		if (LOCAL) {
+			if ($networkBitcoinRegtestEnabled && isNullish($btcAddressRegtest)) {
+				debounceLoadBtcAddressRegtest();
 			}
 
-			if (isNullish($solAddressTestnet)) {
-				debounceLoadSolAddressTestnet();
-			}
-
-			if (isNullish($solAddressDevnet)) {
-				debounceLoadSolAddressDevnet();
-			}
-
-			if (LOCAL) {
-				if (isNullish($btcAddressRegtest)) {
-					debounceLoadBtcAddressRegtest();
-				}
-
-				if (isNullish($solAddressLocal)) {
-					debounceLoadSolAddressLocal();
-				}
+			if ($networkSolanaLocalEnabled && isNullish($solAddressLocal)) {
+				debounceLoadSolAddressLocal();
 			}
 		}
 	}
