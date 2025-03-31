@@ -2,8 +2,7 @@
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import {
-		TRACK_COUNT_AUTHENTICATION_CLICK,
-		TRACK_COUNT_SIGN_IN_SUCCESS
+		TRACK_COUNT_AUTHENTICATION_CLICK
 	} from '$lib/constants/analytics.contants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { signIn } from '$lib/services/auth.services';
