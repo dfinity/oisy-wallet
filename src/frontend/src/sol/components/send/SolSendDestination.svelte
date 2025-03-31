@@ -21,4 +21,4 @@
 	onQRButtonClick={() => dispatch('icQRCodeScan')}
 />
 
-<!--TODO: PRODSEC: add some sort of warning/info when the destination input is not an ATA address, either here or in the confirmation review step-->
+<!-- TODO: PRODSEC: add some sort of warning/info when the destination input is not an ATA address, either here or in the confirmation review step -->

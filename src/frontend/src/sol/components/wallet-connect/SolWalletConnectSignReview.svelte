@@ -33,7 +33,7 @@
 </script>
 
 <ContentWithToolbar>
-	<!-- TODO: add address for devnet and testnet-->
+	<!-- TODO: add address for devnet and testnet -->
 	<SendData
 		amount={amountDisplay}
 		{destination}
@@ -44,7 +44,7 @@
 	>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
-		<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount-->
+		<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->
 
 		<ReviewNetwork sourceNetwork={network} slot="network" />
 	</SendData>
