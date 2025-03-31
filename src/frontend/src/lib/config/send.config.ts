@@ -32,7 +32,11 @@ export const sendWizardStepsWithQrCodeScan = (params: SendWizardStepsParams): Wi
 export const allSendWizardSteps = (params: SendWizardStepsParams): WizardSteps => [
 	{
 		name: WizardStepsSend.TOKENS_LIST,
-		title: params.i18n.send.text.send
+		title: params.i18n.send.text.select_token
+	},
+	{
+		name: WizardStepsSend.FILTER_NETWORKS,
+		title: params.i18n.send.text.select_network_filter
 	},
 	...sendWizardStepsWithQrCodeScan(params)
 ];
