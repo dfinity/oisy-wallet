@@ -10,7 +10,6 @@ const SWAP_TOKENS_MODAL_VIEWPORT_HEIGHT = 900;
 let homepageLoggedIn: HomepageLoggedIn;
 
 testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
-
 	homepageLoggedIn = new HomepageLoggedIn({
 		page,
 		iiPage,
