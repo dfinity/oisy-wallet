@@ -284,7 +284,9 @@
 		"chain_fusion": "All networks",
 		"network": "Network",
 		"testnet": "Testnet",
-		"filter": "Filter networks"
+		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled",
+		"filter": "Filter networks",
+		"manage": "Manage networks"
 	},
 	"receive": {
 		"text": {
