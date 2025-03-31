@@ -42,9 +42,9 @@
 	const enabledTestnetInitial = enabledTestnet;
 
 	const checkModified = ({
-													 enabledTestnet,
-													 enabledNetworks
-												 }: {
+		enabledTestnet,
+		enabledNetworks
+	}: {
 		enabledTestnet: boolean;
 		enabledNetworks: UserNetworks;
 	}) => {
