@@ -26,6 +26,7 @@ interface I18nCore {
 		clear_filter: string;
 		not_available: string;
 		new: string;
+		edit: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -225,15 +226,21 @@ interface I18nHero {
 interface I18nSettings {
 	text: {
 		title: string;
+		general: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
-		session: string;
+		session_duration: string;
+		session_expires_in: string;
 		session_description: string;
-		testnets: string;
+		networks: string;
+		enable_testnets: string;
+		active_networks: string;
+		active_networks_description: string;
+		enable_network: string;
+		disable_network: string;
 		testnets_description: string;
 		hide_zero_balances_description: string;
-		active_networks: string;
 		credentials_title: string;
 		pouh_credential: string;
 		pouh_credential_description: string;
@@ -261,7 +268,9 @@ interface I18nNetworks {
 	chain_fusion: string;
 	network: string;
 	testnet: string;
+	number_of_enabled: string;
 	filter: string;
+	manage: string;
 }
 
 interface I18nReceive {
@@ -353,6 +362,8 @@ interface I18nSend {
 		convert_to_native_icp: string;
 		open_qr_modal: string;
 		scan_qr: string;
+		select_token: string;
+		select_network_filter: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -810,6 +821,10 @@ interface I18nVip {
 	};
 }
 
+interface I18nReferral {
+	invitation: { error: { loading_referrer_info: string; setting_referrer: string } };
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -902,6 +917,7 @@ interface I18n {
 	transactions: I18nTransactions;
 	about: I18nAbout;
 	vip: I18nVip;
+	referral: I18nReferral;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
