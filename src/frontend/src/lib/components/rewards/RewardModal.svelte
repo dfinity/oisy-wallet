@@ -102,7 +102,7 @@
 				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
 			</span>
 		</div>
-		<p class="my-3">{reward.description}</p>
+		<p class="my-3">{@html reward.description}</p>
 
 		<ExternalLink
 			href={reward.learnMoreHref}
