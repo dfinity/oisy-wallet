@@ -13,7 +13,7 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_ITEM_ACTIVITY,
-		NAVIGATION_ITEM_AIRDROPS,
+		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_EXPLORER,
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
@@ -91,7 +91,7 @@
 		})}
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		selected={isRouteRewards(pageData)}
-		testId={addTestIdPrefix(NAVIGATION_ITEM_AIRDROPS)}
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
 		tag={$i18n.core.text.new}
 		tagVariant="emphasis"
 	>
