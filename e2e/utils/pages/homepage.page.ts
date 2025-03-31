@@ -1,5 +1,4 @@
 import {
-	ACTIVE_NETWORKS_EDIT_BUTTON,
 	AMOUNT_DATA,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
@@ -18,8 +17,13 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
+	SETTINGS_NETWORKS_MODAL,
+	SETTINGS_NETWORKS_MODAL_SAVE_BUTTON,
+	SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER,
+	SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX,
+	SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE,
 	SIDEBAR_NAVIGATION_MENU,
-	TESTNET_CHECKBOX,
 	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
@@ -351,8 +355,21 @@ abstract class Homepage {
 
 	async activateTestnetSettings(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
-		await this.clickByTestId({ testId: ACTIVE_NETWORKS_EDIT_BUTTON });
-		await this.clickByTestId({ testId: TESTNET_CHECKBOX });
+		await this.clickByTestId({ testId: SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON });
+		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX });
+		await this.waitForByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER });
+		const togglesLocators = this.getLocatorByTestId({
+			testId: `[data-tid^="${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-"]`
+		});
+		const countToggles = await togglesLocators.count();
+		await Promise.all(
+			Array.from({ length: countToggles }, (_, i) => togglesLocators.nth(i).click())
+		);
+		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_SAVE_BUTTON });
+		await this.waitForByTestId({
+			testId: SETTINGS_NETWORKS_MODAL,
+			options: { state: 'hidden', timeout: 60000 }
+		});
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 
