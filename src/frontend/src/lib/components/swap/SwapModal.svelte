@@ -17,6 +17,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { SWAP_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
 		SWAP_CONTEXT_KEY,
@@ -78,6 +79,7 @@
 
 <WizardModal
 	{steps}
+	testId={SWAP_TOKENS_MODAL}
 	bind:this={modal}
 	bind:currentStep
 	on:nnsClose={close}
