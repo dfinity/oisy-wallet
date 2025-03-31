@@ -18,6 +18,8 @@ jobs:
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Update
@@ -44,6 +46,8 @@ jobs:
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Update

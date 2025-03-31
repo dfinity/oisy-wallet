@@ -19,6 +19,8 @@ jobs:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
         # First, check rust GitHub releases for a new version. We assume that the
         # latest version's tag name is the version.

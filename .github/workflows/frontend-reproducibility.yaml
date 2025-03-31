@@ -6,7 +6,7 @@ on:
       - package-lock.json
   merge_group:
   release:
-    types: [released]
+    types: [ released ]
   workflow_dispatch:
 
 jobs:
@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Prepare
         uses: ./.github/actions/prepare

@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Build Base Docker Image
         uses: ./.github/actions/docker-build-base
@@ -41,6 +43,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Build canister WASM
         uses: ./.github/actions/docker-build-backend
@@ -51,9 +55,11 @@ jobs:
 
   tests:
     runs-on: ubuntu-24.04
-    needs: ['docker-build']
+    needs: [ 'docker-build' ]
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/cache@v4
         with:
@@ -74,11 +80,13 @@ jobs:
         run: ./scripts/test.backend.sh
 
   may-merge:
-    needs: ['tests']
+    needs: [ 'tests' ]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/needs_success
         with:
           needs: '${{ toJson(needs) }}'

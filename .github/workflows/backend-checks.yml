@@ -24,6 +24,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/cache@v4
         with:
           path: |
@@ -38,16 +40,20 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: sudo snap install yq
       - name: Dependencies are defined in the workspace
         run: ./scripts/lint.cargo-workspace-dependencies.sh
 
   may-merge:
-    needs: ['lint', 'workspace-dependencies']
+    needs: [ 'lint', 'workspace-dependencies' ]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/needs_success
         with:
           needs: '${{ toJson(needs) }}'

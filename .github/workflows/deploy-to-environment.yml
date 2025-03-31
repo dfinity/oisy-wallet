@@ -7,8 +7,8 @@ on:
     tags:
       - v*
   workflow_run:
-    workflows: ['Tag on Merge from Release Branch']
-    types: [completed]
+    workflows: [ 'Tag on Merge from Release Branch' ]
+    types: [ completed ]
   workflow_dispatch:
     inputs:
       network:
@@ -107,6 +107,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
         with:
           fetch-depth: 2
 

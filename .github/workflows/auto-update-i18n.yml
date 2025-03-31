@@ -2,7 +2,7 @@ name: Auto Update i18n
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [ opened, synchronize ]
     paths:
       - 'src/frontend/src/lib/i18n/*'
       - 'src/frontend/src/lib/types/i18n.d.ts'
@@ -20,6 +20,8 @@ jobs:
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}

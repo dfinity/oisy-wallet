@@ -25,12 +25,16 @@ jobs:
         if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
+        with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
       - name: Checkout
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Format
@@ -62,6 +66,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Lint
@@ -73,6 +79,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Check
@@ -84,6 +92,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Test
@@ -95,6 +105,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Install dfx
@@ -104,10 +116,12 @@ jobs:
 
   may-merge:
     if: always()
-    needs: ['format', 'lint', 'check', 'test', 'config']
+    needs: [ 'format', 'lint', 'check', 'test', 'config' ]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/needs_success
         with:
           needs: '${{ toJson(needs) }}'
