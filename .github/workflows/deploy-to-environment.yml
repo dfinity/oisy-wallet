@@ -108,9 +108,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          persist-credentials: false
-        with:
           fetch-depth: 2
+          persist-credentials: false
 
       - name: Set Environment Variables Based on Network
         run: |

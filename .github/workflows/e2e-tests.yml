@@ -56,10 +56,9 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/checkout@v4
         with:
-          persist-credentials: false
-        with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: false
 
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
@@ -97,11 +96,10 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/checkout@v4
         with:
-          persist-credentials: false
-        with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Download WASM artifact
         uses: actions/download-artifact@v4
@@ -194,11 +192,10 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         uses: actions/checkout@v4
         with:
-          persist-credentials: false
-        with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Set snapshot status from previous jobs
         run: |

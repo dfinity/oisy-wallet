@@ -21,11 +21,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          persist-credentials: false
-        with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Prepare
         uses: ./.github/actions/prepare
