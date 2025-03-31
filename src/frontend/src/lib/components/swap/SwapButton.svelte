@@ -6,7 +6,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<ButtonHero on:click disabled={$isBusy} testId={SWAP_TOKENS_MODAL_OPEN_BUTTON} ariaLabel={$i18n.swap.text.swap}>
+<ButtonHero
+	on:click
+	disabled={$isBusy}
+	testId={SWAP_TOKENS_MODAL_OPEN_BUTTON}
+	ariaLabel={$i18n.swap.text.swap}
+>
 	<IconCkConvert size="28" slot="icon" />
 
 	{$i18n.swap.text.swap}
