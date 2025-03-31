@@ -66,10 +66,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
-    needs: [ 'oisy-backend-wasm', 'check-e2e-changes' ]
+    needs: ['oisy-backend-wasm', 'check-e2e-changes']
     strategy:
       matrix:
-        os: [ ubuntu-24.04, macos-14 ]
+        os: [ubuntu-24.04, macos-14]
     env:
       MATRIX_OS: ${{ matrix.os }}
     if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
@@ -169,7 +169,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    needs: [ e2e ]
+    needs: [e2e]
     outputs:
       e2e-snapshots-changed: ${{ steps.e2e-check-snapshots.outputs.e2e-snapshots-changed }}
 
@@ -258,13 +258,13 @@ jobs:
 
   may-merge-e2e:
     if: always()
-    needs: [ 'check-e2e-changes', 'e2e', 'finalize-snapshots-update' ]
+    needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
     strategy:
       matrix:
-        os: [ ubuntu-24.04, macos-14 ]
+        os: [ubuntu-24.04, macos-14]
     steps:
       - name: Cleared for merging
         run: |
