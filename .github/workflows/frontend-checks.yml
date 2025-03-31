@@ -8,6 +8,8 @@ on:
 jobs:
   format:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
 
     steps:
       - name: Create GitHub App Token
@@ -58,6 +60,8 @@ jobs:
 
   lint:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -69,6 +73,8 @@ jobs:
 
   check:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -80,6 +86,8 @@ jobs:
 
   test:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -91,6 +99,8 @@ jobs:
 
   config:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -104,8 +114,10 @@ jobs:
 
   may-merge:
     if: always()
-    needs: ['format', 'lint', 'check', 'test', 'config']
+    needs: [ 'format', 'lint', 'check', 'test', 'config' ]
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/needs_success

@@ -2,7 +2,7 @@ name: Auto Update i18n
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [ opened, synchronize ]
     paths:
       - 'src/frontend/src/lib/i18n/*'
       - 'src/frontend/src/lib/types/i18n.d.ts'
@@ -10,6 +10,8 @@ on:
 jobs:
   auto_update:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
 
     steps:
       - name: Create GitHub App Token

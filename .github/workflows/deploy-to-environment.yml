@@ -7,8 +7,8 @@ on:
     tags:
       - v*
   workflow_run:
-    workflows: ['Tag on Merge from Release Branch']
-    types: [completed]
+    workflows: [ 'Tag on Merge from Release Branch' ]
+    types: [ completed ]
   workflow_dispatch:
     inputs:
       network:
@@ -53,6 +53,8 @@ jobs:
   deployment:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Determine Deployment Network

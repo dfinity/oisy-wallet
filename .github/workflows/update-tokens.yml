@@ -9,6 +9,9 @@ on:
 jobs:
   update-tokens-sns:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@v1
@@ -35,6 +38,9 @@ jobs:
 
   update-tokens-ckerc20:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@v1
