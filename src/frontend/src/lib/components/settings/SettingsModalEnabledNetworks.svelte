@@ -16,6 +16,7 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { TESTNET_CHECKBOX } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
@@ -106,6 +107,7 @@
 		<svelte:fragment slot="title">{$i18n.settings.text.networks}</svelte:fragment>
 		<div class="font-bold" slot="title-action"
 			><Checkbox
+				testId={TESTNET_CHECKBOX}
 				text="inline"
 				inputId="toggle-testnets-switcher"
 				bind:checked={enabledTestnet}
