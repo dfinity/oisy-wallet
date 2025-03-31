@@ -80,7 +80,7 @@
 
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			modal.next();
+			goToStep(WizardStepsSend.SEND);
 		};
 		await loadTokenAndRun({ token, callback });
 	};
@@ -125,7 +125,7 @@
 			bind:sendProgressStep
 			formCancelAction={isTransactionsPage ? 'close' : 'back'}
 			on:icBack={modal.back}
-			on:icSendBack={modal.back}
+			on:icSendBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 			on:icNext={modal.next}
 			on:icClose={close}
 			on:icQRCodeScan={() =>
