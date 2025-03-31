@@ -188,6 +188,9 @@
 			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum and Solana",
 			"done": "Enjoy $oisy_short"
 		},
+		"alt": {
+			"loader_banner": "Loading initial data for $oisy_name (theme $theme)"
+		},
 		"info": {
 			"hold_loading": "Hold tight, we are loading some information...",
 			"hold_loading_wallet": "Hold tight, we are loading some initial data for your wallet..."
