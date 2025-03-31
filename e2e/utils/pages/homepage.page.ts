@@ -353,18 +353,25 @@ abstract class Homepage {
 		}
 	}
 
+	private async toggleAllTestnets(): Promise<void> {
+		const toggles = this.#page.locator(`[data-tid^="${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-"]`);
+		const countToggles = await toggles.count();
+		const testIds = await Promise.all(
+			Array.from({ length: countToggles }, (_, i) => toggles.nth(i).getAttribute('data-tid'))
+		);
+		for (const testId of testIds) {
+			if (nonNullish(testId)) {
+				await this.clickByTestId({ testId });
+			}
+		}
+	}
+
 	async activateTestnetSettings(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
 		await this.clickByTestId({ testId: SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON });
 		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX });
 		await this.waitForByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER });
-		const togglesLocators = this.getLocatorByTestId({
-			testId: `[data-tid^="${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-"]`
-		});
-		const countToggles = await togglesLocators.count();
-		await Promise.all(
-			Array.from({ length: countToggles }, (_, i) => togglesLocators.nth(i).click())
-		);
+		await this.toggleAllTestnets();
 		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_SAVE_BUTTON });
 		await this.waitForByTestId({
 			testId: SETTINGS_NETWORKS_MODAL,
