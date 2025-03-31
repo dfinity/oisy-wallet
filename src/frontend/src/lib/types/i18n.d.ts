@@ -810,9 +810,7 @@ interface I18nVip {
 }
 
 interface I18nReferral {
-	invitation: {
-		error: { loading_referrer_info: string; setting_referrer: string };
-	};
+	invitation: { error: { loading_referrer_info: string; setting_referrer: string } };
 }
 
 interface I18nSigner {
