@@ -111,7 +111,9 @@ export const THEME_SELECTOR_CARD = 'theme-selector-card';
 
 export const REWARDS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-reward-campaigns-container';
 export const REWARDS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-reward-campaigns-container';
-export const REWARDS_MODAL_IMAGE_BANNER = 'reward-modal-image-banner';
+export const REWARDS_MODAL = 'rewards-modal';
+export const REWARDS_MODAL_DATE_BADGE = 'rewards-modal-date-badge';
+export const REWARDS_MODAL_IMAGE_BANNER = 'rewards-modal-image-banner';
 export const REWARDS_STATE_MODAL_IMAGE_BANNER = 'reward-state-modal-image-banner';
 export const REWARDS_STATE_MODAL_SHARE_BUTTON = 'reward-state-modal-share-button';
 export const REWARDS_BANNER = 'rewards-banner';
