@@ -26,6 +26,7 @@ interface I18nCore {
 		clear_filter: string;
 		not_available: string;
 		new: string;
+		edit: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -224,19 +225,21 @@ interface I18nHero {
 interface I18nSettings {
 	text: {
 		title: string;
+		general: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
-		session: string;
+		session_duration: string;
+		session_expires_in: string;
 		session_description: string;
-		testnets: string;
 		networks: string;
 		enable_testnets: string;
+		active_networks: string;
+		active_networks_description: string;
 		enable_network: string;
 		disable_network: string;
 		testnets_description: string;
 		hide_zero_balances_description: string;
-		active_networks: string;
 		credentials_title: string;
 		pouh_credential: string;
 		pouh_credential_description: string;
