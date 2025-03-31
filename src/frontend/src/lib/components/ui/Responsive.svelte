@@ -41,9 +41,11 @@
 	});
 
 	onDestroy(() => {
-		if (nonNullish(timeoutHandle)) {
-			clearTimeout(timeoutHandle);
+		if (isNullish(timeoutHandle)) {
+			return;
 		}
+
+		clearTimeout(timeoutHandle);
 	});
 </script>
 
