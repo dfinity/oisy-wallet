@@ -44,7 +44,7 @@
 		"playwright:install": "playwright install --with-deps",
 		"e2e": "npm run playwright:install && playwright test",
 		"e2e:dev": "npm run playwright:install && NODE_ENV=development playwright test",
-		"e2e:ci": "npm run playwright:install && playwright test --reporter=html",
+		"e2e:ci": "npm run playwright:install && playwright test --update-snapshots=changed --reporter=html,list",
 		"e2e:snapshots": "npm run playwright:install && npx playwright test --update-snapshots=changed --reporter=list",
 		"e2e:snapshots:dev": "npm run playwright:install && NODE_ENV=development npx playwright test --update-snapshots=changed --reporter=list",
 		"e2e:report": "npx playwright show-report",
@@ -91,7 +91,7 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@dfinity/eslint-config-oisy-wallet": "^0.1.2",
+		"@dfinity/eslint-config-oisy-wallet": "^0.1.2-next-2025-03-29",
 		"@dfinity/ic-management": "^6.0.5",
 		"@dfinity/identity-secp256k1": "^2.3.0",
 		"@dfinity/internet-identity-playwright": "^0.0.4",
@@ -132,7 +132,8 @@
 	"overrides": {
 		"ws": "^7.5.10",
 		"elliptic": "^6.6.1",
-		"cookie": "^0.7.0"
+		"cookie": "^0.7.0",
+		"axios": "^1.8.2"
 	},
 	"engines": {
 		"node": "^22"
