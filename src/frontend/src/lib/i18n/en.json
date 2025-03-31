@@ -22,7 +22,8 @@
 			"copy": "Copy",
 			"clear_filter": "Clear filter",
 			"not_available": "n/a",
-			"new": "New"
+			"new": "New",
+			"edit": "Edit"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -253,7 +254,7 @@
 			"networks": "Networks",
 			"enable_testnets": "Enable test networks",
 			"active_networks": "Active networks ",
-			"active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions of inactive networks will not show or be included in your available balance.",
+			"active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions from inactive networks will not show or be included in your available balance.",
 			"enable_network": "Enable network",
 			"disable_network": "Disable network",
 			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",

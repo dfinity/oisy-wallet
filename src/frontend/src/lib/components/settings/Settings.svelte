@@ -74,7 +74,7 @@
 			{$i18n.settings.text.session_duration}
 		</svelte:fragment>
 		<output slot="value" class="mr-1.5">
-			<Button link disabled>Edit ></Button>
+			<Button link disabled>{$i18n.core.text.edit} ></Button>
 		</output>
 
 		<svelte:fragment slot="info">
@@ -97,7 +97,7 @@
 			<EnabledNetworksPreviewIcons />
 
 			<Button link on:click={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
-				>Edit ></Button
+				>{$i18n.core.text.edit} ></Button
 			>
 		</svelte:fragment>
 		<svelte:fragment slot="info">
