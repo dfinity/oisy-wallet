@@ -62,7 +62,11 @@
 		networkSepoliaEnabled,
 		networkBitcoinMainnetEnabled,
 		networkBitcoinTestnetEnabled,
-		networkBitcoinRegtestEnabled
+		networkBitcoinRegtestEnabled,
+		networkSolanaMainnetEnabled,
+		networkSolanaTestnetEnabled,
+		networkSolanaDevnetEnabled,
+		networkSolanaLocalEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -184,7 +188,8 @@
 			title: $i18n.receive.solana.text.solana_address,
 			label: $i18n.receive.solana.text.solana_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
-			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr
+			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
+			condition: $networkSolanaMainnetEnabled
 		},
 		{
 			labelRef: 'solAddressTestnet',
@@ -196,7 +201,7 @@
 			label: $i18n.receive.solana.text.solana_testnet_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: $testnetsEnabled
+			condition: $networkSolanaTestnetEnabled && $testnetsEnabled
 		},
 		{
 			labelRef: 'solAddressDevnet',
@@ -208,7 +213,7 @@
 			label: $i18n.receive.solana.text.solana_devnet_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: $testnetsEnabled
+			condition: $networkSolanaDevnetEnabled && $testnetsEnabled
 		},
 		{
 			labelRef: 'solAddressLocal',
@@ -220,7 +225,7 @@
 			label: $i18n.receive.solana.text.solana_local_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: $testnetsEnabled && LOCAL
+			condition: $networkSolanaLocalEnabled && $testnetsEnabled && LOCAL
 		}
 	];
 
