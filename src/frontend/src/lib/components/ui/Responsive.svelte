@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
@@ -46,6 +46,7 @@
 		}
 
 		clearTimeout(timeoutHandle);
+		timeoutHandle = undefined;
 	});
 </script>
 
