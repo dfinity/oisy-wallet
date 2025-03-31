@@ -106,6 +106,7 @@
 		<svelte:fragment slot="title">{$i18n.settings.text.networks}</svelte:fragment>
 		<div class="font-bold" slot="title-action"
 			><Checkbox
+				testId="testnets-checkbox"
 				text="inline"
 				inputId="toggle-testnets-switcher"
 				bind:checked={enabledTestnet}

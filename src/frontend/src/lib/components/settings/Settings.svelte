@@ -96,7 +96,10 @@
 		<svelte:fragment slot="value">
 			<EnabledNetworksPreviewIcons />
 
-			<Button link on:click={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
+			<Button
+				testId="active-networks-edit-button"
+				link
+				on:click={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
 				>{$i18n.core.text.edit} ></Button
 			>
 		</svelte:fragment>
