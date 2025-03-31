@@ -102,6 +102,7 @@
 				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
 			</span>
 		</div>
+		<!-- svelte-ignore a11y-dangerous-html -->
 		<p class="my-3">{@html reward.description}</p>
 
 		<ExternalLink
