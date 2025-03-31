@@ -209,7 +209,7 @@
 		data-tid="import-token-button"
 		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-brand-primary-alt no-underline"
 		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
-
+>
 	<ButtonGroup>
 		<ButtonCancel testId={MANAGE_TOKENS_MODAL_CLOSE} on:click={() => dispatch('icClose')} />
 		<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} on:click={save}>
