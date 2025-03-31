@@ -44,9 +44,9 @@
 	}) => {
 		const testnetModified = enabledTestnet !== enabledTestnetInitial;
 
-		const networkModified = SUPPORTED_NETWORKS.reduce((acc, k) => {
-			const value = enabledNetworks[k.id]?.enabled ?? false;
-			const initialValue = enabledNetworksInitial[k.id]?.enabled ?? false;
+		const networkModified = SUPPORTED_NETWORKS.reduce((acc, {id}) => {
+			const value = enabledNetworks[id]?.enabled ?? false;
+			const initialValue = enabledNetworksInitial[id]?.enabled ?? false;
 
 			return acc || value !== initialValue;
 		}, false);
