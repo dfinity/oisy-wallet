@@ -60,10 +60,10 @@
 		enabledTestnet = !enabledTestnet;
 	};
 
-	const toggleNetwork = (network: Network) => {
-		enabledNetworks[network.id] = {
-			enabled: !enabledNetworks[network.id]?.enabled,
-			isTestnet: network.env === 'testnet'
+	const toggleNetwork = ({id, env}: Network) => {
+		enabledNetworks[id] = {
+			enabled: !enabledNetworks[id]?.enabled,
+			isTestnet: env === 'testnet'
 		};
 	};
 
