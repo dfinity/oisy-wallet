@@ -20,3 +20,23 @@ jobs:
 
       - name: Lint shell scripts
         run: scripts/lint.sh.sh
+  lint-github-actions:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: ./scripts/setup zizmor
+
+      - name: Lint shell scripts
+        run: scripts/lint.github.sh
+  devops-checks-pass:
+    needs: ['lint-shell', 'lint-github-actions']
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/needs_success
+        with:
+          needs: '${{ toJson(needs) }}'
