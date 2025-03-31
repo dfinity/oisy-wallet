@@ -32,7 +32,7 @@ export const formatKongSwapToCoingeckoPrices = (
 	tokens: KongSwapToken[]
 ): CoingeckoSimpleTokenPriceResponse =>
 	tokens.reduce<CoingeckoSimpleTokenPriceResponse>((acc, { token, metrics }) => {
-		if (isNullish(metrics.price)) {
+		if (isNullish(token) || isNullish(metrics?.price)) {
 			return acc;
 		}
 
