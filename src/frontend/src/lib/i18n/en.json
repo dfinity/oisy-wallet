@@ -22,7 +22,8 @@
 			"copy": "Copy",
 			"clear_filter": "Clear filter",
 			"not_available": "n/a",
-			"new": "New"
+			"new": "New",
+			"edit": "Edit"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -243,19 +244,21 @@
 	"settings": {
 		"text": {
 			"title": "Settings",
+			"general": "General",
 			"principal": "Your Principal",
 			"principal_copied": "Principal copied to clipboard",
 			"principal_description": "Your ID for the $oisy_name. Created by your Internet Identity.",
-			"session": "Your session expires in",
+			"session_duration": "Session duration",
+			"session_expires_in": "Expires in",
 			"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
-			"testnets": "Show test networks",
 			"networks": "Networks",
 			"enable_testnets": "Enable test networks",
+			"active_networks": "Active networks ",
+			"active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions from inactive networks will not show or be included in your available balance.",
 			"enable_network": "Enable network",
 			"disable_network": "Disable network",
 			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
 			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance.",
-			"active_networks": "Active networks",
 			"credentials_title": "Credentials",
 			"pouh_credential": "Humanity Credential",
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
