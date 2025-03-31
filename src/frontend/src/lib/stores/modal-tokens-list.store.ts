@@ -21,18 +21,20 @@ export const initModalTokensListContext = (
 	const data = writable<ModalTokensListData>(modalTokensListData);
 	const { update } = data;
 
+	const tokens = derived([data], ([{ tokens }]) => tokens);
 	const filterQuery = derived([data], ([{ filterQuery }]) => filterQuery);
 	const filterNetwork = derived([data], ([{ filterNetwork }]) => filterNetwork);
+	const filterZeroBalance = derived([data], ([{ filterZeroBalance }]) => filterZeroBalance);
 
 	const filteredTokens = derived(
-		[data, exchanges, balancesStore],
-		([{ filterNetwork, filterQuery, tokens, filterZeroBalance }, $exchanges, $balances]) => {
-			const filteredByQuery = filterTokens({ tokens, filter: filterQuery ?? '' });
+		[tokens, filterQuery, filterNetwork, filterZeroBalance, exchanges, balancesStore],
+		([$tokens, $filterQuery, $filterNetwork, $filterZeroBalance, $exchanges, $balances]) => {
+			const filteredByQuery = filterTokens({ tokens: $tokens, filter: $filterQuery ?? '' });
 
 			const filteredByNetwork = filterTokensForSelectedNetwork([
 				filteredByQuery,
-				filterNetwork,
-				isNullish(filterNetwork)
+				$filterNetwork,
+				isNullish($filterNetwork)
 			]);
 
 			const pinnedWithBalance = pinTokensWithBalanceAtTop({
@@ -41,7 +43,7 @@ export const initModalTokensListContext = (
 				$exchanges
 			});
 
-			return filterZeroBalance
+			return $filterZeroBalance
 				? pinnedWithBalance.filter(({ balance }) => (balance ?? ZERO_BI) > ZERO_BI)
 				: pinnedWithBalance;
 		}
@@ -51,6 +53,11 @@ export const initModalTokensListContext = (
 		filterQuery,
 		filterNetwork,
 		filteredTokens,
+		setTokens: (tokens: Token[]) =>
+			update((state) => ({
+				...state,
+				tokens
+			})),
 		setFilterQuery: (query: string) =>
 			update((state) => ({
 				...state,
@@ -68,6 +75,7 @@ export interface ModalTokensListContext {
 	filterQuery: Readable<string | undefined>;
 	filterNetwork: Readable<Network | undefined>;
 	filteredTokens: Readable<TokenUi[]>;
+	setTokens: (tokens: Token[]) => void;
 	setFilterQuery: (query: string) => void;
 	setFilterNetwork: (network: Network | undefined) => void;
 }

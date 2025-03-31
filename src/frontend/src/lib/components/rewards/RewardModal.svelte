@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
+	import { Html, Modal } from '@dfinity/gix-components';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import type { RewardDescription } from '$env/types/env-reward';
@@ -102,7 +102,7 @@
 				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
 			</span>
 		</div>
-		<p class="my-3">{reward.description}</p>
+		<p class="my-3"><Html text={reward.description} /></p>
 
 		<ExternalLink
 			href={reward.learnMoreHref}

@@ -67,6 +67,8 @@ export const DESTINATION_INPUT = 'destination-input';
 export const IN_PROGRESS_MODAL = 'in-progress-modal';
 
 export const TESTNET_TOGGLE = 'testnet-toggle';
+export const TESTNET_CHECKBOX = 'testnets-checkbox';
+export const ACTIVE_NETWORKS_EDIT_BUTTON = 'active-networks-edit-button';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
 export const CAROUSEL_SLIDE = 'carousel-slide';

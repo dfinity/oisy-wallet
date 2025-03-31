@@ -1,10 +1,12 @@
-import type { RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
+import type { ReferrerInfo, RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
 import type { IcToken } from '$icp/types/ic-token';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
+	getReferrerInfo as getReferrerInfoApi,
 	getUserInfo,
-	getUserInfo as getUserInfoApi
+	getUserInfo as getUserInfoApi,
+	setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
 import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
@@ -195,6 +197,95 @@ export const claimVipReward = async (params: {
 		const { vip } = get(i18n);
 		toastsError({
 			msg: { text: vip.reward.error.claiming_reward },
+			err
+		});
+		return { success: false, err };
+	}
+};
+
+const queryReferrerInfo = async (params: {
+	identity: Identity;
+	certified: boolean;
+}): Promise<ReferrerInfo> =>
+	await getReferrerInfoApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+/**
+ * Gets the referrer info of the user.
+ *
+ * This function performs **always** a query (not certified) to get the referrer info of a user.
+ *
+ * @async
+ * @param {Object} params - The parameters required to load the referrer info.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @returns {Promise<ReferrerInfo>} - Resolves with the received referral code and the number of referrals.
+ *
+ * @throws {Error} Displays an error toast and returns undefined if the query fails.
+ */
+export const getReferrerInfo = async (params: {
+	identity: Identity;
+}): Promise<
+	| {
+			referralCode: number;
+			numberOfReferrals: number;
+	  }
+	| undefined
+> => {
+	try {
+		const referrerInfo = await queryReferrerInfo({ ...params, certified: false });
+
+		return {
+			referralCode: referrerInfo.referral_code,
+			numberOfReferrals: fromNullable(referrerInfo.num_referrals) ?? 0
+		};
+	} catch (err: unknown) {
+		const { referral } = get(i18n);
+		toastsError({
+			msg: { text: referral.invitation.error.loading_referrer_info },
+			err
+		});
+	}
+};
+
+const updateReferrer = async ({
+	identity,
+	referrerCode
+}: {
+	identity: Identity;
+	referrerCode: number;
+}): Promise<void> =>
+	await setReferrerApi({
+		identity,
+		referrerCode,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+/**
+ * Establish a referral connection using a provided referral code.
+ *
+ * This function **always** makes an **update** call and cannot be a query.
+ *
+ * @async
+ * @param {Object} params - The parameters required to establish the connection.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @param {string} params.referrerCode - The referral code to establish the connection.
+ * @returns {Promise<ResultSuccess>} - Resolves with the result if successful.
+ *
+ * @throws {Error} Throws an error if the update call fails or if the connection cannot be established.
+ */
+export const setReferrer = async (params: {
+	identity: Identity;
+	referrerCode: number;
+}): Promise<ResultSuccess> => {
+	try {
+		await updateReferrer(params);
+		return { success: true };
+	} catch (err: unknown) {
+		const { referral } = get(i18n);
+		toastsError({
+			msg: { text: referral.invitation.error.setting_referrer },
 			err
 		});
 		return { success: false, err };

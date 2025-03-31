@@ -4,13 +4,15 @@
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import AirdropModalDetails from '$lib/components/rewards/RewardModalDetails.svelte';
+	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalDAppDetails,
 		modalHideToken,
 		modalIcHideToken,
 		modalVipQrCode,
-		modalRewardDetails
+		modalRewardDetails,
+		modalSettingsState
 	} from '$lib/derived/modal.derived';
 
 	/**
@@ -29,5 +31,7 @@
 		<AirdropModalDetails />
 	{:else if $modalVipQrCode}
 		<VipQrCodeModal />
+	{:else if $modalSettingsState}
+		<SettingsModal />
 	{/if}
 {/if}
