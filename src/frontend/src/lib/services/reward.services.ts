@@ -246,8 +246,6 @@ export const getReferrerInfo = async (params: {
 			msg: { text: referral.invitation.error.loading_referrer_info },
 			err
 		});
-
-		return undefined;
 	}
 };
 
