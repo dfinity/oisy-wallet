@@ -38,7 +38,7 @@ jobs:
 
   oisy-backend-wasm:
     runs-on: ubuntu-24.04
-    if: ${{ github.ref == 'refs/heads/main' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+    if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     needs: check-e2e-changes
     permissions:
       contents: write
@@ -62,13 +62,13 @@ jobs:
 
   e2e:
     runs-on: ${{ matrix.os }}
-    needs: ['oisy-backend-wasm', 'check-e2e-changes']
+    needs: [ 'oisy-backend-wasm', 'check-e2e-changes' ]
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ ubuntu-24.04, macos-14 ]
     env:
       MATRIX_OS: ${{ matrix.os }}
-    if: ${{ github.ref == 'refs/heads/main' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+    if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     outputs:
       ubuntu_status: ${{ steps.set_snapshot_output.outputs.ubuntu_status }}
       macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
@@ -162,7 +162,7 @@ jobs:
   finalize-snapshots-update:
     name: Finalize Snapshots Update
     runs-on: ubuntu-24.04
-    needs: [e2e]
+    needs: [ e2e ]
     outputs:
       e2e-snapshots-changed: ${{ steps.e2e-check-snapshots.outputs.e2e-snapshots-changed }}
 
@@ -250,12 +250,12 @@ jobs:
             ```
 
   may-merge-e2e:
-    if: ${{ github.ref != 'refs/heads/main' }}
-    needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
+    if: ${{ github.event_name == 'pull_request' }}
+    needs: [ 'check-e2e-changes', 'e2e', 'finalize-snapshots-update' ]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ ubuntu-24.04, macos-14 ]
     steps:
       - name: Cleared for merging
         run: |
