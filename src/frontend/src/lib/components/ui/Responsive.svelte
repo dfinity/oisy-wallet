@@ -17,7 +17,7 @@
 
 	let innerWidth = 0;
 	let debouncedWidth = writable(0);
-	let timeoutHandle: ReturnType<typeof setTimeout>;
+	let timeoutHandle: NodeJS.Timeout | undefined;
 
 	$: {
 		if (nonNullish(timeoutHandle)) {
