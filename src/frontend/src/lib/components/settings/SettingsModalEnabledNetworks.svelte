@@ -30,7 +30,7 @@
 	import { emit } from '$lib/utils/events.utils';
 
 	let enabledNetworks = { ...$userNetworks };
-	const enabledNetworksInitial = { ...$userNetworks };
+	const enabledNetworksInitial = { ...enabledNetworks };
 
 	let enabledTestnet = $testnetsEnabled;
 	const enabledTestnetInitial = $testnetsEnabled;
