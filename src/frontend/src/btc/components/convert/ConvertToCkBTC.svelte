@@ -18,7 +18,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalConvertBTCToCkBTC } from '$lib/derived/modal.derived';
-	import { networkBitcoinMainnetDisabled, networkICPDisabled } from '$lib/derived/networks.derived';
+	import { networkBitcoinMainnetDisabled } from '$lib/derived/networks.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -58,8 +58,7 @@
 
 <ButtonHero
 	on:click={async () => await openConvert()}
-	disabled={$networkICPDisabled ||
-		$networkBitcoinMainnetDisabled ||
+	disabled={$networkBitcoinMainnetDisabled ||
 		$isBusy ||
 		$outflowActionsDisabled ||
 		isNullish(ckBtcToken)}
