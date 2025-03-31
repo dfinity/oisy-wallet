@@ -44,7 +44,7 @@
 	}) => {
 		const testnetModified = enabledTestnet !== enabledTestnetInitial;
 
-		const networkModified = SUPPORTED_NETWORKS.reduce((acc, {id}) => {
+		const networkModified = SUPPORTED_NETWORKS.reduce((acc, { id }) => {
 			const value = enabledNetworks[id]?.enabled ?? false;
 			const initialValue = enabledNetworksInitial[id]?.enabled ?? false;
 
@@ -60,7 +60,7 @@
 		enabledTestnet = !enabledTestnet;
 	};
 
-	const toggleNetwork = ({id, env}: Network) => {
+	const toggleNetwork = ({ id, env }: Network) => {
 		enabledNetworks[id] = {
 			enabled: !enabledNetworks[id]?.enabled,
 			isTestnet: env === 'testnet'
