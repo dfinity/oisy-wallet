@@ -4,6 +4,7 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 
 	export let network: Network;
+	export let selectedNetworkId: NetworkId | undefined = undefined;
 	export let usdBalance: number | undefined = undefined;
 	export let testIdPrefix = NETWORKS_SWITCHER_SELECTOR;
 
@@ -15,6 +16,7 @@
 
 <NetworkButton
 	{id}
+	{selectedNetworkId}
 	{name}
 	{usdBalance}
 	{icon}
