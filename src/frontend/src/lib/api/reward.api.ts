@@ -1,6 +1,6 @@
 import type {
 	ClaimVipRewardResponse,
-	NewVipRewardResponse,
+	NewVipRewardResponse, ReferrerInfo,
 	UserData,
 	UserSnapshot,
 	VipReward
@@ -39,6 +39,27 @@ export const claimVipReward = async ({
 	const { claimVipReward } = await rewardCanister({ identity });
 
 	return claimVipReward(vipReward);
+};
+
+
+export const getReferrerInfo = async ({
+										  identity,
+										  certified
+									  }: CanisterApiFunctionParams<QueryParams>): Promise<ReferrerInfo> => {
+	const { getReferrerInfo } = await rewardCanister({ identity });
+
+	return getReferrerInfo({ certified });
+};
+
+export const setReferrer = async ({
+									  referrerCode,
+									  identity
+								  }: CanisterApiFunctionParams<{
+	referrerCode: number;
+}>): Promise<void> => {
+	const { setReferrer } = await rewardCanister({ identity });
+
+	return setReferrer(referrerCode);
 };
 
 export const registerAirdropRecipient = async ({
