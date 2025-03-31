@@ -10,5 +10,5 @@ export const OisyMetadataSchema = z.object({
 	OISY_DOCS_URL: z.string().url(),
 	OISY_SUPPORT_URL: z.string().url(),
 	OISY_REWARDS_URL: z.string().url(),
-	OISY_REFERRAL_URL: z.string().url(),
+	OISY_REFERRAL_URL: z.string().url()
 });
