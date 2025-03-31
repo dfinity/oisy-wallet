@@ -5,6 +5,7 @@
 	import { fade } from 'svelte/transition';
 	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
+	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
@@ -13,11 +14,20 @@
 	import {
 		btcAddressRegtest,
 		btcAddressTestnet,
+		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import {
+		networkBitcoinRegtestEnabled,
+		networkBitcoinTestnetEnabled,
+		networkSepoliaEnabled,
+		networkSolanaDevnetEnabled,
+		networkSolanaLocalEnabled,
+		networkSolanaTestnetEnabled
+	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
@@ -28,7 +38,7 @@
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
@@ -91,6 +101,8 @@
 
 	let progressModal = false;
 
+	const debounceLoadEthAddress = debounce(loadEthAddress);
+
 	const debounceLoadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
 	const debounceLoadBtcAddressRegtest = debounce(loadBtcAddressRegtest);
 
@@ -99,24 +111,28 @@
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
 	$: if ($testnetsEnabled) {
-		if (isNullish($btcAddressTestnet)) {
+		if ($networkSepoliaEnabled && isNullish($ethAddress)) {
+			debounceLoadEthAddress();
+		}
+
+		if ($networkBitcoinTestnetEnabled && isNullish($btcAddressTestnet)) {
 			debounceLoadBtcAddressTestnet();
 		}
 
-		if (isNullish($solAddressTestnet)) {
+		if ($networkSolanaTestnetEnabled && isNullish($solAddressTestnet)) {
 			debounceLoadSolAddressTestnet();
 		}
 
-		if (isNullish($solAddressDevnet)) {
+		if ($networkSolanaDevnetEnabled && isNullish($solAddressDevnet)) {
 			debounceLoadSolAddressDevnet();
 		}
 
 		if (LOCAL) {
-			if (isNullish($btcAddressRegtest)) {
+			if ($networkBitcoinRegtestEnabled && isNullish($btcAddressRegtest)) {
 				debounceLoadBtcAddressRegtest();
 			}
 
-			if (isNullish($solAddressLocal)) {
+			if ($networkSolanaLocalEnabled && isNullish($solAddressLocal)) {
 				debounceLoadSolAddressLocal();
 			}
 		}
@@ -176,7 +192,13 @@
 				<div class="stretch">
 					<div class="mb-8 block">
 						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
-							<ImgBanner {src} styleClass="aspect-auto" />
+							<ImgBanner
+								{src}
+								alt={replacePlaceholders(replaceOisyPlaceholders($i18n.init.alt.loader_banner), {
+									$theme: $themeStore ?? 'light'
+								})}
+								styleClass="aspect-auto"
+							/>
 						{/await}
 					</div>
 

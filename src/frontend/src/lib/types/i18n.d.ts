@@ -170,6 +170,7 @@ interface I18nInit {
 		retrieving_public_keys: string;
 		done: string;
 	};
+	alt: { loader_banner: string };
 	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
