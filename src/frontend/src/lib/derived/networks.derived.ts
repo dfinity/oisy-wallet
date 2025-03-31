@@ -5,7 +5,7 @@ import {
 	BTC_TESTNET_NETWORK_ID
 } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
@@ -50,15 +50,6 @@ export const networksMainnets: Readable<Network[]> = derived(
 export const networksTestnets: Readable<Network[]> = derived(
 	[networksEnvs],
 	([{ testnets }]) => testnets
-);
-
-export const networkICPEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
-	$networks.some(({ id }) => id === ICP_NETWORK_ID)
-);
-
-export const networkICPDisabled: Readable<boolean> = derived(
-	[networkICPEnabled],
-	([$networkICPEnabled]) => !$networkICPEnabled
 );
 
 export const networkEthereumEnabled: Readable<boolean> = derived([networks], ([$networks]) =>

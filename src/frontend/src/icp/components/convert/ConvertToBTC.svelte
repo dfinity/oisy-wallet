@@ -9,7 +9,7 @@
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalConvertCkBTCToBTC } from '$lib/derived/modal.derived';
-	import { networkBitcoinMainnetDisabled, networkICPDisabled } from '$lib/derived/networks.derived';
+	import { networkBitcoinMainnetDisabled } from '$lib/derived/networks.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
@@ -37,10 +37,7 @@
 </script>
 
 <ButtonHero
-	disabled={$networkICPDisabled ||
-		$networkBitcoinMainnetDisabled ||
-		$isBusy ||
-		$outflowActionsDisabled}
+	disabled={$networkBitcoinMainnetDisabled || $isBusy || $outflowActionsDisabled}
 	on:click={async () => await openConvert()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >

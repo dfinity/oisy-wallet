@@ -15,11 +15,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { networkICP } from '$lib/derived/network.derived';
-	import {
-		networkEthereumDisabled,
-		networkICPDisabled,
-		networkSepoliaDisabled
-	} from '$lib/derived/networks.derived';
+	import { networkEthereumDisabled, networkSepoliaDisabled } from '$lib/derived/networks.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
@@ -32,7 +28,6 @@
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
 	const isDisabled = (): boolean =>
-		$networkICPDisabled ||
 		(nativeTokenId === ETHEREUM_TOKEN_ID && $networkEthereumDisabled) ||
 		(nativeTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaDisabled) ||
 		$ethAddressNotLoaded ||
