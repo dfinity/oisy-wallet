@@ -250,7 +250,7 @@ jobs:
             ```
 
   may-merge-e2e:
-    if: ${{ github.event_name == 'pull_request' }}
+    if: always()
     needs: [ 'check-e2e-changes', 'e2e', 'finalize-snapshots-update' ]
     runs-on: ${{ matrix.os }}
     strategy:
