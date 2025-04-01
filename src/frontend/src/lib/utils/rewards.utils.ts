@@ -20,7 +20,11 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 			const containsJackpot: boolean = newRewards.some(({ name }) => name === 'jackpot');
 			const containsReferral: boolean = newRewards.some(({ name }) => name === 'referral');
 
-			return { receivedReward: true, receivedJackpot: containsJackpot, receivedReferral: containsReferral };
+			return {
+				receivedReward: true,
+				receivedJackpot: containsJackpot,
+				receivedReferral: containsReferral
+			};
 		}
 	}
 

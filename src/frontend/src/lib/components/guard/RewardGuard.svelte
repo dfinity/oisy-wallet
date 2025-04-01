@@ -16,7 +16,8 @@
 			return;
 		}
 
-		const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult($authIdentity);
+		const { receivedReward, receivedJackpot, receivedReferral } =
+			await loadRewardResult($authIdentity);
 		if (receivedReward) {
 			if (receivedJackpot) {
 				modalStore.openRewardState(receivedJackpot);
