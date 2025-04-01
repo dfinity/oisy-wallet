@@ -12,6 +12,7 @@
 	import type { NetworkId } from '$lib/types/network';
 
 	export let selectedNetworkId: NetworkId | undefined = undefined;
+	export let delayOnNetworkSelect = true;
 
 	let mainnetTokensUsdBalance: number;
 	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
@@ -26,18 +27,19 @@
 	icon={chainFusion}
 	usdBalance={mainnetTokensUsdBalance}
 	{selectedNetworkId}
+	{delayOnNetworkSelect}
 	on:icSelected
 />
 
 <ul class="flex list-none flex-col">
 	{#each $networksMainnets as network (network.id)}
 		<li transition:slide={SLIDE_EASING}
-			><MainnetNetwork {network} {selectedNetworkId} on:icSelected /></li
+			><MainnetNetwork {network} {selectedNetworkId} {delayOnNetworkSelect} on:icSelected /></li
 		>
 	{/each}
 </ul>
 
-{#if $testnetsEnabled}
+{#if $testnetsEnabled && $networksTestnets.length}
 	<span class="my-5 flex px-3 font-bold" transition:slide={SLIDE_EASING}
 		>{$i18n.networks.test_networks}</span
 	>
@@ -45,7 +47,7 @@
 	<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
 		{#each $networksTestnets as network (network.id)}
 			<li transition:slide={SLIDE_EASING}
-				><Network {network} {selectedNetworkId} on:icSelected /></li
+				><Network {network} {selectedNetworkId} {delayOnNetworkSelect} on:icSelected /></li
 			>
 		{/each}
 	</ul>

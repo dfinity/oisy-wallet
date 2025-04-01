@@ -15,12 +15,15 @@
 	export let usdBalance: number | undefined = undefined;
 	export let isTestnet = false;
 	export let testId: string | undefined = undefined;
+	export let delayOnNetworkSelect = true;
 
 	const dispatch = createEventDispatcher();
 
+	const onIcSelected = () => dispatch('icSelected', id);
+
 	const onClick = () => {
-		// A small delay to give the user a visual feedback that the network is checked
-		setTimeout(() => dispatch('icSelected', id), 500);
+		// If rendered in the dropdown, we add a small delay to give the user a visual feedback that the network is checked
+		delayOnNetworkSelect ? setTimeout(onIcSelected, 500) : onIcSelected();
 	};
 </script>
 
