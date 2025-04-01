@@ -19,7 +19,7 @@ runs:
     - name: "Check that we have inputs"
       shell: bash
       run: |
-        all_jobs="$(echo '$NEEDS' | jq 'to_entries[]')"
+        all_jobs="$(echo "$NEEDS" | jq 'to_entries[]')"
         [[ "$all_jobs" != "" ]] || {
            echo "ERROR: No needs found"
            exit 1
@@ -29,7 +29,7 @@ runs:
     - name: "Check that all jobs in 'needs' are successful"
       shell: bash
       run: |
-        unsuccessful_jobs="$(echo '$NEEDS' | jq 'to_entries[] | select(.value.result != "success")')"
+        unsuccessful_jobs="$(echo "$NEEDS" | jq 'to_entries[] | select(.value.result != "success")')"
         if  [[ "$unsuccessful_jobs" == "" ]]
         then echo "Congratulations, you may pass."
         else echo "You shall not pass:  Some required tests did not succeed:"
