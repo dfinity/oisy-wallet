@@ -80,6 +80,7 @@ export interface AddUserCredentialRequest {
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
+	| { PowChallenge: ChallengeCompletionError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
@@ -133,6 +134,12 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array | number[]];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
+export type ChallengeCompletionError =
+	| { InvalidNonce: null }
+	| { MissingChallenge: null }
+	| { ExpiredChallenge: null }
+	| { MissingUserProfile: null }
+	| { ChallengeAlreadySolved: null };
 export interface Config {
 	api: [] | [Guards];
 	derivation_origin: [] | [string];

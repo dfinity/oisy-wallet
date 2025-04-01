@@ -51,7 +51,8 @@
 			"documentation": "Documentation",
 			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
-			"vip_qr_code": "VIP QR codes"
+			"vip_qr_code": "VIP QR codes",
+			"refer_a_friend": "Refer your friends"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -65,7 +66,8 @@
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
-			"vip_qr_code": "Generate an invitation link"
+			"vip_qr_code": "Generate an invitation link",
+			"refer_a_friend": "Generate a referral link for a friend"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -187,6 +189,9 @@
 			"securing_session": "Securing session with Internet Identity",
 			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum and Solana",
 			"done": "Enjoy $oisy_short"
+		},
+		"alt": {
+			"loader_banner": "Loading initial data for $oisy_name (theme $theme)"
 		},
 		"info": {
 			"hold_loading": "Hold tight, we are loading some information...",
@@ -389,7 +394,9 @@
 			"initializing_transaction": "Initializing transaction",
 			"convert_to_native_icp": "Convert to native ICP",
 			"open_qr_modal": "Start QR Code scan for transaction details",
-			"scan_qr": "Scan QR Code"
+			"scan_qr": "Scan QR Code",
+			"select_token": "Select token to send",
+			"select_network_filter": "Select network filter"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
@@ -905,9 +912,26 @@
 	},
 	"referral": {
 		"invitation": {
+			"text": {
+				"title": "Refer a friend",
+				"referral_link_copied": "Referral link copied to clipboard.",
+				"information": "Get bonus sprinkles, every time your friends receive one!",
+				"not_referred_yet": "You haven't referred anyone yet",
+				"referred_amount": "You already referred $amount people",
+				"learn_more": "Learn more"
+			},
 			"error": {
 				"loading_referrer_info": "Error while loading referral info",
 				"setting_referrer": "Error while setting referrer"
+			}
+		},
+		"reward": {
+			"text": {
+				"title": "Congratulations!",
+				"content_title": "Here a small thank you",
+				"content_text": "One of your referred users just got some sprinkles.",
+				"share": "Share on X",
+				"open_wallet": "Take me to the wallet"
 			}
 		}
 	},
