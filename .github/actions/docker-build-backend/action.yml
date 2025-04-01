@@ -13,7 +13,7 @@ inputs:
     description: Dfx Network
     required: true
 
-outputs: { }
+outputs: {}
 
 runs:
   using: 'composite'
