@@ -30,10 +30,11 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 
-			const { receivedReward, receivedJackpot } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBe(false);
 			expect(receivedJackpot).toBe(false);
+			expect(receivedReferral).toBe(false);
 		});
 
 		it('should return falsy reward result and set entry in the session storage', async () => {
@@ -48,10 +49,11 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBe(false);
 			expect(receivedJackpot).toBe(false);
+			expect(receivedReferral).toBe(false);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -68,10 +70,11 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBe(true);
 			expect(receivedJackpot).toBe(false);
+			expect(receivedReferral).toBe(false);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -89,10 +92,11 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBe(true);
 			expect(receivedJackpot).toBe(true);
+			expect(receivedReferral).toBe(false);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -110,10 +114,33 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBe(true);
 			expect(receivedJackpot).toBe(true);
+			expect(receivedReferral).toBe(false);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return isReferral as true and set entry in the session storage', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: ['referral'] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				airdrops: [],
+				usage_awards: [[customMockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
+
+			expect(receivedReward).toBe(true);
+			expect(receivedJackpot).toBe(false);
+			expect(receivedReferral).toBe(true);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
