@@ -11,7 +11,7 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
 	import {
-		ACTIVE_NETWORKS_EDIT_BUTTON,
+		SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
 		SETTINGS_ADDRESS_LABEL
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -100,11 +100,12 @@
 			<EnabledNetworksPreviewIcons />
 
 			<Button
-				testId={ACTIVE_NETWORKS_EDIT_BUTTON}
+				testId={SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON}
 				link
 				on:click={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
-				>{$i18n.core.text.edit} ></Button
 			>
+				{$i18n.core.text.edit} >
+			</Button>
 		</svelte:fragment>
 		<svelte:fragment slot="info">
 			{replaceOisyPlaceholders($i18n.settings.text.active_networks_description)}
@@ -124,9 +125,9 @@
 						{$i18n.settings.text.pouh_credential_verified}
 					</output>
 				{:else}
-					<Button link on:click={getPouhCredential}
-						>{$i18n.settings.text.present_pouh_credential}&hellip;</Button
-					>
+					<Button link on:click={getPouhCredential}>
+						{$i18n.settings.text.present_pouh_credential}&hellip;
+					</Button>
 				{/if}
 			</svelte:fragment>
 			<svelte:fragment slot="info">
