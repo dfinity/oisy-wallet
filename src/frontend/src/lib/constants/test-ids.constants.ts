@@ -110,6 +110,8 @@ export const TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE = 'swap-amount-exchange-value';
 export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-unavailable';
 
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
+export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
+export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
