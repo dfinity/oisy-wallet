@@ -22,7 +22,8 @@ describe('rewards.utils', () => {
 			timestamp: lastTimestamp,
 			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
-			name: ['airdrop']
+			name: ['airdrop'],
+			campaign_name: []
 		};
 
 		it('should return falsy reward result if result was already loaded', async () => {

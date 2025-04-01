@@ -195,8 +195,7 @@ describe('reward-code', () => {
 			timestamp: lastTimestamp,
 			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
-			name: 'jackpot',
-			campaign_name: []
+			name: 'jackpot'
 		};
 
 		it('should return a list of rewards and the last timestamp', async () => {
