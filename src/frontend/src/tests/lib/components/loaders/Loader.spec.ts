@@ -4,7 +4,7 @@ import { loadEthAddress } from '$eth/services/eth-address.services';
 import Loader from '$lib/components/loaders/Loader.svelte';
 import * as appContants from '$lib/constants/app.constants';
 import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
-import { loadIdbAddresses } from '$lib/services/addresses.services';
+import { initLoader } from '$lib/services/loader.services';
 import {
 	btcAddressRegtestStore,
 	btcAddressTestnetStore,
@@ -45,21 +45,13 @@ vi.mock('@dfinity/utils', async () => {
 	};
 });
 
-vi.mock('$lib/services/load-user-profile.services', () => ({
-	loadUserProfile: vi.fn(() => Promise.resolve({ success: true }))
-}));
-
-vi.mock('$lib/services/addresses.services', () => ({
-	loadIdbAddresses: vi.fn(() => Promise.resolve({ success: true })),
-	loadAddresses: vi.fn(() => Promise.resolve({ success: true }))
-}));
-
 vi.mock('$lib/services/loader.services', () => ({
-	initSignerAllowance: vi.fn(() => Promise.resolve({ success: true }))
-}));
-
-vi.mock('$lib/services/auth.services', () => ({
-	signOut: vi.fn()
+	initSignerAllowance: vi.fn(() => Promise.resolve({ success: true })),
+	initLoader: vi
+		.fn()
+		.mockImplementation(async ({ progressAndLoad }: { progressAndLoad: () => Promise<void> }) => {
+			await progressAndLoad();
+		})
 }));
 
 vi.mock('$btc/services/btc-address.services', () => ({
@@ -129,10 +121,23 @@ describe('Loader', () => {
 		});
 	});
 
+	it('should initialize the user profile and the mainnet addresses', async () => {
+		render(Loader);
+
+		await waitFor(() => {
+			expect(initLoader).toHaveBeenCalledOnce();
+		});
+	});
+
 	describe('while loading', () => {
 		beforeEach(() => {
 			loading.set(true);
-			vi.mocked(loadIdbAddresses).mockResolvedValueOnce({ success: false });
+			vi.mocked(initLoader).mockImplementation(
+				async ({ setProgressModal }: { setProgressModal: (value: boolean) => void }) => {
+					setProgressModal(true);
+					await Promise.resolve();
+				}
+			);
 		});
 
 		it('should render modal', async () => {
@@ -214,17 +219,17 @@ describe('Loader', () => {
 
 				render(Loader);
 
-				expect(loadSolAddressTestnet).toHaveBeenCalledTimes(1);
+				expect(loadSolAddressTestnet).toHaveBeenCalledOnce();
 				expect(loadSolAddressDevnet).not.toHaveBeenCalled();
 			});
 
 			it('should call loaders if addresses are not loaded yet', () => {
 				render(Loader);
 
-				expect(loadEthAddress).toHaveBeenCalledTimes(1);
-				expect(loadBtcAddressTestnet).toHaveBeenCalledTimes(1);
-				expect(loadSolAddressTestnet).toHaveBeenCalledTimes(1);
-				expect(loadSolAddressDevnet).toHaveBeenCalledTimes(1);
+				expect(loadEthAddress).toHaveBeenCalledOnce();
+				expect(loadBtcAddressTestnet).toHaveBeenCalledOnce();
+				expect(loadSolAddressTestnet).toHaveBeenCalledOnce();
+				expect(loadSolAddressDevnet).toHaveBeenCalledOnce();
 
 				expect(loadBtcAddressRegtest).not.toHaveBeenCalled();
 				expect(loadSolAddressLocal).not.toHaveBeenCalled();
@@ -249,8 +254,8 @@ describe('Loader', () => {
 
 				render(Loader);
 
-				expect(loadBtcAddressRegtest).toHaveBeenCalledTimes(1);
-				expect(loadSolAddressLocal).toHaveBeenCalledTimes(1);
+				expect(loadBtcAddressRegtest).toHaveBeenCalledOnce();
+				expect(loadSolAddressLocal).toHaveBeenCalledOnce();
 			});
 		});
 	});

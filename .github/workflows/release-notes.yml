@@ -12,6 +12,8 @@ jobs:
   release_notes:
     if: github.ref_type == 'tag'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository

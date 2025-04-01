@@ -22,6 +22,8 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/cache@v4
@@ -36,6 +38,8 @@ jobs:
 
   workspace-dependencies:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - run: sudo snap install yq
@@ -46,6 +50,8 @@ jobs:
     needs: ['lint', 'workspace-dependencies']
     if: ${{ always() }}
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/needs_success

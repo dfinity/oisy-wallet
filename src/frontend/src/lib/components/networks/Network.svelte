@@ -7,6 +7,7 @@
 	export let selectedNetworkId: NetworkId | undefined = undefined;
 	export let usdBalance: number | undefined = undefined;
 	export let testIdPrefix = NETWORKS_SWITCHER_SELECTOR;
+	export let delayOnNetworkSelect = true;
 
 	let id: NetworkId;
 	let name: string;
@@ -19,6 +20,7 @@
 	{selectedNetworkId}
 	{name}
 	{usdBalance}
+	{delayOnNetworkSelect}
 	{icon}
 	isTestnet={network.env === 'testnet'}
 	testId={`${testIdPrefix}-${id.description}`}

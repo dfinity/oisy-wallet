@@ -29,7 +29,11 @@
 </script>
 
 <ContentWithToolbar>
-	<NetworkSwitcherList on:icSelected={onNetworkSelect} selectedNetworkId={$filterNetwork?.id} />
+	<NetworkSwitcherList
+		on:icSelected={onNetworkSelect}
+		selectedNetworkId={$filterNetwork?.id}
+		delayOnNetworkSelect={false}
+	/>
 
 	<ButtonGroup slot="toolbar">
 		<ButtonBack on:click={back} />
