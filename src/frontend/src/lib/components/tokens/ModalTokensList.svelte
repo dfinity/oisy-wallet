@@ -47,7 +47,7 @@
 	>
 		<NetworkSwitcherLogo network={$filterNetwork} />
 
-		{$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+		<span class="hidden md:block">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 	</button>
 </div>
 

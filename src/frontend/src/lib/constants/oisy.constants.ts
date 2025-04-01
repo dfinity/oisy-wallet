@@ -12,7 +12,8 @@ export const {
 	OISY_DOCS_URL,
 	OISY_SUPPORT_URL,
 	OISY_REWARDS_URL,
-	OISY_REFERRAL_URL
+    OISY_REFERRAL_URL,
+	OISY_REFERRAL_TWITTER_URL
 } = safeParse({
 	schema: OisyMetadataSchema,
 	value: metadata,
@@ -26,7 +27,8 @@ export const {
 		OISY_DOCS_URL: '',
 		OISY_SUPPORT_URL: '',
 		OISY_REWARDS_URL: '',
-		OISY_REFERRAL_URL: ''
+        OISY_REFERRAL_URL: '',
+		OISY_REFERRAL_TWITTER_URL: ''
 	}
 });
 
