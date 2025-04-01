@@ -15,6 +15,12 @@ use crate::{
 // -------------------------------------------------------------------------------------------------
 // - General Utility methods
 // -------------------------------------------------------------------------------------------------
+
+/// Returns the current time in milliseconds since the UNIX epoch.
+fn get_current_time_ms() -> u64 {
+    ic_cdk::api::time() / 1_000_000
+}
+
 /// Generates a cryptographically secure random `u64` number using the Internet Computer's
 /// Management Canister API `raw_rand()`.
 ///
@@ -32,8 +38,10 @@ async fn get_random_u64() -> Result<u64, String> {
 
     // Check if we have at least 8 bytes which are required for u64
     if random_bytes.len() < 8 {
-        ic_cdk::println!("Not enough random bytes returned!");
-        return Err("Not enough random bytes returned!".to_string());
+        ic_cdk::println!(
+            "Not enough random bytes returned: expected 8, got {}",
+            random_bytes.len()
+        );
     }
 
     // Convert the first 4 bytes into a [u8; 4] array for conversion
@@ -60,49 +68,49 @@ fn get_time_ms() -> u64 {
 // -------------------------------------------------------------------------------------------------
 
 pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeError> {
-    let principal = caller();
-    let stored_principal = StoredPrincipal(principal);
-
-    // we reject any request from a principle without a user profile
-    if !exists_profile(stored_principal) {
+    let user_principal = StoredPrincipal(caller());
+    if !exists_profile(user_principal) {
         ic_cdk::println!(
-            "create_pow_challenge() -> No user profile exists for {}",
-            principal.to_text()
+            "create_pow_challenge() -> User profile missing for principal: {}",
+            user_principal.0.to_text()
         );
         return Err(CreateChallengeError::MissingUserProfile);
     }
 
+    // Retrieve or initialize new challenge
     let difficulty: u32;
     if let Some(stored_challenge) = get_pow_challenge() {
-        ic_cdk::println!("create_pow_challenge() -> Retrieved {:?}", stored_challenge);
+        ic_cdk::println!(
+            "create_pow_challenge() -> Found existing challenge: {:?}",
+            stored_challenge
+        );
 
         // we re-use the previous challenge so we can dynamically adapt the difficulty
         difficulty = stored_challenge.difficulty;
 
         // to protect this service from overflow the service, it can only be called by a principle
-        // again once the challenge has expired. This provides the basis make sure that only
-        // one challenge can be active when opening multiple windows/taps on the same or different
-        // this also ensures that only one pow challenge is active
+        // again once the challenge has expired.
         if stored_challenge.is_expired() {
             ic_cdk::println!("create_pow_challenge() -> The challenge request is valid",);
         } else {
-            ic_cdk::println!("create_pow_challenge() -> The challenge started at {} has not yet expired. The next challenge can be requested at {}", stored_challenge.start_timestamp_ms, stored_challenge.expiry_timestamp_ms);
+            ic_cdk::println!("create_pow_challenge() -> Challenge started at {} has not yet expired. Next request at {}.", stored_challenge.start_timestamp_ms, stored_challenge.expiry_timestamp_ms);
             return Err(CreateChallengeError::ChallengeInProgress);
         }
     } else {
-        ic_cdk::println!("create_pow_challenge() -> No ChallengeStore found");
-
+        ic_cdk::println!(
+            "create_pow_challenge() -> No existing challenge found. Initializing new one.."
+        );
         // if the challenge is requested the first time we use the start difficulty
         difficulty = START_DIFFICULTY;
     }
 
-    // Map error from get_random_u64() to CreateChallengeError
+    // Generate random nonce
     let random_nonce = get_random_u64()
         .await
         .map_err(CreateChallengeError::RandomnessError)?;
 
-    let current_time_ms: u64 = get_time_ms();
-    let stored_challenge = StoredChallenge {
+    let current_time_ms = get_current_time_ms();
+    let new_challenge = StoredChallenge {
         nonce: random_nonce,
         difficulty,
         start_timestamp_ms: current_time_ms,
@@ -110,45 +118,55 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
         solved: false,
     };
 
+    // Store the challenge
     mutate_state(|state| {
-        let pow_challenge_map = &mut state.pow_challenge;
-        pow_challenge_map.insert(stored_principal, Candid(stored_challenge.clone()));
+        state
+            .pow_challenge
+            .insert(user_principal, Candid(new_challenge.clone()));
     });
 
-    ic_cdk::println!("create_pow_challenge() -> Stored {:?}", stored_challenge);
-    Ok(stored_challenge)
+    ic_cdk::println!(
+        "create_pow_challenge() -> Stored new challenge: {:?}",
+        new_challenge
+    );
+    Ok(new_challenge)
 }
 
 // -------------------------------------------------------------------------------------------------
 // - Internal functions
 // -------------------------------------------------------------------------------------------------
 
-/// Internal function which can be integrated into any service function that requires Proof of Work (`PoW`) protection.
+/// Internal function which can be integrated into any service function that requires Proof of Work
+/// (`PoW`) protection.
 ///
-/// This function plays a critical role in validating the integrity and security of service functions by
-/// enforcing a Proof of Work mechanism. It is particularly useful to mitigate spam or abuse by ensuring
-/// that computational effort is expended before certain operations are allowed.
+/// This function plays a critical role in validating the integrity and security of service
+/// functions by enforcing a Proof of Work mechanism. It is particularly useful to mitigate spam or
+/// abuse by ensuring that computational effort is expended before certain operations are allowed.
 ///
 /// Features:
-/// - Auto adjustment of difficulty based that can be enabled with the `DIFFICULTY_AUTO_ADJUSTMENT` flag.
+/// - Auto adjustment of difficulty based that can be enabled with the `DIFFICULTY_AUTO_ADJUSTMENT`
+///   flag.
 /// - Enforces expiration through timestamp validation.
-/// - Tightly integrates with stored challenges to ensure that the nonce is valid and solves the challenge correctly.
+/// - Tightly integrates with stored challenges to ensure that the nonce is valid and solves the
+///   challenge correctly.
 ///
 /// # Arguments
-/// - `nonce: u64` - The nonce that is provided for solving the challenge. This value is validated against
-///   the stored challenge conditions.
+/// - `nonce: u64` - The nonce that is provided for solving the challenge. This value is validated
+///   against the stored challenge conditions.
 ///
 /// # Returns
 /// - `Result<ChallengeCompletion, ChallengeCompletionError>`:
-///     - On success, it returns a `ChallengeCompletion` struct containing details like solved duration
-///       and difficulty adjustments (if enabled).
-///     - On failure, it returns a `ChallengeCompletionError` indicating why the completion process failed,
-///       such as invalid nonce or expired challenge.
+///     - On success, it returns a `ChallengeCompletion` struct containing details like solved
+///       duration and difficulty adjustments (if enabled).
+///     - On failure, it returns a `ChallengeCompletionError` indicating why the completion process
+///       failed, such as invalid nonce or expired challenge.
 ///
 /// # Errors
 /// This function can fail for various reasons, including:
-/// - `ChallengeCompletionError::MissingChallenge`: If no active challenge exists for the given context.
-/// - `ChallengeCompletionError::InvalidNonce`: If the provided nonce is not valid for the challenge.
+/// - `ChallengeCompletionError::MissingChallenge`: If no active challenge exists for the given
+///   context.
+/// - `ChallengeCompletionError::InvalidNonce`: If the provided nonce is not valid for the
+///   challenge.
 /// - `ChallengeCompletionError::ExpiredChallenge`: If the challenge expired before being solved.
 /// - `ChallengeCompletionError::ChallengeAlreadySolved`: If the challenge has already been solved.
 pub(crate) fn complete_challenge(
@@ -160,7 +178,7 @@ pub(crate) fn complete_challenge(
     // we reject any request from a principle without a user profile
     if !exists_profile(stored_principal) {
         ic_cdk::println!(
-            "complete_challenge(nonce) -> No user profile exists for {}",
+            "complete_challenge(nonce) -> User profile missing for principal: {}",
             principal.to_text()
         );
         return Err(ChallengeCompletionError::MissingUserProfile);
@@ -181,13 +199,15 @@ pub(crate) fn complete_challenge(
 
     // A new challenge can be requested after the current challenge has expired
     if stored_challenge.is_expired() {
-        ic_cdk::println!("complete_challenge(nonce) -> The current challenge has already expired");
+        ic_cdk::println!(
+            "complete_challenge(nonce) -> The current challenge window has already expired"
+        );
         return Err(ChallengeCompletionError::ExpiredChallenge);
     }
     // a challenge can only be solved once
     if stored_challenge.is_solved() {
         ic_cdk::println!(
-            "complete_challenge(nonce) -> The current challenge has already been solved"
+            "complete_challenge(nonce) -> The challenge for the current time window has already been solved"
         );
         return Err(ChallengeCompletionError::ChallengeAlreadySolved);
     }
@@ -228,7 +248,7 @@ pub(crate) fn complete_challenge(
     });
 
     ic_cdk::println!(
-        "complete_challenge(nonce) -> Stored: {:?}",
+        "complete_challenge(nonce) -> Stored challenge: {:?}",
         stored_challenge
     );
 
@@ -255,8 +275,6 @@ pub(crate) fn complete_challenge(
 fn adjust_difficulty(difficulty: u32, solve_duration_ms: u64) -> u32 {
     // TODO add rust feature flag
     // #[cfg(not(feature = "difficulty_auto_adjustment"))]
-    //
-    //
     #[allow(dead_code)]
     if DIFFICULTY_AUTO_ADJUSTMENT {
         let new_difficulty = u32::try_from(

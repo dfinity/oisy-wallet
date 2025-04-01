@@ -38,7 +38,7 @@ use shared::{
         },
         pow::{
             AllowSigningStatus, ChallengeCompletion, ChallengeCompletionError,
-            CreateChallengeError, CreateChallengeResponse, DIFFICULTY_TO_CYCLE_FACTOR, POW_ENABLED,
+            CreateChallengeError, CreateChallengeResponse, CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -749,7 +749,7 @@ pub async fn allow_signing(
 
     // Added for backward-compatibility
     // TODO remove this code block once the PoW feature has been stabilized
-    if request.is_none() && !POW_ENABLED {
+    if !POW_ENABLED {
         // Passing None revert to the original cycle calculation logic
         signer::allow_signing(None).await?;
         // Propagate errors, otherwise return a placeholder response that frontend can temorarly
@@ -761,10 +761,13 @@ pub async fn allow_signing(
         });
     }
 
+    let request = request.ok_or(AllowSigningError::Other("Invalid request".to_string()))?;
+
     // The Proof-of-Work (PoW) protection is explicitly enforced at the HTTP entry-point level.
     // This ensures internal calls to the business service remain unrestricted and do not require
     // PoW.
-    let challenge_completion: ChallengeCompletion = pow::complete_challenge(request.unwrap().nonce)
+
+    let challenge_completion: ChallengeCompletion = pow::complete_challenge(request.nonce)
         .map_err(|e| match e {
             ChallengeCompletionError::InvalidNonce
             | ChallengeCompletionError::MissingUserProfile
@@ -776,8 +779,7 @@ pub async fn allow_signing(
         })?;
 
     // Grant cycles proportional to difficulty
-    let allowed_cycles =
-        u64::from(challenge_completion.current_difficulty) * DIFFICULTY_TO_CYCLE_FACTOR;
+    let allowed_cycles = u64::from(challenge_completion.current_difficulty) * CYCLES_PER_DIFFICULTY;
 
     // Here we would proceed with granting signer permissions and record the granted cycles for
     ic_cdk::println!(

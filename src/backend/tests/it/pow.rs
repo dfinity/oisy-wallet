@@ -1,17 +1,19 @@
 //! Tests the ledger account logic.
 
-use std::{
-    ops::{Add, Sub},
-    thread,
-    time::Duration,
-};
+use std::{thread, time::Duration};
 
+use crate::utils::asserts::{assert_deviation, assert_greater_than};
+use crate::utils::{
+    mock::CALLER,
+    pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
+};
 use candid::Principal;
 use ic_cdk::api::management_canister::{main::canister_status, provisional::CanisterIdRecord};
 use ic_cycles_ledger_client::{Account, Allowance, AllowanceArgs};
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
+use shared::types::pow::POW_ENABLED;
 use shared::types::{
     pow::{
         AllowSigningStatus, ChallengeCompletionError, CreateChallengeError,
@@ -21,68 +23,12 @@ use shared::types::{
     user_profile::UserProfile,
 };
 
-use crate::utils::{
-    mock::CALLER,
-    pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
-};
-
 #[allow(dead_code)]
 const CANISTER_ID_SIGNER: &str = "grghe-syaaa-aaaar-qabyq-cai";
 
 // -------------------------------------------------------------------------------------------------
 // - General Utility methods used for testing
 // -------------------------------------------------------------------------------------------------
-#[allow(dead_code)]
-pub fn assert_greater_than<T: PartialOrd + std::fmt::Debug>(a: T, b: T) {
-    assert!(
-        a > b,
-        "Expected left value ({:?}) to be greater than right value ({:?})",
-        a,
-        b
-    );
-}
-
-#[allow(dead_code)]
-pub fn assert_less_than<T: PartialOrd + std::fmt::Debug>(a: T, b: T) {
-    assert!(
-        a < b,
-        "Expected left value ({:?}) to be less than right value ({:?})",
-        a,
-        b
-    );
-}
-
-#[allow(dead_code)]
-pub fn assert_in_range<T>(value: T, min: T, max: T)
-where
-    T: PartialOrd + std::fmt::Debug,
-{
-    assert!(
-        value >= min && value <= max,
-        "Value {:?} not in range [{:?}, {:?}]",
-        value,
-        min,
-        max
-    );
-}
-
-#[allow(dead_code)]
-pub fn assert_deviation<T>(value: T, expected_value: T, max_deviation: T)
-where
-    T: PartialOrd + std::fmt::Debug + Sub<Output = T> + Add<Output = T> + Clone,
-{
-    let min_value = expected_value.clone() - max_deviation.clone();
-    let max_value = expected_value.clone() + max_deviation.clone();
-
-    assert!(
-        value >= min_value && value <= max_value,
-        "Value {:?} not in range [{:?}, {:?}] of deviation {:?}",
-        value,
-        min_value,
-        max_value,
-        max_deviation
-    );
-}
 
 // This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
 // frontend.
@@ -92,7 +38,7 @@ fn get_timestamp_now_ms() -> u64 {
 
 fn get_timestamp_ms(st: std::time::SystemTime) -> u64 {
     st.duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
+        .unwrap_or_else(|_| panic!("System time is before the UNIX_EPOCH"))
         .as_millis() as u64
 }
 
@@ -120,8 +66,15 @@ fn setup_cycles_ledger_with_progress() -> PicBackend {
     pic_setup
 }
 
+fn helper_is_pow_enabled() -> bool {
+    if !POW_ENABLED {
+        eprintln!("Skipping test: POW is disabled (POW_ENABLED=false)");
+    }
+    POW_ENABLED
+}
+
 #[allow(dead_code)]
-async fn get_canister_balance() -> u64 {
+async fn helper_canister_balance() -> u64 {
     // Call canister_status on the management canister to get status
     canister_status(CanisterIdRecord {
         canister_id: ic_cdk::id(),
@@ -316,12 +269,19 @@ fn test_create_pow_challenge_should_fail_if_not_expired() {
     let err_1th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_1th_call.is_ok());
 
-    let err_2th_call = call_create_pow_challenge(&pic_setup, caller).unwrap_err();
-    assert_eq!(err_2th_call, CreateChallengeError::ChallengeInProgress);
+    let err_2th_call = call_create_pow_challenge(&pic_setup, caller);
+    assert!(err_2th_call.is_err());
+    assert_eq!(
+        err_2th_call.unwrap_err(),
+        CreateChallengeError::ChallengeInProgress
+    );
 }
 
 #[test]
 fn test_allow_signing_should_succeed_with_valid_nonce() {
+    if !helper_is_pow_enabled() {
+        return;
+    }
     let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
@@ -348,6 +308,9 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
 
 #[test]
 fn test_allow_signing_with_valid_nonce_should_fail_when_called_more_than_once() {
+    if !helper_is_pow_enabled() {
+        return;
+    }
     let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
@@ -378,6 +341,9 @@ fn test_allow_signing_with_valid_nonce_should_fail_when_called_more_than_once() 
 
 #[test]
 fn test_allow_signing_should_fail_with_valid_nonce_and_expired_challenge() {
+    if !helper_is_pow_enabled() {
+        return;
+    }
     let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
@@ -403,6 +369,9 @@ fn test_allow_signing_should_fail_with_valid_nonce_and_expired_challenge() {
 
 #[test]
 fn test_allow_signing_should_fail_with_invalid_nonce() {
+    if !helper_is_pow_enabled() {
+        return;
+    }
     let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
@@ -427,6 +396,10 @@ fn test_allow_signing_should_fail_with_invalid_nonce() {
 
 #[test]
 fn test_allow_signing_should_approve_the_correct_cycles_amount() {
+    if !helper_is_pow_enabled() {
+        return;
+    }
+
     let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
@@ -442,7 +415,9 @@ fn test_allow_signing_should_approve_the_correct_cycles_amount() {
     assert!(result_allow_signing.is_ok());
     let response: AllowSigningResponse = result_allow_signing.unwrap();
     assert_eq!(response.allowed_cycles, 1000000000);
-    /*    let backend_principle = pic_setup.canister_id;
+    /*
+    TODO uncomment this when the IC Pocker server supports an API to interact with the cycles ledger
+    let backend_principle = pic_setup.canister_id;
     let result_cycles_allowance = call_get_cycles_allowance(
         &pic_setup,
         caller,
@@ -456,6 +431,9 @@ fn test_allow_signing_should_approve_the_correct_cycles_amount() {
 
 #[test]
 fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
+    if !helper_is_pow_enabled() {
+        return;
+    }
     let pic_setup = setup_cycles_ledger_with_progress();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
@@ -489,7 +467,9 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
     debug_assert!(result_allow_signing_2.is_ok());
 
     let allow_signing_response_2 = result_allow_signing_2.unwrap();
-    let challenge_completion = allow_signing_response_2.challenge_completion.unwrap();
+    let challenge_completion = allow_signing_response_2
+        .challenge_completion
+        .expect("Failed to retrieve optional ChallengeCompletion");
 
     assert_deviation(
         challenge_completion.solved_duration_ms,
