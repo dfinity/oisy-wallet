@@ -16,9 +16,9 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Set git remote silently
+    - name: Set git remote silently and locally
       run: |
-        git config --global url."https://github-actions:$GITHUB_TOKEN@github.com/".insteadOf "https://github.com/"
+        git config url."https://github-actions:$GITHUB_TOKEN@github.com/".insteadOf "https://github.com/"
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
       shell: bash
