@@ -53,6 +53,7 @@ jobs:
         uses: ./.github/actions/add-and-commit
         with:
           message: '🤖 Apply formatting changes'
+          token: ${{ steps.app-token.outputs.token }}
       - name: Fail for formatting issues without personal access token
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
         run: |

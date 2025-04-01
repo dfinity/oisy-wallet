@@ -1,4 +1,4 @@
-name: Format and Commit
+name: Add and Commit
 description: Set git remote and commit changes (e.g., formatting)
 
 inputs:
@@ -9,15 +9,18 @@ inputs:
   message:
     description: Commit message
     required: true
+  token:
+    description: GitHub token
+    required: true
 
 runs:
   using: "composite"
   steps:
     - name: Set git remote silently
       run: |
-        git config --global url."https://github-actions:${{ env.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+        git config --global url."https://github-actions:$GITHUB_TOKEN@github.com/".insteadOf "https://github.com/"
       env:
-        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.token }}
       shell: bash
 
     - name: Commit format
