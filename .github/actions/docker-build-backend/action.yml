@@ -37,7 +37,7 @@ runs:
         outputs: ./out
         target: ${{ inputs.target }}
 
-    - run: sha256sum out/$NAME
+    - run: sha256sum "out/$NAME"
       env:
         NAME: ${{ inputs.name }}
       shell: bash
