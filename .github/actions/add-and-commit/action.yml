@@ -29,3 +29,11 @@ runs:
         add: ${{ inputs.add }}
         default_author: github_actions
         message: ${{ inputs.message }}
+
+    - name: Unset local git remote config
+      run: |
+        git config --unset-all url."https://github-actions:${GITHUB_TOKEN}@github.com/".insteadOf || true
+        git config --unset-all url."https://github.com/".insteadOf || true
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      shell: bash
