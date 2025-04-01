@@ -51,7 +51,8 @@
 			"documentation": "Documentation",
 			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
-			"vip_qr_code": "VIP QR codes"
+			"vip_qr_code": "VIP QR codes",
+			"refer_a_friend": "Refer your friends"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -65,7 +66,8 @@
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
-			"vip_qr_code": "Generate an invitation link"
+			"vip_qr_code": "Generate an invitation link",
+			"refer_a_friend": "Generate a referral link for a friend"
 		},
 		"short": {
 			"documentation": "Docs"
