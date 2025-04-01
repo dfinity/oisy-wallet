@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
@@ -32,7 +33,7 @@
 	<div class="mr-3 flex-1">
 		<InputSearch
 			bind:filter
-			noMatch={noTokensMatch}
+			showResetButton={notEmptyString(filter)}
 			placeholder={$i18n.tokens.placeholder.search_token}
 			autofocus={isDesktop()}
 		/>

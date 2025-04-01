@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, nonNullish } from '@dfinity/utils';
+	import { debounce, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
@@ -148,7 +148,7 @@
 <div class="mb-4">
 	<InputSearch
 		bind:filter
-		noMatch={noTokensMatch}
+		showResetButton={notEmptyString(filter)}
 		placeholder={$i18n.tokens.placeholder.search_token}
 		autofocus={isDesktop()}
 	/>
