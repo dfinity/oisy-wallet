@@ -12,6 +12,7 @@ pub mod dapp;
 pub mod migration;
 pub mod network;
 pub mod number;
+pub mod pow;
 pub mod settings;
 pub mod signer;
 pub mod snapshot;
