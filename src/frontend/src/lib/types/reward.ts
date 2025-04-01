@@ -15,4 +15,5 @@ export interface RewardResponseInfo {
 export interface RewardResult {
 	receivedReward: boolean;
 	receivedJackpot: boolean;
+	receivedReferral: boolean;
 }
