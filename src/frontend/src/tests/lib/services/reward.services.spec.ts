@@ -182,7 +182,7 @@ describe('reward-code', () => {
 			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: ['jackpot'],
-			campaign_name: [],
+			campaign_name: []
 		};
 		const mockedUserData: UserData = {
 			is_vip: [false],
@@ -196,7 +196,7 @@ describe('reward-code', () => {
 			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: 'jackpot',
-			campaign_name: [],
+			campaign_name: []
 		};
 
 		it('should return a list of rewards and the last timestamp', async () => {
