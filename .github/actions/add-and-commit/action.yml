@@ -14,7 +14,7 @@ inputs:
     required: true
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Set git remote silently
       run: |
