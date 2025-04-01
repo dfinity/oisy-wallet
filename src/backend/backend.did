@@ -79,6 +79,7 @@ type AddUserCredentialRequest = record {
 };
 type AllowSigningError = variant {
   ApproveError : ApproveError;
+  PowChallenge : ChallengeCompletionError;
   Other : text;
   FailedToContactCyclesLedger;
 };
@@ -133,6 +134,13 @@ type CanisterStatusResultV2 = record {
   module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
+type ChallengeCompletionError = variant {
+  InvalidNonce;
+  MissingChallenge;
+  ExpiredChallenge;
+  MissingUserProfile;
+  ChallengeAlreadySolved;
+};
 type Config = record {
   api : opt Guards;
   derivation_origin : opt text;
