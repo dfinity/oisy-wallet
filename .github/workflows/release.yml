@@ -2,11 +2,8 @@ name: Release
 
 on:
   release:
-    types: [released]
+    types: [ released ]
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   #####################
@@ -15,6 +12,8 @@ jobs:
 
   docker-build-base:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,6 +23,8 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     needs: docker-build-base
     strategy:
       matrix:
@@ -44,6 +45,8 @@ jobs:
 
   candid:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     strategy:
       matrix:
         include:
@@ -61,7 +64,9 @@ jobs:
 
   release:
     runs-on: ubuntu-24.04
-    needs: ['docker-build', 'candid']
+    permissions:
+      contents: write
+    needs: [ 'docker-build', 'candid' ]
     steps:
       - uses: actions/checkout@v4
 
