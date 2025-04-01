@@ -48,16 +48,9 @@ jobs:
           else
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
-      - name: Create GitHub App Token
-        uses: actions/create-github-app-token@v1
-        continue-on-error: true
-        id: app-token-2
-        with:
-          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
-          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
       - name: Set git remote silently
         run: |
-          git remote set-url origin https://github-actions:${{ steps.app-token-2.outputs.token }}@github.com/${{ github.repository }}.git
+          git remote set-url origin https://github-actions:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
       - name: Commit format
         if: steps.check_changes.outputs.changes_detected == 'true'
         uses: EndBug/add-and-commit@v9
@@ -136,7 +129,7 @@ jobs:
 
   may-merge:
     if: always()
-    needs: ['format', 'lint', 'check', 'test', 'config']
+    needs: [ 'format', 'lint', 'check', 'test', 'config' ]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
