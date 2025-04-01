@@ -103,7 +103,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Download WASM artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: backend.wasm.gz
           path: out/
@@ -210,14 +210,14 @@ jobs:
 
       - name: Download Ubuntu Snapshots
         if: env.ubuntu_status == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: snapshots-ubuntu-24.04
           path: e2e
 
       - name: Download macOS Snapshots
         if: env.macos_status == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: snapshots-macos-14
           path: e2e
