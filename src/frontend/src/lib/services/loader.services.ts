@@ -1,6 +1,6 @@
 import { allowSigning } from '$lib/api/backend.api';
 import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
-import { errorSignOut, signOut } from '$lib/services/auth.services';
+import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -73,7 +73,7 @@ export const initLoader = async ({
 	setProgressModal: (value: boolean) => void;
 }): Promise<void> => {
 	if (isNullish(identity)) {
-		await signOut({});
+		await nullishSignOut();
 		return;
 	}
 
