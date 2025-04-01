@@ -24,6 +24,9 @@ on:
 jobs:
   update-dependencies:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@v1
