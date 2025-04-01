@@ -5,9 +5,10 @@
 
 	export let network: Network;
 	export let selectedNetworkId: NetworkId | undefined = undefined;
+	export let delayOnNetworkSelect = true;
 
 	let usdBalance: number;
 	$: usdBalance = $enabledMainnetTokensUsdBalancesPerNetwork[network.id] ?? 0;
 </script>
 
-<NetworkComponent {network} {usdBalance} {selectedNetworkId} on:icSelected />
+<NetworkComponent {network} {usdBalance} {selectedNetworkId} {delayOnNetworkSelect} on:icSelected />

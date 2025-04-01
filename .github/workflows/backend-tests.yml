@@ -22,6 +22,8 @@ on:
 jobs:
   docker-build-base:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,6 +33,8 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     needs: docker-build-base
     strategy:
       matrix:
@@ -51,6 +55,8 @@ jobs:
 
   tests:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     needs: ['docker-build']
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +70,7 @@ jobs:
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
 
       - name: Download backend.wasm.gz
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: backend.wasm.gz
           path: .
@@ -77,6 +83,8 @@ jobs:
     needs: ['tests']
     if: ${{ always() }}
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/needs_success
