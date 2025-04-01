@@ -11,7 +11,6 @@
 	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
 </script>
 
-<!-- todo: revert z-3 back to z-1 when the modal for mobile version dropdowns is using real modals with store etc with responsive component -->
 <header
 	class="z-3 pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
 	class:1.5xl:fixed={$authSignedIn}
