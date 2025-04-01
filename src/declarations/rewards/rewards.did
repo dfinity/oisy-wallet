@@ -264,6 +264,10 @@ type UsageAwardEvent = record {
 };
 type UsageAwardState = record {
   snapshots : vec UserSnapshot;
+    /// Pseudonym for user who introduced the caller to Oisy.
+  referred_by : opt nat32;
+    /// User's code for inviting others to the platform, and referral stats. 
+  referrer_info : opt ReferrerInfo;
 };
 type UsageAwardStats = record {
   user_count : nat64;

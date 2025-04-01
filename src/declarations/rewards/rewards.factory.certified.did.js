@@ -220,7 +220,11 @@ export const idlFactory = ({ IDL }) => {
 		is_vip: IDL.Opt(IDL.Bool),
 		sprinkles: IDL.Vec(RewardInfo)
 	});
-	const UsageAwardState = IDL.Record({ snapshots: IDL.Vec(UserSnapshot) });
+	const UsageAwardState = IDL.Record({
+		snapshots: IDL.Vec(UserSnapshot),
+		referred_by: IDL.Opt(IDL.Nat32),
+		referrer_info: IDL.Opt(ReferrerInfo)
+	});
 	const VipStats = IDL.Record({
 		total_rejected: IDL.Nat32,
 		total_redeemed: IDL.Nat32,

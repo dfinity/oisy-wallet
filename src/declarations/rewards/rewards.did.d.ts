@@ -177,6 +177,8 @@ export interface UsageAwardEvent {
 }
 export interface UsageAwardState {
 	snapshots: Array<UserSnapshot>;
+	referred_by: [] | [number];
+	referrer_info: [] | [ReferrerInfo];
 }
 export interface UsageAwardStats {
 	user_count: bigint;
