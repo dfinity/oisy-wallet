@@ -3,9 +3,10 @@
 	import { onMount } from 'svelte';
 	import AirdropStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalRewardState } from '$lib/derived/modal.derived';
+	import {modalReferralState, modalRewardState} from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { loadRewardResult } from '$lib/utils/rewards.utils';
+	import ReferralStateModal from "$lib/components/referral/ReferralStateModal.svelte";
 
 	let isJackpot: boolean | undefined;
 	$: isJackpot = $modalRewardState ? ($modalStore?.data as boolean | undefined) : undefined;
@@ -15,9 +16,16 @@
 			return;
 		}
 
-		const { receivedReward, receivedJackpot } = await loadRewardResult($authIdentity);
+		const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult($authIdentity);
 		if (receivedReward) {
-			modalStore.openRewardState(receivedJackpot);
+			if (receivedJackpot) {
+				modalStore.openRewardState(receivedJackpot);
+			} else if (receivedReferral) {
+				modalStore.openReferralState();
+			} else {
+				modalStore.openRewardState(false);
+			}
 		}
 	});
 </script>
@@ -26,4 +34,6 @@
 
 {#if $modalRewardState && nonNullish(isJackpot)}
 	<AirdropStateModal jackpot={isJackpot} />
+{:else if $modalReferralState}
+	<ReferralStateModal />
 {/if}
