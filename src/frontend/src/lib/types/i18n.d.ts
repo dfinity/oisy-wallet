@@ -822,9 +822,7 @@ interface I18nVip {
 }
 
 interface I18nReferral {
-	invitation: {
-		error: { loading_referrer_info: string; setting_referrer: string };
-	};
+	invitation: { error: { loading_referrer_info: string; setting_referrer: string } };
 	reward: {
 		text: {
 			title: string;
