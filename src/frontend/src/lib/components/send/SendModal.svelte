@@ -102,7 +102,8 @@
 	bind:currentStep
 	bind:this={modal}
 	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING}
+	disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
+		currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 	testId={SEND_TOKENS_MODAL}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
