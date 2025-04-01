@@ -11,6 +11,8 @@ on:
 jobs:
   lint-shell:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
