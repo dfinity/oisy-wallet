@@ -42,7 +42,7 @@ runs:
         NAME: ${{ inputs.name }}
       shell: bash
 
-    - run: mv out/$NAME $NAME
+    - run: mv "out/$NAME" "$NAME"
       env:
         NAME: ${{ inputs.name }}
       shell: bash
