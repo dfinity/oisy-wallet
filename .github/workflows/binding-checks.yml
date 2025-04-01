@@ -34,10 +34,13 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Checkout code
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        with:
+          persist-credentials: false
 
       - uses: dorny/paths-filter@v3
         id: changes
@@ -106,11 +109,10 @@ jobs:
 
       - name: Commit bindings
         if: steps.changes.outputs.src == 'true' && steps.check_can_add_commit.outputs.can_add_commit == 'true' && steps.check_changes.outputs.changes_detected == 'true'
-        uses: EndBug/add-and-commit@v9
+        uses: ./.github/actions/add-and-commit
         with:
-          add: .
-          default_author: github_actions
           message: '🤖 Apply bindings changes'
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Provide diff
         if: steps.changes.outputs.src == 'true' && steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
@@ -127,6 +129,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/needs_success
         with:
           needs: '${{ toJson(needs) }}'
