@@ -30,7 +30,8 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 
-			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBe(false);
 			expect(receivedJackpot).toBe(false);
@@ -49,7 +50,8 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBe(false);
 			expect(receivedJackpot).toBe(false);
@@ -70,7 +72,8 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBe(true);
 			expect(receivedJackpot).toBe(false);
@@ -92,7 +95,8 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBe(true);
 			expect(receivedJackpot).toBe(true);
@@ -114,7 +118,8 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBe(true);
 			expect(receivedJackpot).toBe(true);
@@ -136,7 +141,8 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBe(true);
 			expect(receivedJackpot).toBe(false);
