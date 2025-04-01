@@ -172,6 +172,7 @@ interface I18nInit {
 		retrieving_public_keys: string;
 		done: string;
 	};
+	alt: { loader_banner: string };
 	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
@@ -363,6 +364,8 @@ interface I18nSend {
 		convert_to_native_icp: string;
 		open_qr_modal: string;
 		scan_qr: string;
+		select_token: string;
+		select_network_filter: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
