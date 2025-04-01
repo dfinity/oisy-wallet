@@ -71,3 +71,21 @@ testWithII('should display correct QR codes for receiving ETH tokens', async () 
 		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_ETH_SECTION
 	});
 });
+
+testWithII('should display correct QR codes for receiving SOL mainnet tokens', async () => {
+	await homepageLoggedIn.testReceiveModalQrCode({
+		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION
+	});
+});
+
+testWithII('should display correct QR codes for receiving SOL testnet tokens', async () => {
+	await homepageLoggedIn.testReceiveModalQrCode({
+		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_SOL_TESTNET_SECTION
+	});
+});
+
+testWithII('should display correct QR codes for receiving SOL devnet tokens', async () => {
+	await homepageLoggedIn.testReceiveModalQrCode({
+		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION
+	});
+});
