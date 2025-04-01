@@ -1,6 +1,7 @@
 export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
+export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
@@ -93,6 +94,10 @@ export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
 
+export const REFERRAL_CODE_COPY_BUTTON = 'referral-code-copy-button';
+export const REFERRAL_CODE_SHARE_BUTTON = 'referral-code-share-button';
+export const REFERRAL_CODE_LEARN_MORE = 'referral-code-learn-more';
+
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
 export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
@@ -127,6 +132,9 @@ export const REWARDS_STATE_MODAL_SHARE_BUTTON = 'reward-state-modal-share-button
 export const REWARDS_BANNER = 'rewards-banner';
 export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 export const REWARDS_STATUS_BUTTON = 'reward-status-button';
+
+export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
+export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
 
 export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
