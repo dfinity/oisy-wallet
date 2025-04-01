@@ -15,6 +15,8 @@ concurrency:
 jobs:
   check-e2e-changes:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     outputs:
       e2e-or-config-changed: ${{ steps.e2e-or-config-files.outputs.e2e-or-config-changed }}
     steps:
@@ -62,6 +64,8 @@ jobs:
 
   e2e:
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     needs: ['oisy-backend-wasm', 'check-e2e-changes']
     strategy:
       matrix:
@@ -162,6 +166,9 @@ jobs:
   finalize-snapshots-update:
     name: Finalize Snapshots Update
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
     needs: [e2e]
     outputs:
       e2e-snapshots-changed: ${{ steps.e2e-check-snapshots.outputs.e2e-snapshots-changed }}
@@ -253,6 +260,8 @@ jobs:
     if: always()
     needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       matrix:
         os: [ubuntu-24.04, macos-14]

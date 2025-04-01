@@ -20,6 +20,9 @@ on:
 jobs:
   version_bump:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Create GitHub App Token

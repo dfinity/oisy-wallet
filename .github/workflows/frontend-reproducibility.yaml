@@ -6,12 +6,14 @@ on:
       - package-lock.json
   merge_group:
   release:
-    types: [released]
+    types: [ released ]
   workflow_dispatch:
 
 jobs:
   frontend-reproducibility:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
