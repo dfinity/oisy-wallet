@@ -16,9 +16,15 @@
 			return;
 		}
 
-		const { receivedReward, receivedJackpot } = await loadRewardResult($authIdentity);
+		const { receivedReward, receivedJackpot, receivedReferral } = await loadRewardResult($authIdentity);
 		if (receivedReward) {
-			modalStore.openRewardState(receivedJackpot);
+			if (receivedJackpot) {
+				modalStore.openRewardState(receivedJackpot);
+			} else if (receivedReferral) {
+				modalStore.openReferralState();
+			} else {
+				modalStore.openRewardState(false);
+			}
 		}
 	});
 </script>
