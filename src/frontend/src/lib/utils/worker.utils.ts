@@ -3,22 +3,47 @@ import { z } from 'zod';
 type TaggedMessage<T> = {
 	message: string;
 	requestId: string;
+	type: 'request' | 'response';
+	isResponse: boolean;
 	tag: 'Ok' | 'Err';
 	data: T;
 };
 
 const responseHandlers = new Map<string, (data: unknown) => void>();
 
-export function initWorkerMessageRouter(worker: Worker) {
-	worker.onmessage = (event) => {
-		const message = event.data;
-		const { requestId } = message;
+/*export function handleResponse(event: MessageEvent<TaggedMessage<PostMessageBase>>): boolean {
+	let postMessageBase: PostMessageBase = PostMessageBaseSchema.parse(event);
+
+	if (postMessageBase.type == 'response') {
+		const handler = responseHandlers.get(postMessageBase.requestId);
+		if (handler) {
+			handler(postMessageBase.message);
+			responseHandlers.delete(postMessageBase.requestId);
+			return true;
+		}
+	}
+	//
+	return false;
+}*/
+
+export function initWorkerResponseRouter(worker: Worker) {
+	worker.addEventListener('message', (event) => {
+		const { type, requestId } = event.data;
+
+		// Exit immediately if 'type' is missing or not equal to 'response'
+		if (!type || type !== 'response') {
+			console.error(`Invalid message type. Expected 'response', but got: ${type}`);
+			return; // Exit execution early
+		}
+
+		console.log('Valid message received:', event.data);
+
 		const handler = responseHandlers.get(requestId);
 		if (handler) {
-			handler(message);
+			handler(event);
 			responseHandlers.delete(requestId);
 		}
-	};
+	});
 }
 
 /**
@@ -35,6 +60,7 @@ export function sendMessageRequest<T>(
 		message,
 		requestId,
 		tag: 'Ok' as const,
+		type: 'request',
 		data
 	};
 

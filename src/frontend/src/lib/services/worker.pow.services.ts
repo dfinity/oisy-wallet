@@ -11,7 +11,7 @@ import type {
 	PostMessageCreatePowChallengeRequest,
 	PostMessageCreatePowChallengeResponse
 } from '$lib/types/post-message';
-import { initWorkerMessageRouter } from '$lib/utils/worker.utils';
+import { initWorkerResponseRouter } from '$lib/utils/worker.utils';
 import { get } from 'svelte/store';
 
 export interface BaseWorker {
@@ -25,12 +25,17 @@ let errorMessages: { msg: string; timestamp: number }[] = [];
 export const initPowWorker = async (): Promise<BaseWorker> => {
 	const PowWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new PowWorker.default();
-	initWorkerMessageRouter(worker);
+	initWorkerResponseRouter(worker);
 	worker.onmessage = async (event) => {
 		const raw = event.data;
 		const { message } = raw;
 
+		/*if (handleResponse(raw)) {
+            return;
+        }*/
 		switch (message) {
+			// handle any response first and skip further processing
+
 			case 'CreatePowChallengeRequest': {
 				const requestPostMessage = PostMessageCreatePowChallengeRequestSchema.safeParse(raw);
 				if (!requestPostMessage.success) {
@@ -63,6 +68,7 @@ export const initPowWorker = async (): Promise<BaseWorker> => {
 		const response: PostMessageCreatePowChallengeResponse = {
 			message: 'CreatePowChallengeResponse',
 			requestId: parsedPostMessage.requestId,
+			type: 'response',
 			tag: 'Ok',
 			data: {
 				difficulty: allowSigningResponse.difficulty,
@@ -86,6 +92,7 @@ export const initPowWorker = async (): Promise<BaseWorker> => {
 		const response: PostMessageAllowSigningResponse = {
 			message: 'AllowSigningResponse',
 			requestId: parsedPostMessage.requestId,
+			type: 'response',
 			tag: 'Ok',
 			data: {
 				allowed_cycles: allowSigningResponse.allowed_cycles,

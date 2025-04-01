@@ -10,28 +10,31 @@
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
+	import PowProtector from '$lib/components/pow/PowProtector.svelte';
 </script>
 
 <LoaderUserProfile>
-	<AddressGuard>
-		<Loader>
-			<VipRewardGuard>
-				<RewardGuard>
-					<LoaderEthBalances>
-						<LoaderWallets>
-							<ExchangeWorker>
-								<LoaderMetamask>
-									<UserSnapshotWorker>
-										<slot />
-									</UserSnapshotWorker>
-								</LoaderMetamask>
-							</ExchangeWorker>
-						</LoaderWallets>
-					</LoaderEthBalances>
-				</RewardGuard>
-			</VipRewardGuard>
-		</Loader>
-	</AddressGuard>
+	<PowProtector>
+		<AddressGuard>
+			<Loader>
+				<VipRewardGuard>
+					<RewardGuard>
+						<LoaderEthBalances>
+							<LoaderWallets>
+								<ExchangeWorker>
+									<LoaderMetamask>
+										<UserSnapshotWorker>
+											<slot />
+										</UserSnapshotWorker>
+									</LoaderMetamask>
+								</ExchangeWorker>
+							</LoaderWallets>
+						</LoaderEthBalances>
+					</RewardGuard>
+				</VipRewardGuard>
+			</Loader>
+		</AddressGuard>
+	</PowProtector>
 </LoaderUserProfile>
 
 <!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->

@@ -214,10 +214,19 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 export const PostMessageBaseSchema = z.object({
 	message: z.string(),
 	requestId: z.string(),
+	type: z.union([z.literal('request'), z.literal('response')]),
 	tag: z.union([z.literal('Ok'), z.literal('Err')])
 });
 
-export const PostMessageCreatePowChallengeRequestSchema = PostMessageBaseSchema.extend({
+export const PostMessageRequestBaseSchema = PostMessageBaseSchema.extend({
+	type: z.literal('request')
+});
+
+export const PostMessageResponseBaseSchema = PostMessageBaseSchema.extend({
+	type: z.literal('response')
+});
+
+export const PostMessageCreatePowChallengeRequestSchema = PostMessageRequestBaseSchema.extend({
 	message: z.literal('CreatePowChallengeRequest')
 });
 
@@ -233,7 +242,7 @@ export const PostMessageCreatePowChallengeErrorSchema = z.union([
 	z.object({ RandomnessError: z.string() })
 ]);
 
-export const PostMessageCreatePowChallengeResponseSchema = PostMessageBaseSchema.extend({
+export const PostMessageCreatePowChallengeResponseSchema = PostMessageResponseBaseSchema.extend({
 	message: z.literal('CreatePowChallengeResponse'),
 	data: z.union([
 		PostMessageCreatePowChallengeResponseDataSchema,
@@ -248,7 +257,7 @@ export const PostMessageChallengeCompletionSchema = z.object({
 	current_difficulty: z.number()
 });
 
-export const PostMessageAllowSigningRequestSchema = PostMessageBaseSchema.extend({
+export const PostMessageAllowSigningRequestSchema = PostMessageRequestBaseSchema.extend({
 	message: z.literal('AllowSigningRequest'),
 	data: z.object({
 		nonce: z.bigint()
@@ -274,7 +283,7 @@ export const PostMessageAllowSigningErrorSchema = z.union([
 	z.object({ FailedToContactCyclesLedger: z.null() })
 ]);
 
-export const PostMessageAllowSigningResponseSchema = PostMessageBaseSchema.extend({
+export const PostMessageAllowSigningResponseSchema = PostMessageResponseBaseSchema.extend({
 	message: z.literal('AllowSigningResponse'),
 	data: z.union([PostMessageAllowSigningResponseDataSchema, PostMessageAllowSigningErrorSchema])
 });

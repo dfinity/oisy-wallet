@@ -17,7 +17,6 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use oisy_user::oisy_users;
 use serde_bytes::ByteBuf;
-use shared::types::pow::POW_ENABLED;
 use shared::{
     http::{HttpRequest, HttpResponse},
     metrics::get_metrics,
@@ -39,7 +38,7 @@ use shared::{
         },
         pow::{
             AllowSigningStatus, ChallengeCompletion, ChallengeCompletionError,
-            CreateChallengeError, CreateChallengeResponse, DIFFICULTY_TO_CYCLE_FACTOR,
+            CreateChallengeError, CreateChallengeResponse, DIFFICULTY_TO_CYCLE_FACTOR, POW_ENABLED,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -69,9 +68,7 @@ use crate::{
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
-    user_profile::{
-        add_hidden_dapp_id, set_network_settings, set_show_testnets, update_network_settings,
-    },
+    user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
 
 mod assertions;
@@ -716,9 +713,9 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
 // providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
 // cycles ledger.
 ///
-/// When the proof-of-work (PoW) protection is enabled (see [`POW_ENABLED`]), the caller must include
-/// a valid PoW challenge nonce in the request. This function grants the caller a number of cycles
-/// proportional to the current PoW difficulty.
+/// When the proof-of-work (PoW) protection is enabled (see [`POW_ENABLED`]), the caller must
+/// include a valid PoW challenge nonce in the request. This function grants the caller a number of
+/// cycles proportional to the current PoW difficulty.
 ///
 /// # Parameters
 ///

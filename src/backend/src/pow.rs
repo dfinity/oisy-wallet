@@ -15,7 +15,6 @@ use crate::{
 // -------------------------------------------------------------------------------------------------
 // - General Utility methods
 // -------------------------------------------------------------------------------------------------
-
 /// Generates a cryptographically secure random `u64` number using the Internet Computer's
 /// Management Canister API `raw_rand()`.
 ///
@@ -44,7 +43,6 @@ async fn get_random_u64() -> Result<u64, String> {
 
     // Now convert bytes to u64
     let random_number = u64::from_le_bytes(byte_array);
-
     Ok(random_number)
 }
 
@@ -99,10 +97,8 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
     }
 
     // Map error from get_random_u64() to CreateChallengeError
-    // TODO remove message to not leak any security related information in case function fails
     let random_nonce = get_random_u64()
         .await
-        // TODO remove mapping in order avoid leaking any information about the system/algorithm
         .map_err(CreateChallengeError::RandomnessError)?;
 
     let current_time_ms: u64 = get_time_ms();
@@ -120,7 +116,6 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
     });
 
     ic_cdk::println!("create_pow_challenge() -> Stored {:?}", stored_challenge);
-
     Ok(stored_challenge)
 }
 
@@ -128,7 +123,34 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
 // - Internal functions
 // -------------------------------------------------------------------------------------------------
 
-/// Internal function which can be integrated to any service function that requires Pow protection
+/// Internal function which can be integrated into any service function that requires Proof of Work (`PoW`) protection.
+///
+/// This function plays a critical role in validating the integrity and security of service functions by
+/// enforcing a Proof of Work mechanism. It is particularly useful to mitigate spam or abuse by ensuring
+/// that computational effort is expended before certain operations are allowed.
+///
+/// Features:
+/// - Auto adjustment of difficulty based that can be enabled with the `DIFFICULTY_AUTO_ADJUSTMENT` flag.
+/// - Enforces expiration through timestamp validation.
+/// - Tightly integrates with stored challenges to ensure that the nonce is valid and solves the challenge correctly.
+///
+/// # Arguments
+/// - `nonce: u64` - The nonce that is provided for solving the challenge. This value is validated against
+///   the stored challenge conditions.
+///
+/// # Returns
+/// - `Result<ChallengeCompletion, ChallengeCompletionError>`:
+///     - On success, it returns a `ChallengeCompletion` struct containing details like solved duration
+///       and difficulty adjustments (if enabled).
+///     - On failure, it returns a `ChallengeCompletionError` indicating why the completion process failed,
+///       such as invalid nonce or expired challenge.
+///
+/// # Errors
+/// This function can fail for various reasons, including:
+/// - `ChallengeCompletionError::MissingChallenge`: If no active challenge exists for the given context.
+/// - `ChallengeCompletionError::InvalidNonce`: If the provided nonce is not valid for the challenge.
+/// - `ChallengeCompletionError::ExpiredChallenge`: If the challenge expired before being solved.
+/// - `ChallengeCompletionError::ChallengeAlreadySolved`: If the challenge has already been solved.
 pub(crate) fn complete_challenge(
     nonce: u64,
 ) -> Result<ChallengeCompletion, ChallengeCompletionError> {
@@ -152,7 +174,10 @@ pub(crate) fn complete_challenge(
         ChallengeCompletionError::MissingChallenge
     })?;
 
-    ic_cdk::println!("complete_challenge() -> Retrieved {:?}", stored_challenge);
+    ic_cdk::println!(
+        "complete_challenge(nonce) -> Retrieved {:?}",
+        stored_challenge
+    );
 
     // A new challenge can be requested after the current challenge has expired
     if stored_challenge.is_expired() {
@@ -202,7 +227,10 @@ pub(crate) fn complete_challenge(
         pow_challenge_map.insert(stored_principal, Candid(stored_challenge.clone()));
     });
 
-    ic_cdk::println!("complete_challenge() -> Stored: {:?}", stored_challenge);
+    ic_cdk::println!(
+        "complete_challenge(nonce) -> Stored: {:?}",
+        stored_challenge
+    );
 
     Ok(ChallengeCompletion {
         next_allowance_ms: 0,
@@ -212,19 +240,24 @@ pub(crate) fn complete_challenge(
     })
 }
 
-// Calculate the new difficulty for a PoW Challenge:
-//
-// Adjust the current difficulty proportionally based on how long the client took
-// to solve the previous challenge (`solve_duration_ms`) compared to the solving duration
-// (`TARGET_DURATION_MS`).
-//
-// Formula:
-// new_difficulty = (current_difficulty * TARGET_DURATION_MS * ) / solve_duration_ms
-//
-// This ensures:
-// - If the client solved too quickly (duration < target), difficulty increases.
-// - If the client solved too slowly (duration > target), difficulty decreases. .
+/// Calculate the new difficulty for a `PoW` Challenge:
+///
+/// Adjust the current difficulty proportionally based on how long the client took
+/// to solve the previous challenge (`solve_duration_ms`) compared to the solving duration
+/// (`TARGET_DURATION_MS`).
+///
+/// Formula:
+/// `new_difficulty` = (`current_difficulty` * `TARGET_DURATION_MS` * ) / `solve_duration_ms`
+///
+/// This ensures:
+/// - If the client solved too quickly (duration < target), difficulty increases.
+/// - If the client solved too slowly (duration > target), difficulty decreases. .
 fn adjust_difficulty(difficulty: u32, solve_duration_ms: u64) -> u32 {
+    // TODO add rust feature flag
+    // #[cfg(not(feature = "difficulty_auto_adjustment"))]
+    //
+    //
+    #[allow(dead_code)]
     if DIFFICULTY_AUTO_ADJUSTMENT {
         let new_difficulty = u32::try_from(
             ((u64::from(difficulty) * TARGET_DURATION_MS) / solve_duration_ms.max(1))

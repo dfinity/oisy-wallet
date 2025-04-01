@@ -1,6 +1,6 @@
 import { solvePowChallenge } from '$lib/services/pow.services';
 
-export const FIRST_TIMER_INTERVAL = 60_000;
+export const FIRST_TIMER_INTERVAL = 30_000;
 
 import {
 	PostMessageAllowSigningResponseSchema,
