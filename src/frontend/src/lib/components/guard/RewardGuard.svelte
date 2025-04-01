@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import AirdropStateModal from '$lib/components/rewards/RewardStateModal.svelte';
+	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalRewardState } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -25,5 +25,5 @@
 <slot />
 
 {#if $modalRewardState && nonNullish(isJackpot)}
-	<AirdropStateModal jackpot={isJackpot} />
+	<RewardStateModal jackpot={isJackpot} />
 {/if}
