@@ -5,7 +5,7 @@ import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 import * as authServices from '$lib/services/auth.services';
-import { signOut } from '$lib/services/auth.services';
+import { nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
@@ -99,13 +99,14 @@ describe('loader.services', () => {
 			vi.resetAllMocks();
 
 			vi.spyOn(authServices, 'signOut').mockImplementation(vi.fn());
+			vi.spyOn(authServices, 'nullishSignOut').mockImplementation(vi.fn());
 			vi.spyOn(api, 'allowSigning').mockImplementation(vi.fn());
 		});
 
 		it('should sign out if the identity is nullish', async () => {
 			await initLoader({ ...mockParams, identity: null });
 
-			expect(signOut).toHaveBeenCalledOnce();
+			expect(nullishSignOut).toHaveBeenCalledOnce();
 		});
 
 		it('should load the user profile', async () => {
