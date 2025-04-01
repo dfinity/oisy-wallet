@@ -49,79 +49,79 @@
 		animation: blink-window3 0.75s linear 5;
 	}
 
-    @keyframes dome-animation {
-      0% {
-        transform: translateY(0px) translateX(0px);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(0.5px) translateX(-0.5px);
-        opacity: 1;
-      }
-    }
+	@keyframes dome-animation {
+		0% {
+			transform: translateY(0px) translateX(0px);
+			opacity: 1;
+		}
+		100% {
+			transform: translateY(0.5px) translateX(-0.5px);
+			opacity: 1;
+		}
+	}
 
-    @keyframes speed-lines {
-      0% {
-        transform: translateY(-0.75px) translateX(0.75px);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(0px) translateX(0px);
-        opacity: 0.5;
-      }
-    }
+	@keyframes speed-lines {
+		0% {
+			transform: translateY(-0.75px) translateX(0.75px);
+			opacity: 1;
+		}
+		100% {
+			transform: translateY(0px) translateX(0px);
+			opacity: 0.5;
+		}
+	}
 
-    @keyframes blink-window1 {
-      0% {
-        opacity: 0;
-      }
-      25% {
-        opacity: 0;
-      }
-      50% {
-        opacity: 1;
-      }
-      75% {
-        opacity: 1;
-      }
-      100% {
-        opacity: 0;
-      }
-    }
+	@keyframes blink-window1 {
+		0% {
+			opacity: 0;
+		}
+		25% {
+			opacity: 0;
+		}
+		50% {
+			opacity: 1;
+		}
+		75% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
 
-    @keyframes blink-window2 {
-      0% {
-        opacity: 0;
-      }
-      25% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 1;
-      }
-      75% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 0;
-      }
-    }
+	@keyframes blink-window2 {
+		0% {
+			opacity: 0;
+		}
+		25% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 1;
+		}
+		75% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
 
-    @keyframes blink-window3 {
-      0% {
-        opacity: 1;
-      }
-      25% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0;
-      }
-      75% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 0;
-      }
-    }
+	@keyframes blink-window3 {
+		0% {
+			opacity: 1;
+		}
+		25% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0;
+		}
+		75% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
 </style>
