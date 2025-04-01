@@ -18,7 +18,7 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 
 		if (newRewards.length > 0) {
 			const containsJackpot: boolean = newRewards.some(({ name }) => name === 'jackpot');
-			const containsReferral: boolean = newRewards.some(({ name }) => name === 'referral');
+			const containsReferral: boolean = newRewards.some(({ name }) => name === 'referrer');
 
 			return {
 				receivedReward: true,
