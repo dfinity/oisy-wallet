@@ -79,7 +79,7 @@
 			<span class="mb-6 block w-full pt-3 text-center text-sm text-tertiary">
 				{nonNullish(numberOfReferrals) && numberOfReferrals > 0
 					? replacePlaceholders($i18n.referral.invitation.text.referred_amount, {
-							amount: numberOfReferrals.toString()
+							$amount: numberOfReferrals.toString()
 						})
 					: $i18n.referral.invitation.text.not_referred_yet}
 			</span>
