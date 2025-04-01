@@ -2,25 +2,25 @@
 
 use std::{thread, time::Duration};
 
-use crate::utils::asserts::{assert_deviation, assert_greater_than};
-use crate::utils::{
-    mock::CALLER,
-    pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
-};
 use candid::Principal;
 use ic_cdk::api::management_canister::{main::canister_status, provisional::CanisterIdRecord};
 use ic_cycles_ledger_client::{Account, Allowance, AllowanceArgs};
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
-use shared::types::pow::POW_ENABLED;
 use shared::types::{
     pow::{
         AllowSigningStatus, ChallengeCompletionError, CreateChallengeError,
-        CreateChallengeResponse, START_DIFFICULTY, TARGET_DURATION_MS,
+        CreateChallengeResponse, POW_ENABLED, START_DIFFICULTY, TARGET_DURATION_MS,
     },
     signer::{AllowSigningError, AllowSigningRequest, AllowSigningResponse},
     user_profile::UserProfile,
+};
+
+use crate::utils::{
+    asserts::{assert_deviation, assert_greater_than},
+    mock::CALLER,
+    pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
 };
 
 #[allow(dead_code)]
