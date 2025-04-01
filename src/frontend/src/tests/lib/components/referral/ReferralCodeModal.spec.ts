@@ -75,7 +75,7 @@ describe('ReferralCodeModal', () => {
 			expect(
 				getByText(
 					replacePlaceholders(get(i18n).referral.invitation.text.referred_amount, {
-						amount: numberOfReferrals.toString()
+						$amount: numberOfReferrals.toString()
 					})
 				)
 			).toBeInTheDocument();
