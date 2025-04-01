@@ -147,11 +147,9 @@ jobs:
               SUBDOMAIN="fe${NETWORK#test_fe_}" # E.g. test_fe_1 -> fe1
               echo "VITE_AUTH_ALTERNATIVE_ORIGINS=$(echo "$VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING" | sed "s/staging/$SUBDOMAIN/g")" >> $GITHUB_OUTPUT
             fi
-            {
-              echo "DFX_DEPLOY_KEY<<EOF"
-              echo "$DFX_DEPLOY_KEY_STAGING"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
+            echo "DFX_DEPLOY_KEY<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$DFX_DEPLOY_KEY_STAGING" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
           elif [[ "$NETWORK" == "beta" ]]; then
             {
               echo "VITE_ETHERSCAN_API_KEY=$VITE_ETHERSCAN_API_KEY_BETA"
@@ -171,11 +169,9 @@ jobs:
               echo "VITE_USER_NETWORKS_FEATURE_ENABLED=$VITE_USER_NETWORKS_FEATURE_ENABLED_BETA"
               echo "VITE_ONRAMPER_API_KEY_PROD=$VITE_ONRAMPER_API_KEY_PROD_BETA"
             } >> $GITHUB_OUTPUT
-            {
-              echo "DFX_DEPLOY_KEY<<EOF"
-              echo "$DFX_DEPLOY_KEY_BETA"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
+            echo "DFX_DEPLOY_KEY<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$DFX_DEPLOY_KEY_BETA" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
           fi
         env:
           VITE_ETHERSCAN_API_KEY_STAGING: ${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}
