@@ -30,10 +30,7 @@
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
-	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
-	import { signOut } from '$lib/services/auth.services';
-	import { loadUserProfile } from '$lib/services/load-user-profile.services';
-	import { initSignerAllowance } from '$lib/services/loader.services';
+	import { initLoader } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
@@ -140,48 +137,17 @@
 
 	const validateAddresses = () => emit({ message: 'oisyValidateAddresses' });
 
+	const setProgressModal = (value: boolean) => {
+		progressModal = value;
+	};
+
 	onMount(async () => {
-		// The user profile settings will define the enabled/disabled networks.
-		// So we need to load it first to enable/disable the rest of the services.
-		const { success: userProfileSuccess } = await loadUserProfile({ identity: $authIdentity });
-
-		if (!userProfileSuccess) {
-			await signOut({});
-			return;
-		}
-
-		const { success: addressIdbSuccess, err } = await loadIdbAddresses();
-
-		if (addressIdbSuccess) {
-			loading.set(false);
-
-			await progressAndLoad();
-
-			validateAddresses();
-
-			return;
-		}
-
-		// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
-		progressModal = true;
-
-		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
-
-		if (!initSignerAllowanceSuccess) {
-			// Sign-out is handled within the service.
-			return;
-		}
-
-		const { success: addressSuccess } = await loadAddresses(
-			err?.map(({ tokenId }) => tokenId) ?? []
-		);
-
-		if (!addressSuccess) {
-			await signOut({});
-			return;
-		}
-
-		await progressAndLoad();
+		await initLoader({
+			identity: $authIdentity,
+			validateAddresses,
+			progressAndLoad,
+			setProgressModal
+		});
 	});
 </script>
 
