@@ -823,6 +823,15 @@ interface I18nVip {
 
 interface I18nReferral {
 	invitation: { error: { loading_referrer_info: string; setting_referrer: string } };
+	reward: {
+		text: {
+			title: string;
+			content_title: string;
+			content_text: string;
+			share: string;
+			open_wallet: string;
+		};
+	};
 }
 
 interface I18nSigner {

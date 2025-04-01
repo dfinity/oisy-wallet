@@ -7,5 +7,6 @@
 	"OISY_TWITTER_URL": "https://x.com/oisy",
 	"OISY_DOCS_URL": "https://docs.oisy.com",
 	"OISY_SUPPORT_URL": "https://docs.oisy.com/using-oisy-wallet/support",
-	"OISY_REWARDS_URL": "https://docs.oisy.com/rewards"
+	"OISY_REWARDS_URL": "https://docs.oisy.com/rewards",
+	"OISY_REFERRAL_TWITTER_URL": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
 }
