@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-    needs: [ 'docker-build' ]
+    needs: ['docker-build']
     steps:
       - uses: actions/checkout@v4
 
@@ -80,7 +80,7 @@ jobs:
         run: ./scripts/test.backend.sh
 
   may-merge:
-    needs: [ 'tests' ]
+    needs: ['tests']
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     permissions:

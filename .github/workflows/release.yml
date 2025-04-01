@@ -2,7 +2,7 @@ name: Release
 
 on:
   release:
-    types: [ released ]
+    types: [released]
   workflow_dispatch:
 
 jobs:
@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
-    needs: [ 'docker-build', 'candid' ]
+    needs: ['docker-build', 'candid']
     steps:
       - uses: actions/checkout@v4
 
