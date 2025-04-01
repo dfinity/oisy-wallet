@@ -24,21 +24,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Fetch base branch
-        env:
-          BASE_REF: ${{ github.base_ref }}
         run: |
           git fetch origin "$BASE_REF:$BASE_REF"
+        env:
+          BASE_REF: ${{ github.base_ref }}
 
       - name: Check for E2E or Playwright Config File Changes
         id: e2e-or-config-files
-        env:
-          BASE_REF: ${{ github.base_ref }}
         run: |
           if git diff --name-only "origin/$BASE_REF" HEAD | grep -E "(playwright.config.ts|.env.e2e|canister_e2e_ids.json|e2e/)"; then
             echo "e2e-or-config-changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "e2e-or-config-changed=false" >> "$GITHUB_OUTPUT"
           fi
+        env:
+          BASE_REF: ${{ github.base_ref }}
         shell: bash
         continue-on-error: false
 
@@ -150,8 +150,6 @@ jobs:
 
       - name: Set snapshot output
         id: set_snapshot_output
-        env:
-          CHANGES: ${{ steps.check_snapshots.outputs.CHANGES }}
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
             echo "ubuntu_status=$CHANGES" >> $GITHUB_OUTPUT
@@ -160,6 +158,8 @@ jobs:
             echo "macos_status=$CHANGES" >> $GITHUB_OUTPUT
             echo "os_suffix=darwin" >> $GITHUB_OUTPUT
           fi
+        env:
+          CHANGES: ${{ steps.check_snapshots.outputs.CHANGES }}
 
       - name: Save changed snapshots
         if: steps.check_snapshots.outputs.CHANGES == 'true'
@@ -200,12 +200,12 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Set snapshot status from previous jobs
-        env:
-          ubuntu_status: ${{ needs.e2e.outputs.ubuntu_status }}
-          macos_status: ${{ needs.e2e.outputs.macos_status }}
         run: |
           echo "ubuntu_status=$ubuntu_status" >> $GITHUB_ENV
           echo "macos_status=$macos_status" >> $GITHUB_ENV
+        env:
+          ubuntu_status: ${{ needs.e2e.outputs.ubuntu_status }}
+          macos_status: ${{ needs.e2e.outputs.macos_status }}
 
       - name: Download Ubuntu Snapshots
         if: env.ubuntu_status == 'true'
@@ -277,10 +277,6 @@ jobs:
         os: [ ubuntu-24.04, macos-14 ]
     steps:
       - name: Cleared for merging
-        env:
-          E2E_OR_CONFIG_CHANGED: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed }}
-          E2E_SNAPSHOTS_CHANGED: ${{ needs.finalize-snapshots-update.outputs.e2e-snapshots-changed }}
-          E2E_RESULT: ${{ needs.e2e.result }}
         run: |
           if [ "$E2E_OR_CONFIG_CHANGED" == "false" ]; then
             echo "No E2E or config changes detected. PR is cleared for merging."
@@ -290,3 +286,7 @@ jobs:
             echo "This PR is not cleared for merging"
             exit 1
           fi
+        env:
+          E2E_OR_CONFIG_CHANGED: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed }}
+          E2E_SNAPSHOTS_CHANGED: ${{ needs.finalize-snapshots-update.outputs.e2e-snapshots-changed }}
+          E2E_RESULT: ${{ needs.e2e.result }}

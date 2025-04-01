@@ -29,11 +29,11 @@ jobs:
           echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Create Git tag
-        env:
-          VERSION: ${{ steps.get_version.outputs.version }}
         run: |
           git tag "v$VERSION"
           git push origin "v$VERSION"
+        env:
+          VERSION: ${{ steps.get_version.outputs.version }}
 
       - name: Publish Release Notes
         uses: ./.github/actions/release-notes

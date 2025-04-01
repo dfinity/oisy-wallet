@@ -43,8 +43,6 @@ jobs:
 
       - name: Set package variable
         id: package_name
-        env:
-          PACKAGE: ${{ inputs.package }}
         run: |
           case "$PACKAGE" in
             "gix-components") "PKG_NAME=gix-cmp" ;;
@@ -56,6 +54,8 @@ jobs:
             *) echo "Invalid package selection: $PACKAGE" && exit 1 ;;
           esac
           echo "PKG_NAME=$PKG_NAME" >> "$GITHUB_ENV"
+        env:
+          PACKAGE: ${{ inputs.package }}
 
       - name: Update package
         run: npm run update:${{ env.PKG_NAME }}${{ inputs.next && ':next' || '' }}

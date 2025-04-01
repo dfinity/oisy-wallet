@@ -40,13 +40,13 @@ jobs:
 
       - name: Bump version
         id: bump_version
-        env:
-          VERSION_BUMP: ${{ github.event.inputs.version_bump }}
         run: |
           npm version $VERSION_BUMP --no-git-tag-version
           new_version=$(node -p "require('./package.json').version")
           echo "new_version=$new_version" >> $GITHUB_OUTPUT
           echo "Bumped to version: $new_version"
+        env:
+          VERSION_BUMP: ${{ github.event.inputs.version_bump }}
 
       - name: Create Pull Request
         uses: ./.github/actions/create-pr
