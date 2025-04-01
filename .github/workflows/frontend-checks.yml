@@ -48,18 +48,10 @@ jobs:
           else
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
-      - name: Set git remote silently
-        run: |
-          git config --global url."https://github-actions:$GITHUB_TOKEN@github.com/".insteadOf "https://github.com/"
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: Commit format
         if: steps.check_changes.outputs.changes_detected == 'true'
-        uses: EndBug/add-and-commit@v9
+        uses: ./.github/actions/add-and-commit
         with:
-          add: .
-          default_author: github_actions
-          author_name: github-actions
           message: '🤖 Apply formatting changes'
       - name: Fail for formatting issues without personal access token
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
@@ -131,7 +123,7 @@ jobs:
 
   may-merge:
     if: always()
-    needs: ['format', 'lint', 'check', 'test', 'config']
+    needs: [ 'format', 'lint', 'check', 'test', 'config' ]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
