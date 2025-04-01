@@ -44,15 +44,18 @@ jobs:
       - name: Set package variable
         id: package_name
         run: |
-          case "${{ inputs.package }}" in
-            "gix-components") echo "PKG_NAME=gix-cmp" >> "$GITHUB_ENV" ;;
-            "ic-js") echo "PKG_NAME=ic-js" >> "$GITHUB_ENV" ;;
-            "oisy-wallet-signer") echo "PKG_NAME=signer" >> "$GITHUB_ENV" ;;
-            "eslint-config-oisy-wallet") echo "PKG_NAME=oisy-eslint" >> "$GITHUB_ENV" ;;
-            "agent") echo "PKG_NAME=agent" >> "$GITHUB_ENV" ;;
-            "agent & ic-js") echo "PKG_NAME=agent:ic-js" >> "$GITHUB_ENV" ;;
-            *) echo "Invalid package selection" && exit 1 ;;
+          case "$PACKAGE" in
+            "gix-components") "PKG_NAME=gix-cmp" ;;
+            "ic-js") "PKG_NAME=ic-js" ;;
+            "oisy-wallet-signer") "PKG_NAME=signer" ;;
+            "eslint-config-oisy-wallet") "PKG_NAME=oisy-eslint" ;;
+            "agent") "PKG_NAME=agent" ;;
+            "agent & ic-js") "PKG_NAME=agent:ic-js" ;;
+            *) echo "Invalid package selection: $PACKAGE" && exit 1 ;;
           esac
+          echo "PKG_NAME=$PKG_NAME" >> "$GITHUB_ENV"
+        env:
+          PACKAGE: ${{ inputs.package }}
 
       - name: Update package
         run: npm run update:${{ env.PKG_NAME }}${{ inputs.next && ':next' || '' }}

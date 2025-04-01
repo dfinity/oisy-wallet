@@ -37,10 +37,14 @@ runs:
         outputs: ./out
         target: ${{ inputs.target }}
 
-    - run: sha256sum out/${{ inputs.name }}
+    - run: sha256sum "out/$NAME"
+      env:
+        NAME: ${{ inputs.name }}
       shell: bash
 
-    - run: mv out/${{ inputs.name }} ${{ inputs.name }}
+    - run: mv "out/$NAME" "$NAME"
+      env:
+        NAME: ${{ inputs.name }}
       shell: bash
 
     - name: 'Upload ${{ inputs.name }}'

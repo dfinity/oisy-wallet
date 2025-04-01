@@ -62,9 +62,9 @@ jobs:
           echo "deploy_frontend=false" >> $GITHUB_ENV
           echo "deploy_backend=false" >> $GITHUB_ENV
           if [ "${{ github.event_name }}" == "push" ]; then
-            if [ "${{ github.ref_type }}" == "branch" ]; then
+            if [ "$REF_TYPE" == "branch" ]; then
               echo "NETWORK=staging" >> $GITHUB_ENV
-            elif [ "${{ github.ref_type }}" == "tag" ]; then
+            elif [ "$REF_TYPE" == "tag" ]; then
               echo "NETWORK=beta" >> $GITHUB_ENV
             else
               echo "Error: Unsupported ref type."
@@ -74,14 +74,14 @@ jobs:
             echo "deploy_frontend=true" >> $GITHUB_ENV
             echo "deploy_backend=true" >> $GITHUB_ENV
           elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "NETWORK=${{ github.event.inputs.network }}" >> $GITHUB_ENV
-            echo "CANISTER=${{ github.event.inputs.canister }}" >> $GITHUB_ENV
+            echo "NETWORK=$NETWORK" >> $GITHUB_ENV
+            echo "CANISTER=$CANISTER" >> $GITHUB_ENV
             echo "deploy_frontend=${{ github.event.inputs.canister == 'frontend' }}" >> $GITHUB_ENV
             echo "deploy_backend=${{ github.event.inputs.canister == 'backend' }}" >> $GITHUB_ENV
           elif [ "${{ github.event_name }}" == "workflow_run" ]; then
             echo "NETWORK=beta" >> $GITHUB_ENV
             echo "CANISTER=frontend" >> $GITHUB_ENV
-            if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+            if [ "$CONCLUSION" == "success" ]; then
               echo "deploy_frontend=true" >> $GITHUB_ENV
               echo "deploy_backend=true" >> $GITHUB_ENV
             fi
@@ -89,10 +89,15 @@ jobs:
             echo "Error: Unsupported event type."
             exit 1
           fi
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          NETWORK: ${{ github.event.inputs.network }}
+          CANISTER: ${{ github.event.inputs.canister }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
 
       - name: Check release policy
         run: |
-          if [[ "$NETWORK" ==  "staging" ]] && [[ "${{ github.ref }}" != "refs/heads/main" ]] ; then
+          if [[ "$NETWORK" ==  "staging" ]] && [[ "$REF" != "refs/heads/main" ]] ; then
             echo "Only the main branch may be deployed to staging."
             exit 1
           fi
@@ -106,6 +111,8 @@ jobs:
             echo "Only a backend may be deployed to test_be_* networks"
             exit 1
           fi
+        env:
+          REF: ${{ github.ref }}
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -211,11 +218,11 @@ jobs:
       - name: Deploy Backend to Environment
         run: |
           DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
-          [[ "${{ github.event.inputs.force-backend }}" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
+          [[ "$FORCE_BACKEND" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
           if [ "$deploy_backend" == "true" ] ; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
-              if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
+              if [ "$FORCE_BACKEND" == "false" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
               else
                 ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
@@ -226,3 +233,5 @@ jobs:
               dfx deploy backend --network "$NETWORK" "${DFX_DEPLOY_FLAGS[@]}"
             fi
           fi
+        env:
+          FORCE_BACKEND: ${{ github.event.inputs.force-backend }}

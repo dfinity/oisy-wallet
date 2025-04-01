@@ -30,8 +30,10 @@ jobs:
 
       - name: Create Git tag
         run: |
-          git tag "v${{ steps.get_version.outputs.version }}"
-          git push origin "v${{ steps.get_version.outputs.version }}"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+        env:
+          VERSION: ${{ steps.get_version.outputs.version }}
 
       - name: Publish Release Notes
         uses: ./.github/actions/release-notes
