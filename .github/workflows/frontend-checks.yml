@@ -23,7 +23,7 @@ jobs:
         id: check_can_add_commit
         run: |
           echo "can_add_commit=${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
-      - name: Checkout
+      - name: Checkout for pull request
         if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
         uses: actions/checkout@v4
         with:
@@ -114,7 +114,7 @@ jobs:
 
   may-merge:
     if: always()
-    needs: ['format', 'lint', 'check', 'test', 'config']
+    needs: [ 'format', 'lint', 'check', 'test', 'config' ]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
