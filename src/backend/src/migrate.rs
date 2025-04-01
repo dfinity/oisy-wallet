@@ -1,7 +1,6 @@
 use std::ops::Bound;
 
 use candid::{decode_one, encode_one, CandidType, Principal};
-use ic_cdk::eprintln;
 use ic_cdk_timers::clear_timer;
 use serde::Deserialize;
 use shared::{
@@ -177,7 +176,7 @@ macro_rules! migrate {
             .bulk_up(migration_bytes)
             .await
             .map_err(|e| {
-                eprintln!("Failed to transfer data {e:?}");
+                ic_cdk::println!("Failed to transfer data {:?}", e);
                 MigrationError::DataMigrationFailed
             })?;
         next_state

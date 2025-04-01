@@ -1,7 +1,10 @@
 import type {
 	_SERVICE as BackendService,
+	AllowSigningRequest,
 	CustomToken,
 	PendingTransaction,
+	Result_2,
+	Result_6,
 	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserToken
@@ -27,7 +30,7 @@ import type {
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
-import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import { Canister, createServices, type QueryParams, toNullable } from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({
@@ -173,14 +176,25 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	allowSigning = async (): Promise<void> => {
+	allowSigning = async (
+		allowSigningRequest: { request?: AllowSigningRequest } = {}
+	): Promise<Result_2> => {
 		const { allow_signing } = this.caller({ certified: true });
-
-		const response = await allow_signing();
+		const response = await allow_signing(
+			allowSigningRequest.request ? [allowSigningRequest.request] : []
+		);
 
 		if ('Err' in response) {
 			throw mapAllowSigningError(response.Err);
 		}
+
+		return response;
+	};
+
+	createPowChallenge = (): Promise<Result_6> => {
+		const { create_pow_challenge } = this.caller({ certified: true });
+		const response = create_pow_challenge();
+		return response;
 	};
 
 	addUserHiddenDappId = async ({
