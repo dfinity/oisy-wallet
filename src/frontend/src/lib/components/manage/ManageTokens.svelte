@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, nonNullish } from '@dfinity/utils';
+	import { debounce, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
@@ -31,7 +31,6 @@
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { filterTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
@@ -149,7 +148,7 @@
 <div class="mb-4">
 	<InputSearch
 		bind:filter
-		showResetButton={!isNullishOrEmpty(filter)}
+		showResetButton={notEmptyString(filter)}
 		placeholder={$i18n.tokens.placeholder.search_token}
 		autofocus={isDesktop()}
 	/>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
@@ -11,7 +12,6 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { isDesktop } from '$lib/utils/device.utils';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let networkSelectorViewOnly = false;
 	export let loading: boolean;
@@ -33,7 +33,7 @@
 	<div class="mr-3 flex-1">
 		<InputSearch
 			bind:filter
-			showResetButton={!isNullishOrEmpty(filter)}
+			showResetButton={notEmptyString(filter)}
 			placeholder={$i18n.tokens.placeholder.search_token}
 			autofocus={isDesktop()}
 		/>
