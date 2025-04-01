@@ -22,3 +22,28 @@ jobs:
 
       - name: Lint shell scripts
         run: scripts/lint.sh.sh
+
+  lint-github-actions:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install zizmor
+        run: ./scripts/setup cargo-binstall zizmor
+
+      - name: Lint GitHub workflows
+        run: |
+          scripts/lint.github.sh || echo "WARNING: Zizmor lints are still being addressed"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  devops-checks-pass:
+    needs: ['lint-shell', 'lint-github-actions']
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/needs_success
+        with:
+          needs: '${{ toJson(needs) }}'
