@@ -80,6 +80,7 @@ export interface AddUserCredentialRequest {
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
+	| { PowChallenge: ChallengeCompletionError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
@@ -133,6 +134,12 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array | number[]];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
+export type ChallengeCompletionError =
+	| { InvalidNonce: null }
+	| { MissingChallenge: null }
+	| { ExpiredChallenge: null }
+	| { MissingUserProfile: null }
+	| { ChallengeAlreadySolved: null };
 export interface Config {
 	api: [] | [Guards];
 	derivation_origin: [] | [string];
@@ -293,12 +300,12 @@ export type Result_5 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFe
 export type Result_6 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_7 = { Ok: MigrationReport } | { Err: string };
 export type Result_8 = { Ok: null } | { Err: string };
-export type Result_9 = { Ok: null } | { Err: SaveNetworksSettingsError };
-export type SaveNetworksSettingsError = { VersionMismatch: null } | { UserNotFound: null };
+export type Result_9 = { Ok: null } | { Err: SaveTestnetsSettingsError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
 }
+export type SaveTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InternalError: { msg: string } };
@@ -457,7 +464,6 @@ export interface _SERVICE {
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_snapshot: ActorMethod<[UserSnapshot], undefined>;
-	set_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_9>;
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_9>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;

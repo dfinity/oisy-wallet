@@ -22,7 +22,8 @@
 			"copy": "Copy",
 			"clear_filter": "Clear filter",
 			"not_available": "n/a",
-			"new": "New"
+			"new": "New",
+			"edit": "Edit"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -128,8 +129,8 @@
 			"title": "Rewards",
 			"active_campaigns": "Active Opportunities",
 			"upcoming_campaigns": "Upcoming Opportunities",
-			"active_date": "Due on",
-			"participate_title": "Participate and earn Sprinkles",
+			"active_date": "Ends on",
+			"participate_title": "Earn BTC by staying active - and now by inviting others.",
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
@@ -187,6 +188,9 @@
 			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum and Solana",
 			"done": "Enjoy $oisy_short"
 		},
+		"alt": {
+			"loader_banner": "Loading initial data for $oisy_name (theme $theme)"
+		},
 		"info": {
 			"hold_loading": "Hold tight, we are loading some information...",
 			"hold_loading_wallet": "Hold tight, we are loading some initial data for your wallet..."
@@ -243,15 +247,21 @@
 	"settings": {
 		"text": {
 			"title": "Settings",
+			"general": "General",
 			"principal": "Your Principal",
 			"principal_copied": "Principal copied to clipboard",
 			"principal_description": "Your ID for the $oisy_name. Created by your Internet Identity.",
-			"session": "Your session expires in",
+			"session_duration": "Session duration",
+			"session_expires_in": "Expires in",
 			"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
-			"testnets": "Show test networks",
+			"networks": "Networks",
+			"enable_testnets": "Enable test networks",
+			"active_networks": "Active networks ",
+			"active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions from inactive networks will not show or be included in your available balance.",
+			"enable_network": "Enable network",
+			"disable_network": "Disable network",
 			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
 			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance.",
-			"active_networks": "Active networks",
 			"credentials_title": "Credentials",
 			"pouh_credential": "Humanity Credential",
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
@@ -280,7 +290,9 @@
 		"chain_fusion": "All networks",
 		"network": "Network",
 		"testnet": "Testnet",
-		"filter": "Filter networks"
+		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled",
+		"filter": "Filter networks",
+		"manage": "Manage networks"
 	},
 	"receive": {
 		"text": {
@@ -380,7 +392,9 @@
 			"initializing_transaction": "Initializing transaction",
 			"convert_to_native_icp": "Convert to native ICP",
 			"open_qr_modal": "Start QR Code scan for transaction details",
-			"scan_qr": "Scan QR Code"
+			"scan_qr": "Scan QR Code",
+			"select_token": "Select token to send",
+			"select_network_filter": "Select network filter"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
@@ -891,6 +905,31 @@
 				"generate_new_link": "Generate new link",
 				"generating_new_code": "Generating new code",
 				"regenerate_countdown_text": "New link will be generated in $counter sec"
+			}
+		}
+	},
+	"referral": {
+		"invitation": {
+			"text": {
+				"title": "Refer a friend",
+				"referral_link_copied": "Referral link copied to clipboard.",
+				"information": "Get bonus sprinkles, every time your friends receive one!",
+				"not_referred_yet": "You haven't referred anyone yet",
+				"referred_amount": "You already referred $amount people",
+				"learn_more": "Learn more"
+			},
+			"error": {
+				"loading_referrer_info": "Error while loading referral info",
+				"setting_referrer": "Error while setting referrer"
+			}
+		},
+		"reward": {
+			"text": {
+				"title": "Congratulations!",
+				"content_title": "Here a small thank you",
+				"content_text": "One of your referred users just got some sprinkles.",
+				"share": "Share on X",
+				"open_wallet": "Take me to the wallet"
 			}
 		}
 	},

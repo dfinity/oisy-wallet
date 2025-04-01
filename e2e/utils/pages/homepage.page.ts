@@ -17,8 +17,13 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
+	SETTINGS_NETWORKS_MODAL,
+	SETTINGS_NETWORKS_MODAL_SAVE_BUTTON,
+	SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER,
+	SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX,
+	SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE,
 	SIDEBAR_NAVIGATION_MENU,
-	TESTNET_TOGGLE,
 	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
@@ -348,9 +353,30 @@ abstract class Homepage {
 		}
 	}
 
+	private async toggleAllTestnets(): Promise<void> {
+		const toggles = this.#page.locator(`[data-tid^="${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-"]`);
+		const countToggles = await toggles.count();
+		const testIds = await Promise.all(
+			Array.from({ length: countToggles }, (_, i) => toggles.nth(i).getAttribute('data-tid'))
+		);
+		for (const testId of testIds) {
+			if (nonNullish(testId)) {
+				await this.clickByTestId({ testId });
+			}
+		}
+	}
+
 	async activateTestnetSettings(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
-		await this.clickByTestId({ testId: TESTNET_TOGGLE });
+		await this.clickByTestId({ testId: SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON });
+		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX });
+		await this.waitForByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER });
+		await this.toggleAllTestnets();
+		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_SAVE_BUTTON });
+		await this.waitForByTestId({
+			testId: SETTINGS_NETWORKS_MODAL,
+			options: { state: 'hidden', timeout: 60000 }
+		});
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 

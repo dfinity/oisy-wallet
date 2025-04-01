@@ -24,13 +24,11 @@
 	let status: BtcTransactionStatus;
 
 	let explorerUrl: string | undefined;
-	$: {
-		explorerUrl = isNetworkIdBTCTestnet(token?.network.id)
-			? BTC_TESTNET_EXPLORER_URL
-			: isNetworkIdBTCRegtest(token?.network.id)
-				? undefined
-				: BTC_MAINNET_EXPLORER_URL;
-	}
+	$: explorerUrl = isNetworkIdBTCTestnet(token?.network.id)
+		? BTC_TESTNET_EXPLORER_URL
+		: isNetworkIdBTCRegtest(token?.network.id)
+			? undefined
+			: BTC_MAINNET_EXPLORER_URL;
 
 	$: ({ from, value, timestamp, id, blockNumber, to, type, status, confirmations } = transaction);
 

@@ -5,14 +5,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let filter = '';
-	export let noMatch = false;
+	export let showResetButton = false;
 	export let placeholder: string;
 	export let autofocus = false;
 </script>
 
 <InputTextWithAction name="filter" required={false} bind:value={filter} {placeholder} {autofocus}>
 	<svelte:fragment slot="inner-end">
-		{#if noMatch}
+		{#if showResetButton}
 			<button on:click={() => (filter = '')} aria-label={$i18n.core.text.clear_filter}>
 				<IconClose />
 			</button>

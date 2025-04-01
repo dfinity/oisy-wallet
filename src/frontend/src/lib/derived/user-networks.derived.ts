@@ -17,7 +17,7 @@ import {
 	SOLANA_MAINNET_NETWORK_ID,
 	SOLANA_TESTNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
-import { testnets } from '$lib/derived/testnets.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
@@ -25,26 +25,20 @@ import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const userNetworks: Readable<UserNetworks> = derived(
-	[userSettingsNetworks, testnets],
-	([$userSettingsNetworks, $testnets]) => {
+	[userSettingsNetworks, testnetsEnabled],
+	([$userSettingsNetworks, $testnetsEnabled]) => {
 		const userNetworks = $userSettingsNetworks?.networks;
 
 		if (isNullish(userNetworks) || userNetworks.length === 0 || !USER_NETWORKS_FEATURE_ENABLED) {
 			// Returning all mainnets (and testnets if enabled) by default
 			return {
 				...SUPPORTED_MAINNET_NETWORKS_IDS.reduce<UserNetworks>(
-					(acc, id) => ({
-						...acc,
-						[id]: { enabled: true, isTestnet: false }
-					}),
+					(acc, id) => ({ ...acc, [id]: { enabled: true, isTestnet: false } }),
 					{}
 				),
-				...($testnets &&
+				...($testnetsEnabled &&
 					SUPPORTED_TESTNET_NETWORKS_IDS.reduce<UserNetworks>(
-						(acc, id) => ({
-							...acc,
-							[id]: { enabled: $testnets, isTestnet: true }
-						}),
+						(acc, id) => ({ ...acc, [id]: { enabled: $testnetsEnabled, isTestnet: true } }),
 						{}
 					))
 			};
@@ -81,12 +75,13 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			return networkId;
 		};
 
-		return userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
-			const networkId: NetworkId = keyToNetworkId(key);
-			return {
-				...acc,
-				[networkId]: { enabled, isTestnet }
-			};
-		}, {});
+		return {
+			...userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
+				const networkId: NetworkId = keyToNetworkId(key);
+				return { ...acc, [networkId]: { enabled, isTestnet } };
+			}, {}),
+			// We always enable ICP network.
+			[ICP_NETWORK_ID]: { enabled: true, isTestnet: false }
+		};
 	}
 );

@@ -11,6 +11,7 @@ export const LOADER_MODAL = 'loader-modal';
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
+export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
@@ -47,13 +48,21 @@ export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
 
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
+export const SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON = 'settings-active-networks-edit-button';
+
+export const SETTINGS_NETWORKS_MODAL = 'settings-networks-modal';
+export const SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX = 'settings-networks-modal-testnet-checkbox';
+export const SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER =
+	'settings-networks-modal-testnets-container';
+export const SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE = 'settings-networks-modal-testnet-toggle';
+export const SETTINGS_NETWORKS_MODAL_SAVE_BUTTON = 'settings-networks-modal-save-button';
 
 export const NAVIGATION_ITEM_TOKENS = 'navigation-item-tokens';
 export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
-export const NAVIGATION_ITEM_AIRDROPS = 'navigation-item-rewards';
+export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
 
 export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
 
@@ -84,6 +93,10 @@ export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
 
+export const REFERRAL_CODE_COPY_BUTTON = 'referral-code-copy-button';
+export const REFERRAL_CODE_SHARE_BUTTON = 'referral-code-share-button';
+export const REFERRAL_CODE_LEARN_MORE = 'referral-code-learn-more';
+
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
 export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
@@ -110,11 +123,17 @@ export const THEME_SELECTOR_CARD = 'theme-selector-card';
 
 export const REWARDS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-reward-campaigns-container';
 export const REWARDS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-reward-campaigns-container';
-export const REWARDS_MODAL_IMAGE_BANNER = 'reward-modal-image-banner';
+export const REWARDS_MODAL = 'rewards-modal';
+export const REWARDS_MODAL_DATE_BADGE = 'rewards-modal-date-badge';
+export const REWARDS_MODAL_IMAGE_BANNER = 'rewards-modal-image-banner';
 export const REWARDS_STATE_MODAL_IMAGE_BANNER = 'reward-state-modal-image-banner';
 export const REWARDS_STATE_MODAL_SHARE_BUTTON = 'reward-state-modal-share-button';
 export const REWARDS_BANNER = 'rewards-banner';
 export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
+export const REWARDS_STATUS_BUTTON = 'reward-status-button';
+
+export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
+export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
 
 export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
