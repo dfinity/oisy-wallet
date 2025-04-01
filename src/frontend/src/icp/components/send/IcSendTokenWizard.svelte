@@ -189,7 +189,7 @@
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
-	const back = () => dispatch('icBack');
+	const back = () => dispatch('icSendBack');
 	const close = () => dispatch('icClose');
 </script>
 
