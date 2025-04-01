@@ -6,6 +6,7 @@
 	import { REWARDS_ENABLED } from '$env/rewards.env';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
@@ -28,7 +29,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import AnimatedIconUfo from "$lib/components/icons/animated/AnimatedIconUfo.svelte";
 
 	export let testIdPrefix: string | undefined = undefined;
 
