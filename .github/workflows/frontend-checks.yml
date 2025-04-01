@@ -48,6 +48,13 @@ jobs:
           else
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@v1
+        continue-on-error: true
+        id: app-token-2
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
       - name: Commit format
         if: steps.check_changes.outputs.changes_detected == 'true'
         uses: EndBug/add-and-commit@v9
@@ -57,7 +64,7 @@ jobs:
           author_name: github-actions
           message: '🤖 Apply formatting changes'
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.app-token-2.outputs.token }}
       - name: Fail for formatting issues without personal access token
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
         run: |
