@@ -57,7 +57,7 @@ jobs:
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
       - name: Set git remote silently
         run: |
-          git config --global url."https://${{ steps.app-token-2.outputs.token }}:@github.com/".insteadOf "https://github.com/"
+          git remote set-url origin https://${{ steps.app-token-2.outputs.token }}@github.com/${{ github.repository }}.git
       - name: Commit format
         if: steps.check_changes.outputs.changes_detected == 'true'
         uses: EndBug/add-and-commit@v9
