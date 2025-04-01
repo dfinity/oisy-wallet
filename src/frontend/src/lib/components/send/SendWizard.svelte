@@ -53,6 +53,7 @@
 			bind:networkId
 			bind:amount
 			bind:sendProgressStep
+			on:icSendBack
 			on:icBack
 			on:icNext
 			on:icClose
