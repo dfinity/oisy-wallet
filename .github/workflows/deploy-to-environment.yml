@@ -237,6 +237,8 @@ jobs:
 
       - name: Set up DFX
         uses: dfinity/setup-dfx@main
+        env:
+          DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Install key
         run: |
@@ -246,6 +248,8 @@ jobs:
           rm "$key_pem"
           dfx identity use default
           dfx identity get-principal
+        env:
+          DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Pre-build
         run: npm run build
