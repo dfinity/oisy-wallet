@@ -42,7 +42,7 @@
 			<TokenBalance {data} />
 		</span>
 
-		<span class:text-sm={condensed} class="block min-w-12" slot="description">
+		<span class:text-sm={condensed} slot="description">
 			{#if data?.networks}
 				{#each [...new Set(data.networks.map((n) => n.name))] as network, index (network)}
 					{#if index !== 0}

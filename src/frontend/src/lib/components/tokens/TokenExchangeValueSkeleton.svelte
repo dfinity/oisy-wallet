@@ -7,7 +7,7 @@
 </script>
 
 {#if data.balance === undefined || $exchangeNotInitialized}
-	<span class="w-full max-w-[50px]"><SkeletonText /></span>
+	<span class="block w-full max-w-[50px] pt-1"><SkeletonText /></span>
 {:else}
 	<slot />
 {/if}
