@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { IconCheck } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
+	import { fade, slide } from 'svelte/transition';
+	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 
 	export let selectable = false;
 	export let selected = false;
@@ -30,7 +31,13 @@
 	$: hasActionSlot = nonNullish($$slots['action']);
 </script>
 
-<div class="logo-button" class:hover:bg-brand-subtle-10={hover} class:rounded-lg={rounded}>
+<div
+	transition:slide={SLIDE_EASING}
+	class="logo-button flex"
+	class:w-full={dividers}
+	class:hover:bg-brand-subtle-10={hover}
+	class:rounded-lg={rounded}
+>
 	<button on:click class="flex w-full border-0 px-2" data-tid={testId}>
 		<span
 			class="flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0"

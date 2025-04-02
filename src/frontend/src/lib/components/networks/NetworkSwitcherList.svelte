@@ -31,24 +31,20 @@
 	on:icSelected
 />
 
-<ul class="flex list-none flex-col">
+<div class="flex flex-col">
 	{#each $networksMainnets as network (network.id)}
-		<li transition:slide={SLIDE_EASING}
-			><MainnetNetwork {network} {selectedNetworkId} {delayOnNetworkSelect} on:icSelected /></li
-		>
+		<MainnetNetwork {network} {selectedNetworkId} {delayOnNetworkSelect} on:icSelected />
 	{/each}
-</ul>
+</div>
 
 {#if $testnetsEnabled && $networksTestnets.length}
 	<span class="mb-3 mt-6 flex px-3 font-bold" transition:slide={SLIDE_EASING}
 		>{$i18n.networks.test_networks}</span
 	>
 
-	<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
+	<div class="flex flex-col" transition:slide={SLIDE_EASING}>
 		{#each $networksTestnets as network (network.id)}
-			<li transition:slide={SLIDE_EASING}
-				><Network {network} {selectedNetworkId} {delayOnNetworkSelect} on:icSelected /></li
-			>
+			<Network {network} {selectedNetworkId} {delayOnNetworkSelect} on:icSelected />
 		{/each}
-	</ul>
+	</div>
 {/if}
