@@ -39,7 +39,7 @@
 
 		<span class:text-sm={condensed} slot="subtitle">&nbsp;&middot;&nbsp;{data.name}</span>
 
-		<span class:text-sm={condensed} class="block min-w-12" slot="title-end">
+		<span class:text-sm={condensed} class="block min-w-12 text-nowrap" slot="title-end">
 			<TokenBalance {data} />
 		</span>
 
@@ -54,7 +54,7 @@
 			{/if}
 		</span>
 
-		<span class:text-sm={condensed} class="block min-w-12" slot="description-end">
+		<span class:text-sm={condensed} class="block min-w-12 text-nowrap" slot="description-end">
 			<ExchangeTokenValue {data} />
 		</span>
 	</LogoButton>
