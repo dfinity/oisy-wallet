@@ -8,6 +8,7 @@
 	export let dividers = false;
 	export let hover = true;
 	export let rounded = true;
+	export let condensed = false;
 	export let testId: string | undefined = undefined;
 
 	let hasTitleSlot: boolean;
@@ -29,15 +30,30 @@
 	$: hasActionSlot = nonNullish($$slots['action']);
 </script>
 
-<div class:hover:bg-brand-subtle-10={hover} class:rounded-lg={rounded}>
+<div
+	class="flex"
+	class:w-full={dividers}
+	class:logo-button-list-item={dividers}
+	class:hover:bg-brand-subtle-10={hover}
+	class:rounded-lg={rounded}
+>
 	<button on:click class="flex w-full border-0 px-2" data-tid={testId}>
 		<span
-			class="flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0 py-3"
+			class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0"
+			class:py-3={!condensed}
+			class:py-1={condensed}
 			class:border-brand-subtle-20={dividers}
 			class:border-b={dividers}
 		>
 			<span class="flex items-center">
-				<span class="mr-4"><slot name="logo" /></span>
+				{#if selectable}
+					<span in:fade class="mr-2 flex min-w-4 text-brand-primary">
+						{#if selected}
+							<IconCheck size="16px" />
+						{/if}
+					</span>
+				{/if}
+				<span class="mr-2"><slot name="logo" /></span>
 				<span class="flex flex-col text-left">
 					<span class="text-base">
 						{#if hasTitleSlot}
@@ -71,10 +87,6 @@
 						</span>
 					{/if}
 				</span>
-
-				{#if selectable && selected}
-					<span in:fade class="ml-2 flex text-brand-primary"><IconCheck size="20px" /></span>
-				{/if}
 
 				{#if hasActionSlot}
 					<span in:fade class="ml-2 flex text-brand-primary"><slot name="action" /></span>
