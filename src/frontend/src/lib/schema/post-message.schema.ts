@@ -205,7 +205,8 @@ export const PostMessageBaseSchema = z.object({
 	msg: z.string(),
 	requestId: z.string(),
 	type: z.union([z.literal('request'), z.literal('response')]),
-	tag: z.union([z.literal('Ok'), z.literal('Err')])
+	tag: z.union([z.literal('Ok'), z.literal('Err')]),
+	data: z.unknown().optional()
 });
 
 export const PostMessageRequestBaseSchema = PostMessageBaseSchema.extend({
