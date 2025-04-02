@@ -7,7 +7,7 @@ export interface RewardsResponse {
 
 export interface RewardResponseInfo {
 	name: string | undefined;
-	campaign_name: string | undefined;
+	campaignName: string | undefined;
 	ledger: Principal;
 	timestamp: bigint;
 	amount: bigint;
