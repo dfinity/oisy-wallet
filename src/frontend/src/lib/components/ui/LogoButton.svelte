@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { IconCheck } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { fade, slide } from 'svelte/transition';
-	import { SLIDE_EASING } from '$lib/constants/transition.constants';
+	import { fade } from 'svelte/transition';
 
 	export let selectable = false;
 	export let selected = false;
@@ -32,15 +31,14 @@
 </script>
 
 <div
-	transition:slide={SLIDE_EASING}
-	class="logo-button flex"
+	class="flex"
 	class:w-full={dividers}
 	class:hover:bg-brand-subtle-10={hover}
 	class:rounded-lg={rounded}
 >
 	<button on:click class="flex w-full border-0 px-2" data-tid={testId}>
 		<span
-			class="flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0"
+			class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0"
 			class:py-3={!condensed}
 			class:py-1={condensed}
 			class:border-brand-subtle-20={dividers}
@@ -96,9 +94,3 @@
 		</span>
 	</button>
 </div>
-
-<style>
-	.logo-button:last-of-type > button > span {
-		border-bottom: none;
-	}
-</style>
