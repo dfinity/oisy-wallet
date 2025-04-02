@@ -9,7 +9,7 @@
 </script>
 
 {#if nonNullish(network)}
-	<NetworkLogo {network} size="xs" />
+	<NetworkLogo {network} />
 {:else}
-	<Logo src={chainFusion} size="xs" />
+	<Logo src={chainFusion} />
 {/if}

@@ -47,7 +47,7 @@
 	<div slot="items">
 		<NetworkSwitcherList on:icSelected={onNetworkSelect} selectedNetworkId={$networkId} />
 
-		<div class="mb-2 ml-2 mt-5 flex flex-row justify-between text-nowrap">
+		<div class="mb-3 ml-2 mt-6 flex flex-row justify-between text-nowrap">
 			<span class="flex">
 				<Button
 					link
