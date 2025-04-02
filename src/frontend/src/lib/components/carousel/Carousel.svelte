@@ -244,9 +244,9 @@
 	 * Switch to the provided slide
 	 */
 	const goToSlide = ({
-											 slide,
-											 withTransition = true
-										 }: {
+		slide,
+		withTransition = true
+	}: {
 		slide: number;
 		withTransition?: boolean;
 	}) => {
