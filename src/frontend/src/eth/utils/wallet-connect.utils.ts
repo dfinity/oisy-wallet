@@ -4,7 +4,7 @@ import { isEthAddress } from '$lib/utils/account.utils';
 import { isNullish } from '@dfinity/utils';
 import type { Verify } from '@walletconnect/types';
 import { TypedDataEncoder } from 'ethers/hash';
-import { toUtf8String,isHexString } from 'ethers/utils';
+import { isHexString, toUtf8String } from 'ethers/utils';
 
 export const getSignParamsMessageHex = (params: string[]): string =>
 	params.filter((p) => !isEthAddress(p))[0];
