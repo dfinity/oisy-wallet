@@ -12,7 +12,8 @@ import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Transaction } from '$lib/types/transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { AbiCoder, dataSlice } from 'ethers';
+import { AbiCoder } from 'ethers/abi';
+import { dataSlice } from 'ethers/utils';
 
 export const isTransactionPending = ({ blockNumber }: EthTransactionUi): boolean =>
 	isNullish(blockNumber);

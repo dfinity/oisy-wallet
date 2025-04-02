@@ -8,13 +8,14 @@ import {
 } from '$lib/schema/transaction.schema';
 import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import type { FeeData, TransactionResponse, ethers } from 'ethers';
+import type { FeeData, TransactionResponse } from 'ethers/providers';
+import type { Transaction as EthersTransactionLib } from 'ethers/transaction';
 import * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
 export type EthersTransaction = Pick<
-	ethers.Transaction,
+	EthersTransactionLib,
 	| 'hash'
 	| 'to'
 	| 'from'

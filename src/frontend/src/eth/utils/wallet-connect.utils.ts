@@ -4,7 +4,7 @@ import { isEthAddress } from '$lib/utils/account.utils';
 import { isNullish } from '@dfinity/utils';
 import type { Verify } from '@walletconnect/types';
 import { Utils } from 'alchemy-sdk';
-import { TypedDataEncoder } from 'ethers';
+import { TypedDataEncoder } from 'ethers/hash';
 
 export const getSignParamsMessageHex = (params: string[]): string =>
 	params.filter((p) => !isEthAddress(p))[0];

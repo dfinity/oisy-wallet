@@ -1,6 +1,6 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { EthAddress } from '$lib/types/address';
-import type { ContractTransaction } from 'ethers';
+import type { ContractTransaction } from 'ethers/contract';
 
 export interface PopulateTransactionParams {
 	contract: Erc20ContractAddress;

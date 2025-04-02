@@ -8,7 +8,8 @@ import type { OptionToken } from '$lib/types/token';
 import type { EthersTransaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { nonNullish } from '@dfinity/utils';
-import { AbiCoder, dataSlice } from 'ethers';
+import { AbiCoder } from 'ethers/abi';
+import { dataSlice } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 export type MapCkEthereumPendingTransactionParams = {

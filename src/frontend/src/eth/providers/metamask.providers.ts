@@ -4,7 +4,7 @@ import type {
 	MetamaskSendTransactionRequestParams,
 	MetamaskTransactionHash
 } from '$eth/types/metamask';
-import { toBeHex } from 'ethers';
+import { toBeHex } from 'ethers/utils';
 
 // Documentation: https://docs.metamask.io/wallet/how-to/send-transactions/
 

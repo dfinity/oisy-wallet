@@ -1,6 +1,7 @@
 import { isNullish, nonNullish } from '@dfinity/utils';
 import dotenv from 'dotenv';
-import { Contract, EtherscanProvider } from 'ethers';
+import { Contract } from 'ethers/contract';
+import { EtherscanProvider } from 'ethers/providers';
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';

@@ -12,7 +12,8 @@ import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import { Contract, InfuraProvider, type ContractTransaction, type Networkish } from 'ethers';
+import { Contract, type ContractTransaction } from 'ethers/contract';
+import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraCkErc20Provider {

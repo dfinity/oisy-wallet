@@ -15,7 +15,7 @@ import {
 	type FeeData,
 	type Networkish,
 	type TransactionResponse
-} from 'ethers';
+} from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraProvider {

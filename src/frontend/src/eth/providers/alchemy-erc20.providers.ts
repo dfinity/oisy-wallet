@@ -14,7 +14,8 @@ import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import { Contract, JsonRpcProvider } from 'ethers';
+import { Contract } from 'ethers/contract';
+import { JsonRpcProvider } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class AlchemyErc20Provider {
