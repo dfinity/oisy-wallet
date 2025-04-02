@@ -1,6 +1,7 @@
 export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
+export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
@@ -109,6 +110,8 @@ export const TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE = 'swap-amount-exchange-value';
 export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-unavailable';
 
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
+export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
+export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
