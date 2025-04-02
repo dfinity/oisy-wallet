@@ -24,7 +24,7 @@
 
 {#if TEST_FE && notEmptyString(branch) && notEmptyString(commit)}
 	<p class="mt-24 text-center text-xs text-primary">
-		For development purposes, we show the branch and the commit only in test canister.<br />
+		For development purpose, we show the branch and the commit only in test canister.<br />
 		<b>Branch:</b> {branch}<br />
 		<b>Commit:</b> {commit}
 	</p>
