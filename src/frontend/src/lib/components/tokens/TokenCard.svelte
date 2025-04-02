@@ -22,7 +22,7 @@
 		{condensed}
 		{hover}
 	>
-		<span class="mr-2 flex" slot="logo">
+		<span class="flex" slot="logo" class:mr-2={!condensed}>
 			<TokenLogo
 				{data}
 				badge={nonNullish(data.tokenCount)
