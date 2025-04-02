@@ -13,6 +13,9 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import type { TokenUi } from '$lib/types/token';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { IconExpandMore } from '@dfinity/gix-components';
 
 	export let tokenGroup: TokenUiGroup;
 
@@ -73,8 +76,17 @@
 					styleClass="font-normal text-sm justify-start py-2"
 					link
 					on:click={() => toggleHideZeros(!hideZeros)}
-					>{hideZeros ? `Show ${notDisplayedCount} more networks` : `Hide more networks`}</Button
 				>
+					{hideZeros
+						? replacePlaceholders($i18n.tokens.text.show_more_networks, {
+								$number: notDisplayedCount + ''
+							})
+						: $i18n.tokens.text.hide_more_networks}
+
+					<span class="transition-transform duration-500" class:rotate-x-180={!hideZeros}>
+						<IconExpandMore />
+					</span>
+				</Button>
 			{/if}
 		</div>
 	{/if}
