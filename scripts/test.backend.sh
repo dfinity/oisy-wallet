@@ -4,7 +4,7 @@ POCKET_IC_SERVER_VERSION=6.0.0
 OISY_UPGRADE_VERSIONS="v0.0.13,v0.0.19"
 BITCOIN_CANISTER_RELEASE="2024-08-30"
 BITCON_CANISTER_WASM="ic-btc-canister.wasm.gz"
-CYCLES_LEDGER_CANISTER_RELEASE="v1.0.1"
+CYCLES_LEDGER_CANISTER_URL="$(jq -re .canisters.cycles_ledger.wasm dfx.json)"
 CYCLES_LEDGER_CANISTER_WASM="cycles-ledger.wasm.gz"
 # If a backend wasm file exists at the root, it will be used for the tests.
 
