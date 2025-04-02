@@ -121,11 +121,9 @@ export const formatSecondsToNormalizedDate = ({
 	const today = currentDate ?? new Date();
 
 	// TODO: add additional test suite for the below calculations
-	const dateOnlyDate = new Date(date.setHours(0, 0, 0, 0));
-	const dateOnlyToday = new Date(today.setHours(0, 0, 0, 0));
-	const daysDifference = Math.ceil(
-		(dateOnlyDate.getTime() - dateOnlyToday.getTime()) / MILLISECONDS_IN_DAY
-	);
+	const dateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+	const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+	const daysDifference = Math.ceil((dateUTC - todayUTC) / MILLISECONDS_IN_DAY);
 
 	if (Math.abs(daysDifference) < 2) {
 		// TODO: When the method is called many times with the same arguments, it is better to create a Intl.DateTimeFormat object and use its format() method, because a DateTimeFormat object remembers the arguments passed to it and may decide to cache a slice of the database, so future format calls can search for localization strings within a more constrained context.

@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-zizmor .github
+zizmor --persona pedantic .github

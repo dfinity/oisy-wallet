@@ -18,6 +18,11 @@ const initPageStoreMock = () => {
 			set({
 				data
 			}),
+		mockUrl: (url: URL) => {
+			set({
+				url
+			});
+		},
 
 		reset: () => set(initialStoreValue)
 	};

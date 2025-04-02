@@ -9,6 +9,7 @@
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
+	import { SWAP_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { swappableTokens } from '$lib/derived/swap.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
@@ -92,6 +93,7 @@
 
 <WizardModal
 	{steps}
+	testId={SWAP_TOKENS_MODAL}
 	bind:this={modal}
 	bind:currentStep
 	on:nnsClose={close}

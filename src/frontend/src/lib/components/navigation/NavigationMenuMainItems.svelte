@@ -6,9 +6,9 @@
 	import { REWARDS_ENABLED } from '$env/rewards.env';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
-	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
@@ -111,7 +111,7 @@
 	selected={isRouteDappExplorer(pageData)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
 >
-	<IconlyUfo />
+	<AnimatedIconUfo />
 	{$i18n.navigation.text.dapp_explorer}
 </NavigationItem>
 

@@ -22,7 +22,9 @@ jobs:
       e2e-or-config-changed: ${{ steps.e2e-or-config-files.outputs.e2e-or-config-changed }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        with:
+          persist-credentials: false
 
       - name: Fetch base branch
         run: |
@@ -53,14 +55,17 @@ jobs:
     steps:
       - name: Checkout
         if: ${{ github.event_name != 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        with:
+          persist-credentials: false
 
       - name: Checkout for pull request
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: false
 
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
@@ -84,7 +89,7 @@ jobs:
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
@@ -92,18 +97,21 @@ jobs:
 
       - name: Checkout
         if: ${{ github.event_name != 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        with:
+          persist-credentials: false
 
       - name: Checkout for pull request
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Download WASM artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: backend.wasm.gz
           path: out/
@@ -125,7 +133,7 @@ jobs:
         run: npm run e2e:ci
 
       - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: playwright-report-${{ matrix.os }}
@@ -133,7 +141,7 @@ jobs:
           retention-days: 3
 
       - name: Upload Playwright Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: test-results-${{ matrix.os }}
@@ -164,7 +172,7 @@ jobs:
 
       - name: Save changed snapshots
         if: steps.check_snapshots.outputs.CHANGES == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: snapshots-${{ matrix.os }}
           path: e2e/**/*.spec.ts-snapshots/**/*-${{ steps.set_snapshot_output.outputs.os_suffix }}.png
@@ -182,7 +190,7 @@ jobs:
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
@@ -190,15 +198,18 @@ jobs:
 
       - name: Checkout
         if: ${{ github.event_name != 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        with:
+          persist-credentials: false
 
       - name: Checkout for pull request
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Set snapshot status from previous jobs
         run: |
@@ -210,14 +221,14 @@ jobs:
 
       - name: Download Ubuntu Snapshots
         if: env.ubuntu_status == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: snapshots-ubuntu-24.04
           path: e2e
 
       - name: Download macOS Snapshots
         if: env.macos_status == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: snapshots-macos-14
           path: e2e
@@ -234,12 +245,12 @@ jobs:
           fi
 
       - name: Commit and push updates
-        uses: EndBug/add-and-commit@v9
+        uses: ./.github/actions/add-and-commit
         if: env.FINAL_CHANGES == 'true' && github.ref != 'refs/heads/main'
         with:
           add: e2e
-          default_author: github_actions
           message: '🤖 Update E2E snapshots'
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Stage Changes on main
         if: env.FINAL_CHANGES == 'true' && github.ref == 'refs/heads/main'

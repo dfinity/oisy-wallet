@@ -18,11 +18,17 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 
 		if (newRewards.length > 0) {
 			const containsJackpot: boolean = newRewards.some(({ name }) => name === 'jackpot');
-			return { receivedReward: true, receivedJackpot: containsJackpot };
+			const containsReferral: boolean = newRewards.some(({ name }) => name === 'referrer');
+
+			return {
+				receivedReward: true,
+				receivedJackpot: containsJackpot,
+				receivedReferral: containsReferral
+			};
 		}
 	}
 
-	return { receivedReward: false, receivedJackpot: false };
+	return { receivedReward: false, receivedJackpot: false, receivedReferral: false };
 };
 
 export const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {

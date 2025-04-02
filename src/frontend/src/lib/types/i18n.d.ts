@@ -48,6 +48,7 @@ interface I18nNavigation {
 		support: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
+		refer_a_friend: string;
 	};
 	alt: {
 		tokens: string;
@@ -62,6 +63,7 @@ interface I18nNavigation {
 		support: string;
 		open_twitter: string;
 		vip_qr_code: string;
+		refer_a_friend: string;
 	};
 	short: { documentation: string };
 }
