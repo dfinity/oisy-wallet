@@ -67,6 +67,7 @@
 			{#each tokensToShow as token (token.id)}
 				<div
 					class="flex overflow-hidden rounded-lg bg-secondary transition duration-300 hover:bg-brand-subtle-10"
+					transition:slide={SLIDE_PARAMS}
 				>
 					<TokenCard data={token} condensed on:click={() => goto(transactionsUrl({ token }))} />
 				</div>
