@@ -19,7 +19,7 @@
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let id: string;
-	let blockNumber: Option<number>;
+	let blockNumber: number | undefined;
 	let confirmations: number | undefined;
 	let status: BtcTransactionStatus;
 
