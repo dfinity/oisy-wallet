@@ -33,7 +33,6 @@
 <div
 	class="flex"
 	class:w-full={dividers}
-	class:logo-button-list-item={dividers}
 	class:hover:bg-brand-subtle-10={hover}
 	class:rounded-lg={rounded}
 >
