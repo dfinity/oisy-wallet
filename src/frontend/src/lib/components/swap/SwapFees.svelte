@@ -21,10 +21,10 @@
 	$: sourceTokenTransferFeeDisplay =
 		nonNullish($sourceToken) && nonNullish($icTokenFeeStore?.[$sourceToken.symbol])
 			? formatToken({
-				value: $icTokenFeeStore[$sourceToken.symbol],
-				displayDecimals: $sourceToken.decimals,
-				unitName: $sourceToken.decimals
-			})
+					value: $icTokenFeeStore[$sourceToken.symbol],
+					displayDecimals: $sourceToken.decimals,
+					unitName: $sourceToken.decimals
+				})
 			: '0';
 
 	let sourceTokenTransferFee: number;
