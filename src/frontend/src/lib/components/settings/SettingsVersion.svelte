@@ -11,6 +11,9 @@
 
 	const commit = VITE_GIT_COMMIT_HASH;
 	const branch = VITE_GIT_BRANCH_NAME;
+
+	// const commit = process.env.__COMMIT_HASH__;
+	// const branch = process.env.__BRANCH_NAME__;
 </script>
 
 <p class="mt-24 text-center text-xs text-primary">
@@ -22,8 +25,10 @@
 	>
 </p>
 
-{#if TEST_FE && notEmptyString(branch) && notEmptyString(commit)}
-	<small>For development purposes, we show the branch and the commit only in test canister.</small><br />
-	<small>Branch: {branch}</small><br />
-	<small>Commit: {commit}</small>
+{#if true && notEmptyString(branch) && notEmptyString(commit)}
+	<p class="mt-24 text-center text-xs text-primary">
+		For development purposes, we show the branch and the commit only in test canister.<br />
+		<b>Branch:</b> {branch}<br />
+		<b>Commit:</b> {commit}
+	</p>
 {/if}
