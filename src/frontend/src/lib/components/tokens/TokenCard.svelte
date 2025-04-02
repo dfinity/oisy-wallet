@@ -55,22 +55,3 @@
 		</span>
 	</LogoButton>
 </div>
-<!--
-<Card noMargin testId={`${testIdPrefix}-${data.symbol}-${data.network.id.description}`}>
-	<TokenSymbol {data} {hideNetworkLogo} />
-
-	<TokenName {data} slot="description" />
-
-	<TokenLogo
-		{data}
-		badge={nonNullish(data.tokenCount) ? { type: 'tokenCount', count: data.tokenCount } : undefined}
-		slot="icon"
-		color="white"
-		{logoSize}
-	/>
-
-	<slot name="balance" slot="amount" />
-
-	<slot name="exchange" slot="amountDescription" />
-</Card>
--->
