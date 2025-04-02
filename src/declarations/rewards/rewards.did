@@ -161,6 +161,8 @@ type ReferrerInfo = record {
 type RewardInfo = record {
     /// The name of the reward
     name : opt text;
+    /// The campaign name of the reward
+    campaign_name : opt text;
     /// Ledger canister id of the token that was awarded.
     ledger : principal;
     /// The timestamp when the reward was awarded.
@@ -255,12 +257,16 @@ type UsageAwardConfig = record {
   cycle_duration : CandidDuration;
   awards : vec UsageAwardEvent;
   eligibility_criteria : UsageCriteria;
+  /// The campaign the award is associated with.
+  campaign_name : opt text;
 };
 type UsageAwardEvent = record {
   name : text;
   num_events_per_cycle : nat32;
   awards : vec TokenConfig;
   num_users_per_event : nat32;
+  /// The campaign the award is associated with.
+  campaign_name : opt text;
 };
 type UsageAwardState = record {
   snapshots : vec UserSnapshot;
