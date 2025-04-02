@@ -3,8 +3,8 @@ import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constan
 import { isEthAddress } from '$lib/utils/account.utils';
 import { isNullish } from '@dfinity/utils';
 import type { Verify } from '@walletconnect/types';
-import { Utils } from 'alchemy-sdk';
 import { TypedDataEncoder } from 'ethers/hash';
+import { toUtf8String,isHexString } from 'ethers/utils';
 
 export const getSignParamsMessageHex = (params: string[]): string =>
 	params.filter((p) => !isEthAddress(p))[0];
@@ -28,9 +28,9 @@ export const getSignParamsMessageTypedDataV4Hash = (params: string[]): string =>
 };
 
 export const convertHexToUtf8 = (value: string): string => {
-	if (Utils.isHexString(value)) {
+	if (isHexString(value)) {
 		try {
-			return Utils.toUtf8String(value);
+			return toUtf8String(value);
 		} catch (err: unknown) {
 			// We ignore the issue and display the encoded value for now.
 			console.error(err);

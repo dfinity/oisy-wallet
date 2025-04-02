@@ -2,8 +2,7 @@ import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { AmountString } from '$lib/types/amount';
 import { nonNullish } from '@dfinity/utils';
-import { Utils } from 'alchemy-sdk';
-import { type BigNumberish } from 'ethers/utils';
+import { formatUnits, type BigNumberish } from 'ethers/utils';
 
 const DEFAULT_DISPLAY_DECIMALS = 4;
 
@@ -26,7 +25,7 @@ export const formatToken = ({
 	trailingZeros = false,
 	showPlusSign = false
 }: FormatTokenParams): AmountString => {
-	const res = Utils.formatUnits(value, unitName);
+	const res = formatUnits(value, unitName);
 	const formatted = (+res).toLocaleString('en-US', {
 		useGrouping: false,
 		maximumFractionDigits: displayDecimals,
