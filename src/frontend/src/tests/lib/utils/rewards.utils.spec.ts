@@ -205,7 +205,7 @@ describe('rewards.utils', () => {
 			amount: 100n,
 			timestamp: lastTimestamp,
 			name: 'airdrop',
-			campaign_name: 'exodus',
+			campaignName: 'exodus',
 			ledger: mockIdentity.getPrincipal()
 		};
 
