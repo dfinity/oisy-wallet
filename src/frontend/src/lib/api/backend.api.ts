@@ -1,9 +1,9 @@
 import type {
 	AllowSigningRequest,
+	Result_6 as CreateChallengeResult,
 	CustomToken,
 	PendingTransaction,
 	Result_2,
-	Result_6 as CreateChallengeResult,
 	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserToken
