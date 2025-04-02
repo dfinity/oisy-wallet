@@ -106,7 +106,7 @@ export const defineViteReplacements = (): {
 	// dfx deploy --network staging = staging
 	const network = process.env.DFX_NETWORK ?? 'local';
 
-	const isTestFe = network.startsWith('test_fe_') || true;
+	const isTestFe = network.startsWith('test_fe_');
 
 	const commitHash = isTestFe ? execSync('git rev-parse --short HEAD').toString().trim() : '';
 	const branchName = isTestFe ? execSync('git rev-parse --abbrev-ref HEAD').toString().trim() : '';
