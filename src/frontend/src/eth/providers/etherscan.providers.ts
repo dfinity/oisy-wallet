@@ -5,18 +5,19 @@ import {
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
+import type { EtherscanProviderTransaction } from '$eth/types/etherscan-transaction';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
+import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import {
 	EtherscanProvider as EtherscanProviderLib,
 	type BlockTag,
-	type Networkish,
-	type TransactionResponse
+	type Networkish
 } from 'ethers/providers';
-import { Transaction } from 'ethers/transaction';
 import { get } from 'svelte/store';
 
 export class EtherscanProvider {
@@ -28,12 +29,15 @@ export class EtherscanProvider {
 
 	// https://github.com/ethers-io/ethers.js/issues/4303
 	// https://ethereum.stackexchange.com/questions/147756/read-transaction-history-with-ethers-v6-1-0/150836#150836
-	// eslint-disable-next-line local-rules/prefer-object-params
-	private async getHistory(
-		address: string,
-		startBlock?: BlockTag,
-		endBlock?: BlockTag
-	): Promise<Array<TransactionResponse>> {
+	private async getHistory({
+		address,
+		startBlock,
+		endBlock
+	}: {
+		address: string;
+		startBlock?: BlockTag;
+		endBlock?: BlockTag;
+	}): Promise<Transaction[]> {
 		const params = {
 			action: 'txlist',
 			address,
@@ -42,21 +46,26 @@ export class EtherscanProvider {
 			sort: 'asc'
 		};
 
-		const result = await this.provider.fetch('account', params);
+		const result: EtherscanProviderTransaction[] = await this.provider.fetch('account', params);
 
-		console.log('results', result);
-
-		return result.map((tx: Record<string, string>): Transaction => {
-			['contractAddress', 'to'].forEach(function (key) {
-				if (tx[key] == '') {
-					delete tx[key];
-				}
-			});
-			if (tx.creates == null && tx.contractAddress != null) {
-				tx.creates = tx.contractAddress;
-			}
-			return Transaction.from(tx);
-		});
+		return result.map(
+			({ blockNumber, timeStamp, hash, nonce, from, to, value, gas, gasPrice }): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				nonce: parseInt(nonce),
+				gasLimit: BigInt(gas),
+				gasPrice: BigInt(gasPrice),
+				maxPriorityFeePerGas: null,
+				maxFeePerGas: null,
+				type: null,
+				value: BigInt(value),
+				// Chain ID is not delivered by the Etherscan API so, we naively set 0
+				chainId: ZERO_BI
+			})
+		);
 	}
 
 	transactions = ({
@@ -65,7 +74,7 @@ export class EtherscanProvider {
 	}: {
 		address: EthAddress;
 		startBlock?: BlockTag;
-	}): Promise<TransactionResponse[]> => this.getHistory(address, startBlock);
+	}): Promise<Transaction[]> => this.getHistory({ address, startBlock });
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = {
