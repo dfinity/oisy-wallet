@@ -15,8 +15,8 @@ import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import {
+	Contract,
 	InfuraProvider,
-	ethers,
 	type BlockTag,
 	type ContractTransaction,
 	type Log,
@@ -41,7 +41,7 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		to: EthAddress;
 		amount: bigint;
 	}): Promise<bigint> => {
-		const ckEthContract = new ethers.Contract(contractAddress, CKETH_ABI, this.provider);
+		const ckEthContract = new Contract(contractAddress, CKETH_ABI, this.provider);
 		return ckEthContract.deposit.estimateGas(to, { from });
 	};
 
@@ -52,7 +52,7 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		contract: ContractAddress;
 		to: EthAddress;
 	}): Promise<ContractTransaction> => {
-		const ckEthContract = new ethers.Contract(contractAddress, CKETH_ABI, this.provider);
+		const ckEthContract = new Contract(contractAddress, CKETH_ABI, this.provider);
 		return ckEthContract.deposit.populateTransaction(to);
 	};
 

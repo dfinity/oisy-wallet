@@ -13,7 +13,7 @@ import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import { InfuraProvider, ethers, type ContractTransaction, type Networkish } from 'ethers';
+import { Contract, InfuraProvider, type ContractTransaction, type Networkish } from 'ethers';
 import { get } from 'svelte/store';
 
 export class InfuraErc20IcpProvider implements Erc20Provider {
@@ -34,7 +34,7 @@ export class InfuraErc20IcpProvider implements Erc20Provider {
 		from: EthAddress;
 		amount: bigint;
 	}): Promise<bigint> => {
-		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ICP_ABI, this.provider);
+		const erc20Contract = new Contract(contractAddress, ERC20_ICP_ABI, this.provider);
 		return erc20Contract.burnToAccountId.estimateGas(amount, to, { from });
 	};
 
@@ -46,7 +46,7 @@ export class InfuraErc20IcpProvider implements Erc20Provider {
 		to,
 		amount
 	}: PopulateTransactionParams & { amount: bigint }): Promise<ContractTransaction> => {
-		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ICP_ABI, this.provider);
+		const erc20Contract = new Contract(contractAddress, ERC20_ICP_ABI, this.provider);
 		return erc20Contract.burnToAccountId.populateTransaction(amount, to);
 	};
 }

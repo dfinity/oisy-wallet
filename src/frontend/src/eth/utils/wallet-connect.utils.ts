@@ -4,7 +4,7 @@ import { isEthAddress } from '$lib/utils/account.utils';
 import { isNullish } from '@dfinity/utils';
 import type { Verify } from '@walletconnect/types';
 import { Utils } from 'alchemy-sdk';
-import { ethers } from 'ethers';
+import { TypedDataEncoder } from 'ethers';
 
 export const getSignParamsMessageHex = (params: string[]): string =>
 	params.filter((p) => !isEthAddress(p))[0];
@@ -24,7 +24,7 @@ export const getSignParamsMessageTypedDataV4 = (
 export const getSignParamsMessageTypedDataV4Hash = (params: string[]): string => {
 	const { domain, types, message } = getSignParamsMessageTypedDataV4(params);
 	const { EIP712Domain: _, ...rest } = types;
-	return ethers.TypedDataEncoder.hash(domain, { ...rest }, message);
+	return TypedDataEncoder.hash(domain, { ...rest }, message);
 };
 
 export const convertHexToUtf8 = (value: string): string => {
