@@ -11,7 +11,7 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { goto } from '$app/navigation';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import type { TokenUi } from '$lib/types/token';
 
 	export let tokenGroup: TokenUiGroup;
@@ -51,14 +51,9 @@
 	<MultipleListeners tokens={tokenGroup.tokens}>
 		<div class="transition duration-300 hover:bg-primary">
 			<TokenCard
-				data={headerData}
-				hideNetworkLogo
+				data={{ ...headerData, networks: tokenGroup.tokens.map((t) => t.network) }}
 				testIdPrefix={TOKEN_GROUP}
 				on:click={() => toggleIsExpanded(!isExpanded)}
-				{isExpanded}
-				description={[...new Set(tokenGroup.tokens.map((t) => t.network.name))].join(
-					'&nbsp;&middot;&nbsp;'
-				)}
 			/>
 		</div>
 	</MultipleListeners>
@@ -69,12 +64,7 @@
 				<div
 					class="flex overflow-hidden rounded-lg bg-secondary transition duration-300 hover:bg-brand-subtle-10"
 				>
-					<TokenCard
-						data={token}
-						hideNetworkLogo
-						cardSize="xs"
-						on:click={() => goto(transactionsUrl({ token }))}
-					/>
+					<TokenCard data={token} condensed on:click={() => goto(transactionsUrl({ token }))} />
 				</div>
 			{/each}
 

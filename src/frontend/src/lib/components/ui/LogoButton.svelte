@@ -8,7 +8,7 @@
 	export let dividers = false;
 	export let hover = true;
 	export let rounded = true;
-	export let spacings: 'sm' | 'md' = 'md';
+	export let condensed = false;
 	export let testId: string | undefined = undefined;
 
 	let hasTitleSlot: boolean;
@@ -28,23 +28,14 @@
 
 	let hasActionSlot: boolean;
 	$: hasActionSlot = nonNullish($$slots['action']);
-
-	const spacingMap = {
-		sm: {
-			px: 'px-2',
-			py: 'py-1'
-		},
-		md: {
-			px: 'px-2',
-			py: 'py-3'
-		}
-	};
 </script>
 
 <div class:hover:bg-brand-subtle-10={hover} class:rounded-lg={rounded}>
-	<button on:click class={`flex w-full border-0 ${spacingMap[spacings].px}`} data-tid={testId}>
+	<button on:click class="flex w-full border-0 px-2" data-tid={testId}>
 		<span
-			class={`flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0 ${spacingMap[spacings].py}`}
+			class="flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0"
+			class:py-3={!condensed}
+			class:py-1={condensed}
 			class:border-brand-subtle-20={dividers}
 			class:border-b={dividers}
 		>
