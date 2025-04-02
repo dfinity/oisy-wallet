@@ -4,7 +4,7 @@
 	import VipRewardStateModal from '$lib/components/qr/VipRewardStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipRewardState } from '$lib/derived/modal.derived';
-	import { claimVipReward } from '$lib/services/reward.services';
+	import { claimVipReward, setReferrer } from '$lib/services/reward.services';
 	import { loading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { removeSearchParam } from '$lib/utils/nav.utils';
@@ -17,6 +17,17 @@
 
 				removeSearchParam({ url: $page.url, searchParam: 'code' });
 				modalStore.openVipRewardState(result.success);
+			}
+		}
+
+		if (!$loading && $page.url.searchParams.has('referrer') && nonNullish($authIdentity)) {
+			const referrerCode = $page.url.searchParams.get('referrer');
+			if (nonNullish(referrerCode)) {
+				const numericalReferrerCode = Number(referrerCode);
+				if (!isNaN(numericalReferrerCode)) {
+					await setReferrer({ identity: $authIdentity, referrerCode: numericalReferrerCode });
+				}
+				removeSearchParam({ url: $page.url, searchParam: 'referrer' });
 			}
 		}
 	})();
