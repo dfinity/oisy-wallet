@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { APP_VERSION, GIT_BRANCH_NAME, GIT_COMMIT_HASH, TEST_FE } from '$lib/constants/app.constants';
+	import {
+		APP_VERSION,
+		GIT_BRANCH_NAME,
+		GIT_COMMIT_HASH,
+		TEST_FE
+	} from '$lib/constants/app.constants';
 	import { OISY_NAME, OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
