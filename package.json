@@ -130,9 +130,8 @@
 	},
 	"type": "module",
 	"overrides": {
-		"ws": "^7.5.10",
-		"ethers": {
-			"ws": "^8.17.1"
+		"@ethersproject/providers": {
+			"ws": "^7.5.10"
 		},
 		"elliptic": "^6.6.1",
 		"cookie": "^0.7.0",
