@@ -169,14 +169,6 @@ export const PostMessageDataResponseWalletSchema = PostMessageDataResponseSchema
 	wallet: PostMessageWalletDataSchema
 });
 
-export const PostMessageDataRequestCreateChallengeSchema = PostMessageDataResponseSchema.extend({
-	test: z.string().optional()
-});
-
-export const PostMessageDataResponseCreateChallengeSchema = PostMessageDataResponseSchema.extend({
-	error: z.unknown()
-});
-
 export const PostMessageDataResponseErrorSchema = PostMessageDataResponseSchema.extend({
 	error: z.unknown()
 });
@@ -209,10 +201,8 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 // -----------------------------------------------------------------------------
 
 // Base message format with discriminator, request ID, and message type
-
-// Base schema with message metadata
 export const PostMessageBaseSchema = z.object({
-	message: z.string(),
+	msg: z.string(),
 	requestId: z.string(),
 	type: z.union([z.literal('request'), z.literal('response')]),
 	tag: z.union([z.literal('Ok'), z.literal('Err')])
@@ -227,7 +217,7 @@ export const PostMessageResponseBaseSchema = PostMessageBaseSchema.extend({
 });
 
 export const PostMessageCreatePowChallengeRequestSchema = PostMessageRequestBaseSchema.extend({
-	message: z.literal('CreatePowChallengeRequest')
+	msg: z.literal('CreatePowChallengeRequest')
 });
 
 export const PostMessageCreatePowChallengeResponseDataSchema = z.object({
@@ -243,7 +233,7 @@ export const PostMessageCreatePowChallengeErrorSchema = z.union([
 ]);
 
 export const PostMessageCreatePowChallengeResponseSchema = PostMessageResponseBaseSchema.extend({
-	message: z.literal('CreatePowChallengeResponse'),
+	msg: z.literal('CreatePowChallengeResponse'),
 	data: z.union([
 		PostMessageCreatePowChallengeResponseDataSchema,
 		PostMessageCreatePowChallengeErrorSchema
@@ -258,7 +248,7 @@ export const PostMessageChallengeCompletionSchema = z.object({
 });
 
 export const PostMessageAllowSigningRequestSchema = PostMessageRequestBaseSchema.extend({
-	message: z.literal('AllowSigningRequest'),
+	msg: z.literal('AllowSigningRequest'),
 	data: z.object({
 		nonce: z.bigint()
 	})
@@ -284,6 +274,6 @@ export const PostMessageAllowSigningErrorSchema = z.union([
 ]);
 
 export const PostMessageAllowSigningResponseSchema = PostMessageResponseBaseSchema.extend({
-	message: z.literal('AllowSigningResponse'),
+	msg: z.literal('AllowSigningResponse'),
 	data: z.union([PostMessageAllowSigningResponseDataSchema, PostMessageAllowSigningErrorSchema])
 });

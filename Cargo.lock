@@ -3469,7 +3469,6 @@ dependencies = [
  "ic-cdk-timers",
  "ic-cycles-ledger-client",
  "ic-metrics-encoder",
- "ic-stable-structures",
  "ic-verifiable-credentials",
  "serde",
  "serde_bytes",

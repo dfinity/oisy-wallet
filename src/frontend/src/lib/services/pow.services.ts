@@ -56,7 +56,7 @@ export const _allowSigning = async ({
 	identity: OptionIdentity;
 	request?: AllowSigningRequest;
 }): Promise<AllowSigningResponse> => {
-	const response = await allowSigning({ identity });
+	const response = await allowSigning({ identity, request });
 
 	if ('Err' in response) {
 		throw mapAllowSigningError(response.Err);

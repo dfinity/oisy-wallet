@@ -18,6 +18,7 @@
 	}
 
 	function destroyWorker() {
+		stopWorker();
 		powWorker?.destroyPowWorker();
 		powWorker = undefined;
 	}

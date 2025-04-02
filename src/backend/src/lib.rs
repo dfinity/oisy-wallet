@@ -749,7 +749,7 @@ pub async fn allow_signing(
 
     // Added for backward-compatibility
     // TODO remove this code block once the PoW feature has been stabilized
-    if !POW_ENABLED {
+    if request.is_none() || !POW_ENABLED {
         // Passing None revert to the original cycle calculation logic
         signer::allow_signing(None).await?;
         // Propagate errors, otherwise return a placeholder response that frontend can temorarly
