@@ -31,7 +31,7 @@
 </script>
 
 <div
-	class="flex"
+	class="logo-button-list-item flex"
 	class:w-full={dividers}
 	class:hover:bg-brand-subtle-10={hover}
 	class:rounded-lg={rounded}
