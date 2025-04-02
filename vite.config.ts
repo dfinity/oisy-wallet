@@ -18,8 +18,6 @@ const isTestFe = network.startsWith('test_fe_');
 const commitHash = isTestFe ? execSync('git rev-parse --short HEAD').toString().trim() : '';
 const branchName = isTestFe ? execSync('git rev-parse --abbrev-ref HEAD').toString().trim() : '';
 
-console.log(commitHash, branchName);
-
 const config: UserConfig = {
 	plugins: [sveltekit()],
 	resolve: {
