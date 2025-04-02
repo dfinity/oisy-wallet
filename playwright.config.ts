@@ -80,7 +80,8 @@ export default defineConfig({
 			// disable any animations caught by playwright for better screenshots and less flaky tests.
 			animations: 'disabled',
 			// hide caret for cleaner snapshots.
-			caret: 'hide'
+			caret: 'hide',
+			stylePath: 'e2e/styles/masks.scss'
 		}
 	},
 	webServer: {
