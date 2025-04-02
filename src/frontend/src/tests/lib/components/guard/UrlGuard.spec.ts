@@ -14,15 +14,9 @@ describe('UrlGuard', () => {
 	});
 
 	describe('Referrer', () => {
-		let setReferrerSpy: any;
-		let removeSearchParamSpy: any;
-
 		beforeEach(() => {
 			loading.set(false);
 			mockAuthStore();
-
-			setReferrerSpy = vi.spyOn(rewardService, 'setReferrer').mockImplementation(vi.fn());
-			removeSearchParamSpy = vi.spyOn(navUtils, 'removeSearchParam').mockImplementation(vi.fn());
 		});
 
 		it('should establish connection between user and referrer', async () => {
@@ -30,6 +24,9 @@ describe('UrlGuard', () => {
 			const referrerUrl = new URL(`http://localhost:5173/?referrer=${referrerCode}`);
 
 			mockPage.mockUrl(referrerUrl);
+
+			const setReferrerSpy = vi.spyOn(rewardService, 'setReferrer').mockImplementation(vi.fn());
+			const removeSearchParamSpy = vi.spyOn(navUtils, 'removeSearchParam').mockImplementation(vi.fn());
 
 			render(UrlGuard);
 
@@ -52,6 +49,9 @@ describe('UrlGuard', () => {
 
 			mockPage.mockUrl(referrerUrl);
 
+			const setReferrerSpy = vi.spyOn(rewardService, 'setReferrer').mockImplementation(vi.fn());
+			const removeSearchParamSpy = vi.spyOn(navUtils, 'removeSearchParam').mockImplementation(vi.fn());
+
 			render(UrlGuard);
 
 			await vi.waitFor(() => {
@@ -68,6 +68,9 @@ describe('UrlGuard', () => {
 			const referrerUrl = new URL(`http://localhost:5173/`);
 
 			mockPage.mockUrl(referrerUrl);
+
+			const setReferrerSpy = vi.spyOn(rewardService, 'setReferrer').mockImplementation(vi.fn());
+			const removeSearchParamSpy = vi.spyOn(navUtils, 'removeSearchParam').mockImplementation(vi.fn());
 
 			render(UrlGuard);
 
