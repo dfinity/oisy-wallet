@@ -7,7 +7,6 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken } from '$lib/types/token';
-	import type { Option } from '$lib/types/utils';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
 
 	export let transaction: BtcTransactionUi;
