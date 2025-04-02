@@ -10,12 +10,11 @@
 
 	export let data: CardData;
 	export let logoSize: LogoSize = 'md';
-	export let dividers = true;
 
 	const { oisyName, oisySymbol, symbol, name, network } = data;
 </script>
 
-<LogoButton on:click {dividers}>
+<LogoButton on:click dividers={true}>
 	<svelte:fragment slot="title">
 		{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
 	</svelte:fragment>

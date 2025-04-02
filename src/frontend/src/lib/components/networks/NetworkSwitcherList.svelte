@@ -32,15 +32,9 @@
 />
 
 <ul class="flex list-none flex-col">
-	{#each $networksMainnets as network, index (network.id)}
+	{#each $networksMainnets as network (network.id)}
 		<li transition:slide={SLIDE_EASING}
-			><MainnetNetwork
-				{network}
-				{selectedNetworkId}
-				{delayOnNetworkSelect}
-				on:icSelected
-				dividers={$networksMainnets.length - 1 !== index}
-			/></li
+			><MainnetNetwork {network} {selectedNetworkId} {delayOnNetworkSelect} on:icSelected /></li
 		>
 	{/each}
 </ul>
@@ -51,16 +45,10 @@
 	>
 
 	<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
-		{#each $networksTestnets as network, index (network.id)}
-			<li transition:slide={SLIDE_EASING}>
-				<Network
-					{network}
-					{selectedNetworkId}
-					{delayOnNetworkSelect}
-					dividers={$networksTestnets.length - 1 !== index}
-					on:icSelected
-				/>
-			</li>
+		{#each $networksTestnets as network (network.id)}
+			<li transition:slide={SLIDE_EASING}
+				><Network {network} {selectedNetworkId} {delayOnNetworkSelect} on:icSelected /></li
+			>
 		{/each}
 	</ul>
 {/if}

@@ -60,10 +60,9 @@
 					{$i18n.tokens.manage.text.all_tokens_zero_balance}
 				</p>
 			{:else}
-				{#each $filteredTokens as token, index (token.id)}
+				{#each $filteredTokens as token (token.id)}
 					<ModalTokensListItem
 						on:click={() => dispatch('icTokenButtonClick', token)}
-						dividers={$filteredTokens.length - 1 !== index}
 						data={token}
 					/>
 				{/each}
