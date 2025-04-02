@@ -36,7 +36,7 @@ export class InfuraErc20Provider implements Erc20Provider {
 		return {
 			name,
 			symbol,
-			decimals
+			decimals: Number(decimals)
 		};
 	};
 
