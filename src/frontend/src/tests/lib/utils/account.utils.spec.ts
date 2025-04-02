@@ -7,7 +7,7 @@ vi.mock('@dfinity/ledger-icp', () => ({
 	checkAccountId: vi.fn()
 }));
 
-vi.mock('ethers', () => ({
+vi.mock('ethers/address', () => ({
 	isAddress: vi.fn()
 }));
 

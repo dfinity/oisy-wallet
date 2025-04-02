@@ -46,7 +46,7 @@ vi.mock('$eth/services/fee.services', () => ({
 	getErc20FeeData: vi.fn()
 }));
 
-vi.mock('ethers', () => {
+vi.mock('ethers/providers', () => {
 	const provider = vi.fn();
 	provider.prototype.getFeeData = vi.fn().mockResolvedValue({
 		lastBaseFeePerGas: null,

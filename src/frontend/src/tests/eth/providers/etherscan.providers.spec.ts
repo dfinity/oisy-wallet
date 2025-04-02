@@ -11,7 +11,7 @@ import en from '$tests/mocks/i18n.mock';
 import { EtherscanProvider as EtherscanProviderLib } from 'ethers/providers';
 import type { MockedClass } from 'vitest';
 
-vi.mock('ethers', () => {
+vi.mock('ethers/providers', () => {
 	const provider = vi.fn();
 	provider.prototype.fetch = vi.fn().mockResolvedValue([]);
 	return { EtherscanProvider: provider };
