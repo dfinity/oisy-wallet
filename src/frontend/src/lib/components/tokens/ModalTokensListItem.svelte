@@ -10,11 +10,12 @@
 
 	export let data: CardData;
 	export let logoSize: LogoSize = 'md';
+	export let dividers = true;
 
 	const { oisyName, oisySymbol, symbol, name, network } = data;
 </script>
 
-<LogoButton on:click dividers={true}>
+<LogoButton on:click {dividers}>
 	<svelte:fragment slot="title">
 		{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
 	</svelte:fragment>
@@ -31,13 +32,9 @@
 		{network.name}
 	</svelte:fragment>
 
-	<TokenLogo
-		{data}
-		slot="logo"
-		color="white"
-		badge={{ type: 'network', blackAndWhite: true }}
-		{logoSize}
-	/>
+	<div class="mr-2" slot="logo">
+		<TokenLogo {data} color="white" badge={{ type: 'network', blackAndWhite: true }} {logoSize} />
+	</div>
 
 	<TokenBalance {data} slot="title-end" />
 

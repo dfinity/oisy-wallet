@@ -37,7 +37,14 @@
 			class:border-b={dividers}
 		>
 			<span class="flex items-center">
-				<span class="mr-4"><slot name="logo" /></span>
+				{#if selectable}
+					<span in:fade class="mr-2 flex min-w-4 text-brand-primary">
+						{#if selected}
+							<IconCheck size="16px" />
+						{/if}
+					</span>
+				{/if}
+				<span class="mr-2"><slot name="logo" /></span>
 				<span class="flex flex-col text-left">
 					<span class="text-base">
 						{#if hasTitleSlot}
@@ -71,10 +78,6 @@
 						</span>
 					{/if}
 				</span>
-
-				{#if selectable && selected}
-					<span in:fade class="ml-2 flex text-brand-primary"><IconCheck size="20px" /></span>
-				{/if}
 
 				{#if hasActionSlot}
 					<span in:fade class="ml-2 flex text-brand-primary"><slot name="action" /></span>

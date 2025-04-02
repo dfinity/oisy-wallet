@@ -16,6 +16,7 @@
 	export let isTestnet = false;
 	export let testId: string | undefined = undefined;
 	export let delayOnNetworkSelect = true;
+	export let dividers = true;
 
 	const dispatch = createEventDispatcher();
 
@@ -27,7 +28,7 @@
 	};
 </script>
 
-<LogoButton {testId} on:click={onClick} selectable selected={id === selectedNetworkId} dividers>
+<LogoButton {testId} on:click={onClick} selectable selected={id === selectedNetworkId} {dividers}>
 	<Logo slot="logo" src={icon} />
 
 	<span slot="title" class="mr-2 text-sm font-normal md:text-base">
