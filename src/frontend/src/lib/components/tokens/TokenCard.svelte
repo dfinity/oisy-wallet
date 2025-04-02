@@ -22,15 +22,16 @@
 		{condensed}
 		{hover}
 	>
-		<TokenLogo
-			{data}
-			badge={nonNullish(data.tokenCount)
-				? { type: 'tokenCount', count: data.tokenCount }
-				: undefined}
-			slot="logo"
-			color="white"
-			logoSize={condensed ? 'xs' : 'lg'}
-		/>
+		<span class="mr-2 flex" slot="logo">
+			<TokenLogo
+				{data}
+				badge={nonNullish(data.tokenCount)
+					? { type: 'tokenCount', count: data.tokenCount }
+					: undefined}
+				color="white"
+				logoSize={condensed ? 'xs' : 'lg'}
+			/>
+		</span>
 
 		<span class:text-sm={condensed} slot="title">
 			{data.symbol}
