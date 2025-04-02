@@ -1,22 +1,21 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
+	import IconExpand from '$lib/components/icons/IconExpand.svelte';
+	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenGroupStore } from '$lib/stores/token-group.store';
+	import type { TokenUi } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
 	import type { TokenUiGroup } from '$lib/types/token-group';
-	import { mapHeaderData } from '$lib/utils/token-card.utils';
-	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
-	import { transactionsUrl } from '$lib/utils/nav.utils';
-	import { goto } from '$app/navigation';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { nonNullish } from '@dfinity/utils';
-	import type { TokenUi } from '$lib/types/token';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import { IconExpandMore } from '@dfinity/gix-components';
-	import IconExpand from '$lib/components/icons/IconExpand.svelte';
+	import { transactionsUrl } from '$lib/utils/nav.utils';
+	import { mapHeaderData } from '$lib/utils/token-card.utils';
 
 	export let tokenGroup: TokenUiGroup;
 
@@ -38,8 +37,9 @@
 	const isDefaultToken = (token: TokenUi) => tokenGroup.nativeToken.id === token.id;
 	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix);
 
+	let filteredTokens: TokenUi[];
 	$: filteredTokens = tokenGroup.tokens.filter(
-		(token) => isCkToken(token) || isDefaultToken(token) || (token.balance || 0n) > 0 // Always display if balance > 0
+		(token) => isCkToken(token) || isDefaultToken(token) || (token.balance ?? 0n) > 0 // Always display if balance > 0
 	);
 
 	// Show all if hideZeros = false
@@ -80,7 +80,7 @@
 				>
 					{hideZeros
 						? replacePlaceholders($i18n.tokens.text.show_more_networks, {
-								$number: notDisplayedCount + ''
+								$number: `${notDisplayedCount}`
 							})
 						: $i18n.tokens.text.hide_more_networks}
 					<IconExpand expanded={!hideZeros} />

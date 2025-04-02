@@ -2,20 +2,20 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
+	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
+	import { tokenList } from '$lib/components/tokens/tokendata';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
-	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
-	import { tokenList } from '$lib/components/tokens/tokendata';
-	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
-	import { goto } from '$app/navigation';
+	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = tokenList;
 
