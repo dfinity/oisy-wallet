@@ -34,17 +34,17 @@
 	let headerData: CardData;
 	$: headerData = mapHeaderData(tokenGroup);
 
-	const isDefaultToken = (token: TokenUi) => tokenGroup.nativeToken.id === token.id;
-	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix);
+	const isNativeToken = (token: TokenUi) => tokenGroup.nativeToken.id === token.id;
+	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix); // logic taken from old ck badge
 
 	let filteredTokens: TokenUi[];
 	$: filteredTokens = tokenGroup.tokens.filter(
-		(token) => isCkToken(token) || isDefaultToken(token) || (token.balance ?? 0n) > 0 // Always display if balance > 0
+		(token) => isCkToken(token) || isNativeToken(token) || (token.balance ?? 0n) > 0 // Always display if balance > 0
 	);
 
 	// Show all if hideZeros = false
 	$: tokensToShow = (hideZeros ? filteredTokens : tokenGroup.tokens).sort((a, b) =>
-		isDefaultToken(a) ? -1 : isCkToken(a) && !isDefaultToken(b) ? -1 : 1
+		isNativeToken(a) ? -1 : isCkToken(a) && !isNativeToken(b) ? -1 : 1
 	);
 
 	// Count tokens that are not displayed
