@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
 
-	export let size: string | undefined = undefined;
+	export let size: string | undefined = '20';
 	export let expanded = false;
 </script>
 
