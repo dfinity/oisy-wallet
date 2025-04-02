@@ -26,25 +26,18 @@ export const formatToken = ({
 	trailingZeros = false,
 	showPlusSign = false
 }: FormatTokenParams): AmountString => {
-	const res = Utils.formatUnits(value, unitName)
-	try {
-		const formatted = (+res).toLocaleString('en-US', {
-			useGrouping: false,
-			maximumFractionDigits: displayDecimals,
-			minimumFractionDigits: trailingZeros ? displayDecimals : undefined
-		}) as `${number}`;
+	const res = Utils.formatUnits(value, unitName);
+	const formatted = (+res).toLocaleString('en-US', {
+		useGrouping: false,
+		maximumFractionDigits: displayDecimals,
+		minimumFractionDigits: trailingZeros ? displayDecimals : undefined
+	}) as `${number}`;
 
-		if (trailingZeros) {
-			return formatted;
-		}
-
-		return `${showPlusSign && +res > 0 ? '+' : ''}${formatted}`;
-	} catch (error) {
-		console.log(error, value, unitName,res,+res);
-		throw  error
+	if (trailingZeros) {
+		return formatted;
 	}
 
-
+	return `${showPlusSign && +res > 0 ? '+' : ''}${formatted}`;
 };
 
 // TODO: remove this function since it is duplicated of formatToken
