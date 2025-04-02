@@ -134,6 +134,14 @@ export const modalVipQrCode: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'vip-qr-code'
 );
+export const modalReferralCode: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'referral-code'
+);
+export const modalReferralState: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'referral-state'
+);
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'dapp-details'

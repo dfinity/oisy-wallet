@@ -7,6 +7,7 @@ export interface RewardsResponse {
 
 export interface RewardResponseInfo {
 	name: string | undefined;
+	campaignName: string | undefined;
 	ledger: Principal;
 	timestamp: bigint;
 	amount: bigint;
@@ -15,4 +16,5 @@ export interface RewardResponseInfo {
 export interface RewardResult {
 	receivedReward: boolean;
 	receivedJackpot: boolean;
+	receivedReferral: boolean;
 }
