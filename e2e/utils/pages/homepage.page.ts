@@ -327,7 +327,7 @@ abstract class Homepage {
 			);
 		}
 
-		await this.takeScreenshot({ screenshotTarget: modal });
+		await this.takeScreenshot({ freezeCarousel: true, screenshotTarget: modal });
 	}
 
 	// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
