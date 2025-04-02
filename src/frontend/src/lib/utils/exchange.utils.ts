@@ -7,6 +7,7 @@ import type {
 import type { KongSwapToken, KongSwapTokenMetrics } from '$lib/types/kongswap';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { ZERO_BI } from '$lib/constants/app.constants';
 
 export const usdValue = ({
 	decimals,
@@ -25,7 +26,7 @@ export const usdValue = ({
 					displayDecimals: decimals
 				})
 			) * exchangeRate
-		: 0;
+		: Number(ZERO_BI);
 
 export const formatKongSwapToCoingeckoPrices = (
 	tokens: KongSwapToken[]
