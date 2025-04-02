@@ -17,7 +17,7 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 
-	let tokens: TokenUiOrGroupUi[] | undefined = tokenList;
+	let tokens: TokenUiOrGroupUi[] | undefined;
 
 	let animating = false;
 
