@@ -1,13 +1,13 @@
 import { invalidIcpAddress, isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
 import { checkAccountId } from '@dfinity/ledger-icp';
-import * as ethersAddress from 'ethers/address';
+import * as ethersAddress from 'ethers';
 import type { MockedFunction } from 'vitest';
 
 vi.mock('@dfinity/ledger-icp', () => ({
 	checkAccountId: vi.fn()
 }));
 
-vi.mock('ethers/address', () => ({
+vi.mock('ethers', () => ({
 	isAddress: vi.fn()
 }));
 

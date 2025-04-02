@@ -15,7 +15,7 @@ import {
 	type BlockTag,
 	type Networkish,
 	type TransactionResponse
-} from 'ethers/providers';
+} from 'ethers';
 import { get } from 'svelte/store';
 
 export class EtherscanProvider {

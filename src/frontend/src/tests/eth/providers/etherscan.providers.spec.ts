@@ -8,10 +8,10 @@ import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
-import { EtherscanProvider as EtherscanProviderLib } from 'ethers/providers';
+import { EtherscanProvider as EtherscanProviderLib } from 'ethers';
 import type { MockedClass } from 'vitest';
 
-vi.mock('ethers/providers', () => {
+vi.mock('ethers', () => {
 	const provider = vi.fn();
 	provider.prototype.fetch = vi.fn().mockResolvedValue([]);
 	return { EtherscanProvider: provider };

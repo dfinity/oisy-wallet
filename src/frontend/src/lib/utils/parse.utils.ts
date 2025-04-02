@@ -1,5 +1,5 @@
 import { Utils } from 'alchemy-sdk';
-import type { BigNumberish } from 'ethers/utils';
+import type { BigNumberish } from 'ethers';
 
 export const parseToken = ({
 	value,

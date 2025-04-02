@@ -13,7 +13,7 @@ import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
-import type { Listener } from 'ethers/utils';
+import type { Listener } from 'ethers';
 import { get } from 'svelte/store';
 
 const configs: Record<NetworkId, AlchemySettings> = {
