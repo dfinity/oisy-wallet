@@ -16,6 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { IconExpandMore } from '@dfinity/gix-components';
+	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 
 	export let tokenGroup: TokenUiGroup;
 
@@ -82,10 +83,7 @@
 								$number: notDisplayedCount + ''
 							})
 						: $i18n.tokens.text.hide_more_networks}
-
-					<span class="transition-transform duration-500" class:rotate-x-180={!hideZeros}>
-						<IconExpandMore />
-					</span>
+					<IconExpand expanded={!hideZeros} />
 				</Button>
 			{/if}
 		</div>
