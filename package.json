@@ -131,6 +131,7 @@
 	"type": "module",
 	"overrides": {
 		"ws": "^7.5.10",
+		"ethers": {"ws": "^8.17.1"},
 		"elliptic": "^6.6.1",
 		"cookie": "^0.7.0",
 		"axios": "^1.8.2"
