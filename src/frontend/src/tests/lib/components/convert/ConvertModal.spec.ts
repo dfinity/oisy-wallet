@@ -5,6 +5,11 @@ import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('ConvertModal', () => {
 	const props = {
 		sourceToken: BTC_MAINNET_TOKEN,

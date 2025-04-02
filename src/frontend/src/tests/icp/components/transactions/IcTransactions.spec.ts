@@ -6,6 +6,11 @@ import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('IcTransactions', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();

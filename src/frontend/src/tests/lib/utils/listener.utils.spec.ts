@@ -6,6 +6,11 @@ import EthListener from '$eth/components/core/EthListener.svelte';
 import type { OptionToken } from '$lib/types/token';
 import { mapListeners } from '$lib/utils/listener.utils';
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('mapListeners', () => {
 	it('should return an empty array if all tokens are nullish', () => {
 		const tokens: OptionToken[] = [null, undefined, null];

@@ -30,6 +30,11 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('ConvertWizard', () => {
 	const sendAmount = 20;
 

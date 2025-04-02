@@ -17,6 +17,11 @@ import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { render } from '@testing-library/svelte';
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('AllTransactionsList', () => {
 	beforeAll(() => {
 		vi.resetAllMocks();

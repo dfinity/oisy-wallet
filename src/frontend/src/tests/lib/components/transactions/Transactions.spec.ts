@@ -8,6 +8,11 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('Transactions', () => {
 	const timeout = 12000;
 	const mockGoTo = vi.fn();

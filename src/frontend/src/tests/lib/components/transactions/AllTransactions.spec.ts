@@ -16,7 +16,12 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-describe('Activity', () => {
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
+describe('AllTransactions', () => {
 	const customIcrcToken: IcrcCustomToken = {
 		...mockValidIcToken,
 		version: 1n,

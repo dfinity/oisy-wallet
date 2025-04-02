@@ -20,6 +20,11 @@ import en from '$tests/mocks/i18n.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider };
+});
+
 vi.mock('$eth/rest/etherscan.rest', () => ({
 	etherscanRests: vi.fn()
 }));

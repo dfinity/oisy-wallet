@@ -6,6 +6,11 @@ import * as networkUtils from '$lib/utils/network.utils';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('Listener', () => {
 	const mockAuthStore = (value = true) =>
 		vi.spyOn(authStore, 'authNotSignedIn', 'get').mockImplementation(() => readable(value));

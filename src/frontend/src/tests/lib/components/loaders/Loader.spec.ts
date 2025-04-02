@@ -37,6 +37,11 @@ import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 vi.mock('@dfinity/utils', async () => {
 	const mod = await vi.importActual<object>('@dfinity/utils');
 	return {

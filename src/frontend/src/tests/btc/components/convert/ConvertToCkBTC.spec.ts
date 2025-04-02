@@ -9,6 +9,11 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('ConvertToCkBTC', () => {
 	const buttonId = 'convert-to-ckbtc-button';
 	const mockCkBtcToken = {
