@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
@@ -32,7 +33,7 @@
 	<div class="mr-3 flex-1">
 		<InputSearch
 			bind:filter
-			noMatch={noTokensMatch}
+			showResetButton={notEmptyString(filter)}
 			placeholder={$i18n.tokens.placeholder.search_token}
 			autofocus={isDesktop()}
 		/>
@@ -47,7 +48,7 @@
 	>
 		<NetworkSwitcherLogo network={$filterNetwork} />
 
-		{$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+		<span class="hidden md:block">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 	</button>
 </div>
 
@@ -59,12 +60,16 @@
 					{$i18n.tokens.manage.text.all_tokens_zero_balance}
 				</p>
 			{:else}
-				{#each $filteredTokens as token (token.id)}
-					<ModalTokensListItem
-						on:click={() => dispatch('icTokenButtonClick', token)}
-						data={token}
-					/>
-				{/each}
+				<ul class="list-none">
+					{#each $filteredTokens as token (token.id)}
+						<li class="logo-button-list-item">
+							<ModalTokensListItem
+								on:click={() => dispatch('icTokenButtonClick', token)}
+								data={token}
+							/>
+						</li>
+					{/each}
+				</ul>
 			{/if}
 		</TokensSkeletons>
 	</div>

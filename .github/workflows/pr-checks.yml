@@ -13,6 +13,8 @@ jobs:
   check-pr-title:
     name: 'check-pr-title:required'
     runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
     env:
       TITLE: ${{ github.event.pull_request.title }}
     steps:
@@ -32,6 +34,8 @@ jobs:
   check-pr-description:
     name: 'check-pr-description:required'
     runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
     env:
       DESCRIPTION: ${{ github.event.pull_request.body }}
     steps:
