@@ -1,5 +1,6 @@
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { execSync } from 'node:child_process';
 import { basename, dirname, resolve } from 'node:path';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
 import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
@@ -11,6 +12,11 @@ import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './v
 // dfx deploy --network beta = beta
 // dfx deploy --network staging = staging
 const network = process.env.DFX_NETWORK ?? 'local';
+
+const isTestFe = network.startsWith('test_fe_');
+
+const commitHash = isTestFe ? execSync('git rev-parse --short HEAD').toString().trim() : '';
+const branchName = isTestFe ? execSync('git rev-parse --abbrev-ref HEAD').toString().trim() : '';
 
 const config: UserConfig = {
 	plugins: [sveltekit()],
@@ -106,6 +112,8 @@ export default defineConfig((): UserConfig => {
 		...config,
 		// Backwards compatibility for auto generated types of dfx that are meant for webpack and process.env
 		define: {
+			__COMMIT_HASH__: JSON.stringify(commitHash),
+			__BRANCH_NAME__: JSON.stringify(branchName),
 			'process.env': {
 				...readCanisterIds({}),
 				DFX_NETWORK: network
