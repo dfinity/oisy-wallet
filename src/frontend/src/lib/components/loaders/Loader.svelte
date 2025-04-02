@@ -3,7 +3,11 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
+	import {
+		loadBtcAddressMainnet,
+		loadBtcAddressRegtest,
+		loadBtcAddressTestnet
+	} from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
@@ -12,20 +16,25 @@
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import {
+		btcAddressMainnet,
 		btcAddressRegtest,
 		btcAddressTestnet,
 		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
+		solAddressMainnet,
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
+		networkBitcoinMainnetEnabled,
 		networkBitcoinRegtestEnabled,
 		networkBitcoinTestnetEnabled,
+		networkEthereumEnabled,
 		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
+		networkSolanaMainnetEnabled,
 		networkSolanaTestnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
@@ -39,6 +48,7 @@
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
+		loadSolAddressMainnet,
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
@@ -100,37 +110,53 @@
 
 	const debounceLoadEthAddress = debounce(loadEthAddress);
 
+	const debounceLoadBtcAddressMainnet = debounce(loadBtcAddressMainnet);
 	const debounceLoadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
 	const debounceLoadBtcAddressRegtest = debounce(loadBtcAddressRegtest);
 
+	const debounceLoadSolAddressMainnet = debounce(loadSolAddressMainnet);
 	const debounceLoadSolAddressTestnet = debounce(loadSolAddressTestnet);
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
-	$: if ($testnetsEnabled) {
-		if ($networkSepoliaEnabled && isNullish($ethAddress)) {
+	$: {
+		if ($networkEthereumEnabled && isNullish($ethAddress)) {
 			debounceLoadEthAddress();
 		}
 
-		if ($networkBitcoinTestnetEnabled && isNullish($btcAddressTestnet)) {
-			debounceLoadBtcAddressTestnet();
+		if ($networkBitcoinMainnetEnabled && isNullish($btcAddressMainnet)) {
+			debounceLoadBtcAddressMainnet();
 		}
 
-		if ($networkSolanaTestnetEnabled && isNullish($solAddressTestnet)) {
-			debounceLoadSolAddressTestnet();
+		if ($networkSolanaMainnetEnabled && isNullish($solAddressMainnet)) {
+			debounceLoadSolAddressMainnet();
 		}
 
-		if ($networkSolanaDevnetEnabled && isNullish($solAddressDevnet)) {
-			debounceLoadSolAddressDevnet();
-		}
-
-		if (LOCAL) {
-			if ($networkBitcoinRegtestEnabled && isNullish($btcAddressRegtest)) {
-				debounceLoadBtcAddressRegtest();
+		if ($testnetsEnabled) {
+			if ($networkSepoliaEnabled && isNullish($ethAddress)) {
+				debounceLoadEthAddress();
 			}
 
-			if ($networkSolanaLocalEnabled && isNullish($solAddressLocal)) {
-				debounceLoadSolAddressLocal();
+			if ($networkBitcoinTestnetEnabled && isNullish($btcAddressTestnet)) {
+				debounceLoadBtcAddressTestnet();
+			}
+
+			if ($networkSolanaTestnetEnabled && isNullish($solAddressTestnet)) {
+				debounceLoadSolAddressTestnet();
+			}
+
+			if ($networkSolanaDevnetEnabled && isNullish($solAddressDevnet)) {
+				debounceLoadSolAddressDevnet();
+			}
+
+			if (LOCAL) {
+				if ($networkBitcoinRegtestEnabled && isNullish($btcAddressRegtest)) {
+					debounceLoadBtcAddressRegtest();
+				}
+
+				if ($networkSolanaLocalEnabled && isNullish($solAddressLocal)) {
+					debounceLoadSolAddressLocal();
+				}
 			}
 		}
 	}
