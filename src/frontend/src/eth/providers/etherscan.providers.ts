@@ -5,7 +5,6 @@ import {
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
-import { ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -15,10 +14,10 @@ import {
 	EtherscanProvider as EtherscanProviderLib,
 	type BlockTag,
 	type Networkish,
-	type TransactionResponse,
+	type TransactionResponse
 } from 'ethers/providers';
+import { Transaction } from 'ethers/transaction';
 import { get } from 'svelte/store';
-import { isHexString } from 'ethers/utils';
 
 export class EtherscanProvider {
 	private readonly provider: EtherscanProviderLib;
@@ -26,12 +25,6 @@ export class EtherscanProvider {
 	constructor(private readonly network: Networkish) {
 		this.provider = new EtherscanProviderLib(this.network, ETHERSCAN_API_KEY);
 	}
-
-	mapTransaction = (tx: Record<string,string>): TransactionResponse => {
-		console.log(tx)
-		return tx
-	}
-
 
 	// https://github.com/ethers-io/ethers.js/issues/4303
 	// https://ethereum.stackexchange.com/questions/147756/read-transaction-history-with-ethers-v6-1-0/150836#150836
@@ -49,17 +42,20 @@ export class EtherscanProvider {
 			sort: 'asc'
 		};
 
-		const result = await this.provider.fetch("account", params);
+		const result = await this.provider.fetch('account', params);
 
-		return result.map((tx: Record<string,string>) => {
-			["contractAddress", "to"].forEach(function(key) {
-				if (tx[key] == "") { delete tx[key]; }
+		console.log('results', result);
+
+		return result.map((tx: Record<string, string>): Transaction => {
+			['contractAddress', 'to'].forEach(function (key) {
+				if (tx[key] == '') {
+					delete tx[key];
+				}
 			});
 			if (tx.creates == null && tx.contractAddress != null) {
 				tx.creates = tx.contractAddress;
 			}
-			const item = this.mapTransaction(tx);
-			return item;
+			return Transaction.from(tx);
 		});
 	}
 
