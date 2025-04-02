@@ -1,4 +1,5 @@
 import type { LedgerCanisterIdText } from '$icp/types/canister';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { OptionBalance } from '$lib/types/balance';
 import type {
 	CoingeckoSimpleTokenPrice,
@@ -7,7 +8,6 @@ import type {
 import type { KongSwapToken, KongSwapTokenMetrics } from '$lib/types/kongswap';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { ZERO_BI } from '$lib/constants/app.constants';
 
 export const usdValue = ({
 	decimals,
