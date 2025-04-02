@@ -82,7 +82,7 @@ export default defineConfig({
 			// hide caret for cleaner snapshots
 			caret: 'hide',
 			// apply masks to hide flaky elements
-			stylePath: 'e2e/styles/masks.scss'
+			stylePath: 'e2e/styles/masks.css'
 		}
 	},
 	webServer: {
