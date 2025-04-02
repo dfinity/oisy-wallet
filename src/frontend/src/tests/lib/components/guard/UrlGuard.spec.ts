@@ -26,7 +26,9 @@ describe('UrlGuard', () => {
 			mockPage.mockUrl(referrerUrl);
 
 			const setReferrerSpy = vi.spyOn(rewardService, 'setReferrer').mockImplementation(vi.fn());
-			const removeSearchParamSpy = vi.spyOn(navUtils, 'removeSearchParam').mockImplementation(vi.fn());
+			const removeSearchParamSpy = vi
+				.spyOn(navUtils, 'removeSearchParam')
+				.mockImplementation(vi.fn());
 
 			render(UrlGuard);
 
@@ -50,7 +52,9 @@ describe('UrlGuard', () => {
 			mockPage.mockUrl(referrerUrl);
 
 			const setReferrerSpy = vi.spyOn(rewardService, 'setReferrer').mockImplementation(vi.fn());
-			const removeSearchParamSpy = vi.spyOn(navUtils, 'removeSearchParam').mockImplementation(vi.fn());
+			const removeSearchParamSpy = vi
+				.spyOn(navUtils, 'removeSearchParam')
+				.mockImplementation(vi.fn());
 
 			render(UrlGuard);
 
@@ -70,7 +74,9 @@ describe('UrlGuard', () => {
 			mockPage.mockUrl(referrerUrl);
 
 			const setReferrerSpy = vi.spyOn(rewardService, 'setReferrer').mockImplementation(vi.fn());
-			const removeSearchParamSpy = vi.spyOn(navUtils, 'removeSearchParam').mockImplementation(vi.fn());
+			const removeSearchParamSpy = vi
+				.spyOn(navUtils, 'removeSearchParam')
+				.mockImplementation(vi.fn());
 
 			render(UrlGuard);
 
