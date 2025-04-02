@@ -768,14 +768,7 @@ pub async fn allow_signing(
     // PoW.
 
     let challenge_completion: ChallengeCompletion = pow::complete_challenge(request.nonce)
-        .map_err(|e| match e {
-            ChallengeCompletionError::InvalidNonce
-            | ChallengeCompletionError::MissingUserProfile
-            | ChallengeCompletionError::ExpiredChallenge
-            | ChallengeCompletionError::MissingChallenge
-            | ChallengeCompletionError::ChallengeAlreadySolved => {
-                AllowSigningError::PowChallenge(e)
-            }
+        .map_err(AllowSigningError::PowChallenge)
         })?;
 
     // Grant cycles proportional to difficulty
