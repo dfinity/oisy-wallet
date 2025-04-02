@@ -59,7 +59,6 @@ import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
-import { BigNumber } from 'alchemy-sdk';
 import { get } from 'svelte/store';
 
 // All the functions below will be using stores imperatively, since the service it is not reactive.
