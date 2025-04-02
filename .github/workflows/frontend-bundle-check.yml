@@ -63,7 +63,7 @@ jobs:
           echo "size=$SIZE" >> $GITHUB_OUTPUT
 
   compare:
-    needs: [ build-base-branch, build-pr ]
+    needs: [build-base-branch, build-pr]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -72,9 +72,9 @@ jobs:
         run: |
           BASE_SIZE=${{ needs.build-base-branch.outputs.size }}
           PR_SIZE=${{ needs.build-pr.outputs.size }}
-          
+
           DIFF=$((PR_SIZE - BASE_SIZE))
-          
+
           if (( BASE_SIZE > 0 )); then
             PERCENT=$((100 * DIFF / BASE_SIZE))
           else
@@ -86,10 +86,10 @@ jobs:
           echo "::notice::Difference:       ${DIFF} KB"
           echo "::notice::Percent change:   ${PERCENT}%"
           echo "::endgroup::"
-          
+
           MAX_KB=100
           MAX_PERCENT=10
-          
+
            if (( DIFF > MAX_KB )); then
             echo "🚨 Bundle size increased by ${DIFF}KB, over the limit of ${MAX_KB}KB."
             exit 1
