@@ -9,8 +9,8 @@
 	const version = `v${APP_VERSION}`;
 	const releaseUrl = `${OISY_REPO_URL}/releases/tag/${version}`;
 
-	const commit = import.meta.env.__COMMIT_HASH__;
-	const branch = import.meta.env.__BRANCH_NAME__;
+	const commit = VITE_GIT_COMMIT_HASH;
+	const branch = VITE_GIT_BRANCH_NAME;
 </script>
 
 <p class="mt-24 text-center text-xs text-primary">

@@ -18,6 +18,8 @@ const isTestFe = network.startsWith('test_fe_');
 const commitHash = isTestFe ? execSync('git rev-parse --short HEAD').toString().trim() : '';
 const branchName = isTestFe ? execSync('git rev-parse --abbrev-ref HEAD').toString().trim() : '';
 
+console.log(commitHash, branchName);
+
 const config: UserConfig = {
 	plugins: [sveltekit()],
 	resolve: {
@@ -112,8 +114,8 @@ export default defineConfig((): UserConfig => {
 		...config,
 		// Backwards compatibility for auto generated types of dfx that are meant for webpack and process.env
 		define: {
-			__COMMIT_HASH__: JSON.stringify(commitHash),
-			__BRANCH_NAME__: JSON.stringify(branchName),
+			VITE_GIT_COMMIT_HASH: commitHash,
+			VITE_GIT_BRANCH_NAME: branchName,
 			'process.env': {
 				...readCanisterIds({}),
 				DFX_NETWORK: network
