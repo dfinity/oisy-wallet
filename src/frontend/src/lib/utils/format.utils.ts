@@ -27,7 +27,7 @@ export const formatToken = ({
 	showPlusSign = false
 }: FormatTokenParams): AmountString => {
 	const res = Utils.formatUnits(value, unitName);
-	const formatted = (+res).toLocaleString('en-US', {
+	const formatted = Number(+res).toLocaleString('en-US', {
 		useGrouping: false,
 		maximumFractionDigits: displayDecimals,
 		minimumFractionDigits: trailingZeros ? displayDecimals : undefined
