@@ -1,9 +1,9 @@
 import type {
 	AllowSigningRequest,
+	Result_2 as AllowSigningResult,
 	Result_6 as CreateChallengeResult,
 	CustomToken,
 	PendingTransaction,
-	Result_2,
 	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserToken
@@ -153,7 +153,7 @@ export const allowSigning = async ({
 	identity
 }: CanisterApiFunctionParams<{
 	request?: AllowSigningRequest;
-}>): Promise<Result_2> => {
+}>): Promise<AllowSigningResult> => {
 	const { allowSigning } = await backendCanister({ identity });
 
 	// Conditionally call allowSigning with request or provide default logic

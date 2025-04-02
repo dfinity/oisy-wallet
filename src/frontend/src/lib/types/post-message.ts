@@ -6,7 +6,6 @@ import {
 	PostMessageAllowSigningResponseSchema,
 	PostMessageAllowSigningStatusSchema,
 	PostMessageApproveErrorSchema,
-	PostMessageBaseSchema,
 	PostMessageChallengeCompletionErrorSchema,
 	PostMessageChallengeCompletionSchema,
 	PostMessageCreatePowChallengeErrorSchema,
@@ -30,6 +29,7 @@ import {
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
 	PostMessageJsonDataResponseSchema,
+	PostMessageRequestBaseSchema,
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
 	PostMessageSyncStateSchema
@@ -97,7 +97,8 @@ export type PostMessage<T extends PostMessageDataRequest | PostMessageDataRespon
 // - The post message types used by the pow.worker.ts and worker.pow.services.ts
 // -----------------------------------------------------------------------------
 
-export type PostMessageBase = z.infer<typeof PostMessageBaseSchema>;
+export type PostMessageRequestBase = z.infer<typeof PostMessageRequestBaseSchema>;
+
 export type PostMessageCreatePowChallengeRequest = z.infer<
 	typeof PostMessageCreatePowChallengeRequestSchema
 >;
