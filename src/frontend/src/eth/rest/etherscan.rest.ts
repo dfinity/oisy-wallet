@@ -51,7 +51,17 @@ export class EtherscanRest {
 		}
 
 		return result.map(
-			({ nonce, gas, gasPrice, hash, blockNumber, timeStamp, from, to, value }): Transaction => ({
+			({
+				nonce,
+				gas,
+				gasPrice,
+				hash,
+				blockNumber,
+				timeStamp,
+				from,
+				to,
+				value
+			}: EtherscanRestTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
 				timestamp: parseInt(timeStamp),
