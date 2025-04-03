@@ -207,10 +207,10 @@
 	</div>
 {/if}
 
-<style>
-	:root:has(.login-modal) {
-		--alert-max-width: 90vw;
-		--alert-max-height: initial;
-		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
-	}
+<style lang="scss">
+  :root:has(.login-modal) {
+    --alert-max-width: 90vw;
+    --alert-max-height: initial;
+    --dialog-border-radius: calc(var(--border-radius-sm) * 3);
+  }
 </style>
