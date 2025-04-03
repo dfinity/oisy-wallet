@@ -6,7 +6,7 @@ import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
 import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { getBtcBalance } from '$lib/api/signer.api';
-import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import {FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS} from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
@@ -40,6 +40,8 @@ interface BtcWalletData {
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
+
+	private failedSyncCounter = 0;
 
 	private store: BtcWalletStore = {
 		balance: undefined,
@@ -172,9 +174,17 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 					shouldFetchTransactions: data?.shouldFetchTransactions,
 					minterCanisterId: data?.minterCanisterId
 				}),
-			onLoad: ({ certified: _, ...rest }) => this.syncWalletData(rest),
+			onLoad: ({ certified: _, ...rest }) => {
+				this.syncWalletData(rest);
+				this.failedSyncCounter = 0;
+			},
 			identity,
-			onCertifiedError: ({ error }) => this.postMessageWalletError({ error }),
+			onCertifiedError: ({ error }) => {
+				this.failedSyncCounter++;
+				if (FAILURE_THRESHOLD <= this.failedSyncCounter) {
+					this.postMessageWalletError({ error })
+				}
+			},
 			resolution: 'all_settled'
 		});
 	};
@@ -207,6 +217,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				}
 			})
 		};
+
+		if (!newBalance && !newTransactions) {
+			return;
+		}
 
 		this.postMessageWallet({
 			wallet: {

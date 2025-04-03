@@ -1,6 +1,6 @@
 import { syncWallet, syncWalletError } from '$btc/services/btc-listener.services';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
-import { FAILURE_THRESHOLD, STAGING } from '$lib/constants/app.constants';
+import { STAGING } from '$lib/constants/app.constants';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -30,8 +30,6 @@ export const initBtcWalletWorker = async ({
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
-	let failedSyncCounter = 0;
-
 	const isTestnetNetwork = isNetworkIdBTCTestnet(networkId);
 	const isRegtestNetwork = isNetworkIdBTCRegtest(networkId);
 	const isMainnetNetwork = isNetworkIdBTCMainnet(networkId);
@@ -41,7 +39,6 @@ export const initBtcWalletWorker = async ({
 
 		switch (msg) {
 			case 'syncBtcWallet':
-				failedSyncCounter = 0;
 				syncWallet({
 					tokenId,
 					data: data.data as BtcPostMessageDataResponseWallet
@@ -49,19 +46,16 @@ export const initBtcWalletWorker = async ({
 				return;
 
 			case 'syncBtcWalletError':
-				failedSyncCounter = failedSyncCounter + 1;
-				if (FAILURE_THRESHOLD <= failedSyncCounter) {
-					syncWalletError({
-						tokenId,
-						error: (data.data as PostMessageDataResponseError).error,
-						/**
-						 * TODO: Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
-						 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
-						 * TODO: Investigate the "ingress_expiry" error that is sometimes thrown by update BTC balance call, and remove "isMainnetNetwork" afterwards.
-						 * **/
-						hideToast: isRegtestNetwork || isTestnetNetwork || (isMainnetNetwork && !STAGING)
-					});
-				}
+				syncWalletError({
+					tokenId,
+					error: (data.data as PostMessageDataResponseError).error,
+					/**
+					 * TODO: Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
+					 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
+					 * TODO: Investigate the "ingress_expiry" error that is sometimes thrown by update BTC balance call, and remove "isMainnetNetwork" afterwards.
+					 * **/
+					hideToast: isRegtestNetwork || isTestnetNetwork || (isMainnetNetwork && !STAGING)
+				});
 				return;
 		}
 	};
