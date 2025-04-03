@@ -144,32 +144,10 @@ describe('Loader', () => {
 		});
 	});
 
-	it('should not call any address loaders', async () => {
-		setupTestnetsStore('enabled');
-		setupUserNetworksStore('allEnabled');
-
-		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
-
-		render(Loader);
-
-		await waitFor(() => {
-			expect(loadEthAddress).not.toHaveBeenCalled();
-			expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
-			expect(loadSolAddressMainnet).not.toHaveBeenCalled();
-
-			expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
-			expect(loadSolAddressTestnet).not.toHaveBeenCalled();
-			expect(loadSolAddressDevnet).not.toHaveBeenCalled();
-
-			expect(loadBtcAddressRegtest).not.toHaveBeenCalled();
-			expect(loadSolAddressLocal).not.toHaveBeenCalled();
-		});
-	});
-
 	describe('while loading', () => {
 		beforeEach(() => {
 			loading.set(true);
-			vi.mocked(initLoader).mockImplementation(
+			vi.mocked(initLoader).mockImplementationOnce(
 				async ({ setProgressModal }: { setProgressModal: (value: boolean) => void }) => {
 					setProgressModal(true);
 					await Promise.resolve();
@@ -195,6 +173,28 @@ describe('Loader', () => {
 			await waitFor(() => {
 				const banner = getByAltText(altText);
 				expect(banner).toBeInTheDocument();
+			});
+		});
+
+		it('should not call any address loaders', async () => {
+			setupTestnetsStore('enabled');
+			setupUserNetworksStore('allEnabled');
+
+			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+
+			render(Loader);
+
+			await waitFor(() => {
+				expect(loadEthAddress).not.toHaveBeenCalled();
+				expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
+				expect(loadSolAddressMainnet).not.toHaveBeenCalled();
+
+				expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
+				expect(loadSolAddressTestnet).not.toHaveBeenCalled();
+				expect(loadSolAddressDevnet).not.toHaveBeenCalled();
+
+				expect(loadBtcAddressRegtest).not.toHaveBeenCalled();
+				expect(loadSolAddressLocal).not.toHaveBeenCalled();
 			});
 		});
 	});
@@ -265,10 +265,10 @@ describe('Loader', () => {
 			});
 
 			it('should call loaders only for the enabled mainnet networks', async () => {
+				setupUserNetworksStore('allDisabled');
+
 				render(Loader);
 
-				// Toggle the reactive statement
-				setupUserNetworksStore('allDisabled');
 				userProfileStore.set({
 					certified: false,
 					profile: {
@@ -302,10 +302,10 @@ describe('Loader', () => {
 			});
 
 			it('should call loaders only for the enabled networks', async () => {
+				setupUserNetworksStore('allDisabled');
+
 				render(Loader);
 
-				// Toggle the reactive statement
-				setupUserNetworksStore('allDisabled');
 				userProfileStore.set({
 					certified: false,
 					profile: {
@@ -335,10 +335,10 @@ describe('Loader', () => {
 			});
 
 			it('should call testnet loaders if addresses are not loaded yet', async () => {
+				setupUserNetworksStore('allDisabled');
+
 				render(Loader);
 
-				// Toggle the reactive statement
-				setupUserNetworksStore('allDisabled');
 				setupUserNetworksStore('allEnabled');
 
 				await waitFor(() => {

@@ -108,8 +108,6 @@
 
 	let progressModal = false;
 
-	let initiatingLoader = true;
-
 	const debounceLoadEthAddress = debounce(loadEthAddress);
 
 	const debounceLoadBtcAddressMainnet = debounce(loadBtcAddressMainnet);
@@ -121,7 +119,7 @@
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
-	$: if (!initiatingLoader) {
+	$: if (progressStep === ProgressStepsLoader.DONE) {
 		if ($networkEthereumEnabled && isNullish($ethAddress)) {
 			debounceLoadEthAddress();
 		}
@@ -170,16 +168,12 @@
 	};
 
 	onMount(async () => {
-		initiatingLoader = true;
-
 		await initLoader({
 			identity: $authIdentity,
 			validateAddresses,
 			progressAndLoad,
 			setProgressModal
 		});
-
-		initiatingLoader = false;
 	});
 </script>
 
@@ -214,9 +208,9 @@
 {/if}
 
 <style>
-	:root:has(.login-modal) {
-		--alert-max-width: 90vw;
-		--alert-max-height: initial;
-		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
-	}
+    :root:has(.login-modal) {
+        --alert-max-width: 90vw;
+        --alert-max-height: initial;
+        --dialog-border-radius: calc(var(--border-radius-sm) * 3);
+    }
 </style>
