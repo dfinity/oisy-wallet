@@ -494,7 +494,7 @@ const checkExistingApproval = async ({
 	}
 
 	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first, before approving the new amount.
-	if (preApprovedAmount > 0n) {
+	if (preApprovedAmount > ZERO_BI) {
 		await resetExistingApprovalToZero({
 			...rest,
 			token,
