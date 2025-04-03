@@ -59,7 +59,7 @@ describe('plausible analytics service', () => {
 
 	it('should NOT call trackEvent or init anything if PLAUSIBLE_ENABLED is false', async () => {
 		vi.doMock('$env/plausible.env', () => ({
-			PLAUSIBLE_ENABLED: false,
+			PLAUSIBLE_ENABLED: false
 		}));
 
 		const { initPlausibleAnalytics, trackEvent } = await import('$lib/services/analytics.services');
