@@ -54,7 +54,7 @@ export function routeWorkerResponse(event: MessageEvent): boolean {
 
 	const handler = responseHandlers.get(requestId);
 	if (handler) {
-		handler(data);
+		handler(event.data);
 		responseHandlers.delete(requestId);
 		return true;
 	}
@@ -84,7 +84,7 @@ export function sendMessageRequest<T>(
 
 	return new Promise((resolve, reject) => {
 		responseHandlers.set(requestId, (rawResponse: unknown) => {
-			const parsed = schema.safeParse((rawResponse as PostMessageRequestBase).data);
+			const parsed = schema.safeParse(rawResponse as PostMessageRequestBase);
 			if (!parsed.success) {
 				console.error(
 					`Invalid response for message '${msg}' (Request ID: ${requestId}):`,
