@@ -1,6 +1,6 @@
 import { syncWallet, syncWalletError } from '$btc/services/btc-listener.services';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
-import { STAGING } from '$lib/constants/app.constants';
+import {FAILURE_THRESHOLD, STAGING} from '$lib/constants/app.constants';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -30,6 +30,8 @@ export const initBtcWalletWorker = async ({
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
+	let failedSyncCounter = 0;
+
 	const isTestnetNetwork = isNetworkIdBTCTestnet(networkId);
 	const isRegtestNetwork = isNetworkIdBTCRegtest(networkId);
 	const isMainnetNetwork = isNetworkIdBTCMainnet(networkId);
@@ -39,6 +41,7 @@ export const initBtcWalletWorker = async ({
 
 		switch (msg) {
 			case 'syncBtcWallet':
+				failedSyncCounter = 0;
 				syncWallet({
 					tokenId,
 					data: data.data as BtcPostMessageDataResponseWallet
@@ -46,6 +49,7 @@ export const initBtcWalletWorker = async ({
 				return;
 
 			case 'syncBtcWalletError':
+				failedSyncCounter = failedSyncCounter + 1;
 				syncWalletError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error,
@@ -54,7 +58,7 @@ export const initBtcWalletWorker = async ({
 					 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
 					 * TODO: Investigate the "ingress_expiry" error that is sometimes thrown by update BTC balance call, and remove "isMainnetNetwork" afterwards.
 					 * **/
-					hideToast: isRegtestNetwork || isTestnetNetwork || (isMainnetNetwork && !STAGING)
+					hideToast: isRegtestNetwork || isTestnetNetwork || (isMainnetNetwork && !STAGING) || failedSyncCounter <= FAILURE_THRESHOLD
 				});
 				return;
 		}

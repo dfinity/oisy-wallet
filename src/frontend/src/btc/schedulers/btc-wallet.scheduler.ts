@@ -208,10 +208,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			})
 		};
 
-		if (!newBalance && !newTransactions) {
-			return;
-		}
-
 		this.postMessageWallet({
 			wallet: {
 				balance,
