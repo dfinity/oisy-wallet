@@ -78,7 +78,7 @@ describe('eth-transactions.store', () => {
 	describe('update', () => {
 		const updatedTransaction = {
 			...mockTransactions[0],
-			value: BigInt(mockTransactions[0].value) + bn3Bi
+			value: mockTransactions[0].value + bn3Bi
 		};
 
 		beforeEach(() => {

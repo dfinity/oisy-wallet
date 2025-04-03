@@ -4,6 +4,7 @@ import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.
 import type { Erc20Token } from '$eth/types/erc20';
 import { mapAddressToName, mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';

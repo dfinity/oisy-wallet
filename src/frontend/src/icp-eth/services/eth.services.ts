@@ -21,6 +21,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
+import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { emit } from '$lib/utils/events.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
