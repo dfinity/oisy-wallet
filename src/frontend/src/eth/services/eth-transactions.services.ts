@@ -68,9 +68,19 @@ const loadEthTransactions = async ({
 		const transactions = await transactionsProviders({ address });
 
 		if (updateOnly) {
-			transactions.forEach((transaction) => ethTransactionsStore.update({ tokenId, transaction }));
+			// TODO: De-deconstruct the transactions when we upgrade to ethers v6
+			transactions.forEach(({ value, ...rest }) =>
+				ethTransactionsStore.update({ tokenId, transaction: { ...rest, value: value.toBigInt() } })
+			);
 		} else {
-			ethTransactionsStore.set({ tokenId, transactions });
+			ethTransactionsStore.set({
+				tokenId,
+				// TODO: Remove the mapping of the transactions when we upgrade to ethers v6
+				transactions: transactions.map(({ value, ...rest }) => ({
+					...rest,
+					value: value.toBigInt()
+				}))
+			});
 		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
