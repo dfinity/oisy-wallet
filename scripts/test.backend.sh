@@ -30,7 +30,7 @@ export BITCOIN_CANISTER_WASM_FILE="../../$BITCON_CANISTER_WASM"
 if [ -f "./${CYCLES_LEDGER_CANISTER_WASM}" ]; then
   echo "Use existing ${CYCLES_LEDGER_CANISTER_WASM} canister."
 else
-    echo "Downloading cycles_ledger canister."
+  echo "Downloading cycles_ledger canister."
   curl -sSL "${CYCLES_LEDGER_CANISTER_URL}" -o "${CYCLES_LEDGER_CANISTER_WASM}"
 fi
 
