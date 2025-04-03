@@ -11,6 +11,10 @@ vi.mock('plausible-tracker', () => ({
 	}))
 }));
 
+vi.doMock('$lib/constants/app.constants', () => ({
+	PROD: true
+}));
+
 describe('plausible analytics service', () => {
 	beforeEach(() => {
 		vi.resetModules();
