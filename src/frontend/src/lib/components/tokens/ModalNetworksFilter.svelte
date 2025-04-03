@@ -33,6 +33,7 @@
 		on:icSelected={onNetworkSelect}
 		selectedNetworkId={$filterNetwork?.id}
 		delayOnNetworkSelect={false}
+		labelsSize="lg"
 	/>
 
 	<ButtonGroup slot="toolbar">

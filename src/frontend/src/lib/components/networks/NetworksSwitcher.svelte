@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+	import { SUPPORTED_MAINNET_NETWORKS, SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import NetworkSwitcherList from '$lib/components/networks/NetworkSwitcherList.svelte';
 	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
@@ -9,6 +9,7 @@
 	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
 	import { selectedNetwork, networkId } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { SettingsModalType } from '$lib/enums/settings-modal-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -29,6 +30,17 @@
 
 		dropdown?.close();
 	};
+
+	let enabledNetworks: number;
+	$: enabledNetworks =
+		$networksMainnets.length +
+		($testnetsEnabled && $networksTestnets.length > 0 ? $networksTestnets.length : 0);
+
+	let totalNetworks: number;
+	$: totalNetworks =
+		$testnetsEnabled && $networksTestnets.length > 0
+			? SUPPORTED_NETWORKS.length
+			: SUPPORTED_MAINNET_NETWORKS.length;
 </script>
 
 <Dropdown
@@ -57,12 +69,14 @@
 					}}><IconManage />{$i18n.networks.manage}</Button
 				>
 			</span>
-			<span class="ml-4 mr-2 flex text-nowrap text-right text-base">
-				{replacePlaceholders($i18n.networks.number_of_enabled, {
-					$numNetworksEnabled: `${$networksMainnets.length + $networksTestnets.length}`,
-					$numNetworksTotal: `${SUPPORTED_NETWORKS.length}`
-				})}</span
-			>
+			{#if enabledNetworks < totalNetworks}
+				<span class="ml-4 mr-2 flex text-nowrap text-right text-base">
+					{replacePlaceholders($i18n.networks.number_of_enabled, {
+						$numNetworksEnabled: `${enabledNetworks}`,
+						$numNetworksTotal: `${totalNetworks}`
+					})}
+				</span>
+			{/if}
 		</div>
 	</div>
 </Dropdown>
