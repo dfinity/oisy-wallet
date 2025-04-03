@@ -66,7 +66,7 @@
 		<div class="ml-0 flex flex-col gap-1.5 p-2 md:ml-16" transition:slide={SLIDE_PARAMS}>
 			{#each tokensToShow as token (token.id)}
 				<div
-					class="flex overflow-hidden rounded-lg bg-secondary transition duration-300 hover:bg-brand-subtle-10"
+					class="duration-250 flex overflow-hidden rounded-lg bg-secondary transition hover:bg-brand-subtle-10"
 					transition:slide={SLIDE_PARAMS}
 				>
 					<TokenCard data={token} condensed on:click={() => goto(transactionsUrl({ token }))} />
