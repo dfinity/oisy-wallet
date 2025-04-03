@@ -1,6 +1,6 @@
 import { syncWallet, syncWalletError } from '$btc/services/btc-listener.services';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
-import {FAILURE_THRESHOLD, STAGING} from '$lib/constants/app.constants';
+import { FAILURE_THRESHOLD, STAGING } from '$lib/constants/app.constants';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -58,7 +58,11 @@ export const initBtcWalletWorker = async ({
 					 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
 					 * TODO: Investigate the "ingress_expiry" error that is sometimes thrown by update BTC balance call, and remove "isMainnetNetwork" afterwards.
 					 * **/
-					hideToast: isRegtestNetwork || isTestnetNetwork || (isMainnetNetwork && !STAGING) || failedSyncCounter <= FAILURE_THRESHOLD
+					hideToast:
+						isRegtestNetwork ||
+						isTestnetNetwork ||
+						(isMainnetNetwork && !STAGING) ||
+						failedSyncCounter <= FAILURE_THRESHOLD
 				});
 				return;
 		}
