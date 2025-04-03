@@ -9,6 +9,8 @@
 
 	const toggleHide = () =>
 		hideZeroBalancesStore.set({ key: 'hide-zero-balances', value: { enabled: !checked } });
+
+	document.addEventListener('toggleHideZeros', toggleHide);
 </script>
 
 <Toggle ariaLabel={$i18n.tokens.text.hide_zero_balances} bind:checked on:nnsToggle={toggleHide} />
