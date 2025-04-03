@@ -17,7 +17,7 @@ vi.doMock('$lib/constants/app.constants', () => ({
 
 vi.doMock('$env/plausible.env', () => ({
 	PLAUSIBLE_ENABLED: true,
-	PLAUSIBLE_DOMAIN: 'test.com',
+	PLAUSIBLE_DOMAIN: 'test.com'
 }));
 
 describe('plausible analytics service', () => {
