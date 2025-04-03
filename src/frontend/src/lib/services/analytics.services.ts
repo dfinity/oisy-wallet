@@ -5,7 +5,6 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { initOrbiter, trackEvent as trackEventOrbiter } from '@junobuild/analytics';
 import Plausible from 'plausible-tracker';
 
-const domain = PLAUSIBLE_DOMAIN;
 let plausibleTracker: ReturnType<typeof Plausible> | null = null;
 
 export const initAnalytics = async () => {
@@ -39,7 +38,7 @@ export const initPlausibleAnalytics = () => {
 
 	if (isNullish(plausibleTracker)) {
 		plausibleTracker = Plausible({
-			domain,
+			domain: PLAUSIBLE_DOMAIN,
 			hashMode: false,
 			trackLocalhost: false
 		});
