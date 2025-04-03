@@ -50,20 +50,21 @@ export const initBtcWalletWorker = async ({
 
 			case 'syncBtcWalletError':
 				failedSyncCounter = failedSyncCounter + 1;
-				syncWalletError({
-					tokenId,
-					error: (data.data as PostMessageDataResponseError).error,
-					/**
-					 * TODO: Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
-					 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
-					 * TODO: Investigate the "ingress_expiry" error that is sometimes thrown by update BTC balance call, and remove "isMainnetNetwork" afterwards.
-					 * **/
-					hideToast:
-						isRegtestNetwork ||
-						isTestnetNetwork ||
-						(isMainnetNetwork && !STAGING) ||
-						failedSyncCounter <= FAILURE_THRESHOLD
-				});
+				if (FAILURE_THRESHOLD <= failedSyncCounter) {
+					syncWalletError({
+						tokenId,
+						error: (data.data as PostMessageDataResponseError).error,
+						/**
+						 * TODO: Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
+						 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
+						 * TODO: Investigate the "ingress_expiry" error that is sometimes thrown by update BTC balance call, and remove "isMainnetNetwork" afterwards.
+						 * **/
+						hideToast:
+							isRegtestNetwork ||
+							isTestnetNetwork ||
+							(isMainnetNetwork && !STAGING)
+					});
+				}
 				return;
 		}
 	};
