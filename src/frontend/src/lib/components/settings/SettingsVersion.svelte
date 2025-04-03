@@ -29,8 +29,8 @@
 
 {#if TEST_FE && notEmptyString(branch) && notEmptyString(commit)}
 	<p class="mt-24 text-center text-xs text-primary">
-		For development purpose, we show the branch and the commit only in test canisters.<br />
-		<b>Branch:</b>{branch}<br />
-		<b>Commit:</b>{commit}
+		{$i18n.settings.text.git_disclaimer}<br />
+		<b>{$i18n.settings.text.git_branch_name}</b>{branch}<br />
+		<b>{$i18n.settings.text.git_commit_hash}</b>{commit}
 	</p>
 {/if}
