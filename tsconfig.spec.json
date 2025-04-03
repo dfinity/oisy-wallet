@@ -19,7 +19,9 @@
 			"$lib": ["./src/frontend/src/lib"],
 			"$lib/*": ["./src/frontend/src/lib/*"],
 			"$tests": ["./src/frontend/src/tests"],
-			"$tests/*": ["./src/frontend/src/tests/*"]
+			"$tests/*": ["./src/frontend/src/tests/*"],
+			"$routes": ["./src/frontend/src/routes"],
+			"$routes/*": ["./src/frontend/src/routes/*"]
 		},
 		"types": ["vitest/globals", "@testing-library/jest-dom"]
 	},
