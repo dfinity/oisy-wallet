@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
-	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import IconHide from '$lib/components/icons/IconHide.svelte';
+	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
 	let visible = false;
