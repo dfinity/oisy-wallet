@@ -10,7 +10,7 @@
 	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import { formatTokenAmount, formatUSD } from '$lib/utils/format.utils';
+	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 
 	const { destinationToken, sourceToken, sourceTokenExchangeRate, isSourceTokenIcrc2 } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -20,7 +20,7 @@
 	let sourceTokenTransferFeeDisplay: string;
 	$: sourceTokenTransferFeeDisplay =
 		nonNullish($sourceToken) && nonNullish($icTokenFeeStore?.[$sourceToken.symbol])
-			? formatTokenAmount({
+			? formatToken({
 					value: $icTokenFeeStore[$sourceToken.symbol],
 					displayDecimals: $sourceToken.decimals,
 					unitName: $sourceToken.decimals
