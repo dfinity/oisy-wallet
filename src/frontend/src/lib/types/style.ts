@@ -5,6 +5,7 @@ export type ButtonColorStyle =
 	| 'tertiary'
 	| 'tertiary-main-card'
 	| 'tertiary-alt'
+	| 'muted'
 	| 'error'
 	| 'success';
 
