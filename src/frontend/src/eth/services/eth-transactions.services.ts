@@ -1,3 +1,4 @@
+import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { etherscanRests } from '$eth/rest/etherscan.rest';
@@ -14,7 +15,6 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import {ETHEREUM_NETWORK_SYMBOL} from "$env/networks/networks.eth.env";
 
 export const loadEthereumTransactions = ({
 	networkId,
@@ -89,9 +89,11 @@ const loadEthTransactions = async ({
 			} = get(i18n);
 
 			toastsErrorNoTrace({
-				msg: { text: replacePlaceholders(loading_transactions_symbol, {
+				msg: {
+					text: replacePlaceholders(loading_transactions_symbol, {
 						$symbol: ETHEREUM_NETWORK_SYMBOL
-					})},
+					})
+				},
 				err
 			});
 		}

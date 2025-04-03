@@ -6,7 +6,7 @@
 		loadEthereumTransactions,
 		reloadEthereumTransactions
 	} from '$eth/services/eth-transactions.services';
-    import {FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS} from '$lib/constants/app.constants';
+	import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import type { TokenId } from '$lib/types/token';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
@@ -15,7 +15,7 @@
 
 	let loading = false;
 
-    let failedReloadCounter = 0;
+	let failedReloadCounter = 0;
 
 	const load = async ({ reload = false }: { reload?: boolean } = {}) => {
 		if (loading) {
@@ -52,18 +52,22 @@
 		tokenIdLoaded = tokenId;
 
 		const { success } = reload
-			? await reloadEthereumTransactions({ tokenId, networkId, silent: failedReloadCounter + 1 <= FAILURE_THRESHOLD })
+			? await reloadEthereumTransactions({
+					tokenId,
+					networkId,
+					silent: failedReloadCounter + 1 <= FAILURE_THRESHOLD
+				})
 			: await loadEthereumTransactions({ tokenId, networkId });
 
 		if (!success) {
 			tokenIdLoaded = undefined;
 
-            if (reload) {
-                ++failedReloadCounter;
-            }
+			if (reload) {
+				++failedReloadCounter;
+			}
 		} else {
-            failedReloadCounter = 0;
-        }
+			failedReloadCounter = 0;
+		}
 
 		loading = false;
 	};
