@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TOKEN_CARD, TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import type { CardData } from '$lib/types/token-card';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 
 	export let data: CardData;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
