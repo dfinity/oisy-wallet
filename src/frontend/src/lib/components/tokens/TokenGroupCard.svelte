@@ -38,11 +38,27 @@
 	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix); // logic taken from old ck badge
 
 	let filteredTokens: TokenUi[];
-	$: filteredTokens = tokenGroup.tokens.filter(
-		(token) => isCkToken(token) || isNativeToken(token) || (token.balance ?? 0n) > 0 // Always display if balance > 0
-	);
+	$: filteredTokens = tokenGroup.tokens.reduce(
+		(acc, token) => {
+			// Calculate the total balance by accumulating the sum of all balances
+			const totalBalance = acc.totalBalance + BigInt(token.balance ?? 0n);
 
-	// Show all if hideZeros = false
+			// Filter the token if its balance is greater than 0 or if the total balance is 0
+			// and it's either a CK token or Native token
+			if (
+				(token.balance ?? 0n) > 0n ||
+				(totalBalance === 0n && (isCkToken(token) || isNativeToken(token)))
+			) {
+				acc.filteredTokens.push(token);
+			}
+
+			// Return the updated accumulator with the filtered tokens and the new total balance
+			return { filteredTokens: acc.filteredTokens, totalBalance };
+		},
+		{ filteredTokens: [], totalBalance: 0n } as { filteredTokens: TokenUi[]; totalBalance: bigint } // Initial accumulator
+	).filteredTokens;
+
+	// Show all if hideZeros = false and sort so Native > CK > others
 	$: tokensToShow = (hideZeros ? filteredTokens : tokenGroup.tokens).sort((a, b) =>
 		isNativeToken(a) ? -1 : isCkToken(a) && !isNativeToken(b) ? -1 : 1
 	);

@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TOKEN_CARD, TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import type { CardData } from '$lib/types/token-card';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 
 	export let data: CardData;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
@@ -23,21 +24,31 @@
 		{hover}
 	>
 		<span class="flex" slot="logo" class:mr-2={!condensed}>
-			<TokenLogo
-				{data}
-				badge={nonNullish(data.tokenCount)
-					? { type: 'tokenCount', count: data.tokenCount }
-					: undefined}
-				color="white"
-				logoSize={condensed ? 'xs' : 'lg'}
-			/>
+			{#if condensed && isNullish(data.oisyName?.prefix)}
+				<NetworkLogo network={data.network} size="xs" blackAndWhite />
+			{:else}
+				<TokenLogo
+					{data}
+					badge={nonNullish(data.tokenCount)
+						? { type: 'tokenCount', count: data.tokenCount }
+						: !condensed
+							? { type: 'network', blackAndWhite: true }
+							: undefined}
+					color="white"
+					logoSize={condensed ? 'xs' : 'lg'}
+				/>
+			{/if}
 		</span>
 
 		<span class:text-sm={condensed} slot="title">
-			{data.symbol}
+			{condensed ? data.name : data.symbol}
 		</span>
 
-		<span class:text-sm={condensed} slot="subtitle">&nbsp;&middot;&nbsp;{data.name}</span>
+		<span class:text-sm={condensed} slot="subtitle">
+			{#if !condensed}
+				&nbsp;&middot;&nbsp;{data.name}
+			{/if}
+		</span>
 
 		<span class:text-sm={condensed} class="block min-w-12 text-nowrap" slot="title-end">
 			<TokenBalance {data} />
