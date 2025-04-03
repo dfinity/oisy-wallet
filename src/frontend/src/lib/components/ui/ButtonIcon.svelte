@@ -7,11 +7,11 @@
 	export let ariaLabel: string;
 	export let disabled = false;
 	export let link = true;
-	export let active = false;
+	export let styleClass = '';
 </script>
 
 <button
-	class={`${colorStyle} icon flex h-10 w-10 flex-col text-center text-xs font-normal ${active ? 'active' : ''}`}
+	class={`${colorStyle} icon flex h-10 w-10 flex-col text-center text-xs font-normal ${styleClass}`}
 	class:link
 	bind:this={button}
 	on:click
