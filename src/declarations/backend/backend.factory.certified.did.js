@@ -344,11 +344,6 @@ export const idlFactory = ({ IDL }) => {
 		Err: GetUserProfileError
 	});
 	const HasUserProfileResponse = IDL.Record({ has_user_profile: IDL.Bool });
-	const HasUserProfileError = IDL.Variant({ InternalError: IDL.Null });
-	const Result_7 = IDL.Variant({
-		Ok: HasUserProfileResponse,
-		Err: HasUserProfileError
-	});
 	const HttpRequest = IDL.Record({
 		url: IDL.Text,
 		method: IDL.Text,
@@ -439,8 +434,8 @@ export const idlFactory = ({ IDL }) => {
 		to: IDL.Principal,
 		progress: MigrationProgress
 	});
-	const Result_8 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
-	const Result_9 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
+	const Result_7 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
+	const Result_8 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -453,7 +448,7 @@ export const idlFactory = ({ IDL }) => {
 		VersionMismatch: IDL.Null,
 		UserNotFound: IDL.Null
 	});
-	const Result_10 = IDL.Variant({
+	const Result_9 = IDL.Variant({
 		Ok: IDL.Null,
 		Err: SaveTestnetsSettingsError
 	});
@@ -478,7 +473,7 @@ export const idlFactory = ({ IDL }) => {
 			available: IDL.Nat
 		})
 	});
-	const Result_11 = IDL.Variant({
+	const Result_10 = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
@@ -499,7 +494,7 @@ export const idlFactory = ({ IDL }) => {
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)]),
 		get_user_profile: IDL.Func([], [Result_6]),
-		has_user_profile: IDL.Func([], [Result_7]),
+		has_user_profile: IDL.Func([], [HasUserProfileResponse]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)]),
 		list_user_creation_timestamps: IDL.Func(
@@ -508,21 +503,21 @@ export const idlFactory = ({ IDL }) => {
 		),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)]),
 		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse]),
-		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_8], []),
+		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_7], []),
 		migration: IDL.Func([], [IDL.Opt(MigrationReport)]),
-		migration_stop_timer: IDL.Func([], [Result_9], []),
+		migration_stop_timer: IDL.Func([], [Result_8], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_guards: IDL.Func([Guards], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_snapshot: IDL.Func([UserSnapshot], [], []),
-		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_10], []),
+		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_9], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats]),
 		step_migration: IDL.Func([], [], []),
-		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_11], []),
-		update_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_10], [])
+		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_10], []),
+		update_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_9], [])
 	});
 };
 // @ts-ignore

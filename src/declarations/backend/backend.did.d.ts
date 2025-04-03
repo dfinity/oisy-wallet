@@ -178,7 +178,6 @@ export interface Guards {
 	user_data: ApiEnabled;
 	threshold_key: ApiEnabled;
 }
-export type HasUserProfileError = { InternalError: null };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
@@ -294,8 +293,7 @@ export interface PendingTransaction {
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: null } | { Err: AddDappSettingsError };
-export type Result_10 = { Ok: null } | { Err: SaveTestnetsSettingsError };
-export type Result_11 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
+export type Result_10 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
 export type Result_2 = { Ok: null } | { Err: AllowSigningError };
 export type Result_3 = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type Result_4 =
@@ -303,9 +301,9 @@ export type Result_4 =
 	| { Err: BtcAddPendingTransactionError };
 export type Result_5 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
 export type Result_6 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_7 = { Ok: HasUserProfileResponse } | { Err: HasUserProfileError };
-export type Result_8 = { Ok: MigrationReport } | { Err: string };
-export type Result_9 = { Ok: null } | { Err: string };
+export type Result_7 = { Ok: MigrationReport } | { Err: string };
+export type Result_8 = { Ok: null } | { Err: string };
+export type Result_9 = { Ok: null } | { Err: SaveTestnetsSettingsError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -452,7 +450,7 @@ export interface _SERVICE {
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_snapshot: ActorMethod<[], [] | [UserSnapshot]>;
 	get_user_profile: ActorMethod<[], Result_6>;
-	has_user_profile: ActorMethod<[], Result_7>;
+	has_user_profile: ActorMethod<[], HasUserProfileResponse>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_creation_timestamps: ActorMethod<
@@ -461,21 +459,21 @@ export interface _SERVICE {
 	>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
-	migrate_user_data_to: ActorMethod<[Principal], Result_8>;
+	migrate_user_data_to: ActorMethod<[Principal], Result_7>;
 	migration: ActorMethod<[], [] | [MigrationReport]>;
-	migration_stop_timer: ActorMethod<[], Result_9>;
+	migration_stop_timer: ActorMethod<[], Result_8>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_snapshot: ActorMethod<[UserSnapshot], undefined>;
-	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_10>;
+	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_9>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
-	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_11>;
-	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_10>;
+	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_10>;
+	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_9>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
