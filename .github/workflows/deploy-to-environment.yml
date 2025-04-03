@@ -120,58 +120,98 @@ jobs:
           fetch-depth: 2
           persist-credentials: false
 
-      - name: Set Environment Variables Based on Network
+      - name: Set Output Variables Based on Network
+        id: set-outputs
         run: |
           if [[ "$NETWORK" == "staging" ]] || [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
-            echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_QUICKNODE_API_KEY=${{ secrets.VITE_QUICKNODE_API_KEY_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_SWAP_ACTION_ENABLED=${{ secrets.VITE_SWAP_ACTION_ENABLED_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_USER_SNAPSHOT_ENABLED=${{ secrets.VITE_USER_SNAPSHOT_ENABLED_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_AIRDROPS_ENABLED=${{ secrets.VITE_AIRDROPS_ENABLED_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_USER_NETWORKS_FEATURE_ENABLED=${{ secrets.VITE_USER_NETWORKS_FEATURE_ENABLED_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}" >> $GITHUB_ENV
+            {
+              echo "VITE_ETHERSCAN_API_KEY=$VITE_ETHERSCAN_API_KEY_STAGING"
+              echo "VITE_INFURA_API_KEY=$VITE_INFURA_API_KEY_STAGING"
+              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING"
+              echo "VITE_QUICKNODE_API_KEY=$VITE_QUICKNODE_API_KEY_STAGING"
+              echo "VITE_WALLET_CONNECT_PROJECT_ID=$VITE_WALLET_CONNECT_PROJECT_ID_STAGING"
+              echo "VITE_COINGECKO_API_KEY=$VITE_COINGECKO_API_KEY_STAGING"
+              echo "VITE_JUNO_SATELLITE_ID=$VITE_JUNO_SATELLITE_ID_STAGING"
+              echo "VITE_JUNO_ORBITER_ID=$VITE_JUNO_ORBITER_ID_STAGING"
+              echo "VITE_POUH_ENABLED=$VITE_POUH_ENABLED_STAGING"
+              echo "VITE_SWAP_ACTION_ENABLED=$VITE_SWAP_ACTION_ENABLED_STAGING"
+              echo "VITE_USER_SNAPSHOT_ENABLED=$VITE_USER_SNAPSHOT_ENABLED_STAGING"
+              echo "VITE_AIRDROPS_ENABLED=$VITE_AIRDROPS_ENABLED_STAGING"
+              echo "VITE_USER_NETWORKS_FEATURE_ENABLED=$VITE_USER_NETWORKS_FEATURE_ENABLED_STAGING"
+              echo "VITE_ONRAMPER_API_KEY_DEV=$VITE_ONRAMPER_API_KEY_DEV_STAGING"
+              echo "VITE_ONRAMPER_API_KEY_PROD=$VITE_ONRAMPER_API_KEY_PROD_STAGING"
+            } >> $GITHUB_OUTPUT
             if [[ "$NETWORK" == "staging" ]]; then
-              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" >> $GITHUB_ENV
+              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=$VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING" >> $GITHUB_OUTPUT
             else
               SUBDOMAIN="fe${NETWORK#test_fe_}" # E.g. test_fe_1 -> fe1
-              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" | sed "s/staging/$SUBDOMAIN/g" >> $GITHUB_ENV
+              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=$(echo "$VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING" | sed "s/staging/$SUBDOMAIN/g")" >> $GITHUB_OUTPUT
             fi
             {
-              echo 'DFX_DEPLOY_KEY<<EOF'
-              echo "${{ secrets.DFX_DEPLOY_KEY_STAGING }}"
-              echo 'EOF'
-            } >> $GITHUB_ENV
-          elif [ "$NETWORK" == "beta" ]; then
-            echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}" >> $GITHUB_ENV
-            echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_BETA }}" >> $GITHUB_ENV
-            echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_BETA }}" >> $GITHUB_ENV
-            echo "VITE_QUICKNODE_API_KEY=${{ secrets.VITE_QUICKNODE_API_KEY_BETA }}" >> $GITHUB_ENV
-            echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_BETA }}" >> $GITHUB_ENV
-            echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_BETA }}" >> $GITHUB_ENV
-            echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_BETA }}" >> $GITHUB_ENV
-            echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_BETA }}" >> $GITHUB_ENV
-            echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_BETA }}" >> $GITHUB_ENV
-            echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}" >> $GITHUB_ENV
-            echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}" >> $GITHUB_ENV
-            echo "VITE_SWAP_ACTION_ENABLED=${{ secrets.VITE_SWAP_ACTION_ENABLED_BETA }}" >> $GITHUB_ENV
-            echo "VITE_USER_SNAPSHOT_ENABLED=${{ secrets.VITE_USER_SNAPSHOT_ENABLED_BETA }}" >> $GITHUB_ENV
-            echo "VITE_AIRDROPS_ENABLED=${{ secrets.VITE_AIRDROPS_ENABLED_BETA }}" >> $GITHUB_ENV
-            echo "VITE_USER_NETWORKS_FEATURE_ENABLED=${{ secrets.VITE_USER_NETWORKS_FEATURE_ENABLED_BETA }}" >> $GITHUB_ENV
-            echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}" >> $GITHUB_ENV
+              echo "DFX_DEPLOY_KEY<<EOF"
+              echo "$DFX_DEPLOY_KEY_STAGING"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          elif [[ "$NETWORK" == "beta" ]]; then
             {
-              echo 'DFX_DEPLOY_KEY<<EOF'
-              echo "${{ secrets.DFX_DEPLOY_KEY_BETA }}"
-              echo 'EOF'
-            } >> $GITHUB_ENV
+              echo "VITE_ETHERSCAN_API_KEY=$VITE_ETHERSCAN_API_KEY_BETA"
+              echo "VITE_INFURA_API_KEY=$VITE_INFURA_API_KEY_BETA"
+              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA"
+              echo "VITE_QUICKNODE_API_KEY=$VITE_QUICKNODE_API_KEY_BETA"
+              echo "VITE_WALLET_CONNECT_PROJECT_ID=$VITE_WALLET_CONNECT_PROJECT_ID_BETA"
+              echo "VITE_COINGECKO_API_KEY=$VITE_COINGECKO_API_KEY_BETA"
+              echo "VITE_JUNO_SATELLITE_ID=$VITE_JUNO_SATELLITE_ID_BETA"
+              echo "VITE_JUNO_ORBITER_ID=$VITE_JUNO_ORBITER_ID_BETA"
+              echo "VITE_POUH_ENABLED=$VITE_POUH_ENABLED_BETA"
+              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=$VITE_AUTH_ALTERNATIVE_ORIGINS_BETA"
+              echo "VITE_ONRAMPER_API_KEY_DEV=$VITE_ONRAMPER_API_KEY_DEV_BETA"
+              echo "VITE_SWAP_ACTION_ENABLED=$VITE_SWAP_ACTION_ENABLED_BETA"
+              echo "VITE_USER_SNAPSHOT_ENABLED=$VITE_USER_SNAPSHOT_ENABLED_BETA"
+              echo "VITE_AIRDROPS_ENABLED=$VITE_AIRDROPS_ENABLED_BETA"
+              echo "VITE_USER_NETWORKS_FEATURE_ENABLED=$VITE_USER_NETWORKS_FEATURE_ENABLED_BETA"
+              echo "VITE_ONRAMPER_API_KEY_PROD=$VITE_ONRAMPER_API_KEY_PROD_BETA"
+            } >> $GITHUB_OUTPUT
+            {
+              echo "DFX_DEPLOY_KEY<<EOF"
+              echo "$DFX_DEPLOY_KEY_BETA"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
           fi
+        env:
+          VITE_ETHERSCAN_API_KEY_STAGING: ${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}
+          VITE_INFURA_API_KEY_STAGING: ${{ secrets.VITE_INFURA_API_KEY_STAGING }}
+          VITE_ALCHEMY_API_KEY_STAGING: ${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}
+          VITE_QUICKNODE_API_KEY_STAGING: ${{ secrets.VITE_QUICKNODE_API_KEY_STAGING }}
+          VITE_WALLET_CONNECT_PROJECT_ID_STAGING: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}
+          VITE_COINGECKO_API_KEY_STAGING: ${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}
+          VITE_JUNO_SATELLITE_ID_STAGING: ${{ secrets.VITE_JUNO_SATELLITE_ID_STAGING }}
+          VITE_JUNO_ORBITER_ID_STAGING: ${{ secrets.VITE_JUNO_ORBITER_ID_STAGING }}
+          VITE_POUH_ENABLED_STAGING: ${{ secrets.VITE_POUH_ENABLED_STAGING }}
+          VITE_SWAP_ACTION_ENABLED_STAGING: ${{ secrets.VITE_SWAP_ACTION_ENABLED_STAGING }}
+          VITE_USER_SNAPSHOT_ENABLED_STAGING: ${{ secrets.VITE_USER_SNAPSHOT_ENABLED_STAGING }}
+          VITE_AIRDROPS_ENABLED_STAGING: ${{ secrets.VITE_AIRDROPS_ENABLED_STAGING }}
+          VITE_USER_NETWORKS_FEATURE_ENABLED_STAGING: ${{ secrets.VITE_USER_NETWORKS_FEATURE_ENABLED_STAGING }}
+          VITE_ONRAMPER_API_KEY_DEV_STAGING: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}
+          VITE_ONRAMPER_API_KEY_PROD_STAGING: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}
+          VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING: ${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}
+          DFX_DEPLOY_KEY_STAGING: ${{ secrets.DFX_DEPLOY_KEY_STAGING }}
+          VITE_ETHERSCAN_API_KEY_BETA: ${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}
+          VITE_INFURA_API_KEY_BETA: ${{ secrets.VITE_INFURA_API_KEY_BETA }}
+          VITE_ALCHEMY_API_KEY_BETA: ${{ secrets.VITE_ALCHEMY_API_KEY_BETA }}
+          VITE_QUICKNODE_API_KEY_BETA: ${{ secrets.VITE_QUICKNODE_API_KEY_BETA }}
+          VITE_WALLET_CONNECT_PROJECT_ID_BETA: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_BETA }}
+          VITE_COINGECKO_API_KEY_BETA: ${{ secrets.VITE_COINGECKO_API_KEY_BETA }}
+          VITE_JUNO_SATELLITE_ID_BETA: ${{ secrets.VITE_JUNO_SATELLITE_ID_BETA }}
+          VITE_JUNO_ORBITER_ID_BETA: ${{ secrets.VITE_JUNO_ORBITER_ID_BETA }}
+          VITE_POUH_ENABLED_BETA: ${{ secrets.VITE_POUH_ENABLED_BETA }}
+          VITE_AUTH_ALTERNATIVE_ORIGINS_BETA: ${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}
+          VITE_ONRAMPER_API_KEY_DEV_BETA: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}
+          VITE_SWAP_ACTION_ENABLED_BETA: ${{ secrets.VITE_SWAP_ACTION_ENABLED_BETA }}
+          VITE_USER_SNAPSHOT_ENABLED_BETA: ${{ secrets.VITE_USER_SNAPSHOT_ENABLED_BETA }}
+          VITE_AIRDROPS_ENABLED_BETA: ${{ secrets.VITE_AIRDROPS_ENABLED_BETA }}
+          VITE_USER_NETWORKS_FEATURE_ENABLED_BETA: ${{ secrets.VITE_USER_NETWORKS_FEATURE_ENABLED_BETA }}
+          VITE_ONRAMPER_API_KEY_PROD_BETA: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}
+          DFX_DEPLOY_KEY_BETA: ${{ secrets.DFX_DEPLOY_KEY_BETA }}
 
       - name: Fail if no Identity is provided
         run: |
@@ -179,6 +219,8 @@ jobs:
             echo "Error: DFX_DEPLOY_KEY for $NETWORK is not set or is empty. Please provide the deployment identity key."
             exit 1
           fi
+        env:
+          DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Restore cargo cache
         uses: actions/cache@v4
@@ -197,6 +239,8 @@ jobs:
 
       - name: Set up DFX
         uses: dfinity/setup-dfx@main
+        env:
+          DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Install key
         run: |
@@ -206,15 +250,52 @@ jobs:
           rm "$key_pem"
           dfx identity use default
           dfx identity get-principal
+        env:
+          DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Pre-build
         run: npm run build
+        env:
+          VITE_ETHERSCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_ETHERSCAN_API_KEY }}
+          VITE_INFURA_API_KEY: ${{ steps.set-outputs.outputs.VITE_INFURA_API_KEY }}
+          VITE_ALCHEMY_API_KEY: ${{ steps.set-outputs.outputs.VITE_ALCHEMY_API_KEY }}
+          VITE_QUICKNODE_API_KEY: ${{ steps.set-outputs.outputs.VITE_QUICKNODE_API_KEY }}
+          VITE_WALLET_CONNECT_PROJECT_ID: ${{ steps.set-outputs.outputs.VITE_WALLET_CONNECT_PROJECT_ID }}
+          VITE_COINGECKO_API_KEY: ${{ steps.set-outputs.outputs.VITE_COINGECKO_API_KEY }}
+          VITE_JUNO_SATELLITE_ID: ${{ steps.set-outputs.outputs.VITE_JUNO_SATELLITE_ID }}
+          VITE_JUNO_ORBITER_ID: ${{ steps.set-outputs.outputs.VITE_JUNO_ORBITER_ID }}
+          VITE_POUH_ENABLED: ${{ steps.set-outputs.outputs.VITE_POUH_ENABLED }}
+          VITE_SWAP_ACTION_ENABLED: ${{ steps.set-outputs.outputs.VITE_SWAP_ACTION_ENABLED }}
+          VITE_USER_SNAPSHOT_ENABLED: ${{ steps.set-outputs.outputs.VITE_USER_SNAPSHOT_ENABLED }}
+          VITE_AIRDROPS_ENABLED: ${{ steps.set-outputs.outputs.VITE_AIRDROPS_ENABLED }}
+          VITE_USER_NETWORKS_FEATURE_ENABLED: ${{ steps.set-outputs.outputs.VITE_USER_NETWORKS_FEATURE_ENABLED }}
+          VITE_ONRAMPER_API_KEY_DEV: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_DEV }}
+          VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
+          VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}
 
       - name: Deploy Frontend to Environment
         run: |
           if [ "$deploy_frontend" == "true" ] ; then
             dfx deploy frontend --network $NETWORK
           fi
+        env:
+          VITE_ETHERSCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_ETHERSCAN_API_KEY }}
+          VITE_INFURA_API_KEY: ${{ steps.set-outputs.outputs.VITE_INFURA_API_KEY }}
+          VITE_ALCHEMY_API_KEY: ${{ steps.set-outputs.outputs.VITE_ALCHEMY_API_KEY }}
+          VITE_QUICKNODE_API_KEY: ${{ steps.set-outputs.outputs.VITE_QUICKNODE_API_KEY }}
+          VITE_WALLET_CONNECT_PROJECT_ID: ${{ steps.set-outputs.outputs.VITE_WALLET_CONNECT_PROJECT_ID }}
+          VITE_COINGECKO_API_KEY: ${{ steps.set-outputs.outputs.VITE_COINGECKO_API_KEY }}
+          VITE_JUNO_SATELLITE_ID: ${{ steps.set-outputs.outputs.VITE_JUNO_SATELLITE_ID }}
+          VITE_JUNO_ORBITER_ID: ${{ steps.set-outputs.outputs.VITE_JUNO_ORBITER_ID }}
+          VITE_POUH_ENABLED: ${{ steps.set-outputs.outputs.VITE_POUH_ENABLED }}
+          VITE_SWAP_ACTION_ENABLED: ${{ steps.set-outputs.outputs.VITE_SWAP_ACTION_ENABLED }}
+          VITE_USER_SNAPSHOT_ENABLED: ${{ steps.set-outputs.outputs.VITE_USER_SNAPSHOT_ENABLED }}
+          VITE_AIRDROPS_ENABLED: ${{ steps.set-outputs.outputs.VITE_AIRDROPS_ENABLED }}
+          VITE_USER_NETWORKS_FEATURE_ENABLED: ${{ steps.set-outputs.outputs.VITE_USER_NETWORKS_FEATURE_ENABLED }}
+          VITE_ONRAMPER_API_KEY_DEV: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_DEV }}
+          VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
+          VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}
+          DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Deploy Backend to Environment
         run: |
@@ -236,3 +317,4 @@ jobs:
           fi
         env:
           FORCE_BACKEND: ${{ github.event.inputs.force-backend }}
+          DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}

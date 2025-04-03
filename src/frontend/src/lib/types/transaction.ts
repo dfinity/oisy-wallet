@@ -23,12 +23,18 @@ export type EthersTransaction = Pick<
 	| 'gasLimit'
 	| 'gasPrice'
 	| 'data'
-	| 'value'
 	| 'chainId'
 	| 'type'
 	| 'maxPriorityFeePerGas'
 	| 'maxFeePerGas'
->;
+> & {
+	// TODO: use ethers.Transaction.value type again once we upgrade to ethers v6
+	value: bigint;
+};
+
+// TODO: Remove this type when upgrading to ethers v6 since TransactionResponse will be with BigInt
+export type TransactionResponseWithBigInt = Omit<TransactionResponse, 'value'> &
+	Pick<EthersTransaction, 'value'>;
 
 export type Transaction = Omit<EthersTransaction, 'data'> &
 	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {

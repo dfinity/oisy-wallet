@@ -9,10 +9,12 @@
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { LabelSize } from '$lib/types/components';
 	import type { NetworkId } from '$lib/types/network';
 
 	export let selectedNetworkId: NetworkId | undefined = undefined;
 	export let delayOnNetworkSelect = true;
+	export let labelsSize: LabelSize = 'md';
 
 	let mainnetTokensUsdBalance: number;
 	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
@@ -28,26 +30,39 @@
 	usdBalance={mainnetTokensUsdBalance}
 	{selectedNetworkId}
 	{delayOnNetworkSelect}
+	{labelsSize}
 	on:icSelected
 />
 
 <ul class="flex list-none flex-col">
 	{#each $networksMainnets as network (network.id)}
-		<li transition:slide={SLIDE_EASING}
-			><MainnetNetwork {network} {selectedNetworkId} {delayOnNetworkSelect} on:icSelected /></li
+		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
+			><MainnetNetwork
+				{network}
+				{selectedNetworkId}
+				{delayOnNetworkSelect}
+				{labelsSize}
+				on:icSelected
+			/></li
 		>
 	{/each}
 </ul>
 
 {#if $testnetsEnabled && $networksTestnets.length}
-	<span class="my-5 flex px-3 font-bold" transition:slide={SLIDE_EASING}
+	<span class="mb-3 mt-6 flex px-3 font-bold" transition:slide={SLIDE_EASING}
 		>{$i18n.networks.test_networks}</span
 	>
 
 	<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
 		{#each $networksTestnets as network (network.id)}
-			<li transition:slide={SLIDE_EASING}
-				><Network {network} {selectedNetworkId} {delayOnNetworkSelect} on:icSelected /></li
+			<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
+				><Network
+					{network}
+					{selectedNetworkId}
+					{delayOnNetworkSelect}
+					{labelsSize}
+					on:icSelected
+				/></li
 			>
 		{/each}
 	</ul>

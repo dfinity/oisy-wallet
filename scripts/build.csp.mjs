@@ -148,6 +148,8 @@ const updateCSP = (indexHtml) => {
 
 	const coingeckoApiConnectSrc = 'https://pro-api.coingecko.com';
 
+	const plausibleApiConnectSrc = 'https://plausible.io/api/event';
+
 	const walletConnectSrc =
 		'wss://relay.walletconnect.com wss://relay.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org';
 	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
@@ -165,7 +167,7 @@ const updateCSP = (indexHtml) => {
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc};
         img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';

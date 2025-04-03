@@ -15,10 +15,6 @@ interface FormatTokenParams {
 	showPlusSign?: boolean;
 }
 
-type FormatTokenAmountParams = Omit<FormatTokenParams, 'value'> & {
-	value: bigint;
-};
-
 export const formatToken = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
@@ -40,15 +36,8 @@ export const formatToken = ({
 	return `${showPlusSign && +res > 0 ? '+' : ''}${formatted}`;
 };
 
-// TODO: remove this function since it is duplicated of formatToken
-export const formatTokenAmount = ({ value, ...restParams }: FormatTokenAmountParams): string =>
-	formatToken({
-		value,
-		...restParams
-	});
-
-export const formatTokenBigintToNumber = (params: FormatTokenAmountParams): number =>
-	Number(formatTokenAmount(params));
+export const formatTokenBigintToNumber = (params: FormatTokenParams): number =>
+	Number(formatToken(params));
 
 /**
  * Shortens the text from the middle. Ex: "12345678901234567890" -> "1234567...5678901"
