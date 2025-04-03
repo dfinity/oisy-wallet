@@ -78,7 +78,12 @@
 					class="duration-250 flex overflow-hidden rounded-lg bg-secondary transition hover:bg-brand-subtle-10"
 					transition:slide={SLIDE_PARAMS}
 				>
-					<TokenCard data={token} condensed on:click={() => goto(transactionsUrl({ token }))} />
+					<TokenCard
+						data={token}
+						condensed
+						on:click={() => goto(transactionsUrl({ token }))}
+						asNetwork={!isCkToken(token)}
+					/>
 				</div>
 			{/each}
 

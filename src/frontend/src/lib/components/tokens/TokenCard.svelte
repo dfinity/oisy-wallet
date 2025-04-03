@@ -11,6 +11,7 @@
 	export let data: CardData;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
 	export let condensed = false;
+	export let asNetwork = false;
 	export let hover = false;
 </script>
 
@@ -24,7 +25,7 @@
 		{hover}
 	>
 		<span class="flex" slot="logo" class:mr-2={!condensed}>
-			{#if condensed && isNullish(data.oisyName?.prefix)}
+			{#if asNetwork}
 				<NetworkLogo network={data.network} size="xs" blackAndWhite />
 			{:else}
 				<TokenLogo
