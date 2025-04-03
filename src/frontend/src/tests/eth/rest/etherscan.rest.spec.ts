@@ -74,15 +74,13 @@ describe('etherscan.rest', () => {
 				{
 					hash: '0x123abc',
 					blockNumber: 123456,
-					blockHash: '0x456def',
 					timestamp: 1697049600,
-					confirmations: '10',
 					from: '0xabc...',
 					to: '0xdef...',
 					nonce: 1,
 					gasLimit: BigNumber.from('21000'),
 					gasPrice: BigNumber.from('20000000000'),
-					value: BigNumber.from('1000000000000000000'),
+					value: 1000000000000000000n,
 					chainId: 0
 				}
 			]);
