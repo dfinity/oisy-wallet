@@ -48,11 +48,12 @@ export const initPlausibleAnalytics = () => {
 
 export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
 	/**
-	 * We use the `PLAUSIBLE_ENABLED` feature flag instead of relying solely on `PROD`
-	 * to allow more flexibility—for example, disabling analytics in certain production builds.
+	 * We use the `PLAUSIBLE_ENABLED` feature flag to allow flexibility in enabling or disabling
+	 * analytics in specific builds. This ensures that analytics
+	 * can be disabled even in production-like environments during testing.
 	 *
-	 * This is temporary and can be removed once testing is complete and Plausible
-	 * should only run in production.
+	 * TODO: Once testing is complete and Plausible should only run in production,
+	 * replace the `PLAUSIBLE_ENABLED` check with a `PROD` check and remove the feature flag.
 	 */
 	if (PLAUSIBLE_ENABLED && nonNullish(plausibleTracker)) {
 		plausibleTracker.trackEvent(name, { props: metadata });
