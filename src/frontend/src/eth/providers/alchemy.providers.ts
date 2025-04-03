@@ -16,9 +16,9 @@ import type { Listener } from '@ethersproject/abstract-provider';
 import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
 import { get } from 'svelte/store';
 
-type AlchemyConfigs = Pick<AlchemySettings, 'apiKey' | 'network'>;
+type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
-const configs: Record<NetworkId, AlchemyConfigs> = {
+const configs: Record<NetworkId, AlchemyConfig> = {
 	[ETHEREUM_NETWORK_ID]: {
 		apiKey: ALCHEMY_API_KEY,
 		network: ALCHEMY_NETWORK_MAINNET
@@ -29,7 +29,7 @@ const configs: Record<NetworkId, AlchemyConfigs> = {
 	}
 };
 
-const alchemyConfig = (networkId: NetworkId): AlchemyConfigs => {
+const alchemyConfig = (networkId: NetworkId): AlchemyConfig => {
 	const provider = configs[networkId];
 
 	assertNonNullish(
