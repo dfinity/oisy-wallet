@@ -59,10 +59,7 @@ export const initBtcWalletWorker = async ({
 						 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
 						 * TODO: Investigate the "ingress_expiry" error that is sometimes thrown by update BTC balance call, and remove "isMainnetNetwork" afterwards.
 						 * **/
-						hideToast:
-							isRegtestNetwork ||
-							isTestnetNetwork ||
-							(isMainnetNetwork && !STAGING)
+						hideToast: isRegtestNetwork || isTestnetNetwork || (isMainnetNetwork && !STAGING)
 					});
 				}
 				return;
