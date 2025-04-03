@@ -577,6 +577,7 @@ interface I18nTokens {
 		text: {
 			title: string;
 			manage_list: string;
+			list_settings: string;
 			do_not_see_import: string;
 			manage_for_network: string;
 			network: string;

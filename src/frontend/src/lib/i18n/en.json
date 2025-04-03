@@ -621,6 +621,7 @@
 			"text": {
 				"title": "Manage tokens",
 				"manage_list": "Manage tokens",
+				"list_settings": "List settings",
 				"do_not_see_import": "Don’t see your token? Import",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
