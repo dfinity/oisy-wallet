@@ -1,14 +1,14 @@
-use crate::types::DebuggableCandid;
-use crate::{
-    types::{Candid, StoredPrincipal},
-    State,
-};
-use candid::{CandidType, Deserialize, Principal};
 use core::ops::Deref;
+use std::{borrow::Cow, fmt};
+
+use candid::{CandidType, Deserialize, Principal};
 use ic_stable_structures::storable::{Blob, Bound, Storable};
 use shared::types::Stats;
-use std::borrow::Cow;
-use std::fmt;
+
+use crate::{
+    types::{Candid, DebuggableCandid, StoredPrincipal},
+    State,
+};
 
 impl<T> Storable for Candid<T>
 where
