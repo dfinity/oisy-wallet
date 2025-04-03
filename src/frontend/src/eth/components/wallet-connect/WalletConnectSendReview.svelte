@@ -25,7 +25,7 @@
 
 	let amountDisplay: bigint;
 	$: amountDisplay =
-		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data).toBigInt() : amount;
+		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data) : amount;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
