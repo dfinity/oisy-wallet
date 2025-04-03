@@ -80,7 +80,7 @@ describe('etherscan.rest', () => {
 					nonce: 1,
 					gasLimit: BigNumber.from('21000'),
 					gasPrice: BigNumber.from('20000000000'),
-					value: BigNumber.from('1000000000000000000'),
+					value: 1000000000000000000n,
 					chainId: 0
 				}
 			]);

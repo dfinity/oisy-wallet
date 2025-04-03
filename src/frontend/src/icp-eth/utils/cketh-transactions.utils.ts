@@ -8,7 +8,6 @@ import type { OptionToken } from '$lib/types/token';
 import type { EthersTransaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { nonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
 import type { Transaction } from '@ethersproject/transactions';
 import { ethers } from 'ethers';
 import { get } from 'svelte/store';
@@ -46,7 +45,7 @@ const mapPendingTransaction = ({
 }: {
 	transaction: Omit<Transaction, 'value' | 'data'>;
 	token: IcToken;
-	value: BigNumber;
+	value: bigint;
 } & IcCkLinkedAssets): IcTransactionUi => {
 	const explorerUrl = (twinToken.network as EthereumNetwork).explorerUrl;
 
@@ -70,21 +69,21 @@ const mapPendingTransaction = ({
 			$token: twinTokenSymbol,
 			$ckToken: symbol
 		}),
-		value: value.toBigInt(),
+		value,
 		fromExplorerUrl: `${explorerUrl}/address/${from}`,
 		toExplorerUrl: `${explorerUrl}/address/${to}`,
 		txExplorerUrl: `${explorerUrl}/tx/${hash}`
 	};
 };
 
-const decodeCkErc20DepositAbiDataValue = (data: string): BigNumber => {
+const decodeCkErc20DepositAbiDataValue = (data: string): bigint => {
 	// Types are equals to the internalTypes of the CKERC20_ABI for the deposit
 	const [_to, value] = ethers.utils.defaultAbiCoder.decode(
 		['address', 'uint256', 'bytes32'],
 		ethers.utils.hexDataSlice(data, 4)
 	);
 
-	return value;
+	return value.toBigInt();
 };
 
 export const isConvertCkEthToEth = ({
