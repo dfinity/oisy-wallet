@@ -2,17 +2,18 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
-	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
-	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
+	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
+	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined;
@@ -59,9 +60,9 @@
 						{@const { token } = tokenOrGroup}
 
 						<Listener {token}>
-							<TokenCardWithUrl styleClass="rounded-xl px-3 py-2 hover:bg-brand-subtle-10" {token}>
-								<TokenCardContent data={token} />
-							</TokenCardWithUrl>
+							<div class="transition duration-300 hover:bg-primary">
+								<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
+							</div>
 						</Listener>
 					{/if}
 				</div>

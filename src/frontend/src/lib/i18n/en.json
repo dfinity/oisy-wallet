@@ -570,7 +570,9 @@
 			"exchange_is_not_available": "USD value is currently not available.",
 			"source_token_title": "You pay",
 			"destination_token_title": "You receive",
-			"chain_key": "Chain Key"
+			"chain_key": "Chain Key",
+			"show_more_networks": "Show $number more networks",
+			"hide_more_networks": "Hide more networks"
 		},
 		"details": {
 			"title": "Token details",
