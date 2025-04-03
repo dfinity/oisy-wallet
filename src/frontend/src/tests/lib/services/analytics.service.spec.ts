@@ -11,10 +11,6 @@ vi.mock('plausible-tracker', () => ({
 	}))
 }));
 
-vi.mock('$lib/constants/app.constants', () => ({
-	PROD: true
-}));
-
 describe('plausible analytics service', () => {
 	beforeEach(() => {
 		vi.resetModules();
@@ -62,8 +58,8 @@ describe('plausible analytics service', () => {
 	});
 
 	it('should NOT call trackEvent or init anything if PLAUSIBLE_ENABLED is false', async () => {
-		vi.doMock('$lib/constants/app.constants', () => ({
-			PLAUSIBLE_ENABLED: false
+		vi.doMock('$env/plausible.env', () => ({
+			PLAUSIBLE_ENABLED: false,
 		}));
 
 		const { initPlausibleAnalytics, trackEvent } = await import('$lib/services/analytics.services');
