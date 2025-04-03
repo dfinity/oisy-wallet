@@ -51,10 +51,20 @@
 		);
 	});
 
-	// Show all if hideZeros = false and sort so Native > CK > others
-	$: tokensToShow = (hideZeros ? filteredTokens : tokenGroup.tokens).sort((a, b) =>
-		isNativeToken(a) ? -1 : isCkToken(a) && !isNativeToken(b) ? -1 : 1
-	);
+	// Show all if hideZeros = false and sort
+	$: tokensToShow = (hideZeros ? filteredTokens : tokenGroup.tokens).sort((a, b) => {
+		const balanceA = BigInt(a.balance ?? 0n);
+		const balanceB = BigInt(b.balance ?? 0n);
+		// higher balances show first
+		if (balanceA > balanceB) {
+			return -1;
+		}
+		if (balanceA < balanceB) {
+			return 1;
+		}
+		// if same balance order by Native > CK > others
+		return isNativeToken(a) ? -1 : isCkToken(a) && !isNativeToken(b) ? -1 : 1;
+	});
 
 	// Count tokens that are not displayed
 	$: notDisplayedCount = tokenGroup.tokens.length - tokensToShow.length;

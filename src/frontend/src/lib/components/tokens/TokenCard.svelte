@@ -63,6 +63,8 @@
 					{/if}
 					{network}
 				{/each}
+			{:else}
+				{data.network.name}
 			{/if}
 		</span>
 
