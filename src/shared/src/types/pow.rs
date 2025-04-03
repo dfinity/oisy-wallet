@@ -13,7 +13,7 @@ pub const DIFFICULTY_AUTO_ADJUSTMENT: bool = false;
 
 // The average time (in milliseconds) that the system aims for solving the PoW challenge.
 // Difficulty levels are adjusted to approach this target, but only if auto-adjustment is enabled.
-pub const TARGET_DURATION_MS: u64 = 10000;
+pub const TARGET_DURATION_MS: u64 = 3000;
 
 // The challenge expires after this time (in milliseconds). Multiplying
 // `TARGET_DURATION_MS` by 4 ensures challenges remain valid longer than the targeted solve time.
@@ -32,7 +32,7 @@ pub const MIN_DIFFICULTY: u32 = 100_000;
 pub const MAX_DIFFICULTY: u32 = 5_000_000;
 
 // The number of cycles granted per difficulty unit for signer operations.
-pub const DIFFICULTY_TO_CYCLE_FACTOR: u64 = 10_000;
+pub const CYCLES_PER_DIFFICULTY: u64 = 10_000;
 // ---------------------------------------------------------------------------------------------
 // - Error-structures and -enums
 // ---------------------------------------------------------------------------------------------
