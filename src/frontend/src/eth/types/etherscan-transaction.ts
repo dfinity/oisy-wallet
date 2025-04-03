@@ -1,3 +1,4 @@
+// https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address
 export interface EtherscanProviderTransaction {
 	blockNumber: string;
 	timeStamp: string;
@@ -21,6 +22,7 @@ export interface EtherscanProviderTransaction {
 	functionName: string;
 }
 
+// https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address
 export interface EtherscanRestTransaction {
 	blockHash: string;
 	blockNumber: string;

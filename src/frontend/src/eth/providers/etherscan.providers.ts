@@ -18,6 +18,10 @@ import {
 	type BlockTag,
 	type Networkish
 } from 'ethers/providers';
+import type { BlockTag } from '@ethersproject/abstract-provider';
+import type { Networkish } from '@ethersproject/networks';
+import { EtherscanProvider as EtherscanProviderLib } from '@ethersproject/providers';
+import { BigNumber } from 'ethers';
 import { get } from 'svelte/store';
 
 export class EtherscanProvider {
@@ -49,7 +53,17 @@ export class EtherscanProvider {
 		const result: EtherscanProviderTransaction[] = await this.provider.fetch('account', params);
 
 		return result.map(
-			({ blockNumber, timeStamp, hash, nonce, from, to, value, gas, gasPrice }): Transaction => ({
+			({
+				blockNumber,
+				timeStamp,
+				hash,
+				nonce,
+				from,
+				to,
+				value,
+				gas,
+				gasPrice
+			}: EtherscanProviderTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
 				timestamp: parseInt(timeStamp),
