@@ -11,7 +11,7 @@ export const mockEthTransactionUi: Transaction = {
 	from: mockEthAddress,
 	timestamp: 123456789,
 	to: mockEthAddress2,
-	value: BigNumber.from(bn1Bi),
+	value: bn1Bi,
 	hash: '0x123456789'
 };
 
