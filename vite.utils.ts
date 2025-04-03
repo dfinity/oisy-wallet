@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -90,6 +91,8 @@ export const readCanisterIds = (params: { prefix?: string }): Record<string, str
 export const defineViteReplacements = (): {
 	VITE_APP_VERSION: string;
 	VITE_DFX_NETWORK: string;
+	VITE_GIT_COMMIT_HASH: string;
+	VITE_GIT_BRANCH_NAME: string;
 } => {
 	const file = fileURLToPath(new URL('package.json', import.meta.url));
 	const json = readFileSync(file, 'utf8');
@@ -103,9 +106,16 @@ export const defineViteReplacements = (): {
 	// dfx deploy --network staging = staging
 	const network = process.env.DFX_NETWORK ?? 'local';
 
+	const isTestFe = network.startsWith('test_fe_');
+
+	const commitHash = isTestFe ? execSync('git rev-parse --short HEAD').toString().trim() : '';
+	const branchName = isTestFe ? execSync('git rev-parse --abbrev-ref HEAD').toString().trim() : '';
+
 	return {
 		VITE_APP_VERSION: JSON.stringify(version),
-		VITE_DFX_NETWORK: JSON.stringify(network)
+		VITE_DFX_NETWORK: JSON.stringify(network),
+		VITE_GIT_COMMIT_HASH: JSON.stringify(commitHash),
+		VITE_GIT_BRANCH_NAME: JSON.stringify(branchName)
 	};
 };
 

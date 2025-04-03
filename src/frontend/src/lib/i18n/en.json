@@ -272,7 +272,10 @@
 			"appearance": "Appearance",
 			"appearance_light": "Light",
 			"appearance_dark": "Dark",
-			"appearance_system": "System"
+			"appearance_system": "System",
+			"git_disclaimer": "For development purpose, we show the branch and the commit only in test canisters.",
+			"git_branch_name": "Branch:",
+			"git_commit_hash": "Commit:"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
