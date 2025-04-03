@@ -6,10 +6,9 @@ use shared::types::pow::{
     START_DIFFICULTY, TARGET_DURATION_MS,
 };
 
-use crate::types::DebuggableCandid;
 use crate::{
     mutate_state, read_state,
-    types::{Candid, StoredPrincipal},
+    types::{Candid, DebuggableCandid, StoredPrincipal},
     user_profile::exists_profile,
     State,
 };
