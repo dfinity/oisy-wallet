@@ -15,6 +15,11 @@ vi.doMock('$lib/constants/app.constants', () => ({
 	PROD: true
 }));
 
+vi.doMock('$env/plausible.env', () => ({
+	PLAUSIBLE_ENABLED: true,
+	PLAUSIBLE_DOMAIN: 'test.com',
+}));
+
 describe('plausible analytics service', () => {
 	beforeEach(() => {
 		vi.resetModules();
