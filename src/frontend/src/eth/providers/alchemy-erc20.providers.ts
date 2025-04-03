@@ -46,7 +46,7 @@ export class AlchemyErc20Provider {
 		) => {
 			const { transactionHash: hash, args } = transaction;
 			const [_from_, _to_, value] = args;
-			await listener({ hash, value: value?.toBigInt() });
+			await listener({ hash, value });
 		};
 
 		const filterToAddress = erc20Contract.filters.Transfer(null, address);
