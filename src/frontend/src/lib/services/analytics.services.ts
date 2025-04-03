@@ -58,10 +58,12 @@ export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
 		plausibleTracker.trackEvent(name, { props: metadata });
 	}
 
-	if (PROD) {
-		await trackEventOrbiter({
-			name,
-			metadata
-		});
+	if (!PROD) {
+		return;
 	}
+
+	await trackEventOrbiter({
+		name,
+		metadata
+	});
 };

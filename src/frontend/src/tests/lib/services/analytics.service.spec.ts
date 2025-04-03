@@ -61,9 +61,9 @@ describe('plausible analytics service', () => {
 		});
 	});
 
-	it('should NOT call trackEvent or init anything if PROD is false', async () => {
+	it('should NOT call trackEvent or init anything if PLAUSIBLE_ENABLED is false', async () => {
 		vi.doMock('$lib/constants/app.constants', () => ({
-			PROD: false
+			PLAUSIBLE_ENABLED: false
 		}));
 
 		const { initPlausibleAnalytics, trackEvent } = await import('$lib/services/analytics.services');
