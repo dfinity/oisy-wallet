@@ -119,7 +119,7 @@
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
-	$: {
+	$: if (progressStep === ProgressStepsLoader.DONE) {
 		if ($networkEthereumEnabled && isNullish($ethAddress)) {
 			debounceLoadEthAddress();
 		}
