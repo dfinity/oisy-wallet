@@ -41,8 +41,8 @@ use shared::{
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
-            HasUserProfileError, HasUserProfileResponse, ListUserCreationTimestampsResponse,
-            ListUsersRequest, ListUsersResponse, OisyUser, UserProfile,
+            HasUserProfileResponse, ListUserCreationTimestampsResponse, ListUsersRequest,
+            ListUsersResponse, OisyUser, UserProfile,
         },
         Stats, Timestamp,
     },
@@ -666,13 +666,14 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 /// # Errors
 /// Does not return any error
 #[query(guard = "may_read_user_data")]
-pub fn has_user_profile() -> Result<HasUserProfileResponse, HasUserProfileError> {
+#[must_use]
+pub fn has_user_profile() -> HasUserProfileResponse {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     // candid does not support to directly return a bool
-    Ok(HasUserProfileResponse {
+    HasUserProfileResponse {
         has_user_profile: user_profile::has_user_profile(stored_principal),
-    })
+    }
 }
 
 /// An endpoint to be called by users on first login, to enable them to

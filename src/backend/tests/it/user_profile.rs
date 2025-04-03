@@ -117,10 +117,6 @@ fn test_exists_profile_should_return_false_if_profile_not_exists() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    // Create a user profile
-    let response = pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
-    assert!(response.is_ok());
-
     // Check if the profile exists
     let exists_response = pic_setup.query::<HasUserProfileResponse>(caller, "has_user_profile", ());
 

@@ -83,8 +83,3 @@ pub struct ListUserCreationTimestampsResponse {
 pub enum GetUserProfileError {
     NotFound,
 }
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum HasUserProfileError {
-    InternalError,
-}
