@@ -6,7 +6,7 @@ import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
 import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { getBtcBalance } from '$lib/api/signer.api';
-import {FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS} from '$lib/constants/app.constants';
+import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
@@ -182,7 +182,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			onCertifiedError: ({ error }) => {
 				this.failedSyncCounter++;
 				if (FAILURE_THRESHOLD <= this.failedSyncCounter) {
-					this.postMessageWalletError({ error })
+					this.postMessageWalletError({ error });
 				}
 			},
 			resolution: 'all_settled'
