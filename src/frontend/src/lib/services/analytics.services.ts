@@ -1,4 +1,4 @@
-import { PLAUSIBLE_DOMAIN } from '$env/plausible.env';
+import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
 import { PROD } from '$lib/constants/app.constants';
 import type { TrackEventParams } from '$lib/types/analytics';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -32,7 +32,7 @@ export const initAnalytics = async () => {
 };
 
 export const initPlausibleAnalytics = () => {
-	if (!PROD) {
+	if (!PLAUSIBLE_ENABLED) {
 		return;
 	}
 
@@ -47,16 +47,21 @@ export const initPlausibleAnalytics = () => {
 };
 
 export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
-	if (!PROD) {
-		return;
-	}
-
-	if (nonNullish(plausibleTracker)) {
+	/**
+	 * We use the `PLAUSIBLE_ENABLED` feature flag instead of relying solely on `PROD`
+	 * to allow more flexibility—for example, disabling analytics in certain production builds.
+	 *
+	 * This is temporary and can be removed once testing is complete and Plausible
+	 * should only run in production.
+	 */
+	if (PLAUSIBLE_ENABLED && nonNullish(plausibleTracker)) {
 		plausibleTracker.trackEvent(name, { props: metadata });
 	}
 
-	await trackEventOrbiter({
-		name,
-		metadata
-	});
+	if (PROD) {
+		await trackEventOrbiter({
+			name,
+			metadata
+		});
+	}
 };
