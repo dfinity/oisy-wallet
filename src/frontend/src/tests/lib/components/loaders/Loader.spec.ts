@@ -147,7 +147,7 @@ describe('Loader', () => {
 	it('should not call any address loaders', async () => {
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
-		
+
 		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
 		render(Loader);
