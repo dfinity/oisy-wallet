@@ -88,3 +88,37 @@ fn test_get_user_profile_returns_not_found() {
         GetUserProfileError::NotFound,
     );
 }
+
+#[test]
+fn test_exists_profile_should_return_true_if_profile_exists() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    // Create a user profile
+    let create_response = pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+    assert!(create_response.is_ok());
+
+    // Check if the profile exists
+    let exists_response = pic_setup.update::<bool>(caller, "profile_exists", ());
+    assert!(exists_response.is_ok());
+    assert_eq!(
+        exists_response.expect("Call to profile_exists failed"),
+        true
+    );
+}
+
+#[test]
+fn test_exists_profile_should_return_false_if_profile_not_exists() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    // Directly check if the profile exists without creating it
+    let exists_response = pic_setup.update::<bool>(caller, "profile_exists", ());
+    assert!(exists_response.is_ok());
+    assert_eq!(
+        exists_response.expect("Call to profile_exists failed"),
+        false
+    );
+}
