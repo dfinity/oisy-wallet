@@ -11,7 +11,6 @@ import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
-import type { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 export const processTransactionSent = async ({
@@ -40,7 +39,7 @@ export const processErc20Transaction = async ({
 	...rest
 }: {
 	hash: string;
-	value: BigNumber;
+	value: bigint;
 	token: Token;
 	type: 'pending' | 'mined';
 }) => {
@@ -59,7 +58,7 @@ const processPendingTransaction = async ({
 }: {
 	hash: string;
 	token: Token;
-	value?: BigNumber;
+	value?: bigint;
 }) => {
 	const {
 		id: tokenId,

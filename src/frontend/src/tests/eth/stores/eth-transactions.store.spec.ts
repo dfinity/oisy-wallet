@@ -2,7 +2,6 @@ import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env'
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { bn3Bi } from '$tests/mocks/balances.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
-import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 describe('eth-transactions.store', () => {
@@ -79,7 +78,7 @@ describe('eth-transactions.store', () => {
 	describe('update', () => {
 		const updatedTransaction = {
 			...mockTransactions[0],
-			value: mockTransactions[0].value.add(BigNumber.from(bn3Bi))
+			value: mockTransactions[0].value + bn3Bi
 		};
 
 		beforeEach(() => {

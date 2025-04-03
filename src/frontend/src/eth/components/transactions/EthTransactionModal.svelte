@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import type { BigNumber } from '@ethersproject/bignumber';
 	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -32,7 +31,7 @@
 
 	let from: string;
 	let to: string | undefined;
-	let value: BigNumber;
+	let value: bigint;
 	let timestamp: number | undefined;
 	let hash: string | undefined;
 	let blockNumber: number | undefined;
@@ -160,7 +159,7 @@
 				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
 				<output>
 					{formatToken({
-						value: value.toBigInt(),
+						value,
 						unitName: token.decimals,
 						displayDecimals: token.decimals
 					})}

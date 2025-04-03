@@ -66,7 +66,7 @@ export class EtherscanProvider {
 				nonce: parseInt(nonce),
 				gasLimit: BigNumber.from(gas),
 				gasPrice: BigNumber.from(gasPrice),
-				value: BigNumber.from(value),
+				value: BigInt(value),
 				// Chain ID is not delivered by the Etherscan API so, we naively set 0
 				chainId: 0
 			})
