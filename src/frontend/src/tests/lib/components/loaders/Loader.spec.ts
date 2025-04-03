@@ -144,7 +144,7 @@ describe('Loader', () => {
 		});
 	});
 
-	it('should not call only any address loaders', async () => {
+	it('should not call any address loaders', async () => {
 		setupTestnetsStore('disabled');
 		setupUserNetworksStore('allEnabled');
 
