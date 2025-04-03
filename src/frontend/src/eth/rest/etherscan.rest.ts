@@ -57,18 +57,14 @@ export class EtherscanRest {
 				gasPrice,
 				hash,
 				blockNumber,
-				blockHash,
 				timeStamp,
-				confirmations,
 				from,
 				to,
 				value
-			}) => ({
+			}: EtherscanRestTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
-				blockHash,
 				timestamp: parseInt(timeStamp),
-				confirmations,
 				from,
 				to,
 				nonce: parseInt(nonce),

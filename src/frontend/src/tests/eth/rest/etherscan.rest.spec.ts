@@ -74,9 +74,7 @@ describe('etherscan.rest', () => {
 				{
 					hash: '0x123abc',
 					blockNumber: 123456,
-					blockHash: '0x456def',
 					timestamp: 1697049600,
-					confirmations: '10',
 					from: '0xabc...',
 					to: '0xdef...',
 					nonce: 1,
