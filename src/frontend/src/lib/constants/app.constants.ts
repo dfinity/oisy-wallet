@@ -6,8 +6,8 @@ export const APP_VERSION = VITE_APP_VERSION;
 
 export const MODE = VITE_DFX_NETWORK;
 export const LOCAL = MODE === 'local';
-export const STAGING =
-	MODE === 'staging' || MODE.startsWith('test_fe_') || MODE === 'audit' || MODE === 'e2e';
+export const TEST_FE = MODE.startsWith('test_fe_');
+export const STAGING = MODE === 'staging' || TEST_FE || MODE === 'audit' || MODE === 'e2e';
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
@@ -139,3 +139,7 @@ export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1000;
 
 // Fallback
 export const FALLBACK_TIMEOUT = 10000;
+
+// Git
+export const GIT_COMMIT_HASH = VITE_GIT_COMMIT_HASH;
+export const GIT_BRANCH_NAME = VITE_GIT_BRANCH_NAME;

@@ -30,6 +30,7 @@ a.as-button {
 	&.tertiary,
 	&.tertiary-alt,
 	&.tertiary-main-card,
+	&.muted,
 	&.success,
 	&.error {
 		justify-content: center;
@@ -52,6 +53,7 @@ a.as-button {
 	&.tertiary,
 	&.tertiary-alt,
 	&.tertiary-main-card,
+	&.muted,
 	&.success,
 	&.error {
 		font-weight: var(--font-weight-bold);
@@ -275,6 +277,38 @@ a.as-button {
 	}
 
 	&.tertiary-main-card.loading {
+		@apply text-brand-primary-inverted;
+		@apply bg-primary-alt;
+	}
+
+	// MUTED
+	&.muted:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-tertiary;
+
+		&:hover {
+			@apply text-secondary;
+			@apply bg-primary;
+		}
+
+		&:active,
+		&.active {
+			@apply text-secondary;
+			@apply bg-disabled;
+		}
+
+		&:focus-visible {
+			@apply text-secondary;
+			@apply bg-disabled;
+		}
+	}
+
+	&.muted.disabled:not(.loading):not(.link),
+	&.muted[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-primary-alt;
+	}
+
+	&.muted.loading {
 		@apply text-brand-primary-inverted;
 		@apply bg-primary-alt;
 	}
