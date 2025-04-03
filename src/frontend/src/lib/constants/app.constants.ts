@@ -139,3 +139,6 @@ export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1000;
 
 // Fallback
 export const FALLBACK_TIMEOUT = 10000;
+
+// Threshold
+export const FAILURE_THRESHOLD = 3;

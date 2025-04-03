@@ -14,18 +14,21 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import {ETHEREUM_NETWORK_SYMBOL} from "$env/networks/networks.eth.env";
 
 export const loadEthereumTransactions = ({
 	networkId,
 	tokenId,
-	updateOnly = false
+	updateOnly = false,
+	silent = false
 }: {
 	tokenId: TokenId;
 	networkId: NetworkId;
 	updateOnly?: boolean;
+	silent?: boolean;
 }): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(tokenId)) {
-		return loadEthTransactions({ networkId, tokenId, updateOnly });
+		return loadEthTransactions({ networkId, tokenId, updateOnly, silent });
 	}
 
 	return loadErc20Transactions({ networkId, tokenId, updateOnly });
@@ -36,16 +39,19 @@ export const loadEthereumTransactions = ({
 export const reloadEthereumTransactions = (params: {
 	tokenId: TokenId;
 	networkId: NetworkId;
+	silent: boolean;
 }): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
 const loadEthTransactions = async ({
 	networkId,
 	tokenId,
-	updateOnly = false
+	updateOnly = false,
+	silent = false
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
 	updateOnly?: boolean;
+	silent?: boolean;
 }): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
@@ -75,16 +81,21 @@ const loadEthTransactions = async ({
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
 
-		const {
-			transactions: {
-				error: { loading_transactions }
-			}
-		} = get(i18n);
+		if (!silent) {
+			const {
+				transactions: {
+					error: { loading_transactions_symbol }
+				}
+			} = get(i18n);
 
-		toastsErrorNoTrace({
-			msg: { text: loading_transactions },
-			err
-		});
+			toastsErrorNoTrace({
+				msg: { text: replacePlaceholders(loading_transactions_symbol, {
+						$symbol: ETHEREUM_NETWORK_SYMBOL
+					})},
+				err
+			});
+		}
+
 		return { success: false };
 	}
 

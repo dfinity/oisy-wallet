@@ -194,7 +194,8 @@ describe('eth-transactions.services', () => {
 
 			const result = await reloadEthereumTransactions({
 				networkId: mockNetworkId,
-				tokenId: mockTokenId
+				tokenId: mockTokenId,
+				silent: false
 			});
 
 			expect(result).toEqual({ success: true });
