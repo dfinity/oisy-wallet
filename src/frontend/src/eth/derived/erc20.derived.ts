@@ -7,7 +7,6 @@ import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
-import { networkEthereumEnabled } from '$lib/derived/networks.derived';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -36,9 +35,19 @@ const erc20DefaultTokensAddresses: Readable<string[]> = derived(
  * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "user token" in the backend.
  */
 export const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
-	[erc20UserTokensStore, networkEthereumEnabled],
-	([$erc20UserTokensStore, $networkEthereumEnabled]) =>
-		$networkEthereumEnabled ? ($erc20UserTokensStore?.map(({ data: token }) => token) ?? []) : []
+	[erc20UserTokensStore, enabledEthereumNetworksIds],
+	([$erc20UserTokensStore, $enabledEthereumNetworksIds]) =>
+		$erc20UserTokensStore?.reduce<Erc20UserToken[]>((acc, { data: token }) => {
+			const {
+				network: { id: networkId }
+			} = token;
+
+			if ($enabledEthereumNetworksIds.includes(networkId)) {
+				return [...acc, token];
+			}
+
+			return acc;
+		}, []) ?? []
 );
 
 const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(

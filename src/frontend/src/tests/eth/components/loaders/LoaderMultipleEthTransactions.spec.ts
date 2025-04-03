@@ -1,4 +1,4 @@
-import * as ethEnv from '$env/networks/networks.eth.env';
+import * as networksEnv from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import {
 	ETHEREUM_TOKEN,
@@ -12,6 +12,7 @@ import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import * as appContants from '$lib/constants/app.constants';
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
 import type { MockedFunction } from 'vitest';
 
@@ -22,16 +23,20 @@ vi.mock('$eth/services/eth-transactions.services', () => ({
 describe('LoaderMultipleEthTransactions', () => {
 	const timeout = 60000;
 
-	const mockMainnetErc20UserTokens = createMockErc20UserTokens({ n: 2, networkEnv: 'mainnet' });
+	const mockMainnetErc20CertifiedUserTokens = createMockErc20UserTokens({
+		n: 2,
+		networkEnv: 'mainnet'
+	});
 
-	const mockSepoliaErc20UserTokens = createMockErc20UserTokens({ n: 3, networkEnv: 'testnet' });
+	const mockSepoliaErc20CertifiedUserTokens = createMockErc20UserTokens({
+		n: 3,
+		networkEnv: 'testnet'
+	});
 
 	const mockErc20CertifiedUserTokens = [
-		...mockMainnetErc20UserTokens,
-		...mockSepoliaErc20UserTokens
+		...mockMainnetErc20CertifiedUserTokens,
+		...mockSepoliaErc20CertifiedUserTokens
 	];
-
-	const mockErc20UserTokens = mockErc20CertifiedUserTokens.map(({ data: token }) => token);
 
 	const mockAdditionalCertifiedTokens = createMockErc20UserTokens({
 		n: 5,
@@ -39,13 +44,28 @@ describe('LoaderMultipleEthTransactions', () => {
 		start: 2
 	});
 
+	const mockMainnetErc20UserTokens = mockMainnetErc20CertifiedUserTokens.map(
+		({ data: token }) => token
+	);
+
+	const mockSepoliaErc20UserTokens = mockSepoliaErc20CertifiedUserTokens.map(
+		({ data: token }) => token
+	);
+
+	const mockErc20UserTokens = mockErc20CertifiedUserTokens.map(({ data: token }) => token);
+
 	const mockAdditionalTokens = mockAdditionalCertifiedTokens.map(({ data: token }) => token);
+
+	const expectedTokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN, ...mockErc20UserTokens];
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		setupTestnetsStore('reset');
+		vi.spyOn(networksEnv, 'USER_NETWORKS_FEATURE_ENABLED', 'get').mockImplementation(() => true);
+
+		setupTestnetsStore('enabled');
+		setupUserNetworksStore('allEnabled');
 
 		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
 
@@ -58,13 +78,10 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should load transactions for all Ethereum and Sepolia tokens (native and ERC20) when testnets flag is enabled', async () => {
-		setupTestnetsStore('enabled');
-
 		render(LoaderMultipleEthTransactions);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		const expectedTokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN, ...mockErc20UserTokens];
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
@@ -72,11 +89,12 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should not load transactions multiple times for the same list if the stores do not change', async () => {
+		setupTestnetsStore('enabled');
+
 		render(LoaderMultipleEthTransactions);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		const expectedTokens = [ETHEREUM_TOKEN, ...mockErc20UserTokens];
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
@@ -91,12 +109,14 @@ describe('LoaderMultipleEthTransactions', () => {
 		});
 	});
 
-	it('should not load transactions for native Sepolia token when testnets flag is disabled', async () => {
+	it('should not load transactions for testnet tokens when testnets flag is disabled', async () => {
+		setupTestnetsStore('disabled');
+
 		render(LoaderMultipleEthTransactions);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		const expectedTokens = [ETHEREUM_TOKEN, ...mockErc20UserTokens];
+		const expectedTokens = [ETHEREUM_TOKEN, ...mockMainnetErc20UserTokens];
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
@@ -108,15 +128,15 @@ describe('LoaderMultipleEthTransactions', () => {
 		});
 	});
 
-	it('should not load transactions for native Ethereum token when Ethereum mainnet is disabled', async () => {
+	it('should not load transactions for mainnet tokens when Ethereum mainnet is disabled', async () => {
 		setupTestnetsStore('enabled');
-		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementationOnce(() => false);
+		setupUserNetworksStore('onlyTestnets');
 
 		render(LoaderMultipleEthTransactions);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		const expectedTokens = [SEPOLIA_TOKEN, ...mockErc20UserTokens];
+		const expectedTokens = [SEPOLIA_TOKEN, ...mockSepoliaErc20UserTokens];
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
@@ -144,7 +164,6 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		const expectedTokens = [ETHEREUM_TOKEN, ...mockErc20UserTokens];
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
@@ -180,7 +199,6 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		const expectedTokens = [ETHEREUM_TOKEN, ...mockErc20UserTokens];
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
@@ -201,12 +219,26 @@ describe('LoaderMultipleEthTransactions', () => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
 
-		setupTestnetsStore('enabled');
+		const mockNewAdditionalTokens = createMockErc20UserTokens({
+			n: 7,
+			networkEnv: 'mainnet',
+			start: 2
+		});
+
+		erc20UserTokensStore.resetAll();
+		erc20UserTokensStore.setAll([
+			...mockErc20CertifiedUserTokens,
+			...mockAdditionalCertifiedTokens,
+			...mockNewAdditionalTokens
+		]);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		// the number of calls of the first render + the number of additional tokens + Sepolia native token
-		const expectedNewTokensWithSepolia = [...expectedNewTokens, SEPOLIA_TOKEN];
+		// the number of calls as before + the number of new additional tokens
+		const expectedNewTokensWithSepolia = [
+			...expectedNewTokens,
+			...mockNewAdditionalTokens.map(({ data: token }) => token)
+		];
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokensWithSepolia.length);
 		expectedNewTokensWithSepolia.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
@@ -225,7 +257,6 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		const expectedTokens = [ETHEREUM_TOKEN, ...mockErc20UserTokens];
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
