@@ -8,12 +8,14 @@
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { emit } from '$lib/utils/events.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
 	const toggleHideZeros = () => {
 		document.dispatchEvent(new CustomEvent('toggleHideZeros'));
+		emit({ message: 'oisyToggleZeroBalances' });
 	};
 
 	const openManageTokens = () => {
