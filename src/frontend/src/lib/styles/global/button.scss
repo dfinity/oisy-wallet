@@ -290,7 +290,8 @@ a.as-button {
 			@apply bg-primary;
 		}
 
-		&:active, &.active {
+		&:active,
+		&.active {
 			@apply text-secondary;
 			@apply bg-disabled;
 		}
@@ -311,7 +312,6 @@ a.as-button {
 		@apply text-brand-primary-inverted;
 		@apply bg-primary-alt;
 	}
-
 
 	// SUCCESS
 	&.success {
