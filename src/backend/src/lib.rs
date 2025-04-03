@@ -671,6 +671,7 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 ///   internal errors.
 #[update(guard = "may_write_user_data")]
 #[candid_method(update)]
+#[allow(clippy::unused_async)]
 pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
     // TODO implementation will be added once the candid files have been generated and checked in
 
