@@ -29,7 +29,7 @@
 	disabled={$erc20UserTokensNotInitialized}
 	link={false}
 	colorStyle="muted"
-	active={visible}
+	styleClass={visible ? 'active' : ''}
 >
 	<IconManage slot="icon" />
 </ButtonIcon>
