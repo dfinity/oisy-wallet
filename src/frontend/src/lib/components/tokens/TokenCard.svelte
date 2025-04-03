@@ -26,7 +26,7 @@
 	>
 		<span class="flex" slot="logo" class:mr-2={!condensed}>
 			{#if asNetwork}
-				<NetworkLogo network={data.network} size="xs" blackAndWhite />
+				<NetworkLogo network={data.network} size={condensed ? 'xs' : 'lg'} blackAndWhite />
 			{:else}
 				<TokenLogo
 					{data}
@@ -63,7 +63,7 @@
 					{/if}
 					{network}
 				{/each}
-			{:else}
+			{:else if !condensed}
 				{data.network.name}
 			{/if}
 		</span>
