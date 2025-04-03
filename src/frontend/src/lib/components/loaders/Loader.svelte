@@ -108,6 +108,8 @@
 
 	let progressModal = false;
 
+	let initiatingLoader = true;
+
 	const debounceLoadEthAddress = debounce(loadEthAddress);
 
 	const debounceLoadBtcAddressMainnet = debounce(loadBtcAddressMainnet);
@@ -119,7 +121,7 @@
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
-	$: {
+	$: if (!initiatingLoader) {
 		if ($networkEthereumEnabled && isNullish($ethAddress)) {
 			debounceLoadEthAddress();
 		}
@@ -168,12 +170,16 @@
 	};
 
 	onMount(async () => {
+		initiatingLoader = true;
+
 		await initLoader({
 			identity: $authIdentity,
 			validateAddresses,
 			progressAndLoad,
 			setProgressModal
 		});
+
+		initiatingLoader = false;
 	});
 </script>
 
