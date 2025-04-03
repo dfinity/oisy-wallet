@@ -18,10 +18,6 @@ import {
 	type BlockTag,
 	type Networkish
 } from 'ethers/providers';
-import type { BlockTag } from '@ethersproject/abstract-provider';
-import type { Networkish } from '@ethersproject/networks';
-import { EtherscanProvider as EtherscanProviderLib } from '@ethersproject/providers';
-import { BigNumber } from 'ethers';
 import { get } from 'svelte/store';
 
 export class EtherscanProvider {
