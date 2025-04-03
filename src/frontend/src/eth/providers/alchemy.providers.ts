@@ -1,13 +1,18 @@
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
-import { ALCHEMY_NETWORK_MAINNET, ALCHEMY_NETWORK_SEPOLIA } from '$env/networks/networks.eth.env';
+import {
+	ALCHEMY_NETWORK_MAINNET,
+	ALCHEMY_NETWORK_SEPOLIA,
+	ETHEREUM_NETWORK_ID,
+	SEPOLIA_NETWORK_ID
+} from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
+import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
-import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import type { Listener } from '@ethersproject/abstract-provider';
 import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
 import { get } from 'svelte/store';
 
@@ -106,8 +111,17 @@ export class AlchemyProvider {
 		});
 	}
 
-	getTransaction = (hash: string): Promise<TransactionResponse | null> =>
-		this.provider.core.getTransaction(hash);
+	getTransaction = async (hash: string): Promise<TransactionResponseWithBigInt | null> => {
+		const transaction = await this.provider.core.getTransaction(hash);
+
+		if (isNullish(transaction)) {
+			return transaction;
+		}
+
+		const { value, ...rest } = transaction;
+
+		return { ...rest, value: value.toBigInt() };
+	};
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = {

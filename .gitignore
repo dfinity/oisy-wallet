@@ -59,3 +59,5 @@ coverage/
 
 # Frontend reproducibility script output folder
 tmp
+.qodo
+/cycles-ledger.wasm.gz

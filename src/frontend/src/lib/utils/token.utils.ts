@@ -6,9 +6,10 @@ import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { ContractAddressText } from '$eth/types/address';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import type { OptionBalance } from '$lib/types/balance';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { RequiredTokenWithLinkedData, Token, TokenStandard, TokenUi } from '$lib/types/token';
@@ -17,34 +18,34 @@ import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
  * Calculates the maximum amount for a transaction.
  *
  * @param {Object} params
- * @param {BigNumber | undefined} params.balance The balance of the account.
- * @param {BigNumber | undefined} params.fee The fee of the transaction.
+ * @param {bigint | undefined} params.balance The balance of the account.
+ * @param {bigint | undefined} params.fee The fee of the transaction.
  * @param {number} params.tokenDecimals The decimals of the token.
  * @param {string} params.tokenStandard The standard of the token.
  * @returns {number} The maximum amount for the transaction.
  */
 export const getMaxTransactionAmount = ({
-	balance = ZERO,
-	fee = ZERO,
+	balance,
+	fee = ZERO_BI,
 	tokenDecimals,
 	tokenStandard
 }: {
-	balance?: BigNumber;
-	fee?: BigNumber;
+	balance: OptionBalance;
+	fee?: bigint;
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
 }): number => {
-	const value = balance.sub(tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : 0n);
+	const value =
+		(balance ?? ZERO_BI) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO_BI);
 
 	return Number(
-		value.isNegative()
-			? ZERO
+		value <= ZERO_BI
+			? ZERO_BI
 			: formatToken({
 					value,
 					unitName: tokenDecimals,
@@ -135,7 +136,7 @@ export const calculateTokenUsdAmount = ({
 	token,
 	$exchanges
 }: {
-	amount: BigNumber | undefined;
+	amount: bigint | undefined;
 	token: Token;
 	$exchanges: ExchangesData;
 }): number | undefined => {
@@ -178,26 +179,10 @@ export const sumBalances = ([balance1, balance2]: [
 	TokenUi['balance']
 ]): TokenUi['balance'] =>
 	nonNullish(balance1) && nonNullish(balance2)
-		? balance1.add(balance2)
+		? balance1 + balance2
 		: balance1 === undefined || balance2 === undefined
 			? undefined
 			: (balance2 ?? balance1);
-
-/** Function to sum the balances of two tokens.
- *
- * If the decimals of the tokens are the same, the balances are added together.
- * If the decimals are different, the function returns null.
- * If one of the balances is undefined (meaning that it is still not loaded), the function returns undefined, because we don't want to show a possible wrong balance.
- * If one of the balances is nullish, but not undefined, the function returns the other balance.
- * If both balances are nullish, the function prioritize the first token (that, by exclusion of cases, is null).
- * NOTE: the function assumes that the two tokens are always 1:1 twins, for example BTC and ckBTC, or ETH and SepoliaETH
- *
- * @param token1
- * @param token2
- * @returns The sum of the balances or nullish value.
- */
-export const sumTokenBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['balance'] =>
-	token1.decimals === token2.decimals ? sumBalances([token1.balance, token2.balance]) : null;
 
 /** Function to sum the USD balances of two tokens.
  *

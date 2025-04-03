@@ -96,9 +96,6 @@
 			return;
 		}
 
-		// Clean previous HTML if the frame is being re-built (e.g. in case of window resize)
-		sliderFrame.innerHTML = '';
-
 		extendCarouselSliderFrame({
 			sliderFrame,
 			slides,
@@ -285,7 +282,7 @@
 	out:slide={SLIDE_PARAMS}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
-		<div data-tid={CAROUSEL_SLIDE} class="flex" bind:this={sliderFrame}>
+		<div data-tid={CAROUSEL_SLIDE} class="flex" bind:this={sliderFrame} style="width: 9999px">
 			<slot />
 		</div>
 	</div>

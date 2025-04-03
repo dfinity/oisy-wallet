@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import type { BtcTransactionStatus, BtcTransactionUi } from '$btc/types/btc';
 	import type { BtcTransactionType } from '$btc/types/btc-transaction';
 	import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
@@ -24,13 +23,11 @@
 	let status: BtcTransactionStatus;
 
 	let explorerUrl: string | undefined;
-	$: {
-		explorerUrl = isNetworkIdBTCTestnet(token?.network.id)
-			? BTC_TESTNET_EXPLORER_URL
-			: isNetworkIdBTCRegtest(token?.network.id)
-				? undefined
-				: BTC_MAINNET_EXPLORER_URL;
-	}
+	$: explorerUrl = isNetworkIdBTCTestnet(token?.network.id)
+		? BTC_TESTNET_EXPLORER_URL
+		: isNetworkIdBTCRegtest(token?.network.id)
+			? undefined
+			: BTC_MAINNET_EXPLORER_URL;
 
 	$: ({ from, value, timestamp, id, blockNumber, to, type, status, confirmations } = transaction);
 
@@ -56,7 +53,7 @@
 		fromExplorerUrl
 	}}
 	hash={id}
-	value={nonNullish(value) ? BigNumber.from(value) : undefined}
+	{value}
 	{token}
 	sendToLabel={$i18n.transaction.text.to}
 	typeLabel={type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}

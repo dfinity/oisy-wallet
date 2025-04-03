@@ -73,8 +73,7 @@
 	const { sendTokenDecimals, sendToken, sendTokenSymbol, sendPurpose } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let simplifiedForm = false;
-	$: simplifiedForm = sendPurpose === 'convert-cketh-to-eth';
+	const simplifiedForm = sendPurpose === 'convert-cketh-to-eth';
 
 	/**
 	 * Send
@@ -190,7 +189,7 @@
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
-	const back = () => dispatch('icBack');
+	const back = () => dispatch('icSendBack');
 	const close = () => dispatch('icClose');
 </script>
 

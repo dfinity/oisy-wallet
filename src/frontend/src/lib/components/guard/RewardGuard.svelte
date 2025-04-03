@@ -1,32 +1,39 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { page } from '$app/stores';
-	import RewardStateModal from '$lib/components/qr/RewardStateModal.svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
+	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalRewardState } from '$lib/derived/modal.derived';
-	import { claimVipReward } from '$lib/services/reward-code.services';
-	import { loading } from '$lib/stores/loader.store';
+	import { modalReferralState, modalRewardState } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { removeSearchParam } from '$lib/utils/nav.utils';
+	import { loadRewardResult } from '$lib/utils/rewards.utils';
 
-	$: (async () => {
-		if (!$loading && $page.url.searchParams.has('code') && nonNullish($authIdentity)) {
-			const rewardCode = $page.url.searchParams.get('code');
-			if (nonNullish(rewardCode)) {
-				const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
+	let isJackpot: boolean | undefined;
+	$: isJackpot = $modalRewardState ? ($modalStore?.data as boolean | undefined) : undefined;
 
-				removeSearchParam({ url: $page.url, searchParam: 'code' });
-				modalStore.openRewardState(result.success);
+	onMount(async () => {
+		if (isNullish($authIdentity)) {
+			return;
+		}
+
+		const { receivedReward, receivedJackpot, receivedReferral } =
+			await loadRewardResult($authIdentity);
+		if (receivedReward) {
+			if (receivedJackpot) {
+				modalStore.openRewardState(receivedJackpot);
+			} else if (receivedReferral) {
+				modalStore.openReferralState();
+			} else {
+				modalStore.openRewardState(false);
 			}
 		}
-	})();
-
-	let rewardState: boolean | undefined;
-	$: rewardState = $modalRewardState ? ($modalStore?.data as boolean | undefined) : undefined;
+	});
 </script>
 
 <slot />
 
-{#if nonNullish(rewardState)}
-	<RewardStateModal isSuccessful={rewardState} />
+{#if $modalRewardState && nonNullish(isJackpot)}
+	<RewardStateModal jackpot={isJackpot} />
+{:else if $modalReferralState}
+	<ReferralStateModal />
 {/if}

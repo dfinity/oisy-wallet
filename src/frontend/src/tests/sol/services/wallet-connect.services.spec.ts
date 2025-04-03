@@ -1,4 +1,4 @@
-import { ICP_NETWORK_ID } from '$env/networks/networks.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { decode } from '$sol/services/wallet-connect.services';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
@@ -7,7 +7,7 @@ import {
 	mapSolTransactionMessage,
 	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
-import type { CompilableTransactionMessage } from '@solana/web3.js';
+import type { CompilableTransactionMessage } from '@solana/kit';
 
 describe('wallet-connect.services', () => {
 	describe('decode', () => {

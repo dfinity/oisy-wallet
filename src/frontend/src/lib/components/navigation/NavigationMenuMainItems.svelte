@@ -3,32 +3,32 @@
 	import type { NavigationTarget, Page } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { AIRDROPS_ENABLED } from '$env/airdrops.env.js';
+	import { REWARDS_ENABLED } from '$env/rewards.env';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
-	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
-	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_ITEM_ACTIVITY,
-		NAVIGATION_ITEM_AIRDROPS,
+		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_EXPLORER,
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
-	} from '$lib/constants/test-ids.constants.js';
-	import { networkId } from '$lib/derived/network.derived.js';
-	import { i18n } from '$lib/stores/i18n.store.js';
+	} from '$lib/constants/test-ids.constants';
+	import { networkId } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
-		isRouteAirdrops,
+		isRouteRewards,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
 		isRouteTransactions,
 		networkUrl
-	} from '$lib/utils/nav.utils.js';
+	} from '$lib/utils/nav.utils';
 
 	export let testIdPrefix: string | undefined = undefined;
 
@@ -81,24 +81,22 @@
 	{$i18n.navigation.text.activity}
 </NavigationItem>
 
-{#if AIRDROPS_ENABLED}
+{#if REWARDS_ENABLED}
 	<NavigationItem
 		href={networkUrl({
-			path: AppPath.Airdrops,
+			path: AppPath.Rewards,
 			networkId: $networkId,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
 		ariaLabel={$i18n.navigation.alt.airdrops}
-		selected={isRouteAirdrops(pageData)}
-		testId={addTestIdPrefix(NAVIGATION_ITEM_AIRDROPS)}
+		selected={isRouteRewards(pageData)}
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+		tag={$i18n.core.text.new}
+		tagVariant="emphasis"
 	>
 		<IconGift />
 		{$i18n.navigation.text.airdrops}
-		<div
-			class="md:h-5.5 md:mt-0.25 text-xs/4.5 absolute -mt-2 ml-10 h-5 scale-75 rounded-md bg-error-primary px-1 py-0.5 font-bold uppercase text-white md:relative md:ml-1 md:scale-100 md:px-2"
-			>{$i18n.core.text.new}</div
-		>
 	</NavigationItem>
 {/if}
 
@@ -113,7 +111,7 @@
 	selected={isRouteDappExplorer(pageData)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
 >
-	<IconlyUfo />
+	<AnimatedIconUfo />
 	{$i18n.navigation.text.dapp_explorer}
 </NavigationItem>
 

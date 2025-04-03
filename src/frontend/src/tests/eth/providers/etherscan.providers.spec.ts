@@ -1,9 +1,9 @@
 import {
 	ETHEREUM_NETWORK_ID,
-	ICP_NETWORK_ID,
+	ETHERSCAN_NETWORK_HOMESTEAD,
 	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.env';
-import { ETHERSCAN_NETWORK_HOMESTEAD } from '$env/networks/networks.eth.env';
+} from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
@@ -13,7 +13,7 @@ import type { MockedClass } from 'vitest';
 
 vi.mock('@ethersproject/providers', () => {
 	const provider = vi.fn();
-	provider.prototype.getHistory = vi.fn().mockResolvedValue([]);
+	provider.prototype.fetch = vi.fn().mockResolvedValue([]);
 	return { EtherscanProvider: provider };
 });
 
@@ -29,7 +29,7 @@ describe('etherscan.providers', () => {
 
 		const mockGetHistory = vi.fn().mockResolvedValue([]);
 		const mockProvider = EtherscanProviderLib as MockedClass<typeof EtherscanProviderLib>;
-		mockProvider.prototype.getHistory = mockGetHistory;
+		mockProvider.prototype.fetch = mockGetHistory;
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -50,7 +50,13 @@ describe('etherscan.providers', () => {
 			const result = await provider.transactions({ address });
 
 			expect(provider).toBeDefined();
-			expect(mockGetHistory).toHaveBeenCalledWith(address, undefined);
+			expect(mockGetHistory).toHaveBeenCalledWith('account', {
+				action: 'txlist',
+				address,
+				startblock: 0,
+				endblock: 99999999,
+				sort: 'asc'
+			});
 			expect(result).toStrictEqual([]);
 		});
 	});

@@ -1,9 +1,9 @@
 import {
 	ETHEREUM_NETWORK_ID,
-	ICP_NETWORK_ID,
+	ETHERSCAN_API_URL_HOMESTEAD,
 	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.env';
-import { ETHERSCAN_API_URL_HOMESTEAD } from '$env/networks/networks.eth.env';
+} from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { EtherscanRest, etherscanRests } from '$eth/rest/etherscan.rest';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -74,15 +74,13 @@ describe('etherscan.rest', () => {
 				{
 					hash: '0x123abc',
 					blockNumber: 123456,
-					blockHash: '0x456def',
 					timestamp: 1697049600,
-					confirmations: '10',
 					from: '0xabc...',
 					to: '0xdef...',
 					nonce: 1,
 					gasLimit: BigNumber.from('21000'),
 					gasPrice: BigNumber.from('20000000000'),
-					value: BigNumber.from('1000000000000000000'),
+					value: 1000000000000000000n,
 					chainId: 0
 				}
 			]);

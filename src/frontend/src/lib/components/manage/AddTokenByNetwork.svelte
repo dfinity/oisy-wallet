@@ -44,22 +44,18 @@
 
 	// Since we persist the values of relevant variables when switching networks, this ensures that
 	// only the data related to the selected network is passed.
-	$: {
-		if (isIcpNetwork) {
-			tokenData = {
-				ledgerCanisterId,
-				indexCanisterId:
-					nonNullish(indexCanisterId) && notEmptyString(indexCanisterId)
-						? indexCanisterId
-						: undefined
-			};
-		} else if (isEthereumNetwork) {
-			tokenData = { erc20ContractAddress };
-		} else if (isSolanaNetwork) {
-			tokenData = { splTokenAddress };
-		} else {
-			tokenData = {};
-		}
+	$: if (isIcpNetwork) {
+		tokenData = {
+			ledgerCanisterId,
+			indexCanisterId:
+				nonNullish(indexCanisterId) && notEmptyString(indexCanisterId) ? indexCanisterId : undefined
+		};
+	} else if (isEthereumNetwork) {
+		tokenData = { erc20ContractAddress };
+	} else if (isSolanaNetwork) {
+		tokenData = { splTokenAddress };
+	} else {
+		tokenData = {};
 	}
 
 	const dispatch = createEventDispatcher();
@@ -103,7 +99,7 @@
 						<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
 							>{$i18n.tokens.manage.placeholder.select_network}</option
 						>
-						{#each availableNetworks as network}
+						{#each availableNetworks as network (network.id)}
 							<DropdownItem value={network.name}>{network.name}</DropdownItem>
 						{/each}
 					</Dropdown>

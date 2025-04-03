@@ -8,11 +8,11 @@
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
+	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
-	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -20,16 +20,16 @@
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
-		NAVIGATION_MENU_VIP_BUTTON
+		NAVIGATION_MENU_VIP_BUTTON,
+		NAVIGATION_MENU_REFERRAL_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalVipQrCode } from '$lib/derived/modal.derived';
-	import { isVipUser } from '$lib/services/reward-code.services';
+	import { isVipUser } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		isRouteActivity,
-		isRouteAirdrops,
+		isRouteRewards,
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
@@ -59,11 +59,11 @@
 	let activityRoute = false;
 	$: activityRoute = isRouteActivity($page);
 
-	let airdropsRoute = false;
-	$: airdropsRoute = isRouteAirdrops($page);
+	let rewardsRoute = false;
+	$: rewardsRoute = isRouteRewards($page);
 
 	let addressesOption = true;
-	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute && !airdropsRoute;
+	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute;
 </script>
 
 <ButtonIcon
@@ -72,6 +72,7 @@
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
 	colorStyle="tertiary-alt"
+	link={false}
 >
 	<IconUser size="24" slot="icon" />
 	{$i18n.navigation.alt.menu}
@@ -83,6 +84,15 @@
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
 
+		<ButtonMenu
+			ariaLabel={$i18n.navigation.alt.refer_a_friend}
+			testId={NAVIGATION_MENU_REFERRAL_BUTTON}
+			on:click={modalStore.openReferralCode}
+		>
+			<IconShare size="20" />
+			{$i18n.navigation.text.refer_a_friend}
+		</ButtonMenu>
+
 		{#if isVip}
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.vip_qr_code}
@@ -93,6 +103,8 @@
 				{$i18n.navigation.text.vip_qr_code}
 			</ButtonMenu>
 		{/if}
+
+		<Hr />
 
 		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
 
@@ -126,7 +138,3 @@
 		</span>
 	</div>
 </Popover>
-
-{#if $modalVipQrCode}
-	<VipQrCodeModal />
-{/if}

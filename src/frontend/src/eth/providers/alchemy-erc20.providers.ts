@@ -1,7 +1,8 @@
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import {
 	ALCHEMY_JSON_RPC_URL_MAINNET,
-	ALCHEMY_JSON_RPC_URL_SEPOLIA
+	ALCHEMY_JSON_RPC_URL_SEPOLIA,
+	ETHEREUM_NETWORK_ID,
+	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
@@ -33,7 +34,7 @@ export class AlchemyErc20Provider {
 	}: {
 		contract: Erc20Token;
 		address: EthAddress;
-		listener: (params: { hash: string; value: BigNumber }) => Promise<void>;
+		listener: (params: { hash: string; value: bigint }) => Promise<void>;
 	}): WebSocketListener => {
 		const erc20Contract = new ethers.Contract(contract.address, ERC20_ABI, this.provider);
 
@@ -46,7 +47,7 @@ export class AlchemyErc20Provider {
 		) => {
 			const { transactionHash: hash, args } = transaction;
 			const [_from_, _to_, value] = args;
-			await listener({ hash, value });
+			await listener({ hash, value: value?.toBigInt() });
 		};
 
 		const filterToAddress = erc20Contract.filters.Transfer(null, address);

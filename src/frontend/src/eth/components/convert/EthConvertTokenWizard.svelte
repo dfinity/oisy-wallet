@@ -3,12 +3,12 @@
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { ICP_NETWORK } from '$env/networks/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
 	import EthConvertProgress from '$eth/components/convert/EthConvertProgress.svelte';
 	import EthConvertReview from '$eth/components/convert/EthConvertReview.svelte';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { selectedEthereumNetworkWithFallback } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
@@ -162,7 +162,7 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
-				sourceNetwork: $selectedEthereumNetwork,
+				sourceNetwork: $selectedEthereumNetworkWithFallback,
 				targetNetwork: ICP_NETWORK,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[$ethereumToken.id]
@@ -198,7 +198,7 @@
 	amount={sendAmount}
 	{destination}
 	observe={currentStep?.name !== WizardStepsConvert.CONVERTING}
-	sourceNetwork={$selectedEthereumNetwork}
+	sourceNetwork={$selectedEthereumNetworkWithFallback}
 	targetNetwork={ICP_NETWORK}
 	nativeEthereumToken={$ethereumToken}
 >

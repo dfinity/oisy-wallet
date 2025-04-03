@@ -75,8 +75,16 @@ export const idlFactory = ({ IDL }) => {
 		Expired: IDL.Record({ ledger_time: IDL.Nat64 }),
 		InsufficientFunds: IDL.Record({ balance: IDL.Nat })
 	});
+	const ChallengeCompletionError = IDL.Variant({
+		InvalidNonce: IDL.Null,
+		MissingChallenge: IDL.Null,
+		ExpiredChallenge: IDL.Null,
+		MissingUserProfile: IDL.Null,
+		ChallengeAlreadySolved: IDL.Null
+	});
 	const AllowSigningError = IDL.Variant({
 		ApproveError: ApproveError,
+		PowChallenge: ChallengeCompletionError,
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
@@ -154,11 +162,35 @@ export const idlFactory = ({ IDL }) => {
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
 		credential_type: CredentialType
 	});
+	const NetworkSettingsFor = IDL.Variant({
+		InternetComputer: IDL.Null,
+		SolanaTestnet: IDL.Null,
+		BitcoinRegtest: IDL.Null,
+		SolanaDevnet: IDL.Null,
+		EthereumSepolia: IDL.Null,
+		BitcoinTestnet: IDL.Null,
+		SolanaLocal: IDL.Null,
+		EthereumMainnet: IDL.Null,
+		SolanaMainnet: IDL.Null,
+		BitcoinMainnet: IDL.Null
+	});
+	const NetworkSettings = IDL.Record({
+		enabled: IDL.Bool,
+		is_testnet: IDL.Bool
+	});
+	const TestnetsSettings = IDL.Record({ show_testnets: IDL.Bool });
+	const NetworksSettings = IDL.Record({
+		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
+		testnets: TestnetsSettings
+	});
 	const DappCarouselSettings = IDL.Record({
 		hidden_dapp_ids: IDL.Vec(IDL.Text)
 	});
 	const DappSettings = IDL.Record({ dapp_carousel: DappCarouselSettings });
-	const Settings = IDL.Record({ dapp: DappSettings });
+	const Settings = IDL.Record({
+		networks: NetworksSettings,
+		dapp: DappSettings
+	});
 	const UserProfile = IDL.Record({
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
@@ -188,6 +220,123 @@ export const idlFactory = ({ IDL }) => {
 		settings: DefiniteCanisterSettingsArgs,
 		idle_cycles_burned_per_day: IDL.Nat,
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
+	});
+	const EthAddress = IDL.Variant({ Public: IDL.Text });
+	const TransactionType = IDL.Variant({
+		Send: IDL.Null,
+		Receive: IDL.Null
+	});
+	const Transaction = IDL.Record({
+		transaction_type: TransactionType,
+		network: IDL.Record({}),
+		counterparty: EthAddress,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshot = IDL.Record({
+		decimals: IDL.Nat8,
+		token_address: EthAddress,
+		network: IDL.Record({}),
+		approx_usd_per_token: IDL.Float64,
+		last_transactions: IDL.Vec(Transaction),
+		account: EthAddress,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const Transaction_1 = IDL.Record({
+		transaction_type: TransactionType,
+		network: IDL.Record({}),
+		counterparty: IDL.Text,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshot_1 = IDL.Record({
+		decimals: IDL.Nat8,
+		token_address: IDL.Text,
+		network: IDL.Record({}),
+		approx_usd_per_token: IDL.Float64,
+		last_transactions: IDL.Vec(Transaction_1),
+		account: IDL.Text,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const BtcTokenId = IDL.Variant({ Native: IDL.Null });
+	const BtcAddress = IDL.Variant({
+		P2WPKH: IDL.Text,
+		P2PKH: IDL.Text,
+		P2WSH: IDL.Text,
+		P2SH: IDL.Text,
+		P2TR: IDL.Text
+	});
+	const Transaction_2 = IDL.Record({
+		transaction_type: TransactionType,
+		network: IDL.Record({}),
+		counterparty: BtcAddress,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshot_2 = IDL.Record({
+		decimals: IDL.Nat8,
+		token_address: BtcTokenId,
+		network: IDL.Record({}),
+		approx_usd_per_token: IDL.Float64,
+		last_transactions: IDL.Vec(Transaction_2),
+		account: BtcAddress,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const IcrcTokenId = IDL.Variant({
+		Icrc: IDL.Record({
+			ledger: IDL.Principal,
+			index: IDL.Opt(IDL.Principal)
+		}),
+		Native: IDL.Null
+	});
+	const Icrcv2AccountId = IDL.Variant({
+		Account: IDL.Vec(IDL.Nat8),
+		WithPrincipal: IDL.Record({
+			owner: IDL.Principal,
+			subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
+		})
+	});
+	const Transaction_3 = IDL.Record({
+		transaction_type: TransactionType,
+		network: IDL.Record({}),
+		counterparty: Icrcv2AccountId,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshot_3 = IDL.Record({
+		decimals: IDL.Nat8,
+		token_address: IcrcTokenId,
+		network: IDL.Record({}),
+		approx_usd_per_token: IDL.Float64,
+		last_transactions: IDL.Vec(Transaction_3),
+		account: Icrcv2AccountId,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshotFor = IDL.Variant({
+		Erc20Sepolia: AccountSnapshot,
+		EthSepolia: AccountSnapshot,
+		SplTestnet: AccountSnapshot_1,
+		BtcMainnet: AccountSnapshot_2,
+		SolDevnet: AccountSnapshot_1,
+		Erc20Mainnet: AccountSnapshot,
+		SolTestnet: AccountSnapshot_1,
+		Icrcv2: AccountSnapshot_3,
+		BtcRegtest: AccountSnapshot_2,
+		SplDevnet: AccountSnapshot_1,
+		EthMainnet: AccountSnapshot,
+		SplMainnet: AccountSnapshot_1,
+		SolLocal: AccountSnapshot_1,
+		BtcTestnet: AccountSnapshot_2,
+		SplLocal: AccountSnapshot_1,
+		SolMainnet: AccountSnapshot_1
+	});
+	const UserSnapshot = IDL.Record({
+		accounts: IDL.Vec(AccountSnapshotFor),
+		timestamp: IDL.Opt(IDL.Nat64)
 	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
 	const Result_6 = IDL.Variant({
@@ -290,6 +439,18 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
+	const SetShowTestnetsRequest = IDL.Record({
+		current_user_version: IDL.Opt(IDL.Nat64),
+		show_testnets: IDL.Bool
+	});
+	const SaveTestnetsSettingsError = IDL.Variant({
+		VersionMismatch: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const Result_9 = IDL.Variant({
+		Ok: IDL.Null,
+		Err: SaveTestnetsSettingsError
+	});
 	const TopUpCyclesLedgerRequest = IDL.Record({
 		threshold: IDL.Opt(IDL.Nat),
 		percentage: IDL.Opt(IDL.Nat8)
@@ -311,9 +472,13 @@ export const idlFactory = ({ IDL }) => {
 			available: IDL.Nat
 		})
 	});
-	const Result_9 = IDL.Variant({
+	const Result_10 = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
+	});
+	const SaveNetworksSettingsRequest = IDL.Record({
+		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
+		current_user_version: IDL.Opt(IDL.Nat64)
 	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
@@ -326,6 +491,7 @@ export const idlFactory = ({ IDL }) => {
 		config: IDL.Func([], [Config], ['query']),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
+		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)], ['query']),
 		get_user_profile: IDL.Func([], [Result_6], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
@@ -344,10 +510,13 @@ export const idlFactory = ({ IDL }) => {
 		set_guards: IDL.Func([Guards], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
+		set_snapshot: IDL.Func([UserSnapshot], [], []),
+		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_9], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats], ['query']),
 		step_migration: IDL.Func([], [], []),
-		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_9], [])
+		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_10], []),
+		update_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_9], [])
 	});
 };
 // @ts-ignore

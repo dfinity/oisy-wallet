@@ -24,7 +24,7 @@ lazy_static! {
         contract_address: PRE_UPGRADE_TOKEN.contract_address.clone(),
         decimals: PRE_UPGRADE_TOKEN.decimals,
         symbol: PRE_UPGRADE_TOKEN.symbol.clone(),
-        version: PRE_UPGRADE_TOKEN.version.clone(),
+        version: PRE_UPGRADE_TOKEN.version,
         enabled: None
     };
 }
@@ -46,7 +46,7 @@ fn test_upgrade_user_token() {
     // Upgrade canister with new wasm
     pic_setup
         .upgrade_latest_wasm(None)
-        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {e}"));
 
     // Get the list of token and check that it still contains the one we added before upgrade
     let results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
@@ -77,7 +77,7 @@ fn test_update_user_token_after_upgrade() {
     // Upgrade canister with new wasm
     pic_setup
         .upgrade_latest_wasm(None)
-        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {e}"));
 
     // Get the list of token and check that it still contains the one we added before upgrade
     let results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
@@ -96,7 +96,7 @@ fn test_update_user_token_after_upgrade() {
 
     let updated_results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.with_incremented_version()];
 
     assert!(updated_results.is_ok());
 
