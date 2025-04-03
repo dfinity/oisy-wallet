@@ -1,3 +1,5 @@
+use std::result::Result;
+
 use ic_cdk::api::time;
 use shared::types::{
     dapp::AddDappSettingsError,
@@ -20,9 +22,7 @@ pub fn find_profile(
     }
 }
 
-// TODO remove  #[allow(dead_code)] when this function is integrated in complete_pow_challenge method
-#[allow(dead_code)]
-pub fn exists_profile(principal: StoredPrincipal) -> bool {
+pub fn has_user_profile(principal: StoredPrincipal) -> bool {
     read_state(|s: &State| s.user_profile_updated.contains_key(&principal))
 }
 
