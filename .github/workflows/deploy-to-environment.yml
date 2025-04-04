@@ -41,17 +41,12 @@ on:
         type: boolean
         default: true
       network:
-        required: false
+        required: true
         type: string
-        default: beta
       canister:
         required: false
         type: string
         default: frontend
-      force-backend:
-        required: false
-        type: boolean
-        default: false
 
 run-name: >-
   ${{ 
@@ -79,8 +74,8 @@ jobs:
           echo "deploy_frontend=false" >> $GITHUB_ENV
           echo "deploy_backend=false" >> $GITHUB_ENV
           if [ "$WORKFLOW_CALL" == "true" ]; then
-            echo "NETWORK=beta" >> $GITHUB_ENV
-            echo "CANISTER=frontend" >> $GITHUB_ENV
+            echo "NETWORK=$NETWORK_CALL" >> $GITHUB_ENV
+            echo "CANISTER=$CANISTER_CALL" >> $GITHUB_ENV
             echo "deploy_frontend=true" >> $GITHUB_ENV
             echo "deploy_backend=true" >> $GITHUB_ENV
           elif [ "${{ github.event_name }}" == "push" ]; then
@@ -113,6 +108,8 @@ jobs:
           NETWORK: ${{ github.event.inputs.network }}
           CANISTER: ${{ github.event.inputs.canister }}
           WORKFLOW_CALL: ${{ inputs.workflow-call }}
+          NETWORK_CALL: ${{ inputs.network }}
+          CANISTER_CALL: ${{ inputs.canister }}
 
       - name: Check release policy
         run: |

@@ -2,7 +2,7 @@ name: Tag on Merge from Release Branch
 
 on:
   pull_request:
-    types: [closed]
+    types: [ closed ]
     branches:
       - main
 
@@ -52,6 +52,8 @@ jobs:
     permissions:
       contents: read
     uses: ./.github/workflows/deploy-to-environment.yml
+    with:
+      network: beta
     secrets:
       VITE_ETHERSCAN_API_KEY_STAGING: ${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}
       VITE_INFURA_API_KEY_STAGING: ${{ secrets.VITE_INFURA_API_KEY_STAGING }}
