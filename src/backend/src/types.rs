@@ -24,20 +24,3 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct StoredPrincipal(pub Principal);
-
-/// A wrapper for `Candid<T>` to enable formatting for candid based types with `Debug` trait.
-///
-/// This struct is designed to provide a way to print the `Candid<T>` objects e.g., when using
-/// `{:?}`) without having to add the Debug trait on the Candid type definition
-/// Usage::
-/// ```
-/// if let Some(stored_challenge) = get_pow_challenge() {
-///     ic_cdk::println!(
-///         "create_pow_challenge() -> Found existing challenge: {:?}",
-///         DebuggableCandid(stored_challenge)
-///     );
-/// }
-/// ```
-pub struct DebuggableCandid<'a, T>(pub(crate) &'a Candid<T>)
-where
-    T: CandidType + for<'de> Deserialize<'de>;

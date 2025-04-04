@@ -8,7 +8,7 @@ use shared::types::pow::{
 
 use crate::{
     mutate_state, read_state,
-    types::{Candid, DebuggableCandid, StoredPrincipal},
+    types::{Candid, StoredPrincipal},
     user_profile::has_user_profile,
     State,
 };
@@ -63,6 +63,17 @@ fn get_time_ms() -> u64 {
     ic_cdk::api::time() / 1_000_000
 }
 
+/// Formats a `StoredChallenge` excluding the sensitive `nonce` field.
+fn format_challenge(challenge: &StoredChallenge) -> String {
+    format!(
+        "StoredChallenge {{ start_timestamp_ms: {}, expiry_timestamp_ms: {}, difficulty: {}, solved: {} }}",
+        challenge.start_timestamp_ms,
+        challenge.expiry_timestamp_ms,
+        challenge.difficulty,
+        challenge.solved
+    )
+}
+
 // -------------------------------------------------------------------------------------------------
 // - Service functions
 // -------------------------------------------------------------------------------------------------
@@ -82,7 +93,7 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
     if let Some(stored_challenge) = get_pow_challenge() {
         ic_cdk::println!(
             "create_pow_challenge() -> Found existing challenge: {:?}",
-            DebuggableCandid(&stored_challenge)
+            format_challenge(&stored_challenge)
         );
 
         // we re-use the previous challenge so we can dynamically adapt the difficulty
@@ -195,7 +206,7 @@ pub(crate) fn complete_challenge(
 
     ic_cdk::println!(
         "complete_challenge(nonce) -> Retrieved {:?}",
-        DebuggableCandid(&stored_challenge)
+        format_challenge(&stored_challenge)
     );
 
     // A new challenge can be requested after the current challenge has expired
@@ -250,7 +261,7 @@ pub(crate) fn complete_challenge(
 
     ic_cdk::println!(
         "complete_challenge(nonce) -> Stored challenge: {:?}",
-        stored_challenge
+        format_challenge(&stored_challenge)
     );
 
     Ok(ChallengeCompletion {

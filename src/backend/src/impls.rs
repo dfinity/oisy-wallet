@@ -1,12 +1,12 @@
 use core::ops::Deref;
-use std::{borrow::Cow, fmt};
+use std::borrow::Cow;
 
 use candid::{CandidType, Deserialize, Principal};
 use ic_stable_structures::storable::{Blob, Bound, Storable};
 use shared::types::Stats;
 
 use crate::{
-    types::{Candid, DebuggableCandid, StoredPrincipal},
+    types::{Candid, StoredPrincipal},
     State,
 };
 
@@ -63,14 +63,5 @@ impl Storable for StoredPrincipal {
         Self(Principal::from_slice(
             Blob::<29>::from_bytes(bytes).as_slice(),
         ))
-    }
-}
-
-impl<'a, T> fmt::Debug for DebuggableCandid<'a, T>
-where
-    T: fmt::Debug + CandidType + for<'de> Deserialize<'de>,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Candid({:?})", self.0 .0)
     }
 }
