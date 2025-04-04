@@ -16,17 +16,7 @@ export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
 export type EthersTransaction = Pick<
 	ethers.Transaction,
-	| 'hash'
-	| 'to'
-	| 'from'
-	| 'nonce'
-	| 'gasLimit'
-	| 'gasPrice'
-	| 'data'
-	| 'chainId'
-	| 'type'
-	| 'maxPriorityFeePerGas'
-	| 'maxFeePerGas'
+	'hash' | 'to' | 'from' | 'nonce' | 'gasLimit' | 'gasPrice' | 'data' | 'chainId'
 > & {
 	// TODO: use ethers.Transaction.value type again once we upgrade to ethers v6
 	value: bigint;
