@@ -6,9 +6,6 @@ on:
       - main
     tags:
       - v*
-  workflow_run:
-    workflows: ['Tag on Merge from Release Branch']
-    types: [completed]
   workflow_dispatch:
     inputs:
       network:
@@ -36,12 +33,26 @@ on:
         type: boolean
         description: 'Force backend deployment even if no changes are detected.'
         default: false
+  workflow_call:
+    inputs:
+      network:
+        required: false
+        type: string
+        default: beta
+      canister:
+        required: false
+        type: string
+        default: frontend
+      force-backend:
+        required: false
+        type: boolean
+        default: false
 
 run-name: >-
   ${{ 
     github.event_name == 'push' && github.ref_type == 'branch' && 'Deploying Frontend / Backend to Staging'
     || github.event_name == 'push' && github.ref_type == 'tag' && 'Deploying Frontend / Backend to Beta'
-    || github.event_name == 'workflow_run' && 'Deploying Frontend / Backend to Beta'
+    || github.event_name == 'workflow_call' && 'Deploying Frontend / Backend to Beta'
     || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
     || format('Deploying {0} to {1}', inputs.canister, inputs.network) }}
 
@@ -51,7 +62,6 @@ concurrency:
 
 jobs:
   deployment:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -78,13 +88,11 @@ jobs:
             echo "CANISTER=$CANISTER" >> $GITHUB_ENV
             echo "deploy_frontend=${{ github.event.inputs.canister == 'frontend' }}" >> $GITHUB_ENV
             echo "deploy_backend=${{ github.event.inputs.canister == 'backend' }}" >> $GITHUB_ENV
-          elif [ "${{ github.event_name }}" == "workflow_run" ]; then
+          elif [ "${{ github.event_name }}" == "workflow_call" ]; then
             echo "NETWORK=beta" >> $GITHUB_ENV
             echo "CANISTER=frontend" >> $GITHUB_ENV
-            if [ "$CONCLUSION" == "success" ]; then
-              echo "deploy_frontend=true" >> $GITHUB_ENV
-              echo "deploy_backend=true" >> $GITHUB_ENV
-            fi
+            echo "deploy_frontend=true" >> $GITHUB_ENV
+            echo "deploy_backend=true" >> $GITHUB_ENV
           else
             echo "Error: Unsupported event type."
             exit 1
@@ -93,7 +101,6 @@ jobs:
           REF_TYPE: ${{ github.ref_type }}
           NETWORK: ${{ github.event.inputs.network }}
           CANISTER: ${{ github.event.inputs.canister }}
-          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
 
       - name: Check release policy
         run: |
