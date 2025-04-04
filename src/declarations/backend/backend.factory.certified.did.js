@@ -508,7 +508,8 @@ export const idlFactory = ({ IDL }) => {
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)]),
-		get_user_profile: IDL.Func([], [Result_6]),
+		get_user_profile: IDL.Func([], [Result_7]),
+		has_user_profile: IDL.Func([], [HasUserProfileResponse]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)]),
 		list_user_creation_timestamps: IDL.Func(
