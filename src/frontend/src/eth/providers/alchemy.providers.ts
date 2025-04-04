@@ -5,11 +5,11 @@ import {
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
-import { ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
+import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
@@ -113,48 +113,21 @@ export class AlchemyProvider {
 		});
 	}
 
-	getTransaction = async (hash: string) => {
+	getTransaction = async (hash: string): Promise<TransactionResponseWithBigInt | null> => {
 		const transaction = await this.provider.core.getTransaction(hash);
 
 		if (isNullish(transaction)) {
 			return transaction;
 		}
 
-		const {
-			blockNumber,
-			blockHash,
-			from,
-			to,
-			value,
-			type,
-			gasPrice,
-			gasLimit,
-			maxPriorityFeePerGas,
-			maxFeePerGas,
-			nonce,
-			data,
-			chainId,
-			wait
-		} = transaction;
-
-		const possibleUndefinedToNull = <T>(value: T | undefined): T | null => value ?? null;
+		const { value, gasLimit, gasPrice, chainId, ...rest } = transaction;
 
 		return {
-			hash,
-			blockNumber: possibleUndefinedToNull(blockNumber),
-			blockHash: possibleUndefinedToNull(blockHash),
-			from,
-			to: possibleUndefinedToNull(to),
+			...rest,
 			value: value.toBigInt(),
-			type: possibleUndefinedToNull(type),
-			gasPrice: gasPrice?.toBigInt() ?? ZERO_BI,
 			gasLimit: gasLimit.toBigInt(),
-			maxPriorityFeePerGas: possibleUndefinedToNull(maxPriorityFeePerGas?.toBigInt()),
-			maxFeePerGas: possibleUndefinedToNull(maxFeePerGas?.toBigInt()),
-			nonce,
-			data,
-			chainId: BigInt(chainId),
-			wait
+			gasPrice: gasPrice?.toBigInt(),
+			chainId: BigInt(chainId)
 		};
 	};
 }

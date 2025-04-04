@@ -70,9 +70,6 @@ export class EtherscanRest {
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
-				maxPriorityFeePerGas: null,
-				maxFeePerGas: null,
-				type: null,
 				value: BigInt(value),
 				// Chain ID is not delivered by the Etherscan API so, we naively set 0
 				chainId: ZERO_BI

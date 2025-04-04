@@ -94,8 +94,7 @@ const processPendingTransaction = async ({
 				...rest,
 				// For ERC20 pending transactions we noticed that the `to` field is not correct, since it shows the token address instead of the recipient address.
 				// To avoid confusions on the user side, we prefer not to display the `to` field for ERC20 pending transactions.
-				// TODO: replace with `...(!isTokenErc20(token) && { to })` when Alchemy SDK returns the same type (probably when they bump to Ethers v6)
-				to: !isTokenErc20(token) ? to : null,
+				...(!isTokenErc20(token) && { to }),
 				pendingTimestamp: Date.now(),
 				...(nonNullish(value) && { value })
 			}

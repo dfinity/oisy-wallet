@@ -26,8 +26,19 @@ const splDefaultTokensAddresses: Readable<SplTokenAddress[]> = derived(
  * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "user token" in the backend.
  */
 const splUserTokens: Readable<SplUserToken[]> = derived(
-	[splUserTokensStore],
-	([$splUserTokensStore]) => $splUserTokensStore?.map(({ data: token }) => token) ?? []
+	[splUserTokensStore, enabledSolanaNetworksIds],
+	([$splUserTokensStore, $enabledSolanaNetworksIds]) =>
+		$splUserTokensStore?.reduce<SplUserToken[]>((acc, { data: token }) => {
+			const {
+				network: { id: networkId }
+			} = token;
+
+			if ($enabledSolanaNetworksIds.includes(networkId)) {
+				return [...acc, token];
+			}
+
+			return acc;
+		}, []) ?? []
 );
 
 const splDefaultTokensToggleable: Readable<SplTokenToggleable[]> = derived(
