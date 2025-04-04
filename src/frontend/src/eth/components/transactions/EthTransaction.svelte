@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionType, EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';
@@ -15,7 +14,7 @@
 	export let token: Token;
 	export let iconType: 'token' | 'transaction' = 'transaction';
 
-	let value: BigNumber;
+	let value: bigint;
 	let timestamp: number | undefined;
 	let displayTimestamp: number | undefined;
 	let type: EthTransactionType;
@@ -61,7 +60,7 @@
 					: $i18n.receive.text.receive;
 
 	let amount: bigint;
-	$: amount = value.toBigInt() * (type === 'send' || type === 'deposit' ? -1n : 1n);
+	$: amount = value * (type === 'send' || type === 'deposit' ? -1n : 1n);
 
 	let transactionDate: number | undefined;
 	$: transactionDate = timestamp ?? displayTimestamp;

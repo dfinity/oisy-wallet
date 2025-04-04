@@ -16,7 +16,7 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-describe('Activity', () => {
+describe('AllTransactions', () => {
 	const customIcrcToken: IcrcCustomToken = {
 		...mockValidIcToken,
 		version: 1n,

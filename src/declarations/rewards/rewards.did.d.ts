@@ -115,6 +115,7 @@ export interface RewardInfo {
 	ledger: Principal;
 	timestamp: bigint;
 	amount: bigint;
+	campaign_name: [] | [string];
 }
 export interface SetSprinkleTimestampArg {
 	total_sprinkle_amount: bigint;
@@ -168,12 +169,14 @@ export interface UsageAwardConfig {
 	cycle_duration: CandidDuration;
 	awards: Array<UsageAwardEvent>;
 	eligibility_criteria: UsageCriteria;
+	campaign_name: [] | [string];
 }
 export interface UsageAwardEvent {
 	name: string;
 	num_events_per_cycle: number;
 	awards: Array<TokenConfig>;
 	num_users_per_event: number;
+	campaign_name: [] | [string];
 }
 export interface UsageAwardState {
 	snapshots: Array<UserSnapshot>;
