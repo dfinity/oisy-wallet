@@ -16,6 +16,7 @@ export const load: PageLoad = ({ url }: LoadEvent): RouteParams => {
 			foo.set(true);
 
 			const fullUrl = new URL(window.location.href);
+			fullUrl.searchParams.set('pwa-escape', '1');
 
 			const scheme = fullUrl.protocol.replace(/:$/, '');
 			fullUrl.hash = `#Intent;scheme=${scheme};action=android.intent.action.VIEW;end`;
@@ -26,8 +27,6 @@ export const load: PageLoad = ({ url }: LoadEvent): RouteParams => {
 			window.open(fullUrl.toString(), '_blank');
 
 			// // Open the exact same URL in the browser (escaping the PWA shell)
-			//
-			fullUrl.searchParams.set('pwa-escape', '1');
 			// const w = window.open(fullUrl.toString(), '_blank');
 			// w?.document.location.assign(fullUrl.toString());
 		}
