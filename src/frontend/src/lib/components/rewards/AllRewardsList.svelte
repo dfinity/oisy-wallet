@@ -2,7 +2,6 @@
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import rewardBanner from '$lib/assets/rewards-banner.svg';
-	import rewardBanner2 from '$lib/assets/rewards-banner-copy.svg';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import {
@@ -26,9 +25,6 @@
 <div class="relative mb-6 flex items-end md:mb-10">
 	<div class="max-h-66 overflow-hidden rounded-2xl">
 		<Img src={rewardBanner} testId={REWARDS_BANNER} />
-	</div>
-	<div class="max-h-66 overflow-hidden rounded-2xl">
-		<Img src={rewardBanner2} testId={REWARDS_BANNER} />
 	</div>
 </div>
 
