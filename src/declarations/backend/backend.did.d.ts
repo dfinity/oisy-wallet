@@ -178,6 +178,9 @@ export interface Guards {
 	user_data: ApiEnabled;
 	threshold_key: ApiEnabled;
 }
+export interface HasUserProfileResponse {
+	has_user_profile: boolean;
+}
 export interface HttpRequest {
 	url: string;
 	method: string;
@@ -447,6 +450,7 @@ export interface _SERVICE {
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_snapshot: ActorMethod<[], [] | [UserSnapshot]>;
 	get_user_profile: ActorMethod<[], Result_6>;
+	has_user_profile: ActorMethod<[], HasUserProfileResponse>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_creation_timestamps: ActorMethod<
