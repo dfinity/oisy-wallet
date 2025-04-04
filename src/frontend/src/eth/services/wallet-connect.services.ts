@@ -152,7 +152,8 @@ export const send = ({
 					amount,
 					maxFeePerGas,
 					maxPriorityFeePerGas,
-					gas: nonNullish(gasWC) ? gasWC : gas,
+					// The value of gas returned by WalletConnect is a hex string. We need to convert it to a BigInt.
+					gas: nonNullish(gasWC) ? BigInt(gasWC) : gas,
 					data,
 					identity,
 					minterInfo,
