@@ -78,7 +78,9 @@
 						<li>
 							<TransactionAddress
 								{address}
-								explorerUrl={`${explorerUrl}/address/${address}`}
+								explorerUrl={nonNullish(explorerUrl)
+									? `${explorerUrl}/address/${address}`
+									: undefined}
 								copiedText={$i18n.transaction.text.to_copied}
 							/>
 						</li>
