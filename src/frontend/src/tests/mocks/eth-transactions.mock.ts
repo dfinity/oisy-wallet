@@ -1,13 +1,12 @@
 import type { Transaction } from '$lib/types/transaction';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
-import { BigNumber } from 'ethers';
 import { bn1Bi, bn3Bi } from './balances.mock';
 
 export const mockEthTransactionUi: Transaction = {
 	blockNumber: 123213,
 	nonce: 123,
-	gasLimit: BigNumber.from(bn3Bi),
-	chainId: 1,
+	gasLimit: bn3Bi,
+	chainId: 1n,
 	from: mockEthAddress,
 	timestamp: 123456789,
 	to: mockEthAddress2,
