@@ -25,7 +25,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 type WalletConnectSendParams = WalletConnectExecuteParams & {
@@ -138,7 +138,7 @@ export const send = ({
 				return { success: false };
 			}
 
-			const { to, gas: gasWC, data } = firstParam;
+			const { to, gas: gasWC, data } = firstParam as { to: string; gas?: string; data?: string };
 
 			modalNext();
 
@@ -152,7 +152,7 @@ export const send = ({
 					amount,
 					maxFeePerGas,
 					maxPriorityFeePerGas,
-					gas: gasWC ?? gas,
+					gas: nonNullish(gasWC) ? BigInt(gasWC) : gas,
 					data,
 					identity,
 					minterInfo,
