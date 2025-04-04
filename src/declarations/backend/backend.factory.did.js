@@ -357,6 +357,7 @@ export const idlFactory = ({ IDL }) => {
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
+	const HasUserProfileResponse = IDL.Record({ has_user_profile: IDL.Bool });
 	const HttpRequest = IDL.Record({
 		url: IDL.Text,
 		method: IDL.Text,
@@ -507,7 +508,7 @@ export const idlFactory = ({ IDL }) => {
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)], ['query']),
-		get_user_profile: IDL.Func([], [Result_7], ['query']),
+		get_user_profile: IDL.Func([], [Result_6], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
 		list_user_creation_timestamps: IDL.Func(

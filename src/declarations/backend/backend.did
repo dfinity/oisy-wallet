@@ -182,6 +182,7 @@ type DefiniteCanisterSettingsArgs = record {
 type EthAddress = variant { Public : text };
 type GetUserProfileError = variant { NotFound };
 type Guards = record { user_data : ApiEnabled; threshold_key : ApiEnabled };
+type HasUserProfileResponse = record { has_user_profile : bool };
 type HttpRequest = record {
   url : text;
   method : text;
@@ -432,7 +433,7 @@ service : (Arg) -> {
   create_user_profile : () -> (UserProfile);
   get_canister_status : () -> (CanisterStatusResultV2);
   get_snapshot : () -> (opt UserSnapshot) query;
-  get_user_profile : () -> (Result_7) query;
+  get_user_profile : () -> (Result_6) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_creation_timestamps : (ListUsersRequest) -> (
