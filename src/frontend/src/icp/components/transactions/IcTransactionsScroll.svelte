@@ -50,7 +50,7 @@
 			owner: $authIdentity.getPrincipal(),
 			identity: $authIdentity,
 			maxResults: WALLET_PAGINATION,
-			start: BigInt(lastId),
+			start: BigInt(lastId.replace('-self', '')),
 			token,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
