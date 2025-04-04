@@ -32,7 +32,7 @@
 		mapEthTransactionUi({
 			transaction,
 			ckMinterInfoAddresses,
-			$ethAddress: $ethAddress
+			$ethAddress
 		})
 	);
 
@@ -41,7 +41,7 @@
 	$: ({ transaction: selectedTransaction, token: selectedToken } =
 		mapTransactionModalData<EthTransactionUi>({
 			$modalOpen: $modalEthTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 </script>
 

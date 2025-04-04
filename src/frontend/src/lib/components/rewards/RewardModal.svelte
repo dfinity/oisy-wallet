@@ -50,7 +50,7 @@
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress: $ethAddress,
+		$ethAddress,
 		$icTransactions: $icTransactionsStore,
 		$btcStatuses: $btcStatusesStore,
 		$solTransactions: $solTransactionsStore

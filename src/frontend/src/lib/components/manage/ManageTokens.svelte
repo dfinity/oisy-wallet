@@ -64,7 +64,7 @@
 				sortTokens({
 					$tokens: allTokensForSelectedNetwork,
 					$exchanges: exchangesStaticData,
-					$tokensToPin: $tokensToPin
+					$tokensToPin
 				})
 			)
 		: [];

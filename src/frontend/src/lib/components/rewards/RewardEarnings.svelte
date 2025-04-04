@@ -34,7 +34,7 @@
 		? (calculateTokenUsdAmount({
 				amount: ckBtcReward,
 				token: ckBtcToken,
-				$exchanges: $exchanges
+				$exchanges
 			}) ?? 0)
 		: 0;
 
@@ -46,7 +46,7 @@
 		? (calculateTokenUsdAmount({
 				amount: ckUsdcReward,
 				token: ckUsdcToken,
-				$exchanges: $exchanges
+				$exchanges
 			}) ?? 0)
 		: 0;
 
@@ -56,7 +56,7 @@
 		calculateTokenUsdAmount({
 			amount: icpReward,
 			token: ICP_TOKEN,
-			$exchanges: $exchanges
+			$exchanges
 		}) ?? 0;
 
 	let totalRewardUsd: number;
