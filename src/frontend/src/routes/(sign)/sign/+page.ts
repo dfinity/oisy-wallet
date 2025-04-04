@@ -23,7 +23,7 @@ export const load: PageLoad = ({ url }: LoadEvent): RouteParams => {
 			// can't change the protocol on a URL object between "special" and
 			// "non-special" protocols. Don't ask.
 			fullUrl.href.replace(/^[^:]+/, 'intent');
-			// window.open(fullUrl.toString(), '_blank');
+			window.open(fullUrl.toString(), '_blank');
 
 			// // Open the exact same URL in the browser (escaping the PWA shell)
 			//
