@@ -4,8 +4,8 @@ import { config } from 'dotenv';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { ENV, findHtmlFiles } from './build.utils.mjs';
 import sanitizeHtml from 'sanitize-html';
+import { ENV, findHtmlFiles } from './build.utils.mjs';
 
 config({ path: `.env.${ENV}` });
 
@@ -117,7 +117,7 @@ const extractStartScript = (htmlFile) => {
 
 	// 3. Replace original SvelteKit script tag content with empty
 	return sanitizeHtml(indexHtml, {
-		allowedTags: sanitizeHtml.defaults.allowedTags.filter(tag => tag !== 'script'),
+		allowedTags: sanitizeHtml.defaults.allowedTags.filter((tag) => tag !== 'script'),
 		allowedAttributes: false
 	});
 };
