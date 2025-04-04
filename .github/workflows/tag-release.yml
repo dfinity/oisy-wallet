@@ -51,3 +51,4 @@ jobs:
     permissions:
       contents: read
     uses: ./.github/workflows/deploy-to-environment.yml
+    secrets: inherit
