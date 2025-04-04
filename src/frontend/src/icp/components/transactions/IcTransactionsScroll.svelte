@@ -28,7 +28,7 @@
 		}
 
 		try {
-			BigInt(lastId);
+			BigInt(lastId.replace('-self', ''));
 		} catch {
 			// Pseudo transactions are displayed at the end of the list. There is not such use case in Oisy.
 			// Additionally, if it would be the case, that would mean that we display pseudo transactions at the end of the list and therefore we could assume all valid transactions have been fetched
