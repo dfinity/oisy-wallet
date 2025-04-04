@@ -120,9 +120,15 @@ export class AlchemyProvider {
 			return transaction;
 		}
 
-		const { value, ...rest } = transaction;
+		const { value, gasLimit, gasPrice, chainId, ...rest } = transaction;
 
-		return { ...rest, value: value.toBigInt() };
+		return {
+			...rest,
+			value: value.toBigInt(),
+			gasLimit: gasLimit.toBigInt(),
+			gasPrice: gasPrice?.toBigInt(),
+			chainId: BigInt(chainId)
+		};
 	};
 }
 
