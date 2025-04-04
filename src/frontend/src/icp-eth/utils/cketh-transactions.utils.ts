@@ -63,9 +63,8 @@ const mapPendingTransaction = ({
 		incoming: false,
 		type: 'burn',
 		status: 'pending',
-		// TODO: remove this coalescing when the transaction type is not dependant on EthersTransaction type anymore
-		from: from ?? undefined,
-		to: to ?? undefined,
+		from,
+		to,
 		typeLabel: replacePlaceholders(converting_twin_token, {
 			$token: twinTokenSymbol,
 			$ckToken: symbol

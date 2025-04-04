@@ -11,7 +11,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import type { TransactionUiCommon } from '$lib/types/transaction';
-	import type { Option } from '$lib/types/utils';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -29,7 +28,7 @@
 	let from: string;
 	let to: string | undefined;
 	let timestamp: bigint | undefined;
-	let blockNumber: Option<number>;
+	let blockNumber: number | undefined;
 	let txExplorerUrl: string | undefined;
 	let fromExplorerUrl: string | undefined;
 	let toExplorerUrl: string | undefined;

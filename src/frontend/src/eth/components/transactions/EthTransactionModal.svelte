@@ -30,11 +30,11 @@
 	export let token: OptionToken;
 
 	let from: string;
-	let to: string | null;
+	let to: string | undefined;
 	let value: bigint;
 	let timestamp: number | undefined;
-	let hash: string | null;
-	let blockNumber: number | null;
+	let hash: string | undefined;
+	let blockNumber: number | undefined;
 
 	$: ({ from, value, timestamp, hash, blockNumber, to, type } = transaction);
 
