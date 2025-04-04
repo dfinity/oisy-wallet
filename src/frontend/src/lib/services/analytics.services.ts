@@ -45,7 +45,7 @@ export const initPlausibleAnalytics = () => {
 			});
 			plausibleTracker.enableAutoPageviews();
 		}
-	} catch (_err) {
+	} catch (_err: unknown) {
 		console.warn('An unexpected error occurred during initialization.');
 	}
 };
