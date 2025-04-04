@@ -690,7 +690,6 @@ pub fn has_user_profile() -> HasUserProfileResponse {
 /// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
 ///   internal errors.
 #[update(guard = "may_write_user_data")]
-#[candid_method(update)]
 #[allow(clippy::unused_async)]
 pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
     // TODO implementation will be added once the candid files have been generated and checked in
