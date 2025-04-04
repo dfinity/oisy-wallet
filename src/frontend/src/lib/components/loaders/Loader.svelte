@@ -207,7 +207,7 @@
 	</div>
 {/if}
 
-<style>
+<style lang="scss">
 	:root:has(.login-modal) {
 		--alert-max-width: 90vw;
 		--alert-max-height: initial;
