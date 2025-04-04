@@ -10,6 +10,7 @@ on:
 jobs:
   release:
     #    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'chore(release)/v')
+    if: false
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -30,7 +31,6 @@ jobs:
           version=$(node -p "require('./package.json').version")
           echo "Version from package.json: $version"
           echo "version=$version" >> $GITHUB_OUTPUT
-          exit 1
 
   #      - name: Create Git tag
   #        run: |
