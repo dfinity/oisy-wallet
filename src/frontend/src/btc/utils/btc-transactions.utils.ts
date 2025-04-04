@@ -28,7 +28,6 @@ export const mapBtcTransaction = ({
 		}
 	);
 
-	// let totalValue: number | undefined = undefined;
 	const { totalOutputValue, totalValue, to } = out.reduce<{
 		to: string[];
 		totalValue: number | undefined;
