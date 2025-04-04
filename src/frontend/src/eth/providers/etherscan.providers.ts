@@ -28,7 +28,6 @@ export class EtherscanProvider {
 	// There is no `getHistory` in ethers v6
 	// Issue report: https://github.com/ethers-io/ethers.js/issues/4303
 	// Workaround: https://ethereum.stackexchange.com/questions/147756/read-transaction-history-with-ethers-v6-1-0/150836#150836
-	// eslint-disable-next-line local-rules/prefer-object-params
 	private async getHistory({
 		address,
 		startBlock,
