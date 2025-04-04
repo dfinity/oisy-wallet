@@ -68,11 +68,11 @@ export class EtherscanRest {
 				from,
 				to,
 				nonce: parseInt(nonce),
-				gasLimit: BigNumber.from(gas),
-				gasPrice: BigNumber.from(gasPrice),
+				gasLimit: BigNumber.from(gas).toBigInt(),
+				gasPrice: BigNumber.from(gasPrice).toBigInt(),
 				value: BigInt(value),
 				// Chain ID is not delivered by the Etherscan API so, we naively set 0
-				chainId: 0
+				chainId: 0n
 			})
 		);
 	};

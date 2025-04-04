@@ -10,7 +10,6 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
-import { BigNumber } from 'ethers';
 import type { MockedFunction } from 'vitest';
 
 global.fetch = vi.fn();
@@ -50,10 +49,10 @@ describe('etherscan.rest', () => {
 			from: '0xabc...',
 			to: '0xdef...',
 			nonce: 1,
-			gasLimit: BigNumber.from('21000'),
-			gasPrice: BigNumber.from('20000000000'),
+			gasLimit: 21000n,
+			gasPrice: 20000000000n,
 			value: 1000000000000000000n,
-			chainId: 0
+			chainId: 0n
 		};
 
 		const mockEtherscanErrorResponse = {
