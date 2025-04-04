@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { ENV, findHtmlFiles } from './build.utils.mjs';
+import sanitizeHtml from 'sanitize-html';
 
 config({ path: `.env.${ENV}` });
 
@@ -94,7 +95,7 @@ const injectLinkPreloader = (indexHtml) => {
 const extractStartScript = (htmlFile) => {
 	const indexHtml = readFileSync(htmlFile, 'utf8');
 
-	const svelteKitStartScript = /(<script>)([\s\S]*?)(<\/script>)/gim;
+	const svelteKitStartScript = /(<script\b[^>]*>)([\s\S]*?)(<\/script\b[^>]*>)/gim;
 
 	// 1. extract SvelteKit start script to a separate main.js file
 	const [_script, _scriptStartTag, content, _scriptEndTag] = svelteKitStartScript.exec(indexHtml);
@@ -115,7 +116,10 @@ const extractStartScript = (htmlFile) => {
 	writeFileSync(join(folderPath, 'main.js'), moduleScript, 'utf8');
 
 	// 3. Replace original SvelteKit script tag content with empty
-	return indexHtml.replace(svelteKitStartScript, '$1$3');
+	return sanitizeHtml(indexHtml, {
+		allowedTags: sanitizeHtml.defaults.allowedTags.filter(tag => tag !== 'script'),
+		allowedAttributes: false
+	});
 };
 
 /**
@@ -127,7 +131,7 @@ const extractStartScript = (htmlFile) => {
  * Browsers that supports the 'strict-dynamic' rule will ignore these backwards directives (CSP 3).
  */
 const updateCSP = (indexHtml) => {
-	const sw = /<script[\s\S]*?>([\s\S]*?)<\/script>/gm;
+	const sw = /<script\b[^>]*>([\s\S]*?)<\/script\b[^>]*>/gim;
 
 	const indexHashes = [];
 
