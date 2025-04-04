@@ -67,6 +67,7 @@ mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
+mod contacts;
 mod guards;
 mod heap_state;
 mod impls;
