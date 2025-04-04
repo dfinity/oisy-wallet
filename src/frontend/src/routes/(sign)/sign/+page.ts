@@ -1,6 +1,6 @@
+import { foo } from '$lib/utils/address.utils';
 import { resetRouteParams, type RouteParams } from '$lib/utils/nav.utils';
 import type { LoadEvent } from '@sveltejs/kit';
-import { writable } from 'svelte/store';
 import type { PageLoad } from './$types';
 
 // We reset the data because the "sign" route operates without a network or token selected.
@@ -23,5 +23,3 @@ export const load: PageLoad = ({ url }: LoadEvent): RouteParams => {
 
 	return resetRouteParams();
 };
-
-export const foo = writable(false);
