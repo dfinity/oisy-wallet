@@ -1,4 +1,8 @@
-import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
+import {
+	loadBtcAddressMainnet,
+	loadBtcAddressRegtest,
+	loadBtcAddressTestnet
+} from '$btc/services/btc-address.services';
 import * as networksEnv from '$env/networks/networks.env';
 import { loadEthAddress } from '$eth/services/eth-address.services';
 import Loader from '$lib/components/loaders/Loader.svelte';
@@ -6,11 +10,13 @@ import * as appContants from '$lib/constants/app.constants';
 import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 import { initLoader } from '$lib/services/loader.services';
 import {
+	btcAddressMainnetStore,
 	btcAddressRegtestStore,
 	btcAddressTestnetStore,
 	ethAddressStore,
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
+	solAddressMainnetStore,
 	solAddressTestnetStore
 } from '$lib/stores/address.store';
 import { loading } from '$lib/stores/loader.store';
@@ -19,6 +25,7 @@ import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.ut
 import {
 	loadSolAddressDevnet,
 	loadSolAddressLocal,
+	loadSolAddressMainnet,
 	loadSolAddressTestnet
 } from '$sol/services/sol-address.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -55,12 +62,16 @@ vi.mock('$lib/services/loader.services', () => ({
 }));
 
 vi.mock('$btc/services/btc-address.services', () => ({
-	loadBtcAddressRegtest: vi.fn(() => {
-		btcAddressRegtestStore.set({ data: mockBtcAddress, certified: false });
+	loadBtcAddressMainnet: vi.fn(() => {
+		btcAddressMainnetStore.set({ data: mockBtcAddress, certified: false });
 		return Promise.resolve({ success: true });
 	}),
 	loadBtcAddressTestnet: vi.fn(() => {
 		btcAddressTestnetStore.set({ data: mockBtcAddress, certified: false });
+		return Promise.resolve({ success: true });
+	}),
+	loadBtcAddressRegtest: vi.fn(() => {
+		btcAddressRegtestStore.set({ data: mockBtcAddress, certified: false });
 		return Promise.resolve({ success: true });
 	})
 }));
@@ -73,16 +84,20 @@ vi.mock('$eth/services/eth-address.services', () => ({
 }));
 
 vi.mock('$sol/services/sol-address.services', () => ({
+	loadSolAddressMainnet: vi.fn(() => {
+		solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
+		return Promise.resolve({ success: true });
+	}),
+	loadSolAddressTestnet: vi.fn(() => {
+		solAddressTestnetStore.set({ data: mockSolAddress, certified: false });
+		return Promise.resolve({ success: true });
+	}),
 	loadSolAddressDevnet: vi.fn(() => {
 		solAddressDevnetStore.set({ data: mockSolAddress, certified: false });
 		return Promise.resolve({ success: true });
 	}),
 	loadSolAddressLocal: vi.fn(() => {
 		solAddressLocalnetStore.set({ data: mockSolAddress, certified: false });
-		return Promise.resolve({ success: true });
-	}),
-	loadSolAddressTestnet: vi.fn(() => {
-		solAddressTestnetStore.set({ data: mockSolAddress, certified: false });
 		return Promise.resolve({ success: true });
 	})
 }));
@@ -132,7 +147,7 @@ describe('Loader', () => {
 	describe('while loading', () => {
 		beforeEach(() => {
 			loading.set(true);
-			vi.mocked(initLoader).mockImplementation(
+			vi.mocked(initLoader).mockImplementationOnce(
 				async ({ setProgressModal }: { setProgressModal: (value: boolean) => void }) => {
 					setProgressModal(true);
 					await Promise.resolve();
@@ -160,6 +175,28 @@ describe('Loader', () => {
 				expect(banner).toBeInTheDocument();
 			});
 		});
+
+		it('should not call any address loaders', async () => {
+			setupTestnetsStore('enabled');
+			setupUserNetworksStore('allEnabled');
+
+			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+
+			render(Loader);
+
+			await waitFor(() => {
+				expect(loadEthAddress).not.toHaveBeenCalled();
+				expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
+				expect(loadSolAddressMainnet).not.toHaveBeenCalled();
+
+				expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
+				expect(loadSolAddressTestnet).not.toHaveBeenCalled();
+				expect(loadSolAddressDevnet).not.toHaveBeenCalled();
+
+				expect(loadBtcAddressRegtest).not.toHaveBeenCalled();
+				expect(loadSolAddressLocal).not.toHaveBeenCalled();
+			});
+		});
 	});
 
 	describe('handling testnets addresses', () => {
@@ -172,33 +209,66 @@ describe('Loader', () => {
 
 			ethAddressStore.reset();
 
+			btcAddressMainnetStore.reset();
 			btcAddressTestnetStore.reset();
 			btcAddressRegtestStore.reset();
 
+			solAddressMainnetStore.reset();
 			solAddressTestnetStore.reset();
 			solAddressDevnetStore.reset();
 			solAddressLocalnetStore.reset();
 		});
 
-		it('should not call any loaders when testnets are disabled', () => {
-			setupTestnetsStore('disabled');
-
-			render(Loader);
-
-			expect(loadEthAddress).not.toHaveBeenCalled();
-			expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
-			expect(loadSolAddressTestnet).not.toHaveBeenCalled();
-			expect(loadSolAddressDevnet).not.toHaveBeenCalled();
-		});
-
-		describe('when testnets are enabled', () => {
+		describe('when testnets are disabled', () => {
 			beforeEach(() => {
 				vi.clearAllMocks();
 
-				setupTestnetsStore('enabled');
+				setupTestnetsStore('disabled');
 			});
 
-			it('should call loaders only for the enabled testnet networks', () => {
+			it('should call only mainnet loaders if addresses are not loaded yet', async () => {
+				setupTestnetsStore('disabled');
+
+				render(Loader);
+
+				// Toggle the reactive statement
+				setupUserNetworksStore('allDisabled');
+				setupUserNetworksStore('onlyMainnets');
+
+				await waitFor(() => {
+					expect(loadEthAddress).toHaveBeenCalledOnce();
+					expect(loadBtcAddressMainnet).toHaveBeenCalledOnce();
+					expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
+
+					expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
+					expect(loadSolAddressTestnet).not.toHaveBeenCalled();
+					expect(loadSolAddressDevnet).not.toHaveBeenCalled();
+				});
+			});
+
+			it('should not call loaders if addresses are already loaded', async () => {
+				ethAddressStore.set({ data: mockEthAddress, certified: false });
+				btcAddressMainnetStore.set({ data: mockBtcAddress, certified: false });
+				solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
+
+				render(Loader);
+
+				// Toggle the reactive statement
+				setupUserNetworksStore('allDisabled');
+				setupUserNetworksStore('onlyMainnets');
+
+				await waitFor(() => {
+					expect(loadEthAddress).not.toHaveBeenCalled();
+					expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
+					expect(loadSolAddressMainnet).not.toHaveBeenCalled();
+				});
+			});
+
+			it('should call loaders only for the enabled mainnet networks', async () => {
+				setupUserNetworksStore('allDisabled');
+
+				render(Loader);
+
 				userProfileStore.set({
 					certified: false,
 					profile: {
@@ -209,6 +279,45 @@ describe('Loader', () => {
 								...mockNetworksSettings,
 								testnets: { show_testnets: true },
 								networks: [
+									[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
+								]
+							}
+						})
+					}
+				});
+
+				await waitFor(() => {
+					expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
+					expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
+				});
+			});
+		});
+
+		describe('when testnets are enabled', () => {
+			beforeEach(() => {
+				vi.clearAllMocks();
+
+				setupTestnetsStore('enabled');
+			});
+
+			it('should call loaders only for the enabled networks', async () => {
+				setupUserNetworksStore('allDisabled');
+
+				render(Loader);
+
+				userProfileStore.set({
+					certified: false,
+					profile: {
+						...mockUserProfile,
+						settings: toNullable({
+							...mockUserSettings,
+							networks: {
+								...mockNetworksSettings,
+								testnets: { show_testnets: true },
+								networks: [
+									[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
 									[{ SolanaTestnet: null }, { enabled: true, is_testnet: true }],
 									[{ SolanaDevnet: null }, { enabled: false, is_testnet: true }]
 								]
@@ -217,25 +326,33 @@ describe('Loader', () => {
 					}
 				});
 
-				render(Loader);
-
-				expect(loadSolAddressTestnet).toHaveBeenCalledOnce();
-				expect(loadSolAddressDevnet).not.toHaveBeenCalled();
+				await waitFor(() => {
+					expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
+					expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
+					expect(loadSolAddressTestnet).toHaveBeenCalledOnce();
+					expect(loadSolAddressDevnet).not.toHaveBeenCalled();
+				});
 			});
 
-			it('should call loaders if addresses are not loaded yet', () => {
+			it('should call testnet loaders if addresses are not loaded yet', async () => {
+				setupUserNetworksStore('allDisabled');
+
 				render(Loader);
 
-				expect(loadEthAddress).toHaveBeenCalledOnce();
-				expect(loadBtcAddressTestnet).toHaveBeenCalledOnce();
-				expect(loadSolAddressTestnet).toHaveBeenCalledOnce();
-				expect(loadSolAddressDevnet).toHaveBeenCalledOnce();
+				setupUserNetworksStore('allEnabled');
 
-				expect(loadBtcAddressRegtest).not.toHaveBeenCalled();
-				expect(loadSolAddressLocal).not.toHaveBeenCalled();
+				await waitFor(() => {
+					expect(loadEthAddress).toHaveBeenCalledOnce();
+					expect(loadBtcAddressTestnet).toHaveBeenCalledOnce();
+					expect(loadSolAddressTestnet).toHaveBeenCalledOnce();
+					expect(loadSolAddressDevnet).toHaveBeenCalledOnce();
+
+					expect(loadBtcAddressRegtest).not.toHaveBeenCalled();
+					expect(loadSolAddressLocal).not.toHaveBeenCalled();
+				});
 			});
 
-			it('should not call loaders if addresses are already loaded', () => {
+			it('should not call loaders if addresses are already loaded', async () => {
 				ethAddressStore.set({ data: mockEthAddress, certified: false });
 				btcAddressTestnetStore.set({ data: mockBtcAddress, certified: false });
 				solAddressTestnetStore.set({ data: mockSolAddress, certified: false });
@@ -243,19 +360,31 @@ describe('Loader', () => {
 
 				render(Loader);
 
-				expect(loadEthAddress).not.toHaveBeenCalled();
-				expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
-				expect(loadSolAddressTestnet).not.toHaveBeenCalled();
-				expect(loadSolAddressDevnet).not.toHaveBeenCalled();
+				// Toggle the reactive statement
+				setupUserNetworksStore('allDisabled');
+				setupUserNetworksStore('allEnabled');
+
+				await waitFor(() => {
+					expect(loadEthAddress).not.toHaveBeenCalled();
+					expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
+					expect(loadSolAddressTestnet).not.toHaveBeenCalled();
+					expect(loadSolAddressDevnet).not.toHaveBeenCalled();
+				});
 			});
 
-			it('should call local addresses loaders when in local env', () => {
+			it('should call local addresses loaders when in local env', async () => {
 				vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
 				render(Loader);
 
-				expect(loadBtcAddressRegtest).toHaveBeenCalledOnce();
-				expect(loadSolAddressLocal).toHaveBeenCalledOnce();
+				// Toggle the reactive statement
+				setupUserNetworksStore('allDisabled');
+				setupUserNetworksStore('allEnabled');
+
+				await waitFor(() => {
+					expect(loadBtcAddressRegtest).toHaveBeenCalledOnce();
+					expect(loadSolAddressLocal).toHaveBeenCalledOnce();
+				});
 			});
 		});
 	});
