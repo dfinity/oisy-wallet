@@ -15,7 +15,7 @@ export const load: PageLoad = ({ url }: LoadEvent): RouteParams => {
 			// Open the exact same URL in the browser (escaping the PWA shell)
 			const fullUrl = new URL(window.location.href);
 			fullUrl.searchParams.set('pwa-escape', '1');
-			window.open(fullUrl.toString(), '_blank');
+			window.open(fullUrl.toString(), '_blank', 'popup=true');
 		}
 	}
 
