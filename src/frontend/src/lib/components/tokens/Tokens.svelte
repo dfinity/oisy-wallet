@@ -5,13 +5,17 @@
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 </script>
 
 <div>
 	<Header>
 		<h2 class="text-base">{$i18n.tokens.text.title}</h2>
 
-		<TokensMenu slot="end" />
+		<span class="flex flex-row gap-2" slot="end">
+			<TokensFilter />
+			<TokensMenu />
+		</span>
 	</Header>
 
 	<TokensList />
