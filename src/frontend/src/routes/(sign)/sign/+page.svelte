@@ -10,7 +10,7 @@
 	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
 	import { authNotSignedIn, authIdentity } from '$lib/derived/auth.derived';
 	import { initSignerContext, SIGNER_CONTEXT_KEY } from '$lib/stores/signer.store';
-	import { foo } from '$routes/(sign)/sign/+page';
+	import { foo } from '$lib/utils/address.utils';
 
 	const { idle, reset, ...context } = initSignerContext();
 	setContext(SIGNER_CONTEXT_KEY, {
