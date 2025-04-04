@@ -16,9 +16,6 @@ export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
 export type EthersTransaction = Pick<
 	ethers.Transaction,
-	| 'hash'
-	| 'to'
-	| 'from'
 	| 'nonce'
 	| 'gasLimit'
 	| 'gasPrice'
@@ -30,6 +27,10 @@ export type EthersTransaction = Pick<
 > & {
 	// TODO: use ethers.Transaction.value type again once we upgrade to ethers v6
 	value: bigint;
+} & {
+	hash?: string;
+	from?: string;
+	to?: string;
 };
 
 // TODO: Remove this type when upgrading to ethers v6 since TransactionResponse will be with BigInt
@@ -37,7 +38,8 @@ export type TransactionResponseWithBigInt = Omit<TransactionResponse, 'value'> &
 	Pick<EthersTransaction, 'value'>;
 
 export type Transaction = Omit<EthersTransaction, 'data'> &
-	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {
+	Pick<TransactionResponse, 'from' | 'timestamp'> & {
+		blockNumber?: number;
 		pendingTimestamp?: number;
 		displayTimestamp?: number;
 	};
