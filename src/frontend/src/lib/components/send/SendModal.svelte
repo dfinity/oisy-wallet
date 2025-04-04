@@ -89,7 +89,7 @@
 		goToWizardSendStep({
 			modal,
 			steps,
-			stepName: stepName
+			stepName
 		});
 
 	// TODO: Use network id to get the address to support bitcoin.
