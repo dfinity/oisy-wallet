@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use candid::Principal;
-use shared::types::user_profile::{GetUserProfileError, UserProfile};
+use shared::types::user_profile::{GetUserProfileError, HasUserProfileResponse, UserProfile};
 
 use crate::utils::{
     mock::CALLER,
@@ -87,4 +87,44 @@ fn test_get_user_profile_returns_not_found() {
         response.expect("Create failed").unwrap_err(),
         GetUserProfileError::NotFound,
     );
+}
+
+#[test]
+fn test_exists_profile_should_return_true_if_profile_exists() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    // Create a user profile
+    let response = pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+    assert!(response.is_ok());
+
+    // Check if the profile exists
+    let exists_response = pic_setup.query::<HasUserProfileResponse>(caller, "has_user_profile", ());
+
+    assert!(exists_response.is_ok());
+    assert!(
+        exists_response
+            .ok()
+            .expect("Can not access has_user_profile")
+            .has_user_profile
+    )
+}
+
+#[test]
+fn test_exists_profile_should_return_false_if_profile_not_exists() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    // Check if the profile exists
+    let exists_response = pic_setup.query::<HasUserProfileResponse>(caller, "has_user_profile", ());
+
+    assert!(exists_response.is_ok());
+    assert!(
+        !exists_response
+            .ok()
+            .expect("Can not access has_user_profile")
+            .has_user_profile
+    )
 }

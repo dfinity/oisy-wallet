@@ -47,12 +47,12 @@ jobs:
         id: package_name
         run: |
           case "$PACKAGE" in
-            "gix-components") "PKG_NAME=gix-cmp" ;;
-            "ic-js") "PKG_NAME=ic-js" ;;
-            "oisy-wallet-signer") "PKG_NAME=signer" ;;
-            "eslint-config-oisy-wallet") "PKG_NAME=oisy-eslint" ;;
-            "agent") "PKG_NAME=agent" ;;
-            "agent & ic-js") "PKG_NAME=agent:ic-js" ;;
+            "gix-components") PKG_NAME="gix-cmp" ;;
+            "ic-js") PKG_NAME="ic-js" ;;
+            "oisy-wallet-signer") PKG_NAME="signer" ;;
+            "eslint-config-oisy-wallet") PKG_NAME="oisy-eslint" ;;
+            "agent") PKG_NAME="agent" ;;
+            "agent & ic-js") PKG_NAME="agent:ic-js" ;;
             *) echo "Invalid package selection: $PACKAGE" && exit 1 ;;
           esac
           echo "PKG_NAME=$PKG_NAME" >> "$GITHUB_ENV"
