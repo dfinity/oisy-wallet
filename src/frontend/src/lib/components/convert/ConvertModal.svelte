@@ -70,7 +70,7 @@
 		goToWizardSendStep({
 			modal,
 			steps,
-			stepName: stepName
+			stepName
 		});
 </script>
 

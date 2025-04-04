@@ -14,7 +14,7 @@ describe('btc-transactions.derived', () => {
 			type: 'send',
 			value: 100n,
 			from: 'sender',
-			to: 'receiver',
+			to: ['receiver'],
 			status: 'pending'
 		});
 
