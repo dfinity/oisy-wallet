@@ -37,9 +37,10 @@ export type EthersTransaction = Pick<
 export type TransactionResponseWithBigInt = Omit<TransactionResponse, 'value'> &
 	Pick<EthersTransaction, 'value'>;
 
-export type Transaction = Omit<EthersTransaction, 'data'> &
-	Pick<TransactionResponse, 'from' | 'timestamp'> & {
+export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
+	Required<Pick<EthersTransaction, 'from'>> & {
 		blockNumber?: number;
+		timestamp?: number;
 		pendingTimestamp?: number;
 		displayTimestamp?: number;
 	};
