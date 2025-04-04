@@ -75,8 +75,16 @@ export const idlFactory = ({ IDL }) => {
 		Expired: IDL.Record({ ledger_time: IDL.Nat64 }),
 		InsufficientFunds: IDL.Record({ balance: IDL.Nat })
 	});
+	const ChallengeCompletionError = IDL.Variant({
+		InvalidNonce: IDL.Null,
+		MissingChallenge: IDL.Null,
+		ExpiredChallenge: IDL.Null,
+		MissingUserProfile: IDL.Null,
+		ChallengeAlreadySolved: IDL.Null
+	});
 	const AllowSigningError = IDL.Variant({
 		ApproveError: ApproveError,
+		PowChallenge: ChallengeCompletionError,
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
@@ -335,6 +343,7 @@ export const idlFactory = ({ IDL }) => {
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
+	const HasUserProfileResponse = IDL.Record({ has_user_profile: IDL.Bool });
 	const HttpRequest = IDL.Record({
 		url: IDL.Text,
 		method: IDL.Text,
@@ -431,21 +440,17 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
-	const SaveNetworksSettingsRequest = IDL.Record({
-		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
-		current_user_version: IDL.Opt(IDL.Nat64)
+	const SetShowTestnetsRequest = IDL.Record({
+		current_user_version: IDL.Opt(IDL.Nat64),
+		show_testnets: IDL.Bool
 	});
-	const SaveNetworksSettingsError = IDL.Variant({
+	const SaveTestnetsSettingsError = IDL.Variant({
 		VersionMismatch: IDL.Null,
 		UserNotFound: IDL.Null
 	});
 	const Result_9 = IDL.Variant({
 		Ok: IDL.Null,
-		Err: SaveNetworksSettingsError
-	});
-	const SetShowTestnetsRequest = IDL.Record({
-		current_user_version: IDL.Opt(IDL.Nat64),
-		show_testnets: IDL.Bool
+		Err: SaveTestnetsSettingsError
 	});
 	const TopUpCyclesLedgerRequest = IDL.Record({
 		threshold: IDL.Opt(IDL.Nat),
@@ -472,6 +477,10 @@ export const idlFactory = ({ IDL }) => {
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
+	const SaveNetworksSettingsRequest = IDL.Record({
+		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
+		current_user_version: IDL.Opt(IDL.Nat64)
+	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result_1], []),
@@ -485,6 +494,7 @@ export const idlFactory = ({ IDL }) => {
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)], ['query']),
 		get_user_profile: IDL.Func([], [Result_6], ['query']),
+		has_user_profile: IDL.Func([], [HasUserProfileResponse], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
 		list_user_creation_timestamps: IDL.Func(
@@ -503,7 +513,6 @@ export const idlFactory = ({ IDL }) => {
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_snapshot: IDL.Func([UserSnapshot], [], []),
-		set_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_9], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_9], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats], ['query']),

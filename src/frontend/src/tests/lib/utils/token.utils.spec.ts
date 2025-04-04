@@ -11,7 +11,7 @@ import { ckErc20Production } from '$env/tokens/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcCkToken } from '$icp/types/ic-token';
-import type { TokenStandard, TokenUi } from '$lib/types/token';
+import type { TokenStandard } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	calculateTokenUsdAmount,
@@ -20,10 +20,9 @@ import {
 	getMaxTransactionAmount,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
-	sumTokenBalances,
 	sumUsdBalances
 } from '$lib/utils/token.utils';
-import { bn1Bi, bn2Bi, bn3Bi, mockBalances } from '$tests/mocks/balances.mock';
+import { bn3Bi, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
@@ -275,54 +274,6 @@ describe('token.utils', () => {
 				balance: null,
 				usdBalance: 0
 			});
-		});
-	});
-
-	describe('sumTokenBalances', () => {
-		// We mock ETH to be a twin of ICP
-		const token1: TokenUi = { ...ICP_TOKEN, balance: bn1Bi, decimals: 18 };
-		const token2: TokenUi = { ...ETHEREUM_TOKEN, balance: bn2Bi, decimals: 18 };
-
-		it('should sum token balances when both balances are non-null and decimals match', () => {
-			const result = sumTokenBalances([token1, token2]);
-
-			expect(result).toStrictEqual(bn1Bi + bn2Bi);
-		});
-
-		it('should return null when decimals do not match', () => {
-			expect(sumTokenBalances([token1, { ...token2, decimals: 8 }])).toBeNull();
-		});
-
-		it('should return the first balance when the second balance is nullish', () => {
-			expect(sumTokenBalances([token1, { ...token2, balance: null }])).toBe(bn1Bi);
-		});
-
-		it('should return the second balance when the first balance is nullish', () => {
-			expect(sumTokenBalances([{ ...token1, balance: null }, token2])).toBe(bn2Bi);
-		});
-
-		it('should return the first balance nullish value when both balances are nullish but not undefined', () => {
-			expect(
-				sumTokenBalances([
-					{ ...token1, balance: null },
-					{ ...token2, balance: null }
-				])
-			).toBeNull();
-		});
-
-		it('should return undefined when one of the balances is undefined', () => {
-			expect(sumTokenBalances([token1, { ...token2, balance: undefined }])).toBeUndefined();
-
-			expect(sumTokenBalances([{ ...token1, balance: undefined }, token2])).toBeUndefined();
-		});
-
-		it('should return undefined when both balances are undefined', () => {
-			expect(
-				sumTokenBalances([
-					{ ...token1, balance: undefined },
-					{ ...token2, balance: undefined }
-				])
-			).toBeUndefined();
 		});
 	});
 

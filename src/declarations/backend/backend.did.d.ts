@@ -80,6 +80,7 @@ export interface AddUserCredentialRequest {
 }
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
+	| { PowChallenge: ChallengeCompletionError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
@@ -133,6 +134,12 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array | number[]];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
+export type ChallengeCompletionError =
+	| { InvalidNonce: null }
+	| { MissingChallenge: null }
+	| { ExpiredChallenge: null }
+	| { MissingUserProfile: null }
+	| { ChallengeAlreadySolved: null };
 export interface Config {
 	api: [] | [Guards];
 	derivation_origin: [] | [string];
@@ -170,6 +177,9 @@ export type GetUserProfileError = { NotFound: null };
 export interface Guards {
 	user_data: ApiEnabled;
 	threshold_key: ApiEnabled;
+}
+export interface HasUserProfileResponse {
+	has_user_profile: boolean;
 }
 export interface HttpRequest {
 	url: string;
@@ -293,12 +303,12 @@ export type Result_5 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFe
 export type Result_6 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_7 = { Ok: MigrationReport } | { Err: string };
 export type Result_8 = { Ok: null } | { Err: string };
-export type Result_9 = { Ok: null } | { Err: SaveNetworksSettingsError };
-export type SaveNetworksSettingsError = { VersionMismatch: null } | { UserNotFound: null };
+export type Result_9 = { Ok: null } | { Err: SaveTestnetsSettingsError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
 }
+export type SaveTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InternalError: { msg: string } };
@@ -440,6 +450,7 @@ export interface _SERVICE {
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_snapshot: ActorMethod<[], [] | [UserSnapshot]>;
 	get_user_profile: ActorMethod<[], Result_6>;
+	has_user_profile: ActorMethod<[], HasUserProfileResponse>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_creation_timestamps: ActorMethod<
@@ -457,7 +468,6 @@ export interface _SERVICE {
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_snapshot: ActorMethod<[UserSnapshot], undefined>;
-	set_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_9>;
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_9>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
