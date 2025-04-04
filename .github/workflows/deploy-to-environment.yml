@@ -57,7 +57,6 @@ run-name: >-
   ${{ 
     github.event_name == 'push' && github.ref_type == 'branch' && 'Deploying Frontend / Backend to Staging'
     || github.event_name == 'push' && github.ref_type == 'tag' && 'Deploying Frontend / Backend to Beta'
-    || inputs.workflow-call == 'true' && 'Deploying Frontend / Backend to Beta'
     || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
     || format('Deploying {0} to {1}', inputs.canister, inputs.network) }}
 
