@@ -69,6 +69,11 @@ pub struct ListUsersResponse {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct HasUserProfileResponse {
+    pub has_user_profile: bool,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct ListUserCreationTimestampsResponse {
     pub creation_timestamps: Vec<Timestamp>,
     pub matches_max_length: u64,
