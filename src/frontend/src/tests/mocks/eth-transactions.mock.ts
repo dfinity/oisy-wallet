@@ -5,7 +5,6 @@ import { bn1Bi, bn3Bi } from './balances.mock';
 export const mockEthTransactionUi: Transaction = {
 	blockNumber: 123213,
 	nonce: 123,
-	gasPrice: bn1Bi,
 	gasLimit: bn3Bi,
 	chainId: 1n,
 	from: mockEthAddress,

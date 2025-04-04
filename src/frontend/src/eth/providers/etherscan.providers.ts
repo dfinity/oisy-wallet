@@ -6,7 +6,6 @@ import {
 } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import type { EtherscanProviderTransaction } from '$eth/types/etherscan-transaction';
-import { ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -70,7 +69,7 @@ export class EtherscanProvider {
 				gasPrice: BigInt(gasPrice),
 				value: BigInt(value),
 				// Chain ID is not delivered by the Etherscan API so, we naively set 0
-				chainId: ZERO_BI
+				chainId: 0n
 			})
 		);
 	}

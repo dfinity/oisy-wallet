@@ -30,7 +30,7 @@ export type TransactionResponseWithBigInt = Omit<
 	AlchemyTransactionResponse,
 	'value' | 'gasLimit' | 'gasPrice' | 'chainId'
 > &
-	Pick<EthersTransaction, 'value' | 'gasLimit' | 'gasPrice' | 'chainId'>
+	Pick<EthersTransaction, 'value' | 'gasLimit' | 'gasPrice' | 'chainId'>;
 
 export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
 	Required<Pick<EthersTransaction, 'from'>> & {

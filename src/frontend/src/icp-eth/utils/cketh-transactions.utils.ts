@@ -43,7 +43,7 @@ const mapPendingTransaction = ({
 	token,
 	value
 }: {
-	transaction: Omit<EthersTransaction, 'value' | 'data'>;
+	transaction: Omit<MapCkEthereumPendingTransactionParams['transaction'], 'value' | 'data'>;
 	token: IcToken;
 	value: bigint;
 } & IcCkLinkedAssets): IcTransactionUi => {

@@ -24,7 +24,6 @@ const transaction: Transaction = {
 	to: '0xabcd',
 	timestamp: 1670000000,
 	nonce: 1,
-	gasPrice: ZERO_BI,
 	gasLimit: ZERO_BI,
 	value: ZERO_BI,
 	chainId: 1n
