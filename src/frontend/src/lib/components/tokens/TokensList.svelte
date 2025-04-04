@@ -14,6 +14,9 @@
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
+	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
+
+	export let filter: string = '';
 
 	let tokens: TokenUiOrGroupUi[] | undefined;
 
@@ -37,12 +40,23 @@
 
 	let loading: boolean;
 	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
+
+	let filteredTokens: TokenUiOrGroupUi[] | undefined;
+	$: filteredTokens = (tokens || []).filter((t) => {
+		if (!isTokenUiGroup(t) && !filter === '') {
+			return (
+				t.token.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
+				t.token.symbol.toLowerCase().indexOf(filter.toLowerCase()) >= 0
+			);
+		}
+		return true;
+	});
 </script>
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="mb-3 flex flex-col gap-3">
-			{#each tokens ?? [] as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 				<div
 					class="overflow-hidden rounded-xl"
 					transition:fade
@@ -68,8 +82,12 @@
 			{/each}
 		</div>
 
-		{#if tokens?.length === 0}
-			<NoTokensPlaceholder />
+		{#if filteredTokens?.length === 0}
+			{#if filter === ''}
+				<NoTokensPlaceholder />
+			{:else}
+				<NothingFoundPlaceholder />
+			{/if}
 		{/if}
 
 		{#if $modalManageTokens}
