@@ -28,9 +28,10 @@ export const mapBtcTransaction = ({
 		}
 	);
 
-	let totalValue: number | undefined = undefined;
-	const { totalOutputValue, to } = out.reduce<{
+	// let totalValue: number | undefined = undefined;
+	const { totalOutputValue, totalValue, to } = out.reduce<{
 		to: string[];
+		totalValue: number | undefined;
 		totalOutputValue: number;
 	}>(
 		(acc, output) => {
@@ -39,16 +40,16 @@ export const mapBtcTransaction = ({
 			const isValidOutput =
 				(isTypeSend && addr !== btcAddress) || (!isTypeSend && addr === btcAddress);
 
-			totalValue = isValidOutput ? (totalValue ?? 0) + value : totalValue;
-
 			return {
 				...acc,
+				totalValue: isValidOutput ? (acc.totalValue ?? 0) + value : acc.totalValue,
 				to: isValidOutput ? [...acc.to, addr] : acc.to,
 				totalOutputValue: acc.totalOutputValue + value
 			};
 		},
 		{
 			totalOutputValue: 0,
+			totalValue: undefined,
 			to: []
 		}
 	);
