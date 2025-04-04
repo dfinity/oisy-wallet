@@ -6,6 +6,20 @@ on:
       - main
     tags:
       - v*
+  workflow_call:
+    inputs:
+      network:
+        required: false
+        type: string
+        default: beta
+      canister:
+        required: false
+        type: string
+        default: frontend
+      force-backend:
+        required: false
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       network:
@@ -32,20 +46,6 @@ on:
         required: false
         type: boolean
         description: 'Force backend deployment even if no changes are detected.'
-        default: false
-  workflow_call:
-    inputs:
-      network:
-        required: false
-        type: string
-        default: beta
-      canister:
-        required: false
-        type: string
-        default: frontend
-      force-backend:
-        required: false
-        type: boolean
         default: false
 
 run-name: >-
