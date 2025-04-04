@@ -10,7 +10,6 @@ on:
 jobs:
   release:
     #    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'chore(release)/v')
-    if: false
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -22,8 +21,8 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Prepare
-        uses: ./.github/actions/prepare
+      #      - name: Prepare
+      #        uses: ./.github/actions/prepare
 
       - name: Get version from package.json
         id: get_version

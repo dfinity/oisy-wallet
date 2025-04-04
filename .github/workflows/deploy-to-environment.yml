@@ -35,6 +35,11 @@ on:
         default: false
   workflow_call:
     inputs:
+      workflow-call:
+        description: 'To distinguish workflow_call from regular calls'
+        required: false
+        type: boolean
+        default: true
       network:
         required: false
         type: string
@@ -52,7 +57,7 @@ run-name: >-
   ${{ 
     github.event_name == 'push' && github.ref_type == 'branch' && 'Deploying Frontend / Backend to Staging'
     || github.event_name == 'push' && github.ref_type == 'tag' && 'Deploying Frontend / Backend to Beta'
-    || github.event_name == 'workflow_call' && 'Deploying Frontend / Backend to Beta'
+    || inputs.workflow-call == 'true' && 'Deploying Frontend / Backend to Beta'
     || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
     || format('Deploying {0} to {1}', inputs.canister, inputs.network) }}
 
@@ -88,7 +93,7 @@ jobs:
             echo "CANISTER=$CANISTER" >> $GITHUB_ENV
             echo "deploy_frontend=${{ github.event.inputs.canister == 'frontend' }}" >> $GITHUB_ENV
             echo "deploy_backend=${{ github.event.inputs.canister == 'backend' }}" >> $GITHUB_ENV
-          elif [ "${{ github.event_name }}" == "workflow_call" ]; then
+          elif [ "${{ inputs.workflow-call }}" == "true" ]; then
             echo "NETWORK=beta" >> $GITHUB_ENV
             echo "CANISTER=frontend" >> $GITHUB_ENV
             echo "deploy_frontend=true" >> $GITHUB_ENV
@@ -317,7 +322,7 @@ jobs:
 
           if [ "$deploy_backend" == "true" ] ; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
-              if [ "$FORCE_BACKEND" == "false" ]; then
+              if [ "$FORCE_BACKEND" != "true" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
               else
                 ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
