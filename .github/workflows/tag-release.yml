@@ -30,6 +30,7 @@ jobs:
           version=$(node -p "require('./package.json').version")
           echo "Version from package.json: $version"
           echo "version=$version" >> $GITHUB_OUTPUT
+          exit 1
 
   #      - name: Create Git tag
   #        run: |
