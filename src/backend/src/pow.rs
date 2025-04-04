@@ -9,7 +9,7 @@ use shared::types::pow::{
 use crate::{
     mutate_state, read_state,
     types::{Candid, DebuggableCandid, StoredPrincipal},
-    user_profile::exists_profile,
+    user_profile::has_user_profile,
     State,
 };
 // -------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ fn get_time_ms() -> u64 {
 
 pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeError> {
     let user_principal = StoredPrincipal(caller());
-    if !exists_profile(user_principal) {
+    if !has_user_profile(user_principal) {
         ic_cdk::println!(
             "create_pow_challenge() -> User profile missing for principal: {}",
             user_principal.0.to_text()
@@ -169,6 +169,8 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
 ///   challenge.
 /// - `ChallengeCompletionError::ExpiredChallenge`: If the challenge expired before being solved.
 /// - `ChallengeCompletionError::ChallengeAlreadySolved`: If the challenge has already been solved.
+// TODO remove as soon as this method is integrated in the allow_signing method
+#[allow(dead_code)]
 pub(crate) fn complete_challenge(
     nonce: u64,
 ) -> Result<ChallengeCompletion, ChallengeCompletionError> {
@@ -176,7 +178,7 @@ pub(crate) fn complete_challenge(
     let stored_principal = StoredPrincipal(principal);
 
     // we reject any request from a principle without a user profile
-    if !exists_profile(stored_principal) {
+    if !has_user_profile(stored_principal) {
         ic_cdk::println!(
             "complete_challenge(nonce) -> User profile missing for principal: {}",
             principal.to_text()
@@ -275,7 +277,6 @@ pub(crate) fn complete_challenge(
 fn adjust_difficulty(difficulty: u32, solve_duration_ms: u64) -> u32 {
     // TODO add rust feature flag
     // #[cfg(not(feature = "difficulty_auto_adjustment"))]
-    #[allow(dead_code)]
     if DIFFICULTY_AUTO_ADJUSTMENT {
         let new_difficulty = u32::try_from(
             ((u64::from(difficulty) * TARGET_DURATION_MS) / solve_duration_ms.max(1))
