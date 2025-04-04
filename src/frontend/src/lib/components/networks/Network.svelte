@@ -1,6 +1,7 @@
 <script lang="ts">
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import { NETWORKS_SWITCHER_SELECTOR } from '$lib/constants/test-ids.constants';
+	import type { LabelSize } from '$lib/types/components';
 	import type { Network, NetworkId } from '$lib/types/network';
 
 	export let network: Network;
@@ -8,6 +9,7 @@
 	export let usdBalance: number | undefined = undefined;
 	export let testIdPrefix = NETWORKS_SWITCHER_SELECTOR;
 	export let delayOnNetworkSelect = true;
+	export let labelsSize: LabelSize = 'md';
 
 	let id: NetworkId;
 	let name: string;
@@ -22,6 +24,7 @@
 	{usdBalance}
 	{delayOnNetworkSelect}
 	{icon}
+	{labelsSize}
 	isTestnet={network.env === 'testnet'}
 	testId={`${testIdPrefix}-${id.description}`}
 	on:icSelected
