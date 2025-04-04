@@ -2,6 +2,13 @@ import { default as config } from '@dfinity/eslint-config-oisy-wallet/svelte';
 
 export default [
 	...config,
+
+	{
+		rules: {
+			'object-shorthand': 'error'
+		}
+	},
+
 	{
 		ignores: [
 			'**/.DS_Store',
