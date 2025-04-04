@@ -22,7 +22,7 @@
 			isNullish(tokenStandard) ||
 			isInvalidDestinationIc({
 				destination,
-				tokenStandard: tokenStandard,
+				tokenStandard,
 				networkId
 			}));
 
