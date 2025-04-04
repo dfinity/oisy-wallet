@@ -13,7 +13,6 @@ export const load: PageLoad = (_$event: LoadEvent): RouteParams => {
 			// Open the exact same URL in the browser (escaping the PWA shell)
 			const fullUrl = window.location.href;
 			window.open(fullUrl, '_blank');
-			window.close(); // Attempt to close PWA tab (may not always work)
 		}
 	}
 
