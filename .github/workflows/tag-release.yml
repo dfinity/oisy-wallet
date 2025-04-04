@@ -47,7 +47,7 @@ jobs:
 
   call-deploy:
     needs: release
-    if: needs.release.conclusion == 'success'
+    if: needs.release.result == 'success'
     permissions:
       contents: read
     uses: ./.github/workflows/deploy-to-environment.yml
