@@ -10,6 +10,7 @@
 	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
 	import { authNotSignedIn, authIdentity } from '$lib/derived/auth.derived';
 	import { initSignerContext, SIGNER_CONTEXT_KEY } from '$lib/stores/signer.store';
+	import { foo } from '$routes/(sign)/sign/+page';
 
 	const { idle, reset, ...context } = initSignerContext();
 	setContext(SIGNER_CONTEXT_KEY, {
@@ -40,7 +41,9 @@
 <article
 	class="mb-10 flex min-h-96 flex-col rounded-lg border border-brand-subtle-20 bg-surface px-5 py-6"
 >
-	{#if $authNotSignedIn}
+	{#if $foo}
+		<slot />
+	{:else if $authNotSignedIn}
 		<SignerSignIn />
 	{:else}
 		<SignerAccounts>
