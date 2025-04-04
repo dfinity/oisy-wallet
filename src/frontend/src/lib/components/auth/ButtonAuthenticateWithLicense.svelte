@@ -1,7 +1,7 @@
 <script lang="ts">
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
-	import { TRACK_COUNT_AUTHENTICATION_CLICK } from '$lib/constants/analytics.contants';
+	import { TRACK_COUNT_SIGN_IN_CLICK } from '$lib/constants/analytics.contants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -11,7 +11,7 @@
 
 	const onClick = async () => {
 		await trackEvent({
-			name: TRACK_COUNT_AUTHENTICATION_CLICK
+			name: TRACK_COUNT_SIGN_IN_CLICK
 		});
 
 		await signIn({});
