@@ -5,6 +5,7 @@ import {
 } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { EtherscanRest, etherscanRests } from '$eth/rest/etherscan.rest';
+import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
@@ -42,6 +43,19 @@ describe('etherscan.rest', () => {
 			]
 		};
 
+		const expectedTransaction: Transaction = {
+			hash: '0x123abc',
+			blockNumber: 123456,
+			timestamp: 1697049600,
+			from: '0xabc...',
+			to: '0xdef...',
+			nonce: 1,
+			gasLimit: BigNumber.from('21000'),
+			gasPrice: BigNumber.from('20000000000'),
+			value: 1000000000000000000n,
+			chainId: 0
+		};
+
 		const mockEtherscanErrorResponse = {
 			status: '0',
 			message: 'NOTOK',
@@ -70,20 +84,7 @@ describe('etherscan.rest', () => {
 				`${API_URL}?module=account&action=tokentx&contractaddress=${mockValidErc20Token.address}&address=${mockEthAddress}&startblock=0&endblock=99999999&sort=desc&apikey=test-api-key`
 			);
 
-			expect(result).toEqual([
-				{
-					hash: '0x123abc',
-					blockNumber: 123456,
-					timestamp: 1697049600,
-					from: '0xabc...',
-					to: '0xdef...',
-					nonce: 1,
-					gasLimit: BigNumber.from('21000'),
-					gasPrice: BigNumber.from('20000000000'),
-					value: 1000000000000000000n,
-					chainId: 0
-				}
-			]);
+			expect(result).toEqual([expectedTransaction]);
 		});
 
 		it('should throw an error if the API response status is not OK', async () => {
