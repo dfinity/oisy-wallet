@@ -8,7 +8,7 @@ import type {
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { mapAllowSigningError, mapCreateChallengeError } from '$lib/canisters/backend.errors';
 import type { OptionIdentity } from '$lib/types/identity';
-import crypto from 'crypto';
+import { hashToHex } from '$lib/utils/crypto.utils';
 
 function getTimestampNowNs(): bigint {
 	return BigInt(Date.now()) * BigInt(1e6);
@@ -23,8 +23,8 @@ export const solvePowChallenge = async (timestamp: bigint, difficulty: number): 
 
 	while (true) {
 		const challengeStr = `${timestamp}.${nonce}`;
-		const hash = crypto.createHash('sha256').update(challengeStr).digest();
-		const prefix = hash.readUInt32BE(0);
+		const hashHex = await hashToHex(challengeStr); // Using the new hashToHex function
+		const prefix = parseInt(hashHex.slice(0, 8), 16); // Only consider the first 4 bytes
 		if (prefix <= target) break;
 		nonce++;
 	}

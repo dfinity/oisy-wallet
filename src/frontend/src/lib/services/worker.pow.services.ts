@@ -1,9 +1,12 @@
+import type { AllowSigningRequest } from '$declarations/backend/backend.did';
+import { allowSigning } from '$lib/api/backend.api';
+import { mapAllowSigningError } from '$lib/canisters/backend.errors';
 import {
 	PostMessageAllowSigningRequestSchema,
-	PostMessageAllowSigningStatusSchema,
+	PostMessageAllowSigningResponseDataSchema,
 	PostMessageCreatePowChallengeRequestSchema
 } from '$lib/schema/post-message.schema';
-import { _allowSigning, _createPowChallenge } from '$lib/services/pow.services';
+import { _createPowChallenge } from '$lib/services/pow.services';
 import { authStore } from '$lib/stores/auth.store';
 import type {
 	PostMessageAllowSigningRequest,
@@ -42,7 +45,7 @@ export const initPowWorker = async (): Promise<BaseWorker> => {
 				break;
 			}
 
-			case 'AllowSigningMessageRequest': {
+			case 'AllowSigningRequest': {
 				const requestPostMessage = PostMessageAllowSigningRequestSchema.safeParse(raw);
 				if (!requestPostMessage.success) {
 					console.error('Invalid AllowSigningMessageResponse', requestPostMessage.error.format());
@@ -83,21 +86,24 @@ export const initPowWorker = async (): Promise<BaseWorker> => {
 		//};
 		const { identity } = get(authStore);
 
-		let allowSigningResponse = await _allowSigning({ identity });
+		let allowSigningRequest: AllowSigningRequest = {
+			nonce: parsedPostMessage.data.nonce
+		};
+		const result = await allowSigning({ identity, request: allowSigningRequest });
+
+		if ('Err' in result) {
+			throw mapAllowSigningError(result.Err);
+		}
 
 		const response: PostMessageAllowSigningResponse = {
 			msg: 'AllowSigningResponse',
 			requestId: parsedPostMessage.requestId,
 			type: 'response',
 			tag: 'Ok',
-			data: {
-				allowed_cycles: allowSigningResponse.allowed_cycles,
-				challenge_completion: allowSigningResponse.challenge_completion,
-				status: PostMessageAllowSigningStatusSchema.parse(allowSigningResponse.status)
-			}
+			data: PostMessageAllowSigningResponseDataSchema.parse(result)
 		};
 
-		// send theResult_2
+		// send response
 		worker.postMessage(response);
 	};
 
