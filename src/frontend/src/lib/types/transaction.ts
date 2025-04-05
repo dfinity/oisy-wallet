@@ -9,17 +9,16 @@ import {
 import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse as AlchemyTransactionResponse } from 'alchemy-sdk';
-import { ethers } from 'ethers';
+import type { FeeData } from 'ethers/providers';
+import type { Transaction as EthersTransactionLib } from 'ethers/transaction';
 import * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
-export type EthersTransaction = Pick<ethers.Transaction, 'nonce' | 'data'> & {
-	// TODO: use ethers.Transaction.value type again once we upgrade to ethers v6
-	value: bigint;
-	gasLimit: bigint;
-	chainId: bigint;
-} & {
+export type EthersTransaction = Pick<
+	EthersTransactionLib,
+	'nonce' | 'gasLimit' | 'data' | 'value' | 'chainId'
+> & {
 	hash?: string;
 	from?: string;
 	to?: string;
@@ -41,12 +40,9 @@ export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
 		displayTimestamp?: number;
 	};
 
-// TODO: use FeeData type again once we upgrade to ethers v6
-export interface TransactionFeeData {
-	maxFeePerGas: bigint | null;
-	maxPriorityFeePerGas: bigint | null;
+export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
 	gas: bigint;
-}
+};
 
 export type RequiredTransactionFeeData = {
 	[K in keyof Pick<

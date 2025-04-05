@@ -10,7 +10,6 @@ import { isDestinationContractAddress } from '$eth/utils/send.utils';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export interface GetFeeData {
 	from: EthAddress;
@@ -48,8 +47,7 @@ export const getErc20FeeData = async ({
 		const { getFeeData: fn } = isNetworkIdICP(targetNetworkId)
 			? infuraErc20IcpProviders(targetNetworkId as NetworkId)
 			: infuraErc20Providers(targetNetworkId ?? sourceNetworkId);
-		const feeBigNumber = await fn({ ...rest, contract, amount: BigNumber.from(amount) });
-		const fee = feeBigNumber.toBigInt();
+		const fee = await fn({ ...rest, contract, amount });
 
 		const isResearchCoin = contract.symbol === 'RSC' && contract.name === 'ResearchCoin';
 
