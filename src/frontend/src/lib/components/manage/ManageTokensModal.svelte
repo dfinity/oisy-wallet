@@ -29,13 +29,14 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdEthereum, isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
-	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
+	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
+	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 
 	export let initialSearch: string | undefined = undefined;
-	export let onClose: () => void = () => {};
+	export let onClose: () => void = () => {
+	};
 
 	const steps: WizardSteps = [
 		{
@@ -62,8 +63,8 @@
 	let modal: WizardModal;
 
 	const saveTokens = async ({
-		detail: { icrc, erc20, spl }
-	}: CustomEvent<{
+															detail: { icrc, erc20, spl }
+														}: CustomEvent<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
 		spl: SplTokenToggleable[];
@@ -175,8 +176,8 @@
 			identity: $authIdentity
 		});
 
-	const saveSpl = (tokens: SaveSplUserToken[]): Promise<void> =>
-		saveSplUserTokens({
+	const saveSpl = (tokens: SaveSplCustomToken[]): Promise<void> =>
+		saveSplCustomTokens({
 			tokens,
 			progress,
 			modalNext: () => modal.set(3),
