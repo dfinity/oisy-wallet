@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import type { IcCkToken } from '$icp/types/ic-token';
 	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
@@ -30,5 +31,7 @@
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckEthToken)}
-	<ConvertModal sourceToken={$ethereumToken} destinationToken={ckEthToken} />
+	<FeeStoreContext token={$ethereumToken}>
+		<ConvertModal sourceToken={$ethereumToken} destinationToken={ckEthToken} />
+	</FeeStoreContext>
 {/if}
