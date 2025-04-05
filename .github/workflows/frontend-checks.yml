@@ -103,7 +103,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Test
-        run: npm run test
+        run: npm run test:coverage
 
   config:
     runs-on: ubuntu-24.04
