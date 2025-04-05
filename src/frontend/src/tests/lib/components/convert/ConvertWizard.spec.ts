@@ -7,6 +7,12 @@ import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import {
+	FEE_CONTEXT_KEY,
+	initFeeContext,
+	initFeeStore,
+	type FeeContext
+} from '$eth/stores/fee.store';
 import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 import {
 	BTC_CONVERT_FORM_TEST_ID,
@@ -29,6 +35,7 @@ import type { Token } from '$lib/types/token';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
+import { writable } from 'svelte/store';
 
 describe('ConvertWizard', () => {
 	const sendAmount = 20;
@@ -44,8 +51,21 @@ describe('ConvertWizard', () => {
 	};
 
 	const mockContext = (sourceToken: Token) =>
-		new Map<symbol, ConvertContext | TokenActionValidationErrorsContext | UtxosFeeContext>([
+		new Map<
+			symbol,
+			ConvertContext | TokenActionValidationErrorsContext | UtxosFeeContext | FeeContext
+		>([
 			[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }],
+			[
+				FEE_CONTEXT_KEY,
+				initFeeContext({
+					feeStore: initFeeStore(),
+					feeTokenIdStore: writable(sourceToken.id),
+					feeExchangeRateStore: writable(100),
+					feeSymbolStore: writable(sourceToken.symbol),
+					feeDecimalsStore: writable(sourceToken.decimals)
+				})
+			],
 			[CONVERT_CONTEXT_KEY, initConvertContext({ sourceToken, destinationToken: ICP_TOKEN })],
 			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
