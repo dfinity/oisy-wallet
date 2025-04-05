@@ -19,7 +19,7 @@ export const EURC_TOKEN: RequiredErc20Token = {
 	symbol: EURC_SYMBOL,
 	decimals: EURC_DECIMALS,
 	icon: eurc,
-	address: '0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c',
+	address: '0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckEURC'
 };
@@ -37,7 +37,7 @@ export const SEPOLIA_EURC_TOKEN: RequiredErc20Token = {
 	symbol: EURC_SYMBOL,
 	decimals: EURC_DECIMALS,
 	icon: eurc,
-	address: '0x08210F9170F89Ab7658F0B5E3fF39b0E03C594D4',
+	address: '0x808456652fdb597867f38412077A9182bf77359F',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckSepoliaEURC'
 };
