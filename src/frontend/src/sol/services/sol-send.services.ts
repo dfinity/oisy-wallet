@@ -198,7 +198,7 @@ const createSplTokenTransactionMessage = async ({
 						: destinationTokenAccountAddress
 			),
 			authority: signer,
-			amount: amount
+			amount
 		},
 		{ programAddress: solAddress(tokenOwnerAddress) }
 	);

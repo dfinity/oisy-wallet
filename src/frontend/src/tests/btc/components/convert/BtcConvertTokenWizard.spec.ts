@@ -65,7 +65,7 @@ describe('BtcConvertTokenWizard', () => {
 			title: 'title'
 		},
 		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
-		sendAmount: sendAmount,
+		sendAmount,
 		receiveAmount: sendAmount
 	};
 	const mockSignerApi = () =>
