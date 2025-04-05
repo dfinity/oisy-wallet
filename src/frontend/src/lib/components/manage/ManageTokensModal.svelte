@@ -31,12 +31,11 @@
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
-	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
 	export let initialSearch: string | undefined = undefined;
-	export let onClose: () => void = () => {
-	};
+	export let onClose: () => void = () => {};
 
 	const steps: WizardSteps = [
 		{
@@ -63,8 +62,8 @@
 	let modal: WizardModal;
 
 	const saveTokens = async ({
-															detail: { icrc, erc20, spl }
-														}: CustomEvent<{
+		detail: { icrc, erc20, spl }
+	}: CustomEvent<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
 		spl: SplTokenToggleable[];
