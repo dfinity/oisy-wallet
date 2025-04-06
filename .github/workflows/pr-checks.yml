@@ -9,9 +9,7 @@ on:
       - synchronize
       - labeled
 
-permissions:
-  pull-requests: read
-  contents: read
+permissions: {}
 
 jobs:
   check-pr-title:
