@@ -91,3 +91,5 @@ jobs:
             echo "No changes detected in PR!"
             exit 1
           fi
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
