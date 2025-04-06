@@ -9,6 +9,8 @@ on:
       - synchronize
       - labeled
 
+permissions: { }
+
 jobs:
   check-pr-title:
     name: 'check-pr-title:required'

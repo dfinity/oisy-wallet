@@ -7,8 +7,8 @@ on:
     tags:
       - v*
   workflow_run:
-    workflows: ['Tag on Merge from Release Branch']
-    types: [completed]
+    workflows: [ 'Tag on Merge from Release Branch' ]
+    types: [ completed ]
   workflow_dispatch:
     inputs:
       network:
@@ -48,6 +48,8 @@ run-name: >-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.network }}-${{ github.event.inputs.canister }}
   cancel-in-progress: false
+
+permissions: { }
 
 jobs:
   deployment:
@@ -119,6 +121,12 @@ jobs:
         with:
           fetch-depth: 2
           persist-credentials: false
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin "$BASE_REF:$BASE_REF"
+        env:
+          BASE_REF: ${{ github.base_ref }}
 
       - name: Set Output Variables Based on Network
         id: set-outputs
@@ -309,7 +317,7 @@ jobs:
           [[ "$FORCE_BACKEND" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
           if [ "$deploy_backend" == "true" ] ; then
-            if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
+            if git diff --quiet "origin/$BASE_REF" HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
               if [ "$FORCE_BACKEND" == "false" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
               else
@@ -324,3 +332,4 @@ jobs:
         env:
           FORCE_BACKEND: ${{ github.event.inputs.force-backend }}
           DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
+          BASE_REF: ${{ github.base_ref }}
