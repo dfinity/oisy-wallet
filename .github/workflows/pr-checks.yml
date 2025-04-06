@@ -80,7 +80,7 @@ jobs:
         run: |
           git fetch origin "$BASE_REF:$BASE_REF"
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
 
       - name: 'Check for changed files'
         id: file_check
