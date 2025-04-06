@@ -8,7 +8,7 @@ on:
     - cron: '30 3 * * FRI'
   workflow_dispatch:
 
-permissions: { }
+permissions: {}
 
 jobs:
   rust-update:

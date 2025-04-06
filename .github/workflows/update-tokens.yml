@@ -6,7 +6,7 @@ on:
     - cron: '30 3 * * THU'
   workflow_dispatch:
 
-permissions: { }
+permissions: {}
 
 jobs:
   update-tokens-sns:

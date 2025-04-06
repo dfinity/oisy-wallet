@@ -17,7 +17,7 @@ on:
         description: 'Short description of the release (motivation, changes, tests)'
         required: true
 
-permissions: { }
+permissions: {}
 
 jobs:
   version_bump:

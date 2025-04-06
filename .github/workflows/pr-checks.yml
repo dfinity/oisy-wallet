@@ -9,7 +9,7 @@ on:
       - synchronize
       - labeled
 
-permissions: { }
+permissions: {}
 
 jobs:
   check-pr-title:

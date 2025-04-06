@@ -7,8 +7,8 @@ on:
     tags:
       - v*
   workflow_run:
-    workflows: [ 'Tag on Merge from Release Branch' ]
-    types: [ completed ]
+    workflows: ['Tag on Merge from Release Branch']
+    types: [completed]
   workflow_dispatch:
     inputs:
       network:
@@ -49,7 +49,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.network }}-${{ github.event.inputs.canister }}
   cancel-in-progress: false
 
-permissions: { }
+permissions: {}
 
 jobs:
   deployment:

@@ -5,7 +5,7 @@ on:
     - cron: '30 3 * * MON'
   workflow_dispatch:
 
-permissions: { }
+permissions: {}
 
 jobs:
   check-unused-files:

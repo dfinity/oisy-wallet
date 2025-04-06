@@ -8,7 +8,7 @@ on:
       - v*
   workflow_dispatch:
 
-permissions: { }
+permissions: {}
 
 jobs:
   release_notes:

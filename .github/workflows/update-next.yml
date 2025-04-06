@@ -21,7 +21,7 @@ on:
         description: 'Update all dependencies to the next version'
         default: true
 
-permissions: { }
+permissions: {}
 
 jobs:
   update-dependencies:
