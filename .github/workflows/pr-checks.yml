@@ -75,6 +75,12 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
 
+      - name: Fetch base branch
+        run: |
+          git fetch origin "$BASE_REF:$BASE_REF"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+
       - name: 'Check for changed files'
         id: file_check
         run: |
