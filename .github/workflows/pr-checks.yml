@@ -58,8 +58,6 @@ jobs:
     permissions:
       pull-requests: read
       contents: read
-    env:
-      PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
