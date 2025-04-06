@@ -91,7 +91,7 @@ jobs:
 
   pr-checks-pass:
     if: always()
-    needs: [ 'check-pr-title', 'check-pr-description', 'check-empty-pr' ]
+    needs: ['check-pr-title', 'check-pr-description', 'check-empty-pr']
     runs-on: ubuntu-24.04
     permissions:
       contents: read
