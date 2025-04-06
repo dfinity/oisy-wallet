@@ -53,6 +53,7 @@ jobs:
           fi
 
   check-empty-pr:
+    name: 'check-empty-pr:required'
     runs-on: ubuntu-24.04
     permissions:
       pull-requests: read
