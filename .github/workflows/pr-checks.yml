@@ -11,6 +11,7 @@ on:
 
 permissions:
   pull-requests: read
+  contents: read
 
 jobs:
   check-pr-title:
@@ -55,6 +56,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       pull-requests: read
+      contents: read
     env:
       PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
@@ -65,14 +67,20 @@ jobs:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
 
+      - name: Checkout code
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+
       - name: 'Check for changed files'
         id: file_check
         run: |
-          CHANGED_FILES=$(gh pr view $PR_NUMBER --json files -q '.files | length')
+          CHANGED_FILES=$(git diff -name-only "origin/$BASE_REF" HEAD | wc -l)
           echo "Changed files: $CHANGED_FILES"
           if [ "$CHANGED_FILES" -eq "0" ]; then
             echo "No changes detected in PR!"
             exit 1
           fi
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
