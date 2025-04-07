@@ -119,7 +119,7 @@
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
-	$: {
+	$: if (progressStep === ProgressStepsLoader.DONE) {
 		if ($networkEthereumEnabled && isNullish($ethAddress)) {
 			debounceLoadEthAddress();
 		}
@@ -207,7 +207,7 @@
 	</div>
 {/if}
 
-<style>
+<style lang="scss">
 	:root:has(.login-modal) {
 		--alert-max-width: 90vw;
 		--alert-max-height: initial;

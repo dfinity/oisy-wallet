@@ -5,6 +5,8 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   generate:
     runs-on: ubuntu-24.04
@@ -23,13 +25,17 @@ jobs:
       - name: Check if commits can be added
         id: check_can_add_commit
         run: |
-          echo steps.app-token.outputs.token null ${{ steps.app-token.outputs.token == null}}
-          echo steps.app-token.outputs.token empty ${{ steps.app-token.outputs.token == ''}}
-          echo "can_add_commit=${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
+          echo steps.app-token.outputs.token null $TOKEN_IS_NULL
+          echo steps.app-token.outputs.token empty $TOKEN_IS_EMPTY
+          echo "can_add_commit=$CAN_ADD_COMMIT" >> $GITHUB_OUTPUT
+        env:
+          TOKEN_IS_NULL: ${{ steps.app-token.outputs.token == null }}
+          TOKEN_IS_EMPTY: ${{ steps.app-token.outputs.token == '' }}
+          CAN_ADD_COMMIT: ${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}
 
       - name: Checkout code
         if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -38,7 +44,7 @@ jobs:
 
       - name: Checkout code
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
 
@@ -128,7 +134,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
       - uses: ./.github/actions/needs_success
