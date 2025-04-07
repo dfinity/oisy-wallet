@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconClose from '$lib/components/icons/IconClose.svelte';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
