@@ -2,6 +2,7 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
+	import { transferXtc } from '$icp/api/xtc-ledger.api';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
@@ -125,6 +126,12 @@
 			});
 
 			back();
+		}
+	};
+
+	window.transferXtc = ({ to, amount }: { to: string; amount: bigint }) => {
+		if (!isNullish($authIdentity)) {
+			transferXtc($authIdentity, to, amount);
 		}
 	};
 
