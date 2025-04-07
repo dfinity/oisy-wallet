@@ -10,7 +10,7 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { AppPath } from '$lib/constants/routes.constants';
+	import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 
 	let visible: boolean;
 	$: visible = false;
@@ -50,7 +50,10 @@
 
 	afterNavigate(({ from }) => {
 		const previousRoute = `${from?.route?.id}/`;
-		if (previousRoute.indexOf(AppPath.Transactions) < 0) {
+		if (
+			previousRoute !== `${ROUTE_ID_GROUP_APP}/` &&
+			previousRoute !== `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`
+		) {
 			$tokenListStore.filter = '';
 			handleClose();
 		}
