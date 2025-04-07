@@ -1,21 +1,13 @@
 <script lang="ts">
-	import icpDark from '$eth/assets/icp_dark.svg';
-	import bitcoin from '$icp/assets/bitcoin.svg';
-	import eth from '$icp-eth/assets/eth.svg';
-	import Logo from '$lib/components/ui/Logo.svelte';
+	import shocked from '$lib/assets/shocked.svg';
 	import { i18n } from '$lib/stores/i18n.store';
+	import Img from '$lib/components/ui/Img.svelte';
 </script>
 
 <div class="py-12">
 	<div class="mb-5 flex justify-center p-2">
 		<span class="z-0 -mr-4">
-			<Logo ring size="lg" src={icpDark}></Logo>
-		</span>
-		<span class="z-1 -mr-4">
-			<Logo ring size="lg" src={eth}></Logo>
-		</span>
-		<span class="z-2">
-			<Logo ring size="lg" src={bitcoin}></Logo>
+			<Img src={shocked}></Img>
 		</span>
 	</div>
 
