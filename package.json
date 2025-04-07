@@ -84,7 +84,7 @@
 		"@walletconnect/auth-client": "^2.1.2",
 		"alchemy-sdk": "3.4.1",
 		"buffer": "^6.0.3",
-		"ethers": "^5.7.0",
+		"ethers": "^6.13.5",
 		"idb-keyval": "^6.2.1",
 		"plausible-tracker": "^0.3.9",
 		"svelte-confetti": "^2.3.1",
@@ -130,7 +130,9 @@
 	},
 	"type": "module",
 	"overrides": {
-		"ws": "^7.5.10",
+		"@ethersproject/providers": {
+			"ws": "^7.5.10"
+		},
 		"elliptic": "^6.6.1",
 		"cookie": "^0.7.0",
 		"axios": "^1.8.2"
