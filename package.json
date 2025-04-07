@@ -126,7 +126,7 @@
 		"vite": "^6.2.5",
 		"vite-node": "^3.0.9",
 		"vitest": "^3.0.9",
-		"vitest-mock-extended": "^3.0.1"
+		"vitest-mock-extended": "^3.1.0"
 	},
 	"type": "module",
 	"overrides": {
