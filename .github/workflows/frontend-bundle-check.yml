@@ -23,16 +23,13 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Build project
         run: npm run build
 
       - name: Get bundle size
         id: get-size
         run: |
-          SIZE=$(du -sk "./.svelte-kit" | cut -f1)
+          SIZE=$(du -sk build | cut -f1)
           echo "Base branch bundle size: $SIZE KB"
           echo "size=$SIZE" >> $GITHUB_OUTPUT
 
@@ -61,12 +58,12 @@ jobs:
       - name: Get bundle size
         id: get-size
         run: |
-          SIZE=$(du -sk "./.svelte-kit" | cut -f1)
+          SIZE=$(du -sk build | cut -f1)
           echo "PR bundle size: $SIZE KB"
           echo "size=$SIZE" >> $GITHUB_OUTPUT
 
   compare-sizes:
-    needs: [build-base-branch, build-pr]
+    needs: [ build-base-branch, build-pr ]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
