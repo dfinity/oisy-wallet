@@ -2,15 +2,15 @@ import type { BtcTransactionUi } from '$btc/types/btc';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import {
-	TransactionIdSchema,
+	type TransactionIdSchema,
 	type TransactionStatusSchema,
 	type TransactionTypeSchema
 } from '$lib/schema/transaction.schema';
 import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse as AlchemyTransactionResponse } from 'alchemy-sdk';
-import { ethers } from 'ethers';
-import * as z from 'zod';
+import type { ethers } from 'ethers';
+import type * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 

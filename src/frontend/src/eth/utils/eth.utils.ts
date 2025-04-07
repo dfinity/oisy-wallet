@@ -1,5 +1,5 @@
 import {
-	SUPPORTED_ETHEREUM_TOKENS,
+	type SUPPORTED_ETHEREUM_TOKENS,
 	SUPPORTED_ETHEREUM_TOKEN_IDS
 } from '$env/tokens/tokens.eth.env';
 import type { OptionToken, TokenId } from '$lib/types/token';

@@ -1,4 +1,4 @@
-import {
+import type {
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
@@ -22,7 +22,7 @@ import {
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 import type { ZodType } from 'zod';
-import * as z from 'zod';
+import type * as z from 'zod';
 
 export type PostMessageDataRequest = z.infer<typeof PostMessageDataRequestSchema>;
 export type PostMessageDataResponse = z.infer<typeof PostMessageDataResponseSchema>;

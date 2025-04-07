@@ -1,16 +1,16 @@
 import {
-	TokenAppearanceSchema,
-	TokenBuySchema,
-	TokenBuyableSchema,
-	TokenCategorySchema,
-	TokenMetadataSchema,
-	TokenSchema,
-	TokenStandardSchema,
+	type TokenAppearanceSchema,
+	type TokenBuySchema,
+	type TokenBuyableSchema,
+	type TokenCategorySchema,
+	type TokenMetadataSchema,
+	type TokenSchema,
+	type TokenStandardSchema,
 	type TokenIdSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Option, RequiredExcept } from '$lib/types/utils';
-import * as z from 'zod';
+import type * as z from 'zod';
 
 export type TokenId = z.infer<typeof TokenIdSchema>;
 
