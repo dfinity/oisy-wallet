@@ -18,7 +18,7 @@ describe('RewardCard', () => {
 		const { container, getByText } = render(RewardCard, {
 			props: {
 				reward: mockedReward,
-				testId: testId
+				testId
 			}
 		});
 

@@ -5,7 +5,7 @@ export const copyToClipboard = async ({ value, text }: { value: string; text: st
 	await copyText(value);
 
 	toastsShow({
-		text: text,
+		text,
 		level: 'success',
 		duration: 2000
 	});

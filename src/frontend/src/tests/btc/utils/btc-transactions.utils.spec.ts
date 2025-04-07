@@ -108,7 +108,7 @@ describe('mapBtcTransaction', () => {
 			block_index: mockBtcTransactionUi.blockNumber
 		} as BitcoinTransaction;
 		const result = mapBtcTransaction({
-			transaction: transaction,
+			transaction,
 			btcAddress: mockBtcAddress,
 			latestBitcoinBlockHeight:
 				(mockBtcTransactionUi.blockNumber ?? 0) + UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS

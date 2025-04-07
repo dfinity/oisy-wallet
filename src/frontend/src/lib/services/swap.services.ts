@@ -80,8 +80,8 @@ export const swap = async ({
 
 	await kongSwap({
 		identity,
-		sourceToken: sourceToken,
-		destinationToken: destinationToken,
+		sourceToken,
+		destinationToken,
 		sendAmount: parsedSwapAmount,
 		receiveAmount,
 		maxSlippage: Number(slippageValue),

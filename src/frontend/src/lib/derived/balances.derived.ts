@@ -33,7 +33,7 @@ export const allBalancesZero: Readable<boolean> = derived(
 	[balancesStore, enabledNetworkTokens],
 	([$balancesStore, $enabledNetworkTokens]) =>
 		checkAllBalancesZero({
-			$balancesStore: $balancesStore,
+			$balancesStore,
 			minLength: $enabledNetworkTokens.length
 		})
 );

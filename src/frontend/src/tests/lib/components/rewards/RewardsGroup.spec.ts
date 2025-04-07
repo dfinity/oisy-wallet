@@ -37,7 +37,7 @@ describe('RewardsGroups', () => {
 				title,
 				rewards: [],
 				testId: groupTitle,
-				altText: altText
+				altText
 			}
 		});
 
@@ -56,7 +56,7 @@ describe('RewardsGroups', () => {
 				title,
 				rewards: mockRewardCampaigns,
 				testId: groupTitle,
-				altText: altText
+				altText
 			}
 		});
 

@@ -242,7 +242,7 @@ describe('transaction.utils', () => {
 
 			const result = mapTransactionModalData<IcTransactionUi>({
 				$modalOpen,
-				$modalStore: $modalStore
+				$modalStore
 			});
 
 			expect(result.transaction).toBeUndefined();
