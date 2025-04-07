@@ -78,7 +78,6 @@ export function sendMessageRequest<T>(
 		msg,
 		requestId,
 		type: 'request',
-		tag: 'Ok',
 		data: data
 	};
 
@@ -98,18 +97,4 @@ export function sendMessageRequest<T>(
 
 		worker.postMessage(payload); // Send the typed payload
 	});
-}
-
-export function isOk<T, E>(response: {
-	tag: 'Ok' | 'Err';
-	data: T | E;
-}): response is { tag: 'Ok'; data: T } {
-	return response.tag === 'Ok';
-}
-
-export function isErr<T, E>(response: {
-	tag: 'Ok' | 'Err';
-	data: T | E;
-}): response is { tag: 'Err'; data: E } {
-	return response.tag === 'Err';
 }

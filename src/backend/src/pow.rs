@@ -9,7 +9,7 @@ use shared::types::pow::{
 use crate::{
     mutate_state, read_state,
     types::{Candid, StoredPrincipal},
-    user_profile::exists_profile,
+    user_profile::has_user_profile,
     State,
 };
 // -------------------------------------------------------------------------------------------------
@@ -63,13 +63,24 @@ fn get_time_ms() -> u64 {
     ic_cdk::api::time() / 1_000_000
 }
 
+/// Formats a `StoredChallenge` excluding the sensitive `nonce` field.
+fn format_challenge(challenge: &StoredChallenge) -> String {
+    format!(
+        "StoredChallenge {{ start_timestamp_ms: {}, expiry_timestamp_ms: {}, difficulty: {}, solved: {} }}",
+        challenge.start_timestamp_ms,
+        challenge.expiry_timestamp_ms,
+        challenge.difficulty,
+        challenge.solved
+    )
+}
+
 // -------------------------------------------------------------------------------------------------
 // - Service functions
 // -------------------------------------------------------------------------------------------------
 
 pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeError> {
     let user_principal = StoredPrincipal(caller());
-    if !exists_profile(user_principal) {
+    if !has_user_profile(user_principal) {
         ic_cdk::println!(
             "create_pow_challenge() -> User profile missing for principal: {}",
             user_principal.0.to_text()
@@ -82,7 +93,7 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
     if let Some(stored_challenge) = get_pow_challenge() {
         ic_cdk::println!(
             "create_pow_challenge() -> Found existing challenge: {:?}",
-            stored_challenge
+            format_challenge(&stored_challenge)
         );
 
         // we re-use the previous challenge so we can dynamically adapt the difficulty
@@ -169,14 +180,13 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
 ///   challenge.
 /// - `ChallengeCompletionError::ExpiredChallenge`: If the challenge expired before being solved.
 /// - `ChallengeCompletionError::ChallengeAlreadySolved`: If the challenge has already been solved.
-pub(crate) fn complete_challenge(
-    nonce: u64,
-) -> Result<ChallengeCompletion, ChallengeCompletionError> {
+#[allow(dead_code)]
+pub fn complete_challenge(nonce: u64) -> Result<ChallengeCompletion, ChallengeCompletionError> {
     let principal = caller();
     let stored_principal = StoredPrincipal(principal);
 
     // we reject any request from a principle without a user profile
-    if !exists_profile(stored_principal) {
+    if !has_user_profile(stored_principal) {
         ic_cdk::println!(
             "complete_challenge(nonce) -> User profile missing for principal: {}",
             principal.to_text()
@@ -194,7 +204,7 @@ pub(crate) fn complete_challenge(
 
     ic_cdk::println!(
         "complete_challenge(nonce) -> Retrieved {:?}",
-        stored_challenge
+        format_challenge(&stored_challenge)
     );
 
     // A new challenge can be requested after the current challenge has expired
@@ -249,7 +259,7 @@ pub(crate) fn complete_challenge(
 
     ic_cdk::println!(
         "complete_challenge(nonce) -> Stored challenge: {:?}",
-        stored_challenge
+        format_challenge(&stored_challenge)
     );
 
     Ok(ChallengeCompletion {

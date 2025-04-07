@@ -6,11 +6,9 @@ import { solvePowChallenge } from '$lib/services/pow.services';
 import type {
 	PostMessage,
 	PostMessageAllowSigningResponse,
-	PostMessageCreatePowChallengeError,
-	PostMessageCreatePowChallengeResponse,
-	PostMessageCreatePowChallengeResponseData
+	PostMessageCreatePowChallengeResponse
 } from '$lib/types/post-message';
-import { isOk, routeWorkerResponse, sendMessageRequest } from '$lib/utils/worker.utils';
+import { routeWorkerResponse, sendMessageRequest } from '$lib/utils/worker.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const FIRST_TIMER_INTERVAL = 60_000;
@@ -64,18 +62,14 @@ async function allowSigning() {
 			{},
 			PostMessageCreatePowChallengeResponseSchema
 		);
+
 	let nonce;
-	if (
-		isOk<PostMessageCreatePowChallengeResponseData, PostMessageCreatePowChallengeError>(
-			createPowChallengeResponse
-		)
-	) {
-		const challengeData = createPowChallengeResponse.data;
+	if ('Ok' in createPowChallengeResponse.result) {
+		const challengeData = createPowChallengeResponse.result.Ok;
 		nonce = await solvePowChallenge(challengeData.start_timestamp_ms, challengeData.difficulty);
-	} else {
-		const error = createPowChallengeResponse.data;
-		console.error('PoW challenge error:', error);
-		return;
+	} else if ('Err' in createPowChallengeResponse.result) {
+		console.error('PoW challenge error:', createPowChallengeResponse.result.Err);
+		return; // Exit on error
 	}
 
 	// Step 2: AllowSigning
@@ -83,13 +77,13 @@ async function allowSigning() {
 		await sendMessageRequest<PostMessageAllowSigningResponse>(
 			self as unknown as Worker,
 			'AllowSigningRequest',
-			{ nonce: BigInt(nonce) },
+			{ nonce: nonce },
 			PostMessageAllowSigningResponseSchema
 		);
 
-	if (isOk(allowSigningResponse)) {
-		console.info('Allow signing successful:', allowSigningResponse.data);
-	} else {
-		console.error('Allow signing failed:', allowSigningResponse.data);
+	if ('Ok' in allowSigningResponse.result) {
+		console.info('Allow signing successful:', allowSigningResponse.result.Ok);
+	} else if ('Err' in allowSigningResponse.result) {
+		console.error('Allow signing failed:', allowSigningResponse.result.Err);
 	}
 }

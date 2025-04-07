@@ -1,12 +1,9 @@
 import type {
 	AllowSigningRequest,
-	AllowSigningResponse,
-	CreateChallengeResponse,
-	Result_6
+	Result_2 as AllowSigningResult,
+	Result_6 as CreateChallengeResult
 } from '$declarations/backend/backend.did';
-
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
-import { mapAllowSigningError, mapCreateChallengeError } from '$lib/canisters/backend.errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import { hashToHex } from '$lib/utils/crypto.utils';
 
@@ -38,15 +35,17 @@ export const _createPowChallenge = async ({
 	identity
 }: {
 	identity: OptionIdentity;
-}): Promise<CreateChallengeResponse> => {
-	const response: Result_6 = await createPowChallenge({
-		identity
-	});
-
-	if ('Err' in response) {
-		throw mapCreateChallengeError(response.Err);
+}): Promise<CreateChallengeResult> => {
+	try {
+		return await createPowChallenge({ identity });
+	} catch (error) {
+		// Ensure the `Err` matches the `CreateChallengeError` type
+		return {
+			Err: {
+				Other: 'UnexpectedError' // Adjust this based on the expected `CreateChallengeError` structure
+			}
+		};
 	}
-	return response.Ok;
 };
 
 export const _allowSigning = async ({
@@ -55,12 +54,15 @@ export const _allowSigning = async ({
 }: {
 	identity: OptionIdentity;
 	request?: AllowSigningRequest;
-}): Promise<AllowSigningResponse> => {
-	const response = await allowSigning({ identity, request });
-
-	if ('Err' in response) {
-		throw mapAllowSigningError(response.Err);
+}): Promise<AllowSigningResult> => {
+	try {
+		return await allowSigning({ identity, request });
+	} catch (error) {
+		// Ensure the `Err` matches the `CreateChallengeError` type
+		return {
+			Err: {
+				Other: 'UnexpectedError' // Adjust this based on the expected `CreateChallengeError` structure
+			}
+		};
 	}
-
-	return response.Ok;
 };

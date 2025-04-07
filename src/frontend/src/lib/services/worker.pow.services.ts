@@ -1,12 +1,12 @@
-import type { AllowSigningRequest } from '$declarations/backend/backend.did';
-import { allowSigning } from '$lib/api/backend.api';
-import { mapAllowSigningError } from '$lib/canisters/backend.errors';
+import type {
+	Result_2 as AllowSigningResult,
+	Result_6 as CreateChallengeResult
+} from '$declarations/backend/backend.did';
 import {
-	PostMessageAllowSigningRequestSchema,
-	PostMessageAllowSigningResponseDataSchema,
-	PostMessageCreatePowChallengeRequestSchema
+	AllowSigningResponseResultSchema,
+	CreatePowChallengeResponseResultSchema
 } from '$lib/schema/post-message.schema';
-import { _createPowChallenge } from '$lib/services/pow.services';
+import { _allowSigning, _createPowChallenge } from '$lib/services/pow.services';
 import { authStore } from '$lib/stores/auth.store';
 import type {
 	PostMessageAllowSigningRequest,
@@ -15,6 +15,46 @@ import type {
 	PostMessageCreatePowChallengeResponse
 } from '$lib/types/post-message';
 import { get } from 'svelte/store';
+import type { ZodType } from 'zod';
+
+/**
+ * Maps a canister response to its corresponding schema result, validating the schema and handling both `Ok` and `Err` cases.
+ * Includes logic for transforming `Err` to a human-readable string.
+ * @param response - The canister response to map.
+ * @param schema - The Zod schema used to validate the `Ok` part of the response.
+ * @returns The mapped response object.
+ * @throws Will throw an error if the validation fails.
+ */
+function mapCanisterResponse<T>(
+	response: { Ok?: T; Err?: any }, // Allow `Ok` or `Err` as part of the response structure
+	schema: ZodType<T> // Schema only applies to the `Ok` part
+): { Ok: T } | { Err: string } {
+	if ('Err' in response) {
+		const err = response.Err;
+		if ('ChallengeInProgress' in err) {
+			return { Err: 'Challenge is already in progress.' };
+		}
+		if ('Unauthorized' in err) {
+			return { Err: 'Unauthorized request.' };
+		}
+		if ('Other' in err && typeof err.Other === 'string') {
+			return { Err: err.Other };
+		}
+		return { Err: 'Unknown error.' };
+	}
+
+	if (response.Ok) {
+		// Validate only the `Ok` part of the response
+		const validationResult = schema.safeParse(response.Ok);
+		if (!validationResult.success) {
+			throw new Error(`Response validation failed: ${validationResult.error.message}`);
+		}
+		return { Ok: validationResult.data };
+	}
+
+	// Provide an appropriate fallback in case `Ok` is missing and `Err` isn't present
+	return { Err: 'Unexpected response structure.' };
+}
 
 export interface BaseWorker {
 	startPowWorker: () => void;
@@ -22,36 +62,20 @@ export interface BaseWorker {
 	destroyPowWorker: () => void;
 }
 
-let errorMessages: { msg: string; timestamp: number }[] = [];
-
 export const initPowWorker = async (): Promise<BaseWorker> => {
 	const PowWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new PowWorker.default();
-	//initWorkerResponseRouter(worker);
+
 	worker.onmessage = async (event) => {
 		const raw = event.data;
-		const { msg } = raw;
 
-		switch (msg) {
-			// handle any response first and skip further processing
-
+		switch (raw.msg) {
 			case 'CreatePowChallengeRequest': {
-				const requestPostMessage = PostMessageCreatePowChallengeRequestSchema.safeParse(raw);
-				if (!requestPostMessage.success) {
-					console.error('Invalid AllowSigningMessageResponse', requestPostMessage.error.format());
-					return null;
-				}
-				await handleCreatePowChallengeRequest(requestPostMessage.data);
+				await handleCreatePowChallengeRequest(raw);
 				break;
 			}
-
 			case 'AllowSigningRequest': {
-				const requestPostMessage = PostMessageAllowSigningRequestSchema.safeParse(raw);
-				if (!requestPostMessage.success) {
-					console.error('Invalid AllowSigningMessageResponse', requestPostMessage.error.format());
-					return null;
-				}
-				await handleAllowSigningRequest(requestPostMessage.data);
+				await handleAllowSigningRequest(raw);
 				break;
 			}
 		}
@@ -62,49 +86,34 @@ export const initPowWorker = async (): Promise<BaseWorker> => {
 	) => {
 		const { identity } = get(authStore);
 
-		let allowSigningResponse = await _createPowChallenge({ identity });
+		const response: CreateChallengeResult = await _createPowChallenge({ identity });
 
-		const response: PostMessageCreatePowChallengeResponse = {
+		const postMessageResponse: PostMessageCreatePowChallengeResponse = {
 			msg: 'CreatePowChallengeResponse',
 			requestId: parsedPostMessage.requestId,
 			type: 'response',
-			tag: 'Ok',
-			data: {
-				difficulty: allowSigningResponse.difficulty,
-				start_timestamp_ms: allowSigningResponse.start_timestamp_ms,
-				expiry_timestamp_ms: allowSigningResponse.expiry_timestamp_ms
-			}
+			result: mapCanisterResponse(response, CreatePowChallengeResponseResultSchema)
 		};
 
-		worker.postMessage(response);
+		worker.postMessage(postMessageResponse);
 	};
 
 	const handleAllowSigningRequest = async (parsedPostMessage: PostMessageAllowSigningRequest) => {
-		// we call the api service to allow the requested cycles
-		// const request: AllowSigningRequest = {
-		//	nonce: nonce ?? 0n
-		//};
 		const { identity } = get(authStore);
 
-		let allowSigningRequest: AllowSigningRequest = {
-			nonce: parsedPostMessage.data.nonce
-		};
-		const result = await allowSigning({ identity, request: allowSigningRequest });
+		const response: AllowSigningResult = await _allowSigning({
+			identity,
+			request: parsedPostMessage.data
+		});
 
-		if ('Err' in result) {
-			throw mapAllowSigningError(result.Err);
-		}
-
-		const response: PostMessageAllowSigningResponse = {
+		const postMessageResponse: PostMessageAllowSigningResponse = {
 			msg: 'AllowSigningResponse',
 			requestId: parsedPostMessage.requestId,
 			type: 'response',
-			tag: 'Ok',
-			data: PostMessageAllowSigningResponseDataSchema.parse(result)
+			result: mapCanisterResponse(response, AllowSigningResponseResultSchema)
 		};
 
-		// send response
-		worker.postMessage(response);
+		worker.postMessage(postMessageResponse);
 	};
 
 	const stopPowTimer = () =>
@@ -121,7 +130,6 @@ export const initPowWorker = async (): Promise<BaseWorker> => {
 		stopPowWorker: stopPowTimer,
 		destroyPowWorker: () => {
 			stopPowTimer();
-			errorMessages = [];
 		}
 	};
 };
