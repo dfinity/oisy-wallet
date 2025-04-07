@@ -74,7 +74,11 @@
 	<MultipleListeners tokens={tokenGroup.tokens}>
 		<div class="transition duration-300 hover:bg-primary">
 			<TokenCard
-				data={{ ...headerData, networks: tokenGroup.tokens.map((t) => t.network) }}
+				data={{
+					...headerData,
+					tokenCount: tokenGroup.tokens.length,
+					networks: tokenGroup.tokens.map((t) => t.network)
+				}}
 				testIdPrefix={TOKEN_GROUP}
 				on:click={() => toggleIsExpanded(!isExpanded)}
 			/>
