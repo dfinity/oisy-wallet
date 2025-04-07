@@ -24,8 +24,9 @@ export class EtherscanProvider {
 		this.provider = new EtherscanProviderLib(this.network, ETHERSCAN_API_KEY);
 	}
 
-	// https://github.com/ethers-io/ethers.js/issues/4303
-	// https://ethereum.stackexchange.com/questions/147756/read-transaction-history-with-ethers-v6-1-0/150836#150836
+	// There is no `getHistory` in ethers v6
+	// Issue report: https://github.com/ethers-io/ethers.js/issues/4303
+	// Workaround: https://ethereum.stackexchange.com/questions/147756/read-transaction-history-with-ethers-v6-1-0/150836#150836
 	private async getHistory({
 		address,
 		startBlock,
