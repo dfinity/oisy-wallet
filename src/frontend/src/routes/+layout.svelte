@@ -28,8 +28,23 @@
 	 * Init dApp
 	 */
 
-	const init = async () =>
-		await Promise.all([syncAuthStore(), initAnalytics(), initPlausibleAnalytics(), i18n.init()]);
+	const init = async () => {
+		try {
+			/**
+			 * Initialize all core services required for the app.
+			 *
+			 * These services are currently independent and can be initialized in parallel
+			 * to reduce startup time. If any future dependency is introduced between them,
+			 * consider switching to sequential loading.
+			 */
+			await Promise.all([syncAuthStore(), initAnalytics(), initPlausibleAnalytics(), i18n.init()]);
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.auth.error.unexpected_issue_with_syncing },
+				err
+			});
+		}
+	};
 
 	const syncAuthStore = async () => {
 		if (!browser) {
