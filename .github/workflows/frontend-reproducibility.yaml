@@ -9,6 +9,8 @@ on:
     types: [ released ]
   workflow_dispatch:
 
+permissions: { }
+
 jobs:
   frontend-reproducibility:
     runs-on: ubuntu-24.04

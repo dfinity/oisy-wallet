@@ -5,6 +5,8 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   generate:
     runs-on: ubuntu-24.04

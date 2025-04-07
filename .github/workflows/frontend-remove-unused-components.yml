@@ -5,6 +5,8 @@ on:
     - cron: '30 3 * * MON'
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   check-unused-files:
     runs-on: ubuntu-24.04

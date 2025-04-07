@@ -17,6 +17,8 @@ on:
         description: 'Short description of the release (motivation, changes, tests)'
         required: true
 
+permissions: {}
+
 jobs:
   version_bump:
     runs-on: ubuntu-24.04
