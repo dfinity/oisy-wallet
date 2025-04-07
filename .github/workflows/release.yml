@@ -2,10 +2,10 @@ name: Release
 
 on:
   release:
-    types: [released]
+    types: [ released ]
   workflow_dispatch:
 
-permissions: {}
+permissions: { }
 
 jobs:
   #####################
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
-    needs: ['docker-build', 'candid']
+    needs: [ 'docker-build', 'candid' ]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -93,7 +93,7 @@ jobs:
           path: .
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
