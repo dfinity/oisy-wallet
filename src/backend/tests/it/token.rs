@@ -21,7 +21,7 @@ lazy_static! {
         enabled: Some(true),
     };
     static ref MOCK_TOKEN_ID: UserTokenId = UserTokenId {
-        chain_id: MOCK_TOKEN.chain_id.clone(),
+        chain_id: MOCK_TOKEN.chain_id,
         contract_address: MOCK_TOKEN.contract_address.clone(),
     };
 }
@@ -53,7 +53,7 @@ fn test_update_user_token() {
 
     let update_token: UserToken = UserToken {
         symbol: Some("Updated".to_string()),
-        version: add_token_result.unwrap().get(0).unwrap().version,
+        version: add_token_result.unwrap().first().unwrap().version,
         ..MOCK_TOKEN.clone()
     };
 

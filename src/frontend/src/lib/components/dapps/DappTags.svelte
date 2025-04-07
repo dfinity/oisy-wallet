@@ -11,7 +11,7 @@
 	aria-label={replacePlaceholders($i18n.dapps.alt.tags, { $dAppName: dAppName })}
 	class="flex list-none flex-wrap gap-2"
 >
-	{#each tags as tag}
+	{#each tags as tag (tag)}
 		<li class="flex">
 			<Badge>
 				{tag}

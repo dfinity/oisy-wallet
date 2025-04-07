@@ -8,10 +8,13 @@ import type {
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
+import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
 import { type ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
@@ -45,7 +48,7 @@ describe('backend.canister', () => {
 	const addUserCredentialParams = {
 		credentialJwt: 'test-credential-jwt',
 		issuerCanisterId: mockPrincipal,
-		currentUserVersion: 0n,
+		currentUserVersion: ZERO_BI,
 		credentialSpec: {
 			arguments: [],
 			credential_type: ''
@@ -761,6 +764,45 @@ describe('backend.canister', () => {
 
 			const res = setUserShowTestnets({
 				showTestnets: true
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('updateUserNetworkSettings', () => {
+		it('should update user network settings', async () => {
+			const response = { Ok: null };
+
+			service.update_user_network_settings.mockResolvedValue(response);
+
+			const { updateUserNetworkSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateUserNetworkSettings({
+				networks: mockUserNetworks
+			});
+
+			expect(service.update_user_network_settings).toHaveBeenCalledWith({
+				networks: mockUserNetworksMap,
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if update_user_network_settings throws', async () => {
+			service.update_user_network_settings.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { updateUserNetworkSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = updateUserNetworkSettings({
+				networks: mockUserNetworks
 			});
 
 			await expect(res).rejects.toThrow(mockResponseError);

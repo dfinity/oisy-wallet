@@ -50,7 +50,7 @@
 		</div>
 
 		<div
-			class="item pointer-events-auto px-6 text-sm md:px-0 lg:max-w-48"
+			class="item pointer-events-auto px-6 text-xs md:px-0 lg:max-w-48 2xl:text-sm"
 			class:sm:max-w-none={$authNotSignedIn}
 			class:lg:max-w-none={$authNotSignedIn}
 			class:xl:max-w-none={$authNotSignedIn}

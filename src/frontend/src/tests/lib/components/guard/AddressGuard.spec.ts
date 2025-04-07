@@ -1,4 +1,5 @@
 import * as btcAddressServices from '$btc/services/btc-address.services';
+import * as networksEnv from '$env/networks/networks.env';
 import * as ethAddressServices from '$eth/services/eth-address.services';
 import * as api from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -11,13 +12,21 @@ import {
 	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
+import { userProfileStore } from '$lib/stores/user-profile.store';
 import { emit } from '$lib/utils/events.utils';
 import * as solAddressServices from '$sol/services/sol-address.services';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import { render } from '@testing-library/svelte';
+import {
+	mockNetworksSettings,
+	mockUserProfile,
+	mockUserSettings
+} from '$tests/mocks/user-profile.mock';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
+import { toNullable } from '@dfinity/utils';
+import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
 describe('AddressGuard', () => {
@@ -29,6 +38,10 @@ describe('AddressGuard', () => {
 		vi.clearAllMocks();
 
 		vi.resetAllMocks();
+
+		vi.spyOn(networksEnv, 'USER_NETWORKS_FEATURE_ENABLED', 'get').mockImplementation(() => true);
+
+		setupUserNetworksStore('allEnabled');
 
 		apiMock = vi.spyOn(api, 'allowSigning');
 
@@ -71,7 +84,7 @@ describe('AddressGuard', () => {
 
 			emit({ message: 'oisyValidateAddresses' });
 
-			await vi.waitFor(() => {
+			await waitFor(() => {
 				expect(spySignOut).toHaveBeenCalledOnce();
 				expect(spy).toHaveBeenCalledOnce();
 			});
@@ -147,6 +160,54 @@ describe('AddressGuard', () => {
 				}
 			] as const;
 
+			it('should not validate addresses if all networks are disabled', () => {
+				setupUserNetworksStore('allDisabled');
+
+				render(AddressGuard);
+
+				emit({ message: 'oisyValidateAddresses' });
+
+				cases.forEach(({ spy }) => {
+					const validateSpy = spy();
+
+					expect(validateSpy).not.toHaveBeenCalled();
+				});
+			});
+
+			it('should validate addresses only for the enabled networks', async () => {
+				userProfileStore.set({
+					certified: false,
+					profile: {
+						...mockUserProfile,
+						settings: toNullable({
+							...mockUserSettings,
+							networks: {
+								...mockNetworksSettings,
+								testnets: { show_testnets: true },
+								networks: [
+									[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
+								]
+							}
+						})
+					}
+				});
+
+				render(AddressGuard);
+
+				const validateBitcoinSpy = vi.spyOn(btcAddressServices, 'validateBtcAddressMainnet');
+				const validateEthereumSpy = vi.spyOn(ethAddressServices, 'validateEthAddress');
+				const validateSolanaSpy = vi.spyOn(solAddressServices, 'validateSolAddressMainnet');
+
+				emit({ message: 'oisyValidateAddresses' });
+
+				await waitFor(() => {
+					expect(validateBitcoinSpy).not.toHaveBeenCalled();
+					expect(validateEthereumSpy).not.toHaveBeenCalled();
+					expect(validateSolanaSpy).toHaveBeenCalledOnce();
+				});
+			});
+
 			it.each(cases)(
 				'should call validate $name address if signer allowance is loaded after address store',
 				async ({ store, mockAddress, spy }) => {
@@ -161,7 +222,7 @@ describe('AddressGuard', () => {
 
 					emit({ message: 'oisyValidateAddresses' });
 
-					await vi.waitFor(() => {
+					await waitFor(() => {
 						expect(validateSpy).toHaveBeenCalled();
 					});
 				}
@@ -181,7 +242,7 @@ describe('AddressGuard', () => {
 						certified: true
 					});
 
-					await vi.waitFor(() => {
+					await waitFor(() => {
 						expect(validateSpy).toHaveBeenCalled();
 					});
 				}
@@ -201,13 +262,13 @@ describe('AddressGuard', () => {
 						certified: true
 					});
 
-					await vi.waitFor(() => {
+					await waitFor(() => {
 						expect(validateSpy).toHaveBeenCalledTimes(1);
 					});
 
 					emit({ message: 'oisyValidateAddresses' });
 
-					await vi.waitFor(() => {
+					await waitFor(() => {
 						expect(validateSpy).toHaveBeenCalledTimes(2);
 					});
 				}

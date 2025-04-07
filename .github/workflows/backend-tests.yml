@@ -19,18 +19,26 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   docker-build-base:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Build Base Docker Image
         uses: ./.github/actions/docker-build-base
 
   docker-build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     needs: docker-build-base
     strategy:
       matrix:
@@ -40,7 +48,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Build canister WASM
         uses: ./.github/actions/docker-build-backend
@@ -51,11 +61,15 @@ jobs:
 
   tests:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     needs: ['docker-build']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: |
             ~/.cargo/registry
@@ -64,7 +78,7 @@ jobs:
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
 
       - name: Download backend.wasm.gz
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: backend.wasm.gz
           path: .
@@ -77,6 +91,12 @@ jobs:
     needs: ['tests']
     if: ${{ always() }}
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - name: Cleared for merging
-        run: echo OK
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/needs_success
+        with:
+          needs: '${{ toJson(needs) }}'

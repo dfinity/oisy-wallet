@@ -1,12 +1,12 @@
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const APP_VERSION = VITE_APP_VERSION;
 
 export const MODE = VITE_DFX_NETWORK;
 export const LOCAL = MODE === 'local';
-export const STAGING = MODE === 'staging' || MODE.startsWith('test_fe_') || MODE === 'audit';
+export const TEST_FE = MODE.startsWith('test_fe_');
+export const STAGING = MODE === 'staging' || TEST_FE || MODE === 'audit' || MODE === 'e2e';
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
@@ -120,7 +120,6 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_SECOND * 60n;
 export const EIGHT_DECIMALS = 8;
 
 export const ZERO_BI = 0n;
-export const ZERO = BigNumber.from(ZERO_BI);
 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
@@ -137,4 +136,8 @@ export const VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1000; // 5 minutes in milliseconds
 
 // Fallback
-export const FALLBACK_TIMEOUT = 5000;
+export const FALLBACK_TIMEOUT = 10000;
+
+// Git
+export const GIT_COMMIT_HASH = VITE_GIT_COMMIT_HASH;
+export const GIT_BRANCH_NAME = VITE_GIT_BRANCH_NAME;
