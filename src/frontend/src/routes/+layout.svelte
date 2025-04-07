@@ -12,7 +12,11 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.contants';
-	import { initAnalytics, trackEvent } from '$lib/services/analytics.services';
+	import {
+		initAnalytics,
+		initPlausibleAnalytics,
+		trackEvent
+	} from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
@@ -24,7 +28,8 @@
 	 * Init dApp
 	 */
 
-	const init = async () => await Promise.all([syncAuthStore(), initAnalytics(), i18n.init()]);
+	const init = async () =>
+		await Promise.all([syncAuthStore(), initAnalytics(), initPlausibleAnalytics(), i18n.init()]);
 
 	const syncAuthStore = async () => {
 		if (!browser) {

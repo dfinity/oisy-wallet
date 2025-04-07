@@ -11,6 +11,7 @@ import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockedFunction } from 'vitest';
 
@@ -29,6 +30,8 @@ describe('LoaderEthTransactions', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		setupTestnetsStore('enabled');
 
 		mockLoadTransactions.mockResolvedValue({ success: true });
 		mockReloadTransactions.mockResolvedValue({ success: true });
