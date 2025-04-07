@@ -34,7 +34,7 @@ const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore 
 		subscribe,
 		setPendingTransactions({
 			address,
-			pendingTransactions: pendingTransactions
+			pendingTransactions
 		}: {
 			address: Address;
 			pendingTransactions: Array<PendingTransaction>;
