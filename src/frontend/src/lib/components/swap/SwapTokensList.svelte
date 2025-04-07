@@ -29,7 +29,7 @@
 		$tokens: [{ ...ICP_TOKEN, enabled: true }, ...$allKongSwapCompatibleIcrcTokens].filter(
 			(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
 		),
-		$exchanges: $exchanges,
+		$exchanges,
 		$balances: $balancesStore
 	});
 

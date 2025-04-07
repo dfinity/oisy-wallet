@@ -252,6 +252,9 @@ interface I18nSettings {
 		appearance_light: string;
 		appearance_dark: string;
 		appearance_system: string;
+		git_disclaimer: string;
+		git_branch_name: string;
+		git_commit_hash: string;
 	};
 	alt: {
 		testnets_toggle: string;
@@ -577,6 +580,7 @@ interface I18nTokens {
 		text: {
 			title: string;
 			manage_list: string;
+			list_settings: string;
 			do_not_see_import: string;
 			manage_for_network: string;
 			network: string;

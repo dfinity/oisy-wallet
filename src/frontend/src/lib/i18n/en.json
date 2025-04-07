@@ -152,7 +152,7 @@
 			"youre_eligible": "You're eligible!"
 		},
 		"alt": {
-			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
+			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop."
 		}
 	},
 	"footer": {
@@ -272,7 +272,10 @@
 			"appearance": "Appearance",
 			"appearance_light": "Light",
 			"appearance_dark": "Dark",
-			"appearance_system": "System"
+			"appearance_system": "System",
+			"git_disclaimer": "For development purpose, we show the branch and the commit only in test canisters.",
+			"git_branch_name": "Branch:",
+			"git_commit_hash": "Commit:"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -621,6 +624,7 @@
 			"text": {
 				"title": "Manage tokens",
 				"manage_list": "Manage tokens",
+				"list_settings": "List settings",
 				"do_not_see_import": "Don’t see your token? Import",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
