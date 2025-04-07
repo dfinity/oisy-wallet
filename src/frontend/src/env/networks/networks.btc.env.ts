@@ -12,8 +12,7 @@ import { LOCAL } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
 
-export const BTC_MAINNET_ENABLED =
-	JSON.parse(import.meta.env.VITE_BITCOIN_MAINNET_DISABLED ?? false) === false;
+export const BTC_MAINNET_ENABLED = import.meta.env.VITE_BITCOIN_MAINNET_DISABLED === 'true';
 
 /**
  * BTC

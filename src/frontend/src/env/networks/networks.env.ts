@@ -7,8 +7,7 @@ import { SUPPORTED_SOLANA_NETWORKS } from '$env/networks/networks.sol.env';
 import type { Network, NetworkId } from '$lib/types/network';
 
 // TODO: to be removed when the feature is fully implemented
-export const USER_NETWORKS_FEATURE_ENABLED =
-	JSON.parse(import.meta.env.VITE_USER_NETWORKS_FEATURE_ENABLED ?? false) === true;
+export const USER_NETWORKS_FEATURE_ENABLED = import.meta.env.VITE_USER_NETWORKS_FEATURE_ENABLED === 'true';
 
 export const SUPPORTED_NETWORKS: Network[] = [
 	ICP_NETWORK,
