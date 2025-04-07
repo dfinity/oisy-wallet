@@ -9,7 +9,7 @@
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
-	export let filterValue: string = '';
+	export let filterValue = '';
 
 	const handleOpen = (e: Event) => {
 		e.stopPropagation();
@@ -39,7 +39,7 @@
 			on:keydown={() => {}}
 			in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
 			out:fade={{ ...SLIDE_PARAMS }}
-			class={`input-field condensed absolute right-0 -mt-[11px] mr-[1px] flex w-full overflow-hidden transition-all duration-300 md:w-[250px]`}
+			class="input-field condensed absolute right-0 -mt-[11px] mr-[1px] flex w-full overflow-hidden transition-all duration-300 md:w-[250px]"
 			on:click|stopPropagation|preventDefault={() => {}}
 		>
 			<InputTextWithAction name="" placeholder="" bind:value={filterValue} autofocus />
