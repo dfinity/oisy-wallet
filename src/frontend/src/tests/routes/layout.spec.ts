@@ -3,12 +3,9 @@ import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import App from '$routes/+layout.svelte';
 import { render } from '@testing-library/svelte';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-vi.mock('$lib/services/worker.auth.services', async () => {
-	const actual = await vi.importActual<typeof import('$lib/services/worker.auth.services')>(
-		'$lib/services/worker.auth.services'
-	);
+vi.mock(import('$lib/services/worker.auth.services'), async (importOriginal) => {
+	const actual = await importOriginal();
 	return {
 		...actual,
 		initAuthWorker: vi.fn().mockResolvedValue({
