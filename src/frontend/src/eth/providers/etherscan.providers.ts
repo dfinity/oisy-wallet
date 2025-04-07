@@ -12,9 +12,11 @@ import type { NetworkId } from '$lib/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BlockTag } from '@ethersproject/abstract-provider';
-import type { Networkish } from '@ethersproject/networks';
-import { EtherscanProvider as EtherscanProviderLib } from '@ethersproject/providers';
+import {
+	EtherscanProvider as EtherscanProviderLib,
+	type BlockTag,
+	type Networkish
+} from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class EtherscanProvider {
