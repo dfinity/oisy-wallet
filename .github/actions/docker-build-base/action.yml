@@ -2,7 +2,7 @@ name: Build Base Docker Image
 
 description: The image shared by all builds, containing pre-built rust deps
 
-outputs: { }
+outputs: {}
 
 runs:
   using: 'composite'
