@@ -42,12 +42,14 @@
 		inputElement?.focus();
 	};
 
+	// open search if not empty on mount to avoid confusion
 	onMount(() => {
 		if ($tokenListStore.filter !== '') {
 			handleOpen();
 		}
 	});
 
+	// reset search if not coming from home (switching networks) or transactions page
 	afterNavigate(({ from }) => {
 		const previousRoute = `${from?.route?.id}/`;
 		if (
