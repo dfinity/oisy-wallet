@@ -5,6 +5,7 @@
 	import RewardCard from '$lib/components/rewards/RewardCard.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalStore } from '$lib/stores/modal.store';
+	import {Html} from "@dfinity/gix-components";
 
 	export let title: string;
 	export let rewards: RewardDescription[];
@@ -26,6 +27,6 @@
 	{/each}
 
 	{#if nonNullish(altText) && rewards.length === 0}
-		<span>{altText}</span>
+		<span><Html text={altText} /></span>
 	{/if}
 </div>

@@ -5,6 +5,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {Html} from "@dfinity/gix-components";
 
 	export let reward: RewardDescription;
 	export let testId: string | undefined = undefined;
@@ -35,7 +36,7 @@
 			<p class="m-0 text-start text-lg font-semibold">{reward.cardTitle}</p>
 
 			<p class="m-0 mt-2 text-start text-xs text-tertiary">
-				{reward.oneLiner}
+				<Html text={reward.oneLiner} />
 			</p>
 		</section>
 		<section class="bottom-4 left-4 mt-3 flex">
