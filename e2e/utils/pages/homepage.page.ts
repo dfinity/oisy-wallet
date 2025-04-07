@@ -474,7 +474,7 @@ abstract class Homepage {
 	}
 
 	async takeScreenshot(
-		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
+		{ freezeCarousel: _ = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
 			freezeCarousel: false
 		}
 	): Promise<void> {
@@ -492,11 +492,6 @@ abstract class Homepage {
 		// 	await this.setCarouselFirstSlide();
 		// 	await this.#page.clock.pauseAt(Date.now());
 		// }
-		if (isNullish(this.promotionCarousel)) {
-			this.promotionCarousel = new PromotionCarousel(this.#page);
-		}
-		const carouselSelector = this.promotionCarousel.getCarouselSelector();
-		const mask = nonNullish(carouselSelector) && freezeCarousel ? [carouselSelector] : [];
 
 		if (!this.#isMobile) {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
@@ -513,12 +508,12 @@ abstract class Homepage {
 			await this.#page.emulateMedia({ colorScheme: scheme });
 			await this.#page.waitForTimeout(1000);
 
-			await expect(element).toHaveScreenshot({ mask });
+			await expect(element).toHaveScreenshot();
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
-				await expect(element).toHaveScreenshot({ fullPage: true, mask });
+				await expect(element).toHaveScreenshot({ fullPage: true });
 				await this.showMobileNavigationMenu();
 			}
 		}
