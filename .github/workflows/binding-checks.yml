@@ -5,7 +5,7 @@ on:
   merge_group:
   workflow_dispatch:
 
-permissions: { }
+permissions: {}
 
 jobs:
   generate:
@@ -128,7 +128,7 @@ jobs:
           exit 1
 
   binding-checks-pass:
-    needs: [ 'generate' ]
+    needs: ['generate']
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     permissions:
