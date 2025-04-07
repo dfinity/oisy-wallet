@@ -12,7 +12,8 @@ import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Transaction } from '$lib/types/transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { ethers } from 'ethers';
+import { AbiCoder } from 'ethers/abi';
+import { dataSlice } from 'ethers/utils';
 
 export const isTransactionPending = ({ blockNumber }: EthTransactionUi): boolean =>
 	isNullish(blockNumber);
@@ -21,12 +22,12 @@ export const isErc20TransactionApprove = (data: string | undefined): boolean =>
 	nonNullish(data) && data.startsWith(ERC20_APPROVE_HASH);
 
 export const decodeErc20AbiDataValue = (data: string): bigint => {
-	const [_to, value] = ethers.utils.defaultAbiCoder.decode(
+	const [_to, value] = AbiCoder.defaultAbiCoder().decode(
 		['address', 'uint256'],
-		ethers.utils.hexDataSlice(data, 4)
+		dataSlice(data, 4)
 	);
 
-	return value.toBigInt();
+	return value;
 };
 
 /**

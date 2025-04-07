@@ -12,11 +12,8 @@ import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { PopulatedTransaction } from '@ethersproject/contracts';
-import type { Networkish } from '@ethersproject/networks';
-import { InfuraProvider } from '@ethersproject/providers';
-import { ethers } from 'ethers';
+import { Contract, type ContractTransaction } from 'ethers/contract';
+import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraCkErc20Provider {
@@ -35,10 +32,10 @@ export class InfuraCkErc20Provider {
 		contract: Erc20ContractAddress;
 		erc20Contract: Erc20ContractAddress;
 		to: EthAddress;
-		amount: BigNumber;
-	}): Promise<BigNumber> => {
-		const ckEthContract = new ethers.Contract(contractAddress, CKERC20_ABI, this.provider);
-		return ckEthContract.estimateGas.deposit(erc20ContractAddress, amount, to);
+		amount: bigint;
+	}): Promise<bigint> => {
+		const ckEthContract = new Contract(contractAddress, CKERC20_ABI, this.provider);
+		return ckEthContract.deposit.estimateGas(erc20ContractAddress, amount, to);
 	};
 
 	populateTransaction = ({
@@ -50,10 +47,10 @@ export class InfuraCkErc20Provider {
 		contract: Erc20ContractAddress;
 		erc20Contract: Erc20ContractAddress;
 		to: EthAddress;
-		amount: BigNumber;
-	}): Promise<PopulatedTransaction> => {
-		const erc20Contract = new ethers.Contract(contractAddress, CKERC20_ABI, this.provider);
-		return erc20Contract.populateTransaction.deposit(erc20ContractAddress, amount, to);
+		amount: bigint;
+	}): Promise<ContractTransaction> => {
+		const erc20Contract = new Contract(contractAddress, CKERC20_ABI, this.provider);
+		return erc20Contract.deposit.populateTransaction(erc20ContractAddress, amount, to);
 	};
 }
 
