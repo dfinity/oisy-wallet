@@ -1,12 +1,12 @@
 import type {
-	 TokenAppearanceSchema,
-	 TokenBuySchema,
-	 TokenBuyableSchema,
-	 TokenCategorySchema,
-	 TokenIdSchema,
-	 TokenMetadataSchema,
-	 TokenSchema,
-	 TokenStandardSchema
+	TokenAppearanceSchema,
+	TokenBuySchema,
+	TokenBuyableSchema,
+	TokenCategorySchema,
+	TokenIdSchema,
+	TokenMetadataSchema,
+	TokenSchema,
+	TokenStandardSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Option, RequiredExcept } from '$lib/types/utils';
