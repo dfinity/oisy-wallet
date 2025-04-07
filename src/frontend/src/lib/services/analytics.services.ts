@@ -36,13 +36,17 @@ export const initPlausibleAnalytics = () => {
 		return;
 	}
 
-	if (isNullish(plausibleTracker)) {
-		plausibleTracker = Plausible({
-			domain: PLAUSIBLE_DOMAIN,
-			hashMode: false,
-			trackLocalhost: false
-		});
-		plausibleTracker.enableAutoPageviews();
+	try {
+		if (isNullish(plausibleTracker)) {
+			plausibleTracker = Plausible({
+				domain: PLAUSIBLE_DOMAIN,
+				hashMode: false,
+				trackLocalhost: false
+			});
+			plausibleTracker.enableAutoPageviews();
+		}
+	} catch (_err: unknown) {
+		console.warn('An unexpected error occurred during initialization.');
 	}
 };
 
