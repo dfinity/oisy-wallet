@@ -39,12 +39,17 @@
 	const isNativeToken = (token: TokenUi) => tokenGroup.nativeToken.id === token.id;
 	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix); // logic taken from old ck badge
 
+	// list of filtered tokens, filtered by string input
 	let filteredTokens: TokenUi[];
-	$: filteredTokens = tokenGroup.tokens.filter((token) => {
-		const totalBalance = tokenGroup.tokens.reduce(
-			(p, c) => p + BigInt(c.balance ?? 0n),
-			BigInt(0n)
-		);
+	$: filteredTokens = getFilteredTokenGroup({
+		filter: $tokenListStore.filter,
+		list: tokenGroup.tokens
+	});
+
+	// list of tokens that should display with a "show more" button for not displayed ones
+	let truncatedTokens: TokenUi[];
+	$: truncatedTokens = filteredTokens.filter((token) => {
+		const totalBalance = filteredTokens.reduce((p, c) => p + BigInt(c.balance ?? 0n), BigInt(0n));
 		// Only include tokens with a balance
 		return (
 			(token.balance ?? 0n) > 0n ||
@@ -54,7 +59,7 @@
 	});
 
 	// Show all if hideZeros = false and sort
-	$: tokensToShow = (hideZeros ? filteredTokens : tokenGroup.tokens).sort((a, b) => {
+	$: tokensToShow = (hideZeros ? filteredTokens : truncatedTokens).sort((a, b) => {
 		const balanceA = BigInt(a.balance ?? 0n);
 		const balanceB = BigInt(b.balance ?? 0n);
 		// higher balances show first
@@ -69,7 +74,7 @@
 	});
 
 	// Count tokens that are not displayed
-	$: notDisplayedCount = tokenGroup.tokens.length - tokensToShow.length;
+	$: notDisplayedCount = filteredTokens.length - tokensToShow.length;
 </script>
 
 <div class="flex flex-col" class:bg-primary={isExpanded}>
@@ -78,8 +83,8 @@
 			<TokenCard
 				data={{
 					...headerData,
-					tokenCount: tokenGroup.tokens.length,
-					networks: tokenGroup.tokens.map((t) => t.network)
+					tokenCount: filteredTokens.length,
+					networks: filteredTokens.map((t) => t.network)
 				}}
 				testIdPrefix={TOKEN_GROUP}
 				on:click={() => toggleIsExpanded(!isExpanded)}
