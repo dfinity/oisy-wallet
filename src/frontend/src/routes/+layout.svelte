@@ -29,21 +29,20 @@
 	 */
 
 	const init = async () => {
-		try {
-			/**
-			 * Initialize all core services required for the app.
-			 *
-			 * These services are currently independent and can be initialized in parallel
-			 * to reduce startup time. If any future dependency is introduced between them,
-			 * consider switching to sequential loading.
-			 */
-			await Promise.all([syncAuthStore(), initAnalytics(), initPlausibleAnalytics(), i18n.init()]);
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.auth.error.unexpected_issue_with_syncing },
-				err
-			});
-		}
+		/**
+		 * We use `Promise.allSettled` to ensure that all initialization functions run,
+		 * regardless of whether some of them fail. This avoids blocking the entire app
+		 * if non-critical services like analytics or i18n fail to initialize.
+		 *
+		 * Each service handles its own error handling,
+		 * and we avoid surfacing errors to the user here to keep the UX clean.
+		 */
+		await Promise.allSettled([
+			syncAuthStore(),
+			initAnalytics(),
+			initPlausibleAnalytics(),
+			i18n.init()
+		]);
 	};
 
 	const syncAuthStore = async () => {

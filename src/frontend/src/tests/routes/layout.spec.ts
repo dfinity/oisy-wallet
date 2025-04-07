@@ -1,9 +1,8 @@
 import * as analytics from '$lib/services/analytics.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import App from '$routes/+layout.svelte';
-import { render, waitFor } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 vi.mock('$lib/services/worker.auth.services', () => ({
@@ -37,6 +36,7 @@ vi.mock('$lib/stores/auth.store', async (importOriginal) => {
 		}
 	};
 });
+
 vi.mock('$lib/stores/i18n.store', async (importOriginal) => {
 	const actual = await importOriginal<typeof import('$lib/stores/i18n.store')>();
 	return {
@@ -88,25 +88,6 @@ describe('App Layout', () => {
 		render(App);
 
 		expect(spy).toHaveBeenCalledTimes(1);
-	});
-
-	it('should handle errors when a service fails', async () => {
-		vi.mock('$lib/stores/toasts.store', () => ({
-			toastsError: vi.fn()
-		}));
-
-		render(App);
-
-		await waitFor(() => {
-			expect(toastsError).toHaveBeenCalledWith({
-				msg: {
-					text: expect.stringContaining(
-						'Unexpected issue while syncing the status of your authentication.'
-					)
-				},
-				err: expect.any(Error)
-			});
-		});
 	});
 
 	it('should initialize analytics tracking on mount', () => {
