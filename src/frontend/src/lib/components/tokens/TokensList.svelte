@@ -42,7 +42,7 @@
 	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
 
 	let filteredTokens: TokenUiOrGroupUi[] | undefined;
-	$: filteredTokens = (tokens || []).filter((t) => {
+	$: filteredTokens = (tokens ?? []).filter((t) => {
 		if (!isTokenUiGroup(t) && filter !== '') {
 			return (
 				t.token.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
