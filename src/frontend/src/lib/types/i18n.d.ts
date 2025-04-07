@@ -533,6 +533,8 @@ interface I18nTokens {
 		source_token_title: string;
 		destination_token_title: string;
 		chain_key: string;
+		show_more_networks: string;
+		hide_more_networks: string;
 	};
 	details: {
 		title: string;

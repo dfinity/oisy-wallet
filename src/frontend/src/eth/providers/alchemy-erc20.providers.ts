@@ -14,9 +14,8 @@ import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { ethers } from 'ethers';
+import { Contract } from 'ethers/contract';
+import { JsonRpcProvider } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class AlchemyErc20Provider {
@@ -36,18 +35,18 @@ export class AlchemyErc20Provider {
 		address: EthAddress;
 		listener: (params: { hash: string; value: bigint }) => Promise<void>;
 	}): WebSocketListener => {
-		const erc20Contract = new ethers.Contract(contract.address, ERC20_ABI, this.provider);
+		const erc20Contract = new Contract(contract.address, ERC20_ABI, this.provider);
 
 		// eslint-disable-next-line local-rules/prefer-object-params -- This function needs to have listed arguments to match the Listener type passed to ethers.js providers
 		const filterListener = async (
 			_from: string,
 			_address: string,
-			_value: BigNumber,
+			_value: bigint,
 			transaction: Erc20Transaction
 		) => {
 			const { transactionHash: hash, args } = transaction;
 			const [_from_, _to_, value] = args;
-			await listener({ hash, value: value?.toBigInt() });
+			await listener({ hash, value });
 		};
 
 		const filterToAddress = erc20Contract.filters.Transfer(null, address);
