@@ -8,6 +8,8 @@ on:
     - cron: '30 3 * * FRI'
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   rust-update:
     runs-on: ubuntu-24.04

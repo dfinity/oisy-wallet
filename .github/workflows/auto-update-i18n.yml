@@ -7,6 +7,8 @@ on:
       - 'src/frontend/src/lib/i18n/*'
       - 'src/frontend/src/lib/types/i18n.d.ts'
 
+permissions: {}
+
 jobs:
   auto_update:
     runs-on: ubuntu-24.04

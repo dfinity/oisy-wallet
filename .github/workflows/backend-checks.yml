@@ -19,6 +19,8 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   lint:
     runs-on: ubuntu-24.04

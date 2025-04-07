@@ -6,6 +6,8 @@ on:
     - cron: '30 3 * * THU'
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   update-tokens-sns:
     runs-on: ubuntu-24.04
