@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
-	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	let visible = false;
