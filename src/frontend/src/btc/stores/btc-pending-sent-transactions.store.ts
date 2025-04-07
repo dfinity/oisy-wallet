@@ -15,7 +15,9 @@ interface BtcPendingSentTransactionsStore extends Readable<BtcPendingSentTransac
 		address: Address;
 		pendingTransactions: Array<PendingTransaction>;
 	}) => void;
+
 	setPendingTransactionsError(params: { address: Address }): void;
+
 	reset: () => void;
 }
 
