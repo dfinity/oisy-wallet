@@ -150,6 +150,16 @@ type Config = record {
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_raw : opt blob;
 };
+type CreateChallengeError = variant {
+  ChallengeInProgress;
+  MissingUserProfile;
+  RandomnessError : text;
+};
+type CreateChallengeResponse = record {
+  difficulty : nat32;
+  start_timestamp_ms : nat64;
+  expiry_timestamp_ms : nat64;
+};
 type CredentialSpec = record {
   arguments : opt vec record { text; ArgumentValue };
   credential_type : text;
@@ -266,7 +276,8 @@ type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok; Err : AddDappSettingsError };
-type Result_10 = variant {
+type Result_10 = variant { Ok; Err : SaveTestnetsSettingsError };
+type Result_11 = variant {
   Ok : TopUpCyclesLedgerResponse;
   Err : TopUpCyclesLedgerError;
 };
@@ -280,10 +291,13 @@ type Result_5 = variant {
   Ok : SelectedUtxosFeeResponse;
   Err : SelectedUtxosFeeError;
 };
-type Result_6 = variant { Ok : UserProfile; Err : GetUserProfileError };
-type Result_7 = variant { Ok : MigrationReport; Err : text };
-type Result_8 = variant { Ok; Err : text };
-type Result_9 = variant { Ok; Err : SaveTestnetsSettingsError };
+type Result_6 = variant {
+  Ok : CreateChallengeResponse;
+  Err : CreateChallengeError;
+};
+type Result_7 = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result_8 = variant { Ok : MigrationReport; Err : text };
+type Result_9 = variant { Ok; Err : text };
 type SaveNetworksSettingsRequest = record {
   networks : vec record { NetworkSettingsFor; NetworkSettings };
   current_user_version : opt nat64;
@@ -415,10 +429,11 @@ service : (Arg) -> {
   btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_5);
   bulk_up : (blob) -> ();
   config : () -> (Config) query;
+  create_pow_challenge : () -> (Result_6);
   create_user_profile : () -> (UserProfile);
   get_canister_status : () -> (CanisterStatusResultV2);
   get_snapshot : () -> (opt UserSnapshot) query;
-  get_user_profile : () -> (Result_6) query;
+  get_user_profile : () -> (Result_7) query;
   has_user_profile : () -> (HasUserProfileResponse) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
@@ -427,19 +442,19 @@ service : (Arg) -> {
     ) query;
   list_user_tokens : () -> (vec UserToken) query;
   list_users : (ListUsersRequest) -> (ListUsersResponse) query;
-  migrate_user_data_to : (principal) -> (Result_7);
+  migrate_user_data_to : (principal) -> (Result_8);
   migration : () -> (opt MigrationReport) query;
-  migration_stop_timer : () -> (Result_8);
+  migration_stop_timer : () -> (Result_9);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();
   set_guards : (Guards) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
   set_many_user_tokens : (vec UserToken) -> ();
   set_snapshot : (UserSnapshot) -> ();
-  set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_9);
+  set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_10);
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
   step_migration : () -> ();
-  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_10);
-  update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_9);
+  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_11);
+  update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_10);
 }
