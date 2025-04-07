@@ -8,6 +8,8 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   lint-shell:
     runs-on: ubuntu-24.04
