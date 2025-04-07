@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import { writable } from 'svelte/store';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
 	import EthConvertProgress from '$eth/components/convert/EthConvertProgress.svelte';
@@ -11,12 +10,7 @@
 	import { selectedEthereumNetworkWithFallback } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { send as executeSend } from '$eth/services/send.services';
-	import {
-		FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeContext,
-		initFeeStore
-	} from '$eth/stores/fee.store';
+	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
@@ -34,7 +28,6 @@
 	} from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { exchanges } from '$lib/derived/exchange.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -43,7 +36,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -55,34 +47,7 @@
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	let feeStore = initFeeStore();
-
-	let feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set($ethereumToken.symbol);
-
-	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$: feeTokenIdStore.set($ethereumToken.id);
-
-	let feeDecimalsStore = writable<number | undefined>(undefined);
-	$: feeDecimalsStore.set($ethereumToken.decimals);
-
-	let feeExchangeRateStore = writable<number | undefined>(undefined);
-	$: feeExchangeRateStore.set($exchanges?.[$ethereumToken.id]?.usd);
-
-	let feeContext: FeeContext | undefined;
-	const evaluateFee = () => feeContext?.triggerUpdateFee();
-
-	setContext<FeeContextType>(
-		FEE_CONTEXT_KEY,
-		initFeeContext({
-			feeStore,
-			feeSymbolStore,
-			feeTokenIdStore,
-			feeDecimalsStore,
-			feeExchangeRateStore,
-			evaluateFee
-		})
-	);
+	const { feeStore } = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let destination = '';
 	$: destination = isTokenErc20($sourceToken)
@@ -192,12 +157,12 @@
 </script>
 
 <FeeContext
-	bind:this={feeContext}
 	sendToken={$sourceToken}
 	sendTokenId={$sourceToken.id}
 	amount={sendAmount}
 	{destination}
-	observe={currentStep?.name !== WizardStepsConvert.CONVERTING}
+	observe={currentStep?.name !== WizardStepsConvert.CONVERTING &&
+		currentStep?.name !== WizardStepsConvert.REVIEW}
 	sourceNetwork={$selectedEthereumNetworkWithFallback}
 	targetNetwork={ICP_NETWORK}
 	nativeEthereumToken={$ethereumToken}
