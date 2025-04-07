@@ -8,15 +8,16 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
+	import { onMount } from 'svelte';
 
 	let visible: boolean;
-	$: visible = $tokenListStore.filter !== '';
+	$: visible = false;
 
 	let button: HTMLButtonElement | undefined;
 	let inputElement: HTMLInputElement | undefined;
 
-	const handleOpen = (e: Event) => {
-		e.stopPropagation();
+	const handleOpen = (e?: Event) => {
+		e?.stopPropagation();
 		if (visible) {
 			handleClose();
 		} else {
@@ -38,6 +39,12 @@
 		$tokenListStore.filter = '';
 		inputElement?.focus();
 	};
+
+	onMount(() => {
+		if ($tokenListStore.filter !== '') {
+			handleOpen();
+		}
+	});
 </script>
 
 <div class="absolute right-0 w-full">
