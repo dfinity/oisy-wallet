@@ -5,6 +5,18 @@ import App from '$routes/+layout.svelte';
 import { render } from '@testing-library/svelte';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
+vi.mock('$lib/services/worker.auth.services', async () => {
+	const actual = await vi.importActual<typeof import('$lib/services/worker.auth.services')>(
+		'$lib/services/worker.auth.services'
+	);
+	return {
+		...actual,
+		initAuthWorker: vi.fn().mockResolvedValue({
+			syncAuthIdle: vi.fn()
+		})
+	};
+});
+
 beforeAll(() => {
 	Object.defineProperty(window, 'matchMedia', {
 		writable: true,
