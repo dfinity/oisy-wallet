@@ -20,7 +20,8 @@
 	</div>
 
 	<div class="space-y-4">
-		<p class="m-0 text-center text-lg font-bold">Oops, nothing found</p>
-		<p class="m-0 text-center text-tertiary">Type token ticker or name to filter list</p>
+		<p class="m-0 text-center text-lg font-bold">{$i18n.tokens.text.filter_nothing_found}</p>
+		<p class="m-0 text-center text-tertiary">{$i18n.tokens.text.filter_nothing_found_description}</p
+		>
 	</div>
 </div>
