@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardCard from '$lib/components/rewards/RewardCard.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {Html} from "@dfinity/gix-components";
 
 	export let title: string;
 	export let rewards: RewardDescription[];

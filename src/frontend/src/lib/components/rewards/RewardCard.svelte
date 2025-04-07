@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {Html} from "@dfinity/gix-components";
 
 	export let reward: RewardDescription;
 	export let testId: string | undefined = undefined;
