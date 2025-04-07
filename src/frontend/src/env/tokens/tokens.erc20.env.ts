@@ -1,5 +1,8 @@
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.env';
-import { ETH_MAINNET_ENABLED } from '$env/networks/networks.eth.env';
+import {
+	ETHEREUM_NETWORK,
+	ETH_MAINNET_ENABLED,
+	SEPOLIA_NETWORK
+} from '$env/networks/networks.eth.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
