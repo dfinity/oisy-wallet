@@ -7,12 +7,13 @@
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { tokenListStore } from '$lib/stores/token-list.store';
 
-	let visible = false;
+	let visible: boolean;
+	$: visible = $tokenListStore.filter !== '';
+
 	let button: HTMLButtonElement | undefined;
 	let inputElement: HTMLInputElement | undefined;
-
-	export let filterValue = '';
 
 	const handleOpen = (e: Event) => {
 		e.stopPropagation();
@@ -26,7 +27,7 @@
 	};
 
 	const handleClose = () => {
-		if (filterValue.length > 0) {
+		if ($tokenListStore.filter !== '') {
 			return;
 		}
 		visible = false;
@@ -34,7 +35,7 @@
 	};
 
 	const handleClear = () => {
-		filterValue = '';
+		$tokenListStore.filter = '';
 		inputElement?.focus();
 	};
 </script>
@@ -55,10 +56,10 @@
 				bind:inputElement
 				name="tokenFilter"
 				placeholder={$i18n.tokens.text.filter_placeholder}
-				bind:value={filterValue}
+				bind:value={$tokenListStore.filter}
 				autofocus
 			/>
-			{#if filterValue !== ''}
+			{#if $tokenListStore.filter !== ''}
 				<div
 					class="top-4.5 transition-bg duration-250 absolute right-12 bg-primary"
 					transition:fade

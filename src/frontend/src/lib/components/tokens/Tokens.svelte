@@ -6,23 +6,20 @@
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-
-	let filterValue: string | undefined;
-	$: filterValue;
 </script>
 
 <div>
 	<div class="flex w-full flex-row justify-between">
 		<div class="grow-1 relative flex flex-row justify-between">
 			<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
-			<TokensFilter bind:filterValue />
+			<TokensFilter />
 		</div>
 		<div class="flex">
 			<TokensMenu />
 		</div>
 	</div>
 
-	<TokensList filter={filterValue} />
+	<TokensList />
 
 	<div in:fade class="mb-4 mt-12 flex w-full justify-center sm:w-auto">
 		<ManageTokensButton />

@@ -15,8 +15,7 @@
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
-
-	export let filter = '';
+	import { tokenListStore } from '$lib/stores/token-list.store';
 
 	let tokens: TokenUiOrGroupUi[] | undefined;
 
@@ -40,6 +39,11 @@
 
 	let loading: boolean;
 	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
+
+	let filter: string;
+	$: filter = $tokenListStore.filter;
+
+	$: console.log(filter);
 
 	let filteredTokens: TokenUiOrGroupUi[] | undefined;
 	$: filteredTokens = (tokens ?? []).filter((t) => {
