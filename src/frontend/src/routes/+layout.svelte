@@ -28,8 +28,22 @@
 	 * Init dApp
 	 */
 
-	const init = async () =>
-		await Promise.all([syncAuthStore(), initAnalytics(), initPlausibleAnalytics(), i18n.init()]);
+	const init = async () => {
+		/**
+		 * We use `Promise.allSettled` to ensure that all initialization functions run,
+		 * regardless of whether some of them fail. This avoids blocking the entire app
+		 * if non-critical services like analytics or i18n fail to initialize.
+		 *
+		 * Each service handles its own error handling,
+		 * and we avoid surfacing errors to the user here to keep the UX clean.
+		 */
+		await Promise.allSettled([
+			syncAuthStore(),
+			initAnalytics(),
+			initPlausibleAnalytics(),
+			i18n.init()
+		]);
+	};
 
 	const syncAuthStore = async () => {
 		if (!browser) {
