@@ -5,9 +5,12 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import IconClose from '$lib/components/icons/IconClose.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
+	let inputElement: HTMLInputElement | undefined;
 
 	export let filterValue = '';
 
@@ -16,6 +19,7 @@
 		if (visible) {
 			handleClose();
 		} else {
+			inputElement?.focus();
 			visible = true;
 			document.body.addEventListener('click', handleClose);
 		}
@@ -27,6 +31,11 @@
 		}
 		visible = false;
 		document.body.removeEventListener('click', handleClose);
+	};
+
+	const handleClear = () => {
+		filterValue = '';
+		inputElement?.focus();
 	};
 </script>
 
@@ -42,7 +51,25 @@
 			class="input-field condensed absolute right-0 -mt-[11px] mr-[1px] flex w-full overflow-hidden transition-all duration-300 md:w-[250px]"
 			on:click|stopPropagation|preventDefault={() => {}}
 		>
-			<InputTextWithAction name="" placeholder="" bind:value={filterValue} autofocus />
+			<InputTextWithAction
+				bind:inputElement
+				name="tokenFilter"
+				placeholder={$i18n.tokens.text.filter_placeholder}
+				bind:value={filterValue}
+				autofocus
+			/>
+			{#if filterValue !== ''}
+				<div
+					class="top-4.5 transition-bg duration-250 absolute right-12 bg-primary"
+					transition:fade
+				>
+					<button
+						aria-label={$i18n.core.text.clear_filter}
+						class="p-1 text-tertiary"
+						on:click={handleClear}><IconClose size="18" /></button
+					>
+				</div>
+			{/if}
 		</div>
 	{/if}
 	<ButtonIcon
