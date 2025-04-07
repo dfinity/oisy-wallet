@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { ADDRESS_BOOK_ENABLED } from '$env/address-book.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
@@ -21,7 +22,8 @@
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
 		NAVIGATION_MENU_VIP_BUTTON,
-		NAVIGATION_MENU_REFERRAL_BUTTON
+		NAVIGATION_MENU_REFERRAL_BUTTON,
+		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isVipUser } from '$lib/services/reward.services';
@@ -92,6 +94,19 @@
 			<IconShare size="20" />
 			{$i18n.navigation.text.refer_a_friend}
 		</ButtonMenu>
+
+		{#if ADDRESS_BOOK_ENABLED}
+			<Hr />
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.address_book}
+				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
+				on:click={modalStore.openAddressBookCode}
+			>
+				<!-- Add when design is finalized: <IconShare size="20" /> -->
+				{$i18n.navigation.text.address_book}
+			</ButtonMenu>
+		{/if}
 
 		{#if isVip}
 			<ButtonMenu
