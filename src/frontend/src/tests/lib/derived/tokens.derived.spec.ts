@@ -25,10 +25,10 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
 import { tokens } from '$lib/derived/tokens.derived';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
-import { splUserTokensStore } from '$sol/stores/spl-user-tokens.store';
 import type { SplToken } from '$sol/types/spl';
-import type { SplUserToken } from '$sol/types/spl-user-token';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
@@ -71,10 +71,10 @@ describe('tokens.derived', () => {
 		symbol: 'SplDefaultTokenId1'
 	};
 
-	const mockSplUserToken: SplUserToken = {
+	const mockSplCustomToken: SplCustomToken = {
 		...mockValidSplToken,
-		id: parseTokenId('SplUserTokenId2'),
-		symbol: 'SplUserTokenId2',
+		id: parseTokenId('SplCustomTokenId2'),
+		symbol: 'SplCustomTokenId2',
 		address: `${mockValidSplToken.address}2`,
 		version: undefined,
 		enabled: true
@@ -89,7 +89,7 @@ describe('tokens.derived', () => {
 			icrcDefaultTokensStore.resetAll();
 			icrcCustomTokensStore.resetAll();
 			splDefaultTokensStore.reset();
-			splUserTokensStore.resetAll();
+			splCustomTokensStore.resetAll();
 
 			setupTestnetsStore('reset');
 			setupUserNetworksStore('allEnabled');
@@ -106,7 +106,7 @@ describe('tokens.derived', () => {
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
 			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
 			splDefaultTokensStore.add(mockSplDefaultToken);
-			splUserTokensStore.setAll([{ data: mockSplUserToken, certified: false }]);
+			splCustomTokensStore.setAll([{ data: mockSplCustomToken, certified: false }]);
 
 			const result = get(tokens);
 
@@ -120,7 +120,7 @@ describe('tokens.derived', () => {
 				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[6].id },
 				{ ...mockIcrcCustomToken, id: result[7].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
-				mockSplUserToken
+				mockSplCustomToken
 			]);
 		});
 

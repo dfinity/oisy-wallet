@@ -1,3 +1,5 @@
+use std::result::Result;
+
 use ic_cdk::api::time;
 use shared::types::{
     dapp::AddDappSettingsError,
@@ -7,7 +9,7 @@ use shared::types::{
     Version,
 };
 
-use crate::{user_profile_model::UserProfileModel, StoredPrincipal};
+use crate::{read_state, user_profile_model::UserProfileModel, State, StoredPrincipal};
 
 pub fn find_profile(
     principal: StoredPrincipal,
@@ -18,6 +20,10 @@ pub fn find_profile(
     } else {
         Err(GetUserProfileError::NotFound)
     }
+}
+
+pub fn has_user_profile(principal: StoredPrincipal) -> bool {
+    read_state(|s: &State| s.user_profile_updated.contains_key(&principal))
 }
 
 pub fn create_profile(
