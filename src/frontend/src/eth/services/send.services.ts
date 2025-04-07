@@ -21,7 +21,7 @@ import {
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/signer.api';
-import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
@@ -32,8 +32,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
-import type { TransactionResponse } from '@ethersproject/providers';
+import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 const ethPrepareTransaction = ({
@@ -72,7 +71,7 @@ const erc20PrepareTransaction = async ({
 	const { data } = await populate({
 		contract: token as Erc20Token,
 		to,
-		amount: BigNumber.from(amount)
+		amount
 	});
 
 	if (isNullish(data)) {
@@ -158,7 +157,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 		contract,
 		erc20Contract: { address: erc20ContractAddress },
 		to,
-		amount: BigNumber.from(amount)
+		amount
 	});
 
 	const { address: contractAddress } = contract;
@@ -183,7 +182,7 @@ const erc20ContractAllowance = async ({
 	networkId: NetworkId;
 	owner: EthAddress;
 	spender: EthAddress;
-} & Pick<SendParams, 'token'>): Promise<BigNumber> => {
+} & Pick<SendParams, 'token'>): Promise<bigint> => {
 	const { allowance } = infuraErc20Providers(networkId);
 
 	return await allowance({
@@ -217,7 +216,7 @@ const erc20ContractPrepareApprove = async ({
 	const { data } = await populateApprove({
 		contract: token as Erc20Token,
 		spender,
-		amount: BigNumber.from(amount)
+		amount
 	});
 
 	const { address: to } = token as Erc20Token;
@@ -490,12 +489,12 @@ const checkExistingApproval = async ({
 	});
 
 	// If there is already an approved allowance that is enough for the required amount, we don't need to approve again.
-	if (preApprovedAmount.gte(amount)) {
+	if (preApprovedAmount >= amount) {
 		return 'existingApprovalIsEnough';
 	}
 
 	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first, before approving the new amount.
-	if (preApprovedAmount.gt(ZERO)) {
+	if (preApprovedAmount > ZERO_BI) {
 		await resetExistingApprovalToZero({
 			...rest,
 			token,
