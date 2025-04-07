@@ -1,6 +1,6 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
-	export let size: string = '32';
+	export let size = '32';
 </script>
 
 <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
