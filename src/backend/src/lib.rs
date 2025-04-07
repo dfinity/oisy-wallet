@@ -36,6 +36,7 @@ use shared::{
             SaveNetworksSettingsError, SaveNetworksSettingsRequest, SaveTestnetsSettingsError,
             SetShowTestnetsRequest,
         },
+        pow::{CreateChallengeError, CreateChallengeResponse},
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
@@ -678,6 +679,32 @@ pub fn has_user_profile() -> HasUserProfileResponse {
 
 /// An endpoint to be called by users on first login, to enable them to
 /// use the chain fusion signer together with Oisy.
+/// Creates a new proof-of-work challenge for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `CreateChallengeError`.
+///
+/// # Returns
+///
+/// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
+/// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
+///   internal errors.
+#[update(guard = "may_write_user_data")]
+#[allow(clippy::unused_async)]
+pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
+    // TODO implementation will be added once the candid files have been generated and checked in
+
+    Ok(CreateChallengeResponse {
+        difficulty: 0,
+        start_timestamp_ms: 0,
+        expiry_timestamp_ms: 0,
+    })
+}
+
+/// This function authorizes the caller to spend a specific
+//  amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
+// providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
+// cycles ledger.
 ///
 /// Note:
 /// - The chain fusion signer performs threshold key operations including providing public keys,
