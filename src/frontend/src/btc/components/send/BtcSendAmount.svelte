@@ -24,7 +24,7 @@
 
 	// TODO: Enable Max button by passing the `calculateMax` prop - https://dfinity.atlassian.net/browse/GIX-3114
 
-	$: customValidate = (userAmount: bigint): Error | undefined => {
+	const customValidate = (userAmount: bigint): Error | undefined => {
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO_BI) {
 			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);

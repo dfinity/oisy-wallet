@@ -4,8 +4,9 @@
 
 	export let disabled = false;
 	export let testId: string | undefined = undefined;
+	export let fullWidth = false;
 </script>
 
-<Button {testId} colorStyle="secondary-light" type="button" {disabled} on:click>
+<Button {testId} colorStyle="secondary-light" type="button" {fullWidth} {disabled} on:click>
 	{$i18n.core.text.cancel}
 </Button>

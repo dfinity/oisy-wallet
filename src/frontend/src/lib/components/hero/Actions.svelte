@@ -27,6 +27,7 @@
 		networkId,
 		networkSolana
 	} from '$lib/derived/network.derived';
+	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
@@ -40,10 +41,11 @@
 	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
 
 	let convertCkBtc = false;
-	$: convertCkBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
+	$: convertCkBtc =
+		$networkBitcoinMainnetEnabled && $tokenCkBtcLedger && $erc20UserTokensInitialized;
 
 	let convertBtc = false;
-	$: convertBtc = isNetworkIdBTCMainnet($networkId);
+	$: convertBtc = $networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId);
 
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);

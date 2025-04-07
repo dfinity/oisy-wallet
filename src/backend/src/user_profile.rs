@@ -1,12 +1,15 @@
+use std::result::Result;
+
 use ic_cdk::api::time;
 use shared::types::{
     dapp::AddDappSettingsError,
-    networks::SaveTestnetsSettingsError,
+    network::{NetworkSettingsMap, SaveNetworksSettingsError, SaveTestnetsSettingsError},
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
-    CredentialType, Version,
+    verifiable_credential::CredentialType,
+    Version,
 };
 
-use crate::{user_profile_model::UserProfileModel, StoredPrincipal};
+use crate::{read_state, user_profile_model::UserProfileModel, State, StoredPrincipal};
 
 pub fn find_profile(
     principal: StoredPrincipal,
@@ -17,6 +20,10 @@ pub fn find_profile(
     } else {
         Err(GetUserProfileError::NotFound)
     }
+}
+
+pub fn has_user_profile(principal: StoredPrincipal) -> bool {
+    read_state(|s: &State| s.user_profile_updated.contains_key(&principal))
 }
 
 pub fn create_profile(
@@ -53,6 +60,33 @@ pub fn add_credential(
     } else {
         Err(AddUserCredentialError::UserNotFound)
     }
+}
+
+/// Updates the user's network settings, merging with any existing settings.
+///
+/// # Arguments
+/// * `principal` - The principal of the user.
+/// * `profile_version` - The version of the user's profile.
+/// * `networks` - The new network settings to save.
+/// * `user_profile_model` - The user profile model.
+///
+/// # Returns
+/// - Returns `Ok(())` if the settings were successfully updated.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+pub fn update_network_settings(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    networks: NetworkSettingsMap,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), SaveNetworksSettingsError> {
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| SaveNetworksSettingsError::UserNotFound)?;
+    let now = time();
+    let new_profile = user_profile.with_networks(profile_version, now, networks, false)?;
+    user_profile_model.store_new(principal, now, &new_profile);
+    Ok(())
 }
 
 /// Sets the user's preference to show (or hide) testnets in the interface.

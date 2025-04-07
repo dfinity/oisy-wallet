@@ -6,16 +6,20 @@ on:
       - package-lock.json
   merge_group:
   release:
-    types: [released]
+    types: [ released ]
   workflow_dispatch:
 
 jobs:
   frontend-reproducibility:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        with:
+          persist-credentials: false
 
       - name: Prepare
         uses: ./.github/actions/prepare

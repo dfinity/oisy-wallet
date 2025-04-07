@@ -1,3 +1,4 @@
+import { notEmptyString } from '@dfinity/utils';
 import { defineConfig, devices } from '@playwright/test';
 import dotenv, { type DotenvPopulateInput } from 'dotenv';
 import { join } from 'node:path';
@@ -18,7 +19,9 @@ dotenv.populate(
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
 const MATRIX_OS = process.env.MATRIX_OS ?? '';
-const isMac = MATRIX_OS.includes('macos') ?? process.platform === 'darwin';
+const isMac = notEmptyString(MATRIX_OS)
+	? MATRIX_OS.includes('macos')
+	: process.platform === 'darwin';
 
 const appleProjects = [
 	{
@@ -35,6 +38,14 @@ const appleProjects = [
 			...devices['iPhone SE'],
 			screen: { width: 375, height: 667 },
 			viewport: { width: 375, height: 667 }
+		}
+	},
+	{
+		name: 'iPad Pro 11',
+		use: {
+			...devices['iPad Pro 11'],
+			screen: { width: 633, height: 1194 },
+			viewport: { width: 633, height: 1194 }
 		}
 	}
 ];

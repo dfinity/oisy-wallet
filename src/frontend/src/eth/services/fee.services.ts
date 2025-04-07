@@ -48,7 +48,8 @@ export const getErc20FeeData = async ({
 		const { getFeeData: fn } = isNetworkIdICP(targetNetworkId)
 			? infuraErc20IcpProviders(targetNetworkId as NetworkId)
 			: infuraErc20Providers(targetNetworkId ?? sourceNetworkId);
-		const fee = await fn({ ...rest, contract, amount: BigNumber.from(amount) });
+		const feeBigNumber = await fn({ ...rest, contract, amount: BigNumber.from(amount) });
+		const fee = feeBigNumber.toBigInt();
 
 		const isResearchCoin = contract.symbol === 'RSC' && contract.name === 'ResearchCoin';
 
@@ -57,11 +58,9 @@ export const getErc20FeeData = async ({
 		// Note that originally we added 25% but, after facing some issues with transferring Pepe on busy network, we decided to enhance the allowance further.
 		// Additionally, for some particular tokens (RSC), the returned estimated by infura fee is too low. Short-term solution: increase the fee manually for RSC by 150%.
 		// TODO: discuss the fee estimation issue with the cross-chain team and decide how can we properly calculate the max gas
-		const feeBuffer = BigNumber.from(
-			isResearchCoin ? (fee.toBigInt() * 15n) / 10n : fee.toBigInt() / 2n
-		);
+		const feeBuffer = isResearchCoin ? (fee * 15n) / 10n : fee / 2n;
 
-		return fee.add(feeBuffer).toBigInt();
+		return fee + feeBuffer;
 	} catch (err: unknown) {
 		// We silence the error on purpose.
 		// The queries above often produce errors on mainnet, even when all parameters are correctly set.

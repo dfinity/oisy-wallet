@@ -184,22 +184,6 @@ export const sumBalances = ([balance1, balance2]: [
 			? undefined
 			: (balance2 ?? balance1);
 
-/** Function to sum the balances of two tokens.
- *
- * If the decimals of the tokens are the same, the balances are added together.
- * If the decimals are different, the function returns null.
- * If one of the balances is undefined (meaning that it is still not loaded), the function returns undefined, because we don't want to show a possible wrong balance.
- * If one of the balances is nullish, but not undefined, the function returns the other balance.
- * If both balances are nullish, the function prioritize the first token (that, by exclusion of cases, is null).
- * NOTE: the function assumes that the two tokens are always 1:1 twins, for example BTC and ckBTC, or ETH and SepoliaETH
- *
- * @param token1
- * @param token2
- * @returns The sum of the balances or nullish value.
- */
-export const sumTokenBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['balance'] =>
-	token1.decimals === token2.decimals ? sumBalances([token1.balance, token2.balance]) : null;
-
 /** Function to sum the USD balances of two tokens.
  *
  * If one of the balances is nullish, the function returns the other balance.

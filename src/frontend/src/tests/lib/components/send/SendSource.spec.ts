@@ -1,12 +1,11 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import SendSource from '$lib/components/send/SendSource.svelte';
 import { render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 
 describe('SendSource', () => {
 	const props = {
 		token: BTC_MAINNET_TOKEN,
-		balance: BigNumber.from(22000000),
+		balance: 22000000n,
 		source: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9'
 	};
 

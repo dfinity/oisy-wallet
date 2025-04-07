@@ -11,6 +11,7 @@ ManageTokensCases.forEach(({ type, tokenSymbol, networkSymbol }) => {
 		const manageTokensPage = new ManageTokensPage({
 			page,
 			iiPage,
+			isMobile,
 			// TODO: check a better way to make the select network visible in the network switcher dropdown, otherwise the test will fail, since the network cannot be clicked
 			viewportSize: !isMobile
 				? {
@@ -20,6 +21,6 @@ ManageTokensCases.forEach(({ type, tokenSymbol, networkSymbol }) => {
 				: undefined
 		});
 		await manageTokensPage.waitForReady();
-		await manageTokensPage.enableAndDisableToken({ tokenSymbol, networkSymbol, isMobile });
+		await manageTokensPage.enableAndDisableToken({ tokenSymbol, networkSymbol });
 	});
 });

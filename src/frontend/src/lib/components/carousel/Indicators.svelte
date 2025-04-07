@@ -8,7 +8,7 @@
 </script>
 
 <div class="flex items-center">
-	{#each { length: totalSlides } as _, index}
+	{#each { length: totalSlides } as _, index (`indicator-${index}`)}
 		<Indicator on:click={() => onIndicatorClick(index)} {index} {currentSlide} {totalSlides} />
 	{/each}
 </div>
