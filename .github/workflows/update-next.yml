@@ -56,11 +56,15 @@ jobs:
             *) echo "Invalid package selection: $PACKAGE" && exit 1 ;;
           esac
           echo "PKG_NAME=$PKG_NAME" >> "$GITHUB_ENV"
+          echo "PKG_TAG=$NEXT_TAG" >> "$GITHUB_ENV"
         env:
           PACKAGE: ${{ inputs.package }}
+          NEXT_TAG: ${{ inputs.next && 'next' || '' }}
 
       - name: Update package
-        run: npm run update:${{ env.PKG_NAME }}${{ inputs.next && ':next' || '' }}
+        run: npm run update:$PKG_SCRIPT
+        env:
+          PKG_SCRIPT: ${{ env.PKG_NAME }}${{ env.PKG_TAG && ':' || '' }}${{ env.PKG_TAG }}
 
       - name: Create Pull Request
         uses: ./.github/actions/create-pr
