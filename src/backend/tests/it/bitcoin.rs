@@ -14,6 +14,35 @@ use crate::utils::{
 const MOCK_ADDRESS: &str = "bcrt1qpg7udjvq7gx2fp480pgt4hnhj3qc4nhrkstc33";
 
 #[test]
+fn test_select_user_utxos_fee_should_succeed() {
+    let pic_setup = setup();
+
+    let caller =
+        Principal::from_text("ejrt7-mhyue-6oq2j-63k56-qvvae-3uep4-dh34y-zbtzw-7ulf6-2ohv7-dqe")
+            .unwrap();
+
+    let request = SelectedUtxosFeeRequest {
+        amount_satoshis: 100_000_000u64,
+        network: BitcoinNetwork::Regtest,
+        min_confirmations: None,
+    };
+    let response = pic_setup.update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
+        caller,
+        "btc_select_user_utxos_fee",
+        request,
+    );
+
+    assert!(response.is_ok());
+
+    let response = response
+        .expect("Call failed")
+        .expect("Request was not successful");
+
+    assert_eq!(response.utxos.len(), 0);
+    assert_eq!(response.fee_satoshis, 0);
+}
+
+#[test]
 fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
     let pic_setup = setup();
 
