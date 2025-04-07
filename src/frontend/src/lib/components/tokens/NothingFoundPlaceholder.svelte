@@ -1,7 +1,7 @@
 <script lang="ts">
 	import shocked from '$lib/assets/shocked.svg';
-	import { i18n } from '$lib/stores/i18n.store';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <div class="py-12">
