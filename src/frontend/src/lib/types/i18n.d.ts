@@ -26,6 +26,7 @@ interface I18nCore {
 		clear_filter: string;
 		not_available: string;
 		new: string;
+		edit: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -47,6 +48,7 @@ interface I18nNavigation {
 		support: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
+		refer_a_friend: string;
 	};
 	alt: {
 		tokens: string;
@@ -61,6 +63,7 @@ interface I18nNavigation {
 		support: string;
 		open_twitter: string;
 		vip_qr_code: string;
+		refer_a_friend: string;
 	};
 	short: { documentation: string };
 }
@@ -169,6 +172,7 @@ interface I18nInit {
 		retrieving_public_keys: string;
 		done: string;
 	};
+	alt: { loader_banner: string };
 	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
@@ -224,15 +228,21 @@ interface I18nHero {
 interface I18nSettings {
 	text: {
 		title: string;
+		general: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
-		session: string;
+		session_duration: string;
+		session_expires_in: string;
 		session_description: string;
-		testnets: string;
+		networks: string;
+		enable_testnets: string;
+		active_networks: string;
+		active_networks_description: string;
+		enable_network: string;
+		disable_network: string;
 		testnets_description: string;
 		hide_zero_balances_description: string;
-		active_networks: string;
 		credentials_title: string;
 		pouh_credential: string;
 		pouh_credential_description: string;
@@ -242,6 +252,9 @@ interface I18nSettings {
 		appearance_light: string;
 		appearance_dark: string;
 		appearance_system: string;
+		git_disclaimer: string;
+		git_branch_name: string;
+		git_commit_hash: string;
 	};
 	alt: {
 		testnets_toggle: string;
@@ -260,7 +273,9 @@ interface I18nNetworks {
 	chain_fusion: string;
 	network: string;
 	testnet: string;
+	number_of_enabled: string;
 	filter: string;
+	manage: string;
 }
 
 interface I18nReceive {
@@ -352,6 +367,8 @@ interface I18nSend {
 		convert_to_native_icp: string;
 		open_qr_modal: string;
 		scan_qr: string;
+		select_token: string;
+		select_network_filter: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -563,6 +580,7 @@ interface I18nTokens {
 		text: {
 			title: string;
 			manage_list: string;
+			list_settings: string;
 			do_not_see_import: string;
 			manage_for_network: string;
 			network: string;
@@ -809,6 +827,29 @@ interface I18nVip {
 	};
 }
 
+interface I18nReferral {
+	invitation: {
+		text: {
+			title: string;
+			referral_link_copied: string;
+			information: string;
+			not_referred_yet: string;
+			referred_amount: string;
+			learn_more: string;
+		};
+		error: { loading_referrer_info: string; setting_referrer: string };
+	};
+	reward: {
+		text: {
+			title: string;
+			content_title: string;
+			content_text: string;
+			share: string;
+			open_wallet: string;
+		};
+	};
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -901,6 +942,7 @@ interface I18n {
 	transactions: I18nTransactions;
 	about: I18nAbout;
 	vip: I18nVip;
+	referral: I18nReferral;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;

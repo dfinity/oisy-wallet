@@ -37,14 +37,18 @@ runs:
         outputs: ./out
         target: ${{ inputs.target }}
 
-    - run: sha256sum out/${{ inputs.name }}
+    - run: sha256sum "out/$NAME"
+      env:
+        NAME: ${{ inputs.name }}
       shell: bash
 
-    - run: mv out/${{ inputs.name }} ${{ inputs.name }}
+    - run: mv "out/$NAME" "$NAME"
+      env:
+        NAME: ${{ inputs.name }}
       shell: bash
 
     - name: 'Upload ${{ inputs.name }}'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         # name is the name used to display and retrieve the artifact
         name: ${{ inputs.name }}

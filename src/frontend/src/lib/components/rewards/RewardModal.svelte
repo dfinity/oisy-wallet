@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
+	import { Html, Modal } from '@dfinity/gix-components';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import type { RewardDescription } from '$env/types/env-reward';
@@ -18,6 +18,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
+	import { REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		combinedDerivedSortedNetworkTokensUi,
@@ -49,7 +50,7 @@
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress: $ethAddress,
+		$ethAddress,
 		$icTransactions: $icTransactionsStore,
 		$btcStatuses: $btcStatusesStore,
 		$solTransactions: $solTransactionsStore
@@ -84,7 +85,7 @@
 	let amountOfRewards = 0;
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal on:nnsClose={modalStore.close} testId={REWARDS_MODAL}>
 	<span class="text-center text-xl" slot="title">{reward.title}</span>
 
 	<ContentWithToolbar>
@@ -95,11 +96,13 @@
 			<Hr spacing="md" />
 		{/if}
 
-		<div class="flex w-full justify-between text-lg font-semibold"
-			><span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
-			<span class="inline-flex"><RewardDateBadge date={reward.endDate} /></span></div
-		>
-		<p class="my-3">{reward.description}</p>
+		<div class="flex w-full justify-between text-lg font-semibold">
+			<span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
+			<span class="inline-flex">
+				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
+			</span>
+		</div>
+		<p class="my-3"><Html text={reward.description} /></p>
 
 		<ExternalLink
 			href={reward.learnMoreHref}

@@ -61,3 +61,11 @@ export const mapUserNetworks = (
 		},
 		[]
 	);
+
+export const isUserNetworkEnabled = ({
+	userNetworks,
+	networkId
+}: {
+	userNetworks: UserNetworks;
+	networkId: NetworkId;
+}): boolean => userNetworks[networkId]?.enabled ?? false;

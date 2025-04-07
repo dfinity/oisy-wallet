@@ -8,40 +8,41 @@ import {
 } from '$lib/schema/transaction.schema';
 import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
-import { ethers } from 'ethers';
+import type { TransactionResponse as AlchemyTransactionResponse } from 'alchemy-sdk';
+import type { FeeData } from 'ethers/providers';
+import type { Transaction as EthersTransactionLib } from 'ethers/transaction';
 import * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
 export type EthersTransaction = Pick<
-	ethers.Transaction,
-	| 'hash'
-	| 'to'
-	| 'from'
-	| 'nonce'
-	| 'gasLimit'
-	| 'gasPrice'
-	| 'data'
-	| 'value'
-	| 'chainId'
-	| 'type'
-	| 'maxPriorityFeePerGas'
-	| 'maxFeePerGas'
->;
+	EthersTransactionLib,
+	'nonce' | 'gasLimit' | 'data' | 'value' | 'chainId'
+> & {
+	hash?: string;
+	from?: string;
+	to?: string;
+	gasPrice?: bigint;
+};
 
-export type Transaction = Omit<EthersTransaction, 'data'> &
-	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {
+// TODO: Remove this type when `alchemy-sdk` upgrades to `ethers` v6 since `TransactionResponse` will be with BigInt
+export type TransactionResponseWithBigInt = Omit<
+	AlchemyTransactionResponse,
+	'value' | 'gasLimit' | 'gasPrice' | 'chainId'
+> &
+	Pick<EthersTransaction, 'value' | 'gasLimit' | 'gasPrice' | 'chainId'>;
+
+export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
+	Required<Pick<EthersTransaction, 'from'>> & {
+		blockNumber?: number;
+		timestamp?: number;
 		pendingTimestamp?: number;
 		displayTimestamp?: number;
 	};
 
-// TODO: use FeeData type again once we upgrade to ethers v6
-export interface TransactionFeeData {
-	maxFeePerGas: bigint | null;
-	maxPriorityFeePerGas: bigint | null;
+export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
 	gas: bigint;
-}
+};
 
 export type RequiredTransactionFeeData = {
 	[K in keyof Pick<

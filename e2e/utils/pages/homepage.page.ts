@@ -17,8 +17,13 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
+	SETTINGS_NETWORKS_MODAL,
+	SETTINGS_NETWORKS_MODAL_SAVE_BUTTON,
+	SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER,
+	SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX,
+	SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE,
 	SIDEBAR_NAVIGATION_MENU,
-	TESTNET_TOGGLE,
 	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
@@ -100,7 +105,7 @@ abstract class Homepage {
 		testId: string;
 		scrollIntoView?: boolean;
 	}): Promise<void> {
-		const locator = this.#page.getByTestId(testId);
+		const locator = this.#page.getByTestId(testId).filter({ visible: true });
 
 		if (scrollIntoView) {
 			// Method `click` auto-scrolls into view if needed.
@@ -325,6 +330,7 @@ abstract class Homepage {
 		await this.takeScreenshot({ screenshotTarget: modal });
 	}
 
+	// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
 	async setCarouselFirstSlide(): Promise<void> {
 		if (isNullish(this.promotionCarousel)) {
 			this.promotionCarousel = new PromotionCarousel(this.#page);
@@ -347,9 +353,30 @@ abstract class Homepage {
 		}
 	}
 
+	private async toggleAllTestnets(): Promise<void> {
+		const toggles = this.#page.locator(`[data-tid^="${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-"]`);
+		const countToggles = await toggles.count();
+		const testIds = await Promise.all(
+			Array.from({ length: countToggles }, (_, i) => toggles.nth(i).getAttribute('data-tid'))
+		);
+		for (const testId of testIds) {
+			if (nonNullish(testId)) {
+				await this.clickByTestId({ testId });
+			}
+		}
+	}
+
 	async activateTestnetSettings(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
-		await this.clickByTestId({ testId: TESTNET_TOGGLE });
+		await this.clickByTestId({ testId: SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON });
+		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX });
+		await this.waitForByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER });
+		await this.toggleAllTestnets();
+		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_SAVE_BUTTON });
+		await this.waitForByTestId({
+			testId: SETTINGS_NETWORKS_MODAL,
+			options: { state: 'hidden', timeout: 60000 }
+		});
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 
@@ -447,7 +474,7 @@ abstract class Homepage {
 	}
 
 	async takeScreenshot(
-		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
+		{ freezeCarousel: _ = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
 			freezeCarousel: false
 		}
 	): Promise<void> {
@@ -458,12 +485,13 @@ abstract class Homepage {
 
 		const element = screenshotTarget ?? this.#page;
 
-		if (freezeCarousel) {
-			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
-			await this.#page.clock.pauseAt(Date.now());
-			await this.setCarouselFirstSlide();
-			await this.#page.clock.pauseAt(Date.now());
-		}
+		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
+		// if (freezeCarousel) {
+		// 	// Freezing the time because the carousel has a timer that resets the animations and the transitions.
+		// 	await this.#page.clock.pauseAt(Date.now());
+		// 	await this.setCarouselFirstSlide();
+		// 	await this.#page.clock.pauseAt(Date.now());
+		// }
 
 		if (!this.#isMobile) {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
@@ -491,10 +519,11 @@ abstract class Homepage {
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
 
-		if (freezeCarousel) {
-			// Resuming the time that we froze because of the carousel animations.
-			await this.#page.clock.resume();
-		}
+		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
+		// if (freezeCarousel) {
+		// 	// Resuming the time that we froze because of the carousel animations.
+		// 	await this.#page.clock.resume();
+		// }
 	}
 
 	abstract extendWaitForReady(): Promise<void>;

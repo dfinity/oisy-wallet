@@ -1,4 +1,4 @@
-import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
+import { TOKEN_BALANCE, TOKEN_CARD, TOKEN_SKELETON_TEXT } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
@@ -45,12 +45,10 @@ export class ManageTokensPage extends HomepageLoggedIn {
 
 	enableAndDisableToken = async ({
 		tokenSymbol,
-		networkSymbol,
-		isMobile
+		networkSymbol
 	}: {
 		tokenSymbol: string;
 		networkSymbol: string;
-		isMobile?: boolean;
 	}) => {
 		await this.activateTestnetSettings();
 		await this.toggleTokenInList({
@@ -64,8 +62,24 @@ export class ManageTokensPage extends HomepageLoggedIn {
 			})
 		).toBeVisible();
 		await this.waitForLoadState();
+
+		const skeletons = this.getLocatorByTestId({ testId: TOKEN_SKELETON_TEXT });
+		const countSkeletons = await skeletons.count();
+		await Promise.all(
+			Array.from({ length: countSkeletons }, (_, i) =>
+				skeletons.nth(i).waitFor({ state: 'hidden', timeout: 60000 })
+			)
+		);
+
+		const balances = this.getLocatorByTestId({ testId: `[data-tid^="${TOKEN_BALANCE}-"]` });
+		const countBalances = await balances.count();
+		await Promise.all(
+			Array.from({ length: countBalances }, (_, i) =>
+				skeletons.nth(i).waitFor({ state: 'visible', timeout: 60000 })
+			)
+		);
+
 		await this.takeScreenshot({
-			isMobile,
 			freezeCarousel: true,
 			centeredElementTestId: `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`
 		});

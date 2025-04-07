@@ -49,7 +49,7 @@
 	$: ({ transaction: selectedTransaction, token: selectedToken } =
 		mapTransactionModalData<IcTransactionUi>({
 			$modalOpen: $modalIcTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 
 	let noTransactions = false;
