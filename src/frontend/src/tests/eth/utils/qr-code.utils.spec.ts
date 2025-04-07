@@ -53,8 +53,8 @@ describe('decodeQrCode', () => {
 	it('should return { status: "token_incompatible" } when tokens do not match', () => {
 		const payment = {
 			prefix: `not-${token.symbol}`,
-			destination: destination,
-			amount: amount
+			destination,
+			amount
 		};
 		mockDecodeQrCodeUrn.mockReturnValue(payment);
 
@@ -71,7 +71,7 @@ describe('decodeQrCode', () => {
 	it('should return { status: "success", destination, token, amount } when everything matches', () => {
 		const payment = {
 			prefix: 'ethereum',
-			destination: destination,
+			destination,
 			value: amount * 10 ** token.decimals,
 			ethereumChainId: (token.network as EthereumNetwork).chainId.toString()
 		};
@@ -84,9 +84,9 @@ describe('decodeQrCode', () => {
 		});
 		expect(response).toEqual({
 			status: 'success',
-			destination: destination,
+			destination,
 			symbol: token.symbol,
-			amount: amount
+			amount
 		});
 
 		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
