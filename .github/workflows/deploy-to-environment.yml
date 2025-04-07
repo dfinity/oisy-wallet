@@ -263,7 +263,7 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Set up DFX
-        uses: dfinity/setup-dfx@main
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
         env:
           DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
