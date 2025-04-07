@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
+	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 
 	let filterValue: string | undefined;
 	$: filterValue;

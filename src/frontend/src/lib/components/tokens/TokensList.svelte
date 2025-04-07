@@ -6,6 +6,7 @@
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
+	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
@@ -14,9 +15,8 @@
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
-	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 
-	export let filter: string = '';
+	export let filter = '';
 
 	let tokens: TokenUiOrGroupUi[] | undefined;
 
