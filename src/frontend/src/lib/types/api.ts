@@ -16,7 +16,7 @@ import type {
 import type { Address, BtcAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { Principal } from '@dfinity/principal';
+import type { Principal } from '@dfinity/principal';
 
 export interface AddUserCredentialParams {
 	credentialJwt: string;

@@ -4,7 +4,7 @@ import {
 	disableConsoleLog,
 	failTestsThatLogToConsole
 } from '$tests/utils/console.test-utils';
-import { HttpAgent } from '@dfinity/agent';
+import type { HttpAgent } from '@dfinity/agent';
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/svelte';
 import 'fake-indexeddb/auto';

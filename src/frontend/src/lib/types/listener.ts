@@ -1,5 +1,5 @@
-import BitcoinListener from '$btc/components/core/BitcoinListener.svelte';
-import EthListener from '$eth/components/core/EthListener.svelte';
+import type BitcoinListener from '$btc/components/core/BitcoinListener.svelte';
+import type EthListener from '$eth/components/core/EthListener.svelte';
 import type { Token } from '$lib/types/token';
 
 export interface WalletWorker {

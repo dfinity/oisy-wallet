@@ -30,7 +30,7 @@ import {
 } from '$lib/stores/address.store';
 import type { SolAddress } from '$lib/types/address';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { LoadIdbAddressError } from '$lib/types/errors';
+import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
