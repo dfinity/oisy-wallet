@@ -15,18 +15,9 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { getTokenDecimals, getTokenOwner } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
-import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
-import { splUserTokensStore } from '$sol/stores/spl-user-tokens.store';
-import type { SolanaNetworkType } from '$sol/types/network';
-import type { SplUserToken } from '$sol/types/spl-user-token';
-import {
-	SPL_CUSTOM_TOKENS_KEY,
-	splCustomTokensStore,
-	type SplAddressMap
-} from '$sol/stores/spl-custom-tokens.store';
+import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
