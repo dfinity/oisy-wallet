@@ -13,12 +13,12 @@
 
 	onDestroy(() => destroyWorker());
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	function stopWorker() {
 		powWorker?.stopPowWorker();
 	}
 
 	function destroyWorker() {
-		stopWorker();
 		powWorker?.destroyPowWorker();
 		powWorker = undefined;
 	}
