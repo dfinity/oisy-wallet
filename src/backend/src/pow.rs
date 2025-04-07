@@ -45,12 +45,11 @@ async fn get_random_u64() -> Result<u64, String> {
         .map_err(|e| format!("raw_rand failed:  {e:?}"))?;
 
     // Check if we have at least 8 bytes which are required for u64
-    if random_bytes.len() < 8 {
-        debug_println!(
-            "Not enough random bytes returned: expected 8, got {}",
-            random_bytes.len(),
-        );
-    }
+    assert!(
+        (random_bytes.len() >= 8),
+        "Not enough random bytes returned: expected 8, got {}",
+        random_bytes.len()
+    );
 
     // Convert the first 4 bytes into a [u8; 4] array for conversion
     let byte_array: [u8; 8] = random_bytes[0..8]
