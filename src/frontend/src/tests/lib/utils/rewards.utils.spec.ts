@@ -130,7 +130,7 @@ describe('rewards.utils', () => {
 		});
 
 		it('should return isReferral as true and set entry in the session storage', async () => {
-			const customMockedReward: RewardInfo = { ...mockedReward, name: ['referrer'] };
+			const customMockedReward: RewardInfo = { ...mockedReward, name: ['referral'] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				airdrops: [],

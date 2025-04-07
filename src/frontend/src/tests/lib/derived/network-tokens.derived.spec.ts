@@ -27,9 +27,9 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
-import { splUserTokensStore } from '$sol/stores/spl-user-tokens.store';
-import type { SplUserToken } from '$sol/types/spl-user-token';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -59,7 +59,7 @@ describe('network-tokens.derived', () => {
 			icrcDefaultTokensStore.resetAll();
 			icrcCustomTokensStore.resetAll();
 			splDefaultTokensStore.reset();
-			splUserTokensStore.resetAll();
+			splCustomTokensStore.resetAll();
 		});
 
 		it('should return all non-testnet tokens when no network is selected and testnets are disabled', () => {
@@ -82,12 +82,12 @@ describe('network-tokens.derived', () => {
 				...toggleProps
 			};
 
-			const mockSplUserToken: SplUserToken = {
+			const mockSplCustomToken: SplCustomToken = {
 				...BONK_TOKEN,
 				...toggleProps
 			};
 
-			const mockSplDevnetUserToken: SplUserToken = {
+			const mockSplDevnetCustomToken: SplCustomToken = {
 				...DEVNET_EURC_TOKEN,
 				...toggleProps
 			};
@@ -111,7 +111,7 @@ describe('network-tokens.derived', () => {
 				},
 				{
 					network: SOLANA_MAINNET_NETWORK,
-					tokens: [SOLANA_TOKEN, mockSplUserToken]
+					tokens: [SOLANA_TOKEN, mockSplCustomToken]
 				},
 				{
 					network: SOLANA_TESTNET_NETWORK,
@@ -119,7 +119,7 @@ describe('network-tokens.derived', () => {
 				},
 				{
 					network: SOLANA_DEVNET_NETWORK,
-					tokens: [SOLANA_DEVNET_TOKEN, mockSplDevnetUserToken]
+					tokens: [SOLANA_DEVNET_TOKEN, mockSplDevnetCustomToken]
 				}
 			];
 
@@ -130,9 +130,9 @@ describe('network-tokens.derived', () => {
 					{ data: mockErc20UserToken, certified: false },
 					{ data: mockErc20SepoliaUserToken, certified: false }
 				]);
-				splUserTokensStore.setAll([
-					{ data: mockSplUserToken, certified: false },
-					{ data: mockSplDevnetUserToken, certified: false }
+				splCustomTokensStore.setAll([
+					{ data: mockSplCustomToken, certified: false },
+					{ data: mockSplDevnetCustomToken, certified: false }
 				]);
 			});
 
@@ -143,7 +143,7 @@ describe('network-tokens.derived', () => {
 					ETHEREUM_TOKEN,
 					SOLANA_TOKEN,
 					mockErc20UserToken,
-					mockSplUserToken
+					mockSplCustomToken
 				]);
 			});
 

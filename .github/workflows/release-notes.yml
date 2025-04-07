@@ -8,6 +8,8 @@ on:
       - v*
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   release_notes:
     if: github.ref_type == 'tag'
