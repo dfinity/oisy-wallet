@@ -9,6 +9,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { onMount } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
+	import { AppPath } from '$lib/constants/routes.constants';
 
 	let visible: boolean;
 	$: visible = false;
@@ -43,6 +45,14 @@
 	onMount(() => {
 		if ($tokenListStore.filter !== '') {
 			handleOpen();
+		}
+	});
+
+	afterNavigate(({ from }) => {
+		const previousRoute = `${from?.route?.id}/`;
+		if (previousRoute.indexOf(AppPath.Transactions) < 0) {
+			$tokenListStore.filter = '';
+			handleClose();
 		}
 	});
 </script>

@@ -16,6 +16,7 @@
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 	import { tokenListStore } from '$lib/stores/token-list.store';
+	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined;
 
@@ -40,21 +41,8 @@
 	let loading: boolean;
 	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
 
-	let filter: string;
-	$: filter = $tokenListStore.filter;
-
-	$: console.log(filter);
-
 	let filteredTokens: TokenUiOrGroupUi[] | undefined;
-	$: filteredTokens = (tokens ?? []).filter((t) => {
-		if (!isTokenUiGroup(t) && filter !== '') {
-			return (
-				t.token.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
-				t.token.symbol.toLowerCase().indexOf(filter.toLowerCase()) >= 0
-			);
-		}
-		return true;
-	});
+	$: filteredTokens = getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] });
 </script>
 
 <TokensDisplayHandler bind:tokens>
@@ -87,7 +75,7 @@
 		</div>
 
 		{#if filteredTokens?.length === 0}
-			{#if filter === ''}
+			{#if $tokenListStore.filter === ''}
 				<NoTokensPlaceholder />
 			{:else}
 				<NothingFoundPlaceholder />

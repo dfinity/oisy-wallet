@@ -10,6 +10,8 @@
 	import type { CardData } from '$lib/types/token-card';
 	import type { TokenUiGroup } from '$lib/types/token-group';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
+	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
+	import { tokenListStore } from '$lib/stores/token-list.store';
 
 	export let tokenGroup: TokenUiGroup;
 
@@ -37,7 +39,7 @@
 
 	{#if isExpanded}
 		<div class="flex flex-col gap-0 bg-secondary" transition:slide={SLIDE_PARAMS}>
-			{#each tokenGroup.tokens as token (token.id)}
+			{#each getFilteredTokenGroup( { filter: $tokenListStore.filter, list: tokenGroup.tokens } ) as token (token.id)}
 				<TokenCardWithUrl styleClass="p-3 hover:bg-brand-subtle-10" {token}>
 					<TokenCardContent logoSize="md" data={token} />
 				</TokenCardWithUrl>
