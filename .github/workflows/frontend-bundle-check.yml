@@ -63,7 +63,7 @@ jobs:
           echo "size=$SIZE" >> $GITHUB_OUTPUT
 
   compare-sizes:
-    needs: [ build-base-branch, build-pr ]
+    needs: [build-base-branch, build-pr]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
