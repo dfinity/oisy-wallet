@@ -100,7 +100,7 @@ describe('token.utils', () => {
 			const result = getMaxTransactionAmount({
 				balance,
 				fee,
-				tokenDecimals: tokenDecimals,
+				tokenDecimals,
 				tokenStandard: 'erc20'
 			});
 			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
@@ -110,7 +110,7 @@ describe('token.utils', () => {
 			const result = getMaxTransactionAmount({
 				balance,
 				fee,
-				tokenDecimals: tokenDecimals,
+				tokenDecimals,
 				tokenStandard: 'spl'
 			});
 			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);

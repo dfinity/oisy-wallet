@@ -6,9 +6,6 @@ on:
       - main
     tags:
       - v*
-  workflow_run:
-    workflows: ['Tag on Merge from Release Branch']
-    types: [completed]
   workflow_dispatch:
     inputs:
       network:
@@ -36,12 +33,25 @@ on:
         type: boolean
         description: 'Force backend deployment even if no changes are detected.'
         default: false
+  workflow_call:
+    inputs:
+      workflow-call:
+        description: 'To distinguish workflow_call from regular calls'
+        required: false
+        type: boolean
+        default: true
+      network:
+        required: true
+        type: string
+      canister:
+        required: false
+        type: string
+        default: frontend
 
 run-name: >-
   ${{ 
     github.event_name == 'push' && github.ref_type == 'branch' && 'Deploying Frontend / Backend to Staging'
     || github.event_name == 'push' && github.ref_type == 'tag' && 'Deploying Frontend / Backend to Beta'
-    || github.event_name == 'workflow_run' && 'Deploying Frontend / Backend to Beta'
     || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
     || format('Deploying {0} to {1}', inputs.canister, inputs.network) }}
 
@@ -49,9 +59,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.network }}-${{ github.event.inputs.canister }}
   cancel-in-progress: false
 
+permissions: {}
+
 jobs:
   deployment:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -61,7 +72,12 @@ jobs:
         run: |
           echo "deploy_frontend=false" >> $GITHUB_ENV
           echo "deploy_backend=false" >> $GITHUB_ENV
-          if [ "${{ github.event_name }}" == "push" ]; then
+          if [ "$WORKFLOW_CALL" == "true" ]; then
+            echo "NETWORK=$NETWORK_CALL" >> $GITHUB_ENV
+            echo "CANISTER=$CANISTER_CALL" >> $GITHUB_ENV
+            echo "deploy_frontend=true" >> $GITHUB_ENV
+            echo "deploy_backend=true" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" == "push" ]; then
             if [ "$REF_TYPE" == "branch" ]; then
               echo "NETWORK=staging" >> $GITHUB_ENV
             elif [ "$REF_TYPE" == "tag" ]; then
@@ -76,13 +92,10 @@ jobs:
           elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "NETWORK=$NETWORK" >> $GITHUB_ENV
             echo "CANISTER=$CANISTER" >> $GITHUB_ENV
-            echo "deploy_frontend=${{ github.event.inputs.canister == 'frontend' }}" >> $GITHUB_ENV
-            echo "deploy_backend=${{ github.event.inputs.canister == 'backend' }}" >> $GITHUB_ENV
-          elif [ "${{ github.event_name }}" == "workflow_run" ]; then
-            echo "NETWORK=beta" >> $GITHUB_ENV
-            echo "CANISTER=frontend" >> $GITHUB_ENV
-            if [ "$CONCLUSION" == "success" ]; then
+            if [ "$CANISTER" = "frontend" ]; then
               echo "deploy_frontend=true" >> $GITHUB_ENV
+            fi
+            if [ "$CANISTER" = "backend" ]; then
               echo "deploy_backend=true" >> $GITHUB_ENV
             fi
           else
@@ -93,7 +106,9 @@ jobs:
           REF_TYPE: ${{ github.ref_type }}
           NETWORK: ${{ github.event.inputs.network }}
           CANISTER: ${{ github.event.inputs.canister }}
-          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          WORKFLOW_CALL: ${{ inputs.workflow-call }}
+          NETWORK_CALL: ${{ inputs.network }}
+          CANISTER_CALL: ${{ inputs.canister }}
 
       - name: Check release policy
         run: |
@@ -115,10 +130,16 @@ jobs:
           REF: ${{ github.ref }}
 
       - name: Checkout
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 2
           persist-credentials: false
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin "$BASE_REF:$BASE_REF"
+        env:
+          BASE_REF: ${{ github.base_ref }}
 
       - name: Set Output Variables Based on Network
         id: set-outputs
@@ -227,7 +248,7 @@ jobs:
           DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Restore cargo cache
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: |
             /home/runner/.cargo/registry
@@ -309,8 +330,8 @@ jobs:
           [[ "$FORCE_BACKEND" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
           if [ "$deploy_backend" == "true" ] ; then
-            if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
-              if [ "$FORCE_BACKEND" == "false" ]; then
+            if git diff --quiet "origin/$BASE_REF" HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
+              if [ "$FORCE_BACKEND" != "true" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
               else
                 ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
@@ -324,3 +345,4 @@ jobs:
         env:
           FORCE_BACKEND: ${{ github.event.inputs.force-backend }}
           DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
+          BASE_REF: ${{ github.base_ref }}

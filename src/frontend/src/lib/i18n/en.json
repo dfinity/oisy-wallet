@@ -152,7 +152,7 @@
 			"youre_eligible": "You're eligible!"
 		},
 		"alt": {
-			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
+			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop."
 		}
 	},
 	"footer": {
@@ -572,7 +572,9 @@
 			"exchange_is_not_available": "USD value is currently not available.",
 			"source_token_title": "You pay",
 			"destination_token_title": "You receive",
-			"chain_key": "Chain Key"
+			"chain_key": "Chain Key",
+			"show_more_networks": "Show $number more networks",
+			"hide_more_networks": "Hide more networks"
 		},
 		"details": {
 			"title": "Token details",
