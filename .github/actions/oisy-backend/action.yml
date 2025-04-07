@@ -13,7 +13,7 @@ runs:
   using: 'composite'
   steps:
     - name: Cache backend canister WASM
-      uses: actions/cache@v4
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       id: backend-wasm-cache
       with:
         path: |
