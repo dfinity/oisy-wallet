@@ -43,7 +43,7 @@
 
 	let filteredTokens: TokenUiOrGroupUi[] | undefined;
 	$: filteredTokens = (tokens || []).filter((t) => {
-		if (!isTokenUiGroup(t) && !filter === '') {
+		if (!isTokenUiGroup(t) && filter !== '') {
 			return (
 				t.token.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
 				t.token.symbol.toLowerCase().indexOf(filter.toLowerCase()) >= 0
