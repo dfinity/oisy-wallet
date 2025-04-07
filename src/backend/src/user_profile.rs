@@ -20,7 +20,7 @@ pub fn find_profile(
     }
 }
 
-pub fn exists_profile(principal: StoredPrincipal) -> bool {
+pub fn has_user_profile(principal: StoredPrincipal) -> bool {
     read_state(|s: &State| s.user_profile_updated.contains_key(&principal))
 }
 

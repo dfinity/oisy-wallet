@@ -24,7 +24,7 @@
 	$: ({ transaction: selectedTransaction, token: selectedToken } =
 		mapTransactionModalData<SolTransactionUi>({
 			$modalOpen: $modalSolTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 </script>
 

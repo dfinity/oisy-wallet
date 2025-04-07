@@ -132,7 +132,8 @@ const toSplTransaction = ({
 			value: BigNumber.from(value ?? ZERO_BI).toBigInt(),
 			timestamp: BigInt(timestamp ?? ZERO_BI)
 		}),
-		counterparty: address === from ? to : from
+		// in case it's a BTC tx, "to" is an array
+		counterparty: address === from ? (Array.isArray(to) ? to[0] : to) : from
 	};
 };
 

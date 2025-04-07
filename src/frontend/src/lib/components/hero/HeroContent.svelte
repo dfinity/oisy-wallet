@@ -41,7 +41,7 @@
 		? mapTokenUi({
 				token: $pageToken,
 				$balances: $balancesStore,
-				$exchanges: $exchanges
+				$exchanges
 			})
 		: undefined;
 

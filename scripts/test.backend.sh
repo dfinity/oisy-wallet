@@ -4,8 +4,7 @@ POCKET_IC_SERVER_VERSION=6.0.0
 OISY_UPGRADE_VERSIONS="v0.0.13,v0.0.19"
 BITCOIN_CANISTER_RELEASE="2024-08-30"
 BITCON_CANISTER_WASM="ic-btc-canister.wasm.gz"
-CYCLES_LEDGER_CANISTER_RELEASE="v1.0.1"
-CYCLES_LEDGER_CANISTER_WASM="cycles-ledger.wasm.gz"
+
 # If a backend wasm file exists at the root, it will be used for the tests.
 
 if [ -f "./backend.wasm.gz" ]; then
@@ -27,14 +26,15 @@ fi
 # Setting the environment variable that will be used in the test to load that particular file relative to the cargo workspace.
 export BITCOIN_CANISTER_WASM_FILE="../../$BITCON_CANISTER_WASM"
 
-if [ -f "./$CYCLES_LEDGER_CANISTER_WASM" ]; then
-  echo "Use existing $CYCLES_LEDGER_CANISTER_WASM canister."
+if [ -f "./${CYCLES_LEDGER_CANISTER_WASM}" ]; then
+  echo "Use existing ${CYCLES_LEDGER_CANISTER_WASM} canister."
 else
-  curl -sSL "https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-$CYCLES_LEDGER_CANISTER_RELEASE/cycles-ledger.wasm.gz" -o $CYCLES_LEDGER_CANISTER_WASM
+  echo "Downloading cycles_ledger canister."
+  curl -sSL "${CYCLES_LEDGER_CANISTER_URL}" -o "${CYCLES_LEDGER_CANISTER_WASM}"
 fi
 
 # Setting the environment variable that will be used in the test to load that particular file relative to the cargo workspace.
-export CYCLES_LEDGER_CANISTER_WASM_FILE="../../$CYCLES_LEDGER_CANISTER_WASM"
+export CYCLES_LEDGER_CANISTER_WASM_FILE="../../${CYCLES_LEDGER_CANISTER_WASM}"
 
 # We use a previous version of the release to ensure upgradability
 IFS=',' read -r -a versions <<<"$OISY_UPGRADE_VERSIONS"

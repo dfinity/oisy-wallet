@@ -87,4 +87,27 @@ describe('plausible analytics service', () => {
 
 		expect(trackEventMock).not.toHaveBeenCalled();
 	});
+
+	it('should catch and log errors if Plausible initialization fails', async () => {
+		vi.doMock('$env/plausible.env', () => ({
+			PLAUSIBLE_ENABLED: true,
+			PLAUSIBLE_DOMAIN: 'oisy.com'
+		}));
+
+		vi.mocked(Plausible).mockImplementation(() => {
+			throw new Error();
+		});
+
+		const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+		const { initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		initPlausibleAnalytics();
+
+		expect(consoleWarnSpy).toHaveBeenCalledWith(
+			'An unexpected error occurred during initialization.'
+		);
+
+		consoleWarnSpy.mockRestore();
+	});
 });

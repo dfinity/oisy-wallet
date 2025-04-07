@@ -28,33 +28,28 @@ export const mapBtcTransaction = ({
 		}
 	);
 
-	const { totalOutputValue, value, to } = out.reduce<{
+	const { totalOutputValue, totalValue, to } = out.reduce<{
+		to: string[];
+		totalValue: number | undefined;
 		totalOutputValue: number;
-		value: number | undefined;
-		to: string | undefined;
 	}>(
-		(acc, { addr, value }) => {
+		(acc, output) => {
+			const { addr, value } = output;
 			// TODO: test what happens when user sends to the current address (hence isValidOutput = false)
 			const isValidOutput =
 				(isTypeSend && addr !== btcAddress) || (!isTypeSend && addr === btcAddress);
 
-			if (isNullish(acc.value) && isValidOutput) {
-				acc.value = (acc.value ?? 0) + value;
-			}
-
-			if (isNullish(acc.to) && isValidOutput) {
-				acc.to = addr;
-			}
-
 			return {
 				...acc,
+				totalValue: isValidOutput ? (acc.totalValue ?? 0) + value : acc.totalValue,
+				to: isValidOutput ? [...acc.to, addr] : acc.to,
 				totalOutputValue: acc.totalOutputValue + value
 			};
 		},
 		{
 			totalOutputValue: 0,
-			value: undefined,
-			to: undefined
+			totalValue: undefined,
+			to: []
 		}
 	);
 
@@ -74,7 +69,9 @@ export const mapBtcTransaction = ({
 	return {
 		id: hash,
 		timestamp: BigInt(time),
-		value: nonNullish(value) ? BigInt(isTypeSend ? value + utxosFee : value) : undefined,
+		value: nonNullish(totalValue)
+			? BigInt(isTypeSend ? totalValue + utxosFee : totalValue)
+			: undefined,
 		status,
 		blockNumber: block_index ?? undefined,
 		type: isTypeSend ? 'send' : 'receive',
