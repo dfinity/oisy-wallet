@@ -87,7 +87,7 @@ export const initPendingTransactionsListener = ({
 	provider.ws.on(
 		{
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
-			toAddress: toAddress,
+			toAddress,
 			hashesOnly
 		},
 		listener
