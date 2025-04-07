@@ -15,10 +15,6 @@ interface FormatTokenParams {
 	showPlusSign?: boolean;
 }
 
-type FormatTokenAmountParams = Omit<FormatTokenParams, 'value'> & {
-	value: bigint;
-};
-
 export const formatToken = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
@@ -40,15 +36,8 @@ export const formatToken = ({
 	return `${showPlusSign && +res > 0 ? '+' : ''}${formatted}`;
 };
 
-// TODO: remove this function since it is duplicated of formatToken
-export const formatTokenAmount = ({ value, ...restParams }: FormatTokenAmountParams): string =>
-	formatToken({
-		value,
-		...restParams
-	});
-
-export const formatTokenBigintToNumber = (params: FormatTokenAmountParams): number =>
-	Number(formatTokenAmount(params));
+export const formatTokenBigintToNumber = (params: FormatTokenParams): number =>
+	Number(formatToken(params));
 
 /**
  * Shortens the text from the middle. Ex: "12345678901234567890" -> "1234567...5678901"
@@ -121,11 +110,9 @@ export const formatSecondsToNormalizedDate = ({
 	const today = currentDate ?? new Date();
 
 	// TODO: add additional test suite for the below calculations
-	const dateOnlyDate = new Date(date.setHours(0, 0, 0, 0));
-	const dateOnlyToday = new Date(today.setHours(0, 0, 0, 0));
-	const daysDifference = Math.ceil(
-		(dateOnlyDate.getTime() - dateOnlyToday.getTime()) / MILLISECONDS_IN_DAY
-	);
+	const dateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+	const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+	const daysDifference = Math.ceil((dateUTC - todayUTC) / MILLISECONDS_IN_DAY);
 
 	if (Math.abs(daysDifference) < 2) {
 		// TODO: When the method is called many times with the same arguments, it is better to create a Intl.DateTimeFormat object and use its format() method, because a DateTimeFormat object remembers the arguments passed to it and may decide to cache a slice of the database, so future format calls can search for localization strings within a more constrained context.

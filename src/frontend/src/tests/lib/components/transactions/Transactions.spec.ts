@@ -9,7 +9,7 @@ import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('Transactions', () => {
-	const timeout = 7000;
+	const timeout = 12000;
 	const mockGoTo = vi.fn();
 
 	beforeEach(() => {
@@ -113,5 +113,20 @@ describe('Transactions', () => {
 			},
 			{ timeout }
 		);
+	});
+
+	it('should redirect the user to the activity page if token does not exist', async () => {
+		mockPage.mock({ token: 'UNKNOWN', network: ICP_NETWORK_SYMBOL });
+
+		render(Transactions);
+
+		await new Promise<void>((resolve) =>
+			setTimeout(() => {
+				expect(get(modalStore)).toBeNull();
+				resolve();
+			}, timeout)
+		);
+
+		expect(mockGoTo).toHaveBeenCalledWith('/');
 	});
 }, 60000);

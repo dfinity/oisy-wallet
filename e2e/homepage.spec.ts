@@ -15,9 +15,9 @@ testWithII.beforeEach(async ({ page }) => {
 });
 
 testWithII('should display homepage in logged in state', async ({ page, iiPage, isMobile }) => {
-	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage });
+	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage, isMobile });
 
 	await homepageLoggedIn.waitForReady();
 
-	await homepageLoggedIn.takeScreenshot({ isMobile, freezeCarousel: true });
+	await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
 });

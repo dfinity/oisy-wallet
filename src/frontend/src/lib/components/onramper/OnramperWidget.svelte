@@ -70,8 +70,7 @@
 			themeName: 'dark' // we always pass dark, as some card elements arent styled correctly (white text on white background) in light theme / onramper bug?
 		}));
 
-	let themeLoaded: boolean;
-	$: themeLoaded = false;
+	let themeLoaded = false;
 	const changeThemeOnIframeLoad = (e: Event) => {
 		try {
 			const styles = window.getComputedStyle(document.body);

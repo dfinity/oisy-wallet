@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import BtcTransactions from '$btc/components/transactions/BtcTransactions.svelte';
 	import EthTransactions from '$eth/components/transactions/EthTransactions.svelte';
@@ -15,7 +15,9 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionToken } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
 
 	let token: OptionToken;
@@ -24,15 +26,28 @@
 			token.name === $routeToken && $routeNetwork && token.network.id.description === $routeNetwork
 	);
 
+	let timer: NodeJS.Timeout | undefined;
+
 	onMount(() => {
 		// Since we do not have the change to check whether the data fetching is completed or not, we need to use this fallback timeout.
-		// After the timeout, we assume that the fetch has failed and open the token modal.
-		setTimeout(() => {
+		// After the timeout, we assume that the fetch has failed and open the token modal or redirect the user to the activity page.
+		timer = setTimeout(async () => {
 			if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
 				modalStore.openManageTokens();
+			} else if (nonNullish($routeNetwork) && nonNullish($routeToken) && isNullish(token)) {
+				toastsShow({
+					text: replacePlaceholders($i18n.transactions.error.loading_token_with_network, {
+						$token: $routeToken,
+						$network: $routeNetwork
+					}),
+					level: 'warn'
+				});
+				await goto('/');
 			}
 		}, FALLBACK_TIMEOUT);
 	});
+
+	onDestroy(() => clearTimeout(timer));
 
 	const handleClose = async () => {
 		if (isNullish($pageToken)) {

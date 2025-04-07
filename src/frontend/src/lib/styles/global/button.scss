@@ -30,6 +30,7 @@ a.as-button {
 	&.tertiary,
 	&.tertiary-alt,
 	&.tertiary-main-card,
+	&.muted,
 	&.success,
 	&.error {
 		justify-content: center;
@@ -52,6 +53,7 @@ a.as-button {
 	&.tertiary,
 	&.tertiary-alt,
 	&.tertiary-main-card,
+	&.muted,
 	&.success,
 	&.error {
 		font-weight: var(--font-weight-bold);
@@ -279,6 +281,38 @@ a.as-button {
 		@apply bg-primary-alt;
 	}
 
+	// MUTED
+	&.muted:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-tertiary;
+
+		&:hover {
+			@apply text-secondary;
+			@apply bg-primary;
+		}
+
+		&:active,
+		&.active {
+			@apply text-secondary;
+			@apply bg-disabled;
+		}
+
+		&:focus-visible {
+			@apply text-secondary;
+			@apply bg-disabled;
+		}
+	}
+
+	&.muted.disabled:not(.loading):not(.link),
+	&.muted[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-primary-alt;
+	}
+
+	&.muted.loading {
+		@apply text-brand-primary-inverted;
+		@apply bg-primary-alt;
+	}
+
 	// SUCCESS
 	&.success {
 		@apply text-primary-inverted;
@@ -377,25 +411,25 @@ a.as-button {
 	@apply bg-primary;
 	@apply rounded-xl;
 	@apply px-4;
-	@apply py-3;
-	@apply min-w-72;
+	@apply py-1;
 	@apply justify-between;
 	@apply gap-2;
 	@apply text-left;
 	@apply font-medium;
 	@apply leading-5;
-	@apply border-primary;
 
-	transition: border 0.25s ease-out;
+	transition: all 0.25s ease-out;
 
 	&::placeholder {
 		@apply text-tertiary;
 	}
 
-	&:hover:not(.disabled):not([disabled]),
+	&:hover:not(.disabled):not([disabled]) {
+		@apply bg-brand-subtle-20;
+	}
+
 	&.opened {
-		@apply bg-primary;
-		@apply border-brand-primary;
+		@apply bg-brand-subtle-30;
 	}
 }
 
@@ -405,29 +439,8 @@ a.as-button {
 	@apply bg-disabled;
 }
 
-// DROPDOWN ITEM
-.dropdown-item:not(.loading) {
-	@apply text-primary;
-	@apply rounded-xl;
-	@apply px-3;
-	@apply py-2;
-
-	margin-bottom: 1px;
-
-	&:hover:not(.disabled):not([disabled]) {
-		@apply bg-secondary;
+@media (width <= theme(--breakpoint-sm)) {
+	.dropdown-button:not(.loading) {
+		@apply px-2;
 	}
-
-	&.selected {
-		@apply bg-brand-subtle-10;
-
-		& > span > svg {
-			color: var(--color-foreground-brand-primary-alt);
-		}
-	}
-}
-
-.dropdown-item.disabled:not(.loading),
-.dropdown-item[disabled]:not(.loading) {
-	@apply text-tertiary-inverted;
 }
