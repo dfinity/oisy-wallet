@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
+	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import type { IcCkToken } from '$icp/types/ic-token';
 	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
@@ -40,5 +41,7 @@
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckToken) && nonNullish($pageToken)}
-	<ConvertModal sourceToken={$pageToken} destinationToken={ckToken} />
+	<FeeStoreContext token={$ethereumToken}>
+		<ConvertModal sourceToken={$pageToken} destinationToken={ckToken} />
+	</FeeStoreContext>
 {/if}

@@ -3,6 +3,7 @@
 	import type { BtcTransactionStatus, BtcTransactionUi } from '$btc/types/btc';
 	import type { BtcTransactionType } from '$btc/types/btc-transaction';
 	import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
+	import TransactionAddress from '$lib/components/transactions/TransactionAddress.svelte';
 	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -13,7 +14,7 @@
 	export let token: OptionToken;
 
 	let from: string;
-	let to: string | undefined;
+	let to: string[] | undefined;
 	let type: BtcTransactionType;
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
@@ -34,9 +35,6 @@
 	let txExplorerUrl: string | undefined;
 	$: txExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/tx/${id}` : undefined;
 
-	let toExplorerUrl: string | undefined;
-	$: toExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/address/${to}` : undefined;
-
 	let fromExplorerUrl: string | undefined;
 	$: fromExplorerUrl =
 		nonNullish(explorerUrl) && nonNullish(to) ? `${explorerUrl}/address/${from}` : undefined;
@@ -44,12 +42,10 @@
 
 <TransactionModal
 	commonData={{
-		to,
 		from,
 		timestamp,
 		blockNumber,
 		txExplorerUrl,
-		toExplorerUrl,
 		fromExplorerUrl
 	}}
 	hash={id}
@@ -71,4 +67,26 @@
 		<svelte:fragment slot="label">{$i18n.transaction.text.status}</svelte:fragment>
 		{`${$i18n.transaction.status[status]}`}
 	</Value>
+
+	<svelte:fragment slot="transaction-custom-to">
+		{#if nonNullish(to)}
+			<Value ref="recipients">
+				<svelte:fragment slot="label">{$i18n.transaction.text.to}</svelte:fragment>
+
+				<ul class="list-none">
+					{#each to as address, index (`${address}-${index}`)}
+						<li>
+							<TransactionAddress
+								{address}
+								explorerUrl={nonNullish(explorerUrl)
+									? `${explorerUrl}/address/${address}`
+									: undefined}
+								copiedText={$i18n.transaction.text.to_copied}
+							/>
+						</li>
+					{/each}
+				</ul>
+			</Value>
+		{/if}
+	</svelte:fragment>
 </TransactionModal>

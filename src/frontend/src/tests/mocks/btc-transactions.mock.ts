@@ -7,7 +7,7 @@ export const mockBtcTransactionUi: BtcTransactionUi = {
 	id: 'e793cab7e155a0e8f825c4609548faf759c57715fecac587580a1d716bb2b89e',
 	status: 'confirmed',
 	timestamp: 1727175987n,
-	to: 'bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7',
+	to: ['bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7'],
 	type: 'receive',
 	value: 126527n,
 	confirmations: 1
