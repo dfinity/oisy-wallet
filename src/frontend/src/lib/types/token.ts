@@ -3,10 +3,10 @@ import {
 	type TokenBuySchema,
 	type TokenBuyableSchema,
 	type TokenCategorySchema,
+	type TokenIdSchema,
 	type TokenMetadataSchema,
 	type TokenSchema,
-	type TokenStandardSchema,
-	type TokenIdSchema
+	type TokenStandardSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Option, RequiredExcept } from '$lib/types/utils';

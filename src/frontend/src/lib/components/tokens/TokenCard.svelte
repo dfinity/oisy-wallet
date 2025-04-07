@@ -4,7 +4,7 @@
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import TokenSymbol from '$lib/components/tokens/TokenSymbol.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
-	import { type TOKEN_GROUP , TOKEN_CARD } from '$lib/constants/test-ids.constants';
+	import { type TOKEN_GROUP, TOKEN_CARD } from '$lib/constants/test-ids.constants';
 	import type { LogoSize } from '$lib/types/components';
 	import type { CardData } from '$lib/types/token-card';
 

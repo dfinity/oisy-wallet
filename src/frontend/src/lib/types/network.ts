@@ -2,8 +2,8 @@ import {
 	type NetworkAppMetadataSchema,
 	type NetworkBuySchema,
 	type NetworkEnvironmentSchema,
-	type NetworkSchema,
-	type NetworkIdSchema
+	type NetworkIdSchema,
+	type NetworkSchema
 } from '$lib/schema/network.schema';
 import type * as z from 'zod';
 
