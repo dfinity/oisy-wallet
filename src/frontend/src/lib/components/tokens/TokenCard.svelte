@@ -5,7 +5,7 @@
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import { TOKEN_CARD, TOKEN_GROUP } from '$lib/constants/test-ids.constants';
+	import { TOKEN_CARD, type TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import type { CardData } from '$lib/types/token-card';
 
 	export let data: CardData;
