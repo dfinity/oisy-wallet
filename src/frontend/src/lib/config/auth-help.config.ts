@@ -5,14 +5,14 @@ import type { WizardSteps } from '@dfinity/gix-components';
 export const authHelpWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps => [
 	{
 		name: WizardStepsAuthHelp.OVERVIEW,
-		title: 'Have issues with authentication?'
+		title: i18n.auth.help.text.title
 	},
 	{
 		name: WizardStepsAuthHelp.HELP_IDENTITY,
-		title: 'Have issues with authentication?'
+		title: i18n.auth.help.text.title
 	},
 	{
 		name: WizardStepsAuthHelp.HELP_OTHERS,
-		title: 'Have issues with authentication?'
+		title: i18n.auth.help.text.title
 	}
 ];

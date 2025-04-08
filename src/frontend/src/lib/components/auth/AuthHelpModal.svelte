@@ -17,7 +17,7 @@
 	let currentStep: WizardStep | undefined;
 
 	let title;
-	$: title = currentStep?.title ?? 'i18n';
+	$: title = currentStep?.title ?? $i18n.auth.help.text.title;
 
 	const close = () =>
 		closeModal(() => {

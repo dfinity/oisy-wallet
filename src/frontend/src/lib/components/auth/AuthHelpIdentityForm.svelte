@@ -8,6 +8,8 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { HELP_AUTH_IDENTITY_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils";
+	import {Html} from "@dfinity/gix-components";
 
 	export let onBack: () => void;
 	export let onDone: () => void;
@@ -23,21 +25,19 @@
 
 		<div>
 			<p>
-				OISY now uses a new Internet Identity domain:
-				<span class="font-bold">identity.internetcomputer.org</span>
+				<Html text={replaceOisyPlaceholders($i18n.auth.help.text.identity_new_identity)} />
 			</p>
 			<p>
-				As a result, your old Internet Identity number might not appear automatically, and you may
-				need to re-enter it.
+				{$i18n.auth.help.text.identity_legacy_description}
 			</p>
 			<p>
 				<ExternalLink iconVisible={false} styleClass="font-semibold" ariaLabel="" href="">
-					Sign in with legacy Internet Identity domain
+					{$i18n.auth.help.text.identity_legacy_sign_in}
 				</ExternalLink>
 			</p>
 			<p class="mb-0">
 				<ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel="" href="">
-					Learn more on OISY Docs
+					{replaceOisyPlaceholders($i18n.auth.help.text.identity_learn_more)}
 				</ExternalLink>
 			</p>
 		</div>
