@@ -13,7 +13,6 @@ import {
 	IcrcLedgerCanister,
 	type IcrcIndexNgTransactionWithId
 } from '@dfinity/ledger-icrc';
-import { IcrcIndexNgCanister, type IcrcIndexNgTransactionWithId } from '@dfinity/ledger-icrc';
 import { arrayOfNumberToUint8Array, jsonReplacer } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
