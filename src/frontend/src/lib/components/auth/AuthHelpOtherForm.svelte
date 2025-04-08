@@ -5,14 +5,14 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		OISY_ACCESS_CONTROL_URL,
 		OISY_DOCS_URL,
 		OISY_FAQ_URL,
 		OISY_INTERNET_IDENTITY_URL
-	} from "$lib/constants/oisy.constants";
+	} from '$lib/constants/oisy.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let onBack: () => void;
 	export let onDone: () => void;
