@@ -87,17 +87,9 @@ jobs:
         if: steps.changes.outputs.src == 'true'
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
-      - name: Install binstall
+      - name: Install other tools
         if: steps.changes.outputs.src == 'true'
-        run: scripts/setup cargo-binstall
-
-      - name: Install candid-extractor
-        if: steps.changes.outputs.src == 'true'
-        run: cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
-
-      - name: Install didc
-        if: steps.changes.outputs.src == 'true'
-        run: ./scripts/setup didc
+        run: scripts/setup cargo-binstall candid-extractor didc
 
       - name: Generate bindings
         if: steps.changes.outputs.src == 'true'
