@@ -1,12 +1,12 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import {i18n} from "$lib/stores/i18n.store";
-	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils";
-	import {Html} from "@dfinity/gix-components";
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let onBack: () => void;
 	export let onDone: () => void;

@@ -123,9 +123,7 @@
 				"other_private_key": "Who controls the private key for the native assets?",
 				"other_asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet"
 			},
-			"alt": {
-
-			}
+			"alt": {}
 		}
 	},
 	"dapps": {

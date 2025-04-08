@@ -6,7 +6,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { HELP_AUTH_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
-	import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let onLostIdentity: () => void;
 	export let onOther: () => void;
@@ -32,7 +32,9 @@
 				<span class="text-error-primary"><IconAnnoyed /></span>{$i18n.auth.help.text.got_confused}
 			</Button>
 
-			<Button colorStyle="info-alt" type="button" fullWidth on:click={onOther}>{$i18n.auth.help.text.other}</Button>
+			<Button colorStyle="info-alt" type="button" fullWidth on:click={onOther}
+				>{$i18n.auth.help.text.other}</Button
+			>
 		</div>
 	</div>
 

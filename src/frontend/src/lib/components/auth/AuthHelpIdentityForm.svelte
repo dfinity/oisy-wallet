@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import helpAuthIdentityBanner from '$lib/assets/help-auth-identity-banner.svg';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
@@ -8,8 +9,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { HELP_AUTH_IDENTITY_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils";
-	import {Html} from "@dfinity/gix-components";
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let onBack: () => void;
 	export let onDone: () => void;
