@@ -26,7 +26,7 @@ import {
 } from '@dfinity/ledger-icrc';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 
-const getTransactions = ({
+const getBalanceAndTransactions = ({
 	identity,
 	certified,
 	data
@@ -87,7 +87,7 @@ const initIcrcWalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTran
 	PostMessageDataRequestIcrcStrict
 > =>
 	new IcWalletBalanceAndTransactionsScheduler(
-		getTransactions,
+		getBalanceAndTransactions,
 		mapTransactionIcrcToSelf,
 		mapTransaction,
 		MSG_SYNC_ICRC_WALLET
