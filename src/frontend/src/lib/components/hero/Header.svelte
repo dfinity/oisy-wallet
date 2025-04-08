@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
@@ -9,6 +10,7 @@
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
+	import { isRouteTransactions } from '$lib/utils/nav.utils';
 </script>
 
 <header
@@ -26,7 +28,7 @@
 
 	<div class="pointer-events-auto flex justify-end gap-2 md:gap-5">
 		{#if $authSignedIn}
-			<NetworksSwitcher />
+			<NetworksSwitcher disabled={isRouteTransactions($page)} />
 			<ThemeSwitchButton />
 			<WalletConnect />
 		{/if}
