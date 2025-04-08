@@ -43,7 +43,7 @@ describe('AuthHelpIdentityForm', () => {
 		const learnMoreAnchor: HTMLAnchorElement | null =
 			container.querySelector(learnMoreAnchorSelector);
 		expect(learnMoreAnchor).toBeInTheDocument();
-		expect(learnMoreAnchor?.href).toBe(`${OISY_DOCS_URL  }/`);
+		expect(learnMoreAnchor?.href).toBe(`${OISY_DOCS_URL}/`);
 		expect(
 			getByText(replaceOisyPlaceholders(get(i18n).auth.help.text.identity_learn_more))
 		).toBeInTheDocument();

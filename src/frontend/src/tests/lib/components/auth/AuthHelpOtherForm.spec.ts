@@ -40,7 +40,7 @@ describe('AuthHelpOtherForm', () => {
 			introductionAnchorSelector
 		);
 		expect(introductionAnchor).toBeInTheDocument();
-		expect(introductionAnchor?.href).toBe(`${OISY_DOCS_URL  }/`);
+		expect(introductionAnchor?.href).toBe(`${OISY_DOCS_URL}/`);
 		expect(
 			getByText(replaceOisyPlaceholders(get(i18n).auth.help.text.other_introduction))
 		).toBeInTheDocument();
