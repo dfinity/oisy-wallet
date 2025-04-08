@@ -7,6 +7,11 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { HELP_AUTH_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {trackEvent} from "$lib/services/analytics.services";
+	import {
+		TRACK_HELP_CONCERNED_ABOUT_SECURITY, TRACK_HELP_GOT_CONFUSED,
+		TRACK_HELP_LOST_INTERNET_IDENTITY, TRACK_HELP_OTHER
+	} from "$lib/constants/analytics.contants";
 
 	export let onLostIdentity: () => void;
 	export let onOther: () => void;
@@ -20,19 +25,39 @@
 	<div>
 		<p class="text-md font-bold">{$i18n.auth.help.text.subtitle}</p>
 		<div class="grid gap-2">
-			<Button colorStyle="info-alt" type="button" fullWidth on:click={onLostIdentity}>
+			<Button colorStyle="info-alt" type="button" fullWidth on:click={async () => {
+				await trackEvent({
+					name: TRACK_HELP_LOST_INTERNET_IDENTITY
+				});
+				onLostIdentity();
+			}}>
 				<span class="text-error-primary"><IconX /></span>{$i18n.auth.help.text.lost_identity}
 			</Button>
 
-			<Button colorStyle="info-alt" type="button" fullWidth on:click={onOther}>
+			<Button colorStyle="info-alt" type="button" fullWidth on:click={async () => {
+				await trackEvent({
+					name: TRACK_HELP_CONCERNED_ABOUT_SECURITY
+				});
+				onOther();
+			}}>
 				<span class="text-error-primary"><IconShieldCheck /></span>{$i18n.auth.help.text.security}
 			</Button>
 
-			<Button colorStyle="info-alt" type="button" fullWidth on:click={onOther}>
+			<Button colorStyle="info-alt" type="button" fullWidth on:click={async () => {
+				await trackEvent({
+					name: TRACK_HELP_GOT_CONFUSED
+				});
+			onOther();
+			}}>
 				<span class="text-error-primary"><IconAnnoyed /></span>{$i18n.auth.help.text.got_confused}
 			</Button>
 
-			<Button colorStyle="info-alt" type="button" fullWidth on:click={onOther}
+			<Button colorStyle="info-alt" type="button" fullWidth on:click={async () => {
+				await trackEvent({
+					name: TRACK_HELP_OTHER
+				});
+			onOther();
+			}}
 				>{$i18n.auth.help.text.other}</Button
 			>
 		</div>
