@@ -16,10 +16,12 @@
 
     let currentStep: WizardStep | undefined;
 
+    let title;
+    $: title = currentStep?.title ?? 'i18n'
+
     const close = () =>
         closeModal(() => {
             currentStep = undefined;
-            dispatch('nnsClose');
         });
 
     const onBack = () => goToWizardStep({modal, steps, stepName: WizardStepsAuthHelp.OVERVIEW});
@@ -34,7 +36,7 @@
     on:nnsClose={close}
 >
     <svelte:fragment slot="title">
-        <span class="text-xl">{currentStep.title}</span>
+        <span class="text-xl">{title}</span>
     </svelte:fragment>
 
     {#if currentStep?.name === WizardStepsAuthHelp.OVERVIEW}
