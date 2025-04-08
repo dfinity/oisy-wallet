@@ -7,7 +7,8 @@
 	},
 	"rust": {
 		"method": "sh",
-		"version": "See rust-toolchain.toml"
+		"note": "See also: rust-toolchain.toml",
+		"version": "nightly-2025-04-01"
 	},
 	"didc": {
 		"method": "curl",
