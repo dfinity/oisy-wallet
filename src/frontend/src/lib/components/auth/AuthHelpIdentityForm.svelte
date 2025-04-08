@@ -26,12 +26,12 @@
                 As a result, your old Internet Identity number might not appear automatically, and you may need to re-enter it.
             </p>
             <p>
-                <ExternalLink iconVisible={false} styleClass="font-semibold" href="">
+                <ExternalLink iconVisible={false} styleClass="font-semibold" ariaLabel="" href="">
                     Sign in with legacy Internet Identity domain
                 </ExternalLink>
             </p>
             <p class="mb-0">
-                <ExternalLink styleClass="font-semibold flex flex-row-reverse" href="">
+                <ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel="" href="">
                     Learn more on OISY Docs
                 </ExternalLink>
             </p>
