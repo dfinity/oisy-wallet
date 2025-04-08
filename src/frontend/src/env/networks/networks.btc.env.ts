@@ -6,7 +6,6 @@ import {
 } from '$env/explorers.env';
 import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
-// Todo: remove in next PR when not used anymore
 import bitcoinMainnetBW from '$lib/assets/networks/bitcoin-mainnet-bw.svg';
 import bitcoinTestnetBW from '$lib/assets/networks/bitcoin-testnet-bw.svg';
 import bitcoinMainnetIconDark from '$lib/assets/networks/dark/Bitcoin_mono_dark.svg';
