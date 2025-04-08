@@ -59,7 +59,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.network }}-${{ github.event.inputs.canister }}
   cancel-in-progress: false
 
-permissions: {}
+permissions: { }
 
 jobs:
   deployment:
@@ -147,6 +147,7 @@ jobs:
           if [[ "$NETWORK" == "staging" ]] || [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
             {
               echo "VITE_ETHERSCAN_API_KEY=$VITE_ETHERSCAN_API_KEY_STAGING"
+              echo "VITE_BASESCAN_API_KEY=$VITE_BASESCAN_API_KEY_STAGING"
               echo "VITE_INFURA_API_KEY=$VITE_INFURA_API_KEY_STAGING"
               echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING"
               echo "VITE_QUICKNODE_API_KEY=$VITE_QUICKNODE_API_KEY_STAGING"
@@ -177,6 +178,7 @@ jobs:
           elif [[ "$NETWORK" == "beta" ]]; then
             {
               echo "VITE_ETHERSCAN_API_KEY=$VITE_ETHERSCAN_API_KEY_BETA"
+              echo "VITE_BASESCAN_API_KEY=$VITE_BASESCAN_API_KEY_BETA"
               echo "VITE_INFURA_API_KEY=$VITE_INFURA_API_KEY_BETA"
               echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA"
               echo "VITE_QUICKNODE_API_KEY=$VITE_QUICKNODE_API_KEY_BETA"
@@ -202,6 +204,7 @@ jobs:
           fi
         env:
           VITE_ETHERSCAN_API_KEY_STAGING: ${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}
+          VITE_BASESCAN_API_KEY_STAGING: ${{ secrets.VITE_BASESCAN_API_KEY_STAGING }}
           VITE_INFURA_API_KEY_STAGING: ${{ secrets.VITE_INFURA_API_KEY_STAGING }}
           VITE_ALCHEMY_API_KEY_STAGING: ${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}
           VITE_QUICKNODE_API_KEY_STAGING: ${{ secrets.VITE_QUICKNODE_API_KEY_STAGING }}
@@ -219,7 +222,9 @@ jobs:
           VITE_ONRAMPER_API_KEY_PROD_STAGING: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}
           VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING: ${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}
           DFX_DEPLOY_KEY_STAGING: ${{ secrets.DFX_DEPLOY_KEY_STAGING }}
+
           VITE_ETHERSCAN_API_KEY_BETA: ${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}
+          VITE_BASESCAN_API_KEY_BETA: ${{ secrets.VITE_BASESCAN_API_KEY_BETA }}
           VITE_INFURA_API_KEY_BETA: ${{ secrets.VITE_INFURA_API_KEY_BETA }}
           VITE_ALCHEMY_API_KEY_BETA: ${{ secrets.VITE_ALCHEMY_API_KEY_BETA }}
           VITE_QUICKNODE_API_KEY_BETA: ${{ secrets.VITE_QUICKNODE_API_KEY_BETA }}
@@ -282,6 +287,7 @@ jobs:
         run: npm run build
         env:
           VITE_ETHERSCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_ETHERSCAN_API_KEY }}
+          VITE_BASESCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_BASESCAN_API_KEY }}
           VITE_INFURA_API_KEY: ${{ steps.set-outputs.outputs.VITE_INFURA_API_KEY }}
           VITE_ALCHEMY_API_KEY: ${{ steps.set-outputs.outputs.VITE_ALCHEMY_API_KEY }}
           VITE_QUICKNODE_API_KEY: ${{ steps.set-outputs.outputs.VITE_QUICKNODE_API_KEY }}
@@ -306,6 +312,7 @@ jobs:
           fi
         env:
           VITE_ETHERSCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_ETHERSCAN_API_KEY }}
+          VITE_BASESCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_BASESCAN_API_KEY }}
           VITE_INFURA_API_KEY: ${{ steps.set-outputs.outputs.VITE_INFURA_API_KEY }}
           VITE_ALCHEMY_API_KEY: ${{ steps.set-outputs.outputs.VITE_ALCHEMY_API_KEY }}
           VITE_QUICKNODE_API_KEY: ${{ steps.set-outputs.outputs.VITE_QUICKNODE_API_KEY }}
