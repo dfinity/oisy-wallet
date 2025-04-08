@@ -66,13 +66,7 @@ const ERC20_CONTRACT_ADDRESS_WETH: Erc20Contract = {
 	exchange: 'erc20'
 };
 
-export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
-	{
-		// Weenus
-		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9',
-		exchange: 'erc20'
-	}
-];
+export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [];
 
 export const ERC20_CONTRACT_ICP_GOERLI: Erc20Contract = {
 	// ICP
@@ -86,18 +80,7 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 	exchange: 'icp'
 };
 
-export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
-	ERC20_CONTRACT_ICP,
-	ERC20_CONTRACT_ADDRESS_1INCH,
-	ERC20_CONTRACT_ADDRESS_DMAIL,
-	ERC20_CONTRACT_ADDRESS_MATIC,
-	ERC20_CONTRACT_ADDRESS_JASMY,
-	ERC20_CONTRACT_ADDRESS_DAI,
-	ERC20_CONTRACT_ADDRESS_FLOKI,
-	ERC20_CONTRACT_ADDRESS_RNDR,
-	ERC20_CONTRACT_ADDRESS_WEEETH,
-	ERC20_CONTRACT_ADDRESS_WETH
-];
+export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [];
 
 export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] = [
 	...(ETH_MAINNET_ENABLED
