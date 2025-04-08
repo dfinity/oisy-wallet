@@ -1,19 +1,18 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
+	import { afterNavigate } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
+	import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
-	import { onMount } from 'svelte';
-	import { afterNavigate } from '$app/navigation';
-	import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 
-	let visible: boolean;
-	$: visible = false;
+	let visible = false;
 
 	let button: HTMLButtonElement | undefined;
 	let inputElement: HTMLInputElement | undefined;

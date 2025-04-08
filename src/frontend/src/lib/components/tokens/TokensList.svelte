@@ -7,17 +7,17 @@
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
+	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
+	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
+	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
-	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
-	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
-	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 
 	let tokens: TokenUiOrGroupUi[] | undefined;
 
