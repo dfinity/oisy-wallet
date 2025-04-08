@@ -1,6 +1,6 @@
 <script lang="ts">
     import helpAuthIdentityBanner from "$lib/assets/help-auth-identity-banner.svg";
-    import {HELP_AUTH_IMAGE_BANNER} from "$lib/constants/test-ids.constants";
+    import {HELP_AUTH_IDENTITY_IMAGE_BANNER} from "$lib/constants/test-ids.constants";
     import Img from "$lib/components/ui/Img.svelte";
     import {i18n} from "$lib/stores/i18n.store";
     import ExternalLink from "$lib/components/ui/ExternalLink.svelte";
@@ -15,7 +15,7 @@
 
 <ContentWithToolbar>
     <div class="grid gap-6">
-        <Img src={helpAuthIdentityBanner} styleClass="w-full" testId={HELP_AUTH_IMAGE_BANNER} />
+        <Img src={helpAuthIdentityBanner} styleClass="w-full" testId={HELP_AUTH_IDENTITY_IMAGE_BANNER} />
 
         <div>
             <p>

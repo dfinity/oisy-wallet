@@ -7,6 +7,7 @@
     import AuthHelpIdentityForm from "$lib/components/auth/AuthHelpIdentityForm.svelte";
     import {goToWizardStep} from "$lib/utils/wizard-modal.utils";
     import {i18n} from "$lib/stores/i18n.store";
+    import AuthHelpOtherForm from "$lib/components/auth/AuthHelpOtherForm.svelte";
 
     let modal: WizardModal;
 
@@ -33,7 +34,7 @@
     on:nnsClose={close}
 >
     <svelte:fragment slot="title">
-        <span class="text-xl">Have issues with authentication?</span>
+        <span class="text-xl">{currentStep.title}</span>
     </svelte:fragment>
 
     {#if currentStep?.name === WizardStepsAuthHelp.OVERVIEW}
@@ -41,7 +42,6 @@
     {:else if currentStep?.name === WizardStepsAuthHelp.HELP_IDENTITY}
         <AuthHelpIdentityForm {onBack} onDone={close} />
     {:else if currentStep?.name === WizardStepsAuthHelp.HELP_OTHERS}
-        48573495793475345
+        <AuthHelpOtherForm />
     {/if}
-
 </WizardModal>

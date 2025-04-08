@@ -145,4 +145,5 @@ export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 
-export const HELP_AUTH_IMAGE_BANNER = 'help-auth-immage-banner';
+export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
+export const HELP_AUTH_IDENTITY_IMAGE_BANNER = 'help-auth-identity-image-banner';
