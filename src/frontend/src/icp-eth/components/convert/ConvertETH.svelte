@@ -28,7 +28,8 @@
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
 	let isNetworkDisabled = false;
-	$: isNetworkDisabled = (nativeTokenId === ETHEREUM_TOKEN_ID && $networkEthereumDisabled) ||
+	$: isNetworkDisabled =
+		(nativeTokenId === ETHEREUM_TOKEN_ID && $networkEthereumDisabled) ||
 		(nativeTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaDisabled);
 
 	const isDisabled = (): boolean =>
