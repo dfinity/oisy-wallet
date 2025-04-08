@@ -11,7 +11,8 @@
 	import { TRACK_COUNT_LEGACY_SIGN_IN_CLICK } from '$lib/constants/analytics.contants';
 	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
-		HELP_AUTH_BACK_BUTTON, HELP_AUTH_DONE_BUTTON,
+		HELP_AUTH_BACK_BUTTON,
+		HELP_AUTH_DONE_BUTTON,
 		HELP_AUTH_IDENTITY_IMAGE_BANNER,
 		HELP_AUTH_LEARN_MORE_LINK,
 		HELP_AUTH_LEGACY_SIGN_IN_BUTTON

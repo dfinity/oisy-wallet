@@ -11,14 +11,16 @@
 		OISY_FAQ_URL,
 		OISY_INTERNET_IDENTITY_URL
 	} from '$lib/constants/oisy.constants';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import {
-		HELP_AUTH_ASSET_CONTROL_LINK, HELP_AUTH_BACK_BUTTON,
-		HELP_AUTH_DOCS_LINK, HELP_AUTH_DONE_BUTTON,
+		HELP_AUTH_ASSET_CONTROL_LINK,
+		HELP_AUTH_BACK_BUTTON,
+		HELP_AUTH_DOCS_LINK,
+		HELP_AUTH_DONE_BUTTON,
 		HELP_AUTH_INTRODUCTION_LINK,
 		HELP_AUTH_PRIVATE_KEY_LINK
-	} from "$lib/constants/test-ids.constants";
+	} from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let onBack: () => void;
 	export let onDone: () => void;

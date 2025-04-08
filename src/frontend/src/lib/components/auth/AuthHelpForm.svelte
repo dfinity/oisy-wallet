@@ -14,7 +14,8 @@
 	import {
 		HELP_AUTH_GOT_CONFUSED_BUTTON,
 		HELP_AUTH_IMAGE_BANNER,
-		HELP_AUTH_LOST_IDENTITY_BUTTON, HELP_AUTH_OTHER_BUTTON,
+		HELP_AUTH_LOST_IDENTITY_BUTTON,
+		HELP_AUTH_OTHER_BUTTON,
 		HELP_AUTH_SECURITY_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
