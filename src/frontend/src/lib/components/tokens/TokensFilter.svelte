@@ -12,8 +12,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 
-	let visible = false;
+	export let testIdPrefix: string;
 
+	let visible = false;
 	let button: HTMLButtonElement | undefined;
 	let inputElement: HTMLInputElement | undefined;
 
@@ -79,6 +80,7 @@
 				placeholder={$i18n.tokens.text.filter_placeholder}
 				bind:value={$tokenListStore.filter}
 				autofocus
+				testId={`${testIdPrefix}-input`}
 			/>
 			{#if $tokenListStore.filter !== ''}
 				<div
@@ -88,7 +90,8 @@
 					<button
 						aria-label={$i18n.core.text.clear_filter}
 						class="p-1 text-tertiary"
-						on:click={handleClear}><IconClose size="18" /></button
+						on:click={handleClear}
+						data-tid={`${testIdPrefix}-clear-btn`}><IconClose size="18" /></button
 					>
 				</div>
 			{/if}
@@ -102,6 +105,7 @@
 		colorStyle="muted"
 		styleClass={`absolute right-[5px] ${visible ? 'active' : ''}`}
 		ariaLabel="todo"
+		testId={`${testIdPrefix}-open-btn`}
 	>
 		<IconSearch slot="icon" />
 	</ButtonIcon>

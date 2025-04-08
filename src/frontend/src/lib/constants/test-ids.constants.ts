@@ -144,3 +144,5 @@ export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-c
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
+
+export const TOKEN_LIST_FILTER = 'token-list-filter';

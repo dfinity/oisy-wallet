@@ -6,13 +6,14 @@
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { TOKEN_LIST_FILTER } from '$lib/constants/test-ids.constants';
 </script>
 
 <div>
 	<div class="flex w-full flex-row justify-between">
 		<div class="grow-1 relative flex flex-row justify-between">
 			<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
-			<TokensFilter />
+			<TokensFilter testIdPrefix={TOKEN_LIST_FILTER} />
 		</div>
 		<div class="flex">
 			<TokensMenu />
