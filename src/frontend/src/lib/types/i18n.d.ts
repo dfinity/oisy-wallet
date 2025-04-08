@@ -114,7 +114,6 @@ interface I18nAuth {
 			other_asset_control: string;
 		};
 		alt: {
-			identity_legacy_sign_in: string;
 			identity_learn_more: string;
 			other_introduction: string;
 			other_docs: string;
