@@ -677,19 +677,14 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 #[update(guard = "may_write_user_data")]
 #[candid_method(update)]
 pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
-    pow::create_pow_challenge().await.map(
-        |StoredChallenge {
-             difficulty,
-             start_timestamp_ms,
-             expiry_timestamp_ms,
-             ..
-         }| CreateChallengeResponse {
-            difficulty,
-            start_timestamp_ms,
-            expiry_timestamp_ms,
-        },
-    )
+    let challenge = pow::create_pow_challenge().await?;
 
+    Ok(CreateChallengeResponse {
+        difficulty: challenge.difficulty,
+        start_timestamp_ms: challenge.start_timestamp_ms,
+        expiry_timestamp_ms: challenge.expiry_timestamp_ms,
+    })
+}
 /// Checks if the caller has an associated user profile.
 ///
 /// # Returns
