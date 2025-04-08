@@ -10,6 +10,7 @@
 	import { HELP_AUTH_IDENTITY_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import {OISY_DOCS_URL} from "$lib/constants/oisy.constants";
 
 	export let onBack: () => void;
 	export let onDone: () => void;
@@ -44,7 +45,7 @@
 				<ExternalLink
 					styleClass="font-semibold flex flex-row-reverse"
 					ariaLabel={$i18n.auth.help.alt.identity_learn_more}
-					href=""
+					href={OISY_DOCS_URL}
 				>
 					{replaceOisyPlaceholders($i18n.auth.help.text.identity_learn_more)}
 				</ExternalLink>

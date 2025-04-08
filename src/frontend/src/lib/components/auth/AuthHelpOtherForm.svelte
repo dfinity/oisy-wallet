@@ -7,6 +7,12 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import {
+		OISY_ACCESS_CONTROL_URL,
+		OISY_DOCS_URL,
+		OISY_FAQ_URL,
+		OISY_INTERNET_IDENTITY_URL
+	} from "$lib/constants/oisy.constants";
 
 	export let onBack: () => void;
 	export let onDone: () => void;
@@ -24,7 +30,7 @@
 			<ExternalLink
 				styleClass="font-semibold flex flex-row-reverse"
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_introduction)}
-				href=""
+				href={OISY_DOCS_URL}
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_introduction)}
 			</ExternalLink>
@@ -33,7 +39,7 @@
 			<ExternalLink
 				styleClass="font-semibold flex flex-row-reverse"
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_docs)}
-				href=""
+				href={OISY_INTERNET_IDENTITY_URL}
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_docs)}
 			</ExternalLink>
@@ -42,7 +48,7 @@
 			<ExternalLink
 				styleClass="font-semibold flex flex-row-reverse"
 				ariaLabel={$i18n.auth.help.alt.other_private_key}
-				href=""
+				href={OISY_FAQ_URL}
 			>
 				{$i18n.auth.help.text.other_private_key}
 			</ExternalLink>
@@ -51,7 +57,7 @@
 			<ExternalLink
 				styleClass="font-semibold flex flex-row-reverse"
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_asset_control)}
-				href=""
+				href={OISY_ACCESS_CONTROL_URL}
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_asset_control)}
 			</ExternalLink>
