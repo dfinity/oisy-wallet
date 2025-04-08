@@ -34,20 +34,38 @@ where
     );
 }
 
-#[allow(dead_code)]
 pub fn assert_deviation<T>(value: T, expected_value: T, max_deviation: T)
 where
     T: PartialOrd + std::fmt::Debug + Sub<Output = T> + Add<Output = T> + Clone,
 {
-    let min_value = expected_value.clone() - max_deviation.clone();
-    let max_value = expected_value.clone() + max_deviation.clone();
+    // panic if underflow occurs
+    let min_value = (expected_value >= max_deviation.clone())
+        .then(|| expected_value.clone() - max_deviation.clone())
+        .ok_or_else(|| {
+            format!(
+                "Underflow error: Cannot subtract deviation {:?} from expected value {:?}",
+                max_deviation, expected_value
+            )
+        })
+        .expect("Underflow occurred!");
+
+    // panic if overflow occurs
+    let max_value = (expected_value <= expected_value.clone() + max_deviation.clone())
+        .then(|| expected_value.clone() + max_deviation.clone())
+        .ok_or_else(|| {
+            format!(
+                "Overflow error: Cannot add deviation {:?} to expected value {:?}",
+                max_deviation, expected_value
+            )
+        })
+        .expect("Overflow occurred!");
 
     assert!(
         value >= min_value && value <= max_value,
         "Value {:?} not in range [{:?}, {:?}] of deviation {:?}",
         value.clone(),
-        expected_value.clone(),
-        max_deviation,
+        min_value,
+        max_value,
         (value - expected_value)
     );
 }
