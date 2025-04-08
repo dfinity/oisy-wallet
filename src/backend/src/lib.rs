@@ -723,7 +723,7 @@ pub async fn allow_signing(
 ) -> Result<AllowSigningResponse, AllowSigningError> {
     signer::allow_signing().await?;
 
-    eprintln!("Received request: {err:?}", request);
+    eprintln!("Received request: {request:?}");
 
     // TODO map properties from from complete_pow_challenge
     Ok(AllowSigningResponse {
