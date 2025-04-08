@@ -20,7 +20,6 @@
 	{$i18n.auth.help.text.need_help}
 	<a
 		onclick={onClick}
-		role="button"
 		aria-label={replaceOisyPlaceholders($i18n.auth.help.alt.sign_in)}
 		class:no-underline={noUnderline}
 	>
