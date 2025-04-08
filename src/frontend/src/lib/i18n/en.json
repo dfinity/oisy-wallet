@@ -44,6 +44,7 @@
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
 			"airdrops": "Rewards",
+			"contacts": "Contacts",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -60,6 +61,7 @@
 			"dapp_explorer": "Open dapp explorer",
 			"activity": "Open the activity view",
 			"airdrops": "Open the Rewards view",
+			"contacts": "Manage your contacts",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
@@ -272,10 +274,7 @@
 			"appearance": "Appearance",
 			"appearance_light": "Light",
 			"appearance_dark": "Dark",
-			"appearance_system": "System",
-			"git_disclaimer": "For development purpose, we show the branch and the commit only in test canisters.",
-			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"appearance_system": "System"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -624,7 +623,6 @@
 			"text": {
 				"title": "Manage tokens",
 				"manage_list": "Manage tokens",
-				"list_settings": "List settings",
 				"do_not_see_import": "Don’t see your token? Import",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
@@ -1044,6 +1042,57 @@
 		"warning": {
 			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
 			"unavailable_index_canister": "Transactions for $token_list can not be displayed. Index canister is currently unavailable."
+		}
+	},
+	"contacts": {
+		"text": {
+			"title": "Contacts",
+			"add_contact": "Add Contact",
+			"add_group": "Add Group",
+			"edit_contact": "Edit Contact",
+			"delete_contact": "Delete Contact",
+			"edit_group": "Edit Group",
+			"delete_group": "Delete Group",
+			"search_placeholder": "Search contacts...",
+			"no_contacts": "You don't have any contacts yet. Add your first contact to get started.",
+			"no_contacts_filtered": "No contacts match your current filters.",
+			"clear_filters": "Clear Filters",
+			"network": "Network",
+			"group": "Group",
+			"favorites_only": "Favorites only",
+			"all_networks": "All Networks",
+			"all_groups": "All Groups",
+			"no_group": "No Group",
+			"address": "Address",
+			"alias": "Alias",
+			"notes": "Notes",
+			"add_to_favorites": "Add to favorites",
+			"remove_from_favorites": "Remove from favorites",
+			"show_qr_code": "Show QR code",
+			"payment_uri": "Payment URI",
+			"payment_uri_help": "Use this URI in compatible wallet apps to pre-fill payment details",
+			"delete_confirmation": "Are you sure you want to delete this contact? This action cannot be undone.",
+			"delete_group_confirmation": "Are you sure you want to delete this group? Contacts in this group will not be deleted, but they will no longer be associated with this group."
+		},
+		"placeholder": {
+			"enter_address": "Enter blockchain address",
+			"enter_alias": "Enter a name for this contact",
+			"enter_notes": "Add notes about this contact",
+			"enter_group_name": "Enter group name",
+			"enter_group_description": "Enter group description",
+			"enter_group_icon": "Enter icon name or emoji"
+		},
+		"error": {
+			"invalid_bitcoin_address": "Invalid Bitcoin address format",
+			"invalid_ethereum_address": "Invalid Ethereum address format",
+			"invalid_solana_address": "Invalid Solana address format",
+			"invalid_ic_address": "Invalid Internet Computer address format",
+			"address_required": "Address is required",
+			"alias_required": "Alias is required",
+			"group_name_required": "Group name is required",
+			"duplicate_address": "A contact with this address already exists",
+			"duplicate_alias": "A contact with this alias already exists",
+			"duplicate_group": "A group with this name already exists"
 		}
 	}
 }

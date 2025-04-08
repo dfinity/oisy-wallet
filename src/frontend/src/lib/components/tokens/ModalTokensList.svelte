@@ -60,16 +60,12 @@
 					{$i18n.tokens.manage.text.all_tokens_zero_balance}
 				</p>
 			{:else}
-				<ul class="list-none">
-					{#each $filteredTokens as token (token.id)}
-						<li class="logo-button-list-item">
-							<ModalTokensListItem
-								on:click={() => dispatch('icTokenButtonClick', token)}
-								data={token}
-							/>
-						</li>
-					{/each}
-				</ul>
+				{#each $filteredTokens as token (token.id)}
+					<ModalTokensListItem
+						on:click={() => dispatch('icTokenButtonClick', token)}
+						data={token}
+					/>
+				{/each}
 			{/if}
 		</TokensSkeletons>
 	</div>

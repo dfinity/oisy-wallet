@@ -1,99 +1,382 @@
-use candid::{CandidType, Deserialize};
+use candid::{CandidType, Deserialize, Principal};
+use ic_cdk::api::time;
+use ic_cdk::export::candid;
+use ic_cdk_macros::*;
 use serde::Serialize;
+use std::collections::HashMap;
 
-use super::account::{BtcAddress, EthAddress, Icrcv2AccountId, SolPrincipal};
-use crate::types::Version;
+use crate::state::STATE;
+use crate::user_profile::{get_user_profile_internal, update_user_profile_internal};
 
-/// A contact represents a saved address that the user can interact with
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(remote = "Self")]
+// Contact types
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub enum ContactNetwork {
+    Bitcoin,
+    Ethereum,
+    InternetComputer,
+    Solana,
+}
+
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug)]
 pub struct Contact {
-    /// Unique identifier for the contact within a user's address book
-    pub id: ContactId,
-    /// Display name for the contact
-    pub name: String,
-    /// Optional notes about the contact
+    pub address: String,
+    pub alias: String,
     pub notes: Option<String>,
-    /// The actual address data for the contact
-    pub address: ContactAddress,
-    /// The version of this contact (for optimistic concurrency control)
-    pub version: Option<Version>,
+    pub network: ContactNetwork,
+    pub group: Option<String>,
+    pub is_favorite: bool,
+    pub last_used: Option<u64>,
 }
 
-/// Unique identifier for contacts
-pub type ContactId = String;
-
-/// The address data for a contact, supporting multiple networks
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[repr(u8)]
-pub enum ContactAddress {
-    /// Internet Computer address
-    Icrc(Icrcv2AccountId) = 0,
-    /// Ethereum or ERC20 address
-    Ethereum(EthAddress) = 1,
-    /// Bitcoin address
-    Bitcoin(BtcAddress) = 2,
-    /// Solana address
-    Solana(SolPrincipal) = 3,
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug)]
+pub struct ContactGroup {
+    pub name: String,
+    pub description: Option<String>,
+    pub icon: Option<String>,
 }
 
-/// Request to update or add a contact
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct SaveContactRequest {
-    /// The contact to save
+// Request types
+#[derive(CandidType, Deserialize)]
+pub struct AddContactRequest {
     pub contact: Contact,
-    /// The current user profile version for optimistic concurrency control
-    pub current_user_version: Option<Version>,
+    pub current_user_version: Option<u64>,
 }
 
-/// Request to delete a contact
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[derive(CandidType, Deserialize)]
+pub struct UpdateContactRequest {
+    pub address: String,
+    pub network: ContactNetwork,
+    pub alias: String,
+    pub notes: Option<String>,
+    pub group: Option<String>,
+    pub is_favorite: bool,
+    pub current_user_version: Option<u64>,
+}
+
+#[derive(CandidType, Deserialize)]
 pub struct DeleteContactRequest {
-    /// The ID of the contact to delete
-    pub contact_id: ContactId,
-    /// The current user profile version for optimistic concurrency control
-    pub current_user_version: Option<Version>,
+    pub address: String,
+    pub network: ContactNetwork,
+    pub current_user_version: Option<u64>,
 }
 
-/// Response from get contacts operation
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct GetContactsResponse {
-    /// The list of contacts
-    pub contacts: Vec<Contact>,
+#[derive(CandidType, Deserialize)]
+pub struct ToggleContactFavoriteRequest {
+    pub address: String,
+    pub network: ContactNetwork,
+    pub is_favorite: bool,
+    pub current_user_version: Option<u64>,
 }
 
-/// Possible errors when saving a contact
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub enum SaveContactError {
-    /// User not found
-    UserNotFound,
-    /// Version mismatch (optimistic concurrency control)
+#[derive(CandidType, Deserialize)]
+pub struct AddContactGroupRequest {
+    pub group: ContactGroup,
+    pub current_user_version: Option<u64>,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct UpdateContactGroupRequest {
+    pub name: String,
+    pub description: Option<String>,
+    pub icon: Option<String>,
+    pub current_user_version: Option<u64>,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct DeleteContactGroupRequest {
+    pub name: String,
+    pub current_user_version: Option<u64>,
+}
+
+// Error types
+#[derive(CandidType, Deserialize, Debug)]
+pub enum ContactError {
     VersionMismatch,
-    /// Contact name is too long
-    NameTooLong,
-    /// Contact notes are too long
-    NotesTooLong,
-    /// Contact ID is invalid
-    InvalidContactId,
-}
-
-/// Possible errors when deleting a contact
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub enum DeleteContactError {
-    /// User not found
     UserNotFound,
-    /// Version mismatch (optimistic concurrency control)
-    VersionMismatch,
-    /// Contact not found
+    ContactAlreadyExists,
     ContactNotFound,
+    GroupAlreadyExists,
+    GroupNotFound,
+    GroupInUse,
 }
 
-/// Validation constants for contacts
-pub mod constants {
-    /// Maximum length for contact names
-    pub const MAX_NAME_LENGTH: usize = 64;
-    /// Maximum length for contact notes
-    pub const MAX_NOTES_LENGTH: usize = 256;
-    /// Maximum length for contact IDs
-    pub const MAX_ID_LENGTH: usize = 64;
+pub type ContactResult<T> = Result<T, ContactError>;
+
+// Query functions
+#[query]
+pub fn get_contacts() -> Vec<Contact> {
+    let caller = ic_cdk::caller();
+    match get_user_profile_internal(&caller) {
+        Ok(profile) => profile.contacts.clone(),
+        Err(_) => Vec::new(),
+    }
+}
+
+#[query]
+pub fn get_contact_groups() -> Vec<ContactGroup> {
+    let caller = ic_cdk::caller();
+    match get_user_profile_internal(&caller) {
+        Ok(profile) => profile.contact_groups.clone(),
+        Err(_) => Vec::new(),
+    }
+}
+
+// Update functions
+#[update]
+pub fn add_contact(request: AddContactRequest) -> ContactResult<()> {
+    let caller = ic_cdk::caller();
+    let mut profile = get_user_profile_internal(&caller)?;
+    
+    // Check version
+    if let Some(version) = request.current_user_version {
+        if profile.version != Some(version) {
+            return Err(ContactError::VersionMismatch);
+        }
+    }
+    
+    // Check if contact already exists
+    if profile.contacts.iter().any(|c| 
+        c.address == request.contact.address && 
+        std::mem::discriminant(&c.network) == std::mem::discriminant(&request.contact.network)
+    ) {
+        return Err(ContactError::ContactAlreadyExists);
+    }
+    
+    // Check if group exists if specified
+    if let Some(group_name) = &request.contact.group {
+        if !profile.contact_groups.iter().any(|g| g.name == *group_name) {
+            return Err(ContactError::GroupNotFound);
+        }
+    }
+    
+    // Add contact
+    profile.contacts.push(request.contact);
+    
+    // Update timestamp and version
+    profile.updated_timestamp = time();
+    profile.version = profile.version.map(|v| v + 1).or(Some(1));
+    
+    // Save profile
+    update_user_profile_internal(caller, profile)?;
+    
+    Ok(())
+}
+
+#[update]
+pub fn update_contact(request: UpdateContactRequest) -> ContactResult<()> {
+    let caller = ic_cdk::caller();
+    let mut profile = get_user_profile_internal(&caller)?;
+    
+    // Check version
+    if let Some(version) = request.current_user_version {
+        if profile.version != Some(version) {
+            return Err(ContactError::VersionMismatch);
+        }
+    }
+    
+    // Find contact index
+    let contact_index = profile.contacts.iter().position(|c| 
+        c.address == request.address && 
+        std::mem::discriminant(&c.network) == std::mem::discriminant(&request.network)
+    ).ok_or(ContactError::ContactNotFound)?;
+    
+    // Check if group exists if specified
+    if let Some(group_name) = &request.group {
+        if !profile.contact_groups.iter().any(|g| g.name == *group_name) {
+            return Err(ContactError::GroupNotFound);
+        }
+    }
+    
+    // Update contact
+    let contact = &mut profile.contacts[contact_index];
+    contact.alias = request.alias;
+    contact.notes = request.notes;
+    contact.group = request.group;
+    contact.is_favorite = request.is_favorite;
+    
+    // Update timestamp and version
+    profile.updated_timestamp = time();
+    profile.version = profile.version.map(|v| v + 1).or(Some(1));
+    
+    // Save profile
+    update_user_profile_internal(caller, profile)?;
+    
+    Ok(())
+}
+
+#[update]
+pub fn delete_contact(request: DeleteContactRequest) -> ContactResult<()> {
+    let caller = ic_cdk::caller();
+    let mut profile = get_user_profile_internal(&caller)?;
+    
+    // Check version
+    if let Some(version) = request.current_user_version {
+        if profile.version != Some(version) {
+            return Err(ContactError::VersionMismatch);
+        }
+    }
+    
+    // Find contact index
+    let contact_index = profile.contacts.iter().position(|c| 
+        c.address == request.address && 
+        std::mem::discriminant(&c.network) == std::mem::discriminant(&request.network)
+    ).ok_or(ContactError::ContactNotFound)?;
+    
+    // Remove contact
+    profile.contacts.remove(contact_index);
+    
+    // Update timestamp and version
+    profile.updated_timestamp = time();
+    profile.version = profile.version.map(|v| v + 1).or(Some(1));
+    
+    // Save profile
+    update_user_profile_internal(caller, profile)?;
+    
+    Ok(())
+}
+
+#[update]
+pub fn toggle_contact_favorite(request: ToggleContactFavoriteRequest) -> ContactResult<()> {
+    let caller = ic_cdk::caller();
+    let mut profile = get_user_profile_internal(&caller)?;
+    
+    // Check version
+    if let Some(version) = request.current_user_version {
+        if profile.version != Some(version) {
+            return Err(ContactError::VersionMismatch);
+        }
+    }
+    
+    // Find contact index
+    let contact_index = profile.contacts.iter().position(|c| 
+        c.address == request.address && 
+        std::mem::discriminant(&c.network) == std::mem::discriminant(&request.network)
+    ).ok_or(ContactError::ContactNotFound)?;
+    
+    // Update favorite status
+    profile.contacts[contact_index].is_favorite = request.is_favorite;
+    
+    // Update last_used if marking as favorite
+    if request.is_favorite {
+        profile.contacts[contact_index].last_used = Some(time());
+    }
+    
+    // Update timestamp and version
+    profile.updated_timestamp = time();
+    profile.version = profile.version.map(|v| v + 1).or(Some(1));
+    
+    // Save profile
+    update_user_profile_internal(caller, profile)?;
+    
+    Ok(())
+}
+
+#[update]
+pub fn add_contact_group(request: AddContactGroupRequest) -> ContactResult<()> {
+    let caller = ic_cdk::caller();
+    let mut profile = get_user_profile_internal(&caller)?;
+    
+    // Check version
+    if let Some(version) = request.current_user_version {
+        if profile.version != Some(version) {
+            return Err(ContactError::VersionMismatch);
+        }
+    }
+    
+    // Check if group already exists
+    if profile.contact_groups.iter().any(|g| g.name == request.group.name) {
+        return Err(ContactError::GroupAlreadyExists);
+    }
+    
+    // Add group
+    profile.contact_groups.push(request.group);
+    
+    // Update timestamp and version
+    profile.updated_timestamp = time();
+    profile.version = profile.version.map(|v| v + 1).or(Some(1));
+    
+    // Save profile
+    update_user_profile_internal(caller, profile)?;
+    
+    Ok(())
+}
+
+#[update]
+pub fn update_contact_group(request: UpdateContactGroupRequest) -> ContactResult<()> {
+    let caller = ic_cdk::caller();
+    let mut profile = get_user_profile_internal(&caller)?;
+    
+    // Check version
+    if let Some(version) = request.current_user_version {
+        if profile.version != Some(version) {
+            return Err(ContactError::VersionMismatch);
+        }
+    }
+    
+    // Find group index
+    let group_index = profile.contact_groups.iter().position(|g| g.name == request.name)
+        .ok_or(ContactError::GroupNotFound)?;
+    
+    // Update group (keeping the name the same)
+    let group = &mut profile.contact_groups[group_index];
+    group.description = request.description;
+    group.icon = request.icon;
+    
+    // Update timestamp and version
+    profile.updated_timestamp = time();
+    profile.version = profile.version.map(|v| v + 1).or(Some(1));
+    
+    // Save profile
+    update_user_profile_internal(caller, profile)?;
+    
+    Ok(())
+}
+
+#[update]
+pub fn delete_contact_group(request: DeleteContactGroupRequest) -> ContactResult<()> {
+    let caller = ic_cdk::caller();
+    let mut profile = get_user_profile_internal(&caller)?;
+    
+    // Check version
+    if let Some(version) = request.current_user_version {
+        if profile.version != Some(version) {
+            return Err(ContactError::VersionMismatch);
+        }
+    }
+    
+    // Find group index
+    let group_index = profile.contact_groups.iter().position(|g| g.name == request.name)
+        .ok_or(ContactError::GroupNotFound)?;
+    
+    // Check if group is in use
+    if profile.contacts.iter().any(|c| c.group.as_ref() == Some(&request.name)) {
+        return Err(ContactError::GroupInUse);
+    }
+    
+    // Remove group
+    profile.contact_groups.remove(group_index);
+    
+    // Update timestamp and version
+    profile.updated_timestamp = time();
+    profile.version = profile.version.map(|v| v + 1).or(Some(1));
+    
+    // Save profile
+    update_user_profile_internal(caller, profile)?;
+    
+    Ok(())
+}
+
+// Helper function to convert ContactError to a generic error type
+impl From<ContactError> for String {
+    fn from(error: ContactError) -> Self {
+        match error {
+            ContactError::VersionMismatch => "Version mismatch".to_string(),
+            ContactError::UserNotFound => "User not found".to_string(),
+            ContactError::ContactAlreadyExists => "Contact already exists".to_string(),
+            ContactError::ContactNotFound => "Contact not found".to_string(),
+            ContactError::GroupAlreadyExists => "Group already exists".to_string(),
+            ContactError::GroupNotFound => "Group not found".to_string(),
+            ContactError::GroupInUse => "Group is in use by one or more contacts".to_string(),
+        }
+    }
 }

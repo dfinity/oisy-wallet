@@ -64,6 +64,7 @@ export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
+export const NAVIGATION_ITEM_CONTACTS = 'navigation-item-contacts';
 
 export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
 

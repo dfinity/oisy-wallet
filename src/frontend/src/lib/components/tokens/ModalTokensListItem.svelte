@@ -31,9 +31,13 @@
 		{network.name}
 	</svelte:fragment>
 
-	<div class="mr-2" slot="logo">
-		<TokenLogo {data} color="white" badge={{ type: 'network', blackAndWhite: true }} {logoSize} />
-	</div>
+	<TokenLogo
+		{data}
+		slot="logo"
+		color="white"
+		badge={{ type: 'network', blackAndWhite: true }}
+		{logoSize}
+	/>
 
 	<TokenBalance {data} slot="title-end" />
 

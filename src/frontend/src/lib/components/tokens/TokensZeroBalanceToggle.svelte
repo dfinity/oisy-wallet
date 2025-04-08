@@ -11,6 +11,4 @@
 		hideZeroBalancesStore.set({ key: 'hide-zero-balances', value: { enabled: !checked } });
 </script>
 
-<svelte:window on:oisyToggleZeroBalances={toggleHide} />
-
 <Toggle ariaLabel={$i18n.tokens.text.hide_zero_balances} bind:checked on:nnsToggle={toggleHide} />

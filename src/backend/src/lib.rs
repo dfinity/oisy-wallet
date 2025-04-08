@@ -29,6 +29,10 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
+        contact::{
+            AddContactRequest, Contact, ContactError, ContactNetwork, DeleteContactRequest,
+            UpdateContactRequest,
+        },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         migration::{Migration, MigrationProgress, MigrationReport},
@@ -57,6 +61,12 @@ use user_profile_model::UserProfileModel;
 
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
+    contact::{
+        add_contact, add_contact_group, delete_contact, delete_contact_group, get_contact_groups, get_contacts,
+        get_contacts_by_group, get_contacts_by_network, get_favorite_contacts, maybe_add_test_contacts,
+        toggle_contact_favorite, update_contact, update_contact_group,
+    },
+    contacts_model::ContactsModel,
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
@@ -67,7 +77,8 @@ mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
-mod contacts;
+mod contact;
+mod contacts_model;
 mod guards;
 mod heap_state;
 mod impls;
@@ -593,6 +604,241 @@ pub fn set_user_show_testnets(
     })
 }
 
+/// Adds a new contact to the user's profile
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was added successfully
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+///   or if a contact with the same address or alias already exists
+#[update(guard = "may_write_user_data")]
+pub fn add_user_contact(request: AddContactRequest) -> Result<(), ContactError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        add_contact(stored_principal, request, &mut contacts_model)
+    })
+}
+
+/// Updates an existing contact in the user's profile
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was updated successfully
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+///   the contact is not found, or if the new alias conflicts with an existing contact
+#[update(guard = "may_write_user_data")]
+pub fn update_user_contact(request: UpdateContactRequest) -> Result<(), ContactError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        update_contact(stored_principal, request, &mut contacts_model)
+    })
+}
+
+/// Deletes a contact from the user's profile
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was deleted successfully
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+///   or if the contact is not found
+#[update(guard = "may_write_user_data")]
+pub fn delete_user_contact(request: DeleteContactRequest) -> Result<(), ContactError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        delete_contact(stored_principal, request, &mut contacts_model)
+    })
+}
+
+/// Gets all contacts for the user
+///
+/// # Returns
+/// - Returns a vector of contacts if successful
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found
+#[query(guard = "may_read_user_data")]
+pub fn get_user_contacts() -> Result<Vec<Contact>, GetUserProfileError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    read_state(|s| {
+        let contacts_model =
+            ContactsModel::new(&mut s.user_profile.clone(), &mut s.user_profile_updated.clone());
+        get_contacts(stored_principal, &contacts_model)
+    })
+}
+
+/// Gets contacts for the user filtered by network
+///
+/// # Returns
+/// - Returns a vector of contacts filtered by the specified network if successful
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found
+#[query(guard = "may_read_user_data")]
+pub fn get_user_contacts_by_network(network: ContactNetwork) -> Result<Vec<Contact>, GetUserProfileError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    read_state(|s| {
+        let contacts_model =
+            ContactsModel::new(&mut s.user_profile.clone(), &mut s.user_profile_updated.clone());
+        get_contacts_by_network(stored_principal, network, &contacts_model)
+    })
+}
+
+/// Gets contacts for the user filtered by group
+///
+/// # Returns
+/// - Returns a vector of contacts filtered by the specified group if successful
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found
+#[query(guard = "may_read_user_data")]
+pub fn get_user_contacts_by_group(request: GetContactsByGroupRequest) -> Result<Vec<Contact>, GetUserProfileError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    read_state(|s| {
+        let contacts_model =
+            ContactsModel::new(&mut s.user_profile.clone(), &mut s.user_profile_updated.clone());
+        get_contacts_by_group(stored_principal, request, &contacts_model)
+    })
+}
+
+/// Gets favorite contacts for the user
+///
+/// # Returns
+/// - Returns a vector of favorite contacts if successful
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found
+#[query(guard = "may_read_user_data")]
+pub fn get_user_favorite_contacts() -> Result<Vec<Contact>, GetUserProfileError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    read_state(|s| {
+        let contacts_model =
+            ContactsModel::new(&mut s.user_profile.clone(), &mut s.user_profile_updated.clone());
+        get_favorite_contacts(stored_principal, &contacts_model)
+    })
+}
+
+/// Gets all contact groups for the user
+///
+/// # Returns
+/// - Returns a vector of contact groups if successful
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found
+#[query(guard = "may_read_user_data")]
+pub fn get_user_contact_groups() -> Result<Vec<ContactGroup>, GetUserProfileError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    read_state(|s| {
+        let contacts_model =
+            ContactsModel::new(&mut s.user_profile.clone(), &mut s.user_profile_updated.clone());
+        get_contact_groups(stored_principal, &contacts_model)
+    })
+}
+
+/// Adds a new contact group to the user's profile
+///
+/// # Returns
+/// - Returns `Ok(())` if the group was added successfully
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+///   or if a group with the same name already exists
+#[update(guard = "may_write_user_data")]
+pub fn add_user_contact_group(request: CreateContactGroupRequest) -> Result<(), ContactError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        add_contact_group(stored_principal, request, &mut contacts_model)
+    })
+}
+
+/// Updates an existing contact group in the user's profile
+///
+/// # Returns
+/// - Returns `Ok(())` if the group was updated successfully
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+///   or if the group is not found
+#[update(guard = "may_write_user_data")]
+pub fn update_user_contact_group(request: UpdateContactGroupRequest) -> Result<(), ContactError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        update_contact_group(stored_principal, request, &mut contacts_model)
+    })
+}
+
+/// Deletes a contact group from the user's profile
+///
+/// # Returns
+/// - Returns `Ok(())` if the group was deleted successfully
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+///   or if the group is not found
+#[update(guard = "may_write_user_data")]
+pub fn delete_user_contact_group(request: DeleteContactGroupRequest) -> Result<(), ContactError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        delete_contact_group(stored_principal, request, &mut contacts_model)
+    })
+}
+
+/// Marks a contact as favorite or not
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was updated successfully
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, the user profile version is not up-to-date,
+///   or if the contact is not found
+#[update(guard = "may_write_user_data")]
+pub fn toggle_user_contact_favorite(request: ToggleContactFavoriteRequest) -> Result<(), ContactError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        toggle_contact_favorite(stored_principal, request, &mut contacts_model)
+    })
+}
+
 /// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
 ///
 /// # Arguments
@@ -634,7 +880,17 @@ pub fn create_user_profile() -> UserProfile {
         let mut user_profile_model =
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
         let stored_user = create_profile(stored_principal, &mut user_profile_model);
-        UserProfile::from(&stored_user)
+
+        // Add test contacts if the feature flag is enabled
+        let mut contacts_model =
+            ContactsModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        let _ = maybe_add_test_contacts(stored_principal, &mut contacts_model);
+
+        // Get the updated profile after adding test contacts
+        match find_profile(stored_principal, &user_profile_model) {
+            Ok(updated_user) => UserProfile::from(&updated_user),
+            Err(_) => UserProfile::from(&stored_user), // Fallback to original profile if find fails
+        }
     })
 }
 

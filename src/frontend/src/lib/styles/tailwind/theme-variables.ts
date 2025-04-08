@@ -107,7 +107,6 @@ export const themeVariables = {
 		primary: 'var(--color-foreground-primary)',
 		'primary-inverted': 'var(--color-foreground-primary-inverted)',
 		'primary-inverted-alt': 'var(--color-foreground-primary-inverted-alt)',
-		secondary: 'var(--color-foreground-secondary)',
 		'secondary-inverted': 'var(--color-foreground-secondary-inverted)',
 		tertiary: 'var(--color-foreground-tertiary)',
 		'tertiary-inverted': 'var(--color-foreground-tertiary-inverted)',

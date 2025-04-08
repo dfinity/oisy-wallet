@@ -19,6 +19,8 @@ pub struct UserCredential {
 pub struct UserProfile {
     pub settings: Option<Settings>,
     pub credentials: Vec<UserCredential>,
+    pub contacts: Vec<crate::types::contact::Contact>,
+    pub contact_groups: Vec<crate::types::contact::ContactGroup>,
     pub created_timestamp: Timestamp,
     pub updated_timestamp: Timestamp,
     pub version: Option<Version>,
@@ -28,6 +30,8 @@ pub struct UserProfile {
 pub struct StoredUserProfile {
     pub settings: Option<Settings>,
     pub credentials: BTreeMap<CredentialType, UserCredential>,
+    pub contacts: Vec<crate::types::contact::Contact>,
+    pub contact_groups: Vec<crate::types::contact::ContactGroup>,
     pub created_timestamp: Timestamp,
     pub updated_timestamp: Timestamp,
     pub version: Option<Version>,

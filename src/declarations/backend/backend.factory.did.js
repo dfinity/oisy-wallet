@@ -17,6 +17,30 @@ export const idlFactory = ({ IDL }) => {
 		ii_origin: IDL.Text,
 		credential_type: CredentialType
 	});
+	
+	// Contact types
+	const ContactNetwork = IDL.Variant({
+		'Bitcoin': IDL.Null,
+		'Ethereum': IDL.Null,
+		'InternetComputer': IDL.Null,
+		'Solana': IDL.Null,
+	});
+	
+	const Contact = IDL.Record({
+		'address': IDL.Text,
+		'alias': IDL.Text,
+		'notes': IDL.Opt(IDL.Text),
+		'network': ContactNetwork,
+		'group': IDL.Opt(IDL.Text),
+		'is_favorite': IDL.Bool,
+		'last_used': IDL.Opt(IDL.Nat64),
+	});
+	
+	const ContactGroup = IDL.Record({
+		'name': IDL.Text,
+		'description': IDL.Opt(IDL.Text),
+		'icon': IDL.Opt(IDL.Text),
+	});
 	const InitArg = IDL.Record({
 		api: IDL.Opt(Guards),
 		derivation_origin: IDL.Opt(IDL.Text),
@@ -195,6 +219,8 @@ export const idlFactory = ({ IDL }) => {
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
 		settings: IDL.Opt(Settings),
+		contacts: IDL.Vec(Contact),
+		contact_groups: IDL.Vec(ContactGroup),
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
 	});
@@ -480,7 +506,80 @@ export const idlFactory = ({ IDL }) => {
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		current_user_version: IDL.Opt(IDL.Nat64)
 	});
+	// Contact request types
+	const AddContactRequest = IDL.Record({
+		'contact': Contact,
+		'current_user_version': IDL.Opt(IDL.Nat64),
+	});
+	
+	const ContactError = IDL.Variant({
+		'VersionMismatch': IDL.Null,
+		'UserNotFound': IDL.Null,
+		'ContactAlreadyExists': IDL.Null,
+		'ContactNotFound': IDL.Null,
+		'GroupAlreadyExists': IDL.Null,
+		'GroupNotFound': IDL.Null,
+		'GroupInUse': IDL.Null,
+	});
+	
+	const ContactResult = IDL.Variant({
+		'Ok': IDL.Null,
+		'Err': ContactError,
+	});
+	
+	const UpdateContactRequest = IDL.Record({
+		'address': IDL.Text,
+		'network': ContactNetwork,
+		'alias': IDL.Text,
+		'notes': IDL.Opt(IDL.Text),
+		'group': IDL.Opt(IDL.Text),
+		'is_favorite': IDL.Bool,
+		'current_user_version': IDL.Opt(IDL.Nat64),
+	});
+	
+	const DeleteContactRequest = IDL.Record({
+		'address': IDL.Text,
+		'network': ContactNetwork,
+		'current_user_version': IDL.Opt(IDL.Nat64),
+	});
+	
+	const ToggleContactFavoriteRequest = IDL.Record({
+		'address': IDL.Text,
+		'network': ContactNetwork,
+		'is_favorite': IDL.Bool,
+		'current_user_version': IDL.Opt(IDL.Nat64),
+	});
+	
+	const AddContactGroupRequest = IDL.Record({
+		'group': ContactGroup,
+		'current_user_version': IDL.Opt(IDL.Nat64),
+	});
+	
+	const UpdateContactGroupRequest = IDL.Record({
+		'name': IDL.Text,
+		'description': IDL.Opt(IDL.Text),
+		'icon': IDL.Opt(IDL.Text),
+		'current_user_version': IDL.Opt(IDL.Nat64),
+	});
+	
+	const DeleteContactGroupRequest = IDL.Record({
+		'name': IDL.Text,
+		'current_user_version': IDL.Opt(IDL.Nat64),
+	});
+
 	return IDL.Service({
+		// Contact management
+		get_contacts: IDL.Func([], [IDL.Vec(Contact)], ['query']),
+		get_contact_groups: IDL.Func([], [IDL.Vec(ContactGroup)], ['query']),
+		add_contact: IDL.Func([AddContactRequest], [ContactResult], []),
+		update_contact: IDL.Func([UpdateContactRequest], [ContactResult], []),
+		delete_contact: IDL.Func([DeleteContactRequest], [ContactResult], []),
+		toggle_contact_favorite: IDL.Func([ToggleContactFavoriteRequest], [ContactResult], []),
+		add_contact_group: IDL.Func([AddContactGroupRequest], [ContactResult], []),
+		update_contact_group: IDL.Func([UpdateContactGroupRequest], [ContactResult], []),
+		delete_contact_group: IDL.Func([DeleteContactGroupRequest], [ContactResult], []),
+		
+		// Original methods
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result_1], []),
 		allow_signing: IDL.Func([], [Result_2], []),

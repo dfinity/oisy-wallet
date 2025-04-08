@@ -151,6 +151,8 @@ impl StoredUserProfile {
         StoredUserProfile {
             settings: Some(settings),
             credentials,
+            contacts: Vec::new(),
+            contact_groups: Vec::new(),
             created_timestamp: now,
             updated_timestamp: now,
             version: None,
@@ -179,6 +181,285 @@ impl StoredUserProfile {
         let mut new_credentials = new_profile.credentials.clone();
         new_credentials.insert(credential_type.clone(), user_credential);
         new_profile.credentials = new_credentials;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Adds a new contact to the user profile
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch or if a contact with the same address or alias already exists.
+    pub fn add_contact(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        contact: crate::types::contact::Contact,
+    ) -> Result<StoredUserProfile, crate::types::contact::ContactError> {
+        if profile_version != self.version {
+            return Err(crate::types::contact::ContactError::VersionMismatch);
+        }
+
+        // Check for duplicate address
+        if self.contacts.iter().any(|c| c.address == contact.address && c.network == contact.network) {
+            return Err(crate::types::contact::ContactError::DuplicateAddress);
+        }
+
+        // Check for duplicate alias
+        if self.contacts.iter().any(|c| c.alias == contact.alias && c.network == contact.network) {
+            return Err(crate::types::contact::ContactError::DuplicateAlias);
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        let mut new_contacts = new_profile.contacts.clone();
+        new_contacts.push(contact);
+        new_profile.contacts = new_contacts;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Updates an existing contact in the user profile
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch, if the contact is not found,
+    /// or if the new alias conflicts with an existing contact.
+    pub fn update_contact(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        address: String,
+        network: crate::types::contact::ContactNetwork,
+        alias: Option<String>,
+        notes: Option<String>,
+        group: Option<String>,
+        is_favorite: Option<bool>,
+    ) -> Result<StoredUserProfile, crate::types::contact::ContactError> {
+        if profile_version != self.version {
+            return Err(crate::types::contact::ContactError::VersionMismatch);
+        }
+
+        // Find the contact index
+        let contact_index = self.contacts.iter().position(|c| c.address == address && c.network == network)
+            .ok_or(crate::types::contact::ContactError::NotFound)?;
+
+        // Check for duplicate alias if we're changing it
+        if let Some(new_alias) = &alias {
+            if self.contacts.iter().any(|c| &c.alias == new_alias && c.network == network && c.address != address) {
+                return Err(crate::types::contact::ContactError::DuplicateAlias);
+            }
+        }
+
+        // Check if the group exists if we're changing it
+        if let Some(new_group) = &group {
+            if !new_group.is_empty() && !self.contact_groups.iter().any(|g| &g.name == new_group) {
+                return Err(crate::types::contact::ContactError::GroupNotFound);
+            }
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        let mut new_contacts = new_profile.contacts.clone();
+
+        // Update the contact
+        if let Some(new_alias) = alias {
+            new_contacts[contact_index].alias = new_alias;
+        }
+
+        if let Some(new_notes) = notes {
+            new_contacts[contact_index].notes = Some(new_notes);
+        }
+
+        if let Some(new_group) = group {
+            new_contacts[contact_index].group = if new_group.is_empty() {
+                None
+            } else {
+                Some(new_group)
+            };
+        }
+
+        if let Some(new_is_favorite) = is_favorite {
+            new_contacts[contact_index].is_favorite = new_is_favorite;
+        }
+
+        // Update the last_used timestamp if this is a favorite contact
+        if new_contacts[contact_index].is_favorite {
+            new_contacts[contact_index].last_used = Some(now);
+        }
+
+        new_profile.contacts = new_contacts;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Deletes a contact from the user profile
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch or if the contact is not found.
+    pub fn delete_contact(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        address: String,
+        network: crate::types::contact::ContactNetwork,
+    ) -> Result<StoredUserProfile, crate::types::contact::ContactError> {
+        if profile_version != self.version {
+            return Err(crate::types::contact::ContactError::VersionMismatch);
+        }
+
+        // Find the contact index
+        let contact_index = self.contacts.iter().position(|c| c.address == address && c.network == network)
+            .ok_or(crate::types::contact::ContactError::NotFound)?;
+
+        let mut new_profile = self.with_incremented_version();
+        let mut new_contacts = new_profile.contacts.clone();
+
+        // Remove the contact
+        new_contacts.remove(contact_index);
+
+        new_profile.contacts = new_contacts;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Adds a new contact group to the user profile
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch or if a group with the same name already exists.
+    pub fn add_contact_group(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        group: crate::types::contact::ContactGroup,
+    ) -> Result<StoredUserProfile, crate::types::contact::ContactError> {
+        if profile_version != self.version {
+            return Err(crate::types::contact::ContactError::VersionMismatch);
+        }
+
+        // Check for duplicate group name
+        if self.contact_groups.iter().any(|g| g.name == group.name) {
+            return Err(crate::types::contact::ContactError::DuplicateGroupName);
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        let mut new_groups = new_profile.contact_groups.clone();
+        new_groups.push(group);
+        new_profile.contact_groups = new_groups;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Updates an existing contact group in the user profile
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch or if the group is not found.
+    pub fn update_contact_group(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        name: String,
+        description: Option<String>,
+        icon: Option<String>,
+    ) -> Result<StoredUserProfile, crate::types::contact::ContactError> {
+        if profile_version != self.version {
+            return Err(crate::types::contact::ContactError::VersionMismatch);
+        }
+
+        // Find the group index
+        let group_index = self.contact_groups.iter().position(|g| g.name == name)
+            .ok_or(crate::types::contact::ContactError::GroupNotFound)?;
+
+        let mut new_profile = self.with_incremented_version();
+        let mut new_groups = new_profile.contact_groups.clone();
+
+        // Update the group
+        if let Some(new_description) = description {
+            new_groups[group_index].description = Some(new_description);
+        }
+
+        if let Some(new_icon) = icon {
+            new_groups[group_index].icon = Some(new_icon);
+        }
+
+        new_profile.contact_groups = new_groups;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Deletes a contact group from the user profile
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch or if the group is not found.
+    pub fn delete_contact_group(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        name: String,
+    ) -> Result<StoredUserProfile, crate::types::contact::ContactError> {
+        if profile_version != self.version {
+            return Err(crate::types::contact::ContactError::VersionMismatch);
+        }
+
+        // Find the group index
+        let group_index = self.contact_groups.iter().position(|g| g.name == name)
+            .ok_or(crate::types::contact::ContactError::GroupNotFound)?;
+
+        let mut new_profile = self.with_incremented_version();
+        let mut new_groups = new_profile.contact_groups.clone();
+
+        // Remove the group
+        new_groups.remove(group_index);
+
+        // Remove the group from all contacts that were using it
+        let mut new_contacts = new_profile.contacts.clone();
+        for contact in &mut new_contacts {
+            if contact.group.as_ref() == Some(&name) {
+                contact.group = None;
+            }
+        }
+
+        new_profile.contact_groups = new_groups;
+        new_profile.contacts = new_contacts;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Marks a contact as favorite or not
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch or if the contact is not found.
+    pub fn toggle_contact_favorite(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        address: String,
+        network: crate::types::contact::ContactNetwork,
+        is_favorite: bool,
+    ) -> Result<StoredUserProfile, crate::types::contact::ContactError> {
+        if profile_version != self.version {
+            return Err(crate::types::contact::ContactError::VersionMismatch);
+        }
+
+        // Find the contact index
+        let contact_index = self.contacts.iter().position(|c| c.address == address && c.network == network)
+            .ok_or(crate::types::contact::ContactError::NotFound)?;
+
+        let mut new_profile = self.with_incremented_version();
+        let mut new_contacts = new_profile.contacts.clone();
+
+        // Update the favorite status
+        new_contacts[contact_index].is_favorite = is_favorite;
+
+        // Update the last_used timestamp if this is a favorite contact
+        if is_favorite {
+            new_contacts[contact_index].last_used = Some(now);
+        }
+
+        new_profile.contacts = new_contacts;
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
@@ -305,6 +586,8 @@ impl From<&StoredUserProfile> for UserProfile {
             version,
             credentials,
             settings,
+            contacts,
+            contact_groups,
         } = user;
         UserProfile {
             created_timestamp: *created_timestamp,
@@ -312,6 +595,8 @@ impl From<&StoredUserProfile> for UserProfile {
             version: *version,
             credentials: credentials.clone().into_values().collect(),
             settings: settings.clone(),
+            contacts: contacts.clone(),
+            contact_groups: contact_groups.clone(),
         }
     }
 }

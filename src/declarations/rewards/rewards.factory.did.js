@@ -21,8 +21,7 @@ export const idlFactory = ({ IDL }) => {
 		name: IDL.Text,
 		num_events_per_cycle: IDL.Nat32,
 		awards: IDL.Vec(TokenConfig),
-		num_users_per_event: IDL.Nat32,
-		campaign_name: IDL.Opt(IDL.Text)
+		num_users_per_event: IDL.Nat32
 	});
 	const UsageCriteria = IDL.Record({
 		measurement_duration: CandidDuration,
@@ -33,8 +32,7 @@ export const idlFactory = ({ IDL }) => {
 	const UsageAwardConfig = IDL.Record({
 		cycle_duration: CandidDuration,
 		awards: IDL.Vec(UsageAwardEvent),
-		eligibility_criteria: UsageCriteria,
-		campaign_name: IDL.Opt(IDL.Text)
+		eligibility_criteria: UsageCriteria
 	});
 	const BatchSizes = IDL.Record({
 		user_fetching: IDL.Nat16,
@@ -213,8 +211,7 @@ export const idlFactory = ({ IDL }) => {
 		name: IDL.Opt(IDL.Text),
 		ledger: IDL.Principal,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat,
-		campaign_name: IDL.Opt(IDL.Text)
+		amount: IDL.Nat
 	});
 	const UserData = IDL.Record({
 		airdrops: IDL.Vec(RewardInfo),
@@ -286,8 +283,7 @@ export const init = ({ IDL }) => {
 		name: IDL.Text,
 		num_events_per_cycle: IDL.Nat32,
 		awards: IDL.Vec(TokenConfig),
-		num_users_per_event: IDL.Nat32,
-		campaign_name: IDL.Opt(IDL.Text)
+		num_users_per_event: IDL.Nat32
 	});
 	const UsageCriteria = IDL.Record({
 		measurement_duration: CandidDuration,
@@ -298,8 +294,7 @@ export const init = ({ IDL }) => {
 	const UsageAwardConfig = IDL.Record({
 		cycle_duration: CandidDuration,
 		awards: IDL.Vec(UsageAwardEvent),
-		eligibility_criteria: UsageCriteria,
-		campaign_name: IDL.Opt(IDL.Text)
+		eligibility_criteria: UsageCriteria
 	});
 	const BatchSizes = IDL.Record({
 		user_fetching: IDL.Nat16,
