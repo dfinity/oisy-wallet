@@ -25,6 +25,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { transferXtc } from '$icp/api/xtc-ledger.api';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -125,6 +126,12 @@
 			});
 
 			back();
+		}
+	};
+
+	window.transferXtc = ({ to, amount }: { to: string; amount: bigint }) => {
+		if (!isNullish($authIdentity)) {
+			transferXtc($authIdentity, to, amount);
 		}
 	};
 
