@@ -83,6 +83,13 @@ type AllowSigningError = variant {
   Other : text;
   FailedToContactCyclesLedger;
 };
+type AllowSigningRequest = record { nonce : nat64 };
+type AllowSigningResponse = record {
+  status : AllowSigningStatus;
+  challenge_completion : opt ChallengeCompletion;
+  allowed_cycles : nat64;
+};
+type AllowSigningStatus = variant { Skipped; Failed; Executed };
 type ApiEnabled = variant { ReadOnly; Enabled; Disabled };
 type ApproveError = variant {
   GenericError : record { message : text; error_code : nat };
@@ -134,6 +141,12 @@ type CanisterStatusResultV2 = record {
   module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
+type ChallengeCompletion = record {
+  solved_duration_ms : nat64;
+  next_allowance_ms : nat64;
+  next_difficulty : nat32;
+  current_difficulty : nat32;
+};
 type ChallengeCompletionError = variant {
   InvalidNonce;
   MissingChallenge;
@@ -281,7 +294,7 @@ type Result_11 = variant {
   Ok : TopUpCyclesLedgerResponse;
   Err : TopUpCyclesLedgerError;
 };
-type Result_2 = variant { Ok; Err : AllowSigningError };
+type Result_2 = variant { Ok : AllowSigningResponse; Err : AllowSigningError };
 type Result_3 = variant { Ok; Err : BtcAddPendingTransactionError };
 type Result_4 = variant {
   Ok : BtcGetPendingTransactionsReponse;
@@ -421,7 +434,7 @@ type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
   add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (Result_1);
-  allow_signing : () -> (Result_2);
+  allow_signing : (opt AllowSigningRequest) -> (Result_2);
   btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (Result_3);
   btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
       Result_4,
