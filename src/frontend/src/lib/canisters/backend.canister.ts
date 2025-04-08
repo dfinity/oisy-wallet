@@ -1,7 +1,7 @@
 import type {
-	_SERVICE as BackendService,
 	AllowSigningRequest,
 	AllowSigningResponse,
+	_SERVICE as BackendService,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -29,7 +29,7 @@ import type {
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
-import { Canister, createServices, type QueryParams, toNullable } from '@dfinity/utils';
+import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({
