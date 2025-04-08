@@ -1,6 +1,6 @@
 const EXPLORER_URLS = {
-	ETHEREUM: 'https://etherscan.io',
-	SEPOLIA: 'https://sepolia.etherscan.io',
+	ETHEREUM: 'https://basescan.org',
+	SEPOLIA: 'https://sepolia.basescan.org',
 	ICP: 'https://dashboard.internetcomputer.org',
 	CKETH: 'https://dashboard.internetcomputer.org/ethereum',
 	CKETH_SEPOLIA: 'https://dashboard.internetcomputer.org/sepoliaeth',
