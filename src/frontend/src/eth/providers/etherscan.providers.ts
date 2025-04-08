@@ -4,7 +4,7 @@ import {
 	ETHERSCAN_NETWORK_SEPOLIA,
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
-import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
+import { BASESCAN_API_KEY } from '$env/rest/etherscan.env';
 import type { EtherscanProviderTransaction } from '$eth/types/etherscan-transaction';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
@@ -23,7 +23,7 @@ export class EtherscanProvider {
 	private readonly provider: EtherscanProviderLib;
 
 	constructor(private readonly network: Networkish) {
-		this.provider = new EtherscanProviderLib(this.network, ETHERSCAN_API_KEY);
+		this.provider = new EtherscanProviderLib(this.network, BASESCAN_API_KEY);
 	}
 
 	// There is no `getHistory` in ethers v6
