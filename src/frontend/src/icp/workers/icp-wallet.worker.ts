@@ -1,4 +1,4 @@
-import { getTransactions as getTransactionsApi } from '$icp/api/icp-index.api';
+import { getTransactions } from '$icp/api/icp-index.api';
 import { IcWalletBalanceAndTransactionsScheduler } from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
@@ -12,11 +12,11 @@ import type {
 } from '@dfinity/ledger-icp';
 import { isNullish } from '@dfinity/utils';
 
-const getTransactions = ({
+const getBalanceAndTransactions = ({
 	identity,
 	certified
 }: SchedulerJobParams<PostMessageDataRequest>): Promise<GetAccountIdentifierTransactionsResponse> =>
-	getTransactionsApi({
+	getTransactions({
 		identity,
 		certified,
 		owner: identity.getPrincipal(),
@@ -40,7 +40,7 @@ const initIcpWalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTrans
 	PostMessageDataRequest
 > =>
 	new IcWalletBalanceAndTransactionsScheduler(
-		getTransactions,
+		getBalanceAndTransactions,
 		mapTransactionIcpToSelf,
 		mapTransaction,
 		'syncIcpWallet'
