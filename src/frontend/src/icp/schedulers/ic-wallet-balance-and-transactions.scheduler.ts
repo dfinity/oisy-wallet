@@ -32,7 +32,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 	private initialized = false;
 
 	constructor(
-		private getTransactions: (
+		private getBalanceAndTransactions: (
 			data: SchedulerJobParams<PostMessageDataRequest>
 		) => Promise<GetTransactions & { transactions: TWithId[] }>,
 		private mapToSelfTransaction: (
@@ -56,7 +56,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 	}: SchedulerJobData<PostMessageDataRequest>) => {
 		await queryAndUpdate<GetTransactions & { transactions: TWithId[] }>({
 			request: ({ identity: _, certified }) =>
-				this.getTransactions({ ...data, identity, certified }),
+				this.getBalanceAndTransactions({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => {
 				this.syncTransactions({ jobData: { identity, ...data }, certified, ...rest });
 				this.cleanTransactions({ certified });
