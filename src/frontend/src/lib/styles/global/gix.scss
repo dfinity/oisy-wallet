@@ -191,6 +191,9 @@ div.modal {
 	}
 
 	div.container {
+		// hack for fixing blurry text/content on Mac OS when modal content scroll bar is showing
+		border-radius: 0 !important;
+
 		// If using ContentWithToolbar, we need to set some padding manually
 		& > div.content div.stretch {
 			--dialog-padding-x: 12px;
@@ -236,16 +239,12 @@ div.popover {
 	--background-contrast: var(--overlay-background-contrast);
 
 	.wrapper {
-		padding: var(--padding-0_75x);
-		--padding: var(--padding-0_75x);
+		padding: var(--padding-0_5x);
+		--padding: var(--padding-0_5x);
 
 		--border-radius: 16px;
 
 		max-width: calc(100vw - (2 * var(--padding)));
-
-		@media (width >= theme(--breakpoint-sm)) {
-			max-width: 300px !important;
-		}
 	}
 }
 

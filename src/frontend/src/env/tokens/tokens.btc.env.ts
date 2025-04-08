@@ -2,7 +2,7 @@ import {
 	BTC_MAINNET_NETWORK,
 	BTC_REGTEST_NETWORK,
 	BTC_TESTNET_NETWORK
-} from '$env/networks/networks.env';
+} from '$env/networks/networks.btc.env';
 import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import type { Token, TokenId, TokenWithLinkedData } from '$lib/types/token';

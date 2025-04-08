@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { assertNonNullish, isNullish } from '@dfinity/utils';
-	import { isSolanaError, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED } from '@solana/errors';
+	import { isSolanaError, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED } from '@solana/kit';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
@@ -18,6 +18,7 @@
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -25,7 +26,7 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
+	import type { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -163,7 +164,7 @@
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
 				}),
-				prioritizationFee: $prioritizationFeeStore ?? 0n,
+				prioritizationFee: $prioritizationFeeStore ?? ZERO_BI,
 				destination,
 				source
 			});

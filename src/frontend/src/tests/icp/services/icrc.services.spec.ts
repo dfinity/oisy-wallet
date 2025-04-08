@@ -1,5 +1,5 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { ICP_NETWORK } from '$env/networks/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	loadCustomTokens,
 	loadDisabledIcrcTokensBalances,
@@ -21,7 +21,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, nonNullish } from '@dfinity/utils';
-import { BigNumber } from 'alchemy-sdk';
 import { get } from 'svelte/store';
 import { type MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -229,8 +228,6 @@ describe('icrc.services', () => {
 					certified: true
 				});
 
-				vi.spyOn(console, 'error').mockImplementation(() => {});
-
 				spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 			});
 
@@ -325,11 +322,11 @@ describe('icrc.services', () => {
 			expect(get(balancesStore)).toEqual({
 				[disabledIcrcTokens[0].id]: {
 					certified: true,
-					data: BigNumber.from(balance)
+					data: balance
 				},
 				[disabledIcrcTokens[1].id]: {
 					certified: true,
-					data: BigNumber.from(balance)
+					data: balance
 				}
 			});
 		});

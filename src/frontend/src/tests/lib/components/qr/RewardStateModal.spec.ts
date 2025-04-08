@@ -1,4 +1,4 @@
-import RewardStateModal from '$lib/components/qr/RewardStateModal.svelte';
+import RewardStateModal from '$lib/components/qr/VipRewardStateModal.svelte';
 import { i18n } from '$lib/stores/i18n.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { render } from '@testing-library/svelte';

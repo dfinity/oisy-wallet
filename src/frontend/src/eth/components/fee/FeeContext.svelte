@@ -59,15 +59,16 @@
 
 			const { getFeeData } = infuraProviders(sendToken.network.id);
 
+			const feeData = await getFeeData();
+
 			if (isSupportedEthTokenId(sendTokenId)) {
 				feeStore.setFee({
-					...(await getFeeData()),
+					...feeData,
 					gas: getEthFeeData({
 						...params,
-						helperContractAddress: toCkEthHelperContractAddress({
-							minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
-							networkId: sourceNetwork.id
-						})
+						helperContractAddress: toCkEthHelperContractAddress(
+							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+						)
 					})
 				});
 				return;
@@ -82,7 +83,7 @@
 
 			if (isSupportedErc20TwinTokenId(sendTokenId)) {
 				feeStore.setFee({
-					...(await getFeeData()),
+					...feeData,
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
 						erc20HelperContractAddress: toCkErc20HelperContractAddress(
@@ -94,7 +95,7 @@
 			}
 
 			feeStore.setFee({
-				...(await getFeeData()),
+				...feeData,
 				gas: await getErc20FeeData({
 					...erc20GasFeeParams,
 					targetNetwork,
@@ -133,7 +134,9 @@
 		});
 	};
 
-	onMount(() => debounceUpdateFeeData());
+	onMount(() => {
+		observe && debounceUpdateFeeData();
+	});
 	onDestroy(() => listener?.disconnect());
 
 	/**
@@ -142,7 +145,10 @@
 
 	$: obverseFeeData(observe);
 
-	$: $ckEthMinterInfoStore, debounceUpdateFeeData();
+	$: $ckEthMinterInfoStore,
+		(() => {
+			observe && debounceUpdateFeeData();
+		})();
 
 	/**
 	 * Expose a call to evaluate, so that consumers can re-evaluate imperatively, for example, when the amount or destination is manually updated by the user.

@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { ICP_NETWORK } from '$env/networks/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import {
 		ckEthereumTwinTokenStandard,
 		ckEthereumTwinToken,
-		ckEthereumNativeTokenId,
-		ckEthereumNativeToken
+		ckEthereumNativeTokenId
 	} from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import {
@@ -29,10 +28,7 @@
 	$: destination =
 		$ckEthereumTwinTokenStandard === 'erc20'
 			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '')
-			: (toCkEthHelperContractAddress({
-					minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					networkId: $ckEthereumNativeToken.network.id
-				}) ?? '');
+			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '');
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 

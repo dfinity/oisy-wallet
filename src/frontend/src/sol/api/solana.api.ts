@@ -3,12 +3,14 @@ import { last } from '$lib/utils/array.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolSignature } from '$sol/types/sol-transaction';
+import type {
+	SolRpcTransaction,
+	SolRpcTransactionRaw,
+	SolSignature
+} from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { address, address as solAddress, type Address } from '@solana/addresses';
-import { type Signature } from '@solana/keys';
-import type { Lamports } from '@solana/rpc-types';
+import { address as solAddress, type Address, type Lamports, type Signature } from '@solana/kit';
 import type { Writeable } from 'zod';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport
@@ -88,8 +90,8 @@ export const fetchSignatures = async ({
 	return await fetchSignaturesBatch(before);
 };
 
-export const fetchTransactionDetailForSignature = async ({
-	signature: { signature, confirmationStatus },
+export const getRpcTransaction = async ({
+	signature: { signature },
 	network
 }: {
 	signature: SolSignature;
@@ -97,10 +99,25 @@ export const fetchTransactionDetailForSignature = async ({
 }) => {
 	const { getTransaction } = solanaHttpRpc(network);
 
-	const rpcTransaction = await getTransaction(signature, {
+	return await getTransaction(signature, {
 		maxSupportedTransactionVersion: 0,
 		encoding: 'jsonParsed'
 	}).send();
+};
+
+export const fetchTransactionDetailForSignature = async ({
+	signature,
+	network
+}: {
+	signature: SolSignature;
+	network: SolanaNetworkType;
+}): Promise<SolRpcTransaction | null> => {
+	const { confirmationStatus } = signature;
+
+	const rpcTransaction: SolRpcTransactionRaw | null = await getRpcTransaction({
+		signature,
+		network
+	});
 
 	if (isNullish(rpcTransaction)) {
 		return null;
@@ -111,7 +128,7 @@ export const fetchTransactionDetailForSignature = async ({
 		version: rpcTransaction.version,
 		confirmationStatus,
 		id: signature.toString(),
-		signature
+		signature: signature.signature
 	};
 };
 
@@ -171,7 +188,7 @@ export const estimatePriorityFee = async ({
 }): Promise<bigint> => {
 	const { getRecentPrioritizationFees } = solanaHttpRpc(network);
 	const fees = await getRecentPrioritizationFees(
-		nonNullish(addresses) ? addresses.map(address) : undefined
+		nonNullish(addresses) ? addresses.map(solAddress) : undefined
 	).send();
 
 	return fees.reduce<bigint>(

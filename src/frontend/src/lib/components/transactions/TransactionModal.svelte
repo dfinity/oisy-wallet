@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { BigNumber } from '@ethersproject/bignumber';
+	import TransactionAddress from '$lib/components/transactions/TransactionAddress.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -20,7 +20,7 @@
 
 	export let commonData: TransactionUiCommon;
 	export let hash: string | undefined;
-	export let value: BigNumber | undefined;
+	export let value: bigint | undefined;
 	export let token: OptionToken;
 	export let typeLabel: string;
 	export let sendToLabel: string | undefined;
@@ -43,19 +43,23 @@
 		{#if nonNullish(hash)}
 			<Value ref="hash">
 				<svelte:fragment slot="label">{$i18n.transaction.text.hash}</svelte:fragment>
-				<output>{shortenWithMiddleEllipsis({ text: hash })}</output><Copy
+				<output>{shortenWithMiddleEllipsis({ text: hash })}</output>
+				<Copy
 					value={hash}
 					text={replacePlaceholders($i18n.transaction.text.hash_copied, {
 						$hash: hash
 					})}
 					inline
-				/>{#if nonNullish(txExplorerUrl)}<ExternalLink
+				/>
+				{#if nonNullish(txExplorerUrl)}
+					<ExternalLink
 						iconSize="18"
 						href={txExplorerUrl}
 						ariaLabel={$i18n.transaction.alt.open_block_explorer}
 						inline
 						color="blue"
-					/>{/if}
+					/>
+				{/if}
 			</Value>
 		{/if}
 
@@ -84,33 +88,25 @@
 
 		<Value ref="from">
 			<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
-			<output>{from}</output><Copy
-				value={from}
-				text={$i18n.transaction.text.from_copied}
-				inline
-			/>{#if nonNullish(fromExplorerUrl)}<ExternalLink
-					iconSize="18"
-					href={fromExplorerUrl}
-					ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
-					inline
-					color="blue"
-				/>{/if}
+
+			<TransactionAddress
+				address={from}
+				explorerUrl={fromExplorerUrl}
+				copiedText={$i18n.transaction.text.from_copied}
+			/>
 		</Value>
+
+		<slot name="transaction-custom-to" />
 
 		{#if nonNullish(to)}
 			<Value ref="to">
 				<svelte:fragment slot="label">{sendToLabel}</svelte:fragment>
-				<output>{to}</output><Copy
-					value={to}
-					text={$i18n.transaction.text.to_copied}
-					inline
-				/>{#if nonNullish(toExplorerUrl)}<ExternalLink
-						iconSize="18"
-						href={toExplorerUrl}
-						ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
-						inline
-						color="blue"
-					/>{/if}
+
+				<TransactionAddress
+					address={to}
+					explorerUrl={toExplorerUrl}
+					copiedText={$i18n.transaction.text.to_copied}
+				/>
 			</Value>
 		{/if}
 

@@ -16,7 +16,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { getNewReward } from '$lib/services/reward-code.services';
+	import { getNewReward } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';

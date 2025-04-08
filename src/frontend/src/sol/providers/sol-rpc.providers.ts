@@ -13,12 +13,14 @@ import {
 	type SolRpcConnectionConfig,
 	type SolanaNetworkType
 } from '$sol/types/network';
-import { createSolanaRpc, type Rpc, type SolanaRpcApi } from '@solana/rpc';
 import {
+	createSolanaRpc,
 	createSolanaRpcSubscriptions,
+	type Rpc,
 	type RpcSubscriptions,
+	type SolanaRpcApi,
 	type SolanaRpcSubscriptionsApi
-} from '@solana/rpc-subscriptions';
+} from '@solana/kit';
 
 const rpcs: Record<SolanaNetworkType, SolRpcConnectionConfig> = {
 	[SolanaNetworks.mainnet]: {

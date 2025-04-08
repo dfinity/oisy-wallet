@@ -29,7 +29,6 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { AnonymousIdentity, type Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -215,7 +214,7 @@ export const loadDisabledIcrcTokensBalances = ({
 			balancesStore.set({
 				tokenId: id,
 				data: {
-					data: BigNumber.from(icrcTokenBalance),
+					data: icrcTokenBalance,
 					certified: true
 				}
 			});

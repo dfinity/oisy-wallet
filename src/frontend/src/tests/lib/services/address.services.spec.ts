@@ -32,7 +32,6 @@ describe('address.services', () => {
 	const mockIdentity = Ed25519KeyIdentity.generate();
 
 	beforeEach(() => {
-		vi.resetAllMocks();
 		vi.clearAllMocks();
 
 		authStore.setForTesting(mockIdentity);
@@ -106,10 +105,6 @@ describe('address.services', () => {
 			updateIdbAddressLastUsage: mockUpdateIdbAddressLastUsage,
 			addressStore: mockAddressStore
 		};
-
-		beforeEach(() => {
-			vi.spyOn(console, 'error').mockImplementation(() => {});
-		});
 
 		it('should return an error if no IDB address is found', async () => {
 			mockGetIdbAddress.mockResolvedValueOnce(undefined);

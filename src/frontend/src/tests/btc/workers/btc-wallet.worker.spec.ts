@@ -212,7 +212,6 @@ describe('btc-wallet.worker', () => {
 		});
 
 		it('should trigger postMessage with error', async () => {
-			vi.spyOn(console, 'error').mockImplementationOnce(() => {});
 			const err = new Error('test');
 			signerCanisterMock.getBtcBalance.mockRejectedValue(err);
 

@@ -1,4 +1,4 @@
-import { ICP_NETWORK } from '$env/networks/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';

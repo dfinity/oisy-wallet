@@ -45,3 +45,11 @@ export const failTestsThatLogToConsole = () => {
 export const allowLoggingForDebugging = () => {
 	isLoggingAllowed = true;
 };
+
+export const disableConsoleLog = () => {
+	beforeEach(() => {
+		// We mock console just to avoid unnecessary logs while running the tests
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+	});
+};

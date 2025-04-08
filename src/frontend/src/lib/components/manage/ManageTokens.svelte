@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, nonNullish } from '@dfinity/utils';
+	import { debounce, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
@@ -17,7 +17,10 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
+	import {
+		MANAGE_TOKENS_MODAL_CLOSE,
+		MANAGE_TOKENS_MODAL_SAVE
+	} from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
@@ -34,6 +37,8 @@
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
+
+	export let initialSearch: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -59,7 +64,7 @@
 				sortTokens({
 					$tokens: allTokensForSelectedNetwork,
 					$exchanges: exchangesStaticData,
-					$tokensToPin: $tokensToPin
+					$tokensToPin
 				})
 			)
 		: [];
@@ -68,7 +73,7 @@
 	const updateFilter = () => (tokensFilter = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
-	let filter = '';
+	let filter = initialSearch ?? '';
 	$: filter, debounceUpdateFilter();
 
 	let filteredTokens: Token[] = [];
@@ -143,7 +148,7 @@
 <div class="mb-4">
 	<InputSearch
 		bind:filter
-		noMatch={noTokensMatch}
+		showResetButton={notEmptyString(filter)}
 		placeholder={$i18n.tokens.placeholder.search_token}
 		autofocus={isDesktop()}
 	/>
@@ -156,6 +161,8 @@
 		})}
 	</p>
 {/if}
+
+<slot name="info-element" />
 
 {#if noTokensMatch}
 	<button
@@ -204,7 +211,7 @@
 	>
 
 	<ButtonGroup>
-		<ButtonCancel on:click={() => dispatch('icClose')} />
+		<ButtonCancel testId={MANAGE_TOKENS_MODAL_CLOSE} on:click={() => dispatch('icClose')} />
 		<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} on:click={save}>
 			{$i18n.core.text.save}
 		</Button>

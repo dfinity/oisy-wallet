@@ -1,3 +1,4 @@
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
@@ -20,35 +21,33 @@ import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
 import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
-import { address as solAddress } from '@solana/addresses';
-import { pipe } from '@solana/functional';
-import type { Signature } from '@solana/keys';
-import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
-import { lamports, type Commitment } from '@solana/rpc-types';
-import {
-	setTransactionMessageFeePayerSigner,
-	type TransactionPartialSigner,
-	type TransactionSigner
-} from '@solana/signers';
 import {
 	appendTransactionMessageInstructions,
+	assertTransactionIsFullySigned,
 	createTransactionMessage,
-	prependTransactionMessageInstruction,
-	setTransactionMessageLifetimeUsingBlockhash,
-	type ITransactionMessageWithFeePayer,
-	type TransactionMessage,
-	type TransactionVersion
-} from '@solana/transaction-messages';
-import { assertTransactionIsFullySigned } from '@solana/transactions';
-import {
 	getComputeUnitEstimateForTransactionMessageFactory,
-	sendAndConfirmTransactionFactory
-} from '@solana/web3.js';
+	lamports,
+	pipe,
+	prependTransactionMessageInstruction,
+	sendAndConfirmTransactionFactory,
+	setTransactionMessageFeePayerSigner,
+	setTransactionMessageLifetimeUsingBlockhash,
+	address as solAddress,
+	type Commitment,
+	type ITransactionMessageWithFeePayer,
+	type Rpc,
+	type RpcSubscriptions,
+	type Signature,
+	type SolanaRpcApi,
+	type SolanaRpcSubscriptionsApi,
+	type TransactionMessage,
+	type TransactionPartialSigner,
+	type TransactionSigner,
+	type TransactionVersion
+} from '@solana/kit';
 import { get } from 'svelte/store';
 
 const setFeePayerToTransaction = ({
@@ -107,7 +106,7 @@ const createSolTransactionMessage = async ({
 }: {
 	signer: TransactionSigner;
 	destination: SolAddress;
-	amount: BigNumber;
+	amount: bigint;
 	network: SolanaNetworkType;
 }): Promise<SolTransactionMessage> => {
 	const rpc = solanaHttpRpc(network);
@@ -118,7 +117,7 @@ const createSolTransactionMessage = async ({
 				getTransferSolInstruction({
 					source: signer,
 					destination: solAddress(destination),
-					amount: lamports(amount.toBigInt())
+					amount: lamports(amount)
 				})
 			],
 			tx
@@ -136,7 +135,7 @@ const createSplTokenTransactionMessage = async ({
 }: {
 	signer: TransactionSigner;
 	destination: SolAddress;
-	amount: BigNumber;
+	amount: bigint;
 	network: SolanaNetworkType;
 	tokenAddress: SplTokenAddress;
 	tokenOwnerAddress: SolAddress;
@@ -199,7 +198,7 @@ const createSplTokenTransactionMessage = async ({
 						: destinationTokenAccountAddress
 			),
 			authority: signer,
-			amount: amount.toBigInt()
+			amount
 		},
 		{ programAddress: solAddress(tokenOwnerAddress) }
 	);
@@ -249,7 +248,7 @@ export const sendSol = async ({
 	identity: OptionIdentity;
 	progress: (step: ProgressStepsSendSol) => void;
 	token: Token;
-	amount: BigNumber;
+	amount: bigint;
 	prioritizationFee: bigint;
 	destination: SolAddress;
 	source: SolAddress;
@@ -312,7 +311,7 @@ export const sendSol = async ({
 	progress(ProgressStepsSendSol.SIGN);
 
 	const { signedTransaction, signature } = await signTransaction(
-		prioritizationFee > 0n ? transactionMessageWithComputeUnitPrice : transactionMessage
+		prioritizationFee > ZERO_BI ? transactionMessageWithComputeUnitPrice : transactionMessage
 	);
 
 	progress(ProgressStepsSendSol.SEND);

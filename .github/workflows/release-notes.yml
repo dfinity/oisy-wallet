@@ -8,14 +8,20 @@ on:
       - v*
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   release_notes:
     if: github.ref_type == 'tag'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Publish Release Notes
         uses: ./.github/actions/release-notes

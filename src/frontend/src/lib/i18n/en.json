@@ -7,18 +7,23 @@
 			"back": "Back",
 			"done": "Done",
 			"close": "Close",
+			"change": "Change",
+			"apply": "Apply",
 			"refresh": "Refresh",
 			"name": "Name",
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
+			"destination": "Destination",
 			"reject": "Reject",
 			"approve": "Approve",
 			"view": "View",
 			"copy": "Copy",
 			"clear_filter": "Clear filter",
-			"not_available": "n/a"
+			"not_available": "n/a",
+			"new": "New",
+			"edit": "Edit"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -46,7 +51,8 @@
 			"documentation": "Documentation",
 			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
-			"vip_qr_code": "VIP QR codes"
+			"vip_qr_code": "VIP QR codes",
+			"refer_a_friend": "Refer your friends"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -60,7 +66,8 @@
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
-			"vip_qr_code": "Generate an invitation link"
+			"vip_qr_code": "Generate an invitation link",
+			"refer_a_friend": "Generate a referral link for a friend"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -119,15 +126,16 @@
 			"website": "Image of $dAppName"
 		}
 	},
-	"airdrops": {
+	"rewards": {
 		"text": {
 			"title": "Rewards",
 			"active_campaigns": "Active Opportunities",
 			"upcoming_campaigns": "Upcoming Opportunities",
-			"active_date": "Due on",
-			"participate_title": "How to participate",
+			"active_date": "Ends on",
+			"participate_title": "Earn BTC by staying active - and now by inviting others.",
 			"share": "Share on X",
 			"learn_more": "Learn more",
+			"check_status": "Check Status & Eligibility",
 			"requirements_title": "Requirements",
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
@@ -139,10 +147,12 @@
 			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
 			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
 			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
-			"carousel_slide_cta": "Learn more"
+			"carousel_slide_cta": "Learn more",
+			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
+			"youre_eligible": "You're eligible!"
 		},
 		"alt": {
-			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
+			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop."
 		}
 	},
 	"footer": {
@@ -179,6 +189,9 @@
 			"securing_session": "Securing session with Internet Identity",
 			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum and Solana",
 			"done": "Enjoy $oisy_short"
+		},
+		"alt": {
+			"loader_banner": "Loading initial data for $oisy_name (theme $theme)"
 		},
 		"info": {
 			"hold_loading": "Hold tight, we are loading some information...",
@@ -236,12 +249,19 @@
 	"settings": {
 		"text": {
 			"title": "Settings",
+			"general": "General",
 			"principal": "Your Principal",
 			"principal_copied": "Principal copied to clipboard",
 			"principal_description": "Your ID for the $oisy_name. Created by your Internet Identity.",
-			"session": "Your session expires in",
+			"session_duration": "Session duration",
+			"session_expires_in": "Expires in",
 			"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
-			"testnets": "Show test networks",
+			"networks": "Networks",
+			"enable_testnets": "Enable test networks",
+			"active_networks": "Active networks ",
+			"active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions from inactive networks will not show or be included in your available balance.",
+			"enable_network": "Enable network",
+			"disable_network": "Disable network",
 			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
 			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance.",
 			"credentials_title": "Credentials",
@@ -252,7 +272,10 @@
 			"appearance": "Appearance",
 			"appearance_light": "Light",
 			"appearance_dark": "Dark",
-			"appearance_system": "System"
+			"appearance_system": "System",
+			"git_disclaimer": "For development purpose, we show the branch and the commit only in test canisters.",
+			"git_branch_name": "Branch:",
+			"git_commit_hash": "Commit:"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -269,8 +292,12 @@
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
 		"more": "More networks coming soon...",
-		"chain_fusion": "Chain Fusion (all networks)",
-		"network": "Network"
+		"chain_fusion": "All networks",
+		"network": "Network",
+		"testnet": "Testnet",
+		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled",
+		"filter": "Filter networks",
+		"manage": "Manage networks"
 	},
 	"receive": {
 		"text": {
@@ -370,7 +397,9 @@
 			"initializing_transaction": "Initializing transaction",
 			"convert_to_native_icp": "Convert to native ICP",
 			"open_qr_modal": "Start QR Code scan for transaction details",
-			"scan_qr": "Scan QR Code"
+			"scan_qr": "Scan QR Code",
+			"select_token": "Select token to send",
+			"select_network_filter": "Select network filter"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
@@ -382,16 +411,17 @@
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
-			"no_available_utxos": "You won't have available utxos to perform this transaction.",
-			"ata_will_be_calculated": "You provided a non-ATA address. The ATA address will be calculated automatically based on your input."
+			"no_available_utxos": "You won't have available utxos to perform this transaction."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
 			"insufficient_funds": "Insufficient funds.",
 			"unknown_minimum_ckbtc_amount": "The minimum amount of ckBTC required for converting to BTC is unknown.",
 			"unknown_minimum_cketh_amount": "The minimum amount of ckETH required for converting to ETH is unknown.",
+			"unknown_minimum_amount": "The minimum amount of $sourceTokenSymbol required for converting to $destinationTokenSymbol is unknown.",
 			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
 			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
+			"minimum_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
 			"minimum_ledger_fees": "The amount falls below the ledger fees $symbol.",
 			"minimum_cketh_balance": "The $symbol balance falls below the estimated fee of $amount.",
 			"unknown_cketh": "The ckETH token cannot be retrieved.",
@@ -432,6 +462,8 @@
 	"convert": {
 		"text": {
 			"converting": "Converting...",
+			"conversion_destination": "Conversion destination",
+			"default_destination": "Your OISY Wallet",
 			"convert_to_btc": "Convert to BTC",
 			"convert_to_ckbtc": "Convert to ckBTC",
 			"convert_to_token": "Convert to $token",
@@ -440,7 +472,7 @@
 			"convert_eth_to_cketh": "Convert $token to $ckToken",
 			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes",
 			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes",
-			"how_to_convert_eth_to_cketh": "Here is how to can convert $token to $ckToken on $oisy_name",
+			"how_to_convert_eth_to_cketh": "Here is how you can convert $token to $ckToken on $oisy_name",
 			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
 			"set_amount": "Set amount for conversion",
@@ -460,7 +492,9 @@
 			"initializing": "Initializing transaction...",
 			"refreshing_ui": "Refreshing UI",
 			"unsupported_token_conversion": "Conversion for the selected token is not supported.",
-			"calculating_max_amount": "Calculating..."
+			"calculating_max_amount": "Calculating...",
+			"send_to": "Send converted assets to",
+			"custom_destination": "Another address"
 		},
 		"assertion": {
 			"insufficient_funds": "Insufficient balance"
@@ -497,7 +531,10 @@
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
 			"refreshing_ui": "Refreshing UI",
-			"swap_provider": "Swap provider"
+			"swap_provider": "Swap provider",
+			"swap_route": "Swap route",
+			"included_network_fees": "Included network fees",
+			"included_liquidity_fees": "Included liquidity pool fees"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -524,6 +561,8 @@
 			"hide_zero_balances": "Hide zero balances",
 			"hide_zeros": "Hide zeros",
 			"all_tokens_with_zero_hidden": "All assets with zero balance are currently hidden",
+			"filter_nothing_found": "Oops, nothing found",
+			"filter_nothing_found_description": "Type token ticker or name to filter list",
 			"buy_or_receive": "Buy or receive your first tokens now to see them in the list",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
@@ -532,7 +571,10 @@
 			"select_token": "Select token",
 			"exchange_is_not_available": "USD value is currently not available.",
 			"source_token_title": "You pay",
-			"destination_token_title": "You receive"
+			"destination_token_title": "You receive",
+			"chain_key": "Chain Key",
+			"show_more_networks": "Show $number more networks",
+			"hide_more_networks": "Hide more networks"
 		},
 		"details": {
 			"title": "Token details",
@@ -585,7 +627,8 @@
 		"manage": {
 			"text": {
 				"title": "Manage tokens",
-				"manage_list": "Manage list",
+				"manage_list": "Manage tokens",
+				"list_settings": "List settings",
 				"do_not_see_import": "Don’t see your token? Import",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
@@ -647,7 +690,7 @@
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
 			"estimated_eth": "Estimated Ethereum Fee",
-			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>:",
+			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>",
 			"convert_fee": "Conversion fee",
 			"convert_inter_network_fee": "Inter-network fee",
 			"convert_btc_network_fee": "Bitcoin network fee",
@@ -789,8 +832,7 @@
 		},
 		"error": {
 			"get_block_number": "Cannot get block number.",
-			"failed_get_transaction": "Failed to get the transaction from the provided (hash: $hash). Please reload the wallet dapp.",
-			"failed_get_mined_transaction": "Failed to get the mined transaction (hash: $hash). Please reload the wallet dapp."
+			"failed_get_transaction": "Failed to get the transaction from the provided (hash: $hash). Please reload the wallet dapp."
 		}
 	},
 	"transactions": {
@@ -802,7 +844,8 @@
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
 			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
-			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual."
+			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
+			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history."
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
@@ -811,7 +854,9 @@
 			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists.",
 			"loading_pending_ck_ethereum_transactions": "Something went wrong while fetching the pending $network transactions.",
 			"get_transaction_for_hash": "Failed to get the transaction from the provided (hash: $hash).",
-			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash."
+			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash.",
+			"loading_token_with_network": "The token $token on the $network network could not be loaded because it's not in your token list.",
+			"loading_token": "The provided link to a token is invalid."
 		}
 	},
 	"about": {
@@ -870,6 +915,31 @@
 				"generate_new_link": "Generate new link",
 				"generating_new_code": "Generating new code",
 				"regenerate_countdown_text": "New link will be generated in $counter sec"
+			}
+		}
+	},
+	"referral": {
+		"invitation": {
+			"text": {
+				"title": "Refer a friend",
+				"referral_link_copied": "Referral link copied to clipboard.",
+				"information": "Get bonus sprinkles, every time your friends receive one!",
+				"not_referred_yet": "You haven't referred anyone yet",
+				"referred_amount": "You already referred $amount people",
+				"learn_more": "Learn more"
+			},
+			"error": {
+				"loading_referrer_info": "Error while loading referral info",
+				"setting_referrer": "Error while setting referrer"
+			}
+		},
+		"reward": {
+			"text": {
+				"title": "Congratulations!",
+				"content_title": "Here a small thank you",
+				"content_text": "One of your referred users just got some sprinkles.",
+				"share": "Share on X",
+				"open_wallet": "Take me to the wallet"
 			}
 		}
 	},

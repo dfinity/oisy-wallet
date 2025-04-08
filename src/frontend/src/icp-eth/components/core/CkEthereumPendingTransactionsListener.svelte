@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish, isEmptyString, fromNullishNullable } from '@dfinity/utils';
-	import type { TransactionResponse } from '@ethersproject/abstract-provider';
+	import type { TransactionResponse } from 'ethers/providers';
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import {
-		ckEthereumNativeToken,
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
@@ -61,7 +60,7 @@
 
 		// We keep track of what balance was used to fetch the pending transactions to avoid triggering unnecessary reload.
 		// In addition, a transaction might be emitted by the socket (Alchemy) as pending but, might require a few extra time to be delivered as pending by the API (Ehterscan) which can lead to a "race condition" where a pending transaction is displayed and then hidden few seconds later.
-		if (nonNullish(loadBalance) && nonNullish($balance) && loadBalance.eq($balance)) {
+		if (nonNullish(loadBalance) && nonNullish($balance) && loadBalance === $balance) {
 			return;
 		}
 
@@ -121,10 +120,7 @@
 	$: toContractAddress =
 		$ckEthereumTwinTokenStandard === 'erc20'
 			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '')
-			: (toCkEthHelperContractAddress({
-					minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					networkId: $ckEthereumNativeToken.network.id
-				}) ?? '');
+			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '');
 
 	$: (async () =>
 		await init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();

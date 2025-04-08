@@ -6,8 +6,7 @@ import * as solanaApi from '$sol/api/solana.api';
 import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
 import * as solAddressUtils from '$sol/utils/sol-address.utils';
-import en from '$tests/mocks/i18n.mock';
-import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -97,20 +96,6 @@ describe('SolSendForm', () => {
 			);
 
 			vi.spyOn(solAddressUtils, 'isAtaAddress').mockResolvedValue(true);
-		});
-
-		it('should warn the user if the destination is not an ATA address', async () => {
-			vi.spyOn(solAddressUtils, 'isAtaAddress').mockResolvedValue(false);
-
-			const { getByText } = render(SolSendForm, {
-				props: { ...props, destination: mockSolAddress2 },
-				context: mockContext
-			});
-
-			// Wait for the warning to be displayed
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-
-			expect(getByText(en.send.info.ata_will_be_calculated)).toBeInTheDocument();
 		});
 
 		it('should not render ATA creation fee if the destination is empty', () => {

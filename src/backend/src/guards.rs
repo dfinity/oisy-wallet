@@ -11,6 +11,15 @@ pub fn caller_is_not_anonymous() -> Result<(), String> {
     }
 }
 
+pub fn caller_is_controller() -> Result<(), String> {
+    let caller = caller();
+    if is_controller(&caller) {
+        Ok(())
+    } else {
+        Err("Caller is not a controller.".to_string())
+    }
+}
+
 pub fn caller_is_allowed() -> Result<(), String> {
     let caller = caller();
     if read_config(|s| s.allowed_callers.contains(&caller)) || is_controller(&caller) {

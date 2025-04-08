@@ -1,7 +1,7 @@
 {
 	"rustup": {
 		"method": "curl",
-		"version": "1.25.2",
+		"version": "1.28.1",
 		"url": "https://raw.githubusercontent.com/rust-lang/rustup/${VERSION}/rustup-init.sh",
 		"pipe": [["sh"]]
 	},
@@ -13,6 +13,9 @@
 		"method": "curl",
 		"version": "0.4.0",
 		"url": "https://github.com/dfinity/candid/releases/download/2024-07-29/didc-linux64"
+	},
+	"shellcheck": {
+		"method": "apt"
 	},
 	"shfmt": {
 		"method": "go",
@@ -51,5 +54,9 @@
 	"candid-extractor": {
 		"method": "cargo-binstall",
 		"version": "0.1.4"
+	},
+	"zizmor": {
+		"method": "cargo-binstall",
+		"version": "1.5.2"
 	}
 }

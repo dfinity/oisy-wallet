@@ -8,7 +8,7 @@
 		TRACK_COUNT_CAROUSEL_NEXT,
 		TRACK_COUNT_CAROUSEL_PREVIOUS
 	} from '$lib/constants/analytics.contants';
-	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
+	import { CAROUSEL_CONTAINER, CAROUSEL_SLIDE } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
@@ -95,9 +95,6 @@
 			clearTimers();
 			return;
 		}
-
-		// Clean previous HTML if the frame is being re-built (e.g. in case of window resize)
-		sliderFrame.innerHTML = '';
 
 		extendCarouselSliderFrame({
 			sliderFrame,
@@ -280,12 +277,12 @@
 
 <div
 	data-tid={CAROUSEL_CONTAINER}
-	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pb-10 pt-3 shadow-sm`}
+	class={`carousel-container ${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pb-10 pt-3 shadow-sm`}
 	class:pb-3={nonNullish(slides) && slides.length <= 1}
 	out:slide={SLIDE_PARAMS}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
-		<div data-tid="carousel-slide" class="flex" bind:this={sliderFrame}>
+		<div data-tid={CAROUSEL_SLIDE} class="flex" bind:this={sliderFrame} style="width: 9999px">
 			<slot />
 		</div>
 	</div>

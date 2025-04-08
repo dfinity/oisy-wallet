@@ -5,13 +5,17 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   format:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@3ff1caaa28b64c9cc276ce0a02e2ff584f3900c5 # v2.0.2
         continue-on-error: true
         id: app-token
         with:
@@ -20,17 +24,22 @@ jobs:
       - name: Check if commits can be added
         id: check_can_add_commit
         run: |
-          echo "can_add_commit=${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
-      - name: Checkout
+          echo "can_add_commit=$CAN_ADD_COMMIT" >> $GITHUB_OUTPUT
+        env:
+          CAN_ADD_COMMIT: ${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}
+      - name: Checkout for pull request
         if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
       - name: Checkout
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Format
@@ -45,11 +54,10 @@ jobs:
           fi
       - name: Commit format
         if: steps.check_changes.outputs.changes_detected == 'true'
-        uses: EndBug/add-and-commit@v9
+        uses: ./.github/actions/add-and-commit
         with:
-          add: .
-          default_author: github_actions
           message: '🤖 Apply formatting changes'
+          token: ${{ steps.app-token.outputs.token }}
       - name: Fail for formatting issues without personal access token
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
         run: |
@@ -58,10 +66,14 @@ jobs:
 
   lint:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Lint
@@ -69,10 +81,14 @@ jobs:
 
   check:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Check
@@ -80,25 +96,53 @@ jobs:
 
   test:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Test
-        run: npm run test
+        run: npm run test:coverage
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: vitest-coverage-report
+          path: coverage/
+          retention-days: 3
+
+  config:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Prepare
+        uses: ./.github/actions/prepare
+      - name: Install dfx
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
+      - name: Check ic-domains
+        run: scripts/build.ic-domains.test
 
   may-merge:
     if: always()
-    needs: ['format', 'lint', 'check', 'test']
+    needs: ['format', 'lint', 'check', 'test', 'config']
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - name: Cleared for merging
-        run: |
-          if [ "${{ needs.format.result }}" == "success" ] && [ "${{ needs.lint.result }}" == "success" ] && [ "${{ needs.check.result }}" == "success" ] && [ "${{ needs.test.result }}" == "success" ]; then
-            echo "This PR is cleared for merging"
-          else
-            echo "This PR is not cleared for merging"
-            exit 1
-          fi
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/needs_success
+        with:
+          needs: '${{ toJson(needs) }}'

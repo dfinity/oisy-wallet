@@ -3,8 +3,8 @@ import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';
 import { decodeQrCode } from '$eth/utils/qr-code.utils';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { get } from 'svelte/store';
 import type { MockedFunction } from 'vitest';
 
@@ -18,7 +18,7 @@ describe('decodeQrCode', () => {
 	const amount = 1.23;
 	const urn = 'some-urn';
 
-	testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+	setupTestnetsStore('enabled');
 	const otherProps = {
 		expectedToken: token,
 		ethereumTokens: get(enabledEthereumTokens),
@@ -53,8 +53,8 @@ describe('decodeQrCode', () => {
 	it('should return { status: "token_incompatible" } when tokens do not match', () => {
 		const payment = {
 			prefix: `not-${token.symbol}`,
-			destination: destination,
-			amount: amount
+			destination,
+			amount
 		};
 		mockDecodeQrCodeUrn.mockReturnValue(payment);
 
@@ -71,7 +71,7 @@ describe('decodeQrCode', () => {
 	it('should return { status: "success", destination, token, amount } when everything matches', () => {
 		const payment = {
 			prefix: 'ethereum',
-			destination: destination,
+			destination,
 			value: amount * 10 ** token.decimals,
 			ethereumChainId: (token.network as EthereumNetwork).chainId.toString()
 		};
@@ -84,9 +84,9 @@ describe('decodeQrCode', () => {
 		});
 		expect(response).toEqual({
 			status: 'success',
-			destination: destination,
+			destination,
 			symbol: token.symbol,
-			amount: amount
+			amount
 		});
 
 		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);

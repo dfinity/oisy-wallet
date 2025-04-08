@@ -4,14 +4,14 @@ import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import type { SolanaNetworkType } from '$sol/types/network';
-import { address as solAddress } from '@solana/addresses';
 import {
 	assertIsTransactionPartialSigner,
 	assertIsTransactionSigner,
+	address as solAddress,
 	type SignatureDictionary,
+	type Transaction,
 	type TransactionPartialSigner
-} from '@solana/signers';
-import type { Transaction } from '@solana/transactions';
+} from '@solana/kit';
 
 interface CreateSignerParams {
 	identity: OptionIdentity;
@@ -42,7 +42,9 @@ const signTransactions = async ({
 	transactions,
 	address,
 	network
-}: CreateSignerParams & { transactions: Transaction[] }): Promise<SignatureDictionary[]> =>
+}: CreateSignerParams & {
+	transactions: Transaction[];
+}): Promise<SignatureDictionary[]> =>
 	await Promise.all(
 		transactions.map(
 			async (transaction) => await signTransaction({ identity, transaction, address, network })
