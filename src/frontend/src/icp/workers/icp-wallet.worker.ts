@@ -12,7 +12,7 @@ import type {
 } from '@dfinity/ledger-icp';
 import { isNullish } from '@dfinity/utils';
 
-const getTransactions = ({
+const getBalanceAndTransactions = ({
 	identity,
 	certified
 }: SchedulerJobParams<PostMessageDataRequest>): Promise<GetAccountIdentifierTransactionsResponse> =>
@@ -40,7 +40,7 @@ const initIcpWalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTrans
 	PostMessageDataRequest
 > =>
 	new IcWalletBalanceAndTransactionsScheduler(
-		getTransactions,
+		getBalanceAndTransactions,
 		mapTransactionIcpToSelf,
 		mapTransaction,
 		'syncIcpWallet'

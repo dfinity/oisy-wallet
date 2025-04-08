@@ -26,11 +26,17 @@ import {
 } from '@dfinity/ledger-icrc';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 
+type GetTransactions = IcrcIndexNgGetTransactions;
+
+type GetBalance = bigint;
+
+type GetBalanceAndTransactions = Omit<GetTransactions, 'balance'> & { balance: GetBalance };
+
 const getTransactions = ({
 	identity,
 	certified,
 	data
-}: SchedulerJobParams<PostMessageDataRequestIcrcStrict>): Promise<IcrcIndexNgGetTransactions> => {
+}: SchedulerJobParams<PostMessageDataRequestIcrcStrict>): Promise<GetTransactions> => {
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
 
 	return getTransactionsApi({
@@ -68,7 +74,7 @@ const getBalance = ({
 	identity,
 	certified,
 	data
-}: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<bigint> => {
+}: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<GetBalance> => {
 	assertNonNullish(data, 'No data - ledgerIndexCanister - provided to fetch balance.');
 
 	return balance({
@@ -79,16 +85,20 @@ const getBalance = ({
 	});
 };
 
-const getTransactionsWithLedgerBalance = async (
+// The errors raised by this function are handled directly in the scheduler.
+// If loading the transactions fails, the scheduler restarts using only the Ledger canister.
+// If loading the balance fails, the same happens, and we don't load the transactions anymore.
+// It was deemed not relevant, since the balance is more important than the transactions, and the new balance-only scheduler will handle any errors from that point.
+const getBalanceAndTransactions = async (
 	params: SchedulerJobParams<PostMessageDataRequestIcrcStrict>
-): Promise<IcrcIndexNgGetTransactions> => {
+): Promise<GetBalanceAndTransactions> => {
 	const balance = await getBalance(params);
 
 	// Ignoring the balance from the transactions' response.
 	// Even if it could cause some sort of lagged inconsistency, we prefer to always show the latest balance, in case the Index canister is not properly working.
-	const transactions = await getTransactions(params);
+	const { balance: _, ...rest } = await getTransactions(params);
 
-	return { ...transactions, balance };
+	return { ...rest, balance };
 };
 
 const MSG_SYNC_ICRC_WALLET = 'syncIcrcWallet';
@@ -99,7 +109,7 @@ const initIcrcWalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTran
 	PostMessageDataRequestIcrcStrict
 > =>
 	new IcWalletBalanceAndTransactionsScheduler(
-		getTransactionsWithLedgerBalance,
+		getBalanceAndTransactions,
 		mapTransactionIcrcToSelf,
 		mapTransaction,
 		MSG_SYNC_ICRC_WALLET
