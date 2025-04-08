@@ -83,6 +83,15 @@ export type AllowSigningError =
 	| { PowChallenge: ChallengeCompletionError }
 	| { Other: string }
 	| { FailedToContactCyclesLedger: null };
+export interface AllowSigningRequest {
+	nonce: bigint;
+}
+export interface AllowSigningResponse {
+	status: AllowSigningStatus;
+	challenge_completion: [] | [ChallengeCompletion];
+	allowed_cycles: bigint;
+}
+export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type ApproveError =
 	| {
@@ -134,6 +143,12 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array | number[]];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
+export interface ChallengeCompletion {
+	solved_duration_ms: bigint;
+	next_allowance_ms: bigint;
+	next_difficulty: number;
+	current_difficulty: number;
+}
 export type ChallengeCompletionError =
 	| { InvalidNonce: null }
 	| { MissingChallenge: null }
@@ -304,7 +319,7 @@ export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: null } | { Err: AddDappSettingsError };
 export type Result_10 = { Ok: null } | { Err: SaveTestnetsSettingsError };
 export type Result_11 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
-export type Result_2 = { Ok: null } | { Err: AllowSigningError };
+export type Result_2 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type Result_3 = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type Result_4 =
 	| { Ok: BtcGetPendingTransactionsReponse }
@@ -450,7 +465,7 @@ export interface Utxo {
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result_1>;
-	allow_signing: ActorMethod<[], Result_2>;
+	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], Result_2>;
 	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_3>;
 	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_4>;
 	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_5>;
