@@ -2,7 +2,7 @@ import type { BtcTransactionUi } from '$btc/types/btc';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import {
-	TransactionIdSchema,
+	type TransactionIdSchema,
 	type TransactionStatusSchema,
 	type TransactionTypeSchema
 } from '$lib/schema/transaction.schema';
@@ -11,7 +11,7 @@ import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse as AlchemyTransactionResponse } from 'alchemy-sdk';
 import type { FeeData } from 'ethers/providers';
 import type { Transaction as EthersTransactionLib } from 'ethers/transaction';
-import * as z from 'zod';
+import type * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
