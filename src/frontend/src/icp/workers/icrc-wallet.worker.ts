@@ -32,7 +32,7 @@ type GetBalance = bigint;
 
 type GetBalanceAndTransactions = Omit<GetTransactions, 'balance'> & { balance: GetBalance };
 
-const getTransactions = ({
+const getBalanceAndTransactions = ({
 	identity,
 	certified,
 	data
