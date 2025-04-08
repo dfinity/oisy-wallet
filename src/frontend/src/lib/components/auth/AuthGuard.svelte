@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
+	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import LandingPage from '$lib/components/auth/LandingPage.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
-	import {modalAuthHelp} from "$lib/derived/modal.derived";
-	import AuthHelpModal from "$lib/components/auth/AuthHelpModal.svelte";
+	import { modalAuthHelp } from '$lib/derived/modal.derived';
 </script>
 
 {#if $authNotSignedIn}
