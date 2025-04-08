@@ -866,6 +866,20 @@ pub async fn step_migration() {
     };
 }
 
+/// Gets account creation timestamps.
+#[query(guard = "caller_is_allowed")]
+#[must_use]
+pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
+    read_state(|s| {
+        s.user_profile
+            .iter()
+            .map(|((_updated, StoredPrincipal(principal)), user)| {
+                (principal, user.created_timestamp)
+            })
+            .collect()
+    })
+}
+
 /// Saves a snapshot of the user's account.
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)] // Canister API methods are always pass by value.

@@ -473,6 +473,7 @@ export interface _SERVICE {
 	config: ActorMethod<[], Config>;
 	create_pow_challenge: ActorMethod<[], Result_6>;
 	create_user_profile: ActorMethod<[], UserProfile>;
+	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_snapshot: ActorMethod<[], [] | [UserSnapshot]>;
 	get_user_profile: ActorMethod<[], Result_7>;

@@ -526,6 +526,11 @@ export const idlFactory = ({ IDL }) => {
 		config: IDL.Func([], [Config], ['query']),
 		create_pow_challenge: IDL.Func([], [Result_6], []),
 		create_user_profile: IDL.Func([], [UserProfile], []),
+		get_account_creation_timestamps: IDL.Func(
+			[],
+			[IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))],
+			['query']
+		),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)], ['query']),
 		get_user_profile: IDL.Func([], [Result_7], ['query']),

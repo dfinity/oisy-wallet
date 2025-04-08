@@ -444,6 +444,9 @@ service : (Arg) -> {
   config : () -> (Config) query;
   create_pow_challenge : () -> (Result_6);
   create_user_profile : () -> (UserProfile);
+  get_account_creation_timestamps : () -> (
+      vec record { principal; nat64 },
+    ) query;
   get_canister_status : () -> (CanisterStatusResultV2);
   get_snapshot : () -> (opt UserSnapshot) query;
   get_user_profile : () -> (Result_7) query;
