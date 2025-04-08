@@ -630,14 +630,19 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				);
 			};
 
-			const initErrorMock = (err: Error) =>
-				indexCanisterMock.getTransactions.mockRejectedValue(err);
+			initOtherScenarios({
+				initScheduler: initIcrcWalletScheduler,
+				startData,
+				initCleanupMock,
+				initErrorMock: (err: Error) => ledgerCanisterMock.balance.mockRejectedValue(err),
+				msg: 'syncIcrcWallet'
+			});
 
 			initOtherScenarios({
 				initScheduler: initIcrcWalletScheduler,
 				startData,
 				initCleanupMock,
-				initErrorMock,
+				initErrorMock: (err: Error) => indexCanisterMock.getTransactions.mockRejectedValue(err),
 				msg: 'syncIcrcWallet'
 			});
 		});
