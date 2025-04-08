@@ -4,7 +4,7 @@ import {
 	ETHERSCAN_API_URL_SEPOLIA,
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
-import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
+import { BASESCAN_API_URL } from '$env/rest/etherscan.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EtherscanRestTransaction } from '$eth/types/etherscan-transaction';
 import { i18n } from '$lib/stores/i18n.store';
@@ -33,7 +33,7 @@ export class EtherscanRest {
 		url.searchParams.set('startblock', '0');
 		url.searchParams.set('endblock', '99999999');
 		url.searchParams.set('sort', 'desc');
-		url.searchParams.set('apikey', ETHERSCAN_API_KEY);
+		url.searchParams.set('apikey', BASESCAN_API_URL);
 
 		// https://docs.etherscan.io/v/sepolia-etherscan
 		// https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address
