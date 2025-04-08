@@ -27,9 +27,13 @@
 
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
-	const isDisabled = (): boolean =>
+	let isNetworkDisabled = false;
+	$: isNetworkDisabled =
 		(nativeTokenId === ETHEREUM_TOKEN_ID && $networkEthereumDisabled) ||
-		(nativeTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaDisabled) ||
+		(nativeTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaDisabled);
+
+	const isDisabled = (): boolean =>
+		isNetworkDisabled ||
 		$ethAddressNotLoaded ||
 		// We can convert to ETH - i.e. we can convert to Ethereum or Sepolia, not an ERC20 token
 		isNotSupportedEthTokenId(nativeTokenId) ||
@@ -77,7 +81,7 @@
 <CkEthLoader {nativeTokenId}>
 	<ButtonHero
 		on:click={async () => await openConvert()}
-		disabled={$isBusy || $outflowActionsDisabled}
+		disabled={isNetworkDisabled || $isBusy || $outflowActionsDisabled}
 		{ariaLabel}
 	>
 		<slot name="icon" slot="icon" />
