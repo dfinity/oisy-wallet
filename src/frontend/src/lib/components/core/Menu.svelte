@@ -79,7 +79,7 @@
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl" on:click={hidePopover}>
-	<div class="flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
+	<div class="max-w-68 flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
