@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import helpAuthIdentityBanner from '$lib/assets/help-auth-identity-banner.svg';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { TRACK_COUNT_LEGACY_SIGN_IN_CLICK } from '$lib/constants/analytics.contants';
+	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { HELP_AUTH_IDENTITY_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import {OISY_DOCS_URL} from "$lib/constants/oisy.constants";
-	import Button from "$lib/components/ui/Button.svelte";
-	import {trackEvent} from "$lib/services/analytics.services";
-	import {TRACK_COUNT_LEGACY_SIGN_IN_CLICK} from "$lib/constants/analytics.contants";
-	import {signIn} from "$lib/services/auth.services";
 
 	export let onBack: () => void;
 	export let onDone: () => void;
@@ -25,7 +25,7 @@
 		});
 
 		onDone();
-		await signIn({domain: "ic0.app"});
+		await signIn({ domain: 'ic0.app' });
 	};
 </script>
 
@@ -45,7 +45,9 @@
 				{$i18n.auth.help.text.identity_legacy_description}
 			</p>
 			<p>
-				<Button link on:click={onLegacySignIn()}>{$i18n.auth.help.text.identity_legacy_sign_in}</Button>
+				<Button link on:click={onLegacySignIn()}
+					>{$i18n.auth.help.text.identity_legacy_sign_in}</Button
+				>
 			</p>
 			<p class="mb-0">
 				<ExternalLink
