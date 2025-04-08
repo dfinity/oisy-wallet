@@ -1,7 +1,7 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index-ng.api';
 import { balance } from '$icp/api/icrc-ledger.api';
+import { IcWalletBalanceAndTransactionsScheduler } from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
 import { IcWalletBalanceScheduler } from '$icp/schedulers/ic-wallet-balance.scheduler';
-import { IcWalletTransactionsScheduler } from '$icp/schedulers/ic-wallet-transactions.scheduler';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
@@ -81,12 +81,12 @@ const getBalance = ({
 
 const MSG_SYNC_ICRC_WALLET = 'syncIcrcWallet';
 
-const initIcrcWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
+const initIcrcWalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTransactionsScheduler<
 	IcrcTransaction,
 	IcrcTransactionWithId,
 	PostMessageDataRequestIcrcStrict
 > =>
-	new IcWalletTransactionsScheduler(
+	new IcWalletBalanceAndTransactionsScheduler(
 		getTransactions,
 		mapTransactionIcrcToSelf,
 		mapTransaction,
@@ -103,7 +103,7 @@ export const initIcrcWalletScheduler = (
 	const { success: withIndexCanister } = PostMessageDataRequestIcrcStrictSchema.safeParse(data);
 
 	return withIndexCanister
-		? initIcrcWalletTransactionsScheduler()
+		? initIcrcWalletBalanceAndTransactionsScheduler()
 		: initIcrcWalletBalanceScheduler();
 };
 
