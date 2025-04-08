@@ -21,8 +21,8 @@ export const ETHERSCAN_NETWORK_SEPOLIA: Networkish = 'base-sepolia';
 export const ETHERSCAN_API_URL_HOMESTEAD = 'https://api.etherscan.io/api';
 export const ETHERSCAN_API_URL_SEPOLIA = 'https://api-sepolia.etherscan.io/api';
 
-export const ALCHEMY_JSON_RPC_URL_MAINNET = 'https://eth-mainnet.g.alchemy.com/v2';
-export const ALCHEMY_JSON_RPC_URL_SEPOLIA = 'https://eth-sepolia.g.alchemy.com/v2';
+export const ALCHEMY_JSON_RPC_URL_MAINNET = 'https://base-mainnet.g.alchemy.com/v2';
+export const ALCHEMY_JSON_RPC_URL_SEPOLIA = 'https://base-sepolia.g.alchemy.com/v2';
 
 export const ALCHEMY_NETWORK_MAINNET: Network = Network.BASE_MAINNET;
 export const ALCHEMY_NETWORK_SEPOLIA: Network = Network.BASE_SEPOLIA;
