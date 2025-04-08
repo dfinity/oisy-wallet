@@ -42,6 +42,6 @@
     {:else if currentStep?.name === WizardStepsAuthHelp.HELP_IDENTITY}
         <AuthHelpIdentityForm {onBack} onDone={close} />
     {:else if currentStep?.name === WizardStepsAuthHelp.HELP_OTHERS}
-        <AuthHelpOtherForm />
+        <AuthHelpOtherForm {onBack} onDone={close} />
     {/if}
 </WizardModal>
