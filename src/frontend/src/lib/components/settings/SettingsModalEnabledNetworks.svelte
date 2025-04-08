@@ -164,6 +164,7 @@
 		<ButtonCloseModal />
 		<Button
 			loading={saveLoading}
+			loadingAsSkeleton={false}
 			colorStyle="primary"
 			on:click={save}
 			disabled={!isModified || saveLoading || $isBusy}

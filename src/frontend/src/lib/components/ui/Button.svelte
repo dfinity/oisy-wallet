@@ -5,6 +5,7 @@
 	export let type: 'submit' | 'reset' | 'button' = 'submit';
 	export let disabled = false;
 	export let loading = false;
+	export let loadingAsSkeleton = true;
 	export let fullWidth = false;
 	export let link = false;
 	export let paddingSmall = false;
@@ -34,8 +35,8 @@
 		class:transition={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
-		class:invisible={loading}
-		aria-hidden={loading}
+		class:invisible={loading && loadingAsSkeleton}
+		aria-hidden={loading && loadingAsSkeleton}
 	>
 		<slot />
 	</span>
