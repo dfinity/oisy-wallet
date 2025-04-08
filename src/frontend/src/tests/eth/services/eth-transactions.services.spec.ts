@@ -3,8 +3,8 @@ import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import type { EtherscanRest } from '$eth/rest/etherscan.rest';
 import * as foo from '$eth/rest/etherscan.rest';
-import { EtherscanRest } from '$eth/rest/etherscan.rest';
 import {
 	loadEthereumTransactions,
 	reloadEthereumTransactions
@@ -19,6 +19,12 @@ import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
+
+// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider };
+});
 
 vi.mock('$eth/rest/etherscan.rest', () => ({
 	etherscanRests: vi.fn()
