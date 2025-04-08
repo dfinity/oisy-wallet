@@ -9,7 +9,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { TRACK_COUNT_LEGACY_SIGN_IN_CLICK } from '$lib/constants/analytics.contants';
-	import {OISY_FIND_INTERNET_IDENTITY_URL} from '$lib/constants/oisy.constants';
+	import { OISY_FIND_INTERNET_IDENTITY_URL } from '$lib/constants/oisy.constants';
 	import {
 		HELP_AUTH_BACK_BUTTON,
 		HELP_AUTH_DONE_BUTTON,
