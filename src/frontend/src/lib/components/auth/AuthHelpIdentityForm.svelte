@@ -31,12 +31,12 @@
 				{$i18n.auth.help.text.identity_legacy_description}
 			</p>
 			<p>
-				<ExternalLink iconVisible={false} styleClass="font-semibold" ariaLabel="" href="">
+				<ExternalLink iconVisible={false} styleClass="font-semibold" ariaLabel={$i18n.auth.help.alt.identity_legacy_sign_in} href="">
 					{$i18n.auth.help.text.identity_legacy_sign_in}
 				</ExternalLink>
 			</p>
 			<p class="mb-0">
-				<ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel="" href="">
+				<ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel={$i18n.auth.help.alt.identity_learn_more} href="">
 					{replaceOisyPlaceholders($i18n.auth.help.text.identity_learn_more)}
 				</ExternalLink>
 			</p>

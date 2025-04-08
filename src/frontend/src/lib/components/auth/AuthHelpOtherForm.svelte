@@ -21,22 +21,22 @@
 			<Html text={replaceOisyPlaceholders($i18n.auth.help.text.other_description)} />
 		</p>
 		<p>
-			<ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel="" href="">
+			<ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_introduction)} href="">
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_introduction)}
 			</ExternalLink>
 		</p>
 		<p>
-			<ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel="" href="">
+			<ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_docs)} href="">
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_docs)}
 			</ExternalLink>
 		</p>
 		<p>
-			<ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel="" href="">
+			<ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel={$i18n.auth.help.alt.other_private_key} href="">
 				{$i18n.auth.help.text.other_private_key}
 			</ExternalLink>
 		</p>
 		<p class="mb-0">
-			<ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel="" href="">
+			<ExternalLink styleClass="font-semibold flex flex-row-reverse" ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_asset_control)} href="">
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_asset_control)}
 			</ExternalLink>
 		</p>
