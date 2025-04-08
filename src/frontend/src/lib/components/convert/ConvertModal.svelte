@@ -19,7 +19,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	export let sourceToken: Token;
 	export let destinationToken: Token;
@@ -67,7 +67,7 @@
 		});
 
 	const goToStep = (stepName: WizardStepsConvert) =>
-		goToWizardSendStep({
+		goToWizardStep({
 			modal,
 			steps,
 			stepName

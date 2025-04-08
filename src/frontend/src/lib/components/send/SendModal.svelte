@@ -23,7 +23,7 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
@@ -86,7 +86,7 @@
 	};
 
 	const goToStep = (stepName: WizardStepsSend) =>
-		goToWizardSendStep({
+		goToWizardStep({
 			modal,
 			steps,
 			stepName
@@ -130,13 +130,13 @@
 			on:icNext={modal.next}
 			on:icClose={close}
 			on:icQRCodeScan={() =>
-				goToWizardSendStep({
+				goToWizardStep({
 					modal,
 					steps,
 					stepName: WizardStepsSend.QR_CODE_SCAN
 				})}
 			on:icQRCodeBack={() =>
-				goToWizardSendStep({
+				goToWizardStep({
 					modal,
 					steps,
 					stepName: WizardStepsSend.SEND
