@@ -152,7 +152,7 @@
 			"youre_eligible": "You're eligible!"
 		},
 		"alt": {
-			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
+			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop."
 		}
 	},
 	"footer": {
@@ -561,6 +561,8 @@
 			"hide_zero_balances": "Hide zero balances",
 			"hide_zeros": "Hide zeros",
 			"all_tokens_with_zero_hidden": "All assets with zero balance are currently hidden",
+			"filter_nothing_found": "Oops, nothing found",
+			"filter_nothing_found_description": "Type token ticker or name to filter list",
 			"buy_or_receive": "Buy or receive your first tokens now to see them in the list",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
@@ -570,7 +572,9 @@
 			"exchange_is_not_available": "USD value is currently not available.",
 			"source_token_title": "You pay",
 			"destination_token_title": "You receive",
-			"chain_key": "Chain Key"
+			"chain_key": "Chain Key",
+			"show_more_networks": "Show $number more networks",
+			"hide_more_networks": "Hide more networks"
 		},
 		"details": {
 			"title": "Token details",

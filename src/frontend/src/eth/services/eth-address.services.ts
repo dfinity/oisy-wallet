@@ -10,7 +10,7 @@ import {
 import { ethAddressStore, type StorageAddressData } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
-import { LoadIdbAddressError } from '$lib/types/errors';
+import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { get } from 'svelte/store';

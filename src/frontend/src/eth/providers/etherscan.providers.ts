@@ -12,10 +12,11 @@ import type { NetworkId } from '$lib/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BlockTag } from '@ethersproject/abstract-provider';
-import type { Networkish } from '@ethersproject/networks';
-import { EtherscanProvider as EtherscanProviderLib } from '@ethersproject/providers';
-import { BigNumber } from 'ethers';
+import {
+	EtherscanProvider as EtherscanProviderLib,
+	type BlockTag,
+	type Networkish
+} from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class EtherscanProvider {
@@ -25,8 +26,9 @@ export class EtherscanProvider {
 		this.provider = new EtherscanProviderLib(this.network, ETHERSCAN_API_KEY);
 	}
 
-	// https://github.com/ethers-io/ethers.js/issues/4303
-	// https://ethereum.stackexchange.com/questions/147756/read-transaction-history-with-ethers-v6-1-0/150836#150836
+	// There is no `getHistory` in ethers v6
+	// Issue report: https://github.com/ethers-io/ethers.js/issues/4303
+	// Workaround: https://ethereum.stackexchange.com/questions/147756/read-transaction-history-with-ethers-v6-1-0/150836#150836
 	private async getHistory({
 		address,
 		startBlock,
@@ -64,8 +66,8 @@ export class EtherscanProvider {
 				from,
 				to,
 				nonce: parseInt(nonce),
-				gasLimit: BigNumber.from(gas).toBigInt(),
-				gasPrice: BigNumber.from(gasPrice).toBigInt(),
+				gasLimit: BigInt(gas),
+				gasPrice: BigInt(gasPrice),
 				value: BigInt(value),
 				// Chain ID is not delivered by the Etherscan API so, we naively set 0
 				chainId: 0n
