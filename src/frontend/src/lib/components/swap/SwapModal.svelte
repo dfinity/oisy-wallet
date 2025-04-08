@@ -4,7 +4,7 @@
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
-	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
+	import type SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';

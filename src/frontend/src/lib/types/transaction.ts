@@ -2,7 +2,7 @@ import type { BtcTransactionUi } from '$btc/types/btc';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import {
-	TransactionIdSchema,
+	type TransactionIdSchema,
 	type TransactionStatusSchema,
 	type TransactionTypeSchema
 } from '$lib/schema/transaction.schema';
