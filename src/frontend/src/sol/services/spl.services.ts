@@ -19,7 +19,13 @@ import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-import { assertNonNullish, fromNullable, isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	fromNullable,
+	isNullish,
+	nonNullish,
+	queryAndUpdate
+} from '@dfinity/utils';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 

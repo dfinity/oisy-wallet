@@ -12,8 +12,8 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import type { Principal } from '@dfinity/principal';
-import { get } from 'svelte/store';
 import { queryAndUpdate } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 const getTransactions = async ({
 	token: { standard, indexCanisterId },
