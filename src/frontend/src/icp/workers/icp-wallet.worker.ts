@@ -1,5 +1,5 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icp-index.api';
-import { IcWalletTransactionsScheduler } from '$icp/schedulers/ic-wallet-transactions.scheduler';
+import { IcWalletBalanceAndTransactionsScheduler } from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapIcpTransaction, mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
@@ -34,12 +34,12 @@ const mapTransaction = ({
 	jobData: SchedulerJobData<PostMessageDataRequest>;
 }): IcTransactionUi => mapIcpTransaction({ transaction, identity });
 
-const initIcpWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
+const initIcpWalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTransactionsScheduler<
 	Transaction,
 	TransactionWithId,
 	PostMessageDataRequest
 > =>
-	new IcWalletTransactionsScheduler(
+	new IcWalletBalanceAndTransactionsScheduler(
 		getTransactions,
 		mapTransactionIcpToSelf,
 		mapTransaction,
@@ -49,7 +49,7 @@ const initIcpWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
 // Exposed for test purposes
 export const initIcpWalletScheduler = (
 	_data: PostMessageDataRequest | undefined
-): IcWalletScheduler<PostMessageDataRequest> => initIcpWalletTransactionsScheduler();
+): IcWalletScheduler<PostMessageDataRequest> => initIcpWalletBalanceAndTransactionsScheduler();
 
 let scheduler: IcWalletScheduler<PostMessageDataRequest> | undefined;
 

@@ -19,7 +19,7 @@ interface IcWalletStore<T> {
 	transactions: IndexedTransactions<T>;
 }
 
-export class IcWalletTransactionsScheduler<
+export class IcWalletBalanceAndTransactionsScheduler<
 	T extends IcrcTransaction | Transaction,
 	TWithId extends IcrcTransactionWithId | TransactionWithId,
 	PostMessageDataRequest
@@ -93,7 +93,7 @@ export class IcWalletTransactionsScheduler<
 		if (newExtendedTransactions.length === 0 && !newBalance) {
 			// We execute postMessage at least once because developer may have no transaction at all so, we want to display the balance zero
 			if (!this.initialized) {
-				this.postMessageWalletTransactions({
+				this.postMessageWalletBalanceAndTransactions({
 					transactions: [],
 					balance,
 					certified,
@@ -127,7 +127,7 @@ export class IcWalletTransactionsScheduler<
 			this.mapTransaction({ transaction, jobData })
 		);
 
-		this.postMessageWalletTransactions({
+		this.postMessageWalletBalanceAndTransactions({
 			transactions: newUiTransactions,
 			balance,
 			certified,
@@ -138,7 +138,7 @@ export class IcWalletTransactionsScheduler<
 		this.initialized = true;
 	};
 
-	private postMessageWalletTransactions({
+	private postMessageWalletBalanceAndTransactions({
 		transactions: newTransactions,
 		balance: data,
 		certified,
