@@ -13,11 +13,12 @@ import {
 	IcrcLedgerCanister,
 	type IcrcIndexNgTransactionWithId
 } from '@dfinity/ledger-icrc';
+import { IcrcIndexNgCanister, type IcrcIndexNgTransactionWithId } from '@dfinity/ledger-icrc';
 import { arrayOfNumberToUint8Array, jsonReplacer } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
-describe('ic-wallet-transactions.worker', () => {
+describe('ic-wallet-balance-and-transactions.worker', () => {
 	let spyGetBalance: MockInstance;
 	let spyGetTransactions: MockInstance;
 
