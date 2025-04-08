@@ -4,7 +4,6 @@ import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-messa
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
-import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { getBtcBalance } from '$lib/api/signer.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
@@ -20,7 +19,14 @@ import type {
 import type { CertifiedData } from '$lib/types/store';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { type BitcoinNetwork } from '@dfinity/ckbtc';
-import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	isNullish,
+	jsonReplacer,
+	nonNullish,
+	queryAndUpdate,
+	type QueryAndUpdateRequestParams
+} from '@dfinity/utils';
 
 interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 	bitcoinNetwork: BitcoinNetwork;
@@ -174,7 +180,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				}),
 			onLoad: ({ certified: _, ...rest }) => this.syncWalletData(rest),
 			identity,
-			onCertifiedError: ({ error }) => this.postMessageWalletError({ error }),
+			onUpdateError: ({ error }) => this.postMessageWalletError({ error }),
 			resolution: 'all_settled'
 		});
 	};
