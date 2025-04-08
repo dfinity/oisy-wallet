@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { TRACK_HELP_SIGNING_IN } from '$lib/constants/analytics.contants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import {trackEvent} from "$lib/services/analytics.services";
-	import {TRACK_HELP_SIGNING_IN} from "$lib/constants/analytics.contants";
 
 	export let noUnderline = false;
 	export let styleClass = '';
@@ -13,7 +13,7 @@
 			name: TRACK_HELP_SIGNING_IN
 		});
 		modalStore.openAuthHelp(true);
-	}
+	};
 </script>
 
 <span class={`${styleClass}`}>
