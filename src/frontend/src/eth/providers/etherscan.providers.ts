@@ -75,13 +75,61 @@ export class EtherscanProvider {
 		);
 	}
 
-	transactions = ({
+	private async getInternalHistory({
+		address,
+		startBlock,
+		endBlock
+	}: {
+		address: string;
+		startBlock?: BlockTag;
+		endBlock?: BlockTag;
+	}): Promise<Transaction[]> {
+		const params = {
+			action: 'txlistinternal',
+			address,
+			startblock: startBlock ?? 0,
+			endblock: endBlock ?? 99999999,
+			sort: 'asc'
+		};
+
+		const result: Omit<EtherscanProviderTransaction, 'nonce' | 'gasPrice'>[] =
+			await this.provider.fetch('account', params);
+
+		return result.map(
+			({
+				blockNumber,
+				timeStamp,
+				hash,
+				from,
+				to,
+				value,
+				gas
+			}: Omit<EtherscanProviderTransaction, 'nonce' | 'gasPrice'>): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				nonce: 0,
+				gasLimit: BigInt(gas),
+				gasPrice: 0n,
+				value: BigInt(value),
+				// Chain ID is not delivered by the Etherscan API so, we naively set 0
+				chainId: 0n
+			})
+		);
+	}
+
+	transactions = async ({
 		address,
 		startBlock
 	}: {
 		address: EthAddress;
 		startBlock?: BlockTag;
-	}): Promise<Transaction[]> => this.getHistory({ address, startBlock });
+	}): Promise<Transaction[]> => [
+		...(await this.getHistory({ address, startBlock })),
+		...(await this.getInternalHistory({ address, startBlock }))
+	];
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = {
