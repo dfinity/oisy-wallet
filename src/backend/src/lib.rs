@@ -1,7 +1,7 @@
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
-use candid::Principal;
+use candid::{candid_method, Principal};
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
@@ -61,6 +61,7 @@ use crate::{
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
+    types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
 
@@ -73,6 +74,7 @@ mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
+mod pow;
 pub mod signer;
 mod state;
 mod token;
@@ -85,6 +87,7 @@ const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
 const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
+const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -99,6 +102,7 @@ thread_local! {
             // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
+            pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             migration: None,
         })
     );
@@ -151,6 +155,7 @@ pub struct State {
     custom_token: CustomTokenMap,
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
+    pow_challenge: PowChallengeMap,
     migration: Option<Migration>,
 }
 
@@ -659,6 +664,27 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     })
 }
 
+/// Creates a new proof-of-work challenge for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `CreateChallengeError`.
+///
+/// # Returns
+///
+/// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
+/// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
+///   internal errors.
+#[update(guard = "may_write_user_data")]
+#[candid_method(update)]
+pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
+    let challenge = pow::create_pow_challenge().await?;
+
+    Ok(CreateChallengeResponse {
+        difficulty: challenge.difficulty,
+        start_timestamp_ms: challenge.start_timestamp_ms,
+        expiry_timestamp_ms: challenge.expiry_timestamp_ms,
+    })
+}
 /// Checks if the caller has an associated user profile.
 ///
 /// # Returns
@@ -675,30 +701,6 @@ pub fn has_user_profile() -> HasUserProfileResponse {
     HasUserProfileResponse {
         has_user_profile: user_profile::has_user_profile(stored_principal),
     }
-}
-
-/// An endpoint to be called by users on first login, to enable them to
-/// use the chain fusion signer together with Oisy.
-/// Creates a new proof-of-work challenge for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `CreateChallengeError`.
-///
-/// # Returns
-///
-/// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-/// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-///   internal errors.
-#[update(guard = "may_write_user_data")]
-#[allow(clippy::unused_async)]
-pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
-    // TODO implementation will be added once the candid files have been generated and checked in
-
-    Ok(CreateChallengeResponse {
-        difficulty: 0,
-        start_timestamp_ms: 0,
-        expiry_timestamp_ms: 0,
-    })
 }
 
 /// This function authorizes the caller to spend a specific
