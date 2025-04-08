@@ -1,6 +1,6 @@
 import AuthHelpIdentityForm from '$lib/components/auth/AuthHelpIdentityForm.svelte';
 import { TRACK_COUNT_LEGACY_SIGN_IN_CLICK } from '$lib/constants/analytics.contants';
-import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+import {OISY_FIND_INTERNET_IDENTITY_URL} from '$lib/constants/oisy.constants';
 import {
 	HELP_AUTH_BACK_BUTTON,
 	HELP_AUTH_DONE_BUTTON,
@@ -43,7 +43,7 @@ describe('AuthHelpIdentityForm', () => {
 		const learnMoreAnchor: HTMLAnchorElement | null =
 			container.querySelector(learnMoreAnchorSelector);
 		expect(learnMoreAnchor).toBeInTheDocument();
-		expect(learnMoreAnchor?.href).toBe(`${OISY_DOCS_URL}/`);
+		expect(learnMoreAnchor?.href).toBe(OISY_FIND_INTERNET_IDENTITY_URL);
 		expect(
 			getByText(replaceOisyPlaceholders(get(i18n).auth.help.text.identity_learn_more))
 		).toBeInTheDocument();
