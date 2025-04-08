@@ -31,4 +31,3 @@ runs:
           echo "CFLAGS_wasm32_unknown_unknown=--target=wasm32-unknown-unknown"
           echo "CRATE_CC_NO_DEFAULTS_wasm32_unknown_unknown=true"
         } >> "$GITHUB_ENV"
-
