@@ -173,3 +173,8 @@ export const modalSettingsData: Readable<SettingsModalType> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.data as SettingsModalType
 );
+
+export const modalAuthHelp: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'auth-help'
+);
