@@ -11,7 +11,12 @@
 		TRACK_HELP_LOST_INTERNET_IDENTITY,
 		TRACK_HELP_OTHER
 	} from '$lib/constants/analytics.contants';
-	import { HELP_AUTH_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
+	import {
+		HELP_AUTH_GOT_CONFUSED_BUTTON,
+		HELP_AUTH_IMAGE_BANNER,
+		HELP_AUTH_LOST_IDENTITY_BUTTON, HELP_AUTH_OTHER_BUTTON,
+		HELP_AUTH_SECURITY_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -31,6 +36,7 @@
 				colorStyle="info-alt"
 				type="button"
 				fullWidth
+				testId={HELP_AUTH_LOST_IDENTITY_BUTTON}
 				on:click={async () => {
 					await trackEvent({
 						name: TRACK_HELP_LOST_INTERNET_IDENTITY
@@ -45,6 +51,7 @@
 				colorStyle="info-alt"
 				type="button"
 				fullWidth
+				testId={HELP_AUTH_SECURITY_BUTTON}
 				on:click={async () => {
 					await trackEvent({
 						name: TRACK_HELP_CONCERNED_ABOUT_SECURITY
@@ -59,6 +66,7 @@
 				colorStyle="info-alt"
 				type="button"
 				fullWidth
+				testId={HELP_AUTH_GOT_CONFUSED_BUTTON}
 				on:click={async () => {
 					await trackEvent({
 						name: TRACK_HELP_GOT_CONFUSED
@@ -73,6 +81,7 @@
 				colorStyle="info-alt"
 				type="button"
 				fullWidth
+				testId={HELP_AUTH_OTHER_BUTTON}
 				on:click={async () => {
 					await trackEvent({
 						name: TRACK_HELP_OTHER

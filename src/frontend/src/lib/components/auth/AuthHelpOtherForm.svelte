@@ -13,6 +13,12 @@
 	} from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import {
+		HELP_AUTH_ASSET_CONTROL_LINK, HELP_AUTH_BACK_BUTTON,
+		HELP_AUTH_DOCS_LINK, HELP_AUTH_DONE_BUTTON,
+		HELP_AUTH_INTRODUCTION_LINK,
+		HELP_AUTH_PRIVATE_KEY_LINK
+	} from "$lib/constants/test-ids.constants";
 
 	export let onBack: () => void;
 	export let onDone: () => void;
@@ -31,6 +37,7 @@
 				styleClass="font-semibold flex flex-row-reverse"
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_introduction)}
 				href={OISY_DOCS_URL}
+				testId={HELP_AUTH_INTRODUCTION_LINK}
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_introduction)}
 			</ExternalLink>
@@ -40,6 +47,7 @@
 				styleClass="font-semibold flex flex-row-reverse"
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_docs)}
 				href={OISY_INTERNET_IDENTITY_URL}
+				testId={HELP_AUTH_DOCS_LINK}
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_docs)}
 			</ExternalLink>
@@ -49,6 +57,7 @@
 				styleClass="font-semibold flex flex-row-reverse"
 				ariaLabel={$i18n.auth.help.alt.other_private_key}
 				href={OISY_FAQ_URL}
+				testId={HELP_AUTH_PRIVATE_KEY_LINK}
 			>
 				{$i18n.auth.help.text.other_private_key}
 			</ExternalLink>
@@ -58,6 +67,7 @@
 				styleClass="font-semibold flex flex-row-reverse"
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_asset_control)}
 				href={OISY_ACCESS_CONTROL_URL}
+				testId={HELP_AUTH_ASSET_CONTROL_LINK}
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_asset_control)}
 			</ExternalLink>
@@ -65,7 +75,7 @@
 	</div>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={onBack} />
-		<ButtonDone on:click={onDone} />
+		<ButtonBack on:click={onBack} testId={HELP_AUTH_BACK_BUTTON} />
+		<ButtonDone on:click={onDone} testId={HELP_AUTH_DONE_BUTTON} />
 	</ButtonGroup>
 </ContentWithToolbar>

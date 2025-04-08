@@ -10,7 +10,12 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { TRACK_COUNT_LEGACY_SIGN_IN_CLICK } from '$lib/constants/analytics.contants';
 	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
-	import { HELP_AUTH_IDENTITY_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
+	import {
+		HELP_AUTH_BACK_BUTTON, HELP_AUTH_DONE_BUTTON,
+		HELP_AUTH_IDENTITY_IMAGE_BANNER,
+		HELP_AUTH_LEARN_MORE_LINK,
+		HELP_AUTH_LEGACY_SIGN_IN_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -45,7 +50,7 @@
 				{$i18n.auth.help.text.identity_legacy_description}
 			</p>
 			<p>
-				<Button link on:click={onLegacySignIn}
+				<Button link on:click={onLegacySignIn} testId={HELP_AUTH_LEGACY_SIGN_IN_BUTTON}
 					>{$i18n.auth.help.text.identity_legacy_sign_in}</Button
 				>
 			</p>
@@ -54,6 +59,7 @@
 					styleClass="font-semibold flex flex-row-reverse"
 					ariaLabel={$i18n.auth.help.alt.identity_learn_more}
 					href={OISY_DOCS_URL}
+					testId={HELP_AUTH_LEARN_MORE_LINK}
 				>
 					{replaceOisyPlaceholders($i18n.auth.help.text.identity_learn_more)}
 				</ExternalLink>
@@ -62,7 +68,7 @@
 	</div>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={onBack} />
-		<ButtonDone on:click={onDone} />
+		<ButtonBack on:click={onBack} testId={HELP_AUTH_BACK_BUTTON} />
+		<ButtonDone on:click={onDone} testId={HELP_AUTH_DONE_BUTTON} />
 	</ButtonGroup>
 </ContentWithToolbar>
