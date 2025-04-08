@@ -24,7 +24,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	let originalPostmessage: unknown;
 
 	const mockBalance = 100n;
-	const mockBalanceFromTransactions = mockBalance + 1n;
+	let mockBalanceFromTransactions = () => mockBalance;
 	const mockOldestTxId = 4n;
 
 	const mockPostMessageStatusInProgress = {
@@ -305,6 +305,23 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
 		});
+
+		it('should use the balance from the Ledger canister and not from the Index canister', async () => {
+			mockBalanceFromTransactions = () => mockBalance + 1n;
+
+			expect(mockPostMessageNotCertified.data.wallet.balance.data).not.toBe(
+				mockBalanceFromTransactions()
+			);
+			expect(mockPostMessageCertified.data.wallet.balance.data).not.toBe(
+				mockBalanceFromTransactions()
+			);
+
+			await scheduler.start(startData);
+
+			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
+
+			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+		});
 	};
 
 	const initWithoutTransactions = <PostMessageDataRequest>({
@@ -564,7 +581,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		describe('with transactions', () => {
 			beforeEach(() => {
 				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
-					balance: mockBalanceFromTransactions,
+					balance: mockBalanceFromTransactions(),
 					transactions: [mockTransaction],
 					oldest_tx_id: [mockOldestTxId]
 				});
@@ -581,7 +598,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		describe('without transactions', () => {
 			beforeEach(() => {
 				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
-					balance: mockBalanceFromTransactions,
+					balance: mockBalanceFromTransactions(),
 					transactions: [],
 					oldest_tx_id: [mockOldestTxId]
 				});
@@ -598,7 +615,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 			const initCleanupMock = (mockRogueId: bigint) => {
 				indexCanisterMock.getTransactions.mockImplementation(({ certified }) =>
 					Promise.resolve({
-						balance: mockBalanceFromTransactions,
+						balance: mockBalanceFromTransactions(),
 						transactions: !certified
 							? [
 									mockTransaction,
