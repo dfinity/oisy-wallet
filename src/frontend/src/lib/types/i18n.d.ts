@@ -112,11 +112,9 @@ interface I18nAuth {
 			other_docs: string;
 			other_private_key: string;
 			other_asset_control: string;
-		},
-		alt: {
-
-		}
-	}
+		};
+		alt: {};
+	};
 }
 
 interface I18nDapps {
