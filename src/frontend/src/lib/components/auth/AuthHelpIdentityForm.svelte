@@ -24,6 +24,7 @@
 
 	export let onBack: () => void;
 	export let onDone: () => void;
+	export let hideBack = false;
 
 	const onLegacySignIn = async () => {
 		await trackEvent({
@@ -69,7 +70,9 @@
 	</div>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={onBack} testId={HELP_AUTH_BACK_BUTTON} />
+		{#if !hideBack}
+			<ButtonBack on:click={onBack} testId={HELP_AUTH_BACK_BUTTON} />
+		{/if}
 		<ButtonDone on:click={onDone} testId={HELP_AUTH_DONE_BUTTON} />
 	</ButtonGroup>
 </ContentWithToolbar>

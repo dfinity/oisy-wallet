@@ -3,7 +3,8 @@
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import LandingPage from '$lib/components/auth/LandingPage.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
-	import { modalAuthHelp } from '$lib/derived/modal.derived';
+	import {modalAuthHelp, modalAuthHelpData} from '$lib/derived/modal.derived';
+	import {nonNullish} from "@dfinity/utils";
 </script>
 
 {#if $authNotSignedIn}
@@ -14,6 +15,6 @@
 	</div>
 {/if}
 
-{#if $modalAuthHelp}
-	<AuthHelpModal />
+{#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
+	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
 {/if}
