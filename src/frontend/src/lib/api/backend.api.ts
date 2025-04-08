@@ -1,4 +1,6 @@
 import type {
+	AllowSigningRequest,
+	AllowSigningResponse,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -137,10 +139,16 @@ export const selectUserUtxosFee = async ({
 	return btcSelectUserUtxosFee(params);
 };
 
-export const allowSigning = async ({ identity }: CanisterApiFunctionParams): Promise<void> => {
+export const allowSigning = async ({
+	request,
+	identity
+}: CanisterApiFunctionParams<{
+	request?: AllowSigningRequest;
+}>): Promise<AllowSigningResponse> => {
 	const { allowSigning } = await backendCanister({ identity });
 
-	return allowSigning();
+	// Conditionally call allowSigning with request or empty
+	return allowSigning(request ? { request } : {});
 };
 
 export const addUserHiddenDappId = async ({
