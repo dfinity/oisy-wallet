@@ -18,8 +18,8 @@ export const INFURA_NETWORK_SEPOLIA: Networkish = 'base-sepolia';
 export const ETHERSCAN_NETWORK_HOMESTEAD: Networkish = 'base';
 export const ETHERSCAN_NETWORK_SEPOLIA: Networkish = 'base-sepolia';
 
-export const ETHERSCAN_API_URL_HOMESTEAD = 'https://api.etherscan.io/api';
-export const ETHERSCAN_API_URL_SEPOLIA = 'https://api-sepolia.etherscan.io/api';
+export const ETHERSCAN_API_URL_HOMESTEAD = 'https://api.basescan.org/api';
+export const ETHERSCAN_API_URL_SEPOLIA = 'https://api-sepolia.basescan.org/api';
 
 export const ALCHEMY_JSON_RPC_URL_MAINNET = 'https://base-mainnet.g.alchemy.com/v2';
 export const ALCHEMY_JSON_RPC_URL_SEPOLIA = 'https://base-sepolia.g.alchemy.com/v2';
