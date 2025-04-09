@@ -22,7 +22,7 @@ export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 
 export const INTERNET_IDENTITY_ORIGIN = LOCAL
 	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-	: 'https://identity.ic0.app';
+	: 'https://identity.internetcomputer.org';
 
 export const POUH_ISSUER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
