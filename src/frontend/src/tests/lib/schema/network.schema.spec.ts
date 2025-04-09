@@ -1,4 +1,4 @@
-import icpBW from '$lib/assets/networks/icp-bw.svg';
+import icpDark from '$lib/assets/networks/dark/icp.svg';
 import {
 	NetworkAppMetadataSchema,
 	NetworkBuySchema,
@@ -87,8 +87,8 @@ describe('network.schema', () => {
 
 		const validNetwork = {
 			...validNetworkWithRequiredFields,
-			icon: 'https://example.com/icon.svg',
-			iconBW: icpBW,
+			iconLight: 'https://example.com/icon.svg',
+			iconDark: icpDark,
 			buy: { onramperId: 'icp' }
 		};
 
@@ -120,7 +120,7 @@ describe('network.schema', () => {
 		it('should fail validation when icon is not a valid SVG string', () => {
 			const invalidNetwork = {
 				...validNetwork,
-				icon: 'https://example.com/invalid-icon.png'
+				iconLight: 'https://example.com/invalid-icon.png'
 			};
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
@@ -128,7 +128,7 @@ describe('network.schema', () => {
 		it('should fail validation when iconBW is not a valid SVG string', () => {
 			const invalidNetwork = {
 				...validNetwork,
-				iconBW: 'https://example.com/invalid-icon-bw.png'
+				iconLight: 'https://example.com/invalid-icon-bw.png'
 			};
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});

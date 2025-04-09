@@ -1,4 +1,5 @@
 <script lang="ts">
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,11 +13,7 @@
 	<svelte:fragment slot="label">{$i18n.tokens.details.network}</svelte:fragment>
 	<span class="flex items-center gap-1">
 		<output>{token.network.name}</output>
-		<Logo
-			src={token.network.icon}
-			alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.network.name })}
-			color="white"
-		/>
+		<NetworkLogo network={token.network} />
 	</span>
 </Value>
 
