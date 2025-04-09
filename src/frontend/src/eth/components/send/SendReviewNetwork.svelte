@@ -6,6 +6,9 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
+	import eth from '$icp-eth/assets/eth.svg';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
@@ -29,9 +32,7 @@
 		>{#if nonNullish(targetNetwork)}{$i18n.send.text.source_network}{:else}{$i18n.send.text
 				.network}{/if}</svelte:fragment
 	>
-	<TextWithLogo name={sourceNetwork.name}>
-		<NetworkLogo slot="icon" network={sourceNetwork} />
-	</TextWithLogo>
+	<NetworkWithLogo network={sourceNetwork} />
 </Value>
 
 {#if nonNullish(targetNetwork)}

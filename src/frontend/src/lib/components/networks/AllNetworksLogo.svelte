@@ -1,6 +1,6 @@
 <script lang="ts">
-	import AllNetworksIconDark from '$lib/assets/networks/dark/all-networks.svg';
-	import AllNetworksIconLight from '$lib/assets/networks/light/all-networks.svg';
+	import allNetworksIconDark from '$lib/assets/networks/dark/all-networks.svg';
+	import allNetworksIconLight from '$lib/assets/networks/light/all-networks.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
@@ -13,7 +13,7 @@
 
 <div class="dark-hidden block">
 	<Logo
-		src={AllNetworksIconLight}
+		src={allNetworksIconLight}
 		alt={replacePlaceholders($i18n.core.alt.logo, {
 			$name: $i18n.networks.chain_fusion
 		})}
@@ -25,7 +25,7 @@
 
 <div class="dark-block hidden">
 	<Logo
-		src={AllNetworksIconDark}
+		src={allNetworksIconDark}
 		alt={replacePlaceholders($i18n.core.alt.logo, {
 			$name: $i18n.networks.chain_fusion
 		})}

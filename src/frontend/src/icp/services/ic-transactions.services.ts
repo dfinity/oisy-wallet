@@ -6,13 +6,13 @@ import type { IcTransaction } from '$icp/types/ic-transaction';
 import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
-import { queryAndUpdate } from '$lib/actors/query.ic';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import type { Principal } from '@dfinity/principal';
+import { queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const getTransactions = async ({
@@ -77,7 +77,7 @@ export const loadNextTransactions = ({
 				}))
 			});
 		},
-		onCertifiedError: ({ error }) => {
+		onUpdateError: ({ error }) => {
 			onLoadTransactionsError({ tokenId: token.id, error });
 
 			signalEnd();
