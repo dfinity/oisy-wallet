@@ -17,6 +17,8 @@
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 	let inputElement: HTMLInputElement | undefined;
+	let inputValue: string;
+	$: inputValue = '';
 
 	const handleOpen = (e?: Event) => {
 		e?.stopPropagation();
@@ -38,7 +40,7 @@
 	};
 
 	const handleClear = () => {
-		$tokenListStore.filter = '';
+		tokenListStore.set({ filter: '' });
 		inputElement?.focus();
 	};
 
@@ -56,10 +58,12 @@
 			previousRoute !== `${ROUTE_ID_GROUP_APP}/` &&
 			previousRoute !== `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`
 		) {
-			$tokenListStore.filter = '';
+			tokenListStore.set({ filter: '' });
 			handleClose();
 		}
 	});
+
+	$: tokenListStore.set({ filter: inputValue });
 </script>
 
 <div class="absolute right-0 w-full">
@@ -78,7 +82,7 @@
 				bind:inputElement
 				name="tokenFilter"
 				placeholder={$i18n.tokens.text.filter_placeholder}
-				bind:value={$tokenListStore.filter}
+				bind:value={inputValue}
 				autofocus
 				testId={`${testIdPrefix}-input`}
 			/>
