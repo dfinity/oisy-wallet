@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 	import AuthHelpForm from '$lib/components/auth/AuthHelpForm.svelte';
 	import AuthHelpIdentityForm from '$lib/components/auth/AuthHelpIdentityForm.svelte';
 	import AuthHelpOtherForm from '$lib/components/auth/AuthHelpOtherForm.svelte';
@@ -19,12 +20,14 @@
 
 	let currentStep: WizardStep | undefined;
 
-	let title;
+	let title: string;
 	$: title = currentStep?.title ?? $i18n.auth.help.text.title;
 
-	$: if (usesIdentityHelp && nonNullish(modal) && nonNullish(steps)) {
-		goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY });
-	}
+	onMount(() => {
+		if (usesIdentityHelp && nonNullish(modal) && nonNullish(steps)) {
+			goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY });
+		}
+	});
 
 	const close = () =>
 		closeModal(() => {
@@ -34,7 +37,7 @@
 	const onBack = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.OVERVIEW });
 	const onLostIdentity = () =>
 		goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY });
-	const onOther = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_OTHERS });
+	const onOther = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_OTHER });
 </script>
 
 <WizardModal {steps} bind:this={modal} bind:currentStep on:nnsClose={close}>
@@ -46,7 +49,7 @@
 		<AuthHelpForm {onLostIdentity} {onOther} />
 	{:else if currentStep?.name === WizardStepsAuthHelp.HELP_IDENTITY}
 		<AuthHelpIdentityForm hideBack={usesIdentityHelp} {onBack} onDone={close} />
-	{:else if currentStep?.name === WizardStepsAuthHelp.HELP_OTHERS}
+	{:else if currentStep?.name === WizardStepsAuthHelp.HELP_OTHER}
 		<AuthHelpOtherForm {onBack} onDone={close} />
 	{/if}
 </WizardModal>

@@ -1,7 +1,7 @@
-import type {
-	WizardStepsAuthHelp,
-	WizardStepsConvert,
-	WizardStepsSend
+import {
+	type WizardStepsAuthHelp,
+	type WizardStepsConvert,
+	type WizardStepsSend
 } from '$lib/enums/wizard-steps';
 import { type WizardModal, type WizardSteps } from '@dfinity/gix-components';
 

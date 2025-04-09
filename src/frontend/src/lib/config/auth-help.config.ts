@@ -12,7 +12,7 @@ export const authHelpWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps =>
 		title: i18n.auth.help.text.title
 	},
 	{
-		name: WizardStepsAuthHelp.HELP_OTHERS,
+		name: WizardStepsAuthHelp.HELP_OTHER,
 		title: i18n.auth.help.text.title
 	}
 ];
