@@ -2,13 +2,13 @@ name: Auto Update i18n
 
 on:
   pull_request:
-    types: [ opened, synchronize ]
+    types: [opened, synchronize]
     paths:
       - 'src/frontend/src/lib/i18n/*'
       - 'src/frontend/src/lib/types/i18n.d.ts'
   merge_group:
 
-permissions: { }
+permissions: {}
 
 jobs:
   auto_update:
