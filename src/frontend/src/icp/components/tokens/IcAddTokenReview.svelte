@@ -7,7 +7,6 @@
 		loadAndAssertAddCustomToken,
 		type ValidateTokenData
 	} from '$icp/services/ic-add-custom-tokens.service';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -16,11 +15,11 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
-	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	export let ledgerCanisterId: string | undefined;
 	export let indexCanisterId: string | undefined;
@@ -79,9 +78,7 @@
 		<div in:fade>
 			<Value ref="network" element="div">
 				<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
-				<TextWithLogo name={token.token.network.name}>
-					<NetworkLogo slot="icon" network={token.token.network} />
-				</TextWithLogo>
+				<NetworkWithLogo network={token.token.network} />
 			</Value>
 
 			<Value ref="ledgerId" element="div">

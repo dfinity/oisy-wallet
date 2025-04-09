@@ -5,7 +5,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let name: string;
-	export let icon: string | undefined = undefined;
 	export let logo: 'start' | 'end' = 'end';
 	export let description: string | undefined = undefined;
 </script>
@@ -23,9 +22,5 @@
 			<span class="text-left text-xs leading-none text-tertiary">{description}</span>
 		{/if}
 	</span>
-	{#if nonNullish(icon)}
-		<Logo src={icon} alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })} />
-	{:else}
-		<slot name="icon" />
-	{/if}
+	<slot name="icon" />
 </span>

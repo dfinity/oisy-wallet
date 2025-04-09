@@ -2,15 +2,18 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ERC20_CONTRACT_ICP, ERC20_CONTRACT_ICP_GOERLI } from '$env/tokens/tokens.erc20.env';
+	import icpDark from '$eth/assets/icp_dark.svg';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
+	import eth from '$icp-eth/assets/eth.svg';
+	import Logo from '$lib/components/ui/Logo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
@@ -29,9 +32,7 @@
 		>{#if nonNullish(targetNetwork)}{$i18n.send.text.source_network}{:else}{$i18n.send.text
 				.network}{/if}</svelte:fragment
 	>
-	<TextWithLogo name={sourceNetwork.name}>
-		<NetworkLogo slot="icon" network={sourceNetwork} />
-	</TextWithLogo>
+	<NetworkWithLogo network={sourceNetwork} />
 </Value>
 
 {#if nonNullish(targetNetwork)}
@@ -40,10 +41,20 @@
 		<span class="flex gap-1">
 			{#if nativeIcp}
 				{$i18n.send.text.convert_to_native_icp}
-				<NetworkLogo network={ICP_NETWORK} />
+				<Logo
+					src={icpDark}
+					alt={replacePlaceholders($i18n.core.alt.logo, {
+						$name: ICP_NETWORK.name
+					})}
+				/>
 			{:else}
 				{targetNetwork.name}
-				<NetworkLogo network={targetNetwork} />
+				<Logo
+					src={targetNetwork.icon ?? eth}
+					alt={replacePlaceholders($i18n.core.alt.logo, {
+						$name: targetNetwork.name
+					})}
+				/>
 			{/if}
 		</span>
 	</Value>
