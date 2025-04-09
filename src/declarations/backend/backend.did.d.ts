@@ -107,8 +107,8 @@ export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Execut
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type ApproveError =
 	| {
-	GenericError: { message: string; error_code: bigint };
-}
+			GenericError: { message: string; error_code: bigint };
+	  }
 	| { TemporarilyUnavailable: null }
 	| { Duplicate: { duplicate_of: bigint } }
 	| { BadFee: { expected_fee: bigint } }
@@ -260,17 +260,17 @@ export interface IcrcToken {
 
 export type IcrcTokenId =
 	| {
-	Icrc: { ledger: Principal; index: [] | [Principal] };
-}
+			Icrc: { ledger: Principal; index: [] | [Principal] };
+	  }
 	| { Native: null };
 export type Icrcv2AccountId =
 	| { Account: Uint8Array | number[] }
 	| {
-	WithPrincipal: {
-		owner: Principal;
-		subaccount: [] | [Uint8Array | number[]];
-	};
-};
+			WithPrincipal: {
+				owner: Principal;
+				subaccount: [] | [Uint8Array | number[]];
+			};
+	  };
 
 export interface InitArg {
 	api: [] | [Guards];
@@ -309,8 +309,8 @@ export type MigrationError =
 	| { NoMigrationInProgress: null };
 export type MigrationProgress =
 	| {
-	MigratedUserTokensUpTo: [] | [Principal];
-}
+			MigratedUserTokensUpTo: [] | [Principal];
+	  }
 	| { Failed: MigrationError }
 	| { MigratedUserTimestampsUpTo: [] | [Principal] }
 	| { MigratedCustomTokensUpTo: [] | [Principal] }
@@ -440,19 +440,19 @@ export interface TestnetsSettings {
 export type Token = { Icrc: IcrcToken } | { SplDevnet: SplToken } | { SplMainnet: SplToken };
 export type TopUpCyclesLedgerError =
 	| {
-	InvalidArgPercentageOutOfRange: {
-		max: number;
-		min: number;
-		percentage: number;
-	};
-}
+			InvalidArgPercentageOutOfRange: {
+				max: number;
+				min: number;
+				percentage: number;
+			};
+	  }
 	| { CouldNotGetBalanceFromCyclesLedger: null }
 	| {
-	CouldNotTopUpCyclesLedger: {
-		tried_to_send: bigint;
-		available: bigint;
-	};
-};
+			CouldNotTopUpCyclesLedger: {
+				tried_to_send: bigint;
+				available: bigint;
+			};
+	  };
 
 export interface TopUpCyclesLedgerRequest {
 	threshold: [] | [bigint];
