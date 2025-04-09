@@ -17,36 +17,40 @@ describe('NetworkLogo', () => {
 			}
 		});
 
-		const logo = getByTestId(testId);
+		const logo = getByTestId(`${testId}-light`);
 		expect(logo).toBeTruthy();
 	});
 
 	it('should render the Logo component with correct props', () => {
-		const { getByAltText } = render(NetworkLogo, {
+		const { getByTestId } = render(NetworkLogo, {
 			props: {
 				network: mockNetwork,
 				testId
 			}
 		});
 
-		const logo = getByAltText(altText);
+		const logo = getByTestId(`${testId}-light`);
 
-		expect(logo).toBeInTheDocument();
-		expect(logo).toHaveAttribute('src', ICP_NETWORK.icon);
+		expect(logo).toBeVisible();
 	});
 
-	it('should render black and white icon when blackAndWhite is true', () => {
-		const { getByAltText } = render(NetworkLogo, {
+	it('should render dark mode icon in dark mode', () => {
+		document.getElementsByTagName('html')[0].setAttribute('theme', 'dark');
+
+		const { getByTestId } = render(NetworkLogo, {
 			props: {
 				network: mockNetwork,
-				blackAndWhite: true,
 				testId
 			}
 		});
 
-		const logo = getByAltText(altText);
+		const logoLight = getByTestId(`${testId}-light`);
+		const logoDark = getByTestId(`${testId}-dark`);
 
-		expect(logo).toBeInTheDocument();
-		expect(logo).toHaveAttribute('src', ICP_NETWORK.iconBW);
+		const logoLightIsHiddenOnDark = logoLight.parentElement?.classList.contains('dark-hidden');
+		const logoDarkIsShownOnDark = logoDark.parentElement?.classList.contains('dark-block');
+
+		expect(logoLightIsHiddenOnDark).toBeTruthy();
+		expect(logoDarkIsShownOnDark).toBeTruthy();
 	});
 });

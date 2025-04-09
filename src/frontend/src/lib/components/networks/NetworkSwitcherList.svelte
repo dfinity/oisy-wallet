@@ -24,9 +24,6 @@
 </script>
 
 <NetworkButton
-	id={undefined}
-	name={$i18n.networks.chain_fusion}
-	icon={chainFusion}
 	usdBalance={mainnetTokensUsdBalance}
 	{selectedNetworkId}
 	{delayOnNetworkSelect}
