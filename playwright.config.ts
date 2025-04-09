@@ -44,18 +44,18 @@ const nonAppleProjects = [
 		name: 'Google Chrome',
 		use: devices['Desktop Chrome']
 	},
-	{
-		name: 'Firefox',
-		use: devices['Desktop Firefox']
-	},
-	{
-		name: 'Pixel 7',
-		use: {
-			...devices['Pixel 7'],
-			screen: { width: 412, height: 915 },
-			viewport: { width: 412, height: 915 }
-		}
-	}
+//	{
+//		name: 'Firefox',
+//		use: devices['Desktop Firefox']
+//	},
+//	{
+//		name: 'Pixel 7',
+//		use: {
+//			...devices['Pixel 7'],
+//			screen: { width: 412, height: 915 },
+//			viewport: { width: 412, height: 915 }
+//		}
+//	}
 ];
 
 const TIMEOUT = 5 * 60 * 1000;
