@@ -1,5 +1,7 @@
 import icpLight from '$icp/assets/icp_light.svg';
+import icpIconDark from '$lib/assets/networks/dark/icp.svg';
 import icpBW from '$lib/assets/networks/icp-bw.svg';
+import icpIconLight from '$lib/assets/networks/light/icp.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { Network, NetworkId } from '$lib/types/network';
@@ -30,5 +32,7 @@ export const ICP_NETWORK: Network = {
 	name: 'Internet Computer',
 	icon: icpLight,
 	iconBW: icpBW,
+	iconLight: icpIconLight,
+	iconDark: icpIconDark,
 	buy: { onramperId: 'icp' }
 };

@@ -2,7 +2,11 @@ import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env'
 import sepolia from '$eth/assets/sepolia.svg';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
+import ethereumIconDark from '$lib/assets/networks/dark/ethereum-mainnet.svg';
+import sepoliaIconDark from '$lib/assets/networks/dark/ethereum-sepolia.svg';
 import ethereumBW from '$lib/assets/networks/ethereum-bw.svg';
+import ethereumIconLight from '$lib/assets/networks/light/ethereum-mainnet.svg';
+import sepoliaIconLight from '$lib/assets/networks/light/ethereum-sepolia.svg';
 import sepoliaBW from '$lib/assets/networks/sepolia-bw.svg';
 import type { NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
@@ -41,6 +45,8 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	chainId: 1n,
 	icon: eth,
 	iconBW: ethereumBW,
+	iconLight: ethereumIconLight,
+	iconDark: ethereumIconDark,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
 	buy: { onramperId: 'ethereum' }
 };
@@ -58,6 +64,8 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	chainId: 11155111n,
 	icon: sepolia,
 	iconBW: sepoliaBW,
+	iconLight: sepoliaIconLight,
+	iconDark: sepoliaIconDark,
 	explorerUrl: SEPOLIA_EXPLORER_URL
 };
 
