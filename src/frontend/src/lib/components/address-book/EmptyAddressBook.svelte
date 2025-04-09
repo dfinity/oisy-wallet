@@ -1,5 +1,8 @@
 <script>
+	import Button from '$lib/components/ui/Button.svelte';
+	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 </script>
 
 <!-- This is a draft SVG. Add correct image when design is finalized -->
@@ -25,6 +28,8 @@
 		</g>
 	</svg>
 
-	<span class="m-0 text-xl font-bold">{$i18n.address_book.text.empty_title}</span>
+	<PageTitle>{$i18n.address_book.text.empty_title}</PageTitle>
 	<span class="text-center">{$i18n.address_book.text.empty_text}</span>
+
+	<Button on:click={modalStore.openContact}>{$i18n.address_book.text.add_new_contact}</Button>
 </div>

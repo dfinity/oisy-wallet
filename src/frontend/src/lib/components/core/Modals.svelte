@@ -2,6 +2,7 @@
 	import HideTokenModal from '$eth/components/tokens/HideTokenModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
+	import ContactModal from '$lib/components/address-book/ContactModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
@@ -16,7 +17,8 @@
 		modalRewardDetails,
 		modalSettingsState,
 		modalReferralCode,
-		modalAddressBook
+		modalAddressBook,
+		modalContact
 	} from '$lib/derived/modal.derived';
 
 	/**
@@ -41,5 +43,7 @@
 		<ReferralCodeModal />
 	{:else if $modalAddressBook}
 		<AddressBookModal />
+	{:else if $modalContact}
+		<ContactModal />
 	{/if}
 {/if}

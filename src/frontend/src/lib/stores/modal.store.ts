@@ -40,6 +40,7 @@ export interface Modal<T> {
 		| 'referral-code'
 		| 'referral-state'
 		| 'address-book'
+		| 'contact'
 		| 'dapp-details'
 		| 'vip-reward-state'
 		| 'reward-details'
@@ -86,7 +87,8 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAboutWhyOisy: () => void;
 	openVipQrCode: () => void;
 	openReferralCode: () => void;
-	openAddressBookCode: () => void;
+	openAddressBook: () => void;
+	openContact: () => void;
 	openReferralState: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
 	openVipRewardState: <D extends T>(data: D) => void;
@@ -144,7 +146,8 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: setType('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
-		openAddressBookCode: setType('address-book'),
+		openAddressBook: setType('address-book'),
+		openContact: setType('contact'),
 		openReferralState: setType('referral-state'),
 		openDappDetails: setTypeWithData('dapp-details'),
 		openVipRewardState: setTypeWithData('vip-reward-state'),
