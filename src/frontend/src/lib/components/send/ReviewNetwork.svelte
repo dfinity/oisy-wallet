@@ -3,6 +3,7 @@
 	import bitcoin from '$icp/assets/bitcoin.svg';
 	import eth from '$icp-eth/assets/eth.svg';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import SendBtcNetwork from '$lib/components/send/SendBtcNetwork.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';

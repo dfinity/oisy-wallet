@@ -1,4 +1,5 @@
 <script lang="ts">
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';

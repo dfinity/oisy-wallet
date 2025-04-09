@@ -5,6 +5,7 @@
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import type { Erc20Metadata } from '$eth/types/erc20';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';

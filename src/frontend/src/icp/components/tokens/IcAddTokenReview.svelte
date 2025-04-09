@@ -7,6 +7,7 @@
 		loadAndAssertAddCustomToken,
 		type ValidateTokenData
 	} from '$icp/services/ic-add-custom-tokens.service';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
