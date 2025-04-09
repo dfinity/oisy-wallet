@@ -3,14 +3,11 @@ import {
 	PostMessageCreatePowChallengeResponseSchema
 } from '$lib/schema/post-message.schema';
 import { solvePowChallenge } from '$lib/services/pow.services';
-import type {
-	PostMessageAllowSigningResponse,
-	PostMessageCreatePowChallengeResponse
-} from '$lib/types/post-message';
+import type { PostMessageAllowSigningResponse, PostMessageCreatePowChallengeResponse } from '$lib/types/post-message';
 import { routeWorkerResponse, sendMessageRequest } from '$lib/utils/worker.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-export const FIRST_TIMER_INTERVAL = 60_000;
+export const SCHEDULER_INTERVAL = 60_000;
 // in ms, can be changed dynamically by sending message setPowThrottle
 let _throttleRate = 20;
 
@@ -53,11 +50,11 @@ const startPowTimer = () => {
 	if (nonNullish(timer)) {
 		return;
 	}
-	timer = setInterval(allowSigning, FIRST_TIMER_INTERVAL);
+	timer = setInterval(allowSigning, SCHEDULER_INTERVAL);
 };
 
 async function allowSigning() {
-	// Step 1: CreatePoWChallenge
+	// Step 1: Call CreatePoWChallenge
 	const createPowChallengeResponse: PostMessageCreatePowChallengeResponse =
 		await sendMessageRequest<PostMessageCreatePowChallengeResponse>({
 			worker: self as unknown as Worker, // Pass as part of an object
@@ -67,6 +64,7 @@ async function allowSigning() {
 		});
 
 	let nonce;
+	// Step 2: Solve pow challenge
 	if ('Ok' in createPowChallengeResponse.result) {
 		const challengeData = createPowChallengeResponse.result.Ok;
 		nonce = await solvePowChallenge({
@@ -78,7 +76,7 @@ async function allowSigning() {
 		return; // Exit on error
 	}
 
-	// Step 2: AllowSigning
+	// Step 3: Call AllowSigning
 	const allowSigningResponse: PostMessageAllowSigningResponse =
 		await sendMessageRequest<PostMessageAllowSigningResponse>({
 			worker: self as unknown as Worker,

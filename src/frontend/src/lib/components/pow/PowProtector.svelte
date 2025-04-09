@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { type BaseWorker, initPowWorker } from '$lib/services/worker.pow.services';
-
 	let powWorker: BaseWorker | undefined;
 
 	onMount(async () => {
