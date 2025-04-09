@@ -1,25 +1,32 @@
-import type {
-	PostMessageDataRequestBtcSchema,
-	PostMessageDataRequestExchangeTimerSchema,
-	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
-	PostMessageDataRequestIcCkSchema,
-	PostMessageDataRequestIcrcSchema,
-	PostMessageDataRequestIcrcStrictSchema,
-	PostMessageDataRequestSchema,
-	PostMessageDataRequestSolSchema,
-	PostMessageDataResponseAuthSchema,
-	PostMessageDataResponseBTCAddressSchema,
-	PostMessageDataResponseErrorSchema,
-	PostMessageDataResponseExchangeErrorSchema,
-	PostMessageDataResponseExchangeSchema,
-	PostMessageDataResponseSchema,
-	PostMessageDataResponseWalletCleanUpSchema,
-	PostMessageDataResponseWalletSchema,
-	PostMessageJsonDataResponseSchema,
-	PostMessageResponseSchema,
-	PostMessageResponseStatusSchema,
-	PostMessageSyncStateSchema,
-	inferPostMessageSchema
+import {
+	PostMessageAllowSigningRequestSchema,
+	PostMessageAllowSigningResponseSchema,
+	PostMessageCreatePowChallengeRequestSchema,
+	PostMessageCreatePowChallengeResponseSchema,
+	type PostMessageBaseSchema,
+	type PostMessageDataRequestBtcSchema,
+	type PostMessageDataRequestExchangeTimerSchema,
+	type PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
+	type PostMessageDataRequestIcCkSchema,
+	type PostMessageDataRequestIcrcSchema,
+	type PostMessageDataRequestIcrcStrictSchema,
+	type PostMessageDataRequestSchema,
+	type PostMessageDataRequestSolSchema,
+	type PostMessageDataResponseAuthSchema,
+	type PostMessageDataResponseBTCAddressSchema,
+	type PostMessageDataResponseErrorSchema,
+	type PostMessageDataResponseExchangeErrorSchema,
+	type PostMessageDataResponseExchangeSchema,
+	type PostMessageDataResponseSchema,
+	type PostMessageDataResponseWalletCleanUpSchema,
+	type PostMessageDataResponseWalletSchema,
+	type PostMessageJsonDataResponseSchema,
+	type PostMessageRequestBaseSchema,
+	type PostMessageResponseBaseSchema,
+	type PostMessageResponseSchema,
+	type PostMessageResponseStatusSchema,
+	type PostMessageSyncStateSchema,
+	type inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 import type * as z from 'zod';
 import type { ZodType } from 'zod';
@@ -78,3 +85,20 @@ export type PostMessageDataResponseBTCAddress = z.infer<
 export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> = z.infer<
 	ReturnType<typeof inferPostMessageSchema<ZodType<T>>>
 >;
+
+// -----------------------------------------------------------------------------------------------
+// The post message types used for short polling between:
+// pow.worker.ts <--->  worker.pow.services.ts
+// -----------------------------------------------------------------------------------------------
+// Base Types
+export type PostMessageBase = z.infer<typeof PostMessageBaseSchema>;
+export type PostMessageRequestBase = z.infer<typeof PostMessageRequestBaseSchema>;
+export type PostMessageResponseBase = z.infer<typeof PostMessageResponseBaseSchema>;
+export type PostMessageCreatePowChallengeRequest = z.infer<
+	typeof PostMessageCreatePowChallengeRequestSchema
+>;
+export type PostMessageCreatePowChallengeResponse = z.infer<
+	typeof PostMessageCreatePowChallengeResponseSchema
+>;
+export type PostMessageAllowSigningRequest = z.infer<typeof PostMessageAllowSigningRequestSchema>;
+export type PostMessageAllowSigningResponse = z.infer<typeof PostMessageAllowSigningResponseSchema>;
