@@ -100,6 +100,22 @@
 			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?",
 			"error_while_signing_in": "Something went wrong while sign-in.",
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
+		},
+		"help": {
+			"text": {
+				"other_title": "Thanks for your feedback!",
+				"other_description": "Here are some helpful resources about <span class=\"font-bold\">security</span> and <span class=\"font-bold\">privacy</span> in $oisy_short and Internet Identity. We hope they help you make an informed decision:",
+				"other_introduction": "$oisy_short Introduction",
+				"other_docs": "$oisy_short docs: Internet Identity",
+				"other_private_key": "Who controls the private key for the native assets?",
+				"other_asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet"
+			},
+			"alt": {
+				"other_introduction": "Open $oisy_short Introduction",
+				"other_docs": "Open $oisy_short docs: Internet Identity",
+				"other_private_key": "Get help about who controls the private key for the native assets",
+				"other_asset_control": "Get information about Asset Control, Recovery, and Governance in $oisy_short Wallet"
+			}
 		}
 	},
 	"dapps": {

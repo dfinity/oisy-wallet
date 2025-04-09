@@ -144,3 +144,10 @@ export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-c
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
+
+export const HELP_AUTH_BACK_BUTTON = 'help-auth-back-button';
+export const HELP_AUTH_DONE_BUTTON = 'help-auth-done-button';
+export const HELP_AUTH_INTRODUCTION_LINK = 'help-auth-introduction-link';
+export const HELP_AUTH_DOCS_LINK = 'help-auth-docs-link';
+export const HELP_AUTH_PRIVATE_KEY_LINK = 'help-auth-private-key-link';
+export const HELP_AUTH_ASSET_CONTROL_LINK = 'help-auth-asset-control-link';

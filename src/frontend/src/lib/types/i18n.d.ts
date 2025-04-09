@@ -91,6 +91,22 @@ interface I18nAuth {
 		error_while_signing_in: string;
 		unexpected_issue_with_syncing: string;
 	};
+	help: {
+		text: {
+			other_title: string;
+			other_description: string;
+			other_introduction: string;
+			other_docs: string;
+			other_private_key: string;
+			other_asset_control: string;
+		};
+		alt: {
+			other_introduction: string;
+			other_docs: string;
+			other_private_key: string;
+			other_asset_control: string;
+		};
+	}
 }
 
 interface I18nDapps {
