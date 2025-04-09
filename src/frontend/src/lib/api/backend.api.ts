@@ -161,6 +161,19 @@ export const allowSigning = async ({
 	return allowSigning(request ? { request } : {});
 };
 
+
+export const allowSigningResult = async ({
+																					 request,
+																					 identity
+																				 }: CanisterApiFunctionParams<{
+	request?: AllowSigningRequest;
+}>): Promise<AllowSigningResponse> => {
+	const { allowSigningResult } = await backendCanister({ identity });
+
+	// Conditionally call allowSigning with request or empty
+	return allowSigning(request ? { request } : {});
+};
+
 export const addUserHiddenDappId = async ({
 																						identity,
 																						...params
