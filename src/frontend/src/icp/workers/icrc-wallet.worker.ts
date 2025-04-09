@@ -19,6 +19,7 @@ import type {
 	PostMessageDataRequestIcrc,
 	PostMessageDataRequestIcrcStrict
 } from '$lib/types/post-message';
+import { emit } from '$lib/utils/events.utils';
 import {
 	type IcrcIndexNgGetTransactions,
 	type IcrcTransaction,
@@ -106,7 +107,11 @@ const getBalanceAndTransactions = async (
 
 	// Ignoring the balance from the transactions' response.
 	// Even if it could cause some sort of lagged inconsistency, we prefer to always show the latest balance, in case the Index canister is not properly working.
-	const { balance: _, ...rest } = transactions;
+	const { balance: indexCanisterBalance, ...rest } = transactions;
+
+	if (balance !== indexCanisterBalance) {
+		emit({ message: 'oisyDiscordantIndexCanisterBalance' });
+	}
 
 	return { ...rest, balance };
 };
