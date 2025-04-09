@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import bitcoin from '$icp/assets/bitcoin.svg';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendBtcNetwork from '$lib/components/send/SendBtcNetwork.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -9,7 +10,6 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	export let sourceNetwork: Network | undefined;
 	export let destinationNetworkId: NetworkId | undefined = undefined;

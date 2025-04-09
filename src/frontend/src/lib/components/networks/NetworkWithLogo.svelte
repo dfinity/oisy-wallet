@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Network } from '$lib/types/network';
-	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
+	import type { Network } from '$lib/types/network';
 
 	export let network: Network;
 </script>

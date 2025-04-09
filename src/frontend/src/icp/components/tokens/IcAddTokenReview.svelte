@@ -7,6 +7,7 @@
 		loadAndAssertAddCustomToken,
 		type ValidateTokenData
 	} from '$icp/services/ic-add-custom-tokens.service';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -19,7 +20,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	export let ledgerCanisterId: string | undefined;
 	export let indexCanisterId: string | undefined;

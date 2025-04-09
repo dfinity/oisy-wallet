@@ -5,6 +5,7 @@
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import type { Erc20Metadata } from '$eth/types/erc20';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -15,7 +16,6 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;
