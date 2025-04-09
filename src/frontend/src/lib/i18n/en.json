@@ -912,7 +912,7 @@
 				},
 				"cross_device": {
 					"title": "Access your wallet anytime from anywhere",
-					"description": "Using <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.internetcomputer.org/\">Internet Identity</a>, $oisy_short can easily be used across all devices you have linked to your private decentralized identity. This ensures seamless and secure access to your wallet whether you're on a smartphone, tablet, or desktop."
+					"description": "Using <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a>, $oisy_short can easily be used across all devices you have linked to your private decentralized identity. This ensures seamless and secure access to your wallet whether you're on a smartphone, tablet, or desktop."
 				},
 				"verifiable_credentials": {
 					"title": "Unlock Extra Features with Verifiable Credentials",
