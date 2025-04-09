@@ -168,7 +168,7 @@ abstract class Homepage {
 		if (await this.isSelectorVisible({ selector })) {
 			const elementsLocator = this.#page.locator(selector);
 			await elementsLocator.evaluate((element) => (element.innerHTML = 'placeholder'));
-			await elementsLocator.locator('text=placeholder').waitFor();
+			await elementsLocator.locator('text=placeholder').first().waitFor();
 		}
 	}
 
@@ -180,7 +180,7 @@ abstract class Homepage {
 			}
 		});
 
-		await elementsLocator.locator('text=placeholder').waitFor();
+		await elementsLocator.locator('text=placeholder').first().waitFor();
 	}
 
 	private async goto(): Promise<void> {
