@@ -5,11 +5,11 @@ on:
     branches:
       - main
   pull_request:
-    types: [ opened, synchronize, labeled ]
+    types: [opened, synchronize, labeled]
   merge_group:
   workflow_dispatch:
 
-permissions: { }
+permissions: {}
 
 jobs:
   check-e2e-changes:
@@ -74,10 +74,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
-    needs: [ 'oisy-backend-wasm', 'check-e2e-changes' ]
+    needs: ['oisy-backend-wasm', 'check-e2e-changes']
     strategy:
       matrix:
-        os: [ ubuntu-24.04, macos-14 ]
+        os: [ubuntu-24.04, macos-14]
         test:
           - about-why-oisy-modal.spec.ts
           - activity-page.spec.ts
@@ -201,10 +201,10 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    needs: [ e2e ]
+    needs: [e2e]
     strategy:
       matrix:
-        os: [ ubuntu-24.04, macos-14 ]
+        os: [ubuntu-24.04, macos-14]
         test:
           - about-why-oisy-modal.spec.ts
           - activity-page.spec.ts
@@ -311,13 +311,13 @@ jobs:
 
   may-merge-e2e:
     if: always()
-    needs: [ 'check-e2e-changes', 'e2e', 'finalize-snapshots-update' ]
+    needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
     strategy:
       matrix:
-        os: [ ubuntu-24.04, macos-14 ]
+        os: [ubuntu-24.04, macos-14]
         test:
           - about-why-oisy-modal.spec.ts
           - activity-page.spec.ts
