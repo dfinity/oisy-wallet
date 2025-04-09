@@ -61,6 +61,23 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddDappSettingsError
 	});
+	const AllowSigningRequest = IDL.Record({ nonce: IDL.Nat64 });
+	const AllowSigningStatus = IDL.Variant({
+		Skipped: IDL.Null,
+		Failed: IDL.Null,
+		Executed: IDL.Null
+	});
+	const ChallengeCompletion = IDL.Record({
+		solved_duration_ms: IDL.Nat64,
+		next_allowance_ms: IDL.Nat64,
+		next_difficulty: IDL.Nat32,
+		current_difficulty: IDL.Nat32
+	});
+	const AllowSigningResponse = IDL.Record({
+		status: AllowSigningStatus,
+		challenge_completion: IDL.Opt(ChallengeCompletion),
+		allowed_cycles: IDL.Nat64
+	});
 	const ApproveError = IDL.Variant({
 		GenericError: IDL.Record({
 			message: IDL.Text,
@@ -88,7 +105,10 @@ export const idlFactory = ({ IDL }) => {
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
-	const Result_2 = IDL.Variant({ Ok: IDL.Null, Err: AllowSigningError });
+	const Result_2 = IDL.Variant({
+		Ok: AllowSigningResponse,
+		Err: AllowSigningError
+	});
 	const BitcoinNetwork = IDL.Variant({
 		mainnet: IDL.Null,
 		regtest: IDL.Null,
@@ -498,7 +518,7 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result_1], []),
-		allow_signing: IDL.Func([], [Result_2], []),
+		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [Result_2], []),
 		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_3], []),
 		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_4], []),
 		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_5], []),
@@ -506,6 +526,11 @@ export const idlFactory = ({ IDL }) => {
 		config: IDL.Func([], [Config], ['query']),
 		create_pow_challenge: IDL.Func([], [Result_6], []),
 		create_user_profile: IDL.Func([], [UserProfile], []),
+		get_account_creation_timestamps: IDL.Func(
+			[],
+			[IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))],
+			['query']
+		),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)], ['query']),
 		get_user_profile: IDL.Func([], [Result_7], ['query']),
