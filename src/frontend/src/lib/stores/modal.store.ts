@@ -43,7 +43,8 @@ export interface Modal<T> {
 		| 'vip-reward-state'
 		| 'reward-details'
 		| 'reward-state'
-		| 'settings';
+		| 'settings'
+		| 'auth-help';
 	data?: T;
 	id?: symbol;
 }
@@ -92,6 +93,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openRewardState: <D extends T>(data: D) => void;
 	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
 	openSettings: (data: SettingsModalType) => void;
+	openAuthHelp: (data: boolean) => void;
 	close: () => void;
 }
 
@@ -149,6 +151,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openRewardState: setTypeWithData('reward-state'),
 		// todo: explicitly define type here as well
 		openSettings: <(data: SettingsModalType) => void>setTypeWithData('settings'),
+		openAuthHelp: <(data: boolean) => void>setTypeWithData('auth-help'),
 		close: () => set(null),
 		subscribe
 	};

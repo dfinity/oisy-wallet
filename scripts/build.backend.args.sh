@@ -70,7 +70,7 @@ fi
 
 # URL used by II-issuer in the id_alias-verifiable credentials (hard-coded in II)
 # Represents more an ID than a URL
-II_VC_URL="https://identity.ic0.app"
+II_VC_URL="https://identity.internetcomputer.org"
 
 echo "Deploying backend with the following arguments: ${POUH_ISSUER_VC_URL}"
 

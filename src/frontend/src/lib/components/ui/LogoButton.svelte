@@ -54,9 +54,9 @@
 				{/if}
 				<span class="mr-2 flex"><slot name="logo" /></span>
 				<span class="flex min-w-0 flex-col text-left">
-					<span class="truncate text-nowrap text-base text-tertiary">
+					<span class="truncate text-nowrap text-base">
 						{#if hasTitleSlot}
-							<span class="font-bold"><slot name="title" /></span>
+							<span class="font-bold text-primary"><slot name="title" /></span>
 						{/if}
 						{#if hasSubtitleSlot}
 							{#if dividers}

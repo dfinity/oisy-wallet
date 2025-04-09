@@ -42,7 +42,7 @@
 		</span>
 
 		<span class:text-sm={condensed} slot="title">
-			{condensed ? data.name : data.symbol}
+			{asNetwork ? data.network.name : data.symbol}
 		</span>
 
 		<span class:text-sm={condensed} slot="subtitle">

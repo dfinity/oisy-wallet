@@ -59,7 +59,7 @@ jobs:
           persist-credentials: false
 
       - name: Install rust
-        uses: ./.github/actions/install-rust
+        run: scripts/setup rust
 
       - name: Install shfmt
         run: scripts/setup shfmt

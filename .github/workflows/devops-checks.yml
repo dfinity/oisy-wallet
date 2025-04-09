@@ -41,8 +41,7 @@ jobs:
         run: ./scripts/setup cargo-binstall zizmor
 
       - name: Lint GitHub workflows
-        run: |
-          scripts/lint.github.sh || echo "WARNING: Zizmor lints are still being addressed"
+        run: scripts/lint.github.sh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

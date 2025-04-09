@@ -1,4 +1,6 @@
 import type {
+	AllowSigningRequest,
+	AllowSigningResponse,
 	_SERVICE as BackendService,
 	CustomToken,
 	PendingTransaction,
@@ -173,14 +175,18 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	allowSigning = async (): Promise<void> => {
+	allowSigning = async (
+		allowSigningRequest: { request?: AllowSigningRequest } = {}
+	): Promise<AllowSigningResponse> => {
 		const { allow_signing } = this.caller({ certified: true });
+		const result = await allow_signing(
+			allowSigningRequest.request ? [allowSigningRequest.request] : []
+		);
 
-		const response = await allow_signing();
-
-		if ('Err' in response) {
-			throw mapAllowSigningError(response.Err);
+		if ('Err' in result) {
+			throw mapAllowSigningError(result.Err);
 		}
+		return result.Ok;
 	};
 
 	addUserHiddenDappId = async ({
