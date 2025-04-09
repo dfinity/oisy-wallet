@@ -19,7 +19,6 @@
 	import { getSplMetadata } from '$sol/services/spl.services';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 
 	export let tokenAddress: SplTokenAddress | undefined;
 	export let metadata: TokenMetadata | undefined;
@@ -124,9 +123,7 @@
 
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
-		<TextWithLogo name={network.name}>
-			<NetworkLogo slot="icon" {network} />
-		</TextWithLogo>
+		<TextWithLogo name={network.name} icon={network.icon} />
 	</Value>
 
 	<Value ref="contractSymbol" element="div">

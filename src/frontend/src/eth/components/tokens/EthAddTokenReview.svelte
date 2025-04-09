@@ -16,7 +16,6 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;
@@ -114,9 +113,7 @@
 
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
-		<TextWithLogo name={network.name}>
-			<NetworkLogo slot="icon" {network} />
-		</TextWithLogo>
+		<TextWithLogo name={network.name} icon={network.icon} />
 	</Value>
 
 	<Value ref="contractSymbol" element="div">

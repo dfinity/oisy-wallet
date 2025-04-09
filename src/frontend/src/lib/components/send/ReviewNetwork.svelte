@@ -11,7 +11,6 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 
 	export let sourceNetwork: Network | undefined;
 	export let destinationNetworkId: NetworkId | undefined = undefined;
@@ -32,9 +31,7 @@
 			>{#if showDestinationNetwork}{$i18n.send.text.source_network}{:else}{$i18n.send.text
 					.network}{/if}</svelte:fragment
 		>
-		<TextWithLogo name={sourceNetwork.name}>
-			<NetworkLogo slot="icon" network={sourceNetwork} />
-		</TextWithLogo>
+		<TextWithLogo name={sourceNetwork.name} icon={sourceNetwork.icon} />
 	</Value>
 {/if}
 
@@ -52,9 +49,10 @@
 				/>
 			</span>
 		{:else if isNetworkEthereum}
-			<TextWithLogo name={$ckEthereumTwinToken.network.name}>
-				<NetworkLogo slot="icon" network={$ckEthereumTwinToken.network} />
-			</TextWithLogo>
+			<TextWithLogo
+				name={$ckEthereumTwinToken.network.name}
+				icon={$ckEthereumTwinToken.network.icon ?? eth}
+			/>
 		{/if}
 	</Value>
 {/if}
