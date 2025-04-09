@@ -89,7 +89,8 @@ export const initPowWorker = async (): Promise<BaseWorker> => {
 			requestId: parsedPostMessage.requestId,
 			type: 'response',
 			result: mapCanisterResponse({
-				response, schema: CreatePowChallengeResponseResultSchema
+				response,
+				schema: CreatePowChallengeResponseResultSchema
 			})
 		};
 

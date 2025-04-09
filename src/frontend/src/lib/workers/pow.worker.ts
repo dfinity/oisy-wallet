@@ -63,7 +63,6 @@ async function allowSigning() {
 			schema: PostMessageCreatePowChallengeResponseSchema
 		});
 
-
 	let nonce;
 	if ('Ok' in createPowChallengeResponse.result) {
 		const challengeData = createPowChallengeResponse.result.Ok;
@@ -71,7 +70,6 @@ async function allowSigning() {
 			timestamp: challengeData.start_timestamp_ms,
 			difficulty: challengeData.difficulty
 		});
-
 	} else if ('Err' in createPowChallengeResponse.result) {
 		console.error('PoW challenge error:', createPowChallengeResponse.result.Err);
 		return; // Exit on error
@@ -85,7 +83,6 @@ async function allowSigning() {
 			data: { nonce },
 			schema: PostMessageAllowSigningResponseSchema
 		});
-
 
 	if ('Ok' in allowSigningResponse.result) {
 		console.warn('Allow signing successful:', allowSigningResponse.result.Ok);
