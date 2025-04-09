@@ -57,7 +57,7 @@ const initAuthStore = (): AuthStore => {
 					? /apple/i.test(navigator?.vendor)
 						? `http://localhost:4943?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
 						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-					: `https://identity.${domain ?? 'ic0.app'}`;
+					: `https://identity.${domain ?? 'internetcomputer.org'}`;
 
 				await authClient?.login({
 					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
