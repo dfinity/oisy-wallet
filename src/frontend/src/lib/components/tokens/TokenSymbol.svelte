@@ -11,6 +11,6 @@
 	{nonNullish(data.oisySymbol) ? data.oisySymbol.oisySymbol : data.symbol}
 
 	{#if nonNullish(data.network.iconLight) && nonNullish(data.network.iconDark) && !hideNetworkLogo}
-		<NetworkLogo network={data.network} blackAndWhite />
+		<NetworkLogo network={data.network} />
 	{/if}
 </div>
