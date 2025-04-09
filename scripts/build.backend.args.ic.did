@@ -7,7 +7,7 @@
          supported_credentials = opt vec {
             record {
               credential_type = variant { ProofOfUniqueness };
-              ii_origin = "https://identity.internetcomputer.org";
+              ii_origin = "https://identity.ic0.app";
               ii_canister_id = principal "rdmx6-jaaaa-aaaaa-aaadq-cai";
               issuer_origin = "https://id.decideai.xyz/";
               issuer_canister_id = principal "qgxyr-pyaaa-aaaah-qdcwq-cai";
