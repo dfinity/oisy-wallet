@@ -1,6 +1,7 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 import { render } from '@testing-library/svelte';
+import { expect } from 'vitest';
 
 describe('NetworkLogo', () => {
 	const mockNetwork = ICP_NETWORK;
@@ -42,9 +43,14 @@ describe('NetworkLogo', () => {
 		const logoLight = getByTestId(`${testId}-light`);
 		const logoDark = getByTestId(`${testId}-dark`);
 
-		const logoLightIsHiddenOnDark = logoLight.parentElement?.classList.contains('dark-hidden');
-		const logoDarkIsShownOnDark = logoDark.parentElement?.classList.contains('dark-block');
+		const logoLightContainer = getByTestId(`${testId}-light-container`);
+		const logoDarkContainer = getByTestId(`${testId}-dark-container`);
 
+		const logoLightIsHiddenOnDark = logoLightContainer.classList.contains('dark-hidden');
+		const logoDarkIsShownOnDark = logoDarkContainer.classList.contains('dark-block');
+
+		expect(logoLight).toBeInTheDocument();
+		expect(logoDark).toBeInTheDocument();
 		expect(logoLightIsHiddenOnDark).toBeTruthy();
 		expect(logoDarkIsShownOnDark).toBeTruthy();
 	});

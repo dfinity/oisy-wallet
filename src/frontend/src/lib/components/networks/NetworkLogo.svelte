@@ -12,7 +12,7 @@
 	export let testId: string | undefined = undefined;
 </script>
 
-<div class="dark-hidden block">
+<div class="dark-hidden block" data-tid={`${testId}-light-container`}>
 	<Logo
 		src={network.iconLight}
 		alt={replacePlaceholders($i18n.core.alt.logo, {
@@ -24,7 +24,7 @@
 	/>
 </div>
 
-<div class="dark-block hidden">
+<div class="dark-block hidden" data-tid={`${testId}-dark-container`}>
 	<Logo
 		src={network.iconDark}
 		alt={replacePlaceholders($i18n.core.alt.logo, {
