@@ -30,6 +30,7 @@
 
 <!--
 TODO: Find a way to have the "All networks" not be a fallback for undefined network, and without basically duplicating this component
+-->
 <LogoButton
 	{testId}
 	on:click={onClick}
