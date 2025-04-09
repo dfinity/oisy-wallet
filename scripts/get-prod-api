@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+NETWORK=ic
+CANISTER=backend
+DEPLOYED_COMMIT="$(dfx canister metadata "$CANISTER" git:commit --network "$NETWORK")"
+DID_PATH="target/ic/candid/$CANISTER.$DEPLOYED_COMMIT.did"
+mkdir -p "$(dirname "$DID_PATH")"
+test -e "$DID_PATH" || dfx canister metadata "$CANISTER" candid:service --network "$NETWORK" >"$DID_PATH"
+ln -s "$(basename "$DID_PATH")" "target/ic/candid/$CANISTER.$NETWORK.did"
