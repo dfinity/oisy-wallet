@@ -100,6 +100,40 @@
 			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?",
 			"error_while_signing_in": "Something went wrong while sign-in.",
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
+		},
+		"help": {
+			"text": {
+				"title": "Have issues with authentication?",
+				"description": "We noticed you cancelled authentication with Internet Identity. We'd love to understand what happened so we can improve your experience.",
+				"subtitle": "Did any of the following cause the issue?",
+				"lost_identity": "I lost my Internet Identity number",
+				"security": "I was concerned about security or privacy",
+				"got_confused": "I got confused during the process",
+				"other": "Other...",
+				"feedback_text": "Your feedback helps us to make the wallet better.",
+				"thanks_text": "Thank you!",
+				"identity_new_identity": "$oisy_short Wallet switches the Internet Identity domain to: <span class=\"font-bold\">identity.internetcomputer.org</span>",
+				"identity_legacy_description": "As a result, your Internet Identity number might not appear automatically, and you may need to re-enter it.",
+				"identity_legacy_sign_in": "Sign in with legacy Internet Identity domain",
+				"identity_learn_more": "Learn more on $oisy_short Docs",
+				"other_title": "Thanks for your feedback!",
+				"other_description": "Here are some helpful resources about <span class=\"font-bold\">security</span> and <span class=\"font-bold\">privacy</span> in $oisy_short and Internet Identity. We hope they help you make an informed decision:",
+				"other_introduction": "$oisy_short Introduction",
+				"other_docs": "$oisy_short docs: Internet Identity",
+				"other_private_key": "Who controls the private key for the native assets?",
+				"other_asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet",
+				"need_help": "Need help",
+				"sign_in": "signing in?"
+			},
+			"alt": {
+				"internet_identity": "Image of new Internet Identity",
+				"identity_learn_more": "Learn more about legacy Internet Identity",
+				"other_introduction": "Open $oisy_short Introduction",
+				"other_docs": "Open $oisy_short docs: Internet Identity",
+				"other_private_key": "Get help about who controls the private key for the native assets",
+				"other_asset_control": "Get information about Asset Control, Recovery, and Governance in $oisy_short Wallet",
+				"sign_in": "Need some help for signing in?"
+			}
 		}
 	},
 	"dapps": {
