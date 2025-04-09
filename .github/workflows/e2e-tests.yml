@@ -5,7 +5,7 @@ on:
     branches:
       - main
   pull_request:
-    types: [opened, synchronize, labeled]
+    types: [ opened, synchronize, labeled ]
   merge_group:
   workflow_dispatch:
 
@@ -13,7 +13,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions: {}
+permissions: { }
 
 jobs:
   check-e2e-changes:
@@ -78,12 +78,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
-    needs: ['oisy-backend-wasm', 'check-e2e-changes']
+    needs: [ 'oisy-backend-wasm', 'check-e2e-changes' ]
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
-    env:
-      MATRIX_OS: ${{ matrix.os }}
+        os: [ ubuntu-24.04, macos-14 ]
+        test:
+          - about-why-oisy-modal.spec.ts
+          - activity-page.spec.ts
+          - authentication.spec.ts
+          - enable-testnets.spec.ts
+          - explorer-page.spec.ts
+          - guards-page.spec.ts
+          - homepage.spec.ts
+          - manage-tokens.spec.ts
+          - receive-tokens-modal.spec.ts
+          - rewards-modal.spec.ts
+          - rewards-page.spec.ts
+          - send-and-receive-flow.spec.ts
+          - settings-page.spec.ts
+          - swap-modal.spec.ts
+          - transactions-page.spec.ts
     if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     outputs:
       ubuntu_status: ${{ steps.set_snapshot_output.outputs.ubuntu_status }}
@@ -132,13 +146,15 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Test
-        run: npm run e2e:ci
+        run: npm run e2e:ci -- e2e/$TEST_FILE
+        env:
+          TEST_FILE: ${{ env.TEST_FILE }}
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: playwright-report-${{ matrix.os }}
+          name: playwright-report-${{ matrix.os }}-${{ matrix.test }}
           path: playwright-report/
           retention-days: 3
 
@@ -146,7 +162,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: test-results-${{ matrix.os }}
+          name: test-results-${{ matrix.os }}-${{ matrix.test }}
           path: test-results/
           retention-days: 3
 
@@ -176,7 +192,7 @@ jobs:
         if: steps.check_snapshots.outputs.CHANGES == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: snapshots-${{ matrix.os }}
+          name: snapshots-${{ matrix.os }}-${{ matrix.test }}
           path: e2e/**/*.spec.ts-snapshots/**/*-${{ steps.set_snapshot_output.outputs.os_suffix }}.png
           retention-days: 3
 
@@ -186,7 +202,26 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    needs: [e2e]
+    needs: [ e2e ]
+    strategy:
+      matrix:
+        os: [ ubuntu-24.04, macos-14 ]
+        test:
+          - about-why-oisy-modal.spec.ts
+          - activity-page.spec.ts
+          - authentication.spec.ts
+          - enable-testnets.spec.ts
+          - explorer-page.spec.ts
+          - guards-page.spec.ts
+          - homepage.spec.ts
+          - manage-tokens.spec.ts
+          - receive-tokens-modal.spec.ts
+          - rewards-modal.spec.ts
+          - rewards-page.spec.ts
+          - send-and-receive-flow.spec.ts
+          - settings-page.spec.ts
+          - swap-modal.spec.ts
+          - transactions-page.spec.ts
     outputs:
       e2e-snapshots-changed: ${{ steps.e2e-check-snapshots.outputs.e2e-snapshots-changed }}
 
@@ -221,18 +256,10 @@ jobs:
           ubuntu_status: ${{ needs.e2e.outputs.ubuntu_status }}
           macos_status: ${{ needs.e2e.outputs.macos_status }}
 
-      - name: Download Ubuntu Snapshots
-        if: env.ubuntu_status == 'true'
+      - name: Download All Snapshot Artifacts
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
-          name: snapshots-ubuntu-24.04
-          path: e2e
-
-      - name: Download macOS Snapshots
-        if: env.macos_status == 'true'
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
-        with:
-          name: snapshots-macos-14
+          name: snapshots-${{ matrix.os }}-${{ matrix.test }}
           path: e2e
 
       - name: Check for Final Changes
@@ -282,13 +309,29 @@ jobs:
 
   may-merge-e2e:
     if: always()
-    needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
+    needs: [ 'check-e2e-changes', 'e2e', 'finalize-snapshots-update' ]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ ubuntu-24.04, macos-14 ]
+        test:
+          - about-why-oisy-modal.spec.ts
+          - activity-page.spec.ts
+          - authentication.spec.ts
+          - enable-testnets.spec.ts
+          - explorer-page.spec.ts
+          - guards-page.spec.ts
+          - homepage.spec.ts
+          - manage-tokens.spec.ts
+          - receive-tokens-modal.spec.ts
+          - rewards-modal.spec.ts
+          - rewards-page.spec.ts
+          - send-and-receive-flow.spec.ts
+          - settings-page.spec.ts
+          - swap-modal.spec.ts
+          - transactions-page.spec.ts
     steps:
       - name: Cleared for merging
         run: |
