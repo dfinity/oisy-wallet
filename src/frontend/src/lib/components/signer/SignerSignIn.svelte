@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import SignerAnimatedAstronaut from '$lib/components/signer/SignerAnimatedAstronaut.svelte';
+	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import {modalAuthHelp, modalAuthHelpData} from "$lib/derived/modal.derived";
-	import {nonNullish} from "@dfinity/utils";
-	import AuthHelpModal from "$lib/components/auth/AuthHelpModal.svelte";
 </script>
 
 <div class="flex justify-center pt-12">
