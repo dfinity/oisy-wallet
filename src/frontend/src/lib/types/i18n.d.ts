@@ -101,19 +101,25 @@ interface I18nAuth {
 			other: string;
 			feedback_text: string;
 			thanks_text: string;
-			other_title: string;
-			other_description: string;
-			other_introduction: string;
-			other_docs: string;
-			other_private_key: string;
-			other_asset_control: string;
+			identity_new_identity: string;
+			identity_legacy_description: string;
+			identity_legacy_sign_in: string;
+			identity_learn_more: string;
+            other_title: string;
+            other_description: string;
+            other_introduction: string;
+            other_docs: string;
+            other_private_key: string;
+            other_asset_control: string;
 		};
 		alt: {
-			other_introduction: string;
-			other_docs: string;
-			other_private_key: string;
-			other_asset_control: string;
-		};
+            internet_identity: string;
+            identity_learn_more: string;
+            other_introduction: string;
+            other_docs: string;
+            other_private_key: string;
+            other_asset_control: string;
+        };
 	};
 }
 
