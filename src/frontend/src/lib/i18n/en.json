@@ -103,19 +103,27 @@
 		},
 		"help": {
 			"text": {
-				"other_title": "Thanks for your feedback!",
-				"other_description": "Here are some helpful resources about <span class=\"font-bold\">security</span> and <span class=\"font-bold\">privacy</span> in $oisy_short and Internet Identity. We hope they help you make an informed decision:",
-				"other_introduction": "$oisy_short Introduction",
-				"other_docs": "$oisy_short docs: Internet Identity",
-				"other_private_key": "Who controls the private key for the native assets?",
-				"other_asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet"
+				"description": "We noticed you cancelled authentication with Internet Identity. We'd love to understand what happened so we can improve your experience.",
+				"subtitle": "Did any of the following cause the issue?",
+				"lost_identity": "I lost my Internet Identity number",
+				"security": "I was concerned about security or privacy",
+				"got_confused": "I got confused during the process",
+				"other": "Other...",
+				"feedback_text": "Your feedback helps us to make the wallet better.",
+				"thanks_text": "Thank you!",
+              "other_title": "Thanks for your feedback!",
+              "other_description": "Here are some helpful resources about <span class=\"font-bold\">security</span> and <span class=\"font-bold\">privacy</span> in $oisy_short and Internet Identity. We hope they help you make an informed decision:",
+              "other_introduction": "$oisy_short Introduction",
+              "other_docs": "$oisy_short docs: Internet Identity",
+              "other_private_key": "Who controls the private key for the native assets?",
+              "other_asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet"
 			},
-			"alt": {
-				"other_introduction": "Open $oisy_short Introduction",
-				"other_docs": "Open $oisy_short docs: Internet Identity",
-				"other_private_key": "Get help about who controls the private key for the native assets",
-				"other_asset_control": "Get information about Asset Control, Recovery, and Governance in $oisy_short Wallet"
-			}
+          "alt": {
+            "other_introduction": "Open $oisy_short Introduction",
+            "other_docs": "Open $oisy_short docs: Internet Identity",
+            "other_private_key": "Get help about who controls the private key for the native assets",
+            "other_asset_control": "Get information about Asset Control, Recovery, and Governance in $oisy_short Wallet"
+          }
 		}
 	},
 	"dapps": {
