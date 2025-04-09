@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 	import AuthHelpForm from '$lib/components/auth/AuthHelpForm.svelte';
 	import AuthHelpIdentityForm from '$lib/components/auth/AuthHelpIdentityForm.svelte';
 	import AuthHelpOtherForm from '$lib/components/auth/AuthHelpOtherForm.svelte';
@@ -9,7 +10,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import {onMount} from "svelte";
 
 	export let usesIdentityHelp = false;
 
