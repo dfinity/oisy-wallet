@@ -1,6 +1,7 @@
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
+import { nonNullish } from '@dfinity/utils';
 
 const getFilterCondition = ({ filter, token }: { filter: string; token: TokenUi }) =>
 	token.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
@@ -28,7 +29,7 @@ export const getFilteredTokenList: ({
 				const matchesGroup = group.tokens.some((token) => getFilterCondition({ filter, token }));
 
 				// If any token in the group matches, add the group to the result
-				if (matchesGroup) {
+				if (nonNullish(matchesGroup)) {
 					return [...acc, item];
 				}
 			}
