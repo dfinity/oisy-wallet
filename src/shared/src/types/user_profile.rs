@@ -83,3 +83,162 @@ pub struct ListUserCreationTimestampsResponse {
 pub enum GetUserProfileError {
     NotFound,
 }
+
+// Import the contact types
+use super::contact::{Contact, ContactError, ContactSettings};
+
+impl StoredUserProfile {
+    /// Adds a contact to the user profile
+    ///
+    /// # Arguments
+    /// * `profile_version` - The version of the user's profile for optimistic concurrency control
+    /// * `now` - The current timestamp
+    /// * `contact` - The contact to add
+    ///
+    /// # Returns
+    /// - Returns the updated user profile if successful
+    ///
+    /// # Errors
+    /// - Returns `ContactError::VersionMismatch` if the profile version doesn't match
+    /// - Returns `ContactError::ContactIdAlreadyExists` if a contact with the same ID already exists
+    pub fn add_contact(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        contact: Contact,
+    ) -> Result<Self, ContactError> {
+        // Check version
+        if let Some(version) = profile_version {
+            if let Some(current_version) = self.version {
+                if version != current_version {
+                    return Err(ContactError::VersionMismatch);
+                }
+            }
+        }
+
+        let mut new_profile = self.clone();
+        
+        // Initialize settings if not present
+        if new_profile.settings.is_none() {
+            new_profile.settings = Some(Default::default());
+        }
+        
+        let settings = new_profile.settings.as_mut().unwrap();
+        
+        // Check if contact ID already exists
+        if settings.contacts.contacts.iter().any(|c| c.id == contact.id) {
+            return Err(ContactError::ContactIdAlreadyExists);
+        }
+        
+        // Add the contact
+        settings.contacts.contacts.push(contact);
+        
+        // Update timestamp and version
+        new_profile.updated_timestamp = now;
+        new_profile.version = Some(now);
+        
+        Ok(new_profile)
+    }
+    
+    /// Updates an existing contact in the user profile
+    ///
+    /// # Arguments
+    /// * `profile_version` - The version of the user's profile for optimistic concurrency control
+    /// * `now` - The current timestamp
+    /// * `contact` - The updated contact
+    ///
+    /// # Returns
+    /// - Returns the updated user profile if successful
+    ///
+    /// # Errors
+    /// - Returns `ContactError::VersionMismatch` if the profile version doesn't match
+    /// - Returns `ContactError::ContactNotFound` if the contact doesn't exist
+    pub fn update_contact(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        contact: Contact,
+    ) -> Result<Self, ContactError> {
+        // Check version
+        if let Some(version) = profile_version {
+            if let Some(current_version) = self.version {
+                if version != current_version {
+                    return Err(ContactError::VersionMismatch);
+                }
+            }
+        }
+
+        let mut new_profile = self.clone();
+        
+        // Check if settings exist
+        if new_profile.settings.is_none() {
+            return Err(ContactError::ContactNotFound);
+        }
+        
+        let settings = new_profile.settings.as_mut().unwrap();
+        
+        // Find and update the contact
+        let contact_index = settings.contacts.contacts.iter().position(|c| c.id == contact.id)
+            .ok_or(ContactError::ContactNotFound)?;
+        
+        // Update the contact
+        settings.contacts.contacts[contact_index] = contact;
+        
+        // Update timestamp and version
+        new_profile.updated_timestamp = now;
+        new_profile.version = Some(now);
+        
+        Ok(new_profile)
+    }
+    
+    /// Deletes a contact from the user profile
+    ///
+    /// # Arguments
+    /// * `profile_version` - The version of the user's profile for optimistic concurrency control
+    /// * `now` - The current timestamp
+    /// * `contact_id` - The ID of the contact to delete
+    ///
+    /// # Returns
+    /// - Returns the updated user profile if successful
+    ///
+    /// # Errors
+    /// - Returns `ContactError::VersionMismatch` if the profile version doesn't match
+    /// - Returns `ContactError::ContactNotFound` if the contact doesn't exist
+    pub fn delete_contact(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        contact_id: String,
+    ) -> Result<Self, ContactError> {
+        // Check version
+        if let Some(version) = profile_version {
+            if let Some(current_version) = self.version {
+                if version != current_version {
+                    return Err(ContactError::VersionMismatch);
+                }
+            }
+        }
+
+        let mut new_profile = self.clone();
+        
+        // Check if settings exist
+        if new_profile.settings.is_none() {
+            return Err(ContactError::ContactNotFound);
+        }
+        
+        let settings = new_profile.settings.as_mut().unwrap();
+        
+        // Find the contact
+        let contact_index = settings.contacts.contacts.iter().position(|c| c.id == contact_id)
+            .ok_or(ContactError::ContactNotFound)?;
+        
+        // Remove the contact
+        settings.contacts.contacts.remove(contact_index);
+        
+        // Update timestamp and version
+        new_profile.updated_timestamp = now;
+        new_profile.version = Some(now);
+        
+        Ok(new_profile)
+    }
+}

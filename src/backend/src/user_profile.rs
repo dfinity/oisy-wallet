@@ -2,6 +2,7 @@ use std::result::Result;
 
 use ic_cdk::api::time;
 use shared::types::{
+    contact::{AddContactRequest, Contact, ContactError, DeleteContactRequest, UpdateContactRequest},
     dapp::AddDappSettingsError,
     network::{NetworkSettingsMap, SaveNetworksSettingsError, SaveTestnetsSettingsError},
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
@@ -141,5 +142,116 @@ pub fn add_hidden_dapp_id(
     let now = time();
     let new_profile = user_profile.add_hidden_dapp_id(profile_version, now, dapp_id)?;
     user_profile_model.store_new(principal, now, &new_profile);
+    Ok(())
+}
+
+/// Adds a new contact to the user's contact list
+///
+/// # Arguments
+/// * `principal` - The principal of the user
+/// * `request` - The request containing the contact to add and the current profile version
+/// * `user_profile_model` - The user profile model
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was added successfully
+///
+/// # Errors
+/// - Returns `ContactError` if the operation fails
+pub fn add_contact(
+    principal: StoredPrincipal,
+    request: AddContactRequest,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), ContactError> {
+    // Validate the request
+    request.check()?;
+    
+    // Get the user profile
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| ContactError::UserNotFound)?;
+    
+    // Add the contact
+    let now = time();
+    let new_profile = user_profile.add_contact(
+        request.current_user_version,
+        now,
+        request.contact,
+    )?;
+    
+    // Store the updated profile
+    user_profile_model.store_new(principal, now, &new_profile);
+    
+    Ok(())
+}
+
+/// Updates an existing contact in the user's contact list
+///
+/// # Arguments
+/// * `principal` - The principal of the user
+/// * `request` - The request containing the updated contact and the current profile version
+/// * `user_profile_model` - The user profile model
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was updated successfully
+///
+/// # Errors
+/// - Returns `ContactError` if the operation fails
+pub fn update_contact(
+    principal: StoredPrincipal,
+    request: UpdateContactRequest,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), ContactError> {
+    // Validate the request
+    request.check()?;
+    
+    // Get the user profile
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| ContactError::UserNotFound)?;
+    
+    // Update the contact
+    let now = time();
+    let new_profile = user_profile.update_contact(
+        request.current_user_version,
+        now,
+        request.contact,
+    )?;
+    
+    // Store the updated profile
+    user_profile_model.store_new(principal, now, &new_profile);
+    
+    Ok(())
+}
+
+/// Deletes a contact from the user's contact list
+///
+/// # Arguments
+/// * `principal` - The principal of the user
+/// * `request` - The request containing the ID of the contact to delete and the current profile version
+/// * `user_profile_model` - The user profile model
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was deleted successfully
+///
+/// # Errors
+/// - Returns `ContactError` if the operation fails
+pub fn delete_contact(
+    principal: StoredPrincipal,
+    request: DeleteContactRequest,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), ContactError> {
+    // Get the user profile
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| ContactError::UserNotFound)?;
+    
+    // Delete the contact
+    let now = time();
+    let new_profile = user_profile.delete_contact(
+        request.current_user_version,
+        now,
+        request.contact_id,
+    )?;
+    
+    // Store the updated profile
+    user_profile_model.store_new(principal, now, &new_profile);
+    
     Ok(())
 }

@@ -29,6 +29,9 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
+        contact::{
+            AddContactRequest, ContactError, DeleteContactRequest, UpdateContactRequest,
+        },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         migration::{Migration, MigrationProgress, MigrationReport},
@@ -50,14 +53,16 @@ use shared::{
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
-    Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
-    UserTokenMap,
+    Candid, ConfigCell, ContactMap, ContactUpdatedMap, CustomTokenMap, StoredPrincipal, 
+    UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
+    contacts::{add_contact as add_user_contact, delete_contact as delete_user_contact, get_contacts, update_contact as update_user_contact},
+    contacts_model::ContactsModel,
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
@@ -69,6 +74,8 @@ mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
+mod contacts;
+mod contacts_model;
 mod guards;
 mod heap_state;
 mod impls;
@@ -88,6 +95,8 @@ const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
+const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
+const CONTACT_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(7);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -102,6 +111,9 @@ thread_local! {
             // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
+            // Use `ContactsModel` to access and manage access to these states
+            contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
+            contact_updated: ContactUpdatedMap::init(mm.borrow().get(CONTACT_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             migration: None,
         })
@@ -155,6 +167,10 @@ pub struct State {
     custom_token: CustomTokenMap,
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
+    /// Stores user contacts
+    contact: ContactMap,
+    /// Tracks when contacts were last updated
+    contact_updated: ContactUpdatedMap,
     pow_challenge: PowChallengeMap,
     migration: Option<Migration>,
 }
@@ -863,6 +879,107 @@ pub fn set_snapshot(snapshot: UserSnapshot) {
 #[must_use]
 pub fn get_snapshot() -> Option<UserSnapshot> {
     todo!()
+}
+
+/// Adds a new contact to the user's contact list
+///
+/// # Arguments
+/// * `request` - The request containing the contact to add
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was added successfully
+///
+/// # Errors
+/// - Returns `ContactError` if the operation fails
+#[update(guard = "may_write_user_data")]
+pub fn add_contact(request: AddContactRequest) -> Result<(), ContactError> {
+    // Validate the request
+    request.check()?;
+    
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.contact, &mut s.contact_updated);
+        add_user_contact(
+            stored_principal,
+            request,
+            &mut contacts_model,
+        )
+    })
+}
+
+/// Updates an existing contact in the user's contact list
+///
+/// # Arguments
+/// * `request` - The request containing the updated contact
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was updated successfully
+///
+/// # Errors
+/// - Returns `ContactError` if the operation fails
+#[update(guard = "may_write_user_data")]
+pub fn update_contact(request: UpdateContactRequest) -> Result<(), ContactError> {
+    // Validate the request
+    request.check()?;
+    
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.contact, &mut s.contact_updated);
+        update_user_contact(
+            stored_principal,
+            request,
+            &mut contacts_model,
+        )
+    })
+}
+
+/// Deletes a contact from the user's contact list
+///
+/// # Arguments
+/// * `request` - The request containing the ID of the contact to delete
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was deleted successfully
+///
+/// # Errors
+/// - Returns `ContactError` if the operation fails
+#[update(guard = "may_write_user_data")]
+pub fn delete_contact(request: DeleteContactRequest) -> Result<(), ContactError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.contact, &mut s.contact_updated);
+        delete_user_contact(
+            stored_principal,
+            request,
+            &mut contacts_model,
+        )
+    })
+}
+
+/// Gets all contacts for the caller
+///
+/// # Returns
+/// - Returns the user's contacts (empty list if none exist)
+#[query(guard = "may_read_user_data")]
+#[must_use]
+pub fn get_user_contacts() -> ContactSettings {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let contacts_model =
+            ContactsModel::new(&mut s.contact, &mut s.contact_updated);
+        get_contacts(stored_principal, &contacts_model)
+    })
 }
 
 export_candid!();
