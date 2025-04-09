@@ -106,7 +106,7 @@ interface I18nAuth {
 			other_private_key: string;
 			other_asset_control: string;
 		};
-	}
+	};
 }
 
 interface I18nDapps {
