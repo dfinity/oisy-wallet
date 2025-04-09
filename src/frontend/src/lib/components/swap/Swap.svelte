@@ -16,7 +16,10 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalSwap } from '$lib/derived/modal.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { loadKongSwapTokens as loadKongSwapTokensService } from '$lib/services/swap.services';
+	import {
+		loadKongSwapTokens as loadKongSwapTokensService,
+		fetchPoolData
+	} from '$lib/services/swap.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
@@ -67,6 +70,11 @@
 			await nullishSignOut();
 			return;
 		}
+
+		
+		await fetchPoolData({
+				identity: $authIdentity
+			});
 
 		busy.start({ msg: $i18n.init.info.hold_loading });
 

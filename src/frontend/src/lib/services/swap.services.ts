@@ -21,6 +21,7 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { getPool } from '$lib/api/icp_swap.api';
 
 export const swap = async ({
 	identity,
@@ -117,3 +118,23 @@ export const loadKongSwapTokens = async ({ identity }: { identity: Identity }): 
 		)
 	);
 };
+
+
+const token0 = { address: 'ryjl3-tyaaa-aaaaa-aaaba-cai', standard: 'ICP' };
+const token1 = { address: 'mxzaz-hqaaa-aaaar-qaada-cai', standard: 'ICRC2' };
+const fee = 3000n;
+
+export const fetchPoolData = async ({ identity }: { identity: Identity }) => {
+  try {
+    const poolData = await getPool({
+      identity,
+      token0,
+      token1,
+      fee
+    });
+    console.log(poolData);
+  } catch (error) {
+    console.error('Error fetching pool data:', error);
+  }
+};
+
