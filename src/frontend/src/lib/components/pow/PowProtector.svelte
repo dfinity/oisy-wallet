@@ -26,8 +26,6 @@
 			powWorker = undefined;
 		}
 	}
-
-
 </script>
 
 <slot />
