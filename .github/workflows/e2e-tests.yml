@@ -98,9 +98,6 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.test }}
       cancel-in-progress: true
-    outputs:
-      ubuntu_status: ${{ steps.set_snapshot_output.outputs.ubuntu_status }}
-      macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
 
     steps:
       - name: Create GitHub App Token
@@ -176,10 +173,8 @@ jobs:
         id: set_snapshot_output
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
-            echo "ubuntu_status=$CHANGES" >> $GITHUB_OUTPUT
             echo "os_suffix=linux" >> $GITHUB_OUTPUT
           elif [ "$RUNNER_OS" = "macOS" ]; then
-            echo "macos_status=$CHANGES" >> $GITHUB_OUTPUT
             echo "os_suffix=darwin" >> $GITHUB_OUTPUT
           fi
         env:
@@ -225,14 +220,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
-
-      - name: Set snapshot status from previous jobs
-        run: |
-          echo "ubuntu_status=$ubuntu_status" >> $GITHUB_ENV
-          echo "macos_status=$macos_status" >> $GITHUB_ENV
-        env:
-          ubuntu_status: ${{ needs.e2e.outputs.ubuntu_status }}
-          macos_status: ${{ needs.e2e.outputs.macos_status }}
 
       - name: Download All Snapshot Artifacts
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
