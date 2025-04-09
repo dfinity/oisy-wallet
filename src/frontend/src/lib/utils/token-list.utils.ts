@@ -15,13 +15,13 @@ export const getFilteredTokenList: ({
 }) => TokenUiOrGroupUi[] = ({ filter, list }: { filter: string; list: TokenUiOrGroupUi[] }) =>
 	list.reduce<TokenUiOrGroupUi[]>((acc, item) => {
 		if (filter === '') {
-			acc.push(item);
+			return [...acc, item];
 		} else {
 			if (!isTokenUiGroup(item)) {
 				const token = item.token;
 
 				if (getFilterCondition({ filter, token })) {
-					acc.push(item);
+					return [...acc, item];
 				}
 			} else {
 				const group = item.group;
@@ -29,11 +29,10 @@ export const getFilteredTokenList: ({
 
 				// If any token in the group matches, add the group to the result
 				if (matchesGroup) {
-					acc.push(item);
+					return [...acc, item];
 				}
 			}
 		}
-
 		return acc;
 	}, []);
 
