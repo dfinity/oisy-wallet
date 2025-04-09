@@ -5,7 +5,7 @@ use super::{CandidType, Debug, Deserialize};
 // -------------------------------------------------------------------------------------------------
 // If `POW_ENABLED` is false, PoW protection remains disabled, preserving the original behavior
 // of the `allow_signing` function.
-pub const POW_ENABLED: bool = true;
+pub const POW_ENABLED: bool = false;
 
 // If set to `true`, the difficulty for a principal auto-adjusts after each solved challenge,
 // starting at `START_DIFFICULTY`.
