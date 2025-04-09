@@ -1,19 +1,11 @@
 import {
-	ETH_MAINNET_ENABLED,
 	ETHEREUM_NETWORK,
+	ETH_MAINNET_ENABLED,
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
-import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
-import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
-import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
-import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
-import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
-import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
-import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { TokenId } from '$lib/types/token';
@@ -75,11 +67,11 @@ const ERC20_CONTRACT_ADDRESS_WETH: Erc20Contract = {
 };
 
 export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
-	{
-		// Weenus
-		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9',
-		exchange: 'erc20'
-	}
+	// {
+	// 	// Weenus
+	// 	address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9',
+	// 	exchange: 'erc20'
+	// }
 ];
 
 export const ERC20_CONTRACT_ICP_GOERLI: Erc20Contract = {
@@ -95,16 +87,16 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 };
 
 export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
-	ERC20_CONTRACT_ICP,
-	ERC20_CONTRACT_ADDRESS_1INCH,
-	ERC20_CONTRACT_ADDRESS_DMAIL,
-	ERC20_CONTRACT_ADDRESS_MATIC,
-	ERC20_CONTRACT_ADDRESS_JASMY,
-	ERC20_CONTRACT_ADDRESS_DAI,
-	ERC20_CONTRACT_ADDRESS_FLOKI,
-	ERC20_CONTRACT_ADDRESS_RNDR,
-	ERC20_CONTRACT_ADDRESS_WEEETH,
-	ERC20_CONTRACT_ADDRESS_WETH
+	// ERC20_CONTRACT_ICP,
+	// ERC20_CONTRACT_ADDRESS_1INCH,
+	// ERC20_CONTRACT_ADDRESS_DMAIL,
+	// ERC20_CONTRACT_ADDRESS_MATIC,
+	// ERC20_CONTRACT_ADDRESS_JASMY,
+	// ERC20_CONTRACT_ADDRESS_DAI,
+	// ERC20_CONTRACT_ADDRESS_FLOKI,
+	// ERC20_CONTRACT_ADDRESS_RNDR,
+	// ERC20_CONTRACT_ADDRESS_WEEETH,
+	// ERC20_CONTRACT_ADDRESS_WETH
 ];
 
 export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] = [
@@ -122,24 +114,10 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 
 export const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [
 	SEPOLIA_USDC_TOKEN,
-	SEPOLIA_EURC_TOKEN,
-	SEPOLIA_LINK_TOKEN,
-	SEPOLIA_PEPE_TOKEN
+	SEPOLIA_EURC_TOKEN
 ];
 
-export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
-	USDC_TOKEN,
-	LINK_TOKEN,
-	PEPE_TOKEN,
-	OCT_TOKEN,
-	SHIB_TOKEN,
-	WBTC_TOKEN,
-	USDT_TOKEN,
-	WSTETH_TOKEN,
-	UNI_TOKEN,
-	EURC_TOKEN,
-	XAUT_TOKEN
-];
+export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [USDC_TOKEN, EURC_TOKEN];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
 	...(ETH_MAINNET_ENABLED ? ERC20_TWIN_TOKENS_MAINNET : []),

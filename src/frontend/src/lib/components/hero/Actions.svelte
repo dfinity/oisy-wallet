@@ -35,10 +35,10 @@
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
 
 	let convertEth = false;
-	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
+	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized && false;
 
 	let convertErc20 = false;
-	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
+	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized && false;
 
 	let convertCkBtc = false;
 	$: convertCkBtc =
@@ -52,7 +52,7 @@
 
 	let swapAction = false;
 	$: swapAction =
-		SWAP_ACTION_ENABLED && (!isTransactionsPage || (isTransactionsPage && $networkICP));
+		SWAP_ACTION_ENABLED && (!isTransactionsPage || (isTransactionsPage && $networkICP)) && false;
 
 	let sendAction = true;
 	$: sendAction = !$allBalancesZero || isTransactionsPage;
