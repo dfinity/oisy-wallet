@@ -4,6 +4,7 @@ import type {
 	CustomToken,
 	PendingTransaction,
 	Result_2 as AllowSigningResult,
+	Result_6 as CreateChallengeResult,
 	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserToken
@@ -140,7 +141,15 @@ export const selectUserUtxosFee = async ({
 	return btcSelectUserUtxosFee(params);
 };
 
-// keeping the existing implementation to not beak the existing integration
+
+export const createPowChallenge = async ({
+																					 identity
+																				 }: CanisterApiFunctionParams): Promise<CreateChallengeResult> => {
+	const { createPowChallengeResult } = await backendCanister({ identity });
+
+	return createPowChallengeResult();
+};
+
 export const allowSigning = async ({
 																		 request,
 																		 identity
