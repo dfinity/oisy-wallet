@@ -1,11 +1,17 @@
 // Authentication
 export const TRACK_COUNT_SIGN_IN_CLICK = 'sign_in_click_count';
+export const TRACK_COUNT_LEGACY_SIGN_IN_CLICK = 'sign_in_legacy_click_count';
 export const TRACK_COUNT_SIGN_IN_SUCCESS = 'sign_in_success_count';
 export const TRACK_SIGN_IN_CANCELLED_COUNT = 'sign_in_cancelled_count';
 export const TRACK_SIGN_IN_ERROR_COUNT = 'sign_in_error_count';
 export const TRACK_SYNC_AUTH_AUTHENTICATED_COUNT = 'sync_auth_authenticated_count';
 export const TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT = 'sync_auth_not_authenticated_count';
 export const TRACK_SYNC_AUTH_ERROR_COUNT = 'sync_auth_error_count';
+export const TRACK_HELP_LOST_INTERNET_IDENTITY = 'help_lost_internet_identity_count';
+export const TRACK_HELP_SIGNING_IN = 'help_signing_in_count';
+export const TRACK_HELP_CONCERNED_ABOUT_SECURITY = 'help_concerned_about_security_count';
+export const TRACK_HELP_GOT_CONFUSED = 'help_got_confused_count';
+export const TRACK_HELP_OTHER = 'help_other_count';
 
 // Ethereum
 export const TRACK_COUNT_ETH_SEND_SUCCESS = 'eth_send_success_count';
