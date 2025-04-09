@@ -59,7 +59,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.network }}-${{ github.event.inputs.canister }}
   cancel-in-progress: false
 
-permissions: { }
+permissions: {}
 
 jobs:
   deployment:
@@ -306,7 +306,7 @@ jobs:
             echo "Deployment to NETWORK=$NETWORK is not allowed"
             exit 1
           fi
-          
+
           if [ "$deploy_frontend" == "true" ] ; then
             dfx deploy frontend --network $NETWORK
           fi
@@ -336,7 +336,7 @@ jobs:
             echo "Deployment to NETWORK=$NETWORK is not allowed"
             exit 1
           fi
-          
+
           DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
           [[ "$FORCE_BACKEND" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
