@@ -135,7 +135,10 @@ export class EtherscanProvider {
 			this.getInternalHistory(params)
 		]);
 
-		return results.reduce<Transaction[]>((acc, res) => [...acc, ...(res.status === 'fulfilled' ? res.value : [])], []);
+		return results.reduce<Transaction[]>(
+			(acc, res) => [...acc, ...(res.status === 'fulfilled' ? res.value : [])],
+			[]
+		);
 	};
 }
 
