@@ -27,9 +27,11 @@ describe('NetworkLogo', () => {
 			}
 		});
 
-		const logo = getByTestId(`${testId}-light`);
+		const logoLight = getByTestId(`${testId}-light`);
+		const logoDark = getByTestId(`${testId}-dark`);
 
-		expect(logo).toBeVisible();
+		expect(logoLight).toBeVisible();
+		expect(logoDark).toBeVisible();
 	});
 
 	it('should render dark mode icon in dark mode', () => {
