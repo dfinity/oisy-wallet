@@ -59,10 +59,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.network }}-${{ github.event.inputs.canister }}
   cancel-in-progress: false
 
-permissions: {}
+permissions: { }
 
 jobs:
   deployment:
+    if: "${{ github.event.inputs.network != 'ic' && github.event.inputs.network != 'prod' && inputs.network != 'ic' && inputs.network != 'prod' }}"
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -301,6 +302,11 @@ jobs:
 
       - name: Deploy Frontend to Environment
         run: |
+          if [ "$NETWORK" == "ic" ] || [ "$NETWORK" == "prod" ]; then
+            echo "Deployment to NETWORK=$NETWORK is not allowed"
+            exit 1
+          fi
+          
           if [ "$deploy_frontend" == "true" ] ; then
             dfx deploy frontend --network $NETWORK
           fi
@@ -326,6 +332,11 @@ jobs:
 
       - name: Deploy Backend to Environment
         run: |
+          if [ "$NETWORK" == "ic" ] || [ "$NETWORK" == "prod" ]; then
+            echo "Deployment to NETWORK=$NETWORK is not allowed"
+            exit 1
+          fi
+          
           DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
           [[ "$FORCE_BACKEND" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
