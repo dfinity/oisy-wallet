@@ -121,7 +121,9 @@
 				"other_introduction": "$oisy_short Introduction",
 				"other_docs": "$oisy_short docs: Internet Identity",
 				"other_private_key": "Who controls the private key for the native assets?",
-				"other_asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet"
+				"other_asset_control": "Asset Control, Recovery, and Governance in $oisy_short Wallet",
+				"need_help": "Need help",
+				"sign_in": "signing in?"
 			},
 			"alt": {
 				"internet_identity": "Image of new Internet Identity",
@@ -129,7 +131,8 @@
 				"other_introduction": "Open $oisy_short Introduction",
 				"other_docs": "Open $oisy_short docs: Internet Identity",
 				"other_private_key": "Get help about who controls the private key for the native assets",
-				"other_asset_control": "Get information about Asset Control, Recovery, and Governance in $oisy_short Wallet"
+				"other_asset_control": "Get information about Asset Control, Recovery, and Governance in $oisy_short Wallet",
+				"sign_in": "Need some help for signing in?"
 			}
 		}
 	},
