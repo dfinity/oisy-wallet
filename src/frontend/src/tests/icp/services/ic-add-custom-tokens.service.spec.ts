@@ -1,14 +1,13 @@
-import { ICP_NETWORK } from '$env/networks/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { loadAndAssertAddCustomToken } from '$icp/services/ic-add-custom-tokens.service';
 import type { IcCanisters, IcToken } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
-import * as agent from '$lib/actors/agents.ic';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import type { HttpAgent } from '@dfinity/agent';
 import { IcrcIndexNgCanister, IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { get } from 'svelte/store';
@@ -69,7 +68,6 @@ describe('ic-add-custom-tokens.service', () => {
 			spyIndexCreate = vi
 				.spyOn(IcrcIndexNgCanister, 'create')
 				.mockImplementation(() => indexCanisterMock);
-			vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
 		});
 
 		describe('error', () => {
@@ -377,7 +375,7 @@ describe('ic-add-custom-tokens.service', () => {
 					expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 						account: getIcrcAccount(mockIdentity.getPrincipal()),
 						certified: true,
-						max_results: 0n,
+						max_results: ZERO_BI,
 						start: undefined
 					});
 				});

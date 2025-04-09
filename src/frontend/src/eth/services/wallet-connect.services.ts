@@ -1,8 +1,6 @@
-import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
 import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/fee.store';
 import type { SendParams } from '$eth/types/send';
-import type { OptionWalletConnectListener, WalletConnectListener } from '$eth/types/wallet-connect';
 import {
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash
@@ -13,64 +11,36 @@ import {
 	TRACK_COUNT_WC_ETH_SEND_ERROR,
 	TRACK_COUNT_WC_ETH_SEND_SUCCESS
 } from '$lib/constants/analytics.contants';
+import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
+import {
+	execute,
+	type WalletConnectCallBackParams,
+	type WalletConnectExecuteParams
+} from '$lib/services/wallet-connect.services';
 import { authStore } from '$lib/stores/auth.store';
-import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ResultSuccess } from '$lib/types/utils';
+import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
-import { getSdkError } from '@walletconnect/utils';
-import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 import { get } from 'svelte/store';
 
-export interface WalletConnectCallBackParams {
-	request: Web3WalletTypes.SessionRequest;
-	listener: WalletConnectListener;
-}
-
-export type WalletConnectExecuteParams = Pick<WalletConnectCallBackParams, 'request'> & {
-	listener: OptionWalletConnectListener;
-};
-
-export type WalletConnectSendParams = WalletConnectExecuteParams & {
+type WalletConnectSendParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	address: OptionEthAddress;
 	fee: FeeStoreData;
 	modalNext: () => void;
-	amount: BigNumber;
+	amount: bigint;
 } & SendParams;
 
-export type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
+type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	modalNext: () => void;
 	progress: (step: ProgressStepsSign) => void;
 };
-
-export const reject = (params: WalletConnectExecuteParams): Promise<ResultSuccess> =>
-	execute({
-		params,
-		callback: async ({
-			request,
-			listener
-		}: WalletConnectCallBackParams): Promise<ResultSuccess> => {
-			busy.start();
-
-			const { id, topic } = request;
-
-			try {
-				await listener.rejectRequest({ topic, id, error: getSdkError('USER_REJECTED') });
-
-				return { success: true };
-			} finally {
-				busy.stop();
-			}
-		},
-		toastMsg: get(i18n).wallet_connect.error.request_rejected
-	});
 
 export const send = ({
 	address,
@@ -168,7 +138,7 @@ export const send = ({
 				return { success: false };
 			}
 
-			const { to, gas: gasWC, data } = firstParam;
+			const { to, gas: gasWC, data } = firstParam as { to: string; gas?: string; data?: string };
 
 			modalNext();
 
@@ -182,7 +152,7 @@ export const send = ({
 					amount,
 					maxFeePerGas,
 					maxPriorityFeePerGas,
-					gas: nonNullish(gasWC) ? BigNumber.from(gasWC) : gas,
+					gas: nonNullish(gasWC) ? BigInt(gasWC) : gas,
 					data,
 					identity,
 					minterInfo,
@@ -252,7 +222,7 @@ export const signMessage = ({
 							identity,
 							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 						});
-					} catch (err: unknown) {
+					} catch (_err: unknown) {
 						// If the above failed, it's because JSON.parse throw an exception.
 						// We are assuming that it did so because it tried to parse a string that does not represent an object.
 						// Therefore, we continue with a message as hex string.
@@ -267,7 +237,7 @@ export const signMessage = ({
 
 				const signedMessage = await sign(params);
 
-				progress(ProgressStepsSign.APPROVE);
+				progress(ProgressStepsSign.APPROVE_WALLET_CONNECT);
 
 				await listener.approveRequest({ topic, id, message: signedMessage });
 
@@ -282,55 +252,3 @@ export const signMessage = ({
 		},
 		toastMsg: get(i18n).wallet_connect.info.sign_executed
 	});
-
-const execute = async ({
-	params: { request, listener },
-	callback,
-	toastMsg
-}: {
-	params: WalletConnectExecuteParams;
-	callback: (params: WalletConnectCallBackParams) => Promise<ResultSuccess>;
-	toastMsg: string;
-}): Promise<ResultSuccess> => {
-	const {
-		wallet_connect: {
-			error: { no_connection_opened, request_not_defined, unexpected_processing_request }
-		}
-	} = get(i18n);
-
-	if (isNullish(listener)) {
-		toastsError({
-			msg: { text: no_connection_opened }
-		});
-		return { success: false };
-	}
-
-	if (isNullish(request)) {
-		toastsError({
-			msg: { text: request_not_defined }
-		});
-		return { success: false };
-	}
-
-	try {
-		const { success, err } = await callback({ request, listener });
-
-		if (!success) {
-			return { success, err };
-		}
-
-		toastsShow({
-			text: toastMsg,
-			level: 'info',
-			duration: 2000
-		});
-	} catch (err: unknown) {
-		toastsError({
-			msg: { text: unexpected_processing_request },
-			err
-		});
-		return { success: false, err };
-	}
-
-	return { success: true };
-};

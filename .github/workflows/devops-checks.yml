@@ -1,0 +1,61 @@
+name: Check devops code
+
+on:
+  pull_request:
+    paths:
+      - # Note: shell scripts not ending in .sh can be found with: scripts/format.sh.sh --list | grep -vE '[.]sh$'
+        '**/*.sh'
+  merge_group:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  lint-shell:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install shellcheck
+        run: ./scripts/setup shellcheck
+
+      - name: Lint shell scripts
+        run: scripts/lint.sh.sh
+
+  lint-github-actions:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install zizmor
+        run: ./scripts/setup cargo-binstall zizmor
+
+      - name: Lint GitHub workflows
+        run: |
+          scripts/lint.github.sh || echo "WARNING: Zizmor lints are still being addressed"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  devops-checks-pass:
+    needs: ['lint-shell', 'lint-github-actions']
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/needs_success
+        with:
+          needs: '${{ toJson(needs) }}'

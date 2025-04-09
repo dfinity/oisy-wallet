@@ -1,5 +1,4 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -54,7 +53,7 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
-		...(SOLANA_NETWORK_ENABLED ? [SOLANA_TOKEN] : []),
+		SOLANA_TOKEN,
 		...$icrcChainFusionDefaultTokens
 	]
 );
@@ -71,15 +70,6 @@ export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 	[enabledTokens],
 	([$enabledTokens]) =>
 		$enabledTokens.filter(({ standard }) => standard === 'erc20') as Erc20Token[]
-);
-
-// TODO: add tests when https://github.com/dfinity/oisy-wallet/pull/2450 is merged
-/**
- * The following store is used as reference for the list of WalletWorkers that are started/stopped in the main token page.
- */
-export const enabledBtcTokens: Readable<Token[]> = derived(
-	[enabledBitcoinTokens],
-	filterEnabledTokens
 );
 
 /**

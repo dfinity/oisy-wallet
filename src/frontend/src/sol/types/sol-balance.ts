@@ -1,3 +1,3 @@
-import type { Lamports } from '@solana/rpc-types';
+import type { Lamports } from '@solana/kit';
 
 export type SolBalance = Lamports | bigint;

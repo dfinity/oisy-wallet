@@ -36,7 +36,8 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance, sendTokenExchangeRate } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
@@ -46,6 +47,7 @@
 		token={$sendToken}
 		balance={$sendBalance}
 		source={$ethAddress ?? ''}
+		exchangeRate={$sendTokenExchangeRate}
 	>
 		<FeeDisplay slot="fee" />
 

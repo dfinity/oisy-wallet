@@ -13,7 +13,6 @@ import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-to
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Token } from '$lib/types/token';
 import type { UserTokenState } from '$lib/types/token-toggleable';
-
 import { parseTokenId } from '$lib/validation/token.validation';
 
 type MapErc20TokenParams = Erc20Contract &
@@ -79,3 +78,5 @@ export const icTokenEthereumUserToken = (token: Token): token is EthereumUserTok
 
 export const icTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
 	token.standard === 'erc20' && 'enabled' in token && 'address' in token && 'exchange' in token;
+
+export const isTokenErc20 = (token: Token): token is Erc20Token => token.standard === 'erc20';

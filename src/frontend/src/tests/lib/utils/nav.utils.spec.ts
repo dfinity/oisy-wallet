@@ -1,5 +1,6 @@
 import * as appNavigation from '$app/navigation';
-import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	AppPath,
 	NETWORK_PARAM,
@@ -12,6 +13,7 @@ import {
 	gotoReplaceRoot,
 	isRouteActivity,
 	isRouteDappExplorer,
+	isRouteRewards,
 	isRouteSettings,
 	isRouteTokens,
 	isRouteTransactions,
@@ -242,9 +244,10 @@ describe('nav.utils', () => {
 
 		describe('isRouteTransactions', () => {
 			it('should return true when route id matches Transactions path', () => {
-				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(
-					true
-				);
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`;
+
+				expect(isRouteTransactions(mockPage(mockPath))).toBe(true);
+				expect(isRouteTransactions(mockPage(mockPath.slice(0, -1)))).toBe(true);
 			});
 
 			it('should return false when route id does not match Transactions path', () => {
@@ -261,9 +264,10 @@ describe('nav.utils', () => {
 		});
 
 		describe('isRouteSettings', () => {
-			it('should return true when route id matches Settings path', () => {
-				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(true);
-			});
+			const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Settings}`;
+
+			expect(isRouteSettings(mockPage(mockPath))).toBe(true);
+			expect(isRouteSettings(mockPage(mockPath.slice(0, -1)))).toBe(true);
 
 			it('should return false when route id does not match Settings path', () => {
 				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
@@ -280,7 +284,10 @@ describe('nav.utils', () => {
 
 		describe('isRouteDappExplorer', () => {
 			it('should return true when route id matches Explore path', () => {
-				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Explore}`))).toBe(true);
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
+
+				expect(isRouteDappExplorer(mockPage(mockPath))).toBe(true);
+				expect(isRouteDappExplorer(mockPage(mockPath.slice(0, -1)))).toBe(true);
 			});
 
 			it('should return false when route id does not match Explore path', () => {
@@ -298,7 +305,10 @@ describe('nav.utils', () => {
 
 		describe('isRouteActivity', () => {
 			it('should return true when route id matches Activity path', () => {
-				expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Activity}`))).toBe(true);
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Activity}`;
+
+				expect(isRouteActivity(mockPage(mockPath))).toBe(true);
+				expect(isRouteActivity(mockPage(mockPath.slice(0, -1)))).toBe(true);
 			});
 
 			it('should return false when route id does not match Activity path', () => {
@@ -317,6 +327,10 @@ describe('nav.utils', () => {
 				expect(isRouteTokens(mockPage(ROUTE_ID_GROUP_APP))).toBe(true);
 			});
 
+			it('should return true when route id matches Wallet Connect path', () => {
+				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`))).toBe(true);
+			});
+
 			it('should return false when route id does not match ROUTE_ID_GROUP_APP exactly', () => {
 				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
 
@@ -325,6 +339,25 @@ describe('nav.utils', () => {
 				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(false);
 
 				expect(isRouteTokens(mockPage('/anotherGroup'))).toBe(false);
+			});
+		});
+
+		describe('isRouteAirdrops', () => {
+			it('should return true when route id matches Airdrops path', () => {
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
+
+				expect(isRouteRewards(mockPage(mockPath))).toBe(true);
+				expect(isRouteRewards(mockPage(mockPath.slice(0, -1)))).toBe(true);
+			});
+
+			it('should return false when route id does not match Airdrops path', () => {
+				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+
+				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+
+				expect(isRouteRewards(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBe(false);
 			});
 		});
 	});

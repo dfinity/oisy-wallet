@@ -17,7 +17,7 @@ import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.ut
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { fromNullishNullable, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	requestVerifiablePresentation,
 	type VerifiablePresentationResponse
@@ -44,7 +44,7 @@ const addPouhCredential = async ({
 				arguments: []
 			},
 			issuerCanisterId,
-			currentUserVersion: fromNullable(userProfile?.profile.version ?? []),
+			currentUserVersion: fromNullishNullable(userProfile?.profile.version),
 			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 		});
 		if ('Ok' in response) {

@@ -1,3 +1,4 @@
+import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -12,6 +13,7 @@ export interface Modal<T> {
 		| 'sol-receive'
 		| 'receive'
 		| 'send'
+		| 'swap'
 		| 'buy'
 		| 'convert-ckbtc-btc'
 		| 'convert-btc-ckbtc'
@@ -31,12 +33,17 @@ export interface Modal<T> {
 		| 'eth-token'
 		| 'btc-token'
 		| 'ic-token'
+		| 'sol-token'
 		| 'receive-bitcoin'
 		| 'about-why-oisy'
 		| 'vip-qr-code'
+		| 'referral-code'
+		| 'referral-state'
 		| 'dapp-details'
-		| 'successful-reward'
-		| 'failed-reward';
+		| 'vip-reward-state'
+		| 'reward-details'
+		| 'reward-state'
+		| 'settings';
 	data?: T;
 	id?: symbol;
 }
@@ -54,6 +61,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReceive: (id: symbol) => void;
 	openSend: (id: symbol) => void;
 	openBuy: (id: symbol) => void;
+	openSwap: (id: symbol) => void;
 	openConvertCkBTCToBTC: () => void;
 	openConvertBTCToCkBTC: () => void;
 	openConvertToTwinTokenCkEth: () => void;
@@ -72,12 +80,18 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openEthToken: () => void;
 	openBtcToken: () => void;
 	openIcToken: () => void;
+	openSolToken: () => void;
 	openReceiveBitcoin: () => void;
 	openAboutWhyOisy: () => void;
 	openVipQrCode: () => void;
+	openReferralCode: () => void;
+	openReferralState: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
-	openSuccessfulReward: () => void;
-	openFailedReward: () => void;
+	openVipRewardState: <D extends T>(data: D) => void;
+	openRewardDetails: <D extends T>(data: D) => void;
+	openRewardState: <D extends T>(data: D) => void;
+	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
+	openSettings: (data: SettingsModalType) => void;
 	close: () => void;
 }
 
@@ -104,6 +118,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openReceive: setTypeWithId('receive'),
 		openSend: setTypeWithId('send'),
 		openBuy: setTypeWithId('buy'),
+		openSwap: setTypeWithId('swap'),
 		openConvertCkBTCToBTC: setType('convert-ckbtc-btc'),
 		openConvertBTCToCkBTC: setType('convert-btc-ckbtc'),
 		openConvertToTwinTokenCkEth: setType('convert-to-twin-token-cketh'),
@@ -122,12 +137,18 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openEthToken: setType('eth-token'),
 		openBtcToken: setType('btc-token'),
 		openIcToken: setType('ic-token'),
+		openSolToken: setType('sol-token'),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: setType('vip-qr-code'),
+		openReferralCode: setType('referral-code'),
+		openReferralState: setType('referral-state'),
 		openDappDetails: setTypeWithData('dapp-details'),
-		openSuccessfulReward: setType('successful-reward'),
-		openFailedReward: setType('failed-reward'),
+		openVipRewardState: setTypeWithData('vip-reward-state'),
+		openRewardDetails: setTypeWithData('reward-details'),
+		openRewardState: setTypeWithData('reward-state'),
+		// todo: explicitly define type here as well
+		openSettings: <(data: SettingsModalType) => void>setTypeWithData('settings'),
 		close: () => set(null),
 		subscribe
 	};

@@ -1,22 +1,41 @@
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import * as btcEnv from '$env/networks/networks.btc.env';
-import * as networkEnv from '$env/networks/networks.env';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
 import * as transactionsUtils from '$lib/utils/transactions.utils';
+import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { render } from '@testing-library/svelte';
 
+// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('AllTransactionsList', () => {
+	beforeAll(() => {
+		vi.resetAllMocks();
+
+		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+
+		vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(() => [
+			ETHEREUM_NETWORK_ID,
+			SEPOLIA_NETWORK_ID
+		]);
+	});
+
 	it('should call the function to map the transactions list', () => {
 		const spyMapAllTransactionsUi = vi.spyOn(transactionsUtils, 'mapAllTransactionsUi');
 
@@ -28,10 +47,28 @@ describe('AllTransactionsList', () => {
 	});
 
 	describe('when the transactions list is empty', () => {
+		beforeEach(() => {
+			btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
+			ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
+			icTransactionsStore.reset(ICP_TOKEN_ID);
+			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+		});
+
 		it('should render the placeholder', () => {
 			const { getByText } = render(AllTransactionsList);
 
 			expect(getByText(en.transactions.text.transaction_history)).toBeInTheDocument();
+		});
+
+		it('should not render the skeleton', () => {
+			const { container } = render(AllTransactionsList);
+
+			Array.from({ length: 5 }).forEach((_, i) => {
+				const skeleton: HTMLParagraphElement | null = container.querySelector(
+					`div[data-tid="all-transactions-skeleton-card-${i}"]`
+				);
+				expect(skeleton).toBeNull();
+			});
 		});
 	});
 
@@ -43,16 +80,11 @@ describe('AllTransactionsList', () => {
 		const todayTimestamp = new Date().getTime();
 		const yesterdayTimestamp = todayTimestamp - 24 * 60 * 60 * 1000;
 
-		beforeAll(() => {
-			vi.resetAllMocks();
-
-			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-
-			vi.spyOn(networkEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(() => [
-				ETHEREUM_NETWORK_ID,
-				SEPOLIA_NETWORK_ID
-			]);
+		beforeEach(() => {
+			btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
+			ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
+			icTransactionsStore.reset(ICP_TOKEN_ID);
+			solTransactionsStore.reset(SOLANA_TOKEN_ID);
 
 			btcTransactionsStore.append({
 				tokenId: BTC_MAINNET_TOKEN_ID,
@@ -77,6 +109,8 @@ describe('AllTransactionsList', () => {
 					certified: false
 				}))
 			});
+
+			solTransactionsStore.reset(SOLANA_TOKEN_ID);
 		});
 
 		it('should not render the placeholder', () => {
@@ -85,16 +119,26 @@ describe('AllTransactionsList', () => {
 			expect(queryByText(en.transactions.text.transaction_history)).not.toBeInTheDocument();
 		});
 
+		it('should not render the skeleton', () => {
+			const { container } = render(AllTransactionsList);
+
+			Array.from({ length: 5 }).forEach((_, i) => {
+				const skeleton: HTMLParagraphElement | null = container.querySelector(
+					`div[data-tid="all-transactions-skeleton-card-${i}"]`
+				);
+				expect(skeleton).toBeNull();
+			});
+		});
+
 		it('should render the transactions list with group of dates', () => {
-			const { container, getByText } = render(AllTransactionsList);
+			const { getByText, getByTestId } = render(AllTransactionsList);
 
-			const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
-				(el) => el.parentElement === container
-			);
-
-			// today and yesterday
-			expect(transactionComponents).toHaveLength(2);
+			const todayDateGroup = getByTestId('all-transactions-date-group-0');
+			expect(todayDateGroup).toBeInTheDocument();
 			expect(getByText('today')).toBeInTheDocument();
+
+			const yesterdayDateGroup = getByTestId('all-transactions-date-group-1');
+			expect(yesterdayDateGroup).toBeInTheDocument();
 			expect(getByText('yesterday')).toBeInTheDocument();
 		});
 
@@ -102,7 +146,7 @@ describe('AllTransactionsList', () => {
 			const { container } = render(AllTransactionsList);
 
 			const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
-				(el) => el.parentElement?.parentElement === container
+				(el) => el.parentElement?.parentElement?.parentElement === container
 			);
 
 			expect(transactionComponents).toHaveLength(

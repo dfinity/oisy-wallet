@@ -1,33 +1,31 @@
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
-import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
 import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
+import * as solSignaturesServices from '$sol/services/sol-signatures.services';
+import * as accountServices from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
-import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockSolRpcReceiveTransaction } from '$tests/mocks/sol-transactions.mock';
+import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { jsonReplacer, nonNullish } from '@dfinity/utils';
-import { lamports } from '@solana/rpc-types';
+import { lamports } from '@solana/kit';
 import { type MockInstance } from 'vitest';
 
 describe('sol-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;
+	let spyLoadTransactions: MockInstance;
 	let spyLoadSolBalance: MockInstance;
 	let spyLoadSplBalance: MockInstance;
-	let spyLoadTransactions: MockInstance;
 
 	const mockSolBalance = lamports(100n);
-	const mockSplBalance = BigInt(123);
-	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcReceiveTransaction];
+	const mockSplBalance = 123n;
+	const mockSolTransactions = createMockSolTransactionsUi(2);
 
-	const expectedTransactions = mockTransactions.map((transaction) => ({
-		data: mapSolTransactionUi({
-			transaction,
-			address: mockSolAddress
-		}),
+	const expectedSoLTransactions = mockSolTransactions.map((transaction) => ({
+		data: transaction,
 		certified: false
 	}));
 
@@ -60,7 +58,7 @@ describe('sol-wallet.scheduler', () => {
 					data: isSpl ? mockSplBalance : mockSolBalance
 				},
 				...(withTransactions && {
-					newTransactions: JSON.stringify(expectedTransactions, jsonReplacer)
+					newTransactions: JSON.stringify(expectedSoLTransactions, jsonReplacer)
 				})
 			}
 		}
@@ -68,16 +66,16 @@ describe('sol-wallet.scheduler', () => {
 
 	const postMessageMock = vi.fn();
 
-	let originalPostmessage: unknown;
+	let originalPostMessage: unknown;
 
 	beforeAll(() => {
-		originalPostmessage = window.postMessage;
+		originalPostMessage = window.postMessage;
 		window.postMessage = postMessageMock;
 	});
 
 	afterAll(() => {
 		// @ts-expect-error redo original
-		window.postMessage = originalPostmessage;
+		window.postMessage = originalPostMessage;
 	});
 
 	beforeEach(() => {
@@ -88,11 +86,11 @@ describe('sol-wallet.scheduler', () => {
 			.spyOn(solanaApi, 'loadSolLamportsBalance')
 			.mockResolvedValue(mockSolBalance);
 		spyLoadSplBalance = vi
-			.spyOn(solanaApi, 'loadSplTokenBalance')
+			.spyOn(accountServices, 'loadSplTokenBalance')
 			.mockResolvedValue(mockSplBalance);
 		spyLoadTransactions = vi
-			.spyOn(solanaApi, 'getSolTransactions')
-			.mockResolvedValue(mockTransactions);
+			.spyOn(solSignaturesServices, 'getSolTransactions')
+			.mockResolvedValue(mockSolTransactions);
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 	});
@@ -108,7 +106,7 @@ describe('sol-wallet.scheduler', () => {
 	}) => {
 		const scheduler: SolWalletScheduler = new SolWalletScheduler();
 
-		const isSpl = nonNullish(startData?.tokenAddress);
+		const isSpl = nonNullish(startData?.tokenAddress) && nonNullish(startData?.tokenOwnerAddress);
 
 		beforeEach(() => {
 			spyLoadBalance = isSpl ? spyLoadSplBalance : spyLoadSolBalance;
@@ -135,13 +133,13 @@ describe('sol-wallet.scheduler', () => {
 			);
 			expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(postMessageMock).toHaveBeenCalledTimes(5);
 			expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusInProgress);
 			expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusIdle);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(postMessageMock).toHaveBeenCalledTimes(7);
 			expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusInProgress);
@@ -172,12 +170,12 @@ describe('sol-wallet.scheduler', () => {
 			expect(spyLoadBalance).toHaveBeenCalledTimes(1);
 			expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(spyLoadBalance).toHaveBeenCalledTimes(2);
 			expect(spyLoadTransactions).toHaveBeenCalledTimes(2);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(spyLoadBalance).toHaveBeenCalledTimes(3);
 			expect(spyLoadTransactions).toHaveBeenCalledTimes(3);
@@ -217,7 +215,7 @@ describe('sol-wallet.scheduler', () => {
 			spyLoadSolBalance.mockResolvedValue(mockSolBalance);
 			spyLoadSplBalance.mockResolvedValue(mockSplBalance);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
 			// Only status messages should be sent
 			expect(postMessageMock).toHaveBeenCalledTimes(2);
@@ -229,7 +227,7 @@ describe('sol-wallet.scheduler', () => {
 			await scheduler.start(startData);
 
 			expect(scheduler['store'].transactions).toEqual(
-				expectedTransactions.reduce(
+				expectedSoLTransactions.reduce(
 					(acc, transaction) => ({
 						...acc,
 						[transaction.data.id]: transaction
@@ -237,6 +235,28 @@ describe('sol-wallet.scheduler', () => {
 					{}
 				)
 			);
+		});
+
+		it('should load balance with the correct parameters', async () => {
+			await scheduler.start(startData);
+
+			expect(spyLoadBalance).toHaveBeenCalledWith({
+				address: mockSolAddress,
+				network: startData?.solanaNetwork,
+				tokenAddress: startData?.tokenAddress,
+				tokenOwnerAddress: startData?.tokenOwnerAddress
+			});
+		});
+
+		it('should load transactions with the correct parameters', async () => {
+			await scheduler.start(startData);
+
+			expect(spyLoadTransactions).toHaveBeenCalledWith({
+				address: mockSolAddress,
+				network: startData?.solanaNetwork,
+				tokenAddress: startData?.tokenAddress,
+				tokenOwnerAddress: startData?.tokenOwnerAddress
+			});
 		});
 	};
 
@@ -259,7 +279,8 @@ describe('sol-wallet.scheduler', () => {
 				data: mockSolAddress
 			},
 			solanaNetwork: SolanaNetworks.devnet,
-			tokenAddress: DEVNET_USDC_TOKEN.address
+			tokenAddress: DEVNET_USDC_TOKEN.address,
+			tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
 		};
 
 		testWorker({ startData });

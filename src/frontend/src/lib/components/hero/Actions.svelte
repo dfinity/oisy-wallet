@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/stores';
 	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
-	import { BTC_TO_CKBTC_EXCHANGE_ENABLED } from '$env/networks/networks.btc.env';
+	import { SWAP_ACTION_ENABLED } from '$env/actions.env';
+	import ConvertToCkETH from '$eth/components/convert/ConvertToCkETH.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
-	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
 	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
@@ -15,6 +16,7 @@
 	import Buy from '$lib/components/buy/Buy.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
+	import Swap from '$lib/components/swap/Swap.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import {
@@ -25,6 +27,8 @@
 		networkId,
 		networkSolana
 	} from '$lib/derived/network.derived';
+	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
@@ -37,16 +41,24 @@
 	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
 
 	let convertCkBtc = false;
-	$: convertCkBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
+	$: convertCkBtc =
+		$networkBitcoinMainnetEnabled && $tokenCkBtcLedger && $erc20UserTokensInitialized;
 
 	let convertBtc = false;
-	$: convertBtc = BTC_TO_CKBTC_EXCHANGE_ENABLED && isNetworkIdBTCMainnet($networkId);
+	$: convertBtc = $networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId);
 
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
 
+	let swapAction = false;
+	$: swapAction =
+		SWAP_ACTION_ENABLED && (!isTransactionsPage || (isTransactionsPage && $networkICP));
+
 	let sendAction = true;
 	$: sendAction = !$allBalancesZero || isTransactionsPage;
+
+	let buyAction = true;
+	$: buyAction = !$networkICP || nonNullish($pageToken?.buy);
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-10">
@@ -58,13 +70,17 @@
 		{:else if $networkBitcoin}
 			<BtcReceive />
 		{:else if $networkSolana}
-			<SolReceive />
+			<SolReceive token={$tokenWithFallback} />
 		{:else if $pseudoNetworkChainFusion}
 			<Receive />
 		{/if}
 
 		{#if sendAction}
 			<Send {isTransactionsPage} />
+		{/if}
+
+		{#if swapAction}
+			<Swap />
 		{/if}
 
 		{#if isTransactionsPage}
@@ -93,6 +109,8 @@
 			{/if}
 		{/if}
 
-		<Buy />
+		{#if buyAction}
+			<Buy />
+		{/if}
 	</HeroButtonGroup>
 </div>

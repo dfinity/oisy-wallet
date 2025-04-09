@@ -1,18 +1,20 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import WalletConnectModalTitle from '$eth/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
-	import { signMessage, reject as rejectServices } from '$eth/services/wallet-connect.services';
-	import type { OptionWalletConnectListener } from '$eth/types/wallet-connect';
-	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
+	import { signMessage } from '$eth/services/wallet-connect.services';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
+	import { WizardStepsSign } from '$lib/enums/wizard-steps';
+	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	export let listener: OptionWalletConnectListener;
-	export let request: Web3WalletTypes.SessionRequest;
+	export let request: WalletKitTypes.SessionRequest;
 
 	/**
 	 * Modal
@@ -20,11 +22,11 @@
 
 	const steps: WizardSteps = [
 		{
-			name: 'Review',
+			name: WizardStepsSign.REVIEW,
 			title: $i18n.send.text.review
 		},
 		{
-			name: 'Signing',
+			name: WizardStepsSign.SIGNING,
 			title: $i18n.send.text.signing
 		}
 	];
@@ -67,8 +69,8 @@
 		>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
 	>
 
-	{#if currentStep?.name === 'Signing'}
-		<SendProgress progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
+	{#if currentStep?.name === WizardStepsSign.SIGNING}
+		<InProgressWizard progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
 	{:else}
 		<WalletConnectSignReview {request} on:icApprove={approve} on:icReject={reject} />
 	{/if}

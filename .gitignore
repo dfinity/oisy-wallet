@@ -17,6 +17,9 @@ bitcoin*.gz
 # rust and downloaded wasm|did files
 target/
 
+# files used by docker buildx
+in/
+
 # files created by docker buildx
 out/
 
@@ -51,3 +54,10 @@ backend-v*.wasm.gz
 pocket-ic
 
 coverage/
+
+/scripts/build.ic-domains.test.actual.*
+
+# Frontend reproducibility script output folder
+tmp
+.qodo
+/cycles-ledger.wasm.gz

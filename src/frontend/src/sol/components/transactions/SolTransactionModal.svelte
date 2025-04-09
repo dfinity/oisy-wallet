@@ -1,22 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import type { Commitment } from '@solana/rpc-types';
-	import {
-		SOL_DEVNET_EXPLORER_URL,
-		SOL_MAINNET_EXPLORER_URL,
-		SOL_TESTNET_EXPLORER_URL
-	} from '$env/explorers.env';
+	import type { Commitment } from '@solana/kit';
 	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
-	} from '$lib/utils/network.utils';
+	import { isNetworkSolana } from '$lib/utils/network.utils';
 	import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
 
 	export let transaction: SolTransactionUi;
@@ -31,17 +21,9 @@
 	let status: Commitment | null;
 
 	let explorerUrl: string | undefined;
-	$: {
-		explorerUrl = isNetworkIdSOLTestnet(token?.network.id)
-			? SOL_TESTNET_EXPLORER_URL
-			: isNetworkIdSOLDevnet(token?.network.id)
-				? SOL_DEVNET_EXPLORER_URL
-				: isNetworkIdSOLLocal(token?.network.id)
-					? undefined
-					: SOL_MAINNET_EXPLORER_URL;
-	}
+	$: explorerUrl = isNetworkSolana(token?.network) ? token.network.explorerUrl : undefined;
 
-	$: ({ from, value, timestamp, id, blockNumber, to, type, status } = transaction);
+	$: ({ from, value, timestamp, signature: id, blockNumber, to, type, status } = transaction);
 
 	let txExplorerUrl: string | undefined;
 	$: txExplorerUrl = nonNullish(explorerUrl)
@@ -70,7 +52,7 @@
 		fromExplorerUrl
 	}}
 	hash={id}
-	value={nonNullish(value) ? BigNumber.from(value) : undefined}
+	{value}
 	{token}
 	sendToLabel={$i18n.transaction.text.to}
 	typeLabel={type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}

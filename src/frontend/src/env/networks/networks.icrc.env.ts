@@ -21,7 +21,7 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
 import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
-import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { LedgerCanisterIdText, MinterCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { mapIcrcData } from '$icp/utils/map-icrc-data';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
@@ -410,6 +410,48 @@ const CLOUD_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUC
 		}
 	: undefined;
 
+const AAA_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.AAA)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.AAA,
+			position: 15
+		}
+	: undefined;
+
+const GLDT_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.GLDT)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.GLDT,
+			position: 16
+		}
+	: undefined;
+
+const nICP_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.nICP)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.nICP,
+			position: 17
+		}
+	: undefined;
+
+const vUSD_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.vUSD)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.vUSD,
+			position: 18
+		}
+	: undefined;
+
+const RUGGY_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.RUGGY)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.RUGGY,
+			position: 19
+		}
+	: undefined;
+
+const NAK_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.NAK)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.NAK,
+			position: 20
+		}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -477,7 +519,13 @@ const ICRC_CK_TOKENS: IcInterface[] = [
 const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(BURN_IC_DATA) ? [BURN_IC_DATA] : []),
 	...(nonNullish(POPEYE_IC_DATA) ? [POPEYE_IC_DATA] : []),
-	...(nonNullish(CLOUD_IC_DATA) ? [CLOUD_IC_DATA] : [])
+	...(nonNullish(CLOUD_IC_DATA) ? [CLOUD_IC_DATA] : []),
+	...(nonNullish(AAA_IC_DATA) ? [AAA_IC_DATA] : []),
+	...(nonNullish(GLDT_IC_DATA) ? [GLDT_IC_DATA] : []),
+	...(nonNullish(nICP_IC_DATA) ? [nICP_IC_DATA] : []),
+	...(nonNullish(vUSD_IC_DATA) ? [vUSD_IC_DATA] : []),
+	...(nonNullish(RUGGY_IC_DATA) ? [RUGGY_IC_DATA] : []),
+	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : [])
 ];
 
 export const ICRC_TOKENS: IcInterface[] = [
@@ -511,3 +559,12 @@ export const ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS = [
 		? [CKERC20_PRODUCTION_DATA.ckUSDT.ledgerCanisterId]
 		: [])
 ];
+
+export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> = {
+	...(nonNullish(STAGING_CKBTC_MINTER_CANISTER_ID) && {
+		[STAGING_CKBTC_MINTER_CANISTER_ID]: 'g4xu7-jiaaa-aaaan-aaaaq-cai'
+	}),
+	...(nonNullish(IC_CKBTC_MINTER_CANISTER_ID) && {
+		[IC_CKBTC_MINTER_CANISTER_ID]: 'ghsi2-tqaaa-aaaan-aaaca-cai'
+	})
+};

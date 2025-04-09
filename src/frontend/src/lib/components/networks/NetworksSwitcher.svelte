@@ -1,72 +1,82 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
-	import chainFusion from '$lib/assets/chain_fusion.svg';
-	import IconMorePlain from '$lib/components/icons/IconMorePlain.svelte';
-	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
-	import Network from '$lib/components/networks/Network.svelte';
-	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
+	import { page } from '$app/stores';
+	import { SUPPORTED_MAINNET_NETWORKS, SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import NetworkSwitcherList from '$lib/components/networks/NetworkSwitcherList.svelte';
+	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
-	import { SLIDE_EASING } from '$lib/constants/transition.constants';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
+	import { selectedNetwork, networkId } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
-	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import { SettingsModalType } from '$lib/enums/settings-modal-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { NetworkId } from '$lib/types/network';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 
 	export let disabled = false;
 
 	let dropdown: Dropdown | undefined;
 
-	let mainnetTokensUsdBalance: number;
-	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
-		(acc, { id }) => acc + ($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0),
-		0
-	);
+	const onNetworkSelect = async ({ detail: networkId }: CustomEvent<NetworkId>) => {
+		await switchNetwork(networkId);
+
+		if (isRouteTransactions($page)) {
+			await gotoReplaceRoot();
+		}
+
+		dropdown?.close();
+	};
+
+	let enabledNetworks: number;
+	$: enabledNetworks =
+		$networksMainnets.length +
+		($testnetsEnabled && $networksTestnets.length > 0 ? $networksTestnets.length : 0);
+
+	let totalNetworks: number;
+	$: totalNetworks =
+		$testnetsEnabled && $networksTestnets.length > 0
+			? SUPPORTED_NETWORKS.length
+			: SUPPORTED_MAINNET_NETWORKS.length;
 </script>
 
-<Dropdown bind:this={dropdown} ariaLabel={$i18n.networks.title} {disabled}>
-	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
+<Dropdown
+	bind:this={dropdown}
+	ariaLabel={$i18n.networks.title}
+	testId={NETWORKS_SWITCHER_DROPDOWN}
+	{disabled}
+	asModalOnMobile
+>
+	<NetworkSwitcherLogo network={$selectedNetwork} />
+
+	<span class="hidden md:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
+
+	<svelte:fragment slot="title">{$i18n.networks.filter}</svelte:fragment>
 
 	<div slot="items">
-		<ul class="flex list-none flex-col gap-4 font-normal">
-			<li>
-				<NetworkButton
-					id={undefined}
-					name={$i18n.networks.chain_fusion}
-					icon={chainFusion}
-					usdBalance={mainnetTokensUsdBalance}
-					on:icSelected={dropdown.close}
-				/>
-			</li>
+		<NetworkSwitcherList on:icSelected={onNetworkSelect} selectedNetworkId={$networkId} />
 
-			{#each $networksMainnets as network}
-				<li>
-					<MainnetNetwork {network} on:icSelected={dropdown.close} />
-				</li>
-			{/each}
-		</ul>
-
-		<span class="px-4.5 mb-5 mt-8 flex font-bold">{$i18n.networks.test_networks}</span>
-
-		{#if $testnetsEnabled}
-			<ul class="mb-2 flex list-none flex-col gap-4 font-normal" transition:slide={SLIDE_EASING}>
-				{#each $networksTestnets as network}
-					<li>
-						<Network {network} on:icSelected={dropdown.close} />
-					</li>
-				{/each}
-			</ul>
-		{/if}
-
-		<hr class="my-4 w-10/12 opacity-10" style="border: 0.05rem solid" />
-
-		<ul class="flex list-none flex-col gap-4 font-normal">
-			<li class="flex items-center justify-between">
-				<div class="flex items-center gap-2">
-					<IconMorePlain />
-					<span class="text-grey">{$i18n.networks.more}</span>
-				</div>
-			</li>
-		</ul>
+		<div class="mb-3 ml-2 mt-6 flex flex-row justify-between text-nowrap">
+			<span class="flex">
+				<Button
+					link
+					on:click={() => {
+						dropdown?.close();
+						modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS);
+					}}><IconManage />{$i18n.networks.manage}</Button
+				>
+			</span>
+			{#if enabledNetworks < totalNetworks}
+				<span class="ml-4 mr-2 flex text-nowrap text-right text-base">
+					{replacePlaceholders($i18n.networks.number_of_enabled, {
+						$numNetworksEnabled: `${enabledNetworks}`,
+						$numNetworksTotal: `${totalNetworks}`
+					})}
+				</span>
+			{/if}
+		</div>
 	</div>
 </Dropdown>

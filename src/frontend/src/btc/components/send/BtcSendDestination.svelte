@@ -11,8 +11,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	let isInvalidDestination: () => boolean;
-	$: isInvalidDestination = (): boolean =>
+	const isInvalidDestination = (): boolean =>
 		isInvalidDestinationBtc({
 			destination,
 			networkId

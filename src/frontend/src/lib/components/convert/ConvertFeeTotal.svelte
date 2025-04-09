@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
-	import ConvertValue from '$lib/components/convert/ConvertValue.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
@@ -19,10 +19,10 @@
 		: undefined;
 </script>
 
-<ConvertValue>
+<ModalValue>
 	<svelte:fragment slot="label">{$i18n.fee.text.total_fee}</svelte:fragment>
 
 	<svelte:fragment slot="main-value">
 		<ConvertAmountExchange amount={formattedAmount} {exchangeRate} />
 	</svelte:fragment>
-</ConvertValue>
+</ModalValue>

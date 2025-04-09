@@ -1,18 +1,21 @@
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
-import { INFURA_NETWORK_HOMESTEAD, INFURA_NETWORK_SEPOLIA } from '$env/networks/networks.eth.env';
+import {
+	ETHEREUM_NETWORK_ID,
+	INFURA_NETWORK_HOMESTEAD,
+	INFURA_NETWORK_SEPOLIA,
+	SEPOLIA_NETWORK_ID
+} from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { Networkish } from '@ethersproject/networks';
 import {
 	InfuraProvider as InfuraProviderLib,
 	type FeeData,
+	type Networkish,
 	type TransactionResponse
-} from '@ethersproject/providers';
+} from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraProvider {
@@ -22,12 +25,12 @@ export class InfuraProvider {
 		this.provider = new InfuraProviderLib(this.network, INFURA_API_KEY);
 	}
 
-	balance = (address: EthAddress): Promise<BigNumber> => this.provider.getBalance(address);
+	balance = (address: EthAddress): Promise<bigint> => this.provider.getBalance(address);
 
 	getFeeData = (): Promise<FeeData> => this.provider.getFeeData();
 
 	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
-		this.provider.sendTransaction(signedTransaction);
+		this.provider.broadcastTransaction(signedTransaction);
 
 	getTransactionCount = (address: EthAddress): Promise<number> =>
 		this.provider.getTransactionCount(address, 'pending');

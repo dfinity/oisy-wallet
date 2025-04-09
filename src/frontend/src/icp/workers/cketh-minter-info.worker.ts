@@ -11,13 +11,13 @@ export const onCkEthMinterInfoMessage = async ({
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
-		case 'stopCkMinterInfoTimer':
+		case 'stopCkEthMinterInfoTimer':
 			scheduler.stop();
 			return;
-		case 'startCkMinterInfoTimer':
+		case 'startCkEthMinterInfoTimer':
 			await scheduler.start(data);
 			return;
-		case 'triggerCkMinterInfoTimer':
+		case 'triggerCkEthMinterInfoTimer':
 			await scheduler.trigger(data);
 			return;
 	}

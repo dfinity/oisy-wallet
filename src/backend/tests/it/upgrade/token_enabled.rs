@@ -1,12 +1,15 @@
-use crate::upgrade::constants::BACKEND_V0_0_19_WASM_PATH;
-use crate::upgrade::types::UserTokenV0_0_19;
-use crate::utils::assertion::assert_tokens_data_eq;
-use crate::utils::mock::{CALLER, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL};
-use crate::utils::pocketic::{BackendBuilder, PicCanisterTrait};
 use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::token::UserToken;
-use shared::types::TokenVersion;
+use shared::types::{token::UserToken, TokenVersion};
+
+use crate::{
+    upgrade::{constants::BACKEND_V0_0_19_WASM_PATH, types::UserTokenV0_0_19},
+    utils::{
+        assertion::assert_tokens_data_eq,
+        mock::{CALLER, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL},
+        pocketic::{BackendBuilder, PicCanisterTrait},
+    },
+};
 
 lazy_static! {
     static ref PRE_UPGRADE_TOKEN: UserTokenV0_0_19 = UserTokenV0_0_19 {
@@ -21,7 +24,7 @@ lazy_static! {
         contract_address: PRE_UPGRADE_TOKEN.contract_address.clone(),
         decimals: PRE_UPGRADE_TOKEN.decimals,
         symbol: PRE_UPGRADE_TOKEN.symbol.clone(),
-        version: PRE_UPGRADE_TOKEN.version.clone(),
+        version: PRE_UPGRADE_TOKEN.version,
         enabled: None
     };
 }
@@ -43,7 +46,7 @@ fn test_upgrade_user_token() {
     // Upgrade canister with new wasm
     pic_setup
         .upgrade_latest_wasm(None)
-        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {e}"));
 
     // Get the list of token and check that it still contains the one we added before upgrade
     let results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
@@ -74,7 +77,7 @@ fn test_update_user_token_after_upgrade() {
     // Upgrade canister with new wasm
     pic_setup
         .upgrade_latest_wasm(None)
-        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {e}"));
 
     // Get the list of token and check that it still contains the one we added before upgrade
     let results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
@@ -93,7 +96,7 @@ fn test_update_user_token_after_upgrade() {
 
     let updated_results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.with_incremented_version()];
 
     assert!(updated_results.is_ok());
 

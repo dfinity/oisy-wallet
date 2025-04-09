@@ -1,24 +1,15 @@
-import {
-	IC_CKBTC_INDEX_CANISTER_ID,
-	IC_CKBTC_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
-import {
-	autoLoadCustomToken,
-	setCustomToken,
-	toCustomToken
-} from '$icp-eth/services/custom-token.services';
-import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
+import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { autoLoadCustomToken, setCustomToken } from '$icp-eth/services/custom-token.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import * as agent from '$lib/actors/agents.ic';
 import { BackendCanister } from '$lib/canisters/backend.canister';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken, mockIcrcCustomTokens } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
-import type { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { isNullish, toNullable } from '@dfinity/utils';
@@ -32,9 +23,6 @@ describe('custom-token.services', () => {
 
 	let spyToastsError: MockInstance;
 
-	// we mock console.error just to avoid unnecessary logs while running the tests
-	vi.spyOn(console, 'error').mockImplementation(() => undefined);
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 
@@ -42,8 +30,6 @@ describe('custom-token.services', () => {
 		vi.spyOn(BackendCanister, 'create').mockImplementation(async () => backendCanisterMock);
 
 		vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
-
-		vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
 
 		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 	});
@@ -135,7 +121,7 @@ describe('custom-token.services', () => {
 
 					await assertSetCustomToken({
 						customTokens,
-						expectedVersion: [customTokens[0].version ?? 0n],
+						expectedVersion: [customTokens[0].version ?? ZERO_BI],
 						indexCanisterId
 					});
 				}
@@ -275,37 +261,6 @@ describe('custom-token.services', () => {
 				}
 			);
 		});
-	});
-
-	describe('toCustomToken', () => {
-		describe.each([undefined, IC_CKBTC_INDEX_CANISTER_ID])(
-			'with index ID %s',
-			(indexCanisterId) => {
-				it.each([undefined, 2n])('should convert to CustomToken with version %s', (version) => {
-					const input: SaveCustomToken = {
-						enabled: true,
-						version,
-						ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
-						indexCanisterId
-					};
-
-					const result = toCustomToken(input);
-
-					expect(result).toEqual({
-						enabled: input.enabled,
-						version: toNullable(version),
-						token: {
-							Icrc: {
-								ledger_id: Principal.fromText(input.ledgerCanisterId),
-								index_id: toNullable(
-									isNullish(indexCanisterId) ? undefined : Principal.fromText(indexCanisterId)
-								)
-							}
-						}
-					});
-				});
-			}
-		);
 	});
 
 	describe('setCustomToken', () => {

@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import type { Readable } from 'svelte/store';
-	import BtcConvertFeeTotal from '$btc/components/convert/BtcConvertFeeTotal.svelte';
 	import BtcConvertFees from '$btc/components/convert/BtcConvertFees.svelte';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import {
@@ -12,8 +11,11 @@
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
-	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
+	import { BTC_CONVERT_FORM_TEST_ID } from '$lib/constants/test-ids.constants';
+	import {
+		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+		type TokenActionValidationErrorsContext
+	} from '$lib/stores/token-action-validation-errors.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
@@ -24,10 +26,10 @@
 
 	const { store: storeUtxosFeeData } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 
-	let insufficientFunds: boolean;
-	let insufficientFundsForFee: boolean;
+	const { insufficientFunds, insufficientFundsForFee } =
+		getContext<TokenActionValidationErrorsContext>(TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY);
 
-	$: amountError = insufficientFunds || insufficientFundsForFee;
+	$: amountError = $insufficientFunds || $insufficientFundsForFee;
 
 	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
@@ -37,8 +39,8 @@
 
 	let invalid: boolean;
 	$: invalid =
-		insufficientFunds ||
-		insufficientFundsForFee ||
+		$insufficientFunds ||
+		$insufficientFundsForFee ||
 		invalidAmount(sendAmount) ||
 		$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE ||
 		isNullish($storeUtxosFeeData?.utxosFee?.utxos) ||
@@ -51,28 +53,19 @@
 	on:icNext
 	bind:sendAmount
 	bind:receiveAmount
-	bind:insufficientFunds
-	bind:insufficientFundsForFee
 	{totalFee}
 	disabled={invalid}
+	testId={BTC_CONVERT_FORM_TEST_ID}
 >
 	<svelte:fragment slot="message">
-		{#if insufficientFundsForFee}
-			<InsufficientFundsForFee testId="btc-convert-form-insufficient-funds-for-fee" />
-		{:else if nonNullish($hasPendingTransactionsStore)}
+		{#if nonNullish($hasPendingTransactionsStore)}
 			<div class="mb-4" data-tid="btc-convert-form-send-warnings">
 				<BtcSendWarnings {utxosFee} pendingTransactionsStatus={$hasPendingTransactionsStore} />
 			</div>
 		{/if}
 	</svelte:fragment>
 
-	<svelte:fragment slot="fee">
-		<BtcConvertFees />
-
-		<Hr spacing="md" />
-
-		<BtcConvertFeeTotal bind:totalFee />
-	</svelte:fragment>
+	<BtcConvertFees bind:totalFee slot="fee" />
 
 	<slot name="cancel" slot="cancel" />
 </ConvertForm>

@@ -1,5 +1,4 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
@@ -14,12 +13,15 @@ import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
+import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
 	isNetworkIdICP,
-	isNetworkIdSepolia
+	isNetworkIdSepolia,
+	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -31,6 +33,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * @param $ckEthMinterInfo - The CK Ethereum minter info store data.
  * @param $ethAddress - The ETH address of the user.
  * @param $icTransactions - The ICP transactions store data.
+ * @param $solTransactions - The SOL transactions store data.
  * @param $btcStatuses - The BTC statuses store data.
  * @returns The unified list of transactions with their respective token and components.
  */
@@ -41,6 +44,7 @@ export const mapAllTransactionsUi = ({
 	$ckEthMinterInfo,
 	$ethAddress,
 	$icTransactions,
+	$solTransactions,
 	$btcStatuses
 }: {
 	tokens: Token[];
@@ -49,17 +53,16 @@ export const mapAllTransactionsUi = ({
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ethAddress: OptionEthAddress;
 	$icTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
 }): AllTransactionUiWithCmp[] => {
-	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
-		minterInfo: $ckEthMinterInfo?.[ETHEREUM_TOKEN_ID],
-		networkId: ETHEREUM_NETWORK_ID
-	});
+	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses(
+		$ckEthMinterInfo?.[ETHEREUM_TOKEN_ID]
+	);
 
-	const ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses({
-		minterInfo: $ckEthMinterInfo?.[SEPOLIA_TOKEN_ID],
-		networkId: SEPOLIA_NETWORK_ID
-	});
+	const ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses(
+		$ckEthMinterInfo?.[SEPOLIA_TOKEN_ID]
+	);
 
 	return tokens.reduce<AllTransactionUiWithCmp[]>((acc, token) => {
 		const {
@@ -94,7 +97,7 @@ export const mapAllTransactionsUi = ({
 						ckMinterInfoAddresses: isSepoliaNetwork
 							? ckEthMinterInfoAddressesSepolia
 							: ckEthMinterInfoAddressesMainnet,
-						$ethAddress: $ethAddress
+						$ethAddress
 					}),
 					token,
 					component: 'ethereum' as const
@@ -123,6 +126,21 @@ export const mapAllTransactionsUi = ({
 			];
 		}
 
+		if (isNetworkIdSolana(networkId)) {
+			if (isNullish($solTransactions)) {
+				return acc;
+			}
+
+			return [
+				...acc,
+				...($solTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
+					transaction,
+					token,
+					component: 'solana' as const
+				}))
+			];
+		}
+
 		return acc;
 	}, []);
 };
@@ -142,4 +160,41 @@ export const sortTransactions = ({
 	}
 
 	return nonNullish(timestampA) ? -1 : 1;
+};
+
+export const isTransactionsStoreInitialized = ({
+	transactionsStoreData,
+	tokens
+}: TransactionsStoreCheckParams): boolean =>
+	tokens.every(({ id }) => transactionsStoreData?.[id] !== undefined);
+
+export const isTransactionsStoreNotInitialized = (params: TransactionsStoreCheckParams): boolean =>
+	!isTransactionsStoreInitialized(params);
+
+export const isTransactionsStoreEmpty = ({
+	transactionsStoreData,
+	tokens
+}: TransactionsStoreCheckParams): boolean =>
+	tokens.every(
+		({ id }) => isNullish(transactionsStoreData?.[id]) || transactionsStoreData?.[id]?.length === 0
+	);
+
+export const areTransactionsStoresLoading = (
+	transactionsStores: TransactionsStoreCheckParams[]
+): boolean => {
+	const { someNullish, someNotInitialized, allEmpty } = transactionsStores.reduce<{
+		someNullish: boolean;
+		someNotInitialized: boolean;
+		allEmpty: boolean;
+	}>(
+		({ someNullish, someNotInitialized, allEmpty }, { transactionsStoreData, tokens }) => ({
+			someNullish: someNullish || isNullish(transactionsStoreData),
+			someNotInitialized:
+				someNotInitialized || isTransactionsStoreNotInitialized({ transactionsStoreData, tokens }),
+			allEmpty: allEmpty && isTransactionsStoreEmpty({ transactionsStoreData, tokens })
+		}),
+		{ someNullish: false, someNotInitialized: false, allEmpty: true }
+	);
+
+	return (someNullish || someNotInitialized) && allEmpty;
 };

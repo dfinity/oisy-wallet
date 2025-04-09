@@ -1,39 +1,57 @@
 <script lang="ts">
-	import { Modal, type ProgressStep } from '@dfinity/gix-components';
+	import { Modal, type ProgressStep, themeStore } from '@dfinity/gix-components';
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
-	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
+	import {
+		loadBtcAddressMainnet,
+		loadBtcAddressRegtest,
+		loadBtcAddressTestnet
+	} from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
+	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
-	import banner from '$lib/assets/banner.svg';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import {
+		btcAddressMainnet,
 		btcAddressRegtest,
 		btcAddressTestnet,
+		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
+		solAddressMainnet,
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { testnets } from '$lib/derived/testnets.derived';
+	import {
+		networkBitcoinMainnetEnabled,
+		networkBitcoinRegtestEnabled,
+		networkBitcoinTestnetEnabled,
+		networkEthereumEnabled,
+		networkSepoliaEnabled,
+		networkSolanaDevnetEnabled,
+		networkSolanaLocalEnabled,
+		networkSolanaMainnetEnabled,
+		networkSolanaTestnetEnabled
+	} from '$lib/derived/networks.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
-	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
-	import { signOut } from '$lib/services/auth.services';
-	import { initSignerAllowance } from '$lib/services/loader.services';
+	import { initLoader } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
+		loadSolAddressMainnet,
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
+	import { loadSplTokens } from '$sol/services/spl.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -48,6 +66,11 @@
 			step: ProgressStepsLoader.ADDRESSES,
 			text: $i18n.init.text.retrieving_public_keys,
 			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: ProgressStepsLoader.DONE,
+			text: replaceOisyPlaceholders($i18n.init.text.done),
+			state: 'completed'
 		} as ProgressStep
 	];
 
@@ -68,6 +91,9 @@
 			}),
 			loadIcrcTokens({
 				identity: $authIdentity
+			}),
+			loadSplTokens({
+				identity: $authIdentity
 			})
 		]);
 	};
@@ -82,35 +108,53 @@
 
 	let progressModal = false;
 
+	const debounceLoadEthAddress = debounce(loadEthAddress);
+
+	const debounceLoadBtcAddressMainnet = debounce(loadBtcAddressMainnet);
 	const debounceLoadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
 	const debounceLoadBtcAddressRegtest = debounce(loadBtcAddressRegtest);
 
+	const debounceLoadSolAddressMainnet = debounce(loadSolAddressMainnet);
 	const debounceLoadSolAddressTestnet = debounce(loadSolAddressTestnet);
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
-	$: {
-		if ($testnets) {
-			if (isNullish($btcAddressTestnet)) {
+	$: if (progressStep === ProgressStepsLoader.DONE) {
+		if ($networkEthereumEnabled && isNullish($ethAddress)) {
+			debounceLoadEthAddress();
+		}
+
+		if ($networkBitcoinMainnetEnabled && isNullish($btcAddressMainnet)) {
+			debounceLoadBtcAddressMainnet();
+		}
+
+		if ($networkSolanaMainnetEnabled && isNullish($solAddressMainnet)) {
+			debounceLoadSolAddressMainnet();
+		}
+
+		if ($testnetsEnabled) {
+			if ($networkSepoliaEnabled && isNullish($ethAddress)) {
+				debounceLoadEthAddress();
+			}
+
+			if ($networkBitcoinTestnetEnabled && isNullish($btcAddressTestnet)) {
 				debounceLoadBtcAddressTestnet();
 			}
 
-			if (SOLANA_NETWORK_ENABLED) {
-				if (isNullish($solAddressTestnet)) {
-					debounceLoadSolAddressTestnet();
-				}
+			if ($networkSolanaTestnetEnabled && isNullish($solAddressTestnet)) {
+				debounceLoadSolAddressTestnet();
+			}
 
-				if (isNullish($solAddressDevnet)) {
-					debounceLoadSolAddressDevnet();
-				}
+			if ($networkSolanaDevnetEnabled && isNullish($solAddressDevnet)) {
+				debounceLoadSolAddressDevnet();
 			}
 
 			if (LOCAL) {
-				if (isNullish($btcAddressRegtest)) {
+				if ($networkBitcoinRegtestEnabled && isNullish($btcAddressRegtest)) {
 					debounceLoadBtcAddressRegtest();
 				}
 
-				if (isNullish($solAddressLocal) && SOLANA_NETWORK_ENABLED) {
+				if ($networkSolanaLocalEnabled && isNullish($solAddressLocal)) {
 					debounceLoadSolAddressLocal();
 				}
 			}
@@ -119,39 +163,17 @@
 
 	const validateAddresses = () => emit({ message: 'oisyValidateAddresses' });
 
+	const setProgressModal = (value: boolean) => {
+		progressModal = value;
+	};
+
 	onMount(async () => {
-		const { success: addressIdbSuccess, err } = await loadIdbAddresses();
-
-		if (addressIdbSuccess) {
-			loading.set(false);
-
-			await progressAndLoad();
-
-			validateAddresses();
-
-			return;
-		}
-
-		// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
-		progressModal = true;
-
-		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
-
-		if (!initSignerAllowanceSuccess) {
-			// Sign-out is handled within the service.
-			return;
-		}
-
-		const { success: addressSuccess } = await loadAddresses(
-			err?.map(({ tokenId }) => tokenId) ?? []
-		);
-
-		if (!addressSuccess) {
-			await signOut({});
-			return;
-		}
-
-		await progressAndLoad();
+		await initLoader({
+			identity: $authIdentity,
+			validateAddresses,
+			progressAndLoad,
+			setProgressModal
+		});
 	});
 </script>
 
@@ -161,7 +183,15 @@
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
-						<ImgBanner src={banner} styleClass="aspect-auto" />
+						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
+							<ImgBanner
+								{src}
+								alt={replacePlaceholders(replaceOisyPlaceholders($i18n.init.alt.loader_banner), {
+									$theme: $themeStore ?? 'light'
+								})}
+								styleClass="aspect-auto"
+							/>
+						{/await}
 					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
@@ -177,7 +207,7 @@
 	</div>
 {/if}
 
-<style>
+<style lang="scss">
 	:root:has(.login-modal) {
 		--alert-max-width: 90vw;
 		--alert-max-height: initial;

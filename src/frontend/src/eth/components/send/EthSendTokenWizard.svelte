@@ -34,7 +34,8 @@
 	} from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -70,11 +71,7 @@
 	// i.e. Ethereum or Sepolia "main" token.
 	export let nativeEthereumToken: Token;
 
-	let destinationEditable = true;
-	$: destinationEditable = sendPurpose === 'send';
-
-	let simplifiedForm = false;
-	$: simplifiedForm = sendPurpose === 'convert-eth-to-cketh';
+	const destinationEditable = sendPurpose === 'send';
 
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
@@ -100,6 +97,9 @@
 	let feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set(nativeEthereumToken.decimals);
 
+	let feeExchangeRateStore = writable<number | undefined>(undefined);
+	$: feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+
 	let feeContext: FeeContext | undefined;
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
@@ -110,6 +110,7 @@
 			feeSymbolStore,
 			feeTokenIdStore,
 			feeDecimalsStore,
+			feeExchangeRateStore,
 			evaluateFee
 		})
 	);
@@ -220,7 +221,7 @@
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
 
-	$: onDecodeQrCode = ({
+	const onDecodeQrCode = ({
 		status,
 		code,
 		expectedToken
@@ -240,6 +241,8 @@
 
 <FeeContext
 	bind:this={feeContext}
+	sendToken={$sendToken}
+	sendTokenId={$sendTokenId}
 	{amount}
 	{destination}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}
@@ -272,8 +275,6 @@
 			bind:network={targetNetwork}
 			{nativeEthereumToken}
 			{destinationEditable}
-			{sourceNetwork}
-			{simplifiedForm}
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}

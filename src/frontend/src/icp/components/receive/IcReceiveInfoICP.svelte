@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { ICP_NETWORK } from '$env/networks/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {
@@ -13,7 +13,9 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import {
 		RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON,
-		RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON
+		RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON,
+		RECEIVE_TOKENS_MODAL_DONE_BUTTON,
+		RECEIVE_TOKENS_MODAL_ICP_SECTION
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
@@ -57,6 +59,7 @@
 		labelRef="icp-account-id"
 		address={$icpAccountIdentifierText ?? ''}
 		network={ICP_NETWORK}
+		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
 		qrCodeAction={{
 			enabled: true,
 			ariaLabel: $i18n.receive.icp.text.display_account_id_qr
@@ -74,5 +77,5 @@
 		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_icp_deposit}</svelte:fragment>
 	</ReceiveAddress>
 
-	<ButtonDone on:click={close} slot="toolbar" />
+	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} on:click={close} slot="toolbar" />
 </ContentWithToolbar>

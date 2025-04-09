@@ -1,14 +1,8 @@
-import type { IcCkToken } from '$icp/types/ic-token';
-import { isIcCkToken } from '$icp/validation/ic-token.validation';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { TokenId, TokenUi } from '$lib/types/token';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
-import {
-	isRequiredTokenWithLinkedData,
-	sumBalances,
-	sumTokenBalances,
-	sumUsdBalances
-} from '$lib/utils/token.utils';
+import { sumBalances, sumUsdBalances } from '$lib/utils/token.utils';
+import { isToken } from '$lib/validation/token.validation';
 import { nonNullish } from '@dfinity/utils';
 
 /**
@@ -19,35 +13,11 @@ import { nonNullish } from '@dfinity/utils';
  */
 export const isTokenUiGroup = (
 	tokenUiOrGroupUi: TokenUiOrGroupUi
-): tokenUiOrGroupUi is TokenUiGroup =>
+): tokenUiOrGroupUi is { group: TokenUiGroup } =>
 	typeof tokenUiOrGroupUi === 'object' &&
-	'nativeToken' in tokenUiOrGroupUi &&
-	'tokens' in tokenUiOrGroupUi;
-
-/**
- * Factory function to create a TokenUiGroup based on the provided tokens and network details.
- * This function creates a group header and adds both the native token and the twin token to the group's tokens array.
- *
- * @param nativeToken - The native token used for the group, typically the original token or the one from the selected network.
- * @param twinToken - The twin token to be grouped with the native token, usually representing the same asset on a different network.
- *
- * @returns A TokenUiGroup object that includes a header with network and symbol information and contains both the native and twin tokens.
- */
-const createTokenGroup = ({
-	nativeToken,
-	twinToken
-}: {
-	nativeToken: TokenUi;
-	twinToken: TokenUi;
-}): TokenUiGroup => ({
-	// Setting the same ID of the native token to ensure the Group Card component is treated as the same component of the Native Token Card.
-	// This allows Svelte transitions/animations to handle the two cards as the same component, giving a smoother user experience.
-	id: nativeToken.id,
-	nativeToken,
-	tokens: [nativeToken, twinToken],
-	balance: sumTokenBalances([nativeToken, twinToken]),
-	usdBalance: sumUsdBalances([nativeToken.usdBalance, twinToken.usdBalance])
-});
+	'group' in tokenUiOrGroupUi &&
+	'nativeToken' in tokenUiOrGroupUi.group &&
+	'tokens' in tokenUiOrGroupUi.group;
 
 /**
  * Function to create a list of TokenUiOrGroupUi by grouping tokens with matching twinTokenSymbol.
@@ -62,36 +32,46 @@ const createTokenGroup = ({
  *          The group replaces the first token of the group in the list.
  */
 export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
-	const groupedTokenTwins = new Set<string>();
-	const mappedTokensWithGroups: TokenUiOrGroupUi[] = tokens.map((token) => {
-		if (!isRequiredTokenWithLinkedData(token)) {
-			return token;
-		}
+	const tokenGroups = groupTokens(tokens);
 
-		const twinToken = tokens.find((t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)) as
-			| IcCkToken
-			| undefined;
+	return tokenGroups
+		.map((group) => (group.tokens.length === 1 ? { token: group.tokens[0] } : { group }))
+		.sort((aa, bb) => {
+			const a = isTokenUiGroup(aa) ? aa.group : aa.token;
+			const b = isTokenUiGroup(bb) ? bb.group : bb.token;
 
-		if (twinToken && twinToken.decimals === token.decimals) {
-			groupedTokenTwins.add(twinToken.symbol);
-			groupedTokenTwins.add(token.symbol);
-			return createTokenGroup({
-				nativeToken: token,
-				twinToken: twinToken
-			});
-		}
-
-		return token;
-	});
-
-	return mappedTokensWithGroups
-		.filter((t) => isTokenUiGroup(t) || !groupedTokenTwins.has(t.symbol))
-		.sort(
-			(a, b) =>
+			return (
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+(b.balance ?? ZERO).gt(a.balance ?? ZERO) - +(b.balance ?? ZERO).lt(a.balance ?? ZERO)
-		);
+				+((b.balance ?? ZERO_BI) > (a.balance ?? ZERO_BI)) -
+					+((b.balance ?? ZERO_BI) < (a.balance ?? ZERO_BI))
+			);
+		});
 };
+
+const hasBalance = ({ token, showZeroBalances }: { token: TokenUi; showZeroBalances: boolean }) =>
+	Number(token.balance ?? ZERO_BI) || Number(token.usdBalance ?? ZERO_BI) || showZeroBalances;
+
+/**
+ * Function to create a list of TokenUiOrGroupUi, filtering out all groups that do not have at least
+ * one token with a balance if showZeroBalance is false.
+ *
+ * @param groupedTokens - The list of TokenUiOrGroupUi to filter. Groups without balance are filtered out.
+ * @param showZeroBalances - A boolean that indicates if zero balances should be shown.
+ *
+ * @returns A new list where all groups that do not have at least one token with a balance are removed if showZeroBalances is false.
+ */
+export const filterTokenGroups = ({
+	groupedTokens,
+	showZeroBalances
+}: {
+	groupedTokens: TokenUiOrGroupUi[];
+	showZeroBalances: boolean;
+}) =>
+	groupedTokens.filter((tokenOrGroup: TokenUiOrGroupUi) =>
+		isTokenUiGroup(tokenOrGroup)
+			? tokenOrGroup.group.tokens.some((token: TokenUi) => hasBalance({ token, showZeroBalances }))
+			: hasBalance({ token: tokenOrGroup.token, showZeroBalances })
+	);
 
 const mapNewTokenGroup = (token: TokenUi): TokenUiGroup => ({
 	id: token.id,
@@ -189,8 +169,10 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 	}>(
 		(acc, token) => ({
 			...acc,
-			...(isIcCkToken(token) &&
+			...(isToken(token) &&
+			'twinToken' in token &&
 			nonNullish(token.twinToken) &&
+			isToken(token.twinToken) &&
 			// TODO: separate the check for decimals from the rest, since it seems important to the logic.
 			token.decimals === token.twinToken.decimals
 				? // If the token has a twinToken, and both have the same decimals, group them together.

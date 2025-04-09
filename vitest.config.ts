@@ -2,8 +2,8 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
 import { type UserConfig } from 'vite';
-import { defineConfig } from 'vitest/config';
-import { defineViteReplacements, readCanisterIds } from './vite.utils';
+import { coverageConfigDefaults, defineConfig } from 'vitest/config';
+import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
 
 process.env = {
 	...process.env,
@@ -13,6 +13,7 @@ process.env = {
 export default defineConfig(
 	(): UserConfig => ({
 		plugins: [sveltekit(), svelteTesting()],
+		...CSS_CONFIG_OPTIONS,
 		resolve: {
 			alias: [
 				{
@@ -68,7 +69,14 @@ export default defineConfig(
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
-				exclude: ['build', '.dfx', '**/.svelte-kit']
+				exclude: [...coverageConfigDefaults.exclude, 'build', '.dfx', '**/.svelte-kit'],
+				// TODO: increase the thresholds slowly up to an acceptable 80% at least
+				thresholds: {
+					statements: 55,
+					branches: 55,
+					functions: 55,
+					lines: 55
+				}
 			}
 		}
 	})

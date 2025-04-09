@@ -1,4 +1,3 @@
-import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_LOCAL_NETWORK,
@@ -6,8 +5,8 @@ import {
 	SOLANA_TESTNET_NETWORK
 } from '$env/networks/networks.sol.env';
 import * as appContants from '$lib/constants/app.constants';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { get } from 'svelte/store';
 
 describe('networks.derived', () => {
@@ -15,9 +14,7 @@ describe('networks.derived', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
 
-			testnetsStore.reset({ key: 'testnets' });
-
-			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
+			setupTestnetsStore('reset');
 
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
 		});
@@ -26,13 +23,8 @@ describe('networks.derived', () => {
 			expect(get(enabledSolanaNetworks)).toEqual([SOLANA_MAINNET_NETWORK]);
 		});
 
-		it('should return empty array if feature flag is turned off', () => {
-			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => false);
-			expect(get(enabledSolanaNetworks)).toEqual([]);
-		});
-
 		it('should return testnets when they are enabled', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 
 			expect(get(enabledSolanaNetworks)).toEqual([
 				SOLANA_MAINNET_NETWORK,
@@ -42,7 +34,7 @@ describe('networks.derived', () => {
 		});
 
 		it('should return localnet when in local env', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementationOnce(() => true);
 
 			expect(get(enabledSolanaNetworks)).toEqual([

@@ -1,11 +1,11 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import type { OptionToken } from '$lib/types/token';
-import { splTokens } from '$sol/derived/spl.derived';
+import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -18,15 +18,17 @@ export const pageToken: Readable<OptionToken> = derived(
 		routeToken,
 		routeNetwork,
 		enabledBitcoinTokens,
+		enabledEthereumTokens,
 		enabledSolanaTokens,
 		enabledErc20Tokens,
 		enabledIcrcTokens,
-		splTokens
+		enabledSplTokens
 	],
 	([
 		$routeToken,
 		$routeNetwork,
 		$enabledBitcoinTokens,
+		$enabledEthereumTokens,
 		$enabledSolanaTokens,
 		$erc20Tokens,
 		$icrcTokens,
@@ -42,12 +44,11 @@ export const pageToken: Readable<OptionToken> = derived(
 
 		return [
 			...$enabledBitcoinTokens,
+			...$enabledEthereumTokens,
 			...$enabledSolanaTokens,
 			...$erc20Tokens,
 			...$icrcTokens,
-			...$splTokens,
-			ETHEREUM_TOKEN,
-			SEPOLIA_TOKEN
+			...$splTokens
 		].find(
 			({ name, network: { id: networkId } }) =>
 				name === $routeToken && networkId.description === $routeNetwork

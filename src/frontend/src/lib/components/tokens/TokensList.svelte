@@ -2,17 +2,18 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
-	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
-	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
+	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
+	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined;
@@ -42,21 +43,26 @@
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="mb-3 flex flex-col gap-3">
-			{#each tokens ?? [] as token (token.id)}
+			{#each tokens ?? [] as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 				<div
+					class="overflow-hidden rounded-xl"
 					transition:fade
 					animate:flip={{ duration: 250 }}
 					on:animationstart={handleAnimationStart}
 					on:animationend={handleAnimationEnd}
 					class:pointer-events-none={animating}
 				>
-					{#if isTokenUiGroup(token)}
-						<TokenGroupCard tokenGroup={token} />
+					{#if isTokenUiGroup(tokenOrGroup)}
+						{@const { group: tokenGroup } = tokenOrGroup}
+
+						<TokenGroupCard {tokenGroup} />
 					{:else}
+						{@const { token } = tokenOrGroup}
+
 						<Listener {token}>
-							<TokenCardWithUrl {token}>
-								<TokenCardContent data={token} />
-							</TokenCardWithUrl>
+							<div class="transition duration-300 hover:bg-primary">
+								<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
+							</div>
 						</Listener>
 					{/if}
 				</div>

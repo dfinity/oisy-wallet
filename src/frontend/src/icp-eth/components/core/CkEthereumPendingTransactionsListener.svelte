@@ -1,13 +1,11 @@
 <script lang="ts">
-	import { fromNullable, isNullish, nonNullish, isEmptyString } from '@dfinity/utils';
-	import type { TransactionResponse } from '@ethersproject/abstract-provider';
+	import { isNullish, nonNullish, isEmptyString, fromNullishNullable } from '@dfinity/utils';
+	import type { TransactionResponse } from 'ethers/providers';
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
-	import type { WebSocketListener } from '$eth/types/listener';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import {
-		ckEthereumNativeToken,
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
@@ -28,6 +26,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { OptionBalance } from '$lib/types/balance';
+	import type { WebSocketListener } from '$lib/types/listener';
 	import type { NetworkId } from '$lib/types/network';
 
 	let listener: WebSocketListener | undefined = undefined;
@@ -50,8 +49,8 @@
 			return;
 		}
 
-		const lastObservedBlockNumber = fromNullable(
-			$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.last_observed_block_number ?? []
+		const lastObservedBlockNumber = fromNullishNullable(
+			$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.last_observed_block_number
 		);
 
 		// The ckETH minter info has not yet been fetched. We require this information to query all transactions above a certain block index. These can be considered as pending, given that they have not yet been seen by the minter.
@@ -61,7 +60,7 @@
 
 		// We keep track of what balance was used to fetch the pending transactions to avoid triggering unnecessary reload.
 		// In addition, a transaction might be emitted by the socket (Alchemy) as pending but, might require a few extra time to be delivered as pending by the API (Ehterscan) which can lead to a "race condition" where a pending transaction is displayed and then hidden few seconds later.
-		if (nonNullish(loadBalance) && nonNullish($balance) && loadBalance.eq($balance)) {
+		if (nonNullish(loadBalance) && nonNullish($balance) && loadBalance === $balance) {
 			return;
 		}
 
@@ -121,10 +120,7 @@
 	$: toContractAddress =
 		$ckEthereumTwinTokenStandard === 'erc20'
 			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '')
-			: (toCkEthHelperContractAddress({
-					minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					networkId: $ckEthereumNativeToken.network.id
-				}) ?? '');
+			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '');
 
 	$: (async () =>
 		await init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();

@@ -2,6 +2,7 @@ import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import bonk from '$sol/assets/bonk.svg';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { RequiredSplToken } from '$sol/types/spl';
 
 export const BONK_DECIMALS = 5;
@@ -19,5 +20,9 @@ export const BONK_TOKEN: RequiredSplToken = {
 	symbol: BONK_SYMBOL,
 	decimals: BONK_DECIMALS,
 	icon: bonk,
-	address: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'
+	address: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
+	owner: TOKEN_PROGRAM_ADDRESS,
+	buy: {
+		onramperId: 'bonk_solana'
+	}
 };

@@ -11,7 +11,6 @@
 	} from '$eth/services/fee.services';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import type { WebSocketListener } from '$eth/types/listener';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
@@ -23,11 +22,11 @@
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
+	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -37,10 +36,10 @@
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 	export let nativeEthereumToken: Token;
+	export let sendToken: Token;
+	export let sendTokenId: TokenId;
 
 	const { feeStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
-
-	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Updating and fetching fee
@@ -53,38 +52,38 @@
 	const updateFeeData = async () => {
 		try {
 			const params: GetFeeData = {
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress!),
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
 				from: mapAddressStartsWith0x($ethAddress!)
 			};
 
-			const { getFeeData } = infuraProviders($sendToken.network.id);
+			const { getFeeData } = infuraProviders(sendToken.network.id);
 
-			if (isSupportedEthTokenId($sendTokenId)) {
+			const feeData = await getFeeData();
+
+			if (isSupportedEthTokenId(sendTokenId)) {
 				feeStore.setFee({
-					...(await getFeeData()),
+					...feeData,
 					gas: getEthFeeData({
 						...params,
-						helperContractAddress: toCkEthHelperContractAddress({
-							minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
-							networkId: sourceNetwork.id
-						})
+						helperContractAddress: toCkEthHelperContractAddress(
+							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+						)
 					})
 				});
 				return;
 			}
 
 			const erc20GasFeeParams = {
-				contract: $sendToken as Erc20Token,
+				contract: sendToken as Erc20Token,
 				amount: parseToken({ value: `${amount ?? '1'}` }),
 				sourceNetwork,
 				...params
 			};
 
-			if (isSupportedErc20TwinTokenId($sendTokenId)) {
+			if (isSupportedErc20TwinTokenId(sendTokenId)) {
 				feeStore.setFee({
-					...(await getFeeData()),
+					...feeData,
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
 						erc20HelperContractAddress: toCkErc20HelperContractAddress(
@@ -96,7 +95,7 @@
 			}
 
 			feeStore.setFee({
-				...(await getFeeData()),
+				...feeData,
 				gas: await getErc20FeeData({
 					...erc20GasFeeParams,
 					targetNetwork,
@@ -135,7 +134,9 @@
 		});
 	};
 
-	onMount(() => debounceUpdateFeeData());
+	onMount(() => {
+		observe && debounceUpdateFeeData();
+	});
 	onDestroy(() => listener?.disconnect());
 
 	/**
@@ -144,7 +145,10 @@
 
 	$: obverseFeeData(observe);
 
-	$: $ckEthMinterInfoStore, debounceUpdateFeeData();
+	$: $ckEthMinterInfoStore,
+		(() => {
+			observe && debounceUpdateFeeData();
+		})();
 
 	/**
 	 * Expose a call to evaluate, so that consumers can re-evaluate imperatively, for example, when the amount or destination is manually updated by the user.

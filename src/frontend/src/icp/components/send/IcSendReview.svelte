@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendReview from '$lib/components/send/SendReview.svelte';
@@ -29,5 +30,7 @@
 </script>
 
 <SendReview on:icBack on:icSend {source} {amount} {destination} disabled={invalid}>
+	<IcFeeDisplay slot="fee" {networkId} />
+
 	<IcReviewNetwork {networkId} slot="network" />
 </SendReview>

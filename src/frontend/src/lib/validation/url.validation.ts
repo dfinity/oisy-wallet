@@ -1,18 +1,6 @@
-import * as z from 'zod';
+import { createUrlSchema } from '@dfinity/zod-schemas';
 
-export const UrlSchema = z
-	.string()
-	.url()
-	.refine(
-		(url): boolean => {
-			try {
-				const { protocol } = new URL(url);
-				return protocol === 'https:' || protocol === 'wss:';
-			} catch (_err: unknown) {
-				return false;
-			}
-		},
-		{
-			message: 'Invalid URL.'
-		}
-	);
+export const UrlSchema = createUrlSchema({
+	additionalProtocols: ['wss:'],
+	allowHttpLocally: false
+});

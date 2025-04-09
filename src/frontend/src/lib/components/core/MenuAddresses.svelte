@@ -9,8 +9,10 @@
 		networkBitcoin,
 		networkEthereum,
 		networkICP,
+		networkSolana,
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
+	import SolWalletAddress from '$sol/components/core/SolWalletAddress.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -23,6 +25,8 @@
 	<EthWalletAddress />
 {:else if $networkBitcoin}
 	<BtcWalletAddress />
+{:else if $networkSolana}
+	<SolWalletAddress />
 {:else if $pseudoNetworkChainFusion}
 	<WalletAddresses on:icReceiveTriggered={click} />
 {/if}

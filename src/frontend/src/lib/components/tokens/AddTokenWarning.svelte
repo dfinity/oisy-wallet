@@ -4,7 +4,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<MessageBox level="light-warning">
+<MessageBox level="warning">
 	<span>
 		<Html text={$i18n.tokens.warning.trust_token} />
 	</span>
@@ -15,7 +15,7 @@
 		:global(a) {
 			&:active,
 			&:hover {
-				color: var(--color-off-white);
+				color: var(--color-base-white);
 			}
 		}
 	}

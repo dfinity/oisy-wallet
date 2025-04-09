@@ -1,14 +1,16 @@
-import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
+import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import { last } from '$lib/utils/array.utils';
+import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { GetSolTransactionsParams } from '$sol/types/sol-api';
-import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
+import type {
+	SolRpcTransaction,
+	SolRpcTransactionRaw,
+	SolSignature
+} from '$sol/types/sol-transaction';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { address as solAddress, type Address } from '@solana/addresses';
-import { signature, type Signature } from '@solana/keys';
-import type { Lamports } from '@solana/rpc-types';
+import { address as solAddress, type Address, type Lamports, type Signature } from '@solana/kit';
 import type { Writeable } from 'zod';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport
@@ -27,79 +29,29 @@ export const loadSolLamportsBalance = async ({
 	return balance;
 };
 
-/**
- * Fetches the SPL token balance for a wallet.
- */
-export const loadSplTokenBalance = async ({
-	address,
-	network,
-	tokenAddress
+export const loadTokenBalance = async ({
+	ataAddress,
+	network
 }: {
-	address: SolAddress;
+	ataAddress: SolAddress;
 	network: SolanaNetworkType;
-	tokenAddress: SolAddress;
-}): Promise<bigint> => {
-	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
-	const wallet = solAddress(address);
-	const relevantTokenAddress = solAddress(tokenAddress);
-
-	const response = await getTokenAccountsByOwner(
-		wallet,
-		{
-			mint: relevantTokenAddress
-		},
-		{ encoding: 'jsonParsed' }
-	).send();
-
-	if (response.value.length === 0) {
-		return BigInt(0);
-	}
+}): Promise<bigint | undefined> => {
+	const { getTokenAccountBalance } = solanaHttpRpc(network);
+	const wallet = solAddress(ataAddress);
 
 	const {
-		account: {
-			data: {
-				parsed: {
-					info: { tokenAmount }
-				}
-			}
-		}
-	} = response.value[0];
+		value: { amount }
+	} = await getTokenAccountBalance(wallet).send();
 
-	return BigInt(tokenAmount.amount);
-};
-
-/**
- * Fetches transactions without an error for a given wallet address.
- */
-export const getSolTransactions = async ({
-	address,
-	network,
-	before,
-	limit = Number(WALLET_PAGINATION)
-}: GetSolTransactionsParams): Promise<SolRpcTransaction[]> => {
-	const wallet = solAddress(address);
-	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
-	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });
-
-	const transactions = await signatures.reduce(
-		async (accPromise, signature) => {
-			const acc = await accPromise;
-			const transactionDetail = await fetchTransactionDetailForSignature({ signature, network });
-			if (nonNullish(transactionDetail)) {
-				acc.push(transactionDetail);
-			}
-			return acc;
-		},
-		Promise.resolve([] as SolRpcTransaction[])
-	);
-
-	return transactions.slice(0, limit);
+	if (nonNullish(amount)) {
+		return BigInt(amount);
+	}
 };
 
 /**
  * Fetches signatures without an error for a given wallet address.
  */
-const fetchSignatures = async ({
+export const fetchSignatures = async ({
 	network,
 	wallet,
 	before,
@@ -138,18 +90,34 @@ const fetchSignatures = async ({
 	return await fetchSignaturesBatch(before);
 };
 
-const fetchTransactionDetailForSignature = async ({
-	signature: { signature, confirmationStatus },
+export const getRpcTransaction = async ({
+	signature: { signature },
+	network
+}: {
+	signature: SolSignature;
+	network: SolanaNetworkType;
+}) => {
+	const { getTransaction } = solanaHttpRpc(network);
+
+	return await getTransaction(signature, {
+		maxSupportedTransactionVersion: 0,
+		encoding: 'jsonParsed'
+	}).send();
+};
+
+export const fetchTransactionDetailForSignature = async ({
+	signature,
 	network
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
 }): Promise<SolRpcTransaction | null> => {
-	const { getTransaction } = solanaHttpRpc(network);
+	const { confirmationStatus } = signature;
 
-	const rpcTransaction = await getTransaction(signature, {
-		maxSupportedTransactionVersion: 0
-	}).send();
+	const rpcTransaction: SolRpcTransactionRaw | null = await getRpcTransaction({
+		signature,
+		network
+	});
 
 	if (isNullish(rpcTransaction)) {
 		return null;
@@ -159,7 +127,8 @@ const fetchTransactionDetailForSignature = async ({
 		...rpcTransaction,
 		version: rpcTransaction.version,
 		confirmationStatus,
-		id: signature.toString()
+		id: signature.toString(),
+		signature: signature.signature
 	};
 };
 
@@ -171,7 +140,7 @@ export const loadTokenAccount = async ({
 	address: SolAddress;
 	network: SolanaNetworkType;
 	tokenAddress: SolAddress;
-}): Promise<SolAddress> => {
+}): Promise<OptionSolAddress> => {
 	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
 	const wallet = solAddress(address);
 	const relevantTokenAddress = solAddress(tokenAddress);
@@ -184,14 +153,127 @@ export const loadTokenAccount = async ({
 		{ encoding: 'jsonParsed' }
 	).send();
 
-	// TODO: create missing token account
+	// In case of missing token account, we let the caller handle it.
 	if (response.value.length === 0) {
-		throw new Error(
-			`Token account not found for wallet ${address} and token ${tokenAddress} on ${network} network`
-		);
+		return undefined;
 	}
 
 	const { pubkey: accountAddress } = response.value[0];
 
 	return accountAddress;
+};
+
+/**
+ * Fetches the cost in lamports of creating a new Associated Token Account (ATA).
+ *
+ * The cost is equivalent to the rent-exempt cost for the size of an ATA.
+ * https://solana.com/docs/core/fees#rent-exempt
+ */
+export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promise<Lamports> => {
+	const { getMinimumBalanceForRentExemption } = solanaHttpRpc(network);
+	return await getMinimumBalanceForRentExemption(ATA_SIZE).send();
+};
+
+/**
+ * Calculates the maximum among the most recent prioritization fees in microlamports.
+ *
+ * It is useful to have an estimate of how much a transaction could cost to be processed without expiring.
+ */
+export const estimatePriorityFee = async ({
+	network,
+	addresses
+}: {
+	network: SolanaNetworkType;
+	addresses?: SolAddress[];
+}): Promise<bigint> => {
+	const { getRecentPrioritizationFees } = solanaHttpRpc(network);
+	const fees = await getRecentPrioritizationFees(
+		nonNullish(addresses) ? addresses.map(solAddress) : undefined
+	).send();
+
+	return fees.reduce<bigint>(
+		(max, { prioritizationFee: current }) => (BigInt(current) > max ? BigInt(current) : max),
+		0n
+	);
+};
+
+export const getTokenDecimals = async ({
+	address,
+	network
+}: {
+	address: SplTokenAddress;
+	network: SolanaNetworkType;
+}): Promise<number> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const token = solAddress(address);
+
+	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
+
+	if (nonNullish(value) && 'parsed' in value.data) {
+		const {
+			data: {
+				parsed: { info }
+			}
+		} = value;
+
+		return nonNullish(info) && 'decimals' in info ? (info.decimals as number) : 0;
+	}
+
+	return 0;
+};
+
+export const getTokenOwner = async ({
+	address,
+	network
+}: {
+	address: SplTokenAddress;
+	network: SolanaNetworkType;
+}): Promise<SplTokenAddress | undefined> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const token = solAddress(address);
+
+	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
+
+	return value?.owner?.toString();
+};
+
+export const getAccountOwner = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<SolAddress | undefined> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const account = solAddress(address);
+
+	const { value } = await getAccountInfo(account, { encoding: 'jsonParsed' }).send();
+
+	if (isNullish(value?.data) || !('parsed' in value.data)) {
+		return undefined;
+	}
+
+	if (isNullish(value.data.parsed?.info)) {
+		return undefined;
+	}
+
+	// We need to cast the type since it is not implied
+	const { owner } = value.data.parsed.info as { owner: SolAddress };
+
+	return owner;
+};
+
+export const checkIfAccountExists = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<boolean> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const account = solAddress(address);
+
+	const { value } = await getAccountInfo(account, { encoding: 'jsonParsed' }).send();
+
+	return nonNullish(value);
 };

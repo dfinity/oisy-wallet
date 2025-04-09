@@ -253,5 +253,22 @@
 		"description": "Jupiter is a decentralized finance platform on the Solana blockchain, that functions as a liquidity aggregator, streamlining and optimizing trading activities within the DeFi space. Its protocol is designed to facilitate liquidity provision and token swapping and ensures efficient, low-latency, and cost-effective transactions. The platform allows users to swap tokens, provide liquidity, and participate in yield farming through an automated market maker (AMM) model.",
 		"logo": "/images/dapps/jupiter-logo.svg",
 		"screenshots": ["/images/dapps/jupiter.webp"]
+	},
+	{
+		"id": "waterneuron",
+		"name": "WaterNeuron",
+		"oneLiner": "ICP liquid staking - Maximize your capital efficiency by liquid staking your ICP.",
+		"website": "https://waterneuron.fi",
+		"twitter": "https://x.com/waterneuron",
+		"github": "https://github.com/WaterNeuron/",
+		"openChat": "https://oc.app/community/3fudd-diaaa-aaaar-bgmca-cai/channel/29339715467843792089109453577797225214",
+		"telegram": "https://t.me/waterneuron",
+		"tags": ["Staking"],
+		"description": "WaterNeuron offers a more capital-efficient method of staking by allowing you to maintain exposure to ICP staking rewards while keeping your tokens liquid. This approach simplifies the staking process, removing the need to select specific validators to maximize rewards.",
+		"usesInternetIdentity": true,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/waterneuron.webp",
+		"screenshots": ["/images/dapps/waterneuron-screenshot.webp"]
 	}
 ]

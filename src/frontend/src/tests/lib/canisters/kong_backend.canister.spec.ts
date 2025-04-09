@@ -9,8 +9,10 @@ import type { IcCkToken } from '$icp/types/ic-token';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { KongBackendCanister } from '$lib/canisters/kong_backend.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { getKongIcTokenIdentifier } from '$lib/utils/swap.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
+import { mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
+import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
@@ -20,15 +22,6 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 	return {
 		...actual,
 		LOCAL: false
-	};
-});
-
-vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		// eslint-disable-next-line require-await
-		getAgent: async () => mock<HttpAgent>()
 	};
 });
 
@@ -121,9 +114,9 @@ describe('kong_backend.canister', () => {
 
 			expect(res).toEqual(response.Ok);
 			expect(service.swap_amounts).toHaveBeenCalledWith(
-				sourceToken.symbol,
+				getKongIcTokenIdentifier(sourceToken),
 				sourceAmount,
-				destinationToken.symbol
+				getKongIcTokenIdentifier(destinationToken)
 			);
 		});
 
@@ -182,8 +175,8 @@ describe('kong_backend.canister', () => {
 
 			expect(res).toEqual(response.Ok);
 			expect(service.swap_async).toHaveBeenCalledWith({
-				pay_token: swapParams.sourceToken.symbol,
-				receive_token: swapParams.destinationToken.symbol,
+				pay_token: getKongIcTokenIdentifier(swapParams.sourceToken),
+				receive_token: getKongIcTokenIdentifier(swapParams.destinationToken),
 				pay_amount: swapParams.sendAmount,
 				max_slippage: toNullable(swapParams.maxSlippage),
 				receive_address: toNullable(swapParams.receiveAddress),
@@ -228,6 +221,62 @@ describe('kong_backend.canister', () => {
 			});
 
 			const res = swap(swapParams);
+
+			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('tokens', () => {
+		it('returns compatible with kong swap tokens', async () => {
+			const response = {
+				Ok: mockKongBackendTokens
+			};
+			service.tokens.mockResolvedValue(response);
+
+			const { tokens } = await createKongBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await tokens();
+
+			expect(res).toEqual(response.Ok);
+		});
+
+		it('should throw an error if tokens returns an error', async () => {
+			service.tokens.mockResolvedValue(errorResponse);
+
+			const { tokens } = await createKongBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = tokens();
+
+			await expect(res).rejects.toThrow(new CanisterInternalError(errorResponse.Err));
+		});
+
+		it('should throw an error if tokems throws', async () => {
+			service.tokens.mockImplementation(() => {
+				throw mockResponseError;
+			});
+
+			const { tokens } = await createKongBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = tokens();
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if tokens returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.tokens.mockResolvedValue({ test: 'unexpected' });
+
+			const { tokens } = await createKongBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = tokens();
 
 			await expect(res).rejects.toThrow();
 		});

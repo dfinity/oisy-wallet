@@ -4,9 +4,8 @@ import {
 } from '$env/networks/networks.cketh.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
-import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-
 import type { Erc20Token } from '$eth/types/erc20';
+import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { tokenAddressToHex } from '$eth/utils/token.utils';
 import {
 	mapCkErc20PendingTransaction,
@@ -22,12 +21,12 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
+import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { emit } from '$lib/utils/events.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
-import type { Log } from 'alchemy-sdk';
+import type { Log } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export const loadCkEthereumPendingTransactions = async ({
@@ -154,8 +153,9 @@ const loadPendingTransactions = async ({
 		}
 
 		const { getTransaction } = alchemyProviders(twinTokenNetworkId);
-		const loadTransaction = ({ transactionHash }: Log): Promise<TransactionResponse | null> =>
-			getTransaction(transactionHash);
+		const loadTransaction = ({
+			transactionHash
+		}: Log): Promise<TransactionResponseWithBigInt | null> => getTransaction(transactionHash);
 
 		const pendingTransactions = await Promise.all(pendingLogs.map(loadTransaction));
 

@@ -1,18 +1,17 @@
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import {
 	formatSecondsToNormalizedDate,
 	formatToken,
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
-import { BigNumber } from 'ethers';
 
 describe('format.utils', () => {
 	describe('formatToken', () => {
-		const value = BigNumber.from('1000000000000000000');
-		const valueD1 = BigNumber.from('1200000000000000000');
-		const valueD2 = BigNumber.from('1234000000000000000');
-		const valueD3 = BigNumber.from('1234567000000000000');
-		const negativeValue = BigNumber.from('-1000000000000000000');
+		const value = 1000000000000000000n;
+		const valueD1 = 1200000000000000000n;
+		const valueD2 = 1234000000000000000n;
+		const valueD3 = 1234567000000000000n;
+		const negativeValue = -1000000000000000000n;
 
 		it('should format value with default parameters', () => {
 			expect(formatToken({ value })).toBe('1');
@@ -69,19 +68,19 @@ describe('format.utils', () => {
 		});
 
 		it('should format zero with default parameters', () => {
-			expect(formatToken({ value: ZERO })).toBe('0');
+			expect(formatToken({ value: ZERO_BI })).toBe('0');
 		});
 
 		it('should format zero with specified displayDecimals', () => {
-			expect(formatToken({ value: ZERO, displayDecimals: 2 })).toBe('0');
+			expect(formatToken({ value: ZERO_BI, displayDecimals: 2 })).toBe('0');
 		});
 
 		it('should format zero with trailing zeros', () => {
-			expect(formatToken({ value: ZERO, trailingZeros: true })).toBe('0.0000');
+			expect(formatToken({ value: ZERO_BI, trailingZeros: true })).toBe('0.0000');
 		});
 
 		it('should format zero with specified displayDecimals and trailing zeros', () => {
-			expect(formatToken({ value: ZERO, displayDecimals: 2, trailingZeros: true })).toBe('0.00');
+			expect(formatToken({ value: ZERO_BI, displayDecimals: 2, trailingZeros: true })).toBe('0.00');
 		});
 
 		it('should format value with different unitName', () => {
@@ -115,15 +114,15 @@ describe('format.utils', () => {
 
 	describe('formatSecondsToNormalizedDate', () => {
 		describe('when the current date is not provided', () => {
+			const currentDate = new Date();
+
 			it('should return "today" for the current date', () => {
-				const currentDate = new Date();
 				const currentDateTimestamp = Math.floor(currentDate.getTime() / 1000);
 
 				expect(formatSecondsToNormalizedDate({ seconds: currentDateTimestamp })).toBe('today');
 			});
 
 			it('should return "yesterday" for the previous date', () => {
-				const currentDate = new Date();
 				const yesterday = new Date(currentDate);
 				yesterday.setDate(currentDate.getDate() - 1);
 				const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
@@ -132,7 +131,10 @@ describe('format.utils', () => {
 			});
 
 			it('should return day and month if within the same year', () => {
+				// We mock the current date to be February 25th to guarantee that the last month is in the same year
 				const currentDate = new Date(new Date().getFullYear(), 1, 25);
+				vi.useFakeTimers().setSystemTime(currentDate);
+
 				const earlierThisYear = new Date(currentDate);
 				earlierThisYear.setMonth(currentDate.getMonth() - 1);
 				const timestampThisYear = Math.floor(earlierThisYear.getTime() / 1000);
@@ -143,11 +145,13 @@ describe('format.utils', () => {
 				});
 
 				expect(formatSecondsToNormalizedDate({ seconds: timestampThisYear })).toBe(expected);
+
+				vi.useRealTimers();
 			});
 
 			it('should return day, month, and year if from a different year', () => {
-				const currentDate = new Date(new Date().getFullYear(), 1, 25);
 				const lastYear = new Date(currentDate);
+				lastYear.setDate(currentDate.getDate() - 1);
 				lastYear.setFullYear(currentDate.getFullYear() - 1);
 				const timestampLastYear = Math.floor(lastYear.getTime() / 1000);
 
@@ -160,8 +164,26 @@ describe('format.utils', () => {
 				expect(formatSecondsToNormalizedDate({ seconds: timestampLastYear })).toBe(expected);
 			});
 
+			it('should return day, month, and year if we are in January', () => {
+				const currentDate = new Date(new Date().getFullYear(), 0, 25);
+				vi.useFakeTimers().setSystemTime(currentDate);
+
+				const earlierThisYear = new Date(currentDate);
+				earlierThisYear.setMonth(currentDate.getMonth() - 1);
+				const timestampThisYear = Math.floor(earlierThisYear.getTime() / 1000);
+
+				const expected = earlierThisYear.toLocaleDateString('en', {
+					day: 'numeric',
+					month: 'long',
+					year: 'numeric'
+				});
+
+				expect(formatSecondsToNormalizedDate({ seconds: timestampThisYear })).toBe(expected);
+
+				vi.useRealTimers();
+			});
+
 			it('should not give an error if the date is in the future', () => {
-				const currentDate = new Date(new Date().getFullYear(), 1, 25);
 				const futureDate = new Date(currentDate);
 				futureDate.setDate(currentDate.getDate() + 1);
 				const futureTimestamp = Math.floor(futureDate.getTime() / 1000);
@@ -276,7 +298,7 @@ describe('format.utils', () => {
 
 			expect(
 				formatTokenBigintToNumber({
-					value: 0n
+					value: ZERO_BI
 				})
 			).toBe(0);
 		});

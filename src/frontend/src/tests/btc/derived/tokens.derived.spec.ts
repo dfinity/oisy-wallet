@@ -6,7 +6,7 @@ import {
 	BTC_TESTNET_TOKEN
 } from '$env/tokens/tokens.btc.env';
 import * as appContants from '$lib/constants/app.constants';
-import { testnetsStore } from '$lib/stores/settings.store';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { get } from 'svelte/store';
 
 describe('tokens.derived', () => {
@@ -14,7 +14,7 @@ describe('tokens.derived', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
 
-			testnetsStore.reset({ key: 'testnets' });
+			setupTestnetsStore('reset');
 
 			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
@@ -33,20 +33,20 @@ describe('tokens.derived', () => {
 
 		it('should return only BTC Testnet when testnets are enabled and mainnet disabled', () => {
 			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementationOnce(() => false);
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 
 			expect(get(enabledBitcoinTokens)).toEqual([BTC_TESTNET_TOKEN]);
 		});
 
 		it('should return BTC Mainnet and Testnet when testnets are enabled', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 
 			expect(get(enabledBitcoinTokens)).toEqual([BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]);
 		});
 
 		it('should return BTC Mainnet, Testnet, and Regtest when in local env and testnets are enabled', () => {
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementationOnce(() => true);
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 
 			expect(get(enabledBitcoinTokens)).toEqual([
 				BTC_MAINNET_TOKEN,

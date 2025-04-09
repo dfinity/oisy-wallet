@@ -10,15 +10,15 @@
 
 <div class="pr-2">
 	<h4 class="flex items-center gap-2 font-medium">
-		<Logo src={bitcoin} alt={`Bitcoin logo`} />
+		<Logo src={bitcoin} alt="Bitcoin logo" />
 		<span>{$i18n.info.bitcoin.title}</span>
 	</h4>
 
-	<p class="mt-3 text-misty-rose">
+	<p class="mt-3 text-tertiary">
 		{$i18n.info.bitcoin.description}
 	</p>
 
-	<p class="mt-3 text-misty-rose">
+	<p class="mt-3 text-tertiary">
 		{$i18n.info.bitcoin.note}
 	</p>
 

@@ -1,29 +1,47 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { ICP_NETWORK } from '$env/networks/networks.env';
-import { loadCustomTokens } from '$icp/services/icrc.services';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import {
+	loadCustomTokens,
+	loadDisabledIcrcTokensBalances,
+	loadDisabledIcrcTokensExchanges
+} from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import * as agent from '$lib/actors/agents.ic';
 import { BackendCanister } from '$lib/canisters/backend.canister';
+import * as exchangeServices from '$lib/services/exchange.services';
+import { balancesStore } from '$lib/stores/balances.store';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import type { MockInstance } from 'vitest';
+import { type MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 describe('icrc.services', () => {
 	const mockLedgerCanisterId = 'bw4dl-smaaa-aaaaa-qaacq-cai';
 	const mockIndexCanisterId = 'b77ix-eeaaa-aaaaa-qaada-cai';
+	const disabledIcrcTokens = [
+		{
+			...mockValidIcCkToken,
+			twinToken: {
+				...mockValidIcCkToken,
+				address: mockEthAddress
+			}
+		},
+		{ ...mockIcrcCustomToken, id: parseTokenId('MockToken') }
+	];
 
 	describe('loadCustomTokens', () => {
-		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 		const backendCanisterMock = mock<BackendCanister>();
+		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 
 		const mockDecimals = 22n;
 		const mockFee = 456n;
@@ -48,8 +66,6 @@ describe('icrc.services', () => {
 
 			// eslint-disable-next-line require-await
 			vi.spyOn(BackendCanister, 'create').mockImplementation(async () => backendCanisterMock);
-
-			vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
 
 			icrcCustomTokensStore.resetAll();
 		});
@@ -80,6 +96,9 @@ describe('icrc.services', () => {
 				const token = (tokens ?? []).find(
 					({ data: { ledgerCanisterId: tokenLedgerId } }) => tokenLedgerId === ledgerCanisterId
 				);
+
+				// This is just for type safety, since we created the mock with the token field
+				assert('Icrc' in mockCustomToken.token);
 
 				expect(token).not.toBeNull();
 				expect(token).toEqual({
@@ -209,8 +228,6 @@ describe('icrc.services', () => {
 					certified: true
 				});
 
-				vi.spyOn(console, 'error').mockImplementation(() => {});
-
 				spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 			});
 
@@ -248,6 +265,69 @@ describe('icrc.services', () => {
 				expect(afterTokens).toBeNull();
 
 				testToastsError(err);
+			});
+		});
+	});
+
+	describe('loadDisabledIcrcTokensExchanges', () => {
+		const erc20Exchange = {
+			[mockEthAddress]: {
+				usd: 1,
+				usd_market_cap: 1
+			}
+		};
+
+		const icrcExchange = {
+			[mockIcrcCustomToken.ledgerCanisterId]: {
+				usd: 2,
+				usd_market_cap: 2
+			}
+		};
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			exchangeStore.reset();
+			vi.spyOn(exchangeServices, 'exchangeRateERC20ToUsd').mockResolvedValue(erc20Exchange);
+			vi.spyOn(exchangeServices, 'exchangeRateICRCToUsd').mockResolvedValue(icrcExchange);
+		});
+
+		it('should load tokens exchanges for the provided tokens', async () => {
+			await loadDisabledIcrcTokensExchanges({
+				disabledIcrcTokens
+			});
+
+			expect(get(exchangeStore)).toStrictEqual({ ...icrcExchange, ...erc20Exchange });
+		});
+	});
+
+	describe('loadDisabledIcrcTokensBalances', () => {
+		const balance = 1_000_000n;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			const ledgerCanisterMock = mock<IcrcLedgerCanister>();
+			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
+
+			ledgerCanisterMock.balance.mockResolvedValue(balance);
+		});
+
+		it('should load tokens balances for the provided tokens', async () => {
+			await loadDisabledIcrcTokensBalances({
+				identity: mockIdentity,
+				disabledIcrcTokens
+			});
+
+			expect(get(balancesStore)).toEqual({
+				[disabledIcrcTokens[0].id]: {
+					certified: true,
+					data: balance
+				},
+				[disabledIcrcTokens[1].id]: {
+					certified: true,
+					data: balance
+				}
 			});
 		});
 	});

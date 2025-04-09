@@ -1,3 +1,4 @@
+import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import { derived, type Readable } from 'svelte/store';
 
@@ -36,6 +37,10 @@ export const modalReceive: Readable<boolean> = derived(
 export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
+);
+export const modalSwap: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'swap'
 );
 export const modalBuy: Readable<boolean> = derived(
 	modalStore,
@@ -113,6 +118,10 @@ export const modalIcToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-token'
 );
+export const modalSolToken: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'sol-token'
+);
 export const modalReceiveBitcoin: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive-bitcoin'
@@ -125,21 +134,42 @@ export const modalVipQrCode: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'vip-qr-code'
 );
+export const modalReferralCode: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'referral-code'
+);
+export const modalReferralState: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'referral-state'
+);
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'dapp-details'
 );
-export const modalSuccessfulRewardModal: Readable<boolean> = derived(
+export const modalVipRewardState: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'successful-reward'
+	($modalStore) => $modalStore?.type === 'vip-reward-state'
 );
-export const modalFailedRewardModal: Readable<boolean> = derived(
+export const modalRewardDetails: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'failed-reward'
+	($modalStore) => $modalStore?.type === 'reward-details'
+);
+export const modalRewardState: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'reward-state'
 );
 
 export const modalWalletConnect: Readable<boolean> = derived(
 	[modalWalletConnectAuth, modalWalletConnectSign, modalWalletConnectSend],
 	([$modalWalletConnectAuth, $modalWalletConnectSign, $modalWalletConnectSend]) =>
 		$modalWalletConnectAuth || $modalWalletConnectSign || $modalWalletConnectSend
+);
+
+export const modalSettingsState: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'settings'
+);
+export const modalSettingsData: Readable<SettingsModalType> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.data as SettingsModalType
 );

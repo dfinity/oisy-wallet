@@ -9,3 +9,6 @@ ic-cdk = { workspace = true }
 ic-cycles-ledger-types = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,53 +1,59 @@
-import type { SolAddress } from '$lib/types/address';
-import { SYSTEM_ACCOUNT_KEYS } from '$sol/constants/sol.constants';
-import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
-import { address as solAddress } from '@solana/addresses';
+import { ZERO_BI } from '$lib/constants/app.constants';
+import type { SolTransactionMessage } from '$sol/types/sol-send';
+import type { MappedSolTransaction } from '$sol/types/sol-transaction';
+import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
+import { nonNullish } from '@dfinity/utils';
+import {
+	decompileTransactionMessageFetchingLookupTables,
+	getBase64Encoder,
+	getCompiledTransactionMessageDecoder,
+	getTransactionDecoder,
+	type CompilableTransactionMessage,
+	type Rpc,
+	type SolanaRpcApi,
+	type Transaction,
+	type TransactionMessage
+} from '@solana/kit';
+
+export const decodeTransactionMessage = (transactionMessage: string): Transaction => {
+	const transactionBytes = getBase64Encoder().encode(transactionMessage);
+	return getTransactionDecoder().decode(transactionBytes);
+};
 
 /**
- * It maps a transaction to a Solana transaction UI object
+ * It parses a base64 encoded transaction message into a compilable transaction message with lookup tables and instruction
  */
-export const mapSolTransactionUi = ({
-	transaction,
-	address
+export const parseSolBase64TransactionMessage = async ({
+	transactionMessage,
+	rpc
 }: {
-	transaction: SolRpcTransaction;
-	address: SolAddress;
-}): SolTransactionUi => {
-	const {
-		id,
-		blockTime,
-		confirmationStatus: status,
-		transaction: {
-			message: { accountKeys }
-		},
-		meta
-	} = transaction;
-
-	const nonSystemAccountKeys = accountKeys.filter((key) => !SYSTEM_ACCOUNT_KEYS.includes(key));
-
-	const from = accountKeys[0];
-	//edge-case: transaction from my wallet, to my wallet
-	const to = nonSystemAccountKeys.length === 1 ? nonSystemAccountKeys[0] : accountKeys[1];
-
-	const accountIndex = accountKeys.indexOf(solAddress(address));
-
-	const { preBalances, postBalances, fee } = meta ?? {};
-
-	const relevantFee = from === address ? (fee ?? 0n) : 0n;
-
-	const amount =
-		(postBalances?.[accountIndex] ?? 0n) - (preBalances?.[accountIndex] ?? 0n) + relevantFee;
-
-	const type = amount > 0n ? 'receive' : 'send';
-
-	return {
-		id,
-		timestamp: blockTime ?? 0n,
-		from,
-		to,
-		type,
-		status,
-		value: amount,
-		fee
-	};
+	transactionMessage: string;
+	rpc: Rpc<SolanaRpcApi>;
+}): Promise<CompilableTransactionMessage> => {
+	const { messageBytes } = decodeTransactionMessage(transactionMessage);
+	const compiledTransactionMessage = getCompiledTransactionMessageDecoder().decode(messageBytes);
+	return await decompileTransactionMessageFetchingLookupTables(compiledTransactionMessage, rpc);
 };
+
+export const mapSolTransactionMessage = ({
+	instructions
+}: TransactionMessage): MappedSolTransaction =>
+	Array.from(instructions).reduce<MappedSolTransaction>(
+		(acc, instruction) => {
+			const { amount, source, destination, payer } = mapSolInstruction(instruction);
+
+			return {
+				...acc,
+				amount: nonNullish(amount) ? (acc.amount ?? ZERO_BI) + amount : acc.amount,
+				source,
+				destination,
+				payer
+			};
+		},
+		{ amount: undefined }
+	);
+
+export const transactionMessageHasBlockhashLifetime = (
+	message: CompilableTransactionMessage
+): message is SolTransactionMessage =>
+	'blockhash' in message.lifetimeConstraint && 'lastValidBlockHeight' in message.lifetimeConstraint;

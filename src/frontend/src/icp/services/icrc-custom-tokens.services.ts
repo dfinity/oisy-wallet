@@ -1,10 +1,11 @@
 import { SNS_EXPLORER_URL } from '$env/explorers.env';
-import { ICP_NETWORK } from '$env/networks/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { EnvSnsTokenSchema, EnvSnsTokensSchema } from '$env/schema/env-sns-token.schema';
 import snsTokens from '$env/tokens/tokens.sns.json';
 import type { EnvSnsToken } from '$env/types/env-sns-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
+import { isNotDeprecatedSns } from '$icp/utils/icrc.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { get } from 'svelte/store';
@@ -29,7 +30,7 @@ export const buildIndexedIcrcCustomTokens = (): Record<
  */
 export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
 	try {
-		const tokens = EnvSnsTokensSchema.parse(
+		return EnvSnsTokensSchema.parse(
 			snsTokens.map(
 				({
 					metadata: {
@@ -47,8 +48,6 @@ export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
 					})
 			)
 		).map(mapIcrcCustomToken);
-
-		return tokens;
 	} catch (err: unknown) {
 		toastsError({
 			msg: { text: get(i18n).tokens.manage.error.unexpected_build },
@@ -76,8 +75,8 @@ const mapIcrcCustomToken = ({
 	position: Number.MAX_VALUE,
 	standard: 'icrc',
 	category: 'custom',
-	icon: `/icons/sns/${ledgerCanisterId}.png`,
 	fee,
 	alternativeName,
-	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`
+	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`,
+	...(isNotDeprecatedSns({ ledgerCanisterId }) && { icon: `/icons/sns/${ledgerCanisterId}.png` })
 });

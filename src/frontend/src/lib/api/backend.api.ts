@@ -1,4 +1,6 @@
 import type {
+	AllowSigningRequest,
+	AllowSigningResponse,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -14,7 +16,9 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
-	GetUserProfileResponse
+	GetUserProfileResponse,
+	SaveUserNetworksSettings,
+	SetUserShowTestnetsParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
@@ -135,10 +139,43 @@ export const selectUserUtxosFee = async ({
 	return btcSelectUserUtxosFee(params);
 };
 
-export const allowSigning = async ({ identity }: CanisterApiFunctionParams): Promise<void> => {
+export const allowSigning = async ({
+	request,
+	identity
+}: CanisterApiFunctionParams<{
+	request?: AllowSigningRequest;
+}>): Promise<AllowSigningResponse> => {
 	const { allowSigning } = await backendCanister({ identity });
 
-	return allowSigning();
+	// Conditionally call allowSigning with request or empty
+	return allowSigning(request ? { request } : {});
+};
+
+export const addUserHiddenDappId = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<AddUserHiddenDappIdParams>): Promise<void> => {
+	const { addUserHiddenDappId } = await backendCanister({ identity });
+
+	return addUserHiddenDappId(params);
+};
+
+export const setUserShowTestnets = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SetUserShowTestnetsParams>): Promise<void> => {
+	const { setUserShowTestnets } = await backendCanister({ identity });
+
+	return setUserShowTestnets(params);
+};
+
+export const updateUserNetworkSettings = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SaveUserNetworksSettings>): Promise<void> => {
+	const { updateUserNetworkSettings } = await backendCanister({ identity });
+
+	return updateUserNetworkSettings(params);
 };
 
 const backendCanister = async ({
@@ -156,13 +193,4 @@ const backendCanister = async ({
 	}
 
 	return canister;
-};
-
-export const addUserHiddenDappId = async ({
-	identity,
-	...params
-}: CanisterApiFunctionParams<AddUserHiddenDappIdParams>): Promise<void> => {
-	const { addUserHiddenDappId } = await backendCanister({ identity });
-
-	return addUserHiddenDappId(params);
 };

@@ -6,28 +6,37 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
 	export let totalFee: bigint | undefined;
+	export let destinationTokenFee: bigint | undefined = undefined;
+	export let minFee: bigint | undefined = undefined;
+	export let ethereumEstimateFee: bigint | undefined = undefined;
 	export let disabled: boolean;
-	export let insufficientFunds: boolean;
-	export let insufficientFundsForFee: boolean;
+	export let testId: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
+
+	let exchangeValueUnit: DisplayUnit = 'usd';
 </script>
 
-<ContentWithToolbar>
+<ContentWithToolbar {testId}>
 	<ConvertAmount
 		bind:sendAmount
 		bind:receiveAmount
-		bind:insufficientFunds
-		bind:insufficientFundsForFee
+		bind:exchangeValueUnit
 		{totalFee}
+		{destinationTokenFee}
+		{minFee}
+		{ethereumEstimateFee}
 	/>
 
-	<div class="mt-16 pb-5">
+	<div class="mt-6">
 		<slot name="message" />
+
+		<slot name="destination" />
 
 		<slot name="fee" />
 	</div>

@@ -40,7 +40,7 @@ echo 'export PATH=$(brew --prefix llvm)/bin:$PATH' >> ~/.zshrc
 
 ```bash
 dfx deploy frontend --network staging --wallet cvthj-wyaaa-aaaad-aaaaq-cai
-ENV=staging ./scripts/deploy.backend.sh
+dfx deploy backend --network staging
 ```
 
 ### Beta
@@ -54,11 +54,26 @@ dfx deploy frontend --network beta --wallet yit3i-lyaaa-aaaan-qeavq-cai
 
 ### IC
 
-> To perform production development, you'll need a `.env.production` file.
+Ensure that you have [`dfx-orbit`](https://github.com/dfinity/orbit/tree/main/tools/dfx-orbit) installed and are using the correct station:
+
+```
+dfx-orbit station show
+```
+
+> To perform production development, you'll need a `.env.production` file for the frontend. Then:
 
 ```bash
-dfx deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
-ENV=ic ./scripts/deploy.backend.sh
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic -o target/ .
+
+dfx-oisy request deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
+```
+
+For the backend:
+
+```bash
+scripts/docker-build
+
+dfx-orbit request canister install backend --mode upgrade --wasm out/backend.wasm.gz --arg-file out/backend.args.did
 ```
 
 ## Internationalization
@@ -85,11 +100,11 @@ A list of useful faucets and ERC20 tokens on Sepolia:
 
 - ETH: [Ethereum Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia) from Alchemy
 - ckERC20:
-  - USDC: [Circle faucet](https://faucet.circle.com/)
+  - USDC and EURC: [Circle faucet](https://faucet.circle.com/)
   - LINK: [Chainlink Sepolia faucet](https://faucets.chain.link/sepolia)
 - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
 - Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
-- SOL: [Solana Foundation Faucet](https://faucet.solana.com/) or [Sol Faucet](https://solfaucet.com//)
+- SOL: [Solana Foundation Faucet](https://faucet.solana.com/) or [Sol Faucet](https://solfaucet.com/)
 
 ## Testing
 
@@ -117,7 +132,7 @@ This last step will generate the screenshots for the CI and add them to your PR.
 
 ## Integrate ckERC20 Tokens
 
-While the weekly GitHub Action that runs the job [./scripts/build.tokens.ckerc20.mjs] helps discover new ckERC20 tokens deployed on the IC mainnet for testnet purposes or through proposals for effective production usage, some manual steps are still required to integrate them within OISY.
+While the weekly GitHub Action that runs the job [./scripts/build.tokens.ckerc20.ts] helps discover new ckERC20 tokens deployed on the IC mainnet for testnet purposes or through proposals for effective production usage, some manual steps are still required to integrate them within OISY.
 
 The steps are as follows:
 

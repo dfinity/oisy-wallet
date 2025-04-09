@@ -8,6 +8,7 @@
 	export let rounded = false;
 	export let fitHeight = false;
 	export let styleClass: string | undefined = undefined;
+	export let testId: string | undefined = undefined;
 </script>
 
 <img
@@ -17,6 +18,7 @@
 	{loading}
 	{width}
 	{height}
+	data-tid={testId}
 	decoding="async"
 	on:load
 	on:error

@@ -10,7 +10,9 @@
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
 	import Loaders from '$lib/components/loaders/Loaders.svelte';
+	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
+	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
@@ -44,7 +46,7 @@
 </script>
 
 <div
-	class="relative min-h-[640px] lg:flex lg:h-full lg:flex-col"
+	class="relative min-h-[640px] pb-5 md:pb-0 lg:flex lg:h-full lg:flex-col"
 	class:overflow-hidden={$authNotSignedIn}
 	class:flex={$authSignedIn}
 	class:h-full={$authSignedIn}
@@ -73,6 +75,10 @@
 				<slot />
 			</Loaders>
 		</SplitPane>
+
+		<MobileNavigationMenu>
+			<NavigationMenuMainItems testIdPrefix="mobile" />
+		</MobileNavigationMenu>
 
 		<Modals />
 	</AuthGuard>

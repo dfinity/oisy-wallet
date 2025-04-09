@@ -1,22 +1,21 @@
 <script lang="ts">
-	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
-	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
-	import {
-		ckEthereumTwinTokenNetworkId,
-		ckEthereumTwinToken,
-		ckEthereumNativeTokenId,
-		ckEthereumNativeToken
-	} from '$icp-eth/derived/cketh.derived';
+	import { nonNullish } from '@dfinity/utils';
+	import type { OptionIcCkToken } from '$icp/types/ic-token';
+	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
+	import { ckEthereumTwinToken, ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
+	import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalConvertToTwinTokenEth } from '$lib/derived/modal.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+
+	let icCkToken: OptionIcCkToken;
+	$: icCkToken = $pageToken as OptionIcCkToken;
 </script>
 
 <ConvertETH
 	nativeTokenId={$ckEthereumNativeTokenId}
-	nativeNetworkId={$ckEthereumNativeToken.network.id}
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_token, {
 		$token: $ckEthereumTwinToken.symbol
 	})}
@@ -25,6 +24,6 @@
 	<span>{$ckEthereumTwinToken.symbol}</span>
 </ConvertETH>
 
-{#if $modalConvertToTwinTokenEth}
-	<IcSendModal networkId={$ckEthereumTwinTokenNetworkId} destination={$ethAddress ?? ''} />
+{#if $modalConvertToTwinTokenEth && nonNullish(icCkToken) && nonNullish(icCkToken.twinToken)}
+	<ConvertModal sourceToken={icCkToken} destinationToken={icCkToken.twinToken} />
 {/if}

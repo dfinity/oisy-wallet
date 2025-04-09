@@ -1,5 +1,8 @@
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.env';
-import { ETH_MAINNET_ENABLED } from '$env/networks/networks.eth.env';
+import {
+	ETH_MAINNET_ENABLED,
+	ETHEREUM_NETWORK,
+	SEPOLIA_NETWORK
+} from '$env/networks/networks.eth.env';
 import eth from '$icp-eth/assets/eth.svg';
 import type { RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';

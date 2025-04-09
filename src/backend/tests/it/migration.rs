@@ -2,15 +2,18 @@
 
 use std::sync::Arc;
 
-use crate::{
-    user_token::{ANOTHER_TOKEN, MOCK_TOKEN},
-    utils::pocketic::{controller, setup, BackendBuilder, PicBackend, PicCanisterTrait},
-};
 use candid::Principal;
 use pocket_ic::PocketIcBuilder;
 use shared::types::{
+    backend_config::Guards,
     custom_token::{CustomToken, IcrcToken, Token},
-    ApiEnabled, Guards, MigrationProgress, MigrationReport, Stats,
+    migration::{ApiEnabled, MigrationProgress, MigrationReport},
+    Stats,
+};
+
+use crate::{
+    user_token::{ANOTHER_TOKEN, MOCK_TOKEN},
+    utils::pocketic::{controller, setup, BackendBuilder, PicBackend, PicCanisterTrait},
 };
 
 struct MigrationTestEnv {
@@ -77,10 +80,8 @@ impl MigrationTestEnv {
         // Create custom tokens
         let custom_tokens = vec![CustomToken {
             token: Token::Icrc(IcrcToken {
-                ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),
-                index_id: Some(
-                    Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap(),
-                ),
+                ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai").unwrap(),
+                index_id: Some(Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai").unwrap()),
             }),
             enabled: true,
             version: None,
@@ -104,16 +105,19 @@ impl MigrationTestEnv {
             .query::<Option<MigrationReport>>(controller(), "migration", ())
             .expect("Failed to get migration report")
     }
+
     /// Steps the migration.
     fn step_migration(&self) {
         self.old_backend
             .update::<()>(controller(), "step_migration", ())
-            .expect("Failed to stop migration timer")
+            .expect("Failed to stop migration timer");
     }
+
     /// Verifies that the migration is in an expected state.
     fn assert_migration_is(&self, expected: Option<MigrationReport>) {
         assert_eq!(self.migration_state(), expected,);
     }
+
     /// Verifies that migration progress is as expected.
     fn assert_migration_progress_is(&self, expected: MigrationProgress) {
         assert_eq!(
@@ -125,25 +129,24 @@ impl MigrationTestEnv {
             expected,
         );
     }
+
     /// Verifies that old and new canister locks are as expected.
     fn assert_canister_locks_are(&self, old: Option<Guards>, new: Option<Guards>, context: &str) {
         assert_eq!(
             self.old_backend
-                .query::<shared::types::Config>(controller(), "config", ())
+                .query::<shared::types::backend_config::Config>(controller(), "config", ())
                 .expect("Failed to get config")
                 .api,
             old,
-            "Old canister locks are not as expected {}",
-            context
+            "Old canister locks are not as expected {context}"
         );
         assert_eq!(
             self.new_backend
-                .query::<shared::types::Config>(controller(), "config", ())
+                .query::<shared::types::backend_config::Config>(controller(), "config", ())
                 .expect("Failed to get config")
                 .api,
             new,
-            "New canister locks are not as expected {}",
-            context
+            "New canister locks are not as expected {context}"
         );
     }
 }
@@ -219,7 +222,7 @@ fn test_migration() {
                 .expect("Failed to start migration"),
             Ok(MigrationReport {
                 to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::Pending
+                progress: shared::types::migration::MigrationProgress::Pending
             }),
         );
         // Stop the timer so that we can control the migration.
@@ -271,7 +274,7 @@ fn test_migration() {
     // Keep stepping until the user tokens have been migrated.
     {
         while let Some(MigrationReport {
-            progress: shared::types::MigrationProgress::MigratedUserTokensUpTo(_),
+            progress: shared::types::migration::MigrationProgress::MigratedUserTokensUpTo(_),
             ..
         }) = pic_setup.migration_state()
         {
@@ -285,7 +288,7 @@ fn test_migration() {
     // Keep stepping until the custom tokens have been migrated.
     {
         while let Some(MigrationReport {
-            progress: shared::types::MigrationProgress::MigratedCustomTokensUpTo(_),
+            progress: shared::types::migration::MigrationProgress::MigratedCustomTokensUpTo(_),
             ..
         }) = pic_setup.migration_state()
         {
@@ -299,7 +302,7 @@ fn test_migration() {
     // Keep stepping until the user timestamps have been migrated.
     {
         while let Some(MigrationReport {
-            progress: shared::types::MigrationProgress::MigratedUserTimestampsUpTo(_),
+            progress: shared::types::migration::MigrationProgress::MigratedUserTimestampsUpTo(_),
             ..
         }) = pic_setup.migration_state()
         {
@@ -313,7 +316,7 @@ fn test_migration() {
     // Keep stepping until the user profiles have been migrated.
     {
         while let Some(MigrationReport {
-            progress: shared::types::MigrationProgress::MigratedUserProfilesUpTo(_),
+            progress: shared::types::migration::MigrationProgress::MigratedUserProfilesUpTo(_),
             ..
         }) = pic_setup.migration_state()
         {

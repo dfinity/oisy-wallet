@@ -1,6 +1,6 @@
-import { get, set } from '$icp/utils/storage.utils';
 import en from '$lib/i18n/en.json';
 import type { Languages } from '$lib/types/languages';
+import { get, set } from '$lib/utils/storage.utils';
 import { writable, type Readable } from 'svelte/store';
 
 const enI18n = (): I18n => ({

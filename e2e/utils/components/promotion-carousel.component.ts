@@ -1,4 +1,5 @@
-import type { Page } from '@playwright/test';
+import { CAROUSEL_CONTAINER, CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
+import type { Locator, Page } from '@playwright/test';
 
 export class PromotionCarousel {
 	#page: Page;
@@ -7,27 +8,25 @@ export class PromotionCarousel {
 		this.#page = page;
 	}
 
-	public async navigateToSlide(slideNumber: number): Promise<void> {
-		const navigation1Selector = `[data-tid="carousel-slide-navigation-${slideNumber}"]:visible`;
-		await this.#page.click(navigation1Selector);
+	public getCarouselSelector(): Locator {
+		return this.#page.getByTestId(CAROUSEL_CONTAINER).filter({ visible: true });
 	}
 
-	public async freezeCarousel(): Promise<void> {
-		// Freeze the carousel by applying the first slide's transform style to all visible slides
-		await this.#page.$$eval(`div[data-tid="carousel-slide"]:visible`, (elements) => {
-			elements.forEach((el) => {
-				const slideStyle = el.style.transform;
-				el.style.transform = slideStyle;
-			});
-		});
-		// Freeze the carousel navigation indicators by fixing their current width and background color styles
-		await this.#page.$$eval(`[data-tid^="carousel-slide-navigation-"]:visible`, (elements) => {
-			elements.forEach((el) => {
-				const indicatorWidth = el.style.width;
-				const indicatorBackgroundColor = el.style.backgroundColor;
-				el.style.width = indicatorWidth;
-				el.style.backgroundColor = indicatorBackgroundColor;
-			});
+	public async freezeCarouselToSlide(slideNumber: number): Promise<void> {
+		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
+		const navigationSelector1 = `[data-tid="${CAROUSEL_SLIDE_NAVIGATION}${slideNumber}"]:visible`;
+		await this.#page.click(navigationSelector1);
+		await this.#page.evaluate(() => {
+			const slide = document.querySelector(`div[data-tid="carousel-slide"]`);
+			if (slide) {
+				slide.setAttribute(
+					'style',
+					// 'width: 1584px; ' +
+					'transform: translate3d(-264px, 0px, 0px) !important; ' +
+						'transition: none !important; ' +
+						'animation: none !important;'
+				);
+			}
 		});
 	}
 }

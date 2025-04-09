@@ -29,3 +29,9 @@ internet_identity.did
 codes.txt
 
 backend-v*.wasm.gz
+scripts/build.ic-domains.test.actual.*
+
+# Version control files
+# Note: This can be either a file or a directory, depending on how git is configured.
+.git
+.git/

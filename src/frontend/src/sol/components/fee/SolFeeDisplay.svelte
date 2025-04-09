@@ -1,50 +1,49 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
-	import {
-		SOLANA_DEVNET_TOKEN,
-		SOLANA_LOCAL_TOKEN,
-		SOLANA_TESTNET_TOKEN,
-		SOLANA_TOKEN
-	} from '$env/tokens/tokens.sol.env';
+	import { slide } from 'svelte/transition';
+	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { Token } from '$lib/types/token';
-	import { formatToken } from '$lib/utils/format.utils';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
-	} from '$lib/utils/network.utils';
-	import { SOLANA_TRANSACTION_FEE_IN_LAMPORTS } from '$sol/constants/sol.constants';
+	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 
-	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const {
+		feeStore: fee,
+		ataFeeStore: ataFee,
+		feeDecimalsStore: decimals,
+		feeSymbolStore: symbol
+	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	let solanaNativeToken: Token;
-	$: solanaNativeToken = isNetworkIdSOLTestnet($sendTokenNetworkId)
-		? SOLANA_TESTNET_TOKEN
-		: isNetworkIdSOLDevnet($sendTokenNetworkId)
-			? SOLANA_DEVNET_TOKEN
-			: isNetworkIdSOLLocal($sendTokenNetworkId)
-				? SOLANA_LOCAL_TOKEN
-				: SOLANA_TOKEN;
-
-	$: ({ decimals, symbol } = solanaNativeToken);
-
-	const fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS;
+	const { sendTokenId, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<Value ref="fee">
-	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+{#if nonNullish($symbol) && nonNullish($sendTokenId) && nonNullish($decimals)}
+	{#if nonNullish($fee)}
+		<Value ref="fee">
+			<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
-	{#if nonNullish(fee) && nonNullish(decimals) && nonNullish(symbol)}
-		{formatToken({
-			value: BigNumber.from(fee),
-			unitName: decimals,
-			displayDecimals: decimals
-		})}
-		{symbol}
+			<ExchangeAmountDisplay
+				amount={$fee}
+				decimals={$decimals}
+				symbol={$symbol}
+				exchangeRate={$sendTokenExchangeRate}
+			/>
+		</Value>
 	{/if}
-</Value>
+	{#if nonNullish($ataFee)}
+		<div transition:slide={SLIDE_DURATION}>
+			<Value ref="ataFee">
+				<svelte:fragment slot="label">{$i18n.fee.text.ata_fee}</svelte:fragment>
+
+				<ExchangeAmountDisplay
+					amount={$ataFee}
+					decimals={$decimals}
+					symbol={$symbol}
+					exchangeRate={$sendTokenExchangeRate}
+				/>
+			</Value>
+		</div>
+	{/if}
+{/if}

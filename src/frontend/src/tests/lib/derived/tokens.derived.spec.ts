@@ -24,10 +24,16 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
 import { tokens } from '$lib/derived/tokens.derived';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
+import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
+import type { SplToken } from '$sol/types/spl';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('tokens.derived', () => {
@@ -59,6 +65,21 @@ describe('tokens.derived', () => {
 		enabled: true
 	};
 
+	const mockSplDefaultToken: SplToken = {
+		...mockValidSplToken,
+		id: parseTokenId('SplDefaultTokenId1'),
+		symbol: 'SplDefaultTokenId1'
+	};
+
+	const mockSplCustomToken: SplCustomToken = {
+		...mockValidSplToken,
+		id: parseTokenId('SplCustomTokenId2'),
+		symbol: 'SplCustomTokenId2',
+		address: `${mockValidSplToken.address}2`,
+		version: undefined,
+		enabled: true
+	};
+
 	describe('tokens', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -67,15 +88,16 @@ describe('tokens.derived', () => {
 			erc20UserTokensStore.resetAll();
 			icrcDefaultTokensStore.resetAll();
 			icrcCustomTokensStore.resetAll();
+			splDefaultTokensStore.reset();
+			splCustomTokensStore.resetAll();
 
-			testnetsStore.reset({ key: 'testnets' });
+			setupTestnetsStore('reset');
+			setupUserNetworksStore('allEnabled');
 
 			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-
+			vi.spyOn(solEnv, 'SOL_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
-
-			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 		});
 
 		it('should return all the non-testnet tokens by default', () => {
@@ -83,6 +105,8 @@ describe('tokens.derived', () => {
 			erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
 			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			splDefaultTokensStore.add(mockSplDefaultToken);
+			splCustomTokensStore.setAll([{ data: mockSplCustomToken, certified: false }]);
 
 			const result = get(tokens);
 
@@ -94,7 +118,9 @@ describe('tokens.derived', () => {
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20UserToken,
 				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[6].id },
-				{ ...mockIcrcCustomToken, id: result[7].id }
+				{ ...mockIcrcCustomToken, id: result[7].id },
+				{ ...mockSplDefaultToken, enabled: false, version: undefined },
+				mockSplCustomToken
 			]);
 		});
 
@@ -110,7 +136,7 @@ describe('tokens.derived', () => {
 		});
 
 		it('should return testnet tokens too when testnets are enabled', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 
 			expect(get(tokens)).toEqual([
 				ICP_TOKEN,
@@ -125,7 +151,7 @@ describe('tokens.derived', () => {
 		});
 
 		it('should return local tokens too when testnets are enabled and env is LOCAL', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			expect(get(tokens)).toEqual([

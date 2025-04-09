@@ -5,6 +5,3 @@ export const CKETH_HELPER_CONTRACT_SIGNATURE =
 // ckErc20 helper event signature. Same for all Erc20 helpers. Immutable. Similar on Mainnet and Sepolia.
 export const CKERC20_HELPER_CONTRACT_SIGNATURE =
 	'0x4d69d0bd4287b7f66c548f90154dc81bc98f65a1b362775df5ae171a2ccd262b';
-
-// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
-export const CKETH_HELPER_CONTRACT_ADDRESS_MAINNET = '0x7574eB42cA208A4f6960ECCAfDF186D627dCC175';

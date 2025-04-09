@@ -12,7 +12,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
-import { Principal } from '@dfinity/principal';
+import type { Principal } from '@dfinity/principal';
 import { get } from 'svelte/store';
 
 const getTransactions = async ({

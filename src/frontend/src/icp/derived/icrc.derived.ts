@@ -10,7 +10,8 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
-import { testnets } from '$lib/derived/testnets.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
+import type { CanisterIdText } from '$lib/types/canister';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -19,10 +20,10 @@ import { derived, type Readable } from 'svelte/store';
  * The list of Icrc default tokens - i.e. the statically configured Icrc tokens of Oisy + their metadata, unique ids etc. fetched at runtime.
  */
 const icrcDefaultTokens: Readable<IcToken[]> = derived(
-	[icrcDefaultTokensStore, testnets],
-	([$icrcTokensStore, $testnets]) =>
+	[icrcDefaultTokensStore, testnetsEnabled],
+	([$icrcTokensStore, $testnetsEnabled]) =>
 		($icrcTokensStore?.map(({ data: token }) => token) ?? []).filter(
-			(token) => $testnets || !isTokenIcrcTestnet(token)
+			(token) => $testnetsEnabled || !isTokenIcrcTestnet(token)
 		)
 );
 
@@ -40,14 +41,11 @@ export const icrcChainFusionDefaultTokens: Readable<IcToken[]> = derived(
 );
 
 /**
- * A flatten list of the default Icrc Ledger and Index canister Ids.
+ * A flatten list of the default ICRC Ledger canister Id.
  */
-const icrcDefaultTokensCanisterIds: Readable<string[]> = derived(
+const icrcDefaultTokensCanisterIds: Readable<CanisterIdText[]> = derived(
 	[icrcDefaultTokens],
-	([$icrcDefaultTokens]) =>
-		$icrcDefaultTokens.map(
-			({ ledgerCanisterId, indexCanisterId }) => `${ledgerCanisterId}:${indexCanisterId}`
-		)
+	([$icrcDefaultTokens]) => $icrcDefaultTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
 );
 
 /**
@@ -55,28 +53,23 @@ const icrcDefaultTokensCanisterIds: Readable<string[]> = derived(
  * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "custom token" in the backend.
  */
 const icrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
-	[icrcCustomTokensStore, testnets],
-	([$icrcCustomTokensStore, $testnets]) =>
+	[icrcCustomTokensStore, testnetsEnabled],
+	([$icrcCustomTokensStore, $testnetsEnabled]) =>
 		($icrcCustomTokensStore?.map(({ data: token }) => token) ?? []).filter(
-			(token) => $testnets || !isTokenIcrcTestnet(token)
+			(token) => $testnetsEnabled || !isTokenIcrcTestnet(token)
 		)
 );
 
 const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
 	[icrcDefaultTokens, icrcCustomTokens],
 	([$icrcDefaultTokens, $icrcUserTokens]) =>
-		$icrcDefaultTokens.map(({ ledgerCanisterId, indexCanisterId, ...rest }) => {
+		$icrcDefaultTokens.map(({ ledgerCanisterId, ...rest }) => {
 			const userToken = $icrcUserTokens.find(
-				({ ledgerCanisterId: userLedgerCanisterId, indexCanisterId: userIndexCanisterId }) =>
-					userLedgerCanisterId === ledgerCanisterId && userIndexCanisterId === indexCanisterId
+				({ ledgerCanisterId: userLedgerCanisterId }) => userLedgerCanisterId === ledgerCanisterId
 			);
 
 			return mapDefaultTokenToToggleable<IcToken>({
-				defaultToken: {
-					ledgerCanisterId,
-					indexCanisterId,
-					...rest
-				},
+				defaultToken: { ledgerCanisterId, ...rest },
 				userToken
 			});
 		})
@@ -98,8 +91,7 @@ const icrcCustomTokensToggleable: Readable<IcrcCustomToken[]> = derived(
 	[icrcCustomTokens, icrcDefaultTokensCanisterIds],
 	([$icrcCustomTokens, $icrcDefaultTokensCanisterIds]) =>
 		$icrcCustomTokens.filter(
-			({ ledgerCanisterId, indexCanisterId }) =>
-				!$icrcDefaultTokensCanisterIds.includes(`${ledgerCanisterId}:${indexCanisterId}`)
+			({ ledgerCanisterId }) => !$icrcDefaultTokensCanisterIds.includes(ledgerCanisterId)
 		)
 );
 

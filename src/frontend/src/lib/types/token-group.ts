@@ -9,4 +9,4 @@ export type TokenUiGroup = {
 	tokens: [TokenUi, ...TokenUi[]];
 } & TokenFinancialData;
 
-export type TokenUiOrGroupUi = TokenUi | TokenUiGroup;
+export type TokenUiOrGroupUi = { token: TokenUi } | { group: TokenUiGroup };

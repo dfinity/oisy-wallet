@@ -1,6 +1,5 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
-import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -16,17 +15,23 @@ import {
 } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
-import { icrcTokens } from '$icp/derived/icrc.derived';
+import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import * as icrcCustomTokensServices from '$icp/services/icrc-custom-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
-import { allTokens } from '$lib/derived/all-tokens.derived';
-import { testnetsStore } from '$lib/stores/settings.store';
+import {
+	allDisabledKongSwapCompatibleIcrcTokens,
+	allKongSwapCompatibleIcrcTokens,
+	allTokens
+} from '$lib/derived/all-tokens.derived';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
+import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { mockValidToken } from '$tests/mocks/tokens.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { get } from 'svelte/store';
 
 describe('all-tokens.derived', () => {
@@ -44,17 +49,21 @@ describe('all-tokens.derived', () => {
 	};
 
 	const mockErc20Token: Erc20TokenToggleable = {
-		...mockValidToken,
+		...mockValidErc20Token,
 		id: parseTokenId('DUM'),
 		address: mockEthAddress,
 		exchange: 'erc20',
 		enabled: false
 	};
 
+	const mockSplToken: SplTokenToggleable = {
+		...mockValidSplToken,
+		enabled: true
+	};
+
 	beforeEach(() => {
 		vi.resetAllMocks();
 
-		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
@@ -91,7 +100,7 @@ describe('all-tokens.derived', () => {
 			});
 
 			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
-				fn([]);
+				fn([mockSplToken]);
 				return () => {};
 			});
 
@@ -107,14 +116,21 @@ describe('all-tokens.derived', () => {
 				SOLANA_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockIcrcToken2.id.description,
-				mockIcrcToken.id.description
+				mockIcrcToken.id.description,
+				mockSplToken.id.description
 			]);
 		});
 
-		it('should also include disabled ERC20 tokens', () => {
+		it('should also include disabled tokens', () => {
 			const disabledErc20Token = { ...mockErc20Token, enabled: false };
 			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
 				fn([disabledErc20Token]);
+				return () => {};
+			});
+
+			const disabledSplToken = { ...mockSplToken, enabled: false };
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([disabledSplToken]);
 				return () => {};
 			});
 
@@ -122,6 +138,7 @@ describe('all-tokens.derived', () => {
 			const tokenSymbols = tokens.map((token) => token.id.description);
 
 			expect(tokenSymbols).toContain(disabledErc20Token.id.description);
+			expect(tokenSymbols).toContain(disabledSplToken.id.description);
 		});
 
 		it('should not include duplicate tokens with same ledger canister ID', () => {
@@ -155,7 +172,7 @@ describe('all-tokens.derived', () => {
 		});
 
 		it('should include testnet tokens when testnets are enabled', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);
@@ -173,7 +190,7 @@ describe('all-tokens.derived', () => {
 		});
 
 		it('should include local tokens when testnets are enabled and it is local env', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			const tokens = get(allTokens);
@@ -191,6 +208,54 @@ describe('all-tokens.derived', () => {
 				SOLANA_DEVNET_TOKEN.id.description,
 				SOLANA_LOCAL_TOKEN.id.description
 			]);
+		});
+	});
+
+	describe('allDisabledKongSwapCompatibleIcrcTokens', () => {
+		beforeEach(() => {
+			vi.spyOn(allKongSwapCompatibleIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+		});
+
+		it('correctly sets store if there are some disabled kong-compatible icrc tokens', () => {
+			vi.spyOn(allKongSwapCompatibleIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken, mockIcrcToken2]);
+				return () => {};
+			});
+			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken2]);
+				return () => {};
+			});
+
+			expect(get(allDisabledKongSwapCompatibleIcrcTokens)).toStrictEqual([mockIcrcToken]);
+		});
+
+		it('correctly sets store if all icrc tokens are enabled', () => {
+			vi.spyOn(allKongSwapCompatibleIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken, mockIcrcToken2]);
+				return () => {};
+			});
+			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken, mockIcrcToken2]);
+				return () => {};
+			});
+
+			expect(get(allDisabledKongSwapCompatibleIcrcTokens)).toStrictEqual([]);
+		});
+
+		it('correctly sets store if there are no kong-compatible tokens', () => {
+			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken, mockIcrcToken2]);
+				return () => {};
+			});
+
+			expect(get(allDisabledKongSwapCompatibleIcrcTokens)).toStrictEqual([]);
 		});
 	});
 });

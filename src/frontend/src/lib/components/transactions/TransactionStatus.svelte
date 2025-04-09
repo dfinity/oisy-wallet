@@ -13,7 +13,7 @@
 </script>
 
 {#if pending || unconfirmed}
-	<span class="ml-2 text-goldenrod" in:fade>
+	<span class="text-warning-subtle-30 ml-2" in:fade>
 		{pending ? $i18n.transaction.status.pending : $i18n.transaction.status.unconfirmed}
 	</span>
 {/if}

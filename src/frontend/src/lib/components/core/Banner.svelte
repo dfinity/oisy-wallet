@@ -27,7 +27,7 @@
 
 		z-index: calc(var(--overlay-z-index) + 10);
 
-		background: var(--negative-emphasis);
+		background: var(--color-background-error-primary);
 
 		padding: var(--padding-2x) var(--padding-3x);
 		margin: var(--padding-3x) 0;

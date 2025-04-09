@@ -11,7 +11,6 @@ import {
 } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { describe } from 'vitest';
 
 describe('spl.utils', () => {
 	describe('isTokenSpl', () => {

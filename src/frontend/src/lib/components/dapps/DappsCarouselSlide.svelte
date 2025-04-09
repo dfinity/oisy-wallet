@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import type { RewardDescription } from '$env/types/env-reward';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import {
@@ -13,6 +15,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
+	export let airdrop: RewardDescription | undefined = undefined;
 	$: ({
 		id: dappId,
 		carousel: { text, callToAction },
@@ -28,7 +31,11 @@
 			}
 		});
 
-		modalStore.openDappDetails(dappsCarouselSlide);
+		if (nonNullish(airdrop)) {
+			modalStore.openRewardDetails(airdrop);
+		} else {
+			modalStore.openDappDetails(dappsCarouselSlide);
+		}
 	};
 
 	const dispatch = createEventDispatcher();
@@ -60,7 +67,7 @@
 		<button
 			on:click={open}
 			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppName })}
-			class="text-sm font-semibold text-brand-primary"
+			class="text-sm font-semibold text-brand-primary-alt"
 		>
 			{callToAction} →
 		</button>

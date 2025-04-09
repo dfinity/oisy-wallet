@@ -1,17 +1,24 @@
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
-import { ALCHEMY_NETWORK_MAINNET, ALCHEMY_NETWORK_SEPOLIA } from '$env/networks/networks.eth.env';
+import {
+	ALCHEMY_NETWORK_MAINNET,
+	ALCHEMY_NETWORK_SEPOLIA,
+	ETHEREUM_NETWORK_ID,
+	SEPOLIA_NETWORK_ID
+} from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
-import type { WebSocketListener } from '$eth/types/listener';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
+import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
+import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
-import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
+import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 
-const configs: Record<NetworkId, AlchemySettings> = {
+type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
+
+const configs: Record<NetworkId, AlchemyConfig> = {
 	[ETHEREUM_NETWORK_ID]: {
 		apiKey: ALCHEMY_API_KEY,
 		network: ALCHEMY_NETWORK_MAINNET
@@ -22,7 +29,7 @@ const configs: Record<NetworkId, AlchemySettings> = {
 	}
 };
 
-const alchemyConfig = (networkId: NetworkId): AlchemySettings => {
+const alchemyConfig = (networkId: NetworkId): AlchemyConfig => {
 	const provider = configs[networkId];
 
 	assertNonNullish(
@@ -80,7 +87,7 @@ export const initPendingTransactionsListener = ({
 	provider.ws.on(
 		{
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
-			toAddress: toAddress,
+			toAddress,
 			hashesOnly
 		},
 		listener
@@ -106,8 +113,23 @@ export class AlchemyProvider {
 		});
 	}
 
-	getTransaction = (hash: string): Promise<TransactionResponse | null> =>
-		this.provider.core.getTransaction(hash);
+	getTransaction = async (hash: string): Promise<TransactionResponseWithBigInt | null> => {
+		const transaction = await this.provider.core.getTransaction(hash);
+
+		if (isNullish(transaction)) {
+			return transaction;
+		}
+
+		const { value, gasLimit, gasPrice, chainId, ...rest } = transaction;
+
+		return {
+			...rest,
+			value: value.toBigInt(),
+			gasLimit: gasLimit.toBigInt(),
+			gasPrice: gasPrice?.toBigInt(),
+			chainId: BigInt(chainId)
+		};
+	};
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = {

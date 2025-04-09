@@ -16,8 +16,7 @@
 	{disabled}
 	loading={$loading}
 	{testId}
-	colorStyle="tertiary"
-	link
+	colorStyle="tertiary-main-card"
 	paddingSmall
 >
 	<div class="flex flex-col items-center justify-center gap-2 lg:flex-row">

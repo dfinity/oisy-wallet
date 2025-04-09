@@ -19,6 +19,7 @@
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	export let token: Token;
 
@@ -34,9 +35,9 @@
 				: $solAddressMainnet;
 
 	const onIntersect = async () => {
-		const lastId = last($solTransactions)?.id;
+		const lastSignature = last($solTransactions)?.signature;
 
-		if (isNullish(lastId)) {
+		if (isNullish(lastSignature)) {
 			// No transactions, we do nothing here and wait for the worker to post the first transactions
 			return;
 		}
@@ -52,10 +53,16 @@
 			return;
 		}
 
+		const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
+			? token
+			: { address: undefined, owner: undefined };
+
 		await loadNextSolTransactions({
-			network: network,
-			address: address,
-			before: lastId,
+			network,
+			address,
+			tokenAddress,
+			tokenOwnerAddress,
+			before: lastSignature,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
 	};

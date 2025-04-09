@@ -1,16 +1,16 @@
-import {
+import type {
 	TokenAppearanceSchema,
 	TokenBuySchema,
 	TokenBuyableSchema,
 	TokenCategorySchema,
+	TokenIdSchema,
 	TokenMetadataSchema,
 	TokenSchema,
-	TokenStandardSchema,
-	type TokenIdSchema
+	TokenStandardSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Option, RequiredExcept } from '$lib/types/utils';
-import * as z from 'zod';
+import type * as z from 'zod';
 
 export type TokenId = z.infer<typeof TokenIdSchema>;
 
@@ -51,6 +51,6 @@ export interface TokenFinancialData {
 	usdBalance?: number;
 }
 
-export type TokenUi = Token & TokenFinancialData;
+export type TokenUi<T extends Token = Token> = T & TokenFinancialData;
 
 export type OptionTokenUi = Option<TokenUi>;

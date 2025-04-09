@@ -10,14 +10,13 @@ import type { OptionToken } from '$lib/types/token';
 import type {
 	AnyTransactionUi,
 	AnyTransactionUiWithCmp,
-	Transaction,
 	TransactionStatus,
 	TransactionsUiDateGroup,
 	TransactionType
 } from '$lib/types/transaction';
 import { formatSecondsToNormalizedDate } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { ComponentType } from 'svelte';
+import type { Component } from 'svelte';
 import { get } from 'svelte/store';
 
 export const mapTransactionIcon = ({
@@ -26,7 +25,7 @@ export const mapTransactionIcon = ({
 }: {
 	type: TransactionType;
 	status: TransactionStatus;
-}): ComponentType => {
+}): Component => {
 	const isConversionFrom = type === 'withdraw' || type === 'mint';
 
 	const isConversionTo = type === 'deposit' || type === 'burn' || type === 'approve';
@@ -74,7 +73,7 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 	}, {});
 };
 
-export const mapTransactionModalData = <T extends AnyTransactionUi | Transaction>({
+export const mapTransactionModalData = <T extends AnyTransactionUi>({
 	$modalOpen,
 	$modalStore
 }: {
