@@ -15,7 +15,7 @@ runs:
     - name: Add Bash 5 to PATH on macOS
       shell: bash
       run: |
-        echo "$(brew --prefix bash)/bin" >> $GITHUB_PATH
+        brew --prefix bash | awk '{print $0 "/bin"}' >> "$GITHUB_PATH"
 
     - name: Verify Bash Version
       shell: bash
@@ -25,7 +25,9 @@ runs:
     - name: Set environment variables for wasm32 target on macOS
       shell: bash
       run: |
-        echo "CC_wasm32_unknown_unknown=$(brew --prefix llvm)/bin/clang" >> $GITHUB_ENV
-        echo "AR_wasm32_unknown_unknown=$(brew --prefix llvm)/bin/llvm-ar" >> $GITHUB_ENV
-        echo "CFLAGS_wasm32_unknown_unknown=--target=wasm32-unknown-unknown" >> $GITHUB_ENV
-        echo "CRATE_CC_NO_DEFAULTS_wasm32_unknown_unknown=true" >> $GITHUB_ENV
+        {
+          echo "CC_wasm32_unknown_unknown=$(brew --prefix llvm)/bin/clang"
+          echo "AR_wasm32_unknown_unknown=$(brew --prefix llvm)/bin/llvm-ar"
+          echo "CFLAGS_wasm32_unknown_unknown=--target=wasm32-unknown-unknown"
+          echo "CRATE_CC_NO_DEFAULTS_wasm32_unknown_unknown=true"
+        } >> "$GITHUB_ENV"

@@ -67,7 +67,7 @@ describe('transactions.store', () => {
 				})();
 			}));
 
-		it('should duplicate transactions with same id', () =>
+		it('should not duplicate transactions with same id', () =>
 			new Promise<void>((done) => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
@@ -80,10 +80,10 @@ describe('transactions.store', () => {
 				store.append({ tokenId, transactions: [tx] });
 
 				store.subscribe((state) => {
-					expect(state?.[tokenId]).toHaveLength(3);
+					expect(state?.[tokenId]).toHaveLength(2);
 					expect(
 						(state?.[tokenId] ?? []).filter(({ data: { id } }) => id === tx.data.id)
-					).toHaveLength(2);
+					).toHaveLength(1);
 
 					done();
 				})();

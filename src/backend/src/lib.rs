@@ -37,12 +37,12 @@ use shared::{
             SetShowTestnetsRequest,
         },
         pow::{
-            AllowSigningStatus, ChallengeCompletion, ChallengeCompletionError,
-            CreateChallengeError, CreateChallengeResponse, CYCLES_PER_DIFFICULTY, POW_ENABLED,
+            AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
+            CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningError, AllowSigningRequest, AllowSigningResponse,
+            AllowSigningRequest, AllowSigningResponse,
         },
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
@@ -54,7 +54,7 @@ use shared::{
         Stats, Timestamp,
     },
 };
-use signer::btc_principal_to_p2wpkh_address;
+use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
@@ -691,7 +691,6 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
         expiry_timestamp_ms: challenge.expiry_timestamp_ms,
     })
 }
-
 /// Checks if the caller has an associated user profile.
 ///
 /// # Returns
@@ -727,13 +726,12 @@ pub async fn allow_signing(
 ) -> Result<AllowSigningResponse, AllowSigningError> {
     let principal = ic_cdk::caller();
 
-    // Added for backward-compatibility
-    // TODO remove this code block once the PoW feature has been stabilized
-    if request.is_none() || !POW_ENABLED {
-        // Passing None revert to the original cycle calculation logic
+    // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED is
+    // disabled
+    if request.is_none() && !POW_ENABLED {
+        // Passing None to apply the old cycle calculation logic
         signer::allow_signing(None).await?;
-        // Propagate errors, otherwise return a placeholder response that frontend can temporarily
-        // ignore.
+        // Returning a placeholder response that can be ignored by the frontend.
         return Ok(AllowSigningResponse {
             status: AllowSigningStatus::Skipped,
             allowed_cycles: 0u64,
@@ -741,27 +739,18 @@ pub async fn allow_signing(
         });
     }
 
+    // we atill need to make a valid request has been sent request
     let request = request.ok_or(AllowSigningError::Other("Invalid request".to_string()))?;
 
     // The Proof-of-Work (PoW) protection is explicitly enforced at the HTTP entry-point level.
-    // This ensures internal calls to the business service remain unrestricted and do not require
-    // PoW.
-
-    let challenge_completion: ChallengeCompletion = pow::complete_challenge(request.nonce)
-        .map_err(|e| match e {
-            ChallengeCompletionError::InvalidNonce
-            | ChallengeCompletionError::MissingUserProfile
-            | ChallengeCompletionError::ExpiredChallenge
-            | ChallengeCompletionError::MissingChallenge
-            | ChallengeCompletionError::ChallengeAlreadySolved => {
-                AllowSigningError::PowChallenge(e)
-            }
-        })?;
+    // This ensures internal calls to the business service remains unrestricted and does not require
+    // PoW protection.
+    let challenge_completion: ChallengeCompletion =
+        pow::complete_challenge(request.nonce).map_err(AllowSigningError::PowChallenge)?;
 
     // Grant cycles proportional to difficulty
     let allowed_cycles = u64::from(challenge_completion.current_difficulty) * CYCLES_PER_DIFFICULTY;
 
-    // Here we would proceed with granting signer permissions and record the granted cycles for
     ic_cdk::println!(
         "Allowing principle {} to spend {} cycles on signer operations",
         principal.to_string(),
@@ -909,6 +898,20 @@ pub async fn step_migration() {
             eprintln!("Migration failed: {err:?}");
         });
     };
+}
+
+/// Gets account creation timestamps.
+#[query(guard = "caller_is_allowed")]
+#[must_use]
+pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
+    read_state(|s| {
+        s.user_profile
+            .iter()
+            .map(|((_updated, StoredPrincipal(principal)), user)| {
+                (principal, user.created_timestamp)
+            })
+            .collect()
+    })
 }
 
 /// Saves a snapshot of the user's account.

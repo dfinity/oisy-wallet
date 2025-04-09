@@ -411,7 +411,7 @@ describe('reward-code', () => {
 	}): RewardInfo =>
 		({
 			ledger: { toText: () => ledgerCanisterId },
-			amount: amount
+			amount
 		}) as unknown as RewardInfo;
 
 	const baseMockUserData = {

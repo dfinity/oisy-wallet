@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
+	import type IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import SwapFee from '$lib/components/swap/SwapFee.svelte';
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';

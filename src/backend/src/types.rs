@@ -17,7 +17,7 @@ pub type UserProfileMap =
 /// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
 pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
 pub type PowChallengeMap = StableBTreeMap<StoredPrincipal, Candid<StoredChallenge>, VMem>;
-#[derive(Default, Debug)]
+#[derive(Default)]
 pub struct Candid<T>(pub T)
 where
     T: CandidType + for<'de> Deserialize<'de>;

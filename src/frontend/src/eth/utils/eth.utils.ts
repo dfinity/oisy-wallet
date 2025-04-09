@@ -1,6 +1,6 @@
 import {
-	SUPPORTED_ETHEREUM_TOKENS,
-	SUPPORTED_ETHEREUM_TOKEN_IDS
+	SUPPORTED_ETHEREUM_TOKEN_IDS,
+	type SUPPORTED_ETHEREUM_TOKENS
 } from '$env/tokens/tokens.eth.env';
 import type { OptionToken, TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';

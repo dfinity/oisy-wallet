@@ -8,8 +8,8 @@ import type { OptionToken } from '$lib/types/token';
 import type { EthersTransaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { nonNullish } from '@dfinity/utils';
-import type { Transaction } from '@ethersproject/transactions';
-import { ethers } from 'ethers';
+import { AbiCoder } from 'ethers/abi';
+import { dataSlice } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 export type MapCkEthereumPendingTransactionParams = {
@@ -43,7 +43,7 @@ const mapPendingTransaction = ({
 	token,
 	value
 }: {
-	transaction: Omit<Transaction, 'value' | 'data'>;
+	transaction: Omit<MapCkEthereumPendingTransactionParams['transaction'], 'value' | 'data'>;
 	token: IcToken;
 	value: bigint;
 } & IcCkLinkedAssets): IcTransactionUi => {
@@ -78,9 +78,9 @@ const mapPendingTransaction = ({
 
 const decodeCkErc20DepositAbiDataValue = (data: string): bigint => {
 	// Types are equals to the internalTypes of the CKERC20_ABI for the deposit
-	const [_to, value] = ethers.utils.defaultAbiCoder.decode(
+	const [_to, value] = AbiCoder.defaultAbiCoder().decode(
 		['address', 'uint256', 'bytes32'],
-		ethers.utils.hexDataSlice(data, 4)
+		dataSlice(data, 4)
 	);
 
 	return value.toBigInt();

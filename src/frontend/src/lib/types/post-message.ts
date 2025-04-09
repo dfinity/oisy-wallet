@@ -1,10 +1,4 @@
 import {
-	inferPostMessageSchema,
-	PostMessageAllowSigningRequestSchema,
-	PostMessageAllowSigningResponseSchema,
-	PostMessageBaseSchema,
-	PostMessageCreatePowChallengeRequestSchema,
-	PostMessageCreatePowChallengeResponseSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,

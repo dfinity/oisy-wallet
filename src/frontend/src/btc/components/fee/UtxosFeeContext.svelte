@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE } from '$btc/constants/btc.constants';
+	import {
+		BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION,
+		DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
+	} from '$btc/constants/btc.constants';
 	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -43,6 +46,16 @@
 			(nonNullish($store) && $store.amountForFee === parsedAmount)
 		) {
 			return;
+		}
+
+		// If the new amount is 10x bigger than previous value, we need to re-fetch the fees before allowing to proceed to the review step
+		// TODO: remove it and re-fetch the fees on every amount update after time needed to complete the request is decreased
+		if (
+			nonNullish($store?.amountForFee) &&
+			Number($store.amountForFee) !== 0 &&
+			parsedAmount / Number($store.amountForFee) >= BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION
+		) {
+			store.reset();
 		}
 
 		const network = mapNetworkIdToBitcoinNetwork(networkId);

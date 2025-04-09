@@ -1,4 +1,4 @@
-import { solTransactionTypes } from '$lib/schema/transaction.schema';
+import type { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { SolAddress } from '$lib/types/address';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import type { getRpcTransaction } from '$sol/api/solana.api';

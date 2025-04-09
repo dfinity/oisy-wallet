@@ -12,8 +12,8 @@ import type { NetworkId } from '$lib/types/network';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-import type { Listener } from '@ethersproject/abstract-provider';
 import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
+import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
@@ -87,7 +87,7 @@ export const initPendingTransactionsListener = ({
 	provider.ws.on(
 		{
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
-			toAddress: toAddress,
+			toAddress,
 			hashesOnly
 		},
 		listener
@@ -120,9 +120,15 @@ export class AlchemyProvider {
 			return transaction;
 		}
 
-		const { value, ...rest } = transaction;
+		const { value, gasLimit, gasPrice, chainId, ...rest } = transaction;
 
-		return { ...rest, value: value.toBigInt() };
+		return {
+			...rest,
+			value: value.toBigInt(),
+			gasLimit: gasLimit.toBigInt(),
+			gasPrice: gasPrice?.toBigInt(),
+			chainId: BigInt(chainId)
+		};
 	};
 }
 

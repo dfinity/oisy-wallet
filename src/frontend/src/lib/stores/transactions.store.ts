@@ -50,7 +50,13 @@ export const initTransactionsStore = <
 		}) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
-				[tokenId]: [...((state ?? {})[tokenId] ?? []), ...transactions]
+				[tokenId]: [
+					...((state ?? {})[tokenId] ?? []),
+					...transactions.filter(
+						({ data: { id } }) =>
+							!((state ?? {})[tokenId] ?? []).some(({ data: { id: txId } }) => txId === id)
+					)
+				]
 			})),
 		cleanUp: ({ tokenId, transactionIds }: { tokenId: TokenId; transactionIds: string[] }) =>
 			update((state) => ({

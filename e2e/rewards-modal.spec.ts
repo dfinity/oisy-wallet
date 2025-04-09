@@ -10,7 +10,8 @@ import { getNestedSelector } from './utils/selectors.utils';
 
 const REWARDS_MODAL_VIEWPORT_HEIGHT = 900;
 
-testWithII('should display rewards modal', async ({ page, iiPage, isMobile }) => {
+// TODO: improve the test to mock the campaign in case there is none
+testWithII.skip('should display rewards modal', async ({ page, iiPage, isMobile }) => {
 	const rewardsPage = new RewardsPage({
 		page,
 		iiPage,

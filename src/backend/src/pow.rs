@@ -16,6 +16,14 @@ use crate::{
 // - General Utility methods
 // -------------------------------------------------------------------------------------------------
 
+#[macro_export]
+macro_rules! debug_println {
+    ($($arg:tt)*) => {{
+        #[cfg(test)]
+        ic_cdk::println!($($arg)*);
+    }};
+}
+
 /// Returns the current time in milliseconds since the UNIX epoch.
 fn get_current_time_ms() -> u64 {
     ic_cdk::api::time() / 1_000_000
@@ -37,12 +45,11 @@ async fn get_random_u64() -> Result<u64, String> {
         .map_err(|e| format!("raw_rand failed:  {e:?}"))?;
 
     // Check if we have at least 8 bytes which are required for u64
-    if random_bytes.len() < 8 {
-        ic_cdk::println!(
-            "Not enough random bytes returned: expected 8, got {}",
-            random_bytes.len()
-        );
-    }
+    assert!(
+        (random_bytes.len() >= 8),
+        "Not enough random bytes returned: expected 8, got {}",
+        random_bytes.len()
+    );
 
     // Convert the first 4 bytes into a [u8; 4] array for conversion
     let byte_array: [u8; 8] = random_bytes[0..8]
@@ -63,7 +70,8 @@ fn get_time_ms() -> u64 {
     ic_cdk::api::time() / 1_000_000
 }
 
-/// Formats a `StoredChallenge` excluding the sensitive `nonce` field.
+/// Formats a `StoredChallenge` excluding the sensitive field.
+#[allow(dead_code)]
 fn format_challenge(challenge: &StoredChallenge) -> String {
     format!(
         "StoredChallenge {{ start_timestamp_ms: {}, expiry_timestamp_ms: {}, difficulty: {}, solved: {} }}",
@@ -81,9 +89,9 @@ fn format_challenge(challenge: &StoredChallenge) -> String {
 pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeError> {
     let user_principal = StoredPrincipal(caller());
     if !has_user_profile(user_principal) {
-        ic_cdk::println!(
+        debug_println!(
             "create_pow_challenge() -> User profile missing for principal: {}",
-            user_principal.0.to_text()
+            user_principal.0.to_text(),
         );
         return Err(CreateChallengeError::MissingUserProfile);
     }
@@ -91,9 +99,9 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
     // Retrieve or initialize new challenge
     let difficulty: u32;
     if let Some(stored_challenge) = get_pow_challenge() {
-        ic_cdk::println!(
+        debug_println!(
             "create_pow_challenge() -> Found existing challenge: {:?}",
-            format_challenge(&stored_challenge)
+            format_challenge(&stored_challenge),
         );
 
         // we re-use the previous challenge so we can dynamically adapt the difficulty
@@ -102,14 +110,14 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
         // to protect this service from overflow the service, it can only be called by a principle
         // again once the challenge has expired.
         if stored_challenge.is_expired() {
-            ic_cdk::println!("create_pow_challenge() -> The challenge request is valid",);
+            debug_println!("create_pow_challenge() -> The challenge request is valid");
         } else {
-            ic_cdk::println!("create_pow_challenge() -> Challenge started at {} has not yet expired. Next request at {}.", stored_challenge.start_timestamp_ms, stored_challenge.expiry_timestamp_ms);
+            debug_println!("create_pow_challenge() -> Challenge started at {} has not yet expired. Next request at {}.", stored_challenge.start_timestamp_ms, stored_challenge.expiry_timestamp_ms);
             return Err(CreateChallengeError::ChallengeInProgress);
         }
     } else {
-        ic_cdk::println!(
-            "create_pow_challenge() -> No existing challenge found. Initializing new one.."
+        debug_println!(
+            "create_pow_challenge() -> No existing challenge found. Initializing new one..",
         );
         // if the challenge is requested the first time we use the start difficulty
         difficulty = START_DIFFICULTY;
@@ -136,9 +144,9 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
             .insert(user_principal, Candid(new_challenge.clone()));
     });
 
-    ic_cdk::println!(
+    debug_println!(
         "create_pow_challenge() -> Stored new challenge: {:?}",
-        new_challenge
+        new_challenge,
     );
     Ok(new_challenge)
 }
@@ -181,42 +189,44 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
 /// - `ChallengeCompletionError::ExpiredChallenge`: If the challenge expired before being solved.
 /// - `ChallengeCompletionError::ChallengeAlreadySolved`: If the challenge has already been solved.
 #[allow(dead_code)]
-pub fn complete_challenge(nonce: u64) -> Result<ChallengeCompletion, ChallengeCompletionError> {
+pub(crate) fn complete_challenge(
+    nonce: u64,
+) -> Result<ChallengeCompletion, ChallengeCompletionError> {
     let principal = caller();
     let stored_principal = StoredPrincipal(principal);
 
     // we reject any request from a principle without a user profile
     if !has_user_profile(stored_principal) {
-        ic_cdk::println!(
+        debug_println!(
             "complete_challenge(nonce) -> User profile missing for principal: {}",
-            principal.to_text()
+            principal.to_text(),
         );
         return Err(ChallengeCompletionError::MissingUserProfile);
     }
 
     let stored_challenge = get_pow_challenge().ok_or_else(|| {
-        ic_cdk::println!(
+        debug_println!(
             "complete_challenge(nonce) -> No challenge exists for {}",
-            principal
+            principal,
         );
         ChallengeCompletionError::MissingChallenge
     })?;
 
-    ic_cdk::println!(
+    debug_println!(
         "complete_challenge(nonce) -> Retrieved {:?}",
-        format_challenge(&stored_challenge)
+        format_challenge(&stored_challenge),
     );
 
     // A new challenge can be requested after the current challenge has expired
     if stored_challenge.is_expired() {
-        ic_cdk::println!(
-            "complete_challenge(nonce) -> The current challenge window has already expired"
+        debug_println!(
+            "complete_challenge(nonce) -> The current challenge window has already expired",
         );
         return Err(ChallengeCompletionError::ExpiredChallenge);
     }
     // a challenge can only be solved once
     if stored_challenge.is_solved() {
-        ic_cdk::println!(
+        debug_println!(
             "complete_challenge(nonce) -> The challenge for the current time window has already been solved"
         );
         return Err(ChallengeCompletionError::ChallengeAlreadySolved);
@@ -230,14 +240,14 @@ pub fn complete_challenge(nonce: u64) -> Result<ChallengeCompletion, ChallengeCo
         stored_challenge.difficulty,
         stored_challenge.start_timestamp_ms,
     ) {
-        ic_cdk::println!(
+        debug_println!(
             "complete_challenge(nonce) -> The provided nonce is valid (solve_duration={}ms)",
-            solve_duration_ms
+            solve_duration_ms,
         );
     } else {
-        ic_cdk::println!(
+        debug_println!(
             "complete_challenge(nonce) -> The provided nonce is invalid (solve_duration={}ms)",
-            solve_duration_ms
+            solve_duration_ms,
         );
         return Err(ChallengeCompletionError::InvalidNonce);
     }
@@ -257,9 +267,9 @@ pub fn complete_challenge(nonce: u64) -> Result<ChallengeCompletion, ChallengeCo
         pow_challenge_map.insert(stored_principal, Candid(stored_challenge.clone()));
     });
 
-    ic_cdk::println!(
+    debug_println!(
         "complete_challenge(nonce) -> Stored challenge: {:?}",
-        format_challenge(&stored_challenge)
+        format_challenge(&stored_challenge),
     );
 
     Ok(ChallengeCompletion {
@@ -295,10 +305,10 @@ fn adjust_difficulty(difficulty: u32, solve_duration_ms: u64) -> u32 {
         )
         .expect("Difficulty overflow");
 
-        ic_cdk::println!(
+        debug_println!(
             "Adjusted difficulty from {:?} to {:?}",
             difficulty,
-            new_difficulty
+            new_difficulty,
         );
         return new_difficulty;
     }

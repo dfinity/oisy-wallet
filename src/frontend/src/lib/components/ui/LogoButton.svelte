@@ -44,7 +44,7 @@
 			class:border-brand-subtle-20={dividers}
 			class:border-b={dividers}
 		>
-			<span class="flex items-center">
+			<span class="flex min-w-0 items-center">
 				{#if selectable}
 					<span in:fade class="mr-2 flex min-w-4 text-brand-primary">
 						{#if selected}
@@ -52,21 +52,21 @@
 						{/if}
 					</span>
 				{/if}
-				<span class="mr-2"><slot name="logo" /></span>
-				<span class="flex flex-col text-left">
-					<span class="text-base">
+				<span class="mr-2 flex"><slot name="logo" /></span>
+				<span class="flex min-w-0 flex-col text-left">
+					<span class="truncate text-nowrap text-base text-tertiary">
 						{#if hasTitleSlot}
-							<span class="float-left font-bold"><slot name="title" /></span>
+							<span class="font-bold"><slot name="title" /></span>
 						{/if}
 						{#if hasSubtitleSlot}
 							{#if dividers}
-								<span class="float-left text-tertiary"> &nbsp;&middot;&nbsp; </span>
+								<span class="text-tertiary"> &nbsp;&middot;&nbsp; </span>
 							{/if}
-							<span class="float-left text-tertiary"> <slot name="subtitle" /></span>
+							<span class="text-tertiary"> <slot name="subtitle" /></span>
 						{/if}
 					</span>
 					{#if hasDescriptionSlot}
-						<span class="text-sm text-tertiary">
+						<span class="truncate text-sm text-tertiary">
 							<slot name="description" />
 						</span>
 					{/if}

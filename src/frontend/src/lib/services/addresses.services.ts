@@ -6,7 +6,7 @@ import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { loadEthAddress, loadIdbEthAddress } from '$eth/services/eth-address.services';
-import { LoadIdbAddressError } from '$lib/types/errors';
+import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess, ResultSuccessReduced } from '$lib/types/utils';
 import { reduceResults } from '$lib/utils/results.utils';

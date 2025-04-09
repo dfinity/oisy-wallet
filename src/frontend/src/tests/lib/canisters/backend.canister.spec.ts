@@ -6,6 +6,7 @@ import type {
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
+
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO_BI } from '$lib/constants/app.constants';
@@ -609,7 +610,7 @@ describe('backend.canister', () => {
 
 	describe('allowSigning', () => {
 		it('should allow signing', async () => {
-			const response: Result_2 = {
+			const result: Result_2 = {
 				Ok: {
 					status: { Executed: null }, // or { Skipped: null } or { Failed: null }, depending on your scenario
 					challenge_completion: [], // Provide appropriately if challenge completion data exists
@@ -617,7 +618,7 @@ describe('backend.canister', () => {
 				}
 			};
 
-			service.allow_signing.mockResolvedValue(response);
+			service.allow_signing.mockResolvedValue(result);
 
 			const { allowSigning } = await createBackendCanister({
 				serviceOverride: service

@@ -23,9 +23,6 @@ use crate::utils::{
     pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
 };
 
-#[allow(dead_code)]
-const CANISTER_ID_SIGNER: &str = "grghe-syaaa-aaaar-qabyq-cai";
-
 // -------------------------------------------------------------------------------------------------
 // - General Utility methods used for testing
 // -------------------------------------------------------------------------------------------------
@@ -67,10 +64,10 @@ fn setup_cycles_ledger_with_progress() -> PicBackend {
 }
 
 fn helper_is_pow_enabled() -> bool {
-    if !POW_ENABLED {
-        eprintln!("Skipping test: POW is disabled (POW_ENABLED=false)");
-    }
-    POW_ENABLED
+    POW_ENABLED.then(|| true).unwrap_or_else(|| {
+        eprintln!("Skipping test: PoW is disabled (POW_ENABLED=false)");
+        false
+    })
 }
 
 #[allow(dead_code)]

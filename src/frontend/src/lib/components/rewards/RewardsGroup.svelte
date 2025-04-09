@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import type { RewardDescription } from '$env/types/env-reward';
@@ -26,6 +27,6 @@
 	{/each}
 
 	{#if nonNullish(altText) && rewards.length === 0}
-		<span>{altText}</span>
+		<span><Html text={altText} /></span>
 	{/if}
 </div>

@@ -1,8 +1,6 @@
-import type { BigNumber } from '@ethersproject/bignumber';
-
 export type Erc20TransactionAddressFrom = string;
 export type Erc20TransactionAddressTo = string;
-export type Erc20TransactionValue = BigNumber;
+export type Erc20TransactionValue = bigint;
 
 export type Erc20TransactionArgs = [
 	Erc20TransactionAddressFrom,

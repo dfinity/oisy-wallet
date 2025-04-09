@@ -40,8 +40,8 @@ describe('decodeUrn', () => {
 						: standard;
 			const expectedResult: DecodedUrn = {
 				prefix: expectedPrefix,
-				destination: destination,
-				amount: amount
+				destination,
+				amount
 			};
 			if (standard === 'ethereum' || standard === 'erc20') {
 				expectedResult.networkId = (token.network as EthereumNetwork).chainId.toString();
@@ -91,11 +91,11 @@ describe('decodeQrCode', () => {
 		const payment = {
 			token: `not-${token.symbol}`,
 			identifier: address,
-			amount: amount
+			amount
 		};
 		mockDecodePayment.mockReturnValue(payment);
 
-		const response = decodeQrCode({ status: 'success', code: code, expectedToken: token });
+		const response = decodeQrCode({ status: 'success', code, expectedToken: token });
 		expect(response).toEqual({ status: 'token_incompatible' });
 		expect(mockDecodePayment).toHaveBeenCalledWith(code);
 	});
@@ -104,16 +104,16 @@ describe('decodeQrCode', () => {
 		const payment = {
 			token: token.symbol,
 			identifier: address,
-			amount: amount
+			amount
 		};
 		mockDecodePayment.mockReturnValue(payment);
 
-		const response = decodeQrCode({ status: 'success', code: code, expectedToken: token });
+		const response = decodeQrCode({ status: 'success', code, expectedToken: token });
 		expect(response).toEqual({
 			status: 'success',
 			destination: address,
 			symbol: token.symbol,
-			amount: amount
+			amount
 		});
 		expect(mockDecodePayment).toHaveBeenCalledWith(code);
 	});

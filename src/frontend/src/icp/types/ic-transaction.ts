@@ -1,4 +1,4 @@
-import { icpTransactionTypes } from '$lib/schema/transaction.schema';
+import type { icpTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType } from '$lib/types/transaction';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type {

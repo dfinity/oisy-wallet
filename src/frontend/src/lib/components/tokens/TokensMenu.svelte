@@ -6,6 +6,8 @@
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import NotificationBlob from '$lib/components/ui/NotificationBlob.svelte';
+	import { hideZeroBalances } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { emit } from '$lib/utils/events.utils';
@@ -33,7 +35,9 @@
 	colorStyle="muted"
 	styleClass={visible ? 'active' : ''}
 >
-	<IconManage slot="icon" />
+	<NotificationBlob slot="icon" display={$hideZeroBalances} position="top-right">
+		<IconManage />
+	</NotificationBlob>
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">

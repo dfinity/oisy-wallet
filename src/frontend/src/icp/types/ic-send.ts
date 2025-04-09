@@ -1,4 +1,4 @@
-import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
+import type { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TransferParams } from '$lib/types/send';
 

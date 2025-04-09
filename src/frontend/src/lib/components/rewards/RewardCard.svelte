@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
@@ -35,7 +36,7 @@
 			<p class="m-0 text-start text-lg font-semibold">{reward.cardTitle}</p>
 
 			<p class="m-0 mt-2 text-start text-xs text-tertiary">
-				{reward.oneLiner}
+				<Html text={reward.oneLiner} />
 			</p>
 		</section>
 		<section class="bottom-4 left-4 mt-3 flex">

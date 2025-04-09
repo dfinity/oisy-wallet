@@ -138,7 +138,7 @@ export const send = ({
 				return { success: false };
 			}
 
-			const { to, gas: gasWC, data } = firstParam;
+			const { to, gas: gasWC, data } = firstParam as { to: string; gas?: string; data?: string };
 
 			modalNext();
 
@@ -152,7 +152,7 @@ export const send = ({
 					amount,
 					maxFeePerGas,
 					maxPriorityFeePerGas,
-					gas: nonNullish(gasWC) ? gasWC : gas,
+					gas: nonNullish(gasWC) ? BigInt(gasWC) : gas,
 					data,
 					identity,
 					minterInfo,
