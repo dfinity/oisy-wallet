@@ -12,7 +12,7 @@
 	import AllNetworksLogo from '$lib/components/networks/AllNetworksLogo.svelte';
 
 	export let selectedNetworkId: NetworkId | undefined = undefined;
-	export let network: Network | undefined;
+	export let network: Network | undefined = undefined;
 	export let usdBalance: number | undefined = undefined;
 	export let isTestnet = false;
 	export let testId: string | undefined = undefined;
