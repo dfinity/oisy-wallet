@@ -100,6 +100,18 @@
 			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?",
 			"error_while_signing_in": "Something went wrong while sign-in.",
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
+		},
+		"help": {
+			"text": {
+				"description": "We noticed you cancelled authentication with Internet Identity. We'd love to understand what happened so we can improve your experience.",
+				"subtitle": "Did any of the following cause the issue?",
+				"lost_identity": "I lost my Internet Identity number",
+				"security": "I was concerned about security or privacy",
+				"got_confused": "I got confused during the process",
+				"other": "Other...",
+				"feedback_text": "Your feedback helps us to make the wallet better.",
+				"thanks_text": "Thank you!"
+			}
 		}
 	},
 	"dapps": {
