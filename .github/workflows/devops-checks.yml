@@ -8,7 +8,7 @@ on:
   merge_group:
   workflow_dispatch:
 
-permissions: {}
+permissions: { }
 
 jobs:
   lint-shell:
@@ -41,13 +41,12 @@ jobs:
         run: ./scripts/setup cargo-binstall zizmor
 
       - name: Lint GitHub workflows
-        run: |
-          scripts/lint.github.sh || echo "WARNING: Zizmor lints are still being addressed"
+        run: scripts/lint.github.sh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   devops-checks-pass:
-    needs: ['lint-shell', 'lint-github-actions']
+    needs: [ 'lint-shell', 'lint-github-actions' ]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     permissions:
