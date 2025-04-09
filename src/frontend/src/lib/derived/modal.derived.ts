@@ -1,5 +1,6 @@
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
+import type { ContactModalData } from '$lib/types/contact';
 import { derived, type Readable } from 'svelte/store';
 
 export const modalEthReceive: Readable<boolean> = derived(
@@ -150,6 +151,11 @@ export const modalContact: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'contact'
 );
+export const modalContactData: Readable<ContactModalData<unknown>> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.data as ContactModalData<unknown>
+);
+
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'dapp-details'

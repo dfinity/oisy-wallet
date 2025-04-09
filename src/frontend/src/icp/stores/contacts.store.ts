@@ -1,8 +1,5 @@
-import type { ContactSchema } from '$env/schema/env-contact.schema';
+import type { Contact } from '$lib/types/contact';
 import { derived, writable, type Writable } from 'svelte/store';
-import type { z } from 'zod';
-
-type Contact = z.infer<typeof ContactSchema>;
 
 export type ContactsStoreData = Array<Contact> | undefined;
 

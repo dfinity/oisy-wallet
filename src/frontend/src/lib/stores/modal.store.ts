@@ -1,4 +1,5 @@
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
+import type { ContactModalData } from '$lib/types/contact';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -88,7 +89,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openVipQrCode: () => void;
 	openReferralCode: () => void;
 	openAddressBook: () => void;
-	openContact: () => void;
+	openContact: <D extends ContactModalData<T>>(data: D) => void;
 	openReferralState: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
 	openVipRewardState: <D extends T>(data: D) => void;
@@ -96,20 +97,26 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openRewardState: <D extends T>(data: D) => void;
 	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
 	openSettings: (data: SettingsModalType) => void;
+	open: (t: Modal<T>['type']) => void;
 	close: () => void;
 }
 
 const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
-	const setType = (type: Modal<T>['type']) => () => set({ type });
+	const setType = (type: Modal<T>['type']) => () => {
+		console.error(type);
+		set({ type });
+	};
 
 	const setTypeWithId = (type: Modal<T>['type']) => (id: symbol) => set({ type, id });
 
 	const setTypeWithData =
 		(type: Modal<T>['type']) =>
-		<D extends T>(data: D) =>
+		<D extends T>(data: D) => {
+			console.error(type);
 			set({ type, data });
+		};
 
 	return {
 		openEthReceive: setTypeWithId('eth-receive'),
@@ -147,7 +154,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openVipQrCode: setType('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
 		openAddressBook: setType('address-book'),
-		openContact: setType('contact'),
+		openContact: setTypeWithData('contact'),
 		openReferralState: setType('referral-state'),
 		openDappDetails: setTypeWithData('dapp-details'),
 		openVipRewardState: setTypeWithData('vip-reward-state'),
@@ -155,6 +162,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openRewardState: setTypeWithData('reward-state'),
 		// todo: explicitly define type here as well
 		openSettings: <(data: SettingsModalType) => void>setTypeWithData('settings'),
+		open: (type) => setType(type)(),
 		close: () => set(null),
 		subscribe
 	};

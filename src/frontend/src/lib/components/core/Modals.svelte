@@ -20,6 +20,7 @@
 		modalAddressBook,
 		modalContact
 	} from '$lib/derived/modal.derived';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.

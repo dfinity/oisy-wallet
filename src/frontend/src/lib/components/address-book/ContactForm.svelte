@@ -1,19 +1,18 @@
 <script lang="ts">
-	import { readUIntLE } from '@dfinity/candid';
 	import { z, ZodError } from 'zod';
-	import type { ContactSchema } from '$env/schema/env-contact.schema';
 	import { saveContact } from '$icp/services/manage-contacts.services';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
+	import type { Contact } from '$lib/types/contact';
 
 	const { contact, close } = $props();
 	let error = $state<ZodError | null>(null);
 	let progress = $state(false);
 
-	const save = async (contact: z.infer<typeof ContactSchema>) => {
+	const save = async (contact: Partial<Contact>) => {
 		try {
 			progress = true;
 			await saveContact(contact);

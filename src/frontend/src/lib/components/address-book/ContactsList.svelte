@@ -4,6 +4,8 @@
 	const { contacts, deleteContact } = $props();
 </script>
 
-{#each contacts as contact (contact.id)}
-	<ContactItem {contact}></ContactItem>
-{/each}
+<div class="flex flex-col gap-4">
+	{#each contacts as contact (contact.id)}
+		<ContactItem {contact}></ContactItem>
+	{/each}
+</div>

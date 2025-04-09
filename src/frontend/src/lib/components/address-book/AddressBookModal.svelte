@@ -2,8 +2,6 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import * as z from 'zod';
-	import { ContactSchema } from '$env/schema/env-contact.schema';
 	import { loadContacts } from '$icp/services/manage-contacts.services';
 	import { contactsStore, contactsStoreState } from '$icp/stores/contacts.store';
 	import ContactsList from '$lib/components/address-book/ContactsList.svelte';
@@ -17,6 +15,7 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { get } from 'svelte/store';
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
@@ -24,12 +23,10 @@
 			return;
 		}
 
-		loadContacts();
+		if (!get(contactsStore)) {
+			loadContacts();
+		}
 	});
-
-	const crudContactSchema = ContactSchema.partial();
-
-	let contact: z.infer<typeof crudContactSchema> | null = null;
 
 	const styles = $derived(
 		`mx-2 flex flex-col justify-center ${$contactsStoreState === 'loaded' ? '' : 'items-center'}`
@@ -52,7 +49,9 @@
 			<EmptyAddressBook></EmptyAddressBook>
 		{:else}
 			<div class="flex items-center">
-				<Button colorStyle="secondary-light" on:click={modalStore.openContact}
+				<Button
+					colorStyle="secondary-light"
+					on:click={() => modalStore.openContact({ previousModal: 'address-book' })}
 					>{$i18n.address_book.text.add_new_contact}</Button
 				>
 			</div>

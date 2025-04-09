@@ -31,5 +31,7 @@
 	<PageTitle>{$i18n.address_book.text.empty_title}</PageTitle>
 	<span class="text-center">{$i18n.address_book.text.empty_text}</span>
 
-	<Button on:click={modalStore.openContact}>{$i18n.address_book.text.add_new_contact}</Button>
+	<Button on:click={() => modalStore.openContact({ previousModal: 'address-book' })}
+		>{$i18n.address_book.text.add_new_contact}</Button
+	>
 </div>

@@ -3,6 +3,8 @@
 	import { ContactSchema } from '$env/schema/env-contact.schema';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import { IconBin } from '@dfinity/gix-components';
+	import { deleteContact } from '$icp/services/manage-contacts.services';
 
 	const { contact }: { contact: z.infer<typeof ContactSchema> } = $props();
 
@@ -19,7 +21,7 @@
 
 <div class="flex-cols flex w-full gap-4">
 	<span
-		class="inline-block inline-flex h-20 w-20 items-center justify-center rounded-full bg-[lightgray] text-4xl font-bold"
+		class="inline-block inline-flex h-16 w-16 items-center justify-center rounded-full bg-[lightgray] text-2xl font-bold"
 		>{initials}</span
 	>
 
@@ -30,7 +32,14 @@
 	<div class="flex-1"></div>
 	<div class="flex items-center">
 		<ButtonIcon ariaLabel="Info" on:click={selectContact}>
-			<IconInfo slot="icon"></IconInfo></ButtonIcon
+			<IconInfo slot="icon"></IconInfo>
+		</ButtonIcon>
+		<ButtonIcon
+			on:click={() => deleteContact(contact.id)}
+			ariaLabel="Info"
+			on:click={selectContact}
 		>
+			<IconBin slot="icon"></IconBin>
+		</ButtonIcon>
 	</div>
 </div>
