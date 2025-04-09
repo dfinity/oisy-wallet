@@ -69,7 +69,8 @@ describe('TokenLogo', () => {
 				props: { data: mockToken, badge: { type: 'network' }, badgeTestId: 'badge' }
 			});
 
-			expect(getByTestId('network-badge')).toBeInTheDocument();
+			expect(getByTestId('network-badge-light')).toBeInTheDocument();
+			expect(getByTestId('network-badge-dark')).toBeInTheDocument();
 
 			const expected = replacePlaceholders(en.core.alt.logo, {
 				$name: mockToken.network.name
@@ -89,7 +90,8 @@ describe('TokenLogo', () => {
 				}
 			});
 
-			expect(getByTestId('network-badge')).toBeInTheDocument();
+			expect(getByTestId('network-badge-light')).toBeInTheDocument();
+			expect(getByTestId('network-badge-dark')).toBeInTheDocument();
 
 			const expected = replacePlaceholders(en.core.alt.logo, {
 				$name: mockToken.network.name

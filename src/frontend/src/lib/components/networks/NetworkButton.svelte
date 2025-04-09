@@ -4,7 +4,6 @@
 	import AllNetworksLogo from '$lib/components/networks/AllNetworksLogo.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
