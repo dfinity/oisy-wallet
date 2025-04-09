@@ -30,7 +30,9 @@
 		>{#if nonNullish(targetNetwork)}{$i18n.send.text.source_network}{:else}{$i18n.send.text
 				.network}{/if}</svelte:fragment
 	>
-	<TextWithLogo name={sourceNetwork.name} icon={sourceNetwork.icon ?? eth} />
+	<TextWithLogo name={sourceNetwork.name}>
+		<NetworkLogo slot="icon" network={sourceNetwork} />
+	</TextWithLogo>
 </Value>
 
 {#if nonNullish(targetNetwork)}
