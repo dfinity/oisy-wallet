@@ -102,7 +102,7 @@ interface I18nAuth {
 			feedback_text: string;
 			thanks_text: string;
 		};
-	}
+	};
 }
 
 interface I18nDapps {
