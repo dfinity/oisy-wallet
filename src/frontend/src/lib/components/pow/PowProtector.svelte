@@ -1,26 +1,33 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
+	import { POW_ENABLED } from '$env/pow.env';
 	import { type BaseWorker, initPowWorker } from '$lib/services/worker.pow.services';
+
 	let powWorker: BaseWorker | undefined;
 
-	onMount(async () => {
-		// Initialize the worker
-		powWorker = await initPowWorker();
-		// Start the worker
-		powWorker.startPowWorker();
-	});
+	if (POW_ENABLED) {
+		onMount(async () => {
+			// Initialize the worker
+			powWorker = await initPowWorker();
+			// Start the worker
+			powWorker.startPowWorker();
+		});
 
-	onDestroy(() => destroyWorker());
+		onDestroy(() => {
+			destroyWorker();
+		});
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	function stopWorker() {
-		powWorker?.stopPowWorker();
+		function _stopWorker() {
+			powWorker?.stopPowWorker();
+		}
+
+		function destroyWorker() {
+			powWorker?.destroyPowWorker();
+			powWorker = undefined;
+		}
 	}
 
-	function destroyWorker() {
-		powWorker?.destroyPowWorker();
-		powWorker = undefined;
-	}
+
 </script>
 
 <slot />
