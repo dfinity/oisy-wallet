@@ -25,3 +25,9 @@ export enum WizardStepsSwap {
 	REVIEW = 'Review',
 	SWAPPING = 'Swapping'
 }
+
+export enum WizardStepsAuthHelp {
+	OVERVIEW = 'Overview',
+	HELP_IDENTITY = 'Help Identity',
+	HELP_OTHER = 'Help Other'
+}

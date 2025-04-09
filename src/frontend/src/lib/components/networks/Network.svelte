@@ -10,22 +10,15 @@
 	export let testIdPrefix = NETWORKS_SWITCHER_SELECTOR;
 	export let delayOnNetworkSelect = true;
 	export let labelsSize: LabelSize = 'md';
-
-	let id: NetworkId;
-	let name: string;
-	let icon: string | undefined;
-	$: ({ id, name, iconBW: icon } = network);
 </script>
 
 <NetworkButton
-	{id}
 	{selectedNetworkId}
-	{name}
 	{usdBalance}
 	{delayOnNetworkSelect}
-	{icon}
+	{network}
 	{labelsSize}
 	isTestnet={network.env === 'testnet'}
-	testId={`${testIdPrefix}-${id.description}`}
+	testId={`${testIdPrefix}-${network.id.description}`}
 	on:icSelected
 />

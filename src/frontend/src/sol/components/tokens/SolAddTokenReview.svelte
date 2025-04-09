@@ -2,12 +2,12 @@
 	import { assertNonNullish, isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -123,7 +123,7 @@
 
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
-		<TextWithLogo name={network.name} icon={network.icon} />
+		<NetworkWithLogo {network} />
 	</Value>
 
 	<Value ref="contractSymbol" element="div">

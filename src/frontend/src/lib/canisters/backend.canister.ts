@@ -1,9 +1,6 @@
 import type {
-	AllowSigningRequest,
 	AllowSigningResponse,
-	Result_2 as AllowSigningResult,
 	_SERVICE as BackendService,
-	Result_6 as CreateChallengeResult,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -22,6 +19,7 @@ import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
@@ -177,32 +175,16 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	// keeping the existing implementation to not beak the existing integration
-	allowSigning = async (
-		allowSigningRequest: { request?: AllowSigningRequest } = {}
-	): Promise<AllowSigningResponse> => {
+	allowSigning = async ({ request }: AllowSigningParams): Promise<AllowSigningResponse> => {
 		const { allow_signing } = this.caller({ certified: true });
-		const result = await allow_signing(
-			allowSigningRequest.request ? [allowSigningRequest.request] : []
-		);
+		const response = await allow_signing(toNullable(request));
 
-		if ('Err' in result) {
-			throw mapAllowSigningError(result.Err);
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
 		}
-		return result.Ok;
-	};
 
-	// directly returning result and not the response
-	allowSigningResult = async (
-		allowSigningRequest: { request?: AllowSigningRequest } = {}
-	): Promise<AllowSigningResult> => {
-		const { allow_signing } = this.caller({ certified: true });
-		return await allow_signing(allowSigningRequest.request ? [allowSigningRequest.request] : []);
-	};
-
-	createPowChallengeResult = (): Promise<CreateChallengeResult> => {
-		const { create_pow_challenge } = this.caller({ certified: true });
-		return create_pow_challenge();
+		throw mapAllowSigningError(response.Err);
 	};
 
 	addUserHiddenDappId = async ({

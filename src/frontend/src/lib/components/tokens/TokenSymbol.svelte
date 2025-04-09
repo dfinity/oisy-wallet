@@ -10,7 +10,7 @@
 <div class="flex flex-row items-center justify-between gap-2">
 	{nonNullish(data.oisySymbol) ? data.oisySymbol.oisySymbol : data.symbol}
 
-	{#if nonNullish(data.network.iconBW) && !hideNetworkLogo}
+	{#if nonNullish(data.network.iconLight) && nonNullish(data.network.iconDark) && !hideNetworkLogo}
 		<NetworkLogo network={data.network} blackAndWhite />
 	{/if}
 </div>

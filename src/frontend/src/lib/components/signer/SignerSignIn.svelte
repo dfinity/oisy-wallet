@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import SignerAnimatedAstronaut from '$lib/components/signer/SignerAnimatedAstronaut.svelte';
+	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
@@ -16,3 +19,7 @@
 <p class="mb-12 text-center">{$i18n.signer.sign_in.text.open_or_create}</p>
 
 <ButtonAuthenticateWithLicense fullWidth licenseAlignment="center" />
+
+{#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
+	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
+{/if}

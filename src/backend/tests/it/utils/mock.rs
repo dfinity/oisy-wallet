@@ -20,4 +20,4 @@ pub const ISSUER_ORIGIN: &str = "https://dummy-issuer.vc/";
 pub const VC_DERIVATION_ORIGIN: &str = "https://l7rua-raaaa-aaaap-ahh6a-cai.ic0.app";
 pub const II_CANISTER_ID: &str = "fgte5-ciaaa-aaaad-aaatq-cai";
 pub const SIGNER_CANISTER_ID: &str = "grghe-syaaa-aaaar-qabyq-cai";
-pub const II_ORIGIN: &str = "https://identity.ic0.app/";
+pub const II_ORIGIN: &str = "https://identity.internetcomputer.org/";

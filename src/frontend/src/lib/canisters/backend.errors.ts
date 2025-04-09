@@ -1,7 +1,7 @@
 import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
-	CreateChallengeError,
+	ChallengeCompletionError,
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -35,7 +35,7 @@ export const mapBtcSelectUserUtxosFeeError = (
 
 export const mapAllowSigningError = (
 	err: AllowSigningError
-): CanisterInternalError | ApproveError => {
+): CanisterInternalError | ApproveError | ChallengeCompletionError => {
 	if ('ApproveError' in err) {
 		return mapIcrc2ApproveError(err.ApproveError);
 	}
@@ -44,29 +44,13 @@ export const mapAllowSigningError = (
 		return new CanisterInternalError('The Cycles Ledger cannot be contacted.');
 	}
 
+	if ('PowChallenge' in err) {
+		return err.PowChallenge;
+	}
+
 	if ('Other' in err) {
 		return new CanisterInternalError(err.Other);
 	}
 
-	if ('PowChallenge' in err) {
-		return new CanisterInternalError(`PowChallenge:- ${JSON.stringify(err.PowChallenge)}`);
-	}
-
 	return new CanisterInternalError('Unknown AllowSigningError');
-};
-
-export const mapCreateChallengeError = (err: CreateChallengeError): CanisterInternalError => {
-	if ('ChallengeInProgress' in err) {
-		return new CanisterInternalError('A challenge is already in progress.');
-	}
-
-	if ('MissingUserProfile' in err) {
-		return new CanisterInternalError('User profile is missing.');
-	}
-
-	if ('RandomnessError' in err) {
-		return new CanisterInternalError(`Randomness error: ${err.RandomnessError}`);
-	}
-
-	return new CanisterInternalError('Unknown CreateChallengeError');
 };
