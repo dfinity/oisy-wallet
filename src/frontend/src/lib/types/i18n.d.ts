@@ -112,8 +112,8 @@ interface I18nAuth {
 			other_docs: string;
 			other_private_key: string;
 			other_asset_control: string;
-            need_help: string;
-            sign_in: string;
+			need_help: string;
+			sign_in: string;
 		};
 		alt: {
 			internet_identity: string;
@@ -122,7 +122,7 @@ interface I18nAuth {
 			other_docs: string;
 			other_private_key: string;
 			other_asset_control: string;
-            sign_in: string;
+			sign_in: string;
 		};
 	};
 }
