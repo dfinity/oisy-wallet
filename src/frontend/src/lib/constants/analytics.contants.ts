@@ -1,5 +1,4 @@
 // Authentication
-export const TRACK_COUNT_SIGN_IN_CLICK = 'sign_in_click_count';
 export const TRACK_COUNT_LEGACY_SIGN_IN_CLICK = 'sign_in_legacy_click_count';
 export const TRACK_COUNT_SIGN_IN_SUCCESS = 'sign_in_success_count';
 export const TRACK_SIGN_IN_CANCELLED_COUNT = 'sign_in_cancelled_count';
