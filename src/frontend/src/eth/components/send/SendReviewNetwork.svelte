@@ -6,6 +6,7 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import eth from '$icp-eth/assets/eth.svg';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -14,7 +15,6 @@
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
