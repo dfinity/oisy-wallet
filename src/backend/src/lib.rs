@@ -1,7 +1,7 @@
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
-use candid::Principal;
+use candid::{candid_method, Principal};
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
@@ -29,6 +29,9 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
+        contact::{
+            AddContactRequest, ContactError, DeleteContactRequest, UpdateContactRequest,
+        },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         migration::{Migration, MigrationProgress, MigrationReport},
@@ -50,17 +53,20 @@ use shared::{
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
-    Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
-    UserTokenMap,
+    Candid, ConfigCell, ContactMap, ContactUpdatedMap, CustomTokenMap, StoredPrincipal, 
+    UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
+    contacts::{add_contact as add_user_contact, delete_contact as delete_user_contact, get_contacts, update_contact as update_user_contact},
+    contacts_model::ContactsModel,
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
+    types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
 
@@ -68,11 +74,14 @@ mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
+mod contacts;
+mod contacts_model;
 mod guards;
 mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
+mod pow;
 pub mod signer;
 mod state;
 mod token;
@@ -85,6 +94,9 @@ const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
 const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
+const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
+const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
+const CONTACT_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(7);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -99,6 +111,10 @@ thread_local! {
             // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
+            // Use `ContactsModel` to access and manage access to these states
+            contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
+            contact_updated: ContactUpdatedMap::init(mm.borrow().get(CONTACT_UPDATED_MEMORY_ID)),
+            pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             migration: None,
         })
     );
@@ -151,6 +167,11 @@ pub struct State {
     custom_token: CustomTokenMap,
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
+    /// Stores user contacts
+    contact: ContactMap,
+    /// Tracks when contacts were last updated
+    contact_updated: ContactUpdatedMap,
+    pow_challenge: PowChallengeMap,
     migration: Option<Migration>,
 }
 
@@ -468,288 +489,7 @@ pub async fn btc_get_pending_transactions(
     let principal = ic_cdk::caller();
     let now_ns = time();
 
-    let current_use
-    chrono::{ DateTime, Utc };
-    use serde::{Deserialize, Serialize};
-    use std::collections::HashMap;
-    use std::sync::{Arc, Mutex};
-    use uuid::Uuid;
-
-    // Define address types for various blockchains
-    #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
-    pub enum AddressType {
-        BTC,
-        ETH,
-        SOL,
-        ICP,
-    }
-
-    // Structure for blockchain addresses
-    #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub struct Address {
-        pub address_type: AddressType,
-        pub address: String,
-        pub label: Option<String>,
-        pub is_default: bool,
-    }
-
-    // Main contact structure
-    #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub struct Contact {
-        pub id: String,
-        pub name: String,
-        pub avatar: Option<String>,
-        pub addresses: Vec<Address>,
-        pub notes: Option<String>,
-        pub is_favorite: bool,
-        pub last_updated: DateTime<Utc>,
-    }
-
-    // Repository trait for contact operations
-    #[async_trait::async_trait]
-    pub trait ContactRepository: Send + Sync {
-        async fn get_all(&self) -> Vec<Contact>;
-        async fn get_by_id(&self, id: &str) -> Option<Contact>;
-        async fn save(&self, contact: Contact) -> Contact;
-        async fn delete(&self, id: &str) -> bool;
-        async fn search_by_name(&self, query: &str) -> Vec<Contact>;
-        async fn filter_by_address_type(&self, address_type: &AddressType) -> Vec<Contact>;
-        async fn get_favorites(&self) -> Vec<Contact>;
-    }
-
-    // Mock implementation of the contact repository
-    pub struct MockContactRepository {
-        contacts: Arc<Mutex<HashMap<String, Contact>>>,
-    }
-
-    impl MockContactRepository {
-        pub fn new() -> Self {
-            let contacts = create_mock_contacts();
-            Self {
-                contacts: Arc::new(Mutex::new(contacts)),
-            }
-        }
-    }
-
-    #[async_trait::async_trait]
-    impl ContactRepository for MockContactRepository {
-        async fn get_all(&self) -> Vec<Contact> {
-            let contacts = self.contacts.lock().expect("Failed to lock contacts mutex");
-            contacts.values().cloned().collect()
-        }
-
-        async fn get_by_id(&self, id: &str) -> Option<Contact> {
-            let contacts = self.contacts.lock().expect("Failed to lock contacts mutex");
-            contacts.get(id).cloned()
-        }
-
-        async fn save(&self, mut contact: Contact) -> Contact {
-            let mut contacts = self.contacts.lock().expect("Failed to lock contacts mutex");
-
-            // Update last_updated timestamp
-            contact.last_updated = Utc::now();
-
-            // If it's a new contact without an ID, generate a UUID
-            if contact.id.is_empty() {
-                contact.id = Uuid::new_v4().to_string();
-            }
-
-            contacts.insert(contact.id.clone(), contact.clone());
-            contact
-        }
-
-        async fn delete(&self, id: &str) -> bool {
-            let mut contacts = self.contacts.lock().expect("Failed to lock contacts mutex");
-            contacts.remove(id).is_some()
-        }
-
-        async fn search_by_name(&self, query: &str) -> Vec<Contact> {
-            let contacts = self.contacts.lock().expect("Failed to lock contacts mutex");
-            let query = query.to_lowercase();
-
-            contacts
-                .values()
-                .filter(|contact| contact.name.to_lowercase().contains(&query))
-                .cloned()
-                .collect()
-        }
-
-        async fn filter_by_address_type(&self, address_type: &AddressType) -> Vec<Contact> {
-            let contacts = self.contacts.lock().expect("Failed to lock contacts mutex");
-
-            contacts
-                .values()
-                .filter(|contact| {
-                    contact.addresses.iter().any(|addr| addr.address_type == *address_type)
-                })
-                .cloned()
-                .collect()
-        }
-
-        async fn get_favorites(&self) -> Vec<Contact> {
-            let contacts = self.contacts.lock().expect("Failed to lock contacts mutex");
-
-            contacts
-                .values()
-                .filter(|contact| contact.is_favorite)
-                .cloned()
-                .collect()
-        }
-    }
-
-    // Generate random avatar URLs using placeholder services
-    fn generate_avatar(seed: &str) -> String {
-        // Use the seed to get consistent avatars for the same contact
-        let hash: u32 = seed.chars().map(|c| c as u32).sum();
-        format!("https://avatars.dicebear.com/api/avataaars/{}.svg", hash)
-    }
-
-    // Create mock contacts data
-    fn create_mock_contacts() -> HashMap<String, Contact> {
-        let mut contacts = HashMap::new();
-
-        // Sample contacts
-        let alice = Contact {
-            id: "1".to_string(),
-            name: "Alice Johnson".to_string(),
-            avatar: Some(generate_avatar("Alice Johnson")),
-            addresses: vec![
-                Address {
-                    address_type: AddressType::BTC,
-                    address: "bc1q9h6mqsj45cz9y5rnxc7m42a4g46qzhfgdp83pn".to_string(),
-                    label: Some("Hardware Wallet".to_string()),
-                    is_default: true,
-                },
-                Address {
-                    address_type: AddressType::ETH,
-                    address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e".to_string(),
-                    label: Some("MetaMask".to_string()),
-                    is_default: false,
-                },
-                Address {
-                    address_type: AddressType::ICP,
-                    address: "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe".to_string(),
-                    label: Some("NNS".to_string()),
-                    is_default: false,
-                },
-            ],
-            notes: Some("Friend from college".to_string()),
-            is_favorite: true,
-            last_updated: Utc::now(),
-        };
-
-        let bob = Contact {
-            id: "2".to_string(),
-            name: "Bob Smith".to_string(),
-            avatar: Some(generate_avatar("Bob Smith")),
-            addresses: vec![
-                Address {
-                    address_type: AddressType::ETH,
-                    address: "0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE".to_string(),
-                    label: Some("Trading Account".to_string()),
-                    is_default: true,
-                },
-                Address {
-                    address_type: AddressType::SOL,
-                    address: "DRpbCBMxVnDK4UKvXgYBp2HfvUMiEuUR5qjvsf9WvQZr".to_string(),
-                    label: Some("Phantom Wallet".to_string()),
-                    is_default: true,
-                },
-            ],
-            notes: Some("Crypto study group".to_string()),
-            is_favorite: false,
-            last_updated: Utc::now(),
-        };
-
-        let carol = Contact {
-            id: "3".to_string(),
-            name: "Carol Williams".to_string(),
-            avatar: Some(generate_avatar("Carol Williams")),
-            addresses: vec![
-                Address {
-                    address_type: AddressType::BTC,
-                    address: "3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5".to_string(),
-                    label: Some("Cold Storage".to_string()),
-                    is_default: true,
-                },
-                Address {
-                    address_type: AddressType::ETH,
-                    address: "0x6B175474E89094C44Da98b954EedeAC495271d0F".to_string(),
-                    label: Some("Donation Address".to_string()),
-                    is_default: true,
-                },
-                Address {
-                    address_type: AddressType::ICP,
-                    address: "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae".to_string(),
-                    label: Some("DFINITY Wallet".to_string()),
-                    is_default: true,
-                },
-            ],
-            notes: None,
-            is_favorite: true,
-            last_updated: Utc::now(),
-        };
-
-        let dave = Contact {
-            id: "4".to_string(),
-            name: "Dave Brown".to_string(),
-            avatar: Some(generate_avatar("Dave Brown")),
-            addresses: vec![
-                Address {
-                    address_type: AddressType::SOL,
-                    address: "9LnKnhwvGMDnU2zetQji69chJ9McnCYdcGHF3UJAGxwT".to_string(),
-                    label: Some("Main Account".to_string()),
-                    is_default: true,
-                },
-            ],
-            notes: Some("Work colleague - Solana dev".to_string()),
-            is_favorite: false,
-            last_updated: Utc::now(),
-        };
-
-        let eve = Contact {
-            id: "5".to_string(),
-            name: "Eve Davis".to_string(),
-            avatar: Some(generate_avatar("Eve Davis")),
-            addresses: vec![
-                Address {
-                    address_type: AddressType::BTC,
-                    address: "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq".to_string(),
-                    label: Some("Exchange".to_string()),
-                    is_default: true,
-                },
-                Address {
-                    address_type: AddressType::ETH,
-                    address: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9".to_string(),
-                    label: Some("DeFi Wallet".to_string()),
-                    is_default: true,
-                },
-                Address {
-                    address_type: AddressType::ICP,
-                    address: "l3lfs-gak7g-xrbil-j4v4h-aztjn-4jyki-wprso-m27h3-ibcl3-2cwuz-oqe".to_string(),
-                    label: Some("Internet Computer".to_string()),
-                    is_default: true,
-                },
-            ],
-            notes: None,
-            is_favorite: true,
-            last_updated: Utc::now(),
-        };
-
-        // Add contacts to the hashmap
-        contacts.insert(alice.id.clone(), alice);
-        contacts.insert(bob.id.clone(), bob);
-        contacts.insert(carol.id.clone(), carol);
-        contacts.insert(dave.id.clone(), dave);
-        contacts.insert(eve.id.clone(), eve);
-
-        contacts
-    }
-
-    // Factory function to create a repository
-    pub fn create_mock_contact_repository() -> impl ContactRepository {
-        MockContactRepository::new()
-    }utxos = bitcoin_api::get_all_utxos(
+    let current_utxos = bitcoin_api::get_all_utxos(
         params.network,
         params.address.clone(),
         Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
@@ -940,6 +680,27 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     })
 }
 
+/// Creates a new proof-of-work challenge for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `CreateChallengeError`.
+///
+/// # Returns
+///
+/// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
+/// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
+///   internal errors.
+#[update(guard = "may_write_user_data")]
+#[candid_method(update)]
+pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
+    let challenge = pow::create_pow_challenge().await?;
+
+    Ok(CreateChallengeResponse {
+        difficulty: challenge.difficulty,
+        start_timestamp_ms: challenge.start_timestamp_ms,
+        expiry_timestamp_ms: challenge.expiry_timestamp_ms,
+    })
+}
 /// Checks if the caller has an associated user profile.
 ///
 /// # Returns
@@ -956,30 +717,6 @@ pub fn has_user_profile() -> HasUserProfileResponse {
     HasUserProfileResponse {
         has_user_profile: user_profile::has_user_profile(stored_principal),
     }
-}
-
-/// An endpoint to be called by users on first login, to enable them to
-/// use the chain fusion signer together with Oisy.
-/// Creates a new proof-of-work challenge for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `CreateChallengeError`.
-///
-/// # Returns
-///
-/// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
-/// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
-///   internal errors.
-#[update(guard = "may_write_user_data")]
-#[allow(clippy::unused_async)]
-pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
-    // TODO implementation will be added once the candid files have been generated and checked in
-
-    Ok(CreateChallengeResponse {
-        difficulty: 0,
-        start_timestamp_ms: 0,
-        expiry_timestamp_ms: 0,
-    })
 }
 
 /// This function authorizes the caller to spend a specific
@@ -1142,6 +879,107 @@ pub fn set_snapshot(snapshot: UserSnapshot) {
 #[must_use]
 pub fn get_snapshot() -> Option<UserSnapshot> {
     todo!()
+}
+
+/// Adds a new contact to the user's contact list
+///
+/// # Arguments
+/// * `request` - The request containing the contact to add
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was added successfully
+///
+/// # Errors
+/// - Returns `ContactError` if the operation fails
+#[update(guard = "may_write_user_data")]
+pub fn add_contact(request: AddContactRequest) -> Result<(), ContactError> {
+    // Validate the request
+    request.check()?;
+    
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.contact, &mut s.contact_updated);
+        add_user_contact(
+            stored_principal,
+            request,
+            &mut contacts_model,
+        )
+    })
+}
+
+/// Updates an existing contact in the user's contact list
+///
+/// # Arguments
+/// * `request` - The request containing the updated contact
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was updated successfully
+///
+/// # Errors
+/// - Returns `ContactError` if the operation fails
+#[update(guard = "may_write_user_data")]
+pub fn update_contact(request: UpdateContactRequest) -> Result<(), ContactError> {
+    // Validate the request
+    request.check()?;
+    
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.contact, &mut s.contact_updated);
+        update_user_contact(
+            stored_principal,
+            request,
+            &mut contacts_model,
+        )
+    })
+}
+
+/// Deletes a contact from the user's contact list
+///
+/// # Arguments
+/// * `request` - The request containing the ID of the contact to delete
+///
+/// # Returns
+/// - Returns `Ok(())` if the contact was deleted successfully
+///
+/// # Errors
+/// - Returns `ContactError` if the operation fails
+#[update(guard = "may_write_user_data")]
+pub fn delete_contact(request: DeleteContactRequest) -> Result<(), ContactError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut contacts_model =
+            ContactsModel::new(&mut s.contact, &mut s.contact_updated);
+        delete_user_contact(
+            stored_principal,
+            request,
+            &mut contacts_model,
+        )
+    })
+}
+
+/// Gets all contacts for the caller
+///
+/// # Returns
+/// - Returns the user's contacts (empty list if none exist)
+#[query(guard = "may_read_user_data")]
+#[must_use]
+pub fn get_user_contacts() -> ContactSettings {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let contacts_model =
+            ContactsModel::new(&mut s.contact, &mut s.contact_updated);
+        get_contacts(stored_principal, &contacts_model)
+    })
 }
 
 export_candid!();

@@ -1,5 +1,8 @@
 import type {
 	_SERVICE as BackendService,
+	Contact,
+	ContactGroup,
+	ContactNetwork,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -14,6 +17,7 @@ import {
 	mapBtcPendingTransactionError,
 	mapBtcSelectUserUtxosFeeError
 } from '$lib/canisters/backend.errors';
+import { mapContactError } from '$lib/canisters/backend.contact.errors';
 import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
@@ -217,5 +221,179 @@ export class BackendCanister extends Canister<BackendService> {
 			networks: mapUserNetworks(networks),
 			current_user_version: toNullable(currentUserVersion)
 		});
+	};
+
+	// Contact methods
+	getContacts = ({ certified = true }: QueryParams = {}): Promise<Contact[]> => {
+		const { get_contacts } = this.caller({ certified });
+		return get_contacts();
+	};
+
+	getContactGroups = ({ certified = true }: QueryParams = {}): Promise<ContactGroup[]> => {
+		const { get_contact_groups } = this.caller({ certified });
+		return get_contact_groups();
+	};
+
+	addContact = async ({ 
+		contact, 
+		currentUserVersion 
+	}: { 
+		contact: Contact; 
+		currentUserVersion?: bigint 
+	}): Promise<void> => {
+		const { add_contact } = this.caller({ certified: true });
+		
+		const response = await add_contact({
+			contact,
+			current_user_version: currentUserVersion ? [currentUserVersion] : []
+		});
+		
+		if ('Err' in response) {
+			throw mapContactError(response.Err);
+		}
+	};
+
+	updateContact = async ({ 
+		address, 
+		network, 
+		alias, 
+		notes, 
+		group, 
+		isFavorite, 
+		currentUserVersion 
+	}: { 
+		address: string; 
+		network: ContactNetwork; 
+		alias: string; 
+		notes: string | null; 
+		group: string | null; 
+		isFavorite: boolean; 
+		currentUserVersion?: bigint 
+	}): Promise<void> => {
+		const { update_contact } = this.caller({ certified: true });
+		
+		const response = await update_contact({
+			address,
+			network,
+			alias,
+			notes,
+			group,
+			is_favorite: isFavorite,
+			current_user_version: currentUserVersion ? [currentUserVersion] : []
+		});
+		
+		if ('Err' in response) {
+			throw mapContactError(response.Err);
+		}
+	};
+
+	deleteContact = async ({ 
+		address, 
+		network, 
+		currentUserVersion 
+	}: { 
+		address: string; 
+		network: ContactNetwork; 
+		currentUserVersion?: bigint 
+	}): Promise<void> => {
+		const { delete_contact } = this.caller({ certified: true });
+		
+		const response = await delete_contact({
+			address,
+			network,
+			current_user_version: currentUserVersion ? [currentUserVersion] : []
+		});
+		
+		if ('Err' in response) {
+			throw mapContactError(response.Err);
+		}
+	};
+
+	toggleContactFavorite = async ({ 
+		address, 
+		network, 
+		isFavorite, 
+		currentUserVersion 
+	}: { 
+		address: string; 
+		network: ContactNetwork; 
+		isFavorite: boolean; 
+		currentUserVersion?: bigint 
+	}): Promise<void> => {
+		const { toggle_contact_favorite } = this.caller({ certified: true });
+		
+		const response = await toggle_contact_favorite({
+			address,
+			network,
+			is_favorite: isFavorite,
+			current_user_version: currentUserVersion ? [currentUserVersion] : []
+		});
+		
+		if ('Err' in response) {
+			throw mapContactError(response.Err);
+		}
+	};
+
+	addContactGroup = async ({ 
+		group, 
+		currentUserVersion 
+	}: { 
+		group: ContactGroup; 
+		currentUserVersion?: bigint 
+	}): Promise<void> => {
+		const { add_contact_group } = this.caller({ certified: true });
+		
+		const response = await add_contact_group({
+			group,
+			current_user_version: currentUserVersion ? [currentUserVersion] : []
+		});
+		
+		if ('Err' in response) {
+			throw mapContactError(response.Err);
+		}
+	};
+
+	updateContactGroup = async ({ 
+		name, 
+		description, 
+		icon, 
+		currentUserVersion 
+	}: { 
+		name: string; 
+		description: string | null; 
+		icon: string | null; 
+		currentUserVersion?: bigint 
+	}): Promise<void> => {
+		const { update_contact_group } = this.caller({ certified: true });
+		
+		const response = await update_contact_group({
+			name,
+			description,
+			icon,
+			current_user_version: currentUserVersion ? [currentUserVersion] : []
+		});
+		
+		if ('Err' in response) {
+			throw mapContactError(response.Err);
+		}
+	};
+
+	deleteContactGroup = async ({ 
+		name, 
+		currentUserVersion 
+	}: { 
+		name: string; 
+		currentUserVersion?: bigint 
+	}): Promise<void> => {
+		const { delete_contact_group } = this.caller({ certified: true });
+		
+		const response = await delete_contact_group({
+			name,
+			current_user_version: currentUserVersion ? [currentUserVersion] : []
+		});
+		
+		if ('Err' in response) {
+			throw mapContactError(response.Err);
+		}
 	};
 }

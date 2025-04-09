@@ -1,280 +1,298 @@
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Mutex};
+use shared::types::{
+    contact::{Contact, ContactSettings},
+    Timestamp,
+};
 
-// Define address types for various blockchains
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
-pub enum AddressType {
-    BTC,
-    ETH,
-    SOL,
-    ICP,
+use crate::types::{Candid, ContactMap, ContactUpdatedMap, StoredPrincipal};
+
+/// `ContactsModel` provides methods to access and manage contacts in stable memory
+pub struct ContactsModel<'a> {
+    contact_map: &'a mut ContactMap,
+    contact_updated_map: &'a mut ContactUpdatedMap,
 }
 
-// Structure for blockchain addresses
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Address {
-    pub address_type: AddressType,
-    pub address: String,
-    pub label: Option<String>,
-    pub is_default: bool,
-}
+impl<'a> ContactsModel<'a> {
+    /// Creates a new ContactsModel
+    pub fn new(
+        contact_map: &'a mut ContactMap,
+        contact_updated_map: &'a mut ContactUpdatedMap,
+    ) -> ContactsModel<'a> {
+        ContactsModel {
+            contact_map,
+            contact_updated_map,
+        }
+    }
 
-// Main contact structure
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Contact {
-    pub id: String,
-    pub name: String,
-    pub avatar: Option<String>,
-    pub addresses: Vec<Address>,
-    pub notes: Option<String>,
-    pub is_favorite: bool,
-    pub last_updated: DateTime<Utc>,
-}
+    /// Finds contacts for a user by their principal
+    pub fn find_by_principal(&self, user_principal: StoredPrincipal) -> Option<ContactSettings> {
+        if let Some(updated) = self.contact_updated_map.get(&user_principal) {
+            self.contact_map
+                .get(&(updated, user_principal))
+                .map(|p| p.0.clone())
+        } else {
+            None
+        }
+    }
 
-// Repository trait for contact operations
-#[async_trait]
-pub trait ContactRepository: Send + Sync {
-    async fn get_all(&self) -> Vec<Contact>;
-    async fn get_by_id(&self, id: &str) -> Option<Contact>;
-    async fn save(&self, contact: Contact) -> Contact;
-    async fn delete(&self, id: &str) -> bool;
-    async fn search_by_name(&self, query: &str) -> Vec<Contact>;
-    async fn filter_by_address_type(&self, address_type: &AddressType) -> Vec<Contact>;
-    async fn get_favorites(&self) -> Vec<Contact>;
-}
+    /// Stores new contacts for a user
+    pub fn store_new(
+        &mut self,
+        user_principal: StoredPrincipal,
+        timestamp: Timestamp,
+        contacts: &ContactSettings,
+    ) {
+        if let Some(old_updated) = self.contact_updated_map.get(&user_principal) {
+            // Clean up old entries
+            self.contact_map.remove(&(old_updated, user_principal));
+        }
+        self.contact_updated_map.insert(user_principal, timestamp);
+        self.contact_map.insert(
+            (timestamp, user_principal),
+            Candid(contacts.clone()),
+        );
+    }
 
-// Mock implementation of the contact repository
-pub struct MockContactRepository {
-    contacts: Arc<Mutex<HashMap<String, Contact>>>,
-}
+    /// Adds a new contact to a user's contact list
+    pub fn add_contact(
+        &mut self,
+        user_principal: StoredPrincipal,
+        timestamp: Timestamp,
+        contact: Contact,
+    ) {
+        let mut contacts = self.find_by_principal(user_principal).unwrap_or_default();
+        
+        // Check if contact with same ID already exists
+        if let Some(pos) = contacts.contacts.iter().position(|c| c.id == contact.id) {
+            // Replace existing contact
+            contacts.contacts[pos] = contact;
+        } else {
+            // Add new contact
+            contacts.contacts.push(contact);
+        }
+        
+        self.store_new(user_principal, timestamp, &contacts);
+    }
 
-impl MockContactRepository {
-    pub fn new() -> Self {
-        let contacts = create_mock_contacts();
-        Self {
-            contacts: Arc::new(Mutex::new(contacts)),
+    /// Updates an existing contact
+    pub fn update_contact(
+        &mut self,
+        user_principal: StoredPrincipal,
+        timestamp: Timestamp,
+        contact: Contact,
+    ) -> bool {
+        if let Some(mut contacts) = self.find_by_principal(user_principal) {
+            if let Some(pos) = contacts.contacts.iter().position(|c| c.id == contact.id) {
+                contacts.contacts[pos] = contact;
+                self.store_new(user_principal, timestamp, &contacts);
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Deletes a contact by ID
+    pub fn delete_contact(
+        &mut self,
+        user_principal: StoredPrincipal,
+        timestamp: Timestamp,
+        contact_id: &str,
+    ) -> bool {
+        if let Some(mut contacts) = self.find_by_principal(user_principal) {
+            if let Some(pos) = contacts.contacts.iter().position(|c| c.id == contact_id) {
+                contacts.contacts.remove(pos);
+                self.store_new(user_principal, timestamp, &contacts);
+                return true;
+            }
+        }
+        false
+    }
+
+    #[cfg(test)]
+    fn assert_consistent(&self) {
+        assert_eq!(
+            self.contact_map.len(),
+            self.contact_updated_map.len(),
+            "The number of entries should be the same"
+        );
+        for (user_principal, timestamp) in self.contact_updated_map.iter() {
+            assert!(
+                self.contact_map.contains_key(&(timestamp, user_principal)),
+                "Contact map is missing user {}",
+                user_principal.0.to_text()
+            );
         }
     }
 }
 
-#[async_trait]
-impl ContactRepository for MockContactRepository {
-    async fn get_all(&self) -> Vec<Contact> {
-        let contacts = self.contacts.lock().unwrap();
-        contacts.values().cloned().collect()
+#[cfg(test)]
+mod tests {
+    use std::cell::RefCell;
+
+    use candid::Principal;
+    use ic_stable_structures::{
+        memory_manager::{MemoryId, MemoryManager},
+        DefaultMemoryImpl,
+    };
+    use shared::types::{
+        contact::{Contact, ContactAddress, ContactSettings},
+        Timestamp,
+    };
+
+    use super::*;
+
+    const USER_1: &str = "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae";
+    const USER_2: &str = "ufjdl-kewp5-bgfaq-d7k34-e5w62-nyad4-7r3s5-m2pt2-owqga-kcr5z-jae";
+
+    fn prepare_btrees() -> (ContactMap, ContactUpdatedMap) {
+        const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(10);
+        const CONTACT_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(11);
+        let memory = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+        let contact_map = ContactMap::new(memory.borrow().get(CONTACT_MEMORY_ID));
+        let contact_updated_map = ContactUpdatedMap::new(memory.borrow().get(CONTACT_UPDATED_MEMORY_ID));
+
+        (contact_map, contact_updated_map)
     }
 
-    async fn get_by_id(&self, id: &str) -> Option<Contact> {
-        let contacts = self.contacts.lock().unwrap();
-        contacts.get(id).cloned()
-    }
-
-    async fn save(&self, mut contact: Contact) -> Contact {
-        let mut contacts = self.contacts.lock().unwrap();
-
-        // Update last_updated timestamp
-        contact.last_updated = Utc::now();
-
-        // If it's a new contact without an ID, generate one
-        if contact.id.is_empty() {
-            let next_id = (contacts.len() + 1).to_string();
-            contact.id = next_id;
+    fn create_test_contact(id: &str, name: &str) -> Contact {
+        Contact {
+            id: id.to_string(),
+            name: name.to_string(),
+            description: Some("Test contact".to_string()),
+            addresses: vec![
+                ContactAddress {
+                    network: "ICP".to_string(),
+                    address: "abcdef123456".to_string(),
+                    label: Some("Main wallet".to_string()),
+                },
+            ],
         }
-
-        contacts.insert(contact.id.clone(), contact.clone());
-        contact
     }
 
-    async fn delete(&self, id: &str) -> bool {
-        let mut contacts = self.contacts.lock().unwrap();
-        contacts.remove(id).is_some()
+    #[test]
+    fn test_find_by_principal_returns_contacts() {
+        let (mut contact_map, mut contact_updated_map) = prepare_btrees();
+
+        let user_principal = StoredPrincipal(Principal::from_text(USER_1).expect("invalid user principal"));
+        let now: Timestamp = 12345667788223;
+        
+        let contact_settings = ContactSettings {
+            contacts: vec![create_test_contact("1", "Alice")],
+        };
+        
+        contact_map.insert((now, user_principal), Candid(contact_settings.clone()));
+        contact_updated_map.insert(user_principal, now);
+
+        let contacts_model = ContactsModel::new(&mut contact_map, &mut contact_updated_map);
+
+        assert_eq!(
+            contacts_model.find_by_principal(user_principal).unwrap(),
+            contact_settings
+        );
+        
+        contacts_model.assert_consistent();
     }
 
-    async fn search_by_name(&self, query: &str) -> Vec<Contact> {
-        let contacts = self.contacts.lock().unwrap();
-        let query = query.to_lowercase();
+    #[test]
+    fn test_add_contact() {
+        let (mut contact_map, mut contact_updated_map) = prepare_btrees();
+        let contacts_model = &mut ContactsModel::new(&mut contact_map, &mut contact_updated_map);
 
-        contacts
-            .values()
-            .filter(|contact| contact.name.to_lowercase().contains(&query))
-            .cloned()
-            .collect()
+        let user_principal = StoredPrincipal(Principal::from_text(USER_1).expect("invalid user principal"));
+        let now: Timestamp = 12345667788223;
+        
+        let contact = create_test_contact("1", "Alice");
+        
+        // Add a contact
+        contacts_model.add_contact(user_principal, now, contact.clone());
+        
+        // Verify the contact was added
+        let contacts = contacts_model.find_by_principal(user_principal).unwrap();
+        assert_eq!(contacts.contacts.len(), 1);
+        assert_eq!(contacts.contacts[0], contact);
+        
+        // Add another contact
+        let contact2 = create_test_contact("2", "Bob");
+        contacts_model.add_contact(user_principal, now + 1, contact2.clone());
+        
+        // Verify both contacts exist
+        let contacts = contacts_model.find_by_principal(user_principal).unwrap();
+        assert_eq!(contacts.contacts.len(), 2);
+        assert!(contacts.contacts.contains(&contact));
+        assert!(contacts.contacts.contains(&contact2));
+        
+        contacts_model.assert_consistent();
     }
 
-    async fn filter_by_address_type(&self, address_type: &AddressType) -> Vec<Contact> {
-        let contacts = self.contacts.lock().unwrap();
+    #[test]
+    fn test_update_contact() {
+        let (mut contact_map, mut contact_updated_map) = prepare_btrees();
+        let contacts_model = &mut ContactsModel::new(&mut contact_map, &mut contact_updated_map);
 
-        contacts
-            .values()
-            .filter(|contact| {
-                contact.addresses.iter().any(|addr| addr.address_type == *address_type)
-            })
-            .cloned()
-            .collect()
+        let user_principal = StoredPrincipal(Principal::from_text(USER_1).expect("invalid user principal"));
+        let now: Timestamp = 12345667788223;
+        
+        // Add a contact
+        let contact = create_test_contact("1", "Alice");
+        contacts_model.add_contact(user_principal, now, contact);
+        
+        // Update the contact
+        let updated_contact = Contact {
+            id: "1".to_string(),
+            name: "Alice Updated".to_string(),
+            description: Some("Updated description".to_string()),
+            addresses: vec![
+                ContactAddress {
+                    network: "ICP".to_string(),
+                    address: "updated_address".to_string(),
+                    label: Some("Updated label".to_string()),
+                },
+                ContactAddress {
+                    network: "BTC".to_string(),
+                    address: "btc_address".to_string(),
+                    label: None,
+                },
+            ],
+        };
+        
+        let result = contacts_model.update_contact(user_principal, now + 1, updated_contact.clone());
+        assert!(result);
+        
+        // Verify the contact was updated
+        let contacts = contacts_model.find_by_principal(user_principal).unwrap();
+        assert_eq!(contacts.contacts.len(), 1);
+        assert_eq!(contacts.contacts[0], updated_contact);
+        
+        contacts_model.assert_consistent();
     }
 
-    async fn get_favorites(&self) -> Vec<Contact> {
-        let contacts = self.contacts.lock().unwrap();
+    #[test]
+    fn test_delete_contact() {
+        let (mut contact_map, mut contact_updated_map) = prepare_btrees();
+        let contacts_model = &mut ContactsModel::new(&mut contact_map, &mut contact_updated_map);
 
-        contacts
-            .values()
-            .filter(|contact| contact.is_favorite)
-            .cloned()
-            .collect()
+        let user_principal = StoredPrincipal(Principal::from_text(USER_1).expect("invalid user principal"));
+        let now: Timestamp = 12345667788223;
+        
+        // Add two contacts
+        let contact1 = create_test_contact("1", "Alice");
+        let contact2 = create_test_contact("2", "Bob");
+        
+        contacts_model.add_contact(user_principal, now, contact1.clone());
+        contacts_model.add_contact(user_principal, now + 1, contact2.clone());
+        
+        // Verify both contacts exist
+        let contacts = contacts_model.find_by_principal(user_principal).unwrap();
+        assert_eq!(contacts.contacts.len(), 2);
+        
+        // Delete the first contact
+        let result = contacts_model.delete_contact(user_principal, now + 2, &contact1.id);
+        assert!(result);
+        
+        // Verify only the second contact remains
+        let contacts = contacts_model.find_by_principal(user_principal).unwrap();
+        assert_eq!(contacts.contacts.len(), 1);
+        assert_eq!(contacts.contacts[0], contact2);
+        
+        contacts_model.assert_consistent();
     }
-}
-
-// Generate random avatar URLs using placeholder services
-fn generate_avatar(seed: &str) -> String {
-    // Use the seed to get consistent avatars for the same contact
-    let hash: u32 = seed.chars().map(|c| c as u32).sum();
-    format!("https://avatars.dicebear.com/api/avataaars/{}.svg", hash)
-}
-
-// Create mock contacts data
-fn create_mock_contacts() -> HashMap<String, Contact> {
-    let mut contacts = HashMap::new();
-
-    // Sample contacts
-    let alice = Contact {
-        id: "1".to_string(),
-        name: "Alice Johnson".to_string(),
-        avatar: Some(generate_avatar("Alice Johnson")),
-        addresses: vec![
-            Address {
-                address_type: AddressType::BTC,
-                address: "bc1q9h6mqsj45cz9y5rnxc7m42a4g46qzhfgdp83pn".to_string(),
-                label: Some("Hardware Wallet".to_string()),
-                is_default: true,
-            },
-            Address {
-                address_type: AddressType::ETH,
-                address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e".to_string(),
-                label: Some("MetaMask".to_string()),
-                is_default: false,
-            },
-            Address {
-                address_type: AddressType::ICP,
-                address: "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe".to_string(),
-                label: Some("NNS".to_string()),
-                is_default: false,
-            },
-        ],
-        notes: Some("Friend from college".to_string()),
-        is_favorite: true,
-        last_updated: Utc::now(),
-    };
-
-    let bob = Contact {
-        id: "2".to_string(),
-        name: "Bob Smith".to_string(),
-        avatar: Some(generate_avatar("Bob Smith")),
-        addresses: vec![
-            Address {
-                address_type: AddressType::ETH,
-                address: "0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE".to_string(),
-                label: Some("Trading Account".to_string()),
-                is_default: true,
-            },
-            Address {
-                address_type: AddressType::SOL,
-                address: "DRpbCBMxVnDK4UKvXgYBp2HfvUMiEuUR5qjvsf9WvQZr".to_string(),
-                label: Some("Phantom Wallet".to_string()),
-                is_default: true,
-            },
-        ],
-        notes: Some("Crypto study group".to_string()),
-        is_favorite: false,
-        last_updated: Utc::now(),
-    };
-
-    let carol = Contact {
-        id: "3".to_string(),
-        name: "Carol Williams".to_string(),
-        avatar: Some(generate_avatar("Carol Williams")),
-        addresses: vec![
-            Address {
-                address_type: AddressType::BTC,
-                address: "3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5".to_string(),
-                label: Some("Cold Storage".to_string()),
-                is_default: true,
-            },
-            Address {
-                address_type: AddressType::ETH,
-                address: "0x6B175474E89094C44Da98b954EedeAC495271d0F".to_string(),
-                label: Some("Donation Address".to_string()),
-                is_default: true,
-            },
-            Address {
-                address_type: AddressType::ICP,
-                address: "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae".to_string(),
-                label: Some("DFINITY Wallet".to_string()),
-                is_default: true,
-            },
-        ],
-        notes: None,
-        is_favorite: true,
-        last_updated: Utc::now(),
-    };
-
-    let dave = Contact {
-        id: "4".to_string(),
-        name: "Dave Brown".to_string(),
-        avatar: Some(generate_avatar("Dave Brown")),
-        addresses: vec![
-            Address {
-                address_type: AddressType::SOL,
-                address: "9LnKnhwvGMDnU2zetQji69chJ9McnCYdcGHF3UJAGxwT".to_string(),
-                label: Some("Main Account".to_string()),
-                is_default: true,
-            },
-        ],
-        notes: Some("Work colleague - Solana dev".to_string()),
-        is_favorite: false,
-        last_updated: Utc::now(),
-    };
-
-    let eve = Contact {
-        id: "5".to_string(),
-        name: "Eve Davis".to_string(),
-        avatar: Some(generate_avatar("Eve Davis")),
-        addresses: vec![
-            Address {
-                address_type: AddressType::BTC,
-                address: "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq".to_string(),
-                label: Some("Exchange".to_string()),
-                is_default: true,
-            },
-            Address {
-                address_type: AddressType::ETH,
-                address: "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9".to_string(),
-                label: Some("DeFi Wallet".to_string()),
-                is_default: true,
-            },
-            Address {
-                address_type: AddressType::ICP,
-                address: "l3lfs-gak7g-xrbil-j4v4h-aztjn-4jyki-wprso-m27h3-ibcl3-2cwuz-oqe".to_string(),
-                label: Some("Internet Computer".to_string()),
-                is_default: true,
-            },
-        ],
-        notes: None,
-        is_favorite: true,
-        last_updated: Utc::now(),
-    };
-
-    // Add contacts to the hashmap
-    contacts.insert(alice.id.clone(), alice);
-    contacts.insert(bob.id.clone(), bob);
-    contacts.insert(carol.id.clone(), carol);
-    contacts.insert(dave.id.clone(), dave);
-    contacts.insert(eve.id.clone(), eve);
-
-    contacts
-}
-
-// Factory function to create a repository
-pub fn create_mock_contact_repository() -> impl ContactRepository {
-    MockContactRepository::new()
 }

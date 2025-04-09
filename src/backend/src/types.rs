@@ -3,8 +3,8 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    backend_config::Config, custom_token::CustomToken, token::UserToken,
-    user_profile::StoredUserProfile, Timestamp,
+    backend_config::Config, contact::ContactSettings, custom_token::CustomToken, pow::StoredChallenge, 
+    token::UserToken, user_profile::StoredUserProfile, Timestamp,
 };
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
@@ -16,7 +16,12 @@ pub type UserProfileMap =
     StableBTreeMap<(Timestamp, StoredPrincipal), Candid<StoredUserProfile>, VMem>;
 /// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
 pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
-
+/// Map of (`updated_timestamp`, `user_principal`) to `ContactSettings`
+pub type ContactMap =
+    StableBTreeMap<(Timestamp, StoredPrincipal), Candid<ContactSettings>, VMem>;
+/// Map of `user_principal` to `updated_timestamp` (in `ContactSettings`)
+pub type ContactUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
+pub type PowChallengeMap = StableBTreeMap<StoredPrincipal, Candid<StoredChallenge>, VMem>;
 #[derive(Default)]
 pub struct Candid<T>(pub T)
 where
