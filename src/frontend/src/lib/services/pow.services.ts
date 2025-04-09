@@ -3,7 +3,7 @@ import type {
 	Result_2 as AllowSigningResult,
 	Result_6 as CreateChallengeResult
 } from '$declarations/backend/backend.did';
-import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
+import { createPowChallenge } from '$lib/api/backend.api';
 import type { OptionIdentity } from '$lib/types/identity';
 import { hashToHex } from '$lib/utils/crypto.utils';
 
@@ -32,8 +32,8 @@ export const solvePowChallenge = async (timestamp: bigint, difficulty: number): 
 };
 
 export const _createPowChallenge = async ({
-	identity
-}: {
+																						identity
+																					}: {
 	identity: OptionIdentity;
 }): Promise<CreateChallengeResult> => {
 	try {
@@ -49,14 +49,14 @@ export const _createPowChallenge = async ({
 };
 
 export const _allowSigning = async ({
-	identity,
-	request
-}: {
+																			identity,
+																			request
+																		}: {
 	identity: OptionIdentity;
 	request?: AllowSigningRequest;
 }): Promise<AllowSigningResult> => {
 	try {
-		return await allowSigning({ identity, request });
+		return await allowSigningResult({ identity, request });
 	} catch (error) {
 		// Ensure the `Err` matches the `CreateChallengeError` type
 		return {
