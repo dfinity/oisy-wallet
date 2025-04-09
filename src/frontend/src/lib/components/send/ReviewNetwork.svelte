@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import bitcoin from '$icp/assets/bitcoin.svg';
 	import eth from '$icp-eth/assets/eth.svg';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import SendBtcNetwork from '$lib/components/send/SendBtcNetwork.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
@@ -11,8 +13,6 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 
 	export let sourceNetwork: Network | undefined;
 	export let destinationNetworkId: NetworkId | undefined = undefined;

@@ -2,6 +2,7 @@
 	import { assertNonNullish, isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -19,7 +20,6 @@
 	import { getSplMetadata } from '$sol/services/spl.services';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 
 	export let tokenAddress: SplTokenAddress | undefined;
 	export let metadata: TokenMetadata | undefined;
