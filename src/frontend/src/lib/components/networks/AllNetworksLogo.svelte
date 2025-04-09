@@ -1,10 +1,10 @@
 <script lang="ts">
+	import AllNetworksIconDark from '$lib/assets/networks/dark/all-networks.svg';
+	import AllNetworksIconLight from '$lib/assets/networks/light/all-networks.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import AllNetworksIconLight from '$lib/assets/networks/light/all-networks.svg';
-	import AllNetworksIconDark from '$lib/assets/networks/dark/all-networks.svg';
 
 	export let size: LogoSize = 'xxs';
 	export let color: 'off-white' | 'white' = 'off-white';

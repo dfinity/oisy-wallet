@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import AllNetworksLogo from '$lib/components/networks/AllNetworksLogo.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -8,8 +10,6 @@
 	import type { LabelSize } from '$lib/types/components';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { formatUSD } from '$lib/utils/format.utils';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import AllNetworksLogo from '$lib/components/networks/AllNetworksLogo.svelte';
 
 	export let selectedNetworkId: NetworkId | undefined = undefined;
 	export let network: Network | undefined;
