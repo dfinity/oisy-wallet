@@ -9,6 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import {onMount} from "svelte";
 
 	export let usesIdentityHelp = false;
 
@@ -19,12 +20,14 @@
 
 	let currentStep: WizardStep | undefined;
 
-	let title;
+	let title: string;
 	$: title = currentStep?.title ?? $i18n.auth.help.text.title;
 
-	$: if (usesIdentityHelp && nonNullish(modal) && nonNullish(steps)) {
-		goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY });
-	}
+	onMount(() => {
+		if (usesIdentityHelp && nonNullish(modal) && nonNullish(steps)) {
+			goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY });
+		}
+	});
 
 	const close = () =>
 		closeModal(() => {
@@ -34,7 +37,7 @@
 	const onBack = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.OVERVIEW });
 	const onLostIdentity = () =>
 		goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY });
-	const onOther = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_OTHERS });
+	const onOther = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_OTHER });
 </script>
 
 <WizardModal {steps} bind:this={modal} bind:currentStep on:nnsClose={close}>
@@ -46,7 +49,7 @@
 		<AuthHelpForm {onLostIdentity} {onOther} />
 	{:else if currentStep?.name === WizardStepsAuthHelp.HELP_IDENTITY}
 		<AuthHelpIdentityForm hideBack={usesIdentityHelp} {onBack} onDone={close} />
-	{:else if currentStep?.name === WizardStepsAuthHelp.HELP_OTHERS}
+	{:else if currentStep?.name === WizardStepsAuthHelp.HELP_OTHER}
 		<AuthHelpOtherForm {onBack} onDone={close} />
 	{/if}
 </WizardModal>
