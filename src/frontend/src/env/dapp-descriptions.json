@@ -81,7 +81,7 @@
 		"name": "NNS Dapp",
 		"oneLiner": "The NNS front-end dapp allows anyone to interact with the Internet Computer's Network Nervous System with a user-friendly UI.",
 		"callToAction": "Get engaged",
-		"website": "https://nns.ic0.app/",
+		"website": "https://nns.internetcomputer.org/",
 		"github": "https://github.com/dfinity/nns-dapp",
 		"tags": ["Staking"],
 		"stats": "",
