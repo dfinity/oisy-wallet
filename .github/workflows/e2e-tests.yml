@@ -145,9 +145,7 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Test
-        run: npm run e2e:ci -- e2e/$TEST_FILE
-        env:
-          TEST_FILE: ${{ env.TEST_FILE }}
+        run: npm run e2e:ci -- e2e/${{ matrix.test }}
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
