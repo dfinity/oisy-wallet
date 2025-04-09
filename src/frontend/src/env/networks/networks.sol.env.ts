@@ -12,12 +12,12 @@ import solLocalnetIconBW from '$lib/assets/networks/sol-localnet-bw.svg';
 import solMainnetIconBW from '$lib/assets/networks/sol-mainnet-bw.svg';
 import solTestnetIconBW from '$lib/assets/networks/sol-testnet-bw.svg';
 
-import solDevnetIconDark from '$lib/assets/networks/dark/Solana_devnet_dark.svg';
-import solMainnetIconDark from '$lib/assets/networks/dark/Solana_mono_dark.svg';
-import solTestnetIconDark from '$lib/assets/networks/dark/Solana_testnet_dark.svg';
-import solDevnetIconLight from '$lib/assets/networks/light/Solana_devnet.svg';
-import solMainnetIconLight from '$lib/assets/networks/light/Solana_mono.svg';
-import solTestnetIconLight from '$lib/assets/networks/light/Solana_testnet.svg';
+import solDevnetIconDark from '$lib/assets/networks/dark/solana-devnet.svg';
+import solMainnetIconDark from '$lib/assets/networks/dark/solana-mainnet.svg';
+import solTestnetIconDark from '$lib/assets/networks/dark/solana-testnet.svg';
+import solDevnetIconLight from '$lib/assets/networks/light/solana-devnet.svg';
+import solMainnetIconLight from '$lib/assets/networks/light/solana-mainnet.svg';
+import solTestnetIconLight from '$lib/assets/networks/light/solana-testnet.svg';
 import sol from '$lib/assets/networks/sol.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { Network, NetworkId } from '$lib/types/network';
