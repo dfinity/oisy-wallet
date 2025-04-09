@@ -9,8 +9,10 @@ import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import bitcoinMainnetBW from '$lib/assets/networks/bitcoin-mainnet-bw.svg';
 import bitcoinTestnetBW from '$lib/assets/networks/bitcoin-testnet-bw.svg';
 import bitcoinMainnetIconDark from '$lib/assets/networks/dark/bitcoin-mainnet.svg';
+import bitcoinRegtestIconDark from '$lib/assets/networks/dark/bitcoin-regtest.svg';
 import bitcoinTestnetIconDark from '$lib/assets/networks/dark/bitcoin-testnet.svg';
 import bitcoinMainnetIconLight from '$lib/assets/networks/light/bitcoin-mainnet.svg';
+import bitcoinRegtestIconLight from '$lib/assets/networks/light/bitcoin-regtest.svg';
 import bitcoinTestnetIconLight from '$lib/assets/networks/light/bitcoin-testnet.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
@@ -61,8 +63,8 @@ export const BTC_REGTEST_NETWORK: BitcoinNetwork = {
 	env: 'testnet',
 	name: 'Bitcoin (Regtest)',
 	explorerUrl: BTC_REGTEST_EXPLORER_URL,
-	iconLight: bitcoinMainnetIconLight,
-	iconDark: bitcoinMainnetIconDark
+	iconLight: bitcoinRegtestIconLight,
+	iconDark: bitcoinRegtestIconDark
 };
 
 export const SUPPORTED_BITCOIN_NETWORKS: BitcoinNetwork[] = [
