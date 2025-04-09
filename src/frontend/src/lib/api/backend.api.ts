@@ -145,7 +145,7 @@ export const selectUserUtxosFee = async ({
 export const createPowChallenge = async ({
 																					 identity
 																				 }: CanisterApiFunctionParams): Promise<CreateChallengeResult> => {
-	const { createPowChallengeResult } = await backendCanister({ identity });
+	const { createPowChallenge } = await backendCanister({ identity });
 
 	return createPowChallengeResult();
 };
