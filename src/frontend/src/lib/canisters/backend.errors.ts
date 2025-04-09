@@ -1,6 +1,7 @@
 import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
+	ChallengeCompletionError,
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -34,13 +35,17 @@ export const mapBtcSelectUserUtxosFeeError = (
 
 export const mapAllowSigningError = (
 	err: AllowSigningError
-): CanisterInternalError | ApproveError => {
+): CanisterInternalError | ApproveError | ChallengeCompletionError => {
 	if ('ApproveError' in err) {
 		return mapIcrc2ApproveError(err.ApproveError);
 	}
 
 	if ('FailedToContactCyclesLedger' in err) {
 		return new CanisterInternalError('The Cycles Ledger cannot be contacted.');
+	}
+
+	if ('PowChallenge' in err) {
+		return err.PowChallenge;
 	}
 
 	if ('Other' in err) {
