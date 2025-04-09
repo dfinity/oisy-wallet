@@ -49,7 +49,7 @@ export const mapAllowSigningError = (
 	}
 
 	if ('PowChallenge' in err) {
-		return new CanisterInternalError('PowChallenge:- ' + JSON.stringify(err.PowChallenge));
+		return new CanisterInternalError(`PowChallenge:- ${JSON.stringify(err.PowChallenge)}`);
 	}
 
 	return new CanisterInternalError('Unknown AllowSigningError');
@@ -65,7 +65,7 @@ export const mapCreateChallengeError = (err: CreateChallengeError): CanisterInte
 	}
 
 	if ('RandomnessError' in err) {
-		return new CanisterInternalError('Randomness error: ' + err.RandomnessError);
+		return new CanisterInternalError(`Randomness error: ${err.RandomnessError}`);
 	}
 
 	return new CanisterInternalError('Unknown CreateChallengeError');

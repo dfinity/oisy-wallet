@@ -51,7 +51,7 @@ const startPowTimer = async () => {
 	timer = setInterval(allowSigning, FIRST_TIMER_INTERVAL);
 };
 
-let powInProgress = false;
+const powInProgress = false;
 
 async function allowSigning() {
 	// Step 1: CreatePoWChallenge
@@ -77,7 +77,7 @@ async function allowSigning() {
 		await sendMessageRequest<PostMessageAllowSigningResponse>(
 			self as unknown as Worker,
 			'AllowSigningRequest',
-			{ nonce: nonce },
+			{ nonce },
 			PostMessageAllowSigningResponseSchema
 		);
 

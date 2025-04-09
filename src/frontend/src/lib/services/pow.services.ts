@@ -3,7 +3,7 @@ import type {
 	Result_2 as AllowSigningResult,
 	Result_6 as CreateChallengeResult
 } from '$declarations/backend/backend.did';
-import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
+import { allowSigningResult, createPowChallenge } from '$lib/api/backend.api';
 import type { OptionIdentity } from '$lib/types/identity';
 import { hashToHex } from '$lib/utils/crypto.utils';
 
@@ -12,7 +12,9 @@ function getTimestampNowNs(): bigint {
 }
 
 export const solvePowChallenge = async (timestamp: bigint, difficulty: number): Promise<number> => {
-	if (difficulty <= 0) throw new Error('Difficulty must be greater than zero');
+	if (difficulty <= 0) {
+		throw new Error('Difficulty must be greater than zero');
+	}
 
 	let nonce = 0;
 	const target = Math.floor(0xffffffff / difficulty);
@@ -22,7 +24,9 @@ export const solvePowChallenge = async (timestamp: bigint, difficulty: number): 
 		const challengeStr = `${timestamp}.${nonce}`;
 		const hashHex = await hashToHex(challengeStr); // Using the new hashToHex function
 		const prefix = parseInt(hashHex.slice(0, 8), 16); // Only consider the first 4 bytes
-		if (prefix <= target) break;
+		if (prefix <= target) {
+			break;
+		}
 		nonce++;
 	}
 
@@ -56,7 +60,7 @@ export const _allowSigning = async ({
 	request?: AllowSigningRequest;
 }): Promise<AllowSigningResult> => {
 	try {
-		return await allowSigning({ identity, request });
+		return await allowSigningResult({ identity, request });
 	} catch (error) {
 		// Ensure the `Err` matches the `CreateChallengeError` type
 		return {

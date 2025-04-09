@@ -183,7 +183,6 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 		data: dataSchema.optional()
 	});
 
-
 // -----------------------------------------------------------------------------------------------
 // The generic data structures which are required to implement the Short Polling (request-response)
 // design pattern used for a simplified communication between the worker(s) and the web application

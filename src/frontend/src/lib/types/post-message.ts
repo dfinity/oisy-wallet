@@ -1,4 +1,4 @@
-import {
+import type {
 	inferPostMessageSchema,
 	PostMessageAllowSigningRequestSchema,
 	PostMessageAllowSigningResponseSchema,
@@ -28,8 +28,8 @@ import {
 	PostMessageResponseStatusSchema,
 	PostMessageSyncStateSchema
 } from '$lib/schema/post-message.schema';
+import type * as z from 'zod';
 import type { ZodType } from 'zod';
-import * as z from 'zod';
 
 export type PostMessageDataRequest = z.infer<typeof PostMessageDataRequestSchema>;
 export type PostMessageDataResponse = z.infer<typeof PostMessageDataResponseSchema>;

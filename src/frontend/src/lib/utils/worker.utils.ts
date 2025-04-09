@@ -1,5 +1,5 @@
 import type { PostMessageRequestBase } from '$lib/types/post-message';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 const responseHandlers = new Map<string, (data: unknown) => void>();
 
@@ -78,7 +78,7 @@ export function sendMessageRequest<T>(
 		msg,
 		requestId,
 		type: 'request',
-		data: data
+		data
 	};
 
 	return new Promise((resolve, reject) => {
