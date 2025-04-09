@@ -1,8 +1,8 @@
 import {
-	PostMessageAllowSigningRequestSchema,
-	PostMessageAllowSigningResponseSchema,
-	PostMessageCreatePowChallengeRequestSchema,
-	PostMessageCreatePowChallengeResponseSchema,
+	type PostMessageAllowSigningRequestSchema,
+	type PostMessageAllowSigningResponseSchema,
+	type PostMessageCreatePowChallengeRequestSchema,
+	type PostMessageCreatePowChallengeResponseSchema,
 	type PostMessageBaseSchema,
 	type PostMessageDataRequestBtcSchema,
 	type PostMessageDataRequestExchangeTimerSchema,
