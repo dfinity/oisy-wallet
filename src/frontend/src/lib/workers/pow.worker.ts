@@ -3,20 +3,18 @@ import {
 	PostMessageCreatePowChallengeResponseSchema
 } from '$lib/schema/post-message.schema';
 import { solvePowChallenge } from '$lib/services/pow.services';
-import type {
-	PostMessage,
-	PostMessageAllowSigningResponse,
-	PostMessageCreatePowChallengeResponse
-} from '$lib/types/post-message';
+import type { PostMessageAllowSigningResponse, PostMessageCreatePowChallengeResponse } from '$lib/types/post-message';
 import { routeWorkerResponse, sendMessageRequest } from '$lib/utils/worker.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const FIRST_TIMER_INTERVAL = 60_000;
+// in ms, can be changed dynamically by sending message setPowThrottle
+let _throttleRate = 20;
 
 let timer: NodeJS.Timeout | undefined = undefined;
 
-export const onPowMessage = async (event: MessageEvent<PostMessage<any>>) => {
-	console.info('Received event data:', event.data);
+export const onPowMessage = async (event: MessageEvent) => {
+	console.warn('Received event data:', event.data);
 
 	// this makes sure that the response is automatically routed back to the requester that initially published the message vent
 	if (routeWorkerResponse(event)) {
@@ -29,8 +27,13 @@ export const onPowMessage = async (event: MessageEvent<PostMessage<any>>) => {
 			stopPowTimer();
 			return;
 		case 'startPowTimer':
-			await startPowTimer();
+			startPowTimer();
 			return;
+		case 'setPowThrottle':
+			if (event.data?.throttleRate !== undefined && event.data.throttleRate !== 0) {
+				_throttleRate = event.data._throttleRate;
+			}
+			break;
 	}
 };
 
@@ -42,31 +45,33 @@ const stopPowTimer = () => {
 	timer = undefined;
 };
 
-const startPowTimer = async () => {
+const startPowTimer = () => {
 	// This worker has already been started
 	if (nonNullish(timer)) {
 		return;
 	}
-
 	timer = setInterval(allowSigning, FIRST_TIMER_INTERVAL);
 };
-
-const powInProgress = false;
 
 async function allowSigning() {
 	// Step 1: CreatePoWChallenge
 	const createPowChallengeResponse: PostMessageCreatePowChallengeResponse =
-		await sendMessageRequest<PostMessageCreatePowChallengeResponse>(
-			self as unknown as Worker,
-			'CreatePowChallengeRequest',
-			{},
-			PostMessageCreatePowChallengeResponseSchema
-		);
+		await sendMessageRequest<PostMessageCreatePowChallengeResponse>({
+			worker: self as unknown as Worker, // Pass as part of an object
+			msg: 'CreatePowChallengeRequest',
+			data: {}, // Empty object passed as data
+			schema: PostMessageCreatePowChallengeResponseSchema
+		});
+
 
 	let nonce;
 	if ('Ok' in createPowChallengeResponse.result) {
 		const challengeData = createPowChallengeResponse.result.Ok;
-		nonce = await solvePowChallenge(challengeData.start_timestamp_ms, challengeData.difficulty);
+		nonce = await solvePowChallenge({
+			timestamp: challengeData.start_timestamp_ms,
+			difficulty: challengeData.difficulty
+		});
+
 	} else if ('Err' in createPowChallengeResponse.result) {
 		console.error('PoW challenge error:', createPowChallengeResponse.result.Err);
 		return; // Exit on error
@@ -74,16 +79,17 @@ async function allowSigning() {
 
 	// Step 2: AllowSigning
 	const allowSigningResponse: PostMessageAllowSigningResponse =
-		await sendMessageRequest<PostMessageAllowSigningResponse>(
-			self as unknown as Worker,
-			'AllowSigningRequest',
-			{ nonce },
-			PostMessageAllowSigningResponseSchema
-		);
+		await sendMessageRequest<PostMessageAllowSigningResponse>({
+			worker: self as unknown as Worker,
+			msg: 'AllowSigningRequest',
+			data: { nonce },
+			schema: PostMessageAllowSigningResponseSchema
+		});
+
 
 	if ('Ok' in allowSigningResponse.result) {
-		console.info('Allow signing successful:', allowSigningResponse.result.Ok);
+		console.warn('Allow signing successful:', allowSigningResponse.result.Ok);
 	} else if ('Err' in allowSigningResponse.result) {
-		console.error('Allow signing failed:', allowSigningResponse.result.Err);
+		console.warn('Allow signing failed:', allowSigningResponse.result.Err);
 	}
 }

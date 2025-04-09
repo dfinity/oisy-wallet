@@ -4,7 +4,7 @@ const textEncoder = new TextEncoder();
  * Hashes the given input string using the SHA-256 algorithm.
  */
 export async function sha256(input: string): Promise<ArrayBuffer> {
-	return crypto.subtle.digest('SHA-256', textEncoder.encode(input));
+	return await crypto.subtle.digest('SHA-256', textEncoder.encode(input));
 }
 
 /**

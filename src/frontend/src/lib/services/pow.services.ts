@@ -7,18 +7,26 @@ import { allowSigningResult, createPowChallenge } from '$lib/api/backend.api';
 import type { OptionIdentity } from '$lib/types/identity';
 import { hashToHex } from '$lib/utils/crypto.utils';
 
-function getTimestampNowNs(): bigint {
-	return BigInt(Date.now()) * BigInt(1e6);
+function getTimestampNowMs(): bigint {
+	return BigInt(Date.now());
 }
 
-export const solvePowChallenge = async (timestamp: bigint, difficulty: number): Promise<number> => {
+export const solvePowChallenge = async ({
+																					timestamp,
+																					difficulty
+																				}: {
+	timestamp: bigint;
+	difficulty: number;
+}): Promise<number> => {
 	if (difficulty <= 0) {
 		throw new Error('Difficulty must be greater than zero');
 	}
 
 	let nonce = 0;
 	const target = Math.floor(0xffffffff / difficulty);
-	const startTimestamp = getTimestampNowNs();
+
+	// is only used to measure the effective execution time
+	const startTimestampMs = getTimestampNowMs();
 
 	while (true) {
 		const challengeStr = `${timestamp}.${nonce}`;
@@ -30,8 +38,8 @@ export const solvePowChallenge = async (timestamp: bigint, difficulty: number): 
 		nonce++;
 	}
 
-	const solveTimestampNs = getTimestampNowNs() - startTimestamp;
-	console.error(`Pow Challenge solved in ${Number(solveTimestampNs) / 1e9} seconds.`);
+	const solveTimestampMs = getTimestampNowMs() - startTimestampMs;
+	console.error(`Pow Challenge solved in ${Number(solveTimestampMs) / 1e3} seconds.`);
 	return nonce;
 };
 
@@ -43,10 +51,9 @@ export const _createPowChallenge = async ({
 	try {
 		return await createPowChallenge({ identity });
 	} catch (error) {
-		// Ensure the `Err` matches the `CreateChallengeError` type
 		return {
 			Err: {
-				Other: 'UnexpectedError' // Adjust this based on the expected `CreateChallengeError` structure
+				Other: `UnexpectedError: ${error}`
 			}
 		};
 	}
@@ -65,7 +72,7 @@ export const _allowSigning = async ({
 		// Ensure the `Err` matches the `CreateChallengeError` type
 		return {
 			Err: {
-				Other: 'UnexpectedError' // Adjust this based on the expected `CreateChallengeError` structure
+				Other: `UnexpectedError: ${error}`
 			}
 		};
 	}

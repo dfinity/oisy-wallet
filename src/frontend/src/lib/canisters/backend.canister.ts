@@ -5,6 +5,7 @@ import type {
 	CustomToken,
 	PendingTransaction,
 	Result_2 as AllowSigningResult,
+	Result_6 as CreateChallengeResult,
 	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserToken
@@ -196,9 +197,12 @@ export class BackendCanister extends Canister<BackendService> {
 		allowSigningRequest: { request?: AllowSigningRequest } = {}
 	): Promise<AllowSigningResult> => {
 		const { allow_signing } = this.caller({ certified: true });
-		return await allow_signing(
-			allowSigningRequest.request ? [allowSigningRequest.request] : []
-		);
+		return await allow_signing(allowSigningRequest.request ? [allowSigningRequest.request] : []);
+	};
+
+	createPowChallengeResult = (): Promise<CreateChallengeResult> => {
+		const { create_pow_challenge } = this.caller({ certified: true });
+		return create_pow_challenge();
 	};
 
 	addUserHiddenDappId = async ({

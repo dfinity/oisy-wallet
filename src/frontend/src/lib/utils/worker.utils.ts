@@ -42,7 +42,7 @@ export function initWorkerResponseRouter(worker: Worker) {
 
 export function routeWorkerResponse(event: MessageEvent): boolean {
 	//const { type } = event.data;
-	const { type, requestId, ...data } = event.data;
+	const { type, requestId } = event.data;
 
 	// Exit immediately if 'type' is missing or not equal to 'response'
 	if (!type || type !== 'response') {
@@ -50,7 +50,7 @@ export function routeWorkerResponse(event: MessageEvent): boolean {
 		return false; // Exit execution early
 	}
 
-	console.log('Valid data received:', event.data);
+	console.warn('Valid data received: ', event.data);
 
 	const handler = responseHandlers.get(requestId);
 	if (handler) {
@@ -58,19 +58,24 @@ export function routeWorkerResponse(event: MessageEvent): boolean {
 		responseHandlers.delete(requestId);
 		return true;
 	}
-	console.log('No handler found for event', requestId);
+	console.warn('No handler found for event', requestId);
 	return false;
 }
 
 /**
  * Sends a typed request to the worker and awaits the fully typed response envelope (T).
  */
-export function sendMessageRequest<T>(
-	worker: Worker,
-	msg: string,
-	data: object,
-	schema: z.ZodType<T>
-): Promise<T> {
+export function sendMessageRequest<T>({
+																				worker,
+																				msg,
+																				data,
+																				schema
+																			}: {
+	worker: Worker;
+	msg: string;
+	data: object;
+	schema: z.ZodType<T>;
+}): Promise<T> {
 	const requestId = crypto.randomUUID();
 
 	// Explicitly type the payload as PostMessageRequestBase

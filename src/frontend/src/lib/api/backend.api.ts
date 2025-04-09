@@ -141,12 +141,10 @@ export const selectUserUtxosFee = async ({
 	return btcSelectUserUtxosFee(params);
 };
 
-
 export const createPowChallenge = async ({
 																					 identity
 																				 }: CanisterApiFunctionParams): Promise<CreateChallengeResult> => {
-	const { createPowChallenge } = await backendCanister({ identity });
-
+	const { createPowChallengeResult } = await backendCanister({ identity });
 	return createPowChallengeResult();
 };
 

@@ -25,35 +25,31 @@ import type { ZodType } from 'zod';
  * @returns The mapped response object.
  * @throws Will throw an error if the validation fails.
  */
-function mapCanisterResponse<T>(
-	response: { Ok?: T; Err?: any }, // Allow `Ok` or `Err` as part of the response structure
-	schema: ZodType<T> // Schema only applies to the `Ok` part
-): { Ok: T } | { Err: string } {
+function mapCanisterResponse<T>({
+																	response,
+																	schema
+																}: {
+	response: { Ok?: T; Err?: unknown }; // Replace `any` with `unknown`
+	schema: ZodType<T>;
+}): { Ok: T } | { Err: string } {
 	if ('Err' in response) {
 		const err = response.Err;
-		if ('ChallengeInProgress' in err) {
-			return { Err: 'Challenge is already in progress.' };
-		}
-		if ('Unauthorized' in err) {
-			return { Err: 'Unauthorized request.' };
-		}
-		if ('Other' in err && typeof err.Other === 'string') {
-			return { Err: err.Other };
+		if (typeof err === 'object' && err !== null && 'Other' in err) {
+			return { Err: (err as { Other?: string }).Other ?? 'Unknown error' };
 		}
 		return { Err: 'Unknown error.' };
 	}
 
-	if (response.Ok) {
-		// Validate only the `Ok` part of the response
-		const validationResult = schema.safeParse(response.Ok);
-		if (!validationResult.success) {
-			throw new Error(`Response validation failed: ${validationResult.error.message}`);
-		}
-		return { Ok: validationResult.data };
+	if (!response.Ok) {
+		return { Err: 'Unexpected response structure.' };
 	}
 
-	// Provide an appropriate fallback in case `Ok` is missing and `Err` isn't present
-	return { Err: 'Unexpected response structure.' };
+	const validationResult = schema.safeParse(response.Ok);
+	if (!validationResult.success) {
+		throw new Error(`Response validation failed: ${validationResult.error.message}`);
+	}
+
+	return { Ok: validationResult.data };
 }
 
 export interface BaseWorker {
@@ -92,7 +88,9 @@ export const initPowWorker = async (): Promise<BaseWorker> => {
 			msg: 'CreatePowChallengeResponse',
 			requestId: parsedPostMessage.requestId,
 			type: 'response',
-			result: mapCanisterResponse(response, CreatePowChallengeResponseResultSchema)
+			result: mapCanisterResponse({
+				response, schema: CreatePowChallengeResponseResultSchema
+			})
 		};
 
 		worker.postMessage(postMessageResponse);
@@ -110,7 +108,7 @@ export const initPowWorker = async (): Promise<BaseWorker> => {
 			msg: 'AllowSigningResponse',
 			requestId: parsedPostMessage.requestId,
 			type: 'response',
-			result: mapCanisterResponse(response, AllowSigningResponseResultSchema)
+			result: mapCanisterResponse({ response, schema: AllowSigningResponseResultSchema })
 		};
 
 		worker.postMessage(postMessageResponse);
