@@ -598,6 +598,7 @@
 			"filter_nothing_found": "Oops, nothing found",
 			"filter_nothing_found_description": "Type token ticker or name to filter list",
 			"filter_placeholder": "Token ticker or name...",
+			"filter_button": "Open/close filter",
 			"buy_or_receive": "Buy or receive your first tokens now to see them in the list",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",

@@ -108,7 +108,7 @@
 		link={false}
 		colorStyle="muted"
 		styleClass={`absolute right-[5px] ${visible ? 'active' : ''}`}
-		ariaLabel="todo"
+		ariaLabel={$i18n.tokens.text.filter_button}
 		testId={`${testIdPrefix}-open-btn`}
 	>
 		<IconSearch slot="icon" />
