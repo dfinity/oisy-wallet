@@ -30,7 +30,6 @@
 		await trackEvent({
 			name: TRACK_COUNT_LEGACY_SIGN_IN_CLICK
 		});
-
 		onDone();
 		await signIn({ domain: 'ic0.app' });
 	};
@@ -42,6 +41,7 @@
 			src={helpAuthIdentityBanner}
 			styleClass="w-full"
 			testId={HELP_AUTH_IDENTITY_IMAGE_BANNER}
+			alt={$i18n.auth.help.alt.internet_identity}
 		/>
 
 		<div>
