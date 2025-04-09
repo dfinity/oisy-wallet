@@ -100,6 +100,17 @@
 			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?",
 			"error_while_signing_in": "Something went wrong while sign-in.",
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
+		},
+		"help": {
+			"text": {
+				"identity_new_identity": "$oisy_short now uses a new Internet Identity domain: <span class=\"font-bold\">identity.internetcomputer.org</span>",
+				"identity_legacy_description": "As a result, your old Internet Identity number might not appear automatically, and you may need to re-enter it.",
+				"identity_legacy_sign_in": "Sign in with legacy Internet Identity domain",
+				"identity_learn_more": "Learn more on $oisy_short Docs"
+			},
+			"alt": {
+				"identity_learn_more": "Learn more about legacy Internet Identity"
+			}
 		}
 	},
 	"dapps": {

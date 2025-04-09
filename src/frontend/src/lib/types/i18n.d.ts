@@ -91,6 +91,17 @@ interface I18nAuth {
 		error_while_signing_in: string;
 		unexpected_issue_with_syncing: string;
 	};
+	help: {
+		text: {
+			identity_new_identity: string;
+			identity_legacy_description: string;
+			identity_legacy_sign_in: string;
+			identity_learn_more: string;
+		};
+		alt: {
+			identity_learn_more: string;
+		}
+	}
 }
 
 interface I18nDapps {
