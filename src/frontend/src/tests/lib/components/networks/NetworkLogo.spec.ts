@@ -32,8 +32,6 @@ describe('NetworkLogo', () => {
 	});
 
 	it('should render dark mode icon in dark mode', () => {
-		document.getElementsByTagName('html')[0].setAttribute('theme', 'dark');
-
 		const { getByTestId } = render(NetworkLogo, {
 			props: {
 				network: mockNetwork,
