@@ -1,13 +1,12 @@
 import { IcWalletScheduler, type IcWalletMsg } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import type { GetTransactions } from '$icp/types/ic.post-message';
-import { queryAndUpdate } from '$lib/actors/query.ic';
 import { type SchedulerJobData, type SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessageDataResponseWalletCleanUp } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
-import { isNullish, jsonReplacer } from '@dfinity/utils';
+import { isNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
@@ -61,7 +60,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 				this.syncTransactions({ jobData: { identity, ...data }, certified, ...rest });
 				this.cleanTransactions({ certified });
 			},
-			onCertifiedError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
+			onUpdateError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
 			identity,
 			resolution: 'all_settled'
 		});

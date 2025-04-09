@@ -1,5 +1,4 @@
 import type { MinterInfoParams } from '$icp/types/ck';
-import { queryAndUpdate } from '$lib/actors/query.ic';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type {
 	PostMessageDataRequestIcCk,
@@ -9,7 +8,7 @@ import type {
 import type { CertifiedData } from '$lib/types/store';
 import type { MinterInfo as CkBTCMinterInfo } from '@dfinity/ckbtc';
 import type { MinterInfo as CkETHMinterInfo } from '@dfinity/cketh';
-import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
+import { assertNonNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
 
 export class CkMinterInfoScheduler<T extends CkBTCMinterInfo | CkETHMinterInfo>
 	implements Scheduler<PostMessageDataRequestIcCk>
@@ -55,7 +54,7 @@ export class CkMinterInfoScheduler<T extends CkBTCMinterInfo | CkETHMinterInfo>
 			request: ({ identity: _, certified }) =>
 				this.minterInfo({ minterCanisterId, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncMinterInfo({ certified, ...rest }),
-			onCertifiedError: ({ error }) => this.postMessageWalletError(error),
+			onUpdateError: ({ error }) => this.postMessageWalletError(error),
 			identity,
 			resolution: 'all_settled'
 		});

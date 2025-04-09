@@ -14,11 +14,6 @@ import {
 	mapTokenOisyName,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import {
-	queryAndUpdate,
-	type QueryAndUpdateRequestParams,
-	type QueryAndUpdateStrategy
-} from '$lib/actors/query.ic';
 import { listCustomTokens } from '$lib/api/backend.api';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -28,7 +23,14 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { AnonymousIdentity, type Identity } from '@dfinity/agent';
-import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import {
+	fromNullable,
+	isNullish,
+	nonNullish,
+	queryAndUpdate,
+	type QueryAndUpdateRequestParams,
+	type QueryAndUpdateStrategy
+} from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -45,7 +47,7 @@ export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Pr
 	queryAndUpdate<IcrcCustomTokenWithoutId[]>({
 		request: (params) => loadIcrcCustomTokens(params),
 		onLoad: loadIcrcCustomData,
-		onCertifiedError: ({ error: err }) => {
+		onUpdateError: ({ error: err }) => {
 			icrcCustomTokensStore.resetAll();
 
 			toastsError({
@@ -66,7 +68,7 @@ export const loadDefaultIcrc = ({
 	queryAndUpdate<IcrcLoadData>({
 		request: (params) => requestIcrcMetadata({ ...params, ...data, category: 'default' }),
 		onLoad: loadIcrcData,
-		onCertifiedError: ({ error: err }) => {
+		onUpdateError: ({ error: err }) => {
 			icrcDefaultTokensStore.reset(data.ledgerCanisterId);
 
 			toastsError({

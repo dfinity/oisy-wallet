@@ -11,14 +11,13 @@ import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20'
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
-import { queryAndUpdate } from '$lib/actors/query.ic';
 import { listUserTokens } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { UserTokenState } from '$lib/types/token-toggleable';
 import type { ResultSuccess } from '$lib/types/utils';
-import { fromNullable } from '@dfinity/utils';
+import { fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadErc20Tokens = async ({
@@ -66,7 +65,7 @@ export const loadErc20UserTokens = ({ identity }: { identity: OptionIdentity }):
 	queryAndUpdate<Erc20UserToken[]>({
 		request: (params) => loadUserTokens(params),
 		onLoad: loadUserTokenData,
-		onCertifiedError: ({ error: err }) => {
+		onUpdateError: ({ error: err }) => {
 			erc20UserTokensStore.resetAll();
 
 			toastsErrorNoTrace({
