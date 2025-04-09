@@ -17,7 +17,7 @@ export const getFilteredTokenList: ({
 	list.reduce<TokenUiOrGroupUi[]>((acc, item) => {
 		if (filter === '') {
 			return [...acc, item];
-		} else {
+		} 
 			if (!isTokenUiGroup(item)) {
 				const token = item.token;
 
@@ -33,7 +33,7 @@ export const getFilteredTokenList: ({
 					return [...acc, item];
 				}
 			}
-		}
+		
 		return acc;
 	}, []);
 
