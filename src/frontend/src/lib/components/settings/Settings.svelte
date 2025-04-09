@@ -115,10 +115,6 @@
 		</svelte:fragment>
 	</SettingsCardItem>
 </SettingsCard>
-<br />
-<TextWithLogo name="Test">
-	<NetworkLogo slot="icon" network={ETHEREUM_NETWORK} />
-</TextWithLogo>
 
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
 	<SettingsCard>
