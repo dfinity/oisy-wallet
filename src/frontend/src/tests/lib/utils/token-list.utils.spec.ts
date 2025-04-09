@@ -51,7 +51,6 @@ const tokenGroupUi: TokenUiOrGroupUi = { group: tokenGroup };
 const tokenUi: TokenUiOrGroupUi = { token: token1 };
 
 describe('Token Utils', () => {
-	// Test `getFilteredTokenList`
 	it('should return all tokens when filter is an empty string', () => {
 		const list: TokenUiOrGroupUi[] = [tokenUi, tokenGroupUi];
 		const result = getFilteredTokenList({ filter: '', list });
@@ -78,13 +77,11 @@ describe('Token Utils', () => {
 		expect(result).toHaveLength(0);
 	});
 
-	// Test falsy inputs for `getFilteredTokenList`
 	it('should return empty array if no tokens in the list', () => {
 		const result = getFilteredTokenList({ filter: 'Bitcoin', list: [] });
 		expect(result).toHaveLength(0);
 	});
 
-	// Test `getFilteredTokenGroup`
 	it('should return tokens that match the filter', () => {
 		const list: TokenUi[] = [token1, token2, token3];
 		const result = getFilteredTokenGroup({ filter: 'ETH', list });
@@ -98,7 +95,6 @@ describe('Token Utils', () => {
 		expect(result).toHaveLength(0);
 	});
 
-	// Test falsy inputs for `getFilteredTokenGroup`
 	it('should return empty array if no tokens in the list', () => {
 		const result = getFilteredTokenGroup({ filter: 'Bitcoin', list: [] });
 		expect(result).toHaveLength(0);
