@@ -5,8 +5,8 @@
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { TOKEN_LIST_FILTER } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <div>
