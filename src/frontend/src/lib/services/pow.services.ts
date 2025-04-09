@@ -12,9 +12,9 @@ function getTimestampNowMs(): bigint {
 }
 
 export const solvePowChallenge = async ({
-																					timestamp,
-																					difficulty
-																				}: {
+	timestamp,
+	difficulty
+}: {
 	timestamp: bigint;
 	difficulty: number;
 }): Promise<number> => {
@@ -44,8 +44,8 @@ export const solvePowChallenge = async ({
 };
 
 export const _createPowChallenge = async ({
-																						identity
-																					}: {
+	identity
+}: {
 	identity: OptionIdentity;
 }): Promise<CreateChallengeResult> => {
 	try {
@@ -60,9 +60,9 @@ export const _createPowChallenge = async ({
 };
 
 export const _allowSigning = async ({
-																			identity,
-																			request
-																		}: {
+	identity,
+	request
+}: {
 	identity: OptionIdentity;
 	request?: AllowSigningRequest;
 }): Promise<AllowSigningResult> => {
