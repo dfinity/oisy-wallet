@@ -1,18 +1,15 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import bitcoin from '$icp/assets/bitcoin.svg';
-	import eth from '$icp-eth/assets/eth.svg';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import SendBtcNetwork from '$lib/components/send/SendBtcNetwork.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	export let sourceNetwork: Network | undefined;
 	export let destinationNetworkId: NetworkId | undefined = undefined;
@@ -33,9 +30,7 @@
 			>{#if showDestinationNetwork}{$i18n.send.text.source_network}{:else}{$i18n.send.text
 					.network}{/if}</svelte:fragment
 		>
-		<TextWithLogo name={sourceNetwork.name}>
-			<NetworkLogo slot="icon" network={sourceNetwork} />
-		</TextWithLogo>
+		<NetworkWithLogo network={sourceNetwork} />
 	</Value>
 {/if}
 
@@ -53,9 +48,7 @@
 				/>
 			</span>
 		{:else if isNetworkEthereum}
-			<TextWithLogo name={$ckEthereumTwinToken.network.name}>
-				<NetworkLogo slot="icon" network={$ckEthereumTwinToken.network ?? ETHEREUM_NETWORK} />
-			</TextWithLogo>
+			<NetworkWithLogo network={$ckEthereumTwinToken.network} />
 		{/if}
 	</Value>
 {/if}

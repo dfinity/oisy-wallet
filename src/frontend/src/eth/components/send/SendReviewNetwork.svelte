@@ -15,6 +15,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
@@ -33,9 +34,7 @@
 		>{#if nonNullish(targetNetwork)}{$i18n.send.text.source_network}{:else}{$i18n.send.text
 				.network}{/if}</svelte:fragment
 	>
-	<TextWithLogo name={sourceNetwork.name}>
-		<NetworkLogo slot="icon" network={sourceNetwork} />
-	</TextWithLogo>
+	<NetworkWithLogo network={sourceNetwork} />
 </Value>
 
 {#if nonNullish(targetNetwork)}

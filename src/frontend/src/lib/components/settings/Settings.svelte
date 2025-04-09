@@ -30,6 +30,9 @@
 	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -112,6 +115,10 @@
 		</svelte:fragment>
 	</SettingsCardItem>
 </SettingsCard>
+<br />
+<TextWithLogo name="Test">
+	<NetworkLogo slot="icon" network={ETHEREUM_NETWORK} />
+</TextWithLogo>
 
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
 	<SettingsCard>

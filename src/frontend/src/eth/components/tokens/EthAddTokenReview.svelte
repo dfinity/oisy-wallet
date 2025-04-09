@@ -17,6 +17,7 @@
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;
@@ -114,9 +115,7 @@
 
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
-		<TextWithLogo name={network.name}>
-			<NetworkLogo slot="icon" {network} />
-		</TextWithLogo>
+		<NetworkWithLogo {network} />
 	</Value>
 
 	<Value ref="contractSymbol" element="div">
