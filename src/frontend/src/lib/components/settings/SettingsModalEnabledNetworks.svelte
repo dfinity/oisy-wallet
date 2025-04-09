@@ -125,7 +125,7 @@
 		{#each SUPPORTED_MAINNET_NETWORKS as network (network.id)}
 			<SettingsListItem>
 				<svelte:fragment slot="key">
-					<NetworkLogo {network} size="xxs" />
+					<NetworkLogo {network} blackAndWhite size="xxs" />
 					<span class="ml-2 flex">{network.name}</span></svelte:fragment
 				>
 				<!-- We disable the ICP toggle, for simplicity in other components and implications we dont allow disabling ICP -->

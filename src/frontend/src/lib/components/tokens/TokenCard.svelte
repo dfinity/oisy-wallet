@@ -26,14 +26,14 @@
 	>
 		<span class="flex" slot="logo" class:mr-2={!condensed}>
 			{#if asNetwork}
-				<NetworkLogo network={data.network} size={condensed ? 'xs' : 'lg'} />
+				<NetworkLogo network={data.network} size={condensed ? 'xs' : 'lg'} blackAndWhite />
 			{:else}
 				<TokenLogo
 					{data}
 					badge={nonNullish(data.tokenCount)
 						? { type: 'tokenCount', count: data.tokenCount }
 						: !condensed
-							? { type: 'network' }
+							? { type: 'network', blackAndWhite: true }
 							: undefined}
 					color="white"
 					logoSize={condensed ? 'xs' : 'lg'}
