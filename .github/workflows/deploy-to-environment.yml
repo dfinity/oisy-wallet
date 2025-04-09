@@ -59,7 +59,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.network }}-${{ github.event.inputs.canister }}
   cancel-in-progress: false
 
-permissions: {}
+permissions: { }
 
 jobs:
   deployment:
@@ -326,8 +326,8 @@ jobs:
 
       - name: Deploy Backend to Environment
         run: |
-          DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
-          [[ "$FORCE_BACKEND" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
+          DFX_DEPLOY_FLAGS=('--yes') # Arguments to be added to the dfx deploy command.
+          [[ "$FORCE_BACKEND" != "true" ]] || DFX_DEPLOY_FLAGS+=('--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
           if [ "$deploy_backend" == "true" ] ; then
             if git diff --quiet "origin/$BASE_REF" HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
