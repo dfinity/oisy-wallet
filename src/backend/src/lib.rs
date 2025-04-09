@@ -36,8 +36,11 @@ use shared::{
             SaveNetworksSettingsError, SaveNetworksSettingsRequest, SaveTestnetsSettingsError,
             SetShowTestnetsRequest,
         },
-        pow::{CreateChallengeError, CreateChallengeResponse},
-        signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        pow::{AllowSigningStatus, CreateChallengeError, CreateChallengeResponse},
+        signer::{
+            topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+            AllowSigningRequest, AllowSigningResponse,
+        },
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
@@ -715,8 +718,19 @@ pub fn has_user_profile() -> HasUserProfileResponse {
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "may_read_user_data")]
-pub async fn allow_signing() -> Result<(), AllowSigningError> {
-    signer::allow_signing().await
+pub async fn allow_signing(
+    request: Option<AllowSigningRequest>,
+) -> Result<AllowSigningResponse, AllowSigningError> {
+    signer::allow_signing().await?;
+
+    eprintln!("Received request: {request:?}");
+
+    // TODO map properties from from complete_pow_challenge
+    Ok(AllowSigningResponse {
+        status: AllowSigningStatus::Skipped,
+        allowed_cycles: 0u64,
+        challenge_completion: None,
+    })
 }
 
 #[query(guard = "caller_is_allowed")]
@@ -850,6 +864,20 @@ pub async fn step_migration() {
             eprintln!("Migration failed: {err:?}");
         });
     };
+}
+
+/// Gets account creation timestamps.
+#[query(guard = "caller_is_allowed")]
+#[must_use]
+pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
+    read_state(|s| {
+        s.user_profile
+            .iter()
+            .map(|((_updated, StoredPrincipal(principal)), user)| {
+                (principal, user.created_timestamp)
+            })
+            .collect()
+    })
 }
 
 /// Saves a snapshot of the user's account.
