@@ -98,7 +98,10 @@ interface I18nAuth {
 			identity_legacy_sign_in: string;
 			identity_learn_more: string;
 		};
-		alt: { identity_learn_more: string };
+		alt: {
+			internet_identity: string;
+			identity_learn_more: string;
+		};
 	};
 }
 

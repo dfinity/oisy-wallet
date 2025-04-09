@@ -41,6 +41,7 @@
 			src={helpAuthIdentityBanner}
 			styleClass="w-full"
 			testId={HELP_AUTH_IDENTITY_IMAGE_BANNER}
+			alt={$i18n.auth.help.alt.internet_identity}
 		/>
 
 		<div>

@@ -103,12 +103,13 @@
 		},
 		"help": {
 			"text": {
-				"identity_new_identity": "$oisy_short now uses a new Internet Identity domain: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "As a result, your old Internet Identity number might not appear automatically, and you may need to re-enter it.",
+				"identity_new_identity": "$oisy_short Wallet switches the Internet Identity domain to: <span class=\"font-bold\">identity.internetcomputer.org</span>",
+				"identity_legacy_description": "As a result, your Internet Identity number might not appear automatically, and you may need to re-enter it.",
 				"identity_legacy_sign_in": "Sign in with legacy Internet Identity domain",
 				"identity_learn_more": "Learn more on $oisy_short Docs"
 			},
 			"alt": {
+				"internet_identity": "Image of new Internet Identity",
 				"identity_learn_more": "Learn more about legacy Internet Identity"
 			}
 		}
