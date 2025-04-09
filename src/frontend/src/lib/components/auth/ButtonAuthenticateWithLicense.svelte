@@ -17,7 +17,7 @@
 		});
 
 		const { success } = await signIn({});
-		if (success !== 'ok') {
+		if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp(false);
 		}
 	};
