@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SigningInHelpLink from '$lib/components/auth/SigningInHelpLink.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import { TRACK_COUNT_SIGN_IN_CLICK } from '$lib/constants/analytics.contants';
@@ -34,5 +35,6 @@
 		{$i18n.license_agreement.text.accept_terms}
 
 		<LicenseLink />
+		<SigningInHelpLink styleClass="mt-4" />
 	</span>
 </div>
