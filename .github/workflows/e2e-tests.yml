@@ -240,6 +240,7 @@ jobs:
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           pattern: snapshots-*
+          merge-multiple: true
           path: e2e
 
       - name: Check for Final Changes
