@@ -6,6 +6,7 @@ on:
     paths:
       - 'src/frontend/src/lib/i18n/*'
       - 'src/frontend/src/lib/types/i18n.d.ts'
+  merge_group:
 
 permissions: {}
 
