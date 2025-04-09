@@ -101,7 +101,12 @@ interface I18nAuth {
 			other: string;
 			feedback_text: string;
 			thanks_text: string;
+			identity_new_identity: string;
+			identity_legacy_description: string;
+			identity_legacy_sign_in: string;
+			identity_learn_more: string;
 		};
+		alt: { internet_identity: string; identity_learn_more: string };
 	};
 }
 
