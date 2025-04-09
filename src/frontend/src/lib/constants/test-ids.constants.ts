@@ -145,6 +145,11 @@ export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 
+export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
+export const HELP_AUTH_LOST_IDENTITY_BUTTON = 'help-auth-lost-identity-button';
+export const HELP_AUTH_SECURITY_BUTTON = 'help-auth-security-button';
+export const HELP_AUTH_GOT_CONFUSED_BUTTON = 'help-auth-got-confused-button';
+export const HELP_AUTH_OTHER_BUTTON = 'help-auth-other-button';
 export const HELP_AUTH_IDENTITY_IMAGE_BANNER = 'help-auth-identity-image-banner';
 export const HELP_AUTH_LEGACY_SIGN_IN_BUTTON = 'help-auth-legacy-sign-in-button';
 export const HELP_AUTH_BACK_BUTTON = 'help-auth-back-button';

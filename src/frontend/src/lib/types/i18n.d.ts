@@ -93,15 +93,23 @@ interface I18nAuth {
 	};
 	help: {
 		text: {
-			identity_new_identity: string;
-			identity_legacy_description: string;
-			identity_legacy_sign_in: string;
-			identity_learn_more: string;
+			description: string;
+			subtitle: string;
+			lost_identity: string;
+			security: string;
+			got_confused: string;
+			other: string;
+			feedback_text: string;
+			thanks_text: string;
+            identity_new_identity: string;
+            identity_legacy_description: string;
+            identity_legacy_sign_in: string;
+            identity_learn_more: string;
 		};
-		alt: {
-			internet_identity: string;
-			identity_learn_more: string;
-		};
+        alt: {
+            internet_identity: string;
+            identity_learn_more: string;
+        };
 	};
 }
 
