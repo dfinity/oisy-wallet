@@ -6,8 +6,8 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import eth from '$icp-eth/assets/eth.svg';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
@@ -32,7 +32,7 @@
 		>{#if nonNullish(targetNetwork)}{$i18n.send.text.source_network}{:else}{$i18n.send.text
 				.network}{/if}</svelte:fragment
 	>
-	<TextWithLogo name={sourceNetwork.name} icon={sourceNetwork.icon ?? eth} />
+	<NetworkWithLogo network={sourceNetwork} />
 </Value>
 
 {#if nonNullish(targetNetwork)}
