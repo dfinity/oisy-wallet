@@ -1,8 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import Logo from '$lib/components/ui/Logo.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let name: string;
 	export let logo: 'start' | 'end' = 'end';
