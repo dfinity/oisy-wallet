@@ -179,10 +179,12 @@ export class BackendCanister extends Canister<BackendService> {
 		const { allow_signing } = this.caller({ certified: true });
 		const response = await allow_signing(toNullable(request));
 
-		if ('Err' in response) {
-			throw mapAllowSigningError(response.Err);
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
 		}
-		return response.Ok;
+
+		throw mapAllowSigningError(response.Err);
 	};
 
 	addUserHiddenDappId = async ({
