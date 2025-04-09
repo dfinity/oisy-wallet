@@ -34,7 +34,7 @@
 		<p class="text-md font-bold">{$i18n.auth.help.text.subtitle}</p>
 		<div class="grid gap-2">
 			<Button
-				colorStyle="info-alt"
+				colorStyle="secondary"
 				type="button"
 				fullWidth
 				testId={HELP_AUTH_LOST_IDENTITY_BUTTON}
@@ -50,7 +50,7 @@
 			</Button>
 
 			<Button
-				colorStyle="info-alt"
+				colorStyle="secondary"
 				type="button"
 				fullWidth
 				testId={HELP_AUTH_SECURITY_BUTTON}
@@ -65,7 +65,7 @@
 			</Button>
 
 			<Button
-				colorStyle="info-alt"
+				colorStyle="secondary"
 				type="button"
 				fullWidth
 				testId={HELP_AUTH_GOT_CONFUSED_BUTTON}
@@ -80,7 +80,7 @@
 			</Button>
 
 			<Button
-				colorStyle="info-alt"
+				colorStyle="secondary"
 				type="button"
 				fullWidth
 				testId={HELP_AUTH_OTHER_BUTTON}
