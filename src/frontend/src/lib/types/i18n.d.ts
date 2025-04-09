@@ -93,6 +93,7 @@ interface I18nAuth {
 	};
 	help: {
 		text: {
+			title: string;
 			description: string;
 			subtitle: string;
 			lost_identity: string;
@@ -101,6 +102,24 @@ interface I18nAuth {
 			other: string;
 			feedback_text: string;
 			thanks_text: string;
+			identity_new_identity: string;
+			identity_legacy_description: string;
+			identity_legacy_sign_in: string;
+			identity_learn_more: string;
+			other_title: string;
+			other_description: string;
+			other_introduction: string;
+			other_docs: string;
+			other_private_key: string;
+			other_asset_control: string;
+		};
+		alt: {
+			internet_identity: string;
+			identity_learn_more: string;
+			other_introduction: string;
+			other_docs: string;
+			other_private_key: string;
+			other_asset_control: string;
 		};
 	};
 }
