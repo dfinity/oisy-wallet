@@ -13,7 +13,7 @@ let _throttleRate = 20;
 
 let timer: NodeJS.Timeout | undefined = undefined;
 
-export const onPowMessage = async (event: MessageEvent) => {
+export const onPowMessage = (event: MessageEvent) => {
 	console.warn('Received event data:', event.data);
 
 	// this makes sure that the response is automatically routed back to the requester that initially published the message vent
