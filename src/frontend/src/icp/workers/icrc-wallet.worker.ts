@@ -92,11 +92,11 @@ const getBalance = ({
 const getBalanceAndTransactions = async (
 	params: SchedulerJobParams<PostMessageDataRequestIcrcStrict>
 ): Promise<GetBalanceAndTransactions> => {
-	const balance = await getBalance(params);
+	const [balance, transactions] = await Promise.all([getBalance(params), getTransactions(params)]);
 
 	// Ignoring the balance from the transactions' response.
 	// Even if it could cause some sort of lagged inconsistency, we prefer to always show the latest balance, in case the Index canister is not properly working.
-	const { balance: _, ...rest } = await getTransactions(params);
+	const { balance: _, ...rest } = transactions;
 
 	return { ...rest, balance };
 };
