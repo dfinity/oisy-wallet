@@ -1,9 +1,9 @@
 import {
 	type PostMessageAllowSigningRequestSchema,
 	type PostMessageAllowSigningResponseSchema,
+	type PostMessageBaseSchema,
 	type PostMessageCreatePowChallengeRequestSchema,
 	type PostMessageCreatePowChallengeResponseSchema,
-	type PostMessageBaseSchema,
 	type PostMessageDataRequestBtcSchema,
 	type PostMessageDataRequestExchangeTimerSchema,
 	type PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
