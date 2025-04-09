@@ -6,7 +6,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let noUnderline = false;
 	export let styleClass = '';
 
 	const onClick = async () => {
