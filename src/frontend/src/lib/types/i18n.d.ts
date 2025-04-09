@@ -93,6 +93,7 @@ interface I18nAuth {
 	};
 	help: {
 		text: {
+			title: string;
 			description: string;
 			subtitle: string;
 			lost_identity: string;

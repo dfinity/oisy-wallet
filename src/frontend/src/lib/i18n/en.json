@@ -103,6 +103,7 @@
 		},
 		"help": {
 			"text": {
+				"title": "Have issues with authentication?",
 				"description": "We noticed you cancelled authentication with Internet Identity. We'd love to understand what happened so we can improve your experience.",
 				"subtitle": "Did any of the following cause the issue?",
 				"lost_identity": "I lost my Internet Identity number",
