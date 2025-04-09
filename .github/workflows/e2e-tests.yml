@@ -5,15 +5,11 @@ on:
     branches:
       - main
   pull_request:
-    types: [opened, synchronize, labeled]
+    types: [ opened, synchronize, labeled ]
   merge_group:
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions: {}
+permissions: { }
 
 jobs:
   check-e2e-changes:
@@ -78,10 +74,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
-    needs: ['oisy-backend-wasm', 'check-e2e-changes']
+    needs: [ 'oisy-backend-wasm', 'check-e2e-changes' ]
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ ubuntu-24.04, macos-14 ]
         test:
           - about-why-oisy-modal.spec.ts
           - activity-page.spec.ts
@@ -99,6 +95,9 @@ jobs:
           - swap-modal.spec.ts
           - transactions-page.spec.ts
     if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.test }}
+      cancel-in-progress: true
     outputs:
       ubuntu_status: ${{ steps.set_snapshot_output.outputs.ubuntu_status }}
       macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
@@ -202,10 +201,10 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    needs: [e2e]
+    needs: [ e2e ]
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ ubuntu-24.04, macos-14 ]
         test:
           - about-why-oisy-modal.spec.ts
           - activity-page.spec.ts
@@ -222,6 +221,9 @@ jobs:
           - settings-page.spec.ts
           - swap-modal.spec.ts
           - transactions-page.spec.ts
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.test }}
+      cancel-in-progress: true
     outputs:
       e2e-snapshots-changed: ${{ steps.e2e-check-snapshots.outputs.e2e-snapshots-changed }}
 
@@ -309,13 +311,13 @@ jobs:
 
   may-merge-e2e:
     if: always()
-    needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
+    needs: [ 'check-e2e-changes', 'e2e', 'finalize-snapshots-update' ]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ ubuntu-24.04, macos-14 ]
         test:
           - about-why-oisy-modal.spec.ts
           - activity-page.spec.ts
