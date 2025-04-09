@@ -2,7 +2,6 @@
 	import helpAuthBanner from '$lib/assets/help-auth-banner.svg';
 	import IconAnnoyed from '$lib/components/icons/lucide/IconAnnoyed.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
-	import IconX from '$lib/components/icons/lucide/IconX.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import {
@@ -20,6 +19,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+    import IconClose from "$lib/components/icons/lucide/IconClose.svelte";
 
 	export let onLostIdentity: () => void;
 	export let onOther: () => void;
@@ -45,7 +45,7 @@
 					onLostIdentity();
 				}}
 			>
-				<span class="text-error-primary"><IconX /></span>{$i18n.auth.help.text.lost_identity}
+				<span class="text-error-primary"><IconClose size="24" /></span>{$i18n.auth.help.text.lost_identity}
 			</Button>
 
 			<Button
