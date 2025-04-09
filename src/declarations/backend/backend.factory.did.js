@@ -185,8 +185,7 @@ export const idlFactory = ({ IDL }) => {
 	const CreateChallengeError = IDL.Variant({
 		ChallengeInProgress: IDL.Null,
 		MissingUserProfile: IDL.Null,
-		RandomnessError: IDL.Text,
-		Other: IDL.Text
+		RandomnessError: IDL.Text
 	});
 	const Result_6 = IDL.Variant({
 		Ok: CreateChallengeResponse,

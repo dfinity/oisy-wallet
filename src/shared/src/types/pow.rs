@@ -41,7 +41,6 @@ pub enum CreateChallengeError {
     ChallengeInProgress,
     RandomnessError(String),
     MissingUserProfile,
-    Other(String),
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
