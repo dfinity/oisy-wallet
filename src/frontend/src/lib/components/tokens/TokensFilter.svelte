@@ -17,8 +17,7 @@
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 	let inputElement: HTMLInputElement | undefined;
-	let inputValue: string;
-	$: inputValue = '';
+	let inputValue = '';
 
 	const handleOpen = (e?: Event) => {
 		e?.stopPropagation();
