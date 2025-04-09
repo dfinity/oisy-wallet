@@ -326,7 +326,7 @@ jobs:
 
       - name: Deploy Backend to Environment
         run: |
-          DFX_DEPLOY_FLAGS=('--yes') # Arguments to be added to the dfx deploy command.
+          DFX_DEPLOY_FLAGS=('--yes') # Arguments to be added to the dfx deploy command. Corresponds to: dfx deploy --yes
           [[ "$FORCE_BACKEND" != "true" ]] || DFX_DEPLOY_FLAGS+=('--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
           if [ "$deploy_backend" == "true" ] ; then
