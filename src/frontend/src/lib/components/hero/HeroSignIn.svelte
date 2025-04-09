@@ -6,6 +6,9 @@
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import {modalAuthHelp, modalAuthHelpData} from "$lib/derived/modal.derived";
+	import {nonNullish} from "@dfinity/utils";
+	import AuthHelpModal from "$lib/components/auth/AuthHelpModal.svelte";
 
 	let infoList: { label: string; icon: Component }[];
 	$: infoList = [
@@ -46,3 +49,7 @@
 
 	<ButtonAuthenticateWithLicense />
 </div>
+
+{#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
+	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
+{/if}
