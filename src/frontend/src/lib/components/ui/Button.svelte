@@ -8,6 +8,7 @@
 	export let loadingAsSkeleton = true;
 	export let fullWidth = false;
 	export let link = false;
+	export let inlineLink = false;
 	export let paddingSmall = false;
 	export let testId: string | undefined = undefined;
 	export let ariaLabel: string | undefined = undefined;
@@ -15,7 +16,12 @@
 </script>
 
 <button
-	class={`${colorStyle} flex flex-1 text-center ${styleClass}`}
+	class={`${colorStyle} flex text-center ${styleClass}`}
+	class:flex-1={!inlineLink}
+	class:font-normal={inlineLink}
+	class:text-tertiary={inlineLink}
+	class:underline={inlineLink}
+	class:hover:text-brand-primary={inlineLink}
 	class:padding-sm={paddingSmall}
 	class:w-full={fullWidth}
 	class:link
