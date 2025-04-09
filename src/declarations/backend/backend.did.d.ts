@@ -167,7 +167,8 @@ export interface Config {
 export type CreateChallengeError =
 	| { ChallengeInProgress: null }
 	| { MissingUserProfile: null }
-	| { RandomnessError: string };
+	| { RandomnessError: string }
+	| { Other: string };
 export interface CreateChallengeResponse {
 	difficulty: number;
 	start_timestamp_ms: bigint;
