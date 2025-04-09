@@ -96,9 +96,6 @@
 			return;
 		}
 
-		// Clean previous HTML if the frame is being re-built (e.g. in case of window resize)
-		sliderFrame.innerHTML = '';
-
 		extendCarouselSliderFrame({
 			sliderFrame,
 			slides,
@@ -280,7 +277,7 @@
 
 <div
 	data-tid={CAROUSEL_CONTAINER}
-	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pb-10 pt-3 shadow-sm`}
+	class={`carousel-container ${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pb-10 pt-3 shadow-sm`}
 	class:pb-3={nonNullish(slides) && slides.length <= 1}
 	out:slide={SLIDE_PARAMS}
 >

@@ -11,10 +11,15 @@
 		initConvertContext
 	} from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		initTokenActionValidationErrorsContext,
+		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+		type TokenActionValidationErrorsContext
+	} from '$lib/stores/token-action-validation-errors.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	export let sourceToken: Token;
 	export let destinationToken: Token;
@@ -25,6 +30,11 @@
 			sourceToken,
 			destinationToken
 		})
+	);
+
+	setContext<TokenActionValidationErrorsContext>(
+		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+		initTokenActionValidationErrorsContext()
 	);
 
 	let sendAmount: OptionAmount = undefined;
@@ -57,10 +67,10 @@
 		});
 
 	const goToStep = (stepName: WizardStepsConvert) =>
-		goToWizardSendStep({
+		goToWizardStep({
 			modal,
 			steps,
-			stepName: stepName
+			stepName
 		});
 </script>
 

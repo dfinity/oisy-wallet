@@ -17,8 +17,13 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
+	SETTINGS_NETWORKS_MODAL,
+	SETTINGS_NETWORKS_MODAL_SAVE_BUTTON,
+	SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER,
+	SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX,
+	SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE,
 	SIDEBAR_NAVIGATION_MENU,
-	TESTNET_TOGGLE,
 	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
@@ -36,6 +41,7 @@ import {
 interface HomepageParams {
 	page: Page;
 	viewportSize?: ViewportSize;
+	isMobile?: boolean;
 }
 
 export type HomepageLoggedInParams = {
@@ -57,7 +63,6 @@ interface WaitForModalParams {
 }
 
 interface TakeScreenshotParams {
-	isMobile?: boolean;
 	freezeCarousel?: boolean;
 	centeredElementTestId?: string;
 	screenshotTarget?: Locator;
@@ -83,11 +88,14 @@ interface ShowSelectorParams {
 abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
+	readonly #isMobile?: boolean;
+
 	private promotionCarousel?: PromotionCarousel;
 
-	protected constructor({ page, viewportSize }: HomepageParams) {
+	protected constructor({ page, viewportSize, isMobile }: HomepageParams) {
 		this.#page = page;
 		this.#viewportSize = viewportSize;
+		this.#isMobile = isMobile;
 	}
 
 	protected async clickByTestId({
@@ -97,7 +105,7 @@ abstract class Homepage {
 		testId: string;
 		scrollIntoView?: boolean;
 	}): Promise<void> {
-		const locator = this.#page.getByTestId(testId);
+		const locator = this.#page.getByTestId(testId).filter({ visible: true });
 
 		if (scrollIntoView) {
 			// Method `click` auto-scrolls into view if needed.
@@ -322,6 +330,7 @@ abstract class Homepage {
 		await this.takeScreenshot({ screenshotTarget: modal });
 	}
 
+	// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
 	async setCarouselFirstSlide(): Promise<void> {
 		if (isNullish(this.promotionCarousel)) {
 			this.promotionCarousel = new PromotionCarousel(this.#page);
@@ -344,9 +353,30 @@ abstract class Homepage {
 		}
 	}
 
+	private async toggleAllTestnets(): Promise<void> {
+		const toggles = this.#page.locator(`[data-tid^="${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-"]`);
+		const countToggles = await toggles.count();
+		const testIds = await Promise.all(
+			Array.from({ length: countToggles }, (_, i) => toggles.nth(i).getAttribute('data-tid'))
+		);
+		for (const testId of testIds) {
+			if (nonNullish(testId)) {
+				await this.clickByTestId({ testId });
+			}
+		}
+	}
+
 	async activateTestnetSettings(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
-		await this.clickByTestId({ testId: TESTNET_TOGGLE });
+		await this.clickByTestId({ testId: SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON });
+		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX });
+		await this.waitForByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER });
+		await this.toggleAllTestnets();
+		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_SAVE_BUTTON });
+		await this.waitForByTestId({
+			testId: SETTINGS_NETWORKS_MODAL,
+			options: { state: 'hidden', timeout: 60000 }
+		});
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 
@@ -355,7 +385,7 @@ abstract class Homepage {
 			const selector = `[data-tid="${testId}"]`;
 			const locator = this.#page.locator(selector);
 			await locator.evaluate((element) => {
-				element.scrollTop = 0;
+				element.scrollTo(0, 0);
 			});
 		}
 	}
@@ -404,14 +434,18 @@ abstract class Homepage {
 		await this.waitForManageTokensModal({ state: 'hidden', timeout: 60000 });
 	}
 
-	getTokenCardLocator({
+	getTokenCardTestId({
 		tokenSymbol,
 		networkSymbol
 	}: {
 		tokenSymbol: string;
 		networkSymbol: string;
-	}): Locator {
-		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
+	}): string {
+		return `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`;
+	}
+
+	getTokenCardLocator(params: { tokenSymbol: string; networkSymbol: string }): Locator {
+		return this.#page.locator(`[data-tid="${this.getTokenCardTestId(params)}"]`);
 	}
 
 	async getStableViewportHeight(): Promise<number> {
@@ -440,58 +474,56 @@ abstract class Homepage {
 	}
 
 	async takeScreenshot(
-		{
-			isMobile = false,
-			freezeCarousel = false,
-			centeredElementTestId,
-			screenshotTarget
-		}: TakeScreenshotParams = {
-			isMobile: false,
+		{ freezeCarousel: _ = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
 			freezeCarousel: false
 		}
 	): Promise<void> {
-		await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
-
-		if (nonNullish(centeredElementTestId)) {
-			await this.scrollIntoViewCentered(centeredElementTestId);
-		}
-
-		if (isNullish(screenshotTarget) && !isMobile) {
+		if (isNullish(screenshotTarget) && !this.#isMobile) {
 			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
 			await this.viewportAdjuster();
 		}
 
 		const element = screenshotTarget ?? this.#page;
 
-		await this.#page.mouse.move(0, 0);
+		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
+		// if (freezeCarousel) {
+		// 	// Freezing the time because the carousel has a timer that resets the animations and the transitions.
+		// 	await this.#page.clock.pauseAt(Date.now());
+		// 	await this.setCarouselFirstSlide();
+		// 	await this.#page.clock.pauseAt(Date.now());
+		// }
 
-		if (freezeCarousel) {
-			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
-			await this.#page.clock.pauseAt(Date.now());
-			await this.setCarouselFirstSlide();
-			await this.#page.clock.pauseAt(Date.now());
+		if (!this.#isMobile) {
+			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
 		}
+
+		if (nonNullish(centeredElementTestId)) {
+			await this.scrollIntoViewCentered(centeredElementTestId);
+		}
+
+		await this.#page.mouse.move(0, 0);
 
 		const colorSchemes = ['light', 'dark'] as const;
 		for (const scheme of colorSchemes) {
 			await this.#page.emulateMedia({ colorScheme: scheme });
+			await this.#page.waitForTimeout(1000);
 
-			// Playwright can retry flaky tests in the amount of time set below.
-			await expect(element).toHaveScreenshot({ timeout: 5 * 60 * 1000 });
+			await expect(element).toHaveScreenshot();
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
-			if (isMobile) {
+			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
-				await expect(element).toHaveScreenshot({ fullPage: true, timeout: 5 * 60 * 1000 });
+				await expect(element).toHaveScreenshot({ fullPage: true });
 				await this.showMobileNavigationMenu();
 			}
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
 
-		if (freezeCarousel) {
-			// Resuming the time that we froze because of the carousel animations.
-			await this.#page.clock.resume();
-		}
+		// TODO: the carousel is too flaky for the E2E tests, so we need completely mask it and work on freezing it in a permanent state in another PR.
+		// if (freezeCarousel) {
+		// 	// Resuming the time that we froze because of the carousel animations.
+		// 	await this.#page.clock.resume();
+		// }
 	}
 
 	abstract extendWaitForReady(): Promise<void>;

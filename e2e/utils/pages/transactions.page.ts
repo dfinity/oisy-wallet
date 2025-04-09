@@ -1,28 +1,50 @@
 import { CAROUSEL_SLIDE_NAVIGATION, TOKEN_CARD } from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
-export type TransactionsPageParams = {
+type TransactionsPageParams = HomepageLoggedInParams;
+
+interface TransactionsConfig {
 	tokenSymbol: string;
 	networkId: string;
-} & HomepageLoggedInParams;
+}
+
+export const TransactionCases: TransactionsConfig[] = [
+	{
+		tokenSymbol: 'BTC',
+		networkId: 'BTC'
+	},
+	{
+		tokenSymbol: 'ETH',
+		networkId: 'ETH'
+	},
+	{
+		tokenSymbol: 'ICP',
+		networkId: 'ICP'
+	},
+	{
+		tokenSymbol: 'SOL',
+		networkId: 'SOL'
+	}
+];
 
 export class TransactionsPage extends HomepageLoggedIn {
-	readonly #tokenSymbol: string;
-	readonly #networkId: string;
-
-	constructor({ page, iiPage, viewportSize, tokenSymbol, networkId }: TransactionsPageParams) {
-		super({ page, iiPage, viewportSize });
-
-		this.#tokenSymbol = tokenSymbol;
-		this.#networkId = networkId;
+	constructor(params: TransactionsPageParams) {
+		super(params);
 	}
 
-	override async extendWaitForReady(): Promise<void> {
-		const testId = `${TOKEN_CARD}-${this.#tokenSymbol}-${this.#networkId}`;
+	showTransactions = async ({
+		tokenSymbol,
+		networkId
+	}: {
+		tokenSymbol: string;
+		networkId: string;
+	}) => {
+		const testId = `${TOKEN_CARD}-${tokenSymbol}-${networkId}`;
 		await this.clickByTestId({ testId });
 		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({
 			state: 'hidden'
 		});
 		await this.waitForLoadState();
-	}
+		await this.takeScreenshot();
+	};
 }

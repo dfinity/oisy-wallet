@@ -19,7 +19,7 @@ const pendingTransactionMock = {
 	utxos: [
 		{
 			height: 100,
-			value: BigInt(5000),
+			value: 5000n,
 			outpoint: {
 				txid: new Uint8Array([1, 2, 3]),
 				vout: 0

@@ -8,8 +8,14 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
+// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('Transactions', () => {
-	const timeout = 7000;
+	const timeout = 12000;
 	const mockGoTo = vi.fn();
 
 	beforeEach(() => {
@@ -113,5 +119,20 @@ describe('Transactions', () => {
 			},
 			{ timeout }
 		);
+	});
+
+	it('should redirect the user to the activity page if token does not exist', async () => {
+		mockPage.mock({ token: 'UNKNOWN', network: ICP_NETWORK_SYMBOL });
+
+		render(Transactions);
+
+		await new Promise<void>((resolve) =>
+			setTimeout(() => {
+				expect(get(modalStore)).toBeNull();
+				resolve();
+			}, timeout)
+		);
+
+		expect(mockGoTo).toHaveBeenCalledWith('/');
 	});
 }, 60000);

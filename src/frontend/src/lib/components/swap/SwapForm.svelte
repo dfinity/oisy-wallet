@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
+	import type IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
@@ -19,6 +18,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { SWAP_SLIPPAGE_INVALID_VALUE } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -74,7 +74,7 @@
 
 	let totalFee: bigint | undefined;
 	// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
-	$: totalFee = (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n);
+	$: totalFee = (sourceTokenFee ?? ZERO_BI) * ($isSourceTokenIcrc2 ? 2n : 1n);
 
 	let swapAmountsLoading = false;
 	$: swapAmountsLoading =
@@ -108,10 +108,10 @@
 		switchTokens();
 	};
 
-	$: customValidate = (userAmount: BigNumber): TokenActionErrorType =>
+	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		nonNullish($sourceToken)
 			? validateUserAmount({
-					userAmount: userAmount.toBigInt(),
+					userAmount,
 					token: $sourceToken,
 					balance: $sourceTokenBalance,
 					fee: totalFee,
@@ -159,7 +159,7 @@
 								error={nonNullish(errorType)}
 								balance={$sourceTokenBalance}
 								token={$sourceToken}
-								fee={BigNumber.from(totalFee)}
+								fee={totalFee}
 							/>
 						{/if}
 					</svelte:fragment>

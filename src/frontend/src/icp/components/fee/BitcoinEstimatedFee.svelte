@@ -1,7 +1,6 @@
 <script lang="ts">
 	// TODO: component will be removed within migration to the new Send flow
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import {
@@ -34,7 +33,7 @@
 			<svelte:fragment slot="label">{$i18n.fee.text.estimated_btc}</svelte:fragment>
 
 			<ExchangeAmountDisplay
-				amount={BigNumber.from(bitcoinEstimatedFee)}
+				amount={bitcoinEstimatedFee}
 				decimals={BTC_DECIMALS}
 				symbol={BTC_MAINNET_SYMBOL}
 				exchangeRate={btcFeeExchangeRate}

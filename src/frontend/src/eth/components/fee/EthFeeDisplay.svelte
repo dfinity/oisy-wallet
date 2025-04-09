@@ -27,7 +27,7 @@
 					return;
 				}
 
-				fee = $maxGasFee.toBigInt();
+				fee = $maxGasFee;
 			};
 
 			timer = setTimeout(calculateFee, 500);

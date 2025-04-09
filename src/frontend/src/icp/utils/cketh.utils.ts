@@ -38,9 +38,9 @@ export const assertCkETHMinWithdrawalAmount = ({
 	} = minterInfo;
 
 	// The `minimum_withdrawal_amount` is optional in the minter info because the team decided to make all fields optional for maintainability reasons. That's why we assume that it is most likely set.
-	const minWithdrawalAmount = fromNullable(minimum_withdrawal_amount) ?? 0n;
+	const minWithdrawalAmount = fromNullable(minimum_withdrawal_amount) ?? ZERO_BI;
 
-	if ((amount ?? 0n) < minWithdrawalAmount) {
+	if ((amount ?? ZERO_BI) < minWithdrawalAmount) {
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_cketh_amount, {
 				$amount: formatToken({

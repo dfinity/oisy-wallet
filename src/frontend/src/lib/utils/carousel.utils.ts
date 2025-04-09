@@ -42,6 +42,9 @@ export const extendCarouselSliderFrame = ({
 		return;
 	}
 
+	// Clean previous HTML if the frame is being re-built (e.g. in case of window resize)
+	sliderFrame.innerHTML = '';
+
 	// TODO: use Svelte 5 and/or pure CSS in order to avoid the hacky solution
 	// We add the last slide as the first element to properly animate last-to-first slide transition.
 	// The same applies to the last element - we use the first slide as the last item of the array.

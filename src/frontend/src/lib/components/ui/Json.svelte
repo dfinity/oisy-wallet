@@ -101,7 +101,7 @@
 		>
 		<!-- children -->
 		<ul>
-			{#each children as [key, value]}
+			{#each children as [key, value] (key)}
 				<li>
 					<svelte:self json={value} _key={key} {defaultExpandedLevel} _level={_level + 1} />
 				</li>
@@ -141,6 +141,7 @@
 		flex-direction: column;
 		gap: var(--padding-0_5x);
 	}
+
 	.key {
 		display: inline-block;
 		position: relative;
@@ -149,10 +150,12 @@
 
 		margin-right: var(--padding-0_5x);
 	}
+
 	.value {
 		// Values can be strings of JSON and long. We want to break the value, so that the keys stay on the same line.
 		word-break: break-all;
 	}
+
 	.arrow {
 		touch-action: manipulation;
 		cursor: pointer;
@@ -169,9 +172,11 @@
 		&:hover {
 			color: var(--primary-contrast);
 			background: var(--primary);
+
 			&::before {
 				color: var(--primary);
 			}
+
 			.bracket {
 				color: var(--primary-contrast);
 			}
@@ -187,9 +192,11 @@
 			transform: translate(calc(-1 * var(--padding-1_5x)), calc(0.8 * var(--padding)));
 			font-size: var(--padding);
 		}
+
 		&.expanded::before {
 			content: '▼';
 		}
+
 		&.collapsed::before {
 			content: '▶';
 		}
@@ -199,27 +206,35 @@
 	.bracket {
 		color: var(--json-bracket-color);
 	}
+
 	.value {
 		color: var(--json-value-color);
 	}
+
 	.value.string {
 		color: var(--json-string-color);
 	}
+
 	.value.number {
 		color: var(--json-number-color);
 	}
+
 	.value.null {
 		color: var(--json-null-color);
 	}
+
 	.value.principal {
 		color: var(--json-principal-color);
 	}
+
 	.value.hash {
 		color: var(--json-hash-color);
 	}
+
 	.value.bigint {
 		color: var(--json-bigint-color);
 	}
+
 	.value.boolean {
 		color: var(--json-boolean-color);
 	}

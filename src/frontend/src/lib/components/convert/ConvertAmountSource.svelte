@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
@@ -8,6 +7,10 @@
 	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+		type TokenActionValidationErrorsContext
+	} from '$lib/stores/token-action-validation-errors.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
@@ -18,30 +21,23 @@
 	export let totalFee: bigint | undefined;
 	export let minFee: bigint | undefined = undefined;
 	export let ethereumEstimateFee: bigint | undefined = undefined;
-	export let insufficientFunds: boolean;
-	export let insufficientFundsForFee: boolean;
-	export let amountLessThanLedgerFee: boolean | undefined = undefined;
-	export let minimumAmountNotReached: boolean | undefined = undefined;
-	export let unknownMinimumAmount: boolean | undefined = undefined;
-	export let minterInfoNotCertified: boolean | undefined = undefined;
 	export let exchangeValueUnit: DisplayUnit = 'usd';
 	export let inputUnit: DisplayUnit = 'token';
 
 	let errorType: TokenActionErrorType = undefined;
 
-	$: insufficientFunds = nonNullish(errorType) && errorType === 'insufficient-funds';
-	$: insufficientFundsForFee = nonNullish(errorType) && errorType === 'insufficient-funds-for-fee';
-	$: amountLessThanLedgerFee = nonNullish(errorType) && errorType === 'amount-less-than-ledger-fee';
-	$: minimumAmountNotReached = nonNullish(errorType) && errorType === 'minimum-amount-not-reached';
-	$: unknownMinimumAmount = nonNullish(errorType) && errorType === 'unknown-minimum-amount';
-	$: minterInfoNotCertified = nonNullish(errorType) && errorType === 'minter-info-not-certified';
-
 	const { sourceToken, sourceTokenBalance, sourceTokenExchangeRate, balanceForFee, minterInfo } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	$: customValidate = (userAmount: BigNumber): TokenActionErrorType =>
+	const { setErrorType } = getContext<TokenActionValidationErrorsContext>(
+		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY
+	);
+
+	$: errorType, setErrorType(errorType);
+
+	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		validateUserAmount({
-			userAmount: userAmount.toBigInt(),
+			userAmount,
 			token: $sourceToken,
 			balance: $sourceTokenBalance,
 			balanceForFee: $balanceForFee,
@@ -58,8 +54,8 @@
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(totalFee)
 		? getMaxTransactionAmount({
-				balance: nonNullish($sourceTokenBalance) ? BigNumber.from($sourceTokenBalance) : undefined,
-				fee: BigNumber.from(totalFee),
+				balance: $sourceTokenBalance,
+				fee: totalFee,
 				tokenDecimals: $sourceToken.decimals,
 				tokenStandard: $sourceToken.standard
 			})

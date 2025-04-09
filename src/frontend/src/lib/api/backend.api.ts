@@ -1,4 +1,6 @@
 import type {
+	AllowSigningRequest,
+	AllowSigningResponse,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -15,6 +17,7 @@ import type {
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
 	GetUserProfileResponse,
+	SaveUserNetworksSettings,
 	SetUserShowTestnetsParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -136,10 +139,16 @@ export const selectUserUtxosFee = async ({
 	return btcSelectUserUtxosFee(params);
 };
 
-export const allowSigning = async ({ identity }: CanisterApiFunctionParams): Promise<void> => {
+export const allowSigning = async ({
+	request,
+	identity
+}: CanisterApiFunctionParams<{
+	request?: AllowSigningRequest;
+}>): Promise<AllowSigningResponse> => {
 	const { allowSigning } = await backendCanister({ identity });
 
-	return allowSigning();
+	// Conditionally call allowSigning with request or empty
+	return allowSigning(request ? { request } : {});
 };
 
 export const addUserHiddenDappId = async ({
@@ -158,6 +167,15 @@ export const setUserShowTestnets = async ({
 	const { setUserShowTestnets } = await backendCanister({ identity });
 
 	return setUserShowTestnets(params);
+};
+
+export const updateUserNetworkSettings = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SaveUserNetworksSettings>): Promise<void> => {
+	const { updateUserNetworkSettings } = await backendCanister({ identity });
+
+	return updateUserNetworkSettings(params);
 };
 
 const backendCanister = async ({

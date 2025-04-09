@@ -40,7 +40,7 @@
 			amount: parseToken({
 				value: `${amount}`,
 				unitName: token.decimals
-			}).toBigInt(),
+			}),
 			...token
 		});
 

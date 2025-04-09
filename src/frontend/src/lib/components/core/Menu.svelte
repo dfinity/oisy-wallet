@@ -8,6 +8,7 @@
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
+	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
@@ -19,10 +20,11 @@
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
-		NAVIGATION_MENU_VIP_BUTTON
+		NAVIGATION_MENU_VIP_BUTTON,
+		NAVIGATION_MENU_REFERRAL_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { isVipUser } from '$lib/services/reward-code.services';
+	import { isVipUser } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -77,10 +79,19 @@
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl" on:click={hidePopover}>
-	<div class="flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
+	<div class="max-w-68 flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
+
+		<ButtonMenu
+			ariaLabel={$i18n.navigation.alt.refer_a_friend}
+			testId={NAVIGATION_MENU_REFERRAL_BUTTON}
+			on:click={modalStore.openReferralCode}
+		>
+			<IconShare size="20" />
+			{$i18n.navigation.text.refer_a_friend}
+		</ButtonMenu>
 
 		{#if isVip}
 			<ButtonMenu
@@ -92,6 +103,8 @@
 				{$i18n.navigation.text.vip_qr_code}
 			</ButtonMenu>
 		{/if}
+
+		<Hr />
 
 		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
 

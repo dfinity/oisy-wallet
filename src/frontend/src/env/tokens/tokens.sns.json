@@ -536,5 +536,35 @@
 			"alternativeName": "Personal DAO",
 			"url": "https://gsnnn-ziaaa-aaaag-acaaa-cai.icp0.io/"
 		}
+	},
+	{
+		"ledgerCanisterId": "jg2ra-syaaa-aaaaq-aaewa-cai",
+		"rootCanisterId": "ju4gz-6iaaa-aaaaq-aaeva-cai",
+		"indexCanisterId": "jiy4i-jiaaa-aaaaq-aaexa-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Cecil The Lion DAO",
+			"symbol": "CECIL",
+			"fee": {
+				"__bigint__": "1000000"
+			},
+			"alternativeName": "Cecil The Lion DAO",
+			"url": "https://cecildao.org"
+		}
+	},
+	{
+		"ledgerCanisterId": "lvfsa-2aaaa-aaaaq-aaeyq-cai",
+		"rootCanisterId": "jpz24-eqaaa-aaaaq-aaexq-cai",
+		"indexCanisterId": "l3h7i-bqaaa-aaaaq-aaezq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ICPEx",
+			"symbol": "ICX",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "ICPEx",
+			"url": "https://icpex.org/"
+		}
 	}
 ]
