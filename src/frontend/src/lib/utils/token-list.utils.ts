@@ -17,23 +17,23 @@ export const getFilteredTokenList: ({
 	list.reduce<TokenUiOrGroupUi[]>((acc, item) => {
 		if (filter === '') {
 			return [...acc, item];
-		} 
-			if (!isTokenUiGroup(item)) {
-				const token = item.token;
+		}
+		if (!isTokenUiGroup(item)) {
+			const token = item.token;
 
-				if (getFilterCondition({ filter, token })) {
-					return [...acc, item];
-				}
-			} else {
-				const group = item.group;
-				const matchesGroup = group.tokens.some((token) => getFilterCondition({ filter, token }));
-
-				// If any token in the group matches, add the group to the result
-				if (nonNullish(matchesGroup)) {
-					return [...acc, item];
-				}
+			if (getFilterCondition({ filter, token })) {
+				return [...acc, item];
 			}
-		
+		} else {
+			const group = item.group;
+			const matchesGroup = group.tokens.some((token) => getFilterCondition({ filter, token }));
+
+			// If any token in the group matches, add the group to the result
+			if (nonNullish(matchesGroup)) {
+				return [...acc, item];
+			}
+		}
+
 		return acc;
 	}, []);
 
