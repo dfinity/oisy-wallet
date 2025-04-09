@@ -57,7 +57,6 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import {
-		networkICPEnabled,
 		networkEthereumEnabled,
 		networkSepoliaEnabled,
 		networkBitcoinMainnetEnabled,
@@ -164,8 +163,7 @@
 			label: $i18n.receive.icp.text.principal,
 			copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied,
 			qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr,
-			text: $i18n.receive.icp.text.use_for_icrc_deposit,
-			condition: $networkICPEnabled
+			text: $i18n.receive.icp.text.use_for_icrc_deposit
 		},
 		{
 			labelRef: 'icpTokenAddress',
@@ -176,8 +174,7 @@
 			title: $i18n.receive.icp.text.icp_account,
 			label: $i18n.receive.icp.text.icp_account,
 			copyAriaLabel: $i18n.receive.icp.text.icp_account_copied,
-			qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr,
-			condition: $networkICPEnabled
+			qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr
 		},
 		{
 			labelRef: 'solAddressMainnet',

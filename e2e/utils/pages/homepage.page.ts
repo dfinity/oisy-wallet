@@ -18,8 +18,13 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
+	SETTINGS_NETWORKS_MODAL,
+	SETTINGS_NETWORKS_MODAL_SAVE_BUTTON,
+	SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER,
+	SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX,
+	SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE,
 	SIDEBAR_NAVIGATION_MENU,
-	TESTNET_TOGGLE,
 	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
@@ -358,9 +363,30 @@ abstract class Homepage {
 		await this.#page.waitForURL(urlRegex);
 	}
 
+	private async toggleAllTestnets(): Promise<void> {
+		const toggles = this.#page.locator(`[data-tid^="${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-"]`);
+		const countToggles = await toggles.count();
+		const testIds = await Promise.all(
+			Array.from({ length: countToggles }, (_, i) => toggles.nth(i).getAttribute('data-tid'))
+		);
+		for (const testId of testIds) {
+			if (nonNullish(testId)) {
+				await this.clickByTestId({ testId });
+			}
+		}
+	}
+
 	async activateTestnetSettings(): Promise<void> {
 		await this.navigateTo({ testId: NAVIGATION_ITEM_SETTINGS, expectedPath: AppPath.Settings });
-		await this.clickByTestId({ testId: TESTNET_TOGGLE });
+		await this.clickByTestId({ testId: SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON });
+		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX });
+		await this.waitForByTestId({ testId: SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER });
+		await this.toggleAllTestnets();
+		await this.clickByTestId({ testId: SETTINGS_NETWORKS_MODAL_SAVE_BUTTON });
+		await this.waitForByTestId({
+			testId: SETTINGS_NETWORKS_MODAL,
+			options: { state: 'hidden', timeout: 60000 }
+		});
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 
@@ -458,7 +484,7 @@ abstract class Homepage {
 	}
 
 	async takeScreenshot(
-		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
+		{ freezeCarousel: _ = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
 			freezeCarousel: false
 		}
 	): Promise<void> {
@@ -476,11 +502,6 @@ abstract class Homepage {
 		// 	await this.setCarouselFirstSlide();
 		// 	await this.#page.clock.pauseAt(Date.now());
 		// }
-		if (isNullish(this.promotionCarousel)) {
-			this.promotionCarousel = new PromotionCarousel(this.#page);
-		}
-		const carouselSelector = this.promotionCarousel.getCarouselSelector();
-		const mask = nonNullish(carouselSelector) && freezeCarousel ? [carouselSelector] : [];
 
 		if (!this.#isMobile) {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
@@ -497,12 +518,12 @@ abstract class Homepage {
 			await this.#page.emulateMedia({ colorScheme: scheme });
 			await this.#page.waitForTimeout(1000);
 
-			await expect(element).toHaveScreenshot({ mask });
+			await expect(element).toHaveScreenshot();
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
-				await expect(element).toHaveScreenshot({ fullPage: true, mask });
+				await expect(element).toHaveScreenshot({ fullPage: true });
 				await this.showMobileNavigationMenu();
 			}
 		}

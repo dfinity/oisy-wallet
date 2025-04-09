@@ -17,11 +17,11 @@ export const SUPPORTED_NETWORKS: Network[] = [
 	...SUPPORTED_SOLANA_NETWORKS
 ];
 
-const SUPPORTED_MAINNET_NETWORKS: Network[] = SUPPORTED_NETWORKS.filter(
+export const SUPPORTED_MAINNET_NETWORKS: Network[] = SUPPORTED_NETWORKS.filter(
 	({ env }) => env === 'mainnet'
 );
 
-const SUPPORTED_TESTNET_NETWORKS: Network[] = SUPPORTED_NETWORKS.filter(
+export const SUPPORTED_TESTNET_NETWORKS: Network[] = SUPPORTED_NETWORKS.filter(
 	({ env }) => env === 'testnet'
 );
 

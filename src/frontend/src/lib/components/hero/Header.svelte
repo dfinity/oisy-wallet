@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
@@ -9,9 +10,9 @@
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
+	import { isRouteTransactions } from '$lib/utils/nav.utils';
 </script>
 
-<!-- todo: revert z-3 back to z-1 when the modal for mobile version dropdowns is using real modals with store etc with responsive component -->
 <header
 	class="z-3 pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
 	class:1.5xl:fixed={$authSignedIn}
@@ -27,7 +28,7 @@
 
 	<div class="pointer-events-auto flex justify-end gap-2 md:gap-5">
 		{#if $authSignedIn}
-			<NetworksSwitcher />
+			<NetworksSwitcher disabled={isRouteTransactions($page)} />
 			<ThemeSwitchButton />
 			<WalletConnect />
 		{/if}

@@ -5,6 +5,7 @@ on:
     branches:
       - main
   pull_request:
+    types: [opened, synchronize, labeled]
   merge_group:
   workflow_dispatch:
 
@@ -12,33 +13,43 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   check-e2e-changes:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     outputs:
       e2e-or-config-changed: ${{ steps.e2e-or-config-files.outputs.e2e-or-config-changed }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Fetch base branch
         run: |
-          git fetch origin "${{ github.base_ref }}:${{ github.base_ref }}"
+          git fetch origin "$BASE_REF:$BASE_REF"
+        env:
+          BASE_REF: ${{ github.base_ref }}
 
       - name: Check for E2E or Playwright Config File Changes
         id: e2e-or-config-files
         run: |
-          if git diff --name-only "origin/${{ github.base_ref }}" HEAD | grep -E "(playwright.config.ts|.env.e2e|canister_e2e_ids.json|e2e/)"; then
+          if git diff --name-only "origin/$BASE_REF" HEAD | grep -E "(playwright.config.ts|.env.e2e|canister_e2e_ids.json|e2e/)"; then
             echo "e2e-or-config-changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "e2e-or-config-changed=false" >> "$GITHUB_OUTPUT"
           fi
+        env:
+          BASE_REF: ${{ github.base_ref }}
         shell: bash
         continue-on-error: false
 
   oisy-backend-wasm:
     runs-on: ubuntu-24.04
-    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+    if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     needs: check-e2e-changes
     permissions:
       contents: write
@@ -46,14 +57,17 @@ jobs:
     steps:
       - name: Checkout
         if: ${{ github.event_name != 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Checkout for pull request
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: false
 
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
@@ -62,20 +76,22 @@ jobs:
 
   e2e:
     runs-on: ${{ matrix.os }}
-    needs: oisy-backend-wasm
+    permissions:
+      contents: read
+    needs: ['oisy-backend-wasm', 'check-e2e-changes']
     strategy:
       matrix:
         os: [ubuntu-24.04, macos-14]
     env:
       MATRIX_OS: ${{ matrix.os }}
-    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+    if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     outputs:
       ubuntu_status: ${{ steps.set_snapshot_output.outputs.ubuntu_status }}
       macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@3ff1caaa28b64c9cc276ce0a02e2ff584f3900c5 # v2.0.2
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
@@ -83,18 +99,21 @@ jobs:
 
       - name: Checkout
         if: ${{ github.event_name != 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Checkout for pull request
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Download WASM artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: backend.wasm.gz
           path: out/
@@ -116,7 +135,7 @@ jobs:
         run: npm run e2e:ci
 
       - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: playwright-report-${{ matrix.os }}
@@ -124,7 +143,7 @@ jobs:
           retention-days: 3
 
       - name: Upload Playwright Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: test-results-${{ matrix.os }}
@@ -144,16 +163,18 @@ jobs:
         id: set_snapshot_output
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
-            echo "ubuntu_status=${{ steps.check_snapshots.outputs.CHANGES }}" >> $GITHUB_OUTPUT
+            echo "ubuntu_status=$CHANGES" >> $GITHUB_OUTPUT
             echo "os_suffix=linux" >> $GITHUB_OUTPUT
           elif [ "$RUNNER_OS" = "macOS" ]; then
-            echo "macos_status=${{ steps.check_snapshots.outputs.CHANGES }}" >> $GITHUB_OUTPUT
+            echo "macos_status=$CHANGES" >> $GITHUB_OUTPUT
             echo "os_suffix=darwin" >> $GITHUB_OUTPUT
           fi
+        env:
+          CHANGES: ${{ steps.check_snapshots.outputs.CHANGES }}
 
       - name: Save changed snapshots
         if: steps.check_snapshots.outputs.CHANGES == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: snapshots-${{ matrix.os }}
           path: e2e/**/*.spec.ts-snapshots/**/*-${{ steps.set_snapshot_output.outputs.os_suffix }}.png
@@ -162,13 +183,16 @@ jobs:
   finalize-snapshots-update:
     name: Finalize Snapshots Update
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
     needs: [e2e]
     outputs:
       e2e-snapshots-changed: ${{ steps.e2e-check-snapshots.outputs.e2e-snapshots-changed }}
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@3ff1caaa28b64c9cc276ce0a02e2ff584f3900c5 # v2.0.2
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
@@ -176,30 +200,37 @@ jobs:
 
       - name: Checkout
         if: ${{ github.event_name != 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Checkout for pull request
         if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Set snapshot status from previous jobs
         run: |
-          echo "ubuntu_status=${{ needs.e2e.outputs.ubuntu_status }}" >> $GITHUB_ENV
-          echo "macos_status=${{ needs.e2e.outputs.macos_status }}" >> $GITHUB_ENV
+          echo "ubuntu_status=$ubuntu_status" >> $GITHUB_ENV
+          echo "macos_status=$macos_status" >> $GITHUB_ENV
+        env:
+          ubuntu_status: ${{ needs.e2e.outputs.ubuntu_status }}
+          macos_status: ${{ needs.e2e.outputs.macos_status }}
+
       - name: Download Ubuntu Snapshots
         if: env.ubuntu_status == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: snapshots-ubuntu-24.04
           path: e2e
 
       - name: Download macOS Snapshots
         if: env.macos_status == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: snapshots-macos-14
           path: e2e
@@ -216,12 +247,12 @@ jobs:
           fi
 
       - name: Commit and push updates
-        uses: EndBug/add-and-commit@v9
+        uses: ./.github/actions/add-and-commit
         if: env.FINAL_CHANGES == 'true' && github.ref != 'refs/heads/main'
         with:
           add: e2e
-          default_author: github_actions
           message: '🤖 Update E2E snapshots'
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Stage Changes on main
         if: env.FINAL_CHANGES == 'true' && github.ref == 'refs/heads/main'
@@ -253,17 +284,23 @@ jobs:
     if: always()
     needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       matrix:
         os: [ubuntu-24.04, macos-14]
     steps:
       - name: Cleared for merging
         run: |
-          if [ "${{ needs.check-e2e-changes.outputs.e2e-or-config-changed }}" == "false" ]; then
+          if [ "$E2E_OR_CONFIG_CHANGED" == "false" ]; then
             echo "No E2E or config changes detected. PR is cleared for merging."
-          elif [[ "${{ needs.e2e.result }}" == "success" ]] && [[ "${{ needs.finalize-snapshots-update.outputs.e2e-snapshots-changed }}" == "false" ]]; then
+          elif [[ "$E2E_RESULT" == "success" ]] && [[ "$E2E_SNAPSHOTS_CHANGED" == "false" ]]; then
             echo "This PR is cleared for merging"
           else
             echo "This PR is not cleared for merging"
             exit 1
           fi
+        env:
+          E2E_OR_CONFIG_CHANGED: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed }}
+          E2E_SNAPSHOTS_CHANGED: ${{ needs.finalize-snapshots-update.outputs.e2e-snapshots-changed }}
+          E2E_RESULT: ${{ needs.e2e.result }}

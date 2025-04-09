@@ -1,7 +1,7 @@
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
-use candid::Principal;
+use candid::{candid_method, Principal};
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
@@ -36,13 +36,17 @@ use shared::{
             SaveNetworksSettingsError, SaveNetworksSettingsRequest, SaveTestnetsSettingsError,
             SetShowTestnetsRequest,
         },
-        signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+        pow::{AllowSigningStatus, CreateChallengeError, CreateChallengeResponse},
+        signer::{
+            topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
+            AllowSigningRequest, AllowSigningResponse,
+        },
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
-            ListUserCreationTimestampsResponse, ListUsersRequest, ListUsersResponse, OisyUser,
-            UserProfile,
+            HasUserProfileResponse, ListUserCreationTimestampsResponse, ListUsersRequest,
+            ListUsersResponse, OisyUser, UserProfile,
         },
         Stats, Timestamp,
     },
@@ -60,9 +64,8 @@ use crate::{
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
-    user_profile::{
-        add_hidden_dapp_id, set_network_settings, set_show_testnets, update_network_settings,
-    },
+    types::PowChallengeMap,
+    user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
 
 mod assertions;
@@ -74,6 +77,7 @@ mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
+mod pow;
 pub mod signer;
 mod state;
 mod token;
@@ -86,6 +90,7 @@ const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
 const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
+const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -100,6 +105,7 @@ thread_local! {
             // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
+            pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             migration: None,
         })
     );
@@ -152,6 +158,7 @@ pub struct State {
     custom_token: CustomTokenMap,
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
+    pow_challenge: PowChallengeMap,
     migration: Option<Migration>,
 }
 
@@ -538,34 +545,6 @@ pub fn add_user_credential(
     }
 }
 
-/// Sets the user's preference to enable (or disable) networks in the interface, overwriting any
-/// existing settings.
-///
-/// # Returns
-/// - Returns `Ok(())` if the network settings were saved successfully, or if they were already set
-///   to the same value.
-///
-/// # Errors
-/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "may_write_user_data")]
-pub fn set_user_network_settings(
-    request: SaveNetworksSettingsRequest,
-) -> Result<(), SaveNetworksSettingsError> {
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
-
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        set_network_settings(
-            stored_principal,
-            request.current_user_version,
-            request.networks,
-            &mut user_profile_model,
-        )
-    })
-}
-
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
 /// existing settings.
 ///
@@ -688,8 +667,49 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     })
 }
 
-/// An endpoint to be called by users on first login, to enable them to
-/// use the chain fusion signer together with Oisy.
+/// Creates a new proof-of-work challenge for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `CreateChallengeError`.
+///
+/// # Returns
+///
+/// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
+/// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
+///   internal errors.
+#[update(guard = "may_write_user_data")]
+#[candid_method(update)]
+pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
+    let challenge = pow::create_pow_challenge().await?;
+
+    Ok(CreateChallengeResponse {
+        difficulty: challenge.difficulty,
+        start_timestamp_ms: challenge.start_timestamp_ms,
+        expiry_timestamp_ms: challenge.expiry_timestamp_ms,
+    })
+}
+/// Checks if the caller has an associated user profile.
+///
+/// # Returns
+/// - `Ok(true)` if a user profile exists for the caller.
+/// - `Ok(false)` if no user profile exists for the caller.
+/// # Errors
+/// Does not return any error
+#[query(guard = "may_read_user_data")]
+#[must_use]
+pub fn has_user_profile() -> HasUserProfileResponse {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    // candid does not support to directly return a bool
+    HasUserProfileResponse {
+        has_user_profile: user_profile::has_user_profile(stored_principal),
+    }
+}
+
+/// This function authorizes the caller to spend a specific
+//  amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
+// providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
+// cycles ledger.
 ///
 /// Note:
 /// - The chain fusion signer performs threshold key operations including providing public keys,
@@ -698,8 +718,19 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "may_read_user_data")]
-pub async fn allow_signing() -> Result<(), AllowSigningError> {
-    signer::allow_signing().await
+pub async fn allow_signing(
+    request: Option<AllowSigningRequest>,
+) -> Result<AllowSigningResponse, AllowSigningError> {
+    signer::allow_signing().await?;
+
+    eprintln!("Received request: {request:?}");
+
+    // TODO map properties from from complete_pow_challenge
+    Ok(AllowSigningResponse {
+        status: AllowSigningStatus::Skipped,
+        allowed_cycles: 0u64,
+        challenge_completion: None,
+    })
 }
 
 #[query(guard = "caller_is_allowed")]
@@ -833,6 +864,20 @@ pub async fn step_migration() {
             eprintln!("Migration failed: {err:?}");
         });
     };
+}
+
+/// Gets account creation timestamps.
+#[query(guard = "caller_is_allowed")]
+#[must_use]
+pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
+    read_state(|s| {
+        s.user_profile
+            .iter()
+            .map(|((_updated, StoredPrincipal(principal)), user)| {
+                (principal, user.created_timestamp)
+            })
+            .collect()
+    })
 }
 
 /// Saves a snapshot of the user's account.
