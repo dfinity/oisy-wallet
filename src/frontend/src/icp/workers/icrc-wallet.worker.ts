@@ -26,11 +26,17 @@ import {
 } from '@dfinity/ledger-icrc';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 
-const getBalanceAndTransactions = ({
+type GetTransactions = IcrcIndexNgGetTransactions;
+
+type GetBalance = bigint;
+
+type GetBalanceAndTransactions = Omit<GetTransactions, 'balance'> & { balance: GetBalance };
+
+const getTransactions = ({
 	identity,
 	certified,
 	data
-}: SchedulerJobParams<PostMessageDataRequestIcrcStrict>): Promise<IcrcIndexNgGetTransactions> => {
+}: SchedulerJobParams<PostMessageDataRequestIcrcStrict>): Promise<GetTransactions> => {
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
 
 	return getTransactionsApi({
@@ -68,7 +74,7 @@ const getBalance = ({
 	identity,
 	certified,
 	data
-}: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<bigint> => {
+}: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<GetBalance> => {
 	assertNonNullish(data, 'No data - ledgerIndexCanister - provided to fetch balance.');
 
 	return balance({
@@ -77,6 +83,32 @@ const getBalance = ({
 		owner: identity.getPrincipal(),
 		...data
 	});
+};
+
+/**
+ * Fetches the balance from the Ledger canister and the transactions from the Index canister.
+ *
+ * The transactions are fetched using the `getTransactions` function, which is a wrapper around the `getTransactions` function of the ICRC Index canister API.
+ * The balance is fetched using the `getBalance` function, which is a wrapper around the `balance` function of the ICRC Ledger canister API.
+ *
+ * The errors raised by this function are handled directly in the scheduler.
+ * If loading the transactions fails, the scheduler restarts using only the Ledger canister.
+ * If loading the balance fails, the same happens, and we don't load the transactions anymore.
+ * It was deemed not relevant, since the balance is more important than the transactions, and the new balance-only scheduler will handle any errors from that point.
+ *
+ * @param {SchedulerJobParams<PostMessageDataRequestIcrcStrict>} params - The parameters for the function, including the identity and data.
+ * @returns {Promise<GetBalanceAndTransactions>} A promise that resolves to an object containing the balance and transactions of the account.
+ */
+const getBalanceAndTransactions = async (
+	params: SchedulerJobParams<PostMessageDataRequestIcrcStrict>
+): Promise<GetBalanceAndTransactions> => {
+	const [balance, transactions] = await Promise.all([getBalance(params), getTransactions(params)]);
+
+	// Ignoring the balance from the transactions' response.
+	// Even if it could cause some sort of lagged inconsistency, we prefer to always show the latest balance, in case the Index canister is not properly working.
+	const { balance: _, ...rest } = transactions;
+
+	return { ...rest, balance };
 };
 
 const MSG_SYNC_ICRC_WALLET = 'syncIcrcWallet';
