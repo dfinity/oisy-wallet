@@ -1,4 +1,5 @@
 import type {
+	AllowSigningRequest,
 	AllowSigningResponse,
 	CustomToken,
 	PendingTransaction,
@@ -13,9 +14,11 @@ import type {
 	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
 	AllowSigningParams,
+	AllowSigningResult,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateChallengeResult,
 	GetUserProfileResponse,
 	SaveUserNetworksSettings,
 	SetUserShowTestnetsParams
@@ -139,6 +142,13 @@ export const selectUserUtxosFee = async ({
 	return btcSelectUserUtxosFee(params);
 };
 
+export const createPowChallenge = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<CreateChallengeResult> => {
+	const { createPowChallengeResult } = await backendCanister({ identity });
+	return createPowChallengeResult();
+};
+
 export const allowSigning = async ({
 	identity,
 	...params
@@ -146,6 +156,18 @@ export const allowSigning = async ({
 	const { allowSigning } = await backendCanister({ identity });
 
 	return allowSigning(params);
+};
+
+export const allowSigningResult = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<{
+	request?: AllowSigningRequest;
+}>): Promise<AllowSigningResult> => {
+	const { allowSigningResult } = await backendCanister({ identity });
+
+	// Conditionally call allowSigning with request or provide default logic
+	return allowSigningResult(params);
 };
 
 export const addUserHiddenDappId = async ({
