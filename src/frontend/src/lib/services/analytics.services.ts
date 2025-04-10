@@ -24,7 +24,7 @@ export const initPlausibleAnalytics = () => {
 	}
 };
 
-export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
+export const trackEvent = ({ name, metadata }: TrackEventParams) => {
 	/**
 	 * We use the `PLAUSIBLE_ENABLED` feature flag to allow flexibility in enabling or disabling
 	 * analytics in specific builds. This ensures that analytics
@@ -35,11 +35,5 @@ export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
 	 */
 	if (PLAUSIBLE_ENABLED && nonNullish(plausibleTracker)) {
 		plausibleTracker.trackEvent(name, { props: metadata });
-
-		/**
-		 * TODO: Remove `Promise.resolve()` and `async` in the future once we no longer need to use `await` with this function.
-		 * when we eliminate the need for `await` on this function.
-		 */
-		await Promise.resolve();
 	}
 };

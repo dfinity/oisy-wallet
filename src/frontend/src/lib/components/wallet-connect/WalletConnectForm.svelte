@@ -43,24 +43,24 @@
 		return 'success';
 	};
 
-	const onClick = async () => {
+	const onClick = () => {
 		const result = connect();
 
 		if (result === 'error') {
 			return;
 		}
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_COUNT_WALLET_CONNECT
 		});
 	};
 
-	const onQRCodeSuccess = async ({ detail }: CustomEvent<string>) => {
+	const onQRCodeSuccess = ({ detail }: CustomEvent<string>) => {
 		uri = detail;
 
 		connect();
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_COUNT_WALLET_CONNECT_QR_CODE
 		});
 	};
