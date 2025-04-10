@@ -29,6 +29,7 @@ sha2 = { workspace = true }
 shared = { path = "../shared" }
 
 [dev-dependencies]
+candid_parser = { workspace = true }
 lazy_static = { workspace = true }
 pocket-ic = { workspace = true }
 
