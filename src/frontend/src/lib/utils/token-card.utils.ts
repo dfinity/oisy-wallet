@@ -11,15 +11,28 @@ export const mapHeaderData = ({
 	tokens,
 	balance,
 	usdBalance
-}: TokenUiGroup): CardData => ({
-	name,
-	symbol,
-	decimals,
-	icon,
-	network,
-	oisyName: { oisyName: tokens.map((token) => token.symbol).join(', ') },
-	oisySymbol: { oisySymbol: name },
-	balance,
-	usdBalance,
-	tokenCount: tokens.length
-});
+}: TokenUiGroup): CardData => {
+	const ret = {
+		name,
+		symbol,
+		decimals,
+		icon,
+		network,
+		oisyName: { oisyName: tokens.map((token) => token.symbol).join(', ') },
+		oisySymbol: { oisySymbol: name },
+		balance,
+		usdBalance,
+		tokenCount: tokens.length
+	};
+
+	if (tokens[0].symbol.indexOf('ck') === 0 && tokens[1]) {
+		return {
+			...ret,
+			symbol: tokens[1].symbol,
+			icon: tokens[1].icon,
+			name: tokens[1].name
+		};
+	}
+
+	return ret;
+};
