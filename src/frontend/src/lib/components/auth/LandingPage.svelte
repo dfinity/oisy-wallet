@@ -4,6 +4,9 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { nonNullish } from '@dfinity/utils';
+	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
+	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 
 	let ariaLabel: string;
 	$: ariaLabel = replaceOisyPlaceholders($i18n.auth.alt.preview);
@@ -27,3 +30,7 @@
 		</div>
 	</div>
 </div>
+
+{#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
+	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
+{/if}
