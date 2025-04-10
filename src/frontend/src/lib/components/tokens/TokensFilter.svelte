@@ -72,7 +72,7 @@
 		<div
 			role="button"
 			tabindex="-1"
-			aria-label="todo"
+			aria-label={$i18n.tokens.alt.filter_input}
 			on:keydown={() => {}}
 			in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
 			out:fade={SLIDE_PARAMS}
@@ -110,7 +110,7 @@
 		link={false}
 		colorStyle="muted"
 		styleClass={`absolute right-[5px] ${visible ? 'active' : ''}`}
-		ariaLabel={$i18n.tokens.text.filter_button}
+		ariaLabel={$i18n.tokens.alt.filter_button}
 		testId={`${testIdPrefix}-open-btn`}
 	>
 		<IconSearch slot="icon" />
