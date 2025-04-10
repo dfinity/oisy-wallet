@@ -3,51 +3,14 @@ import type { z } from 'zod';
 
 const responseHandlers = new Map<string, (data: unknown) => void>();
 
-/*export function handleResponse(event: MessageEvent<TaggedMessage<PostMessageBase>>): boolean {
-	let postMessageBase: PostMessageBase = PostMessageBaseSchema.parse(event);
-
-	if (postMessageBase.type == 'response') {
-		const handler = responseHandlers.get(postMessageBase.requestId);
-		if (handler) {
-			handler(postMessageBase.msg);
-			responseHandlers.delete(postMessageBase.requestId);
-			return true;
-		}
-	}
-	//
-	return false;
-}*/
-
-/*
-export function initWorkerResponseRouter(worker: Worker) {
-	worker.addEventListener('msg', (event) => {
-		const { type, requestId } = event.data;
-
-		// Exit immediately if 'type' is missing or not equal to 'response'
-		if (!type || type !== 'response') {
-			console.error(`Invalid msg type. Expected 'response', but got: ${type}`);
-			return; // Exit execution early
-		}
-
-		console.log('Valid msg received:', event.data);
-
-		const handler = responseHandlers.get(requestId);
-		if (handler) {
-			handler(event);
-			responseHandlers.delete(requestId);
-		}
-	});
-}
-*/
-
 export function routeWorkerResponse(event: MessageEvent): boolean {
 	//const { type } = event.data;
 	const { type, requestId } = event.data;
 
 	// Exit immediately if 'type' is missing or not equal to 'response'
 	if (!type || type !== 'response') {
-		// console.error("Invalid message type. Expected 'response', but got:", messageEvent.data);
-		return false; // Exit execution early
+		console.error('Invalid message type. Expected \'response\', but got:', event.data);
+		return false;
 	}
 
 	console.warn('Valid data received: ', event.data);
@@ -66,11 +29,11 @@ export function routeWorkerResponse(event: MessageEvent): boolean {
  * Sends a typed request to the worker and awaits the fully typed response envelope (T).
  */
 export function sendMessageRequest<T>({
-	worker,
-	msg,
-	data,
-	schema
-}: {
+																				worker,
+																				msg,
+																				data,
+																				schema
+																			}: {
 	worker: Worker;
 	msg: string;
 	data: object;

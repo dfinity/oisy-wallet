@@ -1,4 +1,10 @@
 import type {
+	inferPostMessageSchema,
+	PostMessageAllowSigningRequestSchema,
+	PostMessageAllowSigningResponseSchema,
+	PostMessageBaseSchema,
+	PostMessageCreatePowChallengeRequestSchema,
+	PostMessageCreatePowChallengeResponseSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
@@ -16,10 +22,11 @@ import type {
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
 	PostMessageJsonDataResponseSchema,
+	PostMessageRequestBaseSchema,
+	PostMessageResponseBaseSchema,
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
-	PostMessageSyncStateSchema,
-	inferPostMessageSchema
+	PostMessageSyncStateSchema
 } from '$lib/schema/post-message.schema';
 import type * as z from 'zod';
 import type { ZodType } from 'zod';
@@ -78,3 +85,20 @@ export type PostMessageDataResponseBTCAddress = z.infer<
 export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> = z.infer<
 	ReturnType<typeof inferPostMessageSchema<ZodType<T>>>
 >;
+
+// -----------------------------------------------------------------------------------------------
+// The post message types used for short polling between:
+// pow.worker.ts <--->  worker.pow.services.ts
+// -----------------------------------------------------------------------------------------------
+// Base Types
+export type PostMessageBase = z.infer<typeof PostMessageBaseSchema>;
+export type PostMessageRequestBase = z.infer<typeof PostMessageRequestBaseSchema>;
+export type PostMessageResponseBase = z.infer<typeof PostMessageResponseBaseSchema>;
+export type PostMessageCreatePowChallengeRequest = z.infer<
+	typeof PostMessageCreatePowChallengeRequestSchema
+>;
+export type PostMessageCreatePowChallengeResponse = z.infer<
+	typeof PostMessageCreatePowChallengeResponseSchema
+>;
+export type PostMessageAllowSigningRequest = z.infer<typeof PostMessageAllowSigningRequestSchema>;
+export type PostMessageAllowSigningResponse = z.infer<typeof PostMessageAllowSigningResponseSchema>;
