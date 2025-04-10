@@ -89,7 +89,8 @@ jobs:
 
   breaking-interface:
     runs-on: ubuntu-24.04
-    needs: ['tests']
+    needs:
+      - docker-build
     permissions:
       contents: read
       pull-requests: read
