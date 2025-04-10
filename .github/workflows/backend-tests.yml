@@ -136,6 +136,9 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
 
+      - name: Install dfx
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
+
       - name: 'Run backend tests'
         if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
         working-directory: .
