@@ -8,7 +8,6 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { TRACK_COUNT_LEGACY_SIGN_IN_CLICK } from '$lib/constants/analytics.contants';
 	import { OISY_FIND_INTERNET_IDENTITY_URL } from '$lib/constants/oisy.constants';
 	import {
 		HELP_AUTH_BACK_BUTTON,
@@ -17,7 +16,6 @@
 		HELP_AUTH_LEARN_MORE_LINK,
 		HELP_AUTH_LEGACY_SIGN_IN_BUTTON
 	} from '$lib/constants/test-ids.constants';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -27,10 +25,8 @@
 	export let hideBack = false;
 
 	const onLegacySignIn = async () => {
-		await trackEvent({
-			name: TRACK_COUNT_LEGACY_SIGN_IN_CLICK
-		});
 		onDone();
+
 		await signIn({ domain: 'ic0.app' });
 	};
 </script>
