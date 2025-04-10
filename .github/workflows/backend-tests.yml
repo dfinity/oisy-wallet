@@ -117,10 +117,10 @@ jobs:
         id: conventional-commit
         run: |
           if [[ "$TITLE" =~ ^([a-z]+)(\([-a-zA-Z0-9,]+\))\!\: ]]; then
-            echo "BREAKING_TITLE=true" >> "$GITHUB_OUTPUT"
+            echo "BREAKING_TITLE=true" | tee -a "$GITHUB_OUTPUT"
           fi
           if [[ "$DESCRIPTION" =~ "BREAKING CHANGE" ]]; then
-            echo "BREAKING_DESCRIPTION=true" >> "$GITHUB_OUTPUT"
+            echo "BREAKING_DESCRIPTION=true" | tee -a "$GITHUB_OUTPUT"
           fi
       - name: Need to check for breaking changes
         id: check-for-breaking-changes
@@ -144,7 +144,14 @@ jobs:
       - name: 'Run backend tests'
         if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
         working-directory: .
-        run: ./scripts/test.backend.sh -- --ignored candid
+        run: |
+          ./scripts/test.backend.sh -- --ignored candid || {
+            echo "The backend API is incompatible with production."
+            echo "If this is intentional, please use the conventional commit convention for indicating a breaking change in this PR."
+            echo "E.g. title: feat(backend)!: Change the API to..."
+            echo "     body: BREAKING CHANGE: The backend API is now incompatible with production."
+            exit 1
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
   may-merge:
     needs:
