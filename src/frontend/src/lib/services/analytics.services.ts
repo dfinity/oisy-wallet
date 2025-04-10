@@ -35,11 +35,11 @@ export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
 	 */
 	if (PLAUSIBLE_ENABLED && nonNullish(plausibleTracker)) {
 		plausibleTracker.trackEvent(name, { props: metadata });
-	}
 
-	/**
-	 * TODO: Remove `Promise.resolve()` and `async` in the future once we no longer need to use `await` with this function.
-	 * when we eliminate the need for `await` on this function.
-	 */
-	await Promise.resolve();
+		/**
+		 * TODO: Remove `Promise.resolve()` and `async` in the future once we no longer need to use `await` with this function.
+		 * when we eliminate the need for `await` on this function.
+		 */
+		await Promise.resolve();
+	}
 };
