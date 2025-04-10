@@ -3,14 +3,11 @@ import {
 	PostMessageCreatePowChallengeResponseSchema
 } from '$lib/schema/post-message.schema';
 import { solvePowChallenge } from '$lib/services/pow.services';
-import type {
-	PostMessageAllowSigningResponse,
-	PostMessageCreatePowChallengeResponse
-} from '$lib/types/post-message';
+import type { PostMessageAllowSigningResponse, PostMessageCreatePowChallengeResponse } from '$lib/types/post-message';
 import { routeWorkerResponse, sendMessageRequest } from '$lib/utils/worker.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-export const SCHEDULER_INTERVAL = 60_000;
+export const SCHEDULER_INTERVAL = 120_000;
 // in ms, can be changed dynamically by sending message setPowThrottle
 let _throttleRate = 20;
 
@@ -31,6 +28,8 @@ export const onPowMessage = (event: MessageEvent) => {
 			return;
 		case 'startPowTimer':
 			startPowTimer();
+			// execute the first call immediately
+			allowSigning();
 			return;
 		case 'setPowThrottle':
 			if (event.data?.throttleRate !== undefined && event.data.throttleRate !== 0) {
