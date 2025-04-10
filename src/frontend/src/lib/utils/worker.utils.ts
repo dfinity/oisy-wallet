@@ -66,11 +66,11 @@ export function routeWorkerResponse(event: MessageEvent): boolean {
  * Sends a typed request to the worker and awaits the fully typed response envelope (T).
  */
 export function sendMessageRequest<T>({
-																				worker,
-																				msg,
-																				data,
-																				schema
-																			}: {
+	worker,
+	msg,
+	data,
+	schema
+}: {
 	worker: Worker;
 	msg: string;
 	data: object;
