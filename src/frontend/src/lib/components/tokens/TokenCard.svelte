@@ -29,7 +29,7 @@
 				{data}
 				badge={nonNullish(data.tokenCount)
 					? { type: 'tokenCount', count: data.tokenCount }
-					: { type: 'network', blackAndWhite: true }}
+					: { type: 'network' }}
 				color="white"
 				logoSize={asNetwork ? 'xs' : 'lg'}
 			/>
