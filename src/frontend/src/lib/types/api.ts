@@ -1,7 +1,6 @@
 import type {
 	AddUserCredentialError,
 	AllowSigningError,
-	AllowSigningRequest,
 	AllowSigningResponse,
 	BitcoinNetwork,
 	CreateChallengeError,
@@ -104,8 +103,4 @@ export interface KongSwapParams {
 	receiveAddress?: Address;
 	sourceToken: Token;
 	payTransactionId?: TxId;
-}
-
-export interface AllowSigningParams {
-	request?: AllowSigningRequest;
 }
