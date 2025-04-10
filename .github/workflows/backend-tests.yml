@@ -147,7 +147,8 @@ jobs:
         run: |
           ./scripts/test.backend.sh -- --ignored candid || {
             echo "The backend API is incompatible with production."
-            echo "If this is intentional, please use the conventional commit convention for indicating a breaking change in this PR."
+            echo "If this is intentional, please use the conventional commit convention for indicating"
+            echo "a breaking change in this PR, then push another commit to re-run this job."
             echo "E.g. title: feat(backend)!: Change the API to..."
             echo "     body: BREAKING CHANGE: The backend API is now incompatible with production."
             exit 1
