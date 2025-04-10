@@ -625,7 +625,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = await allowSigning({ nonce: BigInt(Date.now()) });
+			const res = await allowSigning({ nonce: BigInt(0) });
 
 			expect(service.allow_signing).toHaveBeenCalledTimes(1);
 			expect(res).toBeDefined();
@@ -659,7 +659,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({ nonce: BigInt(Date.now()) })).rejects.toThrow(
+			await expect(allowSigning({ nonce: BigInt(0) })).rejects.toThrow(
 				mapIcrc2ApproveError(response.Err.ApproveError)
 			);
 		});
@@ -673,7 +673,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({ nonce: BigInt(Date.now()) })).rejects.toThrow(
+			await expect(allowSigning({ nonce: BigInt(0) })).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
