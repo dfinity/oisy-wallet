@@ -50,7 +50,7 @@ const tokenGroup: TokenUiGroup = {
 const tokenGroupUi: TokenUiOrGroupUi = { group: tokenGroup };
 const tokenUi: TokenUiOrGroupUi = { token: token1 };
 
-describe('Token Utils', () => {
+describe('Token List Utils', () => {
 	describe('getFilteredTokenList', () => {
 		it('should return all tokens when filter is an empty string', () => {
 			const list: TokenUiOrGroupUi[] = [tokenUi, tokenGroupUi];
