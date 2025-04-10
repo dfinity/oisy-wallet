@@ -25,12 +25,14 @@ export const mapHeaderData = ({
 		tokenCount: tokens.length
 	};
 
-	if (tokens[0].symbol.indexOf('ck') === 0 && tokens[1]) {
+	// if the native tokens network is disabled, we dont want to display ck icon, symbol and name
+	const nonCkTokens = tokens.filter((token) => token.symbol.indexOf('ck') < 0);
+	if (tokens[0].symbol.indexOf('ck') === 0 && nonCkTokens.length > 0) {
 		return {
 			...ret,
-			symbol: tokens[1].symbol,
-			icon: tokens[1].icon,
-			name: tokens[1].name
+			symbol: nonCkTokens[0].symbol,
+			icon: nonCkTokens[0].icon,
+			name: nonCkTokens[0].name
 		};
 	}
 
