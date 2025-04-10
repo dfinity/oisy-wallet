@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { z } from 'zod';
 import { routeWorkerResponse, sendMessageRequest } from '$lib/utils/worker.utils';
+import { z } from 'zod';
 
 describe('worker.utils.ts', () => {
 	describe('routeWorkerResponse', () => {
@@ -67,7 +67,9 @@ describe('worker.utils.ts', () => {
 
 		beforeEach(() => {
 			// Mocking crypto.randomUUID with a valid UUID format
-			vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue('123e4567-e89b-12d3-a456-426614174000');
+			vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue(
+				'123e4567-e89b-12d3-a456-426614174000'
+			);
 		});
 
 		afterEach(() => {
