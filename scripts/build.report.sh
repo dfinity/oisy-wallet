@@ -15,5 +15,5 @@ ic-wasm <(gunzip <"./out/${CANISTER}.wasm.gz") metadata >out/metadata_keys.txt
   printf "\n%s\n" "$CANISTER metadata keys:"
   cat out/metadata_keys.txt
   printf "\n%s\n\n" "To see metadata, use ic-wasm.  For example, to see the git tags:" " ic-wasm <(gunzip < ./out/$CANISTER.wasm.gz) metadata git:tags"
-  ic-wasm <(gunzip < "./out/$CANISTER.wasm.gz") metadata git:tags # Should match the text in the line above.
+  ic-wasm <(gunzip <"./out/$CANISTER.wasm.gz") metadata git:tags # Should match the text in the line above.
 } | tee -a out/report.txt
