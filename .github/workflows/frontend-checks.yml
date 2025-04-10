@@ -100,29 +100,7 @@ jobs:
       contents: read
 
     steps:
-      - name: Create GitHub App Token
-        uses: actions/create-github-app-token@3ff1caaa28b64c9cc276ce0a02e2ff584f3900c5 # v2.0.2
-        continue-on-error: true
-        id: app-token
-        with:
-          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
-          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
-      - name: Check if commits can be added
-        id: check_can_add_commit
-        run: |
-          echo "can_add_commit=$CAN_ADD_COMMIT" >> $GITHUB_OUTPUT
-        env:
-          CAN_ADD_COMMIT: ${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}
-      - name: Checkout for pull request
-        if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ steps.app-token.outputs.token }}
-          persist-credentials: false
       - name: Checkout
-        if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
@@ -137,28 +115,6 @@ jobs:
           name: vitest-coverage-report
           path: coverage/
           retention-days: 3
-      - name: Check for Coverage Thresholds Changes
-        id: check_changes
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "changes_detected=true" >> $GITHUB_OUTPUT
-          else
-            echo "changes_detected=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Format
-        if: steps.check_changes.outputs.changes_detected == 'true'
-        run: npm run format
-      - name: Commit coverage thresholds
-        if: steps.check_changes.outputs.changes_detected == 'true'
-        uses: ./.github/actions/add-and-commit
-        with:
-          message: '🤖 Update coverage threshold changes'
-          token: ${{ steps.app-token.outputs.token }}
-      - name: Fail for coverage issues without personal access token
-        if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
-        run: |
-          echo "Coverage threshold changes are needed but couldn't be committed because the personal access token isn't available or this isn't a pull request."
-          exit 1
 
   config:
     runs-on: ubuntu-24.04
