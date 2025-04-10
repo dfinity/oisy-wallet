@@ -75,7 +75,7 @@
 			aria-label="todo"
 			on:keydown={() => {}}
 			in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
-			out:fade={{ ...SLIDE_PARAMS }}
+			out:fade={SLIDE_PARAMS }
 			class="input-field condensed absolute right-0 -mt-[11px] mr-[1px] flex w-full overflow-hidden transition-all duration-300 md:w-[250px]"
 			on:click|stopPropagation|preventDefault={() => {}}
 		>
