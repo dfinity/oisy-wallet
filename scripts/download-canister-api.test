@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+EXE="${0%.test}"
+DOWNLOAD_PATH="target/ic/candid/backend.ic.did"
+EXIT=0
+
+(
+    echo The help flag should document options
+    HELP="$("$EXE" --help)"
+
+    for option in "--network" "--canister" "--dir"; do
+        if ! grep -qw -- "$option" <<< "$HELP"; then
+            echo "FAILED: $option not documented in help"
+            exit 1
+        fi
+    done
+) || EXIT=1
+
+
+
+
+if (( EXIT == 0 ))
+then echo "PASSED TESTS IN $0"
+else 
+    echo "FAILED TESTS IN $0"
+    exit 1
+fi
