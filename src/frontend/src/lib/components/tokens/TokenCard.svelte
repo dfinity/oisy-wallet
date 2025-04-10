@@ -39,7 +39,9 @@
 		<span class:text-sm={condensed} slot="title">
 			{data.symbol}
 			{#if asNetwork}
-				{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
+				<span class="font-normal">
+					{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
+				</span>
 			{/if}
 		</span>
 
