@@ -11,7 +11,6 @@
 
 	export let data: CardData;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
-	export let condensed = false;
 	export let asNetwork = false;
 	export let hover = false;
 </script>
@@ -22,21 +21,21 @@
 		rounded={false}
 		testId={`${testIdPrefix}-${data.symbol}-${data.network.id.description}`}
 		on:click
-		{condensed}
+		condensed={asNetwork}
 		{hover}
 	>
-		<span class="flex" slot="logo" class:mr-2={!condensed}>
+		<span class="flex" slot="logo" class:mr-2={!asNetwork}>
 			<TokenLogo
 				{data}
 				badge={nonNullish(data.tokenCount)
 					? { type: 'tokenCount', count: data.tokenCount }
-					: { type: 'network', size: condensed ? 'xs' : 'base', blackAndWhite: true }}
+					: { type: 'network', blackAndWhite: true }}
 				color="white"
-				logoSize={condensed ? 'xs' : 'lg'}
+				logoSize={asNetwork ? 'xs' : 'lg'}
 			/>
 		</span>
 
-		<span class:text-sm={condensed} slot="title">
+		<span class:text-sm={asNetwork} slot="title">
 			{data.symbol}
 			{#if asNetwork}
 				<span class="font-normal">
@@ -45,17 +44,17 @@
 			{/if}
 		</span>
 
-		<span class:text-sm={condensed} slot="subtitle">
-			{#if !condensed}
+		<span class:text-sm={asNetwork} slot="subtitle">
+			{#if !asNetwork}
 				&nbsp;&middot;&nbsp;{data.name}
 			{/if}
 		</span>
 
-		<span class:text-sm={condensed} class="block min-w-12 text-nowrap" slot="title-end">
+		<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap" slot="title-end">
 			<TokenBalance {data} />
 		</span>
 
-		<span class:text-sm={condensed} slot="description">
+		<span class:text-sm={asNetwork} slot="description">
 			{#if data?.networks}
 				{#each [...new Set(data.networks.map((n) => n.name))] as network, index (network)}
 					{#if index !== 0}
@@ -63,12 +62,12 @@
 					{/if}
 					{network}
 				{/each}
-			{:else if !condensed}
+			{:else if !asNetwork}
 				{data.network.name}
 			{/if}
 		</span>
 
-		<span class:text-sm={condensed} class="block min-w-12 text-nowrap" slot="description-end">
+		<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap" slot="description-end">
 			<ExchangeTokenValue {data} />
 		</span>
 	</LogoButton>
