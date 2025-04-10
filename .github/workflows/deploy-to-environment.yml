@@ -328,6 +328,10 @@ jobs:
 
       - name: Deploy Backend to Environment
         run: |
+          {
+            echo "## Backend deployment"
+            scripts/build.report.sh
+          } >> "$GITHUB_STEP_SUMMARY"
           DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
           [[ "$FORCE_BACKEND" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
