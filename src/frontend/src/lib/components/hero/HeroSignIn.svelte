@@ -1,12 +1,9 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import type { Component } from 'svelte';
-	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import IconScanFace from '$lib/components/icons/lucide/IconScanFace.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
-	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -49,7 +46,3 @@
 
 	<ButtonAuthenticateWithLicense />
 </div>
-
-{#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
-	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
-{/if}
