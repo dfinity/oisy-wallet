@@ -703,14 +703,13 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
 /// Does not return any error
 #[query(guard = "may_read_user_data")]
 #[must_use]
-pub fn has_user_profile() -> bool {
+pub fn has_user_profile() -> HasUserProfileResponse {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     // candid does not support to directly return a bool
     HasUserProfileResponse {
         has_user_profile: user_profile::has_user_profile(stored_principal),
-    };
-    true
+    }
 }
 
 /// This function authorizes the caller to spend a specific
