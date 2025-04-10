@@ -159,8 +159,8 @@ export const allowSigning = async ({
 };
 
 export const allowSigningResult = async ({
-	request,
-	identity
+	identity,
+	...params
 }: CanisterApiFunctionParams<{
 	request?: AllowSigningRequest;
 }>): Promise<AllowSigningResult> => {
