@@ -167,7 +167,7 @@ export const allowSigningResult = async ({
 	const { allowSigningResult } = await backendCanister({ identity });
 
 	// Conditionally call allowSigning with request or provide default logic
-	return allowSigningResult(request ? { request } : {});
+	return allowSigningResult(params);
 };
 
 export const addUserHiddenDappId = async ({
