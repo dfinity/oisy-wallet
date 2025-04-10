@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-export interface TokenListStoreData {
+interface TokenListStoreData {
 	filter: string;
 }
 
