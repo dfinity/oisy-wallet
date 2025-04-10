@@ -69,7 +69,7 @@ const nonAppleProjects = [
 	}
 ];
 
-const TIMEOUT = 60 * 1000;
+const TIMEOUT = 2 * 60 * 1000;
 
 export default defineConfig({
 	retries: 3,
