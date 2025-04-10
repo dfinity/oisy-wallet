@@ -141,6 +141,12 @@ jobs:
         if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
+      - name: Download backend.wasm.gz
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        with:
+          name: backend.wasm.gz
+          path: .
+
       - name: 'Run backend tests'
         if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
         working-directory: .
