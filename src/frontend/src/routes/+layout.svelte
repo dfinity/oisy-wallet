@@ -13,7 +13,6 @@
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.contants';
 	import {
-		initAnalytics,
 		initPlausibleAnalytics,
 		trackEvent
 	} from '$lib/services/analytics.services';
@@ -39,7 +38,6 @@
 		 */
 		await Promise.allSettled([
 			syncAuthStore(),
-			initAnalytics(),
 			initPlausibleAnalytics(),
 			i18n.init()
 		]);
