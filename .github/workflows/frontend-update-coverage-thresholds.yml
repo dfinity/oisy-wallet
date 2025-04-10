@@ -54,7 +54,7 @@ jobs:
         if: steps.check_changes.outputs.changes_detected == 'true'
         run: git add vitest.config.ts
 
-      - name: Create Pull Request (if changes and on main)
+      - name: Create Pull Request
         if: steps.check_changes.outputs.changes_detected == 'true'
         uses: ./.github/actions/create-pr
         with:
