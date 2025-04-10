@@ -102,11 +102,7 @@
 					<div class="my-0.5 flex items-center justify-center">
 						{#if $erc20UserTokensInitialized && nonNullish($pageToken)}
 							<div in:fade>
-								<TokenLogo
-									data={$pageToken}
-									ring
-									badge={{ type: 'network', blackAndWhite: true }}
-								/>
+								<TokenLogo data={$pageToken} ring badge={{ type: 'network' }} />
 							</div>
 						{:else}
 							<SkeletonLogo size="small" />
