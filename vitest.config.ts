@@ -72,6 +72,7 @@ export default defineConfig(
 				exclude: [...coverageConfigDefaults.exclude, 'build', '.dfx', '**/.svelte-kit'],
 				// TODO: increase the thresholds slowly up to an acceptable 80% at least
 				thresholds: {
+					autoUpdate: true,
 					statements: 55,
 					branches: 55,
 					functions: 55,
