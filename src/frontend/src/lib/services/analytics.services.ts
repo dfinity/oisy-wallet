@@ -41,5 +41,5 @@ export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
 	 * TODO: Remove `Promise.resolve()` and `async` in the future once we no longer need to use `await` with this function.
 	 * when we eliminate the need for `await` on this function.
 	 */
-	return Promise.resolve();
+	await Promise.resolve();
 };
