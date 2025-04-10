@@ -10,7 +10,7 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
-	import { isHomePath, isTransactionsPath } from '$lib/utils/nav.utils';
+	import { isTokensPath, isTransactionsPath } from '$lib/utils/nav.utils';
 
 	export let testIdPrefix: string;
 
@@ -54,7 +54,7 @@
 	// reset search if not coming from home (switching networks) or transactions page
 	afterNavigate(({ from }) => {
 		const previousRoute = `${from?.route?.id}/`;
-		if (!isHomePath(previousRoute) && !isTransactionsPath(previousRoute)) {
+		if (!isTokensPath(previousRoute) && !isTransactionsPath(previousRoute)) {
 			tokenListStore.set({ filter: '' });
 			handleClose();
 		}
