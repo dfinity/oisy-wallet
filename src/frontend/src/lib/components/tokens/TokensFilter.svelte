@@ -7,10 +7,10 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
-	import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
+	import { isHomePath, isTransactionsPath } from '$lib/utils/nav.utils';
 
 	export let testIdPrefix: string;
 
@@ -54,10 +54,7 @@
 	// reset search if not coming from home (switching networks) or transactions page
 	afterNavigate(({ from }) => {
 		const previousRoute = `${from?.route?.id}/`;
-		if (
-			previousRoute !== `${ROUTE_ID_GROUP_APP}/` &&
-			previousRoute !== `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`
-		) {
+		if (!isHomePath(previousRoute) && !isTransactionsPath(previousRoute)) {
 			tokenListStore.set({ filter: '' });
 			handleClose();
 		}
