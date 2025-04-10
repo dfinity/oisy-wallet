@@ -1,5 +1,4 @@
 import AuthHelpIdentityForm from '$lib/components/auth/AuthHelpIdentityForm.svelte';
-import { TRACK_COUNT_LEGACY_SIGN_IN_CLICK } from '$lib/constants/analytics.contants';
 import { OISY_FIND_INTERNET_IDENTITY_URL } from '$lib/constants/oisy.constants';
 import {
 	HELP_AUTH_BACK_BUTTON,
@@ -8,7 +7,6 @@ import {
 	HELP_AUTH_LEARN_MORE_LINK,
 	HELP_AUTH_LEGACY_SIGN_IN_BUTTON
 } from '$lib/constants/test-ids.constants';
-import * as analytics from '$lib/services/analytics.services';
 import * as auth from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -58,7 +56,6 @@ describe('AuthHelpIdentityForm', () => {
 	it('should call correct function on button click', async () => {
 		const onBackMock = vi.fn();
 		const onDoneMock = vi.fn();
-		const analyticSpy = vi.spyOn(analytics, 'trackEvent');
 		const authSpy = vi.spyOn(auth, 'signIn');
 
 		const { container } = render(AuthHelpIdentityForm, {
@@ -70,7 +67,6 @@ describe('AuthHelpIdentityForm', () => {
 
 		expect(onBackMock).not.toHaveBeenCalled();
 		expect(onDoneMock).not.toHaveBeenCalled();
-		expect(analyticSpy).not.toHaveBeenCalled();
 		expect(authSpy).not.toHaveBeenCalled();
 
 		const backButton: HTMLButtonElement | null = container.querySelector(backButtonSelector);
@@ -92,7 +88,6 @@ describe('AuthHelpIdentityForm', () => {
 		await waitFor(() => {
 			signInButton?.click();
 		});
-		expect(analyticSpy).toHaveBeenCalledWith({ name: TRACK_COUNT_LEGACY_SIGN_IN_CLICK });
 		expect(onDoneMock).toHaveBeenCalledTimes(2);
 		expect(authSpy).toHaveBeenCalledWith({ domain: 'ic0.app' });
 	});
