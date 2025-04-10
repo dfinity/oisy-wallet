@@ -5,8 +5,8 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TOKEN_CARD, type TOKEN_GROUP } from '$lib/constants/test-ids.constants';
-	import type { CardData } from '$lib/types/token-card';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
 	export let data: CardData;
