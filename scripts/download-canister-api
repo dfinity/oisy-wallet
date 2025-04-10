@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SOURCE_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+
+print_help() {
+  cat <<-EOF
+	Downloads a deployed canister API.
+	EOF
+}
+# Source the clap.bash file ---------------------------------------------------
+source "$SOURCE_DIR/clap.bash"
+# Define options
+clap.define short=n long=network desc="dfx network to use" variable=DFX_NETWORK default="local"
+clap.define short=c long=canister desc="The canister name" variable=CANISTER default="backend"
+clap.define short=d long=dir desc="The output directory" variable=DID_DIR default="target/ic/candid"
+# Source the output file ----------------------------------------------------------
+source "$(clap.build)"
+
+# Get the deployed commit
+DEPLOYED_COMMIT="$(dfx canister metadata "$CANISTER" git:commit --network "$DFX_NETWORK")"
+
+# Download the did file for that commit, if we don't have it already
+# Note: A quick test showed download the candid taking 5 seconds, while getting the commit took under a second,
+# so some simple caching pays off.
+DID_FILE="$DID_DIR/$CANISTER.$DEPLOYED_COMMIT.did"
+mkdir -p "$DID_DIR"
+test -e "$DID_FILE" || dfx canister metadata "$CANISTER" candid:service --network "$DFX_NETWORK" >"$DID_FILE"
+
+# Create a symlink to the did file
+DID_LINK="$DID_DIR/$CANISTER.$DFX_NETWORK.did"
+rm -f "$DID_LINK"
+ln -s "$(basename "$DID_FILE")" "$DID_LINK"
+
+echo "Downloaded $DFX_NETWORK $CANISTER API to $DID_LINK"
