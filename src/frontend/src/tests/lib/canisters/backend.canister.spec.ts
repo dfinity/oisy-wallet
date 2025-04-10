@@ -33,8 +33,8 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 
 describe('backend.canister', () => {
 	const createBackendCanister = ({
-		serviceOverride
-	}: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
+																	 serviceOverride
+																 }: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
 		BackendCanister.create({
 			canisterId: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
 			identity: mockIdentity,
@@ -625,7 +625,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = await allowSigning({});
+			const res = await allowSigning({ nonce: BigInt(Date.now()) });
 
 			expect(service.allow_signing).toHaveBeenCalledTimes(1);
 			expect(res).toBeDefined();
@@ -641,7 +641,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = allowSigning({});
+			const res = allowSigning({ nonce: BigInt(0) });
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
@@ -659,7 +659,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(
+			await expect(allowSigning({ nonce: BigInt(Date.now()) })).rejects.toThrow(
 				mapIcrc2ApproveError(response.Err.ApproveError)
 			);
 		});
@@ -673,7 +673,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(
+			await expect(allowSigning({ nonce: BigInt(Date.now()) })).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -688,7 +688,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(new CanisterInternalError(errorMsg));
+			await expect(allowSigning({ nonce: BigInt(0) })).rejects.toThrow(new CanisterInternalError(errorMsg));
 		});
 
 		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
@@ -700,7 +700,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(
+			await expect(allowSigning({ nonce: BigInt(0) })).rejects.toThrow(
 				new CanisterInternalError('Unknown AllowSigningError')
 			);
 		});
