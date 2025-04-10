@@ -451,7 +451,7 @@ service : (Arg) -> {
   get_canister_status : () -> (CanisterStatusResultV2);
   get_snapshot : () -> (opt UserSnapshot) query;
   get_user_profile : () -> (Result_7) query;
-  has_user_profile : () -> (HasUserProfileResponse) query;
+  has_user_profile : () -> (bool) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_creation_timestamps : (ListUsersRequest) -> (
