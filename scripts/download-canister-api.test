@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+EXE="${0%.test}"
+DOWNLOAD_DIR="target/ic/candid"
+IC_DOWNLOAD_PATH="$DOWNLOAD_DIR/backend.ic.did"
+EXIT=0
+
+(
+  echo The help flag should document options
+  HELP="$("$EXE" --help)"
+
+  for term in "--network" "--canister" "--dir" "$DOWNLOAD_DIR"; do
+    if ! grep -qw -- "$term" <<<"$HELP"; then
+      echo "FAILED: $term not documented in help"
+      exit 1
+    fi
+  done
+) || EXIT=1
+
+(
+  echo "The command should download a did file"
+  "$EXE" --canister backend --network ic --dir "$DOWNLOAD_DIR"
+  test -f "$IC_DOWNLOAD_PATH"
+) || EXIT=1
+
+if ((EXIT == 0)); then
+  echo "PASSED TESTS IN $0"
+else
+  echo "FAILED TESTS IN $0"
+  exit 1
+fi
