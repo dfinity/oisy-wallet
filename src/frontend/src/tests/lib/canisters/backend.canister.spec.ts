@@ -33,8 +33,8 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 
 describe('backend.canister', () => {
 	const createBackendCanister = ({
-																	 serviceOverride
-																 }: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
+		serviceOverride
+	}: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
 		BackendCanister.create({
 			canisterId: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
 			identity: mockIdentity,
@@ -688,7 +688,9 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({ nonce: BigInt(0) })).rejects.toThrow(new CanisterInternalError(errorMsg));
+			await expect(allowSigning({ nonce: BigInt(0) })).rejects.toThrow(
+				new CanisterInternalError(errorMsg)
+			);
 		});
 
 		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
