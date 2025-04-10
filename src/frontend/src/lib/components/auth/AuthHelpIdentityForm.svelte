@@ -49,7 +49,7 @@
 			</p>
 			<p>
 				<Button link on:click={onLegacySignIn} testId={HELP_AUTH_LEGACY_SIGN_IN_BUTTON}
-				>{$i18n.auth.help.text.identity_legacy_sign_in}</Button
+					>{$i18n.auth.help.text.identity_legacy_sign_in}</Button
 				>
 			</p>
 			<p class="mb-0">
