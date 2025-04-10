@@ -10,7 +10,7 @@
 	export let data: CardData;
 	export let color: 'off-white' | 'white' = 'off-white';
 	export let badge:
-		| { type: 'network'; blackAndWhite?: boolean }
+		| { type: 'network'; size?: 'base' | 'xs'; blackAndWhite?: boolean }
 		| { type: 'tokenCount'; count: number }
 		| { type: 'icon'; icon: Component; ariaLabel: string }
 		| undefined = undefined;
@@ -44,7 +44,12 @@
 			{badge.count}
 		</span>
 	{:else if badge?.type === 'network'}
-		<div class="absolute -bottom-1 -right-1">
+		<div
+			class="absolute -bottom-1 -right-1"
+			class:scale-60={badge?.size === 'xs'}
+			class:-right-1.75={badge?.size === 'xs'}
+			class:-bottom-1.5={badge?.size === 'xs'}
+		>
 			<NetworkLogo
 				{network}
 				blackAndWhite={badge.blackAndWhite}

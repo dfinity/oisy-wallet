@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TOKEN_CARD, type TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import type { CardData } from '$lib/types/token-card';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
 	export let data: CardData;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
@@ -25,24 +26,21 @@
 		{hover}
 	>
 		<span class="flex" slot="logo" class:mr-2={!condensed}>
-			{#if asNetwork}
-				<NetworkLogo network={data.network} size={condensed ? 'xs' : 'lg'} blackAndWhite />
-			{:else}
-				<TokenLogo
-					{data}
-					badge={nonNullish(data.tokenCount)
-						? { type: 'tokenCount', count: data.tokenCount }
-						: !condensed
-							? { type: 'network', blackAndWhite: true }
-							: undefined}
-					color="white"
-					logoSize={condensed ? 'xs' : 'lg'}
-				/>
-			{/if}
+			<TokenLogo
+				{data}
+				badge={nonNullish(data.tokenCount)
+					? { type: 'tokenCount', count: data.tokenCount }
+					: { type: 'network', size: condensed ? 'xs' : 'base', blackAndWhite: true }}
+				color="white"
+				logoSize={condensed ? 'xs' : 'lg'}
+			/>
 		</span>
 
 		<span class:text-sm={condensed} slot="title">
-			{asNetwork ? data.network.name : data.symbol}
+			{data.symbol}
+			{#if asNetwork}
+				{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
+			{/if}
 		</span>
 
 		<span class:text-sm={condensed} slot="subtitle">

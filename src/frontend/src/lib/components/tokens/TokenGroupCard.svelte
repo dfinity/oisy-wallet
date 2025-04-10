@@ -96,7 +96,7 @@
 						data={token}
 						condensed
 						on:click={() => goto(transactionsUrl({ token }))}
-						asNetwork={!isCkToken(token)}
+						asNetwork
 					/>
 				</div>
 			{/each}
