@@ -145,6 +145,9 @@ jobs:
           else
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
+      - name: Format
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        run: npm run format
       - name: Commit coverage thresholds
         if: steps.check_changes.outputs.changes_detected == 'true'
         uses: ./.github/actions/add-and-commit
