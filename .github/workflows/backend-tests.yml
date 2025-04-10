@@ -151,6 +151,7 @@ jobs:
             echo "a breaking change in this PR, then push another commit to re-run this job."
             echo "E.g. title: feat(backend)!: Change the API to..."
             echo "     body: BREAKING CHANGE: The backend API is now incompatible with production."
+            echo "     git commit --allow-empty -m 'I really want breaking changes in the API' && git push"
             exit 1
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
