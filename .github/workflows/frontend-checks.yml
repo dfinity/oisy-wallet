@@ -152,7 +152,7 @@ jobs:
         if: steps.check_changes.outputs.changes_detected == 'true'
         uses: ./.github/actions/add-and-commit
         with:
-          message: '🤖 Apply coverage threshold changes'
+          message: '🤖 Update coverage threshold changes'
           token: ${{ steps.app-token.outputs.token }}
       - name: Fail for coverage issues without personal access token
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
