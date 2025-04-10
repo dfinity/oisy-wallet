@@ -141,8 +141,6 @@ jobs:
         working-directory: .
         run: ./scripts/test.backend.sh -- --ignored candid
 
-
-
   may-merge:
     needs: ['tests']
     if: ${{ always() }}
