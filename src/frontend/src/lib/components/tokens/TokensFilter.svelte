@@ -89,14 +89,14 @@
 			/>
 			{#if $tokenListStore.filter !== ''}
 				<div
-					class="top-4.5 transition-bg duration-250 absolute right-12 bg-primary"
+					class="transition-bg duration-250 top-3.25 absolute right-12 bg-primary"
 					transition:fade
 				>
-					<button
-						aria-label={$i18n.core.text.clear_filter}
-						class="p-1 text-tertiary"
+					<ButtonIcon
+						ariaLabel={$i18n.core.text.clear_filter}
+						styleClass="text-tertiary"
 						on:click={handleClear}
-						data-tid={`${testIdPrefix}-clear-btn`}><IconClose size="18" /></button
+						testId={`${testIdPrefix}-clear-btn`}><IconClose slot="icon" size="18" /></ButtonIcon
 					>
 				</div>
 			{/if}
