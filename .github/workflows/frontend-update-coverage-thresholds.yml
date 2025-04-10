@@ -1,7 +1,6 @@
-name: Update Test Coverage Thresholds for Frontend
+name: Update Frontend Test Coverage Thresholds
 
 on:
-  pull_request:
   push:
     branches:
       - main
