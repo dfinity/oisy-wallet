@@ -350,8 +350,8 @@
 		"indexCanisterId": "ldv2p-dqaaa-aaaaq-aadga-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "ICPCC DAO LLC",
-			"symbol": "CONF",
+			"name": "SWAMPDAO",
+			"symbol": "SWAMP",
 			"fee": {
 				"__bigint__": "10000"
 			},
