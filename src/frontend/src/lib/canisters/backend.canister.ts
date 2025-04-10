@@ -197,7 +197,7 @@ export class BackendCanister extends Canister<BackendService> {
 		allowSigningRequest: { request?: AllowSigningRequest } = {}
 	): Promise<AllowSigningResult> => {
 		const { allow_signing } = this.caller({ certified: true });
-		return await allow_signing(allowSigningRequest.request ? [allowSigningRequest.request] : []);
+		return await allow_signing(toNullable(allowSigningRequest.request));
 	};
 
 	createPowChallengeResult = (): Promise<CreateChallengeResult> => {
