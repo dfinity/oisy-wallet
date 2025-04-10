@@ -283,12 +283,9 @@ jobs:
   may-merge-e2e:
     if: always()
     needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, macos-14]
     steps:
       - name: Cleared for merging
         run: |
