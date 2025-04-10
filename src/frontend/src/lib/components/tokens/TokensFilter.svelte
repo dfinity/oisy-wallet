@@ -11,11 +11,15 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
+
 	export let testIdPrefix: string;
+
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 	let inputElement: HTMLInputElement | undefined;
-	let inputValue = '';
+	let inputValue: string;
+	$: inputValue = $tokenListStore.filter;
+
 	const handleOpen = (e?: Event) => {
 		e?.stopPropagation();
 		if (visible) {
@@ -26,6 +30,7 @@
 			document.body.addEventListener('click', handleClose);
 		}
 	};
+
 	const handleClose = () => {
 		if ($tokenListStore.filter !== '') {
 			return;
@@ -33,16 +38,19 @@
 		visible = false;
 		document.body.removeEventListener('click', handleClose);
 	};
+
 	const handleClear = () => {
 		tokenListStore.set({ filter: '' });
 		inputElement?.focus();
 	};
+
 	// open search if not empty on mount to avoid confusion
 	onMount(() => {
 		if ($tokenListStore.filter !== '') {
 			handleOpen();
 		}
 	});
+
 	// reset search if not coming from home (switching networks) or transactions page
 	afterNavigate(({ from }) => {
 		const previousRoute = `${from?.route?.id}/`;
@@ -54,6 +62,8 @@
 			handleClose();
 		}
 	});
+
+	// update store on inputValue change
 	$: tokenListStore.set({ filter: inputValue });
 </script>
 
@@ -92,6 +102,7 @@
 			{/if}
 		</div>
 	{/if}
+
 	<ButtonIcon
 		bind:button
 		on:click={handleOpen}
