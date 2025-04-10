@@ -33,8 +33,8 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 
 describe('backend.canister', () => {
 	const createBackendCanister = ({
-																	 serviceOverride
-																 }: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
+		serviceOverride
+	}: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
 		BackendCanister.create({
 			canisterId: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
 			identity: mockIdentity,
@@ -706,9 +706,7 @@ describe('backend.canister', () => {
 		});
 	});
 
-
 	describe('createPowChallenge', () => {
-
 		const mockPowChallengeSuccess: CreateChallengeResponse = {
 			start_timestamp_ms: 1_644_001_000_000n,
 			expiry_timestamp_ms: 1_644_001_001_200n,
@@ -730,9 +728,7 @@ describe('backend.canister', () => {
 			} else {
 				throw new Error(`Unexpected error: ${JSON.stringify(result.Err)}`);
 			}
-
 		});
-
 
 		test('should handle challenge already in progress error', async () => {
 			// Mock the backend service response to simulate ChallengeInProgress error
@@ -747,7 +743,6 @@ describe('backend.canister', () => {
 			// Validate the expected error response
 			expect(result).toEqual({ Err: { ChallengeInProgress: null } });
 		});
-
 
 		test('should handle randomness generation error', async () => {
 			// Mock the backend service response to simulate RandomnessError
@@ -782,7 +777,9 @@ describe('backend.canister', () => {
 
 		it('should handle unexpected errors in result', async () => {
 			// Mock backend service to simulate an unexpected error
-			service.create_pow_challenge.mockResolvedValue({ Err: { Other: 'Unexpected error occurred.' } });
+			service.create_pow_challenge.mockResolvedValue({
+				Err: { Other: 'Unexpected error occurred.' }
+			});
 
 			const backendCanister = await createBackendCanister({ serviceOverride: service });
 
@@ -794,9 +791,7 @@ describe('backend.canister', () => {
 			// Ensure the mock has been called
 			expect(service.create_pow_challenge).toHaveBeenCalledTimes(1);
 		});
-
 	});
-
 
 	describe('addUserHiddenDappId', () => {
 		it('should add user hidden dapp id', async () => {
