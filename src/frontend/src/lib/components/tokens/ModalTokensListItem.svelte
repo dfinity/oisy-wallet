@@ -32,7 +32,7 @@
 	</svelte:fragment>
 
 	<div class="mr-2" slot="logo">
-		<TokenLogo {data} color="white" badge={{ type: 'network', blackAndWhite: true }} {logoSize} />
+		<TokenLogo {data} color="white" badge={{ type: 'network' }} {logoSize} />
 	</div>
 
 	<TokenBalance {data} slot="title-end" />

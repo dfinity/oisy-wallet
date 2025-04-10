@@ -10,7 +10,7 @@
 	export let data: CardData;
 	export let color: 'off-white' | 'white' = 'off-white';
 	export let badge:
-		| { type: 'network'; blackAndWhite?: boolean }
+		| { type: 'network' }
 		| { type: 'tokenCount'; count: number }
 		| { type: 'icon'; icon: Component; ariaLabel: string }
 		| undefined = undefined;
@@ -45,12 +45,7 @@
 		</span>
 	{:else if badge?.type === 'network'}
 		<div class="absolute -bottom-1 -right-1">
-			<NetworkLogo
-				{network}
-				blackAndWhite={badge.blackAndWhite}
-				{color}
-				testId={`network-${badgeTestId}`}
-			/>
+			<NetworkLogo {network} {color} testId={`network-${badgeTestId}`} />
 		</div>
 	{:else if badge?.type === 'icon'}
 		<!-- TODO: use new mapping color when merged -->
