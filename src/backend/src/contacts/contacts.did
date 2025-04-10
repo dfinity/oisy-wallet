@@ -1,0 +1,62 @@
+type ContactNetwork = variant {
+    Ethereum;
+    Bitcoin;
+    InternetComputer;
+    Solana;
+    Base;
+    BNB;
+    Avalanche;
+    Polygon;
+};
+
+type Contact = record {
+    address: text;
+    alias: text;
+    network: ContactNetwork;
+    notes: opt text;
+    group: opt text;
+    is_favorite: bool;
+    last_used: opt int;
+};
+
+type AddContactInput = record {
+    contact: Contact;
+};
+
+type UpdateContactInput = record {
+    address: text;
+    network: ContactNetwork;
+    alias: text;
+    notes: opt text;
+    group: opt text;
+    isFavorite: bool;
+};
+
+type DeleteContactInput = record {
+    address: text;
+    network: ContactNetwork;
+};
+
+type ToggleFavoriteInput = record {
+    address: text;
+    network: ContactNetwork;
+    isFavorite: bool;
+};
+
+type ContactError = variant {
+    NotFound;
+    AlreadyExists;
+    InvalidAddress;
+    Unauthorized;
+    LimitExceeded;
+    Other: text;
+};
+
+service : {
+    // Contact management
+    "add_contact": (AddContactInput) -> (variant { Ok; Err: ContactError });
+    "update_contact": (UpdateContactInput) -> (variant { Ok; Err: ContactError });
+    "delete_contact": (DeleteContactInput) -> (variant { Ok; Err: ContactError });
+    "toggle_contact_favorite": (ToggleFavoriteInput) -> (variant { Ok; Err: ContactError });
+    "get_contacts": () -> (vec Contact) query;
+}
