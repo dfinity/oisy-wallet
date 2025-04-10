@@ -4,10 +4,6 @@ import {
 	BTC_REGTEST_EXPLORER_URL,
 	BTC_TESTNET_EXPLORER_URL
 } from '$env/explorers.env';
-import bitcoin from '$icp/assets/bitcoin.svg';
-import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
-import bitcoinMainnetBW from '$lib/assets/networks/bitcoin-mainnet-bw.svg';
-import bitcoinTestnetBW from '$lib/assets/networks/bitcoin-testnet-bw.svg';
 import bitcoinMainnetIconDark from '$lib/assets/networks/dark/bitcoin-mainnet.svg';
 import bitcoinRegtestIconDark from '$lib/assets/networks/dark/bitcoin-regtest.svg';
 import bitcoinTestnetIconDark from '$lib/assets/networks/dark/bitcoin-testnet.svg';
@@ -31,8 +27,6 @@ export const BTC_MAINNET_NETWORK: BitcoinNetwork = {
 	id: BTC_MAINNET_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Bitcoin',
-	icon: bitcoin,
-	iconBW: bitcoinMainnetBW,
 	iconLight: bitcoinMainnetIconLight,
 	iconDark: bitcoinMainnetIconDark,
 	explorerUrl: BTC_MAINNET_EXPLORER_URL,
@@ -48,8 +42,6 @@ export const BTC_TESTNET_NETWORK: BitcoinNetwork = {
 	env: 'testnet',
 	name: 'Bitcoin',
 	explorerUrl: BTC_TESTNET_EXPLORER_URL,
-	icon: bitcoinTestnet,
-	iconBW: bitcoinTestnetBW,
 	iconLight: bitcoinTestnetIconLight,
 	iconDark: bitcoinTestnetIconDark
 };
