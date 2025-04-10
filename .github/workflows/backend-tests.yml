@@ -101,6 +101,11 @@ jobs:
         with:
           persist-credentials: false
       - name: 'Run when backend candid interface changes'
+        # Goal: Run only when the backend candid interface changes, otherwise
+        # every PR after a breaking change will also have to be marked as a breaking change
+        # until deployment to production.  As it is, any PRs that change the backend candid
+        # will still need to be announced as a breaking change, but that is probably acceptable,
+        # and it makes it clear if the API is revised to no longer be breaking.
         uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: interface-changed
         with:
