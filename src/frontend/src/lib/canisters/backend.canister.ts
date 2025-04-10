@@ -186,10 +186,12 @@ export class BackendCanister extends Canister<BackendService> {
 			allowSigningRequest.request ? [allowSigningRequest.request] : []
 		);
 
-		if ('Err' in result) {
-			throw mapAllowSigningError(result.Err);
+		if ('Ok' in result) {
+			const { Ok } = result;
+			return Ok;
 		}
-		return result.Ok;
+
+		throw mapAllowSigningError(result.Err);
 	};
 
 	// directly returning result and not the response
