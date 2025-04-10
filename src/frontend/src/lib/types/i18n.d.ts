@@ -93,6 +93,7 @@ interface I18nAuth {
 	};
 	help: {
 		text: {
+			title: string;
 			description: string;
 			subtitle: string;
 			lost_identity: string;
@@ -111,6 +112,8 @@ interface I18nAuth {
 			other_docs: string;
 			other_private_key: string;
 			other_asset_control: string;
+			need_help: string;
+			sign_in: string;
 		};
 		alt: {
 			internet_identity: string;
@@ -119,6 +122,7 @@ interface I18nAuth {
 			other_docs: string;
 			other_private_key: string;
 			other_asset_control: string;
+			sign_in: string;
 		};
 	};
 }
@@ -567,6 +571,7 @@ interface I18nTokens {
 		chain_key: string;
 		show_more_networks: string;
 		hide_more_networks: string;
+		on_network: string;
 	};
 	details: {
 		title: string;
