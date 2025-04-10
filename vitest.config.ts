@@ -72,10 +72,10 @@ export default defineConfig(
 				exclude: [...coverageConfigDefaults.exclude, 'build', '.dfx', '**/.svelte-kit'],
 				thresholds: {
 					autoUpdate: true,
-					statements: 55,
-					branches: 55,
-					functions: 55,
-					lines: 55
+					statements: 57.5,
+					branches: 81.9,
+					functions: 71.31,
+					lines: 57.5
 				}
 			}
 		}
