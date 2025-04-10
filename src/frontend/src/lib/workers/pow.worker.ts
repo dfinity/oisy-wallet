@@ -3,7 +3,10 @@ import {
 	PostMessageCreatePowChallengeResponseSchema
 } from '$lib/schema/post-message.schema';
 import { solvePowChallenge } from '$lib/services/pow.services';
-import type { PostMessageAllowSigningResponse, PostMessageCreatePowChallengeResponse } from '$lib/types/post-message';
+import type {
+	PostMessageAllowSigningResponse,
+	PostMessageCreatePowChallengeResponse
+} from '$lib/types/post-message';
 import { routeWorkerResponse, sendMessageRequest } from '$lib/utils/worker.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 

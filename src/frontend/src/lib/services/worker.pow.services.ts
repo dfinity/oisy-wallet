@@ -26,9 +26,9 @@ import type { ZodType } from 'zod';
  * @throws Will throw an error if the validation fails.
  */
 function mapCanisterResponse<T>({
-																	response,
-																	schema
-																}: {
+	response,
+	schema
+}: {
 	response: { Ok?: T; Err?: unknown }; // Replace `any` with `unknown`
 	schema: ZodType<T>;
 }): { Ok: T } | { Err: string } {
