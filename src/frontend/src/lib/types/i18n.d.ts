@@ -573,6 +573,7 @@ interface I18nTokens {
 		chain_key: string;
 		show_more_networks: string;
 		hide_more_networks: string;
+		on_network: string;
 	};
 	details: {
 		title: string;
