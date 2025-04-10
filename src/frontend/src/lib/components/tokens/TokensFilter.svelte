@@ -17,7 +17,8 @@
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 	let inputElement: HTMLInputElement | undefined;
-	let inputValue = '';
+	let inputValue: string;
+	$: inputValue = $tokenListStore.filter;
 
 	const handleOpen = (e?: Event) => {
 		e?.stopPropagation();
