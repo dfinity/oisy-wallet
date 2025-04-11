@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Backdrop } from '@dfinity/gix-components';
 	import { onMount } from 'svelte';
+	import { quintOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import { afterNavigate } from '$app/navigation';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
@@ -8,7 +9,6 @@
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { quintOut } from 'svelte/easing';
 
 	export let testIdPrefix: string;
 	export let inputValue: string;
