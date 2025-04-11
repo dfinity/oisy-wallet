@@ -1,11 +1,14 @@
+import type {
+	PostMessageAllowSigningResponse,
+	PostMessageCreatePowChallengeResponse
+} from '$lib/types/post-message';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { routeWorkerResponse, sendMessageRequest } from '../utils/worker.utils';
-import { solvePowChallenge } from '../services/pow.services';
 import {
 	PostMessageAllowSigningResponseSchema,
 	PostMessageCreatePowChallengeResponseSchema
 } from '../schema/post-message.schema';
-import type { PostMessageAllowSigningResponse, PostMessageCreatePowChallengeResponse } from '$lib/types/post-message';
+import { solvePowChallenge } from '../services/pow.services';
+import { routeWorkerResponse, sendMessageRequest } from '../utils/worker.utils';
 
 export const SCHEDULER_INTERVAL = 120_000;
 // in ms, can be changed dynamically by sending message setPowThrottle
