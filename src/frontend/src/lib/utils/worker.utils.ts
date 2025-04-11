@@ -9,7 +9,7 @@ export function routeWorkerResponse(event: MessageEvent): boolean {
 
 	// Exit immediately if 'type' is missing or not equal to 'response'
 	if (!type || type !== 'response') {
-		console.error('Invalid message type. Expected \'response\', but got:', event.data);
+		console.error("Invalid message type. Expected 'response', but got:", event.data);
 		return false;
 	}
 
@@ -29,11 +29,11 @@ export function routeWorkerResponse(event: MessageEvent): boolean {
  * Sends a typed request to the worker and awaits the fully typed response envelope (T).
  */
 export function sendMessageRequest<T>({
-																				worker,
-																				msg,
-																				data,
-																				schema
-																			}: {
+	worker,
+	msg,
+	data,
+	schema
+}: {
 	worker: Worker;
 	msg: string;
 	data: object;
