@@ -1,8 +1,8 @@
 import {
-	BTC_MAINNET_TOKEN_ID,
-	BTC_REGTEST_TOKEN_ID,
-	BTC_TESTNET_TOKEN_ID
-} from '$env/tokens/tokens.btc.env';
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
 import {
 	getIdbBtcAddressMainnet,
 	setIdbBtcAddressMainnet,
@@ -27,15 +27,11 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { BtcAddress } from '$lib/types/address';
 import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { get } from 'svelte/store';
-
-type TokenIdBtcPublicNetwork =
-	| typeof BTC_MAINNET_TOKEN_ID
-	| typeof BTC_TESTNET_TOKEN_ID
-	| typeof BTC_REGTEST_TOKEN_ID;
 
 const bitcoinMapper: Record<
 	BitcoinNetwork,
@@ -57,14 +53,14 @@ const bitcoinMapper: Record<
 };
 
 const loadBtcAddress = ({
-	tokenId,
+	networkId,
 	network
 }: {
-	tokenId: TokenIdBtcPublicNetwork;
+	networkId: NetworkId;
 	network: BitcoinNetwork;
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
-		tokenId,
+		networkId,
 		getAddress: (identity: OptionIdentity) =>
 			getBtcAddress({
 				identity,
@@ -76,25 +72,25 @@ const loadBtcAddress = ({
 
 export const loadBtcAddressTestnet = (): Promise<ResultSuccess> =>
 	loadBtcAddress({
-		tokenId: BTC_TESTNET_TOKEN_ID,
+		networkId: BTC_TESTNET_NETWORK_ID,
 		network: 'testnet'
 	});
 
 export const loadBtcAddressRegtest = (): Promise<ResultSuccess> =>
 	loadBtcAddress({
-		tokenId: BTC_REGTEST_TOKEN_ID,
+		networkId: BTC_REGTEST_NETWORK_ID,
 		network: 'regtest'
 	});
 
 export const loadBtcAddressMainnet = (): Promise<ResultSuccess> =>
 	loadBtcAddress({
-		tokenId: BTC_MAINNET_TOKEN_ID,
+		networkId: BTC_MAINNET_NETWORK_ID,
 		network: 'mainnet'
 	});
 
 export const loadIdbBtcAddressMainnet = (): Promise<ResultSuccess<LoadIdbAddressError>> =>
 	loadIdbTokenAddress<BtcAddress>({
-		tokenId: BTC_MAINNET_TOKEN_ID,
+		networkId: BTC_MAINNET_NETWORK_ID,
 		getIdbAddress: getIdbBtcAddressMainnet,
 		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage,
 		addressStore: btcAddressMainnetStore
@@ -102,7 +98,7 @@ export const loadIdbBtcAddressMainnet = (): Promise<ResultSuccess<LoadIdbAddress
 
 const certifyBtcAddressMainnet = (address: BtcAddress): Promise<ResultSuccess<string>> =>
 	certifyAddress<BtcAddress>({
-		tokenId: BTC_MAINNET_TOKEN_ID,
+		networkId: BTC_MAINNET_NETWORK_ID,
 		address,
 		getAddress: (identity: OptionIdentity) =>
 			getBtcAddress({
