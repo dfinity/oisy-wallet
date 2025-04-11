@@ -1,8 +1,4 @@
-use std::fmt;
-
 use candid::{CandidType, Deserialize};
-
-use crate::types::Version;
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Contact {
