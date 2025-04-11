@@ -13,6 +13,8 @@ const EXPLORER_URLS = {
 	SOL_MAINNET: 'https://solscan.io/$args',
 	SOL_TESTNET: 'https://solscan.io/$args?cluster=testnet',
 	SOL_DEVNET: 'https://solscan.io/$args?cluster=devnet',
+	BASE: 'https://basescan.org',
+	BASE_SEPOLIA: 'https://sepolia.basescan.org',
 	BSC: 'https://bscscan.com',
 	BSC_TESTNET: 'https://testnet.bscscan.com'
 };
@@ -32,6 +34,8 @@ export const {
 	SOL_MAINNET: SOL_MAINNET_EXPLORER_URL,
 	SOL_TESTNET: SOL_TESTNET_EXPLORER_URL,
 	SOL_DEVNET: SOL_DEVNET_EXPLORER_URL,
+	BASE: BASE_EXPLORER_URL,
+	BASE_SEPOLIA: BASE_SEPOLIA_EXPLORER_URL,
 	BSC: BSC_EXPLORER_URL,
 	BSC_TESTNET: BSC_TESTNET_EXPLORER_URL
 } = EXPLORER_URLS;
