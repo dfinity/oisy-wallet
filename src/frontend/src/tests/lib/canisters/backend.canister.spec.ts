@@ -722,7 +722,6 @@ describe('backend.canister', () => {
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
 
-			// Validate the `Ok` portion of the result
 			if ('Ok' in result) {
 				expect(result.Ok).toEqual(mockPowChallengeSuccess);
 			} else {
@@ -731,7 +730,6 @@ describe('backend.canister', () => {
 		});
 
 		test('should handle challenge already in progress error', async () => {
-			// Mock the backend service response to simulate ChallengeInProgress error
 			service.create_pow_challenge.mockResolvedValue({
 				Err: { ChallengeInProgress: null }
 			});
@@ -740,12 +738,10 @@ describe('backend.canister', () => {
 
 			const result = await backendCanister.createPowChallengeResult();
 
-			// Validate the expected error response
 			expect(result).toEqual({ Err: { ChallengeInProgress: null } });
 		});
 
 		test('should handle randomness generation error', async () => {
-			// Mock the backend service response to simulate RandomnessError
 			service.create_pow_challenge.mockResolvedValue({
 				Err: { RandomnessError: 'Failed to generate randomness' }
 			});
@@ -754,29 +750,24 @@ describe('backend.canister', () => {
 
 			const result = await backendCanister.createPowChallengeResult();
 
-			// Validate the response contains the expected Err value
 			expect(result).toEqual({
 				Err: { RandomnessError: 'Failed to generate randomness' }
 			});
 		});
 
 		it('should handle missing user profile error', async () => {
-			// Mock backend service to simulate MissingUserProfile error
 			service.create_pow_challenge.mockResolvedValue({ Err: { MissingUserProfile: null } });
 
 			const backendCanister = await createBackendCanister({ serviceOverride: service });
 
 			const result = await backendCanister.createPowChallengeResult();
 
-			// Validate that the expected error is returned in the result pattern
 			expect(result).toEqual({ Err: { MissingUserProfile: null } });
 
-			// Ensure the mock has been called
 			expect(service.create_pow_challenge).toHaveBeenCalledTimes(1);
 		});
 
 		it('should handle unexpected errors in result', async () => {
-			// Mock backend service to simulate an unexpected error
 			service.create_pow_challenge.mockResolvedValue({
 				Err: { Other: 'Unexpected error occurred.' }
 			});
@@ -785,10 +776,8 @@ describe('backend.canister', () => {
 
 			const result = await backendCanister.createPowChallengeResult();
 
-			// Validate the error matches the mocked response
 			expect(result).toEqual({ Err: { Other: 'Unexpected error occurred.' } });
 
-			// Ensure the mock has been called
 			expect(service.create_pow_challenge).toHaveBeenCalledTimes(1);
 		});
 	});
