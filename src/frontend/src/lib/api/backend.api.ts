@@ -1,5 +1,4 @@
 import type {
-	AllowSigningRequest,
 	AllowSigningResponse,
 	CustomToken,
 	PendingTransaction,
@@ -161,9 +160,7 @@ export const allowSigning = async ({
 export const allowSigningResult = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<{
-	request?: AllowSigningRequest;
-}>): Promise<AllowSigningResult> => {
+}: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningResult> => {
 	const { allowSigningResult } = await backendCanister({ identity });
 
 	// Conditionally call allowSigning with request or provide default logic
