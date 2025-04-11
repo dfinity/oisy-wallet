@@ -55,8 +55,7 @@ describe('worker.utils', () => {
 		});
 
 		it('fails to route response if no handler exists', () => {
-			const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {
-			});
+			const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 			const event = new MessageEvent('message', {
 				data: { type: 'response', requestId: 'unknown-id', data: {} }
@@ -71,8 +70,7 @@ describe('worker.utils', () => {
 		});
 
 		it('correctly handles invalid message type and logs error', () => {
-			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
-			});
+			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 			const invalidData = { type: 'unknown', requestId: 'irrelevant' };
 			const event = new MessageEvent('message', { data: invalidData });
@@ -81,7 +79,7 @@ describe('worker.utils', () => {
 
 			expect(routed).toBe(false);
 			expect(consoleErrorSpy).toHaveBeenCalledWith(
-				'Invalid message type. Expected \'response\', but got:',
+				"Invalid message type. Expected 'response', but got:",
 				invalidData
 			);
 
