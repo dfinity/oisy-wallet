@@ -177,10 +177,16 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
+	// directly returning result and not the response
+	// TODO: check if this one is really needed because it may cause duplication of code with `allowSigningResult`
+	allowSigningResult = async ({ request }: AllowSigningParams): Promise<AllowSigningResult> => {
+		const { allow_signing } = this.caller({ certified: true });
+		return await allow_signing(toNullable(request));
+	};
+
 	// keeping the existing implementation to not beak the existing integration
 	allowSigning = async ({ request }: AllowSigningParams): Promise<AllowSigningResponse> => {
-		const { allow_signing } = this.caller({ certified: true });
-		const response = await allow_signing(toNullable(request));
+		const response = await this.allowSigningResult({ request });
 
 		if ('Ok' in response) {
 			const { Ok } = response;
@@ -188,12 +194,6 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapAllowSigningError(response.Err);
-	};
-
-	// directly returning result and not the response
-	allowSigningResult = async ({ request }: AllowSigningParams): Promise<AllowSigningResult> => {
-		const { allow_signing } = this.caller({ certified: true });
-		return await allow_signing(toNullable(request));
 	};
 
 	createPowChallengeResult = (): Promise<CreateChallengeResult> => {
