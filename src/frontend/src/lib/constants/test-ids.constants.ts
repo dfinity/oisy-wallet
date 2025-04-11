@@ -159,3 +159,5 @@ export const HELP_AUTH_INTRODUCTION_LINK = 'help-auth-introduction-link';
 export const HELP_AUTH_DOCS_LINK = 'help-auth-docs-link';
 export const HELP_AUTH_PRIVATE_KEY_LINK = 'help-auth-private-key-link';
 export const HELP_AUTH_ASSET_CONTROL_LINK = 'help-auth-asset-control-link';
+
+export const TOKEN_LIST_FILTER = 'token-list-filter';

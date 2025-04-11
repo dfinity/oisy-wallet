@@ -42,6 +42,7 @@
 	--focus-border-color: var(---color-border-brand-primary);
 	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
+	--input-width: 100%;
 	--animation-time-short: 0.2s;
 
 	// General GIX
@@ -177,6 +178,7 @@ div.modal {
 		h2 {
 			font-size: var(--font-size-h3);
 		}
+
 		button {
 			@apply p-1.5;
 		}
