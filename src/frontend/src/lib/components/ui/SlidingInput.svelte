@@ -6,11 +6,7 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
-	import {
-		SLIDE_DURATION,
-		SLIDE_EASING,
-		SLIDE_PARAMS
-	} from '$lib/constants/transition.constants.js';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { quintOut } from 'svelte/easing';
 
