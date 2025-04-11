@@ -7,7 +7,7 @@ import {
 	SEPOLIA_USDC_TOKEN,
 	USDC_TOKEN
 } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
-import type { RequiredEvmErc20Token } from '$eth/evm/types/erc20';
+import type { RequiredEvmErc20Token } from '../../../../evm/types/erc20';
 
 export const BASE_ERC20_TWIN_TOKENS_SEPOLIA: RequiredEvmErc20Token[] = [
 	SEPOLIA_USDC_TOKEN,

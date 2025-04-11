@@ -7,9 +7,9 @@ import {
 	USDC_TOKEN as ETH_USDC_TOKEN
 } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import usdc from '$eth/assets/usdc.svg';
-import type { RequiredEvmErc20Token } from '$eth/evm/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import type { RequiredEvmErc20Token } from '../../../../../evm/types/erc20';
 
 export const USDC_DECIMALS = 6;
 

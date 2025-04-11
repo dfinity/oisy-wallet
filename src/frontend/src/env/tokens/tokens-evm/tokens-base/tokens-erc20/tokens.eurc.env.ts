@@ -7,9 +7,9 @@ import {
 	SEPOLIA_EURC_TOKEN as ETH_SEPOLIA_EURC_TOKEN
 } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import eurc from '$eth/assets/eurc.svg';
-import type { RequiredEvmErc20Token } from '$eth/evm/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import type { RequiredEvmErc20Token } from '../../../../../evm/types/erc20';
 
 export const EURC_DECIMALS = 6;
 

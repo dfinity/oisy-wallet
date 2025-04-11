@@ -13,10 +13,10 @@ import {
 	SOLANA_TESTNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
-import { enabledEvmNetworks } from '$eth/evm/derived/networks.derived';
 import type { Network } from '$lib/types/network';
 import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 import { derived, type Readable } from 'svelte/store';
+import { enabledEvmNetworks } from '../../evm/derived/networks.derived';
 
 export const networks: Readable<Network[]> = derived(
 	[enabledBitcoinNetworks, enabledEthereumNetworks, enabledSolanaNetworks, enabledEvmNetworks],

@@ -5,7 +5,6 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-import { enabledBaseTokens } from '$eth/evm/base/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
 import type { IcToken } from '$icp/types/ic-token';
@@ -20,6 +19,7 @@ import {
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { derived, type Readable } from 'svelte/store';
+import { enabledBaseTokens } from '../../evm/base/derived/tokens.derived';
 
 export const tokens: Readable<Token[]> = derived(
 	[
