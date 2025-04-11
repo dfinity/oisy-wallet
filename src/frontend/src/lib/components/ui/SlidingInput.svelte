@@ -6,8 +6,13 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
-	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
+	import {
+		SLIDE_DURATION,
+		SLIDE_EASING,
+		SLIDE_PARAMS
+	} from '$lib/constants/transition.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { quintOut } from 'svelte/easing';
 
 	export let testIdPrefix: string;
 	export let inputValue: string;
@@ -64,8 +69,8 @@
 	{#if visible}
 		<div
 			in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
-			out:fade={SLIDE_PARAMS}
-			class="input-field condensed absolute right-0 -mt-[11px] mr-[1px] flex w-full overflow-hidden transition-all duration-300 md:w-[250px]"
+			out:fade={{ delay: 0, duration: 250, easing: quintOut }}
+			class="input-field condensed absolute right-0 -mt-[11px] mr-px flex w-full overflow-hidden transition-all duration-300 md:w-[250px]"
 		>
 			<InputTextWithAction
 				bind:inputElement
