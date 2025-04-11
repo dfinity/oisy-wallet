@@ -9,8 +9,7 @@
 	export let required = true;
 	export let testId: string | undefined = undefined;
 	export let autofocus = false;
-
-	let inputElement: HTMLInputElement | undefined;
+	export let inputElement: HTMLInputElement | undefined = undefined;
 
 	onMount(() => {
 		if (autofocus && nonNullish(inputElement)) {
