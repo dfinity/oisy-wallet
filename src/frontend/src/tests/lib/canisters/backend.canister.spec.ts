@@ -615,7 +615,7 @@ describe('backend.canister', () => {
 				Ok: {
 					status: { Executed: null }, // or { Skipped: null } or { Failed: null }, depending on your scenario
 					challenge_completion: [], // Provide appropriately if challenge completion data exists
-					allowed_cycles: BigInt(0) // Replace with proper value
+					allowed_cycles: ZERO_BI // Replace with proper value
 				}
 			};
 
@@ -625,7 +625,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = await allowSigning({ nonce: BigInt(0) });
+			const res = await allowSigning({});
 
 			expect(service.allow_signing).toHaveBeenCalledTimes(1);
 			expect(res).toBeDefined();
@@ -641,7 +641,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = allowSigning({ nonce: BigInt(0) });
+			const res = allowSigning({});
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
@@ -659,7 +659,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({ nonce: BigInt(0) })).rejects.toThrow(
+			await expect(allowSigning({})).rejects.toThrow(
 				mapIcrc2ApproveError(response.Err.ApproveError)
 			);
 		});
@@ -673,7 +673,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({ nonce: BigInt(0) })).rejects.toThrow(
+			await expect(allowSigning({})).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -688,9 +688,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({ nonce: BigInt(0) })).rejects.toThrow(
-				new CanisterInternalError(errorMsg)
-			);
+			await expect(allowSigning({})).rejects.toThrow(new CanisterInternalError(errorMsg));
 		});
 
 		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
@@ -702,7 +700,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({ nonce: BigInt(0) })).rejects.toThrow(
+			await expect(allowSigning({})).rejects.toThrow(
 				new CanisterInternalError('Unknown AllowSigningError')
 			);
 		});
@@ -724,7 +722,6 @@ describe('backend.canister', () => {
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
 
-			// Validate the `Ok` portion of the result
 			if ('Ok' in result) {
 				expect(result.Ok).toEqual(mockPowChallengeSuccess);
 			} else {
@@ -733,7 +730,6 @@ describe('backend.canister', () => {
 		});
 
 		test('should handle challenge already in progress error', async () => {
-			// Mock the backend service response to simulate ChallengeInProgress error
 			service.create_pow_challenge.mockResolvedValue({
 				Err: { ChallengeInProgress: null }
 			});
@@ -742,12 +738,10 @@ describe('backend.canister', () => {
 
 			const result = await backendCanister.createPowChallengeResult();
 
-			// Validate the expected error response
 			expect(result).toEqual({ Err: { ChallengeInProgress: null } });
 		});
 
 		test('should handle randomness generation error', async () => {
-			// Mock the backend service response to simulate RandomnessError
 			service.create_pow_challenge.mockResolvedValue({
 				Err: { RandomnessError: 'Failed to generate randomness' }
 			});
@@ -756,29 +750,24 @@ describe('backend.canister', () => {
 
 			const result = await backendCanister.createPowChallengeResult();
 
-			// Validate the response contains the expected Err value
 			expect(result).toEqual({
 				Err: { RandomnessError: 'Failed to generate randomness' }
 			});
 		});
 
 		it('should handle missing user profile error', async () => {
-			// Mock backend service to simulate MissingUserProfile error
 			service.create_pow_challenge.mockResolvedValue({ Err: { MissingUserProfile: null } });
 
 			const backendCanister = await createBackendCanister({ serviceOverride: service });
 
 			const result = await backendCanister.createPowChallengeResult();
 
-			// Validate that the expected error is returned in the result pattern
 			expect(result).toEqual({ Err: { MissingUserProfile: null } });
 
-			// Ensure the mock has been called
 			expect(service.create_pow_challenge).toHaveBeenCalledTimes(1);
 		});
 
 		it('should handle unexpected errors in result', async () => {
-			// Mock backend service to simulate an unexpected error
 			service.create_pow_challenge.mockResolvedValue({
 				Err: { Other: 'Unexpected error occurred.' }
 			});
@@ -787,10 +776,8 @@ describe('backend.canister', () => {
 
 			const result = await backendCanister.createPowChallengeResult();
 
-			// Validate the error matches the mocked response
 			expect(result).toEqual({ Err: { Other: 'Unexpected error occurred.' } });
 
-			// Ensure the mock has been called
 			expect(service.create_pow_challenge).toHaveBeenCalledTimes(1);
 		});
 	});

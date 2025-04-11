@@ -1,6 +1,7 @@
 import type {
 	AddUserCredentialError,
 	AllowSigningError,
+	AllowSigningRequest,
 	AllowSigningResponse,
 	BitcoinNetwork,
 	CreateChallengeError,
@@ -32,10 +33,6 @@ export interface AddUserCredentialParams {
 export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialError };
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
-
-export interface AllowSigningParams {
-	nonce: bigint;
-}
 
 export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 
@@ -103,4 +100,8 @@ export interface KongSwapParams {
 	receiveAddress?: Address;
 	sourceToken: Token;
 	payTransactionId?: TxId;
+}
+
+export interface AllowSigningParams {
+	request?: AllowSigningRequest;
 }
