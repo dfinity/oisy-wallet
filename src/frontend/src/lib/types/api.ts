@@ -105,7 +105,3 @@ export interface KongSwapParams {
 export interface AllowSigningParams {
 	request?: AllowSigningRequest;
 }
-
-export interface AllowSigningParams {
-	nonce: bigint;
-}
