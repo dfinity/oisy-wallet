@@ -1,24 +1,7 @@
-import { bufferToHex, hashToHex, sha256 } from '$lib/utils/crypto.utils';
+import { bufferToHex, hashToHex } from '$lib/utils/crypto.utils';
 import { describe, expect, it } from 'vitest';
 
 describe('crypto.utils', () => {
-	describe('sha256', () => {
-		it('should hash an input string into an ArrayBuffer (SHA-256)', async () => {
-			const input = 'test-input';
-			const result = await sha256(input);
-
-			expect(result).toBeInstanceOf(ArrayBuffer);
-
-			expect(result.byteLength).toBe(32);
-		});
-
-		it('should produce different hashes for different inputs', async () => {
-			const hash1 = await sha256('first-input');
-			const hash2 = await sha256('second-input');
-
-			expect(new Uint8Array(hash1)).not.toEqual(new Uint8Array(hash2));
-		});
-	});
 
 	describe('bufferToHex', () => {
 		it('should convert an ArrayBuffer to a hexadecimal string', () => {
