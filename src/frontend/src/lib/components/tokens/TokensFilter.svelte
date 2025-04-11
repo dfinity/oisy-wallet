@@ -3,10 +3,10 @@
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import SlidingInput from '$lib/components/ui/SlidingInput.svelte';
-	import { tokenListStore } from '$lib/stores/token-list.store';
-	import { isTokensPath, isTransactionsPath } from '$lib/utils/nav.utils';
 	import { TOKEN_LIST_FILTER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { tokenListStore } from '$lib/stores/token-list.store';
+	import { isTokensPath, isTransactionsPath } from '$lib/utils/nav.utils';
 
 	let inputValue: string;
 	$: inputValue = $tokenListStore.filter;
