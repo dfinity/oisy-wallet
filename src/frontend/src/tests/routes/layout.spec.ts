@@ -37,14 +37,12 @@ describe('App Layout', () => {
 
 	it('should initialize all services in parallel', () => {
 		const spyAuthSync = vi.spyOn(authStore, 'sync');
-		const spyInitAnalytics = vi.spyOn(analytics, 'initAnalytics');
 		const spyInitPlausibleAnalytics = vi.spyOn(analytics, 'initPlausibleAnalytics');
 		const spyI18n = vi.spyOn(i18n, 'init');
 
 		render(App);
 
 		expect(spyAuthSync).toHaveBeenCalledTimes(1);
-		expect(spyInitAnalytics).toHaveBeenCalledTimes(1);
 		expect(spyInitPlausibleAnalytics).toHaveBeenCalledTimes(1);
 		expect(spyI18n).toHaveBeenCalledTimes(1);
 	});

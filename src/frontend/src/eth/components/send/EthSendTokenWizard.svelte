@@ -193,7 +193,7 @@
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_SUCCESS,
 				metadata: {
 					token: $sendToken.symbol
@@ -202,7 +202,7 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_ERROR,
 				metadata: {
 					token: $sendToken.symbol

@@ -121,7 +121,7 @@
 
 			progress(ProgressStepsConvert.DONE);
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_BTC_TO_CKBTC_SUCCESS
 			});
 
@@ -132,7 +132,7 @@
 				err
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_BTC_TO_CKBTC_ERROR
 			});
 
