@@ -1,7 +1,4 @@
-import type {
-	PostMessageAllowSigningResponse,
-	PostMessageCreatePowChallengeResponse
-} from '$lib/types/post-message';
+import type { PostMessageAllowSigningResponse, PostMessageCreatePowChallengeResponse } from '$lib/types/post-message';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	PostMessageAllowSigningResponseSchema,
@@ -117,6 +114,7 @@ async function requestAllowSigning(nonce: number) {
 		schema: PostMessageAllowSigningResponseSchema
 	});
 
+	// TODO remove this statement
 	if ('Ok' in signingResponse.result) {
 		console.info('Allow signing successful:', signingResponse.result.Ok);
 		return;
