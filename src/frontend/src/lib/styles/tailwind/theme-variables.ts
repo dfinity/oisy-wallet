@@ -24,6 +24,7 @@ export const themeVariables = {
 		'tertiary-inverted': 'var(--color-background-tertiary-inverted)',
 		disabled: 'var(--color-background-disabled)',
 		'disabled-alt': 'var(--color-background-disabled-alt)',
+		'disabled-alt2': 'var(--color-background-disabled-alt2)',
 		brand: {
 			'subtle-5': 'var(--color-background-brand-subtle-5)',
 			'subtle-10': 'var(--color-background-brand-subtle-10)',
@@ -107,6 +108,7 @@ export const themeVariables = {
 		primary: 'var(--color-foreground-primary)',
 		'primary-inverted': 'var(--color-foreground-primary-inverted)',
 		'primary-inverted-alt': 'var(--color-foreground-primary-inverted-alt)',
+		secondary: 'var(--color-foreground-secondary)',
 		'secondary-inverted': 'var(--color-foreground-secondary-inverted)',
 		tertiary: 'var(--color-foreground-tertiary)',
 		'tertiary-inverted': 'var(--color-foreground-tertiary-inverted)',

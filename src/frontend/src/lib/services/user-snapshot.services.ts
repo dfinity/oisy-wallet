@@ -59,7 +59,6 @@ import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 // All the functions below will be using stores imperatively, since the service it is not reactive.
@@ -129,10 +128,11 @@ const toSplTransaction = ({
 		// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 		...toBaseTransaction({
 			type: type === 'deposit' ? 'send' : type === 'withdraw' ? 'receive' : type,
-			value: BigNumber.from(value ?? ZERO_BI).toBigInt(),
+			value: BigInt(value ?? ZERO_BI),
 			timestamp: BigInt(timestamp ?? ZERO_BI)
 		}),
-		counterparty: address === from ? to : from
+		// in case it's a BTC tx, "to" is an array
+		counterparty: address === from ? (Array.isArray(to) ? to[0] : to) : from
 	};
 };
 
