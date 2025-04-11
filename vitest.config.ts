@@ -69,7 +69,13 @@ export default defineConfig(
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
-				exclude: [...coverageConfigDefaults.exclude, 'build', '.dfx', '**/.svelte-kit'],
+				exclude: [
+					...coverageConfigDefaults.exclude,
+					'build',
+					'.dfx',
+					'**/.svelte-kit',
+					'declarations'
+				],
 				// TODO: increase the thresholds slowly up to an acceptable 80% at least
 				thresholds: {
 					statements: 55,
