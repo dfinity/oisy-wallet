@@ -1,8 +1,6 @@
 use candid::{CandidType, Deserialize};
 use std::fmt;
 
-use crate::types::Version;
-
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Contact {
     pub id: String,
@@ -37,7 +35,7 @@ impl fmt::Display for AddressType {
             AddressType::AVAX => write!(f, "AVAX"),
             AddressType::BSC => write!(f, "BSC"),
             AddressType::MATIC => write!(f, "MATIC"),
-            AddressType::Other(name) => write!(f, "{}", name),
+            AddressType::Other(name) => write!(f, "{name}"),
         }
     }
 }
