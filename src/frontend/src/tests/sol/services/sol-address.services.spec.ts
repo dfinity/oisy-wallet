@@ -1,4 +1,4 @@
-import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
+import { SOLANA_KEY_ID, SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import * as idbApi from '$lib/api/idb.api';
 import * as signerApi from '$lib/api/signer.api';
@@ -151,7 +151,7 @@ describe('sol-address.services', () => {
 
 			expect(result).toEqual({
 				success: false,
-				err: new LoadIdbAddressError(SOLANA_TOKEN_ID)
+				err: new LoadIdbAddressError(SOLANA_MAINNET_NETWORK_ID)
 			});
 			expect(spyUpdateIdbAddressLastUsage).not.toHaveBeenCalled();
 		});
