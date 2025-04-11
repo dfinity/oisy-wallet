@@ -2,7 +2,6 @@ import { bufferToHex, hashToHex } from '$lib/utils/crypto.utils';
 import { describe, expect, it } from 'vitest';
 
 describe('crypto.utils', () => {
-
 	describe('bufferToHex', () => {
 		it('should convert an ArrayBuffer to a hexadecimal string', () => {
 			const buffer = new Uint8Array([1, 255, 16, 32]).buffer;
