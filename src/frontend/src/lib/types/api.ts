@@ -34,10 +34,6 @@ export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialE
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
 
-export interface AllowSigningParams {
-	nonce: bigint;
-}
-
 export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 
 export type CreateChallengeResult = { Ok: CreateChallengeResponse } | { Err: CreateChallengeError };
@@ -108,4 +104,8 @@ export interface KongSwapParams {
 
 export interface AllowSigningParams {
 	request?: AllowSigningRequest;
+}
+
+export interface AllowSigningParams {
+	nonce: bigint;
 }
