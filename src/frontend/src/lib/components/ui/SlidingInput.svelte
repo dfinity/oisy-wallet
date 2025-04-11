@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { fade, slide } from 'svelte/transition';
-	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
-	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
-	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { onMount } from 'svelte';
-	import { afterNavigate } from '$app/navigation';
 	import { Backdrop } from '@dfinity/gix-components';
+	import { onMount } from 'svelte';
+	import { fade, slide } from 'svelte/transition';
+	import { afterNavigate } from '$app/navigation';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let testIdPrefix: string;
 	export let inputValue: string;

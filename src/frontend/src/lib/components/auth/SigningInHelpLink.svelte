@@ -7,8 +7,8 @@
 
 	export let styleClass = '';
 
-	const onClick = async () => {
-		await trackEvent({
+	const onClick = () => {
+		trackEvent({
 			name: TRACK_HELP_SIGNING_IN
 		});
 		modalStore.openAuthHelp(true);
