@@ -1,6 +1,6 @@
 import type {
-	AllowSigningResponse,
 	_SERVICE as BackendService,
+	AllowSigningResponse,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -31,7 +31,7 @@ import type {
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
-import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import { Canister, createServices, type QueryParams, toNullable } from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({
@@ -191,11 +191,9 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	// directly returning result and not the response
-	allowSigningResult = async (
-		allowSigningRequest: { request?: AllowSigningParams } = {}
-	): Promise<AllowSigningResult> => {
+	allowSigningResult = async ({ request }: AllowSigningParams): Promise<AllowSigningResult> => {
 		const { allow_signing } = this.caller({ certified: true });
-		return await allow_signing(toNullable(allowSigningRequest.request));
+		return await allow_signing(toNullable(request));
 	};
 
 	createPowChallengeResult = (): Promise<CreateChallengeResult> => {
