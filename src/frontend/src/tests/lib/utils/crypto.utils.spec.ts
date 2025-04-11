@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import { bufferToHex, hashToHex, sha256 } from '$lib/utils/crypto.utils';
+import { describe, expect, it } from 'vitest';
 
 describe('crypto.utils', () => {
 	describe('sha256', () => {
@@ -11,7 +11,6 @@ describe('crypto.utils', () => {
 
 			expect(result.byteLength).toBe(32);
 		});
-
 
 		it('should produce different hashes for different inputs', async () => {
 			const hash1 = await sha256('first-input');
@@ -28,7 +27,6 @@ describe('crypto.utils', () => {
 
 			expect(hex).toBe('01ff1020');
 		});
-
 	});
 
 	describe('hashToHex', () => {
@@ -40,6 +38,5 @@ describe('crypto.utils', () => {
 
 			expect(hex.length).toBe(64);
 		});
-
 	});
 });
