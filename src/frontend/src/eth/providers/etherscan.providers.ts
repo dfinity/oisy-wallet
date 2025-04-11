@@ -16,8 +16,8 @@ import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import {
-	type BlockTag,
 	EtherscanProvider as EtherscanProviderLib,
+	type BlockTag,
 	type Networkish
 } from 'ethers/providers';
 import { get } from 'svelte/store';
