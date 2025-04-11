@@ -20,8 +20,7 @@
 	let button: HTMLButtonElement | undefined;
 	let inputElement: HTMLInputElement | undefined;
 
-	const handleOpen = (e?: Event) => {
-		e?.stopPropagation();
+	const handleOpen = () => {
 		if (visible) {
 			handleClose();
 		} else {
