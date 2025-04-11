@@ -23,12 +23,14 @@
 	$: tokenListStore.set({ filter: inputValue });
 </script>
 
-<SlidingInput
-	testIdPrefix={TOKEN_LIST_FILTER}
-	inputPlaceholder={$i18n.tokens.text.filter_placeholder}
-	ariaLabel={$i18n.tokens.alt.filter_button}
-	disabled={$erc20UserTokensNotInitialized}
-	bind:inputValue
->
-	<IconSearch slot="icon" />
-</SlidingInput>
+<div class="w-full">
+	<SlidingInput
+		testIdPrefix={TOKEN_LIST_FILTER}
+		inputPlaceholder={$i18n.tokens.text.filter_placeholder}
+		ariaLabel={$i18n.tokens.alt.filter_button}
+		disabled={$erc20UserTokensNotInitialized}
+		bind:inputValue
+	>
+		<IconSearch slot="icon" />
+	</SlidingInput>
+</div>
