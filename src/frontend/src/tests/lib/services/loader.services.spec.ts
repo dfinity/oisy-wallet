@@ -154,10 +154,7 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(api.allowSigning).toHaveBeenNthCalledWith(1, {
-				identity: mockIdentity,
-				nonce: 0n
-			});
+			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [ICP_TOKEN_ID, SOLANA_TOKEN_ID]);
