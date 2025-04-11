@@ -305,6 +305,7 @@ jobs:
           VITE_ONRAMPER_API_KEY_DEV: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_DEV }}
           VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
           VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}
+          VITE_EVM_NETWORKS_ENABLED: ${{ steps.set-outputs.outputs.VITE_EVM_NETWORKS_ENABLED }}
 
       - name: Deploy Frontend to Environment
         run: |
@@ -329,6 +330,7 @@ jobs:
           VITE_ONRAMPER_API_KEY_DEV: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_DEV }}
           VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
           VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}
+          VITE_EVM_NETWORKS_ENABLED: ${{ steps.set-outputs.outputs.VITE_EVM_NETWORKS_ENABLED }}
           DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Deploy Backend to Environment
