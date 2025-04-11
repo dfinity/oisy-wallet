@@ -8,7 +8,6 @@ import {
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { beforeEach } from 'node:test';
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;

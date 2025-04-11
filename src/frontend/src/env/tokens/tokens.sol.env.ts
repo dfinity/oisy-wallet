@@ -4,9 +4,9 @@ import {
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_TESTNET_NETWORK
 } from '$env/networks/networks.sol.env';
-import sol from '$lib/assets/networks/sol.svg';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import sol from '$sol/assets/sol.svg';
 
 export const SOLANA_DEFAULT_DECIMALS = 9;
 

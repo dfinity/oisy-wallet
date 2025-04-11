@@ -1,9 +1,6 @@
 import type {
-	AllowSigningRequest,
 	AllowSigningResponse,
-	Result_2 as AllowSigningResult,
 	_SERVICE as BackendService,
-	Result_6 as CreateChallengeResult,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -22,9 +19,12 @@ import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
+	AllowSigningParams,
+	AllowSigningResult,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateChallengeResult,
 	GetUserProfileResponse,
 	SaveUserNetworksSettings,
 	SetUserShowTestnetsParams
@@ -177,27 +177,22 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	// keeping the existing implementation to not beak the existing integration
-	allowSigning = async (
-		allowSigningRequest: { request?: AllowSigningRequest } = {}
-	): Promise<AllowSigningResponse> => {
+	// directly returning result and not the response
+	// TODO: check if this one is really needed because it may cause duplication of code with `allowSigningResult`
+	allowSigningResult = async ({ request }: AllowSigningParams): Promise<AllowSigningResult> => {
 		const { allow_signing } = this.caller({ certified: true });
-		const result = await allow_signing(
-			allowSigningRequest.request ? [allowSigningRequest.request] : []
-		);
-
-		if ('Err' in result) {
-			throw mapAllowSigningError(result.Err);
-		}
-		return result.Ok;
+		return await allow_signing(toNullable(request));
 	};
 
-	// directly returning result and not the response
-	allowSigningResult = async (
-		allowSigningRequest: { request?: AllowSigningRequest } = {}
-	): Promise<AllowSigningResult> => {
-		const { allow_signing } = this.caller({ certified: true });
-		return await allow_signing(allowSigningRequest.request ? [allowSigningRequest.request] : []);
+	allowSigning = async ({ request }: AllowSigningParams): Promise<AllowSigningResponse> => {
+		const response = await this.allowSigningResult({ request });
+
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
+		}
+
+		throw mapAllowSigningError(response.Err);
 	};
 
 	createPowChallengeResult = (): Promise<CreateChallengeResult> => {

@@ -39,7 +39,7 @@
 			data-tid={testId}
 		>
 			<div class="h-8 w-8">
-				<NetworkLogo {network} blackAndWhite color="white" size="sm" />
+				<NetworkLogo {network} color="white" size="sm" />
 			</div>
 
 			{#if nonNullish(address)}

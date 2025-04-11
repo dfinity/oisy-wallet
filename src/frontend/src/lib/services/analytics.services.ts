@@ -1,5 +1,5 @@
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
-import { PROD } from '$lib/constants/app.constants';
+import { BETA, LOCAL, PROD, STAGING, TEST_FE } from '$lib/constants/app.constants';
 import type { TrackEventParams } from '$lib/types/analytics';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { initOrbiter, trackEvent as trackEventOrbiter } from '@junobuild/analytics';
@@ -8,7 +8,11 @@ import Plausible from 'plausible-tracker';
 let plausibleTracker: ReturnType<typeof Plausible> | null = null;
 
 export const initAnalytics = async () => {
-	if (!PROD) {
+	/**
+	 * TODO: Remove Juno analytics entirely once Plausible is the sole tracking solution.
+	 * Currently, we disable Juno on all environments (PROD, BETA, STAGING, etc.) to avoid conflicts.
+	 */
+	if (PROD || BETA || STAGING || LOCAL || TEST_FE) {
 		return;
 	}
 
@@ -63,7 +67,11 @@ export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
 		plausibleTracker.trackEvent(name, { props: metadata });
 	}
 
-	if (!PROD) {
+	/**
+	 * TODO: Remove Juno analytics entirely once Plausible is the sole tracking solution.
+	 * Currently, we disable Juno on all environments (PROD, BETA, STAGING, etc.) to avoid conflicts.
+	 */
+	if (PROD || BETA || STAGING || LOCAL || TEST_FE) {
 		return;
 	}
 

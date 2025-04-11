@@ -608,7 +608,8 @@
 			"destination_token_title": "You receive",
 			"chain_key": "Chain Key",
 			"show_more_networks": "Show $number more networks",
-			"hide_more_networks": "Hide more networks"
+			"hide_more_networks": "Hide more networks",
+			"on_network": " on $network"
 		},
 		"details": {
 			"title": "Token details",

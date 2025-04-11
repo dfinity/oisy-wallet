@@ -6,7 +6,6 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { waitFor } from '@testing-library/svelte';
-import { beforeEach } from 'node:test';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/api/backend.api');
