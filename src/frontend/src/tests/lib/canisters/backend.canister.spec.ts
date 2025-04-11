@@ -615,7 +615,7 @@ describe('backend.canister', () => {
 				Ok: {
 					status: { Executed: null }, // or { Skipped: null } or { Failed: null }, depending on your scenario
 					challenge_completion: [], // Provide appropriately if challenge completion data exists
-					allowed_cycles: BigInt(0) // Replace with proper value
+					allowed_cycles: ZERO_BI // Replace with proper value
 				}
 			};
 
@@ -625,7 +625,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = await allowSigning({ request: { nonce: BigInt(0) } });
+			const res = await allowSigning({ request: { nonce: ZERO_BI } });
 
 			expect(service.allow_signing).toHaveBeenCalledTimes(1);
 			expect(res).toBeDefined();
@@ -641,7 +641,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = allowSigning({ request: { nonce: BigInt(0) } });
+			const res = allowSigning({ request: { nonce: ZERO_BI } });
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
@@ -659,7 +659,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({ request: { nonce: BigInt(0) } })).rejects.toThrow(
+			await expect(allowSigning({ request: { nonce: ZERO_BI } })).rejects.toThrow(
 				mapIcrc2ApproveError(response.Err.ApproveError)
 			);
 		});
@@ -673,7 +673,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({ request: { nonce: BigInt(0) } })).rejects.toThrow(
+			await expect(allowSigning({ request: { nonce: ZERO_BI } })).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -688,7 +688,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({ request: { nonce: BigInt(0) } })).rejects.toThrow(
+			await expect(allowSigning({ request: { nonce: ZERO_BI } })).rejects.toThrow(
 				new CanisterInternalError(errorMsg)
 			);
 		});
@@ -702,7 +702,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({ request: { nonce: BigInt(0) } })).rejects.toThrow(
+			await expect(allowSigning({ request: { nonce: ZERO_BI } })).rejects.toThrow(
 				new CanisterInternalError('Unknown AllowSigningError')
 			);
 		});
