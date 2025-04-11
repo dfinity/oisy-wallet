@@ -48,6 +48,16 @@ export const TokenBuyableSchema = z.object({
 	buy: z.custom<AtLeastOne<TokenBuy>>().optional()
 });
 
+export const TokenGroupingSchema = z.object({
+	symbol: z.string().optional(),
+	name: z.string().optional(),
+	icon: z.string().optional()
+});
+
+export const TokenGroupSchema = z.object({
+	groupData: TokenGroupingSchema.optional()
+});
+
 export const TokenSchema = z
 	.object({
 		id: TokenIdSchema,
@@ -57,4 +67,5 @@ export const TokenSchema = z
 	})
 	.merge(TokenMetadataSchema)
 	.merge(TokenAppearanceSchema)
-	.merge(TokenBuyableSchema);
+	.merge(TokenBuyableSchema)
+	.merge(TokenGroupSchema);
