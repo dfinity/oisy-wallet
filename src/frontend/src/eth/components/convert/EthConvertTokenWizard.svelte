@@ -133,13 +133,13 @@
 				minterInfo: $ckEthMinterInfoStore?.[$ethereumToken.id]
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR
 			});
 
