@@ -6,7 +6,7 @@ import Plausible from 'plausible-tracker';
 let plausibleTracker: ReturnType<typeof Plausible> | null = null;
 
 export const initPlausibleAnalytics = () => {
-	if (!PLAUSIBLE_ENABLED) {
+	if (!PLAUSIBLE_ENABLED || !PLAUSIBLE_DOMAIN) {
 		return;
 	}
 
