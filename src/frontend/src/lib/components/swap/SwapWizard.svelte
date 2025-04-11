@@ -87,7 +87,7 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_SWAP_SUCCESS,
 				metadata: {
 					sourceToken: $sourceToken.symbol,
@@ -115,7 +115,7 @@
 				});
 			}
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
 					sourceToken: $sourceToken.symbol,

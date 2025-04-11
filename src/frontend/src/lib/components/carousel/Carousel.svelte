@@ -180,8 +180,8 @@
 	/**
 	 * Reset the autoplay timer and call goToNextSlide
 	 */
-	const onNext = async () => {
-		await trackEvent({
+	const onNext = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_NEXT
 		});
 
@@ -218,8 +218,8 @@
 	/**
 	 * Reset the autoplay timer and call goToPreviousSlide
 	 */
-	const onPrevious = async () => {
-		await trackEvent({
+	const onPrevious = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_PREVIOUS
 		});
 

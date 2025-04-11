@@ -233,7 +233,7 @@ export const sign = ({
 
 				progress(ProgressStepsSign.DONE);
 
-				await trackEvent({
+				trackEvent({
 					name: TRACK_COUNT_WC_SOL_SEND_SUCCESS,
 					metadata: {
 						token: token.symbol
@@ -242,7 +242,7 @@ export const sign = ({
 
 				return { success: true, amount, destination };
 			} catch (err: unknown) {
-				await trackEvent({
+				trackEvent({
 					name: TRACK_COUNT_WC_SOL_SEND_ERROR,
 					metadata: {
 						token: token.symbol

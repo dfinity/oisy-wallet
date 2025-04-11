@@ -354,10 +354,10 @@
 
 	onDestroy(() => walletConnectPaired.set(false));
 
-	const openWalletConnectAuth = async () => {
+	const openWalletConnectAuth = () => {
 		modalStore.openWalletConnectAuth();
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_COUNT_WALLET_CONNECT_MENU_OPEN
 		});
 	};
