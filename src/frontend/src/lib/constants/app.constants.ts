@@ -143,5 +143,3 @@ export const FALLBACK_TIMEOUT = 10000;
 // Git
 export const GIT_COMMIT_HASH = VITE_GIT_COMMIT_HASH;
 export const GIT_BRANCH_NAME = VITE_GIT_BRANCH_NAME;
-
-// PoW
