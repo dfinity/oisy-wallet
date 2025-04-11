@@ -16,8 +16,8 @@ import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import {
-	EtherscanProvider as EtherscanProviderLib,
 	type BlockTag,
+	EtherscanProvider as EtherscanProviderLib,
 	type Networkish
 } from 'ethers/providers';
 import { get } from 'svelte/store';
@@ -130,15 +130,9 @@ export class EtherscanProvider {
 		address: EthAddress;
 		startBlock?: BlockTag;
 	}): Promise<Transaction[]> => {
-		const results = await Promise.allSettled([
-			this.getHistory(params),
-			this.getInternalHistory(params)
-		]);
+		const results = await Promise.all([this.getHistory(params), this.getInternalHistory(params)]);
 
-		return results.reduce<Transaction[]>(
-			(acc, res) => [...acc, ...(res.status === 'fulfilled' ? res.value : [])],
-			[]
-		);
+		return results.flat();
 	};
 }
 
