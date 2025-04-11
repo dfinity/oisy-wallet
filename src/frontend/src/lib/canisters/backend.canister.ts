@@ -184,7 +184,6 @@ export class BackendCanister extends Canister<BackendService> {
 		return await allow_signing(toNullable(request));
 	};
 
-	// keeping the existing implementation to not beak the existing integration
 	allowSigning = async ({ request }: AllowSigningParams): Promise<AllowSigningResponse> => {
 		const response = await this.allowSigningResult({ request });
 
