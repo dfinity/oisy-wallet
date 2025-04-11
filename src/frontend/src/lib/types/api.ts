@@ -1,5 +1,6 @@
 import type {
 	AddUserCredentialError,
+	AllowSigningRequest,
 	BitcoinNetwork,
 	CredentialSpec,
 	GetUserProfileError,
@@ -16,7 +17,7 @@ import type {
 import type { Address, BtcAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { Principal } from '@dfinity/principal';
+import type { Principal } from '@dfinity/principal';
 
 export interface AddUserCredentialParams {
 	credentialJwt: string;
@@ -91,4 +92,8 @@ export interface KongSwapParams {
 	receiveAddress?: Address;
 	sourceToken: Token;
 	payTransactionId?: TxId;
+}
+
+export interface AllowSigningParams {
+	request?: AllowSigningRequest;
 }

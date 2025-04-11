@@ -1,6 +1,7 @@
 import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens/tokens.erc20.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { ethereumTokenId } from '$eth/derived/token.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -21,32 +22,6 @@ import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
-
-/**
- * ETH to ckETH is supported:
- * - on network Ethereum if the token is Ethereum (and not some ERC20 token) and the network is enabled
- * - on network ICP if the token is ckETH
- */
-export const ethToCkETHEnabled: Readable<boolean> = derived(
-	[tokenStandard, tokenWithFallbackAsIcToken, selectedEthereumNetwork],
-	([$tokenStandard, $tokenWithFallbackAsIcToken, $selectedEthereumNetwork]) =>
-		($tokenStandard === 'ethereum' && nonNullish($selectedEthereumNetwork)) ||
-		isTokenCkEthLedger($tokenWithFallbackAsIcToken)
-);
-
-/**
- * ERC20 to ckErc20 is supported:
- * - on network Ethereum if the token is a known Erc20 twin tokens and the network is enabled
- * - on network ICP if the token is ckErc20
- * - when Ethereum network is selected (enabled)
- */
-export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
-	[tokenWithFallbackAsIcToken, selectedEthereumNetwork],
-	([$tokenWithFallbackAsIcToken, $selectedEthereumNetwork]) =>
-		(ERC20_TWIN_TOKENS_IDS.includes($tokenWithFallbackAsIcToken.id) &&
-			nonNullish($selectedEthereumNetwork)) ||
-		isTokenCkErc20Ledger($tokenWithFallbackAsIcToken)
-);
 
 /**
  * On ckETH, we need to know if the target for conversion is Ethereum mainnet or Sepolia.
@@ -97,6 +72,16 @@ export const ckEthereumNativeTokenBalance: Readable<OptionBalance> = derived(
 	([$balanceStore, { id }]) => $balanceStore?.[id]?.data
 );
 
+export const ckEthereumNativeTokenEnabledNetwork: Readable<EthereumNetwork | undefined> = derived(
+	[enabledEthereumNetworks, ckEthereumTwinToken],
+	([
+		$enabledEthereumNetworks,
+		{
+			network: { id }
+		}
+	]) => $enabledEthereumNetworks.find(({ id: networkId }) => id === networkId)
+);
+
 /**
  * The contract helper used to convert ETH -> ckETH.
  */
@@ -113,4 +98,42 @@ export const ckErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
 	[ckEthMinterInfoStore, ethereumTokenId],
 	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
 		toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
+);
+
+/**
+ * ETH to ckETH is supported:
+ * - on network Ethereum if the token is Ethereum (and not some ERC20 token) and the network is enabled
+ * - on network ICP if the token is ckETH
+ */
+export const ethToCkETHEnabled: Readable<boolean> = derived(
+	[
+		tokenStandard,
+		tokenWithFallbackAsIcToken,
+		selectedEthereumNetwork,
+		ckEthereumNativeTokenEnabledNetwork
+	],
+	([
+		$tokenStandard,
+		$tokenWithFallbackAsIcToken,
+		$selectedEthereumNetwork,
+		$ckEthereumNativeTokenEnabledNetwork
+	]) =>
+		($tokenStandard === 'ethereum' && nonNullish($selectedEthereumNetwork)) ||
+		(isTokenCkEthLedger($tokenWithFallbackAsIcToken) &&
+			nonNullish($ckEthereumNativeTokenEnabledNetwork))
+);
+
+/**
+ * ERC20 to ckErc20 is supported:
+ * - on network Ethereum if the token is a known Erc20 twin tokens and the network is enabled
+ * - on network ICP if the token is ckErc20
+ * - when Ethereum network is selected (enabled)
+ */
+export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
+	[tokenWithFallbackAsIcToken, selectedEthereumNetwork, ckEthereumNativeTokenEnabledNetwork],
+	([$tokenWithFallbackAsIcToken, $selectedEthereumNetwork, $ckEthereumNativeTokenEnabledNetwork]) =>
+		(ERC20_TWIN_TOKENS_IDS.includes($tokenWithFallbackAsIcToken.id) &&
+			nonNullish($selectedEthereumNetwork)) ||
+		(isTokenCkErc20Ledger($tokenWithFallbackAsIcToken) &&
+			nonNullish($ckEthereumNativeTokenEnabledNetwork))
 );

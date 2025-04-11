@@ -1,6 +1,5 @@
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const APP_VERSION = VITE_APP_VERSION;
 
@@ -23,7 +22,7 @@ export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 
 export const INTERNET_IDENTITY_ORIGIN = LOCAL
 	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-	: 'https://identity.ic0.app';
+	: 'https://identity.internetcomputer.org';
 
 export const POUH_ISSUER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
@@ -121,7 +120,6 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_SECOND * 60n;
 export const EIGHT_DECIMALS = 8;
 
 export const ZERO_BI = 0n;
-export const ZERO = BigNumber.from(ZERO_BI);
 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds

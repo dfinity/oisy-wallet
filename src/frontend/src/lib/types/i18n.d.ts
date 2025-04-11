@@ -91,6 +91,40 @@ interface I18nAuth {
 		error_while_signing_in: string;
 		unexpected_issue_with_syncing: string;
 	};
+	help: {
+		text: {
+			title: string;
+			description: string;
+			subtitle: string;
+			lost_identity: string;
+			security: string;
+			got_confused: string;
+			other: string;
+			feedback_text: string;
+			thanks_text: string;
+			identity_new_identity: string;
+			identity_legacy_description: string;
+			identity_legacy_sign_in: string;
+			identity_learn_more: string;
+			other_title: string;
+			other_description: string;
+			other_introduction: string;
+			other_docs: string;
+			other_private_key: string;
+			other_asset_control: string;
+			need_help: string;
+			sign_in: string;
+		};
+		alt: {
+			internet_identity: string;
+			identity_learn_more: string;
+			other_introduction: string;
+			other_docs: string;
+			other_private_key: string;
+			other_asset_control: string;
+			sign_in: string;
+		};
+	};
 }
 
 interface I18nDapps {
@@ -523,6 +557,8 @@ interface I18nTokens {
 		hide_zero_balances: string;
 		hide_zeros: string;
 		all_tokens_with_zero_hidden: string;
+		filter_nothing_found: string;
+		filter_nothing_found_description: string;
 		buy_or_receive: string;
 		initializing: string;
 		updating_ui: string;
@@ -533,6 +569,9 @@ interface I18nTokens {
 		source_token_title: string;
 		destination_token_title: string;
 		chain_key: string;
+		show_more_networks: string;
+		hide_more_networks: string;
+		on_network: string;
 	};
 	details: {
 		title: string;

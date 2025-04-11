@@ -6,6 +6,7 @@ import type {
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
+
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO_BI } from '$lib/constants/app.constants';
@@ -609,18 +610,24 @@ describe('backend.canister', () => {
 
 	describe('allowSigning', () => {
 		it('should allow signing', async () => {
-			const response = { Ok: null };
+			const result: Result_2 = {
+				Ok: {
+					status: { Executed: null }, // or { Skipped: null } or { Failed: null }, depending on your scenario
+					challenge_completion: [], // Provide appropriately if challenge completion data exists
+					allowed_cycles: BigInt(0) // Replace with proper value
+				}
+			};
 
-			service.allow_signing.mockResolvedValue(response);
+			service.allow_signing.mockResolvedValue(result);
 
 			const { allowSigning } = await createBackendCanister({
 				serviceOverride: service
 			});
 
-			const res = await allowSigning();
+			const res = await allowSigning({});
 
 			expect(service.allow_signing).toHaveBeenCalledTimes(1);
-			expect(res).toBeUndefined();
+			expect(res).toBeDefined();
 		});
 
 		it('should throw an error if allowSigning throws', async () => {
@@ -633,7 +640,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = allowSigning();
+			const res = allowSigning({});
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
@@ -651,7 +658,9 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(mapIcrc2ApproveError(response.Err.ApproveError));
+			await expect(allowSigning({})).rejects.toThrow(
+				mapIcrc2ApproveError(response.Err.ApproveError)
+			);
 		});
 
 		it('should throw a CanisterInternalError if FailedToContactCyclesLedger error is returned', async () => {
@@ -663,7 +672,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(
+			await expect(allowSigning({})).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -678,7 +687,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(new CanisterInternalError(errorMsg));
+			await expect(allowSigning({})).rejects.toThrow(new CanisterInternalError(errorMsg));
 		});
 
 		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
@@ -690,7 +699,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(
+			await expect(allowSigning({})).rejects.toThrow(
 				new CanisterInternalError('Unknown AllowSigningError')
 			);
 		});
