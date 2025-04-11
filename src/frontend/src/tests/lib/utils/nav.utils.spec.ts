@@ -11,12 +11,18 @@ import {
 import {
 	back,
 	gotoReplaceRoot,
+	isActivityPath,
+	isDappExplorerPath,
+	isRewardsPath,
 	isRouteActivity,
 	isRouteDappExplorer,
 	isRouteRewards,
 	isRouteSettings,
 	isRouteTokens,
 	isRouteTransactions,
+	isSettingsPath,
+	isTokensPath,
+	isTransactionsPath,
 	loadRouteParams,
 	networkParam,
 	networkUrl,
@@ -359,6 +365,54 @@ describe('nav.utils', () => {
 
 				expect(isRouteRewards(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBe(false);
 			});
+		});
+	});
+
+	describe('Path Matching Functions', () => {
+		const withAppPrefix = (path: string) => `${ROUTE_ID_GROUP_APP}${path}`;
+
+		it('isTransactionsPath', () => {
+			expect(isTransactionsPath(withAppPrefix(AppPath.Transactions))).toBe(true);
+			expect(isTransactionsPath('/(app)/transactions')).toBe(true); // without trailing slash
+			expect(isTransactionsPath('/wrong')).toBe(false);
+			expect(isTransactionsPath(null)).toBe(false);
+		});
+
+		it('isSettingsPath', () => {
+			expect(isSettingsPath(withAppPrefix(AppPath.Settings))).toBe(true);
+			expect(isSettingsPath('/(app)/settings')).toBe(true);
+			expect(isSettingsPath('/(app)/settings/wrong')).toBe(false);
+			expect(isSettingsPath(null)).toBe(false);
+		});
+
+		it('isDappExplorerPath', () => {
+			expect(isDappExplorerPath(withAppPrefix(AppPath.Explore))).toBe(true);
+			expect(isDappExplorerPath('/(app)/explore')).toBe(true);
+			expect(isDappExplorerPath('/(app)/explore/wrong')).toBe(false);
+			expect(isDappExplorerPath(null)).toBe(false);
+		});
+
+		it('isActivityPath', () => {
+			expect(isActivityPath(withAppPrefix(AppPath.Activity))).toBe(true);
+			expect(isActivityPath('/(app)/activity')).toBe(true);
+			expect(isActivityPath('/(app)/activity/wrong')).toBe(false);
+			expect(isActivityPath(null)).toBe(false);
+		});
+
+		it('isTokensPath', () => {
+			expect(isTokensPath(withAppPrefix(AppPath.Tokens))).toBe(true);
+			expect(isTokensPath('/(app)/')).toBe(true);
+			expect(isTokensPath(withAppPrefix(AppPath.WalletConnect))).toBe(true);
+			expect(isTokensPath('/(app)/wc')).toBe(true);
+			expect(isTokensPath('/(app)/wrong')).toBe(false);
+			expect(isTokensPath(null)).toBe(false);
+		});
+
+		it('isRewardsPath', () => {
+			expect(isRewardsPath(withAppPrefix(AppPath.Rewards))).toBe(true);
+			expect(isRewardsPath('/(app)/rewards')).toBe(true);
+			expect(isRewardsPath('/(app)/rewards/bonus')).toBe(false);
+			expect(isRewardsPath(null)).toBe(false);
 		});
 	});
 });
