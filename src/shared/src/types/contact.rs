@@ -1,5 +1,6 @@
-use candid::{CandidType, Deserialize};
 use std::fmt;
+
+use candid::{CandidType, Deserialize};
 
 use crate::types::Version;
 
