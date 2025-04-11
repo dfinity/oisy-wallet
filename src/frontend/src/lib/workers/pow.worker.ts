@@ -16,7 +16,7 @@ let timer: NodeJS.Timeout | undefined = undefined;
 export const onPowMessage = async (event: MessageEvent) => {
 	console.warn('Received event data:', event.data);
 
-	// this makes sure that the response is automatically routed back to the requester that initially published the message vent
+	// auto-route responses back to original requesters
 	if (routeWorkerResponse(event)) {
 		return;
 	}
@@ -29,7 +29,7 @@ export const onPowMessage = async (event: MessageEvent) => {
 		case 'startPowTimer':
 			startPowTimer();
 			// execute the first call immediately
-			await allowSigning();
+			await requestSignerCycles();
 			return;
 		case 'setPowThrottle':
 			if (event.data?.throttleRate !== undefined && event.data.throttleRate !== 0) {
@@ -52,44 +52,72 @@ const startPowTimer = () => {
 	if (nonNullish(timer)) {
 		return;
 	}
-	timer = setInterval(allowSigning, SCHEDULER_INTERVAL);
+	timer = setInterval(requestSignerCycles, SCHEDULER_INTERVAL);
 };
 
-async function allowSigning() {
-	// Step 1: Call CreatePoWChallenge
-	const createPowChallengeResponse: PostMessageCreatePowChallengeResponse =
-		await sendMessageRequest<PostMessageCreatePowChallengeResponse>({
-			worker: self as unknown as Worker, // Pass as part of an object
-			msg: 'CreatePowChallengeRequest',
-			data: {}, // Empty object passed as data
-			schema: PostMessageCreatePowChallengeResponseSchema
-		});
-
-	let nonce;
-	// Step 2: Solve pow challenge
-	if ('Ok' in createPowChallengeResponse.result) {
-		const challengeData = createPowChallengeResponse.result.Ok;
-		nonce = await solvePowChallenge({
-			timestamp: challengeData.start_timestamp_ms,
-			difficulty: challengeData.difficulty
-		});
-	} else if ('Err' in createPowChallengeResponse.result) {
-		console.error('PoW challenge error:', createPowChallengeResponse.result.Err);
-		return; // Exit on error
+/**
+ * Initiates Proof-of-Work and signing processes sequentially.
+ * This function coordinates:
+ * 1. Creation of a PoW challenge.
+ * 2. Solving the PoW challenge.
+ * 3. Requesting allowance for signing using the solved nonce.
+ *
+ * Errors at any stage lead to early returns with appropriate logging.
+ */
+async function requestSignerCycles(): Promise<void> {
+	const challengeData = await createPoWChallenge();
+	if (!challengeData) {
+		// error already logged in createPoWChallenge
+		return;
 	}
 
-	// Step 3: Call AllowSigning
-	const allowSigningResponse: PostMessageAllowSigningResponse =
-		await sendMessageRequest<PostMessageAllowSigningResponse>({
-			worker: self as unknown as Worker,
-			msg: 'AllowSigningRequest',
-			data: { nonce },
-			schema: PostMessageAllowSigningResponseSchema
-		});
+	const nonce = await solvePowChallenge({
+		timestamp: challengeData.start_timestamp_ms,
+		difficulty: challengeData.difficulty
+	});
 
-	if ('Ok' in allowSigningResponse.result) {
-		console.warn('Allow signing successful:', allowSigningResponse.result.Ok);
-	} else if ('Err' in allowSigningResponse.result) {
-		console.warn('Allow signing failed:', allowSigningResponse.result.Err);
+	await requestAllowSigning(nonce);
+}
+
+/**
+ * Requests creation of the Proof-of-Work (PoW) challenge.
+ * Logs the error if unsuccessful.
+ *
+ * @returns Challenge data on success, null otherwise.
+ */
+async function createPoWChallenge() {
+	const response: PostMessageCreatePowChallengeResponse = await sendMessageRequest({
+		worker: self as unknown as Worker,
+		msg: 'CreatePowChallengeRequest',
+		data: {},
+		schema: PostMessageCreatePowChallengeResponseSchema
+	});
+
+	if ('Ok' in response.result) {
+		return response.result.Ok;
 	}
+
+	console.error('PoW challenge error:', response.result.Err);
+	return null;
+}
+
+/**
+ * Requests allowance for signing operations with solved nonce.
+ *
+ * @param nonce - The computed result from the solved PoW challenge.
+ */
+async function requestAllowSigning(nonce: number) {
+	const signingResponse: PostMessageAllowSigningResponse = await sendMessageRequest({
+		worker: self as unknown as Worker,
+		msg: 'AllowSigningRequest',
+		data: { nonce },
+		schema: PostMessageAllowSigningResponseSchema
+	});
+
+	if ('Ok' in signingResponse.result) {
+		console.info('Allow signing successful:', signingResponse.result.Ok);
+		return;
+	}
+
+	console.warn('Allow signing failed:', signingResponse.result.Err);
 }
