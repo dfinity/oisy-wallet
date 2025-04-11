@@ -180,14 +180,14 @@ export class BackendCanister extends Canister<BackendService> {
 	// keeping the existing implementation to not beak the existing integration
 	allowSigning = async ({ nonce }: AllowSigningParams): Promise<AllowSigningResponse> => {
 		const { allow_signing } = this.caller({ certified: true });
-		const result = await allow_signing(toNullable({ nonce }));
+		const response = await allow_signing(toNullable({ nonce }));
 
-		if ('Ok' in result) {
-			const { Ok } = result;
+		if ('Ok' in response) {
+			const { Ok } = response;
 			return Ok;
 		}
 
-		throw mapAllowSigningError(result.Err);
+		throw mapAllowSigningError(response.Err);
 	};
 
 	// directly returning result and not the response
