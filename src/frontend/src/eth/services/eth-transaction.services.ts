@@ -119,7 +119,7 @@ const processMinedTransaction = async ({ token }: { token: Token }) => {
 	} = token;
 
 	// Reload transactions as a transaction has been mined
-	await reloadEthereumTransactions({ tokenId, networkId });
+	await reloadEthereumTransactions({ tokenId, networkId, silent: false });
 
 	// Reload balance as a transaction has been mined
 	await reloadEthereumBalance(token);
