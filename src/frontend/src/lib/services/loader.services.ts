@@ -1,4 +1,12 @@
+import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { allowSigning } from '$lib/api/backend.api';
+import {
+	networkBitcoinMainnetEnabled,
+	networkEthereumEnabled,
+	networkSolanaMainnetEnabled
+} from '$lib/derived/networks.derived';
 import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
@@ -6,6 +14,7 @@ import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { loading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -108,7 +117,19 @@ export const initLoader = async ({
 		return;
 	}
 
-	const { success: addressSuccess } = await loadAddresses(err?.map(({ tokenId }) => tokenId) ?? []);
+	const errorTokenIds: TokenId[] = err?.map(({ tokenId }) => tokenId) ?? [];
+
+	// We can fetch these values imperatively because there stores are updated in this same function when loading the user profile.
+	const enabledTokenIds: TokenId[] = [
+		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_TOKEN_ID] : []),
+		...(get(networkEthereumEnabled) ? [ETHEREUM_TOKEN_ID] : []),
+		...(get(networkSolanaMainnetEnabled) ? [SOLANA_TOKEN_ID] : [])
+	];
+
+	// We don't need to load the addresses of the disabled networks.
+	const tokenIds: TokenId[] = errorTokenIds.filter((tokenId) => enabledTokenIds.includes(tokenId));
+
+	const { success: addressSuccess } = await loadAddresses(tokenIds);
 
 	if (!addressSuccess) {
 		await signOut({});
