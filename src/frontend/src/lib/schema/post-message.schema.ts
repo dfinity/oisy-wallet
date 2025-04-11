@@ -129,6 +129,8 @@ export const PostMessageResponseSchema = z.enum([
 	'syncBtcPendingUtxos',
 	'syncCkBTCUpdateOk',
 	'syncBtcAddress',
+	'powCreateChallengeRequest',
+	'powAllowSigningRequest',
 	...PostMessageResponseStatusSchema.options
 ]);
 
