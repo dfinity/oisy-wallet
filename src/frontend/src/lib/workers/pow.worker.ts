@@ -1,14 +1,11 @@
+import { isNullish, nonNullish } from '@dfinity/utils';
+import { routeWorkerResponse, sendMessageRequest } from '../utils/worker.utils';
+import { solvePowChallenge } from '../services/pow.services';
 import {
 	PostMessageAllowSigningResponseSchema,
 	PostMessageCreatePowChallengeResponseSchema
-} from '$lib/schema/post-message.schema';
-import { solvePowChallenge } from '$lib/services/pow.services';
-import type {
-	PostMessageAllowSigningResponse,
-	PostMessageCreatePowChallengeResponse
-} from '$lib/types/post-message';
-import { routeWorkerResponse, sendMessageRequest } from '$lib/utils/worker.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+} from '../schema/post-message.schema';
+import type { PostMessageAllowSigningResponse, PostMessageCreatePowChallengeResponse } from '$lib/types/post-message';
 
 export const SCHEDULER_INTERVAL = 120_000;
 // in ms, can be changed dynamically by sending message setPowThrottle
@@ -16,7 +13,7 @@ let _throttleRate = 20;
 
 let timer: NodeJS.Timeout | undefined = undefined;
 
-export const onPowMessage = (event: MessageEvent) => {
+export const onPowMessage = async (event: MessageEvent) => {
 	console.warn('Received event data:', event.data);
 
 	// this makes sure that the response is automatically routed back to the requester that initially published the message vent
@@ -32,7 +29,7 @@ export const onPowMessage = (event: MessageEvent) => {
 		case 'startPowTimer':
 			startPowTimer();
 			// execute the first call immediately
-			allowSigning();
+			await allowSigning();
 			return;
 		case 'setPowThrottle':
 			if (event.data?.throttleRate !== undefined && event.data.throttleRate !== 0) {
