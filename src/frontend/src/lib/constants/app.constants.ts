@@ -95,6 +95,7 @@ export const VC_POPUP_HEIGHT = 900;
 
 // Workers
 export const AUTH_TIMER_INTERVAL = 1000;
+export const POW_TIMER_INTERVAL = 1000;
 // From FI team:
 // On mainnet, the index runs its indexing function every second. The time to see a new transaction in the index is <=1 second plus the time required by the indexing function
 // (however)
@@ -142,3 +143,5 @@ export const FALLBACK_TIMEOUT = 10000;
 // Git
 export const GIT_COMMIT_HASH = VITE_GIT_COMMIT_HASH;
 export const GIT_BRANCH_NAME = VITE_GIT_BRANCH_NAME;
+
+// PoW
