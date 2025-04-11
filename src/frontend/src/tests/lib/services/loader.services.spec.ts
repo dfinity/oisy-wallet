@@ -45,8 +45,7 @@ describe('loader.services', () => {
 				}
 			});
 
-			vi.spyOn(window.history, 'replaceState').mockImplementation(() => {
-			});
+			vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
 		});
 
 		it('should return success', async () => {
