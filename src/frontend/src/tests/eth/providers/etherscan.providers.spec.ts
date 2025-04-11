@@ -164,6 +164,13 @@ describe('etherscan.providers', () => {
 				sort: 'asc'
 			});
 		});
+
+		it('should handle errors gracefully', async () => {
+			const provider = new EtherscanProvider(network);
+			mockFetch.mockRejectedValue(new Error('Network error'));
+
+			await expect(provider.transactions({ address })).rejects.toThrowError('Network error');
+		});
 	});
 
 	describe('etherscanProviders', () => {
