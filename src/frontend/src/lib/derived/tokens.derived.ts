@@ -19,6 +19,7 @@ import {
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { derived, type Readable } from 'svelte/store';
+import { enabledBaseTokens } from '../../evm/base/derived/tokens.derived';
 
 export const tokens: Readable<Token[]> = derived(
 	[
@@ -27,7 +28,8 @@ export const tokens: Readable<Token[]> = derived(
 		splTokens,
 		enabledEthereumTokens,
 		enabledBitcoinTokens,
-		enabledSolanaTokens
+		enabledSolanaTokens,
+		enabledBaseTokens
 	],
 	([
 		$erc20Tokens,
@@ -35,7 +37,8 @@ export const tokens: Readable<Token[]> = derived(
 		$splTokens,
 		$enabledEthereumTokens,
 		$enabledBitcoinTokens,
-		$enabledSolanaTokens
+		$enabledSolanaTokens,
+		$enabledBaseTokens
 	]) => [
 		ICP_TOKEN,
 		...$enabledBitcoinTokens,
@@ -43,7 +46,8 @@ export const tokens: Readable<Token[]> = derived(
 		...$enabledSolanaTokens,
 		...$erc20Tokens,
 		...$icrcTokens,
-		...$splTokens
+		...$splTokens,
+		...$enabledBaseTokens
 	]
 );
 
