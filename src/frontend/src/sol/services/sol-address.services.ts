@@ -18,8 +18,8 @@ import {
 	certifyAddress,
 	loadIdbTokenAddress,
 	loadTokenAddress,
-	type LoadTokenAddressParams,
-	validateAddress
+	validateAddress,
+	type LoadTokenAddressParams
 } from '$lib/services/address.services';
 import {
 	solAddressDevnetStore,
