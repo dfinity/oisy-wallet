@@ -49,6 +49,79 @@ on:
         required: false
         type: string
         default: frontend
+    secrets:
+      VITE_ETHERSCAN_API_KEY_STAGING:
+        required: true
+      VITE_INFURA_API_KEY_STAGING:
+        required: true
+      VITE_ALCHEMY_API_KEY_STAGING:
+        required: true
+      VITE_QUICKNODE_API_KEY_STAGING:
+        required: true
+      VITE_WALLET_CONNECT_PROJECT_ID_STAGING:
+        required: true
+      VITE_COINGECKO_API_KEY_STAGING:
+        required: true
+      VITE_JUNO_SATELLITE_ID_STAGING:
+        required: true
+      VITE_JUNO_ORBITER_ID_STAGING:
+        required: true
+      VITE_POUH_ENABLED_STAGING:
+        required: true
+      VITE_SWAP_ACTION_ENABLED_STAGING:
+        required: true
+      VITE_USER_SNAPSHOT_ENABLED_STAGING:
+        required: true
+      VITE_AIRDROPS_ENABLED_STAGING:
+        required: true
+      VITE_PLAUSIBLE_ENABLED_STAGING:
+        required: true
+      VITE_USER_NETWORKS_FEATURE_ENABLED_STAGING:
+        required: true
+      VITE_ONRAMPER_API_KEY_DEV_STAGING:
+        required: true
+      VITE_ONRAMPER_API_KEY_PROD_STAGING:
+        required: true
+      VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING:
+        required: true
+      DFX_DEPLOY_KEY_STAGING:
+        required: true
+      VITE_ETHERSCAN_API_KEY_BETA:
+        required: true
+      VITE_INFURA_API_KEY_BETA:
+        required: true
+      VITE_ALCHEMY_API_KEY_BETA:
+        required: true
+      VITE_QUICKNODE_API_KEY_BETA:
+        required: true
+      VITE_WALLET_CONNECT_PROJECT_ID_BETA:
+        required: true
+      VITE_COINGECKO_API_KEY_BETA:
+        required: true
+      VITE_JUNO_SATELLITE_ID_BETA:
+        required: true
+      VITE_JUNO_ORBITER_ID_BETA:
+        required: true
+      VITE_POUH_ENABLED_BETA:
+        required: true
+      VITE_AUTH_ALTERNATIVE_ORIGINS_BETA:
+        required: true
+      VITE_ONRAMPER_API_KEY_DEV_BETA:
+        required: true
+      VITE_SWAP_ACTION_ENABLED_BETA:
+        required: true
+      VITE_USER_SNAPSHOT_ENABLED_BETA:
+        required: true
+      VITE_AIRDROPS_ENABLED_BETA:
+        required: true
+      VITE_PLAUSIBLE_ENABLED_BETA:
+        required: true
+      VITE_USER_NETWORKS_FEATURE_ENABLED_BETA:
+        required: true
+      VITE_ONRAMPER_API_KEY_PROD_BETA:
+        required: true
+      DFX_DEPLOY_KEY_BETA:
+        required: true
 
 run-name: >-
   ${{ 
