@@ -360,7 +360,7 @@ export const getIcpSwapAmounts = async ({
 		identity,
 		canisterId,
 		amountIn: amountIn.toString(),
-		zeroForOne: false,
+		zeroForOne: true,
 		amountOutMinimum: '0'
 	});
 
@@ -376,6 +376,6 @@ export const getIcpSwapAmounts = async ({
 			liquidityFees: fee,
 			networkFee: 10_000n
 		},
-		amountForSwap: amountIn
+		amountForSwap: amountIn.toString()
 	};
 };
