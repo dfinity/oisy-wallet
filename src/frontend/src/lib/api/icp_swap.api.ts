@@ -2,7 +2,7 @@ import { ICPSwapFactoryCanister } from '$lib/canisters/icp_swap.canister'; // в
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
 
-const SWAP_FACTORY_CANISTER_ID = 'ososz-6iaaa-aaaag-ak5ua-cai';
+const SWAP_FACTORY_CANISTER_ID = '4mmnk-kiaaa-aaaag-qbllq-cai';
 
 export const getPool = async ({
 	identity,
