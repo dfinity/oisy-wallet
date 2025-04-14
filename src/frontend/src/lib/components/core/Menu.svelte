@@ -94,7 +94,7 @@
 				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
 				on:click={modalStore.openAddressBook}
 			>
-				<IconUserSquare size="20	"></IconUserSquare>
+				<IconUserSquare size="20" />
 				{$i18n.navigation.text.address_book}
 			</ButtonMenu>
 
