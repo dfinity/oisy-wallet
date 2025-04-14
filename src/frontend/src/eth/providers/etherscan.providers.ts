@@ -5,7 +5,10 @@ import {
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
-import type { EtherscanProviderTransaction } from '$eth/types/etherscan-transaction';
+import type {
+	EtherscanProviderInternalTransaction,
+	EtherscanProviderTransaction
+} from '$eth/types/etherscan-transaction';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -19,6 +22,12 @@ import {
 } from 'ethers/providers';
 import { get } from 'svelte/store';
 
+type TransactionsParams = {
+	address: EthAddress;
+	startBlock?: BlockTag;
+	endBlock?: BlockTag;
+};
+
 export class EtherscanProvider {
 	private readonly provider: EtherscanProviderLib;
 
@@ -29,15 +38,12 @@ export class EtherscanProvider {
 	// There is no `getHistory` in ethers v6
 	// Issue report: https://github.com/ethers-io/ethers.js/issues/4303
 	// Workaround: https://ethereum.stackexchange.com/questions/147756/read-transaction-history-with-ethers-v6-1-0/150836#150836
+	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-normal-transactions-by-address
 	private async getHistory({
 		address,
 		startBlock,
 		endBlock
-	}: {
-		address: string;
-		startBlock?: BlockTag;
-		endBlock?: BlockTag;
-	}): Promise<Transaction[]> {
+	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
 			action: 'txlist',
 			address,
@@ -75,13 +81,54 @@ export class EtherscanProvider {
 		);
 	}
 
-	transactions = ({
+	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-internal-transactions-by-address
+	private async getInternalHistory({
 		address,
-		startBlock
-	}: {
-		address: EthAddress;
-		startBlock?: BlockTag;
-	}): Promise<Transaction[]> => this.getHistory({ address, startBlock });
+		startBlock,
+		endBlock
+	}: TransactionsParams): Promise<Transaction[]> {
+		const params = {
+			action: 'txlistinternal',
+			address,
+			startblock: startBlock ?? 0,
+			endblock: endBlock ?? 99999999,
+			sort: 'asc'
+		};
+
+		const result: EtherscanProviderInternalTransaction[] = await this.provider.fetch(
+			'account',
+			params
+		);
+
+		return result.map(
+			({
+				blockNumber,
+				timeStamp,
+				hash,
+				from,
+				to,
+				value,
+				gas
+			}: EtherscanProviderInternalTransaction): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				nonce: 0,
+				gasLimit: BigInt(gas),
+				value: BigInt(value),
+				// Chain ID is not delivered by the Etherscan API so, we naively set 0
+				chainId: 0n
+			})
+		);
+	}
+
+	transactions = async (params: TransactionsParams): Promise<Transaction[]> => {
+		const results = await Promise.all([this.getHistory(params), this.getInternalHistory(params)]);
+
+		return results.flat();
+	};
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = {
