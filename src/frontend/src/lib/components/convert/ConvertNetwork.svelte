@@ -10,7 +10,7 @@
 	<slot slot="label" name="label" />
 
 	<div class="flex" slot="main-value">
-		<NetworkLogo network={token.network} blackAndWhite color="off-white" />
+		<NetworkLogo network={token.network} color="off-white" />
 		<span class="ml-2">{token.network.name}</span>
 	</div>
 </ModalValue>

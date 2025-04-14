@@ -7,15 +7,15 @@
 
 	export let styleClass = '';
 
-	const onClick = async () => {
-		await trackEvent({
+	const onClick = () => {
+		trackEvent({
 			name: TRACK_HELP_SIGNING_IN
 		});
 		modalStore.openAuthHelp(true);
 	};
 </script>
 
-<span class={`${styleClass} flex flex-row gap-1`}>
+<span class={`${styleClass} flex flex-row justify-center gap-1 md:justify-start`}>
 	{$i18n.auth.help.text.need_help}
 	<Button link inlineLink on:click={onClick}>{$i18n.auth.help.text.sign_in}</Button>
 </span>
