@@ -1,5 +1,7 @@
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as networksEnv from '$env/networks/networks.env';
-import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
@@ -11,17 +13,10 @@ import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
 import { loading } from '$lib/stores/loader.store';
-import { userProfileStore } from '$lib/stores/user-profile.store';
-import type { LoadIdbAddressError } from '$lib/types/errors';
+import { LoadIdbAddressError } from '$lib/types/errors';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import {
-	mockNetworksSettings,
-	mockUserProfile,
-	mockUserSettings
-} from '$tests/mocks/user-profile.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
-import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import { type MockInstance } from 'vitest';
 
@@ -98,6 +93,7 @@ describe('loader.services', () => {
 
 		const mockParams = {
 			identity: mockIdentity,
+			enabledNetworkIds: [BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID, SOLANA_MAINNET_NETWORK_ID],
 			validateAddresses: mockValidateAddresses,
 			progressAndLoad: mockProgressAndLoad,
 			setProgressModal: mockSetProgressModal
@@ -163,9 +159,9 @@ describe('loader.services', () => {
 				vi.mocked(loadIdbAddresses).mockResolvedValue({
 					success: false,
 					err: [
-						{ tokenId: ETHEREUM_TOKEN_ID },
-						{ tokenId: SOLANA_TOKEN_ID }
-					] as LoadIdbAddressError[]
+						new LoadIdbAddressError(BTC_MAINNET_NETWORK_ID),
+						new LoadIdbAddressError(SOLANA_MAINNET_NETWORK_ID)
+					]
 				});
 			});
 
@@ -176,29 +172,14 @@ describe('loader.services', () => {
 				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 
 				expect(loadAddresses).toHaveBeenCalledOnce();
-				expect(loadAddresses).toHaveBeenNthCalledWith(1, [ETHEREUM_TOKEN_ID, SOLANA_TOKEN_ID]);
+				expect(loadAddresses).toHaveBeenNthCalledWith(1, [BTC_MAINNET_NETWORK_ID, SOLANA_TOKEN_ID]);
 			});
 
 			it('should load addresses from the backend only for enabled networks', async () => {
-				userProfileStore.set({
-					certified: false,
-					profile: {
-						...mockUserProfile,
-						settings: toNullable({
-							...mockUserSettings,
-							networks: {
-								...mockNetworksSettings,
-								testnets: { show_testnets: true },
-								networks: [
-									[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
-									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
-								]
-							}
-						})
-					}
+				await initLoader({
+					...mockParams,
+					enabledNetworkIds: [ETHEREUM_NETWORK_ID, SOLANA_MAINNET_NETWORK_ID]
 				});
-
-				await initLoader(mockParams);
 
 				expect(allowSigning).toHaveBeenCalledOnce();
 				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
@@ -208,9 +189,10 @@ describe('loader.services', () => {
 			});
 
 			it('should not load addresses from the backend if all networks are disabled', async () => {
-				setupUserNetworksStore('allDisabled');
-
-				await initLoader(mockParams);
+				await initLoader({
+					...mockParams,
+					enabledNetworkIds: []
+				});
 
 				expect(allowSigning).toHaveBeenCalledOnce();
 				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
