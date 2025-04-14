@@ -73,7 +73,6 @@
 		"@dfinity/utils": "^2.12.0",
 		"@dfinity/verifiable-credentials": "^0.0.4",
 		"@dfinity/zod-schemas": "^0.0.2",
-		"@junobuild/analytics": "^0.0.31",
 		"@metamask/detect-provider": "^2.0.0",
 		"@reown/walletkit": "^1.2.2",
 		"@solana-program/compute-budget": "^0.7.0",
