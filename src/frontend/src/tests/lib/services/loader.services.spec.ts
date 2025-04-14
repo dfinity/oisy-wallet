@@ -1,8 +1,6 @@
 import * as networksEnv from '$env/networks/networks.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
-import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -15,7 +13,6 @@ import { authStore } from '$lib/stores/auth.store';
 import { loading } from '$lib/stores/loader.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { LoadIdbAddressError } from '$lib/types/errors';
-import { LoadIdbAddressError } from '$lib/types/errors';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {

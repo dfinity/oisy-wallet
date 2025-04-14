@@ -1,6 +1,3 @@
-import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
-import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { allowSigning } from '$lib/api/backend.api';
 import {
 	networkBitcoinMainnetEnabled,
@@ -14,7 +11,6 @@ import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { loading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -127,7 +123,9 @@ export const initLoader = async ({
 	];
 
 	// We don't need to load the addresses of the disabled networks.
-	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) => enabledNetworkIds.includes(networkId));
+	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) =>
+		enabledNetworkIds.includes(networkId)
+	);
 
 	const { success: addressSuccess } = await loadAddresses(networkIds);
 
