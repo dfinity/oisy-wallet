@@ -3,6 +3,7 @@ import type {
 	NewVipRewardResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
+	SetReferrerResponse,
 	UserData,
 	UserSnapshot,
 	VipReward
@@ -56,7 +57,7 @@ export class RewardCanister extends Canister<RewardService> {
 		return referrer_info();
 	};
 
-	setReferrer = (referralCode: number): Promise<void> => {
+	setReferrer = (referralCode: number): Promise<SetReferrerResponse> => {
 		const { set_referrer } = this.caller({ certified: true });
 
 		return set_referrer(referralCode);
