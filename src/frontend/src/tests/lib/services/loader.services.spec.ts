@@ -1,5 +1,5 @@
-import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -10,7 +10,7 @@ import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
 import { loading } from '$lib/stores/loader.store';
-import type { LoadIdbAddressError } from '$lib/types/errors';
+import { LoadIdbAddressError } from '$lib/types/errors';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
@@ -148,7 +148,10 @@ describe('loader.services', () => {
 
 			vi.mocked(loadIdbAddresses).mockResolvedValueOnce({
 				success: false,
-				err: [{ tokenId: ICP_TOKEN_ID }, { tokenId: SOLANA_TOKEN_ID }] as LoadIdbAddressError[]
+				err: [
+					new LoadIdbAddressError(ICP_NETWORK_ID),
+					new LoadIdbAddressError(SOLANA_MAINNET_NETWORK_ID)
+				]
 			});
 
 			await initLoader(mockParams);
@@ -157,7 +160,7 @@ describe('loader.services', () => {
 			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
-			expect(loadAddresses).toHaveBeenNthCalledWith(1, [ICP_TOKEN_ID, SOLANA_TOKEN_ID]);
+			expect(loadAddresses).toHaveBeenNthCalledWith(1, [ICP_NETWORK_ID, SOLANA_MAINNET_NETWORK_ID]);
 		});
 	});
 });
