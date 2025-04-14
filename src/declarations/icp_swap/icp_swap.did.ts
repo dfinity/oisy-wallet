@@ -31,6 +31,8 @@ export interface SwapArgs {
 
 type DepositArgs = { fee: bigint; token: string; amount: bigint; };
 
+type WithdrawArgs = { fee: bigint; token: string; amount: bigint; };
+
 export type Error =
 	| { CommonError: null }
 	| { InternalError: string }
@@ -45,6 +47,7 @@ export interface _SERVICE {
 	quote: ActorMethod<[SwapArgs], Result>;
   swap: ActorMethod<[SwapArgs], Result>; 
   deposit: ActorMethod<[DepositArgs], Result>;
+  withdraw: ActorMethod<[WithdrawArgs], Result>;
 }
 
 export type { _SERVICE as SwapFactoryService };

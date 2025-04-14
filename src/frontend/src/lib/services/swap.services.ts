@@ -339,16 +339,6 @@ export const getIcpSwapAmounts = async ({
 }) => {
 	const fee = 3000n;	
 
-	const token0 = {
-		address: sourceToken.ledgerCanisterId,
-		standard: sourceToken.standard
-	};
-
-	const token1 = {
-		address: destinationToken.ledgerCanisterId,
-		standard: destinationToken.standard
-	};
-
 	const pool = await getPool({
 		identity,
 		token0,
