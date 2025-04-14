@@ -4,7 +4,7 @@ import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { setCustomToken } from '$lib/api/backend.api';
-import { getPool, getQuote } from '$lib/api/icp_swap.api';
+import { executeSwap, getPool, getQuote } from '$lib/api/icp_swap.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -15,6 +15,7 @@ import {
 } from '$lib/stores/kong-swap-tokens.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Amount } from '$lib/types/send';
+import type { Token } from '$lib/types/token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -149,6 +150,9 @@ export const getQuoteWithSlippage = async ({
 	slippagePercentage: number;
 }) => {
 	const poolData = await getPool({ identity, token0, token1, fee });
+
+	console.log('Pool data:', poolData);
+
 	const swapPoolCanisterId = poolData.canisterId.toString();
 
 	const quoteAmount = await getQuote({
@@ -159,6 +163,8 @@ export const getQuoteWithSlippage = async ({
 		amountOutMinimum: '0'
 	});
 
+	console.log('quoteAmount', quoteAmount);
+
 	const slippageFactor = BigInt(10000 - Math.floor(slippagePercentage * 100));
 	const amountOutMinimum = (quoteAmount * slippageFactor) / 10000n;
 
@@ -166,5 +172,221 @@ export const getQuoteWithSlippage = async ({
 		poolCanisterId: swapPoolCanisterId,
 		quoteAmount,
 		amountOutMinimum
+	};
+};
+
+// export const performSwap = async ({
+// 	identity,
+// 	poolCanisterId,
+// 	amountIn,
+// 	zeroForOne,
+// 	slippagePercentage
+// }: {
+// 	identity: Identity;
+// 	poolCanisterId: string;
+// 	amountIn: bigint;
+// 	zeroForOne: boolean;
+// 	slippagePercentage: number;
+// }) => {
+// 	try {
+// 		// 1. отримуємо quote і slippage
+// 		const { amountOutMinimum } = await getQuoteWithSlippage({
+// 			identity,
+// 			amountIn,
+// 			zeroForOne,
+// 			slippagePercentage
+// 		});
+
+// 		// 2. тут маєш зробити deposit через approve/transfer токенів до пулу
+
+// 		// 3. Викликаємо swap
+// 		const swapResult = await executeSwap({
+// 			identity,
+// 			canisterId: poolCanisterId,
+// 			amountIn: amountIn.toString(),
+// 			zeroForOne,
+// 			amountOutMinimum: amountOutMinimum.toString()
+// 		});
+
+// 		console.log('Swap successful:', swapResult);
+// 		return swapResult;
+// 	} catch (error) {
+// 		console.error('Swap failed:', error);
+// 		throw error;
+// 	}
+// };
+
+// export const icpSwap = async ({
+// 	identity,
+// 	progress,
+// 	sourceToken,
+// 	destinationToken,
+// 	swapAmount,
+// 	slippageValue,
+// 	sourceTokenFee,
+// 	isSourceTokenIcrc2
+// }: {
+// 	identity: OptionIdentity;
+// 	progress: (step: ProgressStepsSwap) => void;
+// 	sourceToken: IcTokenToggleable;
+// 	destinationToken: IcTokenToggleable;
+// 	swapAmount: Amount;
+// 	slippageValue: Amount;
+// 	sourceTokenFee: bigint;
+// 	isSourceTokenIcrc2: boolean;
+// }) => {
+// 	progress(ProgressStepsSwap.SWAP);
+
+// 	const parsedSwapAmount = parseToken({
+// 		value: `${swapAmount}`,
+// 		unitName: sourceToken.decimals
+// 	});
+
+// 	const token0 = {
+// 		address: sourceToken.ledgerCanisterId,
+// 		standard: sourceToken.standard,
+// 		decimals: sourceToken.decimals
+// 	};
+
+// 	const token1 = {
+// 		address: destinationToken.ledgerCanisterId,
+// 		standard: destinationToken.standard,
+// 		decimals: destinationToken.decimals
+// 	};
+
+// 	const fee = 3000n;
+
+// 	const poolData = await getPool({ identity, token0, token1, fee });
+// 	if (!poolData) {
+// 		throw new Error('Could not fetch pool data.');
+// 	}
+
+// 	const swapPoolCanisterId = poolData.canisterId.toString();
+
+// 	const quoteAmount = await getQuote({
+// 		identity,
+// 		canisterId: swapPoolCanisterId,
+// 		amountIn: parsedSwapAmount.toString(),
+// 		zeroForOne: true,
+// 		amountOutMinimum: '0'
+// 	});
+
+// 	const slippageFactor = BigInt(10000 - Math.floor(Number(slippageValue) * 100));
+// 	const amountOutMinimum = (quoteAmount * slippageFactor) / 10000n;
+
+// 	let txBlockIndex: bigint | undefined = undefined;
+
+// 	if (!isSourceTokenIcrc2) {
+// 		if (sourceToken.standard === 'icrc') {
+// 			txBlockIndex = await sendIcrc({
+// 				identity,
+// 				token: sourceToken,
+// 				amount: parsedSwapAmount,
+// 				to: swapPoolCanisterId,
+// 				ledgerCanisterId: sourceToken.ledgerCanisterId
+// 			});
+// 		} else if (sourceToken.standard === 'ICP') {
+// 			txBlockIndex = await sendIcp({
+// 				identity,
+// 				token: sourceToken,
+// 				amount: parsedSwapAmount,
+// 				to: swapPoolCanisterId
+// 			});
+// 		}
+// 	} else {
+// 		await approve({
+// 			identity,
+// 			ledgerCanisterId: sourceToken.ledgerCanisterId,
+// 			amount: parsedSwapAmount + sourceTokenFee * 2n,
+// 			expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+// 			spender: { owner: Principal.fromText(swapPoolCanisterId) }
+// 		});
+// 	}
+
+// 	await executeSwap({
+// 		identity,
+// 		canisterId: swapPoolCanisterId,
+// 		amountIn: parsedSwapAmount.toString(),
+// 		zeroForOne: true,
+// 		amountOutMinimum: amountOutMinimum.toString()
+// 	});
+
+// 	progress(ProgressStepsSwap.UPDATE_UI);
+
+// 	if (!destinationToken.enabled) {
+// 		await setCustomToken({
+// 			token: toCustomToken({ ...destinationToken, enabled: true, networkKey: 'Icrc' }),
+// 			identity,
+// 			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+// 		});
+// 		await loadCustomTokens({ identity });
+// 	}
+
+// 	await waitAndTriggerWallet();
+// };
+export const getIcpSwapAmounts = async ({
+	identity,
+	amountIn,
+	slippage,
+	sourceToken,
+	destinationToken
+}: {
+	identity: Identity;
+	amountIn: bigint;
+	slippage: number;
+	sourceToken: Token;
+	destinationToken: Token;
+}) => {
+	const fee = 3000n;	
+
+	const token0 = {
+		address: sourceToken.ledgerCanisterId,
+		standard: sourceToken.standard
+	};
+
+	const token1 = {
+		address: destinationToken.ledgerCanisterId,
+		standard: destinationToken.standard
+	};
+
+	const pool = await getPool({
+		identity,
+		token0,
+		token1,
+		fee
+	});
+
+	if (!pool) {
+		throw new Error('Pool not found');
+	}
+
+	const canisterId = pool.canisterId.toString();
+
+	// Автоматично визначаємо напрямок свапу
+	const token0Principal = token0.address;
+	const token1Principal = token1.address;
+	const zeroForOne = token0Principal < token1Principal;
+
+	const quote = await getQuote({
+		identity,
+		canisterId,
+		amountIn: amountIn.toString(),
+		zeroForOne,
+		amountOutMinimum: '0'
+	});
+
+	const slippageFactor = BigInt(10000 - Math.floor(slippage * 100));
+	const amountOutMinimum = (quote * slippageFactor) / 10000n;
+
+	return {
+		poolCanisterId: canisterId,
+		swapAmounts: {
+			slippage,
+			receiveAmount: amountOutMinimum,
+			route: `${sourceToken.symbol} → ${destinationToken.symbol}`,
+			liquidityFees: fee,
+			networkFee: 10_000n
+		},
+		amountForSwap: amountIn
 	};
 };

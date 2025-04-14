@@ -47,4 +47,14 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 		}
 		throw new Error(`Quote failed: ${JSON.stringify(result.err)}`);
 	};
+
+	swap = async (args: any) => {
+		const { swap } = this.caller({ certified: true });
+		const result = await swap(args);
+
+		if ('ok' in result) {
+			return result.ok;
+		}
+		throw new Error(`Swap failed: ${JSON.stringify(result.err)}`);
+	};
 }

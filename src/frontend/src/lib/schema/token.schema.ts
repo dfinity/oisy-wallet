@@ -53,7 +53,8 @@ export const TokenSchema = z
 		id: TokenIdSchema,
 		network: NetworkSchema,
 		standard: TokenStandardSchema,
-		category: TokenCategorySchema
+		category: TokenCategorySchema,
+		ledgerCanisterId: z.string()
 	})
 	.merge(TokenMetadataSchema)
 	.merge(TokenAppearanceSchema)

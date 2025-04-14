@@ -13,6 +13,7 @@
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
+	import { getIcpSwapAmounts } from '$lib/services/swap.services';
 
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: Token | undefined;
@@ -50,6 +51,16 @@
 					unitName: sourceToken.decimals
 				})
 			});
+
+			const icpSwap = await getIcpSwapAmounts({
+				identity: $authIdentity,
+				sourceToken,
+				destinationToken,
+				amountIn: BigInt(parsedAmount),
+				slippage: 1.5
+			});
+
+			console.log({ swapAmounts, icpSwap });
 
 			if (isNullish(swapAmounts)) {
 				store.reset();

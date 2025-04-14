@@ -25,8 +25,7 @@ export const getPool = async ({
 		fee
 	});
 
-    console.log('getPool result:', result);
-    
+	console.log('getPool result:', result);
 
 	return result;
 };
@@ -54,20 +53,44 @@ export const getQuote = async ({
 	amountIn,
 	zeroForOne,
 	amountOutMinimum = '0'
-  }: {
+}: {
 	identity: any;
 	canisterId: string;
 	amountIn: string;
 	zeroForOne: boolean;
 	amountOutMinimum?: string;
-  }) => {
+}) => {
 	assertNonNullish(identity, 'Identity required');
-  
+
 	const swapPoolCanister = await icpSwapFactoryCanister({ identity, canisterId });
-  
+
 	return swapPoolCanister.quote({
-	  amountIn,
-	  zeroForOne,
-	  amountOutMinimum
+		amountIn,
+		zeroForOne,
+		amountOutMinimum
 	});
-  };
+};
+
+export const executeSwap = async ({
+	identity,
+	canisterId,
+	amountIn,
+	zeroForOne,
+	amountOutMinimum
+}: {
+	identity: any;
+	canisterId: string;
+	amountIn: string;
+	zeroForOne: boolean;
+	amountOutMinimum: string;
+}) => {
+	assertNonNullish(identity, 'Identity required');
+
+	const swapPoolCanister = await icpSwapFactoryCanister({ identity, canisterId });
+
+	return swapPoolCanister.swap({
+		amountIn,
+		zeroForOne,
+		amountOutMinimum
+	});
+};
