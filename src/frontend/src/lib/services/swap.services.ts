@@ -339,6 +339,10 @@ export const getIcpSwapAmounts = async ({
 }) => {
 	const fee = 3000n;	
 
+
+	console.log(sourceToken, destinationToken);
+	
+
 	const pool = await getPool({
 		identity,
 		token0,
