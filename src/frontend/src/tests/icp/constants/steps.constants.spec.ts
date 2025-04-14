@@ -45,13 +45,13 @@ describe('steps.constants', () => {
 			tokenCkErc20Ledger: false
 		};
 
-		it('returns the correct steps with expected text and state', () => {
+		it('should return the correct steps with expected text and state', () => {
 			const steps = sendSteps(mockParams);
 
 			expect(steps).toEqual([mockSendStepInitialization, mockSendStepSend, mockSendStepReload]);
 		});
 
-		it('returns the correct steps with expected text and state if the token is a ckERC20 Ledger', () => {
+		it('should return the correct steps with expected text and state if the token is a ckERC20 Ledger', () => {
 			const steps = sendSteps({ ...mockParams, tokenCkErc20Ledger: true });
 
 			expect(steps).toEqual([
@@ -62,7 +62,7 @@ describe('steps.constants', () => {
 			]);
 		});
 
-		it('returns the correct steps with expected text and state if the network is Bitcoin', () => {
+		it('should return the correct steps with expected text and state if the network is Bitcoin', () => {
 			const steps = sendSteps({ ...mockParams, networkId: BTC_MAINNET_NETWORK_ID });
 
 			expect(steps).toEqual([
@@ -73,7 +73,7 @@ describe('steps.constants', () => {
 			]);
 		});
 
-		it('returns the correct steps with expected text and state if the network is Ethereum', () => {
+		it('should return the correct steps with expected text and state if the network is Ethereum', () => {
 			const steps = sendSteps({ ...mockParams, networkId: ETHEREUM_NETWORK_ID });
 
 			expect(steps).toEqual([
@@ -84,7 +84,7 @@ describe('steps.constants', () => {
 			]);
 		});
 
-		it('returns the correct steps with expected text and state if the network is Bitcoin and the token is a ckERC20 Ledger', () => {
+		it('should return the correct steps with expected text and state if the network is Bitcoin and the token is a ckERC20 Ledger', () => {
 			const steps = sendSteps({
 				...mockParams,
 				networkId: BTC_MAINNET_NETWORK_ID,
@@ -100,7 +100,7 @@ describe('steps.constants', () => {
 			]);
 		});
 
-		it('returns the correct steps with expected text and state if the network is Ethereum and the token is a ckERC20 Ledger', () => {
+		it('should return the correct steps with expected text and state if the network is Ethereum and the token is a ckERC20 Ledger', () => {
 			const steps = sendSteps({
 				...mockParams,
 				networkId: ETHEREUM_NETWORK_ID,
