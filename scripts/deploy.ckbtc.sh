@@ -64,11 +64,7 @@ dfx deploy ckbtc_kyt --specified-id pvm5g-xaaaa-aaaar-qaaia-cai --network "$DFX_
 })"
 
 echo "Step 5: deploy index canister..."
-dfx deploy ckbtc_index --specified-id mm444-5iaaa-aaaar-qaabq-cai --network "$DFX_NETWORK" --argument "(opt variant {
-  Init = record {
-    ledger_id = principal \"$LEDGERID\";
-   }
-})"
+dfx deploy ckbtc_index --network "$DFX_NETWORK"
 
 # Example to mint ckBTC
 
