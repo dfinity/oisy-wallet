@@ -8,10 +8,6 @@
 		loadBtcAddressRegtest,
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
-	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
-	import { USER_NETWORKS_FEATURE_ENABLED } from '$env/networks/networks.env';
-	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
@@ -46,7 +42,6 @@
 	import { initLoader } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
-	import type { NetworkId } from '$lib/types/network';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -173,19 +168,9 @@
 	};
 
 	onMount(async () => {
-		const enabledNetworkIds: NetworkId[] = [
-			...($networkBitcoinMainnetEnabled || !USER_NETWORKS_FEATURE_ENABLED
-				? [BTC_MAINNET_NETWORK_ID]
-				: []),
-			...($networkEthereumEnabled || !USER_NETWORKS_FEATURE_ENABLED ? [ETHEREUM_NETWORK_ID] : []),
-			...($networkSolanaMainnetEnabled || !USER_NETWORKS_FEATURE_ENABLED
-				? [SOLANA_MAINNET_NETWORK_ID]
-				: [])
-		];
 
 		await initLoader({
 			identity: $authIdentity,
-			enabledNetworkIds,
 			validateAddresses,
 			progressAndLoad,
 			setProgressModal
@@ -224,9 +209,9 @@
 {/if}
 
 <style lang="scss">
-	:root:has(.login-modal) {
-		--alert-max-width: 90vw;
-		--alert-max-height: initial;
-		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
-	}
+  :root:has(.login-modal) {
+    --alert-max-width: 90vw;
+    --alert-max-height: initial;
+    --dialog-border-radius: calc(var(--border-radius-sm) * 3);
+  }
 </style>
