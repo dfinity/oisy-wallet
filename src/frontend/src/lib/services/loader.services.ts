@@ -117,19 +117,19 @@ export const initLoader = async ({
 		return;
 	}
 
-	const errorTokenIds: TokenId[] = err?.map(({ tokenId }) => tokenId) ?? [];
+	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
 
 	// We can fetch these values imperatively because there stores are updated in this same function when loading the user profile.
-	const enabledTokenIds: TokenId[] = [
-		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_TOKEN_ID] : []),
-		...(get(networkEthereumEnabled) ? [ETHEREUM_TOKEN_ID] : []),
-		...(get(networkSolanaMainnetEnabled) ? [SOLANA_TOKEN_ID] : [])
+	const enabledNetworkIds: NetworkId[] = [
+		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
+		...(get(networkEthereumEnabled) ? [ETHEREUM_NETWORK_ID] : []),
+		...(get(networkSolanaMainnetEnabled) ? [SOLANA_NETWORK_ID] : [])
 	];
 
 	// We don't need to load the addresses of the disabled networks.
-	const tokenIds: TokenId[] = errorTokenIds.filter((tokenId) => enabledTokenIds.includes(tokenId));
+	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) => enabledNetworkIds.includes(networkId));
 
-	const { success: addressSuccess } = await loadAddresses(tokenIds);
+	const { success: addressSuccess } = await loadAddresses(networkIds);
 
 	if (!addressSuccess) {
 		await signOut({});
