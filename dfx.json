@@ -283,8 +283,10 @@
 		},
 		"ckbtc_index": {
 			"type": "custom",
+			"build": "scripts/build.ckbtc_index.sh",
 			"candid": "target/ic/ckbtc_index.did",
 			"wasm": "target/ic/ckbtc_index.wasm",
+			"init_arg_file": "target/ic/ckbtc_index.args.did",
 			"specified_id": "mm444-5iaaa-aaaar-qaabq-cai",
 			"remote": {
 				"id": {
