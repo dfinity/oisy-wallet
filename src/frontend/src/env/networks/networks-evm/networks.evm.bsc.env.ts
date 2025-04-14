@@ -1,9 +1,9 @@
 import { BSC_EXPLORER_URL, BSC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import ethereumIconDark from '$lib/assets/networks/dark/ethereum-mainnet.svg';
-import sepoliaIconDark from '$lib/assets/networks/dark/ethereum-sepolia.svg';
-import ethereumIconLight from '$lib/assets/networks/light/ethereum-mainnet.svg';
-import sepoliaIconLight from '$lib/assets/networks/light/ethereum-sepolia.svg';
+import bscMainnetIconDark from '$lib/assets/networks/dark/ethereum-mainnet.svg';
+import bscTestnetIconDark from '$lib/assets/networks/dark/ethereum-sepolia.svg';
+import bscMainnetIconLight from '$lib/assets/networks/light/ethereum-mainnet.svg';
+import bscTestnetIconLight from '$lib/assets/networks/light/ethereum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
 
@@ -19,11 +19,10 @@ export const BSC_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'BNB Smart Chain',
 	chainId: 56n,
-	// TODO: add the correct icon
-	iconLight: ethereumIconLight,
-	iconDark: ethereumIconDark,
+	iconLight: bscMainnetIconLight,
+	iconDark: bscMainnetIconDark,
 	explorerUrl: BSC_EXPLORER_URL,
-	buy: { onramperId: 'base' }
+	buy: { onramperId: 'bsc' }
 };
 
 export const BSC_TESTNET_NETWORK_SYMBOL = 'BSC (Testnet)';
@@ -35,9 +34,8 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'BNB Smart Chain (Testnet)',
 	chainId: 97n,
-	// TODO: add the correct icon
-	iconLight: sepoliaIconLight,
-	iconDark: sepoliaIconDark,
+	iconLight: bscTestnetIconLight,
+	iconDark: bscTestnetIconDark,
 	explorerUrl: BSC_TESTNET_EXPLORER_URL
 };
 
