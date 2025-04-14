@@ -142,6 +142,10 @@ export const modalReferralState: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'referral-state'
 );
+export const modalAddressBook: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'address-book'
+);
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'dapp-details'

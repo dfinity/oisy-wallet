@@ -1,0 +1,48 @@
+import { BASE_EXPLORER_URL, BASE_SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
+import type { EthereumNetwork } from '$eth/types/network';
+import baseMainnetIconDark from '$lib/assets/networks/dark/base-mainnet.svg';
+import baseSepoliaIconDark from '$lib/assets/networks/dark/base-sepolia.svg';
+import baseMainnetIconLight from '$lib/assets/networks/light/base-mainnet.svg';
+import baseSepoliaIconLight from '$lib/assets/networks/light/base-sepolia.svg';
+import type { NetworkId } from '$lib/types/network';
+import { parseBoolEnvVar } from '$lib/utils/env.utils';
+import { parseNetworkId } from '$lib/validation/network.validation';
+
+export const BASE_MAINNET_ENABLED = parseBoolEnvVar(
+	import.meta.env.VITE_BASE_MAINNET_DISABLED,
+	false
+);
+
+export const BASE_NETWORK_SYMBOL = 'BASE';
+
+export const BASE_NETWORK_ID: NetworkId = parseNetworkId(BASE_NETWORK_SYMBOL);
+
+export const BASE_NETWORK: EthereumNetwork = {
+	id: BASE_NETWORK_ID,
+	env: 'mainnet',
+	name: 'Base',
+	chainId: 8453n,
+	iconLight: baseMainnetIconLight,
+	iconDark: baseMainnetIconDark,
+	explorerUrl: BASE_EXPLORER_URL,
+	buy: { onramperId: 'base' }
+};
+
+export const BASE_SEPOLIA_NETWORK_SYMBOL = 'SepoliaBASE';
+
+export const BASE_SEPOLIA_NETWORK_ID: NetworkId = parseNetworkId(BASE_SEPOLIA_NETWORK_SYMBOL);
+
+export const BASE_SEPOLIA_NETWORK: EthereumNetwork = {
+	id: BASE_SEPOLIA_NETWORK_ID,
+	env: 'testnet',
+	name: 'Base Sepolia',
+	chainId: 84532n,
+	iconLight: baseSepoliaIconLight,
+	iconDark: baseSepoliaIconDark,
+	explorerUrl: BASE_SEPOLIA_EXPLORER_URL
+};
+
+export const SUPPORTED_BASE_NETWORKS: [...EthereumNetwork[], EthereumNetwork] = [
+	...(BASE_MAINNET_ENABLED ? [BASE_NETWORK] : []),
+	BASE_SEPOLIA_NETWORK
+];
