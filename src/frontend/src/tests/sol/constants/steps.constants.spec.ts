@@ -4,7 +4,7 @@ import en from '$tests/mocks/i18n.mock';
 
 describe('steps.constants', () => {
 	describe('sendSteps', () => {
-		it('returns the correct steps with expected text and state', () => {
+		it('should return the correct steps with expected text and state', () => {
 			const steps = sendSteps(en);
 
 			expect(steps).toEqual([
@@ -33,7 +33,7 @@ describe('steps.constants', () => {
 	});
 
 	describe('walletConnectSignSteps', () => {
-		it('returns steps without SEND when signWithSending is false', () => {
+		it('should return steps without SEND when signWithSending is false', () => {
 			const steps = walletConnectSignSteps({
 				i18n: en,
 				signWithSending: false
@@ -58,7 +58,7 @@ describe('steps.constants', () => {
 			]);
 		});
 
-		it('returns steps with SEND when signWithSending is true', () => {
+		it('should return steps with SEND when signWithSending is true', () => {
 			const steps = walletConnectSignSteps({
 				i18n: en,
 				signWithSending: true
