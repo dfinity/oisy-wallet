@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Backdrop } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { afterNavigate } from '$app/navigation';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
@@ -10,21 +9,30 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let testIdPrefix: string;
-	export let inputValue: string;
-	export let inputPlaceholder: string | undefined;
-	export let disabled = false;
-	export let ariaLabel: string;
+	let {
+		inputValue = $bindable(''),
+		inputPlaceholder,
+		ariaLabel,
+		testIdPrefix = 'sliding-input',
+		disabled = false,
+		icon,
+		overflowableContent
+	}: {
+		inputValue: string;
+		inputPlaceholder: string;
+		ariaLabel: string;
+		testIdPrefix?: string;
+		disabled?: boolean;
+		icon: Snippet;
+		overflowableContent?: Snippet;
+	} = $props();
 
-	let hasOverflowableSlot: boolean;
-	$: hasOverflowableSlot = nonNullish($$slots['overflowable-content']);
+	let visible = $state(false);
 
-	let visible = false;
+	let button: HTMLButtonElement | undefined = $state();
+	let inputElement: HTMLInputElement | undefined = $state();
 
-	let button: HTMLButtonElement | undefined;
-	let inputElement: HTMLInputElement | undefined;
-
-	const handleOpen = () => {
+	const handleToggle = () => {
 		if (visible) {
 			handleClose();
 		} else {
@@ -47,7 +55,7 @@
 
 	onMount(() => {
 		if (inputValue !== '') {
-			handleOpen();
+			handleToggle();
 		}
 	});
 
@@ -58,7 +66,7 @@
 		// instead of dispatching an event from the parent component using this component
 		setTimeout(() => {
 			if (inputValue === '') {
-				handleClose();
+				visible = false;
 			}
 		}, 1);
 	});
@@ -71,18 +79,20 @@
 		</div>
 	{/if}
 
-	<div class="flex pr-12">
-		<slot name="overflowable-content" />
-	</div>
+	{#if overflowableContent}
+		<div class="flex pr-12">
+			{@render overflowableContent()}
+		</div>
+	{/if}
 	<div class="z-2 absolute right-0 w-full">
 		{#if visible}
 			<div
 				in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
 				out:fade
 				class="input-field condensed absolute right-0 -mt-[11px] mr-px flex overflow-hidden"
-				class:w-full={hasOverflowableSlot}
-				class:md:w-[250px]={hasOverflowableSlot}
-				class:w-[250px]={!hasOverflowableSlot}
+				class:w-full={overflowableContent}
+				class:md:w-[250px]={overflowableContent}
+				class:w-[250px]={!overflowableContent}
 			>
 				<InputTextWithAction
 					bind:inputElement
@@ -109,7 +119,7 @@
 		{/if}
 		<ButtonIcon
 			bind:button
-			on:click={handleOpen}
+			on:click={handleToggle}
 			{disabled}
 			link={false}
 			colorStyle="muted"
@@ -117,7 +127,11 @@
 			{ariaLabel}
 			testId={`${testIdPrefix}-open-btn`}
 		>
-			<slot name="icon" slot="icon" />
+			<span slot="icon">
+				{#if icon}
+					{@render icon()}
+				{/if}
+			</span>
 		</ButtonIcon>
 	</div>
 </div>
