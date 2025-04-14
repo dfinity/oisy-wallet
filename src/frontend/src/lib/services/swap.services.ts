@@ -360,12 +360,15 @@ export const getIcpSwapAmounts = async ({
 		identity,
 		canisterId,
 		amountIn: amountIn.toString(),
-		zeroForOne: true,
+		zeroForOne: sourceToken.ledgerCanisterId < destinationToken.ledgerCanisterId,
 		amountOutMinimum: '0'
 	});
 
 	const slippageFactor = BigInt(10000 - Math.floor(slippage * 100));
 	const amountOutMinimum = (quote * slippageFactor) / 10000n;
+
+	console.log({quote});
+	
 
 	return {
 		poolCanisterId: canisterId,
