@@ -16,11 +16,17 @@ import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import {
-	EtherscanProvider as EtherscanProviderLib,
 	type BlockTag,
+	EtherscanProvider as EtherscanProviderLib,
 	type Networkish
 } from 'ethers/providers';
 import { get } from 'svelte/store';
+
+type TransactionsParams = {
+	address: EthAddress;
+	startBlock?: BlockTag;
+	endBlock?: BlockTag;
+};
 
 export class EtherscanProvider {
 	private readonly provider: EtherscanProviderLib;
@@ -37,11 +43,7 @@ export class EtherscanProvider {
 		address,
 		startBlock,
 		endBlock
-	}: {
-		address: string;
-		startBlock?: BlockTag;
-		endBlock?: BlockTag;
-	}): Promise<Transaction[]> {
+	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
 			action: 'txlist',
 			address,
@@ -84,11 +86,7 @@ export class EtherscanProvider {
 		address,
 		startBlock,
 		endBlock
-	}: {
-		address: string;
-		startBlock?: BlockTag;
-		endBlock?: BlockTag;
-	}): Promise<Transaction[]> {
+	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
 			action: 'txlistinternal',
 			address,
@@ -126,10 +124,7 @@ export class EtherscanProvider {
 		);
 	}
 
-	transactions = async (params: {
-		address: EthAddress;
-		startBlock?: BlockTag;
-	}): Promise<Transaction[]> => {
+	transactions = async (params: TransactionsParams): Promise<Transaction[]> => {
 		const results = await Promise.all([this.getHistory(params), this.getInternalHistory(params)]);
 
 		return results.flat();
