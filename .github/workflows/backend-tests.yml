@@ -116,10 +116,15 @@ jobs:
       - name: 'Check whether the PR description & title mention "breaking interface"'
         id: conventional-commit
         run: |
+          # See the conventional commit conventions for how to mark a breaking change: https://www.conventionalcommits.org/en/v1.0.0/#commit-message-with-both--and-breaking-change-footer
+          # The PR title needs a ! before the colon, e.g.:
+          # chore(frontend)!: drop support for Node 6
           if [[ "$TITLE" =~ ^([a-z]+)(\([-a-zA-Z0-9,]+\))\!\: ]]; then
             echo "BREAKING_TITLE=true" | tee -a "$GITHUB_OUTPUT"
           fi
-          if [[ "$DESCRIPTION" =~ "BREAKING CHANGE" ]]; then
+          # The PR body needs a line declaring the breaking change, e.g.:
+          # BREAKING CHANGE: use JavaScript features not available in Node 6.
+          if grep -qE '^BREAKING CHANGE: ' <<<"$desc"; then
             echo "BREAKING_DESCRIPTION=true" | tee -a "$GITHUB_OUTPUT"
           fi
       - name: Need to check for breaking changes
@@ -142,6 +147,7 @@ jobs:
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
       - name: Download backend.wasm.gz
+        if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: backend.wasm.gz
