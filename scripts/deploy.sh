@@ -4,10 +4,6 @@ set -euxo pipefail
 dfx canister create --all
 dfx deploy backend
 dfx deploy signer
-
-mkdir -p ./target/ic
-
-./scripts/download.icp.sh
 dfx deploy icp_ledger
 dfx deploy icp_index
 
