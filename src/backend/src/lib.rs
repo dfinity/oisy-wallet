@@ -900,7 +900,7 @@ pub async fn step_migration() {
             }
             eprintln!("Migration failed: {err:?}");
         });
-    };
+    }
 }
 
 /// Gets account creation timestamps.
