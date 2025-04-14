@@ -152,7 +152,7 @@ dependencies = [
  "pretty_assertions",
  "serde",
  "serde_bytes",
- "sha2 0.9.9",
+ "sha2 0.10.8",
  "shared",
 ]
 
