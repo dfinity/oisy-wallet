@@ -17,7 +17,7 @@
 	export let ariaLabel: string;
 
 	let hasOverflowableSlot: boolean;
-	$: hasOverflowableSlot = nonNullish($$slots['overflowable-element']);
+	$: hasOverflowableSlot = nonNullish($$slots['overflowable-content']);
 
 	let visible = false;
 
@@ -66,7 +66,7 @@
 
 <div class="relative flex w-full">
 	<div class="flex pr-12">
-		<slot name="overflowable-element" />
+		<slot name="overflowable-content" />
 	</div>
 	<div class="z-3 absolute right-0 w-full">
 		{#if visible}
@@ -87,7 +87,7 @@
 					autofocus
 				/>
 				{#if inputValue !== ''}
-					<div class="top-3.25 absolute right-12 bg-primary" transition:fade>
+					<div class="absolute right-12 top-[11px] bg-primary" transition:fade>
 						<ButtonIcon
 							ariaLabel={$i18n.core.text.clear_filter}
 							colorStyle="muted"
