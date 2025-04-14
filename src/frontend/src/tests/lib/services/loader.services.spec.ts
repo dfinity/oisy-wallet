@@ -2,7 +2,6 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as networksEnv from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -172,7 +171,10 @@ describe('loader.services', () => {
 				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 
 				expect(loadAddresses).toHaveBeenCalledOnce();
-				expect(loadAddresses).toHaveBeenNthCalledWith(1, [BTC_MAINNET_NETWORK_ID, SOLANA_TOKEN_ID]);
+				expect(loadAddresses).toHaveBeenNthCalledWith(1, [
+					BTC_MAINNET_NETWORK_ID,
+					SOLANA_MAINNET_NETWORK_ID
+				]);
 			});
 
 			it('should load addresses from the backend only for enabled networks', async () => {
@@ -185,7 +187,7 @@ describe('loader.services', () => {
 				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 
 				expect(loadAddresses).toHaveBeenCalledOnce();
-				expect(loadAddresses).toHaveBeenNthCalledWith(1, [SOLANA_TOKEN_ID]);
+				expect(loadAddresses).toHaveBeenNthCalledWith(1, [SOLANA_MAINNET_NETWORK_ID]);
 			});
 
 			it('should not load addresses from the backend if all networks are disabled', async () => {
