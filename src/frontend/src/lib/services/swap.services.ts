@@ -151,8 +151,6 @@ export const getQuoteWithSlippage = async ({
 }) => {
 	const poolData = await getPool({ identity, token0, token1, fee });
 
-	console.log('Pool data:', poolData);
-
 	const swapPoolCanisterId = poolData.canisterId.toString();
 
 	const quoteAmount = await getQuote({
@@ -356,10 +354,14 @@ export const getIcpSwapAmounts = async ({
 
 	const canisterId = pool.canisterId.toString();
 
+
+	console.log('Pool data:', pool);
+	
+
 	const quote = await getQuote({
 		identity,
 		canisterId,
-		amountIn: amountIn.toString(),
+		amountIn: BigInt(100000000n).toString(),
 		zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId,
 		amountOutMinimum: '0'
 	});

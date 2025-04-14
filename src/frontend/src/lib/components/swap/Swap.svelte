@@ -71,14 +71,14 @@
 			return;
 		}
 
-		const poolWithSlippage = await getQuoteWithSlippage({
-			identity: $authIdentity,
-			amountIn: 100000000n,
-			zeroForOne: false,
-			slippagePercentage: 1.0
-		});
+		// const poolWithSlippage = await getQuoteWithSlippage({
+		// 	identity: $authIdentity,
+		// 	amountIn: 100000000n,
+		// 	zeroForOne: false,
+		// 	slippagePercentage: 1.0
+		// });
 
-		console.log(poolWithSlippage);
+		// console.log(poolWithSlippage);
 
 		busy.start({ msg: $i18n.init.info.hold_loading });
 
