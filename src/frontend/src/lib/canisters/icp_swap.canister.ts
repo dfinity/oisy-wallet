@@ -17,7 +17,7 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 				...options,
 				agent
 			},
-			idlFactory: idlFactory,
+			idlFactory,
 			certifiedIdlFactory: idlFactory
 		});
 
@@ -32,7 +32,19 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 		const { getPool } = this.caller({ certified: false });
 		const result = await getPool(args);
 
-		if ('ok' in result) {return result.ok;}
-		throw new Error(`getPool failed: ${  JSON.stringify(result.err)}`);
+		if ('ok' in result) {
+			return result.ok;
+		}
+		throw new Error(`getPool failed: ${JSON.stringify(result.err)}`);
+	};
+
+	quote = async (args: any) => {
+		const { quote } = this.caller({ certified: false });
+		const result = await quote(args);
+
+		if ('ok' in result) {
+			return result.ok;
+		}
+		throw new Error(`Quote failed: ${JSON.stringify(result.err)}`);
 	};
 }

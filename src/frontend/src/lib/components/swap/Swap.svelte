@@ -18,7 +18,7 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import {
 		loadKongSwapTokens as loadKongSwapTokensService,
-		fetchPoolData
+		getQuoteWithSlippage
 	} from '$lib/services/swap.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -71,10 +71,14 @@
 			return;
 		}
 
-		
-		await fetchPoolData({
-				identity: $authIdentity
-			});
+		const poolWithSlippage = await getQuoteWithSlippage({
+			identity: $authIdentity,
+			amountIn: 100000000n,
+			zeroForOne: false,
+			slippagePercentage: 1.0
+		});
+
+		console.log(poolWithSlippage);
 
 		busy.start({ msg: $i18n.init.info.hold_loading });
 

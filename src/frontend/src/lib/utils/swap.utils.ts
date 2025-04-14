@@ -51,3 +51,15 @@ export const getNetworkFee = ({
 
 export const getKongIcTokenIdentifier = (token: Token): string =>
 	isIcToken(token) ? `IC.${token.ledgerCanisterId}` : '';
+
+
+export const calculateSlippage = ({
+	quoteAmount,
+	slippagePercentage
+  }: {
+	quoteAmount: bigint;
+	slippagePercentage: number;
+  }): bigint => {
+	const slippageFactor = BigInt(10000 - Math.floor(slippagePercentage * 100))
+	return (quoteAmount * slippageFactor) / 10000n;
+  };

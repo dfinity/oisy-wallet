@@ -4,6 +4,7 @@ import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { setCustomToken } from '$lib/api/backend.api';
+import { getPool, getQuote } from '$lib/api/icp_swap.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -21,7 +22,6 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { getPool } from '$lib/api/icp_swap.api';
 
 export const swap = async ({
 	identity,
@@ -119,22 +119,52 @@ export const loadKongSwapTokens = async ({ identity }: { identity: Identity }): 
 	);
 };
 
-
 const token0 = { address: 'ryjl3-tyaaa-aaaaa-aaaba-cai', standard: 'ICP' };
 const token1 = { address: 'mxzaz-hqaaa-aaaar-qaada-cai', standard: 'ICRC2' };
 const fee = 3000n;
 
 export const fetchPoolData = async ({ identity }: { identity: Identity }) => {
-  try {
-    const poolData = await getPool({
-      identity,
-      token0,
-      token1,
-      fee
-    });
-    console.log(poolData);
-  } catch (error) {
-    console.error('Error fetching pool data:', error);
-  }
+	try {
+		const poolData = await getPool({
+			identity,
+			token0,
+			token1,
+			fee
+		});
+		console.log(poolData);
+	} catch (error) {
+		console.error('Error fetching pool data:', error);
+	}
 };
 
+export const getQuoteWithSlippage = async ({
+	identity,
+	amountIn,
+	zeroForOne,
+	slippagePercentage
+}: {
+	identity: Identity;
+	amountIn: bigint;
+	zeroForOne: boolean;
+	slippagePercentage: number;
+}) => {
+	const poolData = await getPool({ identity, token0, token1, fee });
+	const swapPoolCanisterId = poolData.canisterId.toString();
+
+	const quoteAmount = await getQuote({
+		identity,
+		canisterId: swapPoolCanisterId,
+		amountIn: amountIn.toString(),
+		zeroForOne,
+		amountOutMinimum: '0'
+	});
+
+	const slippageFactor = BigInt(10000 - Math.floor(slippagePercentage * 100));
+	const amountOutMinimum = (quoteAmount * slippageFactor) / 10000n;
+
+	return {
+		poolCanisterId: swapPoolCanisterId,
+		quoteAmount,
+		amountOutMinimum
+	};
+};

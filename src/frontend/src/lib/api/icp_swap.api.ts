@@ -47,3 +47,27 @@ const icpSwapFactoryCanister = async ({
 
 	return canister;
 };
+
+export const getQuote = async ({
+	identity,
+	canisterId,
+	amountIn,
+	zeroForOne,
+	amountOutMinimum = '0'
+  }: {
+	identity: any;
+	canisterId: string;
+	amountIn: string;
+	zeroForOne: boolean;
+	amountOutMinimum?: string;
+  }) => {
+	assertNonNullish(identity, 'Identity required');
+  
+	const swapPoolCanister = await icpSwapFactoryCanister({ identity, canisterId });
+  
+	return swapPoolCanister.quote({
+	  amountIn,
+	  zeroForOne,
+	  amountOutMinimum
+	});
+  };
