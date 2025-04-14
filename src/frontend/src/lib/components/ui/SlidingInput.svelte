@@ -121,3 +121,9 @@
 		</div>
 	{/if}
 </div>
+
+<style lang="scss">
+	.input-field.condensed input {
+		padding-block: var(--padding-1_5x) !important;
+	}
+</style>
