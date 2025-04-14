@@ -65,10 +65,16 @@
 </script>
 
 <div class="relative flex w-full">
+	{#if visible && inputValue === ''}
+		<div class="z-2 fixed bottom-0 left-0 right-0 top-0">
+			<Backdrop invisible on:nnsClose={handleClose} />
+		</div>
+	{/if}
+
 	<div class="flex pr-12">
 		<slot name="overflowable-content" />
 	</div>
-	<div class="z-3 absolute right-0 w-full">
+	<div class="z-2 absolute right-0 w-full">
 		{#if visible}
 			<div
 				in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
@@ -114,12 +120,6 @@
 			<slot name="icon" slot="icon" />
 		</ButtonIcon>
 	</div>
-
-	{#if visible && inputValue === ''}
-		<div class="z-2 fixed bottom-0 left-0 right-0 top-0">
-			<Backdrop invisible on:nnsClose={handleClose} />
-		</div>
-	{/if}
 </div>
 
 <style lang="scss">
