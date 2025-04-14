@@ -38,6 +38,10 @@ jobs:
       - name: Test
         run: npm run test:coverage
 
+      - name: Floor coverage thresholds (remove decimals)
+        run: |
+          sed -i -E 's/(lines|functions|branches|statements):[[:space:]]*([0-9]+)\.[0-9]+/\1: \2/g' vitest.config.ts
+
       - name: Check for Coverage Thresholds Changes
         id: check_changes
         run: |
