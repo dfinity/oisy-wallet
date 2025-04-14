@@ -1,4 +1,4 @@
-// https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address
+// https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-normal-transactions-by-address
 export interface EtherscanProviderTransaction {
 	blockNumber: string;
 	timeStamp: string;
@@ -20,6 +20,24 @@ export interface EtherscanProviderTransaction {
 	confirmations: string;
 	methodId: string;
 	functionName: string;
+}
+
+// https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-internal-transactions-by-address
+export interface EtherscanProviderInternalTransaction {
+	blockNumber: string;
+	timeStamp: string;
+	hash: string;
+	from: string;
+	to: string;
+	value: string;
+	contractAddress: string;
+	input: string;
+	type: string;
+	gas: string;
+	gasUsed: string;
+	traceId: string;
+	isError: string;
+	errCode: string;
 }
 
 // https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address
