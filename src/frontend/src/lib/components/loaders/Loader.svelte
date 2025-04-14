@@ -52,6 +52,10 @@
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import type { NetworkId } from '$lib/types/network';
+	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -168,8 +172,16 @@
 	};
 
 	onMount(async () => {
+		const enabledNetworkIds: NetworkId[] = [
+			...($networkBitcoinMainnetEnabled ? [BTC_MAINNET_NETWORK_ID] : []),
+			...($networkEthereumEnabled ? [ETHEREUM_NETWORK_ID] : []),
+			...($networkSolanaMainnetEnabled ? [SOLANA_MAINNET_NETWORK_ID] : [])
+		];
+
+
 		await initLoader({
 			identity: $authIdentity,
+			enabledNetworkIds,
 			validateAddresses,
 			progressAndLoad,
 			setProgressModal
@@ -208,9 +220,9 @@
 {/if}
 
 <style lang="scss">
-	:root:has(.login-modal) {
-		--alert-max-width: 90vw;
-		--alert-max-height: initial;
-		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
-	}
+  :root:has(.login-modal) {
+    --alert-max-width: 90vw;
+    --alert-max-height: initial;
+    --dialog-border-radius: calc(var(--border-radius-sm) * 3);
+  }
 </style>

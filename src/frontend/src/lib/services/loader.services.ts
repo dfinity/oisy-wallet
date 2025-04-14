@@ -1,9 +1,4 @@
 import { allowSigning } from '$lib/api/backend.api';
-import {
-	networkBitcoinMainnetEnabled,
-	networkEthereumEnabled,
-	networkSolanaMainnetEnabled
-} from '$lib/derived/networks.derived';
 import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
@@ -11,6 +6,7 @@ import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { loading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -61,6 +57,7 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  *
  * @param {Object} params The parameters to initialize the loader.
  * @param {OptionIdentity} params.identity The identity to use for the request.
+ * @param {NetworkId[]} params.enabledNetworkIds The list of enabled network IDs for which the addresses will be loaded.
  * @param {Function} params.validateAddresses The function to validate the addresses.
  * @param {Function} params.progressAndLoad The function to set the next step of the Progress modal and load the additional data.
  * @param {Function} params.setProgressModal The function to set the progress modal.
@@ -68,11 +65,13 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  */
 export const initLoader = async ({
 	identity,
+	enabledNetworkIds,
 	validateAddresses,
 	progressAndLoad,
 	setProgressModal
 }: {
 	identity: OptionIdentity;
+	enabledNetworkIds: NetworkId[];
 	validateAddresses: () => void;
 	progressAndLoad: () => Promise<void>;
 	setProgressModal: (value: boolean) => void;
@@ -114,13 +113,6 @@ export const initLoader = async ({
 	}
 
 	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
-
-	// We can fetch these values imperatively because there stores are updated in this same function when loading the user profile.
-	const enabledNetworkIds: NetworkId[] = [
-		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
-		...(get(networkEthereumEnabled) ? [ETHEREUM_NETWORK_ID] : []),
-		...(get(networkSolanaMainnetEnabled) ? [SOLANA_NETWORK_ID] : [])
-	];
 
 	// We don't need to load the addresses of the disabled networks.
 	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) =>
