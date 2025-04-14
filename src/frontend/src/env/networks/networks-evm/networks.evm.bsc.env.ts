@@ -5,10 +5,13 @@ import bscTestnetIconDark from '$lib/assets/networks/dark/bsc-testnet.svg';
 import bscMainnetIconLight from '$lib/assets/networks/light/bsc-mainnet.svg';
 import bscTestnetIconLight from '$lib/assets/networks/light/bsc-testnet.svg';
 import type { NetworkId } from '$lib/types/network';
+import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 
-export const BSC_MAINNET_ENABLED =
-	JSON.parse(import.meta.env.VITE_BSC_MAINNET_DISABLED ?? false) === false;
+export const BSC_MAINNET_ENABLED = parseBoolEnvVar(
+	import.meta.env.VITE_BSC_MAINNET_DISABLED,
+	false
+);
 
 export const BSC_NETWORK_SYMBOL = 'BSC';
 
