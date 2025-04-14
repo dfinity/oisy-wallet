@@ -170,6 +170,31 @@ type RewardInfo = record {
     /// The amount of tokens awarded.
     amount : nat;
 };
+/// Possible errors for `set_referrer()`
+type SetReferrerError = variant {
+  /// The caller is attempting to refer themselves.
+  SelfReferral;
+  /// The caller already has a different referrer.
+  ///
+  /// (Repeatedly setting the referrer to the same value will cause no issues.)
+  AlreadyHasReferrer;
+  /// The referrer code is unknown.
+  UnknownReferrer;
+  /// Only new users may set a referrer.
+  ///
+  /// A small allowance for existing state is made, in case the front-end
+  /// sends a snapshot before setting the referrer.
+  NotNewUser;
+  /// The caller is anonymous.
+  AnonymousCaller;
+};
+/// Result of calling `set_referrer()`
+type SetReferrerResponse = variant {
+    /// The referrer was set successfully.
+    Ok;
+    /// Ther was an error setting the referrer.
+    Err : SetReferrerError;
+};
 type SetSprinkleTimestampArg = record {
     /// The total amount that will be distributed across all users in the current/next sprinkle
     total_sprinkle_amount: nat;
@@ -250,7 +275,11 @@ type Transaction_Spl = record {
   amount : nat64;
 };
 type UsageAndHolding = record {
+  // Account valuation at the time of the last snapshot.
   approx_usd_valuation : float64;
+  // Time of account creation or first recorded activity.
+  first_activity_ns : opt nat64;
+  // Time of last recorded activity.
   last_activity_ns : opt nat64;
 };
 type UsageAwardConfig = record {
@@ -274,6 +303,10 @@ type UsageAwardState = record {
   referred_by : opt nat32;
     /// User's code for inviting others to the platform, and referral stats. 
   referrer_info : opt ReferrerInfo;
+  /// The time of the first activity.
+  first_activity_ns : opt nat64;
+  /// The time of the last activity.
+  last_activity_ns : opt nat64;
 };
 type UsageAwardStats = record {
   user_count : nat64;
@@ -371,7 +404,7 @@ service : (opt Config) -> {
     register_snapshot_for : (principal, UserSnapshot) -> ();
     stats_usage_vs_holding : () -> (UsageVsHoldingStats) query;
     /// Sets a timestamp for a sprinkle event in the future. The sprinkle will be executed
-  set_referrer : (nat32) -> ();
+  set_referrer : (nat32) -> (SetReferrerResponse);
     /// as soon as possible after the timestamp.
     /// Gives information about the current status of the canister.
     status : () -> (StatusResponse) query;

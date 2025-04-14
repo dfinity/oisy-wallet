@@ -161,7 +161,19 @@ export const idlFactory = ({ IDL }) => {
 		accounts: IDL.Vec(AccountSnapshotFor),
 		timestamp: IDL.Opt(IDL.Nat64)
 	});
+	const SetReferrerError = IDL.Variant({
+		SelfReferral: IDL.Null,
+		AlreadyHasReferrer: IDL.Null,
+		UnknownReferrer: IDL.Null,
+		NotNewUser: IDL.Null,
+		AnonymousCaller: IDL.Null
+	});
+	const SetReferrerResponse = IDL.Variant({
+		Ok: IDL.Null,
+		Err: SetReferrerError
+	});
 	const UsageAndHolding = IDL.Record({
+		first_activity_ns: IDL.Opt(IDL.Nat64),
 		approx_usd_valuation: IDL.Float64,
 		last_activity_ns: IDL.Opt(IDL.Nat64)
 	});
@@ -224,8 +236,10 @@ export const idlFactory = ({ IDL }) => {
 		sprinkles: IDL.Vec(RewardInfo)
 	});
 	const UsageAwardState = IDL.Record({
+		first_activity_ns: IDL.Opt(IDL.Nat64),
 		snapshots: IDL.Vec(UserSnapshot),
 		referred_by: IDL.Opt(IDL.Nat32),
+		last_activity_ns: IDL.Opt(IDL.Nat64),
 		referrer_info: IDL.Opt(ReferrerInfo)
 	});
 	const VipStats = IDL.Record({
@@ -249,7 +263,7 @@ export const idlFactory = ({ IDL }) => {
 		referrer_info_for: IDL.Func([IDL.Principal], [IDL.Opt(ReferrerInfo)]),
 		register_airdrop_recipient: IDL.Func([UserSnapshot], [], []),
 		register_snapshot_for: IDL.Func([IDL.Principal, UserSnapshot], [], []),
-		set_referrer: IDL.Func([IDL.Nat32], [], []),
+		set_referrer: IDL.Func([IDL.Nat32], [SetReferrerResponse], []),
 		stats_usage_vs_holding: IDL.Func([], [UsageVsHoldingStats]),
 		status: IDL.Func([], [StatusResponse]),
 		trigger_usage_award_event: IDL.Func([UsageAwardEvent], [], []),
