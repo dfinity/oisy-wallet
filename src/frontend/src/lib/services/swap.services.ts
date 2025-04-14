@@ -334,8 +334,8 @@ export const getIcpSwapAmounts = async ({
 	identity: Identity;
 	amountIn: bigint;
 	slippage: number;
-	sourceToken: Token;
-	destinationToken: Token;
+	sourceToken: any;
+	destinationToken: any;
 }) => {
 	const fee = 3000n;	
 
@@ -345,8 +345,8 @@ export const getIcpSwapAmounts = async ({
 
 	const pool = await getPool({
 		identity,
-		token0,
-		token1,
+		token0: {address: sourceToken.ledgerCanisterId, standard: sourceToken.standard},
+		token1: {address: destinationToken.ledgerCanisterId, standard: destinationToken.standard},
 		fee
 	});
 
@@ -356,16 +356,11 @@ export const getIcpSwapAmounts = async ({
 
 	const canisterId = pool.canisterId.toString();
 
-	// Автоматично визначаємо напрямок свапу
-	const token0Principal = token0.address;
-	const token1Principal = token1.address;
-	const zeroForOne = token0Principal < token1Principal;
-
 	const quote = await getQuote({
 		identity,
 		canisterId,
 		amountIn: amountIn.toString(),
-		zeroForOne,
+		zeroForOne: false,
 		amountOutMinimum: '0'
 	});
 
