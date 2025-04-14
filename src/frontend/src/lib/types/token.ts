@@ -1,9 +1,9 @@
 import {
-	TokenGroupSchema,
 	type TokenAppearanceSchema,
 	type TokenBuySchema,
 	type TokenBuyableSchema,
 	type TokenCategorySchema,
+	type TokenGroupSchema,
 	type TokenIdSchema,
 	type TokenMetadataSchema,
 	type TokenSchema,
