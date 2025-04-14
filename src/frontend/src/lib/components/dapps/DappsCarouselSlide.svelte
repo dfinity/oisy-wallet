@@ -23,8 +23,8 @@
 		name: dAppName
 	} = dappsCarouselSlide);
 
-	const open = async () => {
-		await trackEvent({
+	const open = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_OPEN,
 			metadata: {
 				dappId
@@ -40,8 +40,8 @@
 
 	const dispatch = createEventDispatcher();
 
-	const close = async () => {
-		await trackEvent({
+	const close = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_CLOSE,
 			metadata: {
 				dappId

@@ -2,9 +2,9 @@ import {
 	loadBtcAddressMainnet,
 	loadIdbBtcAddressMainnet
 } from '$btc/services/btc-address.services';
-import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
-import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { loadEthAddress, loadIdbEthAddress } from '$eth/services/eth-address.services';
 import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 import { LoadIdbAddressError } from '$lib/types/errors';
@@ -33,9 +33,9 @@ describe('addresses.services', () => {
 
 	describe('loadAddresses', () => {
 		it('should load addresses for all supported token IDs when Solana is enabled', async () => {
-			const tokenIds = [BTC_MAINNET_TOKEN_ID, ETHEREUM_TOKEN_ID, SOLANA_TOKEN_ID];
+			const networkIds = [BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID, SOLANA_MAINNET_NETWORK_ID];
 
-			const result = await loadAddresses(tokenIds);
+			const result = await loadAddresses(networkIds);
 
 			expect(result).toEqual({ success: true });
 			expect(loadBtcAddressMainnet).toHaveBeenCalledOnce();
@@ -44,9 +44,9 @@ describe('addresses.services', () => {
 		});
 
 		it('should load addresses only for provided token IDs', async () => {
-			const tokenIds = [BTC_MAINNET_TOKEN_ID];
+			const networkIds = [BTC_MAINNET_NETWORK_ID];
 
-			const result = await loadAddresses(tokenIds);
+			const result = await loadAddresses(networkIds);
 
 			expect(result).toEqual({ success: true });
 			expect(loadBtcAddressMainnet).toHaveBeenCalledOnce();
@@ -66,7 +66,7 @@ describe('addresses.services', () => {
 		});
 
 		it('should handle failure when one network fails during IndexedDB loading', async () => {
-			const mockError = new LoadIdbAddressError(BTC_MAINNET_TOKEN_ID);
+			const mockError = new LoadIdbAddressError(BTC_MAINNET_NETWORK_ID);
 			vi.mocked(loadIdbBtcAddressMainnet).mockResolvedValue({
 				success: false,
 				err: mockError

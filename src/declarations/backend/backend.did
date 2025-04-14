@@ -167,6 +167,7 @@ type CreateChallengeError = variant {
   ChallengeInProgress;
   MissingUserProfile;
   RandomnessError : text;
+  Other : text;
 };
 type CreateChallengeResponse = record {
   difficulty : nat32;

@@ -608,7 +608,8 @@
 			"destination_token_title": "You receive",
 			"chain_key": "Chain Key",
 			"show_more_networks": "Show $number more networks",
-			"hide_more_networks": "Hide more networks"
+			"hide_more_networks": "Hide more networks",
+			"on_network": " on $network"
 		},
 		"details": {
 			"title": "Token details",
@@ -975,6 +976,13 @@
 				"share": "Share on X",
 				"open_wallet": "Take me to the wallet"
 			}
+		}
+	},
+	"address_book": {
+		"text": {
+			"empty_title": "Your contacts are empty",
+			"empty_text": "All your contacts will be shown here",
+			"add_new_contact": "Add new contact"
 		}
 	},
 	"signer": {

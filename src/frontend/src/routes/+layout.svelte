@@ -12,11 +12,7 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.contants';
-	import {
-		initAnalytics,
-		initPlausibleAnalytics,
-		trackEvent
-	} from '$lib/services/analytics.services';
+	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
@@ -37,12 +33,7 @@
 		 * Each service handles its own error handling,
 		 * and we avoid surfacing errors to the user here to keep the UX clean.
 		 */
-		await Promise.allSettled([
-			syncAuthStore(),
-			initAnalytics(),
-			initPlausibleAnalytics(),
-			i18n.init()
-		]);
+		await Promise.allSettled([syncAuthStore(), initPlausibleAnalytics(), i18n.init()]);
 	};
 
 	const syncAuthStore = async () => {
@@ -54,13 +45,13 @@
 			await authStore.sync();
 
 			// We are using $authStore.identity here and not the derived $authIdentity because we track the event imperatively right after authStore.sync
-			await trackEvent({
+			trackEvent({
 				name: nonNullish($authStore.identity)
 					? TRACK_SYNC_AUTH_AUTHENTICATED_COUNT
 					: TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 			});
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_SYNC_AUTH_ERROR_COUNT
 			});
 

@@ -33,14 +33,14 @@ export const sendIc = async ({
 }: IcTransferParams & {
 	token: IcToken;
 	targetNetworkId: NetworkId | undefined;
-	sendCompleted: () => Promise<void>;
+	sendCompleted: () => void;
 }): Promise<void> => {
 	await send({
 		progress,
 		...rest
 	});
 
-	await sendCompleted();
+	sendCompleted();
 
 	progress(ProgressStepsSendIc.RELOAD);
 

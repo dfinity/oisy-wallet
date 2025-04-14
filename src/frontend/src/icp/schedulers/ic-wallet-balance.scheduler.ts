@@ -1,8 +1,7 @@
 import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
-import { queryAndUpdate } from '$lib/actors/query.ic';
 import { type SchedulerJobData, type SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { CertifiedData } from '$lib/types/store';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, queryAndUpdate } from '@dfinity/utils';
 
 // Not reactive, only used to hold values imperatively.
 interface IcrcBalanceStore {
@@ -33,7 +32,7 @@ export class IcWalletBalanceScheduler<
 		await queryAndUpdate<bigint>({
 			request: ({ identity: _, certified }) => this.getBalance({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncBalance({ certified, ...rest }),
-			onCertifiedError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
+			onUpdateError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
 			identity,
 			resolution: 'all_settled'
 		});

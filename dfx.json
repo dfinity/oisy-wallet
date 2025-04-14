@@ -18,6 +18,8 @@
 					"test_fe_2": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_3": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_4": "tdxud-2yaaa-aaaad-aadiq-cai",
+					"test_fe_5": "tdxud-2yaaa-aaaad-aadiq-cai",
+					"test_fe_6": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"audit": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"staging": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"e2e": "tdxud-2yaaa-aaaad-aadiq-cai"
@@ -40,6 +42,8 @@
 					"test_fe_2": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"test_fe_3": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"test_fe_4": "2ipq2-uqaaa-aaaar-qailq-cai",
+					"test_fe_5": "2ipq2-uqaaa-aaaar-qailq-cai",
+					"test_fe_6": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"audit": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"staging": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"e2e": "2ipq2-uqaaa-aaaar-qailq-cai"
@@ -60,7 +64,9 @@
 					"test_fe_1": "d3nvo-aaaaa-aaaar-qagzq-cai",
 					"test_fe_2": "d3nvo-aaaaa-aaaar-qagzq-cai",
 					"test_fe_3": "d3nvo-aaaaa-aaaar-qagzq-cai",
-					"test_fe_4": "d3nvo-aaaaa-aaaar-qagzq-cai"
+					"test_fe_4": "d3nvo-aaaaa-aaaar-qagzq-cai",
+					"test_fe_5": "d3nvo-aaaaa-aaaar-qagzq-cai",
+					"test_fe_6": "d3nvo-aaaaa-aaaar-qagzq-cai"
 				}
 			}
 		},
@@ -105,6 +111,8 @@
 					"test_fe_2": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"test_fe_3": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"test_fe_4": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+					"test_fe_5": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+					"test_fe_6": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"audit": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"staging": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"beta": "rdmx6-jaaaa-aaaaa-aaadq-cai",
@@ -126,6 +134,8 @@
 					"test_fe_2": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"test_fe_3": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"test_fe_4": "um5iw-rqaaa-aaaaq-qaaba-cai",
+					"test_fe_5": "um5iw-rqaaa-aaaaq-qaaba-cai",
+					"test_fe_6": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"audit": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"staging": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"beta": "um5iw-rqaaa-aaaaq-qaaba-cai",
@@ -147,6 +157,8 @@
 					"test_fe_2": "2vxsx-fae",
 					"test_fe_3": "2vxsx-fae",
 					"test_fe_4": "2vxsx-fae",
+					"test_fe_5": "2vxsx-fae",
+					"test_fe_6": "2vxsx-fae",
 					"audit": "2vxsx-fae",
 					"staging": "2vxsx-fae",
 					"beta": "2vxsx-fae",
@@ -168,6 +180,8 @@
 					"test_fe_2": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"test_fe_3": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"test_fe_4": "qbw6f-caaaa-aaaah-qdcwa-cai",
+					"test_fe_5": "qbw6f-caaaa-aaaah-qdcwa-cai",
+					"test_fe_6": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"audit": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"staging": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"beta": "qgxyr-pyaaa-aaaah-qdcwq-cai",
@@ -190,6 +204,8 @@
 					"test_fe_2": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"test_fe_3": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"test_fe_4": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+					"test_fe_5": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+					"test_fe_6": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"audit": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"staging": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"beta": "ryjl3-tyaaa-aaaaa-aaaba-cai",
@@ -213,6 +229,8 @@
 					"test_fe_2": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"test_fe_3": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"test_fe_4": "qhbym-qaaaa-aaaaa-aaafq-cai",
+					"test_fe_5": "qhbym-qaaaa-aaaaa-aaafq-cai",
+					"test_fe_6": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"audit": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"staging": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"beta": "qhbym-qaaaa-aaaaa-aaafq-cai",
@@ -234,6 +252,8 @@
 					"test_fe_2": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"test_fe_3": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"test_fe_4": "ml52i-qqaaa-aaaar-qaaba-cai",
+					"test_fe_5": "ml52i-qqaaa-aaaar-qaaba-cai",
+					"test_fe_6": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"audit": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"staging": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"e2e": "ml52i-qqaaa-aaaar-qaaba-cai"
@@ -253,6 +273,8 @@
 					"test_fe_2": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"test_fe_3": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"test_fe_4": "mc6ru-gyaaa-aaaar-qaaaq-cai",
+					"test_fe_5": "mc6ru-gyaaa-aaaar-qaaaq-cai",
+					"test_fe_6": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"audit": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"staging": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"e2e": "mc6ru-gyaaa-aaaar-qaaaq-cai"
@@ -272,6 +294,8 @@
 					"test_fe_2": "mm444-5iaaa-aaaar-qaabq-cai",
 					"test_fe_3": "mm444-5iaaa-aaaar-qaabq-cai",
 					"test_fe_4": "mm444-5iaaa-aaaar-qaabq-cai",
+					"test_fe_5": "mm444-5iaaa-aaaar-qaabq-cai",
+					"test_fe_6": "mm444-5iaaa-aaaar-qaabq-cai",
 					"audit": "mm444-5iaaa-aaaar-qaabq-cai",
 					"staging": "mm444-5iaaa-aaaar-qaabq-cai",
 					"e2e": "mm444-5iaaa-aaaar-qaabq-cai"
@@ -291,6 +315,8 @@
 					"test_fe_2": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"test_fe_3": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"test_fe_4": "pvm5g-xaaaa-aaaar-qaaia-cai",
+					"test_fe_5": "pvm5g-xaaaa-aaaar-qaaia-cai",
+					"test_fe_6": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"audit": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"staging": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"e2e": "pvm5g-xaaaa-aaaar-qaaia-cai"
@@ -312,6 +338,8 @@
 					"test_fe_2": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"test_fe_3": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"test_fe_4": "jzenf-aiaaa-aaaar-qaa7q-cai",
+					"test_fe_5": "jzenf-aiaaa-aaaar-qaa7q-cai",
+					"test_fe_6": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"audit": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"e2e": "jzenf-aiaaa-aaaar-qaa7q-cai"
@@ -335,6 +363,8 @@
 					"test_fe_2": "apia6-jaaaa-aaaar-qabma-cai",
 					"test_fe_3": "apia6-jaaaa-aaaar-qabma-cai",
 					"test_fe_4": "apia6-jaaaa-aaaar-qabma-cai",
+					"test_fe_5": "apia6-jaaaa-aaaar-qabma-cai",
+					"test_fe_6": "apia6-jaaaa-aaaar-qabma-cai",
 					"audit": "apia6-jaaaa-aaaar-qabma-cai",
 					"staging": "apia6-jaaaa-aaaar-qabma-cai",
 					"e2e": "apia6-jaaaa-aaaar-qabma-cai"
@@ -358,6 +388,8 @@
 					"test_fe_2": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"test_fe_3": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"test_fe_4": "sh5u2-cqaaa-aaaar-qacna-cai",
+					"test_fe_5": "sh5u2-cqaaa-aaaar-qacna-cai",
+					"test_fe_6": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"audit": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"staging": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"e2e": "sh5u2-cqaaa-aaaar-qacna-cai"
@@ -380,6 +412,8 @@
 					"test_fe_2": "yfumr-cyaaa-aaaar-qaela-cai",
 					"test_fe_3": "yfumr-cyaaa-aaaar-qaela-cai",
 					"test_fe_4": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_5": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_6": "yfumr-cyaaa-aaaar-qaela-cai",
 					"audit": "yfumr-cyaaa-aaaar-qaela-cai",
 					"staging": "yfumr-cyaaa-aaaar-qaela-cai"
 				}
@@ -401,6 +435,8 @@
 					"test_fe_2": "ycvkf-paaaa-aaaar-qaelq-cai",
 					"test_fe_3": "ycvkf-paaaa-aaaar-qaelq-cai",
 					"test_fe_4": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_5": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_6": "ycvkf-paaaa-aaaar-qaelq-cai",
 					"audit": "ycvkf-paaaa-aaaar-qaelq-cai",
 					"staging": "ycvkf-paaaa-aaaar-qaelq-cai"
 				}
@@ -420,6 +456,8 @@
 					"test_fe_2": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"test_fe_3": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"test_fe_4": "vi6cu-aiaaa-aaaad-aad7q-cai",
+					"test_fe_5": "vi6cu-aiaaa-aaaad-aad7q-cai",
+					"test_fe_6": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"e2e": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"audit": "vi6cu-aiaaa-aaaad-aad7q-cai"
 				}
@@ -451,6 +489,14 @@
 			"type": "persistent"
 		},
 		"test_fe_4": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"test_fe_5": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"test_fe_6": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
 		},

@@ -59,7 +59,7 @@ describe('plausible analytics service', () => {
 			metadata: { eventName: 'eventValue' }
 		};
 
-		await trackEvent(params);
+		trackEvent(params);
 
 		expect(trackEventMock).toHaveBeenCalledWith('test_event_name', {
 			props: { eventName: 'eventValue' }
@@ -83,7 +83,7 @@ describe('plausible analytics service', () => {
 			metadata: { eventName: 'eventValue' }
 		};
 
-		await trackEvent(params);
+		trackEvent(params);
 
 		expect(trackEventMock).not.toHaveBeenCalled();
 	});
