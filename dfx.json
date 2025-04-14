@@ -241,8 +241,10 @@
 		},
 		"ckbtc_minter": {
 			"type": "custom",
+			"build": "scripts/build.ckbtc_minter.sh",
 			"candid": "target/ic/ckbtc_minter.did",
 			"wasm": "target/ic/ckbtc_minter.wasm",
+			"init_arg_file": "target/ic/ckbtc_minter.args.did",
 			"specified_id": "ml52i-qqaaa-aaaar-qaaba-cai",
 			"remote": {
 				"id": {
