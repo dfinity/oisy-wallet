@@ -24,5 +24,10 @@ export const SHIB_TOKEN: RequiredErc20Token = {
 	twinTokenSymbol: 'ckSHIB',
 	buy: {
 		onramperId: 'shib_ethereum'
+	},
+	groupData: {
+		icon: shib,
+		name: 'SHIBA INU',
+		symbol: SHIB_SYMBOL
 	}
 };

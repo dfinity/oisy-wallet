@@ -24,5 +24,10 @@ export const OCT_TOKEN: RequiredErc20Token = {
 	twinTokenSymbol: 'ckOCT',
 	buy: {
 		onramperId: 'oct_ethereum'
+	},
+	groupData: {
+		icon: oct,
+		name: 'Octopus Network Token',
+		symbol: OCT_SYMBOL
 	}
 };

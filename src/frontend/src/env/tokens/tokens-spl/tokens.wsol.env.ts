@@ -24,5 +24,10 @@ export const WSOL_TOKEN: RequiredSplToken = {
 	owner: TOKEN_PROGRAM_ADDRESS,
 	buy: {
 		onramperId: 'sol'
+	},
+	groupData: {
+		icon: wsol,
+		name: 'Wrapped SOL',
+		symbol: WSOL_SYMBOL
 	}
 };

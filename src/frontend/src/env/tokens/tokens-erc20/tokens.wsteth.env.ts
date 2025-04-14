@@ -21,5 +21,10 @@ export const WSTETH_TOKEN: RequiredErc20Token = {
 	icon: wsteth,
 	address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckWSTETH'
+	twinTokenSymbol: 'ckWSTETH',
+	groupData: {
+		icon: wsteth,
+		name: 'Wrapped liquid staked Ether 2.0',
+		symbol: WSTETH_SYMBOL
+	}
 };

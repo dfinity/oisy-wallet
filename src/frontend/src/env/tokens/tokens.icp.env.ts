@@ -34,5 +34,10 @@ export const ICP_TOKEN: RequiredToken<IcToken> = {
 	explorerUrl: ICP_EXPLORER_URL,
 	buy: {
 		onramperId: 'icp_icp'
+	},
+	groupData: {
+		icon: icpLight,
+		name: 'Internet Computer',
+		symbol: ICP_SYMBOL
 	}
 };

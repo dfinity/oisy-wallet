@@ -24,5 +24,10 @@ export const WBTC_TOKEN: RequiredErc20Token = {
 	twinTokenSymbol: 'ckWBTC',
 	buy: {
 		onramperId: 'wbtc_ethereum'
+	},
+	groupData: {
+		icon: wbtc,
+		name: 'Wrapped BTC',
+		symbol: WBTC_SYMBOL
 	}
 };

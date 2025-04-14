@@ -23,7 +23,12 @@ export const BTC_MAINNET_TOKEN: TokenWithLinkedData = {
 	symbol: BTC_MAINNET_SYMBOL,
 	decimals: BTC_DECIMALS,
 	icon: bitcoin,
-	twinTokenSymbol: 'ckBTC'
+	twinTokenSymbol: 'ckBTC',
+	groupData: {
+		icon: bitcoin,
+		name: 'Bitcoin',
+		symbol: BTC_MAINNET_SYMBOL
+	}
 };
 
 export const BTC_TESTNET_SYMBOL = 'BTC (Testnet)';
@@ -38,7 +43,12 @@ export const BTC_TESTNET_TOKEN: Token = {
 	name: 'Bitcoin (Testnet)',
 	symbol: BTC_TESTNET_SYMBOL,
 	decimals: BTC_DECIMALS,
-	icon: bitcoinTestnet
+	icon: bitcoinTestnet,
+	groupData: {
+		icon: bitcoinTestnet,
+		name: 'Bitcoin (Testnet)',
+		symbol: BTC_TESTNET_SYMBOL
+	}
 };
 
 export const BTC_REGTEST_SYMBOL = 'BTC (Regtest)';
@@ -53,5 +63,10 @@ export const BTC_REGTEST_TOKEN: Token = {
 	name: 'Bitcoin (Regtest)',
 	symbol: BTC_REGTEST_SYMBOL,
 	decimals: BTC_DECIMALS,
-	icon: bitcoinTestnet
+	icon: bitcoinTestnet,
+	groupData: {
+		icon: bitcoinTestnet,
+		name: 'Bitcoin (Regtest)',
+		symbol: BTC_REGTEST_SYMBOL
+	}
 };

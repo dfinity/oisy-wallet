@@ -12,6 +12,7 @@
 	export let data: CardData;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
 	export let asNetwork = false;
+	export let asGroup = false;
 	export let hover = false;
 </script>
 
@@ -26,7 +27,7 @@
 	>
 		<span class="flex" slot="logo" class:mr-2={!asNetwork}>
 			<TokenLogo
-				{data}
+				data={asGroup ? { ...data, icon: data.groupData.icon } : data}
 				badge={nonNullish(data.tokenCount)
 					? { type: 'tokenCount', count: data.tokenCount }
 					: { type: 'network' }}
@@ -36,7 +37,7 @@
 		</span>
 
 		<span class:text-sm={asNetwork} slot="title">
-			{data.symbol}
+			{asGroup ? data.groupData.symbol : data.symbol}
 			{#if asNetwork}
 				<span class="font-normal">
 					{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
@@ -46,7 +47,7 @@
 
 		<span class:text-sm={asNetwork} slot="subtitle">
 			{#if !asNetwork}
-				&nbsp;&middot;&nbsp;{data.name}
+				&nbsp;&middot;&nbsp;{asGroup ? data.groupData.name : data.name}
 			{/if}
 		</span>
 

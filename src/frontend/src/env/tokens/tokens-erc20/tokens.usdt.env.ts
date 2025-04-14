@@ -24,5 +24,10 @@ export const USDT_TOKEN: RequiredErc20Token = {
 	twinTokenSymbol: 'ckUSDT',
 	buy: {
 		onramperId: 'usdt_ethereum'
+	},
+	groupData: {
+		icon: usdt,
+		name: 'Tether USD',
+		symbol: USDT_SYMBOL
 	}
 };

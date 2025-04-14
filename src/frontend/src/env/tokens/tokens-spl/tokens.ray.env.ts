@@ -24,5 +24,10 @@ export const RAY_TOKEN: RequiredSplToken = {
 	owner: TOKEN_PROGRAM_ADDRESS,
 	buy: {
 		onramperId: 'ray_solana'
+	},
+	groupData: {
+		icon: ray,
+		name: 'Raydium',
+		symbol: RAY_SYMBOL
 	}
 };

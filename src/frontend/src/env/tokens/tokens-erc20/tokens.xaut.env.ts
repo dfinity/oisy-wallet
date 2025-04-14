@@ -21,5 +21,10 @@ export const XAUT_TOKEN: RequiredErc20Token = {
 	icon: xaut,
 	address: '0x68749665FF8D2d112Fa859AA293F07A622782F38',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckXAUT'
+	twinTokenSymbol: 'ckXAUT',
+	groupData: {
+		icon: xaut,
+		name: 'Tether Gold',
+		symbol: XAUT_SYMBOL
+	}
 };

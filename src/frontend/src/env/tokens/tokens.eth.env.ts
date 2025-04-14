@@ -25,6 +25,11 @@ export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 	twinTokenSymbol: 'ckETH',
 	buy: {
 		onramperId: 'eth'
+	},
+	groupData: {
+		icon: eth,
+		name: 'Ethereum',
+		symbol: ETHEREUM_SYMBOL
 	}
 };
 
@@ -41,7 +46,12 @@ export const SEPOLIA_TOKEN: RequiredTokenWithLinkedData = {
 	symbol: SEPOLIA_SYMBOL,
 	decimals: ETHEREUM_DEFAULT_DECIMALS,
 	icon: eth,
-	twinTokenSymbol: 'ckSepoliaETH'
+	twinTokenSymbol: 'ckSepoliaETH',
+	groupData: {
+		icon: eth,
+		name: 'SepoliaETH',
+		symbol: SEPOLIA_SYMBOL
+	}
 };
 
 /**

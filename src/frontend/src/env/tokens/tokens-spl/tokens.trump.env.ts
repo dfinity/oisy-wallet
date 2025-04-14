@@ -24,5 +24,10 @@ export const TRUMP_TOKEN: RequiredSplToken = {
 	owner: TOKEN_PROGRAM_ADDRESS,
 	buy: {
 		onramperId: 'trump_solana'
+	},
+	groupData: {
+		icon: trump,
+		name: 'OFFICIAL TRUMP',
+		symbol: TRUMP_SYMBOL
 	}
 };

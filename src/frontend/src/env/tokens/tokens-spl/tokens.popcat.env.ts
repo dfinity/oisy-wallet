@@ -21,5 +21,10 @@ export const POPCAT_TOKEN: RequiredSplToken = {
 	decimals: POPCAT_DECIMALS,
 	icon: popcat,
 	address: '7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr',
-	owner: TOKEN_PROGRAM_ADDRESS
+	owner: TOKEN_PROGRAM_ADDRESS,
+	groupData: {
+		icon: popcat,
+		name: 'Popcat',
+		symbol: POPCAT_SYMBOL
+	}
 };

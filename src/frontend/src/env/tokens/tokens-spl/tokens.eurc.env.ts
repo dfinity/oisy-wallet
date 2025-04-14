@@ -23,7 +23,12 @@ export const EURC_TOKEN: RequiredSplToken = {
 	icon: eurc,
 	address: 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr',
 	owner: TOKEN_PROGRAM_ADDRESS,
-	twinToken: ETH_EURC_TOKEN
+	twinToken: ETH_EURC_TOKEN,
+	groupData: {
+		icon: eurc,
+		name: 'Euro Coin',
+		symbol: EURC_SYMBOL
+	}
 };
 
 export const DEVNET_EURC_SYMBOL = 'DevnetEURC';
@@ -40,5 +45,10 @@ export const DEVNET_EURC_TOKEN: RequiredSplToken = {
 	decimals: EURC_DECIMALS,
 	icon: eurc,
 	address: 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr',
-	owner: TOKEN_PROGRAM_ADDRESS
+	owner: TOKEN_PROGRAM_ADDRESS,
+	groupData: {
+		icon: eurc,
+		name: 'EURC (Devnet)',
+		symbol: DEVNET_EURC_SYMBOL
+	}
 };

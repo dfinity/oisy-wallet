@@ -24,6 +24,11 @@ export const LINK_TOKEN: RequiredErc20Token = {
 	twinTokenSymbol: 'ckLINK',
 	buy: {
 		onramperId: 'link_ethereum'
+	},
+	groupData: {
+		icon: link,
+		name: 'ChainLink Token',
+		symbol: LINK_SYMBOL
 	}
 };
 
@@ -42,5 +47,10 @@ export const SEPOLIA_LINK_TOKEN: RequiredErc20Token = {
 	icon: link,
 	address: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckSepoliaLINK'
+	twinTokenSymbol: 'ckSepoliaLINK',
+	groupData: {
+		icon: link,
+		name: 'ChainLink Token',
+		symbol: LINK_SYMBOL
+	}
 };

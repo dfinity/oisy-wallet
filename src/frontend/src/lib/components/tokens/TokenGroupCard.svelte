@@ -79,6 +79,7 @@
 					tokenCount: tokenGroup.tokens.length,
 					networks: tokenGroup.tokens.map((t) => t.network)
 				}}
+				asGroup
 				testIdPrefix={TOKEN_GROUP}
 				on:click={() => toggleIsExpanded(!isExpanded)}
 			/>

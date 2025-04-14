@@ -68,7 +68,12 @@ const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 				minterCanisterId: LOCAL_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
 				position: 3,
-				twinToken: BTC_TESTNET_TOKEN
+				twinToken: BTC_TESTNET_TOKEN,
+				groupData: {
+					icon: BTC_MAINNET_TOKEN.icon,
+					name: BTC_MAINNET_TOKEN.name,
+					symbol: BTC_MAINNET_TOKEN.symbol
+				}
 			}
 		: undefined;
 
@@ -84,7 +89,12 @@ const CKBTC_STAGING_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'bitcoin',
 				position: 2,
 				twinToken: BTC_TESTNET_TOKEN,
-				explorerUrl: CKBTC_TESTNET_EXPLORER_URL
+				explorerUrl: CKBTC_TESTNET_EXPLORER_URL,
+				groupData: {
+					icon: BTC_MAINNET_TOKEN.icon,
+					name: BTC_MAINNET_TOKEN.name,
+					symbol: BTC_MAINNET_TOKEN.symbol
+				}
 			}
 		: undefined;
 
@@ -97,7 +107,12 @@ const CKBTC_IC_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'bitcoin',
 				position: 1,
 				twinToken: BTC_MAINNET_TOKEN,
-				explorerUrl: CKBTC_EXPLORER_URL
+				explorerUrl: CKBTC_EXPLORER_URL,
+				groupData: {
+					icon: BTC_MAINNET_TOKEN.icon,
+					name: BTC_MAINNET_TOKEN.name,
+					symbol: BTC_MAINNET_TOKEN.symbol
+				}
 			}
 		: undefined;
 
@@ -154,7 +169,12 @@ const CKETH_LOCAL_DATA: IcCkInterface | undefined =
 				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 3,
-				twinToken: SEPOLIA_TOKEN
+				twinToken: SEPOLIA_TOKEN,
+				groupData: {
+					icon: ETHEREUM_TOKEN.icon,
+					name: ETHEREUM_TOKEN.name,
+					symbol: ETHEREUM_TOKEN.symbol
+				}
 			}
 		: undefined;
 
@@ -170,7 +190,12 @@ const CKETH_STAGING_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'ethereum',
 				position: 2,
 				twinToken: SEPOLIA_TOKEN,
-				explorerUrl: CKETH_SEPOLIA_EXPLORER_URL
+				explorerUrl: CKETH_SEPOLIA_EXPLORER_URL,
+				groupData: {
+					icon: ETHEREUM_TOKEN.icon,
+					name: ETHEREUM_TOKEN.name,
+					symbol: ETHEREUM_TOKEN.symbol
+				}
 			}
 		: undefined;
 
@@ -183,7 +208,12 @@ const CKETH_IC_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'ethereum',
 				position: 1,
 				twinToken: ETHEREUM_TOKEN,
-				explorerUrl: CKETH_EXPLORER_URL
+				explorerUrl: CKETH_EXPLORER_URL,
+				groupData: {
+					icon: ETHEREUM_TOKEN.icon,
+					name: ETHEREUM_TOKEN.name,
+					symbol: ETHEREUM_TOKEN.symbol
+				}
 			}
 		: undefined;
 
@@ -217,7 +247,12 @@ const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
 				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 3,
-				twinToken: SEPOLIA_USDC_TOKEN,
+				twinToken: USDC_TOKEN,
+				groupData: {
+					icon: USDC_TOKEN.icon,
+					symbol: USDC_TOKEN.symbol,
+					name: USDC_TOKEN.name
+				},
 				...(nonNullish(LOCAL_CKETH_LEDGER_CANISTER_ID) && {
 					feeLedgerCanisterId: LOCAL_CKETH_LEDGER_CANISTER_ID
 				})
@@ -275,7 +310,12 @@ const CKUSDC_STAGING_DATA: IcCkInterface | undefined = nonNullish(
 	? {
 			...CKERC20_STAGING_DATA.ckSepoliaUSDC,
 			position: 2,
-			twinToken: SEPOLIA_USDC_TOKEN
+			twinToken: SEPOLIA_USDC_TOKEN,
+			groupData: {
+				icon: SEPOLIA_USDC_TOKEN.icon,
+				symbol: SEPOLIA_USDC_TOKEN.symbol,
+				name: SEPOLIA_USDC_TOKEN.name
+			}
 		}
 	: undefined;
 
@@ -303,7 +343,12 @@ const CKUSDC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUSDC,
 			position: 1,
-			twinToken: USDC_TOKEN
+			twinToken: USDC_TOKEN,
+			groupData: {
+				icon: SEPOLIA_USDC_TOKEN.icon,
+				symbol: SEPOLIA_USDC_TOKEN.symbol,
+				name: SEPOLIA_USDC_TOKEN.name
+			}
 		}
 	: undefined;
 

@@ -26,5 +26,10 @@ export const USDT_TOKEN: RequiredSplToken = {
 	twinToken: ETH_USDT_TOKEN,
 	buy: {
 		onramperId: 'usdt_solana'
+	},
+	groupData: {
+		icon: usdt,
+		name: 'Tether USD',
+		symbol: USDT_SYMBOL
 	}
 };

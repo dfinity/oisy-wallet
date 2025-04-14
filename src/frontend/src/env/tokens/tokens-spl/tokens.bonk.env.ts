@@ -24,5 +24,10 @@ export const BONK_TOKEN: RequiredSplToken = {
 	owner: TOKEN_PROGRAM_ADDRESS,
 	buy: {
 		onramperId: 'bonk_solana'
+	},
+	groupData: {
+		icon: bonk,
+		name: 'Bonk',
+		symbol: BONK_SYMBOL
 	}
 };

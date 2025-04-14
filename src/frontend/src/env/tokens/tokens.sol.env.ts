@@ -25,6 +25,11 @@ export const SOLANA_TOKEN: RequiredToken = {
 	icon: sol,
 	buy: {
 		onramperId: 'sol'
+	},
+	groupData: {
+		icon: sol,
+		name: 'Solana',
+		symbol: SOLANA_SYMBOL
 	}
 };
 
@@ -40,7 +45,12 @@ export const SOLANA_TESTNET_TOKEN: RequiredToken = {
 	name: 'Solana (Testnet)',
 	symbol: SOLANA_TESTNET_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
-	icon: sol
+	icon: sol,
+	groupData: {
+		icon: sol,
+		name: 'Solana (Testnet)',
+		symbol: SOLANA_TESTNET_SYMBOL
+	}
 };
 
 const SOLANA_DEVNET_SYMBOL = 'SOL (Devnet)';
@@ -55,7 +65,12 @@ export const SOLANA_DEVNET_TOKEN: RequiredToken = {
 	name: 'Solana (Devnet)',
 	symbol: SOLANA_DEVNET_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
-	icon: sol
+	icon: sol,
+	groupData: {
+		icon: sol,
+		name: 'Solana (Devnet)',
+		symbol: SOLANA_DEVNET_SYMBOL
+	}
 };
 
 const SOLANA_LOCAL_SYMBOL = 'SOL (Local)';
@@ -70,5 +85,10 @@ export const SOLANA_LOCAL_TOKEN: RequiredToken = {
 	name: 'Solana (Local)',
 	symbol: SOLANA_LOCAL_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
-	icon: sol
+	icon: sol,
+	groupData: {
+		icon: sol,
+		name: 'Solana (Local)',
+		symbol: SOLANA_LOCAL_SYMBOL
+	}
 };

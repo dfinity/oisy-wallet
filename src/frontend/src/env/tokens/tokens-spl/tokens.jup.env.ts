@@ -21,5 +21,10 @@ export const JUP_TOKEN: RequiredSplToken = {
 	decimals: JUP_DECIMALS,
 	icon: jup,
 	address: 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN',
-	owner: TOKEN_PROGRAM_ADDRESS
+	owner: TOKEN_PROGRAM_ADDRESS,
+	groupData: {
+		icon: jup,
+		name: 'Jupiter',
+		symbol: JUP_SYMBOL
+	}
 };

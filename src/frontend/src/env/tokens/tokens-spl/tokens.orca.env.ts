@@ -21,5 +21,10 @@ export const ORCA_TOKEN: RequiredSplToken = {
 	decimals: ORCA_DECIMALS,
 	icon: orca,
 	address: 'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE',
-	owner: TOKEN_PROGRAM_ADDRESS
+	owner: TOKEN_PROGRAM_ADDRESS,
+	groupData: {
+		icon: orca,
+		name: 'Orca',
+		symbol: ORCA_SYMBOL
+	}
 };
