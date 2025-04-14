@@ -360,7 +360,7 @@ export const getIcpSwapAmounts = async ({
 		identity,
 		canisterId,
 		amountIn: amountIn.toString(),
-		zeroForOne: sourceToken.ledgerCanisterId < destinationToken.ledgerCanisterId,
+		zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId,
 		amountOutMinimum: '0'
 	});
 

@@ -56,7 +56,7 @@
 				identity: $authIdentity,
 				sourceToken,
 				destinationToken,
-				amountIn: BigInt(parsedAmount),
+				amountIn: 100000000n,
 				slippage: 1.5
 			});
 
