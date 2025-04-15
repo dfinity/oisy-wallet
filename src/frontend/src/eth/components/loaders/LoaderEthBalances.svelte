@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		children?: Snippet;
