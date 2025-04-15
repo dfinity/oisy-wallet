@@ -6,7 +6,7 @@ import eth from '$icp-eth/assets/eth.svg';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
-const BASE_ETH_DEFAULT_DECIMALS = 18;
+const BASE_ETH_DECIMALS = 18;
 
 const BASE_ETH_SYMBOL = 'ETH';
 
@@ -19,7 +19,7 @@ export const BASE_ETH_TOKEN: RequiredToken = {
 	category: 'default',
 	name: 'Ethereum',
 	symbol: BASE_ETH_SYMBOL,
-	decimals: BASE_ETH_DEFAULT_DECIMALS,
+	decimals: BASE_ETH_DECIMALS,
 	icon: eth,
 	buy: {
 		onramperId: 'eth_base'
@@ -37,6 +37,6 @@ export const BASE_SEPOLIA_ETH_TOKEN: RequiredToken = {
 	category: 'default',
 	name: 'SepoliaETH',
 	symbol: BASE_SEPOLIA_ETH_SYMBOL,
-	decimals: BASE_ETH_DEFAULT_DECIMALS,
+	decimals: BASE_ETH_DECIMALS,
 	icon: eth
 };
