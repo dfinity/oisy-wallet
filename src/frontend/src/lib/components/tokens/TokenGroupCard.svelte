@@ -6,6 +6,7 @@
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -18,7 +19,6 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
-	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let tokenGroup: TokenUiGroup;
 
