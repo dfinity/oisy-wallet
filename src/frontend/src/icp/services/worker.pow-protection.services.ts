@@ -5,7 +5,7 @@ export const initPowProtectorWorker = async (): Promise<PowProtectorWorkerInitRe
 	const PowWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new PowWorker.default();
 
-	worker.onmessage = ({ data }: MessageEvent<PostMessage<PostMessageDataResponse>>) => {
+	worker.onmessage = ({ data: _data }: MessageEvent<PostMessage<PostMessageDataResponse>>) => {
 	};
 
 	return {
