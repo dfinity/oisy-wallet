@@ -4,6 +4,13 @@
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		children?: Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	const load = async () => {
 		await Promise.allSettled([
@@ -18,7 +25,11 @@
 
 	const debounceLoad = debounce(load, 500);
 
-	$: $ethAddress, $enabledErc20Tokens, debounceLoad();
+	$effect(() => {
+		// To trigger the load function when any of the dependencies change.
+		[$ethAddress, $enabledEthereumTokens, $enabledErc20Tokens];
+		debounceLoad();
+	});
 </script>
 
-<slot />
+{@render children?.()}
