@@ -17,6 +17,7 @@
 	export let asMenuItem = false;
 	export let asMenuItemCondensed = false;
 	export let asButton = false;
+	export let iconAsLast = false;
 
 	const onClick = () => {
 		if (isNullish(trackEvent)) {
@@ -44,6 +45,7 @@
 	class:w-full={fullWidth}
 	class:nav-item={asMenuItem}
 	class:nav-item-condensed={asMenuItemCondensed}
+	class:flex-row-reverse={iconAsLast}
 	on:click={onClick}
 >
 	{#if iconVisible}
