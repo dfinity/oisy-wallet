@@ -6,7 +6,7 @@ import eth from '$icp-eth/assets/eth.svg';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
-export const BASE_ETH_DEFAULT_DECIMALS = 18;
+const BASE_ETH_DEFAULT_DECIMALS = 18;
 
 const BASE_ETH_SYMBOL = 'ETH';
 
@@ -26,7 +26,7 @@ export const BASE_ETH_TOKEN: RequiredToken = {
 	}
 };
 
-export const BASE_SEPOLIA_ETH_SYMBOL = 'SepoliaETH';
+const BASE_SEPOLIA_ETH_SYMBOL = 'SepoliaETH';
 
 export const BASE_SEPOLIA_ETH_TOKEN_ID: TokenId = parseTokenId(BASE_SEPOLIA_ETH_SYMBOL);
 
