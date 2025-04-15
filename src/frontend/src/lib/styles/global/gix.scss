@@ -123,6 +123,10 @@ div.input-field input[id] {
 	padding: var(--padding-1_5x);
 }
 
+.input-field.condensed input {
+	padding-block: var(--padding-1_5x) !important;
+}
+
 div.input-field input[id]::placeholder {
 	color: var(--color-foreground-tertiary) !important;
 }

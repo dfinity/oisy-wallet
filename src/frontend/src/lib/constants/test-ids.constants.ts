@@ -163,3 +163,5 @@ export const HELP_AUTH_ASSET_CONTROL_LINK = 'help-auth-asset-control-link';
 
 export const AUTH_LICENSE_LINK = 'auth-license-link';
 export const AUTH_SIGNING_IN_HELP_LINK = 'auth-signing-in-help-link';
+
+export const TOKEN_LIST_FILTER = 'token-list-filter';
