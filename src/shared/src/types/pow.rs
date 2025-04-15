@@ -17,22 +17,22 @@ pub const TARGET_DURATION_MS: u64 = 3000;
 
 // The challenge expires after this time (in milliseconds). Multiplying
 // `TARGET_DURATION_MS` by 4 ensures challenges remain valid longer than the targeted solve time.
-pub const EXPIRY_DURATION_MS: u64 = TARGET_DURATION_MS * 4;
+pub const EXPIRY_DURATION_MS: u64 = 120_000;
 
 // The default starting difficulty for the first PoW challenge.
 // Must lie between `MIN_DIFFICULTY` and `MAX_DIFFICULTY`.
-pub const START_DIFFICULTY: u32 = 100_000;
+pub const START_DIFFICULTY: u32 = 500_000;
 
 // The minimum allowed difficulty. Auto-adjustment will not reduce difficulty below this value.
 // Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
-pub const MIN_DIFFICULTY: u32 = 100_000;
+pub const MIN_DIFFICULTY: u32 = 300_000;
 
 // The maximum allowed difficulty. Auto-adjustment will not raise difficulty above this value.
 // Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
-pub const MAX_DIFFICULTY: u32 = 5_000_000;
+pub const MAX_DIFFICULTY: u32 = 10_000_000;
 
 // The number of cycles granted per difficulty unit for signer operations.
-pub const CYCLES_PER_DIFFICULTY: u64 = 10_000;
+pub const CYCLES_PER_DIFFICULTY: u64 = 100_000;
 // ---------------------------------------------------------------------------------------------
 // - Error-structures and -enums
 // ---------------------------------------------------------------------------------------------

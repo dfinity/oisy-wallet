@@ -1,30 +1,20 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { POW_ENABLED } from '$env/pow.env';
-	import { type BaseWorker, initPowWorker } from '$lib/services/worker.pow.services';
-
-	let powWorker: BaseWorker | undefined;
+	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
+	import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
 
 	if (POW_ENABLED) {
+		let powWorker: PowProtectorWorkerInitResult;
+
 		onMount(async () => {
 			// Initialize the worker
-			powWorker = await initPowWorker();
+			powWorker = await initPowProtectorWorker();
 			// Start the worker
-			powWorker.startPowWorker();
+			powWorker.start();
 		});
 
-		onDestroy(() => {
-			destroyWorker();
-		});
-
-		function _stopWorker() {
-			powWorker?.stopPowWorker();
-		}
-
-		function destroyWorker() {
-			powWorker?.destroyPowWorker();
-			powWorker = undefined;
-		}
+		onDestroy(() => powWorker?.stop());
 	}
 </script>
 

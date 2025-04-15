@@ -5,10 +5,10 @@ import { onCkBtcUpdateBalanceMessage } from '$icp/workers/ckbtc-update-balance.w
 import { onCkEthMinterInfoMessage } from '$icp/workers/cketh-minter-info.worker';
 import { onIcpWalletMessage } from '$icp/workers/icp-wallet.worker';
 import { onIcrcWalletMessage } from '$icp/workers/icrc-wallet.worker';
+import { onPowProtectionMessage } from '$icp/workers/pow-protection.worker';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import { onAuthMessage } from '$lib/workers/auth.worker';
 import { onExchangeMessage } from '$lib/workers/exchange.worker';
-import { onPowMessage } from '$lib/workers/pow.worker';
 import { onSolWalletMessage } from '$sol/workers/sol-wallet.worker';
 
 onmessage = async (msg: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
@@ -23,6 +23,6 @@ onmessage = async (msg: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 		onIcpWalletMessage(msg),
 		onIcrcWalletMessage(msg),
 		onSolWalletMessage(msg),
-		onPowMessage(msg)
+		onPowProtectionMessage(msg)
 	]);
 };

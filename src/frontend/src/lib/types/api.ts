@@ -1,11 +1,6 @@
 import type {
 	AddUserCredentialError,
-	AllowSigningError,
-	AllowSigningRequest,
-	AllowSigningResponse,
 	BitcoinNetwork,
-	CreateChallengeError,
-	CreateChallengeResponse,
 	CredentialSpec,
 	GetUserProfileError,
 	UserProfile,
@@ -13,9 +8,9 @@ import type {
 } from '$declarations/backend/backend.did';
 import type { TxId } from '$declarations/kong_backend/kong_backend.did';
 import type {
+	BitcoinNetwork as SignerBitcoinNetwork,
 	BtcTxOutput,
 	SchnorrKeyId,
-	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
 } from '$declarations/signer/signer.did';
 import type { Address, BtcAddress } from '$lib/types/address';
@@ -34,9 +29,9 @@ export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialE
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
 
-export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
-
-export type CreateChallengeResult = { Ok: CreateChallengeResponse } | { Err: CreateChallengeError };
+export interface AllowSigningParams {
+	nonce: [] | [bigint];
+}
 
 export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;
@@ -100,8 +95,4 @@ export interface KongSwapParams {
 	receiveAddress?: Address;
 	sourceToken: Token;
 	payTransactionId?: TxId;
-}
-
-export interface AllowSigningParams {
-	request?: AllowSigningRequest;
 }

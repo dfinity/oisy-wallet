@@ -20,9 +20,9 @@ export const PostMessageRequestSchema = z.enum([
 	'stopCodeTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
-	'startPowTimer',
-	'stopPowTimer',
-	'setPowThrottle',
+	'startPowProtectionTimer',
+	'triggerPowProtectionTimer',
+	'stopPowProtectionTimer',
 	'stopIcpWalletTimer',
 	'startIcpWalletTimer',
 	'triggerIcpWalletTimer',
@@ -100,7 +100,8 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncSolWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
-	'syncCkBTCUpdateBalanceStatus'
+	'syncCkBTCUpdateBalanceStatus',
+	'syncPowProtectionStatus'
 ]);
 
 export const PostMessageResponseSchema = z.enum([
@@ -125,6 +126,7 @@ export const PostMessageResponseSchema = z.enum([
 	'syncBtcPendingUtxos',
 	'syncCkBTCUpdateOk',
 	'syncBtcAddress',
+	'syncPowProtection',
 	...PostMessageResponseStatusSchema.options
 ]);
 
@@ -185,92 +187,3 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 		msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
 		data: dataSchema.optional()
 	});
-
-// -----------------------------------------------------------------------------------------------
-// The generic data structures which are required to implement the Short Polling (request-response)
-// design pattern used for a simplified communication between the worker(s) and the web application
-// The data structure for a request or response to/from a canister call is more or less 1:1 propagated
-// by the data structure defined by the schema.
-// -----------------------------------------------------------------------------------------------
-/**
- * Base schema for all post messages
- */
-export const PostMessageBaseSchema = z.object({
-	msg: z.string(), // Message type
-	requestId: z.string() // Unique identifier for tracking requests and responses
-});
-
-/**
- * Base schema for all post message requests
- */
-export const PostMessageRequestBaseSchema = PostMessageBaseSchema.extend({
-	type: z.literal('request'), // Specifies this is a request
-	data: z.unknown().optional() // Optional data payload
-});
-
-export const PostMessageErrorSchema = z.string();
-
-/**
- * Base schema for all post message responses
- */
-export const PostMessageResponseBaseSchema = PostMessageBaseSchema.extend({
-	type: z.literal('response'),
-	result: z.union([z.object({ Ok: z.unknown() }), z.object({ Err: PostMessageErrorSchema })])
-});
-
-export const CreatePowChallengeRequestDataSchema = z.object({});
-
-export const PostMessageCreatePowChallengeRequestSchema = PostMessageRequestBaseSchema.extend({
-	msg: z.literal('CreatePowChallengeRequest'),
-	data: CreatePowChallengeRequestDataSchema.optional()
-});
-
-export const CreatePowChallengeResponseResultSchema = z.object({
-	difficulty: z.number(),
-	start_timestamp_ms: z.bigint(),
-	expiry_timestamp_ms: z.bigint()
-});
-
-export const PostMessageCreatePowChallengeResponseSchema = PostMessageResponseBaseSchema.extend({
-	msg: z.literal('CreatePowChallengeResponse'),
-	result: z.union([
-		z.object({ Ok: CreatePowChallengeResponseResultSchema }),
-		z.object({ Err: PostMessageErrorSchema })
-	])
-});
-
-export const AllowSigningRequestDataSchema = z.object({
-	nonce: z.bigint()
-});
-
-export const PostMessageAllowSigningRequestSchema = PostMessageRequestBaseSchema.extend({
-	msg: z.literal('AllowSigningRequest'),
-	data: AllowSigningRequestDataSchema
-});
-
-export const ChallengeCompletionSchema = z.object({
-	solved_duration_ms: z.bigint(),
-	next_allowance_ms: z.bigint(),
-	next_difficulty: z.number(),
-	current_difficulty: z.number()
-});
-
-const AllowSigningStatusSchema = z.union([
-	z.object({ Skipped: z.null() }),
-	z.object({ Failed: z.null() }),
-	z.object({ Executed: z.null() })
-]);
-
-export const AllowSigningResponseResultSchema = z.object({
-	status: AllowSigningStatusSchema, // Use the corrected schema for status
-	challenge_completion: z.array(z.any()).optional(), // Assuming ChallengeCompletion is modeled correctly elsewhere
-	allowed_cycles: z.bigint()
-});
-
-export const PostMessageAllowSigningResponseSchema = PostMessageResponseBaseSchema.extend({
-	msg: z.literal('AllowSigningResponse'),
-	result: z.union([
-		z.object({ Ok: AllowSigningResponseResultSchema }),
-		z.object({ Err: PostMessageErrorSchema })
-	])
-});
