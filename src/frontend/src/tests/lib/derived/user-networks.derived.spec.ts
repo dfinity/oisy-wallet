@@ -45,6 +45,7 @@ describe('user-networks.derived', () => {
 
 		it('should return only mainnets when user profile is not set', () => {
 			userProfileStore.reset();
+
 			expect(get(userNetworks)).toEqual(expectedMainnets);
 		});
 
@@ -59,11 +60,13 @@ describe('user-networks.derived', () => {
 					})
 				}
 			});
+
 			expect(get(userNetworks)).toEqual(expectedMainnets);
 		});
 
 		it('should return the user networks if they are set', () => {
 			userProfileStore.set({ certified, profile: mockUserProfile });
+
 			expect(get(userNetworks)).toEqual(mockUserNetworks);
 		});
 
@@ -78,6 +81,7 @@ describe('user-networks.derived', () => {
 					})
 				}
 			});
+
 			expect(get(userNetworks)).toEqual({ ...expectedMainnets, ...expectedTestnets });
 		});
 
@@ -87,6 +91,7 @@ describe('user-networks.derived', () => {
 			);
 
 			userProfileStore.set({ certified, profile: mockUserProfile });
+
 			expect(get(userNetworks)).toEqual(expectedMainnets);
 		});
 
@@ -107,6 +112,7 @@ describe('user-networks.derived', () => {
 					})
 				}
 			});
+
 			expect(get(userNetworks)).toEqual({
 				[SOLANA_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
 				[ICP_NETWORK_ID]: { enabled: true, isTestnet: false }
