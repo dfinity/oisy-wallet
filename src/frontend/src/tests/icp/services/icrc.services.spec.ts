@@ -240,6 +240,7 @@ describe('icrc.services', () => {
 
 			it('should reset all and toasts on list custom tokens error', async () => {
 				const tokens = get(icrcCustomTokensStore);
+
 				expect(tokens).toHaveLength(1);
 
 				const err = new Error('test');
@@ -248,6 +249,7 @@ describe('icrc.services', () => {
 				await loadCustomTokens({ identity: mockIdentity });
 
 				const afterTokens = get(icrcCustomTokensStore);
+
 				expect(afterTokens).toBeNull();
 
 				testToastsError(err);
@@ -262,6 +264,7 @@ describe('icrc.services', () => {
 				await loadCustomTokens({ identity: mockIdentity });
 
 				const afterTokens = get(icrcCustomTokensStore);
+
 				expect(afterTokens).toBeNull();
 
 				testToastsError(err);
