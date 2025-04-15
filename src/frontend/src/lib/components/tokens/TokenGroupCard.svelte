@@ -18,6 +18,7 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let tokenGroup: TokenUiGroup;
 
@@ -49,7 +50,7 @@
 	// list of tokens that should display with a "show more" button for not displayed ones
 	let truncatedTokens: TokenUi[];
 	$: truncatedTokens = filteredTokens.filter((token) => {
-		const totalBalance = filteredTokens.reduce((p, c) => p + BigInt(c.balance ?? 0n), BigInt(0n));
+		const totalBalance = filteredTokens.reduce((p, c) => p + BigInt(c.balance ?? 0n), ZERO_BI);
 		// Only include tokens with a balance
 		return (
 			(token.balance ?? 0n) > 0n ||
