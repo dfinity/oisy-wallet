@@ -5,12 +5,11 @@ import baseSepoliaIconDark from '$lib/assets/networks/dark/base-sepolia.svg';
 import baseMainnetIconLight from '$lib/assets/networks/light/base-mainnet.svg';
 import baseSepoliaIconLight from '$lib/assets/networks/light/base-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
-import { parseBoolEnvVar } from '$lib/utils/env.utils';
+import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 
-export const BASE_MAINNET_ENABLED = parseBoolEnvVar(
-	import.meta.env.VITE_BASE_MAINNET_DISABLED,
-	false
+export const BASE_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
+	import.meta.env.VITE_BASE_MAINNET_DISABLED
 );
 
 export const BASE_NETWORK_SYMBOL = 'BASE';
