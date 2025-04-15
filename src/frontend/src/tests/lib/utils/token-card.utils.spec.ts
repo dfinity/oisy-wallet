@@ -49,7 +49,12 @@ describe('mapHeaderData', () => {
 			network: SEPOLIA_NETWORK,
 			oisyName: { oisyName: `${SEPOLIA_TOKEN.symbol}, ${ICP_TOKEN.symbol}` },
 			oisySymbol: { oisySymbol: SEPOLIA_TOKEN.name },
-			tokenCount: 2
+			tokenCount: 2,
+			groupData: {
+				icon: SEPOLIA_TOKEN.icon,
+				name: SEPOLIA_TOKEN.name,
+				symbol: SEPOLIA_TOKEN.symbol
+			}
 		};
 
 		expect(mapHeaderData(rest)).toEqual(expected);
