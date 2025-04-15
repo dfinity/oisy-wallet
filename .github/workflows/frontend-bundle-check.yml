@@ -29,7 +29,7 @@ jobs:
       - name: Get bundle size
         id: get-size
         run: |
-          SIZE=$(du -sk build/_app/immutable/**/*.js | cut -f1 | tail -n 1)
+          SIZE=$(du -sk build/_app/immutable/**/*.js{,.gz} 2>/dev/null | awk '{sum += $1} END {print sum}')
           echo "Base branch bundle size: $SIZE KB"
           echo "size=$SIZE" >> $GITHUB_OUTPUT
 
@@ -55,7 +55,7 @@ jobs:
       - name: Get bundle size
         id: get-size
         run: |
-          SIZE=$(du -sk build/_app/immutable/**/*.js | cut -f1 | tail -n 1)
+          SIZE=$(du -sk build/_app/immutable/**/*.js{,.gz} 2>/dev/null | awk '{sum += $1} END {print sum}')
           echo "PR bundle size: $SIZE KB"
           echo "size=$SIZE" >> $GITHUB_OUTPUT
 
