@@ -649,7 +649,7 @@ pub fn create_user_profile() -> UserProfile {
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
         let stored_user = create_profile(stored_principal, &mut user_profile_model);
 
-        // TODO convert create_user_profile(..) to an asychronous function and remove spawning the
+        // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
         // Spawn the async task for allow_signing after returning UserProfile synchronously
         ic_cdk::spawn(async move {
             // Upon initial user login, we have to that ensure allow_signing is called to handle
