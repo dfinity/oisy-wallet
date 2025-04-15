@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
+	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
@@ -8,11 +9,18 @@
 </script>
 
 <div>
-	<Header>
-		<h2 class="text-base">{$i18n.tokens.text.title}</h2>
-
-		<TokensMenu slot="end" />
-	</Header>
+	<div class="flex w-full flex-row justify-between">
+		<div class="grow-1 relative flex flex-row justify-between">
+			<TokensFilter>
+				{#snippet overflowableContent()}
+					<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
+				{/snippet}
+			</TokensFilter>
+		</div>
+		<div class="flex">
+			<TokensMenu />
+		</div>
+	</div>
 
 	<TokensList />
 

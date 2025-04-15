@@ -7,14 +7,17 @@
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
+	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
+	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
+	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined;
 
@@ -38,12 +41,15 @@
 
 	let loading: boolean;
 	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
+
+	let filteredTokens: TokenUiOrGroupUi[] | undefined;
+	$: filteredTokens = getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] });
 </script>
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="mb-3 flex flex-col gap-3">
-			{#each tokens ?? [] as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 				<div
 					class="overflow-hidden rounded-xl"
 					transition:fade
@@ -69,8 +75,12 @@
 			{/each}
 		</div>
 
-		{#if tokens?.length === 0}
-			<NoTokensPlaceholder />
+		{#if filteredTokens?.length === 0}
+			{#if $tokenListStore.filter === ''}
+				<NoTokensPlaceholder />
+			{:else}
+				<NothingFoundPlaceholder />
+			{/if}
 		{/if}
 
 		{#if $modalManageTokens}
