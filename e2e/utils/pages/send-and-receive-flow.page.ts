@@ -31,6 +31,7 @@ export class FlowPage extends HomepageLoggedIn {
 	async receiveTokens(): Promise<void> {
 		await this.clickByTestId({ testId: `${TOKEN_CARD}-ICP-ICP` });
 		await this.waitForByTestId({ testId: AMOUNT_DATA });
+
 		await expect(this.getBalanceLocator()).toHaveText('0.00');
 
 		await this.waitForModal({
@@ -38,12 +39,14 @@ export class FlowPage extends HomepageLoggedIn {
 			modalTestId: RECEIVE_TOKENS_MODAL
 		});
 		const accountId = await this.getAccountIdByTestId(RECEIVE_TOKENS_MODAL_ICP_SECTION);
+
 		expect(accountId).toBeTruthy();
 
 		await commandRunner.exec({
 			command: new LedgerTransferCommand({ amount: '10', recipient: accountId })
 		});
 		await this.clickByTestId({ testId: RECEIVE_TOKENS_MODAL_DONE_BUTTON });
+
 		await expect(this.getBalanceLocator()).toHaveText('10 ICP', { timeout: 30_000 });
 	}
 
@@ -65,6 +68,7 @@ export class FlowPage extends HomepageLoggedIn {
 		await this.clickByTestId({ testId: SEND_FORM_NEXT_BUTTON });
 		await this.clickByTestId({ testId: REVIEW_FORM_SEND_BUTTON });
 		const progressModalExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
+
 		expect(progressModalExists).toBeTruthy();
 
 		await this.waitForByTestId({
@@ -72,6 +76,7 @@ export class FlowPage extends HomepageLoggedIn {
 			options: { state: 'detached' }
 		});
 		const progressModalDoesNotExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
+
 		expect(progressModalDoesNotExists).toBeFalsy();
 
 		await this.mockSelectorAll({
