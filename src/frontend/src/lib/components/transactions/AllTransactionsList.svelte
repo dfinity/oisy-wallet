@@ -52,9 +52,7 @@
 	});
 
 	let filteredTransactions: AllTransactionUiWithCmp[];
-	$: filteredTransactions = onlyMicroTransactions
-			? getReceivedMicroTransactions(transactions, $exchanges)
-			: filterReceivedMicroTransactions(transactions, $exchanges)
+	$: filteredTransactions = onlyMicroTransactions ? getReceivedMicroTransactions({transactions, exchanges: $exchanges}) : filterReceivedMicroTransactions({transactions, exchanges: $exchanges});
 
 	let sortedTransactions: AllTransactionUiWithCmp[];
 	$: sortedTransactions = filteredTransactions.sort(({ transaction: a }, { transaction: b }) =>
