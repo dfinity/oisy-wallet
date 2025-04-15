@@ -34,12 +34,8 @@
 	ariaLabel={$i18n.tokens.alt.filter_button}
 	disabled={$erc20UserTokensNotInitialized}
 	bind:inputValue
+	{overflowableContent}
 >
-	{#snippet overflowableContent()}
-		{#if overflowableContent}
-			{@render overflowableContent()}
-		{/if}
-	{/snippet}
 	{#snippet icon()}
 		<IconSearch />
 	{/snippet}
