@@ -16,7 +16,13 @@ export const btcAddressData = ({
 	});
 
 const fetchBlockchainApi = async <T>({ endpointPath }: { endpointPath: string }): Promise<T> => {
-	const response = await fetch(`${BLOCKCHAIN_API_URL}/${endpointPath}`);
+	const url = new URL(`${BLOCKCHAIN_API_URL}/${endpointPath}`);
+
+	// Some API calls are available with CORS headers if you add a &cors=true parameter to the GET request
+	// https://www.blockchain.com/explorer/api/q
+	url.searchParams.set('cors', 'true');
+
+	const response = await fetch(url.toString());
 
 	if (!response.ok) {
 		throw new Error('Blockchain API response not ok.');
