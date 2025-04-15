@@ -58,7 +58,7 @@
 					ariaLabel={$i18n.auth.help.alt.identity_learn_more}
 					href={OISY_FIND_INTERNET_IDENTITY_URL}
 					testId={HELP_AUTH_LEARN_MORE_LINK}
-					rowReverse
+					iconAsLast
 				>
 					{replaceOisyPlaceholders($i18n.auth.help.text.identity_learn_more)}
 				</ExternalLink>

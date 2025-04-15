@@ -40,7 +40,7 @@
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_introduction)}
 				href={OISY_DOCS_URL}
 				testId={HELP_AUTH_INTRODUCTION_LINK}
-				rowReverse
+				iconAsLast
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_introduction)}
 			</ExternalLink>
@@ -51,7 +51,7 @@
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_docs)}
 				href={OISY_INTERNET_IDENTITY_URL}
 				testId={HELP_AUTH_DOCS_LINK}
-				rowReverse
+				iconAsLast
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_docs)}
 			</ExternalLink>
@@ -62,7 +62,7 @@
 				ariaLabel={$i18n.auth.help.alt.other_private_key}
 				href={OISY_FAQ_URL}
 				testId={HELP_AUTH_PRIVATE_KEY_LINK}
-				rowReverse
+				iconAsLast
 			>
 				{$i18n.auth.help.text.other_private_key}
 			</ExternalLink>
@@ -73,7 +73,7 @@
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_asset_control)}
 				href={OISY_ACCESS_CONTROL_URL}
 				testId={HELP_AUTH_ASSET_CONTROL_LINK}
-				rowReverse
+				iconAsLast
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_asset_control)}
 			</ExternalLink>

@@ -101,7 +101,7 @@
 					ariaLabel={$i18n.referral.invitation.text.learn_more}
 					styleClass="font-semibold min-w-30"
 					testId={REFERRAL_CODE_LEARN_MORE}
-					rowReverse
+					iconAsLast
 				>
 					{$i18n.referral.invitation.text.learn_more}
 				</ExternalLink>

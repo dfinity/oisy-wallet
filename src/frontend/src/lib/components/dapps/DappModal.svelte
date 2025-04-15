@@ -143,7 +143,7 @@
 					fullWidth
 					styleClass="primary padding-sm flex-1"
 					href={websiteURL.toString()}
-					rowReverse
+					iconAsLast
 					trackEvent={{ name: TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK, metadata: { dappId } }}
 					>{callToAction ??
 						replacePlaceholders($i18n.dapps.text.open_dapp, {
