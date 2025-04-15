@@ -6,7 +6,7 @@ use candid::{CandidType, Deserialize};
 pub struct Contact {
     pub id: String,
     pub name: String,
-    pub addresses: Vec<ContactAddress>,
+    pub addresses: Vec<ContactAddressData>,
     pub avatar: Option<String>,
 }
 
@@ -21,7 +21,6 @@ pub enum AddressType {
     AVAX,
     BSC,
     MATIC,
-    Other(String),
 }
 
 impl fmt::Display for AddressType {
@@ -36,14 +35,13 @@ impl fmt::Display for AddressType {
             AddressType::AVAX => write!(f, "AVAX"),
             AddressType::BSC => write!(f, "BSC"),
             AddressType::MATIC => write!(f, "MATIC"),
-            AddressType::Other(name) => write!(f, "{name}"),
         }
     }
 }
 
 impl From<&str> for AddressType {
     fn from(s: &str) -> Self {
-        match s.to_uppercase().as_str() {
+        match s {
             "ICP" => AddressType::ICP,
             "BTC" => AddressType::BTC,
             "ETH" => AddressType::ETH,
@@ -53,13 +51,13 @@ impl From<&str> for AddressType {
             "AVAX" => AddressType::AVAX,
             "BSC" => AddressType::BSC,
             "MATIC" => AddressType::MATIC,
-            _ => AddressType::Other(s.to_string()),
+            _ => AddressType::ICP,
         }
     }
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct ContactAddress {
+pub struct ContactAddressData {
     pub network_type: AddressType,
     pub address: String,
     pub label: Option<String>,
@@ -71,39 +69,39 @@ pub struct ContactSettings {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AddContact {
+pub struct AddContactRequest {
     pub contact: Contact,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct RemoveContact {
+pub struct RemoveContactRequest {
     pub contact_id: String,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct UpdateContact {
+pub struct UpdateContactRequest {
     pub contact: Contact,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AddAddress {
+pub struct AddAddressRequest {
     pub contact_id: String,
-    pub address: ContactAddress,
+    pub address: ContactAddressData,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct RemoveAddress {
+pub struct RemoveAddressRequest {
     pub contact_id: String,
     pub network_type: AddressType,
     pub address: String,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct UpdateAddress {
+pub struct UpdateAddressRequest {
     pub contact_id: String,
-    pub old_network_type: AddressType,
-    pub old_address: String,
-    pub new_address: ContactAddress,
+    pub current_network_type: AddressType,
+    pub current_address: String,
+    pub new_address: ContactAddressData,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -111,8 +109,10 @@ pub enum ContactError {
     UserNotFound,
     ContactNotFound,
     ContactIdAlreadyExists,
+    ContactNameAlreadyExists,
     InvalidContactData,
     AddressAlreadyExists,
     AddressNotFound,
     InvalidAddressFormat,
+    InvalidAddressType,
 }
