@@ -241,8 +241,10 @@
 		},
 		"ckbtc_minter": {
 			"type": "custom",
+			"build": "scripts/build.ckbtc_minter.sh",
 			"candid": "target/ic/ckbtc_minter.did",
 			"wasm": "target/ic/ckbtc_minter.wasm",
+			"init_arg_file": "target/ic/ckbtc_minter.args.did",
 			"specified_id": "ml52i-qqaaa-aaaar-qaaba-cai",
 			"remote": {
 				"id": {
@@ -283,8 +285,10 @@
 		},
 		"ckbtc_index": {
 			"type": "custom",
+			"build": "scripts/build.ckbtc_index.sh",
 			"candid": "target/ic/ckbtc_index.did",
 			"wasm": "target/ic/ckbtc_index.wasm",
+			"init_arg_file": "target/ic/ckbtc_index.args.did",
 			"specified_id": "mm444-5iaaa-aaaar-qaabq-cai",
 			"remote": {
 				"id": {
@@ -444,8 +448,8 @@
 		},
 		"rewards": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.2.3-referrer.3/rewards.did",
-			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.2.3-referrer.3/rewards.wasm.gz",
+			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.3.1/rewards.did",
+			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.3.1/rewards.wasm.gz",
 			"remote": {
 				"id": {
 					"ic": "nynz6-haaaa-aaaan-qzqda-cai",
