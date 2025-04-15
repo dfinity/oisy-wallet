@@ -73,7 +73,9 @@ describe('idb.api', () => {
 			// eslint-disable-next-line local-rules/prefer-object-params
 			vi.mocked(idbKeyval.update).mockImplementation((_, updater) => {
 				const updated = updater(mockAddress) as typeof mockAddress;
+
 				expect(updated.lastUsedTimestamp).toBeGreaterThan(mockAddress.lastUsedTimestamp);
+
 				return Promise.resolve();
 			});
 
@@ -116,7 +118,9 @@ describe('idb.api', () => {
 			// eslint-disable-next-line local-rules/prefer-object-params
 			vi.mocked(idbKeyval.update).mockImplementation((_, updater) => {
 				const updated = updater(mockAddress) as typeof mockAddress;
+
 				expect(updated.lastUsedTimestamp).toBeGreaterThan(mockAddress.lastUsedTimestamp);
+
 				return Promise.resolve();
 			});
 
@@ -159,7 +163,9 @@ describe('idb.api', () => {
 			// eslint-disable-next-line local-rules/prefer-object-params
 			vi.mocked(idbKeyval.update).mockImplementation((_, updater) => {
 				const updated = updater(mockAddress) as typeof mockAddress;
+
 				expect(updated.lastUsedTimestamp).toBeGreaterThan(mockAddress.lastUsedTimestamp);
+
 				return Promise.resolve();
 			});
 
@@ -174,7 +180,9 @@ describe('idb.api', () => {
 			// eslint-disable-next-line local-rules/prefer-object-params
 			vi.mocked(idbKeyval.update).mockImplementation((_, updater) => {
 				const result = updater(undefined);
+
 				expect(result).toBeUndefined();
+
 				return Promise.resolve();
 			});
 
