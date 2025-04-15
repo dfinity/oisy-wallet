@@ -3,12 +3,14 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { ADDRESS_BOOK_ENABLED } from '$env/address-book.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
+	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
@@ -21,7 +23,8 @@
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
 		NAVIGATION_MENU_VIP_BUTTON,
-		NAVIGATION_MENU_REFERRAL_BUTTON
+		NAVIGATION_MENU_REFERRAL_BUTTON,
+		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isVipUser } from '$lib/services/reward.services';
@@ -82,6 +85,20 @@
 	<div class="max-w-68 flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
+			<Hr />
+		{/if}
+
+		{#if ADDRESS_BOOK_ENABLED}
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.address_book}
+				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
+				on:click={modalStore.openAddressBook}
+			>
+				<IconUserSquare size="20" />
+				{$i18n.navigation.text.address_book}
+			</ButtonMenu>
+
+			<Hr />
 		{/if}
 
 		<ButtonMenu
