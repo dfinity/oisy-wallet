@@ -1,19 +1,19 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
-import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
-import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
-import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
-import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
-import type { BtcStatusesData } from '$icp/stores/btc.store';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
-import { extendIcTransaction } from '$icp/utils/ic-transactions.utils';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { TransactionsData } from '$lib/stores/transactions.store';
-import type { OptionEthAddress } from '$lib/types/address';
-import type { Token } from '$lib/types/token';
-import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
-import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
+import type {BtcTransactionUi} from '$btc/types/btc';
+import {ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID} from '$env/tokens/tokens.eth.env';
+import type {EthTransactionsData} from '$eth/stores/eth-transactions.store';
+import {mapEthTransactionUi} from '$eth/utils/transactions.utils';
+import type {CkEthMinterInfoData} from '$icp-eth/stores/cketh.store';
+import {toCkMinterInfoAddresses} from '$icp-eth/utils/cketh.utils';
+import type {BtcStatusesData} from '$icp/stores/btc.store';
+import type {IcTransactionUi} from '$icp/types/ic-transaction';
+import {normalizeTimestampToSeconds} from '$icp/utils/date.utils';
+import {extendIcTransaction} from '$icp/utils/ic-transactions.utils';
+import type {CertifiedStoreData} from '$lib/stores/certified.store';
+import type {TransactionsData} from '$lib/stores/transactions.store';
+import type {OptionEthAddress} from '$lib/types/address';
+import type {Token} from '$lib/types/token';
+import type {AllTransactionUiWithCmp, AnyTransactionUi} from '$lib/types/transaction';
+import type {TransactionsStoreCheckParams} from '$lib/types/transactions';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
@@ -21,8 +21,8 @@ import {
 	isNetworkIdSepolia,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import type {SolTransactionUi} from '$sol/types/sol-transaction';
+import {isNullish, nonNullish} from '@dfinity/utils';
 import type {ExchangesData} from "$lib/types/exchange";
 import {usdValue} from "$lib/utils/exchange.utils";
 import {MICRO_TRANSACTION_USD_THRESHOLD} from "$lib/constants/app.constants";
@@ -154,23 +154,17 @@ export const filterReceivedMicroTransactions = ({
 													{transactions: AllTransactionUiWithCmp[],
 														exchanges: ExchangesData})
 	: AllTransactionUiWithCmp[] => {
-	let filteredTransactions: AllTransactionUiWithCmp[];
-	filteredTransactions = transactions.filter((transactionUI) => {
-		const { transaction } = transactionUI;
+	return transactions.filter((transactionUI) => {
+		const {transaction} = transactionUI;
 		return !(transaction.type === 'receive' && isMicroTransaction({transactionUI, exchanges}));
 	});
-
-	return filteredTransactions;
 }
 
 export const getReceivedMicroTransactions = ({transactions, exchanges}: {transactions: AllTransactionUiWithCmp[], exchanges: ExchangesData}): AllTransactionUiWithCmp[] => {
-	let microTransactions: AllTransactionUiWithCmp[];
-	microTransactions = transactions.filter((transactionUI) => {
-		const { transaction } = transactionUI;
+	return transactions.filter((transactionUI) => {
+		const {transaction} = transactionUI;
 		return (transaction.type === 'receive' && isMicroTransaction({transactionUI, exchanges}));
 	});
-
-	return microTransactions;
 }
 
 const isMicroTransaction = ({transactionUI, exchanges}:{transactionUI: AllTransactionUiWithCmp, exchanges: ExchangesData}) => {
