@@ -1,570 +1,570 @@
 [
-  {
-    "ledgerCanisterId": "zfcdd-tqaaa-aaaaq-aaaga-cai",
-    "rootCanisterId": "zxeu2-7aaaa-aaaaq-aaafa-cai",
-    "indexCanisterId": "zlaol-iaaaa-aaaaq-aaaha-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "Draggin Karma Points",
-      "symbol": "DKP",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "Dragginz",
-      "url": "https://dragginz.io/"
-    }
-  },
-  {
-    "ledgerCanisterId": "2ouva-viaaa-aaaaq-aaamq-cai",
-    "rootCanisterId": "3e3x2-xyaaa-aaaaq-aaalq-cai",
-    "indexCanisterId": "2awyi-oyaaa-aaaaq-aaanq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "CHAT",
-      "symbol": "CHAT",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "OpenChat",
-      "url": "https://oc.app"
-    }
-  },
-  {
-    "ledgerCanisterId": "73mez-iiaaa-aaaaq-aaasq-cai",
-    "rootCanisterId": "7jkta-eyaaa-aaaaq-aaarq-cai",
-    "indexCanisterId": "7vojr-tyaaa-aaaaq-aaatq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "KINIC",
-      "symbol": "KINIC",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "Kinic",
-      "url": "https://kinic.io/"
-    }
-  },
-  {
-    "ledgerCanisterId": "6rdgd-kyaaa-aaaaq-aaavq-cai",
-    "rootCanisterId": "67bll-riaaa-aaaaq-aaauq-cai",
-    "indexCanisterId": "6dfr2-giaaa-aaaaq-aaawq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "DOLR AI",
-      "symbol": "DOLR",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "DOLR AI",
-      "url": "https://dolr.ai"
-    }
-  },
-  {
-    "ledgerCanisterId": "4c4fd-caaaa-aaaaq-aaa3a-cai",
-    "rootCanisterId": "4m6il-zqaaa-aaaaq-aaa2a-cai",
-    "indexCanisterId": "5ithz-aqaaa-aaaaq-aaa4a-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "GHOST",
-      "symbol": "GHOST",
-      "fee": {
-        "__bigint__": "100000000"
-      },
-      "alternativeName": "ICGhost",
-      "url": "https://yadjb-mqaaa-aaaan-qaqlq-cai.raw.ic0.app/"
-    }
-  },
-  {
-    "ledgerCanisterId": "xsi2v-cyaaa-aaaaq-aabfq-cai",
-    "rootCanisterId": "x4kx5-ziaaa-aaaaq-aabeq-cai",
-    "indexCanisterId": "xaonm-oiaaa-aaaaq-aabgq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "DecideAI",
-      "symbol": "DCD",
-      "fee": {
-        "__bigint__": "10000"
-      },
-      "alternativeName": "DecideAI DAO",
-      "url": "https://decideai.xyz"
-    }
-  },
-  {
-    "ledgerCanisterId": "vtrom-gqaaa-aaaaq-aabia-cai",
-    "rootCanisterId": "xjngq-yaaaa-aaaaq-aabha-cai",
-    "indexCanisterId": "v5tde-5aaaa-aaaaq-aabja-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "BoomDAO",
-      "symbol": "BOOM",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "BOOM DAO",
-      "url": "https://boomdao.xyz/"
-    }
-  },
-  {
-    "ledgerCanisterId": "uf2wh-taaaa-aaaaq-aabna-cai",
-    "rootCanisterId": "uly3p-iqaaa-aaaaq-aabma-cai",
-    "indexCanisterId": "ux4b6-7qaaa-aaaaq-aaboa-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "CatalyzeDAO",
-      "symbol": "CTZ",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "Catalyze",
-      "url": "https://catalyze.one"
-    }
-  },
-  {
-    "ledgerCanisterId": "rffwt-piaaa-aaaaq-aabqq-cai",
-    "rootCanisterId": "u67kc-jyaaa-aaaaq-aabpq-cai",
-    "indexCanisterId": "rlh33-uyaaa-aaaaq-aabrq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "Seers",
-      "symbol": "SEER",
-      "fee": {
-        "__bigint__": "100000000"
-      },
-      "alternativeName": "Seers",
-      "url": "https://seers.app"
-    }
-  },
-  {
-    "ledgerCanisterId": "rxdbk-dyaaa-aaaaq-aabtq-cai",
-    "rootCanisterId": "rzbmc-yiaaa-aaaaq-aabsq-cai",
-    "indexCanisterId": "q5mdq-biaaa-aaaaq-aabuq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "Nuance",
-      "symbol": "NUA",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "Nuance",
-      "url": "https://nuance.xyz"
-    }
-  },
-  {
-    "ledgerCanisterId": "qbizb-wiaaa-aaaaq-aabwq-cai",
-    "rootCanisterId": "qtooy-2yaaa-aaaaq-aabvq-cai",
-    "indexCanisterId": "qpkuj-nyaaa-aaaaq-aabxq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "Sonic",
-      "symbol": "SONIC",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "SONIC",
-      "url": "https://app.sonic.ooo"
-    }
-  },
-  {
-    "ledgerCanisterId": "tyyy3-4aaaa-aaaaq-aab7a-cai",
-    "rootCanisterId": "tw2vt-hqaaa-aaaaq-aab6a-cai",
-    "indexCanisterId": "efv5g-kqaaa-aaaaq-aacaa-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "GOLDAO",
-      "symbol": "GOLDAO",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "Gold DAO",
-      "url": "https://www.gold-dao.org"
-    }
-  },
-  {
-    "ledgerCanisterId": "emww2-4yaaa-aaaaq-aacbq-cai",
-    "rootCanisterId": "ecu3s-hiaaa-aaaaq-aacaq-cai",
-    "indexCanisterId": "e6qbd-qiaaa-aaaaq-aaccq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "TRAX",
-      "symbol": "TRAX",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "TRAX",
-      "url": "https://trax.so"
-    }
-  },
-  {
-    "ledgerCanisterId": "f54if-eqaaa-aaaaq-aacea-cai",
-    "rootCanisterId": "extk7-gaaaa-aaaaq-aacda-cai",
-    "indexCanisterId": "ft6fn-7aaaa-aaaaq-aacfa-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "Neutrinite",
-      "symbol": "NTN",
-      "fee": {
-        "__bigint__": "10000"
-      },
-      "alternativeName": "Neutrinite",
-      "url": "https://icpcoins.com"
-    }
-  },
-  {
-    "ledgerCanisterId": "hvgxa-wqaaa-aaaaq-aacia-cai",
-    "rootCanisterId": "fp274-iaaaa-aaaaq-aacha-cai",
-    "indexCanisterId": "h3e2i-naaaa-aaaaq-aacja-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "Sneed DAO",
-      "symbol": "SNEED",
-      "fee": {
-        "__bigint__": "1000"
-      },
-      "alternativeName": "Sneed",
-      "url": "https://4pk43-5qaaa-aaaag-qc44a-cai.icp0.io/"
-    }
-  },
-  {
-    "ledgerCanisterId": "hhaaz-2aaaa-aaaaq-aacla-cai",
-    "rootCanisterId": "hjcnr-bqaaa-aaaaq-aacka-cai",
-    "indexCanisterId": "gnpcd-yqaaa-aaaaq-aacma-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "ICLighthouse DAO",
-      "symbol": "ICL",
-      "fee": {
-        "__bigint__": "1000000"
-      },
-      "alternativeName": "ICLighthouse DAO",
-      "url": "https://iclight.io"
-    }
-  },
-  {
-    "ledgerCanisterId": "gemj7-oyaaa-aaaaq-aacnq-cai",
-    "rootCanisterId": "gkoex-viaaa-aaaaq-aacmq-cai",
-    "indexCanisterId": "gwk6g-ciaaa-aaaaq-aacoq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "ELNA",
-      "symbol": "ELNA",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "ELNA AI",
-      "url": "https://dapp.elna.ai"
-    }
-  },
-  {
-    "ledgerCanisterId": "ddsp7-7iaaa-aaaaq-aacqq-cai",
-    "rootCanisterId": "gyito-zyaaa-aaaaq-aacpq-cai",
-    "indexCanisterId": "dnqcx-eyaaa-aaaaq-aacrq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "ICFC",
-      "symbol": "ICFC",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "ICFC",
-      "url": "https://icfc.app/"
-    }
-  },
-  {
-    "ledgerCanisterId": "druyg-tyaaa-aaaaq-aactq-cai",
-    "rootCanisterId": "d7wvo-iiaaa-aaaaq-aacsq-cai",
-    "indexCanisterId": "c3324-riaaa-aaaaq-aacuq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "ICPanda",
-      "symbol": "PANDA",
-      "fee": {
-        "__bigint__": "10000"
-      },
-      "alternativeName": "ICPanda",
-      "url": "https://panda.fans"
-    }
-  },
-  {
-    "ledgerCanisterId": "ca6gz-lqaaa-aaaaq-aacwa-cai",
-    "rootCanisterId": "csyra-haaaa-aaaaq-aacva-cai",
-    "indexCanisterId": "co4lr-qaaaa-aaaaq-aacxa-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "ICPSwap Token",
-      "symbol": "ICS",
-      "fee": {
-        "__bigint__": "1000000"
-      },
-      "alternativeName": "ICPSwap",
-      "url": "https://www.icpswap.com"
-    }
-  },
-  {
-    "ledgerCanisterId": "atbfz-diaaa-aaaaq-aacyq-cai",
-    "rootCanisterId": "cj5nf-5yaaa-aaaaq-aacxq-cai",
-    "indexCanisterId": "a5dir-yyaaa-aaaaq-aaczq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "Yuku AI",
-      "symbol": "YUKU",
-      "fee": {
-        "__bigint__": "1000000"
-      },
-      "alternativeName": "Yuku AI",
-      "url": "https://yuku.app/"
-    }
-  },
-  {
-    "ledgerCanisterId": "bliq2-niaaa-aaaaq-aac4q-cai",
-    "rootCanisterId": "abhsa-pyaaa-aaaaq-aac3q-cai",
-    "indexCanisterId": "bfk5s-wyaaa-aaaaq-aac5q-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "ESTATE",
-      "symbol": "EST",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "EstateDAO",
-      "url": "https://wbdy5-yyaaa-aaaap-abysq-cai.icp0.io/"
-    }
-  },
-  {
-    "ledgerCanisterId": "k45jy-aiaaa-aaaaq-aadcq-cai",
-    "rootCanisterId": "ko36b-myaaa-aaaaq-aadbq-cai",
-    "indexCanisterId": "ks7eq-3yaaa-aaaaq-aaddq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "Motoko",
-      "symbol": "MOTOKO",
-      "fee": {
-        "__bigint__": "100000000"
-      },
-      "alternativeName": "Motoko",
-      "url": "https://2uktw-yiaaa-aaaah-adwxq-cai.icp0.io/"
-    }
-  },
-  {
-    "ledgerCanisterId": "lrtnw-paaaa-aaaaq-aadfa-cai",
-    "rootCanisterId": "l7ra6-uqaaa-aaaaq-aadea-cai",
-    "indexCanisterId": "ldv2p-dqaaa-aaaaq-aadga-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "SWAMPDAO",
-      "symbol": "SWAMP",
-      "fee": {
-        "__bigint__": "10000"
-      },
-      "alternativeName": "ICPCC DAO LLC",
-      "url": "https://osjzm-oaaaa-aaaal-ajcoq-cai.icp0.io/"
-    }
-  },
-  {
-    "ledgerCanisterId": "lkwrt-vyaaa-aaaaq-aadhq-cai",
-    "rootCanisterId": "leu43-oiaaa-aaaaq-aadgq-cai",
-    "indexCanisterId": "jqkzp-liaaa-aaaaq-aadiq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "ORIGYN",
-      "symbol": "OGY",
-      "fee": {
-        "__bigint__": "200000"
-      },
-      "alternativeName": "ORIGYN",
-      "url": "https://www.origyn.com/"
-    }
-  },
-  {
-    "ledgerCanisterId": "jcmow-hyaaa-aaaaq-aadlq-cai",
-    "rootCanisterId": "jmod6-4iaaa-aaaaq-aadkq-cai",
-    "indexCanisterId": "iidmm-fiaaa-aaaaq-aadmq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "WaterNeuron",
-      "symbol": "WTN",
-      "fee": {
-        "__bigint__": "1000000"
-      },
-      "alternativeName": "WaterNeuron",
-      "url": "https://waterneuron.fi/"
-    }
-  },
-  {
-    "ledgerCanisterId": "itgqj-7qaaa-aaaaq-aadoa-cai",
-    "rootCanisterId": "ibahq-taaaa-aaaaq-aadna-cai",
-    "indexCanisterId": "i5e5b-eaaaa-aaaaq-aadpa-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "---- (formerly CYCLES-TRANSFER-STATION)",
-      "symbol": "--- (CTS)",
-      "fee": {
-        "__bigint__": "1000000000000000000"
-      }
-    }
-  },
-  {
-    "ledgerCanisterId": "np5km-uyaaa-aaaaq-aadrq-cai",
-    "rootCanisterId": "nb7he-piaaa-aaaaq-aadqq-cai",
-    "indexCanisterId": "n535v-yiaaa-aaaaq-aadsq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "DOGMI",
-      "symbol": "DOGMI",
-      "fee": {
-        "__bigint__": "100000000000"
-      },
-      "alternativeName": "DOGMI",
-      "url": "https://qu2gy-uqaaa-aaaal-qcv6a-cai.icp0.io"
-    }
-  },
-  {
-    "ledgerCanisterId": "m6xut-mqaaa-aaaaq-aadua-cai",
-    "rootCanisterId": "nuywj-oaaaa-aaaaq-aadta-cai",
-    "indexCanisterId": "mqvz3-xaaaa-aaaaq-aadva-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "ICVC",
-      "symbol": "ICVC",
-      "fee": {
-        "__bigint__": "10000"
-      },
-      "alternativeName": "ICVC",
-      "url": "https://mnc6b-aaaaa-aaaap-qhnrq-cai.icp0.io/"
-    }
-  },
-  {
-    "ledgerCanisterId": "o7oak-iyaaa-aaaaq-aadzq-cai",
-    "rootCanisterId": "ormnc-tiaaa-aaaaq-aadyq-cai",
-    "indexCanisterId": "onixt-eiaaa-aaaaq-aad2q-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "KongSwap",
-      "symbol": "KONG",
-      "fee": {
-        "__bigint__": "10000"
-      },
-      "alternativeName": "KongSwap",
-      "url": "https://www.kongswap.io/"
-    }
-  },
-  {
-    "ledgerCanisterId": "o4zzi-qaaaa-aaaaq-aaeeq-cai",
-    "rootCanisterId": "pww3s-sqaaa-aaaaq-aaedq-cai",
-    "indexCanisterId": "os3ua-lqaaa-aaaaq-aaefq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "FomoWell",
-      "symbol": "WELL",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "FomoWell",
-      "url": "https://fomowell.com/"
-    }
-  },
-  {
-    "ledgerCanisterId": "oj6if-riaaa-aaaaq-aaeha-cai",
-    "rootCanisterId": "oh4fn-kyaaa-aaaaq-aaega-cai",
-    "indexCanisterId": "mtcaz-pyaaa-aaaaq-aaeia-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "ALICE",
-      "symbol": "ALICE",
-      "fee": {
-        "__bigint__": "500000000"
-      },
-      "alternativeName": "Alice",
-      "url": "https://alice.fun/"
-    }
-  },
-  {
-    "ledgerCanisterId": "mih44-vaaaa-aaaaq-aaekq-cai",
-    "rootCanisterId": "m2blf-zqaaa-aaaaq-aaejq-cai",
-    "indexCanisterId": "mgfru-oqaaa-aaaaq-aaelq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "NFID Wallet",
-      "symbol": "NFIDW",
-      "fee": {
-        "__bigint__": "10000"
-      },
-      "alternativeName": "NFID Wallet",
-      "url": "https://nfid.one/"
-    }
-  },
-  {
-    "ledgerCanisterId": "nfjys-2iaaa-aaaaq-aaena-cai",
-    "rootCanisterId": "nllv2-byaaa-aaaaq-aaema-cai",
-    "indexCanisterId": "nxppl-wyaaa-aaaaq-aaeoa-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "FUEL",
-      "symbol": "FUEL",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "FuelEV",
-      "url": "https://fuelev.ai/"
-    }
-  },
-  {
-    "ledgerCanisterId": "ifwyg-gaaaa-aaaaq-aaeqq-cai",
-    "rootCanisterId": "n6mex-aqaaa-aaaaq-aaepq-cai",
-    "indexCanisterId": "iluvo-5qaaa-aaaaq-aaerq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "ICExplorer",
-      "symbol": "ICE",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "IC Explorer",
-      "url": "https://icexplorer.io"
-    }
-  },
-  {
-    "ledgerCanisterId": "ixqp7-kqaaa-aaaaq-aaetq-cai",
-    "rootCanisterId": "izscx-raaaa-aaaaq-aaesq-cai",
-    "indexCanisterId": "j57nf-iaaaa-aaaaq-aaeuq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "Personal DAO",
-      "symbol": "DAO",
-      "fee": {
-        "__bigint__": "10000"
-      },
-      "alternativeName": "Personal DAO",
-      "url": "https://gsnnn-ziaaa-aaaag-acaaa-cai.icp0.io/"
-    }
-  },
-  {
-    "ledgerCanisterId": "jg2ra-syaaa-aaaaq-aaewa-cai",
-    "rootCanisterId": "ju4gz-6iaaa-aaaaq-aaeva-cai",
-    "indexCanisterId": "jiy4i-jiaaa-aaaaq-aaexa-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "Cecil The Lion DAO",
-      "symbol": "CECIL",
-      "fee": {
-        "__bigint__": "1000000"
-      },
-      "alternativeName": "Cecil The Lion DAO",
-      "url": "https://cecildao.org"
-    }
-  },
-  {
-    "ledgerCanisterId": "lvfsa-2aaaa-aaaaq-aaeyq-cai",
-    "rootCanisterId": "jpz24-eqaaa-aaaaq-aaexq-cai",
-    "indexCanisterId": "l3h7i-bqaaa-aaaaq-aaezq-cai",
-    "metadata": {
-      "decimals": 8,
-      "name": "ICPEx",
-      "symbol": "ICX",
-      "fee": {
-        "__bigint__": "100000"
-      },
-      "alternativeName": "ICPEx",
-      "url": "https://icpex.org/"
-    }
-  }
+	{
+		"ledgerCanisterId": "zfcdd-tqaaa-aaaaq-aaaga-cai",
+		"rootCanisterId": "zxeu2-7aaaa-aaaaq-aaafa-cai",
+		"indexCanisterId": "zlaol-iaaaa-aaaaq-aaaha-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Draggin Karma Points",
+			"symbol": "DKP",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "Dragginz",
+			"url": "https://dragginz.io/"
+		}
+	},
+	{
+		"ledgerCanisterId": "2ouva-viaaa-aaaaq-aaamq-cai",
+		"rootCanisterId": "3e3x2-xyaaa-aaaaq-aaalq-cai",
+		"indexCanisterId": "2awyi-oyaaa-aaaaq-aaanq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "CHAT",
+			"symbol": "CHAT",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "OpenChat",
+			"url": "https://oc.app"
+		}
+	},
+	{
+		"ledgerCanisterId": "73mez-iiaaa-aaaaq-aaasq-cai",
+		"rootCanisterId": "7jkta-eyaaa-aaaaq-aaarq-cai",
+		"indexCanisterId": "7vojr-tyaaa-aaaaq-aaatq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "KINIC",
+			"symbol": "KINIC",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "Kinic",
+			"url": "https://kinic.io/"
+		}
+	},
+	{
+		"ledgerCanisterId": "6rdgd-kyaaa-aaaaq-aaavq-cai",
+		"rootCanisterId": "67bll-riaaa-aaaaq-aaauq-cai",
+		"indexCanisterId": "6dfr2-giaaa-aaaaq-aaawq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "DOLR AI",
+			"symbol": "DOLR",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "DOLR AI",
+			"url": "https://dolr.ai"
+		}
+	},
+	{
+		"ledgerCanisterId": "4c4fd-caaaa-aaaaq-aaa3a-cai",
+		"rootCanisterId": "4m6il-zqaaa-aaaaq-aaa2a-cai",
+		"indexCanisterId": "5ithz-aqaaa-aaaaq-aaa4a-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "GHOST",
+			"symbol": "GHOST",
+			"fee": {
+				"__bigint__": "100000000"
+			},
+			"alternativeName": "ICGhost",
+			"url": "https://yadjb-mqaaa-aaaan-qaqlq-cai.raw.ic0.app/"
+		}
+	},
+	{
+		"ledgerCanisterId": "xsi2v-cyaaa-aaaaq-aabfq-cai",
+		"rootCanisterId": "x4kx5-ziaaa-aaaaq-aabeq-cai",
+		"indexCanisterId": "xaonm-oiaaa-aaaaq-aabgq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "DecideAI",
+			"symbol": "DCD",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "DecideAI DAO",
+			"url": "https://decideai.xyz"
+		}
+	},
+	{
+		"ledgerCanisterId": "vtrom-gqaaa-aaaaq-aabia-cai",
+		"rootCanisterId": "xjngq-yaaaa-aaaaq-aabha-cai",
+		"indexCanisterId": "v5tde-5aaaa-aaaaq-aabja-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "BoomDAO",
+			"symbol": "BOOM",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "BOOM DAO",
+			"url": "https://boomdao.xyz/"
+		}
+	},
+	{
+		"ledgerCanisterId": "uf2wh-taaaa-aaaaq-aabna-cai",
+		"rootCanisterId": "uly3p-iqaaa-aaaaq-aabma-cai",
+		"indexCanisterId": "ux4b6-7qaaa-aaaaq-aaboa-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "CatalyzeDAO",
+			"symbol": "CTZ",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "Catalyze",
+			"url": "https://catalyze.one"
+		}
+	},
+	{
+		"ledgerCanisterId": "rffwt-piaaa-aaaaq-aabqq-cai",
+		"rootCanisterId": "u67kc-jyaaa-aaaaq-aabpq-cai",
+		"indexCanisterId": "rlh33-uyaaa-aaaaq-aabrq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Seers",
+			"symbol": "SEER",
+			"fee": {
+				"__bigint__": "100000000"
+			},
+			"alternativeName": "Seers",
+			"url": "https://seers.app"
+		}
+	},
+	{
+		"ledgerCanisterId": "rxdbk-dyaaa-aaaaq-aabtq-cai",
+		"rootCanisterId": "rzbmc-yiaaa-aaaaq-aabsq-cai",
+		"indexCanisterId": "q5mdq-biaaa-aaaaq-aabuq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Nuance",
+			"symbol": "NUA",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "Nuance",
+			"url": "https://nuance.xyz"
+		}
+	},
+	{
+		"ledgerCanisterId": "qbizb-wiaaa-aaaaq-aabwq-cai",
+		"rootCanisterId": "qtooy-2yaaa-aaaaq-aabvq-cai",
+		"indexCanisterId": "qpkuj-nyaaa-aaaaq-aabxq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Sonic",
+			"symbol": "SONIC",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "SONIC",
+			"url": "https://app.sonic.ooo"
+		}
+	},
+	{
+		"ledgerCanisterId": "tyyy3-4aaaa-aaaaq-aab7a-cai",
+		"rootCanisterId": "tw2vt-hqaaa-aaaaq-aab6a-cai",
+		"indexCanisterId": "efv5g-kqaaa-aaaaq-aacaa-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "GOLDAO",
+			"symbol": "GOLDAO",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "Gold DAO",
+			"url": "https://www.gold-dao.org"
+		}
+	},
+	{
+		"ledgerCanisterId": "emww2-4yaaa-aaaaq-aacbq-cai",
+		"rootCanisterId": "ecu3s-hiaaa-aaaaq-aacaq-cai",
+		"indexCanisterId": "e6qbd-qiaaa-aaaaq-aaccq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "TRAX",
+			"symbol": "TRAX",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "TRAX",
+			"url": "https://trax.so"
+		}
+	},
+	{
+		"ledgerCanisterId": "f54if-eqaaa-aaaaq-aacea-cai",
+		"rootCanisterId": "extk7-gaaaa-aaaaq-aacda-cai",
+		"indexCanisterId": "ft6fn-7aaaa-aaaaq-aacfa-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Neutrinite",
+			"symbol": "NTN",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "Neutrinite",
+			"url": "https://icpcoins.com"
+		}
+	},
+	{
+		"ledgerCanisterId": "hvgxa-wqaaa-aaaaq-aacia-cai",
+		"rootCanisterId": "fp274-iaaaa-aaaaq-aacha-cai",
+		"indexCanisterId": "h3e2i-naaaa-aaaaq-aacja-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Sneed DAO",
+			"symbol": "SNEED",
+			"fee": {
+				"__bigint__": "1000"
+			},
+			"alternativeName": "Sneed",
+			"url": "https://4pk43-5qaaa-aaaag-qc44a-cai.icp0.io/"
+		}
+	},
+	{
+		"ledgerCanisterId": "hhaaz-2aaaa-aaaaq-aacla-cai",
+		"rootCanisterId": "hjcnr-bqaaa-aaaaq-aacka-cai",
+		"indexCanisterId": "gnpcd-yqaaa-aaaaq-aacma-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ICLighthouse DAO",
+			"symbol": "ICL",
+			"fee": {
+				"__bigint__": "1000000"
+			},
+			"alternativeName": "ICLighthouse DAO",
+			"url": "https://iclight.io"
+		}
+	},
+	{
+		"ledgerCanisterId": "gemj7-oyaaa-aaaaq-aacnq-cai",
+		"rootCanisterId": "gkoex-viaaa-aaaaq-aacmq-cai",
+		"indexCanisterId": "gwk6g-ciaaa-aaaaq-aacoq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ELNA",
+			"symbol": "ELNA",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "ELNA AI",
+			"url": "https://dapp.elna.ai"
+		}
+	},
+	{
+		"ledgerCanisterId": "ddsp7-7iaaa-aaaaq-aacqq-cai",
+		"rootCanisterId": "gyito-zyaaa-aaaaq-aacpq-cai",
+		"indexCanisterId": "dnqcx-eyaaa-aaaaq-aacrq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ICFC",
+			"symbol": "ICFC",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "ICFC",
+			"url": "https://icfc.app/"
+		}
+	},
+	{
+		"ledgerCanisterId": "druyg-tyaaa-aaaaq-aactq-cai",
+		"rootCanisterId": "d7wvo-iiaaa-aaaaq-aacsq-cai",
+		"indexCanisterId": "c3324-riaaa-aaaaq-aacuq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ICPanda",
+			"symbol": "PANDA",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "ICPanda",
+			"url": "https://panda.fans"
+		}
+	},
+	{
+		"ledgerCanisterId": "ca6gz-lqaaa-aaaaq-aacwa-cai",
+		"rootCanisterId": "csyra-haaaa-aaaaq-aacva-cai",
+		"indexCanisterId": "co4lr-qaaaa-aaaaq-aacxa-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ICPSwap Token",
+			"symbol": "ICS",
+			"fee": {
+				"__bigint__": "1000000"
+			},
+			"alternativeName": "ICPSwap",
+			"url": "https://www.icpswap.com"
+		}
+	},
+	{
+		"ledgerCanisterId": "atbfz-diaaa-aaaaq-aacyq-cai",
+		"rootCanisterId": "cj5nf-5yaaa-aaaaq-aacxq-cai",
+		"indexCanisterId": "a5dir-yyaaa-aaaaq-aaczq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Yuku AI",
+			"symbol": "YUKU",
+			"fee": {
+				"__bigint__": "1000000"
+			},
+			"alternativeName": "Yuku AI",
+			"url": "https://yuku.app/"
+		}
+	},
+	{
+		"ledgerCanisterId": "bliq2-niaaa-aaaaq-aac4q-cai",
+		"rootCanisterId": "abhsa-pyaaa-aaaaq-aac3q-cai",
+		"indexCanisterId": "bfk5s-wyaaa-aaaaq-aac5q-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ESTATE",
+			"symbol": "EST",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "EstateDAO",
+			"url": "https://wbdy5-yyaaa-aaaap-abysq-cai.icp0.io/"
+		}
+	},
+	{
+		"ledgerCanisterId": "k45jy-aiaaa-aaaaq-aadcq-cai",
+		"rootCanisterId": "ko36b-myaaa-aaaaq-aadbq-cai",
+		"indexCanisterId": "ks7eq-3yaaa-aaaaq-aaddq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Motoko",
+			"symbol": "MOTOKO",
+			"fee": {
+				"__bigint__": "100000000"
+			},
+			"alternativeName": "Motoko",
+			"url": "https://2uktw-yiaaa-aaaah-adwxq-cai.icp0.io/"
+		}
+	},
+	{
+		"ledgerCanisterId": "lrtnw-paaaa-aaaaq-aadfa-cai",
+		"rootCanisterId": "l7ra6-uqaaa-aaaaq-aadea-cai",
+		"indexCanisterId": "ldv2p-dqaaa-aaaaq-aadga-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "SWAMPDAO",
+			"symbol": "SWAMP",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "ICPCC DAO LLC",
+			"url": "https://osjzm-oaaaa-aaaal-ajcoq-cai.icp0.io/"
+		}
+	},
+	{
+		"ledgerCanisterId": "lkwrt-vyaaa-aaaaq-aadhq-cai",
+		"rootCanisterId": "leu43-oiaaa-aaaaq-aadgq-cai",
+		"indexCanisterId": "jqkzp-liaaa-aaaaq-aadiq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ORIGYN",
+			"symbol": "OGY",
+			"fee": {
+				"__bigint__": "200000"
+			},
+			"alternativeName": "ORIGYN",
+			"url": "https://www.origyn.com/"
+		}
+	},
+	{
+		"ledgerCanisterId": "jcmow-hyaaa-aaaaq-aadlq-cai",
+		"rootCanisterId": "jmod6-4iaaa-aaaaq-aadkq-cai",
+		"indexCanisterId": "iidmm-fiaaa-aaaaq-aadmq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "WaterNeuron",
+			"symbol": "WTN",
+			"fee": {
+				"__bigint__": "1000000"
+			},
+			"alternativeName": "WaterNeuron",
+			"url": "https://waterneuron.fi/"
+		}
+	},
+	{
+		"ledgerCanisterId": "itgqj-7qaaa-aaaaq-aadoa-cai",
+		"rootCanisterId": "ibahq-taaaa-aaaaq-aadna-cai",
+		"indexCanisterId": "i5e5b-eaaaa-aaaaq-aadpa-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "---- (formerly CYCLES-TRANSFER-STATION)",
+			"symbol": "--- (CTS)",
+			"fee": {
+				"__bigint__": "1000000000000000000"
+			}
+		}
+	},
+	{
+		"ledgerCanisterId": "np5km-uyaaa-aaaaq-aadrq-cai",
+		"rootCanisterId": "nb7he-piaaa-aaaaq-aadqq-cai",
+		"indexCanisterId": "n535v-yiaaa-aaaaq-aadsq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "DOGMI",
+			"symbol": "DOGMI",
+			"fee": {
+				"__bigint__": "100000000000"
+			},
+			"alternativeName": "DOGMI",
+			"url": "https://qu2gy-uqaaa-aaaal-qcv6a-cai.icp0.io"
+		}
+	},
+	{
+		"ledgerCanisterId": "m6xut-mqaaa-aaaaq-aadua-cai",
+		"rootCanisterId": "nuywj-oaaaa-aaaaq-aadta-cai",
+		"indexCanisterId": "mqvz3-xaaaa-aaaaq-aadva-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ICVC",
+			"symbol": "ICVC",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "ICVC",
+			"url": "https://mnc6b-aaaaa-aaaap-qhnrq-cai.icp0.io/"
+		}
+	},
+	{
+		"ledgerCanisterId": "o7oak-iyaaa-aaaaq-aadzq-cai",
+		"rootCanisterId": "ormnc-tiaaa-aaaaq-aadyq-cai",
+		"indexCanisterId": "onixt-eiaaa-aaaaq-aad2q-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "KongSwap",
+			"symbol": "KONG",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "KongSwap",
+			"url": "https://www.kongswap.io/"
+		}
+	},
+	{
+		"ledgerCanisterId": "o4zzi-qaaaa-aaaaq-aaeeq-cai",
+		"rootCanisterId": "pww3s-sqaaa-aaaaq-aaedq-cai",
+		"indexCanisterId": "os3ua-lqaaa-aaaaq-aaefq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "FomoWell",
+			"symbol": "WELL",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "FomoWell",
+			"url": "https://fomowell.com/"
+		}
+	},
+	{
+		"ledgerCanisterId": "oj6if-riaaa-aaaaq-aaeha-cai",
+		"rootCanisterId": "oh4fn-kyaaa-aaaaq-aaega-cai",
+		"indexCanisterId": "mtcaz-pyaaa-aaaaq-aaeia-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ALICE",
+			"symbol": "ALICE",
+			"fee": {
+				"__bigint__": "500000000"
+			},
+			"alternativeName": "Alice",
+			"url": "https://alice.fun/"
+		}
+	},
+	{
+		"ledgerCanisterId": "mih44-vaaaa-aaaaq-aaekq-cai",
+		"rootCanisterId": "m2blf-zqaaa-aaaaq-aaejq-cai",
+		"indexCanisterId": "mgfru-oqaaa-aaaaq-aaelq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "NFID Wallet",
+			"symbol": "NFIDW",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "NFID Wallet",
+			"url": "https://nfid.one/"
+		}
+	},
+	{
+		"ledgerCanisterId": "nfjys-2iaaa-aaaaq-aaena-cai",
+		"rootCanisterId": "nllv2-byaaa-aaaaq-aaema-cai",
+		"indexCanisterId": "nxppl-wyaaa-aaaaq-aaeoa-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "FUEL",
+			"symbol": "FUEL",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "FuelEV",
+			"url": "https://fuelev.ai/"
+		}
+	},
+	{
+		"ledgerCanisterId": "ifwyg-gaaaa-aaaaq-aaeqq-cai",
+		"rootCanisterId": "n6mex-aqaaa-aaaaq-aaepq-cai",
+		"indexCanisterId": "iluvo-5qaaa-aaaaq-aaerq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ICExplorer",
+			"symbol": "ICE",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "IC Explorer",
+			"url": "https://icexplorer.io"
+		}
+	},
+	{
+		"ledgerCanisterId": "ixqp7-kqaaa-aaaaq-aaetq-cai",
+		"rootCanisterId": "izscx-raaaa-aaaaq-aaesq-cai",
+		"indexCanisterId": "j57nf-iaaaa-aaaaq-aaeuq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Personal DAO",
+			"symbol": "DAO",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "Personal DAO",
+			"url": "https://gsnnn-ziaaa-aaaag-acaaa-cai.icp0.io/"
+		}
+	},
+	{
+		"ledgerCanisterId": "jg2ra-syaaa-aaaaq-aaewa-cai",
+		"rootCanisterId": "ju4gz-6iaaa-aaaaq-aaeva-cai",
+		"indexCanisterId": "jiy4i-jiaaa-aaaaq-aaexa-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Cecil The Lion DAO",
+			"symbol": "CECIL",
+			"fee": {
+				"__bigint__": "1000000"
+			},
+			"alternativeName": "Cecil The Lion DAO",
+			"url": "https://cecildao.org"
+		}
+	},
+	{
+		"ledgerCanisterId": "lvfsa-2aaaa-aaaaq-aaeyq-cai",
+		"rootCanisterId": "jpz24-eqaaa-aaaaq-aaexq-cai",
+		"indexCanisterId": "l3h7i-bqaaa-aaaaq-aaezq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ICPEx",
+			"symbol": "ICX",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "ICPEx",
+			"url": "https://icpex.org/"
+		}
+	}
 ]
