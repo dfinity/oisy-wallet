@@ -94,6 +94,7 @@ describe('sol-signatures.services', () => {
 				wallet: mockSolAddress,
 				limit: Number(WALLET_PAGINATION)
 			});
+
 			mockTokensList.forEach(({ address }, index) => {
 				expect(spyFetchSignatures).toHaveBeenNthCalledWith(index + 2, {
 					network: mockNetwork,

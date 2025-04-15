@@ -61,6 +61,7 @@ describe('sol-instructions.utils', () => {
 				instruction,
 				network
 			});
+
 			expect(result).toBeUndefined();
 		});
 
