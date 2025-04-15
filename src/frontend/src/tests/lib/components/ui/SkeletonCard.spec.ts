@@ -6,6 +6,7 @@ describe('SkeletonCard', () => {
 		const { getByTestId } = render(SkeletonCard, { props: { testId: 'skeleton-card' } });
 
 		const skeleton = getByTestId('skeleton-card');
+
 		expect(skeleton).toBeInTheDocument();
 	});
 });

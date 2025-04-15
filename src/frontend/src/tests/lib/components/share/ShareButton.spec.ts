@@ -53,6 +53,7 @@ describe('ShareButton', () => {
 			const { container } = render(ShareButton, { testId, shareAriaLabel });
 
 			const shareButton: HTMLButtonElement | null = container.querySelector(shareButtonSelector);
+
 			expect(shareButton).toBeInTheDocument();
 
 			shareButton?.click();

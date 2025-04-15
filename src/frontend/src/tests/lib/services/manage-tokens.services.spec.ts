@@ -70,6 +70,7 @@ describe('manage-tokens.services', () => {
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsAddToken.DONE);
 
 			await new Promise((resolve) => setTimeout(resolve, 750));
+
 			expect(mockOnSuccess).toHaveBeenCalledOnce();
 		});
 

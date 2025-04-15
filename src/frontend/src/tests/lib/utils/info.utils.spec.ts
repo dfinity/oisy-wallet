@@ -48,11 +48,13 @@ describe('info.utils', () => {
 
 		it('should return true if the value for the key is "true"', () => {
 			sessionStorage.setItem(key, 'true');
+
 			expect(shouldHideInfo(key)).toBe(true);
 		});
 
 		it('should return false if the value for the key is "false"', () => {
 			sessionStorage.setItem(key, 'false');
+
 			expect(shouldHideInfo(key)).toBe(false);
 		});
 

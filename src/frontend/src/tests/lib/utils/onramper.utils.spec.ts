@@ -49,6 +49,7 @@ describe('onramper.utils', () => {
 				`&networkWallets=bitcoin:${mockBtcAddress},icp:${mockAccountIdentifierText}`;
 
 			const result = buildOnramperLink(params);
+
 			expect(result).toBe(expectedUrl);
 		});
 
@@ -75,6 +76,7 @@ describe('onramper.utils', () => {
 				`&networkWallets=bitcoin:${mockBtcAddress}`;
 
 			const result = buildOnramperLink(params);
+
 			expect(result).toBe(expectedUrl);
 		});
 

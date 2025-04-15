@@ -35,7 +35,9 @@ describe('AllTransactions', () => {
 		const title: HTMLHeadingElement | null = container.querySelector('h1');
 
 		expect(title).not.toBeNull();
+
 		assertNonNullish(title, 'Title not found');
+
 		expect(title).toBeInTheDocument();
 		expect(title.textContent).toBe(en.activity.text.title);
 	});

@@ -11,6 +11,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema', () => {
 		const mock = createMockKongSwapToken({});
 
 		const parsed = KongSwapTokenSchema.safeParse(mock);
+
 		expect(parsed.success).toBe(true);
 	});
 
@@ -29,6 +30,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema', () => {
 			}
 		});
 		const parsed = KongSwapTokenSchema.safeParse(mock);
+
 		expect(parsed.success).toBe(true);
 	});
 
@@ -36,6 +38,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema', () => {
 		const mock = createMockKongSwapToken({});
 
 		const parsed = KongSwapTokenSchema.safeParse(mock);
+
 		expect(parsed.success).toBe(true);
 	});
 });
@@ -49,6 +52,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — invalid field values', () =
 			...mock.token,
 			metrics: mock.metrics
 		});
+
 		expect(parsed.success).toBe(false);
 	});
 
@@ -60,6 +64,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — invalid field values', () =
 			...mock.token,
 			metrics: mock.metrics
 		});
+
 		expect(parsed.success).toBe(false);
 	});
 
@@ -74,6 +79,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — invalid field values', () =
 			...token,
 			metrics: mock.metrics
 		});
+
 		expect(parsed.success).toBe(false);
 	});
 });
@@ -86,6 +92,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — missing required fields', (
 		delete invalid.token_id;
 
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(invalid);
+
 		expect(parsed.success).toBe(false);
 	});
 
@@ -96,6 +103,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — missing required fields', (
 		delete invalid.name;
 
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(invalid);
+
 		expect(parsed.success).toBe(false);
 	});
 
@@ -106,6 +114,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — missing required fields', (
 		delete invalid.canister_id;
 
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(invalid);
+
 		expect(parsed.success).toBe(false);
 	});
 });
@@ -116,6 +125,7 @@ describe('Schema: KongSwapTokenMetricsSchema', () => {
 			metrics: { updated_at: 'invalid-date' }
 		});
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(mock.metrics);
+
 		expect(parsed.success).toBe(false);
 	});
 
@@ -124,6 +134,7 @@ describe('Schema: KongSwapTokenMetricsSchema', () => {
 			metrics: { volume_24h: 'NaN' }
 		});
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(mock.metrics);
+
 		expect(parsed.success).toBe(false);
 	});
 });
@@ -143,6 +154,7 @@ describe('Schema: KongSwapTokensSchema (paginated list)', () => {
 			total_count: 2,
 			total_pages: 1
 		});
+
 		expect(parsed.success).toBe(true);
 	});
 
@@ -161,6 +173,7 @@ describe('Schema: KongSwapTokensSchema (paginated list)', () => {
 			total_count: 2,
 			total_pages: 1
 		});
+
 		expect(parsed.success).toBe(false);
 	});
 });

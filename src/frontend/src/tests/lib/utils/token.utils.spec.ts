@@ -48,6 +48,7 @@ describe('token.utils', () => {
 					tokenDecimals,
 					tokenStandard
 				});
+
 				expect(result).toBe(Number(balance - fee) / 10 ** tokenDecimals);
 			});
 		});
@@ -60,6 +61,7 @@ describe('token.utils', () => {
 					tokenDecimals,
 					tokenStandard
 				});
+
 				expect(result).toBe(0);
 			});
 		});
@@ -72,6 +74,7 @@ describe('token.utils', () => {
 					tokenDecimals,
 					tokenStandard
 				});
+
 				expect(result).toBe(0);
 			});
 		});
@@ -84,6 +87,7 @@ describe('token.utils', () => {
 					tokenDecimals,
 					tokenStandard
 				});
+
 				expect(result).toBe(0);
 
 				result = getMaxTransactionAmount({
@@ -92,6 +96,7 @@ describe('token.utils', () => {
 					tokenDecimals,
 					tokenStandard
 				});
+
 				expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 			});
 		});
@@ -103,6 +108,7 @@ describe('token.utils', () => {
 				tokenDecimals,
 				tokenStandard: 'erc20'
 			});
+
 			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 		});
 
@@ -113,6 +119,7 @@ describe('token.utils', () => {
 				tokenDecimals,
 				tokenStandard: 'spl'
 			});
+
 			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 		});
 	});
@@ -134,6 +141,7 @@ describe('token.utils', () => {
 				$balances: mockBalances,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual(Number(bn3Bi));
 		});
 
@@ -143,6 +151,7 @@ describe('token.utils', () => {
 				$balances: mockBalances,
 				$exchanges: {}
 			});
+
 			expect(result).toEqual(undefined);
 		});
 
@@ -152,6 +161,7 @@ describe('token.utils', () => {
 				$balances: {},
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual(0);
 		});
 
@@ -161,6 +171,7 @@ describe('token.utils', () => {
 				$balances: undefined,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual(0);
 		});
 	});
@@ -182,6 +193,7 @@ describe('token.utils', () => {
 				amount: bn3Bi,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual(Number(bn3Bi));
 		});
 
@@ -191,6 +203,7 @@ describe('token.utils', () => {
 				amount: bn3Bi,
 				$exchanges: {}
 			});
+
 			expect(result).toEqual(undefined);
 		});
 
@@ -200,6 +213,7 @@ describe('token.utils', () => {
 				amount: undefined,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual(0);
 		});
 	});
@@ -221,6 +235,7 @@ describe('token.utils', () => {
 				$balances: mockBalances,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual({
 				...ETHEREUM_TOKEN,
 				balance: bn3Bi,
@@ -230,6 +245,7 @@ describe('token.utils', () => {
 
 		it('should return an object TokenUi with undefined usdBalance if exchange rate is not available', () => {
 			const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: mockBalances, $exchanges: {} });
+
 			expect(result).toEqual({
 				...ETHEREUM_TOKEN,
 				balance: bn3Bi,
@@ -243,6 +259,7 @@ describe('token.utils', () => {
 				$balances: undefined,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual({
 				...ETHEREUM_TOKEN,
 				balance: undefined,
@@ -256,6 +273,7 @@ describe('token.utils', () => {
 				$balances: {},
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual({
 				...ETHEREUM_TOKEN,
 				balance: undefined,
@@ -269,6 +287,7 @@ describe('token.utils', () => {
 				$balances: { [ETHEREUM_TOKEN.id]: null },
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual({
 				...ETHEREUM_TOKEN,
 				balance: null,
@@ -416,6 +435,7 @@ describe('token.utils', () => {
 
 			it('should enable the token if no userToken', () => {
 				const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
+
 				expect(result.enabled).toEqual(true);
 			});
 
@@ -424,6 +444,7 @@ describe('token.utils', () => {
 					defaultToken: token,
 					userToken: { ...token, enabled: false }
 				});
+
 				expect(result.enabled).toEqual(true);
 			});
 
@@ -432,6 +453,7 @@ describe('token.utils', () => {
 					defaultToken: token,
 					userToken: { ...token, enabled: true }
 				});
+
 				expect(result.enabled).toEqual(true);
 			});
 		});
@@ -440,6 +462,7 @@ describe('token.utils', () => {
 			...mockValidIcToken,
 			ledgerCanisterId: ckErc20Production.ckUSDT?.ledgerCanisterId
 		};
+
 		describe.each([
 			{
 				description: 'Suggested ICRC token ckUSDT',
@@ -455,6 +478,7 @@ describe('token.utils', () => {
 
 			it('should enable the token if no userToken', () => {
 				const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
+
 				expect(result.enabled).toEqual(true);
 			});
 
@@ -463,6 +487,7 @@ describe('token.utils', () => {
 					defaultToken: token,
 					userToken: { ...token, enabled: false }
 				});
+
 				expect(result.enabled).toEqual(false);
 			});
 
@@ -471,6 +496,7 @@ describe('token.utils', () => {
 					defaultToken: token,
 					userToken: { ...token, enabled: true }
 				});
+
 				expect(result.enabled).toEqual(true);
 			});
 		});

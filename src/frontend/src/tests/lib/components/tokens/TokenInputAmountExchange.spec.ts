@@ -20,6 +20,7 @@ describe('TokenInputAmountExchange', () => {
 	it('renders token amount when in token mode', () => {
 		const { getByTestId } = render(TokenInputAmountExchange, defaultProps);
 		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
 		expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
 	});
 
@@ -29,6 +30,7 @@ describe('TokenInputAmountExchange', () => {
 			displayUnit: 'usd' as DisplayUnit
 		});
 		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
 		expect(valueElement).toHaveTextContent('$200.00');
 	});
 
@@ -40,9 +42,11 @@ describe('TokenInputAmountExchange', () => {
 		expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
 
 		await fireEvent.click(button);
+
 		expect(valueElement).toHaveTextContent('$200.00');
 
 		await fireEvent.click(button);
+
 		expect(valueElement).toHaveTextContent(`100 ${mockValidIcToken.symbol}`);
 	});
 
@@ -52,6 +56,7 @@ describe('TokenInputAmountExchange', () => {
 			exchangeRate: undefined
 		});
 		const unavailableElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE);
+
 		expect(unavailableElement).toBeInTheDocument();
 	});
 
@@ -61,6 +66,7 @@ describe('TokenInputAmountExchange', () => {
 			amount: undefined
 		});
 		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
 		expect(valueElement).toHaveTextContent(`0 ${mockValidIcToken.symbol}`);
 	});
 
@@ -69,6 +75,7 @@ describe('TokenInputAmountExchange', () => {
 			...defaultProps
 		});
 		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
 		expect(valueElement).toHaveTextContent('0');
 	});
 
@@ -79,6 +86,7 @@ describe('TokenInputAmountExchange', () => {
 			displayUnit: 'usd' as DisplayUnit
 		});
 		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
 		expect(valueElement).toHaveTextContent('$246.91');
 	});
 
@@ -88,6 +96,7 @@ describe('TokenInputAmountExchange', () => {
 			amount: '0' as OptionAmount
 		});
 		const valueElement = getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE);
+
 		expect(valueElement).toHaveTextContent(`0 ${mockValidIcToken.symbol}`);
 	});
 });

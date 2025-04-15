@@ -35,6 +35,7 @@ describe('exchangeRateICRCToUsd', () => {
 
 	it('returns null if no canister IDs are provided', async () => {
 		const result = await exchangeRateICRCToUsd([]);
+
 		expect(result).toBeNull();
 		expect(simpleTokenPrice).not.toHaveBeenCalled();
 		expect(findMissingLedgerCanisterIds).not.toHaveBeenCalled();

@@ -39,6 +39,7 @@ describe('AuthHelpOtherForm', () => {
 		const introductionAnchor: HTMLAnchorElement | null = container.querySelector(
 			introductionAnchorSelector
 		);
+
 		expect(introductionAnchor).toBeInTheDocument();
 		expect(introductionAnchor?.href).toBe(`${OISY_DOCS_URL}/`);
 		expect(
@@ -46,6 +47,7 @@ describe('AuthHelpOtherForm', () => {
 		).toBeInTheDocument();
 
 		const docsAnchor: HTMLAnchorElement | null = container.querySelector(docsAnchorSelector);
+
 		expect(docsAnchor).toBeInTheDocument();
 		expect(docsAnchor?.href).toBe(OISY_INTERNET_IDENTITY_URL);
 		expect(
@@ -54,6 +56,7 @@ describe('AuthHelpOtherForm', () => {
 
 		const privateKeyAnchor: HTMLAnchorElement | null =
 			container.querySelector(privateKeyAnchorSelector);
+
 		expect(privateKeyAnchor).toBeInTheDocument();
 		expect(privateKeyAnchor?.href).toBe(OISY_FAQ_URL);
 		expect(
@@ -63,6 +66,7 @@ describe('AuthHelpOtherForm', () => {
 		const assetControlAnchor: HTMLAnchorElement | null = container.querySelector(
 			assetControlAnchorSelector
 		);
+
 		expect(assetControlAnchor).toBeInTheDocument();
 		expect(assetControlAnchor?.href).toBe(OISY_ACCESS_CONTROL_URL);
 		expect(
@@ -70,9 +74,11 @@ describe('AuthHelpOtherForm', () => {
 		).toBeInTheDocument();
 
 		const backButton: HTMLButtonElement | null = container.querySelector(backButtonSelector);
+
 		expect(backButton).toBeInTheDocument();
 
 		const doneButton: HTMLButtonElement | null = container.querySelector(doneButtonSelector);
+
 		expect(doneButton).toBeInTheDocument();
 	});
 
@@ -91,16 +97,22 @@ describe('AuthHelpOtherForm', () => {
 		expect(onDoneMock).not.toHaveBeenCalled();
 
 		const backButton: HTMLButtonElement | null = container.querySelector(backButtonSelector);
+
 		expect(backButton).toBeInTheDocument();
+
 		await waitFor(() => {
 			backButton?.click();
+
 			expect(onBackMock).toHaveBeenCalledOnce();
 		});
 
 		const doneButton: HTMLButtonElement | null = container.querySelector(doneButtonSelector);
+
 		expect(doneButton).toBeInTheDocument();
+
 		await waitFor(() => {
 			doneButton?.click();
+
 			expect(onDoneMock).toHaveBeenCalledOnce();
 		});
 	});

@@ -122,7 +122,9 @@ describe('token-group.utils', () => {
 			const [btcGroup, _, icpToken] = groupedTokens;
 
 			expect(btcGroup).toHaveProperty('group');
+
 			assert('group' in btcGroup);
+
 			expect(btcGroup.group.tokens).toHaveLength(2);
 			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
 			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
@@ -146,7 +148,9 @@ describe('token-group.utils', () => {
 			const [firstGroup] = groupedTokens;
 
 			expect(firstGroup).toHaveProperty('group');
+
 			assert('group' in firstGroup);
+
 			expect(firstGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
 			expect(firstGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
 		});
@@ -190,8 +194,10 @@ describe('token-group.utils', () => {
 			);
 
 			expect(btcGroup).toBeDefined();
+
 			assertNonNullish(btcGroup);
 			assert('group' in btcGroup);
+
 			expect(btcGroup.group.tokens).toHaveLength(2);
 			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
 			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
@@ -202,8 +208,10 @@ describe('token-group.utils', () => {
 			);
 
 			expect(ethGroup).toBeDefined();
+
 			assertNonNullish(ethGroup);
 			assert('group' in ethGroup);
+
 			expect(ethGroup.group.tokens).toHaveLength(2);
 			expect(ethGroup.group.tokens.map((t) => t.symbol)).toContain('ETH');
 			expect(ethGroup.group.tokens.map((t) => t.symbol)).toContain('ckETH');

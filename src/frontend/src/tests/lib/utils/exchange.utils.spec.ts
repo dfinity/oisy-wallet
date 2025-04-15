@@ -35,6 +35,7 @@ describe('formatKongSwapToCoingeckoPrices', () => {
 			metrics: { price: null as unknown as string }
 		});
 		const result = formatKongSwapToCoingeckoPrices([mock]);
+
 		expect(result).toEqual({});
 	});
 
@@ -50,6 +51,7 @@ describe('formatKongSwapToCoingeckoPrices', () => {
 			}
 		});
 		const result = formatKongSwapToCoingeckoPrices([mock]);
+
 		expect(result[MOCK_CANISTER_ID_1.toLowerCase()].usd).toBe(1);
 		expect(result[MOCK_CANISTER_ID_1.toLowerCase()].usd_market_cap).toBeNaN();
 	});

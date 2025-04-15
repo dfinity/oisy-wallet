@@ -45,6 +45,7 @@ describe('reward.canister', () => {
 			});
 
 			const userData = await getUserInfo(queryParams);
+
 			expect(service.user_info).toHaveBeenCalledWith();
 			expect(userData.is_vip.length).toBe(1);
 			expect(fromNullable(userData.is_vip) === true).toBeTruthy();
@@ -65,6 +66,7 @@ describe('reward.canister', () => {
 			});
 
 			const userData = await getUserInfo(queryParams);
+
 			expect(userData.is_vip.length).toBe(1);
 			expect(fromNullable(userData.is_vip) === true).toBeFalsy();
 		});
@@ -80,6 +82,7 @@ describe('reward.canister', () => {
 			});
 
 			const result = getUserInfo(queryParams);
+
 			await expect(result).rejects.toThrow(mockResponseError);
 		});
 	});
@@ -98,6 +101,7 @@ describe('reward.canister', () => {
 			});
 
 			const vipRewardResponse = await getNewVipReward();
+
 			expect(service.new_vip_reward).toHaveBeenCalledWith();
 			expect(vipRewardResponse).toEqual(mockedRewardResponse);
 		});
@@ -113,6 +117,7 @@ describe('reward.canister', () => {
 			});
 
 			const result = getNewVipReward();
+
 			await expect(result).rejects.toThrow(mockResponseError);
 		});
 	});
@@ -128,6 +133,7 @@ describe('reward.canister', () => {
 
 			const vipReward = { code: '1234567890' };
 			const claimResponse = await claimVipReward(vipReward);
+
 			expect(service.claim_vip_reward).toHaveBeenCalledWith(vipReward);
 			expect(claimResponse).toEqual(mockedClaimResponse);
 		});
@@ -143,6 +149,7 @@ describe('reward.canister', () => {
 			});
 
 			const result = claimVipReward({ code: '1234567890' });
+
 			await expect(result).rejects.toThrow(mockResponseError);
 		});
 	});
@@ -161,6 +168,7 @@ describe('reward.canister', () => {
 			});
 
 			const referrerInfo = await getReferrerInfo(queryParams);
+
 			expect(service.referrer_info).toHaveBeenCalledWith();
 			expect(referrerInfo).toEqual(mockedReferrerInfo);
 		});
@@ -176,6 +184,7 @@ describe('reward.canister', () => {
 			});
 
 			const result = getReferrerInfo(queryParams);
+
 			await expect(result).rejects.toThrow(mockResponseError);
 		});
 	});
@@ -189,6 +198,7 @@ describe('reward.canister', () => {
 			});
 
 			await setReferrer(mockedReferrerCode);
+
 			expect(service.set_referrer).toHaveBeenCalledWith(mockedReferrerCode);
 		});
 
@@ -203,6 +213,7 @@ describe('reward.canister', () => {
 			});
 
 			const result = setReferrer(mockedReferrerCode);
+
 			await expect(result).rejects.toThrow(mockResponseError);
 		});
 	});
@@ -219,6 +230,7 @@ describe('reward.canister', () => {
 			});
 
 			await registerAirdropRecipient(mockUserSnapshot);
+
 			expect(service.register_airdrop_recipient).toHaveBeenCalledWith(mockUserSnapshot);
 		});
 
@@ -233,6 +245,7 @@ describe('reward.canister', () => {
 			});
 
 			const result = registerAirdropRecipient(mockUserSnapshot);
+
 			await expect(result).rejects.toThrow(mockResponseError);
 		});
 	});
