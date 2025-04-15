@@ -137,7 +137,7 @@
 		on:icSelectNetworkFilter={onSelectNetwork}
 		networkSelectorViewOnly={nonNullish($selectedNetwork)}
 	>
-		{#snippet tokenListItem(token: Token, onClick: () => void)}
+		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
 				<TokenName slot="title" data={token} />
 

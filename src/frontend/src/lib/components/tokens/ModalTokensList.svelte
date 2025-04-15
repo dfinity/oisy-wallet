@@ -2,7 +2,6 @@
 	import { notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
 	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
-	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
@@ -18,12 +17,14 @@
 		networkSelectorViewOnly = false,
 		loading = false,
 		tokenListItem,
-		toolbar
+		toolbar,
+		noResults
 	}: {
 		networkSelectorViewOnly: boolean;
 		loading: boolean;
 		tokenListItem: Snippet<[Token, () => void]>;
 		toolbar: Snippet;
+		noResults?: Snippet;
 	} = $props();
 
 	const dispatch = createEventDispatcher();
@@ -37,7 +38,7 @@
 		setFilterQuery(filter);
 	});
 
-	let noTokensMatch = $filteredTokens.length === 0;
+	let noTokensMatch = $derived($filteredTokens.length === 0);
 </script>
 
 <div class="flex items-end justify-between">
@@ -67,9 +68,13 @@
 	<div class="gap-6 overflow-y-auto overscroll-contain">
 		<TokensSkeletons {loading}>
 			{#if noTokensMatch}
-				<p class="text-primary">
-					{$i18n.tokens.manage.text.all_tokens_zero_balance}
-				</p>
+				{#if noResults}
+					{@render noResults()}
+				{:else}
+					<p class="text-primary">
+						{$i18n.core.text.no_results}
+					</p>
+				{/if}
 			{:else}
 				<ul class="list-none">
 					{#each $filteredTokens as token (token.id)}
