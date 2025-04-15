@@ -161,6 +161,7 @@ describe('sol-wallet.scheduler', () => {
 
 		it('should stop the scheduler', () => {
 			scheduler.stop();
+
 			expect(scheduler['timer']['timer']).toBeUndefined();
 		});
 

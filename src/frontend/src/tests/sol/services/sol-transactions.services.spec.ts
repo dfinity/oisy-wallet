@@ -166,6 +166,7 @@ describe('sol-transactions.services', () => {
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(expectedResults);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(nInstructions);
+
 			mockAllInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
 					instruction: { ...instruction, programAddress: instruction.programId },
@@ -201,6 +202,7 @@ describe('sol-transactions.services', () => {
 			);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(innerInstructions.length);
+
 			innerInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
 					instruction: { ...instruction, programAddress: instruction.programId },
@@ -331,6 +333,7 @@ describe('sol-transactions.services', () => {
 			);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(nInstructions);
+
 			mockAllInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
 					instruction: { ...instruction, programAddress: instruction.programId },
@@ -418,6 +421,7 @@ describe('sol-transactions.services', () => {
 			});
 
 			const storeData = get(solTransactionsStore)?.[SOLANA_TOKEN_ID];
+
 			expect(storeData).toEqual(mockCertifiedTransactions);
 		});
 
@@ -432,7 +436,9 @@ describe('sol-transactions.services', () => {
 			});
 
 			expect(transactions).toEqual([]);
+
 			const storeData = get(solTransactionsStore)?.[SOLANA_TOKEN_ID];
+
 			expect(storeData).toBeNull();
 		});
 

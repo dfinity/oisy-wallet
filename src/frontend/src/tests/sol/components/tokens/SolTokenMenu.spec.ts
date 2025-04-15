@@ -88,6 +88,7 @@ describe('SolTokenMenu', () => {
 
 			await waitFor(() => {
 				const a = queryByTestId(TOKEN_MENU_SOL_EXPLORER_LINK);
+
 				expect(a).not.toBeNull();
 				expect((a as HTMLAnchorElement).href).toEqual(
 					replacePlaceholders(explorerUrl, { $args: `account/${mockSolAddress}/` })
@@ -108,6 +109,7 @@ describe('SolTokenMenu', () => {
 
 		await waitFor(() => {
 			const a = queryByTestId(TOKEN_MENU_SOL_EXPLORER_LINK);
+
 			expect(a).not.toBeNull();
 			expect((a as HTMLAnchorElement).href).toEqual(
 				replacePlaceholders((mockToken.network as SolanaNetwork).explorerUrl ?? '', {
