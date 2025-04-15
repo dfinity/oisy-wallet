@@ -356,7 +356,12 @@ const CKLINK_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckLINK,
 			position: 2,
-			twinToken: LINK_TOKEN
+			twinToken: LINK_TOKEN,
+			groupData: {
+				icon: LINK_TOKEN.icon,
+				symbol: LINK_TOKEN.symbol,
+				name: LINK_TOKEN.name
+			}
 		}
 	: undefined;
 
@@ -364,7 +369,12 @@ const CKPEPE_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckPEPE,
 			position: 3,
-			twinToken: PEPE_TOKEN
+			twinToken: PEPE_TOKEN,
+			groupData: {
+				icon: PEPE_TOKEN.icon,
+				symbol: PEPE_TOKEN.symbol,
+				name: PEPE_TOKEN.name
+			}
 		}
 	: undefined;
 
@@ -372,7 +382,12 @@ const CKOCT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_D
 	? {
 			...CKERC20_PRODUCTION_DATA.ckOCT,
 			position: 4,
-			twinToken: OCT_TOKEN
+			twinToken: OCT_TOKEN,
+			groupData: {
+				icon: OCT_TOKEN.icon,
+				symbol: OCT_TOKEN.symbol,
+				name: OCT_TOKEN.name
+			}
 		}
 	: undefined;
 
@@ -380,7 +395,12 @@ const CKSHIB_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckSHIB,
 			position: 5,
-			twinToken: SHIB_TOKEN
+			twinToken: SHIB_TOKEN,
+			groupData: {
+				icon: SHIB_TOKEN.icon,
+				symbol: SHIB_TOKEN.symbol,
+				name: SHIB_TOKEN.name
+			}
 		}
 	: undefined;
 
@@ -388,7 +408,12 @@ const CKWBTC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckWBTC,
 			position: 6,
-			twinToken: WBTC_TOKEN
+			twinToken: WBTC_TOKEN,
+			groupData: {
+				icon: WBTC_TOKEN.icon,
+				symbol: WBTC_TOKEN.symbol,
+				name: WBTC_TOKEN.name
+			}
 		}
 	: undefined;
 
@@ -396,7 +421,12 @@ const CKUSDT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUSDT,
 			position: 7,
-			twinToken: USDT_TOKEN
+			twinToken: USDT_TOKEN,
+			groupData: {
+				icon: USDT_TOKEN.icon,
+				symbol: USDT_TOKEN.symbol,
+				name: USDT_TOKEN.name
+			}
 		}
 	: undefined;
 
@@ -404,7 +434,12 @@ const CKWSTETH_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTIO
 	? {
 			...CKERC20_PRODUCTION_DATA.ckWSTETH,
 			position: 8,
-			twinToken: WSTETH_TOKEN
+			twinToken: WSTETH_TOKEN,
+			groupData: {
+				icon: WSTETH_TOKEN.icon,
+				symbol: WSTETH_TOKEN.symbol,
+				name: WSTETH_TOKEN.name
+			}
 		}
 	: undefined;
 
@@ -412,7 +447,12 @@ const CKUNI_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_D
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUNI,
 			position: 9,
-			twinToken: UNI_TOKEN
+			twinToken: UNI_TOKEN,
+			groupData: {
+				icon: UNI_TOKEN.icon,
+				symbol: UNI_TOKEN.symbol,
+				name: UNI_TOKEN.name
+			}
 		}
 	: undefined;
 
@@ -420,7 +460,12 @@ const CKEURC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckEURC,
 			position: 10,
-			twinToken: EURC_TOKEN
+			twinToken: EURC_TOKEN,
+			groupData: {
+				icon: EURC_TOKEN.icon,
+				symbol: EURC_TOKEN.symbol,
+				name: EURC_TOKEN.name
+			}
 		}
 	: undefined;
 
@@ -428,7 +473,12 @@ const CKXAUT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckXAUT,
 			position: 11,
-			twinToken: XAUT_TOKEN
+			twinToken: XAUT_TOKEN,
+			groupData: {
+				icon: XAUT_TOKEN.icon,
+				symbol: XAUT_TOKEN.symbol,
+				name: XAUT_TOKEN.name
+			}
 		}
 	: undefined;
 
