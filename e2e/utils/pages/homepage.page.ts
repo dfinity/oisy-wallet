@@ -517,7 +517,9 @@ abstract class Homepage {
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
+
 				await expect(element).toHaveScreenshot({ fullPage: true });
+
 				await this.showMobileNavigationMenu();
 			}
 		}
