@@ -27,10 +27,15 @@
 	import type { OptionToken } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
-	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
+	import {
+		filterReceivedMicroTransactions,
+		mapAllTransactionsUi,
+		sortTransactions
+	} from '$lib/utils/transactions.utils';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import {exchanges} from "$lib/derived/exchange.derived";
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
@@ -44,8 +49,11 @@
 		$solTransactions: $solTransactionsStore
 	});
 
+	let filteredTransactions: AllTransactionUiWithCmp[];
+	$: filteredTransactions = filterReceivedMicroTransactions(transactions, $exchanges);
+
 	let sortedTransactions: AllTransactionUiWithCmp[];
-	$: sortedTransactions = transactions.sort(({ transaction: a }, { transaction: b }) =>
+	$: sortedTransactions = filteredTransactions.sort(({ transaction: a }, { transaction: b }) =>
 		sortTransactions({ transactionA: a, transactionB: b })
 	);
 
