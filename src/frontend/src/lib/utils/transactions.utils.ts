@@ -1,19 +1,22 @@
-import type {BtcTransactionUi} from '$btc/types/btc';
-import {ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID} from '$env/tokens/tokens.eth.env';
-import type {EthTransactionsData} from '$eth/stores/eth-transactions.store';
-import {mapEthTransactionUi} from '$eth/utils/transactions.utils';
-import type {CkEthMinterInfoData} from '$icp-eth/stores/cketh.store';
-import {toCkMinterInfoAddresses} from '$icp-eth/utils/cketh.utils';
-import type {BtcStatusesData} from '$icp/stores/btc.store';
-import type {IcTransactionUi} from '$icp/types/ic-transaction';
-import {normalizeTimestampToSeconds} from '$icp/utils/date.utils';
-import {extendIcTransaction} from '$icp/utils/ic-transactions.utils';
-import type {CertifiedStoreData} from '$lib/stores/certified.store';
-import type {TransactionsData} from '$lib/stores/transactions.store';
-import type {OptionEthAddress} from '$lib/types/address';
-import type {Token} from '$lib/types/token';
-import type {AllTransactionUiWithCmp, AnyTransactionUi} from '$lib/types/transaction';
-import type {TransactionsStoreCheckParams} from '$lib/types/transactions';
+import type { BtcTransactionUi } from '$btc/types/btc';
+import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
+import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
+import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
+import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
+import type { BtcStatusesData } from '$icp/stores/btc.store';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
+import { extendIcTransaction } from '$icp/utils/ic-transactions.utils';
+import { MICRO_TRANSACTION_USD_THRESHOLD } from '$lib/constants/app.constants';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import type { TransactionsData } from '$lib/stores/transactions.store';
+import type { OptionEthAddress } from '$lib/types/address';
+import type { ExchangesData } from '$lib/types/exchange';
+import type { Token } from '$lib/types/token';
+import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
+import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
+import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
@@ -21,11 +24,8 @@ import {
 	isNetworkIdSepolia,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
-import type {SolTransactionUi} from '$sol/types/sol-transaction';
-import {isNullish, nonNullish} from '@dfinity/utils';
-import type {ExchangesData} from "$lib/types/exchange";
-import {usdValue} from "$lib/utils/exchange.utils";
-import {MICRO_TRANSACTION_USD_THRESHOLD} from "$lib/constants/app.constants";
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Maps the transactions stores to a unified list of transactions with their respective token and components.
@@ -149,36 +149,49 @@ export const mapAllTransactionsUi = ({
 };
 
 export const filterReceivedMicroTransactions = ({
-													transactions,
-													exchanges}:
-													{transactions: AllTransactionUiWithCmp[],
-														exchanges: ExchangesData})
-	: AllTransactionUiWithCmp[] => {
-	return transactions.filter((transactionUI) => {
-		const {transaction} = transactionUI;
-		return !(transaction.type === 'receive' && isMicroTransaction({transactionUI, exchanges}));
+	transactions,
+	exchanges
+}: {
+	transactions: AllTransactionUiWithCmp[];
+	exchanges: ExchangesData;
+}): AllTransactionUiWithCmp[] => transactions.filter((transactionUI) => {
+		const { transaction } = transactionUI;
+		return !(transaction.type === 'receive' && isMicroTransaction({ transactionUI, exchanges }));
 	});
-}
 
-export const getReceivedMicroTransactions = ({transactions, exchanges}: {transactions: AllTransactionUiWithCmp[], exchanges: ExchangesData}): AllTransactionUiWithCmp[] => {
-	return transactions.filter((transactionUI) => {
-		const {transaction} = transactionUI;
-		return (transaction.type === 'receive' && isMicroTransaction({transactionUI, exchanges}));
+export const getReceivedMicroTransactions = ({
+	transactions,
+	exchanges
+}: {
+	transactions: AllTransactionUiWithCmp[];
+	exchanges: ExchangesData;
+}): AllTransactionUiWithCmp[] => transactions.filter((transactionUI) => {
+		const { transaction } = transactionUI;
+		return transaction.type === 'receive' && isMicroTransaction({ transactionUI, exchanges });
 	});
-}
 
-const isMicroTransaction = ({transactionUI, exchanges}:{transactionUI: AllTransactionUiWithCmp, exchanges: ExchangesData}) => {
+const isMicroTransaction = ({
+	transactionUI,
+	exchanges
+}: {
+	transactionUI: AllTransactionUiWithCmp;
+	exchanges: ExchangesData;
+}) => {
 	const { token, transaction } = transactionUI;
 	if (nonNullish(transaction.value)) {
 		const exchangeRate = exchanges?.[token.id]?.usd;
 		if (nonNullish(exchangeRate)) {
-			const usdAmount = usdValue({decimals: token.decimals, balance: transaction.value, exchangeRate})
+			const usdAmount = usdValue({
+				decimals: token.decimals,
+				balance: transaction.value,
+				exchangeRate
+			});
 			return usdAmount < MICRO_TRANSACTION_USD_THRESHOLD;
 		}
 	}
 
 	return false;
-}
+};
 
 export const sortTransactions = ({
 	transactionA: { timestamp: timestampA },

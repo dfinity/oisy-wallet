@@ -4,13 +4,13 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
+	import TransactionMenu from '$lib/components/transactions/TransactionMenu.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import TransactionMenu from "$lib/components/transactions/TransactionMenu.svelte";
 
 	$: enabledTokensWithoutTransaction = $enabledNetworkTokens
 		.filter((token) => $icTransactionsStore?.[token.id] === null)
@@ -44,7 +44,7 @@
 </script>
 
 <div class="flex flex-col gap-5">
-	<div class="flex justify-between items-center">
+	<div class="flex items-center justify-between">
 		<PageTitle>{$i18n.activity.text.title}</PageTitle>
 		<TransactionMenu />
 	</div>

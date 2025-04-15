@@ -16,6 +16,7 @@
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		modalBtcTransaction,
 		modalEthTransaction,
@@ -28,14 +29,14 @@
 	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import {
-		filterReceivedMicroTransactions, getReceivedMicroTransactions,
+		filterReceivedMicroTransactions,
+		getReceivedMicroTransactions,
 		mapAllTransactionsUi,
 		sortTransactions
 	} from '$lib/utils/transactions.utils';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
-	import {exchanges} from "$lib/derived/exchange.derived";
 
 	export let onlyMicroTransactions = false;
 
@@ -52,7 +53,9 @@
 	});
 
 	let filteredTransactions: AllTransactionUiWithCmp[];
-	$: filteredTransactions = onlyMicroTransactions ? getReceivedMicroTransactions({transactions, exchanges: $exchanges}) : filterReceivedMicroTransactions({transactions, exchanges: $exchanges});
+	$: filteredTransactions = onlyMicroTransactions
+		? getReceivedMicroTransactions({ transactions, exchanges: $exchanges })
+		: filterReceivedMicroTransactions({ transactions, exchanges: $exchanges });
 
 	let sortedTransactions: AllTransactionUiWithCmp[];
 	$: sortedTransactions = filteredTransactions.sort(({ transaction: a }, { transaction: b }) =>
