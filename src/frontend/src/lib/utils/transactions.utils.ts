@@ -157,7 +157,7 @@ export const filterReceivedMicroTransactions = ({
 	let filteredTransactions: AllTransactionUiWithCmp[];
 	filteredTransactions = transactions.filter((transactionUI) => {
 		const { transaction } = transactionUI;
-		return !(transaction.type === 'receive' && isMicroTransaction(transactionUI, exchanges));
+		return !(transaction.type === 'receive' && isMicroTransaction({transactionUI, exchanges}));
 	});
 
 	return filteredTransactions;
@@ -167,7 +167,7 @@ export const getReceivedMicroTransactions = ({transactions, exchanges}: {transac
 	let microTransactions: AllTransactionUiWithCmp[];
 	microTransactions = transactions.filter((transactionUI) => {
 		const { transaction } = transactionUI;
-		return (transaction.type === 'receive' && isMicroTransaction(transactionUI, exchanges));
+		return (transaction.type === 'receive' && isMicroTransaction({transactionUI, exchanges}));
 	});
 
 	return microTransactions;
