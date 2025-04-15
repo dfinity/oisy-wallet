@@ -9,7 +9,6 @@
 	export let required = true;
 	export let testId: string | undefined = undefined;
 	export let autofocus = false;
-
 	export let inputElement: HTMLInputElement | undefined = undefined;
 
 	onMount(() => {

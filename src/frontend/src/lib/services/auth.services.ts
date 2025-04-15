@@ -29,7 +29,7 @@ export const signIn = async (
 	try {
 		await authStore.signIn(params);
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_COUNT_SIGN_IN_SUCCESS
 		});
 
@@ -39,7 +39,7 @@ export const signIn = async (
 		return { success: 'ok' };
 	} catch (err: unknown) {
 		if (err === 'UserInterrupt') {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_SIGN_IN_CANCELLED_COUNT
 			});
 
@@ -47,7 +47,7 @@ export const signIn = async (
 			return { success: 'cancelled' };
 		}
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_SIGN_IN_ERROR_COUNT
 		});
 

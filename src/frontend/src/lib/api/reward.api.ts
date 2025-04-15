@@ -2,6 +2,7 @@ import type {
 	ClaimVipRewardResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
+	SetReferrerResponse,
 	UserData,
 	UserSnapshot,
 	VipReward
@@ -56,7 +57,7 @@ export const setReferrer = async ({
 	identity
 }: CanisterApiFunctionParams<{
 	referrerCode: number;
-}>): Promise<void> => {
+}>): Promise<SetReferrerResponse> => {
 	const { setReferrer } = await rewardCanister({ identity });
 
 	return setReferrer(referrerCode);

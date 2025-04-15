@@ -891,6 +891,10 @@ interface I18nReferral {
 	};
 }
 
+interface I18nAddress_book {
+	text: { title: string; empty_title: string; empty_text: string; add_new_contact: string };
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -984,6 +988,7 @@ interface I18n {
 	about: I18nAbout;
 	vip: I18nVip;
 	referral: I18nReferral;
+	address_book: I18nAddress_book;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
