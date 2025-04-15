@@ -4,7 +4,7 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store.js';
 	import { modalStore } from '$lib/stores/modal.store.js';
-	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils.js";
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
