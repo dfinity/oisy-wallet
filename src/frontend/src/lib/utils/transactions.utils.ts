@@ -158,6 +158,16 @@ export const filterReceivedMicroTransactions = (transactions: AllTransactionUiWi
 	return filteredTransactions;
 }
 
+export const getReceivedMicroTransactions = (transactions: AllTransactionUiWithCmp[], exchanges: ExchangesData): AllTransactionUiWithCmp[] => {
+	let microTransactions: AllTransactionUiWithCmp[];
+	microTransactions = transactions.filter((transactionUI) => {
+		const { transaction } = transactionUI;
+		return (transaction.type === 'receive' && isMicroTransaction(transactionUI, exchanges));
+	});
+
+	return microTransactions;
+}
+
 const isMicroTransaction = (transactionUI: AllTransactionUiWithCmp, exchanges: ExchangesData) => {
 	const { token, transaction } = transactionUI;
 	if (nonNullish(transaction.value)) {

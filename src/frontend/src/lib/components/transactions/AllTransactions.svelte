@@ -10,6 +10,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import TransactionMenu from "$lib/components/transactions/TransactionMenu.svelte";
 
 	$: enabledTokensWithoutTransaction = $enabledNetworkTokens
 		.filter((token) => $icTransactionsStore?.[token.id] === null)
@@ -43,7 +44,10 @@
 </script>
 
 <div class="flex flex-col gap-5">
-	<PageTitle>{$i18n.activity.text.title}</PageTitle>
+	<div class="flex justify-between items-center">
+		<PageTitle>{$i18n.activity.text.title}</PageTitle>
+		<TransactionMenu />
+	</div>
 
 	{#if notEmptyString(tokenListWithoutCanister)}
 		<MessageBox level="warning" closableKey="oisy_ic_hide_transaction_no_canister">

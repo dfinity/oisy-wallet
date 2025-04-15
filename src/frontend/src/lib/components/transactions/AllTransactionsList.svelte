@@ -28,7 +28,7 @@
 	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import {
-		filterReceivedMicroTransactions,
+		filterReceivedMicroTransactions, getReceivedMicroTransactions,
 		mapAllTransactionsUi,
 		sortTransactions
 	} from '$lib/utils/transactions.utils';
@@ -36,6 +36,8 @@
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import {exchanges} from "$lib/derived/exchange.derived";
+
+	export let onlyMicroTransactions = false;
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
@@ -50,7 +52,13 @@
 	});
 
 	let filteredTransactions: AllTransactionUiWithCmp[];
-	$: filteredTransactions = filterReceivedMicroTransactions(transactions, $exchanges);
+	$: {
+		if (onlyMicroTransactions) {
+			filteredTransactions = getReceivedMicroTransactions(transactions, $exchanges);
+		} else {
+			filteredTransactions = filterReceivedMicroTransactions(transactions, $exchanges);
+		}
+	}
 
 	let sortedTransactions: AllTransactionUiWithCmp[];
 	$: sortedTransactions = filteredTransactions.sort(({ transaction: a }, { transaction: b }) =>

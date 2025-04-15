@@ -186,3 +186,8 @@ export const modalAuthHelpData: Readable<boolean | undefined> = derived(
 	modalStore,
 	($modalStore) => ($modalStore?.type === 'auth-help' ? ($modalStore?.data as boolean) : undefined)
 );
+
+export const modalHiddenTransactions: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'hidden-transactions'
+);

@@ -815,6 +815,9 @@ interface I18nTransactions {
 		missing_index_canister_explanation: string;
 		index_canister_not_working_explanation: string;
 		token_needs_enabling: string;
+		show_hidden_transactions: string;
+		hidden_transactions_title: string;
+		hidden_transactions_info: string;
 	};
 	error: {
 		loading_transactions: string;
