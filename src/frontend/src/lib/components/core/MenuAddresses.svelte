@@ -4,7 +4,6 @@
 	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
 	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
 	import WalletAddresses from '$lib/components/core/WalletAddresses.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import {
 		networkBitcoin,
 		networkEthereum,
@@ -30,5 +29,3 @@
 {:else if $pseudoNetworkChainFusion}
 	<WalletAddresses on:icReceiveTriggered={click} />
 {/if}
-
-<Hr />
