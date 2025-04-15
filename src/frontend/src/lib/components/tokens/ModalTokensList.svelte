@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
 	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
@@ -12,21 +12,32 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { isDesktop } from '$lib/utils/device.utils';
+	import type { Token } from '$lib/types/token';
 
-	export let networkSelectorViewOnly = false;
-	export let loading: boolean;
+	let {
+		networkSelectorViewOnly = false,
+		loading = false,
+		tokenListItem,
+		toolbar
+	}: {
+		networkSelectorViewOnly: boolean;
+		loading: boolean;
+		tokenListItem: Snippet<[Token, () => void]>;
+		toolbar: Snippet;
+	} = $props();
 
 	const dispatch = createEventDispatcher();
 
 	const { filteredTokens, filterNetwork, filterQuery, setFilterQuery } =
 		getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
-	let filter = $filterQuery ?? '';
+	let filter = $state($filterQuery ?? '');
 
-	$: filter, setFilterQuery(filter);
+	$effect(() => {
+		setFilterQuery(filter);
+	});
 
-	let noTokensMatch = false;
-	$: noTokensMatch = $filteredTokens.length === 0;
+	let noTokensMatch = $filteredTokens.length === 0;
 </script>
 
 <div class="flex items-end justify-between">
@@ -63,10 +74,7 @@
 				<ul class="list-none">
 					{#each $filteredTokens as token (token.id)}
 						<li class="logo-button-list-item">
-							<ModalTokensListItem
-								on:click={() => dispatch('icTokenButtonClick', token)}
-								data={token}
-							/>
+							{@render tokenListItem(token, () => dispatch('icTokenButtonClick', token))}
 						</li>
 					{/each}
 				</ul>
@@ -76,5 +84,5 @@
 </div>
 
 <ButtonGroup>
-	<slot name="toolbar" />
+	{@render toolbar()}
 </ButtonGroup>

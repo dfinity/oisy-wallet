@@ -6,6 +6,7 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { Token } from '$lib/types/token';
+	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -23,5 +24,10 @@
 	on:icTokenButtonClick={onIcTokenButtonClick}
 	networkSelectorViewOnly={nonNullish($selectedNetwork)}
 >
-	<ButtonCloseModal slot="toolbar" />
+	{#snippet tokenListItem(token: Token, onClick: () => void)}
+		<ModalTokensListItem data={token} on:click={onClick} />
+	{/snippet}
+	{#snippet toolbar()}
+		<ButtonCloseModal />
+	{/snippet}
 </ModalTokensList>

@@ -258,7 +258,9 @@
 			on:icSave={saveTokens}
 			{initialSearch}
 		>
-			<slot name="info-element" slot="info-element" />
+			{#snippet infoElement()}
+				<slot name="info-element" />
+			{/snippet}
 		</ManageTokens>
 	{/if}
 </WizardModal>
