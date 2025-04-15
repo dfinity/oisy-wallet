@@ -45,6 +45,7 @@ describe('sortTokens', () => {
 			[ETHEREUM_TOKEN.id]: { usd_market_cap: 300, usd: mockOneUsd }
 		};
 		const sortedTokens = sortTokens({ $tokens: mockTokens, $exchanges, $tokensToPin: [] });
+
 		expect(sortedTokens).toEqual([ETHEREUM_TOKEN, ICP_TOKEN, BTC_MAINNET_TOKEN]);
 	});
 
@@ -55,6 +56,7 @@ describe('sortTokens', () => {
 			[ETHEREUM_TOKEN.id]: { usd_market_cap: 200, usd: mockOneUsd }
 		};
 		const sortedTokens = sortTokens({ $tokens: mockTokens, $exchanges, $tokensToPin: [] });
+
 		expect(sortedTokens).toEqual([BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN]);
 	});
 
@@ -65,6 +67,7 @@ describe('sortTokens', () => {
 			[ETHEREUM_TOKEN.id]: { usd: mockOneUsd }
 		};
 		const sortedTokens = sortTokens({ $tokens: mockTokens, $exchanges, $tokensToPin: [] });
+
 		expect(sortedTokens).toEqual([BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN]);
 	});
 
@@ -80,6 +83,7 @@ describe('sortTokens', () => {
 			$exchanges,
 			$tokensToPin: []
 		});
+
 		expect(sortedTokens).toEqual(
 			[BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN].map((token) => ({
 				...token,
@@ -100,6 +104,7 @@ describe('sortTokens', () => {
 			$exchanges,
 			$tokensToPin: []
 		});
+
 		expect(sortedTokens).toEqual(
 			[BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN].map((token) => ({
 				...token,
@@ -120,6 +125,7 @@ describe('sortTokens', () => {
 			$exchanges,
 			$tokensToPin: tokensToPin
 		});
+
 		expect(sortedTokens).toEqual([ETHEREUM_TOKEN, BTC_MAINNET_TOKEN, ICP_TOKEN]);
 	});
 
@@ -136,6 +142,7 @@ describe('sortTokens', () => {
 			$exchanges: {},
 			$tokensToPin: []
 		});
+
 		expect(sortedTokens).toEqual([
 			BTC_MAINNET_TOKEN,
 			ETHEREUM_TOKEN,
@@ -263,6 +270,7 @@ describe('sumTokensUiUsdBalance', () => {
 		];
 
 		const result = sumTokensUiUsdBalance(tokens);
+
 		expect(result).toEqual(200);
 	});
 
@@ -274,11 +282,13 @@ describe('sumTokensUiUsdBalance', () => {
 		];
 
 		const result = sumTokensUiUsdBalance(tokens);
+
 		expect(result).toEqual(50);
 	});
 
 	it('should correctly calculate USD total balance when tokens list is empty', () => {
 		const result = sumTokensUiUsdBalance([]);
+
 		expect(result).toEqual(0);
 	});
 });
@@ -295,6 +305,7 @@ describe('filterEnabledTokens', () => {
 		];
 
 		const result = filterEnabledTokens([tokens]);
+
 		expect(result).toEqual([ENABLED_ICP_TOKEN, ENABLED_ETHEREUM_TOKEN]);
 	});
 
@@ -309,6 +320,7 @@ describe('filterEnabledTokens', () => {
 		];
 
 		const result = filterEnabledTokens([tokens]);
+
 		expect(result).toEqual([ENABLED_BY_DEFAULT_ICP_TOKEN, ENABLED_BY_DEFAULT_ETHEREUM_TOKEN]);
 	});
 });
@@ -336,6 +348,7 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$balances: balances,
 			$exchanges: mockExchanges
 		});
+
 		expect(result).toEqual({
 			[BTC_MAINNET_NETWORK_ID]: Number(bn2Bi),
 			[ETHEREUM_NETWORK_ID]: Number(bn3Bi),
@@ -357,6 +370,7 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$balances: balances,
 			$exchanges: mockExchanges
 		});
+
 		expect(result).toEqual({
 			[BTC_MAINNET_NETWORK_ID]: Number(ZERO_BI),
 			[ETHEREUM_NETWORK_ID]: Number(ZERO_BI),
@@ -376,6 +390,7 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$balances: balances,
 			$exchanges: mockExchanges
 		});
+
 		expect(result).toEqual({});
 	});
 
@@ -385,6 +400,7 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$balances: mockBalances,
 			$exchanges: mockExchanges
 		});
+
 		expect(result).toEqual({});
 	});
 });
@@ -455,11 +471,13 @@ describe('filterTokens', () => {
 describe('findToken', () => {
 	it('should return the correct token by symbol', () => {
 		const result = findToken({ tokens: mockTokens, symbol: BTC_MAINNET_SYMBOL });
+
 		expect(result).toEqual(BTC_MAINNET_TOKEN);
 	});
 
 	it('should return undefined if token is not found', () => {
 		const result = findToken({ tokens: mockTokens, symbol: 'UNKNOWN_TOKEN' });
+
 		expect(result).toBeUndefined();
 	});
 });
