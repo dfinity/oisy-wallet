@@ -185,7 +185,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				this.failedSyncCounter = 0;
 			},
 			identity,
-            onUpdateError: ({ error }) => {
+			onUpdateError: ({ error }) => {
 				this.failedSyncCounter++;
 				if (FAILURE_THRESHOLD <= this.failedSyncCounter) {
 					this.postMessageWalletError({ error });
