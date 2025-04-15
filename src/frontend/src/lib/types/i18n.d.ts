@@ -818,6 +818,8 @@ interface I18nTransactions {
 		show_hidden_transactions: string;
 		hidden_transactions_title: string;
 		hidden_transactions_info: string;
+		hidden_transaction_history: string;
+		hidden_receive: string;
 	};
 	alt: { transactions_menu: string; show_hidden_transactions_menu_item: string };
 	error: {

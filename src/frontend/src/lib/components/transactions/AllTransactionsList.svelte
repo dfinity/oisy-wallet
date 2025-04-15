@@ -112,7 +112,7 @@
 	{/if}
 
 	{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
-		<TransactionsPlaceholder />
+		<TransactionsPlaceholder isHiddenTransactions={onlyMicroTransactions} />
 	{/if}
 </AllTransactionsSkeletons>
 

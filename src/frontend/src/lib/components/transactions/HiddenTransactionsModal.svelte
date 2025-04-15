@@ -4,6 +4,7 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store.js';
 	import { modalStore } from '$lib/stores/modal.store.js';
+	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils.js";
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -12,7 +13,7 @@
 	</svelte:fragment>
 
 	<MessageBox level="info" closableKey="oisy_hide_hidden_transactions">
-		<Html text={$i18n.transactions.text.hidden_transactions_info} />
+		{replaceOisyPlaceholders($i18n.transactions.text.hidden_transactions_info)}
 	</MessageBox>
 
 	<AllTransactionsList onlyMicroTransactions />

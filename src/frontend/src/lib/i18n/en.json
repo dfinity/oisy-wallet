@@ -885,7 +885,9 @@
 			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history.",
 			"show_hidden_transactions": "View hidden transactions",
 			"hidden_transactions_title": "Hidden transactions",
-			"hidden_transactions_info": "We've hidden these transactions as they considered suspicious. We recommend <b>do not copy or send assets</b> to these addresses."
+			"hidden_transactions_info": "$oisy_short detects suspicious incoming transactions and hides them from the default transaction list. We recommend to not copy or send assets to those addresses.",
+			"hidden_transaction_history": "You have no hidden transactions",
+			"hidden_receive": "$oisy_short protects you and will detect suspicious transactions and move them to this space here!"
 		},
 		"alt": {
 			"transactions_menu": "Open transactions menu",
