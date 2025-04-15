@@ -6,6 +6,7 @@ import * as blockchainRest from '$lib/rest/blockchain.rest';
 import * as blockstreamRest from '$lib/rest/blockstream.rest';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
+import { mockBlockchainResponse } from '$tests/mocks/blockchain.mock';
 import { mockBtcTransaction } from '$tests/mocks/btc-transactions.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -96,16 +97,7 @@ describe('btc-wallet.worker', () => {
 
 		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(1000);
 
-		vi.spyOn(blockchainRest, 'btcAddressData').mockResolvedValue({
-			txs: [mockBtcTransaction],
-			address: mockBtcAddress,
-			final_balance: 100,
-			total_received: 100,
-			hash160: 'hash160',
-			n_tx: 100,
-			n_unredeemed: 100,
-			total_sent: 100
-		});
+		vi.spyOn(blockchainRest, 'btcAddressData').mockResolvedValue(mockBlockchainResponse);
 
 		vi.spyOn(SignerCanister, 'create').mockResolvedValue(signerCanisterMock);
 		vi.spyOn(BitcoinCanister, 'create').mockReturnValue(bitcoinCanisterMock);
