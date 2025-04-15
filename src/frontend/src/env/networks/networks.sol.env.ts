@@ -16,11 +16,13 @@ import solMainnetIconLight from '$lib/assets/networks/light/solana-mainnet.svg';
 import solTestnetIconLight from '$lib/assets/networks/light/solana-testnet.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { Network, NetworkId } from '$lib/types/network';
+import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SolanaNetwork } from '$sol/types/network';
 
-export const SOL_MAINNET_ENABLED =
-	JSON.parse(import.meta.env.VITE_SOLANA_MAINNET_DISABLED ?? false) === false;
+export const SOL_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
+	import.meta.env.VITE_SOLANA_MAINNET_DISABLED
+);
 
 /**
  * RPC URLs

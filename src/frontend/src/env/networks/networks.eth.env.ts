@@ -5,12 +5,14 @@ import sepoliaIconDark from '$lib/assets/networks/dark/ethereum-sepolia.svg';
 import ethereumIconLight from '$lib/assets/networks/light/ethereum-mainnet.svg';
 import sepoliaIconLight from '$lib/assets/networks/light/ethereum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
+import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
 import type { Networkish } from 'ethers/providers';
 
-export const ETH_MAINNET_ENABLED =
-	JSON.parse(import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED ?? false) === false;
+export const ETH_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
+	import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED
+);
 
 export const INFURA_NETWORK_HOMESTEAD: Networkish = 'homestead';
 export const INFURA_NETWORK_SEPOLIA: Networkish = 'sepolia';

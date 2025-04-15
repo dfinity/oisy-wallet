@@ -52,7 +52,8 @@
 			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes",
-			"refer_a_friend": "Refer your friends"
+			"refer_a_friend": "Refer your friends",
+			"address_book": "Address book"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -67,7 +68,8 @@
 			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link",
-			"refer_a_friend": "Generate a referral link for a friend"
+			"refer_a_friend": "Generate a referral link for a friend",
+			"address_book": "Open address book"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -597,6 +599,7 @@
 			"all_tokens_with_zero_hidden": "All assets with zero balance are currently hidden",
 			"filter_nothing_found": "Oops, nothing found",
 			"filter_nothing_found_description": "Type token ticker or name to filter list",
+			"filter_placeholder": "Token name or symbol...",
 			"buy_or_receive": "Buy or receive your first tokens now to see them in the list",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
@@ -694,7 +697,8 @@
 			"open_dashboard": "Open the details of the token on the ICP Dashboard",
 			"open_contract_address_block_explorer": "Open the contract address on a block explorer",
 			"open_token_address_block_explorer": "Open the token address on a block explorer",
-			"token_group_number": "Total number of tokens in the group for native token $token"
+			"token_group_number": "Total number of tokens in the group for native token $token",
+			"filter_button": "Open/close filter"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address",
@@ -976,6 +980,14 @@
 				"share": "Share on X",
 				"open_wallet": "Take me to the wallet"
 			}
+		}
+	},
+	"address_book": {
+		"text": {
+			"title": "Address book",
+			"empty_title": "Your contacts are empty",
+			"empty_text": "All your contacts will be shown here",
+			"add_new_contact": "Add new contact"
 		}
 	},
 	"signer": {
