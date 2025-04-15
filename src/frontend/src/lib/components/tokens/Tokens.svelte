@@ -5,15 +5,17 @@
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
-	import { TOKEN_LIST_FILTER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <div>
 	<div class="flex w-full flex-row justify-between">
 		<div class="grow-1 relative flex flex-row justify-between">
-			<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
-			<TokensFilter testIdPrefix={TOKEN_LIST_FILTER} />
+			<TokensFilter>
+				{#snippet overflowableContent()}
+					<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
+				{/snippet}
+			</TokensFilter>
 		</div>
 		<div class="flex">
 			<TokensMenu />

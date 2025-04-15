@@ -12,7 +12,7 @@
 	let {
 		inputValue = $bindable($tokenListStore.filter),
 		overflowableContent
-	}: { inputValue: string; overflowableContent?: Snippet } = $props();
+	}: { inputValue?: string; overflowableContent?: Snippet } = $props();
 
 	// reset search if not coming from home (switching networks) or transactions page
 	afterNavigate(({ from }) => {
