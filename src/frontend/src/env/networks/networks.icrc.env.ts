@@ -466,7 +466,6 @@ const VEUR_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCT
 		}
 	: undefined;
 
-
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
