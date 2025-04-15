@@ -27,7 +27,12 @@ describe('mapHeaderData', () => {
 			oisySymbol: { oisySymbol: SEPOLIA_TOKEN.name },
 			balance: bn1Bi,
 			usdBalance: 300,
-			tokenCount: 2
+			tokenCount: 2,
+			groupData: {
+				icon: SEPOLIA_TOKEN.icon,
+				name: SEPOLIA_TOKEN.name,
+				symbol: SEPOLIA_TOKEN.symbol
+			}
 		};
 
 		expect(mapHeaderData(tokenGroup)).toEqual(expected);
