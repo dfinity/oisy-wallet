@@ -26,6 +26,7 @@ describe('RewardsGroups', () => {
 		expect(getByText(title)).toBeInTheDocument();
 
 		const activeGroup: HTMLButtonElement | null = container.querySelector(activeGroupSelector);
+
 		expect(activeGroup).toBeInTheDocument();
 	});
 
@@ -45,6 +46,7 @@ describe('RewardsGroups', () => {
 		expect(getByText(altText)).toBeInTheDocument();
 
 		const activeGroup: HTMLButtonElement | null = container.querySelector(activeGroupSelector);
+
 		expect(activeGroup).not.toBeInTheDocument();
 	});
 
@@ -64,6 +66,7 @@ describe('RewardsGroups', () => {
 		expect(queryByText(altText)).not.toBeInTheDocument();
 
 		const activeGroup: HTMLButtonElement | null = container.querySelector(activeGroupSelector);
+
 		expect(activeGroup).toBeInTheDocument();
 	});
 });

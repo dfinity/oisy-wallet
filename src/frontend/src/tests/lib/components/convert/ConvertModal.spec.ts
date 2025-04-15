@@ -28,9 +28,11 @@ describe('ConvertModal', () => {
 		expect(container).toHaveTextContent(firstStepTitle);
 
 		await fireEvent.click(getByText(en.convert.text.review_button));
+
 		expect(container).toHaveTextContent(en.convert.text.review);
 
 		await fireEvent.click(getByText(en.core.text.back));
+
 		expect(container).toHaveTextContent(firstStepTitle);
 	});
 });

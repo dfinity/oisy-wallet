@@ -27,11 +27,13 @@ describe('RewardModal', () => {
 
 		expect(getByText(mockedReward.title)).toBeInTheDocument();
 		expect(getByText(mockedReward.description)).toBeInTheDocument();
+
 		mockedReward.requirements.forEach((requirement: string) => {
 			expect(getByText(requirement)).toBeInTheDocument();
 		});
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 	});
 });

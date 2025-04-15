@@ -21,17 +21,20 @@ describe('ButtonAuthenticateWithLicense', () => {
 		const { container, getByText } = render(ButtonAuthenticateWithLicense);
 
 		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
 		expect(signInButton).toBeInTheDocument();
 
 		expect(getByText(get(i18n).license_agreement.text.accept_terms)).toBeInTheDocument();
 
 		const licenseLinkAnchor: HTMLAnchorElement | null =
 			container.querySelector(licenseLinkAnchorSelector);
+
 		expect(licenseLinkAnchor).toBeInTheDocument();
 
 		const SigningInHelpLinkSpan: HTMLSpanElement | null = container.querySelector(
 			SigningInHelpLinkSpanSelector
 		);
+
 		expect(SigningInHelpLinkSpan).toBeInTheDocument();
 	});
 
@@ -41,9 +44,11 @@ describe('ButtonAuthenticateWithLicense', () => {
 		const { container } = render(ButtonAuthenticateWithLicense);
 
 		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
 		expect(signInButton).toBeInTheDocument();
 
 		await waitFor(() => signInButton?.click());
+
 		expect(authSpy).toHaveBeenCalledOnce();
 
 		expect(get(modalStore)?.type).toBe('auth-help');
@@ -55,9 +60,11 @@ describe('ButtonAuthenticateWithLicense', () => {
 		const { container } = render(ButtonAuthenticateWithLicense);
 
 		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
 		expect(signInButton).toBeInTheDocument();
 
 		await waitFor(() => signInButton?.click());
+
 		expect(authSpy).toHaveBeenCalledOnce();
 
 		expect(get(modalStore)?.type).toBeUndefined();

@@ -85,6 +85,7 @@ describe('load-user-profile.services', () => {
 				certified: true,
 				nullishIdentityErrorMessage
 			});
+
 			await waitFor(() =>
 				expect(get(userProfileStore)).toEqual({ certified: true, profile: mockProfile })
 			);

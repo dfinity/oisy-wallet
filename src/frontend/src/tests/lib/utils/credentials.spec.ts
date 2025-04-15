@@ -21,6 +21,7 @@ describe('credentials utils', () => {
 				],
 				version: [0n]
 			};
+
 			expect(hasPouhCredential(profile)).toBe(true);
 		});
 
@@ -36,6 +37,7 @@ describe('credentials utils', () => {
 				],
 				version: [0n]
 			};
+
 			expect(hasPouhCredential(profile)).toBe(false);
 		});
 
@@ -44,6 +46,7 @@ describe('credentials utils', () => {
 				...mockUserProfile,
 				version: [0n]
 			};
+
 			expect(hasPouhCredential(profile)).toBe(false);
 		});
 	});
