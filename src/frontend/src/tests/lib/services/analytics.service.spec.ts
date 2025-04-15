@@ -11,8 +11,13 @@ vi.mock('plausible-tracker', () => ({
 	}))
 }));
 
-vi.mock('$lib/constants/app.constants', () => ({
+vi.doMock('$lib/constants/app.constants', () => ({
 	PROD: true
+}));
+
+vi.doMock('$env/plausible.env', () => ({
+	PLAUSIBLE_ENABLED: true,
+	PLAUSIBLE_DOMAIN: 'test.com'
 }));
 
 describe('plausible analytics service', () => {
@@ -54,16 +59,16 @@ describe('plausible analytics service', () => {
 			metadata: { eventName: 'eventValue' }
 		};
 
-		await trackEvent(params);
+		trackEvent(params);
 
 		expect(trackEventMock).toHaveBeenCalledWith('test_event_name', {
 			props: { eventName: 'eventValue' }
 		});
 	});
 
-	it('should NOT call trackEvent or init anything if PROD is false', async () => {
-		vi.doMock('$lib/constants/app.constants', () => ({
-			PROD: false
+	it('should NOT call trackEvent or init anything if PLAUSIBLE_ENABLED is false', async () => {
+		vi.doMock('$env/plausible.env', () => ({
+			PLAUSIBLE_ENABLED: false
 		}));
 
 		const { initPlausibleAnalytics, trackEvent } = await import('$lib/services/analytics.services');
@@ -78,8 +83,31 @@ describe('plausible analytics service', () => {
 			metadata: { eventName: 'eventValue' }
 		};
 
-		await trackEvent(params);
+		trackEvent(params);
 
 		expect(trackEventMock).not.toHaveBeenCalled();
+	});
+
+	it('should catch and log errors if Plausible initialization fails', async () => {
+		vi.doMock('$env/plausible.env', () => ({
+			PLAUSIBLE_ENABLED: true,
+			PLAUSIBLE_DOMAIN: 'oisy.com'
+		}));
+
+		vi.mocked(Plausible).mockImplementation(() => {
+			throw new Error();
+		});
+
+		const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+		const { initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		initPlausibleAnalytics();
+
+		expect(consoleWarnSpy).toHaveBeenCalledWith(
+			'An unexpected error occurred during initialization.'
+		);
+
+		consoleWarnSpy.mockRestore();
 	});
 });

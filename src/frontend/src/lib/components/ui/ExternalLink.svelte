@@ -18,12 +18,12 @@
 	export let asMenuItemCondensed = false;
 	export let asButton = false;
 
-	const onClick = async () => {
+	const onClick = () => {
 		if (isNullish(trackEvent)) {
 			return;
 		}
 
-		await trackEventServices(trackEvent);
+		trackEventServices(trackEvent);
 	};
 </script>
 

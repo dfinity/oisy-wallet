@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import chainFusion from '$lib/assets/chain_fusion.svg';
+	import AllNetworksLogo from '$lib/components/networks/AllNetworksLogo.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import type { Network } from '$lib/types/network';
 
 	export let network: Network | undefined;
@@ -11,5 +10,5 @@
 {#if nonNullish(network)}
 	<NetworkLogo {network} />
 {:else}
-	<Logo src={chainFusion} />
+	<AllNetworksLogo />
 {/if}

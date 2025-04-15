@@ -2,6 +2,7 @@ export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
+export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
@@ -144,3 +145,18 @@ export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-c
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
+
+export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
+export const HELP_AUTH_LOST_IDENTITY_BUTTON = 'help-auth-lost-identity-button';
+export const HELP_AUTH_SECURITY_BUTTON = 'help-auth-security-button';
+export const HELP_AUTH_GOT_CONFUSED_BUTTON = 'help-auth-got-confused-button';
+export const HELP_AUTH_OTHER_BUTTON = 'help-auth-other-button';
+export const HELP_AUTH_IDENTITY_IMAGE_BANNER = 'help-auth-identity-image-banner';
+export const HELP_AUTH_LEGACY_SIGN_IN_BUTTON = 'help-auth-legacy-sign-in-button';
+export const HELP_AUTH_BACK_BUTTON = 'help-auth-back-button';
+export const HELP_AUTH_DONE_BUTTON = 'help-auth-done-button';
+export const HELP_AUTH_LEARN_MORE_LINK = 'help-auth-learn-more-link';
+export const HELP_AUTH_INTRODUCTION_LINK = 'help-auth-introduction-link';
+export const HELP_AUTH_DOCS_LINK = 'help-auth-docs-link';
+export const HELP_AUTH_PRIVATE_KEY_LINK = 'help-auth-private-key-link';
+export const HELP_AUTH_ASSET_CONTROL_LINK = 'help-auth-asset-control-link';

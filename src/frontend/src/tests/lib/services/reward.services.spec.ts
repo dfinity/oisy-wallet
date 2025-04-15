@@ -281,9 +281,7 @@ describe('reward-code', () => {
 		const mockedReferrerCode = 123456;
 
 		it('should successfully set referrer', async () => {
-			const setReferrerSpy = vi
-				.spyOn(rewardApi, 'setReferrer')
-				.mockResolvedValueOnce(undefined as void);
+			const setReferrerSpy = vi.spyOn(rewardApi, 'setReferrer').mockResolvedValueOnce({ Ok: null });
 
 			const result = await setReferrer({
 				identity: mockIdentity,
@@ -411,7 +409,7 @@ describe('reward-code', () => {
 	}): RewardInfo =>
 		({
 			ledger: { toText: () => ledgerCanisterId },
-			amount: amount
+			amount
 		}) as unknown as RewardInfo;
 
 	const baseMockUserData = {

@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { getIdbEthAddress, setIdbEthAddress, updateIdbEthAddressLastUsage } from '$lib/api/idb.api';
 import { getEthAddress } from '$lib/api/signer.api';
 import {
@@ -10,14 +10,14 @@ import {
 import { ethAddressStore, type StorageAddressData } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
-import { LoadIdbAddressError } from '$lib/types/errors';
+import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { get } from 'svelte/store';
 
 export const loadEthAddress = (): Promise<ResultSuccess> =>
 	loadTokenAddress<EthAddress>({
-		tokenId: ETHEREUM_TOKEN_ID,
+		networkId: ETHEREUM_NETWORK_ID,
 		getAddress: (identity: OptionIdentity) =>
 			getEthAddress({
 				identity,
@@ -29,7 +29,7 @@ export const loadEthAddress = (): Promise<ResultSuccess> =>
 
 export const loadIdbEthAddress = (): Promise<ResultSuccess<LoadIdbAddressError>> =>
 	loadIdbTokenAddress<EthAddress>({
-		tokenId: ETHEREUM_TOKEN_ID,
+		networkId: ETHEREUM_NETWORK_ID,
 		getIdbAddress: getIdbEthAddress,
 		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage,
 		addressStore: ethAddressStore
@@ -37,7 +37,7 @@ export const loadIdbEthAddress = (): Promise<ResultSuccess<LoadIdbAddressError>>
 
 const certifyEthAddress = (address: EthAddress): Promise<ResultSuccess<string>> =>
 	certifyAddress<EthAddress>({
-		tokenId: ETHEREUM_TOKEN_ID,
+		networkId: ETHEREUM_NETWORK_ID,
 		address,
 		getAddress: (identity: OptionIdentity) =>
 			getEthAddress({
