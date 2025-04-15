@@ -1,5 +1,5 @@
 import { BSC_NETWORK, BSC_TESTNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
-import bnb from '$evm/assets/bnb.svg';
+import bnb from '$evm/bsc/assets/bnb.svg';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
