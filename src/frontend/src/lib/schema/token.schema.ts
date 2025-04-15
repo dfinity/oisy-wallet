@@ -54,14 +54,18 @@ export const TokenGroupSchema = z.object({
 	icon: z.string().optional()
 });
 
+export const TokenGroupPropSchema = z.object({
+	groupData: TokenGroupSchema.optional()
+});
+
 export const TokenSchema = z
 	.object({
 		id: TokenIdSchema,
 		network: NetworkSchema,
 		standard: TokenStandardSchema,
-		category: TokenCategorySchema,
-		groupData: TokenGroupSchema
+		category: TokenCategorySchema
 	})
 	.merge(TokenMetadataSchema)
 	.merge(TokenAppearanceSchema)
-	.merge(TokenBuyableSchema);
+	.merge(TokenBuyableSchema)
+	.merge(TokenGroupPropSchema);

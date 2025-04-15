@@ -27,7 +27,7 @@
 	>
 		<span class="flex" slot="logo" class:mr-2={!asNetwork}>
 			<TokenLogo
-				data={asGroup ? { ...data, icon: data.groupData.icon } : data}
+				data={asGroup && data?.groupData?.icon ? { ...data, icon: data.groupData.icon } : data}
 				badge={nonNullish(data.tokenCount)
 					? { type: 'tokenCount', count: data.tokenCount }
 					: { type: 'network' }}
@@ -37,7 +37,7 @@
 		</span>
 
 		<span class:text-sm={asNetwork} slot="title">
-			{asGroup ? data.groupData.symbol : data.symbol}
+			{asGroup && data?.groupData?.symbol ? data.groupData.symbol : data.symbol}
 			{#if asNetwork}
 				<span class="font-normal">
 					{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
@@ -47,7 +47,7 @@
 
 		<span class:text-sm={asNetwork} slot="subtitle">
 			{#if !asNetwork}
-				&nbsp;&middot;&nbsp;{asGroup ? data.groupData.name : data.name}
+				&nbsp;&middot;&nbsp;{asGroup && data?.groupData?.name ? data.groupData.name : data.name}
 			{/if}
 		</span>
 

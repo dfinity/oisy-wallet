@@ -22,11 +22,11 @@ import {
 } from 'ethers/providers';
 import { get } from 'svelte/store';
 
-type TransactionsParams = {
+interface TransactionsParams {
 	address: EthAddress;
 	startBlock?: BlockTag;
 	endBlock?: BlockTag;
-};
+}
 
 export class EtherscanProvider {
 	private readonly provider: EtherscanProviderLib;
