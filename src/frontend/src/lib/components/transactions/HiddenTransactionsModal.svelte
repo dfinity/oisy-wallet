@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import {modalStore} from "$lib/stores/modal.store.js";
     import {Html, Modal} from "@dfinity/gix-components";
     import {i18n} from "$lib/stores/i18n.store.js";
