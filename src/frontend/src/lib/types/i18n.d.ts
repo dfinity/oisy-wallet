@@ -819,10 +819,7 @@ interface I18nTransactions {
 		hidden_transactions_title: string;
 		hidden_transactions_info: string;
 	};
-	alt: {
-		transactions_menu: string;
-		show_hidden_transactions_menu_item: string;
-	};
+	alt: { transactions_menu: string; show_hidden_transactions_menu_item: string };
 	error: {
 		loading_transactions: string;
 		loading_transactions_symbol: string;
