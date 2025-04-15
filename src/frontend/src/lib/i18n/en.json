@@ -52,7 +52,8 @@
 			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes",
-			"refer_a_friend": "Refer your friends"
+			"refer_a_friend": "Refer your friends",
+			"address_book": "Address book"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -67,7 +68,8 @@
 			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link",
-			"refer_a_friend": "Generate a referral link for a friend"
+			"refer_a_friend": "Generate a referral link for a friend",
+			"address_book": "Open address book"
 		},
 		"short": {
 			"documentation": "Docs"
