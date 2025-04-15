@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Backdrop } from '@dfinity/gix-components';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { afterNavigate } from '$app/navigation';
@@ -8,7 +9,6 @@
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isNullish, nonNullish } from '@dfinity/utils';
 
 	let {
 		inputValue = $bindable(''),
@@ -138,7 +138,7 @@
 </div>
 
 <style lang="scss">
-  .input-field.condensed input {
-    padding-block: var(--padding-1_5x) !important;
-  }
+	.input-field.condensed input {
+		padding-block: var(--padding-1_5x) !important;
+	}
 </style>
