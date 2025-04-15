@@ -561,6 +561,7 @@ interface I18nTokens {
 		all_tokens_with_zero_hidden: string;
 		filter_nothing_found: string;
 		filter_nothing_found_description: string;
+		filter_placeholder: string;
 		buy_or_receive: string;
 		initializing: string;
 		updating_ui: string;
@@ -640,6 +641,7 @@ interface I18nTokens {
 		open_contract_address_block_explorer: string;
 		open_token_address_block_explorer: string;
 		token_group_number: string;
+		filter_button: string;
 	};
 	placeholder: {
 		enter_contract_address: string;
