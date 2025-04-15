@@ -452,9 +452,9 @@ const NAK_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTI
 		}
 	: undefined;
 
-const vCHF_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.vCHF)
+const VCHF_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VCHF)
 	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.vCHF,
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.VCHF,
 			position: 21
 		}
 	: undefined;
@@ -533,7 +533,7 @@ const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(vUSD_IC_DATA) ? [vUSD_IC_DATA] : []),
 	...(nonNullish(RUGGY_IC_DATA) ? [RUGGY_IC_DATA] : []),
 	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : []),
-	...(nonNullish(vCHF_IC_DATA) ? [vCHF_IC_DATA] : [])
+	...(nonNullish(VCHF_IC_DATA) ? [VCHF_IC_DATA] : [])
 ];
 
 export const ICRC_TOKENS: IcInterface[] = [
