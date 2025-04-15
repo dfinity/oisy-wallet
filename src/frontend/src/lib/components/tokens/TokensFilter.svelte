@@ -7,9 +7,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { isTokensPath, isTransactionsPath } from '$lib/utils/nav.utils';
+	import type { Snippet } from 'svelte';
 
-	let inputValue: string;
-	$: inputValue = $tokenListStore.filter;
+	let {
+		inputValue = $bindable($tokenListStore.filter),
+		overflowableContent
+	}: { inputValue: string; overflowableContent?: Snippet } = $props();
 
 	// reset search if not coming from home (switching networks) or transactions page
 	afterNavigate(({ from }) => {
@@ -20,7 +23,9 @@
 	});
 
 	// update store on inputValue change
-	$: tokenListStore.set({ filter: inputValue });
+	$effect(() => {
+		tokenListStore.set({ filter: inputValue });
+	});
 </script>
 
 <SlidingInput
@@ -30,5 +35,12 @@
 	disabled={$erc20UserTokensNotInitialized}
 	bind:inputValue
 >
-	<IconSearch slot="icon" />
+	{#snippet overflowableContent()}
+		{#if overflowableContent}
+			{@render overflowableContent()}
+		{/if}
+	{/snippet}
+	{#snippet icon()}
+		<IconSearch />
+	{/snippet}
 </SlidingInput>
