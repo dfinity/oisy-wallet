@@ -42,7 +42,6 @@ impl fmt::Display for AddressType {
 impl From<&str> for AddressType {
     fn from(s: &str) -> Self {
         match s {
-            "ICP" => AddressType::ICP,
             "BTC" => AddressType::BTC,
             "ETH" => AddressType::ETH,
             "SOL" => AddressType::SOL,
