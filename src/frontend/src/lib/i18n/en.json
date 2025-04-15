@@ -887,6 +887,10 @@
 			"hidden_transactions_title": "Hidden transactions",
 			"hidden_transactions_info": "We've hidden these transactions as they considered suspicious. We recommend <b>do not copy or send assets</b> to these addresses."
 		},
+		"alt": {
+			"transactions_menu": "Open transactions menu",
+			"show_hidden_transactions_menu_item": "Show hidden transactions"
+		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
 			"loading_transactions_symbol": "Error while loading the $symbol transactions.",

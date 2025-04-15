@@ -16,13 +16,14 @@
     const hidePopover = () => (visible = false);
 </script>
 
-<ButtonIcon colorStyle="muted" link={false} styleClass="p-0" bind:button on:click={showPopover}>
+<ButtonIcon colorStyle="muted" link={false} styleClass="p-0" bind:button on:click={showPopover} ariaLabel={$i18n.transactions.alt.transactions_menu}>
     <IconKebabMenu size="32" slot="icon" />
 </ButtonIcon>
 
 <Popover invisibleBackdrop bind:visible direction="rtl" on:click={hidePopover} anchor={button}>
     <ButtonMenu
         on:click={modalStore.openHiddenTransactions}
+        ariaLabel={$i18n.transactions.alt.show_hidden_transactions_menu_item}
     >
         <IconEyeOff />
         {$i18n.transactions.text.show_hidden_transactions}
