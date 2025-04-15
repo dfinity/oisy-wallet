@@ -154,7 +154,8 @@ export const filterReceivedMicroTransactions = ({
 }: {
 	transactions: AllTransactionUiWithCmp[];
 	exchanges: ExchangesData;
-}): AllTransactionUiWithCmp[] => transactions.filter((transactionUI) => {
+}): AllTransactionUiWithCmp[] =>
+	transactions.filter((transactionUI) => {
 		const { transaction } = transactionUI;
 		return !(transaction.type === 'receive' && isMicroTransaction({ transactionUI, exchanges }));
 	});
@@ -165,7 +166,8 @@ export const getReceivedMicroTransactions = ({
 }: {
 	transactions: AllTransactionUiWithCmp[];
 	exchanges: ExchangesData;
-}): AllTransactionUiWithCmp[] => transactions.filter((transactionUI) => {
+}): AllTransactionUiWithCmp[] =>
+	transactions.filter((transactionUI) => {
 		const { transaction } = transactionUI;
 		return transaction.type === 'receive' && isMicroTransaction({ transactionUI, exchanges });
 	});
