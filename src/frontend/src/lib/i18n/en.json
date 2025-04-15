@@ -599,6 +599,7 @@
 			"all_tokens_with_zero_hidden": "All assets with zero balance are currently hidden",
 			"filter_nothing_found": "Oops, nothing found",
 			"filter_nothing_found_description": "Type token ticker or name to filter list",
+			"filter_placeholder": "Token name or symbol...",
 			"buy_or_receive": "Buy or receive your first tokens now to see them in the list",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
@@ -696,7 +697,8 @@
 			"open_dashboard": "Open the details of the token on the ICP Dashboard",
 			"open_contract_address_block_explorer": "Open the contract address on a block explorer",
 			"open_token_address_block_explorer": "Open the token address on a block explorer",
-			"token_group_number": "Total number of tokens in the group for native token $token"
+			"token_group_number": "Total number of tokens in the group for native token $token",
+			"filter_button": "Open/close filter"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address",
