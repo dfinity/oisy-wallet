@@ -49,6 +49,7 @@ interface I18nNavigation {
 		confirm_navigate: string;
 		vip_qr_code: string;
 		refer_a_friend: string;
+		address_book: string;
 	};
 	alt: {
 		tokens: string;
@@ -64,6 +65,7 @@ interface I18nNavigation {
 		open_twitter: string;
 		vip_qr_code: string;
 		refer_a_friend: string;
+		address_book: string;
 	};
 	short: { documentation: string };
 }
@@ -559,6 +561,8 @@ interface I18nTokens {
 		all_tokens_with_zero_hidden: string;
 		filter_nothing_found: string;
 		filter_nothing_found_description: string;
+		filter_placeholder: string;
+		filter_button: string;
 		buy_or_receive: string;
 		initializing: string;
 		updating_ui: string;
@@ -638,6 +642,7 @@ interface I18nTokens {
 		open_contract_address_block_explorer: string;
 		open_token_address_block_explorer: string;
 		token_group_number: string;
+		filter_button: string;
 	};
 	placeholder: {
 		enter_contract_address: string;

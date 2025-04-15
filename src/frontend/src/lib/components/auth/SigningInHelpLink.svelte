@@ -6,6 +6,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 
 	export let styleClass = '';
+	export let testId: string | undefined = undefined;
 
 	const onClick = () => {
 		trackEvent({
@@ -15,7 +16,7 @@
 	};
 </script>
 
-<span class={`${styleClass} flex flex-row justify-center gap-1 md:justify-start`}>
+<span data-tid={testId} class={`${styleClass} flex flex-row justify-center gap-1 md:justify-start`}>
 	{$i18n.auth.help.text.need_help}
 	<Button link inlineLink on:click={onClick}>{$i18n.auth.help.text.sign_in}</Button>
 </span>
