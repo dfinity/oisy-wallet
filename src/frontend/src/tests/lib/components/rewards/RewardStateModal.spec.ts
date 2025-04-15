@@ -35,10 +35,12 @@ describe('RewardStateModal', () => {
 		expect(getByText(get(i18n).rewards.text.state_modal_content_text)).toBeInTheDocument();
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 		expect(imageBanner?.src).toContain(rewardReceived);
 
 		const share: HTMLAnchorElement | null = container.querySelector(shareSelector);
+
 		expect(share).toBeInTheDocument();
 		expect(share?.href).toBe(mockedReward.airdropHref);
 	});
@@ -61,10 +63,12 @@ describe('RewardStateModal', () => {
 		expect(getByText(get(i18n).rewards.text.state_modal_content_text)).toBeInTheDocument();
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 		expect(imageBanner?.src).toContain(rewardJackpotReceived);
 
 		const share: HTMLAnchorElement | null = container.querySelector(shareSelector);
+
 		expect(share).toBeInTheDocument();
 		expect(share?.href).toBe(mockedReward.jackpotHref);
 	});

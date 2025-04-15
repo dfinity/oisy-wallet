@@ -26,9 +26,11 @@ describe('RewardCard', () => {
 		expect(getByText(mockedReward.oneLiner)).toBeInTheDocument();
 
 		const logo: HTMLDivElement | null = container.querySelector(logoSelector);
+
 		expect(logo).toBeInTheDocument();
 
 		const badge: HTMLSpanElement | null = container.querySelector(badgeSelector);
+
 		expect(badge).toBeInTheDocument();
 	});
 });
