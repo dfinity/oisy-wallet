@@ -562,6 +562,7 @@ interface I18nTokens {
 		filter_nothing_found: string;
 		filter_nothing_found_description: string;
 		filter_placeholder: string;
+		filter_button: string;
 		buy_or_receive: string;
 		initializing: string;
 		updating_ui: string;

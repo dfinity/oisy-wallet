@@ -9,10 +9,9 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { isTokensPath, isTransactionsPath } from '$lib/utils/nav.utils';
 
-	let {
-		inputValue = $bindable($tokenListStore.filter),
-		overflowableContent
-	}: { inputValue: string; overflowableContent?: Snippet } = $props();
+	let { overflowableContent }: { overflowableContent?: Snippet } = $props();
+
+	let inputValue = $state($tokenListStore.filter);
 
 	// reset search if not coming from home (switching networks) or transactions page
 	afterNavigate(({ from }) => {
