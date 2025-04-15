@@ -56,13 +56,13 @@ describe('steps.constants', () => {
 	];
 
 	describe('sendSteps', () => {
-		it('returns the correct steps with expected text and state when sendWithApproval is false', () => {
+		it('should return the correct steps with expected text and state when sendWithApproval is false', () => {
 			const steps = sendSteps({ i18n: en, sendWithApproval: false });
 
 			expect(steps).toEqual(expectedSendStepsWithoutApproval);
 		});
 
-		it('returns the correct steps with expected text and state when sendWithApproval is true', () => {
+		it('should return the correct steps with expected text and state when sendWithApproval is true', () => {
 			const steps = sendSteps({ i18n: en, sendWithApproval: true });
 
 			expect(steps).toEqual(expectedSendStepsWithApproval);
@@ -76,13 +76,13 @@ describe('steps.constants', () => {
 			state: 'next'
 		};
 
-		it('returns the correct steps with expected text and state when sendWithApproval is false', () => {
+		it('should return the correct steps with expected text and state when sendWithApproval is false', () => {
 			const steps = walletConnectSendSteps({ i18n: en, sendWithApproval: false });
 
 			expect(steps).toEqual([...expectedSendStepsWithoutApproval, expectedWalletConnectSendStep]);
 		});
 
-		it('returns the correct steps with expected text and state when sendWithApproval is true', () => {
+		it('should return the correct steps with expected text and state when sendWithApproval is true', () => {
 			const steps = walletConnectSendSteps({ i18n: en, sendWithApproval: true });
 
 			expect(steps).toEqual([...expectedSendStepsWithApproval, expectedWalletConnectSendStep]);
@@ -90,7 +90,7 @@ describe('steps.constants', () => {
 	});
 
 	describe('walletConnectSignSteps', () => {
-		it('returns the correct steps with expected text and state', () => {
+		it('should return the correct steps with expected text and state', () => {
 			const steps = walletConnectSignSteps(en);
 
 			expect(steps).toEqual([
