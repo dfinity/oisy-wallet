@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
@@ -7,7 +8,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { isTokensPath, isTransactionsPath } from '$lib/utils/nav.utils';
-	import type { Snippet } from 'svelte';
 
 	let {
 		inputValue = $bindable($tokenListStore.filter),
