@@ -54,6 +54,7 @@ describe('eth-transactions-batch.services', () => {
 			const result = await generator.next();
 
 			expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockTokensNotLoaded.length);
+
 			mockTokensNotLoaded.forEach((token) => {
 				expect(loadEthereumTransactions).toHaveBeenCalledWith({
 					tokenId: token.id,
@@ -106,6 +107,7 @@ describe('eth-transactions-batch.services', () => {
 			expect(batch).toHaveBeenCalled();
 
 			const result = await generator.next();
+
 			expect(result.value).toEqual(expectedReturn);
 		});
 

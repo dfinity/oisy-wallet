@@ -33,11 +33,13 @@ describe('decodeQrCode', () => {
 
 	it('should return { result } when result is not success', () => {
 		const response = decodeQrCode({ status: 'cancelled', ...otherProps });
+
 		expect(response).toEqual({ status: 'cancelled' });
 	});
 
 	it('should return { status: "cancelled" } when code is nullish', () => {
 		const response = decodeQrCode({ status: 'success', code: undefined, ...otherProps });
+
 		expect(response).toEqual({ status: 'cancelled' });
 	});
 
@@ -45,6 +47,7 @@ describe('decodeQrCode', () => {
 		mockDecodeQrCodeUrn.mockReturnValue(undefined);
 
 		const response = decodeQrCode({ status: 'success', code: urn, ...otherProps });
+
 		expect(response).toEqual({ status: 'success', destination: urn });
 
 		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
@@ -63,6 +66,7 @@ describe('decodeQrCode', () => {
 			code: urn,
 			...otherProps
 		});
+
 		expect(response).toEqual({ status: 'token_incompatible' });
 
 		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
@@ -82,6 +86,7 @@ describe('decodeQrCode', () => {
 			code: urn,
 			...otherProps
 		});
+
 		expect(response).toEqual({
 			status: 'success',
 			destination,
