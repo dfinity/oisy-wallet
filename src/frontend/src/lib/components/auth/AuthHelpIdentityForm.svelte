@@ -54,10 +54,11 @@
 			</p>
 			<p class="mb-0">
 				<ExternalLink
-					styleClass="font-semibold flex flex-row-reverse"
+					styleClass="font-semibold"
 					ariaLabel={$i18n.auth.help.alt.identity_learn_more}
 					href={OISY_FIND_INTERNET_IDENTITY_URL}
 					testId={HELP_AUTH_LEARN_MORE_LINK}
+					iconAsLast
 				>
 					{replaceOisyPlaceholders($i18n.auth.help.text.identity_learn_more)}
 				</ExternalLink>
