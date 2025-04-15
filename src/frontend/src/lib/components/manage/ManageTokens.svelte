@@ -71,7 +71,7 @@
 			tokens: $allTokens,
 			filterZeroBalance: false,
 			filterNetwork: $selectedNetwork,
-			filterQuery: initialSearch
+			filterQuery: nonNullish(initialSearch) ? initialSearch : ''
 		})
 	);
 
