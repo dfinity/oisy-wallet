@@ -86,5 +86,9 @@
 	"VCHF": {
 		"indexCanisterId": "4cx56-naaaa-aaaai-aqkaa-cai",
 		"ledgerCanisterId": "ly36x-wiaaa-aaaai-aqj7q-cai"
+	},
+	"VEUR": {
+		"indexCanisterId": "wi24n-jqaaa-aaaan-qmr3a-cai",
+		"ledgerCanisterId": "wu6g4-6qaaa-aaaan-qmrza-cai"
 	}
 }
