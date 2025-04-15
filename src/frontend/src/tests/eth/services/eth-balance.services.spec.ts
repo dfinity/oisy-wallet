@@ -71,6 +71,7 @@ describe('eth-balance.services', () => {
 			expect(result).toEqual({ success: false });
 
 			expect(toastsError).toHaveBeenCalledTimes(mockTokens.length);
+
 			mockTokens.forEach((_, index) => {
 				expect(toastsError).toHaveBeenNthCalledWith(index + 1, {
 					msg: { text: en.init.error.eth_address_unknown }
@@ -85,6 +86,7 @@ describe('eth-balance.services', () => {
 
 			expect(infuraProviders).toHaveBeenCalledTimes(mockTokens.length);
 			expect(mockGetBalance).toHaveBeenCalledTimes(mockTokens.length);
+
 			mockTokens.forEach((token, index) => {
 				expect(infuraProviders).toHaveBeenNthCalledWith(index + 1, token.network.id);
 				expect(mockGetBalance).toHaveBeenNthCalledWith(index + 1, mockEthAddress);
@@ -129,6 +131,7 @@ describe('eth-balance.services', () => {
 			expect(result).toEqual({ success: false });
 
 			expect(toastsError).toHaveBeenCalledTimes(mockTokens.length);
+
 			mockTokens.forEach((_, index) => {
 				expect(toastsError).toHaveBeenNthCalledWith(index + 1, {
 					msg: { text: en.init.error.loading_balance },
@@ -179,6 +182,7 @@ describe('eth-balance.services', () => {
 			expect(result).toEqual({ success: false });
 
 			expect(toastsError).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
+
 			mockErc20DefaultTokens.forEach((_, index) => {
 				expect(toastsError).toHaveBeenNthCalledWith(index + 1, {
 					msg: { text: en.init.error.eth_address_unknown }
@@ -203,6 +207,7 @@ describe('eth-balance.services', () => {
 
 			expect(infuraErc20Providers).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
 			expect(mockGetBalance).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
+
 			mockErc20DefaultTokens.forEach((token, index) => {
 				expect(infuraErc20Providers).toHaveBeenNthCalledWith(index + 1, token.network.id);
 				expect(mockGetBalance).toHaveBeenNthCalledWith(index + 1, mockEthAddress);
@@ -237,6 +242,7 @@ describe('eth-balance.services', () => {
 			});
 
 			expect(get(balancesStore)?.[mockErc20DefaultTokens[0].id]).toEqual(null);
+
 			mockErc20DefaultTokens.slice(1).forEach(({ id }) => {
 				expect(get(balancesStore)?.[id]).toEqual({ certified: false, data: mockBalance });
 			});
@@ -250,6 +256,7 @@ describe('eth-balance.services', () => {
 			expect(result).toEqual({ success: false });
 
 			expect(toastsError).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
+
 			mockErc20DefaultTokens.forEach((_, index) => {
 				expect(toastsError).toHaveBeenNthCalledWith(index + 1, {
 					msg: {

@@ -47,23 +47,29 @@ describe('EthSendForm', () => {
 		});
 
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
+
 		expect(amount).not.toBeNull();
 
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
+
 		expect(destination).not.toBeNull();
 
 		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+
 		expect(network).not.toBeNull();
 
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
+
 		expect(maxFeeEth).not.toBeNull();
 
 		const sendInfoMessageBox: HTMLDivElement | null = container.querySelector(
 			sendInfoMessageBoxSelector
 		);
+
 		expect(sendInfoMessageBox).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
+
 		expect(toolbar).not.toBeNull();
 	});
 
@@ -74,23 +80,29 @@ describe('EthSendForm', () => {
 		});
 
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
+
 		expect(amount).not.toBeNull();
 
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
+
 		expect(destination).toBeNull();
 
 		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+
 		expect(network).not.toBeNull();
 
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
+
 		expect(maxFeeEth).not.toBeNull();
 
 		const sendInfoMessageBox: HTMLDivElement | null = container.querySelector(
 			sendInfoMessageBoxSelector
 		);
+
 		expect(sendInfoMessageBox).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
+
 		expect(toolbar).not.toBeNull();
 	});
 });
