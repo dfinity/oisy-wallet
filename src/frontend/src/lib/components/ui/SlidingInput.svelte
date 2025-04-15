@@ -8,6 +8,7 @@
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 
 	let {
 		inputValue = $bindable(''),
@@ -79,7 +80,7 @@
 		</div>
 	{/if}
 
-	{#if overflowableContent}
+	{#if nonNullish(overflowableContent)}
 		<div class="flex pr-12">
 			{@render overflowableContent()}
 		</div>
@@ -90,9 +91,9 @@
 				in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
 				out:fade
 				class="input-field condensed absolute right-0 -mt-[11px] mr-px flex overflow-hidden"
-				class:w-full={overflowableContent}
-				class:md:w-[250px]={overflowableContent}
-				class:w-[250px]={!overflowableContent}
+				class:w-full={nonNullish(overflowableContent)}
+				class:md:w-[250px]={nonNullish(overflowableContent)}
+				class:w-[250px]={isNullish(overflowableContent)}
 			>
 				<InputTextWithAction
 					bind:inputElement
@@ -128,7 +129,7 @@
 			testId={`${testIdPrefix}-open-btn`}
 		>
 			<span slot="icon">
-				{#if icon}
+				{#if nonNullish(icon)}
 					{@render icon()}
 				{/if}
 			</span>
@@ -137,7 +138,7 @@
 </div>
 
 <style lang="scss">
-	.input-field.condensed input {
-		padding-block: var(--padding-1_5x) !important;
-	}
+  .input-field.condensed input {
+    padding-block: var(--padding-1_5x) !important;
+  }
 </style>
