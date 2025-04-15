@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 
 	const load = async () => {
 		await Promise.allSettled([
