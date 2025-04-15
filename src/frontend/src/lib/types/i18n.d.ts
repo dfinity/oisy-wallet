@@ -49,6 +49,7 @@ interface I18nNavigation {
 		confirm_navigate: string;
 		vip_qr_code: string;
 		refer_a_friend: string;
+		address_book: string;
 	};
 	alt: {
 		tokens: string;
@@ -64,6 +65,7 @@ interface I18nNavigation {
 		open_twitter: string;
 		vip_qr_code: string;
 		refer_a_friend: string;
+		address_book: string;
 	};
 	short: { documentation: string };
 }
@@ -890,7 +892,7 @@ interface I18nReferral {
 }
 
 interface I18nAddress_book {
-	text: { empty_title: string; empty_text: string; add_new_contact: string };
+	text: { title: string; empty_title: string; empty_text: string; add_new_contact: string };
 }
 
 interface I18nSigner {
