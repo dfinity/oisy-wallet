@@ -13,20 +13,24 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import { isDesktop } from '$lib/utils/device.utils';
 
-	export let networkSelectorViewOnly = false;
-	export let loading: boolean;
+	let {
+		networkSelectorViewOnly = false,
+		loading,
+		toolbar
+	}: { networkSelectorViewOnly: boolean; loading: boolean; toolbar: Snippet } = $props();
 
 	const dispatch = createEventDispatcher();
 
 	const { filteredTokens, filterNetwork, filterQuery, setFilterQuery } =
 		getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
-	let filter = $filterQuery ?? '';
+	let filter = $state($filterQuery ?? '');
 
-	$: filter, setFilterQuery(filter);
+	$effect(() => {
+		setFilterQuery(filter);
+	});
 
-	let noTokensMatch = false;
-	$: noTokensMatch = $filteredTokens.length === 0;
+	let noTokensMatch = $derived($filteredTokens.length === 0);
 </script>
 
 <div class="flex items-end justify-between">
@@ -76,5 +80,5 @@
 </div>
 
 <ButtonGroup>
-	<slot name="toolbar" />
+	{@render toolbar()}
 </ButtonGroup>
