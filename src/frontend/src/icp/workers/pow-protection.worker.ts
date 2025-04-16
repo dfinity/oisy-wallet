@@ -4,8 +4,8 @@ import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-messag
 const scheduler = new PowProtectionScheduler();
 
 export const onPowProtectionMessage = async ({
-																							 data: dataMsg
-																						 }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
+	data: dataMsg
+}: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
