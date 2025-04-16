@@ -12,11 +12,13 @@ describe('network.schema', () => {
 	describe('NetworkIdSchema', () => {
 		it('should validate with a symbol as NetworkId', () => {
 			const networkId = Symbol('NetworkId');
+
 			expect(NetworkIdSchema.parse(networkId)).toEqual(networkId);
 		});
 
 		it('should fail validation with a string instead of a symbol', () => {
 			const invalidNetworkId = 'NetworkId';
+
 			expect(() => NetworkIdSchema.parse(invalidNetworkId)).toThrow();
 		});
 	});
@@ -24,16 +26,19 @@ describe('network.schema', () => {
 	describe('NetworkEnvironmentSchema', () => {
 		it('should validate "mainnet" as a supported network environment', () => {
 			const validEnv = 'mainnet';
+
 			expect(NetworkEnvironmentSchema.parse(validEnv)).toEqual(validEnv);
 		});
 
 		it('should validate "testnet" as a supported network environment', () => {
 			const validEnv = 'testnet';
+
 			expect(NetworkEnvironmentSchema.parse(validEnv)).toEqual(validEnv);
 		});
 
 		it('should fail validation with an unsupported network environment', () => {
 			const invalidEnv = 'unsupported-env';
+
 			expect(() => NetworkEnvironmentSchema.parse(invalidEnv)).toThrow();
 		});
 	});
@@ -41,11 +46,13 @@ describe('network.schema', () => {
 	describe('NetworkBuySchema', () => {
 		it('should validate with an optional onramperId', () => {
 			const validBuy = { onramperId: 'icp' };
+
 			expect(NetworkBuySchema.parse(validBuy)).toEqual(validBuy);
 		});
 
 		it('should validate with an empty object (onramperId optional)', () => {
 			const validBuy = {};
+
 			expect(NetworkBuySchema.parse(validBuy)).toEqual(validBuy);
 		});
 
@@ -62,6 +69,7 @@ describe('network.schema', () => {
 			const validMetadata = {
 				explorerUrl: 'https://example.com/explorer'
 			};
+
 			expect(NetworkAppMetadataSchema.parse(validMetadata)).toEqual(validMetadata);
 		});
 
@@ -69,11 +77,13 @@ describe('network.schema', () => {
 			const invalidMetadata = {
 				explorerUrl: 'invalid-url'
 			};
+
 			expect(() => NetworkAppMetadataSchema.parse(invalidMetadata)).toThrow();
 		});
 
 		it('should fail validation with missing explorer URL', () => {
 			const invalidMetadata = {};
+
 			expect(() => NetworkAppMetadataSchema.parse(invalidMetadata)).toThrow();
 		});
 	});
@@ -104,16 +114,19 @@ describe('network.schema', () => {
 
 		it('should fail validation when id is missing', () => {
 			const { id: _, ...invalidNetwork } = validNetwork;
+
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
 
 		it('should fail validation when env is missing', () => {
 			const { env: _, ...invalidNetwork } = validNetwork;
+
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
 
 		it('should fail validation when name is missing', () => {
 			const { name: _, ...invalidNetwork } = validNetwork;
+
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
 
@@ -122,6 +135,7 @@ describe('network.schema', () => {
 				...validNetwork,
 				iconLight: 'https://example.com/invalid-icon.png'
 			};
+
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
 
@@ -130,6 +144,7 @@ describe('network.schema', () => {
 				...validNetwork,
 				iconLight: 'https://example.com/invalid-icon-bw.png'
 			};
+
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
 	});

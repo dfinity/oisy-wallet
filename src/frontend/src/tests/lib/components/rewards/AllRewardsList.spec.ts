@@ -17,14 +17,17 @@ describe('AllRewardsList', () => {
 		const activeCampaignContainer: HTMLDivElement | null = container.querySelector(
 			activeCampaignContainerSelector
 		);
+
 		expect(activeCampaignContainer).toBeInTheDocument();
 
 		const upcomingCampaignContainer: HTMLDivElement | null = container.querySelector(
 			upcomingCampaignContainerSelector
 		);
+
 		expect(upcomingCampaignContainer).toBeInTheDocument();
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 	});
 });

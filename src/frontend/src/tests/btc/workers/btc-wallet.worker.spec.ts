@@ -181,6 +181,7 @@ describe('btc-wallet.worker', () => {
 
 				it('should stop the scheduler', () => {
 					scheduler.stop();
+
 					expect(scheduler['timer']['timer']).toBeUndefined();
 				});
 
