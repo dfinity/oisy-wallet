@@ -1,6 +1,4 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
-import { SEPOLIA_EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
-import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import eurc from '$eth/assets/eurc.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
@@ -11,6 +9,12 @@ export const EURC_DECIMALS = 6;
 export const EURC_SYMBOL = 'EURC';
 
 export const EURC_TOKEN_ID: TokenId = parseTokenId(EURC_SYMBOL);
+
+export const EURC_TOKEN_GROUP = {
+	icon: eurc,
+	name: 'EURC',
+	symbol: EURC_SYMBOL
+};
 
 export const EURC_TOKEN: RequiredErc20Token = {
 	id: EURC_TOKEN_ID,
@@ -30,6 +34,12 @@ export const EURC_TOKEN: RequiredErc20Token = {
 export const SEPOLIA_EURC_SYMBOL = 'SepoliaEURC';
 
 export const SEPOLIA_EURC_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_EURC_SYMBOL);
+
+export const SEPOLIA_EURC_TOKEN_GROUP = {
+	icon: eurc,
+	name: 'EURC',
+	symbol: EURC_SYMBOL
+};
 
 export const SEPOLIA_EURC_TOKEN: RequiredErc20Token = {
 	id: SEPOLIA_EURC_TOKEN_ID,

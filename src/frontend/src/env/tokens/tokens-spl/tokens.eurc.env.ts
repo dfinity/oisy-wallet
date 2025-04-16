@@ -1,5 +1,4 @@
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
-import { EURC_DEVNET_TOKEN_GROUP, EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import { EURC_TOKEN as ETH_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import eurc from '$eth/assets/eurc.svg';
 import type { TokenId } from '$lib/types/token';
@@ -12,6 +11,12 @@ export const EURC_DECIMALS = 6;
 export const EURC_SYMBOL = 'EURC';
 
 export const EURC_TOKEN_ID: TokenId = parseTokenId(EURC_SYMBOL);
+
+export const EURC_TOKEN_GROUP = {
+	icon: eurc,
+	name: 'Euro Coin',
+	symbol: EURC_SYMBOL
+};
 
 export const EURC_TOKEN: RequiredSplToken = {
 	id: EURC_TOKEN_ID,
@@ -32,6 +37,12 @@ export const DEVNET_EURC_SYMBOL = 'DevnetEURC';
 
 export const DEVNET_EURC_TOKEN_ID: TokenId = parseTokenId(DEVNET_EURC_SYMBOL);
 
+export const DEVNET_EURC_TOKEN_GROUP = {
+	icon: eurc,
+	name: 'EURC (Devnet)',
+	symbol: DEVNET_EURC_SYMBOL
+};
+
 export const DEVNET_EURC_TOKEN: RequiredSplToken = {
 	id: DEVNET_EURC_TOKEN_ID,
 	network: SOLANA_DEVNET_NETWORK,
@@ -43,5 +54,5 @@ export const DEVNET_EURC_TOKEN: RequiredSplToken = {
 	icon: eurc,
 	address: 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr',
 	owner: TOKEN_PROGRAM_ADDRESS,
-	groupData: EURC_DEVNET_TOKEN_GROUP
+	groupData: DEVNET_EURC_TOKEN_GROUP
 };

@@ -1,5 +1,4 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { XAUT_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
 import xaut from '$eth/assets/xaut.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
@@ -10,6 +9,12 @@ export const XAUT_DECIMALS = 6;
 export const XAUT_SYMBOL = 'XAUt';
 
 export const XAUT_TOKEN_ID: TokenId = parseTokenId(XAUT_SYMBOL);
+
+export const XAUT_TOKEN_GROUP = {
+	icon: xaut,
+	name: 'Tether Gold',
+	symbol: XAUT_SYMBOL
+};
 
 export const XAUT_TOKEN: RequiredErc20Token = {
 	id: XAUT_TOKEN_ID,

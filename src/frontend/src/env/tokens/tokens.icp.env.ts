@@ -4,7 +4,6 @@ import {
 	ICP_LEDGER_CANISTER_ID,
 	ICP_NETWORK
 } from '$env/networks/networks.icp.env';
-import { ICP_TOKEN_GROUP } from '$env/tokens/groups/groups.icp.env';
 import icpLight from '$icp/assets/icp_light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic-token';
@@ -17,6 +16,12 @@ import { parseTokenId } from '$lib/validation/token.validation';
 export const ICP_SYMBOL = 'ICP';
 
 export const ICP_TOKEN_ID: TokenId = parseTokenId(ICP_SYMBOL);
+
+export const ICP_TOKEN_GROUP = {
+	icon: icpLight,
+	name: 'Internet Computer',
+	symbol: ICP_SYMBOL
+};
 
 export const ICP_TOKEN: RequiredToken<IcToken> = {
 	id: ICP_TOKEN_ID,

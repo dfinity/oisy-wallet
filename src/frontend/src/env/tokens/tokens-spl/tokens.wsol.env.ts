@@ -1,5 +1,4 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
-import { WSOL_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import wsol from '$sol/assets/wsol.svg';
@@ -11,6 +10,12 @@ export const WSOL_DECIMALS = 9;
 export const WSOL_SYMBOL = 'WSOL';
 
 export const WSOL_TOKEN_ID: TokenId = parseTokenId(WSOL_SYMBOL);
+
+export const WSOL_TOKEN_GROUP = {
+	icon: wsol,
+	name: 'Wrapped SOL',
+	symbol: WSOL_SYMBOL
+};
 
 export const WSOL_TOKEN: RequiredSplToken = {
 	id: WSOL_TOKEN_ID,

@@ -1,5 +1,4 @@
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
-import { USDC_DEVNET_TOKEN_GROUP, USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import { USDC_TOKEN as ETH_USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { TokenId } from '$lib/types/token';
@@ -12,6 +11,12 @@ export const USDC_DECIMALS = 6;
 export const USDC_SYMBOL = 'USDC';
 
 export const USDC_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
+
+export const USDC_TOKEN_GROUP = {
+	icon: usdc,
+	name: 'USD Coin',
+	symbol: USDC_SYMBOL
+};
 
 export const USDC_TOKEN: RequiredSplToken = {
 	id: USDC_TOKEN_ID,
@@ -35,6 +40,12 @@ export const DEVNET_USDC_SYMBOL = 'DevnetUSDC';
 
 export const DEVNET_USDC_TOKEN_ID: TokenId = parseTokenId(DEVNET_USDC_SYMBOL);
 
+export const DEVNET_USDC_TOKEN_GROUP = {
+	icon: usdc,
+	name: 'USDC (Devnet)',
+	symbol: DEVNET_USDC_SYMBOL
+};
+
 export const DEVNET_USDC_TOKEN: RequiredSplToken = {
 	id: DEVNET_USDC_TOKEN_ID,
 	network: SOLANA_DEVNET_NETWORK,
@@ -46,5 +57,5 @@ export const DEVNET_USDC_TOKEN: RequiredSplToken = {
 	icon: usdc,
 	address: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
 	owner: TOKEN_PROGRAM_ADDRESS,
-	groupData: USDC_DEVNET_TOKEN_GROUP
+	groupData: DEVNET_USDC_TOKEN_GROUP
 };

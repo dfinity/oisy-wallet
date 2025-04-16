@@ -1,5 +1,4 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
-import { BONK_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import bonk from '$sol/assets/bonk.svg';
@@ -11,6 +10,12 @@ export const BONK_DECIMALS = 5;
 export const BONK_SYMBOL = 'BONK';
 
 export const BONK_TOKEN_ID: TokenId = parseTokenId(BONK_SYMBOL);
+
+export const BONK_TOKEN_GROUP = {
+	icon: bonk,
+	name: 'Bonk',
+	symbol: BONK_SYMBOL
+};
 
 export const BONK_TOKEN: RequiredSplToken = {
 	id: BONK_TOKEN_ID,

@@ -3,7 +3,6 @@ import {
 	ETHEREUM_NETWORK,
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
-import { ETHEREUM_TOKEN_GROUP, SEPOLIA_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import eth from '$icp-eth/assets/eth.svg';
 import type { RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -13,6 +12,12 @@ export const ETHEREUM_DEFAULT_DECIMALS = 18;
 export const ETHEREUM_SYMBOL = 'ETH';
 
 export const ETHEREUM_TOKEN_ID: TokenId = parseTokenId(ETHEREUM_SYMBOL);
+
+export const ETHEREUM_TOKEN_GROUP = {
+	icon: eth,
+	name: 'Ethereum',
+	symbol: ETHEREUM_SYMBOL
+};
 
 export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 	id: ETHEREUM_TOKEN_ID,
@@ -33,6 +38,12 @@ export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 export const SEPOLIA_SYMBOL = 'SepoliaETH';
 
 export const SEPOLIA_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_SYMBOL);
+
+export const SEPOLIA_TOKEN_GROUP = {
+	icon: eth,
+	name: 'SepoliaETH',
+	symbol: SEPOLIA_SYMBOL
+};
 
 export const SEPOLIA_TOKEN: RequiredTokenWithLinkedData = {
 	id: SEPOLIA_TOKEN_ID,

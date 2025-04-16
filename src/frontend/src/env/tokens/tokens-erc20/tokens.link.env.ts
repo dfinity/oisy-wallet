@@ -1,5 +1,4 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
-import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import link from '$icp-eth/assets/link.svg';
 import type { TokenId } from '$lib/types/token';
@@ -10,6 +9,12 @@ export const LINK_DECIMALS = 18;
 export const LINK_SYMBOL = 'LINK';
 
 export const LINK_TOKEN_ID: TokenId = parseTokenId(LINK_SYMBOL);
+
+export const LINK_TOKEN_GROUP = {
+	icon: link,
+	name: 'ChainLink Token',
+	symbol: LINK_SYMBOL
+};
 
 export const LINK_TOKEN: RequiredErc20Token = {
 	id: LINK_TOKEN_ID,

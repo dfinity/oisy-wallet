@@ -1,5 +1,4 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
-import { RAY_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import ray from '$sol/assets/ray.svg';
@@ -11,6 +10,12 @@ export const RAY_DECIMALS = 6;
 export const RAY_SYMBOL = 'RAY';
 
 export const RAY_TOKEN_ID: TokenId = parseTokenId(RAY_SYMBOL);
+
+export const RAY_TOKEN_GROUP = {
+	icon: ray,
+	name: 'Raydium',
+	symbol: RAY_SYMBOL
+};
 
 export const RAY_TOKEN: RequiredSplToken = {
 	id: RAY_TOKEN_ID,
