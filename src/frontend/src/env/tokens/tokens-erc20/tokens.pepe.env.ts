@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import pepe from '$icp-eth/assets/pepe.svg';
 import type { TokenId } from '$lib/types/token';
@@ -25,11 +26,7 @@ export const PEPE_TOKEN: RequiredErc20Token = {
 	buy: {
 		onramperId: 'pepe_ethereum'
 	},
-	groupData: {
-		icon: pepe,
-		name: 'Pepe',
-		symbol: PEPE_SYMBOL
-	}
+	groupData: PEPE_TOKEN_GROUP
 };
 
 export const SEPOLIA_PEPE_SYMBOL = 'SepoliaPEPE';
@@ -48,9 +45,5 @@ export const SEPOLIA_PEPE_TOKEN: RequiredErc20Token = {
 	address: '0x560eF9F39E4B08f9693987cad307f6FBfd97B2F6',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckSepoliaPEPE',
-	groupData: {
-		icon: pepe,
-		name: 'Pepe',
-		symbol: PEPE_SYMBOL
-	}
+	groupData: PEPE_TOKEN_GROUP
 };

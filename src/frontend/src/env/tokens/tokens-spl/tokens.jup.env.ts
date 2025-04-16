@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { JUP_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import jup from '$sol/assets/jup.svg';
@@ -22,9 +23,5 @@ export const JUP_TOKEN: RequiredSplToken = {
 	icon: jup,
 	address: 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN',
 	owner: TOKEN_PROGRAM_ADDRESS,
-	groupData: {
-		icon: jup,
-		name: 'Jupiter',
-		symbol: JUP_SYMBOL
-	}
+	groupData: JUP_TOKEN_GROUP
 };

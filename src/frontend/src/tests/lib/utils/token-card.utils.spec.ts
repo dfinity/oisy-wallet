@@ -1,4 +1,5 @@
 import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { SEPOLIA_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { CardData } from '$lib/types/token-card';
@@ -28,11 +29,7 @@ describe('mapHeaderData', () => {
 			balance: bn1Bi,
 			usdBalance: 300,
 			tokenCount: 2,
-			groupData: {
-				icon: SEPOLIA_TOKEN.icon,
-				name: SEPOLIA_TOKEN.name,
-				symbol: SEPOLIA_TOKEN.symbol
-			}
+			groupData: SEPOLIA_TOKEN_GROUP
 		};
 
 		expect(mapHeaderData(tokenGroup)).toEqual(expected);
@@ -50,11 +47,7 @@ describe('mapHeaderData', () => {
 			oisyName: { oisyName: `${SEPOLIA_TOKEN.symbol}, ${ICP_TOKEN.symbol}` },
 			oisySymbol: { oisySymbol: SEPOLIA_TOKEN.name },
 			tokenCount: 2,
-			groupData: {
-				icon: SEPOLIA_TOKEN.icon,
-				name: SEPOLIA_TOKEN.name,
-				symbol: SEPOLIA_TOKEN.symbol
-			}
+			groupData: SEPOLIA_TOKEN_GROUP
 		};
 
 		expect(mapHeaderData(rest)).toEqual(expected);

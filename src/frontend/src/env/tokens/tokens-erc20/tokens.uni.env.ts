@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { UNI_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import uni from '$icp-eth/assets/uni.svg';
 import type { TokenId } from '$lib/types/token';
@@ -22,9 +23,5 @@ export const UNI_TOKEN: RequiredErc20Token = {
 	address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckUNI',
-	groupData: {
-		icon: uni,
-		name: 'Uniswap',
-		symbol: UNI_SYMBOL
-	}
+	groupData: UNI_TOKEN_GROUP
 };

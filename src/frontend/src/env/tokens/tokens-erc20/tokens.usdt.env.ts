@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import usdt from '$eth/assets/usdt.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
@@ -25,9 +26,5 @@ export const USDT_TOKEN: RequiredErc20Token = {
 	buy: {
 		onramperId: 'usdt_ethereum'
 	},
-	groupData: {
-		icon: usdt,
-		name: 'Tether USD',
-		symbol: USDT_SYMBOL
-	}
+	groupData: USDT_TOKEN_GROUP
 };

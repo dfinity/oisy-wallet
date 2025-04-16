@@ -1,4 +1,6 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { SEPOLIA_EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
+import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import eurc from '$eth/assets/eurc.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
@@ -22,11 +24,7 @@ export const EURC_TOKEN: RequiredErc20Token = {
 	address: '0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckEURC',
-	groupData: {
-		icon: eurc,
-		name: 'Euro Coin',
-		symbol: EURC_SYMBOL
-	}
+	groupData: EURC_TOKEN_GROUP
 };
 
 export const SEPOLIA_EURC_SYMBOL = 'SepoliaEURC';
@@ -45,9 +43,5 @@ export const SEPOLIA_EURC_TOKEN: RequiredErc20Token = {
 	address: '0x08210F9170F89Ab7658F0B5E3fF39b0E03C594D4',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckSepoliaEURC',
-	groupData: {
-		icon: eurc,
-		name: 'EURC',
-		symbol: EURC_SYMBOL
-	}
+	groupData: SEPOLIA_EURC_TOKEN_GROUP
 };

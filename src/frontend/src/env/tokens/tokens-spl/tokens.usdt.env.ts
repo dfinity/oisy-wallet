@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import { USDT_TOKEN as ETH_USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import usdt from '$eth/assets/usdt.svg';
 import type { TokenId } from '$lib/types/token';
@@ -27,9 +28,5 @@ export const USDT_TOKEN: RequiredSplToken = {
 	buy: {
 		onramperId: 'usdt_solana'
 	},
-	groupData: {
-		icon: usdt,
-		name: 'Tether USD',
-		symbol: USDT_SYMBOL
-	}
+	groupData: USDT_TOKEN_GROUP
 };

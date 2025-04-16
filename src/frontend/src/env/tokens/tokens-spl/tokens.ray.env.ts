@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { RAY_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import ray from '$sol/assets/ray.svg';
@@ -25,9 +26,5 @@ export const RAY_TOKEN: RequiredSplToken = {
 	buy: {
 		onramperId: 'ray_solana'
 	},
-	groupData: {
-		icon: ray,
-		name: 'Raydium',
-		symbol: RAY_SYMBOL
-	}
+	groupData: RAY_TOKEN_GROUP
 };
