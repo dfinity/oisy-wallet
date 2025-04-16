@@ -25,6 +25,7 @@ where
 {
 }
 
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum TokenAccountId {
     Icrcv2(Icrcv2AccountId),
     Sol(SolPrincipal),
