@@ -9,7 +9,6 @@ export async function sha256(input: string): Promise<ArrayBuffer> {
 	return await crypto.subtle.digest('SHA-256', textEncoder.encode(input));
 }
 
-
 /**
  * Combines the hashing and hex conversion of a string into a single function.
  */
