@@ -5,14 +5,14 @@
 	import HiddenTransactionsModal from '$lib/components/transactions/HiddenTransactionsModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
-	import { modalHiddenTransactions } from '$lib/derived/modal.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		TRANSACTION_MENU,
 		TRANSACTION_MENU_HIDDEN_TRANSACTIONS,
 		TRANSACTION_MENU_POPOVER
-	} from "$lib/constants/test-ids.constants";
+	} from '$lib/constants/test-ids.constants';
+	import { modalHiddenTransactions } from '$lib/derived/modal.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -33,7 +33,14 @@
 	<IconKebabMenu size="32" slot="icon" />
 </ButtonIcon>
 
-<Popover invisibleBackdrop bind:visible direction="rtl" on:click={hidePopover} anchor={button} testId={TRANSACTION_MENU_POPOVER}>
+<Popover
+	invisibleBackdrop
+	bind:visible
+	direction="rtl"
+	on:click={hidePopover}
+	anchor={button}
+	testId={TRANSACTION_MENU_POPOVER}
+>
 	<ButtonMenu
 		on:click={modalStore.openHiddenTransactions}
 		ariaLabel={$i18n.transactions.alt.show_hidden_transactions_menu_item}
