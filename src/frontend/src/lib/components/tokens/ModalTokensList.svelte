@@ -10,8 +10,8 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
-	import { isDesktop } from '$lib/utils/device.utils';
 	import type { Token } from '$lib/types/token';
+	import { isDesktop } from '$lib/utils/device.utils';
 
 	let {
 		networkSelectorViewOnly = false,
