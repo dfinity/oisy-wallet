@@ -3,11 +3,11 @@
 	import { createEventDispatcher } from 'svelte';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
+	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import type { Token } from '$lib/types/token';
-	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
 
 	const dispatch = createEventDispatcher();
 
