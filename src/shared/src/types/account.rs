@@ -16,11 +16,20 @@ use crate::types::network::marker_trait::{
     InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet, SolanaTestnet,
 };
 
+pub mod conversion;
+
 /// A marker trait, used to indicate that a type is an account identifier for a given network.
 pub trait AccountId<T>
 where
     T: Network,
 {
+}
+
+pub enum TokenAccountId {
+    Icrcv2(Icrcv2AccountId),
+    Sol(SolPrincipal),
+    Btc(BtcAddress),
+    Eth(EthAddress),
 }
 
 /// An account identifier for Internet Computer tokens.
