@@ -23,6 +23,8 @@ import {
 } from '$lib/utils/network.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import {usdValue} from "$lib/utils/exchange.utils";
+import type {ExchangesData} from "$lib/types/exchange";
 
 /**
  * Maps the transactions stores to a unified list of transactions with their respective token and components.
@@ -143,6 +145,53 @@ export const mapAllTransactionsUi = ({
 
 		return acc;
 	}, []);
+};
+
+export const filterReceivedMicroTransactions = ({
+													transactions,
+													exchanges
+												}: {
+	transactions: AllTransactionUiWithCmp[];
+	exchanges: ExchangesData;
+}): AllTransactionUiWithCmp[] =>
+	transactions.filter((transactionUI) => {
+		const { transaction } = transactionUI;
+		return !(transaction.type === 'receive' && isMicroTransaction({ transactionUI, exchanges }));
+	});
+
+export const getReceivedMicroTransactions = ({
+												 transactions,
+												 exchanges
+											 }: {
+	transactions: AllTransactionUiWithCmp[];
+	exchanges: ExchangesData;
+}): AllTransactionUiWithCmp[] =>
+	transactions.filter((transactionUI) => {
+		const { transaction } = transactionUI;
+		return transaction.type === 'receive' && isMicroTransaction({ transactionUI, exchanges });
+	});
+
+const isMicroTransaction = ({
+								transactionUI,
+								exchanges
+							}: {
+	transactionUI: AllTransactionUiWithCmp;
+	exchanges: ExchangesData;
+}) => {
+	const { token, transaction } = transactionUI;
+	if (nonNullish(transaction.value)) {
+		const exchangeRate = exchanges?.[token.id]?.usd;
+		if (nonNullish(exchangeRate)) {
+			const usdAmount = usdValue({
+				decimals: token.decimals,
+				balance: transaction.value,
+				exchangeRate
+			});
+			return usdAmount < MICRO_TRANSACTION_USD_THRESHOLD;
+		}
+	}
+
+	return false;
 };
 
 export const sortTransactions = ({
