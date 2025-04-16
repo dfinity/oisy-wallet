@@ -73,8 +73,8 @@ impl Network for BitcoinNetworkId {}
 pub enum EthereumNetworkId {
     #[default]
     Mainnet = 1,
-    BaseMainnet = 8453,
-    BaseSepolia = 84532,
+    BaseMainnet = 8_453,
+    BaseSepolia = 84_532,
     BNBSmartChainMainnet = 56,
     BNBSmartChainTestnet = 97,
     Sepolia = 11_155_111,
