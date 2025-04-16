@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { hashToHex } from '$lib/utils/crypto.utils';
 
 describe('crypto.utils', () => {
-
 	describe('hashToHex', () => {
 		it('should hash a string and return its hex representation', async () => {
 			const input = 'hash-to-hex-test';
