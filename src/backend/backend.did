@@ -267,15 +267,19 @@ type MigrationReport = record { to : principal; progress : MigrationProgress };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
 type NetworkSettingsFor = variant {
   InternetComputer;
+  BaseSepolia;
   SolanaTestnet;
   BitcoinRegtest;
   SolanaDevnet;
   EthereumSepolia;
   BitcoinTestnet;
+  BaseMainnet;
+  BscMainnet;
   SolanaLocal;
   EthereumMainnet;
   SolanaMainnet;
   BitcoinMainnet;
+  BscTestnet;
 };
 type NetworksSettings = record {
   networks : vec record { NetworkSettingsFor; NetworkSettings };

@@ -25,6 +25,10 @@ pub enum NetworkSettingsFor {
     SolanaTestnet,
     SolanaDevnet,
     SolanaLocal,
+    BaseMainnet,
+    BaseSepolia,
+    BscMainnet,
+    BscTestnet,
 }
 
 pub type NetworkSettingsMap = BTreeMap<NetworkSettingsFor, NetworkSettings>;
