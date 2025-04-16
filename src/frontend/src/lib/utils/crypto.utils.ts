@@ -2,7 +2,6 @@ import { uint8ArrayToHexString } from '@dfinity/utils';
 
 const textEncoder = new TextEncoder();
 
-
 /**
  * Hashes the given input string using the SHA-256 algorithm.
  * @param {string} input - The input string to be hashed.
