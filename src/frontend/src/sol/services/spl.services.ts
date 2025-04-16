@@ -2,7 +2,6 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { queryAndUpdate } from '$lib/actors/query.ic';
 import { listCustomTokens } from '$lib/api/backend.api';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -20,7 +19,13 @@ import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	fromNullable,
+	isNullish,
+	nonNullish,
+	queryAndUpdate
+} from '@dfinity/utils';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 
@@ -49,7 +54,7 @@ export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Pr
 	queryAndUpdate<SplCustomToken[]>({
 		request: () => loadCustomTokensWithMetadata({ identity }),
 		onLoad: loadCustomTokenData,
-		onCertifiedError: ({ error: err }) => {
+		onUpdateError: ({ error: err }) => {
 			splCustomTokensStore.resetAll();
 
 			toastsError({

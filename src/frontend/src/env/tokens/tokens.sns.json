@@ -128,7 +128,7 @@
 			"name": "Seers",
 			"symbol": "SEER",
 			"fee": {
-				"__bigint__": "100000"
+				"__bigint__": "100000000"
 			},
 			"alternativeName": "Seers",
 			"url": "https://seers.app"
@@ -350,13 +350,13 @@
 		"indexCanisterId": "ldv2p-dqaaa-aaaaq-aadga-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "ICPCC DAO LLC",
-			"symbol": "CONF",
+			"name": "SWAMPDAO",
+			"symbol": "SWAMP",
 			"fee": {
 				"__bigint__": "10000"
 			},
-			"alternativeName": "ICPCC DAO LLC",
-			"url": "https://osjzm-oaaaa-aaaal-ajcoq-cai.icp0.io/"
+			"alternativeName": "Swampies",
+			"url": "https://dragginz.io"
 		}
 	},
 	{
