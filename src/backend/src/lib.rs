@@ -648,6 +648,23 @@ pub fn create_user_profile() -> UserProfile {
         let mut user_profile_model =
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
         let stored_user = create_profile(stored_principal, &mut user_profile_model);
+
+        // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
+        // Spawn the async task for allow_signing after returning UserProfile synchronously
+        ic_cdk::spawn(async move {
+            // Upon initial user login, we have to that ensure allow_signing is called to handle
+            // cases where users lack the cycles required for signer operations. To
+            // guarantee correct functionality, create_user_profile(..) must be invoked
+            // before any signer-related calls (e.g., get_eth_address). Spawn the async
+            // task separately after returning UserProfile synchronously
+            if let Err(e) = signer::allow_signing(None).await {
+                ic_cdk::println!(
+                    "Error enabling signing for user {}: {:?}",
+                    stored_principal.0,
+                    e
+                );
+            }
+        });
         UserProfile::from(&stored_user)
     })
 }
@@ -731,7 +748,7 @@ pub async fn allow_signing(
 
     // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED is
     // disabled
-    if request.is_none() && !POW_ENABLED {
+    if !POW_ENABLED {
         // Passing None to apply the old cycle calculation logic
         signer::allow_signing(None).await?;
         // Returning a placeholder response that can be ignored by the frontend.
