@@ -27,6 +27,7 @@ interface I18nCore {
 		not_available: string;
 		new: string;
 		edit: string;
+		no_results: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };

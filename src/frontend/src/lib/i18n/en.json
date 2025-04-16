@@ -23,7 +23,8 @@
 			"clear_filter": "Clear filter",
 			"not_available": "n/a",
 			"new": "New",
-			"edit": "Edit"
+			"edit": "Edit",
+			"no_results": "No results"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
