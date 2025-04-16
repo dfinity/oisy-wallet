@@ -130,11 +130,13 @@ describe('nav.utils', () => {
 		it('should call history.back when pop is true', async () => {
 			const historyBackMock = vi.spyOn(history, 'back');
 			await back({ pop: true });
+
 			expect(historyBackMock).toHaveBeenCalled();
 		});
 
 		it('should navigate to "/" when pop is false', async () => {
 			await back({ pop: false });
+
 			expect(mockGoTo).toHaveBeenCalledWith('/');
 		});
 	});
@@ -142,6 +144,7 @@ describe('nav.utils', () => {
 	describe('gotoReplaceRoot', () => {
 		it('should navigate to "/" with replaceState', async () => {
 			await gotoReplaceRoot();
+
 			expect(mockGoTo).toHaveBeenCalledWith('/', { replaceState: true });
 		});
 	});
@@ -174,6 +177,7 @@ describe('nav.utils', () => {
 					}
 				}
 			} as unknown as LoadEvent);
+
 			expect(result).toEqual({
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: null,

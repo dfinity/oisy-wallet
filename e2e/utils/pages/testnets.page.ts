@@ -50,12 +50,14 @@ export class TestnetsPage extends HomepageLoggedIn {
 	}): Promise<void> {
 		await this.activateTestnetSettings();
 		await this.toggleNetworkSelector({ networkSymbol });
+
 		await expect(
 			this.getTokenCardLocator({
 				tokenSymbol,
 				networkSymbol
 			})
 		).toBeVisible();
+
 		await this.waitForLoadState();
 
 		if (tokenSymbol !== 'BTC (Testnet)') {

@@ -33,6 +33,10 @@ export default defineConfig(
 					replacement: resolve(__dirname, 'src/frontend/src/eth')
 				},
 				{
+					find: '$evm',
+					replacement: resolve(__dirname, 'src/frontend/src/evm')
+				},
+				{
 					find: '$icp',
 					replacement: resolve(__dirname, 'src/frontend/src/icp')
 				},
@@ -79,10 +83,10 @@ export default defineConfig(
 				// TODO: increase the thresholds slowly up to an acceptable 80% at least
 				thresholds: {
 					autoUpdate: true,
-					statements: 57,
+					statements: 58,
 					branches: 82,
-					functions: 71,
-					lines: 57
+					functions: 72,
+					lines: 58
 				}
 			}
 		}
