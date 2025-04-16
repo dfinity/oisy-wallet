@@ -118,27 +118,35 @@ describe('ThemeSelector', () => {
 		const testIdLight = `${THEME_SELECTOR_CARD}-${Theme.LIGHT}`;
 
 		await fireEvent.click(getByTestId(testIdSystem));
+
 		expect(getByTestId(testIdSystem).getAttribute('aria-checked')).toBe(JSON.stringify(true));
 
 		await fireEvent.click(getByTestId(testIdDark));
+
 		expect(getByTestId(testIdDark).getAttribute('aria-checked')).toBe(JSON.stringify(true));
 
 		await fireEvent.click(getByTestId(testIdSystem));
+
 		expect(getByTestId(testIdSystem).getAttribute('aria-checked')).toBe(JSON.stringify(true));
 
 		await fireEvent.click(getByTestId(testIdLight));
+
 		expect(getByTestId(testIdLight).getAttribute('aria-checked')).toBe(JSON.stringify(true));
 
 		await fireEvent.click(getByTestId(testIdSystem));
+
 		expect(getByTestId(testIdSystem).getAttribute('aria-checked')).toBe(JSON.stringify(true));
 
 		await fireEvent.click(getByTestId(testIdDark));
+
 		expect(getByTestId(testIdDark).getAttribute('aria-checked')).toBe(JSON.stringify(true));
 
 		await fireEvent.click(getByTestId(testIdLight));
+
 		expect(getByTestId(testIdLight).getAttribute('aria-checked')).toBe(JSON.stringify(true));
 
 		await fireEvent.click(getByTestId(testIdDark));
+
 		expect(getByTestId(testIdDark).getAttribute('aria-checked')).toBe(JSON.stringify(true));
 	});
 
