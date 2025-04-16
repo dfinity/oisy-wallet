@@ -513,7 +513,14 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		});
 
 		describe('without transactions', () => {
+			const { setup, teardown, tests } = initWithoutTransactions({
+				msg: 'syncIcpWallet',
+				initScheduler: initIcpWalletScheduler
+			});
+
 			beforeEach(() => {
+				setup();
+
 				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
 					balance: mockBalance,
 					transactions: [],
@@ -521,10 +528,9 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				});
 			});
 
-			const { setup, teardown, tests } = initWithoutTransactions({
-				msg: 'syncIcpWallet',
-				initScheduler: initIcpWalletScheduler
-			});
+			afterEach(teardown);
+
+			tests();
 		});
 
 		describe('other scenarios', () => {
@@ -555,6 +561,12 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				initErrorMock,
 				msg: 'syncIcpWallet'
 			});
+
+			beforeEach(setup);
+
+			afterEach(teardown);
+
+			tests();
 		});
 	});
 
