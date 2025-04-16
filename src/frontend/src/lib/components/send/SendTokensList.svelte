@@ -23,5 +23,7 @@
 	on:icTokenButtonClick={onIcTokenButtonClick}
 	networkSelectorViewOnly={nonNullish($selectedNetwork)}
 >
-	<ButtonCloseModal slot="toolbar" />
+	{#snippet toolbar()}
+		<ButtonCloseModal />
+	{/snippet}
 </ModalTokensList>
