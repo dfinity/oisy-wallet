@@ -10,6 +10,7 @@ import { SolanaNetworks } from '$sol/types/network';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
+import type { TestUtil } from '$tests/types/utils';
 import { jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/kit';
 import { type MockInstance } from 'vitest';
@@ -103,162 +104,166 @@ describe('sol-wallet.scheduler', () => {
 		startData = undefined
 	}: {
 		startData?: PostMessageDataRequestSol | undefined;
-	}) => {
+	}): TestUtil => {
 		const scheduler: SolWalletScheduler = new SolWalletScheduler();
 
 		const isSpl = nonNullish(startData?.tokenAddress) && nonNullish(startData?.tokenOwnerAddress);
 
-		beforeEach(() => {
-			spyLoadBalance = isSpl ? spyLoadSplBalance : spyLoadSolBalance;
-		});
+		return {
+			setup: () => {
+				spyLoadBalance = isSpl ? spyLoadSplBalance : spyLoadSolBalance;
+			},
 
-		afterEach(() => {
-			// reset internal store with balance and transactions
-			scheduler['store'] = {
-				balance: undefined,
-				transactions: {}
-			};
+			teardown: () => {
+				// reset internal store with balance and transactions
+				scheduler['store'] = {
+					balance: undefined,
+					transactions: {}
+				};
 
-			scheduler.stop();
-		});
+				scheduler.stop();
+			},
 
-		it('should trigger postMessage with correct data', async () => {
-			await scheduler.start(startData);
+			tests: () => {
+				it('should trigger postMessage with correct data', async () => {
+					await scheduler.start(startData);
 
-			expect(postMessageMock).toHaveBeenCalledTimes(3);
-			expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(
-				2,
-				mockPostMessage({ withTransactions: true, isSpl })
-			);
-			expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(3);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(
+						2,
+						mockPostMessage({ withTransactions: true, isSpl })
+					);
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 
-			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(postMessageMock).toHaveBeenCalledTimes(5);
-			expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(5);
+					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusIdle);
 
-			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(postMessageMock).toHaveBeenCalledTimes(7);
-			expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusIdle);
-		});
+					expect(postMessageMock).toHaveBeenCalledTimes(7);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusIdle);
+				});
 
-		it('should start the scheduler with an interval', async () => {
-			await scheduler.start(startData);
+				it('should start the scheduler with an interval', async () => {
+					await scheduler.start(startData);
 
-			expect(scheduler['timer']['timer']).toBeDefined();
-		});
+					expect(scheduler['timer']['timer']).toBeDefined();
+				});
 
-		it('should trigger the scheduler manually', async () => {
-			await scheduler.trigger(startData);
+				it('should trigger the scheduler manually', async () => {
+					await scheduler.trigger(startData);
 
-			expect(spyLoadBalance).toHaveBeenCalledTimes(1);
-			expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
-		});
+					expect(spyLoadBalance).toHaveBeenCalledTimes(1);
+					expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
+				});
 
-		it('should stop the scheduler', () => {
-			scheduler.stop();
+				it('should stop the scheduler', () => {
+					scheduler.stop();
 
-			expect(scheduler['timer']['timer']).toBeUndefined();
-		});
+					expect(scheduler['timer']['timer']).toBeUndefined();
+				});
 
-		it('should trigger syncWallet periodically', async () => {
-			await scheduler.start(startData);
+				it('should trigger syncWallet periodically', async () => {
+					await scheduler.start(startData);
 
-			expect(spyLoadBalance).toHaveBeenCalledTimes(1);
-			expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
+					expect(spyLoadBalance).toHaveBeenCalledTimes(1);
+					expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
 
-			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(spyLoadBalance).toHaveBeenCalledTimes(2);
-			expect(spyLoadTransactions).toHaveBeenCalledTimes(2);
+					expect(spyLoadBalance).toHaveBeenCalledTimes(2);
+					expect(spyLoadTransactions).toHaveBeenCalledTimes(2);
 
-			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(spyLoadBalance).toHaveBeenCalledTimes(3);
-			expect(spyLoadTransactions).toHaveBeenCalledTimes(3);
-		});
+					expect(spyLoadBalance).toHaveBeenCalledTimes(3);
+					expect(spyLoadTransactions).toHaveBeenCalledTimes(3);
+				});
 
-		it('should postMessage with status of the worker', async () => {
-			await scheduler.start(startData);
+				it('should postMessage with status of the worker', async () => {
+					await scheduler.start(startData);
 
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
-		});
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+				});
 
-		it('should trigger postMessage with error', async () => {
-			const err = new Error('test');
-			spyLoadBalance.mockRejectedValue(err);
+				it('should trigger postMessage with error', async () => {
+					const err = new Error('test');
+					spyLoadBalance.mockRejectedValue(err);
 
-			await scheduler.start(startData);
+					await scheduler.start(startData);
 
-			// idle and in_progress
-			// error
-			expect(postMessageMock).toHaveBeenCalledTimes(3);
+					// idle and in_progress
+					// error
+					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
-			expect(postMessageMock).toHaveBeenCalledWith({
-				msg: 'syncSolWalletError',
-				data: {
-					error: err
-				}
-			});
-		});
+					expect(postMessageMock).toHaveBeenCalledWith({
+						msg: 'syncSolWalletError',
+						data: {
+							error: err
+						}
+					});
+				});
 
-		it('should not post message when no new transactions or balance changes', async () => {
-			await scheduler.start(startData);
-			postMessageMock.mockClear();
+				it('should not post message when no new transactions or balance changes', async () => {
+					await scheduler.start(startData);
+					postMessageMock.mockClear();
 
-			// Mock no changes in transactions and balance
-			spyLoadTransactions.mockResolvedValue([]);
-			spyLoadSolBalance.mockResolvedValue(mockSolBalance);
-			spyLoadSplBalance.mockResolvedValue(mockSplBalance);
+					// Mock no changes in transactions and balance
+					spyLoadTransactions.mockResolvedValue([]);
+					spyLoadSolBalance.mockResolvedValue(mockSolBalance);
+					spyLoadSplBalance.mockResolvedValue(mockSplBalance);
 
-			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
-			// Only status messages should be sent
-			expect(postMessageMock).toHaveBeenCalledTimes(2);
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
-		});
+					// Only status messages should be sent
+					expect(postMessageMock).toHaveBeenCalledTimes(2);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+				});
 
-		it('should update store with new transactions', async () => {
-			await scheduler.start(startData);
+				it('should update store with new transactions', async () => {
+					await scheduler.start(startData);
 
-			expect(scheduler['store'].transactions).toEqual(
-				expectedSoLTransactions.reduce(
-					(acc, transaction) => ({
-						...acc,
-						[transaction.data.id]: transaction
-					}),
-					{}
-				)
-			);
-		});
+					expect(scheduler['store'].transactions).toEqual(
+						expectedSoLTransactions.reduce(
+							(acc, transaction) => ({
+								...acc,
+								[transaction.data.id]: transaction
+							}),
+							{}
+						)
+					);
+				});
 
-		it('should load balance with the correct parameters', async () => {
-			await scheduler.start(startData);
+				it('should load balance with the correct parameters', async () => {
+					await scheduler.start(startData);
 
-			expect(spyLoadBalance).toHaveBeenCalledWith({
-				address: mockSolAddress,
-				network: startData?.solanaNetwork,
-				tokenAddress: startData?.tokenAddress,
-				tokenOwnerAddress: startData?.tokenOwnerAddress
-			});
-		});
+					expect(spyLoadBalance).toHaveBeenCalledWith({
+						address: mockSolAddress,
+						network: startData?.solanaNetwork,
+						tokenAddress: startData?.tokenAddress,
+						tokenOwnerAddress: startData?.tokenOwnerAddress
+					});
+				});
 
-		it('should load transactions with the correct parameters', async () => {
-			await scheduler.start(startData);
+				it('should load transactions with the correct parameters', async () => {
+					await scheduler.start(startData);
 
-			expect(spyLoadTransactions).toHaveBeenCalledWith({
-				address: mockSolAddress,
-				network: startData?.solanaNetwork,
-				tokenAddress: startData?.tokenAddress,
-				tokenOwnerAddress: startData?.tokenOwnerAddress
-			});
-		});
+					expect(spyLoadTransactions).toHaveBeenCalledWith({
+						address: mockSolAddress,
+						network: startData?.solanaNetwork,
+						tokenAddress: startData?.tokenAddress,
+						tokenOwnerAddress: startData?.tokenOwnerAddress
+					});
+				});
+			}
+		};
 	};
 
 	describe('sol-wallet worker should work for SOLANA tokens', () => {
@@ -270,7 +275,13 @@ describe('sol-wallet.scheduler', () => {
 			solanaNetwork: SolanaNetworks.mainnet
 		};
 
-		testWorker({ startData });
+		const { setup, teardown, tests } = testWorker({ startData });
+
+		beforeEach(setup);
+
+		afterEach(teardown);
+
+		tests();
 	});
 
 	describe('sol-wallet worker should work for SPL tokens', () => {
@@ -284,6 +295,12 @@ describe('sol-wallet.scheduler', () => {
 			tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
 		};
 
-		testWorker({ startData });
+		const { setup, teardown, tests } = testWorker({ startData });
+
+		beforeEach(setup);
+
+		afterEach(teardown);
+
+		tests();
 	});
 });
