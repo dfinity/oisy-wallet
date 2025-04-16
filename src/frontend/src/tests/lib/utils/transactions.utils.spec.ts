@@ -30,7 +30,9 @@ import type {
 	Transaction
 } from '$lib/types/transaction';
 import {
-	areTransactionsStoresLoading, filterReceivedMicroTransactions, getReceivedMicroTransactions,
+	areTransactionsStoresLoading,
+	filterReceivedMicroTransactions,
+	getReceivedMicroTransactions,
 	isTransactionsStoreEmpty,
 	isTransactionsStoreInitialized,
 	isTransactionsStoreNotInitialized,
@@ -40,9 +42,9 @@ import {
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
+import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
-import {mockExchanges} from "$tests/mocks/exchanges.mock";
 
 describe('transactions.utils', () => {
 	describe('mapAllTransactionsUi', () => {
