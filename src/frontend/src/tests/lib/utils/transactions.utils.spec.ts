@@ -30,7 +30,7 @@ import type {
 	Transaction
 } from '$lib/types/transaction';
 import {
-	areTransactionsStoresLoading,
+	areTransactionsStoresLoading, filterReceivedMicroTransactions, getReceivedMicroTransactions,
 	isTransactionsStoreEmpty,
 	isTransactionsStoreInitialized,
 	isTransactionsStoreNotInitialized,
@@ -42,6 +42,9 @@ import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock'
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
+import type {ExchangesData} from "$lib/types/exchange";
+import {getMockExchanges, mockExchanges} from "$tests/mocks/exchanges.mock";
+import {afterEach, beforeEach} from "vitest";
 
 describe('transactions.utils', () => {
 	describe('mapAllTransactionsUi', () => {
@@ -373,6 +376,126 @@ describe('transactions.utils', () => {
 				expect(result).toEqual(expectedTransactions);
 			});
 		});
+	});
+
+	describe('MicroTransactions', () => {
+		const btcTokens = [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN];
+		const ethTokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN];
+		const icTokens = [ICP_TOKEN];
+		const solTokens = [SOLANA_TOKEN];
+		const tokens = [...btcTokens, ...ethTokens, ...icTokens, ...solTokens];
+
+		const mockBtcMainnetTransactions: BtcTransactionUi[] = createMockBtcTransactionsUi(3);
+		const mockBtcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>> = {
+			[BTC_MAINNET_TOKEN_ID]: mockBtcMainnetTransactions.map((data) => ({ data, certified: false }))
+		};
+
+		const mockEthMainnetTransactions: Transaction[] = createMockEthTransactions(5);
+		const mockEthTransactions: EthTransactionsData = {
+			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions,
+		};
+
+		const mockIcTransactionsUi: IcTransactionUi[] = createMockIcTransactionsUi(7);
+		const mockIcTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+			[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data: {...data, type: 'receive'}, certified: false }))
+		};
+
+		const rest = {
+			$ckEthMinterInfo: {},
+			$ethAddress: undefined,
+			$solTransactions: {},
+			$btcStatuses: undefined
+		};
+
+		afterEach(() => {
+			getMockExchanges(ICP_TOKEN, 1)
+			getMockExchanges(BTC_MAINNET_TOKEN, 1)
+			getMockExchanges(ETHEREUM_TOKEN, 1)
+		})
+
+		describe('filterReceivedMicroTransactions', () => {
+			it('should filter all received micro transactions', () => {
+				const transactions = mapAllTransactionsUi({
+					tokens,
+					$btcTransactions: mockBtcTransactions,
+					$icTransactions: mockIcTransactions,
+					$ethTransactions: mockEthTransactions,
+					...rest
+				});
+
+				let filteredTransactions = filterReceivedMicroTransactions({
+					transactions, exchanges: getMockExchanges(ICP_TOKEN, 20000000000000000000000) ?? mockExchanges});
+
+				expect(filteredTransactions.length).toBe(7);
+
+				filteredTransactions = filterReceivedMicroTransactions({
+					transactions, exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges});
+
+				expect(filteredTransactions.length).toBe(10);
+			});
+
+			it('should filter only received micro transactions', () => {
+				const mockIcSendTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+					[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified: false }))
+				};
+
+				const transactions = mapAllTransactionsUi({
+					tokens,
+					$btcTransactions: mockBtcTransactions,
+					$icTransactions: mockIcSendTransactions,
+					$ethTransactions: mockEthTransactions,
+					...rest
+				});
+
+				const filteredTransactions = filterReceivedMicroTransactions({
+					transactions, exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges});
+
+				expect(filteredTransactions.length).toBe(10);
+			});
+		});
+
+		describe('getReceivedMicroTransactions', () => {
+			it('should get all received micro transactions', () => {
+				const transactions = mapAllTransactionsUi({
+					tokens,
+					$btcTransactions: mockBtcTransactions,
+					$icTransactions: mockIcTransactions,
+					$ethTransactions: mockEthTransactions,
+					...rest
+				});
+
+				let microTransactions = getReceivedMicroTransactions({
+					transactions, exchanges: getMockExchanges(ICP_TOKEN, 20000000000000000000000) ?? mockExchanges});
+
+				expect(microTransactions.length).toBe(8);
+
+				microTransactions = getReceivedMicroTransactions({
+					transactions, exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges});
+
+				expect(microTransactions.length).toBe(5);
+			});
+
+			it('should get only received micro transactions', () => {
+				const mockIcSendTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+					[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified: false }))
+				};
+
+				const transactions = mapAllTransactionsUi({
+					tokens,
+					$btcTransactions: mockBtcTransactions,
+					$icTransactions: mockIcSendTransactions,
+					$ethTransactions: mockEthTransactions,
+					...rest
+				});
+
+				const microTransactions = getReceivedMicroTransactions({
+					transactions, exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges});
+
+				expect(microTransactions.length).toBe(5);
+			});
+		});
+
+
 	});
 
 	describe('sortTransactions', () => {
