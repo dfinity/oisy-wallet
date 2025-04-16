@@ -8,6 +8,8 @@
 			"$btc/*": ["./src/frontend/src/btc/*"],
 			"$eth": ["./src/frontend/src/eth"],
 			"$eth/*": ["./src/frontend/src/eth/*"],
+			"evm": ["./src/frontend/src/evm"],
+			"evm/*": ["./src/frontend/src/evm/*"],
 			"$icp": ["./src/frontend/src/icp"],
 			"$icp/*": ["./src/frontend/src/icp/*"],
 			"$sol": ["./src/frontend/src/sol"],

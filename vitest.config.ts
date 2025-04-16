@@ -33,6 +33,10 @@ export default defineConfig(
 					replacement: resolve(__dirname, 'src/frontend/src/eth')
 				},
 				{
+					find: '$evm',
+					replacement: resolve(__dirname, 'src/frontend/src/evm')
+				},
+				{
 					find: '$icp',
 					replacement: resolve(__dirname, 'src/frontend/src/icp')
 				},
