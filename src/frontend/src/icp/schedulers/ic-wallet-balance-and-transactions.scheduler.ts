@@ -18,6 +18,9 @@ interface IcWalletStore<T> {
 	transactions: IndexedTransactions<T>;
 }
 
+type GetBalanceAndTransactions<TWithId extends IcrcTransactionWithId | TransactionWithId> =
+	GetTransactions & { transactions: TWithId[] };
+
 export class IcWalletBalanceAndTransactionsScheduler<
 	T extends IcrcTransaction | Transaction,
 	TWithId extends IcrcTransactionWithId | TransactionWithId,
@@ -33,7 +36,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 	constructor(
 		private getBalanceAndTransactions: (
 			data: SchedulerJobParams<PostMessageDataRequest>
-		) => Promise<GetTransactions & { transactions: TWithId[] }>,
+		) => Promise<GetBalanceAndTransactions<TWithId>>,
 		private mapToSelfTransaction: (
 			transaction: TWithId
 		) => (Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> })[],
@@ -53,7 +56,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 		identity,
 		...data
 	}: SchedulerJobData<PostMessageDataRequest>) => {
-		await queryAndUpdate<GetTransactions & { transactions: TWithId[] }>({
+		await queryAndUpdate<GetBalanceAndTransactions<TWithId>>({
 			request: ({ identity: _, certified }) =>
 				this.getBalanceAndTransactions({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => {
@@ -71,7 +74,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 		certified,
 		jobData
 	}: {
-		response: GetTransactions & { transactions: TWithId[] };
+		response: GetBalanceAndTransactions<TWithId>;
 		certified: boolean;
 		jobData: SchedulerJobData<PostMessageDataRequest>;
 	}) => {
