@@ -1,29 +1,36 @@
 //! Tests for parsing account identifiers.
 
+use std::fmt::Debug;
+
 use candid::Principal;
 
 use super::*;
 
-struct TestVector {
+struct TestVector<T: Eq + Debug> {
     name: &'static str,
     input: &'static str,
-    expected: TokenAccountId,
+    expected: T,
 }
 
-fn test_vectors() -> Vec<TestVector> {
+fn icrc2_test_vectors() -> Vec<TestVector<Icrcv2AccountId>> {
     vec![TestVector {
         name: "ICRC: Short principal",
         input: "un4fu-tqaaa-aaaab-qadjq-cai",
-        expected: TokenAccountId::Icrcv2(Icrcv2AccountId::WithPrincipal {
+        expected: Icrcv2AccountId::WithPrincipal {
             owner: Principal::from_text("un4fu-tqaaa-aaaab-qadjq-cai").unwrap(),
             subaccount: None,
-        }),
+        },
     }]
 }
 
 #[test]
-fn account_ids_can_be_parsed() {
-    for vector in test_vectors() {
-        assert_eq!(vector.expected, vector.input.parse().unwrap(), "{}", vector.name);
+fn icrc2_account_ids_can_be_parsed() {
+    for vector in icrc2_test_vectors() {
+        assert_eq!(
+            vector.expected,
+            vector.input.parse().unwrap(),
+            "{}",
+            vector.name
+        );
     }
 }
