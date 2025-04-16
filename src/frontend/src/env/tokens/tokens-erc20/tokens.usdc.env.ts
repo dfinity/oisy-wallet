@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
@@ -9,12 +10,6 @@ export const USDC_DECIMALS = 6;
 export const USDC_SYMBOL = 'USDC';
 
 export const USDC_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
-
-export const USDC_TOKEN_GROUP = {
-	icon: usdc,
-	name: 'USD Coin',
-	symbol: USDC_SYMBOL
-};
 
 export const USDC_TOKEN: RequiredErc20Token = {
 	id: USDC_TOKEN_ID,

@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { ORCA_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import orca from '$sol/assets/orca.svg';
@@ -10,12 +11,6 @@ export const ORCA_DECIMALS = 6;
 export const ORCA_SYMBOL = 'ORCA';
 
 export const ORCA_TOKEN_ID: TokenId = parseTokenId(ORCA_SYMBOL);
-
-export const ORCA_TOKEN_GROUP = {
-	icon: orca,
-	name: 'Orca',
-	symbol: ORCA_SYMBOL
-};
 
 export const ORCA_TOKEN: RequiredSplToken = {
 	id: ORCA_TOKEN_ID,

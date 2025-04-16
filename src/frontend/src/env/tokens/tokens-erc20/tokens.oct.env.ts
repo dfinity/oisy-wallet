@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import oct from '$icp-eth/assets/oct.svg';
 import type { TokenId } from '$lib/types/token';
@@ -9,12 +10,6 @@ export const OCT_DECIMALS = 18;
 export const OCT_SYMBOL = 'OCT';
 
 export const OCT_TOKEN_ID: TokenId = parseTokenId(OCT_SYMBOL);
-
-export const OCT_TOKEN_GROUP = {
-	icon: oct,
-	name: 'Octopus Network Token',
-	symbol: OCT_SYMBOL
-};
 
 export const OCT_TOKEN: RequiredErc20Token = {
 	id: OCT_TOKEN_ID,

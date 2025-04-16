@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import wbtc from '$icp-eth/assets/wbtc.svg';
 import type { TokenId } from '$lib/types/token';
@@ -9,12 +10,6 @@ export const WBTC_DECIMALS = 8;
 export const WBTC_SYMBOL = 'WBTC';
 
 export const WBTC_TOKEN_ID: TokenId = parseTokenId(WBTC_SYMBOL);
-
-export const WBTC_TOKEN_GROUP = {
-	icon: wbtc,
-	name: 'Wrapped BTC',
-	symbol: WBTC_SYMBOL
-};
 
 export const WBTC_TOKEN: RequiredErc20Token = {
 	id: WBTC_TOKEN_ID,

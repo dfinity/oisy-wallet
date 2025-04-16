@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { POPCAT_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import popcat from '$sol/assets/popcat.svg';
@@ -10,12 +11,6 @@ export const POPCAT_DECIMALS = 9;
 export const POPCAT_SYMBOL = 'POPCAT';
 
 export const POPCAT_TOKEN_ID: TokenId = parseTokenId(POPCAT_SYMBOL);
-
-export const POPCAT_TOKEN_GROUP = {
-	icon: popcat,
-	name: 'Popcat',
-	symbol: POPCAT_SYMBOL
-};
 
 export const POPCAT_TOKEN: RequiredSplToken = {
 	id: POPCAT_TOKEN_ID,

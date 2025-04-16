@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { UNI_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import uni from '$icp-eth/assets/uni.svg';
 import type { TokenId } from '$lib/types/token';
@@ -9,12 +10,6 @@ export const UNI_DECIMALS = 18;
 export const UNI_SYMBOL = 'UNI';
 
 export const UNI_TOKEN_ID: TokenId = parseTokenId(UNI_SYMBOL);
-
-export const UNI_TOKEN_GROUP = {
-	icon: uni,
-	name: 'Uniswap',
-	symbol: UNI_SYMBOL
-};
 
 export const UNI_TOKEN: RequiredErc20Token = {
 	id: UNI_TOKEN_ID,
