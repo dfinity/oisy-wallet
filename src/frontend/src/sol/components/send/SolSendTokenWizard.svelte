@@ -26,7 +26,7 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
+	import type { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -169,7 +169,7 @@
 				source
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_SUCCESS,
 				metadata: {
 					token: $sendToken.symbol
@@ -178,7 +178,7 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_ERROR,
 				metadata: {
 					token: $sendToken.symbol

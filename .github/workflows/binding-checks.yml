@@ -15,7 +15,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+        uses: actions/create-github-app-token@3ff1caaa28b64c9cc276ce0a02e2ff584f3900c5 # v2.0.2
         id: app-token
         continue-on-error: true
         with:
@@ -48,7 +48,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: changes
         with:
           filters: |
@@ -81,23 +81,15 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Install rust
-        uses: ./.github/actions/install-rust
+        run: scripts/setup rust
 
       - name: Install dfx
         if: steps.changes.outputs.src == 'true'
-        uses: dfinity/setup-dfx@main
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
-      - name: Install binstall
+      - name: Install other tools
         if: steps.changes.outputs.src == 'true'
-        run: scripts/setup cargo-binstall
-
-      - name: Install candid-extractor
-        if: steps.changes.outputs.src == 'true'
-        run: cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
-
-      - name: Install didc
-        if: steps.changes.outputs.src == 'true'
-        run: ./scripts/setup didc
+        run: scripts/setup cargo-binstall candid-extractor didc
 
       - name: Generate bindings
         if: steps.changes.outputs.src == 'true'

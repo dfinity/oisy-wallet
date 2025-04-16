@@ -1,5 +1,7 @@
-import type { BaseContract } from 'ethers';
+import type { BaseContract } from 'ethers/contract';
 
-export type ContractAddress = Pick<BaseContract, 'address'>;
+export interface ContractAddress {
+	address: Awaited<ReturnType<BaseContract['getAddress']>>;
+}
 
-export type ContractAddressText = typeof BaseContract.prototype.address;
+export type ContractAddressText = Awaited<ReturnType<BaseContract['getAddress']>>;

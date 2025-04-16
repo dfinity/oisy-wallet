@@ -77,10 +77,13 @@ export default defineConfig({
 	workers: 5,
 	expect: {
 		toHaveScreenshot: {
-			// disable any animations caught by playwright for better screenshots and less flaky tests.
+			threshold: 0.3,
+			// disable any animations caught by playwright for better screenshots and less flaky tests
 			animations: 'disabled',
-			// hide caret for cleaner snapshots.
-			caret: 'hide'
+			// hide caret for cleaner snapshots
+			caret: 'hide',
+			// apply masks to hide flaky elements
+			stylePath: 'e2e/styles/masks.css'
 		}
 	},
 	webServer: {

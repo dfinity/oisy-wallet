@@ -28,7 +28,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -133,13 +133,13 @@
 				minterInfo: $ckEthMinterInfoStore?.[$ethereumToken.id]
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR
 			});
 

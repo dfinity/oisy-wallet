@@ -33,6 +33,10 @@ export default defineConfig(
 					replacement: resolve(__dirname, 'src/frontend/src/eth')
 				},
 				{
+					find: '$evm',
+					replacement: resolve(__dirname, 'src/frontend/src/evm')
+				},
+				{
 					find: '$icp',
 					replacement: resolve(__dirname, 'src/frontend/src/icp')
 				},
@@ -69,13 +73,20 @@ export default defineConfig(
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
-				exclude: [...coverageConfigDefaults.exclude, 'build', '.dfx', '**/.svelte-kit'],
+				exclude: [
+					...coverageConfigDefaults.exclude,
+					'build',
+					'.dfx',
+					'**/.svelte-kit',
+					'declarations'
+				],
 				// TODO: increase the thresholds slowly up to an acceptable 80% at least
 				thresholds: {
-					statements: 55,
-					branches: 55,
-					functions: 55,
-					lines: 55
+					autoUpdate: true,
+					statements: 58,
+					branches: 82,
+					functions: 72,
+					lines: 58
 				}
 			}
 		}

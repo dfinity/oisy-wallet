@@ -1,4 +1,4 @@
-import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
+import { SOLANA_KEY_ID, SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import * as idbApi from '$lib/api/idb.api';
 import * as signerApi from '$lib/api/signer.api';
@@ -80,6 +80,7 @@ describe('sol-address.services', () => {
 			// eslint-disable-next-line local-rules/prefer-object-params
 			async (_, getAddress, networkType) => {
 				const result = await getAddress(mockIdentity);
+
 				expect(result).toBe(mockSolAddress);
 				expect(spyGetSchnorrPublicKey).toHaveBeenCalledWith({
 					identity: mockIdentity,
@@ -105,6 +106,7 @@ describe('sol-address.services', () => {
 		// eslint-disable-next-line local-rules/prefer-object-params
 		it.each(loadCases)('should load %s address into store', async (_, loadAddress, store) => {
 			const result = await loadAddress();
+
 			expect(result).toEqual({ success: true });
 			expect(get(store)).toEqual({
 				data: mockSolAddress,
@@ -151,7 +153,7 @@ describe('sol-address.services', () => {
 
 			expect(result).toEqual({
 				success: false,
-				err: new LoadIdbAddressError(SOLANA_TOKEN_ID)
+				err: new LoadIdbAddressError(SOLANA_MAINNET_NETWORK_ID)
 			});
 			expect(spyUpdateIdbAddressLastUsage).not.toHaveBeenCalled();
 		});

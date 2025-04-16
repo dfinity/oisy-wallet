@@ -10,7 +10,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
+import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export const processTransactionSent = async ({

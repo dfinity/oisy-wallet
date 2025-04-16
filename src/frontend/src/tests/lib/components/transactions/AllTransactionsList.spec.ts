@@ -17,6 +17,12 @@ import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { render } from '@testing-library/svelte';
 
+// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('AllTransactionsList', () => {
 	beforeAll(() => {
 		vi.resetAllMocks();
@@ -61,6 +67,7 @@ describe('AllTransactionsList', () => {
 				const skeleton: HTMLParagraphElement | null = container.querySelector(
 					`div[data-tid="all-transactions-skeleton-card-${i}"]`
 				);
+
 				expect(skeleton).toBeNull();
 			});
 		});
@@ -120,6 +127,7 @@ describe('AllTransactionsList', () => {
 				const skeleton: HTMLParagraphElement | null = container.querySelector(
 					`div[data-tid="all-transactions-skeleton-card-${i}"]`
 				);
+
 				expect(skeleton).toBeNull();
 			});
 		});
@@ -128,10 +136,12 @@ describe('AllTransactionsList', () => {
 			const { getByText, getByTestId } = render(AllTransactionsList);
 
 			const todayDateGroup = getByTestId('all-transactions-date-group-0');
+
 			expect(todayDateGroup).toBeInTheDocument();
 			expect(getByText('today')).toBeInTheDocument();
 
 			const yesterdayDateGroup = getByTestId('all-transactions-date-group-1');
+
 			expect(yesterdayDateGroup).toBeInTheDocument();
 			expect(getByText('yesterday')).toBeInTheDocument();
 		});
