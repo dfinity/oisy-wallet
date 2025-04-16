@@ -73,7 +73,7 @@ pub enum EthereumNetworkId {
     BaseSepolia = 84532,
     BNBSmartChainMainnet = 56,
     BNBSmartChainTestnet = 97,
-    Sepolia = 11155111,
+    Sepolia = 11_155_111,
 }
 
 /// Solana networks, or "clusters".
