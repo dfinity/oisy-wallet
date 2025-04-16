@@ -11,10 +11,11 @@ pub enum TokenStandard {
     ///
     /// - [ICRC-1 Spec](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-1/README.md)
     ICRC1,
+    /// The protocol used for native Ethereum
+    EthNative,
     /// Standard for the Ethereum blockchain
     ///
     /// # Used for:
-    /// - ETH
     /// - Most tokens on ETH and other EVM networks.
     ///
     /// - [ERC20 Spec](https://eips.ethereum.org/EIPS/eip-20)
@@ -26,10 +27,11 @@ pub enum TokenStandard {
     ///
     /// - [Invoice Address](https://en.bitcoin.it/wiki/Invoice_address)
     Bitcoin,
+    /// Standard for SOL, the Solana native token
+    SolNative,
     /// Standard for the Solana blockchain
     ///
     /// # Used for:
-    /// - SOL (native SOL token)
     /// - Most tokens on Solana.
     ///
     /// - [Solana Token Guide](https://solana.com/docs/tokens)
@@ -37,5 +39,5 @@ pub enum TokenStandard {
     ///
     /// Note: It seems that Solana tokens are defined by the library rather than by a
     /// specification, but I may be wrong.
-    Spl,
+    SPL,
 }
