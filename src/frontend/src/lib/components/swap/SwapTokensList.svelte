@@ -14,6 +14,8 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { Token, TokenUi } from '$lib/types/token';
 	import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
+	import { i18n } from '$lib/stores/i18n.store';
+	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 
 	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -48,6 +50,14 @@
 	networkSelectorViewOnly={true}
 	on:icTokenButtonClick={onIcTokenButtonClick}
 >
+	{#snippet tokenListItem(token, onClick)}
+		<ModalTokensListItem data={token} on:click={onClick} />
+	{/snippet}
+	{#snippet noResults()}
+		<p class="text-primary">
+			{$i18n.tokens.manage.text.all_tokens_zero_balance}
+		</p>
+	{/snippet}
 	{#snippet toolbar()}
 		<ButtonCancel fullWidth={true} on:click={() => dispatch('icCloseTokensList')} />
 	{/snippet}

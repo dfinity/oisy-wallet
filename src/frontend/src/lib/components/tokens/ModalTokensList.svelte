@@ -2,7 +2,6 @@
 	import { notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
 	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
-	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
@@ -12,12 +11,21 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { isDesktop } from '$lib/utils/device.utils';
+	import type { Token } from '$lib/types/token';
 
 	let {
 		networkSelectorViewOnly = false,
 		loading,
-		toolbar
-	}: { networkSelectorViewOnly: boolean; loading: boolean; toolbar: Snippet } = $props();
+		tokenListItem,
+		toolbar,
+		noResults
+	}: {
+		networkSelectorViewOnly: boolean;
+		loading: boolean;
+		tokenListItem: Snippet<[Token, () => void]>;
+		toolbar: Snippet;
+		noResults?: Snippet;
+	} = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -61,16 +69,19 @@
 		<TokensSkeletons {loading}>
 			{#if noTokensMatch}
 				<p class="text-primary">
-					{$i18n.tokens.manage.text.all_tokens_zero_balance}
+					{#if noResults}
+						{@render noResults()}
+					{:else}
+						<p class="text-primary">
+							{$i18n.core.text.no_results}
+						</p>
+					{/if}
 				</p>
 			{:else}
 				<ul class="list-none">
 					{#each $filteredTokens as token (token.id)}
 						<li class="logo-button-list-item">
-							<ModalTokensListItem
-								on:click={() => dispatch('icTokenButtonClick', token)}
-								data={token}
-							/>
+							{@render tokenListItem(token, () => dispatch('icTokenButtonClick', token))}
 						</li>
 					{/each}
 				</ul>
