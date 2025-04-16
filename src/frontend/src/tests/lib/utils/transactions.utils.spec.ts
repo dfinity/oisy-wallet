@@ -385,6 +385,7 @@ describe('transactions.utils', () => {
 			const result = [transaction2, transaction1, transaction3].sort((a, b) =>
 				sortTransactions({ transactionA: a, transactionB: b })
 			);
+
 			expect(result).toEqual([transaction3, transaction2, transaction1]);
 		});
 
@@ -392,6 +393,7 @@ describe('transactions.utils', () => {
 			const result = [transaction1, transactionWithNullTimestamp, transaction2].sort((a, b) =>
 				sortTransactions({ transactionA: a, transactionB: b })
 			);
+
 			expect(result).toEqual([transaction2, transaction1, transactionWithNullTimestamp]);
 		});
 	});

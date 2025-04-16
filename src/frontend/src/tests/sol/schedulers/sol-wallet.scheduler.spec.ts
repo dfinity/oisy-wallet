@@ -157,13 +157,14 @@ describe('sol-wallet.scheduler', () => {
 
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
-
+          
 					expect(spyLoadBalance).toHaveBeenCalledTimes(1);
 					expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
 				});
 
 				it('should stop the scheduler', () => {
 					scheduler.stop();
+          
 					expect(scheduler['timer']['timer']).toBeUndefined();
 				});
 
