@@ -45,7 +45,8 @@ describe('loader.services', () => {
 				}
 			});
 
-			vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
+			vi.spyOn(window.history, 'replaceState').mockImplementation(() => {
+			});
 		});
 
 		it('should return success', async () => {
@@ -157,7 +158,7 @@ describe('loader.services', () => {
 			await initLoader(mockParams);
 
 			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity, nonce: [] });
 
 			expect(loadAddresses).toHaveBeenCalledOnce();
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [ICP_NETWORK_ID, SOLANA_MAINNET_NETWORK_ID]);
