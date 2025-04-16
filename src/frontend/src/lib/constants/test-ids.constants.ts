@@ -2,6 +2,7 @@ export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
+export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
@@ -159,3 +160,8 @@ export const HELP_AUTH_INTRODUCTION_LINK = 'help-auth-introduction-link';
 export const HELP_AUTH_DOCS_LINK = 'help-auth-docs-link';
 export const HELP_AUTH_PRIVATE_KEY_LINK = 'help-auth-private-key-link';
 export const HELP_AUTH_ASSET_CONTROL_LINK = 'help-auth-asset-control-link';
+
+export const AUTH_LICENSE_LINK = 'auth-license-link';
+export const AUTH_SIGNING_IN_HELP_LINK = 'auth-signing-in-help-link';
+
+export const TOKEN_LIST_FILTER = 'token-list-filter';
