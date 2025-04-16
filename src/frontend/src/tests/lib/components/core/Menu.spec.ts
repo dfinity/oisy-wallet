@@ -38,7 +38,9 @@ describe('Menu', () => {
 	const openMenu = () => {
 		container = render(Menu).container;
 		const menuButton: HTMLButtonElement | null = container.querySelector(menuButtonSelector);
+
 		expect(menuButton).toBeInTheDocument();
+
 		menuButton?.click();
 	};
 
@@ -55,6 +57,7 @@ describe('Menu', () => {
 				if (element == null) {
 					throw new Error(`Element with selector "${selector}" not yet loaded`);
 				}
+
 				expect(element).toBeInTheDocument();
 			} else {
 				expect(element).toBeNull();
