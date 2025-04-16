@@ -199,15 +199,19 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const NetworkSettingsFor = IDL.Variant({
 		InternetComputer: IDL.Null,
+		BaseSepolia: IDL.Null,
 		SolanaTestnet: IDL.Null,
 		BitcoinRegtest: IDL.Null,
 		SolanaDevnet: IDL.Null,
 		EthereumSepolia: IDL.Null,
 		BitcoinTestnet: IDL.Null,
+		BaseMainnet: IDL.Null,
+		BscMainnet: IDL.Null,
 		SolanaLocal: IDL.Null,
 		EthereumMainnet: IDL.Null,
 		SolanaMainnet: IDL.Null,
-		BitcoinMainnet: IDL.Null
+		BitcoinMainnet: IDL.Null,
+		BscTestnet: IDL.Null
 	});
 	const NetworkSettings = IDL.Record({
 		enabled: IDL.Bool,
