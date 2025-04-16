@@ -12,6 +12,30 @@ struct TestVector<T: Eq + Debug> {
     expected: Result<T, ParseError>,
 }
 
+fn icrc2_subaccount_test_vectors() -> Vec<TestVector<IcrcSubaccountId>> {
+    vec![
+        TestVector {
+            name: "ICRC: Subaccount ID",
+            input: "7bd35240a80a8752992470ebd6dd38cd58abd60630198d9e79a019418eb533f7",
+            expected: Ok(IcrcSubaccountId([
+                0x7b, 0xd3, 0x52, 0x40, 0xa8, 0x0a, 0x87, 0x52, 0x99, 0x24, 0x70, 0xeb, 0xd6, 0xdd,
+                0x38, 0xcd, 0x58, 0xab, 0xd6, 0x06, 0x30, 0x19, 0x8d, 0x9e, 0x79, 0xa0, 0x19, 0x41,
+                0x8e, 0xb5, 0x33, 0xf7,
+            ])),
+        },
+        TestVector {
+            name: "ICRC: Incorrect length",
+            input: "234143",
+            expected: Err(ParseError()),
+        },
+        TestVector {
+            name: "ICRC: Invalid characters",
+            input: "7bd35240a80a8752992470ebd6dd38cd58abd6O630198d9e79aO19418eb533f7",
+            expected: Err(ParseError()),
+        },
+    ]
+}
+
 fn icrc2_test_vectors() -> Vec<TestVector<Icrcv2AccountId>> {
     vec![
         TestVector {
@@ -36,16 +60,26 @@ fn icrc2_test_vectors() -> Vec<TestVector<Icrcv2AccountId>> {
         TestVector {
             name: "ICRC: Account ID",
             input: "7bd35240a80a8752992470ebd6dd38cd58abd60630198d9e79a019418eb533f7",
-            expected: Ok(Icrcv2AccountId::Account(IcrcSubaccountId::from_str(
-                "7bd35240a80a8752992470ebd6dd38cd58abd60630198d9e79a019418eb533f7",
-            ))),
+            expected: Ok(Icrcv2AccountId::Account(
+                IcrcSubaccountId::from_str(
+                    "7bd35240a80a8752992470ebd6dd38cd58abd60630198d9e79a019418eb533f7",
+                )
+                .expect("Test setup err: Failed to parse subaccount ID"),
+            )),
         },
         TestVector {
             name: "ICRC: Invalid principal",
             input: "invalid",
-            expected: Err(ParseError),
+            expected: Err(ParseError()),
         },
     ]
+}
+
+#[test]
+fn icrc2_subaccount_ids_can_be_parsed() {
+    for vector in icrc2_subaccount_test_vectors() {
+        assert_eq!(vector.expected, vector.input.parse(), "{}", vector.name);
+    }
 }
 
 #[test]
