@@ -47,7 +47,7 @@
 		class="dropdown-button h-[3.375rem] rounded-lg border border-solid border-primary"
 		class:hover:border-brand-primary={!networkSelectorViewOnly}
 		disabled={networkSelectorViewOnly}
-		on:click={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
+		onclick={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
 		aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 	>
 		<NetworkSwitcherLogo network={$filterNetwork} />
