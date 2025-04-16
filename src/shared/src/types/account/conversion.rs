@@ -72,7 +72,13 @@ impl FromStr for EthAddress {
 impl FromStr for IcrcSubaccountId {
     type Err = ParseError;
 
-    fn from_str(_: &str) -> Result<Self, Self::Err> {
-        todo!()
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() == 64 {
+            let mut bytes = [0u8; 32];
+            hex::decode_to_slice(s, &mut bytes).map_err(|_| ParseError())?;
+            Ok(IcrcSubaccountId(bytes))
+        } else {
+            Err(ParseError())
+        }
     }
 }

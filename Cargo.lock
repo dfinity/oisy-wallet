@@ -3476,6 +3476,7 @@ dependencies = [
  "bs58",
  "candid",
  "getrandom",
+ "hex",
  "ic-canister-sig-creation",
  "ic-cdk 0.16.0",
  "ic-cdk-macros 0.16.0",
