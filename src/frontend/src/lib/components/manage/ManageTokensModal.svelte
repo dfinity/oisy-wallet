@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
@@ -33,7 +34,6 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import type { Snippet } from 'svelte';
 
 	let {
 		initialSearch,
