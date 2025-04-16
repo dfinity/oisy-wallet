@@ -25,6 +25,7 @@ describe('ic-transactions.derived', () => {
 
 	it('should return an empty array when all source stores are empty', () => {
 		const result = get(icTransactions);
+
 		expect(result).toEqual([]);
 	});
 
@@ -39,6 +40,7 @@ describe('ic-transactions.derived', () => {
 		icTransactionsStore.nullify(ICP_TOKEN_ID);
 
 		const result = get(icTransactions);
+
 		expect(result).toHaveLength(0);
 		expect(result).toEqual([]);
 	});
@@ -55,6 +57,7 @@ describe('ic-transactions.derived', () => {
 			});
 
 			const result = get(icTransactions);
+
 			expect(result).toEqual([...transactions]);
 		});
 	});
@@ -68,6 +71,7 @@ describe('ic-transactions.derived', () => {
 
 		it('should derive only pending ckBTC', () => {
 			const result = get(icTransactions);
+
 			expect(result).toEqual([
 				{
 					data: mockCkBtcPendingUtxoTransaction,
@@ -83,6 +87,7 @@ describe('ic-transactions.derived', () => {
 			});
 
 			const result = get(icTransactions);
+
 			expect(result).toEqual([
 				{
 					data: mockCkBtcPendingUtxoTransaction,
@@ -127,6 +132,7 @@ describe('ic-transactions.derived', () => {
 
 		it('should derive only pending ckETH', () => {
 			const result = get(icTransactions);
+
 			expect(result).toEqual([
 				{
 					data: mockPendingCkEth,
@@ -142,6 +148,7 @@ describe('ic-transactions.derived', () => {
 			});
 
 			const result = get(icTransactions);
+
 			expect(result).toEqual([
 				{
 					data: mockPendingCkEth,
