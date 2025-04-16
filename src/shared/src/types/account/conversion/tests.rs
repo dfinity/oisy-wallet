@@ -72,6 +72,11 @@ fn icrc2_test_vectors() -> Vec<TestVector<Icrcv2AccountId>> {
             input: "invalid",
             expected: Err(ParseError()),
         },
+        TestVector {
+            name: "ICRC: Invalid subaccount ID",
+            input: "7bd3524Oa80a8752992470ebd6dd38cd58abd60630198d9e79a019418eb533f7",
+            expected: Err(ParseError()),
+        },
     ]
 }
 
