@@ -24,16 +24,19 @@
 		icCloseTokensList: void;
 	}>();
 
-	let tokens: TokenUi<IcTokenToggleable>[];
-	$: tokens = pinTokensWithBalanceAtTop({
-		$tokens: [{ ...ICP_TOKEN, enabled: true }, ...$allKongSwapCompatibleIcrcTokens].filter(
-			(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
-		),
-		$exchanges,
-		$balances: $balancesStore
-	});
+	let tokens: TokenUi<IcTokenToggleable>[] = $derived(
+		pinTokensWithBalanceAtTop({
+			$tokens: [{ ...ICP_TOKEN, enabled: true }, ...$allKongSwapCompatibleIcrcTokens].filter(
+				(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
+			),
+			$exchanges,
+			$balances: $balancesStore
+		})
+	);
 
-	$: tokens, setTokens(tokens);
+	$effect(() => {
+		setTokens(tokens);
+	});
 
 	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<TokenUi<IcTokenToggleable>>) => {
 		dispatch('icSelectToken', token);
@@ -45,5 +48,7 @@
 	networkSelectorViewOnly={true}
 	on:icTokenButtonClick={onIcTokenButtonClick}
 >
-	<ButtonCancel slot="toolbar" fullWidth={true} on:click={() => dispatch('icCloseTokensList')} />
+	{#snippet toolbar()}
+		<ButtonCancel fullWidth={true} on:click={() => dispatch('icCloseTokensList')} />
+	{/snippet}
 </ModalTokensList>
