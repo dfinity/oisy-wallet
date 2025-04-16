@@ -23,6 +23,11 @@ export const BASE_ETH_TOKEN: RequiredToken = {
 	icon: eth,
 	buy: {
 		onramperId: 'eth_base'
+	},
+	groupData: {
+		icon: eth,
+		name: 'Ethereum',
+		symbol: BASE_ETH_SYMBOL
 	}
 };
 
@@ -38,5 +43,10 @@ export const BASE_SEPOLIA_ETH_TOKEN: RequiredToken = {
 	name: 'SepoliaETH',
 	symbol: BASE_SEPOLIA_ETH_SYMBOL,
 	decimals: BASE_ETH_DECIMALS,
-	icon: eth
+	icon: eth,
+	groupData: {
+		icon: eth,
+		name: 'SepoliaETH',
+		symbol: BASE_SEPOLIA_ETH_SYMBOL
+	}
 };
