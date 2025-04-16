@@ -12,7 +12,9 @@ export const mockExchanges: ExchangesData = mockTokens.reduce<ExchangesData>((ac
 
 export const getMockExchanges = (token: Token, usd: number) => {
 	const exchangeData = mockExchanges[token.id];
-	if (!exchangeData) {return null;}
+	if (!exchangeData) {
+		return null;
+	}
 	exchangeData.usd = usd;
 	return mockExchanges;
 };
