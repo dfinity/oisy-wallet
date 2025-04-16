@@ -12,12 +12,11 @@ import bitcoinRegtestIconLight from '$lib/assets/networks/light/bitcoin-regtest.
 import bitcoinTestnetIconLight from '$lib/assets/networks/light/bitcoin-testnet.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
-import { parseBoolEnvVar } from '$lib/utils/env.utils';
+import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 
-export const BTC_MAINNET_ENABLED = parseBoolEnvVar(
-	import.meta.env.VITE_BITCOIN_MAINNET_DISABLED,
-	false
+export const BTC_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
+	import.meta.env.VITE_BITCOIN_MAINNET_DISABLED
 );
 
 /**

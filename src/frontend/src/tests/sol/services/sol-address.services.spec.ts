@@ -80,6 +80,7 @@ describe('sol-address.services', () => {
 			// eslint-disable-next-line local-rules/prefer-object-params
 			async (_, getAddress, networkType) => {
 				const result = await getAddress(mockIdentity);
+
 				expect(result).toBe(mockSolAddress);
 				expect(spyGetSchnorrPublicKey).toHaveBeenCalledWith({
 					identity: mockIdentity,
@@ -105,6 +106,7 @@ describe('sol-address.services', () => {
 		// eslint-disable-next-line local-rules/prefer-object-params
 		it.each(loadCases)('should load %s address into store', async (_, loadAddress, store) => {
 			const result = await loadAddress();
+
 			expect(result).toEqual({ success: true });
 			expect(get(store)).toEqual({
 				data: mockSolAddress,

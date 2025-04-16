@@ -55,12 +55,14 @@ describe('Token List Utils', () => {
 		it('should return all tokens when filter is an empty string', () => {
 			const list: TokenUiOrGroupUi[] = [tokenUi, tokenGroupUi];
 			const result = getFilteredTokenList({ filter: '', list });
+
 			expect(result).toHaveLength(2);
 		});
 
 		it('should filter the list based on token name', () => {
 			const list: TokenUiOrGroupUi[] = [tokenUi, tokenGroupUi];
 			const result = getFilteredTokenList({ filter: 'Bitcoin', list });
+
 			expect(result).toHaveLength(1);
 			expect(result[0]).toEqual(tokenUi);
 		});
@@ -68,6 +70,7 @@ describe('Token List Utils', () => {
 		it('should filter the list based on token symbol', () => {
 			const list: TokenUiOrGroupUi[] = [tokenUi, tokenGroupUi];
 			const result = getFilteredTokenList({ filter: 'ETH', list });
+
 			expect(result).toHaveLength(1);
 			expect(result[0]).toEqual(tokenGroupUi);
 		});
@@ -75,11 +78,13 @@ describe('Token List Utils', () => {
 		it('should return empty array if no token matches filter', () => {
 			const list: TokenUiOrGroupUi[] = [tokenUi, tokenGroupUi];
 			const result = getFilteredTokenList({ filter: 'Dogecoin', list });
+
 			expect(result).toHaveLength(0);
 		});
 
 		it('should return empty array if no tokens in the list', () => {
 			const result = getFilteredTokenList({ filter: 'Bitcoin', list: [] });
+
 			expect(result).toHaveLength(0);
 		});
 	});
@@ -88,6 +93,7 @@ describe('Token List Utils', () => {
 		it('should return tokens that match the filter', () => {
 			const list: TokenUi[] = [token1, token2, token3];
 			const result = getFilteredTokenGroup({ filter: 'ETH', list });
+
 			expect(result).toHaveLength(1);
 			expect(result[0]).toEqual(token2);
 		});
@@ -95,11 +101,13 @@ describe('Token List Utils', () => {
 		it('should return an empty array if no tokens match the filter', () => {
 			const list: TokenUi[] = [token1, token2, token3];
 			const result = getFilteredTokenGroup({ filter: 'XRP', list });
+
 			expect(result).toHaveLength(0);
 		});
 
 		it('should return empty array if no tokens in the list', () => {
 			const result = getFilteredTokenGroup({ filter: 'Bitcoin', list: [] });
+
 			expect(result).toHaveLength(0);
 		});
 	});
