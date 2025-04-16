@@ -57,7 +57,9 @@ pub enum BitcoinNetworkId {
 
 /// The authoritative list of EVM networks.
 ///
-/// See: <https://chainlist.org>
+/// List of chain IDs: <https://chainlist.org>
+///
+/// List of RPC endpoints: <https://www.alchemy.com/chain-connect>
 ///
 /// Note: This supercedes the `UserToken ChainId` type that specifies an integer but not the
 /// corresponding network name.
@@ -76,7 +78,7 @@ pub enum EthereumNetworkId {
 
 /// Solana networks, or "clusters".
 ///
-/// See: <https://docs.solana.com/clusters>
+/// See: <https://docs.solana.com/clusters> for more information, including RPC endpoints.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub enum SolanaNetworkId {
     #[default]
