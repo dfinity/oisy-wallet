@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use candid::{CandidType, Deserialize};
 
-use crate::types::Version;
+use crate::types::{network::marker_trait::Network, Version};
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct NetworkSettings {
@@ -12,6 +12,7 @@ pub struct NetworkSettings {
     pub is_testnet: bool,
 }
 
+/// A flat list of logical networks.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default, Ord, PartialOrd)]
 pub enum NetworkSettingsFor {
     #[default]
@@ -30,6 +31,67 @@ pub enum NetworkSettingsFor {
     BscMainnet,
     BscTestnet,
 }
+
+/// A list of logical networks grouped by type.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum NetworkId {
+    InternetComputer(ICPNetworkId),
+    Bitcoin(BitcoinNetworkId),
+    Ethereum(EthereumNetworkId),
+    Solana(SolanaNetworkId),
+}
+impl Network for NetworkId {}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+#[repr(u64)]
+pub enum ICPNetworkId {
+    #[default]
+    Mainnet,
+    Local,
+}
+impl Network for ICPNetworkId {}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+#[repr(u64)]
+pub enum BitcoinNetworkId {
+    #[default]
+    Mainnet,
+}
+impl Network for BitcoinNetworkId {}
+
+/// The authoritative list of EVM networks.
+///
+/// List of chain IDs: <https://chainlist.org>
+///
+/// List of RPC endpoints: <https://www.alchemy.com/chain-connect>
+///
+/// Note: This supercedes the `UserToken ChainId` type that specifies an integer but not the
+/// corresponding network name.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+#[repr(u64)]
+#[non_exhaustive] // Note: This allows chain IDs to be used that are not yet included in this list.
+pub enum EthereumNetworkId {
+    #[default]
+    Mainnet = 1,
+    BaseMainnet = 8_453,
+    BaseSepolia = 84_532,
+    BNBSmartChainMainnet = 56,
+    BNBSmartChainTestnet = 97,
+    Sepolia = 11_155_111,
+}
+impl Network for EthereumNetworkId {}
+/// Solana networks, or "clusters".
+///
+/// See: <https://docs.solana.com/clusters> for more information, including RPC endpoints.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+pub enum SolanaNetworkId {
+    #[default]
+    Mainnet,
+    Testnet,
+    Devnet,
+    Local,
+}
+impl Network for SolanaNetworkId {}
 
 pub type NetworkSettingsMap = BTreeMap<NetworkSettingsFor, NetworkSettings>;
 
