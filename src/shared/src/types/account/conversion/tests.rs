@@ -102,6 +102,34 @@ fn solana_test_vectors() -> Vec<TestVector<SolPrincipal>> {
         },
     ]
 }
+
+fn eth_test_vectors() -> Vec<TestVector<EthAddress>> {
+    vec![
+        TestVector {
+            name: "Ethereum: Valid Ethereum ID",
+            input: "0x0000000000000000000000000000000000000000",
+            expected: Ok(
+                EthAddress::from_str("0x0000000000000000000000000000000000000000").unwrap(),
+            ),
+        },
+        TestVector {
+            name: "Ethereum: Invalid length",
+            input: "0x000000000000000000000000000000000000000",
+            expected: Err(ParseError()),
+        },
+        TestVector {
+            name: "Ethereum: Missing prefix",
+            input: "0000000000000000000000000000000000000000",
+            expected: Err(ParseError()),
+        },
+        TestVector {
+            name: "Ethereum: Invalid characters",
+            input: "0x000000000000000000000000000000000000000O",
+            expected: Err(ParseError()),
+        },
+    ]
+}
+
 #[test]
 fn icrc2_subaccount_ids_can_be_parsed() {
     for vector in icrc2_subaccount_test_vectors() {
@@ -119,6 +147,13 @@ fn icrc2_account_ids_can_be_parsed() {
 #[test]
 fn solana_account_ids_can_be_parsed() {
     for vector in solana_test_vectors() {
+        assert_eq!(vector.expected, vector.input.parse(), "{}", vector.name);
+    }
+}
+
+#[test]
+fn eth_account_ids_can_be_parsed() {
+    for vector in eth_test_vectors() {
         assert_eq!(vector.expected, vector.input.parse(), "{}", vector.name);
     }
 }

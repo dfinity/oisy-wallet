@@ -69,8 +69,14 @@ impl FromStr for BtcAddress {
 impl FromStr for EthAddress {
     type Err = ParseError;
 
-    fn from_str(_: &str) -> Result<Self, Self::Err> {
-        todo!()
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Some(hex_encoded) = s.strip_prefix("0x") {
+            let mut bytes = [0u8; 20];
+            hex::decode_to_slice(hex_encoded, &mut bytes).map_err(|_| ParseError())?;
+            Ok(EthAddress::Public(s.to_string()))
+        } else {
+            Err(ParseError())
+        }
     }
 }
 
