@@ -1,6 +1,7 @@
 import type {
-	AllowSigningResponse,
 	_SERVICE as BackendService,
+	AllowSigningResponse,
+	CreateChallengeResponse,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -13,31 +14,29 @@ import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
 	mapBtcPendingTransactionError,
-	mapBtcSelectUserUtxosFeeError
+	mapBtcSelectUserUtxosFeeError,
+	mapCreateChallengeError
 } from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
-	AllowSigningParams,
-	AllowSigningResult,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
-	CreateChallengeResult,
 	GetUserProfileResponse,
 	SaveUserNetworksSettings,
 	SetUserShowTestnetsParams
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
-import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
+import { Canister, createServices, type QueryParams, toNullable } from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({
-		identity,
-		...options
-	}: CreateCanisterOptions<BackendService>): Promise<BackendCanister> {
+												identity,
+												...options
+											}: CreateCanisterOptions<BackendService>): Promise<BackendCanister> {
 		const agent = await getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<BackendService>({
@@ -101,11 +100,11 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	addUserCredential = ({
-		credentialJwt,
-		issuerCanisterId,
-		currentUserVersion,
-		credentialSpec
-	}: AddUserCredentialParams): Promise<AddUserCredentialResponse> => {
+												 credentialJwt,
+												 issuerCanisterId,
+												 currentUserVersion,
+												 credentialSpec
+											 }: AddUserCredentialParams): Promise<AddUserCredentialResponse> => {
 		const { add_user_credential } = this.caller({ certified: true });
 
 		return add_user_credential({
@@ -117,9 +116,9 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	btcAddPendingTransaction = async ({
-		txId,
-		...rest
-	}: BtcAddPendingTransactionParams): Promise<boolean> => {
+																			txId,
+																			...rest
+																		}: BtcAddPendingTransactionParams): Promise<boolean> => {
 		const { btc_add_pending_transaction } = this.caller({ certified: true });
 
 		const response = await btc_add_pending_transaction({
@@ -136,9 +135,9 @@ export class BackendCanister extends Canister<BackendService> {
 
 	// TODO: rename to plural
 	btcGetPendingTransaction = async ({
-		network,
-		address
-	}: BtcGetPendingTransactionParams): Promise<PendingTransaction[]> => {
+																			network,
+																			address
+																		}: BtcGetPendingTransactionParams): Promise<PendingTransaction[]> => {
 		const { btc_get_pending_transactions } = this.caller({ certified: true });
 
 		const response = await btc_get_pending_transactions({
@@ -157,10 +156,10 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	btcSelectUserUtxosFee = async ({
-		network,
-		minConfirmations,
-		amountSatoshis
-	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeResponse> => {
+																	 network,
+																	 minConfirmations,
+																	 amountSatoshis
+																 }: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeResponse> => {
 		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
 
 		const response = await btc_select_user_utxos_fee({
@@ -177,33 +176,35 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	// directly returning result and not the response
-	// TODO: check if this one is really needed because it may cause duplication of code with `allowSigningResult`
-	allowSigningResult = async ({ request }: AllowSigningParams): Promise<AllowSigningResult> => {
+	allowSigning = async (nonce?: bigint): Promise<AllowSigningResponse> => {
 		const { allow_signing } = this.caller({ certified: true });
-		return await allow_signing(toNullable(request));
-	};
 
-	allowSigning = async ({ request }: AllowSigningParams): Promise<AllowSigningResponse> => {
-		const response = await this.allowSigningResult({ request });
+		const result = await allow_signing(nonce !== undefined ? [{ nonce }] : []);
 
-		if ('Ok' in response) {
-			const { Ok } = response;
+		if ('Ok' in result) {
+			const { Ok } = result;
 			return Ok;
 		}
 
-		throw mapAllowSigningError(response.Err);
+		throw mapAllowSigningError(result.Err);
 	};
 
-	createPowChallengeResult = (): Promise<CreateChallengeResult> => {
+	createPowChallenge = async (): Promise<CreateChallengeResponse> => {
 		const { create_pow_challenge } = this.caller({ certified: true });
-		return create_pow_challenge();
+
+		const result = await create_pow_challenge();
+		if ('Ok' in result) {
+			const { Ok } = result;
+			return Ok;
+		}
+
+		throw mapCreateChallengeError(result.Err);
 	};
 
 	addUserHiddenDappId = async ({
-		dappId,
-		currentUserVersion
-	}: AddUserHiddenDappIdParams): Promise<void> => {
+																 dappId,
+																 currentUserVersion
+															 }: AddUserHiddenDappIdParams): Promise<void> => {
 		const { add_user_hidden_dapp_id } = this.caller({ certified: true });
 
 		await add_user_hidden_dapp_id({
@@ -213,9 +214,9 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	setUserShowTestnets = async ({
-		showTestnets,
-		currentUserVersion
-	}: SetUserShowTestnetsParams): Promise<void> => {
+																 showTestnets,
+																 currentUserVersion
+															 }: SetUserShowTestnetsParams): Promise<void> => {
 		const { set_user_show_testnets } = this.caller({ certified: true });
 
 		await set_user_show_testnets({
@@ -225,9 +226,9 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	updateUserNetworkSettings = async ({
-		networks,
-		currentUserVersion
-	}: SaveUserNetworksSettings): Promise<void> => {
+																			 networks,
+																			 currentUserVersion
+																		 }: SaveUserNetworksSettings): Promise<void> => {
 		const { update_user_network_settings } = this.caller({ certified: true });
 
 		await update_user_network_settings({
