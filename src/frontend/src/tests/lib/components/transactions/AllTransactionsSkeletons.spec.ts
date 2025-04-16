@@ -34,6 +34,7 @@ describe('AllTransactionsSkeletons', () => {
 
 		Array.from({ length: 5 }).forEach((_, i) => {
 			const skeleton = getByTestId(`${testIdPrefix}-${i}`);
+
 			expect(skeleton).toBeInTheDocument();
 		});
 	});
@@ -58,6 +59,7 @@ describe('AllTransactionsSkeletons', () => {
 
 			Array.from({ length: 5 }).forEach((_, i) => {
 				const skeleton = getByTestId(`${testIdPrefix}-${i}`);
+
 				expect(skeleton).toBeInTheDocument();
 			});
 		});
@@ -73,6 +75,7 @@ describe('AllTransactionsSkeletons', () => {
 				const skeleton: HTMLParagraphElement | null = container.querySelector(
 					`div[data-tid="${testIdPrefix}-${i}"]`
 				);
+
 				expect(skeleton).toBeDefined();
 			});
 
@@ -84,6 +87,7 @@ describe('AllTransactionsSkeletons', () => {
 				const skeleton: HTMLParagraphElement | null = container.querySelector(
 					`div[data-tid="${testIdPrefix}-${i}"]`
 				);
+
 				expect(skeleton).toBeNull();
 			});
 		});
@@ -108,6 +112,7 @@ describe('AllTransactionsSkeletons', () => {
 				const skeleton: HTMLParagraphElement | null = container.querySelector(
 					`div[data-tid="${testIdPrefix}-${i}"]`
 				);
+
 				expect(skeleton).toBeDefined();
 			});
 		});

@@ -100,6 +100,7 @@ describe('ic-wallet-balance.worker', () => {
 			tests: () => {
 				it('should start the scheduler with an interval', async () => {
 					await scheduler.start(startData);
+          
 					expect(scheduler['timer']['timer']).toBeDefined();
 				});
 
@@ -112,6 +113,7 @@ describe('ic-wallet-balance.worker', () => {
 
 				it('should stop the scheduler', () => {
 					scheduler.stop();
+          
 					expect(scheduler['timer']['timer']).toBeUndefined();
 				});
 
