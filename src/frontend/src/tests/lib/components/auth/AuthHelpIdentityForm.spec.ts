@@ -30,16 +30,19 @@ describe('AuthHelpIdentityForm', () => {
 		});
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 
 		expect(getByText(get(i18n).auth.help.text.identity_legacy_description)).toBeInTheDocument();
 
 		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
 		expect(signInButton).toBeInTheDocument();
 		expect(getByText(get(i18n).auth.help.text.identity_legacy_sign_in)).toBeInTheDocument();
 
 		const learnMoreAnchor: HTMLAnchorElement | null =
 			container.querySelector(learnMoreAnchorSelector);
+
 		expect(learnMoreAnchor).toBeInTheDocument();
 		expect(learnMoreAnchor?.href).toBe(OISY_FIND_INTERNET_IDENTITY_URL);
 		expect(
@@ -47,9 +50,11 @@ describe('AuthHelpIdentityForm', () => {
 		).toBeInTheDocument();
 
 		const backButton: HTMLButtonElement | null = container.querySelector(backButtonSelector);
+
 		expect(backButton).toBeInTheDocument();
 
 		const doneButton: HTMLButtonElement | null = container.querySelector(doneButtonSelector);
+
 		expect(doneButton).toBeInTheDocument();
 	});
 
@@ -70,24 +75,33 @@ describe('AuthHelpIdentityForm', () => {
 		expect(authSpy).not.toHaveBeenCalled();
 
 		const backButton: HTMLButtonElement | null = container.querySelector(backButtonSelector);
+
 		expect(backButton).toBeInTheDocument();
+
 		await waitFor(() => {
 			backButton?.click();
+
 			expect(onBackMock).toHaveBeenCalledOnce();
 		});
 
 		const doneButton: HTMLButtonElement | null = container.querySelector(doneButtonSelector);
+
 		expect(doneButton).toBeInTheDocument();
+
 		await waitFor(() => {
 			doneButton?.click();
+
 			expect(onDoneMock).toHaveBeenCalledOnce();
 		});
 
 		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
+
 		expect(signInButton).toBeInTheDocument();
+
 		await waitFor(() => {
 			signInButton?.click();
 		});
+
 		expect(onDoneMock).toHaveBeenCalledTimes(2);
 		expect(authSpy).toHaveBeenCalledWith({ domain: 'ic0.app' });
 	});

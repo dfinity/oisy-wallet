@@ -33,6 +33,7 @@ describe('AuthHelpForm', () => {
 		});
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 
 		expect(getByText(get(i18n).auth.help.text.subtitle)).toBeInTheDocument();
@@ -40,20 +41,24 @@ describe('AuthHelpForm', () => {
 		const lostIdentityButton: HTMLButtonElement | null = container.querySelector(
 			lostIdentityButtonSelector
 		);
+
 		expect(lostIdentityButton).toBeInTheDocument();
 		expect(getByText(get(i18n).auth.help.text.lost_identity)).toBeInTheDocument();
 
 		const securityButton: HTMLButtonElement | null =
 			container.querySelector(securityButtonSelector);
+
 		expect(securityButton).toBeInTheDocument();
 		expect(getByText(get(i18n).auth.help.text.security)).toBeInTheDocument();
 
 		const gotConfusedButton: HTMLButtonElement | null =
 			container.querySelector(gotConfusedButtonSelector);
+
 		expect(gotConfusedButton).toBeInTheDocument();
 		expect(getByText(get(i18n).auth.help.text.got_confused)).toBeInTheDocument();
 
 		const otherButton: HTMLButtonElement | null = container.querySelector(otherButtonSelector);
+
 		expect(otherButton).toBeInTheDocument();
 		expect(getByText(get(i18n).auth.help.text.other)).toBeInTheDocument();
 
@@ -80,37 +85,53 @@ describe('AuthHelpForm', () => {
 		const lostIdentityButton: HTMLButtonElement | null = container.querySelector(
 			lostIdentityButtonSelector
 		);
+
 		expect(lostIdentityButton).toBeInTheDocument();
+
 		await waitFor(() => {
 			lostIdentityButton?.click();
+
 			expect(onLostIdentityMock).toHaveBeenCalledOnce();
 		});
+
 		expect(analyticSpy).toHaveBeenCalledWith({ name: TRACK_HELP_LOST_INTERNET_IDENTITY });
 
 		const securityButton: HTMLButtonElement | null =
 			container.querySelector(securityButtonSelector);
+
 		expect(securityButton).toBeInTheDocument();
+
 		await waitFor(() => {
 			securityButton?.click();
+
 			expect(onOtherMock).toHaveBeenCalledTimes(1);
 		});
+
 		expect(analyticSpy).toHaveBeenCalledWith({ name: TRACK_HELP_CONCERNED_ABOUT_SECURITY });
 
 		const gotConfusedButton: HTMLButtonElement | null =
 			container.querySelector(gotConfusedButtonSelector);
+
 		expect(gotConfusedButton).toBeInTheDocument();
+
 		await waitFor(() => {
 			gotConfusedButton?.click();
+
 			expect(onOtherMock).toHaveBeenCalledTimes(2);
 		});
+
 		expect(analyticSpy).toHaveBeenCalledWith({ name: TRACK_HELP_GOT_CONFUSED });
 
 		const otherButton: HTMLButtonElement | null = container.querySelector(otherButtonSelector);
+
 		expect(otherButton).toBeInTheDocument();
+
 		await waitFor(() => {
 			otherButton?.click();
+
 			expect(onOtherMock).toHaveBeenCalledTimes(3);
 		});
+
 		expect(analyticSpy).toHaveBeenCalledWith({ name: TRACK_HELP_OTHER });
 	});
 });
