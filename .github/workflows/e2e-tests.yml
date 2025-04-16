@@ -177,7 +177,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: snapshots-${{ matrix.os }}
-          path: e2e/**/*.spec.ts-snapshots/**/*-${{ steps.set_snapshot_output.outputs.os_suffix }}.png
+          path: e2e/snapshots/**/*.spec.ts-snapshots/**/*-${{ steps.set_snapshot_output.outputs.os_suffix }}.png
           retention-days: 3
 
   finalize-snapshots-update:
@@ -226,14 +226,14 @@ jobs:
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: snapshots-ubuntu-24.04
-          path: e2e
+          path: e2e/snapshots
 
       - name: Download macOS Snapshots
         if: env.macos_status == 'true'
         uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: snapshots-macos-14
-          path: e2e
+          path: e2e/snapshots
 
       - name: Check for Final Changes
         id: e2e-check-snapshots
