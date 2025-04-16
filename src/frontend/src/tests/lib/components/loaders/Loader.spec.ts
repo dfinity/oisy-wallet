@@ -178,6 +178,7 @@ describe('Loader', () => {
 
 			await waitFor(() => {
 				const banner = getByAltText(altText);
+
 				expect(banner).toBeInTheDocument();
 			});
 		});
