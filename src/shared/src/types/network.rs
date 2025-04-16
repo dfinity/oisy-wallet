@@ -74,6 +74,9 @@ pub enum EthereumNetworkId {
     Sepolia = 11155111,
 }
 
+/// Solana networks, or "clusters".
+///
+/// See: <https://docs.solana.com/clusters>
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub enum SolanaNetworkId {
     #[default]
