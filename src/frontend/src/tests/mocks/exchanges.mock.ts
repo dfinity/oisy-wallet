@@ -1,7 +1,7 @@
 import type { CoingeckoSimpleTokenPrice } from '$lib/types/coingecko';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { Token } from '$lib/types/token';
 import { mockTokens } from './tokens.mock';
-import type {Token} from "$lib/types/token";
 
 export const mockOneUsd = 1;
 
@@ -12,10 +12,10 @@ export const mockExchanges: ExchangesData = mockTokens.reduce<ExchangesData>((ac
 
 export const getMockExchanges = (token: Token, usd: number) => {
 	const exchangeData = mockExchanges[token.id];
-	if(!exchangeData) return null;
+	if (!exchangeData) {return null;}
 	exchangeData.usd = usd;
 	return mockExchanges;
-}
+};
 
 export const createMockCoingeckoTokenPrice = (
 	overrides: Partial<CoingeckoSimpleTokenPrice> = {}

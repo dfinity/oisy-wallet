@@ -30,7 +30,9 @@ import type {
 	Transaction
 } from '$lib/types/transaction';
 import {
-	areTransactionsStoresLoading, filterReceivedMicroTransactions, getReceivedMicroTransactions,
+	areTransactionsStoresLoading,
+	filterReceivedMicroTransactions,
+	getReceivedMicroTransactions,
 	isTransactionsStoreEmpty,
 	isTransactionsStoreInitialized,
 	isTransactionsStoreNotInitialized,
@@ -40,11 +42,10 @@ import {
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
+import { getMockExchanges, mockExchanges } from '$tests/mocks/exchanges.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
-import type {ExchangesData} from "$lib/types/exchange";
-import {getMockExchanges, mockExchanges} from "$tests/mocks/exchanges.mock";
-import {afterEach, beforeEach} from "vitest";
+import { afterEach, beforeEach } from 'vitest';
 
 describe('transactions.utils', () => {
 	describe('mapAllTransactionsUi', () => {
@@ -392,12 +393,15 @@ describe('transactions.utils', () => {
 
 		const mockEthMainnetTransactions: Transaction[] = createMockEthTransactions(5);
 		const mockEthTransactions: EthTransactionsData = {
-			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions,
+			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions
 		};
 
 		const mockIcTransactionsUi: IcTransactionUi[] = createMockIcTransactionsUi(7);
 		const mockIcTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
-			[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data: {...data, type: 'receive'}, certified: false }))
+			[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({
+				data: { ...data, type: 'receive' },
+				certified: false
+			}))
 		};
 
 		const rest = {
@@ -408,10 +412,10 @@ describe('transactions.utils', () => {
 		};
 
 		afterEach(() => {
-			getMockExchanges(ICP_TOKEN, 1)
-			getMockExchanges(BTC_MAINNET_TOKEN, 1)
-			getMockExchanges(ETHEREUM_TOKEN, 1)
-		})
+			getMockExchanges(ICP_TOKEN, 1);
+			getMockExchanges(BTC_MAINNET_TOKEN, 1);
+			getMockExchanges(ETHEREUM_TOKEN, 1);
+		});
 
 		describe('filterReceivedMicroTransactions', () => {
 			it('should filter all received micro transactions', () => {
@@ -424,12 +428,16 @@ describe('transactions.utils', () => {
 				});
 
 				let filteredTransactions = filterReceivedMicroTransactions({
-					transactions, exchanges: getMockExchanges(ICP_TOKEN, 20000000000000000000000) ?? mockExchanges});
+					transactions,
+					exchanges: getMockExchanges(ICP_TOKEN, 20000000000000000000000) ?? mockExchanges
+				});
 
 				expect(filteredTransactions.length).toBe(7);
 
 				filteredTransactions = filterReceivedMicroTransactions({
-					transactions, exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges});
+					transactions,
+					exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges
+				});
 
 				expect(filteredTransactions.length).toBe(10);
 			});
@@ -448,7 +456,9 @@ describe('transactions.utils', () => {
 				});
 
 				const filteredTransactions = filterReceivedMicroTransactions({
-					transactions, exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges});
+					transactions,
+					exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges
+				});
 
 				expect(filteredTransactions.length).toBe(10);
 			});
@@ -465,12 +475,16 @@ describe('transactions.utils', () => {
 				});
 
 				let microTransactions = getReceivedMicroTransactions({
-					transactions, exchanges: getMockExchanges(ICP_TOKEN, 20000000000000000000000) ?? mockExchanges});
+					transactions,
+					exchanges: getMockExchanges(ICP_TOKEN, 20000000000000000000000) ?? mockExchanges
+				});
 
 				expect(microTransactions.length).toBe(8);
 
 				microTransactions = getReceivedMicroTransactions({
-					transactions, exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges});
+					transactions,
+					exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges
+				});
 
 				expect(microTransactions.length).toBe(5);
 			});
@@ -489,13 +503,13 @@ describe('transactions.utils', () => {
 				});
 
 				const microTransactions = getReceivedMicroTransactions({
-					transactions, exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges});
+					transactions,
+					exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges
+				});
 
 				expect(microTransactions.length).toBe(5);
 			});
 		});
-
-
 	});
 
 	describe('sortTransactions', () => {
