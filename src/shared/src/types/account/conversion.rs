@@ -48,8 +48,13 @@ impl FromStr for Icrcv2AccountId {
 impl FromStr for SolPrincipal {
     type Err = ParseError;
 
-    fn from_str(_: &str) -> Result<Self, Self::Err> {
-        todo!()
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let bytes = bs58::decode(s).into_vec().map_err(|_| ParseError())?;
+        if bytes.len() == 32 {
+            Ok(SolPrincipal(s.to_string()))
+        } else {
+            Err(ParseError())
+        }
     }
 }
 

@@ -80,6 +80,28 @@ fn icrc2_test_vectors() -> Vec<TestVector<Icrcv2AccountId>> {
     ]
 }
 
+fn solana_test_vectors() -> Vec<TestVector<SolPrincipal>> {
+    vec![
+        TestVector {
+            name: "Solana: Valid Solana ID",
+            input: "14grJpemFaf88c8tiVb77W7TYg2W3ir6pfkKz3YjhhZ5",
+            expected: Ok(SolPrincipal(
+                "14grJpemFaf88c8tiVb77W7TYg2W3ir6pfkKz3YjhhZ5".to_string(),
+            )),
+        },
+        TestVector {
+            name: "Solana: Invalid base58",
+            input: "14grJpemFaf88c8tiVb77 W7TYg2W3ir6pfkKz3YjhhZ5", /* Valid ID witha  space
+                                                                     * inserted */
+            expected: Err(ParseError()),
+        },
+        TestVector {
+            name: "Solana: Invalid length",
+            input: "J8kUFc4Vo61", // Base 58 encoded "foghorn"
+            expected: Err(ParseError()),
+        },
+    ]
+}
 #[test]
 fn icrc2_subaccount_ids_can_be_parsed() {
     for vector in icrc2_subaccount_test_vectors() {
@@ -90,6 +112,13 @@ fn icrc2_subaccount_ids_can_be_parsed() {
 #[test]
 fn icrc2_account_ids_can_be_parsed() {
     for vector in icrc2_test_vectors() {
+        assert_eq!(vector.expected, vector.input.parse(), "{}", vector.name);
+    }
+}
+
+#[test]
+fn solana_account_ids_can_be_parsed() {
+    for vector in solana_test_vectors() {
         assert_eq!(vector.expected, vector.input.parse(), "{}", vector.name);
     }
 }
