@@ -18,6 +18,7 @@ pub mod signer;
 pub mod snapshot;
 pub mod token;
 pub mod token_id;
+pub mod token_standard;
 pub mod transaction;
 pub mod user_profile;
 pub mod verifiable_credential;
