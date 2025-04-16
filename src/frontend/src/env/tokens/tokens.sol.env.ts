@@ -16,7 +16,7 @@ import sol from '$sol/assets/sol.svg';
 
 export const SOLANA_DEFAULT_DECIMALS = 9;
 
-export const SOLANA_SYMBOL = 'SOL';
+const SOLANA_SYMBOL = 'SOL';
 
 export const SOLANA_TOKEN_ID: TokenId = parseTokenId(SOLANA_SYMBOL);
 
@@ -35,7 +35,7 @@ export const SOLANA_TOKEN: RequiredToken = {
 	groupData: SOLANA_TOKEN_GROUP
 };
 
-export const SOLANA_TESTNET_SYMBOL = 'SOL (Testnet)';
+const SOLANA_TESTNET_SYMBOL = 'SOL (Testnet)';
 
 export const SOLANA_TESTNET_TOKEN_ID: TokenId = parseTokenId(SOLANA_TESTNET_SYMBOL);
 
@@ -51,7 +51,7 @@ export const SOLANA_TESTNET_TOKEN: RequiredToken = {
 	groupData: SOLANA_TESTNET_TOKEN_GROUP
 };
 
-export const SOLANA_DEVNET_SYMBOL = 'SOL (Devnet)';
+const SOLANA_DEVNET_SYMBOL = 'SOL (Devnet)';
 
 export const SOLANA_DEVNET_TOKEN_ID: TokenId = parseTokenId(SOLANA_DEVNET_SYMBOL);
 
@@ -67,7 +67,7 @@ export const SOLANA_DEVNET_TOKEN: RequiredToken = {
 	groupData: SOLANA_DEVNET_TOKEN_GROUP
 };
 
-export const SOLANA_LOCAL_SYMBOL = 'SOL (Local)';
+const SOLANA_LOCAL_SYMBOL = 'SOL (Local)';
 
 export const SOLANA_LOCAL_TOKEN_ID: TokenId = parseTokenId(SOLANA_LOCAL_SYMBOL);
 

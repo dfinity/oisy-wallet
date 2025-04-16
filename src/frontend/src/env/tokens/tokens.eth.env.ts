@@ -10,7 +10,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 
 export const ETHEREUM_DEFAULT_DECIMALS = 18;
 
-export const ETHEREUM_SYMBOL = 'ETH';
+const ETHEREUM_SYMBOL = 'ETH';
 
 export const ETHEREUM_TOKEN_ID: TokenId = parseTokenId(ETHEREUM_SYMBOL);
 

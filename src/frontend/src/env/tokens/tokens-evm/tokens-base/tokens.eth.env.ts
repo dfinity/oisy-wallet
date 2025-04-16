@@ -12,7 +12,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 
 const BASE_ETH_DECIMALS = 18;
 
-export const BASE_ETH_SYMBOL = 'ETH';
+const BASE_ETH_SYMBOL = 'ETH';
 
 export const BASE_ETH_TOKEN_ID: TokenId = parseTokenId(BASE_ETH_SYMBOL);
 
@@ -31,7 +31,7 @@ export const BASE_ETH_TOKEN: RequiredToken = {
 	groupData: BASE_ETH_TOKEN_GROUP
 };
 
-export const BASE_SEPOLIA_ETH_SYMBOL = 'SepoliaETH';
+const BASE_SEPOLIA_ETH_SYMBOL = 'SepoliaETH';
 
 export const BASE_SEPOLIA_ETH_TOKEN_ID: TokenId = parseTokenId(BASE_SEPOLIA_ETH_SYMBOL);
 
