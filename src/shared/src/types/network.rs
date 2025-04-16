@@ -12,6 +12,7 @@ pub struct NetworkSettings {
     pub is_testnet: bool,
 }
 
+/// A flat list of logical networks.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default, Ord, PartialOrd)]
 pub enum NetworkSettingsFor {
     #[default]
@@ -29,6 +30,57 @@ pub enum NetworkSettingsFor {
     BaseSepolia,
     BscMainnet,
     BscTestnet,
+}
+
+/// A list of logical networks grouped by type.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum NetworkId {
+    InternetComputer(ICPNetworkId),
+    Bitcoin(BitcoinNetworkId),
+    Ethereum(EthereumNetworkId),
+    Solana(SolanaNetworkId),
+}
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+#[repr(u64)]
+pub enum ICPNetworkId {
+    #[default]
+    Mainnet,
+    Local,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+#[repr(u64)]
+pub enum BitcoinNetworkId {
+    #[default]
+    Mainnet,
+}
+
+/// The authoritative list of EVM networks.
+///
+/// See: <https://chainlist.org>
+///
+/// Note: This supercedes the `UserToken ChainId` type that specifies an integer but not the
+/// corresponding network name.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+#[repr(u64)]
+#[non_exhaustive] // Note: This allows chain IDs to be used that are not yet included in this list.
+pub enum EthereumNetworkId {
+    #[default]
+    Mainnet = 1,
+    BaseMainnet = 8453,
+    BaseSepolia = 84532,
+    BNBSmartChainMainnet = 56,
+    BNBSmartChainTestnet = 97,
+    Sepolia = 11155111,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+pub enum SolanaNetworkId {
+    #[default]
+    Mainnet,
+    Testnet,
+    Devnet,
+    Local,
 }
 
 pub type NetworkSettingsMap = BTreeMap<NetworkSettingsFor, NetworkSettings>;
