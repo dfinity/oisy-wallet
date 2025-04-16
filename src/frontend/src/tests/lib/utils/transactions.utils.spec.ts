@@ -412,9 +412,9 @@ describe('transactions.utils', () => {
 		};
 
 		afterEach(() => {
-			getMockExchanges(ICP_TOKEN, 1);
-			getMockExchanges(BTC_MAINNET_TOKEN, 1);
-			getMockExchanges(ETHEREUM_TOKEN, 1);
+			getMockExchanges({token: ICP_TOKEN, usd: 1});
+			getMockExchanges({ token: BTC_MAINNET_TOKEN, usd: 1});
+			getMockExchanges({ token: ETHEREUM_TOKEN, usd: 1});
 		});
 
 		describe('filterReceivedMicroTransactions', () => {
@@ -429,14 +429,14 @@ describe('transactions.utils', () => {
 
 				let filteredTransactions = filterReceivedMicroTransactions({
 					transactions,
-					exchanges: getMockExchanges(ICP_TOKEN, 20000000000000000000000) ?? mockExchanges
+					exchanges: getMockExchanges({token: ICP_TOKEN, usd: 20000000000000000000000}) ?? mockExchanges
 				});
 
 				expect(filteredTransactions.length).toBe(7);
 
 				filteredTransactions = filterReceivedMicroTransactions({
 					transactions,
-					exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges
+					exchanges: getMockExchanges({token: BTC_MAINNET_TOKEN, usd: 20000000000000000000000}) ?? mockExchanges
 				});
 
 				expect(filteredTransactions.length).toBe(10);
@@ -457,7 +457,7 @@ describe('transactions.utils', () => {
 
 				const filteredTransactions = filterReceivedMicroTransactions({
 					transactions,
-					exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges
+					exchanges: getMockExchanges({token: BTC_MAINNET_TOKEN, usd: 20000000000000000000000}) ?? mockExchanges
 				});
 
 				expect(filteredTransactions.length).toBe(10);
@@ -476,14 +476,14 @@ describe('transactions.utils', () => {
 
 				let microTransactions = getReceivedMicroTransactions({
 					transactions,
-					exchanges: getMockExchanges(ICP_TOKEN, 20000000000000000000000) ?? mockExchanges
+					exchanges: getMockExchanges({token: ICP_TOKEN, usd: 20000000000000000000000}) ?? mockExchanges
 				});
 
 				expect(microTransactions.length).toBe(8);
 
 				microTransactions = getReceivedMicroTransactions({
 					transactions,
-					exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges
+					exchanges: getMockExchanges({token: BTC_MAINNET_TOKEN, usd: 20000000000000000000000}) ?? mockExchanges
 				});
 
 				expect(microTransactions.length).toBe(5);
@@ -504,7 +504,7 @@ describe('transactions.utils', () => {
 
 				const microTransactions = getReceivedMicroTransactions({
 					transactions,
-					exchanges: getMockExchanges(BTC_MAINNET_TOKEN, 20000000000000000000000) ?? mockExchanges
+					exchanges: getMockExchanges({token: BTC_MAINNET_TOKEN, usd: 20000000000000000000000}) ?? mockExchanges
 				});
 
 				expect(microTransactions.length).toBe(5);
