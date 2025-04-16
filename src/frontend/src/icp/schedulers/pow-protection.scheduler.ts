@@ -1,7 +1,10 @@
-import type { AllowSigningResponse, CreateChallengeResponse } from '$declarations/backend/backend.did';
+import type {
+	AllowSigningResponse,
+	CreateChallengeResponse
+} from '$declarations/backend/backend.did';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
-import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
+import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import { solvePowChallenge } from '$lib/services/pow.services';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
 import { toNullable } from '@dfinity/utils';
