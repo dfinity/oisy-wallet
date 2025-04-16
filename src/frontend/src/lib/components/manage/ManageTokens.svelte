@@ -6,12 +6,11 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
-	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import type { Token } from '$lib/types/token';
-	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
@@ -27,8 +26,6 @@
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
-	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
-	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import type { ExchangesData } from '$lib/types/exchange';
@@ -41,6 +38,8 @@
 
 	let { initialSearch, infoElement }: { initialSearch: string | undefined; infoElement: Snippet } =
 		$props();
+
+	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
@@ -76,7 +75,7 @@
 	);
 
 	$effect(() => {
-		getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY).setTokens(allTokensSorted);
+		setTokens(allTokensSorted);
 	});
 
 	let loading = $erc20UserTokensNotInitialized;
