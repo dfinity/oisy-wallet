@@ -74,6 +74,17 @@ describe('LoaderEthBalances', () => {
 		});
 	});
 
+	it('should not load balances if no address is set', async () => {
+		ethAddressStore.reset();
+
+		render(LoaderEthBalances);
+
+		await vi.advanceTimersByTimeAsync(1000);
+
+		expect(loadEthBalances).not.toHaveBeenCalled();
+		expect(loadErc20Balances).not.toHaveBeenCalled();
+	});
+
 	it('should re-trigger loading balances when address changes', async () => {
 		render(LoaderEthBalances);
 
