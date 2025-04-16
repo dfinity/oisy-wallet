@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use candid::{CandidType, Deserialize};
 
-use crate::types::Version;
+use crate::types::{network::marker_trait::Network, Version};
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct NetworkSettings {
@@ -40,6 +40,8 @@ pub enum NetworkId {
     Ethereum(EthereumNetworkId),
     Solana(SolanaNetworkId),
 }
+impl Network for NetworkId {}
+
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 #[repr(u64)]
 pub enum ICPNetworkId {
@@ -47,6 +49,7 @@ pub enum ICPNetworkId {
     Mainnet,
     Local,
 }
+impl Network for ICPNetworkId {}
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 #[repr(u64)]
@@ -54,6 +57,7 @@ pub enum BitcoinNetworkId {
     #[default]
     Mainnet,
 }
+impl Network for BitcoinNetworkId {}
 
 /// The authoritative list of EVM networks.
 ///
@@ -75,7 +79,7 @@ pub enum EthereumNetworkId {
     BNBSmartChainTestnet = 97,
     Sepolia = 11_155_111,
 }
-
+impl Network for EthereumNetworkId {}
 /// Solana networks, or "clusters".
 ///
 /// See: <https://docs.solana.com/clusters> for more information, including RPC endpoints.
@@ -87,6 +91,7 @@ pub enum SolanaNetworkId {
     Devnet,
     Local,
 }
+impl Network for SolanaNetworkId {}
 
 pub type NetworkSettingsMap = BTreeMap<NetworkSettingsFor, NetworkSettings>;
 
