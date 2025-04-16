@@ -39,8 +39,6 @@
 	let { initialSearch, infoElement }: { initialSearch: string | undefined; infoElement: Snippet } =
 		$props();
 
-	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
-
 	const dispatch = createEventDispatcher();
 
 	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
@@ -75,7 +73,7 @@
 	);
 
 	$effect(() => {
-		setTokens(allTokensSorted);
+		getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY).setTokens(allTokensSorted);
 	});
 
 	let loading = $erc20UserTokensNotInitialized;
