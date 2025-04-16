@@ -30,7 +30,10 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
-		await allowSigning({ identity });
+		await allowSigning({
+			identity,
+			nonce: [] // Default empty nonce
+		});
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);
@@ -62,11 +65,11 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialized (user profile settings and addresses are loaded).
  */
 export const initLoader = async ({
-	identity,
-	validateAddresses,
-	progressAndLoad,
-	setProgressModal
-}: {
+																	 identity,
+																	 validateAddresses,
+																	 progressAndLoad,
+																	 setProgressModal
+																 }: {
 	identity: OptionIdentity;
 	validateAddresses: () => void;
 	progressAndLoad: () => Promise<void>;
@@ -100,14 +103,14 @@ export const initLoader = async ({
 
 	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 	setProgressModal(true);
+	if (!POW_ENABLED) {
+		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
-	const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
-
-	if (!initSignerAllowanceSuccess) {
-		// Sign-out is handled within the service.
-		return;
+		if (!initSignerAllowanceSuccess) {
+			// Sign-out is handled within the service.
+			return;
+		}
 	}
-
 	const { success: addressSuccess } = await loadAddresses(
 		err?.map(({ networkId }) => networkId) ?? []
 	);
