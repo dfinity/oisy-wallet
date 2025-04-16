@@ -15,7 +15,7 @@
 
 	let {
 		networkSelectorViewOnly = false,
-		loading = false,
+		loading,
 		tokenListItem,
 		toolbar,
 		noResults
@@ -55,7 +55,7 @@
 		class="dropdown-button h-[3.375rem] rounded-lg border border-solid border-primary"
 		class:hover:border-brand-primary={!networkSelectorViewOnly}
 		disabled={networkSelectorViewOnly}
-		on:click={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
+		onclick={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
 		aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 	>
 		<NetworkSwitcherLogo network={$filterNetwork} />
@@ -68,13 +68,13 @@
 	<div class="gap-6 overflow-y-auto overscroll-contain">
 		<TokensSkeletons {loading}>
 			{#if noTokensMatch}
-				{#if noResults}
-					{@render noResults()}
-				{:else}
-					<p class="text-primary">
-						{$i18n.core.text.no_results}
-					</p>
-				{/if}
+					{#if noResults}
+						{@render noResults()}
+					{:else}
+						<p class="text-primary">
+							{$i18n.core.text.no_results}
+						</p>
+					{/if}
 			{:else}
 				<ul class="list-none">
 					{#each $filteredTokens as token (token.id)}
