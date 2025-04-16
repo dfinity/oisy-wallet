@@ -209,17 +209,17 @@ describe('btc-wallet.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
 				});
 
-		it('should trigger postMessage with error on third try', async () => {
-			const err = new Error('test');
-			signerCanisterMock.getBtcBalance.mockRejectedValue(err);
+				it('should trigger postMessage with error on third try', async () => {
+					const err = new Error('test');
+					signerCanisterMock.getBtcBalance.mockRejectedValue(err);
 
-			await scheduler.start(startData);
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					await scheduler.start(startData);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-			// idle and in_progress
-			// error
-			expect(postMessageMock).toHaveBeenCalledTimes(7);
+					// idle and in_progress
+					// error
+					expect(postMessageMock).toHaveBeenCalledTimes(7);
 
 					expect(postMessageMock).toHaveBeenCalledWith({
 						msg: 'syncBtcWalletError',
