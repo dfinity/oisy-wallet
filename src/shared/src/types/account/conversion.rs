@@ -12,8 +12,15 @@ use super::{
 #[cfg(test)]
 mod tests;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, CandidType, Serialize, Deserialize)]
-pub struct ParseError();
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, CandidType, Serialize, Deserialize, Default)]
+pub enum ParseError {
+    #[default]
+    UnsupportedFormat,
+    InvalidLength,
+    InvalidPrefix,
+    InvalidChecksum,
+    InvalidEncoding,
+}
 
 impl FromStr for TokenAccountId {
     type Err = ParseError;
@@ -24,6 +31,7 @@ impl FromStr for TokenAccountId {
             .or_else(|_| BtcAddress::from_str(s).map(TokenAccountId::Btc))
             .or_else(|_| EthAddress::from_str(s).map(TokenAccountId::Eth))
             .or_else(|_| Icrcv2AccountId::from_str(s).map(TokenAccountId::Icrcv2))
+            .or_else(|_| Err(ParseError::UnsupportedFormat))
     }
 }
 
@@ -33,15 +41,15 @@ impl FromStr for Icrcv2AccountId {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.contains('-') {
             Ok(Icrcv2AccountId::WithPrincipal {
-                owner: Principal::from_text(s).map_err(|_| ParseError())?,
+                owner: Principal::from_text(s).map_err(|_| ParseError::InvalidEncoding)?,
                 subaccount: None,
             })
         } else if s.len() == 64 {
             Ok(Icrcv2AccountId::Account(
-                IcrcSubaccountId::from_str(s).map_err(|_| ParseError())?,
+                IcrcSubaccountId::from_str(s).map_err(|_| ParseError::InvalidEncoding)?,
             ))
         } else {
-            Err(ParseError())
+            Err(ParseError::UnsupportedFormat)
         }
     }
 }
@@ -50,11 +58,13 @@ impl FromStr for SolPrincipal {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes = bs58::decode(s).into_vec().map_err(|_| ParseError())?;
+        let bytes = bs58::decode(s)
+            .into_vec()
+            .map_err(|_| ParseError::InvalidEncoding)?;
         if bytes.len() == 32 {
             Ok(SolPrincipal(s.to_string()))
         } else {
-            Err(ParseError())
+            Err(ParseError::InvalidLength)
         }
     }
 }
@@ -64,11 +74,15 @@ impl FromStr for EthAddress {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Some(hex_encoded) = s.strip_prefix("0x") {
+            if hex_encoded.len() != 40 {
+                return Err(ParseError::InvalidLength);
+            }
             let mut bytes = [0u8; 20];
-            hex::decode_to_slice(hex_encoded, &mut bytes).map_err(|_| ParseError())?;
+            hex::decode_to_slice(hex_encoded, &mut bytes)
+                .map_err(|_| ParseError::InvalidEncoding)?;
             Ok(EthAddress::Public(s.to_string()))
         } else {
-            Err(ParseError())
+            Err(ParseError::InvalidPrefix)
         }
     }
 }
@@ -79,10 +93,10 @@ impl FromStr for IcrcSubaccountId {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.len() == 64 {
             let mut bytes = [0u8; 32];
-            hex::decode_to_slice(s, &mut bytes).map_err(|_| ParseError())?;
+            hex::decode_to_slice(s, &mut bytes).map_err(|_| ParseError::InvalidEncoding)?;
             Ok(IcrcSubaccountId(bytes))
         } else {
-            Err(ParseError())
+            Err(ParseError::InvalidLength)
         }
     }
 }
@@ -95,6 +109,7 @@ impl FromStr for BtcAddress {
             .or_else(|_| Self::from_p2sh(s))
             .or_else(|_| Self::from_p2wpkh(s))
             .or_else(|_| Self::from_p2wsh(s))
+            .or_else(|_| Self::from_p2tr(s))
     }
 }
 
@@ -106,7 +121,7 @@ impl BtcAddress {
     fn strip_prefix(s: &str) -> Result<&str, ParseError> {
         s.strip_prefix(Self::MAINNET_PREFIX)
             .or_else(|| s.strip_prefix(Self::TESTNET_PREFIX))
-            .ok_or(ParseError())
+            .ok_or(ParseError::InvalidPrefix)
     }
 
     fn address_checksum(bytes: &[u8]) -> [u8; 4] {
@@ -124,20 +139,22 @@ impl BtcAddress {
 
     pub fn from_p2pkh(s: &str) -> Result<Self, ParseError> {
         if !(s.len() >= 27 && s.len() <= 34) {
-            return Err(ParseError());
+            return Err(ParseError::InvalidLength);
         }
         let body = s; // No prefix to strip
-        let bytes = bs58::decode(body).into_vec().map_err(|_| ParseError())?;
+        let bytes = bs58::decode(body)
+            .into_vec()
+            .map_err(|_| ParseError::InvalidChecksum)?;
         if bytes.len() != 25 {
-            return Err(ParseError());
+            return Err(ParseError::InvalidLength);
         }
         if bytes[0] != 0x00 {
-            return Err(ParseError());
+            return Err(ParseError::InvalidPrefix);
         }
         let checksum = &bytes[21..25];
         let expected_checksum = Self::address_checksum(&bytes[0..21]);
         if checksum != expected_checksum {
-            return Err(ParseError());
+            return Err(ParseError::InvalidChecksum);
         }
         Ok(BtcAddress::P2PKH(s.to_string()))
     }
@@ -145,10 +162,10 @@ impl BtcAddress {
     pub fn from_p2sh(s: &str) -> Result<Self, ParseError> {
         let body = s; // No prefix to strip
         if !body.starts_with("3") {
-            return Err(ParseError());
+            return Err(ParseError::InvalidPrefix);
         }
         if body.len() != 34 {
-            return Err(ParseError());
+            return Err(ParseError::InvalidLength);
         }
         Ok(BtcAddress::P2SH(s.to_string()))
     }
@@ -156,10 +173,10 @@ impl BtcAddress {
     pub fn from_p2wpkh(s: &str) -> Result<Self, ParseError> {
         let body = Self::strip_prefix(s)?;
         if !body.starts_with('1') {
-            return Err(ParseError());
+            return Err(ParseError::InvalidPrefix);
         }
         if s.len() != 42 {
-            return Err(ParseError());
+            return Err(ParseError::InvalidLength);
         }
         Ok(BtcAddress::P2WPKH(s.to_string()))
     }
@@ -167,11 +184,22 @@ impl BtcAddress {
     pub fn from_p2wsh(s: &str) -> Result<Self, ParseError> {
         let body = Self::strip_prefix(s)?;
         if !body.starts_with("1q") {
-            return Err(ParseError());
+            return Err(ParseError::InvalidPrefix);
         }
         if s.len() != 62 {
-            return Err(ParseError());
+            return Err(ParseError::InvalidLength);
         }
         Ok(BtcAddress::P2WSH(s.to_string()))
+    }
+
+    pub fn from_p2tr(s: &str) -> Result<Self, ParseError> {
+        let body = Self::strip_prefix(s)?;
+        if !body.starts_with("1p") {
+            return Err(ParseError::InvalidPrefix);
+        }
+        if s.len() != 62 {
+            return Err(ParseError::InvalidLength);
+        }
+        Ok(BtcAddress::P2TR(s.to_string()))
     }
 }

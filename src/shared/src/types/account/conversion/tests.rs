@@ -26,12 +26,12 @@ fn icrc2_subaccount_test_vectors() -> Vec<TestVector<IcrcSubaccountId>> {
         TestVector {
             name: "ICRC: Incorrect length",
             input: "234143",
-            expected: Err(ParseError()),
+            expected: Err(ParseError::InvalidLength),
         },
         TestVector {
             name: "ICRC: Invalid characters",
             input: "7bd35240a80a8752992470ebd6dd38cd58abd6O630198d9e79aO19418eb533f7",
-            expected: Err(ParseError()),
+            expected: Err(ParseError::InvalidEncoding),
         },
     ]
 }
@@ -70,12 +70,12 @@ fn icrc2_test_vectors() -> Vec<TestVector<Icrcv2AccountId>> {
         TestVector {
             name: "ICRC: Invalid principal",
             input: "invalid",
-            expected: Err(ParseError()),
+            expected: Err(ParseError::UnsupportedFormat),
         },
         TestVector {
             name: "ICRC: Invalid subaccount ID",
             input: "7bd3524Oa80a8752992470ebd6dd38cd58abd60630198d9e79a019418eb533f7",
-            expected: Err(ParseError()),
+            expected: Err(ParseError::InvalidEncoding),
         },
     ]
 }
@@ -93,12 +93,12 @@ fn solana_test_vectors() -> Vec<TestVector<SolPrincipal>> {
             name: "Solana: Invalid base58",
             input: "14grJpemFaf88c8tiVb77 W7TYg2W3ir6pfkKz3YjhhZ5", /* Valid ID witha  space
                                                                      * inserted */
-            expected: Err(ParseError()),
+            expected: Err(ParseError::InvalidEncoding),
         },
         TestVector {
             name: "Solana: Invalid length",
             input: "J8kUFc4Vo61", // Base 58 encoded "foghorn"
-            expected: Err(ParseError()),
+            expected: Err(ParseError::InvalidLength),
         },
     ]
 }
@@ -115,17 +115,17 @@ fn eth_test_vectors() -> Vec<TestVector<EthAddress>> {
         TestVector {
             name: "Ethereum: Invalid length",
             input: "0x000000000000000000000000000000000000000",
-            expected: Err(ParseError()),
+            expected: Err(ParseError::InvalidLength),
         },
         TestVector {
             name: "Ethereum: Missing prefix",
             input: "0000000000000000000000000000000000000000",
-            expected: Err(ParseError()),
+            expected: Err(ParseError::InvalidPrefix),
         },
         TestVector {
             name: "Ethereum: Invalid characters",
             input: "0x000000000000000000000000000000000000000O",
-            expected: Err(ParseError()),
+            expected: Err(ParseError::InvalidEncoding),
         },
     ]
 }
@@ -158,6 +158,13 @@ fn btc_test_vectors() -> Vec<TestVector<BtcAddress>> {
             input: "bc1qeklep85ntjz4605drds6aww9u0qr46qzrv5xswd35uhjuj8ahfcqgf6hak",
             expected: Ok(BtcAddress::P2WSH(
                 "bc1qeklep85ntjz4605drds6aww9u0qr46qzrv5xswd35uhjuj8ahfcqgf6hak".to_string(),
+            )),
+        },
+        TestVector {
+            name: "BTC: P2TR",
+            input: "bc1pxwww0ct9ue7e8tdnlmug5m2tamfn7q06sahstg39ys4c9f3340qqxrdu9k",
+            expected: Ok(BtcAddress::P2TR(
+                "bc1pxwww0ct9ue7e8tdnlmug5m2tamfn7q06sahstg39ys4c9f3340qqxrdu9k".to_string(),
             )),
         },
     ]
