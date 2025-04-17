@@ -19,7 +19,7 @@ import {
 	getRewardRequirementsFulfilled,
 	getRewards,
 	getUserRewardsTokenAmounts,
-	isVipUser,
+	getUserRoles,
 	setReferrer
 } from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -53,28 +53,28 @@ describe('reward-code', () => {
 				.spyOn(rewardApi, 'getUserInfo')
 				.mockResolvedValueOnce(mockedUserData);
 
-			const result = await isVipUser({ identity: mockIdentity });
+			const {is_vip} = await getUserRoles({ identity: mockIdentity });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
 			});
-			expect(result).toEqual({ success: true });
+			expect(is_vip).toEqual(true);
 		});
 
 		it('should return false if user is not vip', async () => {
 			const userData: UserData = { ...mockedUserData, is_vip: [false] };
 			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
 
-			const result = await isVipUser({ identity: mockIdentity });
+			const {is_vip} = await getUserRoles({ identity: mockIdentity });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
 			});
-			expect(result).toEqual({ success: false });
+			expect(is_vip).toEqual(false);
 		});
 	});
 

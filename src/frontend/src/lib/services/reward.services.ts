@@ -17,7 +17,7 @@ import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
-import type { RewardResponseInfo, RewardsResponse } from '$lib/types/reward';
+import type {RewardResponseInfo, RewardsResponse, UserRoleResult} from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
@@ -25,33 +25,33 @@ import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-const queryVipUser = async (params: {
+const queryUserRoles = async (params: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<ResultSuccess> => {
+}): Promise<UserRoleResult> => {
 	const userData = await getUserInfoApi({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	return { success: fromNullable(userData.is_vip) === true };
+	return { is_vip: fromNullable(userData.is_vip) === true, is_gold: false };
 };
 
 /**
- * Checks if a user is a VIP user.
+ * Gets the roles of a user.
  *
- * This function performs **always** a query (not certified) to determine the VIP status of a user.
+ * This function performs **always** a query (not certified) to determine the roles of a user.
  *
  * @async
  * @param {Object} params - The parameters required to check VIP status.
  * @param {Identity} params.identity - The user's identity for authentication.
- * @returns {Promise<ResultSuccess>} - Resolves with the result indicating if the user is a VIP.
+ * @returns {Promise<UserRoleResult>} - Resolves with the result indicating the users roles.
  *
  * @throws {Error} Displays an error toast and logs the error if the query fails.
  */
-export const isVipUser = async (params: { identity: Identity }): Promise<ResultSuccess> => {
+export const getUserRoles = async (params: { identity: Identity }): Promise<UserRoleResult> => {
 	try {
-		return await queryVipUser({ ...params, certified: false });
+		return await queryUserRoles({ ...params, certified: false });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
@@ -59,7 +59,7 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 			err
 		});
 
-		return { success: false, err };
+		return { is_vip: false, is_gold: false };
 	}
 };
 
