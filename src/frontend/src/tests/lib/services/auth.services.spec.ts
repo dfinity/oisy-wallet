@@ -37,6 +37,7 @@ describe('auth.services', () => {
 			mockLocation(activityLocation);
 
 			expect(window.location.href).toEqual(activityLocation);
+
 			await signOut({ resetUrl: true });
 
 			expect(signOutSpy).toHaveBeenCalled();
@@ -47,6 +48,7 @@ describe('auth.services', () => {
 			const signOutSpy = vi.spyOn(authStore, 'signOut');
 
 			sessionStorage.setItem('key', 'value');
+
 			expect(sessionStorage.getItem('key')).toEqual('value');
 
 			await signOut({});
