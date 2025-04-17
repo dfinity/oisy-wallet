@@ -4,6 +4,7 @@ import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
+import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
@@ -218,6 +219,7 @@ const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'ethereum',
 				position: 3,
 				twinToken: SEPOLIA_USDC_TOKEN,
+				groupData: USDC_TOKEN_GROUP,
 				...(nonNullish(LOCAL_CKETH_LEDGER_CANISTER_ID) && {
 					feeLedgerCanisterId: LOCAL_CKETH_LEDGER_CANISTER_ID
 				})
