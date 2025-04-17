@@ -145,7 +145,7 @@ pub enum BtcAddress {
     /// use a script hash instead of a public key hash is to accommodate multisig arrangements.
     ///
     /// ## Format
-    /// P2WSH addresses are exactly 62 characters in length, starting with `bc1p`.
+    /// P2WSH addresses are exactly 62 characters in length, starting with `bc1q`.
     ///
     /// ## Example
     /// - `bc1qeklep85ntjz4605drds6aww9u0qr46qzrv5xswd35uhjuj8ahfcqgf6hak`

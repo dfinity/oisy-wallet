@@ -130,6 +130,26 @@ fn eth_test_vectors() -> Vec<TestVector<EthAddress>> {
     ]
 }
 
+fn btc_test_vectors() -> Vec<TestVector<BtcAddress>> {
+    vec![
+        TestVector {
+            name: "BTC: P2PKH",
+            input: "1RainRzqJtJxHTngafpCejDLfYq2y4KBc",
+            expected: Ok(BtcAddress::P2PKH(
+                "1RainRzqJtJxHTngafpCejDLfYq2y4KBc".to_string(),
+            )),
+        },
+        /*
+        TestVector {
+            name: "BTC: P2SH",
+            input: "3A1nY4ZKZJfWJ9Mzg5YvN12vB14Y5Y7Y",
+            expected: Ok(BtcAddress::P2SH(
+                "3A1nY4ZKZJfWJ9Mzg5YvN12vB14Y5Y7Y".to_string(),
+            )),
+        },
+        */
+    ]
+}
 #[test]
 fn icrc2_subaccount_ids_can_be_parsed() {
     for vector in icrc2_subaccount_test_vectors() {
@@ -154,6 +174,13 @@ fn solana_account_ids_can_be_parsed() {
 #[test]
 fn eth_account_ids_can_be_parsed() {
     for vector in eth_test_vectors() {
+        assert_eq!(vector.expected, vector.input.parse(), "{}", vector.name);
+    }
+}
+
+#[test]
+fn btc_account_ids_can_be_parsed() {
+    for vector in btc_test_vectors() {
         assert_eq!(vector.expected, vector.input.parse(), "{}", vector.name);
     }
 }
