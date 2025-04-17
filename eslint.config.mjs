@@ -4,6 +4,13 @@ import { default as vitestConfig } from '@dfinity/eslint-config-oisy-wallet/vite
 export default [
 	...vitestConfig,
 	...svelteConfig,
+
+	{
+		rules: {
+			'vitest/expect-expect': ['off']
+		}
+	},
+
 	{
 		ignores: [
 			'**/.DS_Store',
