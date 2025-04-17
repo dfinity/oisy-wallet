@@ -53,7 +53,7 @@ describe('reward-code', () => {
 				.spyOn(rewardApi, 'getUserInfo')
 				.mockResolvedValueOnce(mockedUserData);
 
-			const {is_vip} = await getUserRoles({ identity: mockIdentity });
+			const { is_vip } = await getUserRoles({ identity: mockIdentity });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -67,7 +67,7 @@ describe('reward-code', () => {
 			const userData: UserData = { ...mockedUserData, is_vip: [false] };
 			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
 
-			const {is_vip} = await getUserRoles({ identity: mockIdentity });
+			const { is_vip } = await getUserRoles({ identity: mockIdentity });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,

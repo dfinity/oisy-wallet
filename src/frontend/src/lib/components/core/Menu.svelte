@@ -44,7 +44,7 @@
 	let isGold = false;
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
-			({is_vip: isVip, is_gold: isGold} = await getUserRoles({identity: $authIdentity}));
+			({ is_vip: isVip, is_gold: isGold } = await getUserRoles({ identity: $authIdentity }));
 		}
 	});
 
@@ -120,9 +120,9 @@
 
 		{#if isGold}
 			<ButtonMenu
-					ariaLabel={$i18n.navigation.alt.gold_qr_code}
-					testId={NAVIGATION_MENU_VIP_BUTTON}
-					on:click={modalStore.openVipQrCode}
+				ariaLabel={$i18n.navigation.alt.gold_qr_code}
+				testId={NAVIGATION_MENU_VIP_BUTTON}
+				on:click={modalStore.openVipQrCode}
 			>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.gold_qr_code}

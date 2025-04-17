@@ -17,7 +17,7 @@ import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
-import type {RewardResponseInfo, RewardsResponse, UserRoleResult} from '$lib/types/reward';
+import type { RewardResponseInfo, RewardsResponse, UserRoleResult } from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
