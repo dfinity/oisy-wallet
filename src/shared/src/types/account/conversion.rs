@@ -91,7 +91,7 @@ impl FromStr for BtcAddress {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::from_p2pkh(s)
+        Self::from_p2pkh(s).or_else(|_| Self::from_p2sh(s))
     }
 }
 
@@ -127,19 +127,28 @@ impl BtcAddress {
         let body = s; // No prefix to strip
         let bytes = bs58::decode(body).into_vec().map_err(|_| ParseError())?;
         if bytes.len() != 25 {
-            panic!("Invalid P2PKH address length: {}", bytes.len());
-            //return Err(ParseError());
+            return Err(ParseError());
         }
         if bytes[0] != 0x00 {
-            panic!("Invalid P2PKH address prefix: {}", bytes[0]);
-            //return Err(ParseError());
+            return Err(ParseError());
         }
         let checksum = &bytes[21..25];
         let expected_checksum = Self::address_checksum(&bytes[0..21]);
         if checksum != expected_checksum {
-            panic!("Invalid P2PKH address checksum: {:?}", checksum);
-            //return Err(ParseError());
+            return Err(ParseError());
         }
         Ok(BtcAddress::P2PKH(s.to_string()))
+    }
+    pub fn from_p2sh(s: &str) -> Result<Self, ParseError> {
+        let body = s; // No prefix to strip
+        if !body.starts_with("3") {
+            panic!("Invalid P2SH address prefix: {}", body);
+            //return Err(ParseError());
+        }
+        if body.len() != 34 {
+            panic!("Invalid P2SH address length: {}", body.len());
+            //return Err(ParseError());
+        }
+        Ok(BtcAddress::P2SH(s.to_string()))
     }
 }
