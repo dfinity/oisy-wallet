@@ -3,6 +3,7 @@ import type { Address, OptionAddress } from '$lib/types/address';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';
 import { isNullish } from '@dfinity/utils';
+import { writable } from 'svelte/store';
 
 export const mapAddress = <T extends Address>(
 	$addressStore: StorageAddressData<T>
@@ -23,3 +24,5 @@ export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
 
 export const invalidBtcAddress = (address: BtcAddress | undefined): boolean =>
 	!isBtcAddress(address);
+
+export const foo = writable(false);
