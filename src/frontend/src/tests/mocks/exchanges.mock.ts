@@ -1,7 +1,7 @@
 import type { CoingeckoSimpleTokenPrice } from '$lib/types/coingecko';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { Token } from '$lib/types/token';
 import { mockTokens } from './tokens.mock';
-import type {Token} from "$lib/types/token";
 
 export const mockOneUsd = 1;
 

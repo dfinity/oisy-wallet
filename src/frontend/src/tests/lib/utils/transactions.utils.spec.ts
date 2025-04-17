@@ -42,7 +42,7 @@ import {
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
-import {getMockExchanges, mockExchanges} from '$tests/mocks/exchanges.mock';
+import { getMockExchanges, mockExchanges } from '$tests/mocks/exchanges.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 
