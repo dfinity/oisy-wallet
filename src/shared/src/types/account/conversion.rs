@@ -3,11 +3,11 @@ use std::str::FromStr;
 
 use candid::{CandidType, Deserialize, Principal};
 use serde::Serialize;
+use sha2::{Digest, Sha256};
 
 use super::{
     BtcAddress, EthAddress, IcrcSubaccountId, Icrcv2AccountId, SolPrincipal, TokenAccountId,
 };
-use sha2::{Sha256, Digest};
 
 #[cfg(test)]
 mod tests;
@@ -107,7 +107,7 @@ impl BtcAddress {
             .ok_or(ParseError())
     }
     */
-    fn address_checksum(bytes: &[u8]) -> [u8;4] {
+    fn address_checksum(bytes: &[u8]) -> [u8; 4] {
         let hash = {
             let mut hasher = Sha256::new();
             hasher.update(bytes);
@@ -119,6 +119,7 @@ impl BtcAddress {
         checksum.copy_from_slice(&hash[0..4]);
         checksum
     }
+
     pub fn from_p2pkh(s: &str) -> Result<Self, ParseError> {
         if !(s.len() >= 27 && s.len() <= 34) {
             panic!("Invalid P2PKH address length: {}", s.len());
@@ -139,6 +140,7 @@ impl BtcAddress {
         }
         Ok(BtcAddress::P2PKH(s.to_string()))
     }
+
     pub fn from_p2sh(s: &str) -> Result<Self, ParseError> {
         let body = s; // No prefix to strip
         if !body.starts_with("3") {

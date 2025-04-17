@@ -139,7 +139,6 @@ fn btc_test_vectors() -> Vec<TestVector<BtcAddress>> {
                 "1RainRzqJtJxHTngafpCejDLfYq2y4KBc".to_string(),
             )),
         },
-        
         TestVector {
             name: "BTC: P2SH",
             input: "342ftSRCvFHfCeFFBuz4xwbeqnDw6BGUey",
