@@ -6,8 +6,18 @@
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
+	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
+	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
+	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TokenName from '$lib/components/tokens/TokenName.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
 	import {
@@ -17,23 +27,13 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
-	import Button from '$lib/components/ui/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
-	import TokenName from '$lib/components/tokens/TokenName.svelte';
-	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
-	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
-	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
-	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
 
 	let { initialSearch, infoElement }: { initialSearch: string | undefined; infoElement: Snippet } =
