@@ -62,10 +62,6 @@ on:
         required: true
       VITE_COINGECKO_API_KEY_STAGING:
         required: true
-      VITE_JUNO_SATELLITE_ID_STAGING:
-        required: true
-      VITE_JUNO_ORBITER_ID_STAGING:
-        required: true
       VITE_POUH_ENABLED_STAGING:
         required: true
       VITE_SWAP_ACTION_ENABLED_STAGING:
@@ -99,10 +95,6 @@ on:
       VITE_WALLET_CONNECT_PROJECT_ID_BETA:
         required: true
       VITE_COINGECKO_API_KEY_BETA:
-        required: true
-      VITE_JUNO_SATELLITE_ID_BETA:
-        required: true
-      VITE_JUNO_ORBITER_ID_BETA:
         required: true
       VITE_POUH_ENABLED_BETA:
         required: true
