@@ -9,7 +9,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
+	import { CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
 	import {
 		VIP_CODE_REGENERATE_BUTTON,
 		VIP_QR_CODE_COPY_BUTTON
@@ -20,8 +20,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type {QrCodeType} from "$lib/enums/qr-code-types";
 
-	let counter = VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS;
+	export let codeType: QrCodeType = 'vip';
+
+	let counter = CODE_REGENERATE_INTERVAL_IN_SECONDS;
 	let countdown: NodeJS.Timeout | undefined;
 	const maxRetriesToGetRewardCode = 3;
 	let retriesToGetRewardCode = 0;
@@ -49,7 +52,7 @@
 		}
 
 		await generateCode();
-		counter = VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS;
+		counter = CODE_REGENERATE_INTERVAL_IN_SECONDS;
 		countdown = setInterval(intervalFunction, 1000);
 	};
 

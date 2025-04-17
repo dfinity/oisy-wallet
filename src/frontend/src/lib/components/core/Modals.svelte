@@ -16,8 +16,9 @@
 		modalRewardDetails,
 		modalSettingsState,
 		modalReferralCode,
-		modalAddressBook
+		modalAddressBook, modalVipQrCodeData
 	} from '$lib/derived/modal.derived';
+	import {nonNullish} from "@dfinity/utils";
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
@@ -33,8 +34,8 @@
 		<DappModalDetails />
 	{:else if $modalRewardDetails}
 		<AirdropModalDetails />
-	{:else if $modalVipQrCode}
-		<VipQrCodeModal />
+	{:else if $modalVipQrCode && nonNullish($modalVipQrCodeData)}
+		<VipQrCodeModal codeType={$modalVipQrCodeData} />
 	{:else if $modalSettingsState}
 		<SettingsModal />
 	{:else if $modalReferralCode}

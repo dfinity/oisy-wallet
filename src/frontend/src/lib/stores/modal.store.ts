@@ -1,6 +1,7 @@
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
+import type {QrCodeType} from "$lib/enums/qr-code-types";
 
 export interface Modal<T> {
 	type:
@@ -85,7 +86,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openSolToken: () => void;
 	openReceiveBitcoin: () => void;
 	openAboutWhyOisy: () => void;
-	openVipQrCode: () => void;
+	openVipQrCode: (data: QrCodeType) => void;
 	openReferralCode: () => void;
 	openAddressBook: () => void;
 	openReferralState: () => void;
@@ -144,7 +145,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openSolToken: setType('sol-token'),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
-		openVipQrCode: setType('vip-qr-code'),
+		openVipQrCode: <(data: QrCodeType) => void> setTypeWithData('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
 		openAddressBook: setType('address-book'),
 		openReferralState: setType('referral-state'),

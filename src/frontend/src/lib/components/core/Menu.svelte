@@ -36,6 +36,7 @@
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
+	import {QrCodeType} from "$lib/enums/qr-code-types";
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -111,7 +112,7 @@
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.vip_qr_code}
 				testId={NAVIGATION_MENU_VIP_BUTTON}
-				on:click={modalStore.openVipQrCode}
+				on:click={() => modalStore.openVipQrCode(QrCodeType.VIP)}
 			>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.vip_qr_code}
@@ -120,9 +121,9 @@
 
 		{#if isGold}
 			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.gold_qr_code}
-				testId={NAVIGATION_MENU_VIP_BUTTON}
-				on:click={modalStore.openVipQrCode}
+					ariaLabel={$i18n.navigation.alt.gold_qr_code}
+					testId={NAVIGATION_MENU_VIP_BUTTON}
+					on:click={() => modalStore.openVipQrCode(QrCodeType.GOLD)}
 			>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.gold_qr_code}
