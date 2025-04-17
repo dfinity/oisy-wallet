@@ -1,5 +1,13 @@
 import type { NetworkSettingsFor } from '$declarations/backend/backend.did';
 import {
+	BASE_NETWORK_ID,
+	BASE_SEPOLIA_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_NETWORK_ID,
+	BSC_TESTNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
@@ -45,34 +53,53 @@ export const userNetworks: Readable<UserNetworks> = derived(
 		}
 
 		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId => {
-			const networkId: NetworkId | undefined =
-				'InternetComputer' in key
-					? ICP_NETWORK_ID
-					: 'EthereumMainnet' in key
-						? ETHEREUM_NETWORK_ID
-						: 'EthereumSepolia' in key
-							? SEPOLIA_NETWORK_ID
-							: 'BitcoinMainnet' in key
-								? BTC_MAINNET_NETWORK_ID
-								: 'BitcoinTestnet' in key
-									? BTC_TESTNET_NETWORK_ID
-									: 'BitcoinRegtest' in key
-										? BTC_REGTEST_NETWORK_ID
-										: 'SolanaMainnet' in key
-											? SOLANA_MAINNET_NETWORK_ID
-											: 'SolanaTestnet' in key
-												? SOLANA_TESTNET_NETWORK_ID
-												: 'SolanaDevnet' in key
-													? SOLANA_DEVNET_NETWORK_ID
-													: 'SolanaLocal' in key
-														? SOLANA_LOCAL_NETWORK_ID
-														: undefined;
-
-			if (isNullish(networkId)) {
-				throw new Error(`Unknown network key: ${key}`);
+			if ('InternetComputer' in key) {
+				return ICP_NETWORK_ID;
+			}
+			if ('EthereumMainnet' in key) {
+				return ETHEREUM_NETWORK_ID;
+			}
+			if ('EthereumSepolia' in key) {
+				return SEPOLIA_NETWORK_ID;
+			}
+			if ('BitcoinMainnet' in key) {
+				return BTC_MAINNET_NETWORK_ID;
+			}
+			if ('BitcoinTestnet' in key) {
+				return BTC_TESTNET_NETWORK_ID;
+			}
+			if ('BitcoinRegtest' in key) {
+				return BTC_REGTEST_NETWORK_ID;
+			}
+			if ('SolanaMainnet' in key) {
+				return SOLANA_MAINNET_NETWORK_ID;
+			}
+			if ('SolanaTestnet' in key) {
+				return SOLANA_TESTNET_NETWORK_ID;
+			}
+			if ('SolanaDevnet' in key) {
+				return SOLANA_DEVNET_NETWORK_ID;
+			}
+			if ('SolanaLocal' in key) {
+				return SOLANA_LOCAL_NETWORK_ID;
+			}
+			if ('BaseMainnet' in key) {
+				return BASE_NETWORK_ID;
+			}
+			if ('BaseSepolia' in key) {
+				return BASE_SEPOLIA_NETWORK_ID;
+			}
+			if ('BscMainnet' in key) {
+				return BSC_NETWORK_ID;
+			}
+			if ('BscTestnet' in key) {
+				return BSC_TESTNET_NETWORK_ID;
 			}
 
-			return networkId;
+			// Force compiler error on unhandled cases based on leftover types
+			const _: never = key;
+
+			throw new Error(`Unknown network key: ${key}`);
 		};
 
 		return {
