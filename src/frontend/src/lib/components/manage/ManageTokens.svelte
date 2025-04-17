@@ -17,9 +17,12 @@
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -27,14 +30,11 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
-	import { exchanges } from '$lib/derived/exchange.derived';
-	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
 
 	let { initialSearch, infoElement }: { initialSearch: string | undefined; infoElement?: Snippet } =
 		$props();
