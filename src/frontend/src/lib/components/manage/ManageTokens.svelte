@@ -36,7 +36,7 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
 
-	let { initialSearch, infoElement }: { initialSearch: string | undefined; infoElement: Snippet } =
+	let { initialSearch, infoElement }: { initialSearch: string | undefined; infoElement?: Snippet } =
 		$props();
 
 	const dispatch = createEventDispatcher();
@@ -126,7 +126,9 @@
 	const save = () => dispatch('icSave', groupModifiedTokens);
 </script>
 
-{@render infoElement()}
+{#if nonNullish(infoElement)}
+	{@render infoElement()}
+{/if}
 
 {#if showNetworks}
 	<ModalNetworksFilter on:icNetworkFilter={() => (showNetworks = false)} />
