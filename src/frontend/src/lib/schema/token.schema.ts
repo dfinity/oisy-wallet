@@ -1,4 +1,5 @@
 import { NetworkSchema } from '$lib/schema/network.schema';
+import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
 import type { OnramperId } from '$lib/types/onramper';
 import type { TokenBuy } from '$lib/types/token';
 import type { AtLeastOne } from '$lib/types/utils';
@@ -57,4 +58,5 @@ export const TokenSchema = z
 	})
 	.merge(TokenMetadataSchema)
 	.merge(TokenAppearanceSchema)
-	.merge(TokenBuyableSchema);
+	.merge(TokenBuyableSchema)
+	.merge(TokenGroupPropSchema);
