@@ -142,3 +142,9 @@ export const FALLBACK_TIMEOUT = 10000;
 // Git
 export const GIT_COMMIT_HASH = VITE_GIT_COMMIT_HASH;
 export const GIT_BRANCH_NAME = VITE_GIT_BRANCH_NAME;
+
+// Threshold
+export const FAILURE_THRESHOLD = 3;
+
+// Micro transaction
+export const MICRO_TRANSACTION_USD_THRESHOLD = 0.01;
