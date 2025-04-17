@@ -3,8 +3,6 @@ import { describe, expect, it } from 'vitest';
 
 describe('crypto.utils', () => {
 	describe('hashToHex', () => {
-
-
 		it('should hash a simple string correctly', async () => {
 			const input = 'test-hash';
 			const expectedHex = 'd6672ee3a93d0d6e3c30bdef89f310799c2f3ab781098a9792040d5541ce3ed3'; // Verified hash of 'test-hash'
@@ -13,7 +11,6 @@ describe('crypto.utils', () => {
 
 			expect(output).toBe(expectedHex);
 		});
-
 
 		it('should produce different hashes for different inputs', async () => {
 			const input1 = 'first-input';
@@ -42,6 +39,5 @@ describe('crypto.utils', () => {
 
 			expect(result).toBe(expectedHex);
 		});
-
 	});
 });
