@@ -2,11 +2,10 @@ import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
 	ChallengeCompletionError,
-	CreateChallengeError,
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import { mapIcrc2ApproveError, type ApproveError } from '@dfinity/ledger-icp';
+import { type ApproveError, mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 
 export const mapBtcPendingTransactionError = (
 	err: BtcAddPendingTransactionError
@@ -54,24 +53,4 @@ export const mapAllowSigningError = (
 	}
 
 	return new CanisterInternalError('Unknown AllowSigningError');
-};
-
-export const mapCreateChallengeError = (err: CreateChallengeError): CanisterInternalError => {
-	if ('ChallengeInProgress' in err) {
-		return new CanisterInternalError('Challenge is already in progress.');
-	}
-
-	if ('MissingUserProfile' in err) {
-		return new CanisterInternalError('User profile is missing.');
-	}
-
-	if ('RandomnessError' in err) {
-		return new CanisterInternalError(err.RandomnessError);
-	}
-
-	if ('Other' in err) {
-		return new CanisterInternalError(err.Other);
-	}
-
-	return new CanisterInternalError('Unknown CreateChallengeError');
 };
