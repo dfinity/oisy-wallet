@@ -3,6 +3,7 @@ import {
 	ETHEREUM_NETWORK,
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
+import { ETHEREUM_TOKEN_GROUP, SEPOLIA_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import eth from '$icp-eth/assets/eth.svg';
 import type { RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -25,7 +26,8 @@ export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 	twinTokenSymbol: 'ckETH',
 	buy: {
 		onramperId: 'eth'
-	}
+	},
+	groupData: ETHEREUM_TOKEN_GROUP
 };
 
 export const SEPOLIA_SYMBOL = 'SepoliaETH';
@@ -41,7 +43,8 @@ export const SEPOLIA_TOKEN: RequiredTokenWithLinkedData = {
 	symbol: SEPOLIA_SYMBOL,
 	decimals: ETHEREUM_DEFAULT_DECIMALS,
 	icon: eth,
-	twinTokenSymbol: 'ckSepoliaETH'
+	twinTokenSymbol: 'ckSepoliaETH',
+	groupData: SEPOLIA_TOKEN_GROUP
 };
 
 /**

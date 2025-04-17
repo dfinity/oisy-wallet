@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { POPCAT_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import popcat from '$sol/assets/popcat.svg';
@@ -21,5 +22,6 @@ export const POPCAT_TOKEN: RequiredSplToken = {
 	decimals: POPCAT_DECIMALS,
 	icon: popcat,
 	address: '7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr',
-	owner: TOKEN_PROGRAM_ADDRESS
+	owner: TOKEN_PROGRAM_ADDRESS,
+	groupData: POPCAT_TOKEN_GROUP
 };

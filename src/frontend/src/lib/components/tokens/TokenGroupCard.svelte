@@ -87,6 +87,7 @@
 					tokenCount: filteredTokens.length,
 					networks: filteredTokens.map((t) => t.network)
 				}}
+				asGroup
 				testIdPrefix={TOKEN_GROUP}
 				on:click={() => toggleIsExpanded(!isExpanded)}
 			/>

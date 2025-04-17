@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { TRUMP_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import trump from '$sol/assets/trump.svg';
@@ -24,5 +25,6 @@ export const TRUMP_TOKEN: RequiredSplToken = {
 	owner: TOKEN_PROGRAM_ADDRESS,
 	buy: {
 		onramperId: 'trump_solana'
-	}
+	},
+	groupData: TRUMP_TOKEN_GROUP
 };

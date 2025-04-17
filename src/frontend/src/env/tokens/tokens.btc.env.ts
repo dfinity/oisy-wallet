@@ -7,6 +7,11 @@ import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import type { Token, TokenId, TokenWithLinkedData } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import {
+	BTC_MAINNET_TOKEN_GROUP,
+	BTC_REGTEST_TOKEN_GROUP,
+	BTC_TESTNET_TOKEN_GROUP
+} from './groups/groups.btc.env';
 
 export const BTC_DECIMALS = 8;
 
@@ -23,7 +28,8 @@ export const BTC_MAINNET_TOKEN: TokenWithLinkedData = {
 	symbol: BTC_MAINNET_SYMBOL,
 	decimals: BTC_DECIMALS,
 	icon: bitcoin,
-	twinTokenSymbol: 'ckBTC'
+	twinTokenSymbol: 'ckBTC',
+	groupData: BTC_MAINNET_TOKEN_GROUP
 };
 
 export const BTC_TESTNET_SYMBOL = 'BTC (Testnet)';
@@ -38,7 +44,8 @@ export const BTC_TESTNET_TOKEN: Token = {
 	name: 'Bitcoin (Testnet)',
 	symbol: BTC_TESTNET_SYMBOL,
 	decimals: BTC_DECIMALS,
-	icon: bitcoinTestnet
+	icon: bitcoinTestnet,
+	groupData: BTC_TESTNET_TOKEN_GROUP
 };
 
 export const BTC_REGTEST_SYMBOL = 'BTC (Regtest)';
@@ -53,5 +60,6 @@ export const BTC_REGTEST_TOKEN: Token = {
 	name: 'Bitcoin (Regtest)',
 	symbol: BTC_REGTEST_SYMBOL,
 	decimals: BTC_DECIMALS,
-	icon: bitcoinTestnet
+	icon: bitcoinTestnet,
+	groupData: BTC_REGTEST_TOKEN_GROUP
 };
