@@ -56,12 +56,13 @@ describe('network.schema', () => {
 			expect(NetworkBuySchema.parse(validBuy)).toEqual(validBuy);
 		});
 
-		// TODO: uncomment the below when we have a way to validate OnramperNetworkId
+		// TODO: unskip the below when we have a way to validate OnramperNetworkId
 		// For now this test is failing because the OnramperNetworkId is not correctly validated
-		// it('should fail validation with an invalid onramperId', () => {
-		// 	const invalidBuy = { onramperId: 'invalid-id' };
-		// 	expect(() => NetworkBuySchema.parse(invalidBuy)).toThrow();
-		// });
+		it.skip('should fail validation with an invalid onramperId', () => {
+			const invalidBuy = { onramperId: 'invalid-id' };
+
+			expect(() => NetworkBuySchema.parse(invalidBuy)).toThrow();
+		});
 	});
 
 	describe('NetworkAppMetadataSchema', () => {
