@@ -1,14 +1,16 @@
 import { icTokenIcrcCustomToken, isDeprecatedSns } from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { LOCAL, ZERO_BI } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { UserNetworks } from '$lib/types/user-networks';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
+import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -222,3 +224,25 @@ export const findToken = ({
 	tokens: Token[];
 	symbol: string;
 }): Token | undefined => tokens.find((token) => token.symbol === symbol);
+
+export const defineEnabledTokens = <T extends Token>({
+	$testnetsEnabled,
+	$userNetworks,
+	mainnetFlag,
+	mainnetTokens,
+	testnetTokens = [],
+	localTokens = []
+}: {
+	$testnetsEnabled: boolean;
+	$userNetworks: UserNetworks;
+	mainnetFlag: boolean;
+	mainnetTokens: T[];
+	testnetTokens?: T[];
+	localTokens?: T[];
+}): T[] =>
+	[
+		...(mainnetFlag ? mainnetTokens : []),
+		...($testnetsEnabled ? [...testnetTokens, ...(LOCAL ? localTokens : [])] : [])
+	].filter(({ network: { id: networkId } }) =>
+		isUserNetworkEnabled({ userNetworks: $userNetworks, networkId })
+	);

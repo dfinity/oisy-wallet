@@ -10,14 +10,24 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
+import {
+	SOLANA_DEVNET_TOKEN,
+	SOLANA_LOCAL_TOKEN,
+	SOLANA_TESTNET_TOKEN,
+	SOLANA_TOKEN
+} from '$env/tokens/tokens.sol.env';
+import * as appContants from '$lib/constants/app.constants';
 import { ZERO_BI } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { Network } from '$lib/types/network';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { UserNetworks } from '$lib/types/user-networks';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
+	defineEnabledTokens,
 	filterEnabledTokens,
 	filterTokens,
 	findToken,
@@ -479,5 +489,182 @@ describe('findToken', () => {
 		const result = findToken({ tokens: mockTokens, symbol: 'UNKNOWN_TOKEN' });
 
 		expect(result).toBeUndefined();
+	});
+});
+
+describe('defineEnabledTokens', () => {
+	const mainnetTokens: Token[] = [SOLANA_TOKEN];
+	const testnetTokens: Token[] = [SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN];
+	const localTokens: Token[] = [SOLANA_LOCAL_TOKEN];
+
+	const mainnetNetworks: Network[] = mainnetTokens.map(({ network }) => network);
+	const testnetNetworks: Network[] = testnetTokens.map(({ network }) => network);
+	const localNetworks: Network[] = localTokens.map(({ network }) => network);
+
+	const networks: Network[] = [...mainnetNetworks, ...testnetNetworks, ...localNetworks];
+
+	const mapUserNetworks = ({
+		enabledNetworks = networks,
+		disabledNetworks = []
+	}: {
+		enabledNetworks?: Network[];
+		disabledNetworks?: Network[];
+	}): UserNetworks => ({
+		...enabledNetworks.reduce<UserNetworks>(
+			(acc, { id, env }) => ({ ...acc, [id]: { enabled: true, isTestnet: env === 'testnet' } }),
+			{}
+		),
+		...disabledNetworks.reduce<UserNetworks>(
+			(acc, { id, env }) => ({ ...acc, [id]: { enabled: false, isTestnet: env === 'testnet' } }),
+			{}
+		)
+	});
+
+	const userNetworks: UserNetworks = mapUserNetworks({});
+
+	const mockBaseParams = {
+		$testnetsEnabled: false,
+		$userNetworks: userNetworks,
+		mainnetFlag: true,
+		mainnetTokens,
+		testnetTokens,
+		localTokens
+	};
+
+	beforeEach(() => {
+		vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValue(false);
+	});
+
+	describe('when testnets are disabled', () => {
+		const mockParams = { ...mockBaseParams, $testnetsEnabled: false };
+
+		it('should return only mainnet tokens by default', () => {
+			expect(defineEnabledTokens(mockParams)).toEqual(mainnetTokens);
+		});
+
+		it('should return an empty array when mainnet is disabled', () => {
+			expect(defineEnabledTokens({ ...mockParams, mainnetFlag: false })).toEqual([]);
+		});
+
+		it('should return an empty array when all networks are disabled by the user', () => {
+			expect(defineEnabledTokens({ ...mockParams, $userNetworks: {} })).toEqual([]);
+		});
+
+		it('should return an empty array when mainnet networks are disabled by the user', () => {
+			expect(
+				defineEnabledTokens({
+					...mockParams,
+					$userNetworks: mapUserNetworks({ disabledNetworks: mainnetNetworks })
+				})
+			).toEqual([]);
+		});
+
+		it('should return an empty array when no mainnet token is provided', () => {
+			expect(defineEnabledTokens({ ...mockParams, mainnetTokens: [] })).toEqual([]);
+		});
+
+		it('should ignore the local tokens when they are enabled', () => {
+			vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(false);
+
+			expect(defineEnabledTokens(mockParams)).toEqual(mainnetTokens);
+		});
+	});
+
+	describe('when testnets are enabled', () => {
+		const mockParams = { ...mockBaseParams, $testnetsEnabled: true };
+
+		it('should return mainnet and testnet tokens', () => {
+			expect(defineEnabledTokens(mockParams)).toEqual([...mainnetTokens, ...testnetTokens]);
+		});
+
+		it('should return only testnet tokens when mainnet disabled', () => {
+			expect(defineEnabledTokens({ ...mockParams, mainnetFlag: false })).toEqual(testnetTokens);
+		});
+
+		it('should return an empty array when all networks are disabled by the user', () => {
+			expect(defineEnabledTokens({ ...mockParams, $userNetworks: {} })).toEqual([]);
+		});
+
+		it('should return only mainnet tokens when testnet disabled by the user', () => {
+			expect(
+				defineEnabledTokens({
+					...mockParams,
+					$userNetworks: mapUserNetworks({ disabledNetworks: testnetNetworks })
+				})
+			).toEqual(mainnetTokens);
+		});
+
+		it('should return only testnet tokens when mainnet disabled by the user', () => {
+			expect(
+				defineEnabledTokens({
+					...mockParams,
+					$userNetworks: mapUserNetworks({ disabledNetworks: mainnetNetworks })
+				})
+			).toEqual(testnetTokens);
+		});
+
+		it('should return only mainnet tokens when no testnet token is provided', () => {
+			const { testnetTokens: _, ...params } = mockParams;
+
+			expect(defineEnabledTokens(params)).toEqual(mainnetTokens);
+		});
+
+		describe('when local networks are enabled', () => {
+			beforeEach(() => {
+				vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(true);
+			});
+
+			it('should return all tokens', () => {
+				expect(defineEnabledTokens(mockParams)).toEqual([
+					...mainnetTokens,
+					...testnetTokens,
+					...localTokens
+				]);
+			});
+
+			it('should return only testnet and local tokens when mainnet disabled', () => {
+				expect(defineEnabledTokens({ ...mockParams, mainnetFlag: false })).toEqual([
+					...testnetTokens,
+					...localTokens
+				]);
+			});
+
+			it('should return empty array when all networks are disabled by the user', () => {
+				expect(defineEnabledTokens({ ...mockParams, $userNetworks: {} })).toEqual([]);
+			});
+
+			it('should return only mainnet and testnet tokens when local disabled by the user', () => {
+				expect(
+					defineEnabledTokens({
+						...mockParams,
+						$userNetworks: mapUserNetworks({ disabledNetworks: localNetworks })
+					})
+				).toEqual([...mainnetTokens, ...testnetTokens]);
+			});
+
+			it('should return only testnet and local tokens when mainnet disabled by the user', () => {
+				expect(
+					defineEnabledTokens({
+						...mockParams,
+						$userNetworks: mapUserNetworks({ disabledNetworks: mainnetNetworks })
+					})
+				).toEqual([...testnetTokens, ...localTokens]);
+			});
+
+			it('should return only mainnet and local tokens when testnet disabled by the user', () => {
+				expect(
+					defineEnabledTokens({
+						...mockParams,
+						$userNetworks: mapUserNetworks({ disabledNetworks: testnetNetworks })
+					})
+				).toEqual([...mainnetTokens, ...localTokens]);
+			});
+
+			it('should return only mainnet and testnet tokens when no local token is provided', () => {
+				const { localTokens: _, ...params } = mockParams;
+
+				expect(defineEnabledTokens(params)).toEqual([...mainnetTokens, ...testnetTokens]);
+			});
+		});
 	});
 });
