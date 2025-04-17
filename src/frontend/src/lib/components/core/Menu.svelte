@@ -111,9 +111,9 @@
 
 		{#if isGold}
 			<ButtonMenu
-					ariaLabel={$i18n.navigation.alt.binance_qr_code}
-					testId={NAVIGATION_MENU_VIP_BUTTON}
-					on:click={() => modalStore.openVipQrCode(QrCodeType.GOLD)}
+				ariaLabel={$i18n.navigation.alt.binance_qr_code}
+				testId={NAVIGATION_MENU_VIP_BUTTON}
+				on:click={() => modalStore.openVipQrCode(QrCodeType.GOLD)}
 			>
 				<IconBinance size="20" />
 				{$i18n.navigation.text.binance_qr_code}

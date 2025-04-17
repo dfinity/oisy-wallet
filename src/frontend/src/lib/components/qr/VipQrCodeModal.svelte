@@ -3,6 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
+	import IconBinanceYellow from '$lib/components/icons/IconBinanceYellow.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -21,7 +22,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import IconBinanceYellow from "$lib/components/icons/IconBinanceYellow.svelte";
 
 	export let codeType: QrCodeType = 'vip';
 
@@ -84,7 +84,11 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title"
-		><span class="text-xl">{codeType === 'vip' ? $i18n.vip.invitation.text.title : $i18n.vip.invitation.text.binance_title}</span>
+		><span class="text-xl"
+			>{codeType === 'vip'
+				? $i18n.vip.invitation.text.title
+				: $i18n.vip.invitation.text.binance_title}</span
+		>
 	</svelte:fragment>
 
 	<ContentWithToolbar>
