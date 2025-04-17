@@ -142,12 +142,18 @@ impl BtcAddress {
     const TESTNET_PREFIX: &str = "tb";
 
     /// Removes the mainnet or testnet prefix from a Bitcoin address
+    /// 
+    /// # Errors
+    /// - If the address does not have either `MAINNET_PREFIX` or `TESTNET_PREFIX` as a prefix.
     fn strip_prefix(s: &str) -> Result<&str, ParseError> {
         s.strip_prefix(Self::MAINNET_PREFIX)
             .or_else(|| s.strip_prefix(Self::TESTNET_PREFIX))
             .ok_or(ParseError::InvalidPrefix)
     }
 
+    /// Calculates the checksum for a Bitcoin address
+    /// 
+    /// The hash: Hash twice with SHA256 and take the first 4 bytes.
     fn address_checksum(bytes: &[u8]) -> [u8; 4] {
         let hash = {
             let mut hasher = Sha256::new();
@@ -161,6 +167,10 @@ impl BtcAddress {
         checksum
     }
 
+    /// Parses a P2PKH Bitcoin address
+    /// 
+    /// # Errors
+    /// - If the address is not a valid P2PKH address.
     pub fn from_p2pkh(s: &str) -> Result<Self, ParseError> {
         if !(s.len() >= 27 && s.len() <= 34) {
             return Err(ParseError::InvalidLength);
@@ -183,9 +193,13 @@ impl BtcAddress {
         Ok(BtcAddress::P2PKH(s.to_string()))
     }
 
+    /// Parses a P2SH Bitcoin address
+    /// 
+    /// # Errors
+    /// - If the address is not a valid P2SH address.
     pub fn from_p2sh(s: &str) -> Result<Self, ParseError> {
         let body = s; // No prefix to strip
-        if !body.starts_with("3") {
+        if !body.starts_with('3') {
             return Err(ParseError::InvalidPrefix);
         }
         if body.len() != 34 {
@@ -194,6 +208,10 @@ impl BtcAddress {
         Ok(BtcAddress::P2SH(s.to_string()))
     }
 
+    /// Parses a P2WPKH Bitcoin address
+    /// 
+    /// # Errors
+    /// - If the address is not a valid P2WPKH address.
     pub fn from_p2wpkh(s: &str) -> Result<Self, ParseError> {
         let body = Self::strip_prefix(s)?;
         if !body.starts_with('1') {
@@ -205,6 +223,10 @@ impl BtcAddress {
         Ok(BtcAddress::P2WPKH(s.to_string()))
     }
 
+    /// Parses a P2WSH Bitcoin address
+    /// 
+    /// # Errors
+    /// - If the address is not a valid P2WSH address.
     pub fn from_p2wsh(s: &str) -> Result<Self, ParseError> {
         let body = Self::strip_prefix(s)?;
         if !body.starts_with("1q") {
@@ -216,6 +238,10 @@ impl BtcAddress {
         Ok(BtcAddress::P2WSH(s.to_string()))
     }
 
+    /// Parses a P2TR Bitcoin address
+    /// 
+    /// # Errors
+    /// - If the address is not a valid P2TR address.
     pub fn from_p2tr(s: &str) -> Result<Self, ParseError> {
         let body = Self::strip_prefix(s)?;
         if !body.starts_with("1p") {
