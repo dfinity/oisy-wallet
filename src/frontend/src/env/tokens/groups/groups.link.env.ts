@@ -1,4 +1,4 @@
-import link from '$eth/assets/link.svg';
+import link from '$icp-eth/assets/link.svg';
 
 const LINK_TOKEN_GROUP_SYMBOL = 'LINK';
 
