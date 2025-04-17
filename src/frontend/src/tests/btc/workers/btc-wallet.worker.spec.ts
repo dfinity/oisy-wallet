@@ -85,11 +85,6 @@ describe('btc-wallet.worker', () => {
 		window.postMessage = postMessageMock;
 	});
 
-	afterAll(() => {
-		// @ts-expect-error redo original
-		window.postMessage = originalPostmessage;
-	});
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
@@ -112,6 +107,11 @@ describe('btc-wallet.worker', () => {
 
 	afterEach(() => {
 		vi.useRealTimers();
+	});
+
+	afterAll(() => {
+		// @ts-expect-error redo original
+		window.postMessage = originalPostmessage;
 	});
 
 	const testWorker = ({
