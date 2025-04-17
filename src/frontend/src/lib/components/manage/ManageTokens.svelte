@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
 	import { isBitcoinToken } from '$btc/utils/token.utils';
@@ -38,65 +38,68 @@
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
 
-	export let initialSearch: string | undefined = undefined;
+	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
 
 	const dispatch = createEventDispatcher();
 
 	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
 	// the life of the component.
-	let exchangesStaticData: ExchangesData | undefined;
+	let exchangesStaticData: ExchangesData | undefined = $state();
 
 	onMount(() => {
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
 
-	let allTokensForSelectedNetwork: TokenToggleable<Token>[] = [];
-	$: allTokensForSelectedNetwork = filterTokensForSelectedNetwork([
-		$allTokens,
-		$selectedNetwork,
-		$pseudoNetworkChainFusion
-	]);
+	let allTokensForSelectedNetwork: TokenToggleable<Token>[] = $derived(
+		filterTokensForSelectedNetwork([$allTokens, $selectedNetwork, $pseudoNetworkChainFusion])
+	);
 
-	let allTokensSorted: Token[] = [];
-	$: allTokensSorted = nonNullish(exchangesStaticData)
-		? pinEnabledTokensAtTop(
-				sortTokens({
-					$tokens: allTokensForSelectedNetwork,
-					$exchanges: exchangesStaticData,
-					$tokensToPin
-				})
-			)
-		: [];
+	let allTokensSorted: Token[] = $derived(
+		nonNullish(exchangesStaticData)
+			? pinEnabledTokensAtTop(
+					sortTokens({
+						$tokens: allTokensForSelectedNetwork,
+						$exchanges: exchangesStaticData,
+						$tokensToPin
+					})
+				)
+			: []
+	);
 
-	let tokensFilter = '';
+	let tokensFilter = $state('');
 	const updateFilter = () => (tokensFilter = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
-	let filter = initialSearch ?? '';
-	$: filter, debounceUpdateFilter();
+	let filter = $state(initialSearch ?? '');
 
-	let filteredTokens: Token[] = [];
-	$: filteredTokens = filterTokens({ tokens: allTokensSorted, filter: tokensFilter });
-
-	let tokens: Token[] = [];
-	$: tokens = filteredTokens.map((token) => {
-		const modifiedToken = modifiedTokens[`${token.network.id.description}-${token.id.description}`];
-
-		return {
-			...token,
-			...(icTokenIcrcCustomToken(token)
-				? {
-						enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
-					}
-				: {})
-		};
+	$effect(() => {
+		debounceUpdateFilter(filter);
 	});
 
-	let noTokensMatch = false;
-	$: noTokensMatch = tokens.length === 0;
+	let filteredTokens: Token[] = $derived(
+		filterTokens({ tokens: allTokensSorted, filter: tokensFilter })
+	);
 
-	let modifiedTokens: Record<string, Token> = {};
+	let tokens: Token[] = $derived(
+		filteredTokens.map((token) => {
+			const modifiedToken =
+				modifiedTokens[`${token.network.id.description}-${token.id.description}`];
+
+			return {
+				...token,
+				...(icTokenIcrcCustomToken(token)
+					? {
+							enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
+						}
+					: {})
+			};
+		})
+	);
+
+	let noTokensMatch = $derived(tokens.length === 0);
+
+	let modifiedTokens: Record<string, Token> = $state({});
 	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
 		const { id: networkId } = network;
 		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
@@ -112,32 +115,24 @@
 		};
 	};
 
-	let saveDisabled = true;
-	$: saveDisabled = Object.keys(modifiedTokens).length === 0;
+	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
 
-	let groupModifiedTokens: {
-		icrc: IcrcCustomToken[];
-		erc20: Erc20UserToken[];
-		spl: SplTokenToggleable[];
-	} = {
-		icrc: [],
-		erc20: [],
-		spl: []
-	};
-	$: groupModifiedTokens = Object.values(modifiedTokens).reduce<{
-		icrc: IcrcCustomToken[];
-		erc20: Erc20UserToken[];
-		spl: SplTokenToggleable[];
-	}>(
-		({ icrc, erc20, spl }, token) => ({
-			icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
-			erc20: [
-				...erc20,
-				...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
-			],
-			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
-		}),
-		{ icrc: [], erc20: [], spl: [] }
+	let groupModifiedTokens = $derived(
+		Object.values(modifiedTokens).reduce<{
+			icrc: IcrcCustomToken[];
+			erc20: Erc20UserToken[];
+			spl: SplTokenToggleable[];
+		}>(
+			({ icrc, erc20, spl }, token) => ({
+				icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
+				erc20: [
+					...erc20,
+					...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
+				],
+				spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
+			}),
+			{ icrc: [], erc20: [], spl: [] }
+		)
 	);
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
@@ -162,13 +157,15 @@
 	</p>
 {/if}
 
-<slot name="info-element" />
+{#if nonNullish(infoElement)}
+	{@render infoElement()}
+{/if}
 
 {#if noTokensMatch}
 	<button
 		class="flex w-full flex-col items-center justify-center py-16"
 		in:fade
-		on:click={() => dispatch('icAddToken')}
+		onclick={() => dispatch('icAddToken')}
 	>
 		<span class="text-7xl">🤔</span>
 
@@ -207,7 +204,7 @@
 
 	<button
 		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-brand-primary-alt no-underline"
-		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
+		onclick={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 	>
 
 	<ButtonGroup>
