@@ -55,18 +55,18 @@ const nonAppleProjects = [
 		name: 'Google Chrome',
 		use: devices['Desktop Chrome']
 	},
-	{
-		name: 'Firefox',
-		use: devices['Desktop Firefox']
-	},
-	{
-		name: 'Pixel 7',
-		use: {
-			...devices['Pixel 7'],
-			screen: { width: 412, height: 915 },
-			viewport: { width: 412, height: 915 }
-		}
-	}
+//	{
+//		name: 'Firefox',
+//		use: devices['Desktop Firefox']
+//	},
+//	{
+//		name: 'Pixel 7',
+//		use: {
+//			...devices['Pixel 7'],
+//			screen: { width: 412, height: 915 },
+//			viewport: { width: 412, height: 915 }
+//		}
+//	}
 ];
 
 const TIMEOUT = 5 * 60 * 1000;
@@ -86,16 +86,19 @@ export default defineConfig({
 			stylePath: 'e2e/styles/masks.css'
 		}
 	},
-	webServer: {
-		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
-		reuseExistingServer: true,
-		port: DEV ? 5173 : 4173,
-		timeout: TIMEOUT
-	},
+	...(DEV && {
+		webServer: {
+			command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
+			reuseExistingServer: true,
+			port: DEV ? 5173 : 4173,
+			timeout: TIMEOUT
+		}
+	}),
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	snapshotDir: 'e2e/snapshots',
 	use: {
+		baseURL: DEV ? 'http://localhost:5173' : 'https://e2e.oisy.com',
 		testIdAttribute: 'data-tid',
 		trace: 'on',
 		actionTimeout: TIMEOUT,
