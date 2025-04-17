@@ -21,7 +21,7 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
+	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
