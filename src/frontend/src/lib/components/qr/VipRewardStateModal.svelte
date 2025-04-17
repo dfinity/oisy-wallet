@@ -9,8 +9,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import type {QrCodeType} from "$lib/enums/qr-code-types";
 
 	export let isSuccessful: boolean;
+	export let codeType: QrCodeType = 'vip';
 </script>
 
 {#if isSuccessful}
