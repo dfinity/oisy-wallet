@@ -85,7 +85,6 @@ fn format_challenge(challenge: &StoredChallenge) -> String {
 // -------------------------------------------------------------------------------------------------
 // - Service functions
 // -------------------------------------------------------------------------------------------------
-
 pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeError> {
     let user_principal = StoredPrincipal(caller());
     if !has_user_profile(user_principal) {
