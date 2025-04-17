@@ -35,6 +35,30 @@ impl FromStr for TokenAccountId {
     }
 }
 
+impl From<SolPrincipal> for TokenAccountId {
+    fn from(value: SolPrincipal) -> Self {
+        TokenAccountId::Sol(value)
+    }
+}
+
+impl From<BtcAddress> for TokenAccountId {
+    fn from(value: BtcAddress) -> Self {
+        TokenAccountId::Btc(value)
+    }
+}
+
+impl From<EthAddress> for TokenAccountId {
+    fn from(value: EthAddress) -> Self {
+        TokenAccountId::Eth(value)
+    }
+}
+
+impl From<Icrcv2AccountId> for TokenAccountId {
+    fn from(value: Icrcv2AccountId) -> Self {
+        TokenAccountId::Icrcv2(value)
+    }
+}
+
 impl FromStr for Icrcv2AccountId {
     type Err = ParseError;
 

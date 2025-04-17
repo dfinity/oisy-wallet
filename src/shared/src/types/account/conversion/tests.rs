@@ -169,6 +169,97 @@ fn btc_test_vectors() -> Vec<TestVector<BtcAddress>> {
         },
     ]
 }
+
+impl From<TestVector<Icrcv2AccountId>> for TestVector<TokenAccountId> {
+    fn from(value: TestVector<Icrcv2AccountId>) -> Self {
+        let TestVector {
+            name,
+            input,
+            expected,
+        } = value;
+        TestVector {
+            name,
+            input,
+            expected: expected
+                .map(TokenAccountId::Icrcv2)
+                .map_err(|_| ParseError::UnsupportedFormat),
+        }
+    }
+}
+
+impl From<TestVector<SolPrincipal>> for TestVector<TokenAccountId> {
+    fn from(value: TestVector<SolPrincipal>) -> Self {
+        let TestVector {
+            name,
+            input,
+            expected,
+        } = value;
+        TestVector {
+            name,
+            input,
+            expected: expected
+                .map(TokenAccountId::Sol)
+                .map_err(|_| ParseError::UnsupportedFormat),
+        }
+    }
+}
+
+impl From<TestVector<EthAddress>> for TestVector<TokenAccountId> {
+    fn from(value: TestVector<EthAddress>) -> Self {
+        let TestVector {
+            name,
+            input,
+            expected,
+        } = value;
+        TestVector {
+            name,
+            input,
+            expected: expected
+                .map(TokenAccountId::Eth)
+                .map_err(|_| ParseError::UnsupportedFormat),
+        }
+    }
+}
+
+impl From<TestVector<BtcAddress>> for TestVector<TokenAccountId> {
+    fn from(value: TestVector<BtcAddress>) -> Self {
+        let TestVector {
+            name,
+            input,
+            expected,
+        } = value;
+        TestVector {
+            name,
+            input,
+            expected: expected
+                .map(TokenAccountId::Btc)
+                .map_err(|_| ParseError::UnsupportedFormat),
+        }
+    }
+}
+
+fn all_test_vectors() -> Vec<TestVector<TokenAccountId>> {
+    icrc2_test_vectors()
+        .into_iter()
+        .map(TestVector::<TokenAccountId>::from)
+        .chain(
+            solana_test_vectors()
+                .into_iter()
+                .map(TestVector::<TokenAccountId>::from),
+        )
+        .chain(
+            eth_test_vectors()
+                .into_iter()
+                .map(TestVector::<TokenAccountId>::from),
+        )
+        .chain(
+            btc_test_vectors()
+                .into_iter()
+                .map(TestVector::<TokenAccountId>::from),
+        )
+        .collect()
+}
+
 #[test]
 fn icrc2_subaccount_ids_can_be_parsed() {
     for vector in icrc2_subaccount_test_vectors() {
@@ -200,6 +291,13 @@ fn eth_account_ids_can_be_parsed() {
 #[test]
 fn btc_account_ids_can_be_parsed() {
     for vector in btc_test_vectors() {
+        assert_eq!(vector.expected, vector.input.parse(), "{}", vector.name);
+    }
+}
+
+#[test]
+fn all_test_vectors_can_be_parsed() {
+    for vector in all_test_vectors() {
         assert_eq!(vector.expected, vector.input.parse(), "{}", vector.name);
     }
 }
