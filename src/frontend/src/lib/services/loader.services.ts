@@ -119,7 +119,7 @@ export const initLoader = async ({
 
 	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
 
-	// We can fetch these values imperatively because there stores are updated in this same function when loading the user profile.
+	// We can fetch these values imperatively because these stores are updated in this same function when loading the user profile.
 	const enabledNetworkIds: NetworkId[] = [
 		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
 		...(get(networkEthereumEnabled) ? [ETHEREUM_NETWORK_ID] : []),
