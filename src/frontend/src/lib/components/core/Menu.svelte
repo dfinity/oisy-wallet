@@ -37,15 +37,16 @@
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
+	import IconBinance from "$lib/components/icons/IconBinance.svelte";
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
 	let isVip = false;
-	let isGold = false;
+	let isBinance = false;
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
-			({ is_vip: isVip, is_gold: isGold } = await getUserRoles({ identity: $authIdentity }));
+			({ is_vip: isVip, is_binance: isBinance } = await getUserRoles({ identity: $authIdentity }));
 		}
 	});
 
@@ -119,14 +120,14 @@
 			</ButtonMenu>
 		{/if}
 
-		{#if isGold}
+		{#if isBinance}
 			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.gold_qr_code}
+				ariaLabel={$i18n.navigation.alt.binance_qr_code}
 				testId={NAVIGATION_MENU_VIP_BUTTON}
-				on:click={() => modalStore.openVipQrCode(QrCodeType.GOLD)}
+				on:click={() => modalStore.openVipQrCode(QrCodeType.BINANCE)}
 			>
-				<IconVipQr size="20" />
-				{$i18n.navigation.text.gold_qr_code}
+				<IconBinance size="20" />
+				{$i18n.navigation.text.binance_qr_code}
 			</ButtonMenu>
 		{/if}
 

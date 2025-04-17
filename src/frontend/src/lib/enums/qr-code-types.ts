@@ -1,4 +1,4 @@
 export enum QrCodeType {
 	VIP = 'vip',
-	GOLD = 'gold'
+	BINANCE = 'binance'
 }

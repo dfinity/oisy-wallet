@@ -21,5 +21,5 @@ export interface RewardResult {
 
 export interface UserRoleResult {
 	is_vip: boolean;
-	is_gold: boolean;
+	is_binance: boolean;
 }

@@ -34,7 +34,7 @@ const queryUserRoles = async (params: {
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	return { is_vip: fromNullable(userData.is_vip) === true, is_gold: false };
+	return { is_vip: fromNullable(userData.is_vip) === true, is_binance: false };
 };
 
 /**
@@ -59,7 +59,7 @@ export const getUserRoles = async (params: { identity: Identity }): Promise<User
 			err
 		});
 
-		return { is_vip: false, is_gold: false };
+		return { is_vip: false, is_binance: false };
 	}
 };
 
