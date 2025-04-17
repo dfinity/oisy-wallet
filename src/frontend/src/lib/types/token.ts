@@ -1,5 +1,5 @@
 import {
-	TokenGroupSchema,
+	type TokenGroupSchema,
 	type TokenAppearanceSchema,
 	type TokenBuySchema,
 	type TokenBuyableSchema,
