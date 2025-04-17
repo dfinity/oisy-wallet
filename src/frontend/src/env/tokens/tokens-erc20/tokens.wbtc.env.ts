@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import wbtc from '$icp-eth/assets/wbtc.svg';
 import type { TokenId } from '$lib/types/token';
@@ -24,5 +25,6 @@ export const WBTC_TOKEN: RequiredErc20Token = {
 	twinTokenSymbol: 'ckWBTC',
 	buy: {
 		onramperId: 'wbtc_ethereum'
-	}
+	},
+	groupData: WBTC_TOKEN_GROUP
 };

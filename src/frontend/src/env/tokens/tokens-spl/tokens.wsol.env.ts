@@ -1,4 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { WSOL_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import wsol from '$sol/assets/wsol.svg';
@@ -24,5 +25,6 @@ export const WSOL_TOKEN: RequiredSplToken = {
 	owner: TOKEN_PROGRAM_ADDRESS,
 	buy: {
 		onramperId: 'sol'
-	}
+	},
+	groupData: WSOL_TOKEN_GROUP
 };
