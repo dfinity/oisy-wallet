@@ -91,7 +91,9 @@ impl FromStr for BtcAddress {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::from_p2pkh(s).or_else(|_| Self::from_p2sh(s))
+        Self::from_p2pkh(s)
+            .or_else(|_| Self::from_p2sh(s))
+            .or_else(|_| Self::from_p2wpkh(s))
     }
 }
 
@@ -122,8 +124,7 @@ impl BtcAddress {
 
     pub fn from_p2pkh(s: &str) -> Result<Self, ParseError> {
         if !(s.len() >= 27 && s.len() <= 34) {
-            panic!("Invalid P2PKH address length: {}", s.len());
-            //return Err(ParseError());
+            return Err(ParseError());
         }
         let body = s; // No prefix to strip
         let bytes = bs58::decode(body).into_vec().map_err(|_| ParseError())?;
@@ -150,5 +151,15 @@ impl BtcAddress {
             return Err(ParseError());
         }
         Ok(BtcAddress::P2SH(s.to_string()))
+    }
+
+    pub fn from_p2wpkh(s: &str) -> Result<Self, ParseError> {
+        if !s.starts_with("bc1") {
+            return Err(ParseError());
+        }
+        if s.len() != 42 {
+            return Err(ParseError());
+        }
+        Ok(BtcAddress::P2WPKH(s.to_string()))
     }
 }

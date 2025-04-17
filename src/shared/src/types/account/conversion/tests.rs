@@ -146,6 +146,13 @@ fn btc_test_vectors() -> Vec<TestVector<BtcAddress>> {
                 "342ftSRCvFHfCeFFBuz4xwbeqnDw6BGUey".to_string(),
             )),
         },
+        TestVector {
+            name: "BTC: P2WPKH",
+            input: "bc1q34aq5drpuwy3wgl9lhup9892qp6svr8ldzyy7c",
+            expected: Ok(BtcAddress::P2WPKH(
+                "bc1q34aq5drpuwy3wgl9lhup9892qp6svr8ldzyy7c".to_string(),
+            )),
+        },
     ]
 }
 #[test]
