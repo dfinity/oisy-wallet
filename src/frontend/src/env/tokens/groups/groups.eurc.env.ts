@@ -7,11 +7,3 @@ export const EURC_TOKEN_GROUP = {
 	name: 'Euro Coin',
 	symbol: EURC_TOKEN_GROUP_SYMBOL
 };
-
-const SEPOLIA_EURC_TOKEN_GROUP_SYMBOL = 'SepoliaEURC';
-
-export const SEPOLIA_EURC_TOKEN_GROUP = {
-	icon: eurc,
-	name: 'EURC',
-	symbol: SEPOLIA_EURC_TOKEN_GROUP_SYMBOL
-};
