@@ -31,7 +31,7 @@ impl FromStr for TokenAccountId {
             .or_else(|_| BtcAddress::from_str(s).map(TokenAccountId::Btc))
             .or_else(|_| EthAddress::from_str(s).map(TokenAccountId::Eth))
             .or_else(|_| Icrcv2AccountId::from_str(s).map(TokenAccountId::Icrcv2))
-            .or_else(|_| Err(ParseError::UnsupportedFormat))
+            .map_err(|_| ParseError::UnsupportedFormat)
     }
 }
 
@@ -142,7 +142,7 @@ impl BtcAddress {
     const TESTNET_PREFIX: &str = "tb";
 
     /// Removes the mainnet or testnet prefix from a Bitcoin address
-    /// 
+    ///
     /// # Errors
     /// - If the address does not have either `MAINNET_PREFIX` or `TESTNET_PREFIX` as a prefix.
     fn strip_prefix(s: &str) -> Result<&str, ParseError> {
@@ -152,7 +152,7 @@ impl BtcAddress {
     }
 
     /// Calculates the checksum for a Bitcoin address
-    /// 
+    ///
     /// The hash: Hash twice with SHA256 and take the first 4 bytes.
     fn address_checksum(bytes: &[u8]) -> [u8; 4] {
         let hash = {
@@ -168,7 +168,7 @@ impl BtcAddress {
     }
 
     /// Parses a P2PKH Bitcoin address
-    /// 
+    ///
     /// # Errors
     /// - If the address is not a valid P2PKH address.
     pub fn from_p2pkh(s: &str) -> Result<Self, ParseError> {
@@ -194,7 +194,7 @@ impl BtcAddress {
     }
 
     /// Parses a P2SH Bitcoin address
-    /// 
+    ///
     /// # Errors
     /// - If the address is not a valid P2SH address.
     pub fn from_p2sh(s: &str) -> Result<Self, ParseError> {
@@ -209,7 +209,7 @@ impl BtcAddress {
     }
 
     /// Parses a P2WPKH Bitcoin address
-    /// 
+    ///
     /// # Errors
     /// - If the address is not a valid P2WPKH address.
     pub fn from_p2wpkh(s: &str) -> Result<Self, ParseError> {
@@ -224,7 +224,7 @@ impl BtcAddress {
     }
 
     /// Parses a P2WSH Bitcoin address
-    /// 
+    ///
     /// # Errors
     /// - If the address is not a valid P2WSH address.
     pub fn from_p2wsh(s: &str) -> Result<Self, ParseError> {
@@ -239,7 +239,7 @@ impl BtcAddress {
     }
 
     /// Parses a P2TR Bitcoin address
-    /// 
+    ///
     /// # Errors
     /// - If the address is not a valid P2TR address.
     pub fn from_p2tr(s: &str) -> Result<Self, ParseError> {
