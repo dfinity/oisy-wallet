@@ -44,7 +44,7 @@
 	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
 	// the life of the component.
-	let exchangesStaticData: ExchangesData | undefined;
+	let exchangesStaticData: ExchangesData | undefined = $state();
 
 	onMount(() => {
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
@@ -65,7 +65,7 @@
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
-			tokens: $allTokens,
+			tokens: [],
 			filterZeroBalance: false,
 			filterNetwork: $selectedNetwork,
 			filterQuery: nonNullish(initialSearch) ? initialSearch : ''
@@ -85,6 +85,7 @@
 	};
 
 	let modifiedTokens: Record<string, Token> = $state({});
+
 	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
 		const { id: networkId } = network;
 		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
@@ -101,6 +102,7 @@
 	};
 
 	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
+
 	let groupModifiedTokens = $derived(
 		Object.values(modifiedTokens).reduce<{
 			icrc: IcrcCustomToken[];
