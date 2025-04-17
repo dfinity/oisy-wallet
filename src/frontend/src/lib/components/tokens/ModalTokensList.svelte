@@ -15,7 +15,7 @@
 
 	let {
 		networkSelectorViewOnly = false,
-		loading = false,
+		loading,
 		tokenListItem,
 		toolbar,
 		noResults
