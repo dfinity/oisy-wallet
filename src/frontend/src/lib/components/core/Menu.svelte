@@ -109,6 +109,17 @@
 			{$i18n.navigation.text.refer_a_friend}
 		</ButtonMenu>
 
+		{#if isGold}
+			<ButtonMenu
+					ariaLabel={$i18n.navigation.alt.binance_qr_code}
+					testId={NAVIGATION_MENU_VIP_BUTTON}
+					on:click={() => modalStore.openVipQrCode(QrCodeType.GOLD)}
+			>
+				<IconBinance size="20" />
+				{$i18n.navigation.text.binance_qr_code}
+			</ButtonMenu>
+		{/if}
+
 		{#if isVip}
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.vip_qr_code}
@@ -117,17 +128,6 @@
 			>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.vip_qr_code}
-			</ButtonMenu>
-		{/if}
-
-		{#if isGold}
-			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.binance_qr_code}
-				testId={NAVIGATION_MENU_VIP_BUTTON}
-				on:click={() => modalStore.openVipQrCode(QrCodeType.GOLD)}
-			>
-				<IconBinance size="20" />
-				{$i18n.navigation.text.binance_qr_code}
 			</ButtonMenu>
 		{/if}
 

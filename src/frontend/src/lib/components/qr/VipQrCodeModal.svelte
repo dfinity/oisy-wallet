@@ -21,6 +21,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import IconBinanceYellow from "$lib/components/icons/IconBinanceYellow.svelte";
 
 	export let codeType: QrCodeType = 'vip';
 
@@ -83,15 +84,19 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title"
-		><span class="text-xl">{$i18n.vip.invitation.text.title}</span>
+		><span class="text-xl">{codeType === 'vip' ? $i18n.vip.invitation.text.title : $i18n.vip.invitation.text.binance_title}</span>
 	</svelte:fragment>
 
 	<ContentWithToolbar>
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
-					<div slot="logo" class="flex items-center justify-center rounded-lg bg-primary p-2">
-						<IconAstronautHelmet />
+					<div slot="logo" class="flex items-center justify-center rounded-full bg-primary p-2">
+						{#if codeType === 'vip'}
+							<IconAstronautHelmet />
+						{:else}
+							<IconBinanceYellow size="44" />
+						{/if}
 					</div>
 				</QRCode>
 			{/if}

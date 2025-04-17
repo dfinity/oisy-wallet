@@ -866,6 +866,7 @@ interface I18nVip {
 	invitation: {
 		text: {
 			title: string;
+			binance_title: string;
 			invitation_link_copied: string;
 			generate_new_link: string;
 			generating_new_code: string;
