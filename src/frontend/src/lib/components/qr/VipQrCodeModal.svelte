@@ -1,7 +1,7 @@
 <script lang="ts">
-	import {Modal, QRCode} from '@dfinity/gix-components';
-	import {isNullish, nonNullish} from '@dfinity/utils';
-	import {onDestroy, onMount} from 'svelte';
+	import { Modal, QRCode } from '@dfinity/gix-components';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onDestroy, onMount } from 'svelte';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import IconBinanceYellow from '$lib/components/icons/IconBinanceYellow.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
@@ -10,20 +10,20 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import {CODE_REGENERATE_INTERVAL_IN_SECONDS} from '$lib/constants/app.constants';
+	import { CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
 	import {
 		VIP_CODE_REGENERATE_BUTTON,
 		VIP_QR_CODE_BINANCE_ICON,
 		VIP_QR_CODE_COPY_BUTTON,
 		VIP_QR_CODE_ICON
 	} from '$lib/constants/test-ids.constants';
-	import {authIdentity} from '$lib/derived/auth.derived';
-	import {type QrCodeType} from '$lib/enums/qr-code-types';
-	import {nullishSignOut} from '$lib/services/auth.services';
-	import {getNewReward} from '$lib/services/reward.services';
-	import {i18n} from '$lib/stores/i18n.store';
-	import {modalStore} from '$lib/stores/modal.store';
-	import {replacePlaceholders} from '$lib/utils/i18n.utils';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { type QrCodeType } from '$lib/enums/qr-code-types';
+	import { nullishSignOut } from '$lib/services/auth.services';
+	import { getNewReward } from '$lib/services/reward.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let codeType: QrCodeType = QrCodeType.VIP;
 

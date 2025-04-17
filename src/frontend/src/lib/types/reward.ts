@@ -1,5 +1,5 @@
+import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { Principal } from '@dfinity/principal';
-import type {QrCodeType} from "$lib/enums/qr-code-types";
 
 export interface RewardsResponse {
 	rewards: RewardResponseInfo[];

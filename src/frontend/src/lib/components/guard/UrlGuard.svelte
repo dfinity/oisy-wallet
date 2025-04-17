@@ -1,14 +1,14 @@
 <script lang="ts">
-	import {nonNullish} from '@dfinity/utils';
-	import {page} from '$app/stores';
+	import { nonNullish } from '@dfinity/utils';
+	import { page } from '$app/stores';
 	import VipRewardStateModal from '$lib/components/qr/VipRewardStateModal.svelte';
-	import {authIdentity} from '$lib/derived/auth.derived';
-	import {modalVipRewardState, modalVipRewardStateData} from '$lib/derived/modal.derived';
-	import {claimVipReward, setReferrer} from '$lib/services/reward.services';
-	import {loading} from '$lib/stores/loader.store';
-	import {modalStore} from '$lib/stores/modal.store';
-	import {removeSearchParam} from '$lib/utils/nav.utils';
-	import {QrCodeType} from "$lib/enums/qr-code-types";
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { modalVipRewardState, modalVipRewardStateData } from '$lib/derived/modal.derived';
+	import { QrCodeType } from '$lib/enums/qr-code-types';
+	import { claimVipReward, setReferrer } from '$lib/services/reward.services';
+	import { loading } from '$lib/stores/loader.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { removeSearchParam } from '$lib/utils/nav.utils';
 
 	$: (async () => {
 		if (!$loading && $page.url.searchParams.has('code') && nonNullish($authIdentity)) {
@@ -17,7 +17,7 @@
 				const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
 				removeSearchParam({ url: $page.url, searchParam: 'code' });
-				modalStore.openVipRewardState({success: result.success, codeType: QrCodeType.VIP});
+				modalStore.openVipRewardState({ success: result.success, codeType: QrCodeType.VIP });
 			}
 		}
 
@@ -37,5 +37,8 @@
 <slot />
 
 {#if $modalVipRewardState && nonNullish($modalVipRewardStateData)}
-	<VipRewardStateModal isSuccessful={$modalVipRewardStateData.success} codeType={$modalVipRewardStateData.codeType} />
+	<VipRewardStateModal
+		isSuccessful={$modalVipRewardStateData.success}
+		codeType={$modalVipRewardStateData.codeType}
+	/>
 {/if}
