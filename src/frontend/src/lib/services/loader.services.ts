@@ -1,3 +1,4 @@
+import { POW_ENABLED } from '$env/pow.env';
 import { allowSigning } from '$lib/api/backend.api';
 import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
@@ -30,7 +31,10 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
-		await allowSigning({ identity });
+		await allowSigning({
+			identity,
+			nonce: [] // Default empty nonce
+		});
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);
@@ -100,14 +104,14 @@ export const initLoader = async ({
 
 	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 	setProgressModal(true);
+	if (!POW_ENABLED) {
+		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
-	const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
-
-	if (!initSignerAllowanceSuccess) {
-		// Sign-out is handled within the service.
-		return;
+		if (!initSignerAllowanceSuccess) {
+			// Sign-out is handled within the service.
+			return;
+		}
 	}
-
 	const { success: addressSuccess } = await loadAddresses(
 		err?.map(({ networkId }) => networkId) ?? []
 	);
