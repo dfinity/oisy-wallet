@@ -24,6 +24,7 @@ export const EURC_TOKEN: RequiredSplToken = {
 	icon: eurc,
 	address: 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr',
 	owner: TOKEN_PROGRAM_ADDRESS,
+	// TODO: remove this prop when we will use `groupData` for grouping
 	twinToken: ETH_EURC_TOKEN,
 	groupData: EURC_TOKEN_GROUP
 };
