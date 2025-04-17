@@ -36,8 +36,7 @@
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
 
-	let { initialSearch, infoElement }: { initialSearch: string | undefined; infoElement?: Snippet } =
-		$props();
+	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
 
 	const dispatch = createEventDispatcher();
 
