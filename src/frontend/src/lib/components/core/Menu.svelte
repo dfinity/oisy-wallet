@@ -7,6 +7,7 @@
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
+	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
@@ -37,7 +38,6 @@
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
-	import IconBinance from "$lib/components/icons/IconBinance.svelte";
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
