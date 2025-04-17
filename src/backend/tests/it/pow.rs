@@ -1,6 +1,6 @@
 //! Tests the ledger account logic.
 
-use std::{thread, time::Duration};
+use std::time::Duration;
 
 use candid::Principal;
 use ic_cdk::api::management_canister::{main::canister_status, provisional::CanisterIdRecord};
@@ -49,16 +49,10 @@ fn print_canister_time(pic_setup: &PicBackend) {
         get_timestamp_secs(pic_setup.pic.get_time())
     );
 }
-fn sleep_test(duration: Duration) {
-    println!("Sleeping test task for {:?} ms", duration.as_millis());
-    thread::sleep(duration);
-}
-fn setup_cycles_ledger_with_progress() -> PicBackend {
+
+fn setup_with_cycles_ledger() -> PicBackend {
     eprintln!("Enabling auto progress for Pocket IC (Be aware that the cycle usage increases!");
-    let pic_setup = BackendBuilder::default()
-        .with_cycles_ledger(true)
-        .with_auto_progress(true)
-        .deploy();
+    let pic_setup = BackendBuilder::default().with_cycles_ledger(true).deploy();
     print_canister_time(&pic_setup);
     pic_setup
 }
@@ -221,7 +215,7 @@ fn test_create_pow_challenge_should_fail_without_user_profile() {
 
 #[test]
 fn test_create_pow_challenge_should_return_valid_values() {
-    let pic_setup = setup_cycles_ledger_with_progress();
+    let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
@@ -235,7 +229,7 @@ fn test_create_pow_challenge_should_return_valid_values() {
 
 #[test]
 fn test_create_pow_challenge_should_succeed_again_if_expired() {
-    let pic_setup = setup_cycles_ledger_with_progress();
+    let pic_setup = setup();
 
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
@@ -253,13 +247,15 @@ fn test_create_pow_challenge_should_succeed_again_if_expired() {
         .pic
         .advance_time(Duration::from_millis(expiry_ms - now_ms));
 
+    // pic_setup.pic.tick();
+
     let err_2th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_2th_call.is_ok());
 }
 
 #[test]
 fn test_create_pow_challenge_should_fail_if_not_expired() {
-    let pic_setup = setup_cycles_ledger_with_progress();
+    let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
@@ -279,7 +275,7 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
     if !helper_is_pow_enabled() {
         return;
     }
-    let pic_setup = setup_cycles_ledger_with_progress();
+    let pic_setup = setup_with_cycles_ledger();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
@@ -308,7 +304,7 @@ fn test_allow_signing_with_valid_nonce_should_fail_when_called_more_than_once() 
     if !helper_is_pow_enabled() {
         return;
     }
-    let pic_setup = setup_cycles_ledger_with_progress();
+    let pic_setup = setup_with_cycles_ledger();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
@@ -341,7 +337,7 @@ fn test_allow_signing_should_fail_with_valid_nonce_and_expired_challenge() {
     if !helper_is_pow_enabled() {
         return;
     }
-    let pic_setup = setup_cycles_ledger_with_progress();
+    let pic_setup = setup_with_cycles_ledger();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
@@ -358,8 +354,16 @@ fn test_allow_signing_should_fail_with_valid_nonce_and_expired_challenge() {
     // emulates the javascript function running in the browser to create a valid nonce
     let nonce = helper_solve_challenge(response.start_timestamp_ms, response.difficulty);
 
-    // since we enabled auto progress, we can not call pic.advance_time(..) instead we need to wait
-    thread::sleep(Duration::from_millis(expiry_ms - now_ms + 1000));
+    let now_ms = get_timestamp_ms(pic_setup.pic.get_time());
+    let expiry_ms = response.expiry_timestamp_ms;
+
+    assert_greater_than(expiry_ms, now_ms);
+
+    // we need advance to the expiry time of the challenge
+    pic_setup
+        .pic
+        .advance_time(Duration::from_millis(expiry_ms - now_ms));
+
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
     assert!(result_allow_signing.is_err());
 }
@@ -369,7 +373,7 @@ fn test_allow_signing_should_fail_with_invalid_nonce() {
     if !helper_is_pow_enabled() {
         return;
     }
-    let pic_setup = setup_cycles_ledger_with_progress();
+    let pic_setup = setup_with_cycles_ledger();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
@@ -397,7 +401,7 @@ fn test_allow_signing_should_approve_the_correct_cycles_amount() {
         return;
     }
 
-    let pic_setup = setup_cycles_ledger_with_progress();
+    let pic_setup = setup_with_cycles_ledger();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
 
@@ -411,7 +415,7 @@ fn test_allow_signing_should_approve_the_correct_cycles_amount() {
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
     assert!(result_allow_signing.is_ok());
     let response: AllowSigningResponse = result_allow_signing.unwrap();
-    assert_eq!(response.allowed_cycles, 1000000000);
+    assert_eq!(response.allowed_cycles, 7000000000);
     /*
     TODO uncomment this when the IC Pocker server supports an API to interact with the cycles ledger
     let backend_principle = pic_setup.canister_id;
@@ -431,7 +435,7 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
     if !helper_is_pow_enabled() {
         return;
     }
-    let pic_setup = setup_cycles_ledger_with_progress();
+    let pic_setup = setup_with_cycles_ledger();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
     let _ = call_create_user_profile(&pic_setup, caller);
     // ---------------------------------------------------------------------------------------------
@@ -448,11 +452,15 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
         result_allow_signing_1.unwrap_err()
     );
 
-    // since we enabled auto progress, we can not call pic.advance_time(..) instead we need to wait
-    // instead
-    sleep_test(Duration::from_millis(
-        response_1.expiry_timestamp_ms - get_timestamp_ms(pic_setup.pic.get_time()) + 1000,
-    ));
+    let now_ms = get_timestamp_ms(pic_setup.pic.get_time());
+    let expiry_ms = response_1.expiry_timestamp_ms;
+    assert_greater_than(expiry_ms, now_ms);
+
+    // we need advance to the expiry time of the challenge
+    pic_setup
+        .pic
+        .advance_time(Duration::from_millis(expiry_ms - now_ms));
+
     // ---------------------------------------------------------------------------------------------
     // - Solve the second challenge and call allow_signing (using the adjusted difficulty)
     // ---------------------------------------------------------------------------------------------
@@ -461,7 +469,7 @@ fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
         result_2.expect("Failed to retrieve CreateChallengeResponse");
     let nonce_2 = helper_solve_challenge(response_2.start_timestamp_ms, response_2.difficulty);
     let result_allow_signing_2 = call_allow_signing(&pic_setup, caller, nonce_2);
-    debug_assert!(result_allow_signing_2.is_ok());
+    assert!(result_allow_signing_2.is_ok());
 
     let allow_signing_response_2 = result_allow_signing_2.unwrap();
     let challenge_completion = allow_signing_response_2
