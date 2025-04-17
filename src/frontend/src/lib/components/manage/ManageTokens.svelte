@@ -45,7 +45,7 @@
 	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
 	// the life of the component.
-	let exchangesStaticData: ExchangesData | undefined = $state(undefined);
+	let exchangesStaticData: ExchangesData | undefined = $state();
 
 	onMount(() => {
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
@@ -157,7 +157,7 @@
 	</p>
 {/if}
 
-{#if infoElement}
+{#if nonNullish(infoElement)}
 	{@render infoElement()}
 {/if}
 
