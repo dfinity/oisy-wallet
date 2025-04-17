@@ -86,11 +86,6 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		window.postMessage = postMessageMock;
 	});
 
-	afterAll(() => {
-		// @ts-expect-error redo original
-		window.postMessage = originalPostmessage;
-	});
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
@@ -100,6 +95,11 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 	afterEach(() => {
 		vi.useRealTimers();
+	});
+
+	afterAll(() => {
+		// @ts-expect-error redo original
+		window.postMessage = originalPostmessage;
 	});
 
 	const initWithTransactions = <PostMessageDataRequest>({
