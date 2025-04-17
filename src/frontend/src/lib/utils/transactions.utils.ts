@@ -25,6 +25,7 @@ import {
 } from '$lib/utils/network.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import {MICRO_TRANSACTION_USD_THRESHOLD} from "$lib/constants/app.constants";
 
 /**
  * Maps the transactions stores to a unified list of transactions with their respective token and components.
