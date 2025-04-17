@@ -12,6 +12,7 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { Token } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
+	import { MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS } from '$lib/constants/test-ids.constants';
 
 	let {
 		networkSelectorViewOnly = false,
@@ -71,7 +72,7 @@
 				{#if noResults}
 					{@render noResults()}
 				{:else}
-					<p class="text-primary" data-tid="default-no-results-message">
+					<p class="text-primary" data-tid={MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS}>
 						{$i18n.core.text.no_results}
 					</p>
 				{/if}

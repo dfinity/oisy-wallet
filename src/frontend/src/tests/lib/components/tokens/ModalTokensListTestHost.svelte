@@ -7,6 +7,11 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { ModalTokensListContext } from '$lib/stores/modal-tokens-list.store';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
+	import {
+		MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS,
+		MODAL_TOKEN_LIST_ITEM_PREFIX,
+		MODAL_TOKEN_LIST_TOOLBAR
+	} from '$lib/constants/test-ids.constants';
 
 	let { tokens, renderNoResults }: { tokens: Token[]; renderNoResults: boolean } = $props();
 
@@ -29,13 +34,15 @@
 >
 	{#snippet noResults()}
 		{#if renderNoResults}
-			<div data-tid={'custom-no-results'}>No results custom message</div>
+			<div data-tid={MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS}>No results custom message</div>
 		{/if}
 	{/snippet}
 	{#snippet tokenListItem(token: Token, onClick: () => void)}
-		<button data-tid={'list-item-' + token.symbol} onclick={onClick}>{token.symbol}</button>
+		<button data-tid={`${MODAL_TOKEN_LIST_ITEM_PREFIX}${token.symbol}`} onclick={onClick}
+			>{token.symbol}</button
+		>
 	{/snippet}
 	{#snippet toolbar()}
-		<div data-tid="toolbar">Toolbar</div>
+		<div data-tid={MODAL_TOKEN_LIST_TOOLBAR}>Toolbar</div>
 	{/snippet}
 </ModalTokensList>

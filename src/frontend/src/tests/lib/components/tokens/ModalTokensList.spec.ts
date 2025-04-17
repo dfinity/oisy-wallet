@@ -1,7 +1,13 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import {
+	MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS,
+	MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS,
+	MODAL_TOKEN_LIST_ITEM_PREFIX,
+	MODAL_TOKEN_LIST_TOOLBAR
+} from '$lib/constants/test-ids.constants';
 import type { Token } from '$lib/types/token';
-import ModalTokensListHost from '$tests/lib/components/tokens/ModalTokensListHost.svelte';
+import ModalTokensListHost from '$tests/lib/components/tokens/ModalTokensListTestHost.svelte';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { expect } from 'vitest';
 
@@ -28,7 +34,9 @@ describe('ModalTokensList', () => {
 		});
 
 		for (const token of mockTokens) {
-			expect(await screen.findByTestId(`list-item-${token.symbol}`)).toBeInTheDocument();
+			expect(
+				await screen.findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}${token.symbol}`)
+			).toBeInTheDocument();
 		}
 	});
 
@@ -40,7 +48,7 @@ describe('ModalTokensList', () => {
 			}
 		});
 
-		expect(await screen.findByTestId('toolbar')).toBeInTheDocument();
+		expect(await screen.findByTestId(MODAL_TOKEN_LIST_TOOLBAR)).toBeInTheDocument();
 	});
 
 	it('shows default no-results message when snippet is not provided', async () => {
@@ -52,7 +60,7 @@ describe('ModalTokensList', () => {
 		});
 
 		waitFor(async () => {
-			const el = await screen.findByTestId('default-no-results-message');
+			const el = await screen.findByTestId(MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS);
 			expect(el).toBeInTheDocument();
 		});
 	});
@@ -66,7 +74,7 @@ describe('ModalTokensList', () => {
 		});
 
 		waitFor(async () => {
-			const el = await screen.findByTestId('custom-no-results');
+			const el = await screen.findByTestId(MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS);
 			expect(el).toBeInTheDocument();
 		});
 	});
@@ -83,7 +91,7 @@ describe('ModalTokensList', () => {
 
 		await fireEvent.input(searchInput, { target: { value: 'BTC' } });
 
-		expect(await screen.findByTestId('list-item-BTC')).toBeInTheDocument();
+		expect(await screen.findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}BTC`)).toBeInTheDocument();
 		expect(screen.queryByTestId('list-item-ETH')).not.toBeInTheDocument();
 	});
 
@@ -100,7 +108,7 @@ describe('ModalTokensList', () => {
 		await fireEvent.input(searchInput, { target: { value: 'nonexistent' } });
 
 		waitFor(async () => {
-			const el = await screen.findByTestId('custom-no-results');
+			const el = await screen.findByTestId(MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS);
 			expect(el).toBeInTheDocument();
 		});
 	});
@@ -118,7 +126,7 @@ describe('ModalTokensList', () => {
 			}
 		});
 
-		const btcButton = await screen.findByTestId('list-item-BTC');
+		const btcButton = await screen.findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}BTC`);
 		await fireEvent.click(btcButton);
 
 		expect(handler).toHaveBeenCalledExactlyOnceWith(
