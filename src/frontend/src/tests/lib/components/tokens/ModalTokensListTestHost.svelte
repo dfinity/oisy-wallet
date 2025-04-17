@@ -1,24 +1,23 @@
 <script lang="ts">
-	import type { Token } from '$lib/types/token';
 	import { setContext } from 'svelte';
-	import {
-		initModalTokensListContext,
-		MODAL_TOKENS_LIST_CONTEXT_KEY
-	} from '$lib/stores/modal-tokens-list.store';
-	import type { ModalTokensListContext } from '$lib/stores/modal-tokens-list.store';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import {
 		MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS,
 		MODAL_TOKEN_LIST_ITEM_PREFIX,
 		MODAL_TOKEN_LIST_TOOLBAR
 	} from '$lib/constants/test-ids.constants';
+	import {
+		initModalTokensListContext,
+		MODAL_TOKENS_LIST_CONTEXT_KEY
+	,type  ModalTokensListContext } from '$lib/stores/modal-tokens-list.store';
+		import type { Token } from '$lib/types/token';
 
 	let { tokens, renderNoResults }: { tokens: Token[]; renderNoResults: boolean } = $props();
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
-			tokens: tokens,
+			tokens,
 			filterZeroBalance: false,
 			filterNetwork: undefined,
 			filterQuery: ''

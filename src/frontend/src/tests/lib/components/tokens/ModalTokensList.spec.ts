@@ -51,7 +51,7 @@ describe('ModalTokensList', () => {
 		expect(await screen.findByTestId(MODAL_TOKEN_LIST_TOOLBAR)).toBeInTheDocument();
 	});
 
-	it('shows default no-results message when snippet is not provided', async () => {
+	it('shows default no-results message when snippet is not provided', () => {
 		render(ModalTokensListHost, {
 			props: {
 				tokens: [],
@@ -65,7 +65,7 @@ describe('ModalTokensList', () => {
 		});
 	});
 
-	it('shows custom no results message when no tokens match', async () => {
+	it('shows custom no results message when no tokens match', () => {
 		render(ModalTokensListHost, {
 			props: {
 				tokens: [], // no tokens
