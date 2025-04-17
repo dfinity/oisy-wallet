@@ -83,7 +83,7 @@ const decodeCkErc20DepositAbiDataValue = (data: string): bigint => {
 		dataSlice(data, 4)
 	);
 
-	return value.toBigInt();
+	return value;
 };
 
 export const isConvertCkEthToEth = ({
