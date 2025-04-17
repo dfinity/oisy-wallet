@@ -1,5 +1,5 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
-import { SEPOLIA_USDC_TOKEN_GROUP, USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
+import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
@@ -44,6 +44,5 @@ export const SEPOLIA_USDC_TOKEN: RequiredErc20Token = {
 	icon: usdc,
 	address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckSepoliaUSDC',
-	groupData: SEPOLIA_USDC_TOKEN_GROUP
+	twinTokenSymbol: 'ckSepoliaUSDC'
 };

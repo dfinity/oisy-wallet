@@ -7,11 +7,3 @@ export const USDC_TOKEN_GROUP = {
 	name: 'USDC',
 	symbol: USDC_TOKEN_GROUP_SYMBOL
 };
-
-const SEPOLIA_USDC_TOKEN_GROUP_SYMBOL = 'SepoliaUSDC';
-
-export const SEPOLIA_USDC_TOKEN_GROUP = {
-	icon: usdc,
-	name: 'USDC',
-	symbol: SEPOLIA_USDC_TOKEN_GROUP_SYMBOL
-};
