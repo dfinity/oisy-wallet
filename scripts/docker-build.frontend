@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic -o target/ .
+echo "BUILD REPORT:"
+cat target/frontend/build-report.txt
