@@ -142,12 +142,10 @@ impl BtcAddress {
     pub fn from_p2sh(s: &str) -> Result<Self, ParseError> {
         let body = s; // No prefix to strip
         if !body.starts_with("3") {
-            panic!("Invalid P2SH address prefix: {}", body);
-            //return Err(ParseError());
+            return Err(ParseError());
         }
         if body.len() != 34 {
-            panic!("Invalid P2SH address length: {}", body.len());
-            //return Err(ParseError());
+            return Err(ParseError());
         }
         Ok(BtcAddress::P2SH(s.to_string()))
     }
