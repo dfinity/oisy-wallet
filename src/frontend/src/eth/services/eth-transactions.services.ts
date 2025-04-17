@@ -39,7 +39,7 @@ export const loadEthereumTransactions = ({
 export const reloadEthereumTransactions = (params: {
 	tokenId: TokenId;
 	networkId: NetworkId;
-	silent: boolean;
+	silent?: boolean;
 }): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
 const loadEthTransactions = async ({
