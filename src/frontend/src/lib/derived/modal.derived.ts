@@ -1,7 +1,7 @@
+import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import { derived, type Readable } from 'svelte/store';
-import type {QrCodeType} from "$lib/enums/qr-code-types";
 
 export const modalEthReceive: Readable<boolean> = derived(
 	modalStore,
@@ -137,7 +137,8 @@ export const modalVipQrCode: Readable<boolean> = derived(
 );
 export const modalVipQrCodeData: Readable<QrCodeType | undefined> = derived(
 	modalStore,
-	($modalStore) => ($modalStore?.type === 'vip-qr-code' ? ($modalStore?.data as QrCodeType) : undefined)
+	($modalStore) =>
+		$modalStore?.type === 'vip-qr-code' ? ($modalStore?.data as QrCodeType) : undefined
 );
 export const modalReferralCode: Readable<boolean> = derived(
 	modalStore,
