@@ -1,5 +1,13 @@
 import type { NetworkSettings, NetworkSettingsFor } from '$declarations/backend/backend.did';
 import {
+	BASE_NETWORK_ID,
+	BASE_SEPOLIA_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_NETWORK_ID,
+	BSC_TESTNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
@@ -38,6 +46,14 @@ const networkIdToKey = (networkId: NetworkId): NetworkSettingsFor | undefined =>
 			return { SolanaDevnet: null };
 		case SOLANA_LOCAL_NETWORK_ID:
 			return { SolanaLocal: null };
+		case BASE_NETWORK_ID:
+			return { BaseMainnet: null };
+		case BASE_SEPOLIA_NETWORK_ID:
+			return { BaseSepolia: null };
+		case BSC_NETWORK_ID:
+			return { BscMainnet: null };
+		case BSC_TESTNET_NETWORK_ID:
+			return { BscTestnet: null };
 		default:
 			// We just print the error to console and ignore the missing network, for the sake of the user's experience.
 			console.warn(`Unknown networkId: ${networkId.description}`);
