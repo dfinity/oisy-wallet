@@ -15,7 +15,8 @@ const sha256 = async (input: string): Promise<ArrayBuffer> =>
  * @param {string} input - The input string to be hashed and converted to a hexadecimal string.
  * @returns {Promise<string>} - A promise that resolves to the resulting hash as a hexadecimal string.
  */
-const hashToHex = async (input: string): Promise<string> => {
+// TODO remove _hashToHex once this function is used
+const _hashToHex = async (input: string): Promise<string> => {
 	// TODO remove sha256 and replace oisy-wallet-signer/src/utils/crypto.utils.ts as soon as a dedicated sha256 function becomes available
 	const hashBuffer = await sha256(input);
 
