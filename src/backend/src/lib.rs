@@ -644,12 +644,36 @@ pub fn add_user_hidden_dapp_id(
 pub fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    mutate_state(|s| {
+    let user_profile: UserProfile = mutate_state(|s| {
         let mut user_profile_model =
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
         let stored_user = create_profile(stored_principal, &mut user_profile_model);
+
         UserProfile::from(&stored_user)
-    })
+    });
+
+    // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
+    // Spawn the async task for allow_signing after returning UserProfile synchronously
+    ic_cdk::spawn(async move {
+        // Upon initial user login, we have to that ensure allow_signing is called to handle
+        // cases where users lack the cycles required for signer operations. To
+        // guarantee correct functionality, create_user_profile(..) must be invoked
+        // before any signer-related calls (e.g., get_eth_address). Spawns the async
+        // task separately after returning UserProfile synchronously
+        if let Err(e) = signer::allow_signing(None).await {
+            // We don't return errors or panic here because:
+            // 1. The user profile was already created successfully
+            // 2. This is running in a spawned task, so we can't return errors to the original
+            //    caller
+            ic_cdk::println!(
+                "Error enabling signing for user {}: {:?}",
+                stored_principal.0,
+                e
+            );
+        }
+    });
+
+    user_profile
 }
 
 /// Returns the caller's user profile.
@@ -731,7 +755,7 @@ pub async fn allow_signing(
 
     // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED is
     // disabled
-    if request.is_none() && !POW_ENABLED {
+    if !POW_ENABLED {
         // Passing None to apply the old cycle calculation logic
         signer::allow_signing(None).await?;
         // Returning a placeholder response that can be ignored by the frontend.
