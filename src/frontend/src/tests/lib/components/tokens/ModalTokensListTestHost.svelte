@@ -8,9 +8,10 @@
 	} from '$lib/constants/test-ids.constants';
 	import {
 		initModalTokensListContext,
-		MODAL_TOKENS_LIST_CONTEXT_KEY
-	,type  ModalTokensListContext } from '$lib/stores/modal-tokens-list.store';
-		import type { Token } from '$lib/types/token';
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
+	} from '$lib/stores/modal-tokens-list.store';
+	import type { Token } from '$lib/types/token';
 
 	let { tokens, renderNoResults }: { tokens: Token[]; renderNoResults: boolean } = $props();
 
