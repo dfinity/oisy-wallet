@@ -5,25 +5,24 @@ import {
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_TESTNET_NETWORK
 } from '$env/networks/networks.sol.env';
-import { LOCAL } from '$lib/constants/app.constants';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userNetworks } from '$lib/derived/user-networks.derived';
 import type { NetworkId } from '$lib/types/network';
-import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
+import { defineEnabledNetworks } from '$lib/utils/networks.utils';
 import type { SolanaNetwork } from '$sol/types/network';
 import { derived, type Readable } from 'svelte/store';
 
 export const enabledSolanaNetworks: Readable<SolanaNetwork[]> = derived(
 	[testnetsEnabled, userNetworks],
 	([$testnetsEnabled, $userNetworks]) =>
-		[
-			...(SOL_MAINNET_ENABLED ? [SOLANA_MAINNET_NETWORK] : []),
-			...($testnetsEnabled
-				? [SOLANA_TESTNET_NETWORK, SOLANA_DEVNET_NETWORK, ...(LOCAL ? [SOLANA_LOCAL_NETWORK] : [])]
-				: [])
-		].filter(({ id: networkId }) =>
-			isUserNetworkEnabled({ userNetworks: $userNetworks, networkId })
-		)
+		defineEnabledNetworks({
+			$testnetsEnabled,
+			$userNetworks,
+			mainnetFlag: SOL_MAINNET_ENABLED,
+			mainnetNetworks: [SOLANA_MAINNET_NETWORK],
+			testnetNetworks: [SOLANA_TESTNET_NETWORK, SOLANA_DEVNET_NETWORK],
+			localNetworks: [SOLANA_LOCAL_NETWORK]
+		})
 );
 
 export const enabledSolanaNetworksIds: Readable<NetworkId[]> = derived(
