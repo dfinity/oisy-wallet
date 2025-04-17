@@ -1,9 +1,16 @@
 <script lang="ts">
 	import { debounce, isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
+
+	interface Props {
+		children?: Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	const load = async () => {
 		if (isNullish($ethAddress)) {
@@ -22,7 +29,11 @@
 
 	const debounceLoad = debounce(load, 500);
 
-	$: $ethAddress, $enabledErc20Tokens, debounceLoad();
+	$effect(() => {
+		// To trigger the load function when any of the dependencies change.
+		[$ethAddress, $enabledEthereumTokens, $enabledErc20Tokens];
+		debounceLoad();
+	});
 </script>
 
-<slot />
+{@render children?.()}
