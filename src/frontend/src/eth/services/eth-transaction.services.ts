@@ -26,7 +26,7 @@ export const processTransactionSent = async ({
 	}
 
 	// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
-	const value = decodeErc20AbiDataValue(transaction.data);
+	const value = decodeErc20AbiDataValue({ data: transaction.data });
 
 	await processErc20Transaction({ hash: transaction.hash, value, token, type: 'pending' });
 };
