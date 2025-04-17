@@ -78,7 +78,7 @@ export default defineConfig(
 					'build',
 					'.dfx',
 					'**/.svelte-kit',
-					'declarations'
+					'src/declarations'
 				],
 				// TODO: increase the thresholds slowly up to an acceptable 80% at least
 				thresholds: {
