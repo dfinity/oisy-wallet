@@ -148,6 +148,7 @@ export const mapAllTransactionsUi = ({
 	}, []);
 };
 
+//When using this filter function in combination with an infinite loader we need to make sure that the transactions are filtered while loading and not right before displaying them.
 export const filterReceivedMicroTransactions = ({
 	transactions,
 	exchanges
