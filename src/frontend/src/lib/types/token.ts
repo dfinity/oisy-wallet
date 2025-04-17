@@ -3,7 +3,6 @@ import {
 	type TokenBuySchema,
 	type TokenBuyableSchema,
 	type TokenCategorySchema,
-	type TokenGroupPropSchema,
 	type TokenIdSchema,
 	type TokenMetadataSchema,
 	type TokenSchema,
