@@ -43,10 +43,10 @@
 	let button: HTMLButtonElement | undefined;
 
 	let isVip = false;
-	let isBinance = false;
+	let isGold = false;
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
-			({ is_vip: isVip, is_binance: isBinance } = await getUserRoles({ identity: $authIdentity }));
+			({ is_vip: isVip, is_gold: isGold } = await getUserRoles({ identity: $authIdentity }));
 		}
 	});
 
@@ -120,11 +120,11 @@
 			</ButtonMenu>
 		{/if}
 
-		{#if isBinance}
+		{#if isGold}
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.binance_qr_code}
 				testId={NAVIGATION_MENU_VIP_BUTTON}
-				on:click={() => modalStore.openVipQrCode(QrCodeType.BINANCE)}
+				on:click={() => modalStore.openVipQrCode(QrCodeType.GOLD)}
 			>
 				<IconBinance size="20" />
 				{$i18n.navigation.text.binance_qr_code}
