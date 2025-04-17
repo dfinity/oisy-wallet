@@ -5,6 +5,7 @@
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import Info from '$icp/components/info/Info.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
+	import IcIndexCanisterStatus from '$icp/components/transactions/IcIndexCanisterStatus.svelte';
 	import IcNoIndexPlaceholder from '$icp/components/transactions/IcNoIndexPlaceholder.svelte';
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
@@ -62,11 +63,13 @@
 	{$i18n.transactions.text.title}
 
 	<svelte:fragment slot="end">
-		{#if $tokenCkBtcLedger}
-			<IcTransactionsBitcoinStatus />
-		{:else if ckEthereum}
-			<IcTransactionsEthereumStatus />
-		{/if}
+		<IcIndexCanisterStatus>
+			{#if $tokenCkBtcLedger}
+				<IcTransactionsBitcoinStatus />
+			{:else if ckEthereum}
+				<IcTransactionsEthereumStatus />
+			{/if}
+		</IcIndexCanisterStatus>
 	</svelte:fragment>
 </Header>
 
