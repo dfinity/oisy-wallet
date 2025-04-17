@@ -1,14 +1,15 @@
-import type {
-	TokenAppearanceSchema,
-	TokenBuySchema,
-	TokenBuyableSchema,
-	TokenCategorySchema,
-	TokenIdSchema,
-	TokenMetadataSchema,
-	TokenSchema,
-	TokenStandardSchema
+import {
+	type TokenAppearanceSchema,
+	type TokenBuySchema,
+	type TokenBuyableSchema,
+	type TokenCategorySchema,
+	type TokenIdSchema,
+	type TokenMetadataSchema,
+	type TokenSchema,
+	type TokenStandardSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
+import type { TokenGroup } from '$lib/types/token-group';
 import type { Option, RequiredExcept } from '$lib/types/utils';
 import type * as z from 'zod';
 
@@ -34,7 +35,7 @@ export interface TokenLinkedData {
 
 export type TokenWithLinkedData = Token & TokenLinkedData;
 
-export type NonRequiredProps = TokenAppearance & TokenBuyable;
+export type NonRequiredProps = TokenAppearance & TokenBuyable & TokenGroup;
 
 export type RequiredToken<T extends Token = Token> = RequiredExcept<T, keyof NonRequiredProps>;
 
