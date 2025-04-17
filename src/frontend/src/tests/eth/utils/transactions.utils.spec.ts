@@ -216,10 +216,10 @@ describe('transactions.utils', () => {
 			expect(result.id).toBe('0x1234');
 		});
 
-		it('should map an ID to undefined if the transaction hash does not exist', () => {
+		it('should map an ID to empty string if the transaction hash does not exist', () => {
 			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
-			expect(result.id).toBeUndefined;
+			expect(result.id).toBe('');
 		});
 	});
 });
