@@ -6,7 +6,7 @@ import { uint8ArrayToHexString } from '@dfinity/utils';
  * @param {string} input - The input string to be hashed.
  * @returns {Promise<ArrayBuffer>} - A promise that resolves to the resulting SHA-256 hash as an ArrayBuffer.
  */
-const sha256 = async (input: string): Promise<ArrayBuffer> => {
+export const sha256 = async (input: string): Promise<ArrayBuffer> => {
 	const textEncoder = new TextEncoder();
 	return await crypto.subtle.digest('SHA-256', textEncoder.encode(input));
 };
@@ -16,8 +16,7 @@ const sha256 = async (input: string): Promise<ArrayBuffer> => {
  * @param {string} input - The input string to be hashed and converted to a hexadecimal string.
  * @returns {Promise<string>} - A promise that resolves to the resulting hash as a hexadecimal string.
  */
-// TODO remove _hashToHex once this function is used
-const _hashToHex = async (input: string): Promise<string> => {
+export const hashToHex = async (input: string): Promise<string> => {
 	// TODO remove sha256 and replace oisy-wallet-signer/src/utils/crypto.utils.ts as soon as a dedicated sha256 function becomes available
 	const hashBuffer = await sha256(input);
 
