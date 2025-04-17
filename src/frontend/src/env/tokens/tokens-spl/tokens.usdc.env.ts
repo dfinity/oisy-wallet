@@ -25,10 +25,10 @@ export const USDC_TOKEN: RequiredSplToken = {
 	address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
 	owner: TOKEN_PROGRAM_ADDRESS,
 	twinToken: ETH_USDC_TOKEN,
+	groupData: USDC_TOKEN_GROUP,
 	buy: {
 		onramperId: 'usdc_solana'
-	},
-	groupData: USDC_TOKEN_GROUP
+	}
 };
 
 export const DEVNET_USDC_SYMBOL = 'DevnetUSDC';
