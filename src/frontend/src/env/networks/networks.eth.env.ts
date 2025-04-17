@@ -1,16 +1,18 @@
 import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
-import sepolia from '$eth/assets/sepolia.svg';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
-import eth from '$icp-eth/assets/eth.svg';
-import ethereumBW from '$lib/assets/networks/ethereum-bw.svg';
-import sepoliaBW from '$lib/assets/networks/sepolia-bw.svg';
+import ethereumIconDark from '$lib/assets/networks/dark/ethereum-mainnet.svg';
+import sepoliaIconDark from '$lib/assets/networks/dark/ethereum-sepolia.svg';
+import ethereumIconLight from '$lib/assets/networks/light/ethereum-mainnet.svg';
+import sepoliaIconLight from '$lib/assets/networks/light/ethereum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
+import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
 import type { Networkish } from 'ethers/providers';
 
-export const ETH_MAINNET_ENABLED =
-	JSON.parse(import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED ?? false) === false;
+export const ETH_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
+	import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED
+);
 
 export const INFURA_NETWORK_HOMESTEAD: Networkish = 'homestead';
 export const INFURA_NETWORK_SEPOLIA: Networkish = 'sepolia';
@@ -39,8 +41,8 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Ethereum',
 	chainId: 1n,
-	icon: eth,
-	iconBW: ethereumBW,
+	iconLight: ethereumIconLight,
+	iconDark: ethereumIconDark,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
 	buy: { onramperId: 'ethereum' }
 };
@@ -56,8 +58,8 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Sepolia',
 	chainId: 11155111n,
-	icon: sepolia,
-	iconBW: sepoliaBW,
+	iconLight: sepoliaIconLight,
+	iconDark: sepoliaIconDark,
 	explorerUrl: SEPOLIA_EXPLORER_URL
 };
 

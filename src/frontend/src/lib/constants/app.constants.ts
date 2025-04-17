@@ -1,3 +1,4 @@
+import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 
@@ -10,7 +11,7 @@ export const STAGING = MODE === 'staging' || TEST_FE || MODE === 'audit' || MODE
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
-export const TEST = JSON.parse(import.meta.env.TEST ?? false) === true;
+export const TEST = parseBoolEnvVar(import.meta.env.TEST);
 
 const MAINNET_DOMAIN = 'icp0.io';
 
@@ -22,7 +23,7 @@ export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 
 export const INTERNET_IDENTITY_ORIGIN = LOCAL
 	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-	: 'https://identity.ic0.app';
+	: 'https://identity.internetcomputer.org';
 
 export const POUH_ISSUER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
@@ -141,3 +142,9 @@ export const FALLBACK_TIMEOUT = 10000;
 // Git
 export const GIT_COMMIT_HASH = VITE_GIT_COMMIT_HASH;
 export const GIT_BRANCH_NAME = VITE_GIT_BRANCH_NAME;
+
+// Threshold
+export const FAILURE_THRESHOLD = 3;
+
+// Micro transaction
+export const MICRO_TRANSACTION_USD_THRESHOLD = 0.01;

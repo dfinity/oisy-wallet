@@ -57,6 +57,7 @@ describe('Transactions', () => {
 		await new Promise<void>((resolve) =>
 			setTimeout(() => {
 				expect(get(modalStore)).toBeNull();
+
 				resolve();
 			}, timeout)
 		);
@@ -70,6 +71,7 @@ describe('Transactions', () => {
 		await new Promise<void>((resolve) =>
 			setTimeout(() => {
 				expect(get(modalStore)).toBeNull();
+
 				resolve();
 			}, timeout)
 		);
@@ -129,6 +131,7 @@ describe('Transactions', () => {
 		await new Promise<void>((resolve) =>
 			setTimeout(() => {
 				expect(get(modalStore)).toBeNull();
+
 				resolve();
 			}, timeout)
 		);

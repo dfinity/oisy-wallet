@@ -108,7 +108,9 @@ export const initLoader = async ({
 		return;
 	}
 
-	const { success: addressSuccess } = await loadAddresses(err?.map(({ tokenId }) => tokenId) ?? []);
+	const { success: addressSuccess } = await loadAddresses(
+		err?.map(({ networkId }) => networkId) ?? []
+	);
 
 	if (!addressSuccess) {
 		await signOut({});

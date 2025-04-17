@@ -27,6 +27,7 @@ interface I18nCore {
 		not_available: string;
 		new: string;
 		edit: string;
+		no_results: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -49,6 +50,7 @@ interface I18nNavigation {
 		confirm_navigate: string;
 		vip_qr_code: string;
 		refer_a_friend: string;
+		address_book: string;
 	};
 	alt: {
 		tokens: string;
@@ -64,6 +66,7 @@ interface I18nNavigation {
 		open_twitter: string;
 		vip_qr_code: string;
 		refer_a_friend: string;
+		address_book: string;
 	};
 	short: { documentation: string };
 }
@@ -90,6 +93,40 @@ interface I18nAuth {
 		no_pouh_credential: string;
 		error_while_signing_in: string;
 		unexpected_issue_with_syncing: string;
+	};
+	help: {
+		text: {
+			title: string;
+			description: string;
+			subtitle: string;
+			lost_identity: string;
+			security: string;
+			got_confused: string;
+			other: string;
+			feedback_text: string;
+			thanks_text: string;
+			identity_new_identity: string;
+			identity_legacy_description: string;
+			identity_legacy_sign_in: string;
+			identity_learn_more: string;
+			other_title: string;
+			other_description: string;
+			other_introduction: string;
+			other_docs: string;
+			other_private_key: string;
+			other_asset_control: string;
+			need_help: string;
+			sign_in: string;
+		};
+		alt: {
+			internet_identity: string;
+			identity_learn_more: string;
+			other_introduction: string;
+			other_docs: string;
+			other_private_key: string;
+			other_asset_control: string;
+			sign_in: string;
+		};
 	};
 }
 
@@ -525,6 +562,8 @@ interface I18nTokens {
 		all_tokens_with_zero_hidden: string;
 		filter_nothing_found: string;
 		filter_nothing_found_description: string;
+		filter_placeholder: string;
+		filter_button: string;
 		buy_or_receive: string;
 		initializing: string;
 		updating_ui: string;
@@ -537,6 +576,7 @@ interface I18nTokens {
 		chain_key: string;
 		show_more_networks: string;
 		hide_more_networks: string;
+		on_network: string;
 	};
 	details: {
 		title: string;
@@ -603,6 +643,7 @@ interface I18nTokens {
 		open_contract_address_block_explorer: string;
 		open_token_address_block_explorer: string;
 		token_group_number: string;
+		filter_button: string;
 	};
 	placeholder: {
 		enter_contract_address: string;
@@ -854,6 +895,10 @@ interface I18nReferral {
 	};
 }
 
+interface I18nAddress_book {
+	text: { title: string; empty_title: string; empty_text: string; add_new_contact: string };
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -947,6 +992,7 @@ interface I18n {
 	about: I18nAbout;
 	vip: I18nVip;
 	referral: I18nReferral;
+	address_book: I18nAddress_book;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;

@@ -281,9 +281,7 @@ describe('reward-code', () => {
 		const mockedReferrerCode = 123456;
 
 		it('should successfully set referrer', async () => {
-			const setReferrerSpy = vi
-				.spyOn(rewardApi, 'setReferrer')
-				.mockResolvedValueOnce(undefined as void);
+			const setReferrerSpy = vi.spyOn(rewardApi, 'setReferrer').mockResolvedValueOnce({ Ok: null });
 
 			const result = await setReferrer({
 				identity: mockIdentity,
@@ -541,6 +539,7 @@ describe('reward-code', () => {
 				icpToken: mockIcpToken,
 				identity: mockIdentity
 			});
+
 			expect(result.ckBtcReward.toString()).toEqual('3000');
 			expect(result.ckUsdcReward.toString()).toEqual('4000');
 			expect(result.icpReward.toString()).toEqual('3000');
@@ -554,6 +553,7 @@ describe('reward-code', () => {
 				icpToken: mockIcpToken,
 				identity: mockIdentity
 			});
+
 			expect(result.ckBtcReward.toString()).toEqual('1000');
 			expect(result.ckUsdcReward.toString()).toEqual('0');
 			expect(result.icpReward.toString()).toEqual('0');
@@ -567,6 +567,7 @@ describe('reward-code', () => {
 				icpToken: mockIcpToken,
 				identity: mockIdentity
 			});
+
 			expect(result.ckBtcReward.toString()).toEqual('0');
 			expect(result.ckUsdcReward.toString()).toEqual('0');
 			expect(result.icpReward.toString()).toEqual('0');

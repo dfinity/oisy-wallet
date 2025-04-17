@@ -166,7 +166,9 @@ abstract class Homepage {
 		await this.#page.locator(selector).innerHTML();
 
 		if (await this.isSelectorVisible({ selector })) {
-			await this.#page.locator(selector).evaluate((element) => (element.innerHTML = 'placeholder'));
+			const elementsLocator = this.#page.locator(selector);
+			await elementsLocator.evaluate((element) => (element.innerHTML = 'placeholder'));
+			await elementsLocator.locator('text=placeholder').first().waitFor();
 		}
 	}
 
@@ -177,6 +179,8 @@ abstract class Homepage {
 				(element as HTMLElement).innerHTML = 'placeholder';
 			}
 		});
+
+		await elementsLocator.locator('text=placeholder').first().waitFor();
 	}
 
 	private async goto(): Promise<void> {
@@ -513,7 +517,9 @@ abstract class Homepage {
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
+
 				await expect(element).toHaveScreenshot({ fullPage: true });
+
 				await this.showMobileNavigationMenu();
 			}
 		}

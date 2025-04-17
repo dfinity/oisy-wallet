@@ -167,7 +167,8 @@ export interface Config {
 export type CreateChallengeError =
 	| { ChallengeInProgress: null }
 	| { MissingUserProfile: null }
-	| { RandomnessError: string };
+	| { RandomnessError: string }
+	| { Other: string };
 export interface CreateChallengeResponse {
 	difficulty: number;
 	start_timestamp_ms: bigint;
@@ -289,15 +290,19 @@ export interface NetworkSettings {
 }
 export type NetworkSettingsFor =
 	| { InternetComputer: null }
+	| { BaseSepolia: null }
 	| { SolanaTestnet: null }
 	| { BitcoinRegtest: null }
 	| { SolanaDevnet: null }
 	| { EthereumSepolia: null }
 	| { BitcoinTestnet: null }
+	| { BaseMainnet: null }
+	| { BscMainnet: null }
 	| { SolanaLocal: null }
 	| { EthereumMainnet: null }
 	| { SolanaMainnet: null }
-	| { BitcoinMainnet: null };
+	| { BitcoinMainnet: null }
+	| { BscTestnet: null };
 export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
