@@ -50,7 +50,7 @@
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
 
-	let allTokensSorted = $derived(
+	let allTokensSorted: Token[] = $derived(
 		nonNullish(exchangesStaticData)
 			? pinEnabledTokensAtTop(
 					sortTokens({
