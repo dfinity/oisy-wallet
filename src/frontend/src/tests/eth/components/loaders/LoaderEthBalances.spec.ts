@@ -5,7 +5,8 @@ import type { Erc20Token } from '$eth/types/erc20';
 import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
@@ -73,13 +74,59 @@ describe('LoaderEthBalances', () => {
 		});
 	});
 
-	// TODO: modify the component to be Svelte v5 and check if the children are rendered
-	it('should not handle errors', async () => {
-		vi.mocked(loadEthBalances).mockRejectedValue(new Error('Error loading balances'));
+	it('should not load balances if no address is set', async () => {
+		ethAddressStore.reset();
 
 		render(LoaderEthBalances);
 
 		await vi.advanceTimersByTimeAsync(1000);
+
+		expect(loadEthBalances).not.toHaveBeenCalled();
+		expect(loadErc20Balances).not.toHaveBeenCalled();
+	});
+
+	it('should re-trigger loading balances when address changes', async () => {
+		render(LoaderEthBalances);
+
+		await vi.advanceTimersByTimeAsync(1000);
+
+		expect(loadEthBalances).toHaveBeenCalledOnce();
+		expect(loadEthBalances).toHaveBeenNthCalledWith(1, [ETHEREUM_TOKEN]);
+
+		expect(loadErc20Balances).toHaveBeenCalledOnce();
+		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
+			address: mockEthAddress,
+			erc20Tokens: mockErc20DefaultTokens
+		});
+
+		ethAddressStore.set({ data: mockEthAddress2, certified: false });
+
+		await vi.advanceTimersByTimeAsync(1000);
+
+		expect(loadEthBalances).toHaveBeenCalledTimes(2);
+		expect(loadEthBalances).toHaveBeenNthCalledWith(2, [ETHEREUM_TOKEN]);
+
+		expect(loadErc20Balances).toHaveBeenCalledTimes(2);
+		expect(loadErc20Balances).toHaveBeenNthCalledWith(2, {
+			address: mockEthAddress2,
+			erc20Tokens: mockErc20DefaultTokens
+		});
+	});
+
+	it('should not handle errors', async () => {
+		vi.mocked(loadEthBalances).mockRejectedValue(new Error('Error loading balances'));
+
+		const testId = 'test-id';
+
+		const { getByTestId } = render(LoaderEthBalances, {
+			props: {
+				children: createMockSnippet(testId)
+			}
+		});
+
+		await vi.advanceTimersByTimeAsync(1000);
+
+		expect(getByTestId(testId)).toBeInTheDocument();
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, [ETHEREUM_TOKEN]);

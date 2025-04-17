@@ -12,6 +12,7 @@ export type CardData = Pick<
 	| 'oisySymbol'
 	| 'balance'
 	| 'usdBalance'
+	| 'groupData'
 > & {
 	tokenCount?: number;
 	networks?: Network[];
