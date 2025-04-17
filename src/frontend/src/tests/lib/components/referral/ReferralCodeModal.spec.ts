@@ -47,7 +47,7 @@ describe('ReferralCodeModal', () => {
 			expect(qrCode).toBeInTheDocument();
 
 			expect(qrCodeURL).toBeInTheDocument();
-			expect(qrCodeURL?.textContent?.includes(mockedReferrerInfo.referral_code.toString()));
+			expect(qrCodeURL?.textContent).includes(mockedReferrerInfo.referral_code.toString());
 
 			expect(copyButton).toBeInTheDocument();
 

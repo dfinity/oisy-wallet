@@ -54,8 +54,8 @@ describe('swap utils', () => {
 		it('should return a list of token symbols', () => {
 			const route = getSwapRoute(transactions);
 
-			expect(route.includes(ICP_SYMBOL));
-			expect(route.includes('ETH'));
+			expect(route).includes(ICP_SYMBOL);
+			expect(route).includes('ETH');
 		});
 
 		it('should return an empty list', () => {
