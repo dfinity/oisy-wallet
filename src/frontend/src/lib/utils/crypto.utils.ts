@@ -5,7 +5,7 @@ import { uint8ArrayToHexString } from '@dfinity/utils';
  * @param {string} input - The input string to be hashed.
  * @returns {Promise<ArrayBuffer>} - A promise that resolves to the resulting SHA-256 hash as an ArrayBuffer.
  */
-export const sha256 = async (input: string): Promise<ArrayBuffer> => {
+const sha256 = async (input: string): Promise<ArrayBuffer> => {
 	const textEncoder = new TextEncoder();
 	return await crypto.subtle.digest('SHA-256', textEncoder.encode(input));
 };
