@@ -1,5 +1,5 @@
 import {
-	TokenGroupSchema,
+	TokenGroupPropSchema,
 	type TokenAppearanceSchema,
 	type TokenBuySchema,
 	type TokenBuyableSchema,
@@ -27,7 +27,7 @@ export type TokenAppearance = z.infer<typeof TokenAppearanceSchema>;
 
 export type TokenBuyable = z.infer<typeof TokenBuyableSchema>;
 
-export type TokenGroup = z.infer<typeof TokenGroupSchema>;
+export type TokenGroup = z.infer<typeof TokenGroupPropSchema>;
 
 export type TokenBuy = z.infer<typeof TokenBuySchema>;
 
