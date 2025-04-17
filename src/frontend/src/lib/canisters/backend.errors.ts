@@ -5,7 +5,7 @@ import type {
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import { type ApproveError, mapIcrc2ApproveError } from '@dfinity/ledger-icp';
+import { mapIcrc2ApproveError, type ApproveError } from '@dfinity/ledger-icp';
 
 export const mapBtcPendingTransactionError = (
 	err: BtcAddPendingTransactionError
