@@ -3,6 +3,7 @@ import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import type { TestUtil } from '$tests/types/utils';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -81,95 +82,99 @@ describe('ic-wallet-balance.worker', () => {
 		) => IcWalletScheduler<PostMessageDataRequest>;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet';
 		startData?: PostMessageDataRequest | undefined;
-	}) => {
+	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
 		const mockPostMessageNotCertified = mockPostMessage({ msg, certified: false });
 		const mockPostMessageCertified = mockPostMessage({ msg, certified: true });
 
-		beforeEach(() => {
-			scheduler = initScheduler(startData);
-		});
+		return {
+			setup: () => {
+				scheduler = initScheduler(startData);
+			},
 
-		afterEach(() => {
-			scheduler.stop();
-		});
+			teardown: () => {
+				scheduler.stop();
+			},
 
-		it('should start the scheduler with an interval', async () => {
-			await scheduler.start(startData);
+			tests: () => {
+				it('should start the scheduler with an interval', async () => {
+					await scheduler.start(startData);
 
-			expect(scheduler['timer']['timer']).toBeDefined();
-		});
+					expect(scheduler['timer']['timer']).toBeDefined();
+				});
 
-		it('should trigger the scheduler manually', async () => {
-			await scheduler.trigger(startData);
+				it('should trigger the scheduler manually', async () => {
+					await scheduler.trigger(startData);
 
-			// query + update = 2
-			expect(spyGetBalance).toHaveBeenCalledTimes(2);
-		});
+					// query + update = 2
+					expect(spyGetBalance).toHaveBeenCalledTimes(2);
+				});
 
-		it('should stop the scheduler', () => {
-			scheduler.stop();
+				it('should stop the scheduler', () => {
+					scheduler.stop();
 
-			expect(scheduler['timer']['timer']).toBeUndefined();
-		});
+					expect(scheduler['timer']['timer']).toBeUndefined();
+				});
 
-		it('should trigger syncWallet periodically', async () => {
-			await scheduler.start(startData);
+				it('should trigger syncWallet periodically', async () => {
+					await scheduler.start(startData);
 
-			// query + update = 2
-			expect(spyGetBalance).toHaveBeenCalledTimes(2);
+					// query + update = 2
+					expect(spyGetBalance).toHaveBeenCalledTimes(2);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(spyGetBalance).toHaveBeenCalledTimes(4);
+					expect(spyGetBalance).toHaveBeenCalledTimes(4);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(spyGetBalance).toHaveBeenCalledTimes(6);
-		});
+					expect(spyGetBalance).toHaveBeenCalledTimes(6);
+				});
 
-		it('should not trigger postMessage again if no changes', async () => {
-			await scheduler.start(startData);
+				it('should not trigger postMessage again if no changes', async () => {
+					await scheduler.start(startData);
 
-			// query + update = 2
-			expect(postMessageMock).toHaveBeenCalledTimes(4);
+					// query + update = 2
+					expect(postMessageMock).toHaveBeenCalledTimes(4);
 
-			expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageNotCertified);
-			expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageCertified);
-			expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageNotCertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageCertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(postMessageMock).toHaveBeenCalledTimes(6);
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
 
-			expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(postMessageMock).toHaveBeenCalledTimes(8);
+					expect(postMessageMock).toHaveBeenCalledTimes(8);
 
-			expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
-		});
+					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
+				});
 
-		it('should postMessage with status of the worker', async () => {
-			await scheduler.start(startData);
+				it('should postMessage with status of the worker', async () => {
+					await scheduler.start(startData);
 
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
-		});
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+				});
 
-		it('should postMessage with balance', async () => {
-			await scheduler.start(startData);
+				it('should postMessage with balance', async () => {
+					await scheduler.start(startData);
 
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
 
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
-		});
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+				});
+			}
+		};
 	};
 
 	const initOtherScenarios = <PostMessageDataRequest>({
@@ -184,34 +189,38 @@ describe('ic-wallet-balance.worker', () => {
 		startData?: PostMessageDataRequest | undefined;
 		initErrorMock: (err: Error) => void;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet';
-	}) => {
+	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
-		beforeEach(() => {
-			scheduler = initScheduler(startData);
-		});
+		return {
+			setup: () => {
+				scheduler = initScheduler(startData);
+			},
 
-		afterEach(() => {
-			scheduler.stop();
-		});
+			teardown: () => {
+				scheduler.stop();
+			},
 
-		it('should trigger postMessage with error', async () => {
-			const err = new Error('test');
-			initErrorMock(err);
+			tests: () => {
+				it('should trigger postMessage with error', async () => {
+					const err = new Error('test');
+					initErrorMock(err);
 
-			await scheduler.start(startData);
+					await scheduler.start(startData);
 
-			// idle and in_progress
-			// error
-			expect(postMessageMock).toHaveBeenCalledTimes(3);
+					// idle and in_progress
+					// error
+					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
-			expect(postMessageMock).toHaveBeenCalledWith({
-				msg: `${msg}Error`,
-				data: {
-					error: err
-				}
-			});
-		});
+					expect(postMessageMock).toHaveBeenCalledWith({
+						msg: `${msg}Error`,
+						data: {
+							error: err
+						}
+					});
+				});
+			}
+		};
 	};
 
 	describe('icrc-wallet.worker', () => {
@@ -227,26 +236,38 @@ describe('ic-wallet-balance.worker', () => {
 		});
 
 		describe('with balance', () => {
-			beforeEach(() => {
-				spyGetBalance = ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
-			});
-
-			initWithBalance({
+			const { setup, teardown, tests } = initWithBalance({
 				msg: 'syncIcrcWallet',
 				initScheduler: initIcrcWalletScheduler,
 				startData
 			});
+
+			beforeEach(() => {
+				setup();
+
+				spyGetBalance = ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
+			});
+
+			afterEach(teardown);
+
+			tests();
 		});
 
 		describe('other scenarios', () => {
 			const initErrorMock = (err: Error) => ledgerCanisterMock.balance.mockRejectedValue(err);
 
-			initOtherScenarios({
+			const { setup, teardown, tests } = initOtherScenarios({
 				initScheduler: initIcrcWalletScheduler,
 				startData,
 				initErrorMock,
 				msg: 'syncIcrcWallet'
 			});
+
+			beforeEach(setup);
+
+			afterEach(teardown);
+
+			tests();
 		});
 	});
 });
