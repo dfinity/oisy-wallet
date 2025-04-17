@@ -98,7 +98,6 @@ impl FromStr for BtcAddress {
 }
 
 impl BtcAddress {
-    /*
     const MAINNET_PREFIX: &str = "bc";
     const TESTNET_PREFIX: &str = "tb";
 
@@ -108,7 +107,6 @@ impl BtcAddress {
             .or_else(|| s.strip_prefix(Self::TESTNET_PREFIX))
             .ok_or(ParseError())
     }
-    */
     fn address_checksum(bytes: &[u8]) -> [u8; 4] {
         let hash = {
             let mut hasher = Sha256::new();
@@ -154,7 +152,8 @@ impl BtcAddress {
     }
 
     pub fn from_p2wpkh(s: &str) -> Result<Self, ParseError> {
-        if !s.starts_with("bc1") {
+        let body = Self::strip_prefix(s)?;
+        if !body.starts_with('1') {
             return Err(ParseError());
         }
         if s.len() != 42 {
