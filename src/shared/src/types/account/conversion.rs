@@ -94,6 +94,7 @@ impl FromStr for BtcAddress {
         Self::from_p2pkh(s)
             .or_else(|_| Self::from_p2sh(s))
             .or_else(|_| Self::from_p2wpkh(s))
+            .or_else(|_| Self::from_p2wsh(s))
     }
 }
 
@@ -107,6 +108,7 @@ impl BtcAddress {
             .or_else(|| s.strip_prefix(Self::TESTNET_PREFIX))
             .ok_or(ParseError())
     }
+
     fn address_checksum(bytes: &[u8]) -> [u8; 4] {
         let hash = {
             let mut hasher = Sha256::new();
@@ -160,5 +162,16 @@ impl BtcAddress {
             return Err(ParseError());
         }
         Ok(BtcAddress::P2WPKH(s.to_string()))
+    }
+
+    pub fn from_p2wsh(s: &str) -> Result<Self, ParseError> {
+        let body = Self::strip_prefix(s)?;
+        if !body.starts_with("1q") {
+            return Err(ParseError());
+        }
+        if s.len() != 62 {
+            return Err(ParseError());
+        }
+        Ok(BtcAddress::P2WSH(s.to_string()))
     }
 }
