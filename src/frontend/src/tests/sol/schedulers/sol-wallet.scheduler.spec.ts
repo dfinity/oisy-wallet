@@ -74,11 +74,6 @@ describe('sol-wallet.scheduler', () => {
 		window.postMessage = postMessageMock;
 	});
 
-	afterAll(() => {
-		// @ts-expect-error redo original
-		window.postMessage = originalPostMessage;
-	});
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
@@ -98,6 +93,11 @@ describe('sol-wallet.scheduler', () => {
 
 	afterEach(() => {
 		vi.useRealTimers();
+	});
+
+	afterAll(() => {
+		// @ts-expect-error redo original
+		window.postMessage = originalPostMessage;
 	});
 
 	const testWorker = ({
