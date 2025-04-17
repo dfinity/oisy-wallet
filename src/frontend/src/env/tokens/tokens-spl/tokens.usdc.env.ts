@@ -24,6 +24,7 @@ export const USDC_TOKEN: RequiredSplToken = {
 	icon: usdc,
 	address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
 	owner: TOKEN_PROGRAM_ADDRESS,
+	// TODO: remove this prop when we will use `groupData` for grouping
 	twinToken: ETH_USDC_TOKEN,
 	groupData: USDC_TOKEN_GROUP,
 	buy: {
