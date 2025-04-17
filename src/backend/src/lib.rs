@@ -663,7 +663,8 @@ pub fn create_user_profile() -> UserProfile {
         if let Err(e) = signer::allow_signing(None).await {
             // We don't return errors or panic here because:
             // 1. The user profile was already created successfully
-            // 2. This is running in a spawned task, so we can't return errors to the original caller
+            // 2. This is running in a spawned task, so we can't return errors to the original
+            //    caller
             ic_cdk::println!(
                 "Error enabling signing for user {}: {:?}",
                 stored_principal.0,
