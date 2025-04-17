@@ -3,7 +3,7 @@ import type { Network } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 
-export const filterEnabledNetworks = <T extends Network>({
+export const defineEnabledNetworks = <T extends Network>({
 	$testnetsEnabled,
 	$userNetworks,
 	mainnetFlag,

@@ -7,13 +7,13 @@ import {
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userNetworks } from '$lib/derived/user-networks.derived';
 import type { Network } from '$lib/types/network';
-import { filterEnabledNetworks } from '$lib/utils/networks.utils';
+import { defineEnabledNetworks } from '$lib/utils/networks.utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const enabledBitcoinNetworks: Readable<Network[]> = derived(
 	[testnetsEnabled, userNetworks],
 	([$testnetsEnabled, $userNetworks]) =>
-		filterEnabledNetworks({
+		defineEnabledNetworks({
 			$testnetsEnabled,
 			$userNetworks,
 			mainnetFlag: BTC_MAINNET_ENABLED,
