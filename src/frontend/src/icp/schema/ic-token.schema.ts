@@ -1,4 +1,5 @@
-import { TokenGroupPropSchema, TokenSchema } from '$lib/schema/token.schema';
+import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
+import { TokenSchema } from '$lib/schema/token.schema';
 import { CanisterIdTextSchema } from '$lib/types/canister';
 import { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
 import { UrlSchema } from '$lib/validation/url.validation';

@@ -1,4 +1,5 @@
 import { NetworkSchema } from '$lib/schema/network.schema';
+import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
 import type { OnramperId } from '$lib/types/onramper';
 import type { TokenBuy } from '$lib/types/token';
 import type { AtLeastOne } from '$lib/types/utils';
@@ -46,16 +47,6 @@ export const TokenBuySchema = z.object({
 
 export const TokenBuyableSchema = z.object({
 	buy: z.custom<AtLeastOne<TokenBuy>>().optional()
-});
-
-export const TokenGroupSchema = z.object({
-	symbol: z.string(),
-	name: z.string(),
-	icon: z.string().optional()
-});
-
-export const TokenGroupPropSchema = z.object({
-	groupData: TokenGroupSchema.optional()
 });
 
 export const TokenSchema = z

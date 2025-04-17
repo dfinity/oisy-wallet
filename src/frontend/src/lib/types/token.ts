@@ -1,5 +1,4 @@
 import {
-	TokenGroupPropSchema,
 	type TokenAppearanceSchema,
 	type TokenBuySchema,
 	type TokenBuyableSchema,
@@ -10,6 +9,7 @@ import {
 	type TokenStandardSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
+import type { TokenGroup } from '$lib/types/token-group';
 import type { Option, RequiredExcept } from '$lib/types/utils';
 import type * as z from 'zod';
 
@@ -26,8 +26,6 @@ export type TokenMetadata = z.infer<typeof TokenMetadataSchema>;
 export type TokenAppearance = z.infer<typeof TokenAppearanceSchema>;
 
 export type TokenBuyable = z.infer<typeof TokenBuyableSchema>;
-
-export type TokenGroup = z.infer<typeof TokenGroupPropSchema>;
 
 export type TokenBuy = z.infer<typeof TokenBuySchema>;
 
