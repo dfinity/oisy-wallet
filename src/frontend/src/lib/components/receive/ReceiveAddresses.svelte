@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import { BTC_MAINNET_NETWORK, BTC_REGTEST_NETWORK, BTC_TESTNET_NETWORK } from '$env/networks/networks.btc.env';
+	import {
+		BTC_MAINNET_NETWORK,
+		BTC_REGTEST_NETWORK,
+		BTC_TESTNET_NETWORK
+	} from '$env/networks/networks.btc.env';
 	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import {
@@ -10,7 +14,11 @@
 		SOLANA_MAINNET_NETWORK,
 		SOLANA_TESTNET_NETWORK
 	} from '$env/networks/networks.sol.env';
-	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+	import {
+		BTC_MAINNET_TOKEN,
+		BTC_REGTEST_TOKEN,
+		BTC_TESTNET_TOKEN
+	} from '$env/tokens/tokens.btc.env';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import {
@@ -145,7 +153,11 @@
 			copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied,
 			qrCodeAriaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr,
 			text: $i18n.receive.icp.text.your_private_eth_address,
-			condition: $networkEthereumEnabled || $networkSepoliaEnabled || $networkEvmMainnetEnabled || $networkEvmTestnetEnabled
+			condition:
+				$networkEthereumEnabled ||
+				$networkSepoliaEnabled ||
+				$networkEvmMainnetEnabled ||
+				$networkEvmTestnetEnabled
 		},
 		{
 			labelRef: 'icrcTokenAddress',

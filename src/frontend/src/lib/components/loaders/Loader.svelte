@@ -139,8 +139,6 @@
 				debounceLoadEthAddress();
 			}
 
-	
-
 			if ($networkBitcoinTestnetEnabled && isNullish($btcAddressTestnet)) {
 				debounceLoadBtcAddressTestnet();
 			}
