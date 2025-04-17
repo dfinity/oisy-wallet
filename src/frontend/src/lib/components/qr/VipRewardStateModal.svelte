@@ -32,7 +32,7 @@
 	<ContentWithToolbar>
 		<ImgBanner
 			src={isSuccessful
-				? codeType === 'vip'
+				? codeType === QrCodeType.VIP
 					? successfulVipReward
 					: successfulBinanceReward
 				: failedVipReward}

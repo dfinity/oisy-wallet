@@ -87,7 +87,7 @@
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title"
 		><span class="text-xl"
-			>{codeType === 'vip'
+			>{codeType === QrCodeType.VIP
 				? $i18n.vip.invitation.text.title
 				: $i18n.vip.invitation.text.binance_title}</span
 		>
@@ -98,7 +98,7 @@
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
 					<div slot="logo" class="flex items-center justify-center rounded-full bg-primary p-2">
-						{#if codeType === 'vip'}
+						{#if codeType === QrCodeType.VIP}
 							<IconAstronautHelmet testId={VIP_QR_CODE_ICON} />
 						{:else}
 							<IconBinanceYellow size="44" testId={VIP_QR_CODE_BINANCE_ICON} />
