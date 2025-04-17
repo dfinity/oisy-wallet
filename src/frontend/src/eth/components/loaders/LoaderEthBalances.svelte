@@ -7,7 +7,7 @@
 
 	const load = async () => {
 		if (isNullish($ethAddress)) {
-			return
+			return;
 		}
 
 		await Promise.allSettled([
