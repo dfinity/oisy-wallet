@@ -1,12 +1,13 @@
-import type {
-	TokenAppearanceSchema,
-	TokenBuySchema,
-	TokenBuyableSchema,
-	TokenCategorySchema,
-	TokenIdSchema,
-	TokenMetadataSchema,
-	TokenSchema,
-	TokenStandardSchema
+import {
+	TokenGroupSchema,
+	type TokenAppearanceSchema,
+	type TokenBuySchema,
+	type TokenBuyableSchema,
+	type TokenCategorySchema,
+	type TokenIdSchema,
+	type TokenMetadataSchema,
+	type TokenSchema,
+	type TokenStandardSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Option, RequiredExcept } from '$lib/types/utils';
@@ -26,6 +27,8 @@ export type TokenAppearance = z.infer<typeof TokenAppearanceSchema>;
 
 export type TokenBuyable = z.infer<typeof TokenBuyableSchema>;
 
+export type TokenGroup = z.infer<typeof TokenGroupSchema>;
+
 export type TokenBuy = z.infer<typeof TokenBuySchema>;
 
 export interface TokenLinkedData {
@@ -34,7 +37,7 @@ export interface TokenLinkedData {
 
 export type TokenWithLinkedData = Token & TokenLinkedData;
 
-export type NonRequiredProps = TokenAppearance & TokenBuyable;
+export type NonRequiredProps = TokenAppearance & TokenBuyable & TokenGroup;
 
 export type RequiredToken<T extends Token = Token> = RequiredExcept<T, keyof NonRequiredProps>;
 

@@ -1,4 +1,4 @@
-import { TokenSchema } from '$lib/schema/token.schema';
+import { TokenGroupPropSchema, TokenSchema } from '$lib/schema/token.schema';
 import { CanisterIdTextSchema } from '$lib/types/canister';
 import { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
@@ -40,4 +40,5 @@ export const IcTokenWithoutIdSchema = IcTokenSchema.omit({ id: true }).strict();
 
 export const IcCkTokenSchema = IcTokenSchema.merge(IcCkMetadataSchema.partial());
 
-export const IcCkInterfaceSchema = IcInterfaceSchema.merge(IcCkMetadataSchema);
+export const IcCkInterfaceSchema =
+	IcInterfaceSchema.merge(IcCkMetadataSchema).merge(TokenGroupPropSchema);
