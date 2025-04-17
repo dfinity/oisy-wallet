@@ -1,15 +1,16 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
+	import {Modal} from '@dfinity/gix-components';
 	import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 	import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
+	import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
-	import { type QrCodeType } from '$lib/enums/qr-code-types';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import {type QrCodeType} from '$lib/enums/qr-code-types';
+	import {i18n} from '$lib/stores/i18n.store';
+	import {modalStore} from '$lib/stores/modal.store';
+	import {replaceOisyPlaceholders} from '$lib/utils/i18n.utils';
 
 	export let isSuccessful: boolean;
 	export let codeType: QrCodeType = QrCodeType.VIP;
@@ -30,7 +31,7 @@
 
 	<ContentWithToolbar>
 		<ImgBanner
-			src={isSuccessful ? successfulVipReward : failedVipReward}
+			src={isSuccessful ? codeType === 'vip' ? successfulVipReward : successfulBinanceReward : failedVipReward}
 			styleClass="aspect-auto"
 		/>
 
@@ -47,7 +48,7 @@
 
 		<Button
 			paddingSmall
-			colorStyle="secondary"
+			colorStyle="secondary-light"
 			type="button"
 			fullWidth
 			on:click={modalStore.close}
