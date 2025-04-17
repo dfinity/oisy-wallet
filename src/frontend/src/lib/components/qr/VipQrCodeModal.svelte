@@ -12,8 +12,8 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
 	import {
-		VIP_CODE_REGENERATE_BUTTON,
-		VIP_QR_CODE_COPY_BUTTON
+		VIP_CODE_REGENERATE_BUTTON, VIP_QR_CODE_BINANCE_ICON,
+		VIP_QR_CODE_COPY_BUTTON, VIP_QR_CODE_ICON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { QrCodeType } from '$lib/enums/qr-code-types';
@@ -97,9 +97,9 @@
 				<QRCode value={qrCodeUrl}>
 					<div slot="logo" class="flex items-center justify-center rounded-full bg-primary p-2">
 						{#if codeType === 'vip'}
-							<IconAstronautHelmet />
+							<IconAstronautHelmet testId={VIP_QR_CODE_ICON} />
 						{:else}
-							<IconBinanceYellow size="44" />
+							<IconBinanceYellow size="44" testId={VIP_QR_CODE_BINANCE_ICON} />
 						{/if}
 					</div>
 				</QRCode>
