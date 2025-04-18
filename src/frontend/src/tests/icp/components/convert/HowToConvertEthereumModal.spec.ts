@@ -1,8 +1,15 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import {
+	FEE_CONTEXT_KEY,
+	initFeeContext,
+	initFeeStore,
+	type FeeContext
+} from '$eth/stores/fee.store';
 import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
 import { HOW_TO_CONVERT_ETHEREUM_INFO } from '$lib/constants/test-ids.constants';
-import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
+import { writable } from 'svelte/store';
 
 // We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
 vi.mock('ethers/providers', () => {
@@ -11,19 +18,28 @@ vi.mock('ethers/providers', () => {
 });
 
 describe('HowToConvertEthereumModal', () => {
+	const props = {
+		sourceToken: ETHEREUM_TOKEN,
+		destinationToken: ICP_TOKEN
+	};
+
 	const mockContext = () =>
-		new Map<symbol, SendContext>([
+		new Map<symbol, FeeContext>([
 			[
-				SEND_CONTEXT_KEY,
-				initSendContext({
-					sendPurpose: 'convert-eth-to-cketh',
-					token: ETHEREUM_TOKEN
+				FEE_CONTEXT_KEY,
+				initFeeContext({
+					feeStore: initFeeStore(),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeExchangeRateStore: writable(100),
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
 				})
 			]
 		]);
 
 	it('should render convert info on initial render', () => {
 		const { getByTestId } = render(HowToConvertEthereumModal, {
+			props,
 			context: mockContext()
 		});
 
