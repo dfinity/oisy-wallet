@@ -3,6 +3,7 @@ import {
 	ETHEREUM_NETWORK,
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
+import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import eth from '$icp-eth/assets/eth.svg';
 import type { RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -23,6 +24,7 @@ export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 	decimals: ETHEREUM_DEFAULT_DECIMALS,
 	icon: eth,
 	twinTokenSymbol: 'ckETH',
+	groupData: ETH_TOKEN_GROUP,
 	buy: {
 		onramperId: 'eth'
 	}
