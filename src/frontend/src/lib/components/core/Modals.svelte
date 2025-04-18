@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import HideTokenModal from '$eth/components/tokens/HideTokenModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
@@ -16,7 +17,8 @@
 		modalRewardDetails,
 		modalSettingsState,
 		modalReferralCode,
-		modalAddressBook
+		modalAddressBook,
+		modalVipQrCodeData
 	} from '$lib/derived/modal.derived';
 
 	/**
@@ -33,8 +35,8 @@
 		<DappModalDetails />
 	{:else if $modalRewardDetails}
 		<AirdropModalDetails />
-	{:else if $modalVipQrCode}
-		<VipQrCodeModal />
+	{:else if $modalVipQrCode && nonNullish($modalVipQrCodeData)}
+		<VipQrCodeModal codeType={$modalVipQrCodeData} />
 	{:else if $modalSettingsState}
 		<SettingsModal />
 	{:else if $modalReferralCode}

@@ -1,3 +1,4 @@
+import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { Principal } from '@dfinity/principal';
 
 export interface RewardsResponse {
@@ -17,4 +18,14 @@ export interface RewardResult {
 	receivedReward: boolean;
 	receivedJackpot: boolean;
 	receivedReferral: boolean;
+}
+
+export interface UserRoleResult {
+	is_vip: boolean;
+	is_gold: boolean;
+}
+
+export interface VipRewardStateData {
+	success: boolean;
+	codeType: QrCodeType;
 }
