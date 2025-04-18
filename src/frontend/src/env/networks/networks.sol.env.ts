@@ -14,8 +14,8 @@ import solTestnetIconDark from '$lib/assets/networks/dark/solana-testnet.svg';
 import solDevnetIconLight from '$lib/assets/networks/light/solana-devnet.svg';
 import solMainnetIconLight from '$lib/assets/networks/light/solana-mainnet.svg';
 import solTestnetIconLight from '$lib/assets/networks/light/solana-testnet.svg';
-import { LOCAL } from '$lib/constants/app.constants';
 import type { Network, NetworkId } from '$lib/types/network';
+import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SolanaNetwork } from '$sol/types/network';
@@ -99,12 +99,12 @@ export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 	iconDark: solDevnetIconDark
 };
 
-export const SUPPORTED_SOLANA_NETWORKS: Network[] = [
-	...(SOL_MAINNET_ENABLED ? [SOLANA_MAINNET_NETWORK] : []),
-	SOLANA_TESTNET_NETWORK,
-	SOLANA_DEVNET_NETWORK,
-	...(LOCAL ? [SOLANA_LOCAL_NETWORK] : [])
-];
+export const SUPPORTED_SOLANA_NETWORKS: Network[] = defineSupportedNetworks({
+	mainnetFlag: SOL_MAINNET_ENABLED,
+	mainnetNetworks: [SOLANA_MAINNET_NETWORK],
+	testnetNetworks: [SOLANA_TESTNET_NETWORK, SOLANA_DEVNET_NETWORK],
+	localNetworks: [SOLANA_LOCAL_NETWORK]
+});
 
 export const SUPPORTED_SOLANA_NETWORKS_IDS: NetworkId[] = SUPPORTED_SOLANA_NETWORKS.map(
 	({ id }) => id
