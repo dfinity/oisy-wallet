@@ -4,6 +4,7 @@
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
 	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
+	import { HOW_TO_CONVERT_ETHEREUM_QR_CODE } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { WizardStepsHowToConvert } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,6 +21,7 @@
 	<HowToConvertEthereumInfo on:icQRCode on:icConvert on:icBack {formCancelAction} />
 {:else if currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
 	<ReceiveAddressQRCode
+		testId={HOW_TO_CONVERT_ETHEREUM_QR_CODE}
 		address={$ethAddress ?? ''}
 		addressToken={ETHEREUM_TOKEN}
 		network={ETHEREUM_NETWORK}
