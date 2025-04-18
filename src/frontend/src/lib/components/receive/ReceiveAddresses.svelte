@@ -9,10 +9,10 @@
 	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import {
-		SOLANA_MAINNET_NETWORK,
-		SOLANA_TESTNET_NETWORK,
 		SOLANA_DEVNET_NETWORK,
-		SOLANA_LOCAL_NETWORK
+		SOLANA_LOCAL_NETWORK,
+		SOLANA_MAINNET_NETWORK,
+		SOLANA_TESTNET_NETWORK
 	} from '$env/networks/networks.sol.env';
 	import {
 		BTC_MAINNET_TOKEN,
@@ -22,10 +22,10 @@
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import {
-		SOLANA_TOKEN,
-		SOLANA_TESTNET_TOKEN,
 		SOLANA_DEVNET_TOKEN,
-		SOLANA_LOCAL_TOKEN
+		SOLANA_LOCAL_TOKEN,
+		SOLANA_TESTNET_TOKEN,
+		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
@@ -33,18 +33,18 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import {
-		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
-		RECEIVE_TOKENS_MODAL_ICP_SECTION,
-		RECEIVE_TOKENS_MODAL_ETH_SECTION,
 		RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
-		RECEIVE_TOKENS_MODAL_DONE_BUTTON,
-		RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
 		RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION,
+		RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
+		RECEIVE_TOKENS_MODAL_DONE_BUTTON,
+		RECEIVE_TOKENS_MODAL_ETH_SECTION,
+		RECEIVE_TOKENS_MODAL_ICP_SECTION,
+		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
-		RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION,
-		RECEIVE_TOKENS_MODAL_SOL_TESTNET_SECTION,
 		RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION,
-		RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION
+		RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION,
+		RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION,
+		RECEIVE_TOKENS_MODAL_SOL_TESTNET_SECTION
 	} from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnet,
@@ -57,15 +57,17 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import {
-		networkEthereumEnabled,
-		networkSepoliaEnabled,
 		networkBitcoinMainnetEnabled,
-		networkBitcoinTestnetEnabled,
 		networkBitcoinRegtestEnabled,
-		networkSolanaMainnetEnabled,
-		networkSolanaTestnetEnabled,
+		networkBitcoinTestnetEnabled,
+		networkEthereumEnabled,
+		networkEvmMainnetEnabled,
+		networkEvmTestnetEnabled,
+		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
-		networkSolanaLocalEnabled
+		networkSolanaLocalEnabled,
+		networkSolanaMainnetEnabled,
+		networkSolanaTestnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -151,7 +153,11 @@
 			copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied,
 			qrCodeAriaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr,
 			text: $i18n.receive.icp.text.your_private_eth_address,
-			condition: $networkEthereumEnabled || $networkSepoliaEnabled
+			condition:
+				$networkEthereumEnabled ||
+				$networkSepoliaEnabled ||
+				$networkEvmMainnetEnabled ||
+				$networkEvmTestnetEnabled
 		},
 		{
 			labelRef: 'icrcTokenAddress',

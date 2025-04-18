@@ -4,6 +4,7 @@
 	import {
 		networkBitcoinMainnetEnabled,
 		networkEthereumEnabled,
+		networkEvmMainnetEnabled,
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { initSignerAllowance } from '$lib/services/loader.services';
@@ -35,7 +36,9 @@
 		}
 
 		await Promise.allSettled([
-			$networkEthereumEnabled ? validateEthAddress($ethAddressStore) : Promise.resolve(),
+			$networkEthereumEnabled || $networkEvmMainnetEnabled
+				? validateEthAddress($ethAddressStore)
+				: Promise.resolve(),
 			$networkBitcoinMainnetEnabled
 				? validateBtcAddressMainnet($btcAddressMainnetStore)
 				: Promise.resolve(),
@@ -50,6 +53,7 @@
 		$solAddressMainnetStore,
 		$networkBitcoinMainnetEnabled,
 		$networkEthereumEnabled,
+		$networkEvmMainnetEnabled,
 		$networkSolanaMainnetEnabled,
 		(async () => await validateAddresses())();
 </script>
