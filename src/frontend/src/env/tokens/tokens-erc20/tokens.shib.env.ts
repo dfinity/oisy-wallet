@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { SHIB_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import shib from '$icp-eth/assets/shib.svg';
 import type { TokenId } from '$lib/types/token';
@@ -24,5 +25,6 @@ export const SHIB_TOKEN: RequiredErc20Token = {
 	twinTokenSymbol: 'ckSHIB',
 	buy: {
 		onramperId: 'shib_ethereum'
-	}
+	},
+	groupData: SHIB_TOKEN_GROUP
 };

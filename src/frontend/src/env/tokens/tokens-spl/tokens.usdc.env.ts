@@ -1,4 +1,5 @@
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { USDC_DEVNET_TOKEN_GROUP, USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import { USDC_TOKEN as ETH_USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { TokenId } from '$lib/types/token';
@@ -26,7 +27,8 @@ export const USDC_TOKEN: RequiredSplToken = {
 	twinToken: ETH_USDC_TOKEN,
 	buy: {
 		onramperId: 'usdc_solana'
-	}
+	},
+	groupData: USDC_TOKEN_GROUP
 };
 
 export const DEVNET_USDC_SYMBOL = 'DevnetUSDC';
@@ -43,5 +45,6 @@ export const DEVNET_USDC_TOKEN: RequiredSplToken = {
 	decimals: USDC_DECIMALS,
 	icon: usdc,
 	address: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
-	owner: TOKEN_PROGRAM_ADDRESS
+	owner: TOKEN_PROGRAM_ADDRESS,
+	groupData: USDC_DEVNET_TOKEN_GROUP
 };

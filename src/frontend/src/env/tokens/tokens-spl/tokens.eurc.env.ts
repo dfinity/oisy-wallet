@@ -1,4 +1,5 @@
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { EURC_DEVNET_TOKEN_GROUP, EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import { EURC_TOKEN as ETH_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import eurc from '$eth/assets/eurc.svg';
 import type { TokenId } from '$lib/types/token';
@@ -23,7 +24,8 @@ export const EURC_TOKEN: RequiredSplToken = {
 	icon: eurc,
 	address: 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr',
 	owner: TOKEN_PROGRAM_ADDRESS,
-	twinToken: ETH_EURC_TOKEN
+	twinToken: ETH_EURC_TOKEN,
+	groupData: EURC_TOKEN_GROUP
 };
 
 export const DEVNET_EURC_SYMBOL = 'DevnetEURC';
@@ -40,5 +42,6 @@ export const DEVNET_EURC_TOKEN: RequiredSplToken = {
 	decimals: EURC_DECIMALS,
 	icon: eurc,
 	address: 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr',
-	owner: TOKEN_PROGRAM_ADDRESS
+	owner: TOKEN_PROGRAM_ADDRESS,
+	groupData: EURC_DEVNET_TOKEN_GROUP
 };

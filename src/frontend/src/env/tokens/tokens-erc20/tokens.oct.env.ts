@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import oct from '$icp-eth/assets/oct.svg';
 import type { TokenId } from '$lib/types/token';
@@ -24,5 +25,6 @@ export const OCT_TOKEN: RequiredErc20Token = {
 	twinTokenSymbol: 'ckOCT',
 	buy: {
 		onramperId: 'oct_ethereum'
-	}
+	},
+	groupData: OCT_TOKEN_GROUP
 };
