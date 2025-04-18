@@ -280,7 +280,7 @@ describe('EthConvertTokenWizard', () => {
 		expect(sendSpy).not.toHaveBeenCalled();
 	});
 
-	it('should not call send if maxFeePerGas is null', async () => {
+	it('should not call send if maxPriorityFeePerGas is null', async () => {
 		const { container } = render(EthConvertTokenWizard, {
 			props,
 			context: mockContext({ ...mockFees, maxPriorityFeePerGas: null })
