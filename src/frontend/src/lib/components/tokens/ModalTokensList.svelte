@@ -68,15 +68,13 @@
 	<div class="gap-6 overflow-y-auto overscroll-contain">
 		<TokensSkeletons {loading}>
 			{#if noTokensMatch}
-				<p class="text-primary">
-					{#if noResults}
-						{@render noResults()}
-					{:else}
-						<p class="text-primary">
-							{$i18n.core.text.no_results}
-						</p>
-					{/if}
-				</p>
+				{#if noResults}
+					{@render noResults()}
+				{:else}
+					<p class="text-primary">
+						{$i18n.core.text.no_results}
+					</p>
+				{/if}
 			{:else}
 				<ul class="list-none">
 					{#each $filteredTokens as token (token.id)}
