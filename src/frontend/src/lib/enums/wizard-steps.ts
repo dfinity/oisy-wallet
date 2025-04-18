@@ -31,3 +31,8 @@ export enum WizardStepsAuthHelp {
 	HELP_IDENTITY = 'Help Identity',
 	HELP_OTHER = 'Help Other'
 }
+
+export enum WizardStepsHowToConvert {
+	INFO = 'Info',
+	ETH_QR_CODE = 'ETH QR Code'
+}
