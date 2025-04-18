@@ -165,3 +165,8 @@ export const AUTH_LICENSE_LINK = 'auth-license-link';
 export const AUTH_SIGNING_IN_HELP_LINK = 'auth-signing-in-help-link';
 
 export const TOKEN_LIST_FILTER = 'token-list-filter';
+
+export const MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS = 'modal-token-list-custom-no-results';
+export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+export const MODAL_TOKEN_LIST_ITEM_PREFIX = 'modal-token-list-item-';
+export const MODAL_TOKEN_LIST_TOOLBAR = 'modal-token-list-toolbar';
