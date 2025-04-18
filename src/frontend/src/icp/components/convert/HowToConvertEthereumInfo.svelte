@@ -14,6 +14,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { HOW_TO_CONVERT_ETHEREUM_INFO } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -32,7 +33,7 @@
 	const { sendBalance, sendTokenDecimals, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<ContentWithToolbar>
+<ContentWithToolbar testId={HOW_TO_CONVERT_ETHEREUM_INFO}>
 	<div>
 		<p>
 			{replacePlaceholders(
