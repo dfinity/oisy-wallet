@@ -6,7 +6,7 @@ import {
 } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { EtherscanRestTransaction } from '$eth/types/etherscan-transaction';
+import type { EtherscanProviderTokenTransferTransaction } from '$eth/types/etherscan-transaction';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -43,7 +43,8 @@ export class EtherscanRest {
 			throw new Error(`Fetching transactions with Etherscan API failed.`);
 		}
 
-		const { result }: { result: EtherscanRestTransaction[] | string } = await response.json();
+		const { result }: { result: EtherscanProviderTokenTransferTransaction[] | string } =
+			await response.json();
 
 		if (typeof result === 'string') {
 			throw new Error(result);
@@ -60,7 +61,7 @@ export class EtherscanRest {
 				from,
 				to,
 				value
-			}: EtherscanRestTransaction): Transaction => ({
+			}: EtherscanProviderTokenTransferTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
 				timestamp: parseInt(timeStamp),
