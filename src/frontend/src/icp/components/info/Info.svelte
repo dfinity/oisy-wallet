@@ -1,28 +1,35 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import InfoBitcoin from '$icp/components/info/InfoBitcoin.svelte';
 	import {
 		tokenCkBtcLedger,
 		tokenCkErc20Ledger,
 		tokenCkEthLedger
 	} from '$icp/derived/ic-token.derived';
-	import type { OptionIcCkToken } from '$icp/types/ic-token';
+	import type { IcCkToken, IcToken, OptionIcCkToken, OptionIcToken } from '$icp/types/ic-token';
 	import { isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import InfoEthereum from '$icp-eth/components/info/InfoEthereum.svelte';
-	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import InfoBoxWrapper from '$lib/components/info/InfoBoxWrapper.svelte';
 	import {
 		networkBitcoinMainnetEnabled,
 		networkEthereumEnabled
 	} from '$lib/derived/networks.derived';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { token } from '$lib/stores/token.store';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import type { HideInfoKey } from '$lib/utils/info.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
+	let destinationToken: OptionIcCkToken;
+	$: destinationToken = nonNullish($pageToken) ? ($pageToken as IcCkToken) : undefined;
+
+	let sourceToken: OptionIcToken;
+	$: sourceToken = nonNullish(destinationToken)
+		? (destinationToken.twinToken as IcToken)
+		: undefined;
+
 	let mainnet = true;
 	$: mainnet =
-		isNetworkIdBTCMainnet(($token as OptionIcCkToken)?.twinToken?.network.id) ||
-		isNetworkIdETHMainnet(($token as OptionIcCkToken)?.twinToken?.network.id);
+		isNetworkIdBTCMainnet(sourceToken?.network.id) ||
+		isNetworkIdETHMainnet(sourceToken?.network.id);
 
 	let ckBTC = false;
 	$: ckBTC = mainnet && $networkBitcoinMainnetEnabled && $tokenCkBtcLedger;
@@ -43,12 +50,12 @@
 				: undefined;
 </script>
 
-{#if ckBTC || ckETH || ckErc20}
+{#if (ckBTC || ckETH || ckErc20) && nonNullish(sourceToken) && nonNullish(destinationToken)}
 	<InfoBoxWrapper {key}>
 		{#if ckBTC}
 			<InfoBitcoin />
 		{:else}
-			<InfoEthereum twinToken={$ckEthereumTwinToken} ckTokenSymbol={$tokenWithFallback.symbol} />
+			<InfoEthereum {sourceToken} {destinationToken} />
 		{/if}
 	</InfoBoxWrapper>
 {/if}
