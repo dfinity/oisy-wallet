@@ -1,5 +1,9 @@
 import { enabledBitcoinNetworks } from '$btc/derived/networks.derived';
 import {
+	SUPPORTED_EVM_MAINNET_NETWORKS_IDS,
+	SUPPORTED_EVM_TESTNET_NETWORKS_IDS
+} from '$env/networks/networks-evm/networks.evm.env';
+import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
@@ -58,6 +62,14 @@ export const networkEthereumEnabled: Readable<boolean> = derived([networks], ([$
 
 export const networkSepoliaEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
 	$networks.some(({ id }) => id === SEPOLIA_NETWORK_ID)
+);
+
+export const networkEvmMainnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => SUPPORTED_EVM_MAINNET_NETWORKS_IDS.includes(id))
+);
+
+export const networkEvmTestnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => SUPPORTED_EVM_TESTNET_NETWORKS_IDS.includes(id))
 );
 
 export const networkEthereumDisabled: Readable<boolean> = derived(
