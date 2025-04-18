@@ -45,6 +45,7 @@ import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { getMockExchanges, mockExchanges } from '$tests/mocks/exchanges.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
+import { afterEach, beforeEach } from 'vitest';
 
 describe('transactions.utils', () => {
 	describe('mapAllTransactionsUi', () => {
