@@ -22,7 +22,7 @@ describe('IcTransactions', () => {
 		icTransactionsStore.reset(ICP_TOKEN_ID);
 	});
 
-	it('should render no transactions placeholder', () => {
+	it('should render no transactions placeholder when the transactions are empty', () => {
 		icTransactionsStore.append({
 			tokenId: ICP_TOKEN_ID,
 			transactions: []
@@ -33,7 +33,7 @@ describe('IcTransactions', () => {
 		expect(getByTestId(ACTIVITY_TRANSACTIONS_PLACEHOLDER)).not.toBeNull();
 	});
 
-	it('should render no transactions placeholder', () => {
+	it('should render no transactions placeholder when the transactions are null', () => {
 		icTransactionsStore.nullify(ICP_TOKEN_ID);
 
 		const { getByTestId } = render(IcTransactions);
