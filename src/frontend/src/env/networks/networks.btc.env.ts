@@ -10,8 +10,8 @@ import bitcoinTestnetIconDark from '$lib/assets/networks/dark/bitcoin-testnet.sv
 import bitcoinMainnetIconLight from '$lib/assets/networks/light/bitcoin-mainnet.svg';
 import bitcoinRegtestIconLight from '$lib/assets/networks/light/bitcoin-regtest.svg';
 import bitcoinTestnetIconLight from '$lib/assets/networks/light/bitcoin-testnet.svg';
-import { LOCAL } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
+import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 
@@ -61,11 +61,12 @@ export const BTC_REGTEST_NETWORK: BitcoinNetwork = {
 	iconDark: bitcoinRegtestIconDark
 };
 
-export const SUPPORTED_BITCOIN_NETWORKS: BitcoinNetwork[] = [
-	...(BTC_MAINNET_ENABLED ? [BTC_MAINNET_NETWORK] : []),
-	BTC_TESTNET_NETWORK,
-	...(LOCAL ? [BTC_REGTEST_NETWORK] : [])
-];
+export const SUPPORTED_BITCOIN_NETWORKS: BitcoinNetwork[] = defineSupportedNetworks({
+	mainnetFlag: BTC_MAINNET_ENABLED,
+	mainnetNetworks: [BTC_MAINNET_NETWORK],
+	testnetNetworks: [BTC_TESTNET_NETWORK],
+	localNetworks: [BTC_REGTEST_NETWORK]
+});
 
 export const SUPPORTED_BITCOIN_NETWORKS_IDS: NetworkId[] = SUPPORTED_BITCOIN_NETWORKS.map(
 	({ id }) => id
