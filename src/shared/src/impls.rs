@@ -6,6 +6,7 @@ use serde::{de, Deserializer};
 #[cfg(test)]
 use strum::IntoEnumIterator;
 
+use crate::types::dapp::MAX_DAPP_ID_LIST_LENGTH;
 use crate::{
     types::{
         backend_config::{Config, InitArg},
@@ -287,7 +288,7 @@ impl StoredUserProfile {
         let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
         let mut new_hidden_dapp_ids = new_dapp_carousel_settings.hidden_dapp_ids.clone();
 
-        if new_hidden_dapp_ids.len() == crate::types::MAX_DAPP_ID_LIST_LENGTH {
+        if new_hidden_dapp_ids.len() == MAX_DAPP_ID_LIST_LENGTH {
             return Err(AddDappSettingsError::MaxHiddenDappIds);
         }
 
