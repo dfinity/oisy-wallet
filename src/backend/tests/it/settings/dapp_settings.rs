@@ -366,9 +366,19 @@ fn test_add_user_hidden_dapp_id_does_not_allow_to_add_too_many_ids() {
     );
 
     for i in 0..MAX_DAPP_ID_LIST_LENGTH {
+        let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+            caller,
+            "get_user_profile",
+            (),
+        );
+
+        let current_user_profile = get_profile_response
+            .expect("Call to get profile failed")
+            .expect("Get profile failed");
+
         let add_hidden_dapp_id_arg = AddHiddenDappIdRequest {
             dapp_id: format!("test_dapp_id_{}", i),
-            current_user_version: profile.version,
+            current_user_version: current_user_profile.version,
         };
 
         let add_hidden_dapp_id_response = pic_setup.update::<Result<(), AddDappSettingsError>>(
@@ -380,9 +390,19 @@ fn test_add_user_hidden_dapp_id_does_not_allow_to_add_too_many_ids() {
         assert_eq!(add_hidden_dapp_id_response, Ok(Ok(())));
     }
 
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    let current_user_profile = get_profile_response
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
     let add_hidden_dapp_id_arg = AddHiddenDappIdRequest {
         dapp_id: "test_dapp_id".to_string(),
-        current_user_version: profile.version,
+        current_user_version: current_user_profile.version,
     };
 
     let add_hidden_dapp_id_response = pic_setup.update::<Result<(), AddDappSettingsError>>(
