@@ -309,7 +309,7 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 					? toSplSnapshot({
 							token: {
 								...token,
-								address: 'So11111111111111111111111111111111111111111',
+								address: parseSolAddress('So11111111111111111111111111111111111111111'),
 								owner: SYSTEM_PROGRAM_ADDRESS
 							},
 							balance,
@@ -324,9 +324,8 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 						? toSplSnapshot({
 								token: {
 									...token,
-									address: token.symbol.padStart(
-										'So11111111111111111111111111111111111111111'.length,
-										'0'
+									address: parseSolAddress(
+										token.symbol.padStart('So11111111111111111111111111111111111111111'.length, '0')
 									),
 									owner: SYSTEM_PROGRAM_ADDRESS
 								},

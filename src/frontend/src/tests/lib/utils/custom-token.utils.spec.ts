@@ -1,4 +1,5 @@
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@dfinity/principal';
 
@@ -77,7 +78,7 @@ describe('custom-token.utils', () => {
 				toCustomToken({
 					...mockParams,
 					networkKey: 'SplMainnet',
-					address: 'mock-token-address',
+					address: parseSolAddress('mock-token-address'),
 					decimals: 8,
 					symbol: 'mock-symbol'
 				})
@@ -98,7 +99,7 @@ describe('custom-token.utils', () => {
 				toCustomToken({
 					...mockParams,
 					networkKey: 'SplDevnet',
-					address: 'mock-token-address',
+					address: parseSolAddress('mock-token-address'),
 					decimals: 8,
 					symbol: 'mock-symbol'
 				})
