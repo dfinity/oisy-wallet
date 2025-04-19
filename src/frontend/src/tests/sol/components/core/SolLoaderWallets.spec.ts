@@ -10,6 +10,7 @@ import {
 	solAddressMainnetStore,
 	solAddressTestnetStore
 } from '$lib/stores/address.store';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { initSolWalletWorker } from '$sol/services/worker.sol-wallet.services';
@@ -46,8 +47,8 @@ describe('SolLoaderWallets', () => {
 	});
 
 	it('should initialize wallet workers only for networks with available addresses', () => {
-		const testnetAddress = 'testnet-address';
-		const mainnetAddress = 'mainnet-address';
+		const testnetAddress = parseSolAddress('testnet-address');
+		const mainnetAddress = parseSolAddress('mainnet-address');
 
 		setupTestnetsStore('enabled');
 		solAddressTestnetStore.set({ data: testnetAddress, certified: true });
@@ -65,7 +66,7 @@ describe('SolLoaderWallets', () => {
 	});
 
 	it('should update wallet workers when addresses change', async () => {
-		const devnetAddress = 'devnet-address';
+		const devnetAddress = parseSolAddress('devnet-address');
 		setupTestnetsStore('enabled');
 
 		const { rerender } = render(SolLoaderWallets);
@@ -85,10 +86,10 @@ describe('SolLoaderWallets', () => {
 
 	it('should handle all networks having addresses', () => {
 		setupTestnetsStore('enabled');
-		solAddressLocalnetStore.set({ data: 'local-address', certified: true });
-		solAddressTestnetStore.set({ data: 'testnet-address', certified: true });
-		solAddressDevnetStore.set({ data: 'devnet-address', certified: true });
-		solAddressMainnetStore.set({ data: 'mainnet-address', certified: true });
+		solAddressLocalnetStore.set({ data: parseSolAddress('local-address'), certified: true });
+		solAddressTestnetStore.set({ data: parseSolAddress('testnet-address'), certified: true });
+		solAddressDevnetStore.set({ data: parseSolAddress('devnet-address'), certified: true });
+		solAddressMainnetStore.set({ data: parseSolAddress('mainnet-address'), certified: true });
 
 		render(SolLoaderWallets);
 

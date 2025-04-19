@@ -24,6 +24,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
 import { tokens } from '$lib/derived/tokens.derived';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
@@ -75,7 +76,7 @@ describe('tokens.derived', () => {
 		...mockValidSplToken,
 		id: parseTokenId('SplCustomTokenId2'),
 		symbol: 'SplCustomTokenId2',
-		address: `${mockValidSplToken.address}2`,
+		address: parseSolAddress(`${mockValidSplToken.address}2`),
 		version: undefined,
 		enabled: true
 	};
