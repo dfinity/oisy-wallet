@@ -7,8 +7,11 @@ use serde::Deserialize;
 use shared::{
     backend_api::Service,
     types::{
-        custom_token::CustomToken, token::UserToken, user_profile::StoredUserProfile,
-        MigrationError, MigrationProgress, Timestamp,
+        custom_token::CustomToken,
+        migration::{MigrationError, MigrationProgress},
+        token::UserToken,
+        user_profile::StoredUserProfile,
+        Timestamp,
     },
 };
 use steps::{

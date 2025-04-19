@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
+	import type IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
@@ -19,6 +18,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { SWAP_SLIPPAGE_INVALID_VALUE } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -27,9 +27,9 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
@@ -52,7 +52,7 @@
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
-	let errorType: ConvertAmountErrorType = undefined;
+	let errorType: TokenActionErrorType = undefined;
 	let amountSetToMax = false;
 	let exchangeValueUnit: DisplayUnit = 'usd';
 	let inputUnit: DisplayUnit;
@@ -74,7 +74,7 @@
 
 	let totalFee: bigint | undefined;
 	// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
-	$: totalFee = (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n);
+	$: totalFee = (sourceTokenFee ?? ZERO_BI) * ($isSourceTokenIcrc2 ? 2n : 1n);
 
 	let swapAmountsLoading = false;
 	$: swapAmountsLoading =
@@ -108,7 +108,7 @@
 		switchTokens();
 	};
 
-	$: customValidate = (userAmount: BigNumber): ConvertAmountErrorType =>
+	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		nonNullish($sourceToken)
 			? validateUserAmount({
 					userAmount,
@@ -159,7 +159,7 @@
 								error={nonNullish(errorType)}
 								balance={$sourceTokenBalance}
 								token={$sourceToken}
-								fee={BigNumber.from(totalFee)}
+								fee={totalFee}
 							/>
 						{/if}
 					</svelte:fragment>

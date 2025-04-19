@@ -24,14 +24,14 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
-import { address, type Address } from '@solana/web3.js';
+import { address, type Address } from '@solana/kit';
 import { type MockInstance } from 'vitest';
 
 vi.mock('@solana-program/token', () => ({
 	findAssociatedTokenPda: vi.fn()
 }));
 
-describe('sol-transactions.services', () => {
+describe('sol-signatures.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.resetAllMocks();
@@ -94,6 +94,7 @@ describe('sol-transactions.services', () => {
 				wallet: mockSolAddress,
 				limit: Number(WALLET_PAGINATION)
 			});
+
 			mockTokensList.forEach(({ address }, index) => {
 				expect(spyFetchSignatures).toHaveBeenNthCalledWith(index + 2, {
 					network: mockNetwork,

@@ -4,6 +4,7 @@ import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
+import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
@@ -21,7 +22,7 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
 import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
-import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { LedgerCanisterIdText, MinterCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { mapIcrcData } from '$icp/utils/map-icrc-data';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
@@ -183,6 +184,7 @@ const CKETH_IC_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'ethereum',
 				position: 1,
 				twinToken: ETHEREUM_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
 				explorerUrl: CKETH_EXPLORER_URL
 			}
 		: undefined;
@@ -445,6 +447,27 @@ const RUGGY_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUC
 		}
 	: undefined;
 
+const NAK_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.NAK)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.NAK,
+			position: 20
+		}
+	: undefined;
+
+const VCHF_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VCHF)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.VCHF,
+			position: 21
+		}
+	: undefined;
+
+const VEUR_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VEUR)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.VEUR,
+			position: 22
+		}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -517,7 +540,10 @@ const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(GLDT_IC_DATA) ? [GLDT_IC_DATA] : []),
 	...(nonNullish(nICP_IC_DATA) ? [nICP_IC_DATA] : []),
 	...(nonNullish(vUSD_IC_DATA) ? [vUSD_IC_DATA] : []),
-	...(nonNullish(RUGGY_IC_DATA) ? [RUGGY_IC_DATA] : [])
+	...(nonNullish(RUGGY_IC_DATA) ? [RUGGY_IC_DATA] : []),
+	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : []),
+	...(nonNullish(VCHF_IC_DATA) ? [VCHF_IC_DATA] : []),
+	...(nonNullish(VEUR_IC_DATA) ? [VEUR_IC_DATA] : [])
 ];
 
 export const ICRC_TOKENS: IcInterface[] = [
@@ -551,3 +577,12 @@ export const ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS = [
 		? [CKERC20_PRODUCTION_DATA.ckUSDT.ledgerCanisterId]
 		: [])
 ];
+
+export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> = {
+	...(nonNullish(STAGING_CKBTC_MINTER_CANISTER_ID) && {
+		[STAGING_CKBTC_MINTER_CANISTER_ID]: 'g4xu7-jiaaa-aaaan-aaaaq-cai'
+	}),
+	...(nonNullish(IC_CKBTC_MINTER_CANISTER_ID) && {
+		[IC_CKBTC_MINTER_CANISTER_ID]: 'ghsi2-tqaaa-aaaan-aaaca-cai'
+	})
+};

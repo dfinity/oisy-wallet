@@ -7,18 +7,22 @@ import {
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { QUICKNODE_API_KEY } from '$env/rest/quicknode.env';
 import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
-import solDevnetIconBW from '$lib/assets/networks/sol-devnet-bw.svg';
-import solLocalnetIconBW from '$lib/assets/networks/sol-localnet-bw.svg';
-import solMainnetIconBW from '$lib/assets/networks/sol-mainnet-bw.svg';
-import solTestnetIconBW from '$lib/assets/networks/sol-testnet-bw.svg';
-import sol from '$lib/assets/networks/sol.svg';
-import { LOCAL } from '$lib/constants/app.constants';
+
+import solDevnetIconDark from '$lib/assets/networks/dark/solana-devnet.svg';
+import solMainnetIconDark from '$lib/assets/networks/dark/solana-mainnet.svg';
+import solTestnetIconDark from '$lib/assets/networks/dark/solana-testnet.svg';
+import solDevnetIconLight from '$lib/assets/networks/light/solana-devnet.svg';
+import solMainnetIconLight from '$lib/assets/networks/light/solana-mainnet.svg';
+import solTestnetIconLight from '$lib/assets/networks/light/solana-testnet.svg';
 import type { Network, NetworkId } from '$lib/types/network';
+import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
+import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SolanaNetwork } from '$sol/types/network';
 
-export const SOL_MAINNET_ENABLED =
-	JSON.parse(import.meta.env.VITE_SOLANA_MAINNET_DISABLED ?? false) === false;
+export const SOL_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
+	import.meta.env.VITE_SOLANA_MAINNET_DISABLED
+);
 
 /**
  * RPC URLs
@@ -47,10 +51,10 @@ export const SOLANA_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_MAINNE
 export const SOLANA_MAINNET_NETWORK: SolanaNetwork = {
 	id: SOLANA_MAINNET_NETWORK_ID,
 	env: 'mainnet',
-	name: 'Solana Mainnet Beta',
+	name: 'Solana',
 	chainId: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
-	icon: sol,
-	iconBW: solMainnetIconBW,
+	iconLight: solMainnetIconLight,
+	iconDark: solMainnetIconDark,
 	explorerUrl: SOL_MAINNET_EXPLORER_URL,
 	buy: { onramperId: 'solana' }
 };
@@ -64,8 +68,8 @@ export const SOLANA_TESTNET_NETWORK: SolanaNetwork = {
 	env: 'testnet',
 	name: 'Solana Testnet',
 	chainId: '4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z',
-	icon: sol,
-	iconBW: solTestnetIconBW,
+	iconLight: solTestnetIconLight,
+	iconDark: solTestnetIconDark,
 	explorerUrl: SOL_TESTNET_EXPLORER_URL
 };
 
@@ -78,8 +82,8 @@ export const SOLANA_DEVNET_NETWORK: SolanaNetwork = {
 	env: 'testnet',
 	name: 'Solana Devnet',
 	chainId: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
-	icon: sol,
-	iconBW: solDevnetIconBW,
+	iconLight: solDevnetIconLight,
+	iconDark: solDevnetIconDark,
 	explorerUrl: SOL_DEVNET_EXPLORER_URL
 };
 
@@ -91,16 +95,16 @@ export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 	id: SOLANA_LOCAL_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Local',
-	icon: sol,
-	iconBW: solLocalnetIconBW
+	iconLight: solDevnetIconLight,
+	iconDark: solDevnetIconDark
 };
 
-export const SUPPORTED_SOLANA_NETWORKS: Network[] = [
-	...(SOL_MAINNET_ENABLED ? [SOLANA_MAINNET_NETWORK] : []),
-	SOLANA_TESTNET_NETWORK,
-	SOLANA_DEVNET_NETWORK,
-	...(LOCAL ? [SOLANA_LOCAL_NETWORK] : [])
-];
+export const SUPPORTED_SOLANA_NETWORKS: Network[] = defineSupportedNetworks({
+	mainnetFlag: SOL_MAINNET_ENABLED,
+	mainnetNetworks: [SOLANA_MAINNET_NETWORK],
+	testnetNetworks: [SOLANA_TESTNET_NETWORK, SOLANA_DEVNET_NETWORK],
+	localNetworks: [SOLANA_LOCAL_NETWORK]
+});
 
 export const SUPPORTED_SOLANA_NETWORKS_IDS: NetworkId[] = SUPPORTED_SOLANA_NETWORKS.map(
 	({ id }) => id

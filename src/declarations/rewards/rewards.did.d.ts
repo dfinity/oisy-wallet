@@ -63,6 +63,24 @@ export interface Config {
 	readonly_admins: Array<Principal>;
 	oisy_canister: [] | [Principal];
 }
+export interface LastActivityHistogram {
+	older: number;
+	unknown: number;
+	buckets: Array<LastActivityHistogramBucket>;
+}
+export interface LastActivityHistogramBucket {
+	start_ns: bigint;
+	count: number;
+}
+export interface LastActivityHistogramRequest {
+	bucket_count: number;
+	bucket_duration: CandidDuration;
+}
+export interface LastActivityHistogramResponse {
+	request_time: bigint;
+	request: LastActivityHistogramRequest;
+	response: LastActivityHistogram;
+}
 export interface LedgerConfig {
 	ledger_index: Principal;
 	ledger: Principal;
@@ -88,12 +106,24 @@ export interface PublicSprinkleInfo {
 	n_sprinkled_users: bigint;
 	ledger: Principal;
 }
+export interface ReferrerInfo {
+	referral_code: number;
+	num_referrals: [] | [number];
+}
 export interface RewardInfo {
 	name: [] | [string];
 	ledger: Principal;
 	timestamp: bigint;
 	amount: bigint;
+	campaign_name: [] | [string];
 }
+export type SetReferrerError =
+	| { SelfReferral: null }
+	| { AlreadyHasReferrer: null }
+	| { UnknownReferrer: null }
+	| { NotNewUser: null }
+	| { AnonymousCaller: null };
+export type SetReferrerResponse = { Ok: null } | { Err: SetReferrerError };
 export interface SetSprinkleTimestampArg {
 	total_sprinkle_amount: bigint;
 	min_account_amount: bigint;
@@ -138,23 +168,35 @@ export interface Transaction_Spl {
 	timestamp: bigint;
 	amount: bigint;
 }
+export interface UsageAndHolding {
+	first_activity_ns: [] | [bigint];
+	approx_usd_valuation: number;
+	last_activity_ns: [] | [bigint];
+}
 export interface UsageAwardConfig {
 	cycle_duration: CandidDuration;
 	awards: Array<UsageAwardEvent>;
 	eligibility_criteria: UsageCriteria;
+	campaign_name: [] | [string];
 }
 export interface UsageAwardEvent {
 	name: string;
 	num_events_per_cycle: number;
 	awards: Array<TokenConfig>;
 	num_users_per_event: number;
+	campaign_name: [] | [string];
 }
 export interface UsageAwardState {
+	first_activity_ns: [] | [bigint];
 	snapshots: Array<UserSnapshot>;
+	referred_by: [] | [number];
+	last_activity_ns: [] | [bigint];
+	referrer_info: [] | [ReferrerInfo];
 }
 export interface UsageAwardStats {
 	user_count: bigint;
 	eligible_user_count: bigint;
+	assets_usd: number;
 	snapshot_count: bigint;
 	awarded_count: bigint;
 	award_events: bigint;
@@ -166,12 +208,30 @@ export interface UsageCriteria {
 	min_logins: number;
 	min_valuation_usd: bigint;
 }
+export interface UsageVsHoldingStats {
+	holdings: Array<UsageAndHolding>;
+}
+export interface UsageWinnersRequest {
+	to_ns: bigint;
+	from_ns: bigint;
+	limit: number;
+	after_user: [] | [UserDbKey];
+}
+export interface UsageWinnersResponse {
+	last: [] | [UserDbKey];
+	num_checked: number;
+	winners: Array<Principal>;
+}
 export interface UserData {
 	airdrops: Array<RewardInfo>;
 	usage_awards: [] | [Array<RewardInfo>];
 	last_snapshot_timestamp: [] | [bigint];
 	is_vip: [] | [boolean];
 	sprinkles: Array<RewardInfo>;
+}
+export interface UserDbKey {
+	pouh_verified: boolean;
+	oisy_user: Principal;
 }
 export interface UserSnapshot {
 	accounts: Array<AccountSnapshotFor>;
@@ -196,16 +256,25 @@ export interface _SERVICE {
 	config: ActorMethod<[], Config>;
 	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
 	configure_vip: ActorMethod<[VipConfig], undefined>;
+	last_activity_histogram: ActorMethod<
+		[LastActivityHistogramRequest],
+		LastActivityHistogramResponse
+	>;
 	new_vip_reward: ActorMethod<[], NewVipRewardResponse>;
 	public_rewards_info: ActorMethod<[], PublicRewardsInfo>;
+	referrer_info: ActorMethod<[], ReferrerInfo>;
+	referrer_info_for: ActorMethod<[Principal], [] | [ReferrerInfo]>;
 	register_airdrop_recipient: ActorMethod<[UserSnapshot], undefined>;
 	register_snapshot_for: ActorMethod<[Principal, UserSnapshot], undefined>;
-	set_sprinkle_timestamp: ActorMethod<[SetSprinkleTimestampArg], undefined>;
+	set_referrer: ActorMethod<[number], SetReferrerResponse>;
+	stats_usage_vs_holding: ActorMethod<[], UsageVsHoldingStats>;
 	status: ActorMethod<[], StatusResponse>;
 	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
-	usage_eligible: ActorMethod<[Principal], boolean>;
+	usage_eligible: ActorMethod<[Principal], [boolean, boolean]>;
 	usage_stats: ActorMethod<[], UsageAwardStats>;
+	usage_winners: ActorMethod<[[] | [UsageWinnersRequest]], UsageWinnersResponse>;
 	user_info: ActorMethod<[], UserData>;
+	user_info_for: ActorMethod<[Principal], UserData>;
 	user_stats: ActorMethod<[Principal], UsageAwardState>;
 	vip_stats: ActorMethod<[], VipStats>;
 }

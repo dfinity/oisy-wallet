@@ -1,7 +1,8 @@
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
-import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID } from '$env/networks/networks.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import * as backendAPI from '$lib/api/backend.api';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
@@ -16,7 +17,6 @@ describe('BTC Pending Sent Transactions Services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		btcPendingSentTransactionsStore.reset();
-		vi.spyOn(console, 'error').mockImplementation(() => {});
 	});
 
 	describe('loadBtcPendingSentTransactions', () => {

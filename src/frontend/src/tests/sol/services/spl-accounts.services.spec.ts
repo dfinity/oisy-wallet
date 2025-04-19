@@ -5,7 +5,7 @@ import { SolanaNetworks } from '$sol/types/network';
 import * as solAddressUtils from '$sol/utils/sol-address.utils';
 import { mockAtaAddress, mockAtaAddress2, mockSolAddress } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
-import { address, type ProgramDerivedAddressBump } from '@solana/web3.js';
+import { address, type ProgramDerivedAddressBump } from '@solana/kit';
 import { type MockInstance } from 'vitest';
 
 vi.mock('@solana-program/token', () => ({

@@ -1,6 +1,11 @@
 import type {
 	AddUserCredentialError,
+	AllowSigningError,
+	AllowSigningRequest,
+	AllowSigningResponse,
 	BitcoinNetwork,
+	CreateChallengeError,
+	CreateChallengeResponse,
 	CredentialSpec,
 	GetUserProfileError,
 	UserProfile,
@@ -15,7 +20,8 @@ import type {
 } from '$declarations/signer/signer.did';
 import type { Address, BtcAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
-import { Principal } from '@dfinity/principal';
+import type { UserNetworks } from '$lib/types/user-networks';
+import type { Principal } from '@dfinity/principal';
 
 export interface AddUserCredentialParams {
 	credentialJwt: string;
@@ -23,9 +29,14 @@ export interface AddUserCredentialParams {
 	currentUserVersion?: bigint;
 	credentialSpec: CredentialSpec;
 }
+
 export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialError };
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
+
+export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
+
+export type CreateChallengeResult = { Ok: CreateChallengeResponse } | { Err: CreateChallengeError };
 
 export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;
@@ -64,6 +75,16 @@ export interface AddUserHiddenDappIdParams {
 	currentUserVersion?: bigint;
 }
 
+export interface SaveUserNetworksSettings {
+	networks: UserNetworks;
+	currentUserVersion?: bigint;
+}
+
+export interface SetUserShowTestnetsParams {
+	showTestnets: boolean;
+	currentUserVersion?: bigint;
+}
+
 export interface KongSwapAmountsParams {
 	sourceToken: Token;
 	destinationToken: Token;
@@ -79,4 +100,8 @@ export interface KongSwapParams {
 	receiveAddress?: Address;
 	sourceToken: Token;
 	payTransactionId?: TxId;
+}
+
+export interface AllowSigningParams {
+	request?: AllowSigningRequest;
 }

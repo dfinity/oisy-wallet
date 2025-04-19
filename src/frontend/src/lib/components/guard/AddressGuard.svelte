@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { validateBtcAddressMainnet } from '$btc/services/btc-address.services';
 	import { validateEthAddress } from '$eth/services/eth-address.services';
+	import {
+		networkBitcoinMainnetEnabled,
+		networkEthereumEnabled,
+		networkEvmMainnetEnabled,
+		networkSolanaMainnetEnabled
+	} from '$lib/derived/networks.derived';
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import {
 		btcAddressMainnetStore,
@@ -30,15 +36,25 @@
 		}
 
 		await Promise.allSettled([
-			validateEthAddress($ethAddressStore),
-			validateBtcAddressMainnet($btcAddressMainnetStore),
-			validateSolAddressMainnet($solAddressMainnetStore)
+			$networkEthereumEnabled || $networkEvmMainnetEnabled
+				? validateEthAddress($ethAddressStore)
+				: Promise.resolve(),
+			$networkBitcoinMainnetEnabled
+				? validateBtcAddressMainnet($btcAddressMainnetStore)
+				: Promise.resolve(),
+			$networkSolanaMainnetEnabled
+				? validateSolAddressMainnet($solAddressMainnetStore)
+				: Promise.resolve()
 		]);
 	};
 
 	$: $btcAddressMainnetStore,
 		$ethAddressStore,
 		$solAddressMainnetStore,
+		$networkBitcoinMainnetEnabled,
+		$networkEthereumEnabled,
+		$networkEvmMainnetEnabled,
+		$networkSolanaMainnetEnabled,
 		(async () => await validateAddresses())();
 </script>
 

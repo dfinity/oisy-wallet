@@ -13,8 +13,7 @@ pub fn assert_tokens_data_eq<T: PartialEq + std::fmt::Debug>(
     for (token, expected) in results_tokens.iter().zip(expected_tokens.iter()) {
         assert_eq!(
             token, expected,
-            "Result token differs from expected token: {:?} vs {:?}",
-            token, expected
+            "Result token differs from expected token: {token:?} vs {expected:?}"
         );
     }
 }
@@ -32,8 +31,7 @@ pub fn assert_custom_tokens_eq(
     for (token, expected) in results_tokens.iter().zip(expected_tokens.iter()) {
         assert_eq!(
             token, expected,
-            "Result custom token differs from expected custom token: {:?} vs {:?}",
-            token, expected
+            "Result custom token differs from expected custom token: {token:?} vs {expected:?}"
         );
     }
 }
@@ -44,8 +42,7 @@ pub fn assert_user_profiles_eq(results_users: Vec<OisyUser>, expected_users: Vec
     for (user, expected) in results_users.iter().zip(expected_users.iter()) {
         assert_eq!(
             user, expected,
-            "Result users differs from expected user: {:?} vs {:?}",
-            user, expected
+            "Result users differs from expected user: {user:?} vs {expected:?}"
         );
     }
 }

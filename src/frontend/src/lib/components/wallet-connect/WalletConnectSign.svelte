@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import WalletConnectSignModal from '$eth/components/wallet-connect/WalletConnectSignModal.svelte';
@@ -13,9 +13,9 @@
 
 	export let listener: OptionWalletConnectListener;
 
-	let request: Web3WalletTypes.SessionRequest | undefined;
+	let request: WalletKitTypes.SessionRequest | undefined;
 	$: request = $modalWalletConnectSign
-		? ($modalStore?.data as Web3WalletTypes.SessionRequest | undefined)
+		? ($modalStore?.data as WalletKitTypes.SessionRequest | undefined)
 		: undefined;
 
 	let ethChainId: number | undefined;

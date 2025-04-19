@@ -10,7 +10,7 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
-import { testnets } from '$lib/derived/testnets.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import type { CanisterIdText } from '$lib/types/canister';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -20,10 +20,10 @@ import { derived, type Readable } from 'svelte/store';
  * The list of Icrc default tokens - i.e. the statically configured Icrc tokens of Oisy + their metadata, unique ids etc. fetched at runtime.
  */
 const icrcDefaultTokens: Readable<IcToken[]> = derived(
-	[icrcDefaultTokensStore, testnets],
-	([$icrcTokensStore, $testnets]) =>
+	[icrcDefaultTokensStore, testnetsEnabled],
+	([$icrcTokensStore, $testnetsEnabled]) =>
 		($icrcTokensStore?.map(({ data: token }) => token) ?? []).filter(
-			(token) => $testnets || !isTokenIcrcTestnet(token)
+			(token) => $testnetsEnabled || !isTokenIcrcTestnet(token)
 		)
 );
 
@@ -53,10 +53,10 @@ const icrcDefaultTokensCanisterIds: Readable<CanisterIdText[]> = derived(
  * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "custom token" in the backend.
  */
 const icrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
-	[icrcCustomTokensStore, testnets],
-	([$icrcCustomTokensStore, $testnets]) =>
+	[icrcCustomTokensStore, testnetsEnabled],
+	([$icrcCustomTokensStore, $testnetsEnabled]) =>
 		($icrcCustomTokensStore?.map(({ data: token }) => token) ?? []).filter(
-			(token) => $testnets || !isTokenIcrcTestnet(token)
+			(token) => $testnetsEnabled || !isTokenIcrcTestnet(token)
 		)
 );
 

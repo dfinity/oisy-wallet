@@ -73,8 +73,7 @@
 	const { sendTokenDecimals, sendToken, sendTokenSymbol, sendPurpose } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let simplifiedForm = false;
-	$: simplifiedForm = sendPurpose === 'convert-cketh-to-eth';
+	const simplifiedForm = sendPurpose === 'convert-cketh-to-eth';
 
 	/**
 	 * Send
@@ -124,8 +123,8 @@
 				ckErc20ToErc20MaxCkEthFees
 			};
 
-			const trackAnalyticsOnSendComplete = async () => {
-				await trackEvent({
+			const trackAnalyticsOnSendComplete = () => {
+				trackEvent({
 					name: isNetworkIdBitcoin(networkId)
 						? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
 						: isConvertCkEthToEth({ token: $sendToken, networkId })
@@ -150,7 +149,7 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
 					: isConvertCkEthToEth({ token: $sendToken, networkId })
@@ -190,7 +189,7 @@
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
-	const back = () => dispatch('icBack');
+	const back = () => dispatch('icSendBack');
 	const close = () => dispatch('icClose');
 </script>
 

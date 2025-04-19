@@ -1,5 +1,5 @@
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
-import type { OptionEthAddress } from '$lib/types/address';
+import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import { fromNullishNullable, nonNullish } from '@dfinity/utils';
 
 export const toCkEthHelperContractAddress = (
@@ -13,13 +13,13 @@ export const toCkErc20HelperContractAddress = (
 export const toCkMinterAddress = (minterInfo: OptionCertifiedMinterInfo): OptionEthAddress =>
 	fromNullishNullable(minterInfo?.data.minter_address);
 
-export const toCkMinterInfoAddresses = (
-	minterInfo: OptionCertifiedMinterInfo
-): OptionEthAddress[] =>
+export const toCkMinterInfoAddresses = (minterInfo: OptionCertifiedMinterInfo): EthAddress[] =>
 	nonNullish(minterInfo)
 		? [
 				toCkEthHelperContractAddress(minterInfo),
 				toCkErc20HelperContractAddress(minterInfo),
 				toCkMinterAddress(minterInfo)
-			].map((address) => address?.toLowerCase())
+			]
+				.map((address) => address?.toLowerCase())
+				.filter(nonNullish)
 		: [];

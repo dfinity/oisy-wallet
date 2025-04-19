@@ -3,8 +3,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let disabled = false;
+	export let testId: string | undefined = undefined;
+	export let fullWidth = false;
 </script>
 
-<Button colorStyle="secondary-light" type="button" {disabled} on:click>
+<Button {testId} colorStyle="secondary-light" type="button" {fullWidth} {disabled} on:click>
 	{$i18n.core.text.cancel}
 </Button>

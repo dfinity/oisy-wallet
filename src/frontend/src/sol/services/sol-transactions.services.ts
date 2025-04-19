@@ -5,6 +5,7 @@ import {
 	SOLANA_TESTNET_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
@@ -15,7 +16,9 @@ import {
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type {
+	ParsedAccount,
 	SolMappedTransaction,
+	SolRpcTransaction,
 	SolSignature,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
@@ -23,11 +26,16 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
-import { address as solAddress } from '@solana/web3.js';
+import { address as solAddress } from '@solana/kit';
 
 interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
 	signalEnd: () => void;
 }
+
+// The fee payer is always the first signer
+// https://solana.com/docs/core/fees#base-transaction-fee
+const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
+	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
 
 export const fetchSolTransactionsForSignature = async ({
 	signature,
@@ -42,7 +50,10 @@ export const fetchSolTransactionsForSignature = async ({
 	tokenAddress?: SplTokenAddress;
 	tokenOwnerAddress?: SolAddress;
 }): Promise<SolTransactionUi[]> => {
-	const transactionDetail = await fetchTransactionDetailForSignature({ signature, network });
+	const transactionDetail: SolRpcTransaction | null = await fetchTransactionDetailForSignature({
+		signature,
+		network
+	});
 
 	if (isNullish(transactionDetail)) {
 		return [];
@@ -52,12 +63,14 @@ export const fetchSolTransactionsForSignature = async ({
 		blockTime,
 		confirmationStatus: status,
 		transaction: {
-			message: { instructions }
+			message: { instructions, accountKeys }
 		},
 		meta
 	} = transactionDetail;
 
 	const { fee } = meta ?? {};
+	const { pubkey: feePayer } = extractFeePayer([...(accountKeys ?? [])]) ?? {};
+
 	const putativeInnerInstructions = meta?.innerInstructions ?? [];
 
 	// Inside the instructions there could be some that we are unable to decode, but that may have
@@ -132,8 +145,8 @@ export const fetchSolTransactionsForSignature = async ({
 				...accCumulativeBalances,
 				// We include WSOL in the calculation, because it is used to affect the SOL balance of the ATA.
 				...((isNullish(mappedTokenAddress) || mappedTokenAddress === WSOL_TOKEN.address) && {
-					[from]: (accCumulativeBalances[from] ?? 0n) - value,
-					[to]: (accCumulativeBalances[to] ?? 0n) + value
+					[from]: (accCumulativeBalances[from] ?? ZERO_BI) - value,
+					[to]: (accCumulativeBalances[to] ?? ZERO_BI) + value
 				})
 			};
 
@@ -151,7 +164,7 @@ export const fetchSolTransactionsForSignature = async ({
 			const newTransaction: SolTransactionUi = {
 				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
-				timestamp: blockTime ?? 0n,
+				timestamp: blockTime ?? ZERO_BI,
 				value,
 				type: address === from || ataAddress === from ? 'send' : 'receive',
 				from,
@@ -160,7 +173,8 @@ export const fetchSolTransactionsForSignature = async ({
 				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
 				// Particularly, we are repeating the same fee for each instruction in the transaction.
 				// However, we should have it anyway saved in the transaction, so we can display it in the UI.
-				fee
+				...(nonNullish(fee) &&
+					nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO_BI })
 			};
 
 			return {

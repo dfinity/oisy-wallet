@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import type { Commitment } from '@solana/web3.js';
+	import type { Commitment } from '@solana/kit';
 	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -53,7 +52,7 @@
 		fromExplorerUrl
 	}}
 	hash={id}
-	value={nonNullish(value) ? BigNumber.from(value) : undefined}
+	{value}
 	{token}
 	sendToLabel={$i18n.transaction.text.to}
 	typeLabel={type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}

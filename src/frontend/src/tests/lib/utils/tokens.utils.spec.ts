@@ -1,30 +1,43 @@
-import {
-	BTC_MAINNET_NETWORK_ID,
-	ETHEREUM_NETWORK_ID,
-	ICP_NETWORK_ID
-} from '$env/networks/networks.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import {
+	BTC_MAINNET_SYMBOL,
+	BTC_MAINNET_TOKEN,
+	BTC_TESTNET_TOKEN
+} from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
-import { ZERO } from '$lib/constants/app.constants';
+import {
+	SOLANA_DEVNET_TOKEN,
+	SOLANA_LOCAL_TOKEN,
+	SOLANA_TESTNET_TOKEN,
+	SOLANA_TOKEN
+} from '$env/tokens/tokens.sol.env';
+import * as appContants from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { Network } from '$lib/types/network';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { UserNetworks } from '$lib/types/user-networks';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
+	defineEnabledTokens,
 	filterEnabledTokens,
 	filterTokens,
+	findToken,
 	pinEnabledTokensAtTop,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
 	sumMainnetTokensUsdBalancesPerNetwork,
 	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
-import { bn1, bn2, bn3, certified, mockBalances } from '$tests/mocks/balances.mock';
+import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
@@ -42,6 +55,7 @@ describe('sortTokens', () => {
 			[ETHEREUM_TOKEN.id]: { usd_market_cap: 300, usd: mockOneUsd }
 		};
 		const sortedTokens = sortTokens({ $tokens: mockTokens, $exchanges, $tokensToPin: [] });
+
 		expect(sortedTokens).toEqual([ETHEREUM_TOKEN, ICP_TOKEN, BTC_MAINNET_TOKEN]);
 	});
 
@@ -52,6 +66,7 @@ describe('sortTokens', () => {
 			[ETHEREUM_TOKEN.id]: { usd_market_cap: 200, usd: mockOneUsd }
 		};
 		const sortedTokens = sortTokens({ $tokens: mockTokens, $exchanges, $tokensToPin: [] });
+
 		expect(sortedTokens).toEqual([BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN]);
 	});
 
@@ -62,6 +77,7 @@ describe('sortTokens', () => {
 			[ETHEREUM_TOKEN.id]: { usd: mockOneUsd }
 		};
 		const sortedTokens = sortTokens({ $tokens: mockTokens, $exchanges, $tokensToPin: [] });
+
 		expect(sortedTokens).toEqual([BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN]);
 	});
 
@@ -77,6 +93,7 @@ describe('sortTokens', () => {
 			$exchanges,
 			$tokensToPin: []
 		});
+
 		expect(sortedTokens).toEqual(
 			[BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN].map((token) => ({
 				...token,
@@ -97,6 +114,7 @@ describe('sortTokens', () => {
 			$exchanges,
 			$tokensToPin: []
 		});
+
 		expect(sortedTokens).toEqual(
 			[BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN].map((token) => ({
 				...token,
@@ -117,6 +135,7 @@ describe('sortTokens', () => {
 			$exchanges,
 			$tokensToPin: tokensToPin
 		});
+
 		expect(sortedTokens).toEqual([ETHEREUM_TOKEN, BTC_MAINNET_TOKEN, ICP_TOKEN]);
 	});
 
@@ -133,6 +152,7 @@ describe('sortTokens', () => {
 			$exchanges: {},
 			$tokensToPin: []
 		});
+
 		expect(sortedTokens).toEqual([
 			BTC_MAINNET_TOKEN,
 			ETHEREUM_TOKEN,
@@ -155,9 +175,9 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 	it('should pin tokens with usd balance at the top and sort by usd balance', () => {
 		const newBalances: CertifiedStoreData<BalancesData> = {
-			[ICP_TOKEN.id]: { data: bn2, certified },
-			[BTC_MAINNET_TOKEN.id]: { data: bn1, certified },
-			[ETHEREUM_TOKEN.id]: { data: bn3, certified }
+			[ICP_TOKEN.id]: { data: bn2Bi, certified },
+			[BTC_MAINNET_TOKEN.id]: { data: bn1Bi, certified },
+			[ETHEREUM_TOKEN.id]: { data: bn3Bi, certified }
 		};
 
 		const result = pinTokensWithBalanceAtTop({
@@ -193,9 +213,9 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 	it('should return the same array if all tokens have no balance', () => {
 		const newBalances: CertifiedStoreData<BalancesData> = {
-			[ICP_TOKEN.id]: { data: ZERO, certified },
-			[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
-			[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
+			[ICP_TOKEN.id]: { data: ZERO_BI, certified },
+			[BTC_MAINNET_TOKEN.id]: { data: ZERO_BI, certified },
+			[ETHEREUM_TOKEN.id]: { data: ZERO_BI, certified }
 		};
 
 		const result = pinTokensWithBalanceAtTop({
@@ -213,9 +233,9 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 	it('should sort only tokens with non-zero balances and leave untouched the rest', () => {
 		const newBalances: CertifiedStoreData<BalancesData> = {
-			[ICP_TOKEN.id]: { data: ZERO, certified },
-			[BTC_MAINNET_TOKEN.id]: { data: bn1, certified },
-			[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
+			[ICP_TOKEN.id]: { data: ZERO_BI, certified },
+			[BTC_MAINNET_TOKEN.id]: { data: bn1Bi, certified },
+			[ETHEREUM_TOKEN.id]: { data: ZERO_BI, certified }
 		};
 
 		const result = pinTokensWithBalanceAtTop({
@@ -233,8 +253,8 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 	it('should put tokens with no exchange data after tokens with balance', () => {
 		const newBalances: CertifiedStoreData<BalancesData> = {
-			[BTC_MAINNET_TOKEN.id]: { data: bn1, certified },
-			[ETHEREUM_TOKEN.id]: { data: bn3, certified }
+			[BTC_MAINNET_TOKEN.id]: { data: bn1Bi, certified },
+			[ETHEREUM_TOKEN.id]: { data: bn3Bi, certified }
 		};
 
 		const result = pinTokensWithBalanceAtTop({
@@ -260,6 +280,7 @@ describe('sumTokensUiUsdBalance', () => {
 		];
 
 		const result = sumTokensUiUsdBalance(tokens);
+
 		expect(result).toEqual(200);
 	});
 
@@ -271,11 +292,13 @@ describe('sumTokensUiUsdBalance', () => {
 		];
 
 		const result = sumTokensUiUsdBalance(tokens);
+
 		expect(result).toEqual(50);
 	});
 
 	it('should correctly calculate USD total balance when tokens list is empty', () => {
 		const result = sumTokensUiUsdBalance([]);
+
 		expect(result).toEqual(0);
 	});
 });
@@ -292,6 +315,7 @@ describe('filterEnabledTokens', () => {
 		];
 
 		const result = filterEnabledTokens([tokens]);
+
 		expect(result).toEqual([ENABLED_ICP_TOKEN, ENABLED_ETHEREUM_TOKEN]);
 	});
 
@@ -306,6 +330,7 @@ describe('filterEnabledTokens', () => {
 		];
 
 		const result = filterEnabledTokens([tokens]);
+
 		expect(result).toEqual([ENABLED_BY_DEFAULT_ICP_TOKEN, ENABLED_BY_DEFAULT_ETHEREUM_TOKEN]);
 	});
 });
@@ -324,7 +349,7 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 	it('should return a dictionary with correct balances for the list of mainnet and testnet tokens', () => {
 		const balances = {
 			...mockBalances,
-			[BTC_TESTNET_TOKEN.id]: { data: bn3, certified }
+			[BTC_TESTNET_TOKEN.id]: { data: bn3Bi, certified }
 		};
 		const tokens = [...mockTokens, BTC_TESTNET_TOKEN];
 
@@ -333,19 +358,20 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$balances: balances,
 			$exchanges: mockExchanges
 		});
+
 		expect(result).toEqual({
-			[BTC_MAINNET_NETWORK_ID]: bn2.toNumber(),
-			[ETHEREUM_NETWORK_ID]: bn3.toNumber(),
-			[ICP_NETWORK_ID]: bn1.toNumber()
+			[BTC_MAINNET_NETWORK_ID]: Number(bn2Bi),
+			[ETHEREUM_NETWORK_ID]: Number(bn3Bi),
+			[ICP_NETWORK_ID]: Number(bn1Bi)
 		});
 	});
 
 	it('should return a dictionary with correct balances if all token balances are 0', () => {
 		const balances = {
-			[ICP_TOKEN.id]: { data: ZERO, certified },
-			[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
-			[ETHEREUM_TOKEN.id]: { data: ZERO, certified },
-			[BTC_TESTNET_TOKEN.id]: { data: ZERO, certified }
+			[ICP_TOKEN.id]: { data: ZERO_BI, certified },
+			[BTC_MAINNET_TOKEN.id]: { data: ZERO_BI, certified },
+			[ETHEREUM_TOKEN.id]: { data: ZERO_BI, certified },
+			[BTC_TESTNET_TOKEN.id]: { data: ZERO_BI, certified }
 		};
 		const tokens = [...mockTokens, BTC_TESTNET_TOKEN];
 
@@ -354,17 +380,18 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$balances: balances,
 			$exchanges: mockExchanges
 		});
+
 		expect(result).toEqual({
-			[BTC_MAINNET_NETWORK_ID]: ZERO.toNumber(),
-			[ETHEREUM_NETWORK_ID]: ZERO.toNumber(),
-			[ICP_NETWORK_ID]: ZERO.toNumber()
+			[BTC_MAINNET_NETWORK_ID]: Number(ZERO_BI),
+			[ETHEREUM_NETWORK_ID]: Number(ZERO_BI),
+			[ICP_NETWORK_ID]: Number(ZERO_BI)
 		});
 	});
 
 	it('should return an empty dictionary if no mainnet tokens are in the list', () => {
 		const balances = {
 			...mockBalances,
-			[BTC_TESTNET_TOKEN.id]: { data: bn2, certified }
+			[BTC_TESTNET_TOKEN.id]: { data: bn2Bi, certified }
 		};
 		const tokens = [BTC_TESTNET_TOKEN];
 
@@ -373,6 +400,7 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$balances: balances,
 			$exchanges: mockExchanges
 		});
+
 		expect(result).toEqual({});
 	});
 
@@ -382,6 +410,7 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$balances: mockBalances,
 			$exchanges: mockExchanges
 		});
+
 		expect(result).toEqual({});
 	});
 });
@@ -446,5 +475,196 @@ describe('filterTokens', () => {
 		expect(filterTokens({ tokens: [...mockTokens, PEPE_TOKEN], filter: 'ethereum' })).toStrictEqual(
 			[ETHEREUM_TOKEN, PEPE_TOKEN]
 		);
+	});
+});
+
+describe('findToken', () => {
+	it('should return the correct token by symbol', () => {
+		const result = findToken({ tokens: mockTokens, symbol: BTC_MAINNET_SYMBOL });
+
+		expect(result).toEqual(BTC_MAINNET_TOKEN);
+	});
+
+	it('should return undefined if token is not found', () => {
+		const result = findToken({ tokens: mockTokens, symbol: 'UNKNOWN_TOKEN' });
+
+		expect(result).toBeUndefined();
+	});
+});
+
+describe('defineEnabledTokens', () => {
+	const mainnetTokens: Token[] = [SOLANA_TOKEN];
+	const testnetTokens: Token[] = [SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN];
+	const localTokens: Token[] = [SOLANA_LOCAL_TOKEN];
+
+	const mainnetNetworks: Network[] = mainnetTokens.map(({ network }) => network);
+	const testnetNetworks: Network[] = testnetTokens.map(({ network }) => network);
+	const localNetworks: Network[] = localTokens.map(({ network }) => network);
+
+	const networks: Network[] = [...mainnetNetworks, ...testnetNetworks, ...localNetworks];
+
+	const mapUserNetworks = ({
+		enabledNetworks = networks,
+		disabledNetworks = []
+	}: {
+		enabledNetworks?: Network[];
+		disabledNetworks?: Network[];
+	}): UserNetworks => ({
+		...enabledNetworks.reduce<UserNetworks>(
+			(acc, { id, env }) => ({ ...acc, [id]: { enabled: true, isTestnet: env === 'testnet' } }),
+			{}
+		),
+		...disabledNetworks.reduce<UserNetworks>(
+			(acc, { id, env }) => ({ ...acc, [id]: { enabled: false, isTestnet: env === 'testnet' } }),
+			{}
+		)
+	});
+
+	const userNetworks: UserNetworks = mapUserNetworks({});
+
+	const mockBaseParams = {
+		$testnetsEnabled: false,
+		$userNetworks: userNetworks,
+		mainnetFlag: true,
+		mainnetTokens,
+		testnetTokens,
+		localTokens
+	};
+
+	beforeEach(() => {
+		vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValue(false);
+	});
+
+	describe('when testnets are disabled', () => {
+		const mockParams = { ...mockBaseParams, $testnetsEnabled: false };
+
+		it('should return only mainnet tokens by default', () => {
+			expect(defineEnabledTokens(mockParams)).toEqual(mainnetTokens);
+		});
+
+		it('should return an empty array when mainnet is disabled', () => {
+			expect(defineEnabledTokens({ ...mockParams, mainnetFlag: false })).toEqual([]);
+		});
+
+		it('should return an empty array when all networks are disabled by the user', () => {
+			expect(defineEnabledTokens({ ...mockParams, $userNetworks: {} })).toEqual([]);
+		});
+
+		it('should return an empty array when mainnet networks are disabled by the user', () => {
+			expect(
+				defineEnabledTokens({
+					...mockParams,
+					$userNetworks: mapUserNetworks({ disabledNetworks: mainnetNetworks })
+				})
+			).toEqual([]);
+		});
+
+		it('should return an empty array when no mainnet token is provided', () => {
+			expect(defineEnabledTokens({ ...mockParams, mainnetTokens: [] })).toEqual([]);
+		});
+
+		it('should ignore the local tokens when they are enabled', () => {
+			vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(false);
+
+			expect(defineEnabledTokens(mockParams)).toEqual(mainnetTokens);
+		});
+	});
+
+	describe('when testnets are enabled', () => {
+		const mockParams = { ...mockBaseParams, $testnetsEnabled: true };
+
+		it('should return mainnet and testnet tokens', () => {
+			expect(defineEnabledTokens(mockParams)).toEqual([...mainnetTokens, ...testnetTokens]);
+		});
+
+		it('should return only testnet tokens when mainnet disabled', () => {
+			expect(defineEnabledTokens({ ...mockParams, mainnetFlag: false })).toEqual(testnetTokens);
+		});
+
+		it('should return an empty array when all networks are disabled by the user', () => {
+			expect(defineEnabledTokens({ ...mockParams, $userNetworks: {} })).toEqual([]);
+		});
+
+		it('should return only mainnet tokens when testnet disabled by the user', () => {
+			expect(
+				defineEnabledTokens({
+					...mockParams,
+					$userNetworks: mapUserNetworks({ disabledNetworks: testnetNetworks })
+				})
+			).toEqual(mainnetTokens);
+		});
+
+		it('should return only testnet tokens when mainnet disabled by the user', () => {
+			expect(
+				defineEnabledTokens({
+					...mockParams,
+					$userNetworks: mapUserNetworks({ disabledNetworks: mainnetNetworks })
+				})
+			).toEqual(testnetTokens);
+		});
+
+		it('should return only mainnet tokens when no testnet token is provided', () => {
+			const { testnetTokens: _, ...params } = mockParams;
+
+			expect(defineEnabledTokens(params)).toEqual(mainnetTokens);
+		});
+
+		describe('when local networks are enabled', () => {
+			beforeEach(() => {
+				vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(true);
+			});
+
+			it('should return all tokens', () => {
+				expect(defineEnabledTokens(mockParams)).toEqual([
+					...mainnetTokens,
+					...testnetTokens,
+					...localTokens
+				]);
+			});
+
+			it('should return only testnet and local tokens when mainnet disabled', () => {
+				expect(defineEnabledTokens({ ...mockParams, mainnetFlag: false })).toEqual([
+					...testnetTokens,
+					...localTokens
+				]);
+			});
+
+			it('should return empty array when all networks are disabled by the user', () => {
+				expect(defineEnabledTokens({ ...mockParams, $userNetworks: {} })).toEqual([]);
+			});
+
+			it('should return only mainnet and testnet tokens when local disabled by the user', () => {
+				expect(
+					defineEnabledTokens({
+						...mockParams,
+						$userNetworks: mapUserNetworks({ disabledNetworks: localNetworks })
+					})
+				).toEqual([...mainnetTokens, ...testnetTokens]);
+			});
+
+			it('should return only testnet and local tokens when mainnet disabled by the user', () => {
+				expect(
+					defineEnabledTokens({
+						...mockParams,
+						$userNetworks: mapUserNetworks({ disabledNetworks: mainnetNetworks })
+					})
+				).toEqual([...testnetTokens, ...localTokens]);
+			});
+
+			it('should return only mainnet and local tokens when testnet disabled by the user', () => {
+				expect(
+					defineEnabledTokens({
+						...mockParams,
+						$userNetworks: mapUserNetworks({ disabledNetworks: testnetNetworks })
+					})
+				).toEqual([...mainnetTokens, ...localTokens]);
+			});
+
+			it('should return only mainnet and testnet tokens when no local token is provided', () => {
+				const { localTokens: _, ...params } = mockParams;
+
+				expect(defineEnabledTokens(params)).toEqual([...mainnetTokens, ...testnetTokens]);
+			});
+		});
 	});
 });

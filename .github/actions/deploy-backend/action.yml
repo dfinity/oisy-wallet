@@ -8,7 +8,7 @@ runs:
   using: 'composite'
   steps:
     - name: Restore cargo cache
-      uses: actions/cache@v4
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: |
           /home/runner/.cargo/registry
@@ -23,7 +23,7 @@ runs:
       uses: ./.github/actions/prepare
 
     - name: Install dfx
-      uses: dfinity/setup-dfx@main
+      uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
     - name: Start dfx
       shell: bash

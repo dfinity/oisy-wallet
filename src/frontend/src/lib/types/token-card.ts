@@ -1,3 +1,4 @@
+import type { Network } from '$lib/types/network';
 import type { TokenUi } from '$lib/types/token';
 
 export type CardData = Pick<
@@ -11,6 +12,8 @@ export type CardData = Pick<
 	| 'oisySymbol'
 	| 'balance'
 	| 'usdBalance'
+	| 'groupData'
 > & {
 	tokenCount?: number;
+	networks?: Network[];
 };

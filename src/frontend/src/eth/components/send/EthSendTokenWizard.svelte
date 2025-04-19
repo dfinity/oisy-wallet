@@ -35,7 +35,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -71,8 +71,7 @@
 	// i.e. Ethereum or Sepolia "main" token.
 	export let nativeEthereumToken: Token;
 
-	let destinationEditable = true;
-	$: destinationEditable = sendPurpose === 'send';
+	const destinationEditable = sendPurpose === 'send';
 
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
@@ -194,7 +193,7 @@
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_SUCCESS,
 				metadata: {
 					token: $sendToken.symbol
@@ -203,7 +202,7 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_ERROR,
 				metadata: {
 					token: $sendToken.symbol
@@ -222,7 +221,7 @@
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
 
-	$: onDecodeQrCode = ({
+	const onDecodeQrCode = ({
 		status,
 		code,
 		expectedToken
@@ -276,7 +275,6 @@
 			bind:network={targetNetwork}
 			{nativeEthereumToken}
 			{destinationEditable}
-			{sourceNetwork}
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}

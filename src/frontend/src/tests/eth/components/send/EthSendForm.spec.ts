@@ -1,11 +1,10 @@
-import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 import { FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
 import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 import { writable } from 'svelte/store';
 
 describe('EthSendForm', () => {
@@ -29,10 +28,9 @@ describe('EthSendForm', () => {
 
 	const props = {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
-		amount: BigNumber.from(22000000),
+		amount: '22000000',
 		network: ETHEREUM_NETWORK,
-		nativeEthereumToken: ETHEREUM_TOKEN,
-		sourceNetwork: ETHEREUM_NETWORK
+		nativeEthereumToken: ETHEREUM_TOKEN
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
@@ -49,23 +47,29 @@ describe('EthSendForm', () => {
 		});
 
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
+
 		expect(amount).not.toBeNull();
 
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
+
 		expect(destination).not.toBeNull();
 
 		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+
 		expect(network).not.toBeNull();
 
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
+
 		expect(maxFeeEth).not.toBeNull();
 
 		const sendInfoMessageBox: HTMLDivElement | null = container.querySelector(
 			sendInfoMessageBoxSelector
 		);
+
 		expect(sendInfoMessageBox).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
+
 		expect(toolbar).not.toBeNull();
 	});
 
@@ -76,23 +80,29 @@ describe('EthSendForm', () => {
 		});
 
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
+
 		expect(amount).not.toBeNull();
 
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
+
 		expect(destination).toBeNull();
 
 		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+
 		expect(network).not.toBeNull();
 
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
+
 		expect(maxFeeEth).not.toBeNull();
 
 		const sendInfoMessageBox: HTMLDivElement | null = container.querySelector(
 			sendInfoMessageBoxSelector
 		);
+
 		expect(sendInfoMessageBox).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
+
 		expect(toolbar).not.toBeNull();
 	});
 });

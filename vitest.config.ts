@@ -2,7 +2,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
 import { type UserConfig } from 'vite';
-import { defineConfig } from 'vitest/config';
+import { coverageConfigDefaults, defineConfig } from 'vitest/config';
 import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
 
 process.env = {
@@ -31,6 +31,10 @@ export default defineConfig(
 				{
 					find: '$eth',
 					replacement: resolve(__dirname, 'src/frontend/src/eth')
+				},
+				{
+					find: '$evm',
+					replacement: resolve(__dirname, 'src/frontend/src/evm')
 				},
 				{
 					find: '$icp',
@@ -69,7 +73,21 @@ export default defineConfig(
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
-				exclude: ['build', '.dfx', '**/.svelte-kit']
+				exclude: [
+					...coverageConfigDefaults.exclude,
+					'build',
+					'.dfx',
+					'**/.svelte-kit',
+					'src/declarations'
+				],
+				// TODO: increase the thresholds slowly up to an acceptable 80% at least
+				thresholds: {
+					autoUpdate: true,
+					statements: 61,
+					branches: 82,
+					functions: 72,
+					lines: 61
+				}
 			}
 		}
 	})

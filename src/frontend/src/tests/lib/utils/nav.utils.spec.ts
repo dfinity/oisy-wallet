@@ -1,5 +1,6 @@
 import * as appNavigation from '$app/navigation';
-import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	AppPath,
 	NETWORK_PARAM,
@@ -10,12 +11,18 @@ import {
 import {
 	back,
 	gotoReplaceRoot,
+	isActivityPath,
+	isDappExplorerPath,
+	isRewardsPath,
 	isRouteActivity,
 	isRouteDappExplorer,
 	isRouteRewards,
 	isRouteSettings,
 	isRouteTokens,
 	isRouteTransactions,
+	isSettingsPath,
+	isTokensPath,
+	isTransactionsPath,
 	loadRouteParams,
 	networkParam,
 	networkUrl,
@@ -123,11 +130,13 @@ describe('nav.utils', () => {
 		it('should call history.back when pop is true', async () => {
 			const historyBackMock = vi.spyOn(history, 'back');
 			await back({ pop: true });
+
 			expect(historyBackMock).toHaveBeenCalled();
 		});
 
 		it('should navigate to "/" when pop is false', async () => {
 			await back({ pop: false });
+
 			expect(mockGoTo).toHaveBeenCalledWith('/');
 		});
 	});
@@ -135,6 +144,7 @@ describe('nav.utils', () => {
 	describe('gotoReplaceRoot', () => {
 		it('should navigate to "/" with replaceState', async () => {
 			await gotoReplaceRoot();
+
 			expect(mockGoTo).toHaveBeenCalledWith('/', { replaceState: true });
 		});
 	});
@@ -167,6 +177,7 @@ describe('nav.utils', () => {
 					}
 				}
 			} as unknown as LoadEvent);
+
 			expect(result).toEqual({
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: null,
@@ -358,6 +369,54 @@ describe('nav.utils', () => {
 
 				expect(isRouteRewards(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBe(false);
 			});
+		});
+	});
+
+	describe('Path Matching Functions', () => {
+		const withAppPrefix = (path: string) => `${ROUTE_ID_GROUP_APP}${path}`;
+
+		it('isTransactionsPath', () => {
+			expect(isTransactionsPath(withAppPrefix(AppPath.Transactions))).toBe(true);
+			expect(isTransactionsPath('/(app)/transactions')).toBe(true); // without trailing slash
+			expect(isTransactionsPath('/wrong')).toBe(false);
+			expect(isTransactionsPath(null)).toBe(false);
+		});
+
+		it('isSettingsPath', () => {
+			expect(isSettingsPath(withAppPrefix(AppPath.Settings))).toBe(true);
+			expect(isSettingsPath('/(app)/settings')).toBe(true);
+			expect(isSettingsPath('/(app)/settings/wrong')).toBe(false);
+			expect(isSettingsPath(null)).toBe(false);
+		});
+
+		it('isDappExplorerPath', () => {
+			expect(isDappExplorerPath(withAppPrefix(AppPath.Explore))).toBe(true);
+			expect(isDappExplorerPath('/(app)/explore')).toBe(true);
+			expect(isDappExplorerPath('/(app)/explore/wrong')).toBe(false);
+			expect(isDappExplorerPath(null)).toBe(false);
+		});
+
+		it('isActivityPath', () => {
+			expect(isActivityPath(withAppPrefix(AppPath.Activity))).toBe(true);
+			expect(isActivityPath('/(app)/activity')).toBe(true);
+			expect(isActivityPath('/(app)/activity/wrong')).toBe(false);
+			expect(isActivityPath(null)).toBe(false);
+		});
+
+		it('isTokensPath', () => {
+			expect(isTokensPath(withAppPrefix(AppPath.Tokens))).toBe(true);
+			expect(isTokensPath('/(app)/')).toBe(true);
+			expect(isTokensPath(withAppPrefix(AppPath.WalletConnect))).toBe(true);
+			expect(isTokensPath('/(app)/wc')).toBe(true);
+			expect(isTokensPath('/(app)/wrong')).toBe(false);
+			expect(isTokensPath(null)).toBe(false);
+		});
+
+		it('isRewardsPath', () => {
+			expect(isRewardsPath(withAppPrefix(AppPath.Rewards))).toBe(true);
+			expect(isRewardsPath('/(app)/rewards')).toBe(true);
+			expect(isRewardsPath('/(app)/rewards/bonus')).toBe(false);
+			expect(isRewardsPath(null)).toBe(false);
 		});
 	});
 });

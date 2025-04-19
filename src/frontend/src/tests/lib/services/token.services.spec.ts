@@ -24,6 +24,7 @@ describe('token.services', () => {
 		it('should set the token in tokenStore', async () => {
 			await loadTokenAndRun({ token: mockValidToken, callback: mockCallback });
 			const tokenStore = get(token);
+
 			expect(tokenStore).toBe(mockValidToken);
 		});
 
@@ -51,6 +52,7 @@ describe('token.services', () => {
 			).rejects.toThrow('Callback failed');
 
 			const tokenStore = get(token);
+
 			expect(tokenStore).toBe(mockValidToken);
 			expect(failingCallback).toHaveBeenCalled();
 		});
@@ -69,9 +71,6 @@ describe('token.services', () => {
 		let spyToastsError: MockInstance;
 		let spyBusyStart: MockInstance;
 		let spyBusyStop: MockInstance;
-
-		// we mock console.error just to avoid unnecessary logs while running the tests
-		vi.spyOn(console, 'error').mockImplementation(() => {});
 
 		beforeEach(() => {
 			mockAssertSendTokenData = vi.fn();

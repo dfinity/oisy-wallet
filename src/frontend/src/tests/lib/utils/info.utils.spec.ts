@@ -5,11 +5,9 @@ describe('info.utils', () => {
 		const key = 'someKey' as HideInfoKey;
 
 		beforeEach(() => {
-			vi.resetAllMocks();
+			vi.clearAllMocks();
 
 			sessionStorage.clear();
-
-			vi.spyOn(console, 'error').mockImplementation(() => {});
 		});
 
 		it('should save a value in localStorage', () => {
@@ -46,17 +44,17 @@ describe('info.utils', () => {
 			vi.resetAllMocks();
 
 			sessionStorage.clear();
-
-			vi.spyOn(console, 'error').mockImplementation(() => {});
 		});
 
 		it('should return true if the value for the key is "true"', () => {
 			sessionStorage.setItem(key, 'true');
+
 			expect(shouldHideInfo(key)).toBe(true);
 		});
 
 		it('should return false if the value for the key is "false"', () => {
 			sessionStorage.setItem(key, 'false');
+
 			expect(shouldHideInfo(key)).toBe(false);
 		});
 

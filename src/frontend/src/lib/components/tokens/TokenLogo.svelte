@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -10,9 +10,9 @@
 	export let data: CardData;
 	export let color: 'off-white' | 'white' = 'off-white';
 	export let badge:
-		| { type: 'network'; blackAndWhite?: boolean }
+		| { type: 'network' }
 		| { type: 'tokenCount'; count: number }
-		| { type: 'icon'; icon: ComponentType; ariaLabel: string }
+		| { type: 'icon'; icon: Component; ariaLabel: string }
 		| undefined = undefined;
 	export let logoSize: LogoSize = 'lg';
 	export let ring = false;
@@ -44,16 +44,16 @@
 			{badge.count}
 		</span>
 	{:else if badge?.type === 'network'}
-		<div class="absolute -bottom-1 -right-1">
-			<NetworkLogo
-				{network}
-				blackAndWhite={badge.blackAndWhite}
-				{color}
-				testId={`network-${badgeTestId}`}
-			/>
+		<div
+			class="absolute -bottom-1 -right-1"
+			class:scale-60={logoSize === 'xs'}
+			class:-right-1.75={logoSize === 'xs'}
+			class:-bottom-1.5={logoSize === 'xs'}
+		>
+			<NetworkLogo {network} {color} testId={`network-${badgeTestId}`} />
 		</div>
 	{:else if badge?.type === 'icon'}
-		<!-- TODO: use new mapping color when merged-->
+		<!-- TODO: use new mapping color when merged -->
 		<div
 			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-primary-inverted"
 			aria-label={badge.ariaLabel}
