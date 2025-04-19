@@ -1,6 +1,6 @@
-import { SolAddressSchema, type AddressSchema } from '$lib/schema/address.schema';
+import { type SolAddressSchema, type AddressSchema } from '$lib/schema/address.schema';
 import type { Option } from '$lib/types/utils';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 export type Address = z.infer<typeof AddressSchema>;
 

@@ -10,7 +10,6 @@ import {
 	solAddressMainnetStore,
 	solAddressTestnetStore
 } from '$lib/stores/address.store';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { parseSolAddress } from '$lib/validation/address.validation';
 import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
@@ -68,7 +67,7 @@ describe('SolLoaderWallets', () => {
 
 	it('should update wallet workers when addresses change', async () => {
 		const devnetAddress = parseSolAddress('devnet-address');
-				setupTestnetsStore('enabled');
+		setupTestnetsStore('enabled');
 
 		const { rerender } = render(SolLoaderWallets);
 

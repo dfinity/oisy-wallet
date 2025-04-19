@@ -1,7 +1,9 @@
 import type { SolAddress } from '$lib/types/address';
 import { parseSolAddress } from '$lib/validation/address.validation';
 
-export const mockSolAddress: SolAddress = parseSolAddress('7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1');
+export const mockSolAddress: SolAddress = parseSolAddress(
+	'7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1'
+);
 
 export const mockSolAddress2: SolAddress = parseSolAddress(
 	'4GsmSut5stEKJHsGfiTeP5c6VbPyt4KmtCQ9TAM56JR8'
