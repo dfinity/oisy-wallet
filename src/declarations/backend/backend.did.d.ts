@@ -60,6 +60,7 @@ export interface AccountSnapshot_3 {
 	amount: bigint;
 }
 export type AddDappSettingsError =
+	| { MaxHiddenDappIds: null }
 	| { VersionMismatch: null }
 	| { DappIdTooLong: null }
 	| { UserNotFound: null };
