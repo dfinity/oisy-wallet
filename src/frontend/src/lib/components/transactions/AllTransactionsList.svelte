@@ -15,7 +15,6 @@
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		modalBtcTransaction,
 		modalEthTransaction,
@@ -23,7 +22,6 @@
 		modalSolTransaction
 	} from '$lib/derived/modal.derived';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
-	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
@@ -89,9 +87,9 @@
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
-		{#each Object.entries(groupedTransactions) as [date, transactions], index (date)}
+		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 			<TransactionsDateGroup
-				{date}
+				{formattedDate}
 				{transactions}
 				testId={`all-transactions-date-group-${index}`}
 			/>
