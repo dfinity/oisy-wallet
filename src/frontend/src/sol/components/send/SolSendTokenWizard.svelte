@@ -14,11 +14,8 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import {
-		TRACK_COUNT_SOL_SEND_ERROR,
-		TRACK_COUNT_SOL_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { TRACK_COUNT_SOL_SEND_ERROR, TRACK_COUNT_SOL_SEND_SUCCESS } from '$lib/constants/analytics.contants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -52,10 +49,10 @@
 	import { sendSteps } from '$sol/constants/steps.constants';
 	import { sendSol } from '$sol/services/sol-send.services';
 	import {
-		SOL_FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
 		initFeeContext,
-		initFeeStore
+		initFeeStore,
+		SOL_FEE_CONTEXT_KEY
 	} from '$sol/stores/sol-fee.store';
 
 	export let currentStep: WizardStep | undefined;
@@ -164,7 +161,7 @@
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
 				}),
-				prioritizationFee: $prioritizationFeeStore ?? ZERO_BI,
+				prioritizationFee: $prioritizationFeeStore ?? ZERO,
 				destination,
 				source
 			});
