@@ -6,12 +6,11 @@ use serde::{de, Deserializer};
 #[cfg(test)]
 use strum::IntoEnumIterator;
 
-use crate::types::dapp::MAX_DAPP_ID_LIST_LENGTH;
 use crate::{
     types::{
         backend_config::{Config, InitArg},
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
-        dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
+        dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         migration::{ApiEnabled, Migration, MigrationProgress, MigrationReport},
         network::{
             NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
