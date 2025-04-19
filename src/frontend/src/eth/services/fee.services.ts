@@ -44,10 +44,10 @@ export const getErc20FeeData = async ({
 	try {
 		const targetNetworkId: NetworkId | undefined = targetNetwork?.id;
 
-		const { getFeeData: fn } = isNetworkIdICP(targetNetworkId)
+		const { getFeeData } = isNetworkIdICP(targetNetworkId)
 			? infuraErc20IcpProviders(targetNetworkId as NetworkId)
 			: infuraErc20Providers(targetNetworkId ?? sourceNetworkId);
-		const fee = await fn({ ...rest, contract, amount });
+		const fee = await getFeeData({ ...rest, contract, amount });
 
 		const isResearchCoin = contract.symbol === 'RSC' && contract.name === 'ResearchCoin';
 
