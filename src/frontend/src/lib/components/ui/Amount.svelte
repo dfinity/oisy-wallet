@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { EIGHT_DECIMALS, ZERO_BI } from '$lib/constants/app.constants';
+	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	export let amount: bigint;
@@ -23,7 +23,7 @@
 	});
 </script>
 
-<span class:text-success-primary={formatPositiveAmount && amount > ZERO_BI}>
+<span class:text-success-primary={formatPositiveAmount && amount > ZERO}>
 	<data value={detailedValue}>
 		{displayValue}
 	</data>

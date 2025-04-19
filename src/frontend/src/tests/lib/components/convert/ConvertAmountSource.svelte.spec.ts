@@ -1,6 +1,6 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.svelte';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { TOKEN_INPUT_AMOUNT_EXCHANGE } from '$lib/constants/test-ids.constants';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import { TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY } from '$lib/stores/token-action-validation-errors.store';
@@ -145,7 +145,7 @@ describe('ConvertAmountSource', () => {
 
 		const { getByTestId } = render(ConvertAmountSource, {
 			props: testProps,
-			context: mockContext(ZERO_BI)
+			context: mockContext(ZERO)
 		});
 
 		await fireEvent.click(getByTestId(balanceTestId));

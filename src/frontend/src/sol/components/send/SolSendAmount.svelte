@@ -10,7 +10,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -18,11 +18,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal, isNetworkIdSOLTestnet } from '$lib/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
 
@@ -48,12 +44,12 @@
 				: SOLANA_TOKEN;
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
-		if (invalidAmount(Number(userAmount)) || userAmount === ZERO_BI) {
+		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
 			return new SolAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
 		if (nonNullish($sendBalance) && $sendTokenStandard === 'solana') {
-			const total = userAmount + ($fee ?? ZERO_BI);
+			const total = userAmount + ($fee ?? ZERO);
 
 			if (total > $sendBalance) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
@@ -62,11 +58,11 @@
 			return;
 		}
 
-		if (userAmount > ($sendBalance ?? ZERO_BI)) {
+		if (userAmount > ($sendBalance ?? ZERO)) {
 			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds);
 		}
 
-		const solBalance = $balancesStore?.[solanaNativeToken.id]?.data ?? ZERO_BI;
+		const solBalance = $balancesStore?.[solanaNativeToken.id]?.data ?? ZERO;
 		if (nonNullish($fee) && solBalance < $fee) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_solana_funds_to_cover_the_fees
@@ -108,7 +104,7 @@
 					error={nonNullish(amountError)}
 					balance={$sendBalance}
 					token={$sendToken}
-					fee={$fee ?? ZERO_BI}
+					fee={$fee ?? ZERO}
 				/>
 			{/if}
 		</svelte:fragment>

@@ -2,7 +2,7 @@ import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { EthereumFeeStoreData } from '$icp/stores/ethereum-fee.store';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Option } from '$lib/types/utils';
 import { formatToken } from '$lib/utils/format.utils';
@@ -24,7 +24,7 @@ export const assertCkETHMinWithdrawalAmount = ({
 }): IcAmountAssertionError | undefined => {
 	// We skip validation checks here for zero because it makes the UI/UX ungraceful.
 	// e.g. user enters 0. and an error gets displayed.
-	if (amount === ZERO_BI) {
+	if (amount === ZERO) {
 		return undefined;
 	}
 
@@ -38,9 +38,9 @@ export const assertCkETHMinWithdrawalAmount = ({
 	} = minterInfo;
 
 	// The `minimum_withdrawal_amount` is optional in the minter info because the team decided to make all fields optional for maintainability reasons. That's why we assume that it is most likely set.
-	const minWithdrawalAmount = fromNullable(minimum_withdrawal_amount) ?? ZERO_BI;
+	const minWithdrawalAmount = fromNullable(minimum_withdrawal_amount) ?? ZERO;
 
-	if ((amount ?? ZERO_BI) < minWithdrawalAmount) {
+	if ((amount ?? ZERO) < minWithdrawalAmount) {
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_cketh_amount, {
 				$amount: formatToken({
@@ -73,7 +73,7 @@ export const assertCkETHMinFee = ({
 }): IcAmountAssertionError | undefined => {
 	// We skip validation checks here for zero because it makes the UI/UX ungraceful.
 	// e.g. user enters 0. and an error gets displayed.
-	if (amount === ZERO_BI) {
+	if (amount === ZERO) {
 		return undefined;
 	}
 
@@ -99,10 +99,10 @@ export const assertCkETHBalanceEstimatedFee = ({
 	feeStoreData: EthereumFeeStoreData;
 	i18n: I18n;
 }): IcAmountAssertionError | undefined => {
-	const ethBalance = balance ?? ZERO_BI;
+	const ethBalance = balance ?? ZERO;
 
 	// We skip validation checks here for zero balance because it makes the UI/UX ungraceful if the balance is just not yet loaded.
-	if (ethBalance === ZERO_BI) {
+	if (ethBalance === ZERO) {
 		return undefined;
 	}
 
@@ -112,7 +112,7 @@ export const assertCkETHBalanceEstimatedFee = ({
 
 	const { decimals, symbol } = tokenCkEth;
 
-	const estimatedFee = feeStoreData?.maxTransactionFee ?? ZERO_BI;
+	const estimatedFee = feeStoreData?.maxTransactionFee ?? ZERO;
 
 	if (estimatedFee > ethBalance) {
 		return new IcAmountAssertionError(

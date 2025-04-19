@@ -5,18 +5,12 @@
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
-	import {
-		ETHEREUM_FEE_CONTEXT_KEY,
-		type EthereumFeeContext
-	} from '$icp/stores/ethereum-fee.store';
+	import { ETHEREUM_FEE_CONTEXT_KEY, type EthereumFeeContext } from '$icp/stores/ethereum-fee.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 	import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
-	import {
-		isConvertCkErc20ToErc20,
-		isConvertCkEthToEth
-	} from '$icp-eth/utils/cketh-transactions.utils';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { isConvertCkErc20ToErc20, isConvertCkEthToEth } from '$icp-eth/utils/cketh-transactions.utils';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
@@ -53,7 +47,7 @@
 	// See https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
 	let maxTransactionFeePlusLedgerApproveCkEth: bigint | undefined = undefined;
 	$: maxTransactionFeePlusLedgerApproveCkEth = nonNullish(maxTransactionFeeCkEth)
-		? maxTransactionFeeCkEth + (tokenCkEth?.fee ?? ZERO_BI)
+		? maxTransactionFeeCkEth + (tokenCkEth?.fee ?? ZERO)
 		: undefined;
 
 	let maxTransactionFee: bigint | undefined = undefined;

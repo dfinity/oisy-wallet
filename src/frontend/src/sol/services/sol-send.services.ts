@@ -1,4 +1,4 @@
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
@@ -311,7 +311,7 @@ export const sendSol = async ({
 	progress(ProgressStepsSendSol.SIGN);
 
 	const { signedTransaction, signature } = await signTransaction(
-		prioritizationFee > ZERO_BI ? transactionMessageWithComputeUnitPrice : transactionMessage
+		prioritizationFee > ZERO ? transactionMessageWithComputeUnitPrice : transactionMessage
 	);
 
 	progress(ProgressStepsSendSol.SEND);

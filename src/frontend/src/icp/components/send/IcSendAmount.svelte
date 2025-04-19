@@ -4,10 +4,7 @@
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import {
-		ETHEREUM_FEE_CONTEXT_KEY,
-		type EthereumFeeContext
-	} from '$icp/stores/ethereum-fee.store';
+	import { ETHEREUM_FEE_CONTEXT_KEY, type EthereumFeeContext } from '$icp/stores/ethereum-fee.store';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import type { OptionIcToken } from '$icp/types/ic-token';
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
@@ -21,7 +18,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { balance } from '$lib/derived/balances.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -88,9 +85,9 @@
 		}
 
 		const assertBalance = (): IcAmountAssertionError | undefined => {
-			const total = userAmount + (fee ?? ZERO_BI);
+			const total = userAmount + (fee ?? ZERO);
 
-			if (total > ($balance ?? ZERO_BI)) {
+			if (total > ($balance ?? ZERO)) {
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
 
@@ -158,7 +155,7 @@
 					error={nonNullish(amountError)}
 					balance={$sendBalance}
 					token={$sendToken}
-					fee={fee ?? ZERO_BI}
+					fee={fee ?? ZERO}
 				/>
 			{/if}
 		</svelte:fragment>

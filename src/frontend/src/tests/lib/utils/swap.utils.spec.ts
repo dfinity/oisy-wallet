@@ -2,7 +2,7 @@ import type { SwapAmountsTxReply } from '$declarations/kong_backend/kong_backend
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
@@ -14,7 +14,7 @@ import { mockTokens } from '$tests/mocks/tokens.mock';
 
 describe('swap utils', () => {
 	const ICP_LP_FEE = 4271n;
-	const ICP_GAS_FEE = ZERO_BI;
+	const ICP_GAS_FEE = ZERO;
 
 	const ETH_LP_FEE = 4267n;
 	const ETH_GAS_FEE = 10000n;

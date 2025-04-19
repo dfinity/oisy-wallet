@@ -13,7 +13,7 @@ import {
 	getUserInfo as getUserInfoApi,
 	setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
-import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
+import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
@@ -76,7 +76,7 @@ const queryRewards = async (params: {
 
 	return {
 		rewards: nonNullish(awards) ? awards.map(mapRewardsInfo) : [],
-		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? ZERO_BI
+		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? ZERO
 	};
 };
 
@@ -109,7 +109,7 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 		});
 	}
 
-	return { rewards: [], lastTimestamp: ZERO_BI };
+	return { rewards: [], lastTimestamp: ZERO };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
@@ -337,9 +337,9 @@ export const getUserRewardsTokenAmounts = async ({
 	amountOfRewards: number;
 }> => {
 	const initialRewards = {
-		ckBtcReward: ZERO_BI,
-		ckUsdcReward: ZERO_BI,
-		icpReward: ZERO_BI,
+		ckBtcReward: ZERO,
+		ckUsdcReward: ZERO,
+		icpReward: ZERO,
 		amountOfRewards: 0
 	};
 

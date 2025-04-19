@@ -8,11 +8,10 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import RewardEarningsCard from '$lib/components/rewards/RewardEarningsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -28,7 +27,7 @@
 
 	let ckBtcToken: IcToken | undefined;
 	$: ckBtcToken = findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens });
-	let ckBtcReward: bigint = ZERO_BI;
+	let ckBtcReward: bigint = ZERO;
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
 		? (calculateTokenUsdAmount({
@@ -40,7 +39,7 @@
 
 	let ckUsdcToken: IcToken | undefined;
 	$: ckUsdcToken = findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $tokens });
-	let ckUsdcReward: bigint = ZERO_BI;
+	let ckUsdcReward: bigint = ZERO;
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
 		? (calculateTokenUsdAmount({
@@ -50,7 +49,7 @@
 			}) ?? 0)
 		: 0;
 
-	let icpReward: bigint = ZERO_BI;
+	let icpReward: bigint = ZERO;
 	let icpRewardUsd: number;
 	$: icpRewardUsd =
 		calculateTokenUsdAmount({
