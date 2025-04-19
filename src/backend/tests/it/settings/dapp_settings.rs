@@ -432,6 +432,6 @@ fn test_add_user_hidden_dapp_id_does_not_allow_to_add_too_many_ids() {
             .dapp_carousel
             .hidden_dapp_ids
             .len(),
-        100
+        MAX_DAPP_ID_LIST_LENGTH
     );
 }
