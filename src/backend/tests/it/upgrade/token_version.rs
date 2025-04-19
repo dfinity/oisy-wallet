@@ -47,7 +47,7 @@ fn test_upgrade_user_token() {
     // Upgrade canister with new wasm
     pic_setup
         .upgrade_with_wasm(&BACKEND_V0_0_19_WASM_PATH.to_string(), None)
-        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {e}"));
 
     // Get the list of token and check that it still contains the one we added before upgrade
     let results = pic_setup.update::<Vec<UserTokenV0_0_19>>(caller, "list_user_tokens", ());
@@ -84,7 +84,7 @@ fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgr
     // Upgrade canister with new wasm
     pic_setup
         .upgrade_with_wasm(&BACKEND_V0_0_19_WASM_PATH.to_string(), None)
-        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {e}"));
 
     // Add a user token
     let caller = Principal::from_text(CALLER).unwrap();
@@ -92,7 +92,7 @@ fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgr
     let mut token = POST_UPGRADE_TOKEN.clone();
     // The version number should be ignored but we can check that.
     for _ in 0..options.premature_increments {
-        token = token.clone_with_incremented_version();
+        token = token.with_incremented_version();
     }
 
     let result = pic_setup.update::<()>(caller, "add_user_token", token);
@@ -104,7 +104,7 @@ fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgr
     let results = pic_setup.update::<Vec<UserTokenV0_0_19>>(caller, "list_user_tokens", ());
 
     let expected_tokens: Vec<UserTokenV0_0_19> =
-        vec![POST_UPGRADE_TOKEN.clone_with_incremented_version()];
+        vec![POST_UPGRADE_TOKEN.with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -130,7 +130,7 @@ fn test_update_user_token_after_upgrade() {
     // Upgrade canister with new wasm
     pic_setup
         .upgrade_latest_wasm(None)
-        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {e}"));
 
     // Get the list of token and check that it still contains the one we added before upgrade
     let results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
@@ -149,7 +149,7 @@ fn test_update_user_token_after_upgrade() {
 
     let updated_results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.with_incremented_version()];
 
     assert!(updated_results.is_ok());
 

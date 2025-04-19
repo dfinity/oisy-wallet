@@ -8,14 +8,9 @@
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
 	export let totalFee: bigint | undefined;
+	export let destinationTokenFee: bigint | undefined = undefined;
 	export let minFee: bigint | undefined = undefined;
 	export let ethereumEstimateFee: bigint | undefined = undefined;
-	export let insufficientFunds: boolean;
-	export let insufficientFundsForFee: boolean;
-	export let amountLessThanLedgerFee: boolean | undefined = undefined;
-	export let minimumAmountNotReached: boolean | undefined = undefined;
-	export let unknownMinimumAmount: boolean | undefined = undefined;
-	export let minterInfoNotCertified: boolean | undefined = undefined;
 	export let exchangeValueUnit: DisplayUnit = 'usd';
 
 	let inputUnit: DisplayUnit;
@@ -26,12 +21,6 @@
 	<div class="mb-2">
 		<ConvertAmountSource
 			bind:sendAmount
-			bind:insufficientFunds
-			bind:insufficientFundsForFee
-			bind:amountLessThanLedgerFee
-			bind:minimumAmountNotReached
-			bind:unknownMinimumAmount
-			bind:minterInfoNotCertified
 			bind:exchangeValueUnit
 			{inputUnit}
 			{totalFee}
@@ -46,5 +35,11 @@
 		<IconMoveDown />
 	</div>
 
-	<ConvertAmountDestination bind:receiveAmount bind:exchangeValueUnit {sendAmount} {inputUnit} />
+	<ConvertAmountDestination
+		bind:receiveAmount
+		bind:exchangeValueUnit
+		{sendAmount}
+		{destinationTokenFee}
+		{inputUnit}
+	/>
 </div>

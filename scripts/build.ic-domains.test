@@ -13,14 +13,13 @@ dfx_networks() {
 # Prints the Oisy domain name for every network.
 # - The URL is the one in .well-known/ic-domains, used by the Internet Computer.
 dfx_network_domains() {
-  dfx_networks | while read i; do dfx build frontend --network "$i" >/dev/null 2>/dev/null && cat build/.well-known/ic-domains && echo " $i"; done
+  dfx_networks | while read -r i; do dfx build frontend --network "$i" >/dev/null 2>/dev/null && cat build/.well-known/ic-domains && echo " $i"; done
 }
 
 (
   echo Checking domains for all known networks...
-  actual="$(dfx_networks)"
   EXPECTED_DOMAINS="$0.expected"
-  ACTUAL_DOMAINS="$(mktemp $0.actual.XXXXXXXXXX)"
+  ACTUAL_DOMAINS="$(mktemp "$0.actual.XXXXXXXXXX")"
   dfx_network_domains >"$ACTUAL_DOMAINS"
   if diff --ignore-all-space --ignore-blank-lines <(sort <"$EXPECTED_DOMAINS") <(sort <"$ACTUAL_DOMAINS"); then
     echo OK: ic-domains

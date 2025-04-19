@@ -1,16 +1,17 @@
+import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const APP_VERSION = VITE_APP_VERSION;
 
 export const MODE = VITE_DFX_NETWORK;
 export const LOCAL = MODE === 'local';
-export const STAGING = MODE === 'staging' || MODE.startsWith('test_fe_') || MODE === 'audit';
+export const TEST_FE = MODE.startsWith('test_fe_');
+export const STAGING = MODE === 'staging' || TEST_FE || MODE === 'audit' || MODE === 'e2e';
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
-export const TEST = JSON.parse(import.meta.env.TEST ?? false) === true;
+export const TEST = parseBoolEnvVar(import.meta.env.TEST);
 
 const MAINNET_DOMAIN = 'icp0.io';
 
@@ -22,7 +23,7 @@ export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 
 export const INTERNET_IDENTITY_ORIGIN = LOCAL
 	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-	: 'https://identity.ic0.app';
+	: 'https://identity.internetcomputer.org';
 
 export const POUH_ISSUER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
@@ -119,7 +120,7 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_SECOND * 60n;
 // Just a value that looks good visually.
 export const EIGHT_DECIMALS = 8;
 
-export const ZERO = BigNumber.from(0n);
+export const ZERO_BI = 0n;
 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
@@ -134,3 +135,16 @@ export const VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
 
 // User Snapshot
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1000; // 5 minutes in milliseconds
+
+// Fallback
+export const FALLBACK_TIMEOUT = 10000;
+
+// Git
+export const GIT_COMMIT_HASH = VITE_GIT_COMMIT_HASH;
+export const GIT_BRANCH_NAME = VITE_GIT_BRANCH_NAME;
+
+// Threshold
+export const FAILURE_THRESHOLD = 3;
+
+// Micro transaction
+export const MICRO_TRANSACTION_USD_THRESHOLD = 0.01;

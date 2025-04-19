@@ -56,15 +56,15 @@ if [ ! -d $BITCOIN_DIR ]; then
   case "$OS_TYPE" in
   linux)
     echo "Downloading Bitcoin Core $BITCOIN_CORE_VERSION for Linux..."
-    curl -O $BITCOIN_URL/bitcoin-core-$BITCOIN_CORE_VERSION/bitcoin-$BITCOIN_CORE_VERSION-x86_64-linux-gnu.tar.gz
-    tar -xzf bitcoin-$BITCOIN_CORE_VERSION-x86_64-linux-gnu.tar.gz
-    mv bitcoin-$BITCOIN_CORE_VERSION $BITCOIN_DIR
+    curl -O "$BITCOIN_URL/bitcoin-core-$BITCOIN_CORE_VERSION/bitcoin-$BITCOIN_CORE_VERSION-x86_64-linux-gnu.tar.gz"
+    tar -xzf "bitcoin-$BITCOIN_CORE_VERSION-x86_64-linux-gnu.tar.gz"
+    mv "bitcoin-$BITCOIN_CORE_VERSION" "$BITCOIN_DIR"
     ;;
   darwin)
     echo "Downloading Bitcoin Core $BITCOIN_CORE_VERSION for macOS..."
-    curl -O $BITCOIN_URL/bitcoin-core-$BITCOIN_CORE_VERSION/bitcoin-$BITCOIN_CORE_VERSION-$(uname -m)-apple-darwin.tar.gz
-    tar -xzf bitcoin-$BITCOIN_CORE_VERSION-$(uname -m)-apple-darwin.tar.gz
-    mv bitcoin-$BITCOIN_CORE_VERSION $BITCOIN_DIR
+    curl -O "$BITCOIN_URL/bitcoin-core-$BITCOIN_CORE_VERSION/bitcoin-$BITCOIN_CORE_VERSION-$(uname -m)-apple-darwin.tar.gz"
+    tar -xzf "bitcoin-$BITCOIN_CORE_VERSION-$(uname -m)-apple-darwin.tar.gz"
+    mv "bitcoin-$BITCOIN_CORE_VERSION" "$BITCOIN_DIR"
     # Reference:
     if [ "$(uname -m)" = "arm64" ]; then
       codesign -s - ./$BITCOIN_DIR/bin/bitcoind

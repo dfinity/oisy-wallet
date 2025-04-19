@@ -6,9 +6,10 @@ import {
 	isTokenCkErc20Ledger,
 	isTokenCkEthLedger
 } from '$icp/utils/ic-send.utils';
-import { ZERO } from '$lib/constants/app.constants';
-import type { ConvertAmountErrorType } from '$lib/types/convert';
+import { ZERO_BI } from '$lib/constants/app.constants';
+import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
+import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
 import {
 	assertAmount,
@@ -20,7 +21,6 @@ import {
 import { formatToken } from '$lib/utils/format.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const validateUserAmount = ({
 	userAmount,
@@ -32,15 +32,15 @@ export const validateUserAmount = ({
 	minterInfo,
 	isSwapFlow = false
 }: {
-	userAmount: BigNumber;
+	userAmount: bigint;
 	token: Token;
-	balance?: BigNumber;
-	balanceForFee?: BigNumber;
+	balance?: Balance;
+	balanceForFee?: Balance;
 	fee?: bigint;
 	ethereumEstimateFee?: bigint;
 	minterInfo?: Option<CkBtcMinterInfoData | CkEthMinterInfoData>;
 	isSwapFlow?: boolean;
-}): ConvertAmountErrorType => {
+}): TokenActionErrorType => {
 	// We should align balance and userAmount to avoid issues caused by comparing formatted and unformatted BN
 	const parsedSendBalance = nonNullish(balance)
 		? parseToken({
@@ -51,7 +51,7 @@ export const validateUserAmount = ({
 				}),
 				unitName: token.decimals
 			})
-		: ZERO;
+		: ZERO_BI;
 
 	// if the function called in the swap flow, we only need to check the basic assertAmount condition
 	// if convert or send - we identify token type and check some network-specific conditions
@@ -67,7 +67,7 @@ export const validateUserAmount = ({
 		return assertErc20Amount({
 			userAmount,
 			balance: parsedSendBalance,
-			balanceForFee: balanceForFee ?? ZERO,
+			balanceForFee: balanceForFee ?? ZERO_BI,
 			fee
 		});
 	}
@@ -94,7 +94,7 @@ export const validateUserAmount = ({
 		return assertCkErc20Amount({
 			userAmount,
 			balance: parsedSendBalance,
-			balanceForFee: balanceForFee ?? ZERO,
+			balanceForFee: balanceForFee ?? ZERO_BI,
 			ethereumEstimateFee,
 			fee
 		});

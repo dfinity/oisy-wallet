@@ -15,6 +15,7 @@ import { parseSolAddress } from '$lib/validation/address.validation';
 import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { initSolWalletWorker } from '$sol/services/worker.sol-wallet.services';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -31,13 +32,13 @@ describe('SolLoaderWallets', () => {
 		solAddressTestnetStore.reset();
 		solAddressDevnetStore.reset();
 		solAddressMainnetStore.reset();
-		testnetsStore.reset({ key: 'testnets' });
+		setupTestnetsStore('reset');
 
 		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 	});
 
 	it('should not initialize wallet workers when no addresses are available', () => {
-		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+		setupTestnetsStore('enabled');
 
 		render(SolLoaderWallets);
 
@@ -50,7 +51,7 @@ describe('SolLoaderWallets', () => {
 		const testnetAddress = parseSolAddress('testnet-address');
 		const mainnetAddress = parseSolAddress('mainnet-address');
 
-		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+		setupTestnetsStore('enabled');
 		solAddressTestnetStore.set({ data: testnetAddress, certified: true });
 		solAddressMainnetStore.set({ data: mainnetAddress, certified: true });
 
@@ -67,7 +68,7 @@ describe('SolLoaderWallets', () => {
 
 	it('should update wallet workers when addresses change', async () => {
 		const devnetAddress = parseSolAddress('devnet-address');
-		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+				setupTestnetsStore('enabled');
 
 		const { rerender } = render(SolLoaderWallets);
 
@@ -85,7 +86,7 @@ describe('SolLoaderWallets', () => {
 	});
 
 	it('should handle all networks having addresses', () => {
-		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+		setupTestnetsStore('enabled');
 		solAddressLocalnetStore.set({ data: parseSolAddress('local-address'), certified: true });
 		solAddressTestnetStore.set({ data: parseSolAddress('testnet-address'), certified: true });
 		solAddressDevnetStore.set({ data: parseSolAddress('devnet-address'), certified: true });
@@ -105,7 +106,7 @@ describe('SolLoaderWallets', () => {
 
 	it('should include local network token when LOCAL is true', () => {
 		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
-		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+		setupTestnetsStore('enabled');
 
 		render(SolLoaderWallets);
 

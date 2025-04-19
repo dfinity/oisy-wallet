@@ -4,19 +4,17 @@ set -euxo pipefail
 dfx canister create --all
 dfx deploy backend
 dfx deploy signer
-
-mkdir -p ./target/ic
-
-./scripts/download.icp.sh
 dfx deploy icp_ledger
 dfx deploy icp_index
 
 ./scripts/download.ckbtc.sh
 ./scripts/deploy.ckbtc.sh
 
-./scripts/download.cketh.sh
-./scripts/deploy.cketh.sh
-./scripts/deploy.ckerc20.sh
+dfx deploy cketh_minter
+dfx deploy cketh_ledger
+dfx deploy cketh_index
+dfx deploy ckusdc_ledger
+dfx deploy ckusdc_index
 
 dfx deploy kong_backend
 

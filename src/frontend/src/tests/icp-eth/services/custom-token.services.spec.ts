@@ -3,6 +3,7 @@ import { autoLoadCustomToken, setCustomToken } from '$icp-eth/services/custom-to
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { BackendCanister } from '$lib/canisters/backend.canister';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -21,9 +22,6 @@ describe('custom-token.services', () => {
 	const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 
 	let spyToastsError: MockInstance;
-
-	// we mock console.error just to avoid unnecessary logs while running the tests
-	vi.spyOn(console, 'error').mockImplementation(() => {});
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -123,7 +121,7 @@ describe('custom-token.services', () => {
 
 					await assertSetCustomToken({
 						customTokens,
-						expectedVersion: [customTokens[0].version ?? 0n],
+						expectedVersion: [customTokens[0].version ?? ZERO_BI],
 						indexCanisterId
 					});
 				}

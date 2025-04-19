@@ -6,6 +6,12 @@ import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 
+// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
+});
+
 describe('IcTransactions', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -16,7 +22,7 @@ describe('IcTransactions', () => {
 		icTransactionsStore.reset(ICP_TOKEN_ID);
 	});
 
-	it('should render no transactions placeholder', () => {
+	it('should render no transactions placeholder when the transactions are empty', () => {
 		icTransactionsStore.append({
 			tokenId: ICP_TOKEN_ID,
 			transactions: []
@@ -27,7 +33,7 @@ describe('IcTransactions', () => {
 		expect(getByTestId(ACTIVITY_TRANSACTIONS_PLACEHOLDER)).not.toBeNull();
 	});
 
-	it('should render no transactions placeholder', () => {
+	it('should render no transactions placeholder when the transactions are null', () => {
 		icTransactionsStore.nullify(ICP_TOKEN_ID);
 
 		const { getByTestId } = render(IcTransactions);

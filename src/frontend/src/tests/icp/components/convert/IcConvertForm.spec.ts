@@ -15,13 +15,21 @@ import {
 	initConvertContext,
 	type ConvertContext
 } from '$lib/stores/convert.store';
+import {
+	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
+	type TokenActionValidationErrorsContext
+} from '$lib/stores/token-action-validation-errors.store';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 
 describe('IcConvertForm', () => {
 	const mockContext = () =>
-		new Map<symbol, ConvertContext | BitcoinFeeContext | EthereumFeeContext>([
+		new Map<
+			symbol,
+			ConvertContext | BitcoinFeeContext | EthereumFeeContext | TokenActionValidationErrorsContext
+		>([
 			[ETHEREUM_FEE_CONTEXT_KEY, { store: initEthereumFeeStore() }],
 			[BITCOIN_FEE_CONTEXT_KEY, { store: initBitcoinFeeStore() }],
 			[
@@ -30,7 +38,8 @@ describe('IcConvertForm', () => {
 					sourceToken: mockValidIcCkToken,
 					destinationToken: ICP_TOKEN
 				})
-			]
+			],
+			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 
 	const props = {

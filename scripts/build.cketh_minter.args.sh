@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PRINCIPAL="$(dfx identity get-principal)"
 ARG_FILE="$(jq -re .canisters.cketh_minter.init_arg_file dfx.json)"
 
 mkdir -p "$(dirname "$ARG_FILE")"
+
+[[ "${CANISTER_ID_CKETH_LEDGER:-}" != "" ]] || {
+  echo "ERROR: cketh_ledger canister ID is not known."
+  echo "       Please create the cketh_ledger canister before deploying the minter:"
+  echo
+  echo "       dfx canister create cketh_ledger --network $DFX_NETWORK"
+  echo
+  echo "NOTE: There is an (expected) circular dependency between the ledger and minter."
+  echo "      To resolve this, both canister IDs need to be known before deploying either."
+  exit 1
+} >&2
 
 cat <<EOF >"$ARG_FILE"
 (variant {

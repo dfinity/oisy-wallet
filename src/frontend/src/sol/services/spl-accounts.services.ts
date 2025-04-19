@@ -1,3 +1,4 @@
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { checkIfAccountExists, loadTokenBalance } from '$sol/api/solana.api';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -8,7 +9,7 @@ import {
 	findAssociatedTokenPda,
 	getCreateAssociatedTokenInstructionAsync
 } from '@solana-program/token';
-import { address as solAddress, type TransactionSigner } from '@solana/web3.js';
+import { address as solAddress, type TransactionSigner } from '@solana/kit';
 
 export const calculateAssociatedTokenAddress = async ({
 	owner,
@@ -78,5 +79,5 @@ export const loadSplTokenBalance = async ({
 		network
 	});
 
-	return balance ?? 0n;
+	return balance ?? ZERO_BI;
 };

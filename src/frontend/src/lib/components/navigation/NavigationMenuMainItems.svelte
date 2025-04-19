@@ -3,23 +3,23 @@
 	import type { NavigationTarget, Page } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { REWARDS_ENABLED } from '$env/rewards.env.js';
+	import { REWARDS_ENABLED } from '$env/rewards.env';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
-	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
-	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_ITEM_ACTIVITY,
-		NAVIGATION_ITEM_AIRDROPS,
+		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_EXPLORER,
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
-	} from '$lib/constants/test-ids.constants.js';
-	import { networkId } from '$lib/derived/network.derived.js';
-	import { i18n } from '$lib/stores/i18n.store.js';
+	} from '$lib/constants/test-ids.constants';
+	import { networkId } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -28,7 +28,7 @@
 		isRouteTokens,
 		isRouteTransactions,
 		networkUrl
-	} from '$lib/utils/nav.utils.js';
+	} from '$lib/utils/nav.utils';
 
 	export let testIdPrefix: string | undefined = undefined;
 
@@ -91,7 +91,7 @@
 		})}
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		selected={isRouteRewards(pageData)}
-		testId={addTestIdPrefix(NAVIGATION_ITEM_AIRDROPS)}
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
 		tag={$i18n.core.text.new}
 		tagVariant="emphasis"
 	>
@@ -111,7 +111,7 @@
 	selected={isRouteDappExplorer(pageData)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
 >
-	<IconlyUfo />
+	<AnimatedIconUfo />
 	{$i18n.navigation.text.dapp_explorer}
 </NavigationItem>
 

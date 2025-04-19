@@ -3,16 +3,18 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { ADDRESS_BOOK_ENABLED } from '$env/address-book.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
+	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
+	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
-	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -20,11 +22,12 @@
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
-		NAVIGATION_MENU_VIP_BUTTON
+		NAVIGATION_MENU_VIP_BUTTON,
+		NAVIGATION_MENU_REFERRAL_BUTTON,
+		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalVipQrCode } from '$lib/derived/modal.derived';
-	import { isVipUser } from '$lib/services/reward-code.services';
+	import { isVipUser } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -72,16 +75,40 @@
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
 	colorStyle="tertiary-alt"
+	link={false}
 >
 	<IconUser size="24" slot="icon" />
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl" on:click={hidePopover}>
-	<div class="flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
+	<div class="max-w-68 flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
+			<Hr />
 		{/if}
+
+		{#if ADDRESS_BOOK_ENABLED}
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.address_book}
+				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
+				on:click={modalStore.openAddressBook}
+			>
+				<IconUserSquare size="20" />
+				{$i18n.navigation.text.address_book}
+			</ButtonMenu>
+
+			<Hr />
+		{/if}
+
+		<ButtonMenu
+			ariaLabel={$i18n.navigation.alt.refer_a_friend}
+			testId={NAVIGATION_MENU_REFERRAL_BUTTON}
+			on:click={modalStore.openReferralCode}
+		>
+			<IconShare size="20" />
+			{$i18n.navigation.text.refer_a_friend}
+		</ButtonMenu>
 
 		{#if isVip}
 			<ButtonMenu
@@ -93,6 +120,8 @@
 				{$i18n.navigation.text.vip_qr_code}
 			</ButtonMenu>
 		{/if}
+
+		<Hr />
 
 		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
 
@@ -126,7 +155,3 @@
 		</span>
 	</div>
 </Popover>
-
-{#if $modalVipQrCode}
-	<VipQrCodeModal />
-{/if}

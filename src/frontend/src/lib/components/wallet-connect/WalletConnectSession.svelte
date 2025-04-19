@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getSdkError } from '@walletconnect/utils';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { onDestroy } from 'svelte';
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
@@ -57,7 +57,7 @@
 		close();
 	};
 
-	let proposal: Option<Web3WalletTypes.SessionProposal>;
+	let proposal: Option<WalletKitTypes.SessionProposal>;
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -207,7 +207,7 @@
 			goToFirstStep();
 		});
 
-		listener.sessionRequest(async (sessionRequest: Web3WalletTypes.SessionRequest) => {
+		listener.sessionRequest(async (sessionRequest: WalletKitTypes.SessionRequest) => {
 			// Prevent race condition
 			if (isNullish(listener)) {
 				return;
@@ -309,7 +309,7 @@
 		callback,
 		toast
 	}: {
-		callback: ((proposal: Web3WalletTypes.SessionProposal) => Promise<void>) | undefined;
+		callback: ((proposal: WalletKitTypes.SessionProposal) => Promise<void>) | undefined;
 		toast?: () => void;
 	}) => {
 		if (isNullish(listener) || isNullish(callback)) {
@@ -354,10 +354,10 @@
 
 	onDestroy(() => walletConnectPaired.set(false));
 
-	const openWalletConnectAuth = async () => {
+	const openWalletConnectAuth = () => {
 		modalStore.openWalletConnectAuth();
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_COUNT_WALLET_CONNECT_MENU_OPEN
 		});
 	};

@@ -95,8 +95,8 @@
 			<p class="break-normal font-bold">{$i18n.signer.permissions.text.requested_permissions}</p>
 
 			<ul class="mt-2.5 flex list-none flex-col gap-1">
-				{#each scopes as scope}
-					{@const { icon, label } = listItems[scope.scope.method]}
+				{#each scopes as { scope: { method } } (method)}
+					{@const { icon, label } = listItems[method]}
 
 					<li class="flex items-center gap-2 break-normal pb-1.5">
 						<svelte:component this={icon} size="24" />

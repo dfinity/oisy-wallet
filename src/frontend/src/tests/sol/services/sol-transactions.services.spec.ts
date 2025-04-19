@@ -1,4 +1,5 @@
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import * as solanaApi from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
@@ -10,7 +11,7 @@ import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type {
 	SolMappedTransaction,
-	SolRpcTransactionRaw,
+	SolRpcTransaction,
 	SolSignature,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
@@ -50,8 +51,6 @@ describe('sol-transactions.services', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.resetAllMocks();
-		vi.resetAllMocks();
 
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
 		spyGetTransactions = vi.spyOn(solSignaturesServices, 'getSolTransactions');
@@ -62,15 +61,15 @@ describe('sol-transactions.services', () => {
 	describe('fetchSolTransactionsForSignature', () => {
 		const network: SolanaNetworkType = 'mainnet';
 
-		const mockTransactionDetail: SolRpcTransactionRaw = mockSolTransactionDetail;
+		const mockTransactionDetail: SolRpcTransaction = mockSolTransactionDetail;
 
-		const mockTransactionDetailOnlyInnerInstructions: SolRpcTransactionRaw = {
+		const mockTransactionDetailOnlyInnerInstructions: SolRpcTransaction = {
 			...mockTransactionDetail,
 			transaction: {
 				...mockTransactionDetail.transaction,
 				message: { ...mockTransactionDetail.transaction.message, instructions: [] }
 			}
-		};
+		} as SolRpcTransaction;
 
 		const mockSignature: SolSignature = {
 			...mockSolSignatureResponse(),
@@ -109,7 +108,7 @@ describe('sol-transactions.services', () => {
 		const expected: SolTransactionUi = {
 			id: mockSignature.signature,
 			signature: mockSignature.signature,
-			timestamp: mockTransactionDetail.blockTime ?? 0n,
+			timestamp: mockTransactionDetail.blockTime ?? ZERO_BI,
 			value: mockMappedTransaction.value,
 			from: mockSolAddress,
 			to: mockSolAddress2,
@@ -167,6 +166,7 @@ describe('sol-transactions.services', () => {
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(expectedResults);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(nInstructions);
+
 			mockAllInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
 					instruction: { ...instruction, programAddress: instruction.programId },
@@ -202,6 +202,7 @@ describe('sol-transactions.services', () => {
 			);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(innerInstructions.length);
+
 			innerInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
 					instruction: { ...instruction, programAddress: instruction.programId },
@@ -332,6 +333,7 @@ describe('sol-transactions.services', () => {
 			);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(nInstructions);
+
 			mockAllInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
 					instruction: { ...instruction, programAddress: instruction.programId },
@@ -419,11 +421,11 @@ describe('sol-transactions.services', () => {
 			});
 
 			const storeData = get(solTransactionsStore)?.[SOLANA_TOKEN_ID];
+
 			expect(storeData).toEqual(mockCertifiedTransactions);
 		});
 
 		it('should handle errors and reset store', async () => {
-			vi.spyOn(console, 'error').mockImplementationOnce(() => {});
 			const error = new Error('Failed to load transactions');
 			spyGetTransactions.mockRejectedValue(error);
 
@@ -434,7 +436,9 @@ describe('sol-transactions.services', () => {
 			});
 
 			expect(transactions).toEqual([]);
+
 			const storeData = get(solTransactionsStore)?.[SOLANA_TOKEN_ID];
+
 			expect(storeData).toBeNull();
 		});
 

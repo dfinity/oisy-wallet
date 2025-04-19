@@ -18,7 +18,7 @@ pub struct UserTokenV0_0_19 {
     pub version: Option<Version>,
 }
 
-/// Options for unusual add_user_token behaviour.
+/// Options for unusual `add_user_token` behaviour.
 #[derive(Default)]
 pub struct AddUserTokenAfterUpgradeOptions {
     /// The version number should be None but we can set it to Some(n) for a few small values to

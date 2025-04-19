@@ -5,7 +5,6 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { TokenId } from '$lib/types/token';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 export const syncWallet = ({
@@ -26,7 +25,7 @@ export const syncWallet = ({
 		balancesStore.set({
 			tokenId,
 			data: {
-				data: BigNumber.from(balance),
+				data: balance,
 				certified
 			}
 		});

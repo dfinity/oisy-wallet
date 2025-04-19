@@ -1,3 +1,4 @@
+import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -36,10 +37,15 @@ export interface Modal<T> {
 		| 'receive-bitcoin'
 		| 'about-why-oisy'
 		| 'vip-qr-code'
+		| 'referral-code'
+		| 'referral-state'
+		| 'address-book'
 		| 'dapp-details'
 		| 'vip-reward-state'
 		| 'reward-details'
-		| 'reward-state';
+		| 'reward-state'
+		| 'settings'
+		| 'auth-help';
 	data?: T;
 	id?: symbol;
 }
@@ -80,10 +86,16 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReceiveBitcoin: () => void;
 	openAboutWhyOisy: () => void;
 	openVipQrCode: () => void;
+	openReferralCode: () => void;
+	openAddressBook: () => void;
+	openReferralState: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
 	openVipRewardState: <D extends T>(data: D) => void;
 	openRewardDetails: <D extends T>(data: D) => void;
 	openRewardState: <D extends T>(data: D) => void;
+	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
+	openSettings: (data: SettingsModalType) => void;
+	openAuthHelp: (data: boolean) => void;
 	close: () => void;
 }
 
@@ -133,10 +145,16 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: setType('vip-qr-code'),
+		openReferralCode: setType('referral-code'),
+		openAddressBook: setType('address-book'),
+		openReferralState: setType('referral-state'),
 		openDappDetails: setTypeWithData('dapp-details'),
 		openVipRewardState: setTypeWithData('vip-reward-state'),
 		openRewardDetails: setTypeWithData('reward-details'),
 		openRewardState: setTypeWithData('reward-state'),
+		// todo: explicitly define type here as well
+		openSettings: <(data: SettingsModalType) => void>setTypeWithData('settings'),
+		openAuthHelp: <(data: boolean) => void>setTypeWithData('auth-help'),
 		close: () => set(null),
 		subscribe
 	};

@@ -1,7 +1,9 @@
 import type {
 	ClaimVipRewardResponse,
 	NewVipRewardResponse,
+	ReferrerInfo,
 	_SERVICE as RewardService,
+	SetReferrerResponse,
 	UserData,
 	UserSnapshot,
 	VipReward
@@ -47,6 +49,18 @@ export class RewardCanister extends Canister<RewardService> {
 		const { claim_vip_reward } = this.caller({ certified: true });
 
 		return claim_vip_reward(vipReward);
+	};
+
+	getReferrerInfo = ({ certified = true }: QueryParams): Promise<ReferrerInfo> => {
+		const { referrer_info } = this.caller({ certified });
+
+		return referrer_info();
+	};
+
+	setReferrer = (referralCode: number): Promise<SetReferrerResponse> => {
+		const { set_referrer } = this.caller({ certified: true });
+
+		return set_referrer(referralCode);
 	};
 
 	registerAirdropRecipient = (userSnapshot: UserSnapshot): Promise<void> => {
