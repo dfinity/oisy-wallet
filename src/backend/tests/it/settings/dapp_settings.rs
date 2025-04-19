@@ -1,13 +1,12 @@
-use candid::Principal;
-use shared::types::{
-    dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-    user_profile::{GetUserProfileError, UserProfile},
-    MAX_DAPP_ID_LIST_LENGTH,
-};
-
 use crate::utils::{
     mock::CALLER,
     pocketic::{setup, PicCanisterTrait},
+};
+use candid::Principal;
+use shared::types::dapp::MAX_DAPP_ID_LIST_LENGTH;
+use shared::types::{
+    dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
+    user_profile::{GetUserProfileError, UserProfile},
 };
 
 #[test]
