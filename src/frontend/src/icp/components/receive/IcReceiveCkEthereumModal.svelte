@@ -22,6 +22,7 @@
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { token } from '$lib/stores/token.store';
 	import type { Network } from '$lib/types/network';
 	import { closeModal } from '$lib/utils/modal.utils';
 
@@ -45,7 +46,12 @@
 	 */
 
 	let howToSteps: WizardSteps;
-	$: howToSteps = howToConvertWizardSteps({ i18n: $i18n, twinToken: $ckEthereumTwinToken });
+	// TODO: update this component to use Convert wizard
+	$: howToSteps = howToConvertWizardSteps({
+		i18n: $i18n,
+		sourceToken: $ckEthereumTwinToken.symbol,
+		destinationToken: $token?.symbol ?? ''
+	});
 
 	let steps: WizardSteps;
 	$: steps = [

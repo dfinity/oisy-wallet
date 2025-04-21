@@ -88,8 +88,7 @@ describe('Info', () => {
 			});
 		});
 
-		// TODO: unskip after Info components are migrated to the Convert wizard
-		it.skip('should not render bitcoin info if network is not enabled', async () => {
+		it('should not render bitcoin info if network is not enabled', async () => {
 			mockEnabledToken();
 			const { getByText } = render(Info);
 
@@ -104,8 +103,7 @@ describe('Info', () => {
 			});
 		});
 
-		// TODO: unskip after Info components are migrated to the Convert wizard
-		it.skip('should not render bitcoin info if page token is not set', async () => {
+		it('should not render bitcoin info if page token is not set', async () => {
 			mockEnabledToken(mockCkBtcToken);
 			const { getByText } = render(Info);
 

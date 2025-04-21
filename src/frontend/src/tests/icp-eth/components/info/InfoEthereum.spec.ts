@@ -12,8 +12,8 @@ vi.mock('ethers/providers', () => {
 
 describe('InfoEthereum', () => {
 	const props = {
-		ckTokenSymbol: mockValidIcCkToken.symbol,
-		twinToken: mockValidIcToken
+		sourceToken: mockValidIcToken,
+		destinationToken: mockValidIcCkToken
 	};
 
 	it('should render title correctly', () => {
