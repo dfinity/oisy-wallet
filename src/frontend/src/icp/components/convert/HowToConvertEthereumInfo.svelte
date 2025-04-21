@@ -23,14 +23,17 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let formCancelAction: 'back' | 'close' = 'back';
+	interface Props {
+		formCancelAction?: 'back' | 'close';
+	}
 
-	let ckErc20 = false;
-	$: ckErc20 = $tokenCkErc20Ledger;
-
-	const dispatch = createEventDispatcher();
+	let { formCancelAction = 'back' }: Props = $props();
 
 	const { sourceTokenBalance, sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+
+	const ckErc20 = $derived($tokenCkErc20Ledger);
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <ContentWithToolbar testId={HOW_TO_CONVERT_ETHEREUM_INFO}>
