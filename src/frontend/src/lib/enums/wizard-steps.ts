@@ -36,3 +36,8 @@ export enum WizardStepsHowToConvert {
 	INFO = 'Info',
 	ETH_QR_CODE = 'ETH QR Code'
 }
+
+export enum WizardStepsReceive {
+	RECEIVE = 'Receive',
+	QR_CODE = 'QR Code'
+}
