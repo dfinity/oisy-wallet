@@ -1,4 +1,5 @@
 import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
@@ -15,4 +16,15 @@ export const mockUserNetworks: UserNetworks = {
 	[ICP_NETWORK_ID]: { enabled: true, isTestnet: false },
 	[SOLANA_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
 	[SOLANA_DEVNET_NETWORK_ID]: { enabled: true, isTestnet: true }
+};
+
+export const mockUserNetworksComplete: UserNetworks = {
+	...SUPPORTED_NETWORKS.reduce<UserNetworks>(
+		(acc, { id, env }) => ({
+			...acc,
+			[id]: { enabled: true, isTestnet: env === 'testnet' }
+		}),
+		{}
+	),
+	...mockUserNetworks
 };
