@@ -17,9 +17,9 @@
 	import { HOW_TO_CONVERT_ETHEREUM_INFO } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -30,7 +30,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendBalance, sendTokenDecimals, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sourceTokenBalance, sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar testId={HOW_TO_CONVERT_ETHEREUM_INFO}>
@@ -119,11 +119,11 @@
 
 				<p class="mb-6">
 					{formatToken({
-						value: $sendBalance ?? ZERO_BI,
-						unitName: $sendTokenDecimals,
-						displayDecimals: $sendTokenDecimals
+						value: $sourceTokenBalance ?? ZERO_BI,
+						unitName: $sourceToken.decimals,
+						displayDecimals: $sourceToken.decimals
 					})}
-					{$sendToken.symbol}
+					{$sourceToken.symbol}
 				</p>
 			</Value>
 		</div>

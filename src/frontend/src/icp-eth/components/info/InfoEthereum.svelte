@@ -1,36 +1,21 @@
 <script lang="ts">
-	import { setContext } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
+	import { ethereumToken } from '$eth/derived/token.derived';
 	import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
+	import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 	import eth from '$icp-eth/assets/eth.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalHowToConvertToTwinTokenEth } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { Token } from '$lib/types/token';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let twinToken: Token;
-	export let ckTokenSymbol: string;
+	export let sourceToken: IcToken;
+	export let destinationToken: IcCkToken;
 
 	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth();
-
-	/**
-	 * Send modal context store
-	 */
-
-	const { sendToken, ...rest } = initSendContext({
-		sendPurpose:
-			twinToken.standard === 'erc20' ? 'convert-erc20-to-ckerc20' : 'convert-eth-to-cketh',
-		token: twinToken
-	});
-	setContext<SendContext>(SEND_CONTEXT_KEY, {
-		sendToken,
-		...rest
-	});
-
-	$: sendToken.set(twinToken);
 </script>
 
 <div class="pr-2">
@@ -38,38 +23,40 @@
 		<Logo
 			src={eth}
 			alt={replacePlaceholders($i18n.core.alt.logo, {
-				$name: twinToken.name
+				$name: sourceToken.name
 			})}
 		/>
 		<span class="w-[70%]"
 			>{replacePlaceholders($i18n.info.ethereum.title, {
-				$ckToken: ckTokenSymbol
+				$ckToken: destinationToken.symbol
 			})}</span
 		>
 	</h4>
 
 	<p class="mt-3 text-tertiary">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.description), {
-			$token: twinToken.symbol,
-			$ckToken: ckTokenSymbol,
-			$network: twinToken.network.name
+			$token: sourceToken.symbol,
+			$ckToken: destinationToken.symbol,
+			$network: sourceToken.network.name
 		})}
 	</p>
 
 	<p class="mt-3 text-tertiary">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.note), {
-			$token: twinToken.symbol,
-			$ckToken: ckTokenSymbol
+			$token: sourceToken.symbol,
+			$ckToken: destinationToken.symbol
 		})}
 	</p>
 
 	<button class="primary mt-6" disabled={$isBusy} on:click={openReceive}>
 		{replacePlaceholders($i18n.info.ethereum.how_to, {
-			$ckToken: ckTokenSymbol
+			$ckToken: destinationToken.symbol
 		})}</button
 	>
 </div>
 
-{#if $modalHowToConvertToTwinTokenEth}
-	<HowToConvertEthereumModal />
+{#if $modalHowToConvertToTwinTokenEth && nonNullish(sourceToken) && nonNullish(destinationToken)}
+	<FeeStoreContext token={$ethereumToken}>
+		<HowToConvertEthereumModal {sourceToken} {destinationToken} />
+	</FeeStoreContext>
 {/if}
