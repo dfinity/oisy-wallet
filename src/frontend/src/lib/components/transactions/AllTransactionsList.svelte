@@ -89,9 +89,9 @@
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
-		{#each Object.entries(groupedTransactions) as [date, transactions], index (date)}
+		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 			<TransactionsDateGroup
-				{date}
+				{formattedDate}
 				{transactions}
 				testId={`all-transactions-date-group-${index}`}
 			/>
