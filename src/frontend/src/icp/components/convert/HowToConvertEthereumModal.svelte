@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
 	import HowToConvertEthereumWizardSteps from '$icp/components/convert/HowToConvertEthereumWizardSteps.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
@@ -12,22 +13,26 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let sourceToken: Token;
-	export let destinationToken: Token;
+	interface Props {
+		sourceToken: Token;
+		destinationToken: Token;
+	}
 
-	let sendAmount: OptionAmount = undefined;
-	let receiveAmount: number | undefined = undefined;
-	let convertProgressStep: string = ProgressStepsConvert.INITIALIZATION;
+	let { sourceToken, destinationToken }: Props = $props();
 
-	let steps: WizardSteps;
-	$: steps = howToConvertWizardSteps({
-		i18n: $i18n,
-		sourceToken: sourceToken.symbol,
-		destinationToken: destinationToken.symbol
-	});
+	let sendAmount: OptionAmount = $state();
+	let receiveAmount: number | undefined = $state();
+	let convertProgressStep: string = $state(ProgressStepsConvert.INITIALIZATION);
+	let currentStep: WizardStep | undefined = $state();
+	let modal: WizardModal | undefined = $state();
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	const steps: WizardSteps = $derived(
+		howToConvertWizardSteps({
+			i18n: $i18n,
+			sourceToken: sourceToken.symbol,
+			destinationToken: destinationToken.symbol
+		})
+	);
 
 	const close = () =>
 		closeModal(() => {
@@ -39,12 +44,15 @@
 			currentStep = undefined;
 		});
 
-	const goToStep = (stepName: WizardStepsHowToConvert | WizardStepsConvert) =>
-		goToWizardStep({
-			modal,
-			steps,
-			stepName
-		});
+	const goToStep = (stepName: WizardStepsHowToConvert | WizardStepsConvert) => {
+		if (nonNullish(modal)) {
+			goToWizardStep({
+				modal,
+				steps,
+				stepName
+			});
+		}
+	};
 </script>
 
 <ConvertContexts {sourceToken} {destinationToken}>
@@ -66,15 +74,15 @@
 			on:icBack={() =>
 				currentStep?.name === WizardStepsConvert.CONVERT
 					? goToStep(WizardStepsHowToConvert.INFO)
-					: modal.back()}
-			on:icNext={modal.next}
+					: modal?.back()}
+			on:icNext={modal?.next}
 			on:icClose={close}
 		>
 			<HowToConvertEthereumWizardSteps
 				{currentStep}
 				on:icQRCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
 				on:icConvert={() => goToStep(WizardStepsConvert.CONVERT)}
-				on:icBack={modal.back}
+				on:icBack={modal?.back}
 			/>
 		</EthConvertTokenWizard>
 	</WizardModal>
