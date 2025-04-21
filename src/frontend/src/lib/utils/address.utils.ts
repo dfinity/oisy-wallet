@@ -6,7 +6,7 @@ import { isNullish } from '@dfinity/utils';
 
 export const mapAddress = <T extends Address>(
 	$addressStore: StorageAddressData<T>
-): OptionAddress<Address> => mapCertifiedData($addressStore);
+): OptionAddress<T> => mapCertifiedData($addressStore);
 
 export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
 	if (isNullish(address)) {
