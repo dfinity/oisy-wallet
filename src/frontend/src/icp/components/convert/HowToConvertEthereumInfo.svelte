@@ -24,14 +24,14 @@
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		formCancelAction: 'back' | 'close';
+		formCancelAction?: 'back' | 'close';
 	}
 
 	let { formCancelAction = 'back' }: Props = $props();
 
 	const { sourceTokenBalance, sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	let ckErc20 = $state($tokenCkErc20Ledger);
+	const ckErc20 = $derived($tokenCkErc20Ledger);
 
 	const dispatch = createEventDispatcher();
 </script>
