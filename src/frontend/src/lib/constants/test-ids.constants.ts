@@ -88,6 +88,12 @@ export const TOKEN_MENU_ETH = 'token-menu-eth';
 export const TOKEN_MENU_ETH_BUTTON = 'token-menu-eth-button';
 export const TOKEN_MENU_BTC = 'token-menu-btc';
 export const TOKEN_MENU_BTC_BUTTON = 'token-menu-btc-button';
+
+export const MANAGE_TOKENS_BUTTON = 'manage-tokens-button';
+
+export const IMPORT_TOKENS_BUTTON = 'import-tokens-button';
+export const IMPORT_TOKENS_NETWORK_SELECTOR = 'import-tokens-network-selector';
+
 export const TOKEN_MENU_SOL = 'token-menu-sol';
 export const TOKEN_MENU_SOL_BUTTON = 'token-menu-sol-button';
 export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';

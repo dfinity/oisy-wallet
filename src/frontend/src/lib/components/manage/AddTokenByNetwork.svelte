@@ -94,7 +94,7 @@
 			<Value ref="network" element="div">
 				<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
 
-				<div id="network" class="network mt-1 pt-0.5">
+				<div data-tid="import-token-network-selector" id="network" class="network mt-1 pt-0.5">
 					<Dropdown name="network" bind:selectedValue={networkName}>
 						<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
 							>{$i18n.tokens.manage.placeholder.select_network}</option
