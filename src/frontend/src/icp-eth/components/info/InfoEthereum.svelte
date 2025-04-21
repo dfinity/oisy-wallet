@@ -12,8 +12,12 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let sourceToken: IcToken;
-	export let destinationToken: IcCkToken;
+	interface Props {
+		sourceToken: IcToken;
+		destinationToken: IcCkToken;
+	}
+
+	let { sourceToken, destinationToken }: Props = $props();
 
 	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth();
 </script>
@@ -48,7 +52,7 @@
 		})}
 	</p>
 
-	<button class="primary mt-6" disabled={$isBusy} on:click={openReceive}>
+	<button class="primary mt-6" disabled={$isBusy} onclick={openReceive}>
 		{replacePlaceholders($i18n.info.ethereum.how_to, {
 			$ckToken: destinationToken.symbol
 		})}</button
