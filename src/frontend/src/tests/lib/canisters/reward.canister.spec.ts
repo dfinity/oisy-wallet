@@ -30,9 +30,100 @@ describe('reward.canister', () => {
 	};
 
 	describe('getUserInfo', () => {
-		it('returns true if user is vip', async () => {
+		describe('VIP', () => {
+			it('returns true if user is vip', async () => {
+				const mockedUserData: UserData = {
+					is_vip: [true],
+					superpowers: [['vip']],
+					airdrops: [],
+					usage_awards: [],
+					last_snapshot_timestamp: [BigInt(Date.now())],
+					sprinkles: []
+				};
+				service.user_info.mockResolvedValue(mockedUserData);
+
+				const { getUserInfo } = await createRewardCanister({
+					serviceOverride: service
+				});
+
+				const userData = await getUserInfo(queryParams);
+
+				expect(service.user_info).toHaveBeenCalledWith();
+				expect(userData.superpowers[0]?.length).toBe(1);
+				expect(fromNullable(userData.superpowers)?.includes('vip') === true).toBeTruthy();
+			});
+
+			it('returns false if user is not vip', async () => {
+				const mockedUserData: UserData = {
+					is_vip: [false],
+					superpowers: [],
+					airdrops: [],
+					usage_awards: [],
+					last_snapshot_timestamp: [BigInt(Date.now())],
+					sprinkles: []
+				};
+				service.user_info.mockResolvedValue(mockedUserData);
+
+				const { getUserInfo } = await createRewardCanister({
+					serviceOverride: service
+				});
+
+				const userData = await getUserInfo(queryParams);
+
+				expect(userData.superpowers.length).toBe(0);
+				expect(fromNullable(userData.superpowers)?.includes('vip') === true).toBeFalsy();
+			});
+		});
+
+		describe('Gold', () => {
+			it('returns true if user is gold user', async () => {
+				const mockedUserData: UserData = {
+					is_vip: [true],
+					superpowers: [['gold']],
+					airdrops: [],
+					usage_awards: [],
+					last_snapshot_timestamp: [BigInt(Date.now())],
+					sprinkles: []
+				};
+				service.user_info.mockResolvedValue(mockedUserData);
+
+				const { getUserInfo } = await createRewardCanister({
+					serviceOverride: service
+				});
+
+				const userData = await getUserInfo(queryParams);
+
+				expect(service.user_info).toHaveBeenCalledWith();
+				expect(userData.superpowers[0]?.length).toBe(1);
+				expect(fromNullable(userData.superpowers)?.includes('gold') === true).toBeTruthy();
+			});
+
+			it('returns false if user is not gold user', async () => {
+				const mockedUserData: UserData = {
+					is_vip: [false],
+					superpowers: [],
+					airdrops: [],
+					usage_awards: [],
+					last_snapshot_timestamp: [BigInt(Date.now())],
+					sprinkles: []
+				};
+				service.user_info.mockResolvedValue(mockedUserData);
+
+				const { getUserInfo } = await createRewardCanister({
+					serviceOverride: service
+				});
+
+				const userData = await getUserInfo(queryParams);
+
+				expect(userData.superpowers.length).toBe(0);
+				expect(fromNullable(userData.superpowers)?.includes('gold') === true).toBeFalsy();
+			});
+		});
+
+		it('returns true if user is vip and gold user', async () => {
 			const mockedUserData: UserData = {
 				is_vip: [true],
+				superpowers: [['vip', 'gold']],
 				airdrops: [],
 				usage_awards: [],
 				last_snapshot_timestamp: [BigInt(Date.now())],
@@ -47,28 +138,9 @@ describe('reward.canister', () => {
 			const userData = await getUserInfo(queryParams);
 
 			expect(service.user_info).toHaveBeenCalledWith();
-			expect(userData.is_vip.length).toBe(1);
-			expect(fromNullable(userData.is_vip) === true).toBeTruthy();
-		});
-
-		it('returns false if user is not vip', async () => {
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				airdrops: [],
-				usage_awards: [],
-				last_snapshot_timestamp: [BigInt(Date.now())],
-				sprinkles: []
-			};
-			service.user_info.mockResolvedValue(mockedUserData);
-
-			const { getUserInfo } = await createRewardCanister({
-				serviceOverride: service
-			});
-
-			const userData = await getUserInfo(queryParams);
-
-			expect(userData.is_vip.length).toBe(1);
-			expect(fromNullable(userData.is_vip) === true).toBeFalsy();
+			expect(userData.superpowers[0]?.length).toBe(2);
+			expect(fromNullable(userData.superpowers)?.includes('vip') === true).toBeTruthy();
+			expect(fromNullable(userData.superpowers)?.includes('gold') === true).toBeTruthy();
 		});
 
 		it('should throw an error if user_info throws', async () => {
