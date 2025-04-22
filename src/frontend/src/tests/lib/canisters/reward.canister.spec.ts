@@ -36,7 +36,7 @@ describe('reward.canister', () => {
 			it('returns true if user is vip', async () => {
 				const mockedUserData: UserData = {
 					is_vip: [true],
-					superpowers: [['vip']],
+					superpowers: toNullable(['vip']),
 					airdrops: [],
 					usage_awards: [],
 					last_snapshot_timestamp: [BigInt(Date.now())],
@@ -81,7 +81,7 @@ describe('reward.canister', () => {
 			it('returns true if user is gold user', async () => {
 				const mockedUserData: UserData = {
 					is_vip: [true],
-					superpowers: [['gold']],
+					superpowers: toNullable(['gold']),
 					airdrops: [],
 					usage_awards: [],
 					last_snapshot_timestamp: [BigInt(Date.now())],
@@ -125,7 +125,7 @@ describe('reward.canister', () => {
 		it('returns true if user is vip and gold user', async () => {
 			const mockedUserData: UserData = {
 				is_vip: [true],
-				superpowers: [['vip', 'gold']],
+				superpowers: toNullable(['vip', 'gold']),
 				airdrops: [],
 				usage_awards: [],
 				last_snapshot_timestamp: [BigInt(Date.now())],
@@ -177,7 +177,7 @@ describe('reward.canister', () => {
 			const rewardType: ClaimedVipReward = { campaign_id: 'vip' };
 			const vipRewardResponse = await getNewVipReward(rewardType);
 
-			expect(service.new_vip_reward).toHaveBeenCalledWith([rewardType]);
+			expect(service.new_vip_reward).toHaveBeenCalledWith(toNullable(rewardType));
 			expect(vipRewardResponse).toEqual(mockedRewardResponse);
 		});
 
@@ -201,7 +201,7 @@ describe('reward.canister', () => {
 		it('should be possible to claim a vip reward', async () => {
 			const mockedClaimResponse: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = [
 				{ Success: null },
-				[{ campaign_id: 'vip' }]
+				toNullable({ campaign_id: 'vip' })
 			];
 			service.claim_vip_reward.mockResolvedValue(mockedClaimResponse);
 

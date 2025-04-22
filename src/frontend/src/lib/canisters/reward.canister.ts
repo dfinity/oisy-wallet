@@ -13,7 +13,7 @@ import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/r
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices, type QueryParams } from '@dfinity/utils';
+import {Canister, createServices, type QueryParams, toNullable} from '@dfinity/utils';
 
 export class RewardCanister extends Canister<RewardService> {
 	static async create({
@@ -43,7 +43,7 @@ export class RewardCanister extends Canister<RewardService> {
 	getNewVipReward = (rewardType: ClaimedVipReward): Promise<NewVipRewardResponse> => {
 		const { new_vip_reward } = this.caller({ certified: true });
 
-		return new_vip_reward([rewardType]);
+		return new_vip_reward(toNullable(rewardType));
 	};
 
 	claimVipReward = (

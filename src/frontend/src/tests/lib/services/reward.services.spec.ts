@@ -32,6 +32,7 @@ import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
+import {toNullable} from "@dfinity/utils";
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
@@ -43,7 +44,7 @@ describe('reward-code', () => {
 	describe('getUserRoles', () => {
 		const mockedUserData: UserData = {
 			is_vip: [true],
-			superpowers: [['vip', 'gold']],
+			superpowers: toNullable(['vip', 'gold']),
 			airdrops: [],
 			usage_awards: [],
 			last_snapshot_timestamp: [BigInt(Date.now())],
@@ -157,7 +158,7 @@ describe('reward-code', () => {
 	describe('claimVipReward', () => {
 		const mockedClaimRewardResponse: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = [
 			{ Success: null },
-			[{ campaign_id: 'vip' }]
+			toNullable({ campaign_id: 'vip' })
 		];
 
 		it('should return true if a valid vip reward code is used', async () => {
