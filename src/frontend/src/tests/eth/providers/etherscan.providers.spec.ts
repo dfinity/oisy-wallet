@@ -21,18 +21,6 @@ import {
 } from 'ethers/providers';
 import { type MockedClass } from 'vitest';
 
-vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
-	provider.prototype.fetch = vi.fn().mockResolvedValue([]);
-
-	const plugin = vi.fn();
-
-	const network = vi.fn();
-	network.prototype.attachPlugin = vi.fn();
-
-	return { EtherscanProvider: provider, EtherscanPlugin: plugin, Network: network };
-});
-
 vi.mock('$env/rest/etherscan.env', () => ({
 	ETHERSCAN_API_KEY: 'test-api-key'
 }));
