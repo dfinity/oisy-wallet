@@ -30,7 +30,7 @@ export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialE
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
 
 export interface AllowSigningParams {
-	nonce: [] | [bigint];
+	nonce?: bigint;
 }
 
 export interface BtcSelectUserUtxosFeeParams {
