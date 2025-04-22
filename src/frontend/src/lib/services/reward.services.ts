@@ -1,5 +1,5 @@
 import type {
-	ClaimedVipReward,
+	ClaimedVipReward, ClaimVipRewardResponse,
 	ReferrerInfo,
 	RewardInfo,
 	SetReferrerResponse,
@@ -17,8 +17,8 @@ import {
 import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
-import type { RewardResponseInfo, RewardsResponse, UserRoleResult } from '$lib/types/reward';
+import {AlreadyClaimedError, InvalidCampaignError, InvalidCodeError, UserNotVipError} from '$lib/types/errors';
+import type {RewardClaimResponse, RewardResponseInfo, RewardsResponse, UserRoleResult} from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
@@ -177,22 +177,27 @@ const updateVipReward = async ({
 }: {
 	identity: Identity;
 	code: string;
-}): Promise<void> => {
-	const response = await claimVipRewardApi({
+}): Promise<string> => {
+	const response: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = await claimVipRewardApi({
 		identity,
 		vipReward: { code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	if ('Success' in response) {
-		return;
+	if ('Success' in response[0]) {
+		const claimedVipReward = fromNullable(response[1])
+		if (isNullish(claimedVipReward)) {
+			throw new InvalidCampaignError();
+		}
+
+		return claimedVipReward.campaign_id;
 	}
 
-	if ('InvalidCode' in response) {
+	if ('InvalidCode' in response[0]) {
 		throw new InvalidCodeError();
 	}
 
-	if ('AlreadyClaimed' in response) {
+	if ('AlreadyClaimed' in response[0]) {
 		throw new AlreadyClaimedError();
 	}
 
@@ -215,10 +220,10 @@ const updateVipReward = async ({
 export const claimVipReward = async (params: {
 	identity: Identity;
 	code: string;
-}): Promise<ResultSuccess> => {
+}): Promise<RewardClaimResponse> => {
 	try {
-		await updateVipReward(params);
-		return { success: true };
+		const campaignId = await updateVipReward(params);
+		return { success: true, campaignId };
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({

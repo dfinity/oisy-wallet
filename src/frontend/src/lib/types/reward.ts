@@ -20,6 +20,12 @@ export interface RewardResult {
 	receivedReferral: boolean;
 }
 
+export interface RewardClaimResponse<T = unknown> {
+	success: boolean;
+	campaignId?: string;
+	err?: T;
+}
+
 export interface UserRoleResult {
 	is_vip: boolean;
 	is_gold: boolean;
