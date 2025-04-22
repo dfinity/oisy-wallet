@@ -1,13 +1,13 @@
+import failedVipReward from '$lib/assets/failed-vip-reward.svg';
+import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
+import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
 import RewardStateModal from '$lib/components/qr/VipRewardStateModal.svelte';
+import { VIP_STATE_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
+import { QrCodeType } from '$lib/enums/qr-code-types';
 import { i18n } from '$lib/stores/i18n.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import {QrCodeType} from "$lib/enums/qr-code-types";
-import {VIP_STATE_IMAGE_BANNER} from "$lib/constants/test-ids.constants";
-import failedVipReward from '$lib/assets/failed-vip-reward.svg';
-import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
-import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
 
 describe('RewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid=${VIP_STATE_IMAGE_BANNER}]`;
@@ -18,7 +18,7 @@ describe('RewardStateModal', () => {
 
 			const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
 			expect(imageBanner).toBeInTheDocument();
-			expect(imageBanner?.src.includes(successfulVipReward))
+			expect(imageBanner?.src.includes(successfulVipReward));
 
 			expect(getByText(get(i18n).vip.reward.text.title_successful)).toBeInTheDocument();
 			expect(
@@ -33,7 +33,7 @@ describe('RewardStateModal', () => {
 
 			const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
 			expect(imageBanner).toBeInTheDocument();
-			expect(imageBanner?.src.includes(failedVipReward))
+			expect(imageBanner?.src.includes(failedVipReward));
 
 			expect(getByText(get(i18n).vip.reward.text.title_failed)).toBeInTheDocument();
 			expect(getByText(get(i18n).vip.reward.text.reward_failed)).toBeInTheDocument();
@@ -44,11 +44,14 @@ describe('RewardStateModal', () => {
 
 	describe('Gold type', () => {
 		it('should render expected texts in the positive case', () => {
-			const { container, getByText } = render(RewardStateModal, { isSuccessful: true, codeType: QrCodeType.GOLD });
+			const { container, getByText } = render(RewardStateModal, {
+				isSuccessful: true,
+				codeType: QrCodeType.GOLD
+			});
 
 			const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
 			expect(imageBanner).toBeInTheDocument();
-			expect(imageBanner?.src.includes(successfulBinanceReward))
+			expect(imageBanner?.src.includes(successfulBinanceReward));
 
 			expect(getByText(get(i18n).vip.reward.text.title_successful)).toBeInTheDocument();
 			expect(
@@ -59,11 +62,14 @@ describe('RewardStateModal', () => {
 		});
 
 		it('should render expected texts in the negative case', () => {
-			const { container, getByText } = render(RewardStateModal, { isSuccessful: false, codeType: QrCodeType.GOLD });
+			const { container, getByText } = render(RewardStateModal, {
+				isSuccessful: false,
+				codeType: QrCodeType.GOLD
+			});
 
 			const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
 			expect(imageBanner).toBeInTheDocument();
-			expect(imageBanner?.src.includes(failedVipReward))
+			expect(imageBanner?.src.includes(failedVipReward));
 
 			expect(getByText(get(i18n).vip.reward.text.title_failed)).toBeInTheDocument();
 			expect(getByText(get(i18n).vip.reward.text.reward_failed)).toBeInTheDocument();
