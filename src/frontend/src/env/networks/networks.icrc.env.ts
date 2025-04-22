@@ -4,6 +4,7 @@ import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
+import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
@@ -183,6 +184,7 @@ const CKETH_IC_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'ethereum',
 				position: 1,
 				twinToken: ETHEREUM_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
 				explorerUrl: CKETH_EXPLORER_URL
 			}
 		: undefined;
@@ -452,6 +454,20 @@ const NAK_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTI
 		}
 	: undefined;
 
+const VCHF_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VCHF)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.VCHF,
+			position: 21
+		}
+	: undefined;
+
+const VEUR_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VEUR)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.VEUR,
+			position: 22
+		}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -525,7 +541,9 @@ const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(nICP_IC_DATA) ? [nICP_IC_DATA] : []),
 	...(nonNullish(vUSD_IC_DATA) ? [vUSD_IC_DATA] : []),
 	...(nonNullish(RUGGY_IC_DATA) ? [RUGGY_IC_DATA] : []),
-	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : [])
+	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : []),
+	...(nonNullish(VCHF_IC_DATA) ? [VCHF_IC_DATA] : []),
+	...(nonNullish(VEUR_IC_DATA) ? [VEUR_IC_DATA] : [])
 ];
 
 export const ICRC_TOKENS: IcInterface[] = [

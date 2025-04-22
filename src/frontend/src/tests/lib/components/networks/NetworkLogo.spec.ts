@@ -16,6 +16,7 @@ describe('NetworkLogo', () => {
 		});
 
 		const logo = getByTestId(`${testId}-light`);
+
 		expect(logo).toBeTruthy();
 	});
 
