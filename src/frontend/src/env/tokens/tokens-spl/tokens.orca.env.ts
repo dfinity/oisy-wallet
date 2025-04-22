@@ -1,5 +1,4 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
-import { ORCA_TOKEN_GROUP } from '$env/tokens/groups/groups.spl.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import orca from '$sol/assets/orca.svg';
@@ -22,6 +21,5 @@ export const ORCA_TOKEN: RequiredSplToken = {
 	decimals: ORCA_DECIMALS,
 	icon: orca,
 	address: 'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE',
-	owner: TOKEN_PROGRAM_ADDRESS,
-	groupData: ORCA_TOKEN_GROUP
+	owner: TOKEN_PROGRAM_ADDRESS
 };

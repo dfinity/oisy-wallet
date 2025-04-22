@@ -29,6 +29,5 @@ export const USDT_TOKEN: RequiredSplToken = {
 	groupData: USDT_TOKEN_GROUP,
 	buy: {
 		onramperId: 'usdt_solana'
-	},
-	groupData: USDT_TOKEN_GROUP
+	}
 };
