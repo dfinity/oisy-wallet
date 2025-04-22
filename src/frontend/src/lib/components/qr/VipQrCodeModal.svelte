@@ -9,10 +9,10 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
+	import { CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
 	import {
-		VIP_CODE_REGENERATE_BUTTON,
-		VIP_QR_CODE_COPY_BUTTON
+		VIP_CODE_REGENERATE_BUTTON, VIP_QR_CODE_BINANCE_ICON,
+		VIP_QR_CODE_COPY_BUTTON, VIP_QR_CODE_ICON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -20,8 +20,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import {QrCodeType} from "$lib/enums/qr-codes-types";
+	import IconBinanceYellow from "$lib/components/icons/IconBinanceYellow.svelte";
 
-	let counter = VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS;
+	export let codeType: QrCodeType = QrCodeType.VIP;
+
+	let counter = CODE_REGENERATE_INTERVAL_IN_SECONDS;
 	let countdown: NodeJS.Timeout | undefined;
 	const maxRetriesToGetRewardCode = 3;
 	let retriesToGetRewardCode = 0;
@@ -49,7 +53,7 @@
 		}
 
 		await generateCode();
-		counter = VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS;
+		counter = CODE_REGENERATE_INTERVAL_IN_SECONDS;
 		countdown = setInterval(intervalFunction, 1000);
 	};
 
@@ -80,15 +84,23 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title"
-		><span class="text-xl">{$i18n.vip.invitation.text.title}</span>
+	><span class="text-xl"
+		>{codeType === QrCodeType.VIP
+				? $i18n.vip.invitation.text.title
+				: $i18n.vip.invitation.text.binance_title}</span
+		>
 	</svelte:fragment>
 
 	<ContentWithToolbar>
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
-					<div slot="logo" class="flex items-center justify-center rounded-lg bg-primary p-2">
-						<IconAstronautHelmet />
+					<div slot="logo" class="flex items-center justify-center rounded-full bg-primary p-2">
+						{#if codeType === QrCodeType.VIP}
+							<IconAstronautHelmet testId={VIP_QR_CODE_ICON} />
+						{:else}
+							<IconBinanceYellow size="44" testId={VIP_QR_CODE_BINANCE_ICON} />
+						{/if}
 					</div>
 				</QRCode>
 			{/if}

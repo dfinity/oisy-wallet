@@ -94,6 +94,8 @@ export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
 
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
+export const VIP_QR_CODE_ICON = 'vip-qr-code-icon';
+export const VIP_QR_CODE_BINANCE_ICON = 'vip-qr-code-binance-icon';
 
 export const REFERRAL_CODE_COPY_BUTTON = 'referral-code-copy-button';
 export const REFERRAL_CODE_SHARE_BUTTON = 'referral-code-share-button';
