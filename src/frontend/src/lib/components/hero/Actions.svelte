@@ -62,18 +62,18 @@
 
 <div role="toolbar" class="flex w-full justify-center pt-10">
 	<HeroButtonGroup>
-		{#if nonNullish($pageToken)}
-		{#if $networkICP}
-			<IcReceive token={$pageToken} />
-		{:else if $networkEthereum}
-			<EthReceive token={$pageToken} />
-		{:else if $networkBitcoin}
-			<BtcReceive />
-		{:else if $networkSolana}
-			<SolReceive token={$pageToken} />
-		{:else if $pseudoNetworkChainFusion}
+		{#if $pseudoNetworkChainFusion}
 			<Receive />
-		{/if}
+		{:else if nonNullish($pageToken)}
+			{#if $networkICP}
+				<IcReceive token={$pageToken} />
+			{:else if $networkEthereum}
+				<EthReceive token={$pageToken} />
+			{:else if $networkBitcoin}
+				<BtcReceive />
+			{:else if $networkSolana}
+				<SolReceive token={$pageToken} />
+			{/if}
 		{/if}
 
 		{#if sendAction}
