@@ -30,7 +30,6 @@ describe('Menu', () => {
 	const mockUserData = (powers: Array<string>): UserData => ({
 		is_vip: [],
 		superpowers: [powers],
-		superpowers: [],
 		airdrops: [],
 		usage_awards: [],
 		last_snapshot_timestamp: [BigInt(Date.now())],
