@@ -59,11 +59,11 @@ export const swappableTokens: Readable<SwappableTokens> = derived(
 );
 
 export const bestSwap: Readable<SwapProviderResult | null> = derived(swapAmountsStore, ($store) => {
-	if (!$store?.swaps || $store.swaps.length === 0) {
+	if (!$store?.swaps?.length) {
 		return null;
 	}
 
 	return $store.swaps.reduce((best, current) =>
-		current.receiveAmount > best.receiveAmount ? current : best
+		BigInt(current.receiveAmount) > BigInt(best.receiveAmount) ? current : best
 	);
 });
