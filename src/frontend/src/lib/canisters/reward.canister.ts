@@ -13,7 +13,13 @@ import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.fa
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import type { RewardClaimApiResponse } from '$lib/types/reward';
-import {Canister, createServices, toNullable, type QueryParams, fromNullable} from '@dfinity/utils';
+import {
+	Canister,
+	createServices,
+	fromNullable,
+	toNullable,
+	type QueryParams
+} from '@dfinity/utils';
 
 export class RewardCanister extends Canister<RewardService> {
 	static async create({

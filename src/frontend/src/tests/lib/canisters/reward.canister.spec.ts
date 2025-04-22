@@ -213,7 +213,10 @@ describe('reward.canister', () => {
 			const claimResponse = await claimVipReward(vipReward);
 
 			expect(service.claim_vip_reward).toHaveBeenCalledWith(vipReward);
-			expect(claimResponse).toEqual({claimRewardResponse: { Success: null }, claimedVipReward: {campaign_id: 'vip'}});
+			expect(claimResponse).toEqual({
+				claimRewardResponse: { Success: null },
+				claimedVipReward: { campaign_id: 'vip' }
+			});
 		});
 
 		it('should throw an error if claim_vip_reward throws', async () => {
