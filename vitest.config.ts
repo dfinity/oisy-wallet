@@ -78,15 +78,15 @@ export default defineConfig(
 					'build',
 					'.dfx',
 					'**/.svelte-kit',
-					'declarations'
+					'src/declarations'
 				],
 				// TODO: increase the thresholds slowly up to an acceptable 80% at least
 				thresholds: {
 					autoUpdate: true,
-					statements: 58,
+					statements: 61,
 					branches: 82,
 					functions: 72,
-					lines: 58
+					lines: 61
 				}
 			}
 		}
