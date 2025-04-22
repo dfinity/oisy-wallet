@@ -1,3 +1,8 @@
+import {
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import { BSC_NETWORK, BSC_TESTNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import * as btcEnv from '$env/networks/networks.btc.env';
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
@@ -11,6 +16,14 @@ import {
 } from '$env/networks/networks.sol.env';
 import { SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import {
+	BASE_ETH_TOKEN,
+	BASE_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import {
+	BNB_MAINNET_TOKEN,
+	BNB_TESTNET_TOKEN
+} from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -67,7 +80,9 @@ describe('network-tokens.derived', () => {
 				ICP_TOKEN,
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
-				SOLANA_TOKEN
+				SOLANA_TOKEN,
+				BASE_ETH_TOKEN,
+				BNB_MAINNET_TOKEN
 			]);
 		});
 
@@ -120,6 +135,22 @@ describe('network-tokens.derived', () => {
 				{
 					network: SOLANA_DEVNET_NETWORK,
 					tokens: [SOLANA_DEVNET_TOKEN, mockSplDevnetCustomToken]
+				},
+				{
+					network: BASE_NETWORK,
+					tokens: [BASE_ETH_TOKEN]
+				},
+				{
+					network: BASE_SEPOLIA_NETWORK,
+					tokens: [BASE_SEPOLIA_ETH_TOKEN]
+				},
+				{
+					network: BSC_NETWORK,
+					tokens: [BNB_MAINNET_TOKEN]
+				},
+				{
+					network: BSC_TESTNET_NETWORK,
+					tokens: [BNB_TESTNET_TOKEN]
 				}
 			];
 
@@ -142,6 +173,8 @@ describe('network-tokens.derived', () => {
 					BTC_MAINNET_TOKEN,
 					ETHEREUM_TOKEN,
 					SOLANA_TOKEN,
+					BASE_ETH_TOKEN,
+					BNB_MAINNET_TOKEN,
 					mockErc20UserToken,
 					mockSplCustomToken
 				]);

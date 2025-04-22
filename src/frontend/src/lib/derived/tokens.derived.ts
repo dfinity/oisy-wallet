@@ -6,6 +6,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { exchanges } from '$lib/derived/exchange.derived';
@@ -27,7 +28,8 @@ export const tokens: Readable<Token[]> = derived(
 		splTokens,
 		enabledEthereumTokens,
 		enabledBitcoinTokens,
-		enabledSolanaTokens
+		enabledSolanaTokens,
+		enabledEvmTokens
 	],
 	([
 		$erc20Tokens,
@@ -35,12 +37,14 @@ export const tokens: Readable<Token[]> = derived(
 		$splTokens,
 		$enabledEthereumTokens,
 		$enabledBitcoinTokens,
-		$enabledSolanaTokens
+		$enabledSolanaTokens,
+		$enabledEvmTokens
 	]) => [
 		ICP_TOKEN,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
+		...$enabledEvmTokens,
 		...$erc20Tokens,
 		...$icrcTokens,
 		...$splTokens

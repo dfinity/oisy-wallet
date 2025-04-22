@@ -1,6 +1,14 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import {
+	BASE_ETH_TOKEN,
+	BASE_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import {
+	BNB_MAINNET_TOKEN,
+	BNB_TESTNET_TOKEN
+} from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
+import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
 	BTC_TESTNET_TOKEN
@@ -114,6 +122,8 @@ describe('all-tokens.derived', () => {
 				BTC_MAINNET_TOKEN.id.description,
 				ETHEREUM_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
+				BASE_ETH_TOKEN.id.description,
+				BNB_MAINNET_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockIcrcToken2.id.description,
 				mockIcrcToken.id.description,
@@ -185,7 +195,11 @@ describe('all-tokens.derived', () => {
 				SEPOLIA_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
 				SOLANA_TESTNET_TOKEN.id.description,
-				SOLANA_DEVNET_TOKEN.id.description
+				SOLANA_DEVNET_TOKEN.id.description,
+				BASE_ETH_TOKEN.id.description,
+				BASE_SEPOLIA_ETH_TOKEN.id.description,
+				BNB_MAINNET_TOKEN.id.description,
+				BNB_TESTNET_TOKEN.id.description
 			]);
 		});
 
@@ -206,7 +220,11 @@ describe('all-tokens.derived', () => {
 				SOLANA_TOKEN.id.description,
 				SOLANA_TESTNET_TOKEN.id.description,
 				SOLANA_DEVNET_TOKEN.id.description,
-				SOLANA_LOCAL_TOKEN.id.description
+				SOLANA_LOCAL_TOKEN.id.description,
+				BASE_ETH_TOKEN.id.description,
+				BASE_SEPOLIA_ETH_TOKEN.id.description,
+				BNB_MAINNET_TOKEN.id.description,
+				BNB_TESTNET_TOKEN.id.description
 			]);
 		});
 	});
