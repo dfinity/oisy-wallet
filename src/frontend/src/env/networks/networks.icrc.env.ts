@@ -9,7 +9,9 @@ import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
 import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
 import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.oct.env';
 import { SHIB_TOKEN_GROUP } from '$env/tokens/groups/groups.shib.env';
+import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
 import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
+import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
@@ -328,7 +330,8 @@ const CKPEPE_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckPEPE,
 			position: 3,
-			twinToken: PEPE_TOKEN
+			twinToken: PEPE_TOKEN,
+			groupData: PEPE_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -362,7 +365,8 @@ const CKUSDT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUSDT,
 			position: 7,
-			twinToken: USDT_TOKEN
+			twinToken: USDT_TOKEN,
+			groupData: USDT_TOKEN_GROUP
 		}
 	: undefined;
 
