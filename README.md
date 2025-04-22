@@ -63,6 +63,10 @@ OISY Wallet does not give any warranties, whether express or implied, as to the 
 
 - [x] Install the [IC SDK](https://internetcomputer.org/docs/current/developer-docs/setup/install/index.mdx).
 
+### Windows Development
+
+For detailed instructions on setting up and running OISY on Windows (both native Windows and WSL), please refer to our [Windows Development Guide](WINDOWS.md).
+
 ### Start the local replica
 
 Open a new terminal window _in the project directory_, and run the following command to start the local replica. The replica will not start unless [dfx.json](dfx.json) exists in the current directory.
