@@ -1,4 +1,5 @@
 import type {
+	ClaimedVipReward,
 	ReferrerInfo,
 	RewardInfo,
 	SetReferrerResponse,
@@ -16,8 +17,19 @@ import {
 import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
-import type { RewardResponseInfo, RewardsResponse } from '$lib/types/reward';
+import {
+	AlreadyClaimedError,
+	InvalidCampaignError,
+	InvalidCodeError,
+	UserNotVipError
+} from '$lib/types/errors';
+import type {
+	RewardClaimApiResponse,
+	RewardClaimResponse,
+	RewardResponseInfo,
+	RewardsResponse,
+	UserRoleResult
+} from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
@@ -25,33 +37,38 @@ import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-const queryVipUser = async (params: {
+const queryUserRoles = async (params: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<ResultSuccess> => {
+}): Promise<UserRoleResult> => {
 	const userData = await getUserInfoApi({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	return { success: fromNullable(userData.is_vip) === true };
+	const superpowers = fromNullable(userData.superpowers);
+	if (isNullish(superpowers)) {
+		return { is_vip: false, is_gold: false };
+	}
+
+	return { is_vip: superpowers.includes('vip'), is_gold: superpowers.includes('gold') };
 };
 
 /**
- * Checks if a user is a VIP user.
+ * Gets the roles of a user.
  *
- * This function performs **always** a query (not certified) to determine the VIP status of a user.
+ * This function performs **always** a query (not certified) to determine the roles of a user.
  *
  * @async
  * @param {Object} params - The parameters required to check VIP status.
  * @param {Identity} params.identity - The user's identity for authentication.
- * @returns {Promise<ResultSuccess>} - Resolves with the result indicating if the user is a VIP.
+ * @returns {Promise<UserRoleResult>} - Resolves with the result indicating the users roles.
  *
  * @throws {Error} Displays an error toast and logs the error if the query fails.
  */
-export const isVipUser = async (params: { identity: Identity }): Promise<ResultSuccess> => {
+export const isVipUser = async (params: { identity: Identity }): Promise<UserRoleResult> => {
 	try {
-		return await queryVipUser({ ...params, certified: false });
+		return await queryUserRoles({ ...params, certified: false });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
@@ -59,7 +76,7 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 			err
 		});
 
-		return { success: false, err };
+		return { is_vip: false, is_gold: false };
 	}
 };
 
@@ -112,8 +129,15 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 	return { rewards: [], lastTimestamp: ZERO_BI };
 };
 
-const updateReward = async (identity: Identity): Promise<VipReward> => {
+const updateReward = async ({
+	rewardType,
+	identity
+}: {
+	rewardType: ClaimedVipReward;
+	identity: Identity;
+}): Promise<VipReward> => {
 	const response = await getNewVipRewardApi({
+		rewardType,
 		identity,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
@@ -128,19 +152,26 @@ const updateReward = async (identity: Identity): Promise<VipReward> => {
 };
 
 /**
- * Generates a new VIP reward code.
+ * Generates a new VIP or Gold reward code.
  *
  * This function **always** makes an **update** call and cannot be a query.
  *
  * @async
  * @param {Identity} identity - The user's identity for authentication.
- * @returns {Promise<VipReward | undefined>} - Resolves with the generated VIP reward or `undefined` if the operation fails.
+ * @param {string} campaignId - The campaign's id.
+ * @returns {Promise<VipReward | undefined>} - Resolves with the generated VIP or Gold reward or `undefined` if the operation fails.
  *
  * @throws {Error} Displays an error toast and logs the error if the update call fails.
  */
-export const getNewReward = async (identity: Identity): Promise<VipReward | undefined> => {
+export const getNewReward = async ({
+	campaignId,
+	identity
+}: {
+	campaignId: string;
+	identity: Identity;
+}): Promise<VipReward | undefined> => {
 	try {
-		return await updateReward(identity);
+		return await updateReward({ rewardType: { campaign_id: campaignId }, identity });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
@@ -157,22 +188,27 @@ const updateVipReward = async ({
 }: {
 	identity: Identity;
 	code: string;
-}): Promise<void> => {
-	const response = await claimVipRewardApi({
+}): Promise<string> => {
+	const response: RewardClaimApiResponse = await claimVipRewardApi({
 		identity,
 		vipReward: { code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	if ('Success' in response) {
-		return;
+	if ('Success' in response.claimRewardResponse) {
+		const claimedVipReward = response.claimedVipReward;
+		if (isNullish(claimedVipReward)) {
+			throw new InvalidCampaignError();
+		}
+
+		return claimedVipReward.campaign_id;
 	}
 
-	if ('InvalidCode' in response) {
+	if ('InvalidCode' in response.claimRewardResponse) {
 		throw new InvalidCodeError();
 	}
 
-	if ('AlreadyClaimed' in response) {
+	if ('AlreadyClaimed' in response.claimRewardResponse) {
 		throw new AlreadyClaimedError();
 	}
 
@@ -188,17 +224,17 @@ const updateVipReward = async ({
  * @param {Object} params - The parameters required to claim the reward.
  * @param {Identity} params.identity - The user's identity for authentication.
  * @param {string} params.code - The reward code to claim the VIP reward.
- * @returns {Promise<ResultSuccess>} - Resolves with the result of the claim if successful.
+ * @returns {Promise<RewardClaimResponse>} - Resolves with the result state and campaign id of the claim if successful.
  *
  * @throws {Error} Throws an error if the update call fails or the reward cannot be claimed.
  */
 export const claimVipReward = async (params: {
 	identity: Identity;
 	code: string;
-}): Promise<ResultSuccess> => {
+}): Promise<RewardClaimResponse> => {
 	try {
-		await updateVipReward(params);
-		return { success: true };
+		const campaignId = await updateVipReward(params);
+		return { success: true, campaignId };
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
