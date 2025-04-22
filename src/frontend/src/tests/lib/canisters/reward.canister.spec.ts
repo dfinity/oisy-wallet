@@ -1,10 +1,11 @@
 import type {
+	ClaimVipRewardResponse,
 	ClaimedVipReward,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
 	UserData,
-	UserSnapshot, ClaimVipRewardResponse
+	UserSnapshot
 } from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -198,7 +199,10 @@ describe('reward.canister', () => {
 
 	describe('claimVipReward', () => {
 		it('should be possible to claim a vip reward', async () => {
-			const mockedClaimResponse: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = [{ Success: null }, [{ campaign_id: 'vip' }]];
+			const mockedClaimResponse: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = [
+				{ Success: null },
+				[{ campaign_id: 'vip' }]
+			];
 			service.claim_vip_reward.mockResolvedValue(mockedClaimResponse);
 
 			const { claimVipReward } = await createRewardCanister({

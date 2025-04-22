@@ -1,5 +1,6 @@
 import type {
-	ClaimedVipReward, ClaimVipRewardResponse,
+	ClaimedVipReward,
+	ClaimVipRewardResponse,
 	ReferrerInfo,
 	RewardInfo,
 	SetReferrerResponse,
@@ -17,8 +18,18 @@ import {
 import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import {AlreadyClaimedError, InvalidCampaignError, InvalidCodeError, UserNotVipError} from '$lib/types/errors';
-import type {RewardClaimResponse, RewardResponseInfo, RewardsResponse, UserRoleResult} from '$lib/types/reward';
+import {
+	AlreadyClaimedError,
+	InvalidCampaignError,
+	InvalidCodeError,
+	UserNotVipError
+} from '$lib/types/errors';
+import type {
+	RewardClaimResponse,
+	RewardResponseInfo,
+	RewardsResponse,
+	UserRoleResult
+} from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
@@ -185,7 +196,7 @@ const updateVipReward = async ({
 	});
 
 	if ('Success' in response[0]) {
-		const claimedVipReward = fromNullable(response[1])
+		const claimedVipReward = fromNullable(response[1]);
 		if (isNullish(claimedVipReward)) {
 			throw new InvalidCampaignError();
 		}
