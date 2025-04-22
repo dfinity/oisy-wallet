@@ -44,7 +44,7 @@
 	</Value>
 
 	<div class="flex w-full flex-col gap-3" slot="toolbar">
-		<Button paddingSmall colorStyle="secondary" on:click={() => dispatch('icConvert')}>
+		<Button paddingSmall colorStyle="secondary" on:click={() => dispatch('icHowToConvert')}>
 			<span class="text-dark-slate-blue font-bold"
 				>{replacePlaceholders(
 					replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
