@@ -2,7 +2,10 @@ import {
 	BASE_NETWORK,
 	BASE_SEPOLIA_NETWORK
 } from '$env/networks/networks-evm/networks.evm.base.env';
-import { BSC_NETWORK, BSC_TESTNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
 	ETHEREUM_NETWORK,
 	INFURA_NETWORK_BASE,
@@ -32,7 +35,7 @@ describe('infura.providers', () => {
 		SEPOLIA_NETWORK,
 		BASE_NETWORK,
 		BASE_SEPOLIA_NETWORK,
-		BSC_NETWORK,
+		BSC_MAINNET_NETWORK,
 		BSC_TESTNET_NETWORK
 	];
 

@@ -3,7 +3,7 @@ import {
 	BASE_SEPOLIA_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.base.env';
 import {
-	BSC_NETWORK_ID,
+	BSC_MAINNET_NETWORK_ID,
 	BSC_TESTNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
@@ -55,7 +55,7 @@ const providersMap: [NetworkId, Networkish][] = [
 	[SEPOLIA_NETWORK_ID, INFURA_NETWORK_SEPOLIA],
 	[BASE_NETWORK_ID, INFURA_NETWORK_BASE],
 	[BASE_SEPOLIA_NETWORK_ID, INFURA_NETWORK_BASE_SEPOLIA],
-	[BSC_NETWORK_ID, INFURA_NETWORK_BNB_MAINNET],
+	[BSC_MAINNET_NETWORK_ID, INFURA_NETWORK_BNB_MAINNET],
 	[BSC_TESTNET_NETWORK_ID, INFURA_NETWORK_BNB_TESTNET]
 ];
 
