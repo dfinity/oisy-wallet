@@ -153,7 +153,7 @@ export const allowSigning = async ({
 }: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningResponse> => {
 	const { allowSigning } = await backendCanister({ identity });
 
-	return allowSigning(params.nonce);
+	return allowSigning(params.nonce[0]);
 };
 
 export const addUserHiddenDappId = async ({
