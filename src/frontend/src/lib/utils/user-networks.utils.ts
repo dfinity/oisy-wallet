@@ -4,7 +4,7 @@ import {
 	BASE_SEPOLIA_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.base.env';
 import {
-	BSC_NETWORK_ID,
+	BSC_MAINNET_NETWORK_ID,
 	BSC_TESTNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
@@ -50,7 +50,7 @@ const networkIdToKey = (networkId: NetworkId): NetworkSettingsFor | undefined =>
 			return { BaseMainnet: null };
 		case BASE_SEPOLIA_NETWORK_ID:
 			return { BaseSepolia: null };
-		case BSC_NETWORK_ID:
+		case BSC_MAINNET_NETWORK_ID:
 			return { BscMainnet: null };
 		case BSC_TESTNET_NETWORK_ID:
 			return { BscTestnet: null };

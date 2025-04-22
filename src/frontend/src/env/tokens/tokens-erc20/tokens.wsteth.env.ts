@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { WSTETH_TOKEN_GROUP } from '$env/tokens/groups/groups.wsteth.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import wsteth from '$icp-eth/assets/wsteth.svg';
 import type { TokenId } from '$lib/types/token';

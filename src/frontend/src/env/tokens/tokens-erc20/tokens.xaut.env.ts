@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { XAUT_TOKEN_GROUP } from '$env/tokens/groups/groups.xaut.env';
 import xaut from '$eth/assets/xaut.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
