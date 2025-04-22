@@ -4,7 +4,7 @@ import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
-	NAVIGATION_MENU_BUTTON,
+	NAVIGATION_MENU_BUTTON, NAVIGATION_MENU_GOLD_BUTTON,
 	NAVIGATION_MENU_REFERRAL_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -15,6 +15,7 @@ import { render, waitFor } from '@testing-library/svelte';
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
 	const menuItemVipButtonSelector = `button[data-tid="${NAVIGATION_MENU_VIP_BUTTON}"]`;
+	const menuItemGoldButtonSelector = `button[data-tid="${NAVIGATION_MENU_GOLD_BUTTON}"]`;
 	const menuItemAddressBookSelector = `button[data-tid="${NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}"]`;
 	const menuItemReferralButtonSelector = `button[data-tid="${NAVIGATION_MENU_REFERRAL_BUTTON}"]`;
 
@@ -24,11 +25,12 @@ describe('Menu', () => {
 		userProfileStore.reset();
 		vi.resetAllMocks();
 		mockAuthStore();
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(false));
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
 	});
 
-	const mockUserData = (isVip: boolean): UserData => ({
-		is_vip: [isVip],
+	const mockUserData = (powers: Array<string>): UserData => ({
+		is_vip: [],
+		superpowers: [powers],
 		airdrops: [],
 		usage_awards: [],
 		last_snapshot_timestamp: [BigInt(Date.now())],
@@ -67,7 +69,8 @@ describe('Menu', () => {
 	}
 
 	it('renders the vip menu item', async () => {
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(true));
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(['vip']));
+
 		await openMenu();
 		await waitForElement({ selector: menuItemVipButtonSelector });
 	});
@@ -75,6 +78,18 @@ describe('Menu', () => {
 	it('does not render the vip menu item', async () => {
 		await openMenu();
 		await waitForElement({ selector: menuItemVipButtonSelector, shouldExist: false });
+	});
+
+	it('renders the gold menu item', async () => {
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(['gold']));
+
+		await openMenu();
+		await waitForElement({ selector: menuItemGoldButtonSelector });
+	});
+
+	it('does not render the gold menu item', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemGoldButtonSelector, shouldExist: false });
 	});
 
 	it('renders the address book button when ADDRESS_BOOK_ENABLED is true', async () => {

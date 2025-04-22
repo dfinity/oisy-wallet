@@ -25,7 +25,7 @@
 		NAVIGATION_MENU,
 		NAVIGATION_MENU_VIP_BUTTON,
 		NAVIGATION_MENU_REFERRAL_BUTTON,
-		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON
+		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON, NAVIGATION_MENU_GOLD_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
@@ -112,7 +112,7 @@
 		{#if isGold}
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.binance_qr_code}
-				testId={NAVIGATION_MENU_VIP_BUTTON}
+				testId={NAVIGATION_MENU_GOLD_BUTTON}
 				on:click={() => modalStore.openVipQrCode(QrCodeType.GOLD)}
 			>
 				<IconBinance size="20" />
