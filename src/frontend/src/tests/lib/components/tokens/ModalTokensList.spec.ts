@@ -1,12 +1,12 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS } from '$lib/constants/test-ids.constants';
 import type { Token } from '$lib/types/token';
 import ModalTokensListHost from '$tests/lib/components/tokens/ModalTokensListTestHost.svelte';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 // Test IDs
 export const MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS = 'modal-token-list-custom-no-results';
-export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
 export const MODAL_TOKEN_LIST_ITEM_PREFIX = 'modal-token-list-item-';
 export const MODAL_TOKEN_LIST_TOOLBAR = 'modal-token-list-toolbar';
 
