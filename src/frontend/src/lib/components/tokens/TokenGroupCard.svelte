@@ -76,7 +76,7 @@
 	);
 
 	// Count tokens that are not displayed
-	let notDisplayedCount = $derived(filteredTokens.length - tokensToShow.length);
+	let notDisplayedCount: number = $derived(filteredTokens.length - tokensToShow.length);
 </script>
 
 <div class="flex flex-col" class:bg-primary={isExpanded}>
