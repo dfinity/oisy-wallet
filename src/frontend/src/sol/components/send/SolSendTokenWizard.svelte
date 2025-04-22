@@ -215,7 +215,6 @@
 			on:icBack
 			bind:destination
 			bind:amount
-			on:icQRCodeScan
 			source={source ?? ''}
 		>
 			<ButtonBack onclick={back} slot="cancel" />

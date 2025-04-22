@@ -32,7 +32,6 @@
 	export let amount: number | undefined;
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
-	export let formCancelAction: 'back' | 'close' = 'back';
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -46,20 +45,20 @@
 </script>
 
 <SendTokenContext token={$sendToken}>
-	{#if isNetworkIdEthereum($sendToken.network.id)}
+	{#if isNetworkIdEthereum($sendToken?.network.id)}
 		<EthSendTokenWizard
 			{currentStep}
 			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			nativeEthereumToken={$ethereumToken}
-			bind:destination
+			{destination}
 			bind:targetNetwork
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
 			on:icSendBack
+			on:icTokensList
 			on:icNext
 			on:icClose
-			on:icTokensList
 		/>
 	{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken)}
 		<EthSendTokenWizard
@@ -72,47 +71,47 @@
 			bind:sendProgressStep
 			on:icBack
 			on:icSendBack
+			on:icTokensList
 			on:icNext
 			on:icClose
-			on:icTokensList
 		/>
-	{:else if isNetworkIdICP($sendToken.network.id)}
+	{:else if isNetworkIdICP($sendToken?.network.id)}
 		<IcSendTokenWizard
 			{source}
 			{currentStep}
-			bind:destination
+			{destination}
 			bind:networkId
 			bind:amount
 			bind:sendProgressStep
 			on:icSendBack
+			on:icTokensList
 			on:icBack
 			on:icNext
 			on:icClose
-			on:icTokensList
 		/>
-	{:else if isNetworkIdBitcoin($sendToken.network.id)}
+	{:else if isNetworkIdBitcoin($sendToken?.network.id)}
 		<BtcSendTokenWizard
 			{currentStep}
-			bind:destination
+			{destination}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
+			on:icTokensList
 			on:icNext
 			on:icClose
 			on:icSendBack
-			on:icTokensList
 		/>
-	{:else if isNetworkIdSolana($sendToken.network.id)}
+	{:else if isNetworkIdSolana($sendToken?.network.id)}
 		<SolSendTokenWizard
 			{currentStep}
-			bind:destination
+			{destination}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
+			on:icTokensList
 			on:icNext
 			on:icClose
 			on:icSendBack
-			on:icTokensList
 		/>
 	{:else}
 		<slot />

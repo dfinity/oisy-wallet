@@ -1,12 +1,18 @@
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import type { WizardStepsParams } from '$lib/types/steps';
+import type { OptionToken } from '$lib/types/token';
 import type { WizardSteps } from '@dfinity/gix-components';
 
 interface SendWizardStepsParams extends WizardStepsParams {
 	converting?: boolean;
+	token?: OptionToken;
 }
 
 export const sendWizardSteps = ({ i18n, converting }: SendWizardStepsParams): WizardSteps => [
+	{
+		name: WizardStepsSend.DESTINATION,
+		title: i18n.send.text.send
+	},
 	{
 		name: WizardStepsSend.SEND,
 		title: i18n.send.text.send
