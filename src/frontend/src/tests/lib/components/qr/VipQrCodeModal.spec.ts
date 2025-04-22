@@ -52,7 +52,7 @@ describe('VipQrCodeModal', () => {
 			expect(qrCode).toBeInTheDocument();
 
 			expect(qrCodeURL).toBeInTheDocument();
-			expect(qrCodeURL?.textContent?.includes(mockedNewRewardResponse.VipReward.code));
+			expect(qrCodeURL?.textContent).includes(mockedNewRewardResponse.VipReward.code);
 
 			expect(copyButton).toBeInTheDocument();
 
@@ -112,7 +112,7 @@ describe('VipQrCodeModal', () => {
 			}
 
 			expect(qrCodeURL).toBeInTheDocument();
-			expect(qrCodeURL?.textContent?.includes(mockedNewRewardResponse.VipReward.code));
+			expect(qrCodeURL?.textContent).includes(mockedNewRewardResponse.VipReward.code);
 
 			expect(regenerateButton).toBeInTheDocument();
 
@@ -130,7 +130,7 @@ describe('VipQrCodeModal', () => {
 				throw new Error('reward code not yet reloaded.');
 			}
 
-			expect(reloadedQrCodeUrl?.textContent?.includes(regeneratedNewRewardResponse.VipReward.code));
+			expect(reloadedQrCodeUrl?.textContent).includes(regeneratedNewRewardResponse.VipReward.code);
 		});
 	});
 });
