@@ -1,6 +1,9 @@
-import type { AllowSigningResponse, CreateChallengeResponse } from '$declarations/backend/backend.did';
+import type {
+	AllowSigningResponse,
+	CreateChallengeResponse
+} from '$declarations/backend/backend.did';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
-import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
+import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import { solvePowChallenge } from '$lib/services/pow.services';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
 
@@ -50,7 +53,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		// Step 3: Requests allowance for signing operations with solved nonce.
 		const _allow_signing: AllowSigningResponse = await allowSigning({
 			identity,
-			nonce: nonce
+			nonce
 		});
 
 		// console.log('_allow_signing:', _allow_signing);
