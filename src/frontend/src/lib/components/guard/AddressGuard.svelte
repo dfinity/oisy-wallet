@@ -15,8 +15,7 @@
 	let signerAllowanceLoaded = false;
 
 	const loadSignerAllowanceAndValidateAddresses = async () => {
-		if (!POW_FEATURE_ENABLED
-		) {
+		if (!POW_FEATURE_ENABLED) {
 			const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
 			if (!initSignerAllowanceSuccess) {

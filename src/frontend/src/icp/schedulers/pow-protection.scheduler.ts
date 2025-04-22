@@ -1,9 +1,9 @@
 import type { AllowSigningResponse, CreateChallengeResponse } from '$declarations/backend/backend.did';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
+import { POW_CHALLENGE_INTERVALL_MILLIS } from '$lib/constants/pow.constants';
 import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
 import { solvePowChallenge } from '$lib/services/pow.services';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
-import { POW_CHALLENGE_INTERVALL_MILLIS } from '$lib/constants/pow.constants';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
