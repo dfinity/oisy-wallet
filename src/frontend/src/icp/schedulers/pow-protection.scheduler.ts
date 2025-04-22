@@ -51,9 +51,9 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		// Step 3: Requests allowance for signing operations with solved nonce.
 		const allow_signing: AllowSigningResponse = await allowSigning({
 			identity,
-			nonce: nonce
+			nonce
 		});
 
-		// console.log('_allow_signing:', _allow_signing);
+		console.log('_allow_signing:', allow_signing);
 	};
 }
