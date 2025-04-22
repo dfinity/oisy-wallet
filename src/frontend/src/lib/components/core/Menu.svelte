@@ -25,7 +25,8 @@
 		NAVIGATION_MENU,
 		NAVIGATION_MENU_VIP_BUTTON,
 		NAVIGATION_MENU_REFERRAL_BUTTON,
-		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON, NAVIGATION_MENU_GOLD_BUTTON
+		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
+		NAVIGATION_MENU_GOLD_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
