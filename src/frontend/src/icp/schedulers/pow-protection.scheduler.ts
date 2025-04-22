@@ -54,6 +54,6 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 			nonce
 		});
 
-		console.log('_allow_signing:', allow_signing);
+		console.warn('allow_signing:', allow_signing);
 	};
 }
