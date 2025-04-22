@@ -24,11 +24,12 @@ describe('Menu', () => {
 		userProfileStore.reset();
 		vi.resetAllMocks();
 		mockAuthStore();
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(false));
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
 	});
 
-	const mockUserData = (isVip: boolean): UserData => ({
-		is_vip: [isVip],
+	const mockUserData = (powers: Array<string>): UserData => ({
+		is_vip: [],
+		superpowers: [powers],
 		superpowers: [],
 		airdrops: [],
 		usage_awards: [],
@@ -68,7 +69,8 @@ describe('Menu', () => {
 	}
 
 	it('renders the vip menu item', async () => {
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(true));
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(['vip']));
+
 		await openMenu();
 		await waitForElement({ selector: menuItemVipButtonSelector });
 	});
