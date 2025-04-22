@@ -34,10 +34,10 @@
 	// $: liquidityFees = $swapAmountsStore?.swapAmounts?.liquidityFees;
 
 	const dApp: OisyDappDescription | undefined = $bestSwap
-		? dAppDescriptions.find(({ id }) => id === $bestSwap.provider.toLocaleLowerCase())
+		? dAppDescriptions.find(({ id }) => id === $bestSwap.provider.toLowerCase())
 		: undefined;
 
-	console.log($bestSwap);
+	console.log('bestSwap in Proveder', $bestSwap);
 
 
 	// TODO: this state - websiteURL - isn't one and should become a local variable
