@@ -61,6 +61,23 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	};
 });
 
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+
+	const plugin = vi.fn();
+
+	const network = vi.fn();
+	network.prototype.attachPlugin = vi.fn();
+
+	return {
+		EtherscanProvider: provider,
+		InfuraProvider: provider,
+		JsonRpcProvider: provider,
+		EtherscanPlugin: plugin,
+		Network: network
+	};
+});
+
 failTestsThatLogToConsole();
 
 if (process.env.ALLOW_LOGGING_FOR_DEBUGGING) {
