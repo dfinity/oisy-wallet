@@ -5,6 +5,7 @@ import sepoliaIconDark from '$lib/assets/networks/dark/ethereum-sepolia.svg';
 import ethereumIconLight from '$lib/assets/networks/light/ethereum-mainnet.svg';
 import sepoliaIconLight from '$lib/assets/networks/light/ethereum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
+import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
@@ -70,10 +71,11 @@ export const { chainId: SEPOLIA_NETWORK_CHAIN_ID } = SEPOLIA_NETWORK;
  * However, from a UX perspective, we use a store to enable the list of networks based on the testnets flag.
  * That's why those constants are prefixed with SUPPORTED_.
  */
-export const SUPPORTED_ETHEREUM_NETWORKS: [...EthereumNetwork[], EthereumNetwork] = [
-	...(ETH_MAINNET_ENABLED ? [ETHEREUM_NETWORK] : []),
-	SEPOLIA_NETWORK
-];
+export const SUPPORTED_ETHEREUM_NETWORKS: EthereumNetwork[] = defineSupportedNetworks({
+	mainnetFlag: ETH_MAINNET_ENABLED,
+	mainnetNetworks: [ETHEREUM_NETWORK],
+	testnetNetworks: [SEPOLIA_NETWORK]
+});
 
 export const SUPPORTED_ETHEREUM_NETWORKS_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NETWORKS.map(
 	({ id }) => id

@@ -1,5 +1,10 @@
 import { POW_ENABLED } from '$env/pow.env';
 import { allowSigning } from '$lib/api/backend.api';
+import {
+	networkBitcoinMainnetEnabled,
+	networkEthereumEnabled,
+	networkSolanaMainnetEnabled
+} from '$lib/derived/networks.derived';
 import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
@@ -7,6 +12,7 @@ import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { loading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -31,10 +37,7 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
-		await allowSigning({
-			identity,
-			nonce: [] // Default empty nonce
-		});
+		await allowSigning({ identity });
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);
@@ -66,11 +69,11 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialized (user profile settings and addresses are loaded).
  */
 export const initLoader = async ({
-																	 identity,
-																	 validateAddresses,
-																	 progressAndLoad,
-																	 setProgressModal
-																 }: {
+	identity,
+	validateAddresses,
+	progressAndLoad,
+	setProgressModal
+}: {
 	identity: OptionIdentity;
 	validateAddresses: () => void;
 	progressAndLoad: () => Promise<void>;
@@ -112,9 +115,22 @@ export const initLoader = async ({
 			return;
 		}
 	}
-	const { success: addressSuccess } = await loadAddresses(
-		err?.map(({ networkId }) => networkId) ?? []
+
+	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
+
+	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
+	const enabledNetworkIds: NetworkId[] = [
+		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
+		...(get(networkEthereumEnabled) ? [ETHEREUM_NETWORK_ID] : []),
+		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
+	];
+
+	// We don't need to load the addresses of the disabled networks.
+	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) =>
+		enabledNetworkIds.includes(networkId)
 	);
+
+	const { success: addressSuccess } = await loadAddresses(networkIds);
 
 	if (!addressSuccess) {
 		await signOut({});
