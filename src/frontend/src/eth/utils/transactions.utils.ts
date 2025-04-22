@@ -21,9 +21,15 @@ export const isTransactionPending = ({ blockNumber }: EthTransactionUi): boolean
 export const isErc20TransactionApprove = (data: string | undefined): boolean =>
 	nonNullish(data) && data.startsWith(ERC20_APPROVE_HASH);
 
-export const decodeErc20AbiDataValue = (data: string): bigint => {
+export const decodeErc20AbiDataValue = ({
+	data,
+	bytesParam = false
+}: {
+	data: string;
+	bytesParam?: boolean;
+}): bigint => {
 	const [_to, value] = AbiCoder.defaultAbiCoder().decode(
-		['address', 'uint256'],
+		['address', 'uint256', ...(bytesParam ? ['bytes32'] : [])],
 		dataSlice(data, 4)
 	);
 
