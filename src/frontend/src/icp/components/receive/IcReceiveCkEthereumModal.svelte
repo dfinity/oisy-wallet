@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -22,30 +23,26 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let sourceToken: Token;
-	export let destinationToken: Token;
+	interface Props {
+		sourceToken: Token;
+		destinationToken: Token;
+	}
 
-	/**
-	 * Props
-	 */
+	let { sourceToken, destinationToken }: Props = $props();
 
-	let sendAmount: OptionAmount = undefined;
-	let receiveAmount: number | undefined = undefined;
-	let convertProgressStep: string = ProgressStepsConvert.INITIALIZATION;
+	let sendAmount: OptionAmount = $state();
+	let receiveAmount: number | undefined = $state();
+	let convertProgressStep: string = $state(ProgressStepsConvert.INITIALIZATION);
+	let currentStep: WizardStep | undefined = $state();
+	let modal: WizardModal | undefined = $state();
 
-	/**
-	 * Wizard modal
-	 */
-
-	let steps: WizardSteps;
-	$: steps = receiveWizardSteps({
-		i18n: $i18n,
-		sourceToken: sourceToken.symbol,
-		destinationToken: destinationToken.symbol
-	});
-
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let steps: WizardSteps = $derived(
+		receiveWizardSteps({
+			i18n: $i18n,
+			sourceToken: sourceToken.symbol,
+			destinationToken: destinationToken.symbol
+		})
+	);
 
 	const dispatch = createEventDispatcher();
 
@@ -61,12 +58,17 @@
 			dispatch('nnsClose');
 		});
 
-	const goToStep = (stepName: WizardStepsHowToConvert | WizardStepsConvert | WizardStepsReceive) =>
-		goToWizardStep({
-			modal,
-			steps,
-			stepName
-		});
+	const goToStep = (
+		stepName: WizardStepsHowToConvert | WizardStepsConvert | WizardStepsReceive
+	) => {
+		if (nonNullish(modal)) {
+			goToWizardStep({
+				modal,
+				steps,
+				stepName
+			});
+		}
+	};
 </script>
 
 <ConvertContexts {sourceToken} {destinationToken}>
@@ -88,8 +90,8 @@
 			on:icBack={() =>
 				currentStep?.name === WizardStepsConvert.CONVERT
 					? goToStep(WizardStepsHowToConvert.INFO)
-					: modal.back()}
-			on:icNext={modal.next}
+					: modal?.back()}
+			on:icNext={modal?.next}
 			on:icClose={close}
 		>
 			{#if currentStep?.name === WizardStepsHowToConvert.INFO || currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
@@ -107,7 +109,7 @@
 				/>
 			{:else if currentStep?.name === WizardStepsReceive.QR_CODE}
 				<ReceiveAddressQRCode
-					on:icBack={modal.back}
+					on:icBack={modal?.back}
 					address={$icrcAccountIdentifierText ?? ''}
 					addressToken={ICP_TOKEN}
 					network={ICP_NETWORK}
