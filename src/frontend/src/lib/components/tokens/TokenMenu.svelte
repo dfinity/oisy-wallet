@@ -5,7 +5,8 @@
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import {
 		networkBitcoin,
-		networkEthereum, networkEvm,
+		networkEthereum,
+		networkEvm,
 		networkICP,
 		networkSolana
 	} from '$lib/derived/network.derived';

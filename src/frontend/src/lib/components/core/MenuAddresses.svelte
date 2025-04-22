@@ -6,7 +6,8 @@
 	import WalletAddresses from '$lib/components/core/WalletAddresses.svelte';
 	import {
 		networkBitcoin,
-		networkEthereum, networkEvm,
+		networkEthereum,
+		networkEvm,
 		networkICP,
 		networkSolana,
 		pseudoNetworkChainFusion

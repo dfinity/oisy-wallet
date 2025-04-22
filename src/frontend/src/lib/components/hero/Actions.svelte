@@ -25,7 +25,8 @@
 		networkBitcoin,
 		pseudoNetworkChainFusion,
 		networkId,
-		networkSolana, networkEvm
+		networkSolana,
+		networkEvm
 	} from '$lib/derived/network.derived';
 	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
