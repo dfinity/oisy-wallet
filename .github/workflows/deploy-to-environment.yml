@@ -82,6 +82,8 @@ on:
         required: true
       VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING:
         required: true
+      VITE_EVM_NETWORKS_ENABLED_STAGING:
+        required: true
       DFX_DEPLOY_KEY_STAGING:
         required: true
       VITE_ETHERSCAN_API_KEY_BETA:
@@ -115,6 +117,8 @@ on:
       VITE_ADDRESS_BOOK_ENABLED_BETA:
         required: true
       VITE_ONRAMPER_API_KEY_PROD_BETA:
+        required: true
+      VITE_EVM_NETWORKS_ENABLED_BETA:
         required: true
       DFX_DEPLOY_KEY_BETA:
         required: true
