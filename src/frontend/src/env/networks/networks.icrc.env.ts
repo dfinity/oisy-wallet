@@ -11,6 +11,7 @@ import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
 import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.oct.env';
 import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
 import { SHIB_TOKEN_GROUP } from '$env/tokens/groups/groups.shib.env';
+import { UNI_TOKEN_GROUP } from '$env/tokens/groups/groups.uni.env';
 import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.wbtc.env';
@@ -386,7 +387,8 @@ const CKUNI_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_D
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUNI,
 			position: 9,
-			twinToken: UNI_TOKEN
+			twinToken: UNI_TOKEN,
+			groupData: UNI_TOKEN_GROUP
 		}
 	: undefined;
 
