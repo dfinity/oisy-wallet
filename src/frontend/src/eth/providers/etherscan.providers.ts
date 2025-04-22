@@ -15,8 +15,7 @@ import {
 	EtherscanPlugin,
 	EtherscanProvider as EtherscanProviderLib,
 	Network,
-	type BlockTag,
-	type Networkish
+	type BlockTag
 } from 'ethers/providers';
 import { get } from 'svelte/store';
 
@@ -30,7 +29,7 @@ export class EtherscanProvider {
 	private readonly provider: EtherscanProviderLib;
 
 	constructor(
-		private readonly network: Networkish,
+		private readonly network: Network,
 		private readonly chainId: EthereumChainId
 	) {
 		this.provider = new EtherscanProviderLib(this.network, ETHERSCAN_API_KEY);
