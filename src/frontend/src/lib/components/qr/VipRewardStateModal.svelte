@@ -7,11 +7,11 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import { VIP_STATE_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
+	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import {QrCodeType} from "$lib/enums/qr-code-types";
-	import {VIP_STATE_IMAGE_BANNER} from "$lib/constants/test-ids.constants";
 
 	export let isSuccessful: boolean;
 	export let codeType: QrCodeType = QrCodeType.VIP;
@@ -32,7 +32,7 @@
 
 	<ContentWithToolbar>
 		<ImgBanner
-				src={isSuccessful
+			src={isSuccessful
 				? codeType === QrCodeType.VIP
 					? successfulVipReward
 					: successfulBinanceReward
