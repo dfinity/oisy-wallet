@@ -43,10 +43,10 @@ export class RewardCanister extends Canister<RewardService> {
 	getNewVipReward = (rewardType: ClaimedVipReward): Promise<NewVipRewardResponse> => {
 		const { new_vip_reward } = this.caller({ certified: true });
 
-		return new_vip_reward(rewardType);
+		return new_vip_reward([rewardType]);
 	};
 
-	claimVipReward = (vipReward: VipReward): Promise<ClaimVipRewardResponse> => {
+	claimVipReward = (vipReward: VipReward): Promise<[ClaimVipRewardResponse, [] | [ClaimedVipReward]]> => {
 		const { claim_vip_reward } = this.caller({ certified: true });
 
 		return claim_vip_reward(vipReward);

@@ -41,7 +41,7 @@ export const claimVipReward = async ({
 	identity
 }: CanisterApiFunctionParams<{
 	vipReward: VipReward;
-}>): Promise<ClaimVipRewardResponse> => {
+}>): Promise<[ClaimVipRewardResponse, [] | [ClaimedVipReward]]> => {
 	const { claimVipReward } = await rewardCanister({ identity });
 
 	return claimVipReward(vipReward);
