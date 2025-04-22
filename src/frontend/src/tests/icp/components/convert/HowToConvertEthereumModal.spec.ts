@@ -11,12 +11,6 @@ import { HOW_TO_CONVERT_ETHEREUM_INFO } from '$lib/constants/test-ids.constants'
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
-// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
-vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
-	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
-});
-
 describe('HowToConvertEthereumModal', () => {
 	const props = {
 		sourceToken: ETHEREUM_TOKEN,
