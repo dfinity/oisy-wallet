@@ -5,17 +5,19 @@ vi.mock('@dfinity/gix-components', () => ({
 	Modal: ModalMock
 }));
 
-import MultiComponentModal from '$lib/components/core/MultiComponentModal.svelte';
+import MultiComponentModal from '$lib/components/core/MultiPageModal.svelte';
+import { multiPageModalStore } from '$lib/stores/multi-page-modal.store';
 import { render, screen } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { vi } from 'vitest';
 import TestModalComponent from './TestModalComponent.svelte';
 import TestModalNoSnippets from './TestModalNoSnippets.svelte';
 
-describe('MultiComponentModal', () => {
+describe('MultiPageModal', () => {
 	let subject: MultiComponentModal;
 
 	beforeEach(() => {
+		multiPageModalStore.reset();
 		// Create a fresh instance for each test
 		const { component } = render(MultiComponentModal);
 		subject = component as MultiComponentModal;
