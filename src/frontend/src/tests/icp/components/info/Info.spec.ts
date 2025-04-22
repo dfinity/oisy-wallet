@@ -17,12 +17,6 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
-vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
-	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
-});
-
 describe('Info', () => {
 	const mockCkBtcToken = {
 		...mockValidIcCkToken,
