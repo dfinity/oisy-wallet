@@ -1,9 +1,10 @@
 import type {
+	ClaimedVipReward,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
 	UserData,
-	UserSnapshot, ClaimedVipReward
+	UserSnapshot
 } from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -172,7 +173,7 @@ describe('reward.canister', () => {
 				serviceOverride: service
 			});
 
-			const rewardType: ClaimedVipReward = {campaign_id: 'vip'}
+			const rewardType: ClaimedVipReward = { campaign_id: 'vip' };
 			const vipRewardResponse = await getNewVipReward(rewardType);
 
 			expect(service.new_vip_reward).toHaveBeenCalledWith(rewardType);
@@ -189,7 +190,7 @@ describe('reward.canister', () => {
 				serviceOverride: service
 			});
 
-			const result = getNewVipReward({campaign_id: 'vip'});
+			const result = getNewVipReward({ campaign_id: 'vip' });
 
 			await expect(result).rejects.toThrow(mockResponseError);
 		});

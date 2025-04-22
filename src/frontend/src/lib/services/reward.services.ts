@@ -118,7 +118,13 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 	return { rewards: [], lastTimestamp: ZERO_BI };
 };
 
-const updateReward = async ({rewardType, identity}: {rewardType: ClaimedVipReward, identity: Identity}): Promise<VipReward> => {
+const updateReward = async ({
+	rewardType,
+	identity
+}: {
+	rewardType: ClaimedVipReward;
+	identity: Identity;
+}): Promise<VipReward> => {
 	const response = await getNewVipRewardApi({
 		rewardType,
 		identity,
@@ -146,9 +152,15 @@ const updateReward = async ({rewardType, identity}: {rewardType: ClaimedVipRewar
  *
  * @throws {Error} Displays an error toast and logs the error if the update call fails.
  */
-export const getNewReward = async ({campaignId, identity}: { campaignId: string, identity: Identity }): Promise<VipReward | undefined> => {
+export const getNewReward = async ({
+	campaignId,
+	identity
+}: {
+	campaignId: string;
+	identity: Identity;
+}): Promise<VipReward | undefined> => {
 	try {
-		return await updateReward({ rewardType: {campaign_id: campaignId}, identity});
+		return await updateReward({ rewardType: { campaign_id: campaignId }, identity });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({

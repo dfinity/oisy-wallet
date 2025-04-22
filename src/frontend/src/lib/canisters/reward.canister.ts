@@ -1,12 +1,13 @@
 import type {
 	ClaimVipRewardResponse,
+	ClaimedVipReward,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
 	SetReferrerResponse,
 	UserData,
 	UserSnapshot,
-	VipReward, ClaimedVipReward
+	VipReward
 } from '$declarations/rewards/rewards.did';
 import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/rewards.factory.certified.did';
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
