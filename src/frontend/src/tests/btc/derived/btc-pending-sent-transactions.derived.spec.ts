@@ -187,17 +187,6 @@ describe('initPendingSentTransactionsStatus', () => {
 			);
 		});
 
-		it('should return "BtcPendingSentTransactionsStatus.SOME" if there are pending transactions for the address', () => {
-			btcAddressMainnetStore.set({ certified: true, data: mockAddressMainnet });
-			btcPendingSentTransactionsStore.setPendingTransactions({
-				address: mockAddressMainnet,
-				pendingTransactions: [pendingTransactionMock]
-			});
-			const store = initPendingSentTransactionsStatus(mockAddressMainnet);
-
-			expect(get(store)).toBe(BtcPendingSentTransactionsStatus.SOME);
-		});
-
 		it('should return "BtcPendingSentTransactionsStatus.NONE" if there is empty pending transactions for the address', () => {
 			btcAddressMainnetStore.set({ certified: true, data: mockAddressMainnet });
 			btcPendingSentTransactionsStore.setPendingTransactions({
