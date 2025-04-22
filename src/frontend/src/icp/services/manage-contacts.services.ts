@@ -1,0 +1,85 @@
+import type { Contact as BackendContact } from '$declarations/backend/backend.did';
+import { contactsStore } from '$icp/stores/contacts.store';
+import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
+import type { Contact } from '$lib/types/contact';
+import {
+	getAddressString,
+	getDiscriminatorForTokenAccountId
+} from '$lib/utils/token-account-id.utils';
+import { fromNullable, toNullable } from '@dfinity/utils';
+
+// TODO remove when real backend call implementation is used
+const DELAY = 1000;
+
+const mapToFrontendContact = (contact: BackendContact): Contact => ({
+	...contact,
+	addresses: contact.addresses.map((address) => ({
+		address: getAddressString(address.token_account_id),
+		label: fromNullable(address.label),
+		addressType: getDiscriminatorForTokenAccountId(address.token_account_id)
+	}))
+});
+
+const mapToBackendContact = (contact: Contact): BackendContact => ({
+	...contact,
+	addresses: contact.addresses.map((address) => ({
+		token_account_id: TokenAccountIdSchema.parse(address),
+		label: toNullable(address.alias)
+	}))
+});
+
+export const loadContacts = async (): Promise<void> => {
+	contactsStore.reset();
+
+	// TODO: Add real implementation
+	await new Promise((r) => setTimeout(r, DELAY));
+	const contacts: BackendContact[] = [
+		{
+			id: BigInt(Date.now()),
+			name: 'Initial Contact',
+			addresses: [],
+			update_timestamp: BigInt(Date.now())
+		}
+	];
+	// TODO: END
+
+	contactsStore.set(contacts.map(mapToFrontendContact));
+};
+
+export const createContact = async (name: string) => {
+	// TODO: Add real implementation
+	await new Promise((r) => setTimeout(r, DELAY));
+	const newContact: BackendContact = {
+		id: BigInt(Date.now()),
+		update_timestamp: BigInt(Date.now()),
+		addresses: [],
+		name
+	};
+	// TODO: END
+
+	contactsStore.addContact(mapToFrontendContact(newContact));
+	return newContact;
+};
+
+export const updateContact = async (contact: Contact) => {
+	const backendContact = mapToBackendContact(contact);
+
+	// TODO: Add real implementation
+	await new Promise((r) => setTimeout(r, DELAY));
+	const updatedContact: BackendContact = {
+		...backendContact,
+		update_timestamp: BigInt(Date.now())
+	};
+	// TODO: END
+
+	contactsStore.updateContact(mapToFrontendContact(updatedContact));
+	return updatedContact;
+};
+
+export const deleteContact = async (id: Contact['id']) => {
+	// TODO: Add real implementation
+	await new Promise((r) => setTimeout(r, DELAY));
+	// TODO: END
+
+	contactsStore.removeContact(id);
+};

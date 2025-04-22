@@ -3,23 +3,26 @@ import { ADDRESS_BOOK_ADD_CONTACT_BUTTON } from '$lib/constants/test-ids.constan
 import type { Contact } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
+import { vi } from 'vitest';
 
 describe('AddressBookStep', () => {
 	const mockContacts: Contact[] = [
 		{
-			id: 'contact-1',
+			id: BigInt(1),
 			name: 'Test Contact 1',
+			update_timestamp: BigInt(Date.now()),
 			addresses: [
 				{
-					id: 'address-1',
 					address: '0x123456789abcdef',
-					alias: 'My ETH Address'
+					alias: 'My ETH Address',
+					addressType: 'Eth'
 				}
 			]
 		},
 		{
-			id: 'contact-2',
+			id: BigInt(2),
 			name: 'Test Contact 2',
+			update_timestamp: BigInt(Date.now()),
 			addresses: []
 		}
 	];

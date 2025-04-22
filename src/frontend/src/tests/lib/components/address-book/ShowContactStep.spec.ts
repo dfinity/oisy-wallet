@@ -11,24 +11,26 @@ import { fireEvent, render } from '@testing-library/svelte';
 
 describe('ShowContactStep', () => {
 	const mockContact: Contact = {
-		id: 'contact-1',
+		id: BigInt(1),
 		name: 'Test Contact',
+		update_timestamp: BigInt(Date.now()),
 		addresses: []
 	};
 
 	const mockContactWithAddresses: Contact = {
-		id: 'contact-2',
+		id: BigInt(2),
 		name: 'Contact With Addresses',
+		update_timestamp: BigInt(Date.now()),
 		addresses: [
 			{
-				id: 'address-1',
 				address: '0x123456789abcdef',
-				alias: 'My ETH Address'
+				alias: 'My ETH Address',
+				addressType: 'Eth'
 			},
 			{
-				id: 'address-2',
 				address: 'btc123456789abcdef',
-				alias: 'My BTC Address'
+				alias: 'My BTC Address',
+				addressType: 'Btc'
 			}
 		]
 	};

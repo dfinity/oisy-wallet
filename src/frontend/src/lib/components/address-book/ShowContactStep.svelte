@@ -12,14 +12,14 @@
 		CONTACT_SHOW_CLOSE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Address, Contact } from '$lib/types/contact';
+	import type { Contact, ContactAddress } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		contact: Contact;
 		close: () => void;
 		addAddress?: () => void;
-		showAddress?: (address: Address) => void;
+		showAddress?: (address: ContactAddress) => void;
 		edit?: (contact: Contact) => void;
 	}
 
@@ -37,7 +37,7 @@
 		https://github.com/dfinity/oisy-wallet/pull/6243 
 		-->
 		<div>
-			{#each contact.addresses as address (address.id)}
+			{#each contact.addresses as address, index (index)}
 				<div class="flex items-center">
 					<div class="grow">ADDRESS: {address.address} {address.alias}</div>
 					{#if nonNullish(showAddress)}
