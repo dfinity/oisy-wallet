@@ -40,6 +40,7 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import type { MinterInfo } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
+import { InfuraProvider } from 'ethers/providers';
 import { get, readable, writable } from 'svelte/store';
 import { type MockInstance } from 'vitest';
 
@@ -50,17 +51,6 @@ vi.mock('$lib/services/auth.services', () => ({
 vi.mock('$eth/services/fee.services', () => ({
 	getErc20FeeData: vi.fn()
 }));
-
-vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
-	provider.prototype.getFeeData = vi.fn().mockResolvedValue({
-		lastBaseFeePerGas: null,
-		maxFeePerGas: null,
-		maxPriorityFeePerGas: null,
-		gasPrice: null
-	});
-	return { InfuraProvider: provider, JsonRpcProvider: provider, EtherscanProvider: provider };
-});
 
 describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
@@ -154,6 +144,13 @@ describe('EthConvertTokenWizard', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		InfuraProvider.prototype.getFeeData = vi.fn().mockResolvedValue({
+			lastBaseFeePerGas: null,
+			maxFeePerGas: null,
+			maxPriorityFeePerGas: null,
+			gasPrice: null
+		});
 
 		mockPage.reset();
 
