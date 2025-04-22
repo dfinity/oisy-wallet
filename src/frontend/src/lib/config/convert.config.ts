@@ -3,7 +3,7 @@ import type { WizardStepsParams } from '$lib/types/steps';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { WizardSteps } from '@dfinity/gix-components';
 
-interface ConvertWizardStepsParams extends WizardStepsParams {
+export interface ConvertWizardStepsParams extends WizardStepsParams {
 	sourceToken: string;
 	destinationToken: string;
 }
