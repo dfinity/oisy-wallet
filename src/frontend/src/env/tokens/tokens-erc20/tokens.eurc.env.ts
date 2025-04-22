@@ -44,5 +44,5 @@ export const SEPOLIA_EURC_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	// TODO: is there a ckSepoliaEURC ?
 	twinTokenSymbol: 'ckSepoliaEURC',
-    groupData: SEPOLIA_EURC_TOKEN_GROUP
+	groupData: SEPOLIA_EURC_TOKEN_GROUP
 };

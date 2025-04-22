@@ -11,7 +11,6 @@ import {
 	SOLANA_TESTNET_TOKEN_GROUP,
 	SOLANA_TOKEN_GROUP
 } from '$env/tokens/groups/groups.sol.env';
-import type { RequiredToken, TokenId } from '$lib/types/token';
 import type { RequiredToken, Token, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
