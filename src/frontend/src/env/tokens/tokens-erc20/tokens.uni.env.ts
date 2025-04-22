@@ -1,5 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { UNI_TOKEN_GROUP } from '$env/tokens/groups/groups.erc20.env';
+import { UNI_TOKEN_GROUP } from '$env/tokens/groups/groups.uni.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import uni from '$icp-eth/assets/uni.svg';
 import type { TokenId } from '$lib/types/token';

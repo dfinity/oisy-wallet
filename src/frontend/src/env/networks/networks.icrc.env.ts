@@ -21,6 +21,17 @@ import {
 	USDC_TOKEN_GROUP,
 	USDT_TOKEN_GROUP
 } from '$env/tokens/groups/groups.spl.env';
+import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
+import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
+import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
+import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
+import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.oct.env';
+import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
+import { SHIB_TOKEN_GROUP } from '$env/tokens/groups/groups.shib.env';
+import { UNI_TOKEN_GROUP } from '$env/tokens/groups/groups.uni.env';
+import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
+import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
+import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.wbtc.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
@@ -116,8 +127,8 @@ const CKBTC_IC_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'bitcoin',
 				position: 1,
 				twinToken: BTC_MAINNET_TOKEN,
-				explorerUrl: CKBTC_EXPLORER_URL,
-				groupData: BTC_MAINNET_TOKEN_GROUP
+				groupData: BTC_TOKEN_GROUP,
+				explorerUrl: CKBTC_EXPLORER_URL
 			}
 		: undefined;
 
