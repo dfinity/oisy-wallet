@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync, readdirSync } from 'node:fs';
-import { readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { open, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const deleteIndexes = async ({ dest = `./src/declarations` }) => {
@@ -50,7 +50,13 @@ export const idlFactory = ({ IDL }) => {`
 export const init = ({ IDL }) => {`
 					);
 
-					await writeFile(factoryPath, cleanInit, 'utf8');
+					// Open the file for writing only if it does not already exist (wx flag).
+					// This avoids a potential file system race condition warning.
+					const fd = await open(factoryPath, 'wx');
+
+					await writeFile(fd, cleanInit, 'utf8');
+
+					await fd.close();
 
 					resolve();
 				};

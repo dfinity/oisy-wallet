@@ -1,4 +1,12 @@
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { allowSigning } from '$lib/api/backend.api';
+import {
+	networkBitcoinMainnetEnabled,
+	networkEthereumEnabled,
+	networkSolanaMainnetEnabled
+} from '$lib/derived/networks.derived';
 import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
@@ -6,6 +14,7 @@ import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { loading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -108,9 +117,21 @@ export const initLoader = async ({
 		return;
 	}
 
-	const { success: addressSuccess } = await loadAddresses(
-		err?.map(({ networkId }) => networkId) ?? []
+	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
+
+	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
+	const enabledNetworkIds: NetworkId[] = [
+		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
+		...(get(networkEthereumEnabled) ? [ETHEREUM_NETWORK_ID] : []),
+		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
+	];
+
+	// We don't need to load the addresses of the disabled networks.
+	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) =>
+		enabledNetworkIds.includes(networkId)
 	);
+
+	const { success: addressSuccess } = await loadAddresses(networkIds);
 
 	if (!addressSuccess) {
 		await signOut({});
