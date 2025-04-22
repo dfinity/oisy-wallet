@@ -18,36 +18,31 @@
 	import type { HideInfoKey } from '$lib/utils/info.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
-	let destinationToken: OptionIcCkToken;
-	$: destinationToken = nonNullish($pageToken) ? ($pageToken as IcCkToken) : undefined;
+	const destinationToken: OptionIcCkToken = $derived(
+		nonNullish($pageToken) ? ($pageToken as IcCkToken) : undefined
+	);
 
-	let sourceToken: OptionIcToken;
-	$: sourceToken = nonNullish(destinationToken)
-		? (destinationToken.twinToken as IcToken)
-		: undefined;
+	const sourceToken: OptionIcToken = $derived(
+		nonNullish(destinationToken) ? (destinationToken.twinToken as IcToken) : undefined
+	);
 
-	let mainnet = true;
-	$: mainnet =
-		isNetworkIdBTCMainnet(sourceToken?.network.id) ||
-		isNetworkIdETHMainnet(sourceToken?.network.id);
+	const mainnet = $derived(
+		isNetworkIdBTCMainnet(sourceToken?.network.id) || isNetworkIdETHMainnet(sourceToken?.network.id)
+	);
 
-	let ckBTC = false;
-	$: ckBTC = mainnet && $networkBitcoinMainnetEnabled && $tokenCkBtcLedger;
+	const ckBTC = $derived(mainnet && $networkBitcoinMainnetEnabled && $tokenCkBtcLedger);
+	const ckETH = $derived(mainnet && $networkEthereumEnabled && $tokenCkEthLedger);
+	const ckErc20 = $derived(mainnet && $networkEthereumEnabled && $tokenCkErc20Ledger);
 
-	let ckETH = false;
-	$: ckETH = mainnet && $networkEthereumEnabled && $tokenCkEthLedger;
-
-	let ckErc20 = false;
-	$: ckErc20 = mainnet && $networkEthereumEnabled && $tokenCkErc20Ledger;
-
-	let key: HideInfoKey | undefined = undefined;
-	$: key = ckBTC
-		? 'oisy_ic_hide_bitcoin_info'
-		: ckETH
-			? 'oisy_ic_hide_ethereum_info'
-			: ckErc20
-				? 'oisy_ic_hide_erc20_info'
-				: undefined;
+	const key: HideInfoKey | undefined = $derived(
+		ckBTC
+			? 'oisy_ic_hide_bitcoin_info'
+			: ckETH
+				? 'oisy_ic_hide_ethereum_info'
+				: ckErc20
+					? 'oisy_ic_hide_erc20_info'
+					: undefined
+	);
 </script>
 
 {#if (ckBTC || ckETH || ckErc20) && nonNullish(sourceToken) && nonNullish(destinationToken)}
