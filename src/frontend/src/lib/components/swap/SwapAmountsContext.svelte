@@ -11,6 +11,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { fetchSwapOptions } from '$lib/utils/swap.utils';
+	import { log } from 'console';
 
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: Token | undefined;
@@ -41,6 +42,8 @@
 				amount: parsedAmount,
 				tokens: $tokens
 			});
+
+			console.log('swaps', swaps);
 
 			if (swaps.length === 0) {
 				store.reset();
