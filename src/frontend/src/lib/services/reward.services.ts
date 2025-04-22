@@ -196,7 +196,7 @@ const updateVipReward = async ({
 	});
 
 	if ('Success' in response.claimRewardResponse) {
-		const claimedVipReward = fromNullable(response.claimedVipReward);
+		const claimedVipReward = response.claimedVipReward;
 		if (isNullish(claimedVipReward)) {
 			throw new InvalidCampaignError();
 		}

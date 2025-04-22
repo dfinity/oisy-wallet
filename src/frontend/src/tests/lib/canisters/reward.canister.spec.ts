@@ -201,7 +201,7 @@ describe('reward.canister', () => {
 		it('should be possible to claim a vip reward', async () => {
 			const mockedClaimResponse: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = [
 				{ Success: null },
-				toNullable({ campaign_id: 'vip' })
+				[{ campaign_id: 'vip' }]
 			];
 			service.claim_vip_reward.mockResolvedValue(mockedClaimResponse);
 
@@ -213,7 +213,7 @@ describe('reward.canister', () => {
 			const claimResponse = await claimVipReward(vipReward);
 
 			expect(service.claim_vip_reward).toHaveBeenCalledWith(vipReward);
-			expect(claimResponse).toEqual(mockedClaimResponse);
+			expect(claimResponse).toEqual({claimRewardResponse: { Success: null }, claimedVipReward: {campaign_id: 'vip'}});
 		});
 
 		it('should throw an error if claim_vip_reward throws', async () => {

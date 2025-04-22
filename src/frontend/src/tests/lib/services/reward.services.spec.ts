@@ -156,7 +156,7 @@ describe('reward-code', () => {
 	describe('claimVipReward', () => {
 		const mockedClaimRewardResponse: RewardClaimApiResponse = {
 			claimRewardResponse: { Success: null },
-			claimedVipReward: toNullable({ campaign_id: 'vip' })
+			claimedVipReward: { campaign_id: 'vip' }
 		};
 
 		it('should return true if a valid vip reward code is used', async () => {
@@ -177,7 +177,7 @@ describe('reward-code', () => {
 		it('should return false if an invalid vip reward code is used', async () => {
 			const claimRewardResponse: RewardClaimApiResponse = {
 				claimRewardResponse: { InvalidCode: null },
-				claimedVipReward: []
+				claimedVipReward: undefined
 			};
 			const claimRewardSpy = vi
 				.spyOn(rewardApi, 'claimVipReward')
@@ -199,7 +199,7 @@ describe('reward-code', () => {
 		it('should return false if an already used vip reward code is used', async () => {
 			const claimRewardResponse: RewardClaimApiResponse = {
 				claimRewardResponse: { AlreadyClaimed: null },
-				claimedVipReward: []
+				claimedVipReward: undefined
 			};
 			const claimRewardSpy = vi
 				.spyOn(rewardApi, 'claimVipReward')
@@ -221,7 +221,7 @@ describe('reward-code', () => {
 		it('should return false if no campaign id is returned', async () => {
 			const claimRewardResponse: RewardClaimApiResponse = {
 				claimRewardResponse: { Success: null },
-				claimedVipReward: []
+				claimedVipReward: undefined
 			};
 			const claimRewardSpy = vi
 				.spyOn(rewardApi, 'claimVipReward')

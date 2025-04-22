@@ -22,7 +22,7 @@ export interface RewardResult {
 
 export interface RewardClaimApiResponse {
 	claimRewardResponse: ClaimVipRewardResponse;
-	claimedVipReward: [] | [ClaimedVipReward];
+	claimedVipReward: ClaimedVipReward | undefined;
 }
 
 export interface RewardClaimResponse<T = unknown> {
