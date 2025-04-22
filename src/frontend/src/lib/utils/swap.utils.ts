@@ -131,8 +131,7 @@ export const swapProviders: SwapProvider<any>[] = [
 	{
 		id: 'kongSwap',
 		getQuote: kongSwapAmounts,
-		mapResult: ({ swap, tokens }) =>
-			mapKongSwapResult({ swap, tokens: tokens ?? [] })
+		mapResult: ({ swap, tokens }) => mapKongSwapResult({ swap, tokens: tokens ?? [] })
 	},
 	{
 		id: 'icpSwap',
@@ -141,10 +140,7 @@ export const swapProviders: SwapProvider<any>[] = [
 	}
 ];
 
-
-//queryAndUpdate    
-
-
+//queryAndUpdate
 
 export const fetchSwapOptions = async ({
 	identity,

@@ -40,6 +40,6 @@ export const idlFactory = ({ IDL }: { IDL: any }) => {
 		getPool: IDL.Func([GetPoolArgs], [Result_3], ['query']),
 		getPools: IDL.Func([], [Result_2], ['query']),
 		quote: IDL.Func([SwapArgs], [Result], ['query']),
-    swap: IDL.Func([SwapArgs], [Result], []),
+		swap: IDL.Func([SwapArgs], [Result], [])
 	});
 };

@@ -139,14 +139,14 @@
 		destinationToken={$destinationToken}
 	>
 		<!-- <!-- {#if currentStep?.name === WizardStepsSwap.SWAP} -->
-			<SwapForm
-				on:icClose
-				on:icNext
-				on:icShowTokensList
-				bind:swapAmount
-				bind:receiveAmount
-				bind:slippageValue
-			/>
+		<SwapForm
+			on:icClose
+			on:icNext
+			on:icShowTokensList
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+		/>
 		<!-- {:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview on:icSwap={swap} on:icBack {slippageValue} {swapAmount} {receiveAmount} />
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}

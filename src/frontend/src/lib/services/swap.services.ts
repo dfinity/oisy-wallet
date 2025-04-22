@@ -13,8 +13,6 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
-import type { KongSwapAmountsParams } from '$lib/types/api';
-import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Amount } from '$lib/types/send';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
@@ -120,6 +118,8 @@ export const loadKongSwapTokens = async ({ identity }: { identity: Identity }): 
 		)
 	);
 };
+
+// ICTokenType || ICRCTOKENTYPE
 
 // 	identity,
 // 	poolCanisterId,
@@ -274,7 +274,8 @@ export const getIcpSwapAmounts = async ({
 	sourceAmount,
 	sourceToken,
 	destinationToken
-}: CanisterApiFunctionParams<KongSwapAmountsParams>) => {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: any) => {
 	const pool = await getPool({
 		identity,
 		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },

@@ -1,23 +1,22 @@
-import type { ICTokenReply } from '$declarations/kong_backend/kong_backend.did';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export type SwapTokensStoreData = Option<Record<string, any>>;
 
 interface SwapTokensStore extends Readable<SwapTokensStoreData> {
-    setKongSwapTokens: (data: SwapTokensStoreData) => void;
+	setKongSwapTokens: (data: SwapTokensStoreData) => void;
 }
 
 const initSwapTokensStore = (): SwapTokensStore => {
-    const { subscribe, set } = writable<SwapTokensStoreData>(undefined);
+	const { subscribe, set } = writable<SwapTokensStoreData>(undefined);
 
-    return {
-        subscribe,
+	return {
+		subscribe,
 
-        setKongSwapTokens(data: SwapTokensStoreData) {
-            set(data);
-        }
-    };
+		setKongSwapTokens(data: SwapTokensStoreData) {
+			set(data);
+		}
+	};
 };
 
 // The store is global but will be filled with data only once user opens the Swap modal.
