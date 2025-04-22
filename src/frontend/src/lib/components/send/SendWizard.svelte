@@ -12,9 +12,13 @@
 		isNetworkIdEthereum,
 		isNetworkIdICP,
 		isNetworkIdBitcoin,
-		isNetworkIdSolana
+		isNetworkIdSolana,
+		isNetworkIdEvm
 	} from '$lib/utils/network.utils';
 	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
+	import { selectedEvmNetwork } from '$evm/derived/network.derived';
+	import { nonNullish } from '@dfinity/utils';
+	import { evmNativeToken } from '$evm/derived/token.derived';
 
 	export let source: string;
 	export let destination: string;
@@ -33,6 +37,23 @@
 			{formCancelAction}
 			sourceNetwork={$selectedEthereumNetworkWithFallback}
 			nativeEthereumToken={$ethereumToken}
+			bind:destination
+			bind:targetNetwork
+			bind:amount
+			bind:sendProgressStep
+			on:icBack
+			on:icSendBack
+			on:icNext
+			on:icClose
+			on:icQRCodeScan
+			on:icQRCodeBack
+		/>
+	{:else if isNetworkIdEvm($token?.network.id) && nonNullish($selectedEvmNetwork) && nonNullish($evmNativeToken)}
+		<EthSendTokenWizard
+			{currentStep}
+			{formCancelAction}
+			sourceNetwork={$selectedEvmNetwork}
+			nativeEthereumToken={$evmNativeToken}
 			bind:destination
 			bind:targetNetwork
 			bind:amount
