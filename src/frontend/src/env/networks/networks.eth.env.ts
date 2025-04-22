@@ -18,9 +18,6 @@ export const ETH_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 export const INFURA_NETWORK_HOMESTEAD: Networkish = 'homestead';
 export const INFURA_NETWORK_SEPOLIA: Networkish = 'sepolia';
 
-export const ETHERSCAN_NETWORK_HOMESTEAD: Networkish = 'homestead';
-export const ETHERSCAN_NETWORK_SEPOLIA: Networkish = 'sepolia';
-
 export const ETHERSCAN_API_URL_HOMESTEAD = 'https://api.etherscan.io/api';
 export const ETHERSCAN_API_URL_SEPOLIA = 'https://api-sepolia.etherscan.io/api';
 
