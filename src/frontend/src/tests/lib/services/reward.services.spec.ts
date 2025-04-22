@@ -39,42 +39,76 @@ describe('reward-code', () => {
 		vi.clearAllMocks();
 	});
 
-	describe('isVip', () => {
+	describe('getUserRoles', () => {
 		const mockedUserData: UserData = {
 			is_vip: [true],
+			superpowers: [['vip', 'gold']],
 			airdrops: [],
 			usage_awards: [],
 			last_snapshot_timestamp: [BigInt(Date.now())],
 			sprinkles: []
 		};
 
-		it('should return true if user is vip', async () => {
-			const getUserInfoSpy = vi
-				.spyOn(rewardApi, 'getUserInfo')
-				.mockResolvedValueOnce(mockedUserData);
+		describe('VIP', () => {
+			it('should return true if user is vip', async () => {
+				const getUserInfoSpy = vi
+					.spyOn(rewardApi, 'getUserInfo')
+					.mockResolvedValueOnce(mockedUserData);
 
-			const { is_vip } = await getUserRoles({ identity: mockIdentity });
+				const { is_vip } = await getUserRoles({ identity: mockIdentity });
 
-			expect(getUserInfoSpy).toHaveBeenCalledWith({
-				identity: mockIdentity,
-				certified: false,
-				nullishIdentityErrorMessage
+				expect(getUserInfoSpy).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					certified: false,
+					nullishIdentityErrorMessage
+				});
+				expect(is_vip).toEqual(true);
 			});
-			expect(is_vip).toEqual(true);
+
+			it('should return false if user is not vip', async () => {
+				const userData: UserData = { ...mockedUserData, superpowers: [] };
+				const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
+
+				const { is_vip } = await getUserRoles({ identity: mockIdentity });
+
+				expect(getUserInfoSpy).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					certified: false,
+					nullishIdentityErrorMessage
+				});
+				expect(is_vip).toEqual(false);
+			});
 		});
 
-		it('should return false if user is not vip', async () => {
-			const userData: UserData = { ...mockedUserData, is_vip: [false] };
-			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
+		describe('Gold', () => {
+			it('should return true if user is gold user', async () => {
+				const getUserInfoSpy = vi
+					.spyOn(rewardApi, 'getUserInfo')
+					.mockResolvedValueOnce(mockedUserData);
 
-			const { is_vip } = await getUserRoles({ identity: mockIdentity });
+				const { is_gold } = await getUserRoles({ identity: mockIdentity });
 
-			expect(getUserInfoSpy).toHaveBeenCalledWith({
-				identity: mockIdentity,
-				certified: false,
-				nullishIdentityErrorMessage
+				expect(getUserInfoSpy).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					certified: false,
+					nullishIdentityErrorMessage
+				});
+				expect(is_gold).toEqual(true);
 			});
-			expect(is_vip).toEqual(false);
+
+			it('should return false if user is not gold user', async () => {
+				const userData: UserData = { ...mockedUserData, superpowers: [] };
+				const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
+
+				const { is_gold } = await getUserRoles({ identity: mockIdentity });
+
+				expect(getUserInfoSpy).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					certified: false,
+					nullishIdentityErrorMessage
+				});
+				expect(is_gold).toEqual(false);
+			});
 		});
 	});
 
@@ -186,6 +220,7 @@ describe('reward-code', () => {
 		};
 		const mockedUserData: UserData = {
 			is_vip: [false],
+			superpowers: [],
 			airdrops: [],
 			usage_awards: [[mockedReward]],
 			last_snapshot_timestamp: [lastTimestamp],

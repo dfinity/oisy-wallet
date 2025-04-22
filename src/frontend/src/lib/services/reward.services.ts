@@ -34,7 +34,12 @@ const queryUserRoles = async (params: {
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	return { is_vip: fromNullable(userData.is_vip) === true, is_gold: false };
+	const superpowers = fromNullable(userData.superpowers);
+	if (isNullish(superpowers)) {
+		return { is_vip: false, is_gold: false };
+	}
+
+	return { is_vip: superpowers.includes('vip'), is_gold: superpowers.includes('gold') };
 };
 
 /**
