@@ -7,6 +7,7 @@ edition = "2021"
 bs58 = { workspace = true }
 candid = { workspace = true }
 getrandom = { workspace = true }
+hex = { workspace = true }
 ic-canister-sig-creation = { workspace = true }
 ic-cdk = { workspace = true }
 ic-cdk-macros = { workspace = true }
@@ -16,6 +17,7 @@ ic-metrics-encoder = { workspace = true }
 ic-verifiable-credentials = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
+sha2 = { workspace = true }
 strum = { workspace = true }
 strum_macros = { workspace = true }
 
