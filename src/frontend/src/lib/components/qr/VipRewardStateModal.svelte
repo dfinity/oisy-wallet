@@ -11,6 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import {VIP_STATE_IMAGE_BANNER} from "$lib/constants/test-ids.constants";
 
 	export let isSuccessful: boolean;
 	export let codeType: QrCodeType = QrCodeType.VIP;
@@ -37,6 +38,7 @@
 					: successfulBinanceReward
 				: failedVipReward}
 			styleClass="aspect-auto"
+			testId={VIP_STATE_IMAGE_BANNER}
 		/>
 
 		<h3 class="my-3 text-center"
