@@ -4,8 +4,8 @@ import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
 import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
+import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
