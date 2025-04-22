@@ -6,24 +6,24 @@ describe('InfoBitcoin', () => {
 	it('should render title correctly', () => {
 		const { getByText } = render(InfoBitcoin);
 
-		expect(getByText(en.info.bitcoin.title));
+		expect(getByText(en.info.bitcoin.title)).toBeDefined();
 	});
 
 	it('should render description correctly', () => {
 		const { getByText } = render(InfoBitcoin);
 
-		expect(getByText(en.info.bitcoin.description));
+		expect(getByText(en.info.bitcoin.description)).toBeDefined();
 	});
 
 	it('should render note correctly', () => {
 		const { getByText } = render(InfoBitcoin);
 
-		expect(getByText(en.info.bitcoin.note));
+		expect(getByText(en.info.bitcoin.note)).toBeDefined();
 	});
 
 	it('should how-to message correctly', () => {
 		const { getByText } = render(InfoBitcoin);
 
-		expect(getByText(en.info.bitcoin.how_to));
+		expect(getByText(en.info.bitcoin.how_to)).toBeDefined();
 	});
 });
