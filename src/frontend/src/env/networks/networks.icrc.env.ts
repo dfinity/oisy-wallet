@@ -5,6 +5,7 @@ import {
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
 import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
+import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
 import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
 import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.oct.env';
 import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
@@ -383,7 +384,8 @@ const CKEURC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckEURC,
 			position: 10,
-			twinToken: EURC_TOKEN
+			twinToken: EURC_TOKEN,
+			groupData: EURC_TOKEN_GROUP
 		}
 	: undefined;
 
