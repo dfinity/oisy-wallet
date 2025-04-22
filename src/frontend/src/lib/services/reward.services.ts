@@ -1,5 +1,4 @@
 import type {
-	ClaimVipRewardResponse,
 	ClaimedVipReward,
 	ReferrerInfo,
 	RewardInfo,

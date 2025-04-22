@@ -1,5 +1,5 @@
+import type { ClaimedVipReward, ClaimVipRewardResponse } from '$declarations/rewards/rewards.did';
 import type { Principal } from '@dfinity/principal';
-import type {ClaimedVipReward, ClaimVipRewardResponse} from "$declarations/rewards/rewards.did";
 
 export interface RewardsResponse {
 	rewards: RewardResponseInfo[];

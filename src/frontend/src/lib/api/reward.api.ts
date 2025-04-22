@@ -1,5 +1,4 @@
 import type {
-	ClaimVipRewardResponse,
 	ClaimedVipReward,
 	NewVipRewardResponse,
 	ReferrerInfo,
@@ -11,9 +10,9 @@ import type {
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import { REWARDS_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
+import type { RewardClaimApiResponse } from '$lib/types/reward';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
-import type {RewardClaimApiResponse} from "$lib/types/reward";
 
 let canister: RewardCanister | undefined = undefined;
 

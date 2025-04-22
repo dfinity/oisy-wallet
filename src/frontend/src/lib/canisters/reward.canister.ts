@@ -1,5 +1,4 @@
 import type {
-	ClaimVipRewardResponse,
 	ClaimedVipReward,
 	NewVipRewardResponse,
 	ReferrerInfo,
@@ -13,8 +12,8 @@ import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/r
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import {Canister, createServices, type QueryParams, toNullable} from '@dfinity/utils';
-import type {RewardClaimApiResponse} from "$lib/types/reward";
+import type { RewardClaimApiResponse } from '$lib/types/reward';
+import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
 export class RewardCanister extends Canister<RewardService> {
 	static async create({
@@ -47,13 +46,11 @@ export class RewardCanister extends Canister<RewardService> {
 		return new_vip_reward(toNullable(rewardType));
 	};
 
-	claimVipReward = async (
-		vipReward: VipReward
-	): Promise<RewardClaimApiResponse> => {
+	claimVipReward = async (vipReward: VipReward): Promise<RewardClaimApiResponse> => {
 		const { claim_vip_reward } = this.caller({ certified: true });
 
 		const [claimRewardResponse, claimedVipReward] = await claim_vip_reward(vipReward);
-		return {claimRewardResponse, claimedVipReward};
+		return { claimRewardResponse, claimedVipReward };
 	};
 
 	getReferrerInfo = ({ certified = true }: QueryParams): Promise<ReferrerInfo> => {
