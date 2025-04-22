@@ -2,6 +2,7 @@ import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
@@ -60,7 +61,8 @@ export const allTokens = derived(
 		enabledEthereumTokens,
 		allIcrcTokens,
 		enabledSolanaTokens,
-		splTokens
+		splTokens,
+		enabledEvmTokens
 	],
 	([
 		$erc20Tokens,
@@ -68,7 +70,8 @@ export const allTokens = derived(
 		$enabledEthereumTokens,
 		$allIcrcTokens,
 		$enabledSolanaTokens,
-		$splTokens
+		$splTokens,
+		$enabledEvmTokens
 	]) => [
 		{
 			...ICP_TOKEN,
@@ -77,6 +80,7 @@ export const allTokens = derived(
 		...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
 		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
 		...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })),
+		...$enabledEvmTokens.map((token) => ({ ...token, enabled: true })),
 		...$erc20Tokens,
 		...$allIcrcTokens,
 		...$splTokens
