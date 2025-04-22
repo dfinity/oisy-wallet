@@ -6,7 +6,7 @@
 	import WalletAddresses from '$lib/components/core/WalletAddresses.svelte';
 	import {
 		networkBitcoin,
-		networkEthereum,
+		networkEthereum, networkEvm,
 		networkICP,
 		networkSolana,
 		pseudoNetworkChainFusion
@@ -20,7 +20,7 @@
 
 {#if $networkICP}
 	<IcWalletAddress />
-{:else if $networkEthereum}
+{:else if $networkEthereum || $networkEvm}
 	<EthWalletAddress />
 {:else if $networkBitcoin}
 	<BtcWalletAddress />

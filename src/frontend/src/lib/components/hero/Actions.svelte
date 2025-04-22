@@ -25,7 +25,7 @@
 		networkBitcoin,
 		pseudoNetworkChainFusion,
 		networkId,
-		networkSolana
+		networkSolana, networkEvm
 	} from '$lib/derived/network.derived';
 	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
@@ -65,7 +65,7 @@
 	<HeroButtonGroup>
 		{#if $networkICP}
 			<IcReceive token={$tokenWithFallback} />
-		{:else if $networkEthereum}
+		{:else if $networkEthereum || $networkEvm}
 			<EthReceive token={$tokenWithFallback} />
 		{:else if $networkBitcoin}
 			<BtcReceive />
