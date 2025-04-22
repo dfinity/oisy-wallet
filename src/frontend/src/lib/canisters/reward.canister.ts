@@ -6,7 +6,7 @@ import type {
 	SetReferrerResponse,
 	UserData,
 	UserSnapshot,
-	VipReward
+	VipReward, ClaimedVipReward
 } from '$declarations/rewards/rewards.did';
 import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/rewards.factory.certified.did';
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
@@ -39,10 +39,10 @@ export class RewardCanister extends Canister<RewardService> {
 		return user_info();
 	};
 
-	getNewVipReward = (): Promise<NewVipRewardResponse> => {
+	getNewVipReward = (rewardType: ClaimedVipReward): Promise<NewVipRewardResponse> => {
 		const { new_vip_reward } = this.caller({ certified: true });
 
-		return new_vip_reward();
+		return new_vip_reward(rewardType);
 	};
 
 	claimVipReward = (vipReward: VipReward): Promise<ClaimVipRewardResponse> => {

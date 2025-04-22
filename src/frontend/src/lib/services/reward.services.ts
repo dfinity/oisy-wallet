@@ -1,4 +1,5 @@
 import type {
+	ClaimedVipReward,
 	ReferrerInfo,
 	RewardInfo,
 	SetReferrerResponse,
@@ -117,8 +118,9 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 	return { rewards: [], lastTimestamp: ZERO_BI };
 };
 
-const updateReward = async (identity: Identity): Promise<VipReward> => {
+const updateReward = async ({rewardType, identity}: {rewardType: ClaimedVipReward, identity: Identity}): Promise<VipReward> => {
 	const response = await getNewVipRewardApi({
+		rewardType,
 		identity,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
@@ -133,19 +135,20 @@ const updateReward = async (identity: Identity): Promise<VipReward> => {
 };
 
 /**
- * Generates a new VIP reward code.
+ * Generates a new VIP or Gold reward code.
  *
  * This function **always** makes an **update** call and cannot be a query.
  *
  * @async
  * @param {Identity} identity - The user's identity for authentication.
- * @returns {Promise<VipReward | undefined>} - Resolves with the generated VIP reward or `undefined` if the operation fails.
+ * @param {string} campaignId - The campaign's id.
+ * @returns {Promise<VipReward | undefined>} - Resolves with the generated VIP or Gold reward or `undefined` if the operation fails.
  *
  * @throws {Error} Displays an error toast and logs the error if the update call fails.
  */
-export const getNewReward = async (identity: Identity): Promise<VipReward | undefined> => {
+export const getNewReward = async ({campaignId, identity}: { campaignId: string, identity: Identity }): Promise<VipReward | undefined> => {
 	try {
-		return await updateReward(identity);
+		return await updateReward({ rewardType: {campaign_id: campaignId}, identity});
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({

@@ -124,9 +124,10 @@ describe('reward-code', () => {
 				.spyOn(rewardApi, 'getNewVipReward')
 				.mockResolvedValue(mockedNewRewardResponse);
 
-			const vipReward = await getNewReward(mockIdentity);
+			const vipReward = await getNewReward({campaignId: 'vip', identity: mockIdentity});
 
 			expect(getNewVipRewardSpy).toHaveBeenCalledWith({
+				rewardType: { campaign_id: 'vip'},
 				identity: mockIdentity,
 				nullishIdentityErrorMessage
 			});
@@ -138,9 +139,10 @@ describe('reward-code', () => {
 			const getNewVipRewardSpy = vi.spyOn(rewardApi, 'getNewVipReward').mockRejectedValue(err);
 			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
-			await getNewReward(mockIdentity);
+			await getNewReward({campaignId: 'vip', identity: mockIdentity});
 
 			expect(getNewVipRewardSpy).toHaveBeenCalledWith({
+				rewardType: { campaign_id: 'vip'},
 				identity: mockIdentity,
 				nullishIdentityErrorMessage
 			});
