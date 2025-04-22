@@ -1,5 +1,6 @@
 import type {
 	ClaimVipRewardResponse,
+	ClaimedVipReward,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
@@ -39,13 +40,15 @@ export class RewardCanister extends Canister<RewardService> {
 		return user_info();
 	};
 
-	getNewVipReward = (): Promise<NewVipRewardResponse> => {
+	getNewVipReward = (rewardType: ClaimedVipReward): Promise<NewVipRewardResponse> => {
 		const { new_vip_reward } = this.caller({ certified: true });
 
-		return new_vip_reward();
+		return new_vip_reward([rewardType]);
 	};
 
-	claimVipReward = (vipReward: VipReward): Promise<ClaimVipRewardResponse> => {
+	claimVipReward = (
+		vipReward: VipReward
+	): Promise<[ClaimVipRewardResponse, [] | [ClaimedVipReward]]> => {
 		const { claim_vip_reward } = this.caller({ certified: true });
 
 		return claim_vip_reward(vipReward);

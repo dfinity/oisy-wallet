@@ -18,3 +18,8 @@ export interface RewardResult {
 	receivedJackpot: boolean;
 	receivedReferral: boolean;
 }
+
+export interface UserRoleResult {
+	is_vip: boolean;
+	is_gold: boolean;
+}
