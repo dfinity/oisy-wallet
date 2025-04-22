@@ -33,7 +33,7 @@
 			return;
 		}
 
-		const vipReward = await getNewReward($authIdentity);
+		const vipReward = await getNewReward({ campaignId: 'vip', identity: $authIdentity });
 		if (nonNullish(vipReward)) {
 			code = vipReward.code;
 		} else {

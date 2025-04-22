@@ -53,6 +53,9 @@ export type ClaimVipRewardResponse =
 	| { AlreadyClaimed: null }
 	| { Success: null }
 	| { InvalidCode: null };
+export interface ClaimedVipReward {
+	campaign_id: string;
+}
 export interface Config {
 	usage_awards_config: [] | [UsageAwardConfig];
 	batch_sizes: [] | [BatchSizes];
@@ -223,6 +226,7 @@ export interface UsageWinnersResponse {
 	winners: Array<Principal>;
 }
 export interface UserData {
+	superpowers: [] | [Array<string>];
 	airdrops: Array<RewardInfo>;
 	usage_awards: [] | [Array<RewardInfo>];
 	last_snapshot_timestamp: [] | [bigint];
@@ -252,7 +256,7 @@ export interface VipStats {
 }
 export interface _SERVICE {
 	claim_usage_award: ActorMethod<[UsageAwardEvent, Principal], undefined>;
-	claim_vip_reward: ActorMethod<[VipReward], ClaimVipRewardResponse>;
+	claim_vip_reward: ActorMethod<[VipReward], [ClaimVipRewardResponse, [] | [ClaimedVipReward]]>;
 	config: ActorMethod<[], Config>;
 	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
 	configure_vip: ActorMethod<[VipConfig], undefined>;
@@ -260,7 +264,7 @@ export interface _SERVICE {
 		[LastActivityHistogramRequest],
 		LastActivityHistogramResponse
 	>;
-	new_vip_reward: ActorMethod<[], NewVipRewardResponse>;
+	new_vip_reward: ActorMethod<[[] | [ClaimedVipReward]], NewVipRewardResponse>;
 	public_rewards_info: ActorMethod<[], PublicRewardsInfo>;
 	referrer_info: ActorMethod<[], ReferrerInfo>;
 	referrer_info_for: ActorMethod<[Principal], [] | [ReferrerInfo]>;
