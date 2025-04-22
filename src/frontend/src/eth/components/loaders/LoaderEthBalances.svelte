@@ -3,9 +3,9 @@
 	import type { Snippet } from 'svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
+	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
-	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 
 	interface Props {
 		children?: Snippet;
@@ -32,7 +32,7 @@
 
 	$effect(() => {
 		// To trigger the load function when any of the dependencies change.
-		[$ethAddress, $enabledEthereumTokens,$enabledEvmTokens, $enabledErc20Tokens];
+		[$ethAddress, $enabledEthereumTokens, $enabledEvmTokens, $enabledErc20Tokens];
 		debounceLoad();
 	});
 </script>
