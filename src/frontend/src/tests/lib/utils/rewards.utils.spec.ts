@@ -42,6 +42,7 @@ describe('rewards.utils', () => {
 		it('should return falsy reward result and set entry in the session storage', async () => {
 			const mockedUserData: UserData = {
 				is_vip: [false],
+				superpowers: [],
 				airdrops: [],
 				usage_awards: [],
 				last_snapshot_timestamp: [lastTimestamp],
@@ -64,6 +65,7 @@ describe('rewards.utils', () => {
 		it('should return isReward as true and set entry in the session storage', async () => {
 			const mockedUserData: UserData = {
 				is_vip: [false],
+				superpowers: [],
 				airdrops: [],
 				usage_awards: [[mockedReward]],
 				last_snapshot_timestamp: [lastTimestamp],
@@ -87,6 +89,7 @@ describe('rewards.utils', () => {
 			const customMockedReward: RewardInfo = { ...mockedReward, name: ['jackpot'] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
+				superpowers: [],
 				airdrops: [],
 				usage_awards: [[customMockedReward]],
 				last_snapshot_timestamp: [lastTimestamp],
@@ -110,6 +113,7 @@ describe('rewards.utils', () => {
 			const customMockedReward: RewardInfo = { ...mockedReward, name: ['jackpot'] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
+				superpowers: [],
 				airdrops: [],
 				usage_awards: [[mockedReward, customMockedReward]],
 				last_snapshot_timestamp: [lastTimestamp],
@@ -133,6 +137,7 @@ describe('rewards.utils', () => {
 			const customMockedReward: RewardInfo = { ...mockedReward, name: ['referral'] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
+				superpowers: [],
 				airdrops: [],
 				usage_awards: [[customMockedReward]],
 				last_snapshot_timestamp: [lastTimestamp],

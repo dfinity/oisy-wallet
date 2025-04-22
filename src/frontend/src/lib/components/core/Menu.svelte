@@ -43,11 +43,7 @@
 	let isVip = false;
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
-			isVip = (
-				await isVipUser({
-					identity: $authIdentity
-				})
-			).success;
+			({ is_vip: isVip } = await isVipUser({ identity: $authIdentity }));
 		}
 	});
 

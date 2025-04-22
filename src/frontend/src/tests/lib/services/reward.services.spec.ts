@@ -1,5 +1,4 @@
 import type {
-	ClaimVipRewardResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	RewardInfo,
@@ -24,12 +23,13 @@ import {
 } from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
-import type { RewardResponseInfo } from '$lib/types/reward';
+import { AlreadyClaimedError, InvalidCampaignError, InvalidCodeError } from '$lib/types/errors';
+import type { RewardClaimApiResponse, RewardResponseInfo } from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
@@ -39,42 +39,76 @@ describe('reward-code', () => {
 		vi.clearAllMocks();
 	});
 
-	describe('isVip', () => {
+	describe('getUserRoles', () => {
 		const mockedUserData: UserData = {
 			is_vip: [true],
+			superpowers: toNullable(['vip', 'gold']),
 			airdrops: [],
 			usage_awards: [],
 			last_snapshot_timestamp: [BigInt(Date.now())],
 			sprinkles: []
 		};
 
-		it('should return true if user is vip', async () => {
-			const getUserInfoSpy = vi
-				.spyOn(rewardApi, 'getUserInfo')
-				.mockResolvedValueOnce(mockedUserData);
+		describe('VIP', () => {
+			it('should return true if user is vip', async () => {
+				const getUserInfoSpy = vi
+					.spyOn(rewardApi, 'getUserInfo')
+					.mockResolvedValueOnce(mockedUserData);
 
-			const result = await isVipUser({ identity: mockIdentity });
+				const { is_vip } = await isVipUser({ identity: mockIdentity });
 
-			expect(getUserInfoSpy).toHaveBeenCalledWith({
-				identity: mockIdentity,
-				certified: false,
-				nullishIdentityErrorMessage
+				expect(getUserInfoSpy).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					certified: false,
+					nullishIdentityErrorMessage
+				});
+				expect(is_vip).toEqual(true);
 			});
-			expect(result).toEqual({ success: true });
+
+			it('should return false if user is not vip', async () => {
+				const userData: UserData = { ...mockedUserData, superpowers: [] };
+				const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
+
+				const { is_vip } = await isVipUser({ identity: mockIdentity });
+
+				expect(getUserInfoSpy).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					certified: false,
+					nullishIdentityErrorMessage
+				});
+				expect(is_vip).toEqual(false);
+			});
 		});
 
-		it('should return false if user is not vip', async () => {
-			const userData: UserData = { ...mockedUserData, is_vip: [false] };
-			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
+		describe('Gold', () => {
+			it('should return true if user is gold user', async () => {
+				const getUserInfoSpy = vi
+					.spyOn(rewardApi, 'getUserInfo')
+					.mockResolvedValueOnce(mockedUserData);
 
-			const result = await isVipUser({ identity: mockIdentity });
+				const { is_gold } = await isVipUser({ identity: mockIdentity });
 
-			expect(getUserInfoSpy).toHaveBeenCalledWith({
-				identity: mockIdentity,
-				certified: false,
-				nullishIdentityErrorMessage
+				expect(getUserInfoSpy).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					certified: false,
+					nullishIdentityErrorMessage
+				});
+				expect(is_gold).toEqual(true);
 			});
-			expect(result).toEqual({ success: false });
+
+			it('should return false if user is not gold user', async () => {
+				const userData: UserData = { ...mockedUserData, superpowers: [] };
+				const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
+
+				const { is_gold } = await isVipUser({ identity: mockIdentity });
+
+				expect(getUserInfoSpy).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					certified: false,
+					nullishIdentityErrorMessage
+				});
+				expect(is_gold).toEqual(false);
+			});
 		});
 	});
 
@@ -90,9 +124,10 @@ describe('reward-code', () => {
 				.spyOn(rewardApi, 'getNewVipReward')
 				.mockResolvedValue(mockedNewRewardResponse);
 
-			const vipReward = await getNewReward(mockIdentity);
+			const vipReward = await getNewReward({ campaignId: 'vip', identity: mockIdentity });
 
 			expect(getNewVipRewardSpy).toHaveBeenCalledWith({
+				rewardType: { campaign_id: 'vip' },
 				identity: mockIdentity,
 				nullishIdentityErrorMessage
 			});
@@ -104,9 +139,10 @@ describe('reward-code', () => {
 			const getNewVipRewardSpy = vi.spyOn(rewardApi, 'getNewVipReward').mockRejectedValue(err);
 			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
-			await getNewReward(mockIdentity);
+			await getNewReward({ campaignId: 'vip', identity: mockIdentity });
 
 			expect(getNewVipRewardSpy).toHaveBeenCalledWith({
+				rewardType: { campaign_id: 'vip' },
 				identity: mockIdentity,
 				nullishIdentityErrorMessage
 			});
@@ -118,8 +154,9 @@ describe('reward-code', () => {
 	});
 
 	describe('claimVipReward', () => {
-		const mockedClaimRewardResponse: ClaimVipRewardResponse = {
-			Success: null
+		const mockedClaimRewardResponse: RewardClaimApiResponse = {
+			claimRewardResponse: { Success: null },
+			claimedVipReward: { campaign_id: 'vip' }
 		};
 
 		it('should return true if a valid vip reward code is used', async () => {
@@ -134,11 +171,14 @@ describe('reward-code', () => {
 				vipReward: { code: '1234567890' },
 				nullishIdentityErrorMessage
 			});
-			expect(result).toEqual({ success: true });
+			expect(result).toEqual({ success: true, campaignId: 'vip' });
 		});
 
 		it('should return false if an invalid vip reward code is used', async () => {
-			const claimRewardResponse: ClaimVipRewardResponse = { InvalidCode: null };
+			const claimRewardResponse: RewardClaimApiResponse = {
+				claimRewardResponse: { InvalidCode: null },
+				claimedVipReward: undefined
+			};
 			const claimRewardSpy = vi
 				.spyOn(rewardApi, 'claimVipReward')
 				.mockResolvedValue(claimRewardResponse);
@@ -151,12 +191,16 @@ describe('reward-code', () => {
 				nullishIdentityErrorMessage
 			});
 			expect(result.success).toBeFalsy();
+			expect(result.campaignId).toBeUndefined();
 			expect(result.err).not.toBeUndefined();
 			expect(result.err).toBeInstanceOf(InvalidCodeError);
 		});
 
 		it('should return false if an already used vip reward code is used', async () => {
-			const claimRewardResponse: ClaimVipRewardResponse = { AlreadyClaimed: null };
+			const claimRewardResponse: RewardClaimApiResponse = {
+				claimRewardResponse: { AlreadyClaimed: null },
+				claimedVipReward: undefined
+			};
 			const claimRewardSpy = vi
 				.spyOn(rewardApi, 'claimVipReward')
 				.mockResolvedValue(claimRewardResponse);
@@ -169,8 +213,31 @@ describe('reward-code', () => {
 				nullishIdentityErrorMessage
 			});
 			expect(result.success).toBeFalsy();
+			expect(result.campaignId).toBeUndefined();
 			expect(result.err).not.toBeUndefined();
 			expect(result.err).toBeInstanceOf(AlreadyClaimedError);
+		});
+
+		it('should return false if no campaign id is returned', async () => {
+			const claimRewardResponse: RewardClaimApiResponse = {
+				claimRewardResponse: { Success: null },
+				claimedVipReward: undefined
+			};
+			const claimRewardSpy = vi
+				.spyOn(rewardApi, 'claimVipReward')
+				.mockResolvedValue(claimRewardResponse);
+
+			const result = await claimVipReward({ identity: mockIdentity, code: '1234567890' });
+
+			expect(claimRewardSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				vipReward: { code: '1234567890' },
+				nullishIdentityErrorMessage
+			});
+			expect(result.success).toBeFalsy();
+			expect(result.campaignId).toBeUndefined();
+			expect(result.err).not.toBeUndefined();
+			expect(result.err).toBeInstanceOf(InvalidCampaignError);
 		});
 	});
 
@@ -186,6 +253,7 @@ describe('reward-code', () => {
 		};
 		const mockedUserData: UserData = {
 			is_vip: [false],
+			superpowers: [],
 			airdrops: [],
 			usage_awards: [[mockedReward]],
 			last_snapshot_timestamp: [lastTimestamp],
