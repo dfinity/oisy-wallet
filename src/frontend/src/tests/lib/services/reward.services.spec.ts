@@ -471,9 +471,9 @@ describe('reward-code', () => {
 		const mockIcpToken = { ...ICP_TOKEN, ledgerCanisterId: 'icpLedgerCanisterId' };
 
 		const getMockReward = ({
-								   ledgerCanisterId,
-								   amount
-							   }: {
+			ledgerCanisterId,
+			amount
+		}: {
 			ledgerCanisterId: unknown;
 			amount: bigint;
 		}): RewardInfo =>

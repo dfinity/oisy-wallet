@@ -17,8 +17,8 @@ import { mock } from 'vitest-mock-extended';
 
 describe('reward.canister', () => {
 	const createRewardCanister = ({
-									  serviceOverride
-								  }: Pick<CreateCanisterOptions<RewardService>, 'serviceOverride'>): Promise<RewardCanister> =>
+		serviceOverride
+	}: Pick<CreateCanisterOptions<RewardService>, 'serviceOverride'>): Promise<RewardCanister> =>
 		RewardCanister.create({
 			canisterId: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
 			identity: mockIdentity,

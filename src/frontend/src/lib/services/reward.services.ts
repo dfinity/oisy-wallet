@@ -18,8 +18,13 @@ import {
 import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import {AlreadyClaimedError, InvalidCampaignError, InvalidCodeError, UserNotVipError} from '$lib/types/errors';
-import type {RewardResponseInfo, RewardsResponse, UserRoleResult} from '$lib/types/reward';
+import {
+	AlreadyClaimedError,
+	InvalidCampaignError,
+	InvalidCodeError,
+	UserNotVipError
+} from '$lib/types/errors';
+import type { RewardResponseInfo, RewardsResponse, UserRoleResult } from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
@@ -120,9 +125,9 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 };
 
 const updateReward = async ({
-								rewardType,
-								identity
-							}: {
+	rewardType,
+	identity
+}: {
 	rewardType: ClaimedVipReward;
 	identity: Identity;
 }): Promise<VipReward> => {
@@ -154,9 +159,9 @@ const updateReward = async ({
  * @throws {Error} Displays an error toast and logs the error if the update call fails.
  */
 export const getNewReward = async ({
-									   campaignId,
-									   identity
-								   }: {
+	campaignId,
+	identity
+}: {
 	campaignId: string;
 	identity: Identity;
 }): Promise<VipReward | undefined> => {
