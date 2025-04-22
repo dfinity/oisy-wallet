@@ -9,6 +9,7 @@ export const LOGIN_BUTTON = 'login-button';
 export const MAX_BUTTON = 'max-button';
 
 export const LOADER_MODAL = 'loader-modal';
+export const BUTTON_MODAL_CLOSE = 'close-modal';
 
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
@@ -118,7 +119,6 @@ export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
 export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
-export const MANAGE_TOKENS_MODAL_CLOSE = 'manage-tokens-modal-close';
 export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
