@@ -11,9 +11,11 @@ import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
 import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.oct.env';
 import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
 import { SHIB_TOKEN_GROUP } from '$env/tokens/groups/groups.shib.env';
+import { UNI_TOKEN_GROUP } from '$env/tokens/groups/groups.uni.env';
 import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.wbtc.env';
+import { WSTETH_TOKEN_GROUP } from '$env/tokens/groups/groups.wsteth.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
@@ -378,7 +380,8 @@ const CKWSTETH_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTIO
 	? {
 			...CKERC20_PRODUCTION_DATA.ckWSTETH,
 			position: 8,
-			twinToken: WSTETH_TOKEN
+			twinToken: WSTETH_TOKEN,
+			groupData: WSTETH_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -386,7 +389,8 @@ const CKUNI_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_D
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUNI,
 			position: 9,
-			twinToken: UNI_TOKEN
+			twinToken: UNI_TOKEN,
+			groupData: UNI_TOKEN_GROUP
 		}
 	: undefined;
 
