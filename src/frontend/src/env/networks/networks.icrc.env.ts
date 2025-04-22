@@ -4,6 +4,7 @@ import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
+import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
 import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
 import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
@@ -11,6 +12,7 @@ import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.oct.env';
 import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
 import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.wbtc.env';
+import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
@@ -104,6 +106,7 @@ const CKBTC_IC_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'bitcoin',
 				position: 1,
 				twinToken: BTC_MAINNET_TOKEN,
+				groupData: BTC_TOKEN_GROUP,
 				explorerUrl: CKBTC_EXPLORER_URL
 			}
 		: undefined;
@@ -364,7 +367,8 @@ const CKUSDT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUSDT,
 			position: 7,
-			twinToken: USDT_TOKEN
+			twinToken: USDT_TOKEN,
+			groupData: USDT_TOKEN_GROUP
 		}
 	: undefined;
 
