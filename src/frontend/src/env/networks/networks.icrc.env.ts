@@ -4,33 +4,18 @@ import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import { BTC_MAINNET_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
-import {
-	LINK_TOKEN_GROUP,
-	OCT_TOKEN_GROUP,
-	PEPE_TOKEN_GROUP,
-	SHIB_TOKEN_GROUP,
-	UNI_TOKEN_GROUP,
-	WBTC_TOKEN_GROUP,
-	WSETH_TOKEN_GROUP,
-	XAUT_TOKEN_GROUP
-} from '$env/tokens/groups/groups.erc20.env';
-import { ETHEREUM_TOKEN_GROUP, ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
+import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
+import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
+import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
+import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.oct.env';
+import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
+import { SHIB_TOKEN_GROUP } from '$env/tokens/groups/groups.shib.env';
 import {
 	EURC_TOKEN_GROUP,
 	USDC_TOKEN_GROUP,
 	USDT_TOKEN_GROUP
 } from '$env/tokens/groups/groups.spl.env';
-import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
-import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
-import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
-import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
-import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.oct.env';
-import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
-import { SHIB_TOKEN_GROUP } from '$env/tokens/groups/groups.shib.env';
 import { UNI_TOKEN_GROUP } from '$env/tokens/groups/groups.uni.env';
-import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
-import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.wbtc.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
@@ -96,8 +81,7 @@ const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 				minterCanisterId: LOCAL_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
 				position: 3,
-				twinToken: BTC_TESTNET_TOKEN,
-				groupData: BTC_MAINNET_TOKEN_GROUP
+				twinToken: BTC_TESTNET_TOKEN
 			}
 		: undefined;
 
@@ -113,8 +97,7 @@ const CKBTC_STAGING_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'bitcoin',
 				position: 2,
 				twinToken: BTC_TESTNET_TOKEN,
-				explorerUrl: CKBTC_TESTNET_EXPLORER_URL,
-				groupData: BTC_MAINNET_TOKEN_GROUP
+				explorerUrl: CKBTC_TESTNET_EXPLORER_URL
 			}
 		: undefined;
 
@@ -185,8 +168,7 @@ const CKETH_LOCAL_DATA: IcCkInterface | undefined =
 				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 3,
-				twinToken: SEPOLIA_TOKEN,
-				groupData: ETHEREUM_TOKEN_GROUP
+				twinToken: SEPOLIA_TOKEN
 			}
 		: undefined;
 
@@ -202,8 +184,7 @@ const CKETH_STAGING_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'ethereum',
 				position: 2,
 				twinToken: SEPOLIA_TOKEN,
-				explorerUrl: CKETH_SEPOLIA_EXPLORER_URL,
-				groupData: ETHEREUM_TOKEN_GROUP
+				explorerUrl: CKETH_SEPOLIA_EXPLORER_URL
 			}
 		: undefined;
 
