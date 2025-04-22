@@ -24,7 +24,12 @@ import {
 	InvalidCodeError,
 	UserNotVipError
 } from '$lib/types/errors';
-import type {RewardClaimResponse, RewardResponseInfo, RewardsResponse, UserRoleResult} from '$lib/types/reward';
+import type {
+	RewardClaimResponse,
+	RewardResponseInfo,
+	RewardsResponse,
+	UserRoleResult
+} from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
