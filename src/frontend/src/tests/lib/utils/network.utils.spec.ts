@@ -1,3 +1,11 @@
+import {
+	BASE_NETWORK_ID,
+	BASE_SEPOLIA_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_NETWORK_ID,
+	BSC_TESTNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
 import * as btcNetworkEnv from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK,
@@ -38,6 +46,7 @@ import {
 	isNetworkIdBTCTestnet,
 	isNetworkIdBitcoin,
 	isNetworkIdEthereum,
+	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
@@ -98,6 +107,25 @@ describe('network utils', () => {
 
 		it('should return false for non-Ethereum network IDs', () => {
 			expect(isNetworkIdEthereum(BTC_MAINNET_NETWORK_ID)).toBe(false);
+		});
+	});
+
+	describe('isNetworkIdEvm', () => {
+		const allEvmNetworkIds = [
+			BASE_NETWORK_ID,
+			BASE_SEPOLIA_NETWORK_ID,
+			BSC_NETWORK_ID,
+			BSC_TESTNET_NETWORK_ID
+		];
+
+		it.each(allEvmNetworkIds)('should return true for EVM network ID %s', (id) => {
+			expect(isNetworkIdEvm(id as NetworkId)).toBe(true);
+		});
+
+		it('should return false for non-EVM network IDs', () => {
+			expect(isNetworkIdEvm(BTC_MAINNET_NETWORK_ID)).toBe(false);
+
+			expect(isNetworkIdEvm(ETHEREUM_NETWORK_ID)).toBe(false);
 		});
 	});
 

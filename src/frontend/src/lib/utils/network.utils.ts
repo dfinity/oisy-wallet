@@ -1,4 +1,5 @@
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
+import { SUPPORTED_EVM_NETWORKS_IDS } from '$env/networks/networks-evm/networks.evm.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -35,6 +36,9 @@ export const isNetworkIdICP: IsNetworkIdUtil = (id) => nonNullish(id) && ICP_NET
 
 export const isNetworkIdEthereum: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_ETHEREUM_NETWORKS_IDS.includes(id);
+
+export const isNetworkIdEvm: IsNetworkIdUtil = (id) =>
+	nonNullish(id) && SUPPORTED_EVM_NETWORKS_IDS.includes(id);
 
 export const isNetworkIdBitcoin: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_BITCOIN_NETWORKS_IDS.includes(id);
