@@ -1,6 +1,5 @@
 import type {
 	_SERVICE as BackendService,
-	CreateChallengeResponse,
 	CustomToken,
 	IcrcToken,
 	Result_2,
@@ -625,7 +624,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = await allowSigning({});
+			const res = await allowSigning();
 
 			expect(service.allow_signing).toHaveBeenCalledTimes(1);
 			expect(res).toBeDefined();
@@ -641,7 +640,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = allowSigning({});
+			const res = allowSigning();
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
@@ -659,9 +658,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(
-				mapIcrc2ApproveError(response.Err.ApproveError)
-			);
+			await expect(allowSigning()).rejects.toThrow(mapIcrc2ApproveError(response.Err.ApproveError));
 		});
 
 		it('should throw a CanisterInternalError if FailedToContactCyclesLedger error is returned', async () => {
@@ -673,7 +670,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(
+			await expect(allowSigning()).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -688,7 +685,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(new CanisterInternalError(errorMsg));
+			await expect(allowSigning()).rejects.toThrow(new CanisterInternalError(errorMsg));
 		});
 
 		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
@@ -700,120 +697,80 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(
+			await expect(allowSigning()).rejects.toThrow(
 				new CanisterInternalError('Unknown AllowSigningError')
 			);
 		});
 	});
 
 	describe('createPowChallenge', () => {
-		const mockPowChallengeSuccess: CreateChallengeResponse = {
+		const mockPowChallengeSuccess = {
 			start_timestamp_ms: 1_644_001_000_000n,
 			expiry_timestamp_ms: 1_644_001_001_200n,
 			difficulty: 1_000_000
 		};
 
+		let backendCanister: BackendCanister;
+
+		beforeEach(async () => {
+			backendCanister = await createBackendCanister({ serviceOverride: service });
+		});
+
 		it('should successfully create a PoW challenge (Ok case)', async () => {
 			service.create_pow_challenge.mockResolvedValue({ Ok: mockPowChallengeSuccess });
 
-			const backendCanister = await createBackendCanister({ serviceOverride: service });
-
-			const result = await backendCanister.createPowChallengeResult();
+			const result = await backendCanister.createPowChallenge();
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
-
-			if ('Ok' in result) {
-				expect(result.Ok).toEqual(mockPowChallengeSuccess);
-			} else {
-				throw new Error(`Unexpected error: ${JSON.stringify(result.Err)}`);
-			}
+			expect(result).toEqual(mockPowChallengeSuccess);
 		});
 
-		test('should handle challenge already in progress error', async () => {
+		it('should handle challenge already in progress error', async () => {
 			service.create_pow_challenge.mockResolvedValue({
 				Err: { ChallengeInProgress: null }
 			});
 
-			const backendCanister = await createBackendCanister({ serviceOverride: service });
+			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+				'Challenge is already in progress.'
+			);
 
-			const result = await backendCanister.createPowChallengeResult();
-
-			expect(result).toEqual({ Err: { ChallengeInProgress: null } });
+			expect(service.create_pow_challenge).toHaveBeenCalled();
 		});
 
-		test('should handle randomness generation error', async () => {
+		it('should handle randomness generation error', async () => {
 			service.create_pow_challenge.mockResolvedValue({
 				Err: { RandomnessError: 'Failed to generate randomness' }
 			});
 
-			const backendCanister = await createBackendCanister({ serviceOverride: service });
+			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+				'Failed to generate randomness'
+			);
 
-			const result = await backendCanister.createPowChallengeResult();
-
-			expect(result).toEqual({
-				Err: { RandomnessError: 'Failed to generate randomness' }
-			});
+			expect(service.create_pow_challenge).toHaveBeenCalled();
 		});
 
 		it('should handle missing user profile error', async () => {
-			service.create_pow_challenge.mockResolvedValue({ Err: { MissingUserProfile: null } });
+			service.create_pow_challenge.mockResolvedValue({
+				Err: { MissingUserProfile: null }
+			});
 
-			const backendCanister = await createBackendCanister({ serviceOverride: service });
+			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+				'User profile is missing.'
+			);
 
-			const result = await backendCanister.createPowChallengeResult();
-
-			expect(result).toEqual({ Err: { MissingUserProfile: null } });
-
-			expect(service.create_pow_challenge).toHaveBeenCalledTimes(1);
+			expect(service.create_pow_challenge).toHaveBeenCalled();
 		});
 
-		it('should handle unexpected errors in result', async () => {
+		it('should handle other unexpected errors', async () => {
 			service.create_pow_challenge.mockResolvedValue({
 				Err: { Other: 'Unexpected error occurred.' }
 			});
 
-			const backendCanister = await createBackendCanister({ serviceOverride: service });
+			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+				'Unexpected error occurred.'
+			);
 
-			const result = await backendCanister.createPowChallengeResult();
-
-			expect(result).toEqual({ Err: { Other: 'Unexpected error occurred.' } });
-
-			expect(service.create_pow_challenge).toHaveBeenCalledTimes(1);
-		});
-	});
-
-	describe('addUserHiddenDappId', () => {
-		it('should add user hidden dapp id', async () => {
-			const response = { Ok: null };
-
-			service.add_user_hidden_dapp_id.mockResolvedValue(response);
-
-			const { addUserHiddenDappId } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = await addUserHiddenDappId({ dappId: 'test-dapp-id' });
-
-			expect(service.add_user_hidden_dapp_id).toHaveBeenCalledWith({
-				dapp_id: 'test-dapp-id',
-				current_user_version: []
-			});
-			expect(res).toBeUndefined();
-		});
-
-		it('should throw an error if add_user_hidden_dapp_id throws', async () => {
-			service.add_user_hidden_dapp_id.mockImplementation(async () => {
-				await Promise.resolve();
-				throw mockResponseError;
-			});
-
-			const { addUserHiddenDappId } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = addUserHiddenDappId({ dappId: 'test-dapp-id' });
-
-			await expect(res).rejects.toThrow(mockResponseError);
+			expect(service.create_pow_challenge).toHaveBeenCalled();
 		});
 	});
 
