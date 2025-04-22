@@ -1,10 +1,12 @@
 import {
+	SOL_MAINNET_ENABLED,
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_TESTNET_NETWORK
 } from '$env/networks/networks.sol.env';
-import type { RequiredToken, TokenId } from '$lib/types/token';
+import type { RequiredToken, Token, TokenId } from '$lib/types/token';
+import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import sol from '$sol/assets/sol.svg';
 
@@ -72,3 +74,10 @@ export const SOLANA_LOCAL_TOKEN: RequiredToken = {
 	decimals: SOLANA_DEFAULT_DECIMALS,
 	icon: sol
 };
+
+export const SUPPORTED_SOLANA_TOKENS: Token[] = defineSupportedTokens({
+	mainnetFlag: SOL_MAINNET_ENABLED,
+	mainnetTokens: [SOLANA_TOKEN],
+	testnetTokens: [SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN],
+	localTokens: [SOLANA_LOCAL_TOKEN]
+});
