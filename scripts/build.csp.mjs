@@ -127,7 +127,7 @@ const extractStartScript = (htmlFile) => {
  * Browsers that supports the 'strict-dynamic' rule will ignore these backwards directives (CSP 3).
  */
 const updateCSP = (indexHtml) => {
-	const sw = /<script[\s\S]*?>([\s\S]*?)<\/script>/gm;
+	const sw = /<script[\s\S]*?>([\s\S]*?)<\/script>/gim;
 
 	const indexHashes = [];
 
