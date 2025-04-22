@@ -118,16 +118,6 @@ describe('network utils', () => {
 			BSC_TESTNET_NETWORK_ID
 		];
 
-		beforeEach(() => {
-			vi.clearAllMocks();
-
-			vi.stubEnv('VITE_EVM_NETWORKS_ENABLED', 'true');
-
-			// vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
-			// 	() => allEvmNetworkIds
-			// );
-		});
-
 		it.each(allEvmNetworkIds)('should return true for EVM network ID %s', (id) => {
 			expect(isNetworkIdEvm(id as NetworkId)).toBe(true);
 		});
