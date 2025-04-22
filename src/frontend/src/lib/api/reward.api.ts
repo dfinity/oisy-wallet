@@ -26,6 +26,7 @@ export const getUserInfo = async ({
 };
 
 export const getNewVipReward = async ({
+	rewardType,
 	identity
 }: CanisterApiFunctionParams<{
 	rewardType: ClaimedVipReward;

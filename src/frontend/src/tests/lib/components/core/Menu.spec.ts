@@ -29,6 +29,7 @@ describe('Menu', () => {
 
 	const mockUserData = (isVip: boolean): UserData => ({
 		is_vip: [isVip],
+		superpowers: [],
 		airdrops: [],
 		usage_awards: [],
 		last_snapshot_timestamp: [BigInt(Date.now())],
