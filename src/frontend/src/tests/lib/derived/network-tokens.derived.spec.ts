@@ -2,7 +2,10 @@ import {
 	BASE_NETWORK,
 	BASE_SEPOLIA_NETWORK
 } from '$env/networks/networks-evm/networks.evm.base.env';
-import { BSC_NETWORK, BSC_TESTNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
 import * as btcEnv from '$env/networks/networks.btc.env';
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
@@ -145,7 +148,7 @@ describe('network-tokens.derived', () => {
 					tokens: [BASE_SEPOLIA_ETH_TOKEN]
 				},
 				{
-					network: BSC_NETWORK,
+					network: BSC_MAINNET_NETWORK,
 					tokens: [BNB_MAINNET_TOKEN]
 				},
 				{

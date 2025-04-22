@@ -4,7 +4,7 @@ import {
 	BASE_SEPOLIA_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.base.env';
 import {
-	BSC_NETWORK_ID,
+	BSC_MAINNET_NETWORK_ID,
 	BSC_TESTNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
@@ -90,7 +90,7 @@ export const userNetworks: Readable<UserNetworks> = derived(
 				return BASE_SEPOLIA_NETWORK_ID;
 			}
 			if ('BscMainnet' in key) {
-				return BSC_NETWORK_ID;
+				return BSC_MAINNET_NETWORK_ID;
 			}
 			if ('BscTestnet' in key) {
 				return BSC_TESTNET_NETWORK_ID;
