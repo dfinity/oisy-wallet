@@ -24,7 +24,7 @@ window.matchMedia = vi.fn().mockImplementation((query) => ({
 const mockTokens: Token[] = [BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
 
 describe('ModalTokensList', () => {
-	it('renders tokens passed as props', async () => {
+	it('renders tokens passed as props', () => {
 		const { findByTestId } = render(ModalTokensListHost, {
 			props: {
 				tokens: mockTokens,
