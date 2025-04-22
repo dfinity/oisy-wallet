@@ -43,11 +43,7 @@
 	let isVip = false;
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
-			isVip = (
-				await getUserRoles({
-					identity: $authIdentity
-				})
-			).success;
+			({ is_vip: isVip } = await getUserRoles({ identity: $authIdentity }));
 		}
 	});
 
