@@ -34,11 +34,14 @@ This guide provides detailed instructions for setting up and running the OISY wa
 ### Setup
 
 1. **Configure Git for Windows**:
+
    - During installation, select the option to use Git from the Windows Command Prompt.
    - Choose the recommended line ending conversion settings.
 
 2. **Configure Rust**:
+
    - After installing rustup, open PowerShell and run:
+
    ```powershell
    rustup default stable
    rustup target add wasm32-unknown-unknown
@@ -71,24 +74,30 @@ from the project directory will stop the local replica.
 Make sure you switch back to the project root directory.
 
 1. **Install frontend dependencies**:
+
    ```powershell
    npm ci
    ```
 
 2. **Configure environment variables**:
+
    - Create a `.env.development` file by copying the [.env.example](.env.example) file:
+
    ```powershell
    Copy-Item .env.example .env.development
    ```
+
    - Edit the `.env.development` file to set the API keys for the services that OISY needs.
    - For local development, you can keep most settings as they are in the example file.
 
 3. **Deploy the project locally**:
+
    ```powershell
    npm run deploy
    ```
 
    It should output something like the following:
+
    ```
    ...
    Deployed canisters.
@@ -106,24 +115,31 @@ Make sure you switch back to the project root directory.
 ### Troubleshooting
 
 1. **Path length limitations**:
+
    - Windows has a default path length limitation of 260 characters.
    - If you encounter path-related errors, enable long path support:
+
    ```powershell
    # Run as administrator
    New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
    ```
 
 2. **Permission issues**:
+
    - If you encounter permission errors when running dfx commands, try running PowerShell as Administrator.
 
 3. **Node.js native module compilation**:
+
    - If you encounter errors related to node-gyp or native module compilation:
+
    ```powershell
    npm config set msvs_version 2019
    ```
 
 4. **Rust compilation errors**:
+
    - Ensure your Rust toolchain is up to date:
+
    ```powershell
    rustup update
    ```
@@ -139,16 +155,19 @@ Make sure you switch back to the project root directory.
 If you want to work on the frontend in development mode:
 
 1. **Ensure the local replica is running**:
+
    ```powershell
    dfx start --background
    ```
 
 2. **Start the frontend development server**:
+
    ```powershell
    npm run dev
    ```
 
 3. **Access the development server**:
+
    - Open your browser and navigate to the URL shown in the terminal (typically http://localhost:5173/).
    - Changes to the frontend code will be automatically reflected in the browser.
 
@@ -171,28 +190,38 @@ dfx deploy backend
 To develop with Bitcoin functionality locally on Windows:
 
 1. **Configure Bitcoin environment variables**:
+
    - Ensure the following line is disabled or completely absent in your `.env.development` file:
+
    ```
    VITE_BITCOIN_MAINNET_DISABLED=false    # or remove this line
    ```
 
 2. **Set up a local Bitcoin node (Regtest)**:
+
    - Open Git Bash (not PowerShell) and run:
+
    ```bash
    ./scripts/setup.bitcoin-node.sh
    ```
+
    - This script will download and set up a local Bitcoin node from [Bitcoin.org](https://bitcoin.org/en/download).
    - To reset the node if needed:
+
    ```bash
    ./scripts/setup.bitcoin-node.sh --reset
    ```
 
 3. **Start DFX with Bitcoin support**:
+
    - Open Git Bash and run:
+
    ```bash
    ./scripts/dfx.start-with-bitcoin.sh
    ```
+
    - If you were running a local replica before without Bitcoin, use the `--clean` flag:
+
    ```bash
    ./scripts/dfx.start-with-bitcoin.sh --clean
    ```
@@ -215,6 +244,7 @@ To develop with Bitcoin functionality locally on Windows:
 OISY supports internationalization through JSON files. To work with translations:
 
 1. **Generate interfaces for translations**:
+
    ```powershell
    npm run i18n
    ```
@@ -229,16 +259,19 @@ OISY supports internationalization through JSON files. To work with translations
 To run tests on your Windows machine:
 
 1. **Run backend tests**:
+
    ```powershell
    npm run test:backend
    ```
 
 2. **Run frontend tests**:
+
    ```powershell
    npm run test:frontend
    ```
 
 3. **Run E2E tests**:
+
    ```powershell
    npm run e2e
    ```
@@ -257,11 +290,15 @@ Using Windows Subsystem for Linux (WSL) can provide a more Linux-like developmen
 ### Installing WSL
 
 1. **Enable WSL and install a Linux distribution**:
+
    - Open PowerShell as Administrator and run:
+
    ```powershell
    wsl --install
    ```
+
    - This will install WSL 2 with Ubuntu by default. If you want a different distribution, you can specify it:
+
    ```powershell
    wsl --install -d Debian
    ```
@@ -274,17 +311,20 @@ Using Windows Subsystem for Linux (WSL) can provide a more Linux-like developmen
 ### Setting Up the Development Environment in WSL
 
 1. **Update your Linux distribution**:
+
    ```bash
    sudo apt update && sudo apt upgrade -y
    ```
 
 2. **Install Node.js**:
+
    ```bash
    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
    sudo apt-get install -y nodejs
    ```
 
 3. **Install Rust**:
+
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    source $HOME/.cargo/env
@@ -292,11 +332,13 @@ Using Windows Subsystem for Linux (WSL) can provide a more Linux-like developmen
    ```
 
 4. **Install the IC SDK**:
+
    ```bash
    sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
    ```
 
 5. **Install additional dependencies**:
+
    ```bash
    sudo apt install -y build-essential pkg-config libssl-dev llvm clang
    ```
@@ -312,22 +354,26 @@ Using Windows Subsystem for Linux (WSL) can provide a more Linux-like developmen
 The process for running OISY in WSL is similar to the Linux instructions:
 
 1. **Start the local replica**:
+
    ```bash
    dfx start --background
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm ci
    ```
 
 3. **Configure environment variables**:
+
    ```bash
    cp .env.example .env.development
    # Edit .env.development as needed
    ```
 
 4. **Deploy the project**:
+
    ```bash
    npm run deploy
    ```
@@ -338,31 +384,40 @@ The process for running OISY in WSL is similar to the Linux instructions:
 ### WSL Tips and Tricks
 
 1. **Accessing Windows files from WSL**:
+
    - Windows drives are mounted under `/mnt/` in WSL. For example, your C: drive is accessible at `/mnt/c/`.
    - You can access your Windows user directory with `/mnt/c/Users/<YourUsername>/`.
 
 2. **Accessing WSL files from Windows**:
+
    - You can access your WSL files from Windows Explorer by entering `\\wsl$\<DistributionName>\` in the address bar.
    - For example, `\\wsl$\Ubuntu\home\<YourUsername>\`.
 
 3. **Using VS Code with WSL**:
+
    - Install the "Remote - WSL" extension in VS Code.
    - Open a folder in WSL by clicking on the green remote indicator in the bottom-left corner of VS Code and selecting "Remote-WSL: New Window".
 
 4. **Running GUI applications**:
+
    - WSL 2 supports running GUI applications directly. You can install a browser within WSL if needed:
+
    ```bash
    sudo apt install -y firefox
    ```
 
 5. **Sharing Git credentials**:
+
    - To use your Windows Git credentials in WSL:
+
    ```bash
    git config --global credential.helper "/mnt/c/Program\ Files/Git/mingw64/bin/git-credential-manager.exe"
    ```
 
 6. **Improving WSL performance**:
+
    - Add the following to your `.wslconfig` file in your Windows user directory to allocate more resources to WSL:
+
    ```
    [wsl2]
    memory=8GB
@@ -370,8 +425,10 @@ The process for running OISY in WSL is similar to the Linux instructions:
    ```
 
 7. **Handling Bitcoin development in WSL**:
+
    - The Bitcoin scripts should work more reliably in WSL than in Git Bash on Windows.
    - Run the Bitcoin setup and mining commands directly in your WSL terminal:
+
    ```bash
    ./scripts/setup.bitcoin-node.sh
    ./scripts/dfx.start-with-bitcoin.sh

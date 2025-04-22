@@ -28,20 +28,23 @@ Before you begin, ensure you have the following installed on your macOS system:
 ## Environment Setup
 
 1. **Install Homebrew** (if not already installed):
+
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
 
 2. **Install the IC SDK**:
+
    ```bash
    sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
    ```
 
 3. **Install Node.js** (if not already installed):
+
    ```bash
    # Using Homebrew
    brew install node
-   
+
    # Or using NVM (recommended for managing multiple Node.js versions)
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
    source ~/.zshrc  # or source ~/.bash_profile if using bash
@@ -49,6 +52,7 @@ Before you begin, ensure you have the following installed on your macOS system:
    ```
 
 4. **Install Rust**:
+
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    source $HOME/.cargo/env
@@ -56,18 +60,20 @@ Before you begin, ensure you have the following installed on your macOS system:
    ```
 
 5. **Install LLVM** (required for Rust dependencies):
+
    ```bash
    brew install llvm
    ```
 
 6. **Configure LLVM paths** (add to your shell profile):
+
    ```bash
    # For zsh (default in macOS Catalina and later)
    echo 'export CC=$(brew --prefix llvm)/bin/clang' >> ~/.zshrc
    echo 'export AR=$(brew --prefix llvm)/bin/llvm-ar' >> ~/.zshrc
    echo 'export PATH=$(brew --prefix llvm)/bin:$PATH' >> ~/.zshrc
    source ~/.zshrc
-   
+
    # For bash
    echo 'export CC=$(brew --prefix llvm)/bin/clang' >> ~/.bash_profile
    echo 'export AR=$(brew --prefix llvm)/bin/llvm-ar' >> ~/.bash_profile
@@ -102,27 +108,35 @@ from the project directory will stop the local replica.
 Make sure you are in the project root directory.
 
 1. **Install frontend dependencies**:
+
    ```bash
    npm ci
    ```
 
 2. **Configure environment variables**:
+
    - Create a `.env.development` file by copying the [.env.example](.env.example) file:
+
    ```bash
    cp .env.example .env.development
    ```
+
    - Edit the `.env.development` file to set the API keys for the services that OISY needs:
+
    ```bash
    nano .env.development  # or use your preferred text editor
    ```
+
    - For local development, you can keep most settings as they are in the example file.
 
 3. **Deploy the project locally**:
+
    ```bash
    npm run deploy
    ```
 
    It should output something like the following:
+
    ```
    ...
    Deployed canisters.
@@ -142,16 +156,19 @@ Make sure you are in the project root directory.
 If you want to work on the frontend in development mode:
 
 1. **Ensure the local replica is running**:
+
    ```bash
    dfx start --background
    ```
 
 2. **Start the frontend development server**:
+
    ```bash
    npm run dev
    ```
 
 3. **Access the development server**:
+
    - Open your browser and navigate to the URL shown in the terminal (typically http://localhost:5173/).
    - Changes to the frontend code will be automatically reflected in the browser.
 
@@ -174,26 +191,34 @@ dfx deploy backend
 To develop with Bitcoin functionality locally on macOS:
 
 1. **Configure Bitcoin environment variables**:
+
    - Ensure the following line is disabled or completely absent in your `.env.development` file:
+
    ```
    VITE_BITCOIN_MAINNET_DISABLED=false    # or remove this line
    ```
 
 2. **Set up a local Bitcoin node (Regtest)**:
+
    ```bash
    ./scripts/setup.bitcoin-node.sh
    ```
+
    - This script will download and set up a local Bitcoin node from [Bitcoin.org](https://bitcoin.org/en/download).
    - To reset the node if needed:
+
    ```bash
    ./scripts/setup.bitcoin-node.sh --reset
    ```
 
 3. **Start DFX with Bitcoin support**:
+
    ```bash
    ./scripts/dfx.start-with-bitcoin.sh
    ```
+
    - If you were running a local replica before without Bitcoin, use the `--clean` flag:
+
    ```bash
    ./scripts/dfx.start-with-bitcoin.sh --clean
    ```
@@ -214,6 +239,7 @@ To develop with Bitcoin functionality locally on macOS:
 OISY supports internationalization through JSON files. To work with translations:
 
 1. **Generate interfaces for translations**:
+
    ```bash
    npm run i18n
    ```
@@ -228,16 +254,19 @@ OISY supports internationalization through JSON files. To work with translations
 To run tests on your macOS machine:
 
 1. **Run backend tests**:
+
    ```bash
    npm run test:backend
    ```
 
 2. **Run frontend tests**:
+
    ```bash
    npm run test:frontend
    ```
 
 3. **Run E2E tests**:
+
    ```bash
    npm run e2e
    ```
@@ -250,16 +279,18 @@ To run tests on your macOS machine:
 ## Troubleshooting
 
 1. **LLVM/Clang issues**:
+
    - If you encounter errors related to LLVM or Clang during Rust compilation:
+
    ```bash
    brew install llvm
-   
+
    # For zsh
    echo 'export CC=$(brew --prefix llvm)/bin/clang' >> ~/.zshrc
    echo 'export AR=$(brew --prefix llvm)/bin/llvm-ar' >> ~/.zshrc
    echo 'export PATH=$(brew --prefix llvm)/bin:$PATH' >> ~/.zshrc
    source ~/.zshrc
-   
+
    # For bash
    echo 'export CC=$(brew --prefix llvm)/bin/clang' >> ~/.bash_profile
    echo 'export AR=$(brew --prefix llvm)/bin/llvm-ar' >> ~/.bash_profile
@@ -268,57 +299,69 @@ To run tests on your macOS machine:
    ```
 
 2. **Apple Silicon (M1/M2) specific issues**:
+
    - If you're using an Apple Silicon Mac and encounter architecture-related issues:
+
    ```bash
    # Install Rosetta 2 if you haven't already
    softwareupdate --install-rosetta
-   
+
    # Use the x86_64 version of Homebrew alongside the arm64 version
    arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-   
+
    # Add to your shell profile
    echo 'alias ibrew="arch -x86_64 /usr/local/bin/brew"' >> ~/.zshrc
    source ~/.zshrc
-   
+
    # Install x86_64 versions of packages if needed
    ibrew install <package-name>
    ```
 
 3. **Node.js version conflicts**:
+
    - If you have multiple Node.js versions installed, ensure you're using the correct one:
+
    ```bash
    # If using NVM
    nvm use --lts
    ```
 
 4. **DFX cache issues**:
+
    - If you encounter unexpected behavior, try clearing the DFX cache:
+
    ```bash
    dfx cache delete
    ```
 
 5. **Permission issues**:
+
    - If you encounter permission errors when running scripts:
+
    ```bash
    chmod +x scripts/*.sh
    ```
 
 6. **Port conflicts**:
+
    - If you encounter port conflicts when starting the local replica:
+
    ```bash
    # Check if port 4943 is in use
    lsof -i :4943
-   
+
    # Kill the process using the port
    kill <PID>
    ```
 
 7. **Homebrew installation issues**:
+
    - If you encounter issues with Homebrew:
+
    ```bash
    # Update Homebrew
    brew update
-   
+
    # Diagnose issues
    brew doctor
    ```
