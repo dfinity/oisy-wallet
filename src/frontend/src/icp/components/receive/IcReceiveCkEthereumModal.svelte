@@ -3,68 +3,46 @@
 	import { createEventDispatcher } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
+	import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
+	import { receiveWizardSteps } from '$eth/config/receive.config';
+	import HowToConvertEthereumWizardSteps from '$icp/components/convert/HowToConvertEthereumWizardSteps.svelte';
 	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
-	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
-	import {
-		ckEthereumNativeTokenId,
-		ckEthereumTwinToken,
-		ckEthereumTwinTokenStandard
-	} from '$icp-eth/derived/cketh.derived';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import {
-		toCkErc20HelperContractAddress,
-		toCkEthHelperContractAddress
-	} from '$icp-eth/utils/cketh.utils';
+	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
-	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
+	import {
+		WizardStepsConvert,
+		WizardStepsHowToConvert,
+		WizardStepsReceive
+	} from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { token } from '$lib/stores/token.store';
-	import type { Network } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+
+	export let sourceToken: Token;
+	export let destinationToken: Token;
 
 	/**
 	 * Props
 	 */
 
-	let destination = '';
-	$: destination =
-		$ckEthereumTwinTokenStandard === 'erc20'
-			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '')
-			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '');
-
-	let targetNetwork: Network | undefined = ICP_NETWORK;
-
-	let amount: number | undefined = undefined;
-	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
+	let sendAmount: OptionAmount = undefined;
+	let receiveAmount: number | undefined = undefined;
+	let convertProgressStep: string = ProgressStepsConvert.INITIALIZATION;
 
 	/**
 	 * Wizard modal
 	 */
 
-	let howToSteps: WizardSteps;
-	// TODO: update this component to use Convert wizard
-	$: howToSteps = howToConvertWizardSteps({
-		i18n: $i18n,
-		sourceToken: $ckEthereumTwinToken.symbol,
-		destinationToken: $token?.symbol ?? ''
-	});
-
 	let steps: WizardSteps;
-	$: steps = [
-		{
-			name: 'Receive',
-			title: $i18n.receive.text.receive
-		},
-		{
-			name: 'QR Code',
-			title: $i18n.receive.text.address
-		},
-		...howToSteps
-	];
+	$: steps = receiveWizardSteps({
+		i18n: $i18n,
+		sourceToken: sourceToken.symbol,
+		destinationToken: destinationToken.symbol
+	});
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -73,55 +51,75 @@
 
 	const close = () =>
 		closeModal(() => {
-			destination = '';
-			amount = undefined;
-			targetNetwork = undefined;
+			sendAmount = undefined;
+			receiveAmount = undefined;
 
-			sendProgressStep = ProgressStepsSend.INITIALIZATION;
+			convertProgressStep = ProgressStepsSend.INITIALIZATION;
 
 			currentStep = undefined;
 
 			dispatch('nnsClose');
 		});
+
+	const goToStep = (stepName: WizardStepsHowToConvert | WizardStepsConvert | WizardStepsReceive) =>
+		goToWizardStep({
+			modal,
+			steps,
+			stepName
+		});
 </script>
 
-<WizardModal
-	{steps}
-	bind:currentStep
-	bind:this={modal}
-	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING}
->
-	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
-
-	<ConvertETHToCkETHWizard
-		on:icBack={modal.back}
-		on:icNext={modal.next}
-		on:icClose={close}
-		on:icSendBack={() => modal.set(2)}
-		bind:destination
-		bind:targetNetwork
-		bind:amount
-		bind:sendProgressStep
-		{currentStep}
+<ConvertContexts {sourceToken} {destinationToken}>
+	<WizardModal
+		{steps}
+		bind:currentStep
+		bind:this={modal}
+		on:nnsClose={close}
+		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
 	>
-		{#if currentStep?.name === howToSteps[0].name}
-			<HowToConvertEthereumInfo
-				on:icBack={() => modal.set(0)}
-				on:icQRCode={modal.next}
-				on:icConvert={() => modal.set(4)}
-			/>
-		{:else if currentStep?.name === steps[1].name}
-			<ReceiveAddressQRCode
-				on:icBack={modal.back}
-				address={$icrcAccountIdentifierText ?? ''}
-				addressToken={ICP_TOKEN}
-				network={ICP_NETWORK}
-				qrCodeAction={{ enabled: false }}
-				copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
-			/>
-		{:else}
-			<IcReceiveInfoCkEthereum on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
-		{/if}
-	</ConvertETHToCkETHWizard>
-</WizardModal>
+		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+
+		<EthConvertTokenWizard
+			{currentStep}
+			formCancelAction="back"
+			bind:sendAmount
+			bind:receiveAmount
+			bind:convertProgressStep
+			on:icBack={() =>
+				currentStep?.name === WizardStepsConvert.CONVERT
+					? goToStep(WizardStepsHowToConvert.INFO)
+					: modal.back()}
+			on:icNext={modal.next}
+			on:icClose={close}
+		>
+			{#if currentStep?.name === WizardStepsHowToConvert.INFO || currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
+				<HowToConvertEthereumWizardSteps
+					{currentStep}
+					formCancelAction="back"
+					on:icBack={() =>
+						goToStep(
+							currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE
+								? WizardStepsHowToConvert.INFO
+								: WizardStepsReceive.RECEIVE
+						)}
+					on:icQRCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
+					on:icConvert={() => goToStep(WizardStepsConvert.CONVERT)}
+				/>
+			{:else if currentStep?.name === WizardStepsReceive.QR_CODE}
+				<ReceiveAddressQRCode
+					on:icBack={modal.back}
+					address={$icrcAccountIdentifierText ?? ''}
+					addressToken={ICP_TOKEN}
+					network={ICP_NETWORK}
+					qrCodeAction={{ enabled: false }}
+					copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
+				/>
+			{:else}
+				<IcReceiveInfoCkEthereum
+					on:icQRCode={() => goToStep(WizardStepsReceive.QR_CODE)}
+					on:icHowToConvert={() => goToStep(WizardStepsHowToConvert.INFO)}
+				/>
+			{/if}
+		</EthConvertTokenWizard>
+	</WizardModal>
+</ConvertContexts>
