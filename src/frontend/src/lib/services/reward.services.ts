@@ -224,7 +224,7 @@ const updateVipReward = async ({
  * @param {Object} params - The parameters required to claim the reward.
  * @param {Identity} params.identity - The user's identity for authentication.
  * @param {string} params.code - The reward code to claim the VIP reward.
- * @returns {Promise<ResultSuccess>} - Resolves with the result of the claim if successful.
+ * @returns {Promise<RewardClaimResponse>} - Resolves with the result state and campaign id of the claim if successful.
  *
  * @throws {Error} Throws an error if the update call fails or the reward cannot be claimed.
  */
