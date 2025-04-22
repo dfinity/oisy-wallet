@@ -44,6 +44,5 @@ export const SEPOLIA_PEPE_TOKEN: RequiredErc20Token = {
 	icon: pepe,
 	address: '0x560eF9F39E4B08f9693987cad307f6FBfd97B2F6',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckSepoliaPEPE',
-	groupData: PEPE_TOKEN_GROUP
+	twinTokenSymbol: 'ckSepoliaPEPE'
 };

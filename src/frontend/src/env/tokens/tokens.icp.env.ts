@@ -4,7 +4,6 @@ import {
 	ICP_LEDGER_CANISTER_ID,
 	ICP_NETWORK
 } from '$env/networks/networks.icp.env';
-import { ICP_TOKEN_GROUP } from '$env/tokens/groups/groups.icp.env';
 import icpLight from '$icp/assets/icp_light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic-token';
@@ -35,6 +34,5 @@ export const ICP_TOKEN: RequiredToken<IcToken> = {
 	explorerUrl: ICP_EXPLORER_URL,
 	buy: {
 		onramperId: 'icp_icp'
-	},
-	groupData: ICP_TOKEN_GROUP
+	}
 };

@@ -230,8 +230,7 @@ const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
 				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 3,
-				twinToken: USDC_TOKEN,
-				groupData: USDC_TOKEN_GROUP,
+				twinToken: SEPOLIA_USDC_TOKEN,
 				...(nonNullish(LOCAL_CKETH_LEDGER_CANISTER_ID) && {
 					feeLedgerCanisterId: LOCAL_CKETH_LEDGER_CANISTER_ID
 				})
