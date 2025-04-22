@@ -4,6 +4,7 @@ import {
 	BTC_REGTEST_NETWORK,
 	BTC_TESTNET_NETWORK
 } from '$env/networks/networks.btc.env';
+import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
 import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import type { Token, TokenId, TokenWithLinkedData } from '$lib/types/token';
@@ -25,7 +26,8 @@ export const BTC_MAINNET_TOKEN: TokenWithLinkedData = {
 	symbol: BTC_MAINNET_SYMBOL,
 	decimals: BTC_DECIMALS,
 	icon: bitcoin,
-	twinTokenSymbol: 'ckBTC'
+	twinTokenSymbol: 'ckBTC',
+	groupData: BTC_TOKEN_GROUP
 };
 
 export const BTC_TESTNET_SYMBOL = 'BTC (Testnet)';
