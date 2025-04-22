@@ -2,16 +2,16 @@
 	import { setContext } from 'svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import {
-		MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS,
-		MODAL_TOKEN_LIST_ITEM_PREFIX,
-		MODAL_TOKEN_LIST_TOOLBAR
-	} from '$lib/constants/test-ids.constants';
-	import {
 		initModalTokensListContext,
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { Token } from '$lib/types/token';
+	import {
+		MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS,
+		MODAL_TOKEN_LIST_ITEM_PREFIX,
+		MODAL_TOKEN_LIST_TOOLBAR
+	} from '$tests/lib/components/tokens/ModalTokensList.spec';
 
 	let { tokens, renderNoResults }: { tokens: Token[]; renderNoResults: boolean } = $props();
 
