@@ -22,11 +22,11 @@
 	const { ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
-	let destinationToken: OptionIcCkToken;
-	$: destinationToken = nonNullish($pageToken) ? ($pageToken as IcCkToken) : undefined;
+	const destinationToken: OptionIcCkToken = $derived(
+		nonNullish($pageToken) ? ($pageToken as IcCkToken) : undefined
+	);
 
-	let sourceToken: Token;
-	$: sourceToken = $ckEthereumTwinToken;
+	const sourceToken: Token = $derived($ckEthereumTwinToken);
 
 	const openReceive = async (modalId: symbol) => {
 		const { result } = await autoLoadUserToken({
