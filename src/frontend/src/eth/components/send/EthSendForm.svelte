@@ -14,7 +14,6 @@
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
-	export let destinationEditable = true;
 	export let amount: OptionAmount = undefined;
 	export let nativeEthereumToken: Token;
 
@@ -31,17 +30,14 @@
 <SendForm on:icNext token={$sendToken} balance={$sendBalance} disabled={invalid} hideSource>
 	<EthSendAmount slot="amount" {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-	<svelte:fragment slot="destination">
-		{#if destinationEditable}
-			<EthSendDestination
-				token={$sendToken}
-				{network}
-				bind:destination
-				bind:invalidDestination
-				on:icQRCodeScan
-			/>
-		{/if}
-	</svelte:fragment>
+	<EthSendDestination
+		slot="destination"
+		token={$sendToken}
+		{network}
+		bind:destination
+		bind:invalidDestination
+		on:icQRCodeScan
+	/>
 
 	<FeeDisplay slot="fee" />
 
