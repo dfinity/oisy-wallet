@@ -1,4 +1,7 @@
-import { BSC_NETWORK, BSC_TESTNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
 import bnb from '$evm/bsc/assets/bnb.svg';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -11,7 +14,7 @@ export const BNB_MAINNET_TOKEN_ID: TokenId = parseTokenId(BNB_MAINNET_SYMBOL);
 
 export const BNB_MAINNET_TOKEN: RequiredToken = {
 	id: BNB_MAINNET_TOKEN_ID,
-	network: BSC_NETWORK,
+	network: BSC_MAINNET_NETWORK,
 	standard: 'ethereum',
 	category: 'default',
 	name: 'BNB',
