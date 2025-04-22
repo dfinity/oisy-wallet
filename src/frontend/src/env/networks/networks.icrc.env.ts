@@ -13,6 +13,7 @@ import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
 import { SHIB_TOKEN_GROUP } from '$env/tokens/groups/groups.shib.env';
 import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
+import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.wbtc.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
@@ -359,7 +360,8 @@ const CKWBTC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckWBTC,
 			position: 6,
-			twinToken: WBTC_TOKEN
+			twinToken: WBTC_TOKEN,
+			groupData: WBTC_TOKEN_GROUP
 		}
 	: undefined;
 
