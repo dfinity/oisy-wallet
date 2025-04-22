@@ -1,38 +1,36 @@
 <script lang="ts">
-	import { debounce, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { createEventDispatcher, onMount, type Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
+	import { nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher, getContext, onMount, setContext, type Snippet } from 'svelte';
 	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
 	import { isBitcoinToken } from '$btc/utils/token.utils';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
+	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
+	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import {
-		MANAGE_TOKENS_MODAL_CLOSE,
-		MANAGE_TOKENS_MODAL_SAVE
-	} from '$lib/constants/test-ids.constants';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		initModalTokensListContext,
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
+	} from '$lib/stores/modal-tokens-list.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
-	import type { TokenToggleable } from '$lib/types/token-toggleable';
-	import { isDesktop } from '$lib/utils/device.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-	import { filterTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
@@ -51,15 +49,11 @@
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
 
-	let allTokensForSelectedNetwork: TokenToggleable<Token>[] = $derived(
-		filterTokensForSelectedNetwork([$allTokens, $selectedNetwork, $pseudoNetworkChainFusion])
-	);
-
 	let allTokensSorted: Token[] = $derived(
 		nonNullish(exchangesStaticData)
 			? pinEnabledTokensAtTop(
 					sortTokens({
-						$tokens: allTokensForSelectedNetwork,
+						$tokens: $allTokens,
 						$exchanges: exchangesStaticData,
 						$tokensToPin
 					})
@@ -67,39 +61,32 @@
 			: []
 	);
 
-	let tokensFilter = $state('');
-	const updateFilter = () => (tokensFilter = filter);
-	const debounceUpdateFilter = debounce(updateFilter);
-
-	let filter = $state(initialSearch ?? '');
-
-	$effect(() => {
-		debounceUpdateFilter(filter);
-	});
-
-	let filteredTokens: Token[] = $derived(
-		filterTokens({ tokens: allTokensSorted, filter: tokensFilter })
-	);
-
-	let tokens: Token[] = $derived(
-		filteredTokens.map((token) => {
-			const modifiedToken =
-				modifiedTokens[`${token.network.id.description}-${token.id.description}`];
-
-			return {
-				...token,
-				...(icTokenIcrcCustomToken(token)
-					? {
-							enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
-						}
-					: {})
-			};
+	setContext<ModalTokensListContext>(
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		initModalTokensListContext({
+			tokens: [],
+			filterZeroBalance: false,
+			filterNetwork: $selectedNetwork,
+			filterQuery: nonNullish(initialSearch) ? initialSearch : ''
 		})
 	);
 
-	let noTokensMatch = $derived(tokens.length === 0);
+	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+
+	$effect(() => {
+		setTokens(allTokensSorted);
+	});
+
+	let loading = $erc20UserTokensNotInitialized;
+
+	let showNetworks = $state(false);
+
+	const onSelectNetwork = () => {
+		showNetworks = !showNetworks;
+	};
 
 	let modifiedTokens: Record<string, Token> = $state({});
+
 	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
 		const { id: networkId } = network;
 		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
@@ -140,77 +127,48 @@
 	const save = () => dispatch('icSave', groupModifiedTokens);
 </script>
 
-<div class="mb-4">
-	<InputSearch
-		bind:filter
-		showResetButton={notEmptyString(filter)}
-		placeholder={$i18n.tokens.placeholder.search_token}
-		autofocus={isDesktop()}
-	/>
-</div>
-
-{#if nonNullish($selectedNetwork)}
-	<p class="mb-4 pb-2 pt-1 text-tertiary">
-		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
-			$network: $selectedNetwork.name
-		})}
-	</p>
-{/if}
-
 {#if nonNullish(infoElement)}
 	{@render infoElement()}
 {/if}
 
-{#if noTokensMatch}
-	<button
-		class="flex w-full flex-col items-center justify-center py-16"
-		in:fade
-		onclick={() => dispatch('icAddToken')}
-	>
-		<span class="text-7xl">🤔</span>
-
-		<span class="py-4 text-center font-bold text-brand-primary-alt no-underline"
-			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
-		>
-	</button>
+{#if showNetworks}
+	<ModalNetworksFilter on:icNetworkFilter={() => (showNetworks = false)} />
 {:else}
-	<div class="flex flex-col overflow-y-hidden py-3 sm:max-h-[26rem]">
-		<div class="my-3 overflow-y-auto overscroll-contain">
-			{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
-				<Card>
-					<TokenName data={token} />
-
-					<TokenLogo slot="icon" color="white" data={token} badge={{ type: 'network' }} />
-
-					<span class="break-all" slot="description">
-						{token.symbol}
-					</span>
-
-					<svelte:fragment slot="action">
-						{#if icTokenIcrcCustomToken(token)}
-							<IcManageTokenToggle {token} on:icToken={onToggle} />
-						{:else if icTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
-							<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
-						{:else if isBitcoinToken(token)}
-							<BtcManageTokenToggle />
-						{:else if isSolanaToken(token)}
-							<SolManageTokenToggle />
-						{/if}
-					</svelte:fragment>
-				</Card>
-			{/each}
-		</div>
-	</div>
-
-	<button
-		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-brand-primary-alt no-underline"
-		onclick={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
+	<ModalTokensList
+		{loading}
+		on:icSelectNetworkFilter={onSelectNetwork}
+		networkSelectorViewOnly={nonNullish($selectedNetwork)}
 	>
+		{#snippet tokenListItem(token)}
+			<LogoButton dividers hover={false}>
+				<TokenName slot="title" data={token} />
 
-	<ButtonGroup>
-		<ButtonCancel testId={MANAGE_TOKENS_MODAL_CLOSE} on:click={() => dispatch('icClose')} />
-		<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} on:click={save}>
-			{$i18n.core.text.save}
-		</Button>
-	</ButtonGroup>
+				<TokenLogo slot="logo" color="white" data={token} badge={{ type: 'network' }} />
+
+				<span class="break-all" slot="description">
+					{token.symbol}
+				</span>
+
+				<svelte:fragment slot="action">
+					{#if icTokenIcrcCustomToken(token)}
+						<IcManageTokenToggle {token} on:icToken={onToggle} />
+					{:else if icTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
+						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
+					{:else if isBitcoinToken(token)}
+						<BtcManageTokenToggle />
+					{:else if isSolanaToken(token)}
+						<SolManageTokenToggle />
+					{/if}
+				</svelte:fragment>
+			</LogoButton>
+		{/snippet}
+		{#snippet toolbar()}
+			<Button colorStyle="secondary-light" on:click={() => dispatch('icAddToken')}
+				><IconPlus /> {$i18n.tokens.manage.text.import_token}</Button
+			>
+			<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} on:click={save}>
+				{$i18n.core.text.save}
+			</Button>
+		{/snippet}
+	</ModalTokensList>
 {/if}
