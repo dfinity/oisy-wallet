@@ -8,6 +8,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import {QrCodeType} from "$lib/enums/qr-code-types";
 
 describe('UrlGuard', () => {
 	beforeEach(() => {
@@ -46,7 +47,7 @@ describe('UrlGuard', () => {
 					searchParam: 'code'
 				});
 
-				expect(get(modalStore)).toEqual({ data: true, type: 'vip-reward-state' });
+				expect(get(modalStore)).toEqual({ data: {success: true, codeType: QrCodeType.VIP}, type: 'vip-reward-state' });
 			});
 		});
 
@@ -76,7 +77,7 @@ describe('UrlGuard', () => {
 					searchParam: 'code'
 				});
 
-				expect(get(modalStore)).toEqual({ data: false, type: 'vip-reward-state' });
+				expect(get(modalStore)).toEqual({ data: {success: false, codeType: QrCodeType.VIP}, type: 'vip-reward-state' });
 			});
 		});
 
