@@ -33,6 +33,14 @@ export const TestnetCases: TestnetConfig[] = [
 	{
 		networkSymbol: 'SOL (Local)',
 		tokenSymbol: 'SOL (Local)'
+	},
+	{
+		networkSymbol: 'SepoliaBASE',
+		tokenSymbol: 'SepoliaETH'
+	},
+	{
+		networkSymbol: 'BSC (Testnet)',
+		tokenSymbol: 'BNB (Testnet)'
 	}
 ];
 
