@@ -26,6 +26,5 @@ export const SHIB_TOKEN: RequiredErc20Token = {
 	groupData: SHIB_TOKEN_GROUP,
 	buy: {
 		onramperId: 'shib_ethereum'
-	},
-	groupData: SHIB_TOKEN_GROUP
+	}
 };

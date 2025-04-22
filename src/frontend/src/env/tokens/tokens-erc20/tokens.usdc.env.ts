@@ -26,8 +26,7 @@ export const USDC_TOKEN: RequiredErc20Token = {
 	groupData: USDC_TOKEN_GROUP,
 	buy: {
 		onramperId: 'usdc_ethereum'
-	},
-	groupData: USDC_TOKEN_GROUP
+	}
 };
 
 export const SEPOLIA_USDC_SYMBOL = 'SepoliaUSDC';
@@ -45,6 +44,5 @@ export const SEPOLIA_USDC_TOKEN: RequiredErc20Token = {
 	icon: usdc,
 	address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckSepoliaUSDC',
-	groupData: USDC_TOKEN_GROUP
+	twinTokenSymbol: 'ckSepoliaUSDC'
 };

@@ -10,11 +10,6 @@ import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import type { Token, TokenId, TokenWithLinkedData } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
-import {
-	BTC_MAINNET_TOKEN_GROUP,
-	BTC_REGTEST_TOKEN_GROUP,
-	BTC_TESTNET_TOKEN_GROUP
-} from './groups/groups.btc.env';
 
 export const BTC_DECIMALS = 8;
 
@@ -47,8 +42,7 @@ export const BTC_TESTNET_TOKEN: Token = {
 	name: 'Bitcoin (Testnet)',
 	symbol: BTC_TESTNET_SYMBOL,
 	decimals: BTC_DECIMALS,
-	icon: bitcoinTestnet,
-	groupData: BTC_TESTNET_TOKEN_GROUP
+	icon: bitcoinTestnet
 };
 
 export const BTC_REGTEST_SYMBOL = 'BTC (Regtest)';
@@ -63,8 +57,7 @@ export const BTC_REGTEST_TOKEN: Token = {
 	name: 'Bitcoin (Regtest)',
 	symbol: BTC_REGTEST_SYMBOL,
 	decimals: BTC_DECIMALS,
-	icon: bitcoinTestnet,
-	groupData: BTC_REGTEST_TOKEN_GROUP
+	icon: bitcoinTestnet
 };
 
 // The following tokens are used as fallback for any Bitcoin token defined in the token store.

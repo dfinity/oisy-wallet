@@ -26,8 +26,7 @@ export const PEPE_TOKEN: RequiredErc20Token = {
 	groupData: PEPE_TOKEN_GROUP,
 	buy: {
 		onramperId: 'pepe_ethereum'
-	},
-	groupData: PEPE_TOKEN_GROUP
+	}
 };
 
 export const SEPOLIA_PEPE_SYMBOL = 'SepoliaPEPE';

@@ -26,6 +26,5 @@ export const USDT_TOKEN: RequiredErc20Token = {
 	groupData: USDT_TOKEN_GROUP,
 	buy: {
 		onramperId: 'usdt_ethereum'
-	},
-	groupData: USDT_TOKEN_GROUP
+	}
 };

@@ -26,6 +26,5 @@ export const WBTC_TOKEN: RequiredErc20Token = {
 	groupData: WBTC_TOKEN_GROUP,
 	buy: {
 		onramperId: 'wbtc_ethereum'
-	},
-	groupData: WBTC_TOKEN_GROUP
+	}
 };

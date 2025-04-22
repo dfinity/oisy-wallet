@@ -382,7 +382,7 @@ const CKWSTETH_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTIO
 			...CKERC20_PRODUCTION_DATA.ckWSTETH,
 			position: 8,
 			twinToken: WSTETH_TOKEN,
-			groupData: WSETH_TOKEN_GROUP
+			groupData: WSTETH_TOKEN_GROUP
 		}
 	: undefined;
 

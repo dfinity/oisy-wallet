@@ -26,6 +26,5 @@ export const OCT_TOKEN: RequiredErc20Token = {
 	groupData: OCT_TOKEN_GROUP,
 	buy: {
 		onramperId: 'oct_ethereum'
-	},
-	groupData: OCT_TOKEN_GROUP
+	}
 };

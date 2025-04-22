@@ -26,8 +26,7 @@ export const LINK_TOKEN: RequiredErc20Token = {
 	groupData: LINK_TOKEN_GROUP,
 	buy: {
 		onramperId: 'link_ethereum'
-	},
-	groupData: LINK_TOKEN_GROUP
+	}
 };
 
 export const SEPOLIA_LINK_SYMBOL = 'SepoliaLINK';
@@ -45,6 +44,5 @@ export const SEPOLIA_LINK_TOKEN: RequiredErc20Token = {
 	icon: link,
 	address: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckSepoliaLINK',
-	groupData: LINK_TOKEN_GROUP
+	twinTokenSymbol: 'ckSepoliaLINK'
 };
