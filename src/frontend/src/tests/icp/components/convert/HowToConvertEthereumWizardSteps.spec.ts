@@ -1,21 +1,26 @@
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import HowToConvertEthereumWizardSteps from '$icp/components/convert/HowToConvertEthereumWizardSteps.svelte';
 import {
 	HOW_TO_CONVERT_ETHEREUM_INFO,
 	HOW_TO_CONVERT_ETHEREUM_QR_CODE
 } from '$lib/constants/test-ids.constants';
 import { WizardStepsHowToConvert } from '$lib/enums/wizard-steps';
-import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import {
+	CONVERT_CONTEXT_KEY,
+	initConvertContext,
+	type ConvertContext
+} from '$lib/stores/convert.store';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
 describe('HowToConvertEthereumWizardSteps', () => {
 	const mockContext = () =>
-		new Map<symbol, SendContext>([
+		new Map<symbol, ConvertContext>([
 			[
-				SEND_CONTEXT_KEY,
-				initSendContext({
-					sendPurpose: 'convert-eth-to-cketh',
-					token: ETHEREUM_TOKEN
+				CONVERT_CONTEXT_KEY,
+				initConvertContext({
+					sourceToken: mockValidIcCkToken,
+					destinationToken: ICP_TOKEN
 				})
 			]
 		]);
