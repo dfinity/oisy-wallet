@@ -5,12 +5,6 @@ import {
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_TESTNET_NETWORK
 } from '$env/networks/networks.sol.env';
-import {
-	SOLANA_DEVNET_TOKEN_GROUP,
-	SOLANA_LOCAL_TOKEN_GROUP,
-	SOLANA_TESTNET_TOKEN_GROUP,
-	SOLANA_TOKEN_GROUP
-} from '$env/tokens/groups/groups.sol.env';
 import type { RequiredToken, Token, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -33,8 +27,7 @@ export const SOLANA_TOKEN: RequiredToken = {
 	icon: sol,
 	buy: {
 		onramperId: 'sol'
-	},
-	groupData: SOLANA_TOKEN_GROUP
+	}
 };
 
 const SOLANA_TESTNET_SYMBOL = 'SOL (Testnet)';
@@ -49,8 +42,7 @@ export const SOLANA_TESTNET_TOKEN: RequiredToken = {
 	name: 'Solana (Testnet)',
 	symbol: SOLANA_TESTNET_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
-	icon: sol,
-	groupData: SOLANA_TESTNET_TOKEN_GROUP
+	icon: sol
 };
 
 const SOLANA_DEVNET_SYMBOL = 'SOL (Devnet)';
@@ -65,8 +57,7 @@ export const SOLANA_DEVNET_TOKEN: RequiredToken = {
 	name: 'Solana (Devnet)',
 	symbol: SOLANA_DEVNET_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
-	icon: sol,
-	groupData: SOLANA_DEVNET_TOKEN_GROUP
+	icon: sol
 };
 
 const SOLANA_LOCAL_SYMBOL = 'SOL (Local)';
@@ -81,8 +72,7 @@ export const SOLANA_LOCAL_TOKEN: RequiredToken = {
 	name: 'Solana (Local)',
 	symbol: SOLANA_LOCAL_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
-	icon: sol,
-	groupData: SOLANA_LOCAL_TOKEN_GROUP
+	icon: sol
 };
 
 export const SUPPORTED_SOLANA_TOKENS: Token[] = defineSupportedTokens({
