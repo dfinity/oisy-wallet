@@ -2,7 +2,7 @@ import * as appNavigation from '$app/navigation';
 import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import Transactions from '$lib/components/transactions/Transactions.svelte';
-import { MANAGE_TOKENS_MODAL_CLOSE } from '$lib/constants/test-ids.constants';
+import { BUTTON_MODAL_CLOSE } from '$lib/constants/test-ids.constants';
 import { modalStore } from '$lib/stores/modal.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
@@ -88,7 +88,7 @@ describe('Transactions', () => {
 				expect(get(modalStore)?.type).toBe('manage-tokens');
 
 				const button: HTMLButtonElement | null = container.querySelector(
-					`button[data-tid='${MANAGE_TOKENS_MODAL_CLOSE}']`
+					`button[data-tid='${BUTTON_MODAL_CLOSE}']`
 				);
 
 				button?.click();
@@ -110,7 +110,7 @@ describe('Transactions', () => {
 				expect(get(modalStore)?.type).toBe('manage-tokens');
 
 				const button: HTMLButtonElement | null = container.querySelector(
-					`button[data-tid='${MANAGE_TOKENS_MODAL_CLOSE}']`
+					`button[data-tid='${BUTTON_MODAL_CLOSE}']`
 				);
 
 				mockPage.mock({ token: ICP_TOKEN.name, network: ICP_NETWORK_SYMBOL });
