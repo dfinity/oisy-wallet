@@ -289,8 +289,7 @@ const CKUSDC_STAGING_DATA: IcCkInterface | undefined = nonNullish(
 	? {
 			...CKERC20_STAGING_DATA.ckSepoliaUSDC,
 			position: 2,
-			twinToken: SEPOLIA_USDC_TOKEN,
-			groupData: USDC_TOKEN_GROUP
+			twinToken: SEPOLIA_USDC_TOKEN
 		}
 	: undefined;
 
