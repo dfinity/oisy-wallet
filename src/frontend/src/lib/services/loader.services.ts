@@ -1,4 +1,6 @@
-import { POW_ENABLED } from '$env/pow.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { allowSigning } from '$lib/api/backend.api';
 import {
 	networkBitcoinMainnetEnabled,
@@ -16,6 +18,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { POW_FEATURE_ENABLED } from '$env/pow.env';
 
 /**
  * Initializes the signer allowance by calling `allow_signing`.
@@ -69,11 +72,11 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialized (user profile settings and addresses are loaded).
  */
 export const initLoader = async ({
-	identity,
-	validateAddresses,
-	progressAndLoad,
-	setProgressModal
-}: {
+																	 identity,
+																	 validateAddresses,
+																	 progressAndLoad,
+																	 setProgressModal
+																 }: {
 	identity: OptionIdentity;
 	validateAddresses: () => void;
 	progressAndLoad: () => Promise<void>;
@@ -107,7 +110,7 @@ export const initLoader = async ({
 
 	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 	setProgressModal(true);
-	if (!POW_ENABLED) {
+	if (!POW_FEATURE_ENABLED) {
 		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
 		if (!initSignerAllowanceSuccess) {

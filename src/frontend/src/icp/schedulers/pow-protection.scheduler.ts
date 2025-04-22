@@ -1,10 +1,9 @@
 import type { AllowSigningResponse, CreateChallengeResponse } from '$declarations/backend/backend.did';
-import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
 import { solvePowChallenge } from '$lib/services/pow.services';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
-import { toNullable } from '@dfinity/utils';
+import { POW_CHALLENGE_INTERVALL_MILLIS } from '$lib/constants/pow.constants';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
@@ -17,7 +16,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 
 	async start(data: PostMessageDataRequest | undefined) {
 		await this.timer.start<PostMessageDataRequest>({
-			interval: POW_CHALLENGE_INTERVAL_MILLIS,
+			interval: POW_CHALLENGE_INTERVALL_MILLIS,
 			job: this.requestSignerCycles,
 			data
 		});
@@ -50,9 +49,9 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		});
 
 		// Step 3: Requests allowance for signing operations with solved nonce.
-		const _allow_signing: AllowSigningResponse = await allowSigning({
+		const allow_signing: AllowSigningResponse = await allowSigning({
 			identity,
-			nonce: toNullable(nonce)
+			nonce: nonce
 		});
 
 		// console.log('_allow_signing:', _allow_signing);
