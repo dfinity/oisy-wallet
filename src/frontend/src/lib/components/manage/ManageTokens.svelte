@@ -71,8 +71,10 @@
 		})
 	);
 
+	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+
 	$effect(() => {
-		getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY).setTokens(allTokensSorted);
+		setTokens(allTokensSorted);
 	});
 
 	let loading = $erc20UserTokensNotInitialized;
