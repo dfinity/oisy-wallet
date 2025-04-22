@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { kongSwapAmounts } from '$lib/api/kong_backend.api';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -11,9 +10,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
-	import { parseToken } from '$lib/utils/parse.utils';
-	import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
-	import { getIcpSwapAmounts } from '$lib/services/swap.services';
+	import { fetchSwapOptions } from '$lib/utils/swap.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: Token | undefined;
@@ -21,7 +18,6 @@
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	// TODO: add tests for this context
 	const loadSwapAmounts = async () => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
@@ -35,56 +31,28 @@
 
 		const parsedAmount = Number(amount);
 
-		// WizardModal re-renders content on step change (e.g. when switching between Swap to Review steps)
-		// To avoid re-fetching the fees, we need to check if amount hasn't changed since the last request
-		if (nonNullish($store) && $store.amountForSwap === parsedAmount) {
-			return;
-		}
+		if (nonNullish($store) && $store.amountForSwap === parsedAmount) return;
 
 		try {
-			const swapAmounts = await kongSwapAmounts({
+			const swaps = await fetchSwapOptions({
 				identity: $authIdentity,
 				sourceToken,
 				destinationToken,
-				sourceAmount: parseToken({
-					value: `${amount}`,
-					unitName: sourceToken.decimals
-				})
+				amount: parsedAmount,
+				tokens: $tokens
 			});
 
-			const icpSwap = await getIcpSwapAmounts({
-				identity: $authIdentity,
-				sourceToken,
-				destinationToken,
-				amountIn: 100000000n,
-				slippage: 1.5
-			});
-
-			console.log({ swapAmounts, icpSwap });
-
-			if (isNullish(swapAmounts)) {
+			if (swaps.length === 0) {
 				store.reset();
 				return;
 			}
 
-			store.setSwapAmounts({
-				swapAmounts: {
-					slippage: swapAmounts.slippage,
-					receiveAmount: swapAmounts.receive_amount,
-					route: getSwapRoute(swapAmounts.txs ?? []),
-					liquidityFees: getLiquidityFees({ transactions: swapAmounts.txs ?? [], tokens: $tokens }),
-					networkFee: getNetworkFee({ transactions: swapAmounts.txs ?? [], tokens: $tokens })
-				},
-				amountForSwap: parsedAmount
-			});
-		} catch (_err: unknown) {
-			// if kongSwapAmounts fails, it means no pool is currently available for the provided tokens
-			store.setSwapAmounts({
-				swapAmounts: null,
-				amountForSwap: parsedAmount
-			});
+			store.setSwaps({ swaps, amount: parsedAmount });
+		} catch {
+			store.reset();
 		}
 	};
+
 	const debounceLoadSwapAmounts = debounce(loadSwapAmounts);
 
 	$: amount, sourceToken, destinationToken, debounceLoadSwapAmounts();

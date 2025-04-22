@@ -17,24 +17,22 @@
 	import { modalSwap } from '$lib/derived/modal.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import {
-		loadKongSwapTokens as loadKongSwapTokensService,
-		getQuoteWithSlippage
+		loadKongSwapTokens as loadKongSwapTokensService
+		// getQuoteWithSlippage
 	} from '$lib/services/swap.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
-		initSwapAmountsStore,
+		swapAmountsContext,
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { waitReady } from '$lib/utils/timeout.utils';
 
-	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
-		store: initSwapAmountsStore()
-	});
+	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, swapAmountsContext);
 
 	setContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY, {
 		store: icTokenFeeStore

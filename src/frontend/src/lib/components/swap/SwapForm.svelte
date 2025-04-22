@@ -2,8 +2,10 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
+
 	import type IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
+
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
@@ -22,11 +24,13 @@
 	import { SWAP_SLIPPAGE_INVALID_VALUE } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { bestSwap } from '$lib/derived/swap.derived';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
@@ -52,16 +56,19 @@
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
+	const dispatch = createEventDispatcher();
+
 	let errorType: TokenActionErrorType = undefined;
 	let amountSetToMax = false;
 	let exchangeValueUnit: DisplayUnit = 'usd';
 	let inputUnit: DisplayUnit;
+
 	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 
 	$: receiveAmount =
-		nonNullish($destinationToken) && $swapAmountsStore?.swapAmounts?.receiveAmount
+		nonNullish($destinationToken) && nonNullish($bestSwap)
 			? formatTokenBigintToNumber({
-					value: $swapAmountsStore?.swapAmounts.receiveAmount,
+					value: $bestSwap.receiveAmount,
 					unitName: $destinationToken.decimals,
 					displayDecimals: $destinationToken.decimals
 				})
@@ -85,8 +92,6 @@
 	let disableSwitchTokens = false;
 	$: disableSwitchTokens =
 		(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
-
-	const dispatch = createEventDispatcher();
 
 	let invalid: boolean;
 	$: invalid =
@@ -132,9 +137,7 @@
 					bind:amountSetToMax
 					token={$sourceToken}
 					{customValidate}
-					on:click={() => {
-						dispatch('icShowTokensList', 'source');
-					}}
+					on:click={() => dispatch('icShowTokensList', 'source')}
 				>
 					<span slot="title">{$i18n.tokens.text.source_token_title}</span>
 
@@ -175,18 +178,16 @@
 				exchangeRate={$destinationTokenExchangeRate}
 				loading={swapAmountsLoading}
 				disabled={true}
-				on:click={() => {
-					dispatch('icShowTokensList', 'destination');
-				}}
+				on:click={() => dispatch('icShowTokensList', 'destination')}
 			>
 				<span slot="title">{$i18n.tokens.text.destination_token_title}</span>
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if $swapAmountsStore?.swapAmounts === null}
-							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
-								>{$i18n.swap.text.swap_is_not_offered}</div
-							>
+						{#if $bestSwap === null}
+							<div transition:slide={SLIDE_DURATION} class="text-error-primary">
+								{$i18n.swap.text.swap_is_not_offered}
+							</div>
 						{:else}
 							<div class="flex gap-3 text-tertiary">
 								<TokenInputAmountExchange

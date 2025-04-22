@@ -5,6 +5,7 @@ import { ZERO_BI } from '$lib/constants/app.constants';
 import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import { swapAmountsStore, type SwapProviderResult } from '$lib/stores/swap-amounts.store';
 import type { Balance } from '$lib/types/balance';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -56,3 +57,13 @@ export const swappableTokens: Readable<SwappableTokens> = derived(
 		return { sourceToken: undefined, destinationToken: selectedToken };
 	}
 );
+
+export const bestSwap: Readable<SwapProviderResult | null> = derived(swapAmountsStore, ($store) => {
+	if (!$store?.swaps || $store.swaps.length === 0) {
+		return null;
+	}
+
+	return $store.swaps.reduce((best, current) =>
+		current.receiveAmount > best.receiveAmount ? current : best
+	);
+});

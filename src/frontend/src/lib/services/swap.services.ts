@@ -4,7 +4,7 @@ import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { setCustomToken } from '$lib/api/backend.api';
-import { executeSwap, getPool, getQuote } from '$lib/api/icp_swap.api';
+import { getPool, getQuote } from '$lib/api/icp_swap.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -13,9 +13,10 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { KongSwapAmountsParams } from '$lib/types/api';
+import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Amount } from '$lib/types/send';
-import type { Token } from '$lib/types/token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -120,60 +121,6 @@ export const loadKongSwapTokens = async ({ identity }: { identity: Identity }): 
 	);
 };
 
-const token0 = { address: 'ryjl3-tyaaa-aaaaa-aaaba-cai', standard: 'ICP' };
-const token1 = { address: 'mxzaz-hqaaa-aaaar-qaada-cai', standard: 'ICRC2' };
-const fee = 3000n;
-
-export const fetchPoolData = async ({ identity }: { identity: Identity }) => {
-	try {
-		const poolData = await getPool({
-			identity,
-			token0,
-			token1,
-			fee
-		});
-		console.log(poolData);
-	} catch (error) {
-		console.error('Error fetching pool data:', error);
-	}
-};
-
-export const getQuoteWithSlippage = async ({
-	identity,
-	amountIn,
-	zeroForOne,
-	slippagePercentage
-}: {
-	identity: Identity;
-	amountIn: bigint;
-	zeroForOne: boolean;
-	slippagePercentage: number;
-}) => {
-	const poolData = await getPool({ identity, token0, token1, fee });
-
-	const swapPoolCanisterId = poolData.canisterId.toString();
-
-	const quoteAmount = await getQuote({
-		identity,
-		canisterId: swapPoolCanisterId,
-		amountIn: amountIn.toString(),
-		zeroForOne,
-		amountOutMinimum: '0'
-	});
-
-	console.log('quoteAmount', quoteAmount);
-
-	const slippageFactor = BigInt(10000 - Math.floor(slippagePercentage * 100));
-	const amountOutMinimum = (quoteAmount * slippageFactor) / 10000n;
-
-	return {
-		poolCanisterId: swapPoolCanisterId,
-		quoteAmount,
-		amountOutMinimum
-	};
-};
-
-// export const performSwap = async ({
 // 	identity,
 // 	poolCanisterId,
 // 	amountIn,
@@ -324,28 +271,15 @@ export const getQuoteWithSlippage = async ({
 // };
 export const getIcpSwapAmounts = async ({
 	identity,
-	amountIn,
-	slippage,
+	sourceAmount,
 	sourceToken,
 	destinationToken
-}: {
-	identity: Identity;
-	amountIn: bigint;
-	slippage: number;
-	sourceToken: any;
-	destinationToken: any;
-}) => {
-	const fee = 3000n;	
-
-
-	console.log(sourceToken, destinationToken);
-	
-
+}: CanisterApiFunctionParams<KongSwapAmountsParams>) => {
 	const pool = await getPool({
 		identity,
-		token0: {address: sourceToken.ledgerCanisterId, standard: sourceToken.standard},
-		token1: {address: destinationToken.ledgerCanisterId, standard: destinationToken.standard},
-		fee
+		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },
+		token1: { address: destinationToken.ledgerCanisterId, standard: destinationToken.standard },
+		fee: 3000n
 	});
 
 	if (!pool) {
@@ -354,33 +288,16 @@ export const getIcpSwapAmounts = async ({
 
 	const canisterId = pool.canisterId.toString();
 
-
-	console.log('Pool data:', pool);
-	
-
 	const quote = await getQuote({
 		identity,
 		canisterId,
-		amountIn: BigInt(100000000n).toString(),
+		amountIn: sourceAmount.toString(),
 		zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId,
 		amountOutMinimum: '0'
 	});
 
-	const slippageFactor = BigInt(10000 - Math.floor(slippage * 100));
-	const amountOutMinimum = (quote * slippageFactor) / 10000n;
-
-	console.log({quote});
-	
-
 	return {
-		poolCanisterId: canisterId,
-		swapAmounts: {
-			slippage,
-			receiveAmount: amountOutMinimum,
-			route: `${sourceToken.symbol} → ${destinationToken.symbol}`,
-			liquidityFees: fee,
-			networkFee: 10_000n
-		},
-		amountForSwap: amountIn.toString()
+		provider: 'icpSwap',
+		receiveAmount: quote
 	};
 };

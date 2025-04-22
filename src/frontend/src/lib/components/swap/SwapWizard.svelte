@@ -138,7 +138,7 @@
 		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
 	>
-		{#if currentStep?.name === WizardStepsSwap.SWAP}
+		<!-- <!-- {#if currentStep?.name === WizardStepsSwap.SWAP} -->
 			<SwapForm
 				on:icClose
 				on:icNext
@@ -147,12 +147,12 @@
 				bind:receiveAmount
 				bind:slippageValue
 			/>
-		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
+		<!-- {:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview on:icSwap={swap} on:icBack {slippageValue} {swapAmount} {receiveAmount} />
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress bind:swapProgressStep />
 		{:else}
 			<slot />
-		{/if}
+		{/if} -->
 	</SwapAmountsContext>
 </IcTokenFeeContext>

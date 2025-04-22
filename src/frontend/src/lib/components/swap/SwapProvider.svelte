@@ -20,30 +20,31 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 	import { safeParse } from '$lib/validation/utils.validation';
+	import { bestSwap } from '$lib/derived/swap.derived';
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let route: string[] | undefined;
-	$: route = $swapAmountsStore?.swapAmounts?.route;
+	// let route: string[] | undefined;
+	// $: route = $swapAmountsStore?.swapAmounts?.route;
 
-	let networkFee: ProviderFee | undefined;
-	$: networkFee = $swapAmountsStore?.swapAmounts?.networkFee;
+	// let networkFee: ProviderFee | undefined;
+	// $: networkFee = $swapAmountsStore?.swapAmounts?.networkFee;
 
-	let liquidityFees: ProviderFee[] | undefined;
-	$: liquidityFees = $swapAmountsStore?.swapAmounts?.liquidityFees;
+	// let liquidityFees: ProviderFee[] | undefined;
+	// $: liquidityFees = $swapAmountsStore?.swapAmounts?.liquidityFees;
 
-	const kongSwapDApp: OisyDappDescription | undefined = dAppDescriptions.find(
-		({ id }) => id === 'kongswap'
-	);
+	const dApp: OisyDappDescription | undefined = $bestSwap
+	? dAppDescriptions.find(({ id }) => id === $bestSwap.provider)
+	: undefined;
 
 	// TODO: this state - websiteURL - isn't one and should become a local variable
 	let websiteURL: Option<URL>;
 	let displayURL: OptionString;
-	$: if (nonNullish(kongSwapDApp)) {
+	$: if (nonNullish(dApp)) {
 		try {
 			const validatedWebsiteUrl = safeParse({
 				schema: UrlSchema,
-				value: kongSwapDApp?.website
+				value: dApp?.website
 			});
 			if (nonNullish(validatedWebsiteUrl)) {
 				websiteURL = new URL(validatedWebsiteUrl);
@@ -58,7 +59,7 @@
 	}
 </script>
 
-{#if nonNullish(kongSwapDApp)}
+{#if nonNullish(dApp)}
 	<ModalExpandableValues>
 		<ModalValue slot="list-header">
 			<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
@@ -67,12 +68,12 @@
 				<div class="flex gap-2">
 					<div class="mt-1">
 						<Logo
-							src={kongSwapDApp.logo}
-							alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: kongSwapDApp.name })}
+							src={dApp.logo}
+							alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dApp.name })}
 						/>
 					</div>
 					<div class="mr-auto">
-						<div class="text-lg font-bold">{kongSwapDApp.name}</div>
+						<div class="text-lg font-bold">{dApp.name}</div>
 						{#if nonNullish(displayURL)}
 							<div class="text-sm text-tertiary">{displayURL}</div>
 						{/if}
@@ -81,7 +82,7 @@
 			</svelte:fragment>
 		</ModalValue>
 
-		<svelte:fragment slot="list-items">
+		<!-- <svelte:fragment slot="list-items">
 			{#if nonNullish(route) && route.length > 0}
 				<SwapRoute {route} />
 			{/if}
@@ -91,6 +92,6 @@
 			{#if nonNullish(liquidityFees) && liquidityFees.length > 0}
 				<SwapLiquidityFees {liquidityFees} />
 			{/if}
-		</svelte:fragment>
+		</svelte:fragment> -->
 	</ModalExpandableValues>
 {/if}
