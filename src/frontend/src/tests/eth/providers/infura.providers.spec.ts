@@ -18,7 +18,7 @@ import { InfuraProvider, infuraProviders } from '$eth/providers/infura.providers
 import type { EthereumNetwork } from '$eth/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
-import { type Networkish , InfuraProvider as InfuraProviderLib } from 'ethers/providers';
+import { InfuraProvider as InfuraProviderLib, type Networkish } from 'ethers/providers';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'
