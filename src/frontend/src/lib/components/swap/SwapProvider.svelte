@@ -37,6 +37,9 @@
 		? dAppDescriptions.find(({ id }) => id === $bestSwap.provider.toLocaleLowerCase())
 		: undefined;
 
+	console.log($bestSwap);
+
+
 	// TODO: this state - websiteURL - isn't one and should become a local variable
 	let websiteURL: Option<URL>;
 	let displayURL: OptionString;
