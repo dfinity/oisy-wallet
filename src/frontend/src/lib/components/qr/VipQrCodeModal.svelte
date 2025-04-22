@@ -3,6 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
+	import IconBinanceYellow from '$lib/components/icons/IconBinanceYellow.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -11,17 +12,18 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
 	import {
-		VIP_CODE_REGENERATE_BUTTON, VIP_QR_CODE_BINANCE_ICON,
-		VIP_QR_CODE_COPY_BUTTON, VIP_QR_CODE_ICON
+		VIP_CODE_REGENERATE_BUTTON,
+		VIP_QR_CODE_BINANCE_ICON,
+		VIP_QR_CODE_COPY_BUTTON,
+		VIP_QR_CODE_ICON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { QrCodeType } from '$lib/enums/qr-codes-types';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getNewReward } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {QrCodeType} from "$lib/enums/qr-codes-types";
-	import IconBinanceYellow from "$lib/components/icons/IconBinanceYellow.svelte";
 
 	export let codeType: QrCodeType = QrCodeType.VIP;
 
@@ -84,8 +86,8 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title"
-	><span class="text-xl"
-		>{codeType === QrCodeType.VIP
+		><span class="text-xl"
+			>{codeType === QrCodeType.VIP
 				? $i18n.vip.invitation.text.title
 				: $i18n.vip.invitation.text.binance_title}</span
 		>
