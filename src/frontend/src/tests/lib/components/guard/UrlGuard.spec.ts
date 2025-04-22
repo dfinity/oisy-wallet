@@ -1,4 +1,5 @@
 import UrlGuard from '$lib/components/guard/UrlGuard.svelte';
+import { QrCodeType } from '$lib/enums/qr-code-types';
 import * as rewardService from '$lib/services/reward.services';
 import { loading } from '$lib/stores/loader.store';
 import { modalStore } from '$lib/stores/modal.store';
@@ -8,7 +9,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import {QrCodeType} from "$lib/enums/qr-code-types";
 
 describe('UrlGuard', () => {
 	beforeEach(() => {
@@ -47,7 +47,10 @@ describe('UrlGuard', () => {
 					searchParam: 'code'
 				});
 
-				expect(get(modalStore)).toEqual({ data: {success: true, codeType: QrCodeType.VIP}, type: 'vip-reward-state' });
+				expect(get(modalStore)).toEqual({
+					data: { success: true, codeType: QrCodeType.VIP },
+					type: 'vip-reward-state'
+				});
 			});
 		});
 
@@ -77,7 +80,10 @@ describe('UrlGuard', () => {
 					searchParam: 'code'
 				});
 
-				expect(get(modalStore)).toEqual({ data: {success: false, codeType: QrCodeType.VIP}, type: 'vip-reward-state' });
+				expect(get(modalStore)).toEqual({
+					data: { success: false, codeType: QrCodeType.VIP },
+					type: 'vip-reward-state'
+				});
 			});
 		});
 
