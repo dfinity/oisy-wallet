@@ -27,7 +27,7 @@ describe('InfoEthereum', () => {
 					$ckToken: mockValidIcCkToken.symbol
 				})
 			)
-		);
+		).toBeDefined();
 	});
 
 	it('should render description correctly', () => {
@@ -43,7 +43,7 @@ describe('InfoEthereum', () => {
 					$network: mockValidIcToken.network.name
 				})
 			)
-		);
+		).toBeDefined();
 	});
 
 	it('should render note correctly', () => {
@@ -58,7 +58,7 @@ describe('InfoEthereum', () => {
 					$ckToken: mockValidIcCkToken.symbol
 				})
 			)
-		);
+		).toBeDefined();
 	});
 
 	it('should render how-to message correctly', () => {
@@ -72,6 +72,6 @@ describe('InfoEthereum', () => {
 					$ckToken: mockValidIcCkToken.symbol
 				})
 			)
-		);
+		).toBeDefined();
 	});
 });
