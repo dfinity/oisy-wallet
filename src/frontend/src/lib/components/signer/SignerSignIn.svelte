@@ -8,11 +8,11 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
-<div class="flex justify-center pt-12">
+<div class="flex justify-center pt-7">
 	<SignerAnimatedAstronaut />
 </div>
 
-<h2 class="mb-4 mt-12 text-center">
+<h2 class="mb-2 mt-9 text-center">
 	{replaceOisyPlaceholders($i18n.signer.sign_in.text.access_your_wallet)}
 </h2>
 
