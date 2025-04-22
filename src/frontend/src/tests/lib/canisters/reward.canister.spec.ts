@@ -14,6 +14,7 @@ import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
+import type {RewardClaimApiResponse} from "$lib/types/reward";
 
 describe('reward.canister', () => {
 	const createRewardCanister = ({

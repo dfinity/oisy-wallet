@@ -1,4 +1,5 @@
 import type { Principal } from '@dfinity/principal';
+import type {ClaimedVipReward, ClaimVipRewardResponse} from "$declarations/rewards/rewards.did";
 
 export interface RewardsResponse {
 	rewards: RewardResponseInfo[];
@@ -17,6 +18,11 @@ export interface RewardResult {
 	receivedReward: boolean;
 	receivedJackpot: boolean;
 	receivedReferral: boolean;
+}
+
+export interface RewardClaimApiResponse {
+	claimRewardResponse: ClaimVipRewardResponse;
+	claimedVipReward: [] | [ClaimedVipReward];
 }
 
 export interface RewardClaimResponse<T = unknown> {

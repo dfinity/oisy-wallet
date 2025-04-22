@@ -13,6 +13,7 @@ import { REWARDS_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
+import type {RewardClaimApiResponse} from "$lib/types/reward";
 
 let canister: RewardCanister | undefined = undefined;
 
@@ -41,7 +42,7 @@ export const claimVipReward = async ({
 	identity
 }: CanisterApiFunctionParams<{
 	vipReward: VipReward;
-}>): Promise<[ClaimVipRewardResponse, [] | [ClaimedVipReward]]> => {
+}>): Promise<RewardClaimApiResponse> => {
 	const { claimVipReward } = await rewardCanister({ identity });
 
 	return claimVipReward(vipReward);
