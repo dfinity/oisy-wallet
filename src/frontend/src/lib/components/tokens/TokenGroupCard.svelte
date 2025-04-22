@@ -22,9 +22,11 @@
 
 	let { tokenGroup }: { tokenGroup: TokenUiGroup } = $props();
 
-	let isExpanded: boolean = $derived(($tokenGroupStore ?? {})[tokenGroup.id]?.isExpanded ?? false);
+	const isExpanded: boolean = $derived(
+		($tokenGroupStore ?? {})[tokenGroup.id]?.isExpanded ?? false
+	);
 
-	let hideZeros: boolean = $derived(($tokenGroupStore ?? {})[tokenGroup.id]?.hideZeros ?? true);
+	const hideZeros: boolean = $derived(($tokenGroupStore ?? {})[tokenGroup.id]?.hideZeros ?? true);
 
 	const toggleIsExpanded = (toggle: boolean) =>
 		tokenGroupStore.set({ tokenId: tokenGroup.id, data: { isExpanded: toggle, hideZeros } });
@@ -32,13 +34,13 @@
 	const toggleHideZeros = (toggle: boolean) =>
 		tokenGroupStore.set({ tokenId: tokenGroup.id, data: { isExpanded, hideZeros: toggle } });
 
-	let headerData: CardData = $derived(mapHeaderData(tokenGroup));
+	const headerData: CardData = $derived(mapHeaderData(tokenGroup));
 
 	const isNativeToken = (token: TokenUi) => tokenGroup.nativeToken.id === token.id;
 	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix); // logic taken from old ck badge
 
 	// list of filtered tokens, filtered by string input
-	let filteredTokens: TokenUi[] = $derived(
+	const filteredTokens: TokenUi[] = $derived(
 		getFilteredTokenGroup({
 			filter: $tokenListStore.filter,
 			list: tokenGroup.tokens
@@ -46,7 +48,7 @@
 	);
 
 	// list of tokens that should display with a "show more" button for not displayed ones
-	let truncatedTokens: TokenUi[] = $derived(
+	const truncatedTokens: TokenUi[] = $derived(
 		filteredTokens.filter((token) => {
 			const totalBalance = filteredTokens.reduce((p, c) => p + BigInt(c.balance ?? 0n), ZERO_BI);
 			// Only include tokens with a balance
@@ -59,7 +61,7 @@
 	);
 
 	// Show all if hideZeros = false and sort
-	let tokensToShow: TokenUi[] = $derived(
+	const tokensToShow: TokenUi[] = $derived(
 		(hideZeros ? filteredTokens : truncatedTokens).sort((a, b) => {
 			const balanceA = BigInt(a.balance ?? 0n);
 			const balanceB = BigInt(b.balance ?? 0n);
@@ -76,7 +78,7 @@
 	);
 
 	// Count tokens that are not displayed
-	let notDisplayedCount: number = $derived(filteredTokens.length - tokensToShow.length);
+	const notDisplayedCount: number = $derived(filteredTokens.length - tokensToShow.length);
 </script>
 
 <div class="flex flex-col" class:bg-primary={isExpanded}>
