@@ -146,14 +146,13 @@ export const createPowChallenge = async ({
 	const { createPowChallenge } = await backendCanister({ identity });
 	return createPowChallenge();
 };
-
 export const allowSigning = async ({
 	identity,
 	...params
 }: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningResponse> => {
 	const { allowSigning } = await backendCanister({ identity });
 
-	return allowSigning(params.nonce);
+	return allowSigning(params);
 };
 
 export const addUserHiddenDappId = async ({

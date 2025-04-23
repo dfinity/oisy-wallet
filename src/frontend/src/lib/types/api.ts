@@ -1,5 +1,6 @@
 import type {
 	AddUserCredentialError,
+	AllowSigningRequest,
 	BitcoinNetwork,
 	CredentialSpec,
 	GetUserProfileError,
@@ -8,9 +9,9 @@ import type {
 } from '$declarations/backend/backend.did';
 import type { TxId } from '$declarations/kong_backend/kong_backend.did';
 import type {
-	BitcoinNetwork as SignerBitcoinNetwork,
 	BtcTxOutput,
 	SchnorrKeyId,
+	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
 } from '$declarations/signer/signer.did';
 import type { Address, BtcAddress } from '$lib/types/address';
@@ -30,7 +31,7 @@ export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialE
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
 
 export interface AllowSigningParams {
-	nonce?: bigint;
+	request?: AllowSigningRequest;
 }
 
 export interface BtcSelectUserUtxosFeeParams {

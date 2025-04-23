@@ -21,6 +21,7 @@ import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
@@ -176,17 +177,17 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	allowSigning = async (nonce?: bigint): Promise<AllowSigningResponse> => {
+	allowSigning = async ({ request }: AllowSigningParams = {}): Promise<AllowSigningResponse> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		const result = await allow_signing(nonce !== undefined ? [{ nonce }] : []);
+		const response = await allow_signing(toNullable(request));
 
-		if ('Ok' in result) {
-			const { Ok } = result;
+		if ('Ok' in response) {
+			const { Ok } = response;
 			return Ok;
 		}
 
-		throw mapAllowSigningError(result.Err);
+		throw mapAllowSigningError(response.Err);
 	};
 
 	createPowChallenge = async (): Promise<CreateChallengeResponse> => {
