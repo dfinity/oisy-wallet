@@ -1,5 +1,17 @@
 import {
+	BASE_NETWORK_ID,
+	BASE_SEPOLIA_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_MAINNET_NETWORK_ID,
+	BSC_TESTNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
 	ETHEREUM_NETWORK_ID,
+	INFURA_NETWORK_BASE,
+	INFURA_NETWORK_BASE_SEPOLIA,
+	INFURA_NETWORK_BNB_MAINNET,
+	INFURA_NETWORK_BNB_TESTNET,
 	INFURA_NETWORK_HOMESTEAD,
 	INFURA_NETWORK_SEPOLIA,
 	SEPOLIA_NETWORK_ID
@@ -10,13 +22,12 @@ import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { Networkish } from '@ethersproject/networks';
 import {
 	InfuraProvider as InfuraProviderLib,
 	type FeeData,
+	type Networkish,
 	type TransactionResponse
-} from '@ethersproject/providers';
+} from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraProvider {
@@ -26,12 +37,12 @@ export class InfuraProvider {
 		this.provider = new InfuraProviderLib(this.network, INFURA_API_KEY);
 	}
 
-	balance = (address: EthAddress): Promise<BigNumber> => this.provider.getBalance(address);
+	balance = (address: EthAddress): Promise<bigint> => this.provider.getBalance(address);
 
 	getFeeData = (): Promise<FeeData> => this.provider.getFeeData();
 
 	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
-		this.provider.sendTransaction(signedTransaction);
+		this.provider.broadcastTransaction(signedTransaction);
 
 	getTransactionCount = (address: EthAddress): Promise<number> =>
 		this.provider.getTransactionCount(address, 'pending');
@@ -39,10 +50,18 @@ export class InfuraProvider {
 	getBlockNumber = (): Promise<number> => this.provider.getBlockNumber();
 }
 
-const providers: Record<NetworkId, InfuraProvider> = {
-	[ETHEREUM_NETWORK_ID]: new InfuraProvider(INFURA_NETWORK_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new InfuraProvider(INFURA_NETWORK_SEPOLIA)
-};
+const providersMap: [NetworkId, Networkish][] = [
+	[ETHEREUM_NETWORK_ID, INFURA_NETWORK_HOMESTEAD],
+	[SEPOLIA_NETWORK_ID, INFURA_NETWORK_SEPOLIA],
+	[BASE_NETWORK_ID, INFURA_NETWORK_BASE],
+	[BASE_SEPOLIA_NETWORK_ID, INFURA_NETWORK_BASE_SEPOLIA],
+	[BSC_MAINNET_NETWORK_ID, INFURA_NETWORK_BNB_MAINNET],
+	[BSC_TESTNET_NETWORK_ID, INFURA_NETWORK_BNB_TESTNET]
+];
+
+const providers: Record<NetworkId, InfuraProvider> = providersMap.reduce<
+	Record<NetworkId, InfuraProvider>
+>((acc, [id, name]) => ({ ...acc, [id]: new InfuraProvider(name) }), {});
 
 export const infuraProviders = (networkId: NetworkId): InfuraProvider => {
 	const provider = providers[networkId];

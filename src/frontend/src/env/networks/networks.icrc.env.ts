@@ -4,6 +4,19 @@ import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
+import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
+import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
+import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
+import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
+import { OCT_TOKEN_GROUP } from '$env/tokens/groups/groups.oct.env';
+import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
+import { SHIB_TOKEN_GROUP } from '$env/tokens/groups/groups.shib.env';
+import { UNI_TOKEN_GROUP } from '$env/tokens/groups/groups.uni.env';
+import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
+import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
+import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.wbtc.env';
+import { WSTETH_TOKEN_GROUP } from '$env/tokens/groups/groups.wsteth.env';
+import { XAUT_TOKEN_GROUP } from '$env/tokens/groups/groups.xaut.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
@@ -97,6 +110,7 @@ const CKBTC_IC_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'bitcoin',
 				position: 1,
 				twinToken: BTC_MAINNET_TOKEN,
+				groupData: BTC_TOKEN_GROUP,
 				explorerUrl: CKBTC_EXPLORER_URL
 			}
 		: undefined;
@@ -183,6 +197,7 @@ const CKETH_IC_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'ethereum',
 				position: 1,
 				twinToken: ETHEREUM_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
 				explorerUrl: CKETH_EXPLORER_URL
 			}
 		: undefined;
@@ -303,7 +318,8 @@ const CKUSDC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUSDC,
 			position: 1,
-			twinToken: USDC_TOKEN
+			twinToken: USDC_TOKEN,
+			groupData: USDC_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -311,7 +327,8 @@ const CKLINK_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckLINK,
 			position: 2,
-			twinToken: LINK_TOKEN
+			twinToken: LINK_TOKEN,
+			groupData: LINK_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -319,7 +336,8 @@ const CKPEPE_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckPEPE,
 			position: 3,
-			twinToken: PEPE_TOKEN
+			twinToken: PEPE_TOKEN,
+			groupData: PEPE_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -327,7 +345,8 @@ const CKOCT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_D
 	? {
 			...CKERC20_PRODUCTION_DATA.ckOCT,
 			position: 4,
-			twinToken: OCT_TOKEN
+			twinToken: OCT_TOKEN,
+			groupData: OCT_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -335,7 +354,8 @@ const CKSHIB_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckSHIB,
 			position: 5,
-			twinToken: SHIB_TOKEN
+			twinToken: SHIB_TOKEN,
+			groupData: SHIB_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -343,7 +363,8 @@ const CKWBTC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckWBTC,
 			position: 6,
-			twinToken: WBTC_TOKEN
+			twinToken: WBTC_TOKEN,
+			groupData: WBTC_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -351,7 +372,8 @@ const CKUSDT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUSDT,
 			position: 7,
-			twinToken: USDT_TOKEN
+			twinToken: USDT_TOKEN,
+			groupData: USDT_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -359,7 +381,8 @@ const CKWSTETH_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTIO
 	? {
 			...CKERC20_PRODUCTION_DATA.ckWSTETH,
 			position: 8,
-			twinToken: WSTETH_TOKEN
+			twinToken: WSTETH_TOKEN,
+			groupData: WSTETH_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -367,7 +390,8 @@ const CKUNI_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_D
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUNI,
 			position: 9,
-			twinToken: UNI_TOKEN
+			twinToken: UNI_TOKEN,
+			groupData: UNI_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -375,7 +399,8 @@ const CKEURC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckEURC,
 			position: 10,
-			twinToken: EURC_TOKEN
+			twinToken: EURC_TOKEN,
+			groupData: EURC_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -383,7 +408,8 @@ const CKXAUT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 	? {
 			...CKERC20_PRODUCTION_DATA.ckXAUT,
 			position: 11,
-			twinToken: XAUT_TOKEN
+			twinToken: XAUT_TOKEN,
+			groupData: XAUT_TOKEN_GROUP
 		}
 	: undefined;
 
@@ -449,6 +475,20 @@ const NAK_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTI
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.NAK,
 			position: 20
+		}
+	: undefined;
+
+const VCHF_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VCHF)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.VCHF,
+			position: 21
+		}
+	: undefined;
+
+const VEUR_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VEUR)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.VEUR,
+			position: 22
 		}
 	: undefined;
 
@@ -525,7 +565,9 @@ const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(nICP_IC_DATA) ? [nICP_IC_DATA] : []),
 	...(nonNullish(vUSD_IC_DATA) ? [vUSD_IC_DATA] : []),
 	...(nonNullish(RUGGY_IC_DATA) ? [RUGGY_IC_DATA] : []),
-	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : [])
+	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : []),
+	...(nonNullish(VCHF_IC_DATA) ? [VCHF_IC_DATA] : []),
+	...(nonNullish(VEUR_IC_DATA) ? [VEUR_IC_DATA] : [])
 ];
 
 export const ICRC_TOKENS: IcInterface[] = [

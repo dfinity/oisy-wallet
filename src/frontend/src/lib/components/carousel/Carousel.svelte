@@ -180,8 +180,8 @@
 	/**
 	 * Reset the autoplay timer and call goToNextSlide
 	 */
-	const onNext = async () => {
-		await trackEvent({
+	const onNext = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_NEXT
 		});
 
@@ -218,8 +218,8 @@
 	/**
 	 * Reset the autoplay timer and call goToPreviousSlide
 	 */
-	const onPrevious = async () => {
-		await trackEvent({
+	const onPrevious = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_PREVIOUS
 		});
 
@@ -277,7 +277,7 @@
 
 <div
 	data-tid={CAROUSEL_CONTAINER}
-	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pb-10 pt-3 shadow-sm`}
+	class={`carousel-container ${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pb-10 pt-3 shadow-sm`}
 	class:pb-3={nonNullish(slides) && slides.length <= 1}
 	out:slide={SLIDE_PARAMS}
 >

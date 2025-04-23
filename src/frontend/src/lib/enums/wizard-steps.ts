@@ -25,3 +25,19 @@ export enum WizardStepsSwap {
 	REVIEW = 'Review',
 	SWAPPING = 'Swapping'
 }
+
+export enum WizardStepsAuthHelp {
+	OVERVIEW = 'Overview',
+	HELP_IDENTITY = 'Help Identity',
+	HELP_OTHER = 'Help Other'
+}
+
+export enum WizardStepsHowToConvert {
+	INFO = 'Info',
+	ETH_QR_CODE = 'ETH QR Code'
+}
+
+export enum WizardStepsReceive {
+	RECEIVE = 'Receive',
+	QR_CODE = 'QR Code'
+}

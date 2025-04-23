@@ -1,5 +1,6 @@
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
+import type { VipRewardStateData } from '$lib/types/reward';
 import { derived, type Readable } from 'svelte/store';
 
 export const modalEthReceive: Readable<boolean> = derived(
@@ -142,6 +143,10 @@ export const modalReferralState: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'referral-state'
 );
+export const modalAddressBook: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'address-book'
+);
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'dapp-details'
@@ -149,6 +154,11 @@ export const modalDAppDetails: Readable<boolean> = derived(
 export const modalVipRewardState: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'vip-reward-state'
+);
+export const modalVipRewardStateData: Readable<VipRewardStateData | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'vip-reward-state' ? ($modalStore?.data as VipRewardStateData) : undefined
 );
 export const modalRewardDetails: Readable<boolean> = derived(
 	modalStore,
@@ -172,4 +182,13 @@ export const modalSettingsState: Readable<boolean> = derived(
 export const modalSettingsData: Readable<SettingsModalType> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.data as SettingsModalType
+);
+
+export const modalAuthHelp: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'auth-help'
+);
+export const modalAuthHelpData: Readable<boolean | undefined> = derived(
+	modalStore,
+	($modalStore) => ($modalStore?.type === 'auth-help' ? ($modalStore?.data as boolean) : undefined)
 );

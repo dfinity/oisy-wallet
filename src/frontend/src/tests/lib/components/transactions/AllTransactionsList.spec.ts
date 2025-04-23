@@ -61,6 +61,7 @@ describe('AllTransactionsList', () => {
 				const skeleton: HTMLParagraphElement | null = container.querySelector(
 					`div[data-tid="all-transactions-skeleton-card-${i}"]`
 				);
+
 				expect(skeleton).toBeNull();
 			});
 		});
@@ -120,6 +121,7 @@ describe('AllTransactionsList', () => {
 				const skeleton: HTMLParagraphElement | null = container.querySelector(
 					`div[data-tid="all-transactions-skeleton-card-${i}"]`
 				);
+
 				expect(skeleton).toBeNull();
 			});
 		});
@@ -128,10 +130,12 @@ describe('AllTransactionsList', () => {
 			const { getByText, getByTestId } = render(AllTransactionsList);
 
 			const todayDateGroup = getByTestId('all-transactions-date-group-0');
+
 			expect(todayDateGroup).toBeInTheDocument();
 			expect(getByText('today')).toBeInTheDocument();
 
 			const yesterdayDateGroup = getByTestId('all-transactions-date-group-1');
+
 			expect(yesterdayDateGroup).toBeInTheDocument();
 			expect(getByText('yesterday')).toBeInTheDocument();
 		});

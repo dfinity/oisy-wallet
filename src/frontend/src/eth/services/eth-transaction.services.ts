@@ -10,7 +10,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
+import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export const processTransactionSent = async ({
@@ -26,7 +26,7 @@ export const processTransactionSent = async ({
 	}
 
 	// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
-	const value = decodeErc20AbiDataValue(transaction.data);
+	const value = decodeErc20AbiDataValue({ data: transaction.data });
 
 	await processErc20Transaction({ hash: transaction.hash, value, token, type: 'pending' });
 };

@@ -4,7 +4,7 @@ import {
 	disableConsoleLog,
 	failTestsThatLogToConsole
 } from '$tests/utils/console.test-utils';
-import { HttpAgent } from '@dfinity/agent';
+import type { HttpAgent } from '@dfinity/agent';
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/svelte';
 import 'fake-indexeddb/auto';
@@ -58,6 +58,23 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 		...actual,
 		// eslint-disable-next-line require-await
 		getAgent: async () => mock<HttpAgent>()
+	};
+});
+
+vi.mock('ethers/providers', () => {
+	const provider = vi.fn();
+
+	const plugin = vi.fn();
+
+	const network = vi.fn();
+	network.prototype.attachPlugin = vi.fn();
+
+	return {
+		EtherscanProvider: provider,
+		InfuraProvider: provider,
+		JsonRpcProvider: provider,
+		EtherscanPlugin: plugin,
+		Network: network
 	};
 });
 

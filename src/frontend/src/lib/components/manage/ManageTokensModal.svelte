@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
@@ -29,13 +30,16 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdEthereum, isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
-	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
+	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
+	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 
-	export let initialSearch: string | undefined = undefined;
-	export let onClose: () => void = () => {};
+	let {
+		initialSearch,
+		onClose = () => {},
+		infoElement
+	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
 
 	const steps: WizardSteps = [
 		{
@@ -56,10 +60,10 @@
 		}
 	];
 
-	let saveProgressStep: ProgressStepsAddToken = ProgressStepsAddToken.INITIALIZATION;
+	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep | undefined = $state();
+	let modal: WizardModal | undefined = $state();
 
 	const saveTokens = async ({
 		detail: { icrc, erc20, spl }
@@ -159,9 +163,9 @@
 		saveIcrcCustomTokens({
 			tokens,
 			progress,
-			modalNext: () => modal.set(3),
+			modalNext: () => modal?.set(3),
 			onSuccess: close,
-			onError: () => modal.set(0),
+			onError: () => modal?.set(0),
 			identity: $authIdentity
 		});
 
@@ -169,19 +173,19 @@
 		saveErc20UserTokens({
 			tokens,
 			progress,
-			modalNext: () => modal.set(3),
+			modalNext: () => modal?.set(3),
 			onSuccess: close,
-			onError: () => modal.set(0),
+			onError: () => modal?.set(0),
 			identity: $authIdentity
 		});
 
-	const saveSpl = (tokens: SaveSplUserToken[]): Promise<void> =>
-		saveSplUserTokens({
+	const saveSpl = (tokens: SaveSplCustomToken[]): Promise<void> =>
+		saveSplCustomTokens({
 			tokens,
 			progress,
-			modalNext: () => modal.set(3),
+			modalNext: () => modal?.set(3),
 			onSuccess: close,
-			onError: () => modal.set(0),
+			onError: () => modal?.set(0),
 			identity: $authIdentity
 		});
 
@@ -192,20 +196,21 @@
 		onClose();
 	};
 
-	let ledgerCanisterId: string | undefined;
-	let indexCanisterId: string | undefined;
+	let ledgerCanisterId: string | undefined = $state();
+	let indexCanisterId: string | undefined = $state();
 
-	let erc20ContractAddress: string | undefined;
-	let erc20Metadata: Erc20Metadata | undefined;
+	let erc20ContractAddress: string | undefined = $state();
+	let erc20Metadata: Erc20Metadata | undefined = $state();
 
-	let splTokenAddress: string | undefined;
-	let splMetadata: TokenMetadata | undefined;
+	let splTokenAddress: string | undefined = $state();
+	let splMetadata: TokenMetadata | undefined = $state();
 
-	let network: Network | undefined = $selectedNetwork;
-	let tokenData: Partial<AddTokenData> = {};
+	let network: Network | undefined = $state($selectedNetwork);
+	let tokenData: Partial<AddTokenData> = $state({});
 
-	$: tokenData,
+	$effect(() => {
 		({ ledgerCanisterId, indexCanisterId, erc20ContractAddress, splTokenAddress } = tokenData);
+	});
 </script>
 
 <WizardModal
@@ -257,8 +262,7 @@
 			on:icAddToken={modal.next}
 			on:icSave={saveTokens}
 			{initialSearch}
-		>
-			<slot name="info-element" slot="info-element" />
-		</ManageTokens>
+			{infoElement}
+		/>
 	{/if}
 </WizardModal>
