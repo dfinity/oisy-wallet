@@ -66,7 +66,7 @@ const queryUserRoles = async (params: {
  *
  * @throws {Error} Displays an error toast and logs the error if the query fails.
  */
-export const isVipUser = async (params: { identity: Identity }): Promise<UserRoleResult> => {
+export const getUserRoles = async (params: { identity: Identity }): Promise<UserRoleResult> => {
 	try {
 		return await queryUserRoles({ ...params, certified: false });
 	} catch (err: unknown) {
