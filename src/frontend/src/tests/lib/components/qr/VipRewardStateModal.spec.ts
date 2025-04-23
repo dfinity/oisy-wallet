@@ -17,6 +17,7 @@ describe('VipRewardStateModal', () => {
 			const { container, getByText } = render(VipRewardStateModal, { isSuccessful: true });
 
 			const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 			expect(imageBanner).toBeInTheDocument();
 			expect(imageBanner?.src).includes(successfulVipReward);
 
@@ -32,6 +33,7 @@ describe('VipRewardStateModal', () => {
 			const { container, getByText } = render(VipRewardStateModal, { isSuccessful: false });
 
 			const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 			expect(imageBanner).toBeInTheDocument();
 			expect(imageBanner?.src).includes(failedVipReward);
 
@@ -50,6 +52,7 @@ describe('VipRewardStateModal', () => {
 			});
 
 			const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 			expect(imageBanner).toBeInTheDocument();
 			expect(imageBanner?.src).includes(successfulBinanceReward);
 
@@ -68,6 +71,7 @@ describe('VipRewardStateModal', () => {
 			});
 
 			const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 			expect(imageBanner).toBeInTheDocument();
 			expect(imageBanner?.src).includes(failedVipReward);
 
