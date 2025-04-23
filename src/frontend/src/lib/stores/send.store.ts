@@ -24,10 +24,7 @@ const initSendStore = (token: Token): SendStore => {
 	};
 };
 
-export const initSendContext = ({
-	token,
-	...staticContext
-}: Pick<SendContext, 'sendPurpose'> & { token: Token }): SendContext => {
+export const initSendContext = ({ token }: { token: Token }): SendContext => {
 	const sendToken = initSendStore(token);
 
 	const sendTokenDecimals = derived(sendToken, ({ decimals }) => decimals);
@@ -53,16 +50,9 @@ export const initSendContext = ({
 		sendTokenSymbol,
 		sendBalance,
 		sendTokenExchangeRate,
-		sendTokenNetworkId,
-		...staticContext
+		sendTokenNetworkId
 	};
 };
-
-export type SendContextPurpose =
-	| 'send'
-	| 'convert-eth-to-cketh'
-	| 'convert-cketh-to-eth'
-	| 'convert-erc20-to-ckerc20';
 
 export interface SendContext {
 	sendToken: SendStore;
@@ -72,7 +62,6 @@ export interface SendContext {
 	sendTokenSymbol: Readable<string>;
 	sendBalance: Readable<OptionBalance>;
 	sendTokenExchangeRate: Readable<number | undefined>;
-	sendPurpose: SendContextPurpose;
 	sendTokenNetworkId: Readable<NetworkId>;
 }
 

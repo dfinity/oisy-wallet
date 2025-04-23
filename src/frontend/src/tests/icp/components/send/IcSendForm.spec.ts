@@ -15,7 +15,6 @@ describe('IcSendForm', () => {
 	mockContext.set(
 		SEND_CONTEXT_KEY,
 		initSendContext({
-			sendPurpose: 'convert-cketh-to-eth',
 			token: ETHEREUM_TOKEN
 		})
 	);

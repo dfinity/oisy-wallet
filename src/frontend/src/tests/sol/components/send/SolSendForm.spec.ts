@@ -56,7 +56,6 @@ describe('SolSendForm', () => {
 		mockContext.set(
 			SEND_CONTEXT_KEY,
 			initSendContext({
-				sendPurpose: 'send',
 				token: SOLANA_TOKEN
 			})
 		);
@@ -95,7 +94,6 @@ describe('SolSendForm', () => {
 			mockContext.set(
 				SEND_CONTEXT_KEY,
 				initSendContext({
-					sendPurpose: 'send',
 					token: TRUMP_TOKEN
 				})
 			);
