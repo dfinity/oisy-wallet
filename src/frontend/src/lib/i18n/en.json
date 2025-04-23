@@ -953,6 +953,7 @@
 		"invitation": {
 			"text": {
 				"title": "Generate invitation link",
+				"binance_title": "Binance Clubhouse QR",
 				"invitation_link_copied": "Invitation link copied to clipboard.",
 				"generate_new_link": "Generate new link",
 				"generating_new_code": "Generating new code",
