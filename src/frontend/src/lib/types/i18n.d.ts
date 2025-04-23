@@ -626,6 +626,7 @@ interface I18nTokens {
 			manage_list: string;
 			list_settings: string;
 			do_not_see_import: string;
+			import_token: string;
 			manage_for_network: string;
 			network: string;
 			all_tokens_zero_balance: string;
@@ -864,6 +865,7 @@ interface I18nVip {
 	invitation: {
 		text: {
 			title: string;
+			binance_title: string;
 			invitation_link_copied: string;
 			generate_new_link: string;
 			generating_new_code: string;
