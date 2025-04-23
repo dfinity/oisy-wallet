@@ -6,6 +6,7 @@
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
+	import MultiPageModal from '$lib/components/core/MultiPageModal.svelte';
 	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
@@ -81,6 +82,7 @@
 		</MobileNavigationMenu>
 
 		<Modals />
+		<MultiPageModal />
 	</AuthGuard>
 
 	<Footer />
