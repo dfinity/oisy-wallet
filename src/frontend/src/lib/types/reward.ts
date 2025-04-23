@@ -28,13 +28,13 @@ export interface RewardClaimApiResponse {
 
 export interface RewardClaimResponse<T = unknown> {
 	success: boolean;
-	campaignId?: string;
+	campaignId?: QrCodeType;
 	err?: T;
 }
 
 export interface UserRoleResult {
-	is_vip: boolean;
-	is_gold: boolean;
+	isVip: boolean;
+	isGold: boolean;
 }
 
 export interface VipRewardStateData {
