@@ -7,6 +7,7 @@
 	import {
 		networkBitcoin,
 		networkEthereum,
+		networkEvm,
 		networkICP,
 		networkSolana,
 		pseudoNetworkChainFusion
@@ -20,7 +21,7 @@
 
 {#if $networkICP}
 	<IcWalletAddress />
-{:else if $networkEthereum}
+{:else if $networkEthereum || $networkEvm}
 	<EthWalletAddress />
 {:else if $networkBitcoin}
 	<BtcWalletAddress />
