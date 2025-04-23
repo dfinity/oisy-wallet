@@ -5,7 +5,7 @@ import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { extendIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { MICRO_TRANSACTION_USD_THRESHOLD } from '$lib/constants/app.constants';
@@ -55,7 +55,7 @@ export const mapAllTransactionsUi = ({
 	$ethTransactions: EthTransactionsData;
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ethAddress: OptionEthAddress;
-	$icTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+	$icTransactions: (token: Token | undefined) => NonNullable<IcTransactionsData>;
 	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
 }): AllTransactionUiWithCmp[] => {
@@ -117,7 +117,7 @@ export const mapAllTransactionsUi = ({
 
 			return [
 				...acc,
-				...($icTransactions[tokenId] ?? []).map((transaction) => ({
+				...($icTransactions(token) ?? []).map((transaction) => ({
 					transaction: extendIcTransaction({
 						transaction,
 						token,

@@ -4,15 +4,25 @@ import {
 } from '$icp/stores/ic-pending-transactions.store';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { tokenWithFallback } from '$lib/derived/token.derived';
+import type { Token } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const ckEthPendingTransactions: Readable<IcPendingTransactionsData> = derived(
+export const ckEthPendingTransactions: Readable<
+	(token: Token | undefined) => IcPendingTransactionsData
+> = derived(
 	[tokenWithFallback, icPendingTransactionsStore],
-	([$token, $convertEthToCkEthPendingStore]) => {
-		if (!isTokenCkEthLedger($token) && !isTokenCkErc20Ledger($token)) {
-			return [];
-		}
+	([$token, $convertEthToCkEthPendingStore]) =>
+		(token: Token | undefined) => {
+			// remove fallback when $token gets removed
+			if (nonNullish(token)) {
+				$token = token;
+			}
 
-		return $convertEthToCkEthPendingStore?.[$token.id] ?? [];
-	}
+			if (!isTokenCkEthLedger($token) && !isTokenCkErc20Ledger($token)) {
+				return [];
+			}
+
+			return $convertEthToCkEthPendingStore?.[$token.id] ?? [];
+		}
 );

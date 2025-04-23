@@ -31,6 +31,8 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import { icTransactions } from '$icp/derived/ic-transactions.derived';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
@@ -39,10 +41,12 @@
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
 		$ethAddress,
-		$icTransactions: $icTransactionsStore,
+		$icTransactions: $icTransactions,
 		$btcStatuses: $btcStatusesStore,
 		$solTransactions: $solTransactionsStore
 	});
+
+	$: console.log('pending', $icPendingTransactionsStore);
 
 	let sortedTransactions: AllTransactionUiWithCmp[];
 	$: sortedTransactions = transactions.sort(({ transaction: a }, { transaction: b }) =>

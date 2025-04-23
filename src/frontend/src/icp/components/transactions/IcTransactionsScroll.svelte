@@ -20,7 +20,7 @@
 			return;
 		}
 
-		const lastId = last($icTransactions)?.data.id;
+		const lastId = last($icTransactions(token))?.data.id;
 
 		if (isNullish(lastId)) {
 			// No transactions, we do nothing here and wait for the worker to post the first transactions
