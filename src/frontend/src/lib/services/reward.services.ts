@@ -15,6 +15,7 @@ import {
 	setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
 import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
+import { asQrCodeType, type QrCodeType } from '$lib/enums/qr-code-types';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import {
@@ -36,7 +37,6 @@ import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import {asQrCodeType, type QrCodeType} from "$lib/enums/qr-code-types";
 
 const queryUserRoles = async (params: {
 	identity: Identity;
