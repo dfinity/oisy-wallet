@@ -1,9 +1,18 @@
+import {
+	BASE_ETH_TOKEN,
+	BASE_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import {
+	BNB_MAINNET_TOKEN,
+	BNB_TESTNET_TOKEN
+} from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
 import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 import { ethAddressStore } from '$lib/stores/address.store';
+import type { Token } from '$lib/types/token';
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
@@ -21,6 +30,17 @@ describe('LoaderEthBalances', () => {
 		n: 3,
 		networkEnv: 'testnet'
 	});
+
+	const mainnetTokens: Token[] = [ETHEREUM_TOKEN, BASE_ETH_TOKEN, BNB_MAINNET_TOKEN];
+
+	const allTokens: Token[] = [
+		ETHEREUM_TOKEN,
+		SEPOLIA_TOKEN,
+		BASE_ETH_TOKEN,
+		BASE_SEPOLIA_ETH_TOKEN,
+		BNB_MAINNET_TOKEN,
+		BNB_TESTNET_TOKEN
+	];
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -48,7 +68,7 @@ describe('LoaderEthBalances', () => {
 		await vi.advanceTimersByTimeAsync(1000);
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
-		expect(loadEthBalances).toHaveBeenNthCalledWith(1, [ETHEREUM_TOKEN]);
+		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
 	});
 
 	it('should call `loadEthBalances` on mount for testnet', async () => {
@@ -59,7 +79,7 @@ describe('LoaderEthBalances', () => {
 		await vi.advanceTimersByTimeAsync(1000);
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
-		expect(loadEthBalances).toHaveBeenNthCalledWith(1, [ETHEREUM_TOKEN, SEPOLIA_TOKEN]);
+		expect(loadEthBalances).toHaveBeenNthCalledWith(1, allTokens);
 	});
 
 	it('should call `loadErc20Balances` on mount', async () => {
@@ -91,7 +111,7 @@ describe('LoaderEthBalances', () => {
 		await vi.advanceTimersByTimeAsync(1000);
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
-		expect(loadEthBalances).toHaveBeenNthCalledWith(1, [ETHEREUM_TOKEN]);
+		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
 
 		expect(loadErc20Balances).toHaveBeenCalledOnce();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
@@ -104,7 +124,7 @@ describe('LoaderEthBalances', () => {
 		await vi.advanceTimersByTimeAsync(1000);
 
 		expect(loadEthBalances).toHaveBeenCalledTimes(2);
-		expect(loadEthBalances).toHaveBeenNthCalledWith(2, [ETHEREUM_TOKEN]);
+		expect(loadEthBalances).toHaveBeenNthCalledWith(2, mainnetTokens);
 
 		expect(loadErc20Balances).toHaveBeenCalledTimes(2);
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(2, {
@@ -129,7 +149,7 @@ describe('LoaderEthBalances', () => {
 		expect(getByTestId(testId)).toBeInTheDocument();
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
-		expect(loadEthBalances).toHaveBeenNthCalledWith(1, [ETHEREUM_TOKEN]);
+		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
 
 		expect(loadErc20Balances).toHaveBeenCalledOnce();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {

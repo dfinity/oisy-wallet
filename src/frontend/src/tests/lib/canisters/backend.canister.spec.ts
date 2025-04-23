@@ -624,7 +624,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = await allowSigning();
+			const res = await allowSigning({});
 
 			expect(service.allow_signing).toHaveBeenCalledTimes(1);
 			expect(res).toBeDefined();
@@ -640,7 +640,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = allowSigning();
+			const res = allowSigning({});
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
@@ -658,7 +658,9 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(mapIcrc2ApproveError(response.Err.ApproveError));
+			await expect(allowSigning({})).rejects.toThrow(
+				mapIcrc2ApproveError(response.Err.ApproveError)
+			);
 		});
 
 		it('should throw a CanisterInternalError if FailedToContactCyclesLedger error is returned', async () => {
@@ -670,7 +672,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(
+			await expect(allowSigning({})).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -685,7 +687,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(new CanisterInternalError(errorMsg));
+			await expect(allowSigning({})).rejects.toThrow(new CanisterInternalError(errorMsg));
 		});
 
 		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
@@ -697,7 +699,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning()).rejects.toThrow(
+			await expect(allowSigning({})).rejects.toThrow(
 				new CanisterInternalError('Unknown AllowSigningError')
 			);
 		});
@@ -771,6 +773,41 @@ describe('backend.canister', () => {
 			);
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
+		});
+	});
+
+	describe('addUserHiddenDappId', () => {
+		it('should add user hidden dapp id', async () => {
+			const response = { Ok: null };
+
+			service.add_user_hidden_dapp_id.mockResolvedValue(response);
+
+			const { addUserHiddenDappId } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await addUserHiddenDappId({ dappId: 'test-dapp-id' });
+
+			expect(service.add_user_hidden_dapp_id).toHaveBeenCalledWith({
+				dapp_id: 'test-dapp-id',
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if add_user_hidden_dapp_id throws', async () => {
+			service.add_user_hidden_dapp_id.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { addUserHiddenDappId } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = addUserHiddenDappId({ dappId: 'test-dapp-id' });
+
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 
