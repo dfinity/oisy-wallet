@@ -15,7 +15,7 @@ import {
 	setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
 import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
-import { asQrCodeType, QrCodeType } from '$lib/enums/qr-code-types';
+import { QrCodeType, asQrCodeType } from '$lib/enums/qr-code-types';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import {
@@ -52,7 +52,10 @@ const queryUserRoles = async (params: {
 		return { is_vip: false, is_gold: false };
 	}
 
-	return { is_vip: superpowers.includes(QrCodeType.VIP), is_gold: superpowers.includes(QrCodeType.GOLD) };
+	return {
+		is_vip: superpowers.includes(QrCodeType.VIP),
+		is_gold: superpowers.includes(QrCodeType.GOLD)
+	};
 };
 
 /**
