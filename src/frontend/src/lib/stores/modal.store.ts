@@ -3,6 +3,7 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { VipRewardStateData } from '$lib/types/reward';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
+import type {ManageTokensData} from "$lib/types/manage-tokens";
 
 export interface Modal<T> {
 	type:
@@ -78,7 +79,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openIcTransaction: <D extends T>(data: D) => void;
 	openBtcTransaction: <D extends T>(data: D) => void;
 	openSolTransaction: <D extends T>(data: D) => void;
-	openManageTokens: () => void;
+	openManageTokens: (data?: ManageTokensData) => void;
 	openHideToken: () => void;
 	openIcHideToken: () => void;
 	openEthToken: () => void;
@@ -137,7 +138,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openIcTransaction: setTypeWithData('ic-transaction'),
 		openBtcTransaction: setTypeWithData('btc-transaction'),
 		openSolTransaction: setTypeWithData('sol-transaction'),
-		openManageTokens: setType('manage-tokens'),
+		openManageTokens: <(data?: ManageTokensData) => void>setTypeWithData('manage-tokens'),
 		openHideToken: setType('hide-token'),
 		openIcHideToken: setType('ic-hide-token'),
 		openEthToken: setType('eth-token'),

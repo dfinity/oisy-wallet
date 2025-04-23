@@ -3,6 +3,7 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import type { VipRewardStateData } from '$lib/types/reward';
 import { derived, type Readable } from 'svelte/store';
+import type {ManageTokensData} from "$lib/types/manage-tokens";
 
 export const modalEthReceive: Readable<boolean> = derived(
 	modalStore,
@@ -91,6 +92,10 @@ export const modalIcTransaction: Readable<boolean> = derived(
 export const modalManageTokens: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'manage-tokens'
+);
+export const modalManageTokensData: Readable<ManageTokensData | undefined> = derived(
+	modalStore,
+	($modalStore) => ($modalStore?.type === 'manage-tokens' ? ($modalStore?.data as ManageTokensData) : undefined)
 );
 export const modalHideToken: Readable<boolean> = derived(
 	modalStore,

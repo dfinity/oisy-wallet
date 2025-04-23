@@ -624,6 +624,7 @@ interface I18nTokens {
 		text: {
 			title: string;
 			manage_list: string;
+			default_message: string;
 			list_settings: string;
 			do_not_see_import: string;
 			import_token: string;

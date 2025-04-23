@@ -12,9 +12,16 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import {allIcrcTokens} from "$lib/derived/all-tokens.derived";
+	import {isNullish} from "@dfinity/utils";
+	import type {IcTokenToggleable} from "$icp/types/ic-token-toggleable";
 
 	export let isSuccessful: boolean;
 	export let codeType: QrCodeType = QrCodeType.VIP;
+
+	const goldTokenSymbol = 'GLDT';
+	let token: IcTokenToggleable;
+	$: token = $allIcrcTokens.find((token) => token.symbol === goldTokenSymbol);
 </script>
 
 {#if isSuccessful}
@@ -57,7 +64,9 @@
 			colorStyle="secondary-light"
 			type="button"
 			fullWidth
-			on:click={modalStore.close}
+			on:click={() => {
+				codeType === QrCodeType.GOLD && (isNullish(token) || !token.enabled) ? modalStore.openManageTokens({initialSearch: goldTokenSymbol, message: replaceOisyPlaceholders($i18n.tokens.manage.text.default_message)}) : modalStore.close();
+			}}
 			slot="toolbar"
 		>
 			{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
