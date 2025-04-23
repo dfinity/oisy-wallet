@@ -51,7 +51,7 @@
 
 <LogoButton on:click dividers={false}>
 	<svelte:fragment slot="title">
-		<span>
+		<span class="inline-flex items-center gap-2">
 			<span class="font-bold text-primary">
 				{dapp.name}
 			</span>
