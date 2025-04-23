@@ -18,7 +18,7 @@ import {
 	getRewardRequirementsFulfilled,
 	getRewards,
 	getUserRewardsTokenAmounts,
-	isVipUser,
+	getUserRoles,
 	setReferrer
 } from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -55,7 +55,7 @@ describe('reward-code', () => {
 					.spyOn(rewardApi, 'getUserInfo')
 					.mockResolvedValueOnce(mockedUserData);
 
-				const { is_vip } = await isVipUser({ identity: mockIdentity });
+				const { is_vip } = await getUserRoles({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
@@ -69,7 +69,7 @@ describe('reward-code', () => {
 				const userData: UserData = { ...mockedUserData, superpowers: [] };
 				const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
 
-				const { is_vip } = await isVipUser({ identity: mockIdentity });
+				const { is_vip } = await getUserRoles({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
@@ -86,7 +86,7 @@ describe('reward-code', () => {
 					.spyOn(rewardApi, 'getUserInfo')
 					.mockResolvedValueOnce(mockedUserData);
 
-				const { is_gold } = await isVipUser({ identity: mockIdentity });
+				const { is_gold } = await getUserRoles({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
@@ -100,7 +100,7 @@ describe('reward-code', () => {
 				const userData: UserData = { ...mockedUserData, superpowers: [] };
 				const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
 
-				const { is_gold } = await isVipUser({ identity: mockIdentity });
+				const { is_gold } = await getUserRoles({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
