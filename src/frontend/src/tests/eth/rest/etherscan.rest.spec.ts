@@ -128,7 +128,7 @@ describe('etherscan.rest', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => etherscanRests(ICP_NETWORK_ID)).toThrowError(
+			expect(() => etherscanRests(ICP_NETWORK_ID)).toThrow(
 				replacePlaceholders(en.init.error.no_etherscan_rest_api, {
 					$network: ICP_NETWORK_ID.toString()
 				})

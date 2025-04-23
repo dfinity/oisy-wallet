@@ -173,7 +173,7 @@ describe('screens.utils tests', () => {
 				activeScreen: 'lg'
 			});
 
-			expect(result).toEqual(true);
+			expect(result).toBeTruthy();
 
 			// Test with an activeScreen that is NOT in the filtered list
 			const result2 = shouldDisplayForScreen({
@@ -181,7 +181,7 @@ describe('screens.utils tests', () => {
 				activeScreen: '2.5xl'
 			});
 
-			expect(result2).toEqual(false);
+			expect(result2).toBeFalsy();
 		});
 
 		it('should return false if the activeScreen is not in the filtered screens list', () => {
@@ -198,7 +198,7 @@ describe('screens.utils tests', () => {
 				activeScreen: 'xs'
 			});
 
-			expect(result).toEqual(false);
+			expect(result).toBeFalsy();
 		});
 
 		it('should return false if the activeScreen is undefined or invalid', () => {
@@ -215,14 +215,14 @@ describe('screens.utils tests', () => {
 				activeScreen: undefined as unknown as ScreensKeyType
 			});
 
-			expect(result).toEqual(false);
+			expect(result).toBeFalsy();
 
 			const result2 = shouldDisplayForScreen({
 				filteredScreens,
 				activeScreen: 'nonExistentScreen' as ScreensKeyType
 			});
 
-			expect(result2).toEqual(false);
+			expect(result2).toBeFalsy();
 		});
 
 		it('should return false if filteredScreens is an empty array', () => {
@@ -234,7 +234,7 @@ describe('screens.utils tests', () => {
 				activeScreen: 'sm'
 			});
 
-			expect(result).toEqual(false);
+			expect(result).toBeFalsy();
 		});
 	});
 });

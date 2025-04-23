@@ -72,7 +72,7 @@ describe('infura.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => infuraProviders(ICP_NETWORK_ID)).toThrowError(
+			expect(() => infuraProviders(ICP_NETWORK_ID)).toThrow(
 				replacePlaceholders(en.init.error.no_infura_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})

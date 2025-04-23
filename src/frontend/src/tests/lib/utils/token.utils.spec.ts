@@ -391,7 +391,7 @@ describe('token.utils', () => {
 						userToken: { ...token, enabled: true }
 					});
 
-					expect(result.enabled).toEqual(true);
+					expect(result.enabled).toBeTruthy();
 				});
 
 				it('should not enable the token if user has not enabled it', () => {
@@ -400,7 +400,7 @@ describe('token.utils', () => {
 						userToken: { ...token, enabled: false }
 					});
 
-					expect(result.enabled).toEqual(false);
+					expect(result.enabled).toBeFalsy();
 				});
 
 				it('should not enable the token if userToken is undefined', () => {
@@ -409,7 +409,7 @@ describe('token.utils', () => {
 						userToken: undefined
 					});
 
-					expect(result.enabled).toEqual(false);
+					expect(result.enabled).toBeFalsy();
 				});
 			}
 		);
@@ -436,7 +436,7 @@ describe('token.utils', () => {
 			it('should enable the token if no userToken', () => {
 				const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
 
-				expect(result.enabled).toEqual(true);
+				expect(result.enabled).toBeTruthy();
 			});
 
 			it('should enable the token if userToken has enabled false', () => {
@@ -445,7 +445,7 @@ describe('token.utils', () => {
 					userToken: { ...token, enabled: false }
 				});
 
-				expect(result.enabled).toEqual(true);
+				expect(result.enabled).toBeTruthy();
 			});
 
 			it('should enable the token if userToken has enabled true', () => {
@@ -454,7 +454,7 @@ describe('token.utils', () => {
 					userToken: { ...token, enabled: true }
 				});
 
-				expect(result.enabled).toEqual(true);
+				expect(result.enabled).toBeTruthy();
 			});
 		});
 
@@ -479,7 +479,7 @@ describe('token.utils', () => {
 			it('should enable the token if no userToken', () => {
 				const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
 
-				expect(result.enabled).toEqual(true);
+				expect(result.enabled).toBeTruthy();
 			});
 
 			it('should not enable the token if userToken has enabled false', () => {
@@ -488,7 +488,7 @@ describe('token.utils', () => {
 					userToken: { ...token, enabled: false }
 				});
 
-				expect(result.enabled).toEqual(false);
+				expect(result.enabled).toBeFalsy();
 			});
 
 			it('should enable the token if userToken has enabled true', () => {
@@ -497,7 +497,7 @@ describe('token.utils', () => {
 					userToken: { ...token, enabled: true }
 				});
 
-				expect(result.enabled).toEqual(true);
+				expect(result.enabled).toBeTruthy();
 			});
 		});
 	});

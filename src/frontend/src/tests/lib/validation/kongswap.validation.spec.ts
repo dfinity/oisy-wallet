@@ -12,7 +12,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema', () => {
 
 		const parsed = KongSwapTokenSchema.safeParse(mock);
 
-		expect(parsed.success).toBe(true);
+		expect(parsed.success).toBeTruthy();
 	});
 
 	it('accepts nulls in explicitly nullable fields', () => {
@@ -31,7 +31,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema', () => {
 		});
 		const parsed = KongSwapTokenSchema.safeParse(mock);
 
-		expect(parsed.success).toBe(true);
+		expect(parsed.success).toBeTruthy();
 	});
 
 	it('accepts optional fields when omitted', () => {
@@ -39,7 +39,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema', () => {
 
 		const parsed = KongSwapTokenSchema.safeParse(mock);
 
-		expect(parsed.success).toBe(true);
+		expect(parsed.success).toBeTruthy();
 	});
 });
 
@@ -53,7 +53,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — invalid field values', () =
 			metrics: mock.metrics
 		});
 
-		expect(parsed.success).toBe(false);
+		expect(parsed.success).toBeFalsy();
 	});
 
 	it('rejects invalid ISO string in "logo_updated_at"', () => {
@@ -65,7 +65,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — invalid field values', () =
 			metrics: mock.metrics
 		});
 
-		expect(parsed.success).toBe(false);
+		expect(parsed.success).toBeFalsy();
 	});
 
 	it('rejects wrong type for "token_id"', () => {
@@ -80,7 +80,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — invalid field values', () =
 			metrics: mock.metrics
 		});
 
-		expect(parsed.success).toBe(false);
+		expect(parsed.success).toBeFalsy();
 	});
 });
 
@@ -93,7 +93,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — missing required fields', (
 
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(invalid);
 
-		expect(parsed.success).toBe(false);
+		expect(parsed.success).toBeFalsy();
 	});
 
 	it('rejects missing "name"', () => {
@@ -104,7 +104,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — missing required fields', (
 
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(invalid);
 
-		expect(parsed.success).toBe(false);
+		expect(parsed.success).toBeFalsy();
 	});
 
 	it('rejects missing "canister_id"', () => {
@@ -115,7 +115,7 @@ describe('Schema: KongSwapTokenWithMetricsSchema — missing required fields', (
 
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(invalid);
 
-		expect(parsed.success).toBe(false);
+		expect(parsed.success).toBeFalsy();
 	});
 });
 
@@ -126,7 +126,7 @@ describe('Schema: KongSwapTokenMetricsSchema', () => {
 		});
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(mock.metrics);
 
-		expect(parsed.success).toBe(false);
+		expect(parsed.success).toBeFalsy();
 	});
 
 	it('rejects wrong type for "volume_24h"', () => {
@@ -135,7 +135,7 @@ describe('Schema: KongSwapTokenMetricsSchema', () => {
 		});
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(mock.metrics);
 
-		expect(parsed.success).toBe(false);
+		expect(parsed.success).toBeFalsy();
 	});
 });
 
@@ -155,7 +155,7 @@ describe('Schema: KongSwapTokensSchema (paginated list)', () => {
 			total_pages: 1
 		});
 
-		expect(parsed.success).toBe(true);
+		expect(parsed.success).toBeTruthy();
 	});
 
 	it('rejects paginated list if one item is invalid', () => {
@@ -174,6 +174,6 @@ describe('Schema: KongSwapTokensSchema (paginated list)', () => {
 			total_pages: 1
 		});
 
-		expect(parsed.success).toBe(false);
+		expect(parsed.success).toBeFalsy();
 	});
 });

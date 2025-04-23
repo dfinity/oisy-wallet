@@ -49,17 +49,17 @@ describe('info.utils', () => {
 		it('should return true if the value for the key is "true"', () => {
 			sessionStorage.setItem(key, 'true');
 
-			expect(shouldHideInfo(key)).toBe(true);
+			expect(shouldHideInfo(key)).toBeTruthy();
 		});
 
 		it('should return false if the value for the key is "false"', () => {
 			sessionStorage.setItem(key, 'false');
 
-			expect(shouldHideInfo(key)).toBe(false);
+			expect(shouldHideInfo(key)).toBeFalsy();
 		});
 
 		it('should return false if the key does not exist in sessionStorage', () => {
-			expect(shouldHideInfo(key)).toBe(false);
+			expect(shouldHideInfo(key)).toBeFalsy();
 		});
 
 		it('should return false if sessionStorage is unavailable or throws an error', () => {
@@ -74,7 +74,7 @@ describe('info.utils', () => {
 				writable: true
 			});
 
-			expect(shouldHideInfo(key)).toBe(false);
+			expect(shouldHideInfo(key)).toBeFalsy();
 
 			Object.defineProperty(window, 'sessionStorage', {
 				value: originalSessionStorage,

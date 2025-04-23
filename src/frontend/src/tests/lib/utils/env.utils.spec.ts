@@ -5,19 +5,19 @@ describe('env.utils', () => {
 		describe('when the check is `true` (default)', () => {
 			['true', 'TRUE', 'True', 'TrUe'].forEach((value) => {
 				it(`should return true for "${value}"`, () => {
-					expect(parseBoolEnvVar(value)).toBe(true);
+					expect(parseBoolEnvVar(value)).toBeTruthy();
 				});
 			});
 
 			['false', 'FALSE', 'False', 'FaLsE'].forEach((value) => {
 				it(`should return false for "${value}"`, () => {
-					expect(parseBoolEnvVar(value)).toBe(false);
+					expect(parseBoolEnvVar(value)).toBeFalsy();
 				});
 			});
 
 			['1', '0'].forEach((value) => {
 				it(`should return false for "${value}"`, () => {
-					expect(parseBoolEnvVar(value)).toBe(false);
+					expect(parseBoolEnvVar(value)).toBeFalsy();
 				});
 			});
 		});
@@ -25,26 +25,26 @@ describe('env.utils', () => {
 		describe('when the check is `false`', () => {
 			['true', 'TRUE', 'True', 'TrUe'].forEach((value) => {
 				it(`should return false for "${value}"`, () => {
-					expect(parseBoolEnvVar(value, false)).toBe(false);
+					expect(parseBoolEnvVar(value, false)).toBeFalsy();
 				});
 			});
 
 			['false', 'FALSE', 'False', 'FaLsE'].forEach((value) => {
 				it(`should return true for "${value}"`, () => {
-					expect(parseBoolEnvVar(value, false)).toBe(true);
+					expect(parseBoolEnvVar(value, false)).toBeTruthy();
 				});
 			});
 
 			['1', '0'].forEach((value) => {
 				it(`should return false for "${value}"`, () => {
-					expect(parseBoolEnvVar(value, false)).toBe(false);
+					expect(parseBoolEnvVar(value, false)).toBeFalsy();
 				});
 			});
 		});
 
 		['not_a_json', 'yes', 'no', 'a'].forEach((value) => {
 			it(`should throw for malformed JSON string "${value}"`, () => {
-				expect(() => parseBoolEnvVar(value)).toThrowError(
+				expect(() => parseBoolEnvVar(value)).toThrow(
 					expect.objectContaining({
 						message: expect.stringContaining(`"${value}" is not valid JSON`)
 					})
@@ -53,38 +53,38 @@ describe('env.utils', () => {
 		});
 
 		it('should throw for empty strings', () => {
-			expect(() => parseBoolEnvVar('')).toThrowError('Unexpected end of JSON input');
+			expect(() => parseBoolEnvVar('')).toThrow('Unexpected end of JSON input');
 		});
 
 		it('should return false for nullish values', () => {
-			expect(parseBoolEnvVar(null)).toBe(false);
+			expect(parseBoolEnvVar(null)).toBeFalsy();
 
-			expect(parseBoolEnvVar(undefined)).toBe(false);
+			expect(parseBoolEnvVar(undefined)).toBeFalsy();
 		});
 	});
 
 	describe('parseEnabledMainnetBoolEnvVar', () => {
 		['true', 'TRUE', 'True', 'TrUe'].forEach((value) => {
 			it(`should return false for "${value}"`, () => {
-				expect(parseBoolEnvVar(value, false)).toBe(false);
+				expect(parseBoolEnvVar(value, false)).toBeFalsy();
 			});
 		});
 
 		['false', 'FALSE', 'False', 'FaLsE'].forEach((value) => {
 			it(`should return true for "${value}"`, () => {
-				expect(parseBoolEnvVar(value, false)).toBe(true);
+				expect(parseBoolEnvVar(value, false)).toBeTruthy();
 			});
 		});
 
 		['1', '0'].forEach((value) => {
 			it(`should return false for "${value}"`, () => {
-				expect(parseBoolEnvVar(value, false)).toBe(false);
+				expect(parseBoolEnvVar(value, false)).toBeFalsy();
 			});
 		});
 
 		['not_a_json', 'yes', 'no', 'a'].forEach((value) => {
 			it(`should throw for malformed JSON string "${value}"`, () => {
-				expect(() => parseBoolEnvVar(value)).toThrowError(
+				expect(() => parseBoolEnvVar(value)).toThrow(
 					expect.objectContaining({
 						message: expect.stringContaining(`"${value}" is not valid JSON`)
 					})
@@ -93,13 +93,13 @@ describe('env.utils', () => {
 		});
 
 		it('should throw for empty strings', () => {
-			expect(() => parseBoolEnvVar('')).toThrowError('Unexpected end of JSON input');
+			expect(() => parseBoolEnvVar('')).toThrow('Unexpected end of JSON input');
 		});
 
 		it('should return false for nullish values', () => {
-			expect(parseBoolEnvVar(null)).toBe(false);
+			expect(parseBoolEnvVar(null)).toBeFalsy();
 
-			expect(parseBoolEnvVar(undefined)).toBe(false);
+			expect(parseBoolEnvVar(undefined)).toBeFalsy();
 		});
 	});
 });

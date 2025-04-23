@@ -26,12 +26,12 @@ describe('tokenActionValidationErrorsStore', () => {
 			minterInfoNotCertified
 		} = initTokenActionValidationErrorsContext();
 
-		expect(get(insufficientFunds)).toBe(false);
-		expect(get(insufficientFundsForFee)).toBe(false);
-		expect(get(amountLessThanLedgerFee)).toBe(false);
-		expect(get(minimumAmountNotReached)).toBe(false);
-		expect(get(unknownMinimumAmount)).toBe(false);
-		expect(get(minterInfoNotCertified)).toBe(false);
+		expect(get(insufficientFunds)).toBeFalsy();
+		expect(get(insufficientFundsForFee)).toBeFalsy();
+		expect(get(amountLessThanLedgerFee)).toBeFalsy();
+		expect(get(minimumAmountNotReached)).toBeFalsy();
+		expect(get(unknownMinimumAmount)).toBeFalsy();
+		expect(get(minterInfoNotCertified)).toBeFalsy();
 	});
 
 	it('should have all expected values on insufficient-funds error', () => {
@@ -47,13 +47,13 @@ describe('tokenActionValidationErrorsStore', () => {
 
 		setErrorType('insufficient-funds');
 
-		expect(get(insufficientFunds)).toBe(true);
+		expect(get(insufficientFunds)).toBeTruthy();
 
-		expect(get(insufficientFundsForFee)).toBe(false);
-		expect(get(amountLessThanLedgerFee)).toBe(false);
-		expect(get(minimumAmountNotReached)).toBe(false);
-		expect(get(unknownMinimumAmount)).toBe(false);
-		expect(get(minterInfoNotCertified)).toBe(false);
+		expect(get(insufficientFundsForFee)).toBeFalsy();
+		expect(get(amountLessThanLedgerFee)).toBeFalsy();
+		expect(get(minimumAmountNotReached)).toBeFalsy();
+		expect(get(unknownMinimumAmount)).toBeFalsy();
+		expect(get(minterInfoNotCertified)).toBeFalsy();
 	});
 
 	it('should have all expected values on insufficient-funds-for-fee error', () => {
@@ -69,13 +69,13 @@ describe('tokenActionValidationErrorsStore', () => {
 
 		setErrorType('insufficient-funds-for-fee');
 
-		expect(get(insufficientFundsForFee)).toBe(true);
+		expect(get(insufficientFundsForFee)).toBeTruthy();
 
-		expect(get(insufficientFunds)).toBe(false);
-		expect(get(amountLessThanLedgerFee)).toBe(false);
-		expect(get(minimumAmountNotReached)).toBe(false);
-		expect(get(unknownMinimumAmount)).toBe(false);
-		expect(get(minterInfoNotCertified)).toBe(false);
+		expect(get(insufficientFunds)).toBeFalsy();
+		expect(get(amountLessThanLedgerFee)).toBeFalsy();
+		expect(get(minimumAmountNotReached)).toBeFalsy();
+		expect(get(unknownMinimumAmount)).toBeFalsy();
+		expect(get(minterInfoNotCertified)).toBeFalsy();
 	});
 
 	it('should have all expected values on amount-less-than-ledger-fee error', () => {
@@ -91,13 +91,13 @@ describe('tokenActionValidationErrorsStore', () => {
 
 		setErrorType('amount-less-than-ledger-fee');
 
-		expect(get(amountLessThanLedgerFee)).toBe(true);
+		expect(get(amountLessThanLedgerFee)).toBeTruthy();
 
-		expect(get(insufficientFundsForFee)).toBe(false);
-		expect(get(insufficientFunds)).toBe(false);
-		expect(get(minimumAmountNotReached)).toBe(false);
-		expect(get(unknownMinimumAmount)).toBe(false);
-		expect(get(minterInfoNotCertified)).toBe(false);
+		expect(get(insufficientFundsForFee)).toBeFalsy();
+		expect(get(insufficientFunds)).toBeFalsy();
+		expect(get(minimumAmountNotReached)).toBeFalsy();
+		expect(get(unknownMinimumAmount)).toBeFalsy();
+		expect(get(minterInfoNotCertified)).toBeFalsy();
 	});
 
 	it('should have all expected values on minimum-amount-not-reached error', () => {
@@ -113,13 +113,13 @@ describe('tokenActionValidationErrorsStore', () => {
 
 		setErrorType('minimum-amount-not-reached');
 
-		expect(get(minimumAmountNotReached)).toBe(true);
+		expect(get(minimumAmountNotReached)).toBeTruthy();
 
-		expect(get(amountLessThanLedgerFee)).toBe(false);
-		expect(get(insufficientFundsForFee)).toBe(false);
-		expect(get(insufficientFunds)).toBe(false);
-		expect(get(unknownMinimumAmount)).toBe(false);
-		expect(get(minterInfoNotCertified)).toBe(false);
+		expect(get(amountLessThanLedgerFee)).toBeFalsy();
+		expect(get(insufficientFundsForFee)).toBeFalsy();
+		expect(get(insufficientFunds)).toBeFalsy();
+		expect(get(unknownMinimumAmount)).toBeFalsy();
+		expect(get(minterInfoNotCertified)).toBeFalsy();
 	});
 
 	it('should have all expected values on unknown-minimum-amount error', () => {
@@ -135,13 +135,13 @@ describe('tokenActionValidationErrorsStore', () => {
 
 		setErrorType('unknown-minimum-amount');
 
-		expect(get(unknownMinimumAmount)).toBe(true);
+		expect(get(unknownMinimumAmount)).toBeTruthy();
 
-		expect(get(minimumAmountNotReached)).toBe(false);
-		expect(get(amountLessThanLedgerFee)).toBe(false);
-		expect(get(insufficientFundsForFee)).toBe(false);
-		expect(get(insufficientFunds)).toBe(false);
-		expect(get(minterInfoNotCertified)).toBe(false);
+		expect(get(minimumAmountNotReached)).toBeFalsy();
+		expect(get(amountLessThanLedgerFee)).toBeFalsy();
+		expect(get(insufficientFundsForFee)).toBeFalsy();
+		expect(get(insufficientFunds)).toBeFalsy();
+		expect(get(minterInfoNotCertified)).toBeFalsy();
 	});
 
 	it('should have all expected values on minter-info-not-certified error', () => {
@@ -157,12 +157,12 @@ describe('tokenActionValidationErrorsStore', () => {
 
 		setErrorType('minter-info-not-certified');
 
-		expect(get(minterInfoNotCertified)).toBe(true);
+		expect(get(minterInfoNotCertified)).toBeTruthy();
 
-		expect(get(unknownMinimumAmount)).toBe(false);
-		expect(get(minimumAmountNotReached)).toBe(false);
-		expect(get(amountLessThanLedgerFee)).toBe(false);
-		expect(get(insufficientFundsForFee)).toBe(false);
-		expect(get(insufficientFunds)).toBe(false);
+		expect(get(unknownMinimumAmount)).toBeFalsy();
+		expect(get(minimumAmountNotReached)).toBeFalsy();
+		expect(get(amountLessThanLedgerFee)).toBeFalsy();
+		expect(get(insufficientFundsForFee)).toBeFalsy();
+		expect(get(insufficientFunds)).toBeFalsy();
 	});
 });
