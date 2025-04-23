@@ -48,10 +48,10 @@ const queryUserRoles = async (params: {
 
 	const superpowers = fromNullable(userData.superpowers);
 	if (isNullish(superpowers)) {
-		return { is_vip: false, is_gold: false };
+		return { isVip: false, isGold: false };
 	}
 
-	return { is_vip: superpowers.includes('vip'), is_gold: superpowers.includes('gold') };
+	return { isVip: superpowers.includes('vip'), isGold: superpowers.includes('gold') };
 };
 
 /**
@@ -76,7 +76,7 @@ export const getUserRoles = async (params: { identity: Identity }): Promise<User
 			err
 		});
 
-		return { is_vip: false, is_gold: false };
+		return { isVip: false, isGold: false };
 	}
 };
 

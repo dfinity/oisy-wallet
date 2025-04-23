@@ -32,6 +32,6 @@ export interface RewardClaimResponse<T = unknown> {
 }
 
 export interface UserRoleResult {
-	is_vip: boolean;
-	is_gold: boolean;
+	isVip: boolean;
+	isGold: boolean;
 }

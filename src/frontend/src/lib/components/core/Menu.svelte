@@ -46,7 +46,7 @@
 	let isGold = false;
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
-			({ is_vip: isVip, is_gold: isGold } = await getUserRoles({ identity: $authIdentity }));
+			({ isVip, isGold } = await getUserRoles({ identity: $authIdentity }));
 		}
 	});
 
