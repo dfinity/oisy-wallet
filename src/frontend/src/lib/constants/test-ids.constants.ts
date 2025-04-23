@@ -1,6 +1,7 @@
 export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
+export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 
