@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { type WizardStep } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { selectedEthereumNetworkWithFallback } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
+	import { selectedEvmNetwork } from '$evm/derived/network.derived';
+	import { evmNativeToken } from '$evm/derived/token.derived';
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import { token } from '$lib/stores/token.store';
@@ -12,7 +15,8 @@
 		isNetworkIdEthereum,
 		isNetworkIdICP,
 		isNetworkIdBitcoin,
-		isNetworkIdSolana
+		isNetworkIdSolana,
+		isNetworkIdEvm
 	} from '$lib/utils/network.utils';
 	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
 
@@ -32,6 +36,24 @@
 			{currentStep}
 			{formCancelAction}
 			sourceNetwork={$selectedEthereumNetworkWithFallback}
+			nativeEthereumToken={$ethereumToken}
+			bind:destination
+			bind:targetNetwork
+			bind:amount
+			bind:sendProgressStep
+			on:icBack
+			on:icSendBack
+			on:icNext
+			on:icClose
+			on:icQRCodeScan
+			on:icQRCodeBack
+		/>
+	{:else if isNetworkIdEvm($token?.network.id) && nonNullish($selectedEvmNetwork) && nonNullish($evmNativeToken)}
+		<!--			TODO: use store evmNativeToken here when we adapt the fee context to fetch the EVM fees -->
+		<EthSendTokenWizard
+			{currentStep}
+			{formCancelAction}
+			sourceNetwork={$selectedEvmNetwork}
 			nativeEthereumToken={$ethereumToken}
 			bind:destination
 			bind:targetNetwork
