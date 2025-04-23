@@ -5,6 +5,7 @@ import bscTestnetIconDark from '$lib/assets/networks/dark/bsc-testnet.svg';
 import bscMainnetIconLight from '$lib/assets/networks/light/bsc-mainnet.svg';
 import bscTestnetIconLight from '$lib/assets/networks/light/bsc-testnet.svg';
 import type { NetworkId } from '$lib/types/network';
+import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 
@@ -12,12 +13,12 @@ export const BSC_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_BSC_MAINNET_DISABLED
 );
 
-export const BSC_NETWORK_SYMBOL = 'BSC';
+export const BSC_MAINNET_NETWORK_SYMBOL = 'BSC';
 
-export const BSC_NETWORK_ID: NetworkId = parseNetworkId(BSC_NETWORK_SYMBOL);
+export const BSC_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(BSC_MAINNET_NETWORK_SYMBOL);
 
-export const BSC_NETWORK: EthereumNetwork = {
-	id: BSC_NETWORK_ID,
+export const BSC_MAINNET_NETWORK: EthereumNetwork = {
+	id: BSC_MAINNET_NETWORK_ID,
 	env: 'mainnet',
 	name: 'BNB Smart Chain',
 	chainId: 56n,
@@ -41,7 +42,8 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 	explorerUrl: BSC_TESTNET_EXPLORER_URL
 };
 
-export const SUPPORTED_BSC_NETWORKS: [...EthereumNetwork[], EthereumNetwork] = [
-	...(BSC_MAINNET_ENABLED ? [BSC_NETWORK] : []),
-	BSC_TESTNET_NETWORK
-];
+export const SUPPORTED_BSC_NETWORKS: EthereumNetwork[] = defineSupportedNetworks({
+	mainnetFlag: BSC_MAINNET_ENABLED,
+	mainnetNetworks: [BSC_MAINNET_NETWORK],
+	testnetNetworks: [BSC_TESTNET_NETWORK]
+});

@@ -670,6 +670,7 @@
 				"manage_list": "Manage tokens",
 				"list_settings": "List settings",
 				"do_not_see_import": "Don’t see your token? Import",
+				"import_token": "Import token",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance."
@@ -961,6 +962,7 @@
 		"invitation": {
 			"text": {
 				"title": "Generate invitation link",
+				"binance_title": "Binance Clubhouse QR",
 				"invitation_link_copied": "Invitation link copied to clipboard.",
 				"generate_new_link": "Generate new link",
 				"generating_new_code": "Generating new code",
