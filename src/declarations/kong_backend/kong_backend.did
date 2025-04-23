@@ -184,6 +184,7 @@ type UserBalancesReply = variant {
 type LPBalancesReply = record {
     name : text;
     symbol : text;
+    lp_token_id : nat64;
     balance : float64;
     usd_balance : float64;
     chain_0 : text;
@@ -239,13 +240,6 @@ type ICTokenReply = record {
 };
 type TokensResult = variant { Ok : vec TokenReply; Err : text };
 
-type PoolsReply = record {
-    pools : vec PoolReply;
-    total_tvl : nat;
-    total_24h_volume : nat;
-    total_24h_lp_fee : nat;
-    total_24h_num_swaps : nat;
-};
 type PoolReply = record {
     pool_id : nat32;
     name : text;
@@ -262,15 +256,10 @@ type PoolReply = record {
     lp_fee_1 : nat;
     price : float64;
     lp_fee_bps : nat8;
-    tvl : nat;                  // USD value of TVL
-    rolling_24h_volume : nat;   // USD value of rolling 24h volume
-    rolling_24h_lp_fee : nat;   // USD value of rolling 24h LP fees
-    rolling_24h_num_swaps : nat;
-    rolling_24h_apy : float64;
     lp_token_symbol : text;
     is_removed : bool;
 };
-type PoolsResult = variant { Ok : PoolsReply; Err : text };
+type PoolsResult = variant { Ok : vec PoolReply; Err : text };
 
 type PoolExpectedBalance = record {
     pool_symbol : text;
@@ -544,6 +533,34 @@ type SwapReply = record {
 type SwapResult = variant { Ok : SwapReply; Err : text };
 type SwapAsyncResult = variant { Ok : nat64; Err : text };
 
+type ClaimsReply = record {
+    claim_id : nat64;
+    status : text;
+    chain : text;
+    symbol : text;
+    canister_id : opt text;
+    amount : nat;
+    fee : nat;
+    to_address : text;
+    desc : text;
+    ts : nat64;
+};
+type ClaimsResult = variant { Ok : vec ClaimsReply; Err : text };
+type ClaimReply = record {
+    claim_id : nat64;
+    status : text;
+    chain : text;
+    symbol : text;
+    canister_id : opt text;
+    amount : nat;
+    fee : nat;
+    to_address : text;
+    desc : text;
+    transfer_ids : vec TransferIdReply;
+    ts : nat64;
+};
+type ClaimResult = variant { Ok : ClaimReply; Err : text };
+
 type SendArgs = record {
     token : text;
     amount : nat;
@@ -577,10 +594,8 @@ service : {
     get_user : () -> (UserResult) query;
     // user_balances(principal_id) - return user's LP balances
     user_balances : (text) -> (UserBalancesResult) query;
-    // requests(opt request_id) - return specific request or most recent requests
+    // requests(opt request_id) - return specific request_id
     requests : (opt nat64) -> (RequestsResult) query;
-    // txs(opt principal_id) - return transactions filtered by principal id
-    txs : (opt text) -> (TxsResult) query;
 
     // add a new token
     add_token : (AddTokenArgs) -> (AddTokenResult);
@@ -635,6 +650,11 @@ service : {
     // asnychronous version of swap()
     // request_id will be returned by swap_async() and poll requests(request_id) to get updated status
     swap_async : (SwapArgs) -> (SwapAsyncResult);
+
+    // claims(principal_id) - return list of claims for user
+    claims : (text) -> (ClaimsResult) query;
+    // claim(claim_id) - claim claim_id
+    claim : (nat64) -> (ClaimResult);
 
     // send LP tokens to another user
     send : (SendArgs) -> (SendResult);
