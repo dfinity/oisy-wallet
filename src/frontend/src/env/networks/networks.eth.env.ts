@@ -17,6 +17,10 @@ export const ETH_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 
 export const INFURA_NETWORK_HOMESTEAD: Networkish = 'homestead';
 export const INFURA_NETWORK_SEPOLIA: Networkish = 'sepolia';
+export const INFURA_NETWORK_BASE: Networkish = 'base';
+export const INFURA_NETWORK_BASE_SEPOLIA: Networkish = 'base-sepolia';
+export const INFURA_NETWORK_BNB_MAINNET: Networkish = 'bnb';
+export const INFURA_NETWORK_BNB_TESTNET: Networkish = 'bnbt';
 
 export const ETHERSCAN_NETWORK_HOMESTEAD: Networkish = 'homestead';
 export const ETHERSCAN_NETWORK_SEPOLIA: Networkish = 'sepolia';
