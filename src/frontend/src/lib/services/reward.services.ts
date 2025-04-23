@@ -53,8 +53,8 @@ const queryUserRoles = async (params: {
 	}
 
 	return {
-        isVip: superpowers.includes(QrCodeType.VIP),
-        isGold: superpowers.includes(QrCodeType.GOLD)
+		isVip: superpowers.includes(QrCodeType.VIP),
+		isGold: superpowers.includes(QrCodeType.GOLD)
 	};
 };
 
