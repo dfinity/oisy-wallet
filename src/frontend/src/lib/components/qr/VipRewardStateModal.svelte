@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 	import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
 	import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
@@ -8,13 +10,11 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { VIP_STATE_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
+	import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import {allIcrcTokens} from "$lib/derived/all-tokens.derived";
-	import {isNullish} from "@dfinity/utils";
-	import type {IcTokenToggleable} from "$icp/types/ic-token-toggleable";
 
 	export let isSuccessful: boolean;
 	export let codeType: QrCodeType = QrCodeType.VIP;
@@ -65,7 +65,12 @@
 			type="button"
 			fullWidth
 			on:click={() => {
-				codeType === QrCodeType.GOLD && (isNullish(token) || !token.enabled) ? modalStore.openManageTokens({initialSearch: goldTokenSymbol, message: replaceOisyPlaceholders($i18n.tokens.manage.text.default_message)}) : modalStore.close();
+				codeType === QrCodeType.GOLD && (isNullish(token) || !token.enabled)
+					? modalStore.openManageTokens({
+							initialSearch: goldTokenSymbol,
+							message: replaceOisyPlaceholders($i18n.tokens.manage.text.default_message)
+						})
+					: modalStore.close();
 			}}
 			slot="toolbar"
 		>

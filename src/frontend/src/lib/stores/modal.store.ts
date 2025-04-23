@@ -1,9 +1,9 @@
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
+import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { VipRewardStateData } from '$lib/types/reward';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
-import type {ManageTokensData} from "$lib/types/manage-tokens";
 
 export interface Modal<T> {
 	type:

@@ -1,5 +1,4 @@
-
 export interface ManageTokensData {
-    initialSearch: string;
-    message?: string;
+	initialSearch: string;
+	message?: string;
 }

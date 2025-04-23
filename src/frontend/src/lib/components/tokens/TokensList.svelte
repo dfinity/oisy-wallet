@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {debounce, isNullish, nonNullish} from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
@@ -12,13 +12,13 @@
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import {modalManageTokens, modalManageTokensData} from '$lib/derived/modal.derived';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
-	import MessageBox from "$lib/components/ui/MessageBox.svelte";
 
 	let tokens: TokenUiOrGroupUi[] | undefined;
 
