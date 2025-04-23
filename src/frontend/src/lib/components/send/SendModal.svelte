@@ -2,6 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { createEventDispatcher, setContext } from 'svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
@@ -20,6 +21,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import { token } from '$lib/stores/token.store';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
@@ -97,50 +99,52 @@
 	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
-<WizardModal
-	{steps}
-	bind:currentStep
-	bind:this={modal}
-	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
-		currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
-	testId={SEND_TOKENS_MODAL}
->
-	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+<SendTokenContext token={$token}>
+	<WizardModal
+		{steps}
+		bind:currentStep
+		bind:this={modal}
+		on:nnsClose={close}
+		disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
+			currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
+		testId={SEND_TOKENS_MODAL}
+	>
+		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
-		<SendTokensList
-			on:icSendToken={nextStep}
-			on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
-		/>
-	{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
-		<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
-	{:else}
-		<SendWizard
-			{source}
-			{currentStep}
-			bind:destination
-			bind:networkId
-			bind:targetNetwork
-			bind:amount
-			bind:sendProgressStep
-			formCancelAction={isTransactionsPage ? 'close' : 'back'}
-			on:icBack={modal.back}
-			on:icSendBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-			on:icNext={modal.next}
-			on:icClose={close}
-			on:icQRCodeScan={() =>
-				goToWizardStep({
-					modal,
-					steps,
-					stepName: WizardStepsSend.QR_CODE_SCAN
-				})}
-			on:icQRCodeBack={() =>
-				goToWizardStep({
-					modal,
-					steps,
-					stepName: WizardStepsSend.SEND
-				})}
-		/>
-	{/if}
-</WizardModal>
+		{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
+			<SendTokensList
+				on:icSendToken={nextStep}
+				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+			/>
+		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
+			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
+		{:else}
+			<SendWizard
+				{source}
+				{currentStep}
+				bind:destination
+				bind:networkId
+				bind:targetNetwork
+				bind:amount
+				bind:sendProgressStep
+				formCancelAction={isTransactionsPage ? 'close' : 'back'}
+				on:icBack={modal.back}
+				on:icSendBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+				on:icNext={modal.next}
+				on:icClose={close}
+				on:icQRCodeScan={() =>
+					goToWizardStep({
+						modal,
+						steps,
+						stepName: WizardStepsSend.QR_CODE_SCAN
+					})}
+				on:icQRCodeBack={() =>
+					goToWizardStep({
+						modal,
+						steps,
+						stepName: WizardStepsSend.SEND
+					})}
+			/>
+		{/if}
+	</WizardModal>
+</SendTokenContext>
