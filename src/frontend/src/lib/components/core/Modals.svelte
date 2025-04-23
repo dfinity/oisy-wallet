@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import HideTokenModal from '$eth/components/tokens/HideTokenModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
@@ -16,9 +17,9 @@
 		modalRewardDetails,
 		modalSettingsState,
 		modalReferralCode,
-		modalAddressBook, modalVipQrCodeData
+		modalAddressBook,
+		modalVipQrCodeData
 	} from '$lib/derived/modal.derived';
-	import {nonNullish} from "@dfinity/utils";
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
