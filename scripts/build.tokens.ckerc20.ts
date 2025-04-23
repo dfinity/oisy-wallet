@@ -15,9 +15,9 @@ import {
 } from '@dfinity/cketh';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
-import { closeSync, existsSync, openSync, writeFileSync, writeSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { agent, loadMetadata } from './build.tokens.utils';
+import { agent, loadMetadata, saveLogo } from './build.tokens.utils';
 import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 interface TokensAndIcons {
@@ -162,16 +162,7 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 		return;
 	}
 
-	// Open the file for writing only if it does not already exist (wx flag).
-	// This avoids a potential file system race condition warning.
-	const fd = openSync(file, 'wx');
-
-	const [encoding, encodedStr] = logoData.split(';')[1].split(',');
-
-	const svgContent = Buffer.from(encodedStr, encoding as BufferEncoding).toString('utf-8');
-
-	writeSync(fd, svgContent, 0, 'utf-8');
-	closeSync(fd);
+	saveLogo({ logoData, file });
 };
 
 const findCkErc20 = async () => {
