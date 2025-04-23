@@ -223,20 +223,22 @@ describe('icrc.services', () => {
 			let spyToastsError: MockInstance;
 
 			beforeEach(() => {
-				icrcCustomTokensStore.set({
-					data: mockIcrcCustomToken,
-					certified: true
-				});
+				icrcCustomTokensStore.setAll([
+					{
+						data: mockIcrcCustomToken,
+						certified: true
+					}
+				]);
+
+				ledgerCanisterMock.metadata.mockResolvedValue([
+					['icrc1:name', { Text: mockName }],
+					['icrc1:symbol', { Text: mockSymbol }],
+					['icrc1:decimals', { Nat: mockDecimals }],
+					['icrc1:fee', { Nat: mockFee }]
+				]);
 
 				spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 			});
-
-			const testToastsError = (err: Error) => {
-				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-					msg: { text: get(i18n).init.error.icrc_canisters },
-					err
-				});
-			};
 
 			it('should reset all and toasts on list custom tokens error', async () => {
 				const tokens = get(icrcCustomTokensStore);
@@ -252,10 +254,17 @@ describe('icrc.services', () => {
 
 				expect(afterTokens).toBeNull();
 
-				testToastsError(err);
+				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+					msg: { text: get(i18n).init.error.icrc_canisters },
+					err
+				});
 			});
 
-			it('should reset all and toasts on metadata error', async () => {
+			it('should ignore tokens on metadata error', async () => {
+				const tokens = get(icrcCustomTokensStore);
+
+				expect(tokens).toHaveLength(1);
+
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
 
 				const err = new Error('test');
@@ -265,9 +274,42 @@ describe('icrc.services', () => {
 
 				const afterTokens = get(icrcCustomTokensStore);
 
-				expect(afterTokens).toBeNull();
+				expect(afterTokens).toEqual(tokens);
 
-				testToastsError(err);
+				expect(spyToastsError).not.toHaveBeenCalled();
+
+				expect(console.error).toHaveBeenCalledTimes(2);
+				expect(console.error).toHaveBeenNthCalledWith(1, err);
+				expect(console.error).toHaveBeenNthCalledWith(2, err);
+			});
+
+			it('should reset tokens on metadata error', async () => {
+				const initialTokens = get(icrcCustomTokensStore);
+
+				expect(initialTokens).toHaveLength(1);
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				const tokens = get(icrcCustomTokensStore);
+
+				expect(tokens).toHaveLength(2);
+
+				const err = new Error('test');
+				ledgerCanisterMock.metadata.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				const afterTokens = get(icrcCustomTokensStore);
+
+				expect(afterTokens).toEqual(initialTokens);
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+
+				expect(console.error).toHaveBeenCalledTimes(2);
+				expect(console.error).toHaveBeenNthCalledWith(1, err);
+				expect(console.error).toHaveBeenNthCalledWith(2, err);
 			});
 		});
 	});
