@@ -22,6 +22,9 @@
 	export let usdBalance: OptionAmount;
 	export let dapp: any;
 	export let isBest: any;
+
+    console.log(amount, token, logoSize, usdBalance, dapp, isBest);
+    
 </script>
 
 <LogoButton on:click dividers={true}>
