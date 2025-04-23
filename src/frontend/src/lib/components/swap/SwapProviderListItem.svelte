@@ -15,6 +15,8 @@
 	import type { CardData } from '$lib/types/token-card';
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { safeParse } from '$lib/validation/utils.validation';
+	import { UrlSchema } from '@dfinity/zod-schemas';
 
 	export let amount: bigint;
 	export let token: any;
@@ -22,6 +24,27 @@
 	export let usdBalance: OptionAmount;
 	export let dapp: any;
 	export let isBest: any;
+
+
+    let websiteURL: any;
+	let displayURL: any;
+	$: if (nonNullish(dapp)) {
+		try {
+			const validatedWebsiteUrl = safeParse({
+				schema: UrlSchema,
+				value: dapp?.website
+			});
+			if (nonNullish(validatedWebsiteUrl)) {
+				websiteURL = new URL(validatedWebsiteUrl);
+				displayURL = websiteURL.hostname.startsWith('www.')
+					? websiteURL.hostname.substring(4)
+					: websiteURL.hostname;
+			}
+		} catch (_err: unknown) {
+			websiteURL = null;
+			displayURL = null;
+		}
+	}
 
     console.log(amount, token, logoSize, usdBalance, dapp, isBest);
     
@@ -35,7 +58,7 @@
 
 	<svelte:fragment slot="subtitle">
 		{#if nonNullish(dapp?.displayURL)}
-			<div class="text-sm text-tertiary">{dapp.displayURL}</div>
+			<div class="text-sm text-tertiary">{dapp.name}</div>
 		{/if}
 	</svelte:fragment>
 
