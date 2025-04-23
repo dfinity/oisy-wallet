@@ -39,7 +39,7 @@
 			return;
 		}
 
-		const vipReward = await getNewReward({ campaignId: QrCodeType.VIP, identity: $authIdentity });
+		const vipReward = await getNewReward({ campaignId: codeType, identity: $authIdentity });
 		if (nonNullish(vipReward)) {
 			code = vipReward.code;
 		} else {
