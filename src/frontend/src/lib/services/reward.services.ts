@@ -15,6 +15,7 @@ import {
 	setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
 import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
+import { QrCodeType, asQrCodeType } from '$lib/enums/qr-code-types';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import {
@@ -51,7 +52,10 @@ const queryUserRoles = async (params: {
 		return { isVip: false, isGold: false };
 	}
 
-	return { isVip: superpowers.includes('vip'), isGold: superpowers.includes('gold') };
+	return {
+        isVip: superpowers.includes(QrCodeType.VIP),
+        isGold: superpowers.includes(QrCodeType.GOLD)
+	};
 };
 
 /**
@@ -167,7 +171,7 @@ export const getNewReward = async ({
 	campaignId,
 	identity
 }: {
-	campaignId: string;
+	campaignId: QrCodeType;
 	identity: Identity;
 }): Promise<VipReward | undefined> => {
 	try {
@@ -234,7 +238,7 @@ export const claimVipReward = async (params: {
 }): Promise<RewardClaimResponse> => {
 	try {
 		const campaignId = await updateVipReward(params);
-		return { success: true, campaignId };
+		return { success: true, campaignId: asQrCodeType(campaignId) };
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
