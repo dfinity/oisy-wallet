@@ -4,7 +4,8 @@ import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
-	NAVIGATION_MENU_BUTTON, NAVIGATION_MENU_GOLD_BUTTON,
+	NAVIGATION_MENU_BUTTON,
+	NAVIGATION_MENU_GOLD_BUTTON,
 	NAVIGATION_MENU_REFERRAL_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON
 } from '$lib/constants/test-ids.constants';
