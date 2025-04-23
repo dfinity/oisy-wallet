@@ -1,5 +1,4 @@
 import type {
-	ClaimedVipReward,
 	ClaimVipRewardResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
@@ -26,11 +25,12 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCampaignError, InvalidCodeError } from '$lib/types/errors';
-import type { RewardResponseInfo } from '$lib/types/reward';
+import type { RewardClaimApiResponse, RewardResponseInfo } from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
@@ -43,7 +43,7 @@ describe('reward-code', () => {
 	describe('getUserRoles', () => {
 		const mockedUserData: UserData = {
 			is_vip: [true],
-			superpowers: [['vip', 'gold']],
+			superpowers: toNullable(['vip', 'gold']),
 			airdrops: [],
 			usage_awards: [],
 			last_snapshot_timestamp: [BigInt(Date.now())],
@@ -56,7 +56,7 @@ describe('reward-code', () => {
 					.spyOn(rewardApi, 'getUserInfo')
 					.mockResolvedValueOnce(mockedUserData);
 
-				const { is_vip } = await getUserRoles({ identity: mockIdentity });
+				const { is_vip } = await isVipUser({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
@@ -70,7 +70,7 @@ describe('reward-code', () => {
 				const userData: UserData = { ...mockedUserData, superpowers: [] };
 				const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
 
-				const { is_vip } = await getUserRoles({ identity: mockIdentity });
+				const { is_vip } = await isVipUser({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
@@ -87,7 +87,7 @@ describe('reward-code', () => {
 					.spyOn(rewardApi, 'getUserInfo')
 					.mockResolvedValueOnce(mockedUserData);
 
-				const { is_gold } = await getUserRoles({ identity: mockIdentity });
+				const { is_gold } = await isVipUser({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
@@ -101,7 +101,7 @@ describe('reward-code', () => {
 				const userData: UserData = { ...mockedUserData, superpowers: [] };
 				const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
 
-				const { is_gold } = await getUserRoles({ identity: mockIdentity });
+				const { is_gold } = await isVipUser({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
@@ -155,10 +155,10 @@ describe('reward-code', () => {
 	});
 
 	describe('claimVipReward', () => {
-		const mockedClaimRewardResponse: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = [
-			{ Success: null },
-			[{ campaign_id: 'vip' }]
-		];
+		const mockedClaimRewardResponse: RewardClaimApiResponse = {
+			claimRewardResponse: { Success: null },
+			claimedVipReward: { campaign_id: 'vip' }
+		};
 
 		it('should return true if a valid vip reward code is used', async () => {
 			const claimRewardSpy = vi
@@ -176,10 +176,10 @@ describe('reward-code', () => {
 		});
 
 		it('should return false if an invalid vip reward code is used', async () => {
-			const claimRewardResponse: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = [
-				{ InvalidCode: null },
-				[]
-			];
+			const claimRewardResponse: RewardClaimApiResponse = {
+				claimRewardResponse: { InvalidCode: null },
+				claimedVipReward: undefined
+			};
 			const claimRewardSpy = vi
 				.spyOn(rewardApi, 'claimVipReward')
 				.mockResolvedValue(claimRewardResponse);
@@ -198,10 +198,10 @@ describe('reward-code', () => {
 		});
 
 		it('should return false if an already used vip reward code is used', async () => {
-			const claimRewardResponse: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = [
-				{ AlreadyClaimed: null },
-				[]
-			];
+			const claimRewardResponse: RewardClaimApiResponse = {
+				claimRewardResponse: { AlreadyClaimed: null },
+				claimedVipReward: undefined
+			};
 			const claimRewardSpy = vi
 				.spyOn(rewardApi, 'claimVipReward')
 				.mockResolvedValue(claimRewardResponse);
@@ -220,10 +220,10 @@ describe('reward-code', () => {
 		});
 
 		it('should return false if no campaign id is returned', async () => {
-			const claimRewardResponse: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = [
-				{ Success: null },
-				[]
-			];
+			const claimRewardResponse: RewardClaimApiResponse = {
+				claimRewardResponse: { Success: null },
+				claimedVipReward: undefined
+			};
 			const claimRewardSpy = vi
 				.spyOn(rewardApi, 'claimVipReward')
 				.mockResolvedValue(claimRewardResponse);

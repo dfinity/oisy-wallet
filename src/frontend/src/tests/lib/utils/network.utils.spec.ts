@@ -3,7 +3,7 @@ import {
 	BASE_SEPOLIA_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.base.env';
 import {
-	BSC_NETWORK_ID,
+	BSC_MAINNET_NETWORK_ID,
 	BSC_TESTNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import * as btcNetworkEnv from '$env/networks/networks.btc.env';
@@ -114,7 +114,7 @@ describe('network utils', () => {
 		const allEvmNetworkIds = [
 			BASE_NETWORK_ID,
 			BASE_SEPOLIA_NETWORK_ID,
-			BSC_NETWORK_ID,
+			BSC_MAINNET_NETWORK_ID,
 			BSC_TESTNET_NETWORK_ID
 		];
 

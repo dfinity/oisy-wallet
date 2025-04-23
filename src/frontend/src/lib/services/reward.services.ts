@@ -1,6 +1,5 @@
 import type {
 	ClaimedVipReward,
-	ClaimVipRewardResponse,
 	ReferrerInfo,
 	RewardInfo,
 	SetReferrerResponse,
@@ -25,6 +24,7 @@ import {
 	UserNotVipError
 } from '$lib/types/errors';
 import type {
+	RewardClaimApiResponse,
 	RewardClaimResponse,
 	RewardResponseInfo,
 	RewardsResponse,
@@ -66,7 +66,7 @@ const queryUserRoles = async (params: {
  *
  * @throws {Error} Displays an error toast and logs the error if the query fails.
  */
-export const getUserRoles = async (params: { identity: Identity }): Promise<UserRoleResult> => {
+export const isVipUser = async (params: { identity: Identity }): Promise<UserRoleResult> => {
 	try {
 		return await queryUserRoles({ ...params, certified: false });
 	} catch (err: unknown) {
@@ -189,14 +189,14 @@ const updateVipReward = async ({
 	identity: Identity;
 	code: string;
 }): Promise<string> => {
-	const response: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = await claimVipRewardApi({
+	const response: RewardClaimApiResponse = await claimVipRewardApi({
 		identity,
 		vipReward: { code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	if ('Success' in response[0]) {
-		const claimedVipReward = fromNullable(response[1]);
+	if ('Success' in response.claimRewardResponse) {
+		const claimedVipReward = response.claimedVipReward;
 		if (isNullish(claimedVipReward)) {
 			throw new InvalidCampaignError();
 		}
@@ -204,11 +204,11 @@ const updateVipReward = async ({
 		return claimedVipReward.campaign_id;
 	}
 
-	if ('InvalidCode' in response[0]) {
+	if ('InvalidCode' in response.claimRewardResponse) {
 		throw new InvalidCodeError();
 	}
 
-	if ('AlreadyClaimed' in response[0]) {
+	if ('AlreadyClaimed' in response.claimRewardResponse) {
 		throw new AlreadyClaimedError();
 	}
 

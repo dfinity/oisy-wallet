@@ -9,10 +9,17 @@
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
-	export let data: CardData;
-	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
-	export let asNetwork = false;
-	export let hover = false;
+	let {
+		data,
+		testIdPrefix = TOKEN_CARD,
+		asNetwork = false,
+		hover = false
+	}: {
+		data: CardData;
+		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
+		asNetwork?: boolean;
+		hover?: boolean;
+	} = $props();
 </script>
 
 <div class="flex w-full flex-col">

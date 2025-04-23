@@ -1,6 +1,5 @@
 import type {
 	ClaimedVipReward,
-	ClaimVipRewardResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	SetReferrerResponse,
@@ -11,6 +10,7 @@ import type {
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import { REWARDS_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
+import type { RewardClaimApiResponse } from '$lib/types/reward';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 
@@ -41,7 +41,7 @@ export const claimVipReward = async ({
 	identity
 }: CanisterApiFunctionParams<{
 	vipReward: VipReward;
-}>): Promise<[ClaimVipRewardResponse, [] | [ClaimedVipReward]]> => {
+}>): Promise<RewardClaimApiResponse> => {
 	const { claimVipReward } = await rewardCanister({ identity });
 
 	return claimVipReward(vipReward);
