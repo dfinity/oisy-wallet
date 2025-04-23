@@ -31,11 +31,13 @@ import type { SolanaNetwork } from '$sol/types/network';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('SolTokenMenu', () => {
 	beforeAll(() => {
 		setupTestnetsStore('enabled');
+		setupUserNetworksStore('allEnabled');
 	});
 
 	beforeEach(() => {
@@ -45,7 +47,7 @@ describe('SolTokenMenu', () => {
 		solAddressTestnetStore.reset();
 		solAddressDevnetStore.reset();
 
-		// In component TOkenMenu there is a dependency to the store erc20UserTokensStore that impedes the correct rendering of the component
+		// In component TokenMenu there is a dependency to the store erc20UserTokensStore that impedes the correct rendering of the component
 		// So we need to reset the store before each test
 		// TODO: verify if this dependency can be removed
 		erc20UserTokensStore.resetAll();
