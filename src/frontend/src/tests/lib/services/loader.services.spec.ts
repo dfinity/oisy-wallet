@@ -1,4 +1,3 @@
-import * as networksEnv from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import * as api from '$lib/api/backend.api';
@@ -110,8 +109,6 @@ describe('loader.services', () => {
 			vi.spyOn(authServices, 'signOut').mockImplementation(vi.fn());
 			vi.spyOn(authServices, 'nullishSignOut').mockImplementation(vi.fn());
 			vi.spyOn(api, 'allowSigning').mockImplementation(vi.fn());
-
-			vi.spyOn(networksEnv, 'USER_NETWORKS_FEATURE_ENABLED', 'get').mockImplementation(() => true);
 
 			setupUserNetworksStore('allEnabled');
 		});

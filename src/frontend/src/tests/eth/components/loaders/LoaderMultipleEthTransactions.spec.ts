@@ -1,4 +1,3 @@
-import * as networksEnv from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import {
 	ETHEREUM_TOKEN,
@@ -61,8 +60,6 @@ describe('LoaderMultipleEthTransactions', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
-
-		vi.spyOn(networksEnv, 'USER_NETWORKS_FEATURE_ENABLED', 'get').mockImplementation(() => true);
 
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
