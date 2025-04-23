@@ -7,8 +7,6 @@
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
-	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
 		FEE_CONTEXT_KEY,
@@ -17,14 +15,12 @@
 		initFeeStore
 	} from '$eth/stores/fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import { decodeQrCode } from '$eth/utils/qr-code.utils';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
-	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
@@ -42,9 +38,8 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
-	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { OptionToken, Token, TokenId } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -217,23 +212,6 @@
 
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
-
-	const onDecodeQrCode = ({
-		status,
-		code,
-		expectedToken
-	}: {
-		status: QrStatus;
-		code?: string;
-		expectedToken: OptionToken;
-	}): QrResponse =>
-		decodeQrCode({
-			status,
-			code,
-			expectedToken,
-			ethereumTokens: $enabledEthereumTokens,
-			erc20Tokens: $enabledErc20Tokens
-		});
 </script>
 
 <FeeContext
@@ -279,14 +257,6 @@
 				{/if}
 			</svelte:fragment>
 		</EthSendForm>
-	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-		<SendQRCodeScan
-			expectedToken={$sendToken}
-			bind:destination
-			bind:amount
-			decodeQrCode={onDecodeQrCode}
-			on:icQRCodeBack
-		/>
 	{:else}
 		<slot />
 	{/if}
