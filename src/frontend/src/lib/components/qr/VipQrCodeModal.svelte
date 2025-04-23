@@ -1,7 +1,7 @@
 <script lang="ts">
-	import {Modal, QRCode} from '@dfinity/gix-components';
-	import {isNullish, nonNullish} from '@dfinity/utils';
-	import {onDestroy, onMount} from 'svelte';
+	import { Modal, QRCode } from '@dfinity/gix-components';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onDestroy, onMount } from 'svelte';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -9,15 +9,18 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import {VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS} from '$lib/constants/app.constants';
-	import {VIP_CODE_REGENERATE_BUTTON, VIP_QR_CODE_COPY_BUTTON} from '$lib/constants/test-ids.constants';
-	import {authIdentity} from '$lib/derived/auth.derived';
-	import {nullishSignOut} from '$lib/services/auth.services';
-	import {getNewReward} from '$lib/services/reward.services';
-	import {i18n} from '$lib/stores/i18n.store';
-	import {modalStore} from '$lib/stores/modal.store';
-	import {replacePlaceholders} from '$lib/utils/i18n.utils';
-	import {QrCodeType} from "$lib/enums/qr-code-types";
+	import { VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
+	import {
+		VIP_CODE_REGENERATE_BUTTON,
+		VIP_QR_CODE_COPY_BUTTON
+	} from '$lib/constants/test-ids.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { QrCodeType } from '$lib/enums/qr-code-types';
+	import { nullishSignOut } from '$lib/services/auth.services';
+	import { getNewReward } from '$lib/services/reward.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let counter = VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS;
 	let countdown: NodeJS.Timeout | undefined;
