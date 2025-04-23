@@ -168,7 +168,7 @@ describe('etherscan.providers', () => {
 				const provider = new EtherscanProvider(network);
 				mockFetch.mockRejectedValue(new Error('Network error'));
 
-				await expect(provider.transactions({ address })).rejects.toThrowError('Network error');
+				await expect(provider.transactions({ address })).rejects.toThrow('Network error');
 			});
 		});
 
