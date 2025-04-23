@@ -56,28 +56,28 @@ describe('reward-code', () => {
 					.spyOn(rewardApi, 'getUserInfo')
 					.mockResolvedValueOnce(mockedUserData);
 
-				const { is_vip } = await getUserRoles({ identity: mockIdentity });
+				const { isVip } = await getUserRoles({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					certified: false,
 					nullishIdentityErrorMessage
 				});
-				expect(is_vip).toEqual(true);
+				expect(isVip).toEqual(true);
 			});
 
 			it('should return false if user is not vip', async () => {
 				const userData: UserData = { ...mockedUserData, superpowers: [] };
 				const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
 
-				const { is_vip } = await getUserRoles({ identity: mockIdentity });
+				const { isVip } = await getUserRoles({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					certified: false,
 					nullishIdentityErrorMessage
 				});
-				expect(is_vip).toEqual(false);
+				expect(isVip).toEqual(false);
 			});
 		});
 
@@ -87,28 +87,28 @@ describe('reward-code', () => {
 					.spyOn(rewardApi, 'getUserInfo')
 					.mockResolvedValueOnce(mockedUserData);
 
-				const { is_gold } = await getUserRoles({ identity: mockIdentity });
+				const { isGold } = await getUserRoles({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					certified: false,
 					nullishIdentityErrorMessage
 				});
-				expect(is_gold).toEqual(true);
+				expect(isGold).toEqual(true);
 			});
 
 			it('should return false if user is not gold user', async () => {
 				const userData: UserData = { ...mockedUserData, superpowers: [] };
 				const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
 
-				const { is_gold } = await getUserRoles({ identity: mockIdentity });
+				const { isGold } = await getUserRoles({ identity: mockIdentity });
 
 				expect(getUserInfoSpy).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					certified: false,
 					nullishIdentityErrorMessage
 				});
-				expect(is_gold).toEqual(false);
+				expect(isGold).toEqual(false);
 			});
 		});
 	});

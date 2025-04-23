@@ -7,6 +7,7 @@
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
+	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
@@ -24,7 +25,8 @@
 		NAVIGATION_MENU,
 		NAVIGATION_MENU_VIP_BUTTON,
 		NAVIGATION_MENU_REFERRAL_BUTTON,
-		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON
+		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
+		NAVIGATION_MENU_GOLD_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
@@ -42,9 +44,10 @@
 	let button: HTMLButtonElement | undefined;
 
 	let isVip = false;
+	let isGold = false;
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
-			({ is_vip: isVip } = await getUserRoles({ identity: $authIdentity }));
+			({ isVip, isGold } = await getUserRoles({ identity: $authIdentity }));
 		}
 	});
 
@@ -106,6 +109,17 @@
 			<IconShare size="20" />
 			{$i18n.navigation.text.refer_a_friend}
 		</ButtonMenu>
+
+		{#if isGold}
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.binance_qr_code}
+				testId={NAVIGATION_MENU_GOLD_BUTTON}
+				on:click={() => modalStore.openVipQrCode(QrCodeType.GOLD)}
+			>
+				<IconBinance size="20" />
+				{$i18n.navigation.text.binance_qr_code}
+			</ButtonMenu>
+		{/if}
 
 		{#if isVip}
 			<ButtonMenu

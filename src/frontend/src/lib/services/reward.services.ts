@@ -49,12 +49,12 @@ const queryUserRoles = async (params: {
 
 	const superpowers = fromNullable(userData.superpowers);
 	if (isNullish(superpowers)) {
-		return { is_vip: false, is_gold: false };
+		return { isVip: false, isGold: false };
 	}
 
 	return {
-		is_vip: superpowers.includes(QrCodeType.VIP),
-		is_gold: superpowers.includes(QrCodeType.GOLD)
+		isVip: superpowers.includes(QrCodeType.VIP),
+		isGold: superpowers.includes(QrCodeType.GOLD)
 	};
 };
 
@@ -80,7 +80,7 @@ export const getUserRoles = async (params: { identity: Identity }): Promise<User
 			err
 		});
 
-		return { is_vip: false, is_gold: false };
+		return { isVip: false, isGold: false };
 	}
 };
 
