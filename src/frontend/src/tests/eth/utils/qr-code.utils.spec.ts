@@ -5,6 +5,7 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { decodeQrCode } from '$eth/utils/qr-code.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 import type { MockedFunction } from 'vitest';
 
@@ -19,6 +20,8 @@ describe('decodeQrCode', () => {
 	const urn = 'some-urn';
 
 	setupTestnetsStore('enabled');
+	setupUserNetworksStore('allEnabled');
+
 	const otherProps = {
 		expectedToken: token,
 		ethereumTokens: get(enabledEthereumTokens),

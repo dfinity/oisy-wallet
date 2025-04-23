@@ -14,6 +14,7 @@ import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { initSolWalletWorker } from '$sol/services/worker.sol-wallet.services';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -30,14 +31,14 @@ describe('SolLoaderWallets', () => {
 		solAddressTestnetStore.reset();
 		solAddressDevnetStore.reset();
 		solAddressMainnetStore.reset();
-		setupTestnetsStore('reset');
+
+		setupTestnetsStore('enabled');
+		setupUserNetworksStore('allEnabled');
 
 		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 	});
 
 	it('should not initialize wallet workers when no addresses are available', () => {
-		setupTestnetsStore('enabled');
-
 		render(SolLoaderWallets);
 
 		// With testnets enabled, we expect mainnet + testnet + devnet tokens
@@ -49,7 +50,6 @@ describe('SolLoaderWallets', () => {
 		const testnetAddress = 'testnet-address';
 		const mainnetAddress = 'mainnet-address';
 
-		setupTestnetsStore('enabled');
 		solAddressTestnetStore.set({ data: testnetAddress, certified: true });
 		solAddressMainnetStore.set({ data: mainnetAddress, certified: true });
 
@@ -66,7 +66,6 @@ describe('SolLoaderWallets', () => {
 
 	it('should update wallet workers when addresses change', async () => {
 		const devnetAddress = 'devnet-address';
-		setupTestnetsStore('enabled');
 
 		const { rerender } = render(SolLoaderWallets);
 
@@ -84,7 +83,6 @@ describe('SolLoaderWallets', () => {
 	});
 
 	it('should handle all networks having addresses', () => {
-		setupTestnetsStore('enabled');
 		solAddressLocalnetStore.set({ data: 'local-address', certified: true });
 		solAddressTestnetStore.set({ data: 'testnet-address', certified: true });
 		solAddressDevnetStore.set({ data: 'devnet-address', certified: true });
@@ -104,7 +102,6 @@ describe('SolLoaderWallets', () => {
 
 	it('should include local network token when LOCAL is true', () => {
 		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
-		setupTestnetsStore('enabled');
 
 		render(SolLoaderWallets);
 

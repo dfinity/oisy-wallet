@@ -40,6 +40,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('all-tokens.derived', () => {
@@ -183,6 +184,7 @@ describe('all-tokens.derived', () => {
 
 		it('should include testnet tokens when testnets are enabled', () => {
 			setupTestnetsStore('enabled');
+			setupUserNetworksStore('allEnabled');
 
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);
@@ -205,6 +207,8 @@ describe('all-tokens.derived', () => {
 
 		it('should include local tokens when testnets are enabled and it is local env', () => {
 			setupTestnetsStore('enabled');
+			setupUserNetworksStore('allEnabled');
+
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			const tokens = get(allTokens);

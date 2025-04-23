@@ -6,12 +6,6 @@ import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_NETWORKS } from '$env/networks/networks.sol.env';
 import type { Network, NetworkId } from '$lib/types/network';
-import { parseBoolEnvVar } from '$lib/utils/env.utils';
-
-// TODO: to be removed when the feature is fully implemented
-export const USER_NETWORKS_FEATURE_ENABLED = parseBoolEnvVar(
-	import.meta.env.VITE_USER_NETWORKS_FEATURE_ENABLED
-);
 
 export const SUPPORTED_NETWORKS: Network[] = [
 	ICP_NETWORK,
