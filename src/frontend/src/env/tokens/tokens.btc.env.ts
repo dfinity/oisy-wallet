@@ -5,8 +5,8 @@ import {
 	BTC_TESTNET_NETWORK
 } from '$env/networks/networks.btc.env';
 import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
+import bitcoinTestnet from '$icp/assets/bitcoin-testnet.svg';
 import bitcoin from '$icp/assets/bitcoin.svg';
-import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import type { Token, TokenId, TokenWithLinkedData } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';

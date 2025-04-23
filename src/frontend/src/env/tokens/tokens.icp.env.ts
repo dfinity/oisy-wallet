@@ -4,7 +4,7 @@ import {
 	ICP_LEDGER_CANISTER_ID,
 	ICP_NETWORK
 } from '$env/networks/networks.icp.env';
-import icpLight from '$icp/assets/icp_light.svg';
+import icpLight from '$icp/assets/icp-light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic-token';
 import type { RequiredToken, TokenId } from '$lib/types/token';
