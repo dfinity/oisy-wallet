@@ -10,7 +10,6 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
-	import SendQrCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
@@ -45,7 +44,6 @@
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
@@ -228,14 +226,6 @@
 				{/if}
 			</svelte:fragment>
 		</SolSendForm>
-	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-		<SendQrCodeScan
-			expectedToken={$sendToken}
-			bind:destination
-			bind:amount
-			{decodeQrCode}
-			on:icQRCodeBack
-		/>
 	{:else}
 		<slot />
 	{/if}
