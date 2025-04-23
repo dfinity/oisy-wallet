@@ -33,6 +33,10 @@ export const ALCHEMY_JSON_RPC_URL_SEPOLIA = 'https://eth-sepolia.g.alchemy.com/v
 
 export const ALCHEMY_NETWORK_MAINNET: Network = Network.ETH_MAINNET;
 export const ALCHEMY_NETWORK_SEPOLIA: Network = Network.ETH_SEPOLIA;
+export const ALCHEMY_NETWORK_BASE_MAINNET: Network = Network.BASE_MAINNET;
+export const ALCHEMY_NETWORK_BASE_SEPOLIA: Network = Network.BASE_SEPOLIA;
+export const ALCHEMY_NETWORK_BSC_MAINNET: Network = Network.BNB_MAINNET;
+export const ALCHEMY_NETWORK_BSC_TESTNET: Network = Network.BNB_TESTNET;
 
 /**
  * Ethereum
