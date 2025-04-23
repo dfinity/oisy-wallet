@@ -28,7 +28,7 @@ export interface RewardClaimApiResponse {
 
 export interface RewardClaimResponse<T = unknown> {
 	success: boolean;
-	campaignId?: string;
+	campaignId?: QrCodeType;
 	err?: T;
 }
 
