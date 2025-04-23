@@ -1,4 +1,6 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
+import { ETH_TOKEN_GROUP, ETH_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.eth.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -6,23 +8,22 @@ import {
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO_BI } from '$lib/constants/app.constants';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import {
 	filterTokenGroups,
-	groupMainToken,
 	groupSecondaryToken,
 	groupTokens,
 	groupTokensByTwin,
 	updateTokenGroup
 } from '$lib/utils/token-group.utils';
-import { parseTokenId } from '$lib/validation/token.validation';
 import { bn1Bi, bn2Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
 
-const tokens = [
+const tokens: TokenUi[] = [
 	{
 		...BTC_MAINNET_TOKEN,
 		balance: bn1Bi,
@@ -38,8 +39,7 @@ const tokens = [
 		category: 'default',
 		decimals: BTC_MAINNET_TOKEN.decimals,
 		name: 'Chain key Bitcoin',
-		minterCanisterId: 'mc6ru-gyaaa-aaaar-qaaaq-cai',
-		twinToken: BTC_MAINNET_TOKEN
+		groupData: BTC_TOKEN_GROUP
 	},
 	{
 		...ETHEREUM_TOKEN,
@@ -56,51 +56,12 @@ const tokens = [
 		category: 'default',
 		decimals: ETHEREUM_TOKEN.decimals,
 		name: 'Chain key Ethereum',
-		minterCanisterId: 'apia6-jaaaa-aaaar-qabma-cai',
-		twinToken: ETHEREUM_TOKEN
+		groupData: ETH_TOKEN_GROUP
 	},
 	{
 		...ICP_TOKEN,
 		balance: 50n,
 		usdBalance: 1000
-	}
-];
-
-const tokensWithMismatchedDecimals = [
-	...tokens,
-	{
-		...mockValidIcCkToken,
-		id: parseTokenId('FOO'),
-		symbol: 'FOO',
-		network: {
-			id: Symbol('FOO'),
-			name: 'Foo Network',
-			icon: 'foo-icon',
-			iconBW: 'foo-icon-bw',
-			env: 'mainnet'
-		},
-		twinTokenSymbol: 'ckFOO',
-		balance: 100n,
-		usdBalance: 1000,
-		standard: 'ethereum',
-		category: 'default',
-		decimals: 1000,
-		name: 'Foo Token',
-		twinToken: ETHEREUM_TOKEN
-	},
-	{
-		...mockValidIcCkToken,
-		id: parseTokenId('ckFOO'),
-		symbol: 'ckFOO',
-		network: ICP_NETWORK,
-		balance: 200n,
-		usdBalance: 2000,
-		standard: 'icrc',
-		category: 'default',
-		decimals: 5000,
-		name: 'Chain key Foo Token',
-		minterCanisterId: 'ckfoo-canister-id',
-		twinToken: ETHEREUM_TOKEN
 	}
 ];
 
@@ -114,8 +75,8 @@ const reorderedTokens = [
 
 describe('token-group.utils', () => {
 	describe('groupTokensByTwin', () => {
-		it('should group tokens with matching twinTokenSymbol', () => {
-			const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
+		it('should group tokens with matching group ID', () => {
+			const groupedTokens = groupTokensByTwin(tokens);
 
 			expect(groupedTokens).toHaveLength(3);
 
@@ -144,7 +105,7 @@ describe('token-group.utils', () => {
 		});
 
 		it('should place the group in the position of the first token', () => {
-			const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
+			const groupedTokens = groupTokensByTwin(tokens);
 			const [firstGroup] = groupedTokens;
 
 			expect(firstGroup).toHaveProperty('group');
@@ -156,7 +117,7 @@ describe('token-group.utils', () => {
 		});
 
 		it('should not duplicate tokens in the result', () => {
-			const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
+			const groupedTokens = groupTokensByTwin(tokens);
 
 			const tokenSymbols = groupedTokens.flatMap((groupOrToken) =>
 				'group' in groupOrToken
@@ -168,23 +129,8 @@ describe('token-group.utils', () => {
 			expect(uniqueSymbols.size).toBe(tokenSymbols.length);
 		});
 
-		it('should not group tokens when their decimals are mismatched', () => {
-			const groupedTokens = groupTokensByTwin(tokensWithMismatchedDecimals as TokenUi[]);
-
-			expect(groupedTokens).toHaveLength(5);
-
-			const fooToken = groupedTokens.find((t) => 'token' in t && t.token.symbol === 'FOO');
-			const ckFooToken = groupedTokens.find((t) => 'token' in t && t.token.symbol === 'ckFOO');
-
-			expect(fooToken).toBeDefined();
-			expect(ckFooToken).toBeDefined();
-
-			expect(fooToken).not.toHaveProperty('group.tokens');
-			expect(ckFooToken).not.toHaveProperty('group.tokens');
-		});
-
 		it('should correctly group tokens even when the ckToken is declared before the native token', () => {
-			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
+			const groupedTokens = groupTokensByTwin(reorderedTokens);
 
 			expect(groupedTokens).toHaveLength(3);
 
@@ -422,100 +368,23 @@ describe('token-group.utils', () => {
 		});
 	});
 
-	describe('groupMainToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
-
-		// We mock the tokens to have the same "main token"
-		const twinToken = {
-			...SEPOLIA_TOKEN,
-			balance: bn2Bi,
-			usdBalance: 250,
-			twinToken: ICP_TOKEN,
-			decimals: ICP_TOKEN.decimals
-		};
-
-		it('should create a new group when no tokenGroup exists', () => {
-			expect(groupMainToken({ token, tokenGroup: undefined })).toEqual({
-				id: token.id,
-				nativeToken: token,
-				tokens: [token],
-				balance: token.balance,
-				usdBalance: token.usdBalance
-			});
-		});
-
-		it('should add token to existing group and update balances', () => {
-			const tokenGroup: TokenUiGroup = {
-				id: token.id,
-				nativeToken: token,
-				tokens: [twinToken],
-				balance: bn3Bi,
-				usdBalance: 300
-			};
-
-			expect(groupMainToken({ token, tokenGroup })).toEqual({
-				...tokenGroup,
-				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance! + token.balance,
-				usdBalance: tokenGroup.usdBalance! + token.usdBalance
-			});
-		});
-
-		it('should add token to existing group with more than one token already', () => {
-			const tokenGroup: TokenUiGroup = {
-				id: token.id,
-				nativeToken: token,
-				tokens: [twinToken, anotherToken],
-				balance: bn3Bi,
-				usdBalance: 300
-			};
-
-			expect(groupMainToken({ token, tokenGroup })).toEqual({
-				...tokenGroup,
-				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance! + token.balance,
-				usdBalance: tokenGroup.usdBalance! + token.usdBalance
-			});
-		});
-
-		it('should override the "main token" props if the group was created by a "secondary token"', () => {
-			const tokenGroup: TokenUiGroup = {
-				id: twinToken.id,
-				nativeToken: twinToken,
-				tokens: [twinToken],
-				balance: bn3Bi,
-				usdBalance: 300
-			};
-
-			expect(groupMainToken({ token, tokenGroup })).toEqual({
-				...tokenGroup,
-				id: token.id,
-				nativeToken: token,
-				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance! + token.balance,
-				usdBalance: tokenGroup.usdBalance! + token.usdBalance
-			});
-		});
-	});
-
 	describe('groupSecondaryToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const token = { ...ETHEREUM_TOKEN, balance: bn1Bi, usdBalance: 100 };
 		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const twinToken = {
-			...SEPOLIA_TOKEN,
+			...SOLANA_TOKEN,
 			balance: bn2Bi,
 			usdBalance: 250,
-			twinToken: ICP_TOKEN,
-			decimals: ICP_TOKEN.decimals
+			groupData: ETH_TOKEN_GROUP
 		};
 
 		it('should create a new group when no tokenGroup exists', () => {
 			expect(groupSecondaryToken({ token: twinToken, tokenGroup: undefined })).toEqual({
-				id: twinToken.id,
+				id: ETH_TOKEN_GROUP_ID,
 				nativeToken: twinToken,
+				groupData: ETH_TOKEN_GROUP,
 				tokens: [twinToken],
 				balance: twinToken.balance,
 				usdBalance: twinToken.usdBalance
@@ -524,8 +393,9 @@ describe('token-group.utils', () => {
 
 		it('should add token to existing group and update balances', () => {
 			const tokenGroup: TokenUiGroup = {
-				id: token.id,
+				id: ETH_TOKEN_GROUP_ID,
 				nativeToken: token,
+				groupData: ETH_TOKEN_GROUP,
 				tokens: [token],
 				balance: bn3Bi,
 				usdBalance: 300

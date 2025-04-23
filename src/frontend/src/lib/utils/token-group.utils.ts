@@ -1,9 +1,8 @@
 import { ZERO_BI } from '$lib/constants/app.constants';
-import type { TokenId, TokenUi } from '$lib/types/token';
-import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
+import type { TokenId, TokenUi, TokenUiWithGroupData } from '$lib/types/token';
+import type { TokenGroupId, TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import { sumBalances, sumUsdBalances } from '$lib/utils/token.utils';
-import { isToken } from '$lib/validation/token.validation';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Type guard to check if an object is of type TokenUiGroup.
@@ -34,18 +33,16 @@ export const isTokenUiGroup = (
 export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	const tokenGroups = groupTokens(tokens);
 
-	return tokenGroups
-		.map((group) => (group.tokens.length === 1 ? { token: group.tokens[0] } : { group }))
-		.sort((aa, bb) => {
-			const a = isTokenUiGroup(aa) ? aa.group : aa.token;
-			const b = isTokenUiGroup(bb) ? bb.group : bb.token;
+	return tokenGroups.sort((aa, bb) => {
+		const a = isTokenUiGroup(aa) ? aa.group : aa.token;
+		const b = isTokenUiGroup(bb) ? bb.group : bb.token;
 
-			return (
-				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+((b.balance ?? ZERO_BI) > (a.balance ?? ZERO_BI)) -
-					+((b.balance ?? ZERO_BI) < (a.balance ?? ZERO_BI))
-			);
-		});
+		return (
+			(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
+			+((b.balance ?? ZERO_BI) > (a.balance ?? ZERO_BI)) -
+				+((b.balance ?? ZERO_BI) < (a.balance ?? ZERO_BI))
+		);
+	});
 };
 
 const hasBalance = ({ token, showZeroBalances }: { token: TokenUi; showZeroBalances: boolean }) =>
@@ -73,16 +70,17 @@ export const filterTokenGroups = ({
 			: hasBalance({ token: tokenOrGroup.token, showZeroBalances })
 	);
 
-const mapNewTokenGroup = (token: TokenUi): TokenUiGroup => ({
-	id: token.id,
+const mapNewTokenGroup = (token: TokenUiWithGroupData): TokenUiGroup => ({
+	id: token.groupData.id,
 	nativeToken: token,
+	groupData: token.groupData,
 	tokens: [token],
 	balance: token.balance,
 	usdBalance: token.usdBalance
 });
 
 interface GroupTokenParams {
-	token: TokenUi;
+	token: TokenUiWithGroupData;
 	tokenGroup: TokenUiGroup | undefined;
 }
 
@@ -107,27 +105,6 @@ export const updateTokenGroup = ({ token, tokenGroup }: UpdateTokenGroupParams):
 	balance: sumBalances([tokenGroup.balance, token.balance]),
 	usdBalance: sumUsdBalances([tokenGroup.usdBalance, token.usdBalance])
 });
-
-/**
- * Function to group a "main token" with an existing group or create a new group with the token as the "main token".
- *
- * If the token has no "main token", it is either a "main token" for an existing group,
- * or a "main token" for a group that still does not exist, or a single-element group (but still its "main token").
- *
- * @param {GroupTokenParams} params - The parameters for the function.
- * @param {TokenUi} params.token - The "main token" to group.
- * @param {TokenUiGroup} params.tokenGroup - The group where the "main token" should be added, if it exists.
- * @returns {TokenUiGroup} The updated group with the "main token", or a new group with the "main token".
- */
-export const groupMainToken = ({ token, tokenGroup }: GroupTokenParams): TokenUiGroup =>
-	nonNullish(tokenGroup)
-		? {
-				...updateTokenGroup({ token, tokenGroup }),
-				// It overrides any possible "main token" placeholder.
-				id: token.id,
-				nativeToken: token
-			}
-		: mapNewTokenGroup(token);
 
 /**
  * Function to group a "secondary token" with an existing group or create a new group with the token as a "secondary token".
@@ -161,38 +138,34 @@ export const groupSecondaryToken = ({ token, tokenGroup }: GroupTokenParams): To
  * NOTE: The function does not sort the groups by any criteria. It only groups the tokens. So, even if a group ends up having a total balance that would put it in a higher position in the list, it will not be moved.
  *
  * @param {TokenUi[]} tokens - The list of TokenUi objects to group. Each token may or may not have a prop key to identify a "main token".
- * @returns {TokenUiGroup[]} A list where tokens are grouped into a TokenUiGroup, even if they are by themselves.
+ * @returns {TokenUiOrGroupUi[]} A list where tokens are grouped into a TokenUiGroup, even if they are by themselves.
  */
-export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
+export const groupTokens = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	const tokenGroupsMap = tokens.reduce<{
-		[id: TokenId]: TokenUiGroup | undefined;
-	}>(
-		(acc, token) => ({
-			...acc,
-			...(isToken(token) &&
-			'twinToken' in token &&
-			nonNullish(token.twinToken) &&
-			isToken(token.twinToken) &&
-			// TODO: separate the check for decimals from the rest, since it seems important to the logic.
-			token.decimals === token.twinToken.decimals
-				? // If the token has a twinToken, and both have the same decimals, group them together.
-					{
-						[token.twinToken.id]: groupSecondaryToken({
-							token,
-							tokenGroup: acc[token.twinToken.id]
-						})
-					}
-				: {
-						[token.id]: groupMainToken({
-							token,
-							tokenGroup: acc[token.id]
-						})
-					})
-		}),
-		{}
-	);
+		[id: TokenId | TokenGroupId]: TokenUiOrGroupUi;
+	}>((acc, token) => {
+		const { id: tokenId, groupData } = token;
 
-	return Object.getOwnPropertySymbols(tokenGroupsMap).map(
-		(id) => tokenGroupsMap[id as TokenId] as TokenUiGroup
-	);
+		if (isNullish(groupData)) {
+			return { ...acc, [tokenId]: { token } };
+		}
+
+		const { id: groupId } = groupData;
+
+		const putativeExistingGroup = acc[groupId];
+
+		const group: TokenUiGroup = groupSecondaryToken({
+			// Even if we check for the existence of the groupData, the compiler warns that the type of the token is still `TokenUi`.
+			// We need to cast it to `TokenUiWithGroupData` to access the groupData property.
+			token: token as TokenUiWithGroupData,
+			tokenGroup:
+				nonNullish(putativeExistingGroup) && 'group' in putativeExistingGroup
+					? putativeExistingGroup.group
+					: undefined
+		});
+
+		return { ...acc, [groupId]: { group } };
+	}, {});
+
+	return Object.getOwnPropertySymbols(tokenGroupsMap).map((id) => tokenGroupsMap[id as TokenId]);
 };
