@@ -900,7 +900,18 @@ interface I18nReferral {
 }
 
 interface I18nAddress_book {
-	text: { title: string; empty_title: string; empty_text: string; add_new_contact: string };
+	text: {
+		title: string;
+		empty_title: string;
+		empty_text: string;
+		add_new_contact: string;
+		add_contact: string;
+	};
+}
+
+interface I18nContact {
+	form: { add_new_contact: string };
+	fields: { name: string };
 }
 
 interface I18nSigner {
@@ -997,6 +1008,7 @@ interface I18n {
 	vip: I18nVip;
 	referral: I18nReferral;
 	address_book: I18nAddress_book;
+	contact: I18nContact;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;

@@ -11,6 +11,7 @@ export const MAX_BUTTON = 'max-button';
 
 export const LOADER_MODAL = 'loader-modal';
 export const BUTTON_MODAL_CLOSE = 'close-modal';
+export const MODAL_TITLE = 'modal-title';
 
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
@@ -174,3 +175,10 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+
+export const ADDRESS_BOOK_MODAL = 'address-book-modal';
+export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
+export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
+export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
+export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
+export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
