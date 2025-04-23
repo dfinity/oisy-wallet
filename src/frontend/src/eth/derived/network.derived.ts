@@ -1,7 +1,9 @@
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import type { EthereumNetwork } from '$eth/types/network';
+import { selectedEvmNetwork } from '$evm/derived/network.derived';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { networkId } from '$lib/derived/network.derived';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const selectedEthereumNetwork: Readable<EthereumNetwork | undefined> = derived(
@@ -16,6 +18,7 @@ export const selectedEthereumNetworkWithFallback: Readable<EthereumNetwork> = de
 );
 
 export const explorerUrl: Readable<string> = derived(
-	[selectedEthereumNetworkWithFallback],
-	([{ explorerUrl }]) => explorerUrl
+	[selectedEvmNetwork, selectedEthereumNetworkWithFallback],
+	([$selectedEvmNetwork, { explorerUrl }]) =>
+		nonNullish($selectedEvmNetwork) ? $selectedEvmNetwork?.explorerUrl : explorerUrl
 );
