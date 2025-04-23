@@ -2,7 +2,6 @@
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
-	import SendInfo from '$eth/components/send/SendInfo.svelte';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -22,7 +21,6 @@
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
 	export let sourceNetwork: EthereumNetwork;
-	export let destinationEditable = true;
 	export let amount: OptionAmount = undefined;
 
 	const { feeStore: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
@@ -43,7 +41,7 @@
 <ContentWithToolbar>
 	<SendData
 		{amount}
-		destination={destinationEditable ? destination : null}
+		{destination}
 		token={$sendToken}
 		balance={$sendBalance}
 		source={$ethAddress ?? ''}
@@ -53,8 +51,6 @@
 
 		<SendReviewNetwork {targetNetwork} {sourceNetwork} token={$sendToken} slot="network" />
 	</SendData>
-
-	<SendInfo />
 
 	<ButtonGroup slot="toolbar">
 		<ButtonBack on:click={() => dispatch('icBack')} />

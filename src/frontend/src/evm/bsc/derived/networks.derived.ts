@@ -1,6 +1,6 @@
 import {
 	BSC_MAINNET_ENABLED,
-	BSC_NETWORK,
+	BSC_MAINNET_NETWORK,
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -16,7 +16,7 @@ export const enabledBscNetworks: Readable<EthereumNetwork[]> = derived(
 			$testnetsEnabled,
 			$userNetworks,
 			mainnetFlag: BSC_MAINNET_ENABLED,
-			mainnetNetworks: [BSC_NETWORK],
+			mainnetNetworks: [BSC_MAINNET_NETWORK],
 			testnetNetworks: [BSC_TESTNET_NETWORK]
 		})
 );

@@ -69,6 +69,7 @@ export const idlFactory = ({ IDL }) => {
 		Success: IDL.Null,
 		InvalidCode: IDL.Null
 	});
+	const ClaimedVipReward = IDL.Record({ campaign_id: IDL.Text });
 	const LastActivityHistogramRequest = IDL.Record({
 		bucket_count: IDL.Nat32,
 		bucket_duration: CandidDuration
@@ -229,6 +230,7 @@ export const idlFactory = ({ IDL }) => {
 		campaign_name: IDL.Opt(IDL.Text)
 	});
 	const UserData = IDL.Record({
+		superpowers: IDL.Opt(IDL.Vec(IDL.Text)),
 		airdrops: IDL.Vec(RewardInfo),
 		usage_awards: IDL.Opt(IDL.Vec(RewardInfo)),
 		last_snapshot_timestamp: IDL.Opt(IDL.Nat64),
@@ -249,7 +251,11 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		claim_usage_award: IDL.Func([UsageAwardEvent, IDL.Principal], [], []),
-		claim_vip_reward: IDL.Func([VipReward], [ClaimVipRewardResponse], []),
+		claim_vip_reward: IDL.Func(
+			[VipReward],
+			[ClaimVipRewardResponse, IDL.Opt(ClaimedVipReward)],
+			[]
+		),
 		config: IDL.Func([], [Config]),
 		configure_usage_awards: IDL.Func([UsageAwardConfig], [], []),
 		configure_vip: IDL.Func([VipConfig], [], []),
@@ -257,7 +263,7 @@ export const idlFactory = ({ IDL }) => {
 			[LastActivityHistogramRequest],
 			[LastActivityHistogramResponse]
 		),
-		new_vip_reward: IDL.Func([], [NewVipRewardResponse], []),
+		new_vip_reward: IDL.Func([IDL.Opt(ClaimedVipReward)], [NewVipRewardResponse], []),
 		public_rewards_info: IDL.Func([], [PublicRewardsInfo]),
 		referrer_info: IDL.Func([], [ReferrerInfo], []),
 		referrer_info_for: IDL.Func([IDL.Principal], [IDL.Opt(ReferrerInfo)]),

@@ -53,6 +53,7 @@
 			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes",
+			"binance_qr_code": "Binance Clubhouse QR",
 			"refer_a_friend": "Refer your friends",
 			"address_book": "Address book"
 		},
@@ -69,6 +70,7 @@
 			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link",
+			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
 			"address_book": "Open address book"
 		},
@@ -670,6 +672,7 @@
 				"manage_list": "Manage tokens",
 				"list_settings": "List settings",
 				"do_not_see_import": "Don’t see your token? Import",
+				"import_token": "Import token",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance."
@@ -952,6 +955,7 @@
 		"invitation": {
 			"text": {
 				"title": "Generate invitation link",
+				"binance_title": "Binance Clubhouse QR",
 				"invitation_link_copied": "Invitation link copied to clipboard.",
 				"generate_new_link": "Generate new link",
 				"generating_new_code": "Generating new code",

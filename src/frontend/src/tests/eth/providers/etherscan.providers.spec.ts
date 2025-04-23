@@ -22,12 +22,6 @@ import en from '$tests/mocks/i18n.mock';
 import { EtherscanProvider as EtherscanProviderLib } from 'ethers/providers';
 import type { MockedClass } from 'vitest';
 
-vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
-	provider.prototype.fetch = vi.fn().mockResolvedValue([]);
-	return { EtherscanProvider: provider };
-});
-
 vi.mock('$env/rest/etherscan.env', () => ({
 	ETHERSCAN_API_KEY: 'test-api-key'
 }));
@@ -258,7 +252,7 @@ describe('etherscan.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrowError(
+			expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
 				replacePlaceholders(en.init.error.no_etherscan_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})
