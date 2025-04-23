@@ -8,6 +8,8 @@ export class InvalidCodeError extends Error {}
 
 export class AlreadyClaimedError extends Error {}
 
+export class InvalidCampaignError extends Error {}
+
 export class LoadIdbAddressError extends Error {
 	constructor(private readonly _networkId: NetworkId) {
 		super();
