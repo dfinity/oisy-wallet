@@ -16,7 +16,7 @@ export const mapHeaderData = ({
 	name,
 	symbol,
 	decimals,
-	icon: nonNullish(tokens[0]?.groupData?.icon) ? tokens[0]?.groupData?.icon : icon, // TODO: this can be directly the prop of TokenUiGroup type
+	icon: nonNullish(tokens[0]?.groupData?.icon) ? tokens[0].groupData.icon : icon, // TODO: this can be directly the prop of TokenUiGroup type
 	network,
 	oisyName: { oisyName: tokens.map((token) => token.symbol).join(', ') },
 	oisySymbol: { oisySymbol: name },
