@@ -19,16 +19,16 @@ export const isTokenUiGroup = (
 	'tokens' in tokenUiOrGroupUi.group;
 
 /**
- * Function to create a list of TokenUiOrGroupUi by grouping tokens with matching twinTokenSymbol.
- * The group is placed in the position where the first token of the group was found.
- * Tokens with no twin remain as individual tokens in their original position.
+ * Function to create a list of `TokenUiOrGroupUi` by grouping tokens with matching `groupData`.
+ * A group is placed in the position where its first token was found.
+ * Tokens with no groups remain as individual tokens in their original position.
  *
- * @param tokens - The list of TokenUi objects to group. Each token may or may not have a twinTokenSymbol.
- *                 Tokens with a twinTokenSymbol are grouped together.
+ * @param tokens - The list of TokenUi objects to group. Each token may or may not have a `groupData` field.
+ *                 Tokens with `groupData` are grouped together.
  *
- * @returns A new list where tokens with twinTokenSymbols are grouped into a TokenUiGroup,
+ * @returns A new list where tokens with `groupData` are grouped into a `TokenUiGroup`,
  *          and tokens without twins remain in their original place.
- *          The group replaces the first token of the group in the list.
+ *          A group replaces its first token in the list.
  */
 export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	const tokenOrGroups = groupTokens(tokens);
@@ -129,22 +129,17 @@ export const groupSecondaryToken = ({ token, tokenGroup }: GroupTokenParams): To
 	nonNullish(tokenGroup) ? updateTokenGroup({ token, tokenGroup }) : mapNewTokenGroup(token);
 
 /**
- * Function to create a list of TokenUiGroup by grouping a provided list of tokens.
+ * Function to create a list of `TokenUiOrGroupUi` by grouping (or not grouping) a provided list of tokens.
  *
- * The function loops through the tokens list and groups them according to a prop key that links a token to its "main token".
- * For example, it could be `twinToken` as per ck token standard. But the logic can be extended to other props, if necessary.
- *
- * The tokens with no "main token" will still be included in a group, but it will be a single-element group, where the "main token" is the token itself.
- * That, in general, makes sense for tokens that are not "secondary tokens" of a "main token".
- *
+ * The function loops through the tokens list and groups them according to the `groupData` field,
+ * if it exists, in a variant of `TokenUiOrGroupUi` that is `{ group: TokenUiGroup }`.
+ * The tokens with no `groupData` will be included in the list, but as variant `{ token : TokenUi }`.
  * The returned list respects the sorting order of the initial tokens list, meaning that the group is created at each position of the first encountered token of the group.
- * So, independently of being a "main token" or a "secondary token", the group will replace the first token of the group in the list.
- * That is useful if a "secondary token" is before the "main token" in the list; for example, if the list is sorted by balance.
  *
  * NOTE: The function does not sort the groups by any criteria. It only groups the tokens. So, even if a group ends up having a total balance that would put it in a higher position in the list, it will not be moved.
  *
  * @param {TokenUi[]} tokens - The list of TokenUi objects to group. Each token may or may not have a prop key to identify a "main token".
- * @returns {TokenUiOrGroupUi[]} A list where tokens are grouped into a TokenUiGroup, even if they are by themselves.
+ * @returns {TokenUiOrGroupUi[]} A list where tokens are either grouped into a `TokenUiGroup`, or remain as individual tokens.
  */
 export const groupTokens = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	const tokenGroupsMap = tokens.reduce<{
