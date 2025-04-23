@@ -17,7 +17,8 @@ import {
 	getReferrerInfo,
 	getRewardRequirementsFulfilled,
 	getRewards,
-	getUserRewardsTokenAmounts, getUserRoles,
+	getUserRewardsTokenAmounts,
+	getUserRoles,
 	setReferrer
 } from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
