@@ -31,18 +31,24 @@ export const isTokenUiGroup = (
  *          The group replaces the first token of the group in the list.
  */
 export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
-	const tokenGroups = groupTokens(tokens);
+	const tokenOrGroups = groupTokens(tokens);
 
-	return tokenGroups.sort((aa, bb) => {
-		const a = isTokenUiGroup(aa) ? aa.group : aa.token;
-		const b = isTokenUiGroup(bb) ? bb.group : bb.token;
+	return tokenOrGroups
+		.map((tokenOrGroup) =>
+			'group' in tokenOrGroup && tokenOrGroup.group.tokens.length === 1
+				? { token: tokenOrGroup.group.tokens[0] }
+				: tokenOrGroup
+		)
+		.sort((aa, bb) => {
+			const a = isTokenUiGroup(aa) ? aa.group : aa.token;
+			const b = isTokenUiGroup(bb) ? bb.group : bb.token;
 
-		return (
-			(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-			+((b.balance ?? ZERO_BI) > (a.balance ?? ZERO_BI)) -
-				+((b.balance ?? ZERO_BI) < (a.balance ?? ZERO_BI))
-		);
-	});
+			return (
+				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
+				+((b.balance ?? ZERO_BI) > (a.balance ?? ZERO_BI)) -
+					+((b.balance ?? ZERO_BI) < (a.balance ?? ZERO_BI))
+			);
+		});
 };
 
 const hasBalance = ({ token, showZeroBalances }: { token: TokenUi; showZeroBalances: boolean }) =>
