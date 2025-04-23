@@ -185,7 +185,30 @@ const loadCustomIcrcTokensData = async ({
 				};
 	};
 
-	return (await Promise.all(tokens.map(requestIcrcCustomTokenMetadata))).filter(nonNullish);
+	const results = await Promise.allSettled(tokens.map(requestIcrcCustomTokenMetadata));
+
+	return results.reduce<IcrcCustomTokenWithoutId[]>((acc, result, index) => {
+		if (result.status !== 'fulfilled') {
+			// For development purposes, we want to see the error in the console.
+			console.error(result.reason);
+
+			const { token } = tokens[index];
+
+			if ('Icrc' in token) {
+				const {
+					Icrc: { ledger_id }
+				} = token;
+
+				icrcCustomTokensStore.reset(ledger_id.toString());
+			}
+
+			return acc;
+		}
+
+		const { value } = result;
+
+		return [...acc, ...(nonNullish(value) ? [value] : [])];
+	}, []);
 };
 
 const loadIcrcCustomData = ({
