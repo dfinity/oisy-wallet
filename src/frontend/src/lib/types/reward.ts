@@ -1,5 +1,6 @@
 import type { ClaimedVipReward, ClaimVipRewardResponse } from '$declarations/rewards/rewards.did';
 import type { Principal } from '@dfinity/principal';
+import type {QrCodeType} from "$lib/enums/qr-code-types";
 
 export interface RewardsResponse {
 	rewards: RewardResponseInfo[];
@@ -34,4 +35,9 @@ export interface RewardClaimResponse<T = unknown> {
 export interface UserRoleResult {
 	is_vip: boolean;
 	is_gold: boolean;
+}
+
+export interface VipRewardStateData {
+	success: boolean;
+	codeType: QrCodeType;
 }
