@@ -130,7 +130,7 @@ export const WALLET_PAGINATION = 10n;
 // TODO: Use the normal one when we have a better way to handle the Solana wallets, for example when we have the internal Solana RPC canister, or when we don't load again the transactions that are already loaded.
 export const SOL_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1000; // 1 minute in milliseconds
 
-// VIP
+// Code generation
 export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
 
 // User Snapshot
