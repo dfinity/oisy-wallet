@@ -34,6 +34,7 @@ describe('ModalTokensList', () => {
 
 		mockTokens.forEach(async (token) => {
 			const el = await findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}${token.symbol}`);
+
 			expect(el).toBeInTheDocument();
 		});
 	});
@@ -59,6 +60,7 @@ describe('ModalTokensList', () => {
 
 		waitFor(async () => {
 			const el = await findByTestId(MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS);
+
 			expect(el).toBeInTheDocument();
 		});
 	});
@@ -73,6 +75,7 @@ describe('ModalTokensList', () => {
 
 		waitFor(async () => {
 			const el = await findByTestId(MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS);
+
 			expect(el).toBeInTheDocument();
 		});
 	});
@@ -107,6 +110,7 @@ describe('ModalTokensList', () => {
 
 		waitFor(async () => {
 			const el = await findByTestId(MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS);
+
 			expect(el).toBeInTheDocument();
 		});
 	});
@@ -146,7 +150,9 @@ describe('ModalTokensList', () => {
 		});
 
 		const networkButton = document.querySelector('button.dropdown-button');
+
 		expect(networkButton).toBeInTheDocument();
+
 		if (networkButton) {
 			await fireEvent.click(networkButton);
 

@@ -70,6 +70,7 @@ describe('VipQrCodeModal', () => {
 
 		await waitFor(() => {
 			const vipCodeIcon: Element | null = container.querySelector(vipCodeIconSelector);
+
 			expect(vipCodeIcon).toBeInTheDocument();
 		});
 	});
@@ -86,6 +87,7 @@ describe('VipQrCodeModal', () => {
 			const vipCodeBinanceIcon: Element | null = container.querySelector(
 				vipCodeBinanceIconSelector
 			);
+
 			expect(vipCodeBinanceIcon).toBeInTheDocument();
 		});
 	});
