@@ -432,7 +432,7 @@ describe('transactions.utils', () => {
 						getMockExchanges({ token: ICP_TOKEN, usd: 20000000000000000000000 }) ?? mockExchanges
 				});
 
-				expect(filteredTransactions.length).toBe(7);
+				expect(filteredTransactions).toHaveLength(7);
 
 				filteredTransactions = filterReceivedMicroTransactions({
 					transactions,
@@ -441,7 +441,7 @@ describe('transactions.utils', () => {
 						mockExchanges
 				});
 
-				expect(filteredTransactions.length).toBe(10);
+				expect(filteredTransactions).toHaveLength(10);
 			});
 
 			it('should filter only received micro transactions', () => {
@@ -464,7 +464,7 @@ describe('transactions.utils', () => {
 						mockExchanges
 				});
 
-				expect(filteredTransactions.length).toBe(10);
+				expect(filteredTransactions).toHaveLength(10);
 			});
 		});
 
@@ -484,7 +484,7 @@ describe('transactions.utils', () => {
 						getMockExchanges({ token: ICP_TOKEN, usd: 20000000000000000000000 }) ?? mockExchanges
 				});
 
-				expect(microTransactions.length).toBe(8);
+				expect(microTransactions).toHaveLength(8);
 
 				microTransactions = getReceivedMicroTransactions({
 					transactions,
@@ -493,7 +493,7 @@ describe('transactions.utils', () => {
 						mockExchanges
 				});
 
-				expect(microTransactions.length).toBe(5);
+				expect(microTransactions).toHaveLength(5);
 			});
 
 			it('should get only received micro transactions', () => {
@@ -516,7 +516,7 @@ describe('transactions.utils', () => {
 						mockExchanges
 				});
 
-				expect(microTransactions.length).toBe(5);
+				expect(microTransactions).toHaveLength(5);
 			});
 		});
 	});
