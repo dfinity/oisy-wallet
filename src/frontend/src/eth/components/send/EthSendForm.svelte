@@ -4,7 +4,6 @@
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
-	import SendInfo from '$eth/components/send/SendInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
@@ -40,8 +39,6 @@
 	/>
 
 	<FeeDisplay slot="fee" />
-
-	<SendInfo slot="info" />
 
 	<slot name="cancel" slot="cancel" />
 </SendForm>
