@@ -98,7 +98,7 @@
 			: selectTokenType === 'destination'
 				? $i18n.swap.text.select_destination_token
 				: showSelectProviderModal
-					? 'Select'
+					? 'Select swap provider'
 					: (currentStep?.title ?? '');
 
 	const close = () =>

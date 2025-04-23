@@ -17,6 +17,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { safeParse } from '$lib/validation/utils.validation';
 	import { UrlSchema } from '@dfinity/zod-schemas';
+	import Badge from '../ui/Badge.svelte';
 
 	export let amount: bigint;
 	export let token: any;
@@ -25,8 +26,7 @@
 	export let dapp: any;
 	export let isBest: any;
 
-
-    let websiteURL: any;
+	let websiteURL: any;
 	let displayURL: any;
 	$: if (nonNullish(dapp)) {
 		try {
@@ -46,14 +46,13 @@
 		}
 	}
 
-    console.log(amount, token, logoSize, usdBalance, dapp, isBest);
-    
+	console.log(amount, token, logoSize, usdBalance, dapp, isBest);
 </script>
 
 <LogoButton on:click dividers={true}>
 	<svelte:fragment slot="title">
 		{dapp.name}
-		{isBest && isBest}
+		<Badge variant="success">Best rate</Badge>
 	</svelte:fragment>
 
 	<svelte:fragment slot="subtitle">
