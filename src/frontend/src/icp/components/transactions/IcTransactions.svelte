@@ -74,7 +74,7 @@
 	<svelte:component this={additionalListener}>
 		{#if $icTransactions.length > 0}
 			<IcTransactionsScroll token={$token ?? ICP_TOKEN}>
-				{#each $icTransactions(undefined) as transaction, index (`${transaction.data.id}-${index}`)}
+				{#each $icTransactions() as transaction, index (`${transaction.data.id}-${index}`)}
 					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
 						<IcTransaction transaction={transaction.data} token={$token ?? ICP_TOKEN} />
 					</li>
@@ -86,7 +86,7 @@
 			<IcNoIndexPlaceholder
 				placeholderType={hasIndexCanister($tokenAsIcToken) ? 'not-working' : 'missing'}
 			/>
-		{:else if $icTransactions(undefined).length === 0}
+		{:else if $icTransactions().length === 0}
 			<TransactionsPlaceholder />
 		{/if}
 	</svelte:component>
