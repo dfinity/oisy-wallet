@@ -263,9 +263,9 @@ describe('nav.utils', () => {
 			it('should return false when route id does not match Transactions path', () => {
 				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
-				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy(
-					
-				);
+				expect(
+					isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))
+				).toBeFalsy();
 
 				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
@@ -282,9 +282,9 @@ describe('nav.utils', () => {
 			it('should return false when route id does not match Settings path', () => {
 				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
-				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBeFalsy(
-					
-				);
+				expect(
+					isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))
+				).toBeFalsy();
 
 				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
@@ -303,9 +303,9 @@ describe('nav.utils', () => {
 			it('should return false when route id does not match Explore path', () => {
 				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
-				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy(
-					
-				);
+				expect(
+					isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))
+				).toBeFalsy();
 
 				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
@@ -338,7 +338,9 @@ describe('nav.utils', () => {
 			});
 
 			it('should return true when route id matches Wallet Connect path', () => {
-				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`))).toBeTruthy();
+				expect(
+					isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`))
+				).toBeTruthy();
 			});
 
 			it('should return false when route id does not match ROUTE_ID_GROUP_APP exactly', () => {
