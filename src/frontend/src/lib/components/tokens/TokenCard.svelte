@@ -13,11 +13,13 @@
 		data,
 		testIdPrefix = TOKEN_CARD,
 		asNetwork = false,
+		asGroup = false,
 		hover = false
 	}: {
 		data: CardData;
 		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
 		asNetwork?: boolean;
+		asGroup?: boolean;
 		hover?: boolean;
 	} = $props();
 </script>
@@ -43,7 +45,7 @@
 		</span>
 
 		<span class:text-sm={asNetwork} slot="title">
-			{data.symbol}
+			{asGroup && nonNullish(data?.groupData?.symbol) ? data.groupData.symbol : data.symbol}
 			{#if asNetwork}
 				<span class="font-normal">
 					{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
@@ -53,7 +55,9 @@
 
 		<span class:text-sm={asNetwork} slot="subtitle">
 			{#if !asNetwork}
-				&nbsp;&middot;&nbsp;{data.name}
+				&nbsp;&middot;&nbsp;{asGroup && nonNullish(data?.groupData?.name)
+					? data.groupData.name
+					: data.name}
 			{/if}
 		</span>
 
