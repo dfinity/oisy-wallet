@@ -20,7 +20,7 @@
 	export let codeType: QrCodeType = QrCodeType.VIP;
 
 	const goldTokenSymbol = 'GLDT';
-	let token: IcTokenToggleable;
+	let token: IcTokenToggleable | undefined;
 	$: token = $allIcrcTokens.find((token) => token.symbol === goldTokenSymbol);
 </script>
 

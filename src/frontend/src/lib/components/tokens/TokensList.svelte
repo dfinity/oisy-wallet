@@ -87,7 +87,7 @@
 		{#if $modalManageTokens}
 			<ManageTokensModal initialSearch={$modalManageTokensData?.initialSearch}>
 				{#snippet infoElement()}
-					{#if nonNullish($modalManageTokensData.message)}
+					{#if nonNullish($modalManageTokensData) && nonNullish($modalManageTokensData.message)}
 						<MessageBox level="info">
 							{$modalManageTokensData.message}
 						</MessageBox>
