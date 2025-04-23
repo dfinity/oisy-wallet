@@ -146,7 +146,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openSolToken: setType('sol-token'),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
-		openVipQrCode: <(data: QrCodeType) => void>setType('vip-qr-code'),
+		openVipQrCode: <(data: QrCodeType) => void>setTypeWithData('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
 		openAddressBook: setType('address-book'),
 		openReferralState: setType('referral-state'),
