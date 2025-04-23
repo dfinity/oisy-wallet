@@ -38,6 +38,6 @@ export interface UserRoleResult {
 }
 
 export interface VipRewardStateData {
-    success: boolean;
-    codeType: QrCodeType;
+	success: boolean;
+	codeType: QrCodeType;
 }

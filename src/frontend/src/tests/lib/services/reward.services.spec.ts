@@ -1,5 +1,4 @@
 import type {
-	ClaimVipRewardResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	RewardInfo,
@@ -19,7 +18,6 @@ import {
 	getRewardRequirementsFulfilled,
 	getRewards,
 	getUserRewardsTokenAmounts,
-	getUserRoles,
 	setReferrer
 } from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
