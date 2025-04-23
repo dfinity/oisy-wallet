@@ -19,7 +19,6 @@ export interface AddLiquidityAmountsReply {
 export interface AddLiquidityArgs {
 	token_0: string;
 	token_1: string;
-	amount_0: bigint;
 	amount_1: bigint;
 	tx_id_0: [] | [TxId];
 	tx_id_1: [] | [TxId];
