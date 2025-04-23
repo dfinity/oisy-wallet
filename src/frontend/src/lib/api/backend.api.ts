@@ -1,5 +1,6 @@
 import type {
 	AllowSigningResponse,
+	CreateChallengeResponse,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -17,7 +18,6 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
-	CreateChallengeResult,
 	GetUserProfileResponse,
 	SaveUserNetworksSettings,
 	SetUserShowTestnetsParams
@@ -143,9 +143,9 @@ export const selectUserUtxosFee = async ({
 
 export const createPowChallenge = async ({
 	identity
-}: CanisterApiFunctionParams): Promise<CreateChallengeResult> => {
-	const { createPowChallengeResult } = await backendCanister({ identity });
-	return createPowChallengeResult();
+}: CanisterApiFunctionParams): Promise<CreateChallengeResponse> => {
+	const { createPowChallenge } = await backendCanister({ identity });
+	return createPowChallenge();
 };
 
 export const allowSigning = async ({

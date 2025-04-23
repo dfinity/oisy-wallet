@@ -4,12 +4,6 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
-// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
-vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
-	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
-});
-
 describe('InfoEthereum', () => {
 	const props = {
 		sourceToken: mockValidIcToken,
@@ -27,7 +21,7 @@ describe('InfoEthereum', () => {
 					$ckToken: mockValidIcCkToken.symbol
 				})
 			)
-		);
+		).toBeDefined();
 	});
 
 	it('should render description correctly', () => {
@@ -43,7 +37,7 @@ describe('InfoEthereum', () => {
 					$network: mockValidIcToken.network.name
 				})
 			)
-		);
+		).toBeDefined();
 	});
 
 	it('should render note correctly', () => {
@@ -58,7 +52,7 @@ describe('InfoEthereum', () => {
 					$ckToken: mockValidIcCkToken.symbol
 				})
 			)
-		);
+		).toBeDefined();
 	});
 
 	it('should render how-to message correctly', () => {
@@ -72,6 +66,6 @@ describe('InfoEthereum', () => {
 					$ckToken: mockValidIcCkToken.symbol
 				})
 			)
-		);
+		).toBeDefined();
 	});
 });
