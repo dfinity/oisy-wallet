@@ -19,7 +19,7 @@
 				removeSearchParam({ url: $page.url, searchParam: 'code' });
 				modalStore.openVipRewardState({
 					success: result.success,
-					codeType: result.campaignId === 'gold' ? QrCodeType.GOLD : QrCodeType.VIP
+					codeType: result.campaignId ?? QrCodeType.VIP
 				});
 			}
 		}
