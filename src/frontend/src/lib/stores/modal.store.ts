@@ -1,4 +1,5 @@
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
+import type { VipRewardStateData } from '$lib/types/reward';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -90,7 +91,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAddressBook: () => void;
 	openReferralState: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
-	openVipRewardState: <D extends T>(data: D) => void;
+	openVipRewardState: (data: VipRewardStateData) => void;
 	openRewardDetails: <D extends T>(data: D) => void;
 	openRewardState: <D extends T>(data: D) => void;
 	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
@@ -149,7 +150,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAddressBook: setType('address-book'),
 		openReferralState: setType('referral-state'),
 		openDappDetails: setTypeWithData('dapp-details'),
-		openVipRewardState: setTypeWithData('vip-reward-state'),
+		openVipRewardState: <(data: VipRewardStateData) => void>setTypeWithData('vip-reward-state'),
 		openRewardDetails: setTypeWithData('reward-details'),
 		openRewardState: setTypeWithData('reward-state'),
 		// todo: explicitly define type here as well
