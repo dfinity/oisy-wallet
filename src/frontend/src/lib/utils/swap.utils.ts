@@ -140,8 +140,6 @@ export const swapProviders: SwapProvider<any>[] = [
 	}
 ];
 
-//queryAndUpdate
-
 export const fetchSwapOptions = async ({
 	identity,
 	sourceToken,

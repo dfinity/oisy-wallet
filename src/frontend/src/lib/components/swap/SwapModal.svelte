@@ -2,6 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import SwapSelectedProviderModal from './SwapSelectedProviderModal.svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import type SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
@@ -25,6 +26,7 @@
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
 
+	// Contexts
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
 		SWAP_CONTEXT_KEY,
 		initSwapContext({
@@ -54,6 +56,9 @@
 	let swapProgressStep = ProgressStepsSwap.INITIALIZATION;
 	let currentStep: WizardStep | undefined;
 	let selectTokenType: SwapSelectTokenType | undefined;
+	let showSelectProviderModal = false;
+
+	const dispatch = createEventDispatcher();
 
 	const showTokensList = ({ detail: type }: CustomEvent<SwapSelectTokenType>) => {
 		swapAmountsStore.reset();
@@ -73,20 +78,34 @@
 		closeTokenList();
 	};
 
+	const openSelectProviderModal = () => {
+		showSelectProviderModal = true;
+	};
+
+	const closeSelectProviderModal = () => {
+		showSelectProviderModal = false;
+	};
+
+	const selectProvider = ({ detail }: CustomEvent<string>) => {
+		swapAmountsStore.setSelectedProvider(detail);
+		closeSelectProviderModal();
+	};
+
 	let title = '';
 	$: title =
 		selectTokenType === 'source'
 			? $i18n.swap.text.select_source_token
 			: selectTokenType === 'destination'
 				? $i18n.swap.text.select_destination_token
-				: (currentStep?.title ?? '');
-
-	const dispatch = createEventDispatcher();
+				: showSelectProviderModal
+					? 'Select'
+					: (currentStep?.title ?? '');
 
 	const close = () =>
 		closeModal(() => {
 			currentStep = undefined;
 			selectTokenType = undefined;
+			showSelectProviderModal = false;
 			dispatch('nnsClose');
 		});
 </script>
@@ -103,6 +122,11 @@
 
 	{#if nonNullish(selectTokenType)}
 		<SwapTokensList on:icSelectToken={selectToken} on:icCloseTokensList={closeTokenList} />
+	{:else if showSelectProviderModal}
+		<SwapSelectedProviderModal
+			on:icSelectProvider={selectProvider}
+			on:icCloseProviderList={closeSelectProviderModal}
+		/>
 	{:else}
 		<SwapWizard
 			{currentStep}
@@ -114,6 +138,7 @@
 			on:icNext={modal.next}
 			on:icClose={close}
 			on:icShowTokensList={showTokensList}
+			on:icShowProviderList={openSelectProviderModal}
 		/>
 	{/if}
 </WizardModal>

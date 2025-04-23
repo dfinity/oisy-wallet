@@ -18,15 +18,17 @@ export interface SwapProviderResult {
 export interface SwapAmountsStoreData {
 	swaps: SwapProviderResult[];
 	amountForSwap?: OptionAmount;
+	selectedProvider?: string;
 }
 
 export interface SwapAmountsStore extends Readable<Option<SwapAmountsStoreData>> {
 	setSwaps: (params: { swaps: SwapProviderResult[]; amount: OptionAmount }) => void;
 	reset: () => void;
+	setSelectedProvider: (provider: string) => void;
 }
 
 export const initSwapAmountsStore = (): SwapAmountsStore => {
-	const { subscribe, set } = writable<Option<SwapAmountsStoreData>>(undefined);
+	const { subscribe, set, update } = writable<Option<SwapAmountsStoreData>>(undefined);
 
 	return {
 		subscribe,
@@ -39,6 +41,15 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 			set({
 				swaps,
 				amountForSwap: amount
+			});
+		},
+
+		setSelectedProvider(provider: string) {
+			update((data) => {
+				if (!data) {
+					return data;
+				}
+				return { ...data, selectedProvider: provider };
 			});
 		}
 	};

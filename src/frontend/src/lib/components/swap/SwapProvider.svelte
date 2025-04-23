@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
+	import Button from '../ui/Button.svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import SwapLiquidityFees from '$lib/components/swap/SwapLiquidityFees.svelte';
 	import SwapNetworkFee from '$lib/components/swap/SwapNetworkFee.svelte';
@@ -8,6 +9,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { bestSwap } from '$lib/derived/swap.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -20,7 +22,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 	import { safeParse } from '$lib/validation/utils.validation';
-	import { bestSwap } from '$lib/derived/swap.derived';
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -59,12 +60,18 @@
 			displayURL = null;
 		}
 	}
+
+	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish(dApp)}
 	<ModalExpandableValues>
 		<ModalValue slot="list-header">
-			<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
+			<svelte:fragment slot="label"
+				>{$i18n.swap.text.swap_provider}
+
+				<Button link on:click={() => dispatch('icShowProviderList')}>Select ></Button>
+			</svelte:fragment>
 
 			<svelte:fragment slot="main-value">
 				<div class="flex gap-2">

@@ -11,7 +11,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { fetchSwapOptions } from '$lib/utils/swap.utils';
-	import { log } from 'console';
 
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: Token | undefined;
@@ -32,7 +31,7 @@
 
 		const parsedAmount = Number(amount);
 
-		if (nonNullish($store) && $store.amountForSwap === parsedAmount) return;
+		if (nonNullish($store) && $store.amountForSwap === parsedAmount) {return;}
 
 		try {
 			const swaps = await fetchSwapOptions({
