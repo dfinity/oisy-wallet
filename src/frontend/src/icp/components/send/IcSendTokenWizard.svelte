@@ -25,7 +25,6 @@
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
-	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
@@ -50,7 +49,6 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 
 	/**
 	 * Props
@@ -207,14 +205,6 @@
 					{/if}
 				</svelte:fragment>
 			</IcSendForm>
-		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-			<SendQRCodeScan
-				expectedToken={$sendToken}
-				bind:destination
-				bind:amount
-				{decodeQrCode}
-				on:icQRCodeBack
-			/>
 		{:else}
 			<slot />
 		{/if}
