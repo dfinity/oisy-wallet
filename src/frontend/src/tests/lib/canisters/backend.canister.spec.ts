@@ -426,7 +426,7 @@ describe('backend.canister', () => {
 			expect(service.btc_add_pending_transaction).toHaveBeenCalledWith(
 				btcAddPendingTransactionEndpointParams
 			);
-			expect(res).toEqual(true);
+			expect(res).toBeTruthy();
 		});
 
 		it('should throw an error if btc_add_pending_transaction returns an internal error', async () => {
@@ -730,7 +730,7 @@ describe('backend.canister', () => {
 				Err: { ChallengeInProgress: null }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
 				'Challenge is already in progress.'
 			);
 
@@ -742,7 +742,7 @@ describe('backend.canister', () => {
 				Err: { RandomnessError: 'Failed to generate randomness' }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
 				'Failed to generate randomness'
 			);
 
@@ -754,7 +754,7 @@ describe('backend.canister', () => {
 				Err: { MissingUserProfile: null }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
 				'User profile is missing.'
 			);
 
@@ -766,7 +766,7 @@ describe('backend.canister', () => {
 				Err: { Other: 'Unexpected error occurred.' }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
 				'Unexpected error occurred.'
 			);
 

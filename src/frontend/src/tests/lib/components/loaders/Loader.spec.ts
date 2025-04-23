@@ -129,7 +129,7 @@ describe('Loader', () => {
 		await waitFor(() => {
 			expect(queryByTestId(LOADER_MODAL)).toBeNull();
 
-			expect(get(loading)).toBe(false);
+			expect(get(loading)).toBeFalsy();
 		});
 	});
 

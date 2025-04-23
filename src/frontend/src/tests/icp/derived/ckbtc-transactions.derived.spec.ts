@@ -27,7 +27,7 @@ describe('ckBtcPendingUtxoTransactions', () => {
 		it('derived pending UTXOs is always not certified', () => {
 			const result = get(ckBtcPendingUtxoTransactions);
 
-			expect(result[0].certified).toBe(false);
+			expect(result[0].certified).toBeFalsy();
 		});
 	});
 });

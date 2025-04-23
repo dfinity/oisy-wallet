@@ -63,7 +63,7 @@ describe('reward-code', () => {
 					certified: false,
 					nullishIdentityErrorMessage
 				});
-				expect(isVip).toEqual(true);
+				expect(isVip).toBeTruthy();
 			});
 
 			it('should return false if user is not vip', async () => {
@@ -77,7 +77,7 @@ describe('reward-code', () => {
 					certified: false,
 					nullishIdentityErrorMessage
 				});
-				expect(isVip).toEqual(false);
+				expect(isVip).toBeFalsy();
 			});
 		});
 
@@ -94,7 +94,7 @@ describe('reward-code', () => {
 					certified: false,
 					nullishIdentityErrorMessage
 				});
-				expect(isGold).toEqual(true);
+				expect(isGold).toBeTruthy();
 			});
 
 			it('should return false if user is not gold user', async () => {
@@ -108,7 +108,7 @@ describe('reward-code', () => {
 					certified: false,
 					nullishIdentityErrorMessage
 				});
-				expect(isGold).toEqual(false);
+				expect(isGold).toBeFalsy();
 			});
 		});
 	});

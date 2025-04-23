@@ -15,20 +15,20 @@ import { isTokenSpl } from '$sol/utils/spl.utils';
 describe('spl.utils', () => {
 	describe('isTokenSpl', () => {
 		it.each(SPL_TOKENS)('should return true for SPL token $id', (token) => {
-			expect(isTokenSpl(token)).toBe(true);
+			expect(isTokenSpl(token)).toBeTruthy();
 		});
 
 		it.each([SOLANA_TOKEN, SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN])(
 			'should return false for SOLANA token $id',
 			(token) => {
-				expect(isTokenSpl(token)).toBe(false);
+				expect(isTokenSpl(token)).toBeFalsy();
 			}
 		);
 
 		it.each([ETHEREUM_TOKEN, SEPOLIA_TOKEN, ICP_TOKEN, BTC_MAINNET_TOKEN, USDC_TOKEN, PEPE_TOKEN])(
 			'should return false for non-SPL token $id',
 			(token) => {
-				expect(isTokenSpl(token)).toBe(false);
+				expect(isTokenSpl(token)).toBeFalsy();
 			}
 		);
 	});

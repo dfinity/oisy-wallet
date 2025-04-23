@@ -50,7 +50,7 @@ describe('UtxosFeeContext', () => {
 
 		await waitFor(() => {
 			expect(selectUtxosFeeSpy).toHaveBeenCalledOnce();
-			expect(selectUtxosFeeSpy).toBeCalledWith({
+			expect(selectUtxosFeeSpy).toHaveBeenCalledWith({
 				amount,
 				network: 'mainnet',
 				identity: mockIdentity

@@ -61,7 +61,7 @@ describe('swap utils', () => {
 		it('should return an empty list', () => {
 			const route = getSwapRoute([]);
 
-			expect(route.length).toBe(0);
+			expect(route).toHaveLength(0);
 		});
 	});
 
@@ -69,7 +69,7 @@ describe('swap utils', () => {
 		it('should return a list of liquidity fees', () => {
 			const liquidityFees = getLiquidityFees({ transactions, tokens: mockTokens });
 
-			expect(liquidityFees.length).toBe(2);
+			expect(liquidityFees).toHaveLength(2);
 
 			expect(liquidityFees[0].fee).toBe(ICP_LP_FEE);
 			expect(liquidityFees[0].token).toBe(ICP_TOKEN);
@@ -81,13 +81,13 @@ describe('swap utils', () => {
 		it('should return an empty list if no transactions are provided', () => {
 			const liquidityFees = getLiquidityFees({ transactions: [], tokens: mockTokens });
 
-			expect(liquidityFees.length).toBe(0);
+			expect(liquidityFees).toHaveLength(0);
 		});
 
 		it('should return a subset if token cannot be found', () => {
 			const liquidityFees = getLiquidityFees({ transactions, tokens: [ICP_TOKEN] });
 
-			expect(liquidityFees.length).toBe(1);
+			expect(liquidityFees).toHaveLength(1);
 
 			expect(liquidityFees[0].fee).toBe(ICP_LP_FEE);
 			expect(liquidityFees[0].token).toBe(ICP_TOKEN);

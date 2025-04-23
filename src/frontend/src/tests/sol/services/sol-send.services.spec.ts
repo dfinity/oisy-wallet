@@ -306,7 +306,7 @@ describe('sol-send.services', () => {
 					...mockParams,
 					token: SOLANA_TOKEN
 				})
-			).rejects.toThrowError(
+			).rejects.toThrow(
 				replacePlaceholders(en.init.error.no_solana_network, {
 					$network: SOLANA_TOKEN.network.id.description ?? ''
 				})
@@ -321,7 +321,7 @@ describe('sol-send.services', () => {
 				}))
 			} as unknown as Rpc<SolanaRpcApi>);
 
-			await expect(sendSol({ ...mockParams, token: DEVNET_USDC_TOKEN })).rejects.toThrowError(
+			await expect(sendSol({ ...mockParams, token: DEVNET_USDC_TOKEN })).rejects.toThrow(
 				`Destination ATA address is different from the calculated one. Destination: different-address, Calculated: ${mockAtaAddress2}`
 			);
 		});

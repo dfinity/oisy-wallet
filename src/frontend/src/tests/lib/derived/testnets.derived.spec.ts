@@ -15,13 +15,13 @@ describe('testnets.derived', () => {
 		it('should return false when user profile is not set', () => {
 			userProfileStore.reset();
 
-			expect(get(testnetsEnabled)).toBe(false);
+			expect(get(testnetsEnabled)).toBeFalsy();
 		});
 
 		it('should return false when settings are not set', () => {
 			userProfileStore.set({ certified, profile: { ...mockUserProfile, settings: [] } });
 
-			expect(get(testnetsEnabled)).toBe(false);
+			expect(get(testnetsEnabled)).toBeFalsy();
 		});
 
 		it('should return the value of show testnets settings', () => {
@@ -36,7 +36,7 @@ describe('testnets.derived', () => {
 				}
 			});
 
-			expect(get(testnetsEnabled)).toBe(true);
+			expect(get(testnetsEnabled)).toBeTruthy();
 
 			userProfileStore.set({
 				certified,
@@ -49,7 +49,7 @@ describe('testnets.derived', () => {
 				}
 			});
 
-			expect(get(testnetsEnabled)).toBe(false);
+			expect(get(testnetsEnabled)).toBeFalsy();
 		});
 	});
 });

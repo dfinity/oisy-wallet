@@ -163,7 +163,7 @@ describe('all-tokens.derived', () => {
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);
 
-			expect(tokenSymbols.filter((symbol) => symbol === mockIcrcToken.id.description).length).toBe(
+			expect(tokenSymbols.filter((symbol) => symbol === mockIcrcToken.id.description)).toHaveLength(
 				1
 			);
 		});

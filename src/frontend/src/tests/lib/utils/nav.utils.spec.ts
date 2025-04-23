@@ -256,39 +256,39 @@ describe('nav.utils', () => {
 			it('should return true when route id matches Transactions path', () => {
 				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`;
 
-				expect(isRouteTransactions(mockPage(mockPath))).toBe(true);
-				expect(isRouteTransactions(mockPage(mockPath.slice(0, -1)))).toBe(true);
+				expect(isRouteTransactions(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteTransactions(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
 			});
 
 			it('should return false when route id does not match Transactions path', () => {
-				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
-				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(
-					false
-				);
+				expect(
+					isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))
+				).toBeFalsy();
 
-				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
-				expect(isRouteTransactions(mockPage(`/anotherGroup/${AppPath.Transactions}`))).toBe(false);
+				expect(isRouteTransactions(mockPage(`/anotherGroup/${AppPath.Transactions}`))).toBeFalsy();
 			});
 		});
 
 		describe('isRouteSettings', () => {
 			const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Settings}`;
 
-			expect(isRouteSettings(mockPage(mockPath))).toBe(true);
-			expect(isRouteSettings(mockPage(mockPath.slice(0, -1)))).toBe(true);
+			expect(isRouteSettings(mockPage(mockPath))).toBeTruthy();
+			expect(isRouteSettings(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
 
 			it('should return false when route id does not match Settings path', () => {
-				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
-				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(
-					false
-				);
+				expect(
+					isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))
+				).toBeFalsy();
 
-				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
-				expect(isRouteSettings(mockPage(`/anotherGroup/${AppPath.Settings}`))).toBe(false);
+				expect(isRouteSettings(mockPage(`/anotherGroup/${AppPath.Settings}`))).toBeFalsy();
 			});
 		});
 
@@ -296,20 +296,20 @@ describe('nav.utils', () => {
 			it('should return true when route id matches Explore path', () => {
 				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
 
-				expect(isRouteDappExplorer(mockPage(mockPath))).toBe(true);
-				expect(isRouteDappExplorer(mockPage(mockPath.slice(0, -1)))).toBe(true);
+				expect(isRouteDappExplorer(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteDappExplorer(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
 			});
 
 			it('should return false when route id does not match Explore path', () => {
-				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
-				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(
-					false
-				);
+				expect(
+					isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))
+				).toBeFalsy();
 
-				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
-				expect(isRouteDappExplorer(mockPage(`/anotherGroup/${AppPath.Explore}`))).toBe(false);
+				expect(isRouteDappExplorer(mockPage(`/anotherGroup/${AppPath.Explore}`))).toBeFalsy();
 			});
 		});
 
@@ -317,38 +317,40 @@ describe('nav.utils', () => {
 			it('should return true when route id matches Activity path', () => {
 				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Activity}`;
 
-				expect(isRouteActivity(mockPage(mockPath))).toBe(true);
-				expect(isRouteActivity(mockPage(mockPath.slice(0, -1)))).toBe(true);
+				expect(isRouteActivity(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteActivity(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
 			});
 
 			it('should return false when route id does not match Activity path', () => {
-				expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+				expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
-				expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+				expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
 
-				expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+				expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
-				expect(isRouteActivity(mockPage(`/anotherGroup/${AppPath.Activity}`))).toBe(false);
+				expect(isRouteActivity(mockPage(`/anotherGroup/${AppPath.Activity}`))).toBeFalsy();
 			});
 		});
 
 		describe('isRouteTokens', () => {
 			it('should return true when route id matches ROUTE_ID_GROUP_APP exactly', () => {
-				expect(isRouteTokens(mockPage(ROUTE_ID_GROUP_APP))).toBe(true);
+				expect(isRouteTokens(mockPage(ROUTE_ID_GROUP_APP))).toBeTruthy();
 			});
 
 			it('should return true when route id matches Wallet Connect path', () => {
-				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`))).toBe(true);
+				expect(
+					isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`))
+				).toBeTruthy();
 			});
 
 			it('should return false when route id does not match ROUTE_ID_GROUP_APP exactly', () => {
-				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
-				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
 
-				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(false);
+				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBeFalsy();
 
-				expect(isRouteTokens(mockPage('/anotherGroup'))).toBe(false);
+				expect(isRouteTokens(mockPage('/anotherGroup'))).toBeFalsy();
 			});
 		});
 
@@ -356,18 +358,18 @@ describe('nav.utils', () => {
 			it('should return true when route id matches Airdrops path', () => {
 				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 
-				expect(isRouteRewards(mockPage(mockPath))).toBe(true);
-				expect(isRouteRewards(mockPage(mockPath.slice(0, -1)))).toBe(true);
+				expect(isRouteRewards(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteRewards(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
 			});
 
 			it('should return false when route id does not match Airdrops path', () => {
-				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
-				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
 
-				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
-				expect(isRouteRewards(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBe(false);
+				expect(isRouteRewards(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
 			});
 		});
 	});
@@ -376,47 +378,47 @@ describe('nav.utils', () => {
 		const withAppPrefix = (path: string) => `${ROUTE_ID_GROUP_APP}${path}`;
 
 		it('isTransactionsPath', () => {
-			expect(isTransactionsPath(withAppPrefix(AppPath.Transactions))).toBe(true);
-			expect(isTransactionsPath('/(app)/transactions')).toBe(true); // without trailing slash
-			expect(isTransactionsPath('/wrong')).toBe(false);
-			expect(isTransactionsPath(null)).toBe(false);
+			expect(isTransactionsPath(withAppPrefix(AppPath.Transactions))).toBeTruthy();
+			expect(isTransactionsPath('/(app)/transactions')).toBeTruthy(); // without trailing slash
+			expect(isTransactionsPath('/wrong')).toBeFalsy();
+			expect(isTransactionsPath(null)).toBeFalsy();
 		});
 
 		it('isSettingsPath', () => {
-			expect(isSettingsPath(withAppPrefix(AppPath.Settings))).toBe(true);
-			expect(isSettingsPath('/(app)/settings')).toBe(true);
-			expect(isSettingsPath('/(app)/settings/wrong')).toBe(false);
-			expect(isSettingsPath(null)).toBe(false);
+			expect(isSettingsPath(withAppPrefix(AppPath.Settings))).toBeTruthy();
+			expect(isSettingsPath('/(app)/settings')).toBeTruthy();
+			expect(isSettingsPath('/(app)/settings/wrong')).toBeFalsy();
+			expect(isSettingsPath(null)).toBeFalsy();
 		});
 
 		it('isDappExplorerPath', () => {
-			expect(isDappExplorerPath(withAppPrefix(AppPath.Explore))).toBe(true);
-			expect(isDappExplorerPath('/(app)/explore')).toBe(true);
-			expect(isDappExplorerPath('/(app)/explore/wrong')).toBe(false);
-			expect(isDappExplorerPath(null)).toBe(false);
+			expect(isDappExplorerPath(withAppPrefix(AppPath.Explore))).toBeTruthy();
+			expect(isDappExplorerPath('/(app)/explore')).toBeTruthy();
+			expect(isDappExplorerPath('/(app)/explore/wrong')).toBeFalsy();
+			expect(isDappExplorerPath(null)).toBeFalsy();
 		});
 
 		it('isActivityPath', () => {
-			expect(isActivityPath(withAppPrefix(AppPath.Activity))).toBe(true);
-			expect(isActivityPath('/(app)/activity')).toBe(true);
-			expect(isActivityPath('/(app)/activity/wrong')).toBe(false);
-			expect(isActivityPath(null)).toBe(false);
+			expect(isActivityPath(withAppPrefix(AppPath.Activity))).toBeTruthy();
+			expect(isActivityPath('/(app)/activity')).toBeTruthy();
+			expect(isActivityPath('/(app)/activity/wrong')).toBeFalsy();
+			expect(isActivityPath(null)).toBeFalsy();
 		});
 
 		it('isTokensPath', () => {
-			expect(isTokensPath(withAppPrefix(AppPath.Tokens))).toBe(true);
-			expect(isTokensPath('/(app)/')).toBe(true);
-			expect(isTokensPath(withAppPrefix(AppPath.WalletConnect))).toBe(true);
-			expect(isTokensPath('/(app)/wc')).toBe(true);
-			expect(isTokensPath('/(app)/wrong')).toBe(false);
-			expect(isTokensPath(null)).toBe(false);
+			expect(isTokensPath(withAppPrefix(AppPath.Tokens))).toBeTruthy();
+			expect(isTokensPath('/(app)/')).toBeTruthy();
+			expect(isTokensPath(withAppPrefix(AppPath.WalletConnect))).toBeTruthy();
+			expect(isTokensPath('/(app)/wc')).toBeTruthy();
+			expect(isTokensPath('/(app)/wrong')).toBeFalsy();
+			expect(isTokensPath(null)).toBeFalsy();
 		});
 
 		it('isRewardsPath', () => {
-			expect(isRewardsPath(withAppPrefix(AppPath.Rewards))).toBe(true);
-			expect(isRewardsPath('/(app)/rewards')).toBe(true);
-			expect(isRewardsPath('/(app)/rewards/bonus')).toBe(false);
-			expect(isRewardsPath(null)).toBe(false);
+			expect(isRewardsPath(withAppPrefix(AppPath.Rewards))).toBeTruthy();
+			expect(isRewardsPath('/(app)/rewards')).toBeTruthy();
+			expect(isRewardsPath('/(app)/rewards/bonus')).toBeFalsy();
+			expect(isRewardsPath(null)).toBeFalsy();
 		});
 	});
 });
