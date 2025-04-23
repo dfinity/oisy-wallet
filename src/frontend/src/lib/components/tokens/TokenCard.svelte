@@ -35,9 +35,7 @@
 	>
 		<span class="flex" slot="logo" class:mr-2={!asNetwork}>
 			<TokenLogo
-				data={asGroup && nonNullish(data?.groupData?.icon)
-					? { ...data, icon: data.groupData.icon }
-					: data}
+				{data}
 				badge={nonNullish(data.tokenCount)
 					? { type: 'tokenCount', count: data.tokenCount }
 					: { type: 'network' }}
