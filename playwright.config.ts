@@ -94,6 +94,7 @@ export default defineConfig({
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
+	snapshotDir: 'e2e/snapshots',
 	use: {
 		testIdAttribute: 'data-tid',
 		trace: 'on',

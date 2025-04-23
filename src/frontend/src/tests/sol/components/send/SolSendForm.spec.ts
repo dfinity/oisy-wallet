@@ -56,7 +56,6 @@ describe('SolSendForm', () => {
 		mockContext.set(
 			SEND_CONTEXT_KEY,
 			initSendContext({
-				sendPurpose: 'send',
 				token: SOLANA_TOKEN
 			})
 		);
@@ -67,18 +66,23 @@ describe('SolSendForm', () => {
 		});
 
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
+
 		expect(amount).not.toBeNull();
 
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
+
 		expect(destination).not.toBeNull();
 
 		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+
 		expect(network).not.toBeNull();
 
 		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
+
 		expect(fee).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
+
 		expect(toolbar).not.toBeNull();
 	});
 
@@ -90,7 +94,6 @@ describe('SolSendForm', () => {
 			mockContext.set(
 				SEND_CONTEXT_KEY,
 				initSendContext({
-					sendPurpose: 'send',
 					token: TRUMP_TOKEN
 				})
 			);
@@ -105,6 +108,7 @@ describe('SolSendForm', () => {
 			});
 
 			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
+
 			expect(ataFee).toBeNull();
 		});
 
@@ -120,6 +124,7 @@ describe('SolSendForm', () => {
 			await new Promise((resolve) => setTimeout(resolve, 100));
 
 			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
+
 			expect(ataFee).not.toBeNull();
 		});
 
@@ -137,6 +142,7 @@ describe('SolSendForm', () => {
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 
 			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
+
 			expect(ataFee).toBeNull();
 		}, 60000);
 	});
