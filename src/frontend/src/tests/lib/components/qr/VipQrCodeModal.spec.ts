@@ -7,11 +7,11 @@ import {
 	VIP_QR_CODE_COPY_BUTTON,
 	VIP_QR_CODE_ICON
 } from '$lib/constants/test-ids.constants';
-import { QrCodeType } from '$lib/enums/qr-codes-types';
 import { i18n } from '$lib/stores/i18n.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import {QrCodeType} from "$lib/enums/qr-code-types";
 
 describe('VipQrCodeModal', () => {
 	const qrCodeSelector = `div[data-tid="qr-code"]`;
