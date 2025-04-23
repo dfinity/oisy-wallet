@@ -277,6 +277,10 @@ describe('icrc.services', () => {
 				expect(afterTokens).toEqual(tokens);
 
 				expect(spyToastsError).not.toHaveBeenCalled();
+
+				expect(console.error).toHaveBeenCalledTimes(2);
+				expect(console.error).toHaveBeenNthCalledWith(1, err);
+				expect(console.error).toHaveBeenNthCalledWith(2, err);
 			});
 
 			it('should reset tokens on metadata error', async () => {
@@ -302,6 +306,10 @@ describe('icrc.services', () => {
 				expect(afterTokens).toEqual(initialTokens);
 
 				expect(spyToastsError).not.toHaveBeenCalled();
+
+				expect(console.error).toHaveBeenCalledTimes(2);
+				expect(console.error).toHaveBeenNthCalledWith(1, err);
+				expect(console.error).toHaveBeenNthCalledWith(2, err);
 			});
 		});
 	});

@@ -189,6 +189,9 @@ const loadCustomIcrcTokensData = async ({
 
 	return results.reduce<IcrcCustomTokenWithoutId[]>((acc, result, index) => {
 		if (result.status !== 'fulfilled') {
+			// For development purposes, we want to see the error in the console.
+			console.error(result.reason);
+
 			const { token } = tokens[index];
 
 			if ('Icrc' in token) {
