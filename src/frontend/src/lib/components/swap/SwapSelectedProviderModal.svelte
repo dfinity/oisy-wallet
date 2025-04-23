@@ -40,14 +40,14 @@
 	<div class="gap-6 overflow-y-auto overscroll-contain">
 		<ul class="list-none">
 			{#each $swapAmountsStore?.swaps ?? [] as swap (swap.provider)}
-				{#if nonNullish(destinationToken)}
+				{#if nonNullish($destinationToken)}
 					<li class="logo-button-list-item">
 						<SwapProviderListItem
 							on:click={() => handleSelect(swap.provider)}
 							dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
 							amount={swap.receiveAmount}
-							token={destinationToken}
-							usdBalance={getUsdBalance(swap.receiveAmount, destinationToken)}
+							token={$destinationToken}
+							usdBalance={getUsdBalance(swap.receiveAmount, $destinationToken)}
 							isBest={swap.provider === bestProvider}
 						/>
 					</li>
