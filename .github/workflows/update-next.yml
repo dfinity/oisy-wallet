@@ -64,8 +64,9 @@ jobs:
           NEXT_TAG: ${{ inputs.next && 'next' || '' }}
 
       - name: Update package
-        run: npm run update:$PKG_SCRIPT
-        shell: zsh
+        run: |
+          npm run update:$PKG_SCRIPT
+        shell: bash
         env:
           PKG_SCRIPT: ${{ env.PKG_NAME }}${{ env.PKG_TAG && ':' || '' }}${{ env.PKG_TAG }}
 
