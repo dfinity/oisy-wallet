@@ -15,7 +15,6 @@ describe('IcSendForm', () => {
 	mockContext.set(
 		SEND_CONTEXT_KEY,
 		initSendContext({
-			sendPurpose: 'convert-cketh-to-eth',
 			token: ETHEREUM_TOKEN
 		})
 	);
@@ -47,50 +46,29 @@ describe('IcSendForm', () => {
 		});
 
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
+
 		expect(amount).not.toBeNull();
 
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
+
 		expect(destination).not.toBeNull();
 
 		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+
 		expect(network).not.toBeNull();
 
 		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
+
 		expect(fee).not.toBeNull();
 
 		const ethereumEstimatedFee: HTMLParagraphElement | null = container.querySelector(
 			ethereumEstimatedFeeSelector
 		);
+
 		expect(ethereumEstimatedFee).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
-		expect(toolbar).not.toBeNull();
-	});
 
-	it('should not render destination field', () => {
-		const { container } = render(IcSendForm, {
-			props: { ...props, simplifiedForm: true },
-			context: mockContext
-		});
-
-		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
-		expect(amount).not.toBeNull();
-
-		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
-		expect(destination).toBeNull();
-
-		const network: HTMLDivElement | null = container.querySelector(networkSelector);
-		expect(network).not.toBeNull();
-
-		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
-		expect(fee).not.toBeNull();
-
-		const ethereumEstimatedFee: HTMLParagraphElement | null = container.querySelector(
-			ethereumEstimatedFeeSelector
-		);
-		expect(ethereumEstimatedFee).not.toBeNull();
-
-		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 		expect(toolbar).not.toBeNull();
 	});
 });

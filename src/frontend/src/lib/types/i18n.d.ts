@@ -27,6 +27,7 @@ interface I18nCore {
 		not_available: string;
 		new: string;
 		edit: string;
+		no_results: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -48,7 +49,9 @@ interface I18nNavigation {
 		support: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
+		binance_qr_code: string;
 		refer_a_friend: string;
+		address_book: string;
 	};
 	alt: {
 		tokens: string;
@@ -63,7 +66,9 @@ interface I18nNavigation {
 		support: string;
 		open_twitter: string;
 		vip_qr_code: string;
+		binance_qr_code: string;
 		refer_a_friend: string;
+		address_book: string;
 	};
 	short: { documentation: string };
 }
@@ -559,6 +564,8 @@ interface I18nTokens {
 		all_tokens_with_zero_hidden: string;
 		filter_nothing_found: string;
 		filter_nothing_found_description: string;
+		filter_placeholder: string;
+		filter_button: string;
 		buy_or_receive: string;
 		initializing: string;
 		updating_ui: string;
@@ -571,6 +578,7 @@ interface I18nTokens {
 		chain_key: string;
 		show_more_networks: string;
 		hide_more_networks: string;
+		on_network: string;
 	};
 	details: {
 		title: string;
@@ -620,6 +628,7 @@ interface I18nTokens {
 			manage_list: string;
 			list_settings: string;
 			do_not_see_import: string;
+			import_token: string;
 			manage_for_network: string;
 			network: string;
 			all_tokens_zero_balance: string;
@@ -637,6 +646,7 @@ interface I18nTokens {
 		open_contract_address_block_explorer: string;
 		open_token_address_block_explorer: string;
 		token_group_number: string;
+		filter_button: string;
 	};
 	placeholder: {
 		enter_contract_address: string;
@@ -857,6 +867,7 @@ interface I18nVip {
 	invitation: {
 		text: {
 			title: string;
+			binance_title: string;
 			invitation_link_copied: string;
 			generate_new_link: string;
 			generating_new_code: string;
@@ -886,6 +897,10 @@ interface I18nReferral {
 			open_wallet: string;
 		};
 	};
+}
+
+interface I18nAddress_book {
+	text: { title: string; empty_title: string; empty_text: string; add_new_contact: string };
 }
 
 interface I18nSigner {
@@ -981,6 +996,7 @@ interface I18n {
 	about: I18nAbout;
 	vip: I18nVip;
 	referral: I18nReferral;
+	address_book: I18nAddress_book;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;

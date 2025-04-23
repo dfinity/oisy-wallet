@@ -1,5 +1,6 @@
 import type {
 	AddUserCredentialError,
+	AllowSigningRequest,
 	BitcoinNetwork,
 	CredentialSpec,
 	GetUserProfileError,
@@ -28,6 +29,10 @@ export interface AddUserCredentialParams {
 export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialError };
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
+
+export interface AllowSigningParams {
+	request?: AllowSigningRequest;
+}
 
 export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;

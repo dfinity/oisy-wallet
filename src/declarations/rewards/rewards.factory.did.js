@@ -69,6 +69,7 @@ export const idlFactory = ({ IDL }) => {
 		Success: IDL.Null,
 		InvalidCode: IDL.Null
 	});
+	const ClaimedVipReward = IDL.Record({ campaign_id: IDL.Text });
 	const LastActivityHistogramRequest = IDL.Record({
 		bucket_count: IDL.Nat32,
 		bucket_duration: CandidDuration
@@ -161,7 +162,19 @@ export const idlFactory = ({ IDL }) => {
 		accounts: IDL.Vec(AccountSnapshotFor),
 		timestamp: IDL.Opt(IDL.Nat64)
 	});
+	const SetReferrerError = IDL.Variant({
+		SelfReferral: IDL.Null,
+		AlreadyHasReferrer: IDL.Null,
+		UnknownReferrer: IDL.Null,
+		NotNewUser: IDL.Null,
+		AnonymousCaller: IDL.Null
+	});
+	const SetReferrerResponse = IDL.Variant({
+		Ok: IDL.Null,
+		Err: SetReferrerError
+	});
 	const UsageAndHolding = IDL.Record({
+		first_activity_ns: IDL.Opt(IDL.Nat64),
 		approx_usd_valuation: IDL.Float64,
 		last_activity_ns: IDL.Opt(IDL.Nat64)
 	});
@@ -217,6 +230,7 @@ export const idlFactory = ({ IDL }) => {
 		campaign_name: IDL.Opt(IDL.Text)
 	});
 	const UserData = IDL.Record({
+		superpowers: IDL.Opt(IDL.Vec(IDL.Text)),
 		airdrops: IDL.Vec(RewardInfo),
 		usage_awards: IDL.Opt(IDL.Vec(RewardInfo)),
 		last_snapshot_timestamp: IDL.Opt(IDL.Nat64),
@@ -224,8 +238,10 @@ export const idlFactory = ({ IDL }) => {
 		sprinkles: IDL.Vec(RewardInfo)
 	});
 	const UsageAwardState = IDL.Record({
+		first_activity_ns: IDL.Opt(IDL.Nat64),
 		snapshots: IDL.Vec(UserSnapshot),
 		referred_by: IDL.Opt(IDL.Nat32),
+		last_activity_ns: IDL.Opt(IDL.Nat64),
 		referrer_info: IDL.Opt(ReferrerInfo)
 	});
 	const VipStats = IDL.Record({
@@ -235,7 +251,11 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		claim_usage_award: IDL.Func([UsageAwardEvent, IDL.Principal], [], []),
-		claim_vip_reward: IDL.Func([VipReward], [ClaimVipRewardResponse], []),
+		claim_vip_reward: IDL.Func(
+			[VipReward],
+			[ClaimVipRewardResponse, IDL.Opt(ClaimedVipReward)],
+			[]
+		),
 		config: IDL.Func([], [Config], ['query']),
 		configure_usage_awards: IDL.Func([UsageAwardConfig], [], []),
 		configure_vip: IDL.Func([VipConfig], [], []),
@@ -244,13 +264,13 @@ export const idlFactory = ({ IDL }) => {
 			[LastActivityHistogramResponse],
 			['query']
 		),
-		new_vip_reward: IDL.Func([], [NewVipRewardResponse], []),
+		new_vip_reward: IDL.Func([IDL.Opt(ClaimedVipReward)], [NewVipRewardResponse], []),
 		public_rewards_info: IDL.Func([], [PublicRewardsInfo], ['query']),
 		referrer_info: IDL.Func([], [ReferrerInfo], []),
 		referrer_info_for: IDL.Func([IDL.Principal], [IDL.Opt(ReferrerInfo)], ['query']),
 		register_airdrop_recipient: IDL.Func([UserSnapshot], [], []),
 		register_snapshot_for: IDL.Func([IDL.Principal, UserSnapshot], [], []),
-		set_referrer: IDL.Func([IDL.Nat32], [], []),
+		set_referrer: IDL.Func([IDL.Nat32], [SetReferrerResponse], []),
 		stats_usage_vs_holding: IDL.Func([], [UsageVsHoldingStats], ['query']),
 		status: IDL.Func([], [StatusResponse], ['query']),
 		trigger_usage_award_event: IDL.Func([UsageAwardEvent], [], []),

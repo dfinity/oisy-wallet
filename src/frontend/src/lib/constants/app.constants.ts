@@ -1,3 +1,4 @@
+import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 
@@ -10,7 +11,7 @@ export const STAGING = MODE === 'staging' || TEST_FE || MODE === 'audit' || MODE
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
-export const TEST = JSON.parse(import.meta.env.TEST ?? false) === true;
+export const TEST = parseBoolEnvVar(import.meta.env.TEST);
 
 const MAINNET_DOMAIN = 'icp0.io';
 
@@ -129,8 +130,8 @@ export const WALLET_PAGINATION = 10n;
 // TODO: Use the normal one when we have a better way to handle the Solana wallets, for example when we have the internal Solana RPC canister, or when we don't load again the transactions that are already loaded.
 export const SOL_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1000; // 1 minute in milliseconds
 
-// VIP
-export const VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
+// Code generation
+export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
 
 // User Snapshot
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1000; // 5 minutes in milliseconds
@@ -141,3 +142,9 @@ export const FALLBACK_TIMEOUT = 10000;
 // Git
 export const GIT_COMMIT_HASH = VITE_GIT_COMMIT_HASH;
 export const GIT_BRANCH_NAME = VITE_GIT_BRANCH_NAME;
+
+// Threshold
+export const FAILURE_THRESHOLD = 3;
+
+// Micro transaction
+export const MICRO_TRANSACTION_USD_THRESHOLD = 0.01;

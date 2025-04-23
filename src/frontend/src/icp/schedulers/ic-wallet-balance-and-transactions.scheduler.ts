@@ -1,13 +1,12 @@
 import { IcWalletScheduler, type IcWalletMsg } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import type { GetTransactions } from '$icp/types/ic.post-message';
-import { queryAndUpdate } from '$lib/actors/query.ic';
 import { type SchedulerJobData, type SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessageDataResponseWalletCleanUp } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
-import { isNullish, jsonReplacer } from '@dfinity/utils';
+import { isNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
@@ -18,6 +17,9 @@ interface IcWalletStore<T> {
 	balance: CertifiedData<bigint> | undefined;
 	transactions: IndexedTransactions<T>;
 }
+
+type GetBalanceAndTransactions<TWithId extends IcrcTransactionWithId | TransactionWithId> =
+	GetTransactions & { transactions: TWithId[] };
 
 export class IcWalletBalanceAndTransactionsScheduler<
 	T extends IcrcTransaction | Transaction,
@@ -34,7 +36,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 	constructor(
 		private getBalanceAndTransactions: (
 			data: SchedulerJobParams<PostMessageDataRequest>
-		) => Promise<GetTransactions & { transactions: TWithId[] }>,
+		) => Promise<GetBalanceAndTransactions<TWithId>>,
 		private mapToSelfTransaction: (
 			transaction: TWithId
 		) => (Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> })[],
@@ -54,14 +56,14 @@ export class IcWalletBalanceAndTransactionsScheduler<
 		identity,
 		...data
 	}: SchedulerJobData<PostMessageDataRequest>) => {
-		await queryAndUpdate<GetTransactions & { transactions: TWithId[] }>({
+		await queryAndUpdate<GetBalanceAndTransactions<TWithId>>({
 			request: ({ identity: _, certified }) =>
 				this.getBalanceAndTransactions({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => {
 				this.syncTransactions({ jobData: { identity, ...data }, certified, ...rest });
 				this.cleanTransactions({ certified });
 			},
-			onCertifiedError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
+			onUpdateError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
 			identity,
 			resolution: 'all_settled'
 		});
@@ -72,7 +74,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 		certified,
 		jobData
 	}: {
-		response: GetTransactions & { transactions: TWithId[] };
+		response: GetBalanceAndTransactions<TWithId>;
 		certified: boolean;
 		jobData: SchedulerJobData<PostMessageDataRequest>;
 	}) => {

@@ -1,23 +1,26 @@
 import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
-import sepolia from '$eth/assets/sepolia.svg';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
-import eth from '$icp-eth/assets/eth.svg';
 import ethereumIconDark from '$lib/assets/networks/dark/ethereum-mainnet.svg';
 import sepoliaIconDark from '$lib/assets/networks/dark/ethereum-sepolia.svg';
-import ethereumBW from '$lib/assets/networks/ethereum-bw.svg';
 import ethereumIconLight from '$lib/assets/networks/light/ethereum-mainnet.svg';
 import sepoliaIconLight from '$lib/assets/networks/light/ethereum-sepolia.svg';
-import sepoliaBW from '$lib/assets/networks/sepolia-bw.svg';
 import type { NetworkId } from '$lib/types/network';
+import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
+import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
 import type { Networkish } from 'ethers/providers';
 
-export const ETH_MAINNET_ENABLED =
-	JSON.parse(import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED ?? false) === false;
+export const ETH_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
+	import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED
+);
 
 export const INFURA_NETWORK_HOMESTEAD: Networkish = 'homestead';
 export const INFURA_NETWORK_SEPOLIA: Networkish = 'sepolia';
+export const INFURA_NETWORK_BASE: Networkish = 'base';
+export const INFURA_NETWORK_BASE_SEPOLIA: Networkish = 'base-sepolia';
+export const INFURA_NETWORK_BNB_MAINNET: Networkish = 'bnb';
+export const INFURA_NETWORK_BNB_TESTNET: Networkish = 'bnbt';
 
 export const ETHERSCAN_NETWORK_HOMESTEAD: Networkish = 'homestead';
 export const ETHERSCAN_NETWORK_SEPOLIA: Networkish = 'sepolia';
@@ -43,8 +46,6 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Ethereum',
 	chainId: 1n,
-	icon: eth,
-	iconBW: ethereumBW,
 	iconLight: ethereumIconLight,
 	iconDark: ethereumIconDark,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
@@ -62,8 +63,6 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Sepolia',
 	chainId: 11155111n,
-	icon: sepolia,
-	iconBW: sepoliaBW,
 	iconLight: sepoliaIconLight,
 	iconDark: sepoliaIconDark,
 	explorerUrl: SEPOLIA_EXPLORER_URL
@@ -76,10 +75,11 @@ export const { chainId: SEPOLIA_NETWORK_CHAIN_ID } = SEPOLIA_NETWORK;
  * However, from a UX perspective, we use a store to enable the list of networks based on the testnets flag.
  * That's why those constants are prefixed with SUPPORTED_.
  */
-export const SUPPORTED_ETHEREUM_NETWORKS: [...EthereumNetwork[], EthereumNetwork] = [
-	...(ETH_MAINNET_ENABLED ? [ETHEREUM_NETWORK] : []),
-	SEPOLIA_NETWORK
-];
+export const SUPPORTED_ETHEREUM_NETWORKS: EthereumNetwork[] = defineSupportedNetworks({
+	mainnetFlag: ETH_MAINNET_ENABLED,
+	mainnetNetworks: [ETHEREUM_NETWORK],
+	testnetNetworks: [SEPOLIA_NETWORK]
+});
 
 export const SUPPORTED_ETHEREUM_NETWORKS_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NETWORKS.map(
 	({ id }) => id

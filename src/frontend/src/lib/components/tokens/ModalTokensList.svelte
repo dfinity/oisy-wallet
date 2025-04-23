@@ -1,32 +1,45 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
 	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
-	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import type { Token } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
 
-	export let networkSelectorViewOnly = false;
-	export let loading: boolean;
+	let {
+		networkSelectorViewOnly = false,
+		loading,
+		tokenListItem,
+		toolbar,
+		noResults
+	}: {
+		networkSelectorViewOnly: boolean;
+		loading: boolean;
+		tokenListItem: Snippet<[Token, () => void]>;
+		toolbar: Snippet;
+		noResults?: Snippet;
+	} = $props();
 
 	const dispatch = createEventDispatcher();
 
 	const { filteredTokens, filterNetwork, filterQuery, setFilterQuery } =
 		getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
-	let filter = $filterQuery ?? '';
+	let filter = $state($filterQuery ?? '');
 
-	$: filter, setFilterQuery(filter);
+	$effect(() => {
+		setFilterQuery(filter);
+	});
 
-	let noTokensMatch = false;
-	$: noTokensMatch = $filteredTokens.length === 0;
+	let noTokensMatch = $derived($filteredTokens.length === 0);
 </script>
 
 <div class="flex items-end justify-between">
@@ -43,7 +56,7 @@
 		class="dropdown-button h-[3.375rem] rounded-lg border border-solid border-primary"
 		class:hover:border-brand-primary={!networkSelectorViewOnly}
 		disabled={networkSelectorViewOnly}
-		on:click={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
+		onclick={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
 		aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 	>
 		<NetworkSwitcherLogo network={$filterNetwork} />
@@ -56,17 +69,18 @@
 	<div class="gap-6 overflow-y-auto overscroll-contain">
 		<TokensSkeletons {loading}>
 			{#if noTokensMatch}
-				<p class="text-primary">
-					{$i18n.tokens.manage.text.all_tokens_zero_balance}
-				</p>
+				{#if noResults}
+					{@render noResults()}
+				{:else}
+					<p class="text-primary" data-tid={MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS}>
+						{$i18n.core.text.no_results}
+					</p>
+				{/if}
 			{:else}
 				<ul class="list-none">
 					{#each $filteredTokens as token (token.id)}
 						<li class="logo-button-list-item">
-							<ModalTokensListItem
-								on:click={() => dispatch('icTokenButtonClick', token)}
-								data={token}
-							/>
+							{@render tokenListItem(token, () => dispatch('icTokenButtonClick', token))}
 						</li>
 					{/each}
 				</ul>
@@ -76,5 +90,5 @@
 </div>
 
 <ButtonGroup>
-	<slot name="toolbar" />
+	{@render toolbar()}
 </ButtonGroup>

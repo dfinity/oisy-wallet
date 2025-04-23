@@ -1,10 +1,10 @@
-import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
 import {
-	SOLANA_DEVNET_TOKEN_ID,
-	SOLANA_LOCAL_TOKEN_ID,
-	SOLANA_TESTNET_TOKEN_ID,
-	SOLANA_TOKEN_ID
-} from '$env/tokens/tokens.sol.env';
+	SOLANA_DEVNET_NETWORK_ID,
+	SOLANA_KEY_ID,
+	SOLANA_LOCAL_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK_ID,
+	SOLANA_TESTNET_NETWORK_ID
+} from '$env/networks/networks.sol.env';
 import {
 	getIdbSolAddressMainnet,
 	setIdbSolAddressDevnet,
@@ -32,7 +32,7 @@ import type { SolAddress } from '$lib/types/address';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { TokenId } from '$lib/types/token';
+import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
@@ -98,44 +98,44 @@ const solanaMapper: Record<
 };
 
 const loadSolAddress = ({
-	tokenId,
+	networkId,
 	network
 }: {
-	tokenId: TokenId;
+	networkId: NetworkId;
 	network: SolanaNetworkType;
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<SolAddress>({
-		tokenId,
+		networkId,
 		...solanaMapper[network]
 	});
 
 export const loadSolAddressMainnet = (): Promise<ResultSuccess> =>
 	loadSolAddress({
-		tokenId: SOLANA_TOKEN_ID,
+		networkId: SOLANA_MAINNET_NETWORK_ID,
 		network: SolanaNetworks.mainnet
 	});
 
 export const loadSolAddressTestnet = (): Promise<ResultSuccess> =>
 	loadSolAddress({
-		tokenId: SOLANA_TESTNET_TOKEN_ID,
+		networkId: SOLANA_TESTNET_NETWORK_ID,
 		network: SolanaNetworks.testnet
 	});
 
 export const loadSolAddressDevnet = (): Promise<ResultSuccess> =>
 	loadSolAddress({
-		tokenId: SOLANA_DEVNET_TOKEN_ID,
+		networkId: SOLANA_DEVNET_NETWORK_ID,
 		network: SolanaNetworks.devnet
 	});
 
 export const loadSolAddressLocal = (): Promise<ResultSuccess> =>
 	loadSolAddress({
-		tokenId: SOLANA_LOCAL_TOKEN_ID,
+		networkId: SOLANA_LOCAL_NETWORK_ID,
 		network: SolanaNetworks.local
 	});
 
 export const loadIdbSolAddressMainnet = (): Promise<ResultSuccess<LoadIdbAddressError>> =>
 	loadIdbTokenAddress<SolAddress>({
-		tokenId: SOLANA_TOKEN_ID,
+		networkId: SOLANA_MAINNET_NETWORK_ID,
 		getIdbAddress: getIdbSolAddressMainnet,
 		updateIdbAddressLastUsage: updateIdbSolAddressMainnetLastUsage,
 		addressStore: solAddressMainnetStore
@@ -143,7 +143,7 @@ export const loadIdbSolAddressMainnet = (): Promise<ResultSuccess<LoadIdbAddress
 
 const certifySolAddressMainnet = (address: SolAddress): Promise<ResultSuccess<string>> =>
 	certifyAddress<SolAddress>({
-		tokenId: SOLANA_TOKEN_ID,
+		networkId: SOLANA_MAINNET_NETWORK_ID,
 		address,
 		getAddress: (identity: OptionIdentity) => getSolAddressMainnet(identity),
 		updateIdbAddressLastUsage: updateIdbSolAddressMainnetLastUsage,

@@ -127,7 +127,7 @@ const extractStartScript = (htmlFile) => {
  * Browsers that supports the 'strict-dynamic' rule will ignore these backwards directives (CSP 3).
  */
 const updateCSP = (indexHtml) => {
-	const sw = /<script[\s\S]*?>([\s\S]*?)<\/script>/gm;
+	const sw = /<script[\s\S]*?>([\s\S]*?)<\/script[^\S\r\n]*[^>]*?>/gim;
 
 	const indexHashes = [];
 
@@ -148,6 +148,8 @@ const updateCSP = (indexHtml) => {
 
 	const coingeckoApiConnectSrc = 'https://pro-api.coingecko.com';
 
+	const kongSwapApiConnectSrc = 'https://api.kongswap.io';
+
 	const plausibleApiConnectSrc = 'https://plausible.io/api/event';
 
 	const walletConnectSrc =
@@ -167,7 +169,7 @@ const updateCSP = (indexHtml) => {
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc};
         img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';

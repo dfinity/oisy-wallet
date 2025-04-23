@@ -1,4 +1,3 @@
-import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -23,7 +22,7 @@ export const reloadEthereumBalance = (token: Token): Promise<ResultSuccess> => {
 	return loadErc20Balance({ token: token as Erc20Token });
 };
 
-export const loadEthBalance = async ({
+const loadEthBalance = async ({
 	networkId,
 	tokenId
 }: {
@@ -110,9 +109,9 @@ const loadErc20Balance = async ({
 	return { success: true };
 };
 
-export const loadEthBalances = async (): Promise<ResultSuccess> => {
+export const loadEthBalances = async (tokens: Token[]): Promise<ResultSuccess> => {
 	const results = await Promise.all([
-		...SUPPORTED_ETHEREUM_TOKENS.map(({ network: { id: networkId }, id: tokenId }) =>
+		...tokens.map(({ network: { id: networkId }, id: tokenId }) =>
 			loadEthBalance({ networkId, tokenId })
 		)
 	]);
