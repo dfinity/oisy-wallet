@@ -207,11 +207,7 @@ const loadCustomIcrcTokensData = async ({
 
 		const { value } = result;
 
-		if (isNullish(value)) {
-			return acc;
-		}
-
-		return [...acc, value];
+		return [...acc, ...(nonNullish(value) ? [value] : [])];
 	}, []);
 };
 
