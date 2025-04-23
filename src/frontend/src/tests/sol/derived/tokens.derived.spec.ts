@@ -20,6 +20,8 @@ describe('tokens.derived', () => {
 		});
 
 		it('should return only mainnet token by default', () => {
+			setupTestnetsStore('disabled');
+
 			expect(get(enabledSolanaTokens)).toEqual([SOLANA_TOKEN]);
 		});
 
