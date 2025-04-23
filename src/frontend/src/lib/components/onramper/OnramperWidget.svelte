@@ -20,7 +20,7 @@
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
 
 	let defaultCrypto: OnramperId | undefined = $derived(
-			$token?.buy?.onramperId ??
+		$token?.buy?.onramperId ??
 			($networkEthereum
 				? ETHEREUM_TOKEN.buy?.onramperId
 				: $networkBitcoin
@@ -34,13 +34,16 @@
 
 	// List of Cryptocurrencies that are allowed to be bought
 	let onlyCryptos: OnramperId[] = $derived(
- $enabledTokens.map((token) => token.buy?.onramperId).filter(nonNullish));
+		$enabledTokens.map((token) => token.buy?.onramperId).filter(nonNullish)
+	);
 
 	// List of Cryptocurrency Networks to which the tokens are allowed to be bought
 	let onlyCryptoNetworks: OnramperNetworkId[] = $derived(
-		 $networks.map((network) => network.buy?.onramperId).filter(nonNullish));
+		$networks.map((network) => network.buy?.onramperId).filter(nonNullish)
+	);
 
-	let networkWallets: OnramperNetworkWallet[] = $derived( mapOnramperNetworkWallets({
+	let networkWallets: OnramperNetworkWallet[] = $derived(
+		mapOnramperNetworkWallets({
 			networks: $networks,
 			walletMap: new Map([
 				[BTC_MAINNET_NETWORK_ID, $btcAddressMainnet],
@@ -48,21 +51,23 @@
 				[ICP_NETWORK_ID, $icpAccountIdentifierText],
 				[SOLANA_MAINNET_NETWORK_ID, $solAddressMainnet]
 			])
-		}))
+		})
+	);
 
 	let src: string = $derived(
 		buildOnramperLink({
-				mode: 'buy',
-				defaultFiat: 'usd',
-				defaultCrypto,
-				onlyCryptos,
-				onlyCryptoNetworks,
-				wallets: [],
-				networkWallets,
-				supportRecurringPayments: true,
-				enableCountrySelector: true,
-				themeName: 'dark' // we always pass dark, as some card elements aren't styled correctly (white text on white background) in light theme / onramper bug?
-			}))
+			mode: 'buy',
+			defaultFiat: 'usd',
+			defaultCrypto,
+			onlyCryptos,
+			onlyCryptoNetworks,
+			wallets: [],
+			networkWallets,
+			supportRecurringPayments: true,
+			enableCountrySelector: true,
+			themeName: 'dark' // we always pass dark, as some card elements aren't styled correctly (white text on white background) in light theme / onramper bug?
+		})
+	);
 
 	let themeLoaded = $state(false);
 
