@@ -9,7 +9,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
-	import {VIP_STATE_BUTTON, VIP_STATE_IMAGE_BANNER} from '$lib/constants/test-ids.constants';
+	import { VIP_STATE_BUTTON, VIP_STATE_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { i18n } from '$lib/stores/i18n.store';

@@ -1,17 +1,17 @@
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
 import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
 import VipRewardStateModal from '$lib/components/qr/VipRewardStateModal.svelte';
-import {VIP_STATE_BUTTON, VIP_STATE_IMAGE_BANNER} from '$lib/constants/test-ids.constants';
+import { VIP_STATE_BUTTON, VIP_STATE_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import { i18n } from '$lib/stores/i18n.store';
+import { modalStore } from '$lib/stores/modal.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-import {render, waitFor} from '@testing-library/svelte';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import {modalStore} from "$lib/stores/modal.store";
-import {mockValidIcToken} from "$tests/mocks/ic-tokens.mock";
-import {icrcCustomTokensStore} from "$icp/stores/icrc-custom-tokens.store";
-import type {IcrcCustomToken} from "$icp/types/icrc-custom-token";
 
 describe('VipRewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid=${VIP_STATE_IMAGE_BANNER}]`;
@@ -106,13 +106,17 @@ describe('VipRewardStateModal', () => {
 			});
 
 			const button: HTMLButtonElement | null = container.querySelector(buttonSelector);
+
 			expect(button).toBeInTheDocument();
 
 			await waitFor(() => {
 				button?.click();
 
 				expect(get(modalStore)).toEqual({
-					data: { initialSearch: goldTokenSymbol, message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message) },
+					data: {
+						initialSearch: goldTokenSymbol,
+						message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
+					},
 					type: 'manage-tokens'
 				});
 			});
@@ -127,20 +131,27 @@ describe('VipRewardStateModal', () => {
 			});
 
 			const button: HTMLButtonElement | null = container.querySelector(buttonSelector);
+
 			expect(button).toBeInTheDocument();
 
 			await waitFor(() => {
 				button?.click();
 
 				expect(get(modalStore)).toEqual({
-					data: { initialSearch: goldTokenSymbol, message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message) },
+					data: {
+						initialSearch: goldTokenSymbol,
+						message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
+					},
 					type: 'manage-tokens'
 				});
 			});
 		});
 
 		it('should not open manage tokens modal for Gold campaign and enabled token', async () => {
-			icrcCustomTokensStore.set({ data: {...mockIcrcCustomToken, enabled: true}, certified: false });
+			icrcCustomTokensStore.set({
+				data: { ...mockIcrcCustomToken, enabled: true },
+				certified: false
+			});
 
 			const { container } = render(VipRewardStateModal, {
 				isSuccessful: true,
@@ -148,6 +159,7 @@ describe('VipRewardStateModal', () => {
 			});
 
 			const button: HTMLButtonElement | null = container.querySelector(buttonSelector);
+
 			expect(button).toBeInTheDocument();
 
 			await waitFor(() => {
@@ -164,6 +176,7 @@ describe('VipRewardStateModal', () => {
 			});
 
 			const button: HTMLButtonElement | null = container.querySelector(buttonSelector);
+
 			expect(button).toBeInTheDocument();
 
 			await waitFor(() => {
@@ -182,6 +195,7 @@ describe('VipRewardStateModal', () => {
 			});
 
 			const button: HTMLButtonElement | null = container.querySelector(buttonSelector);
+
 			expect(button).toBeInTheDocument();
 
 			await waitFor(() => {
@@ -192,7 +206,10 @@ describe('VipRewardStateModal', () => {
 		});
 
 		it('should not open manage tokens modal for VIP campaign and enabled token', async () => {
-			icrcCustomTokensStore.set({ data: {...mockIcrcCustomToken, enabled: true}, certified: false });
+			icrcCustomTokensStore.set({
+				data: { ...mockIcrcCustomToken, enabled: true },
+				certified: false
+			});
 
 			const { container } = render(VipRewardStateModal, {
 				isSuccessful: true,
@@ -200,6 +217,7 @@ describe('VipRewardStateModal', () => {
 			});
 
 			const button: HTMLButtonElement | null = container.querySelector(buttonSelector);
+
 			expect(button).toBeInTheDocument();
 
 			await waitFor(() => {
