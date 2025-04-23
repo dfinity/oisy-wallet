@@ -70,10 +70,8 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendToken, sendTokenSymbol, sendPurpose } =
+	const { sendTokenDecimals, sendToken, sendTokenSymbol } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	const simplifiedForm = sendPurpose === 'convert-cketh-to-eth';
 
 	/**
 	 * Send
@@ -123,8 +121,8 @@
 				ckErc20ToErc20MaxCkEthFees
 			};
 
-			const trackAnalyticsOnSendComplete = async () => {
-				await trackEvent({
+			const trackAnalyticsOnSendComplete = () => {
+				trackEvent({
 					name: isNetworkIdBitcoin(networkId)
 						? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
 						: isConvertCkEthToEth({ token: $sendToken, networkId })
@@ -149,7 +147,7 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
 					: isConvertCkEthToEth({ token: $sendToken, networkId })
@@ -200,15 +198,7 @@
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
 			<IcSendProgress bind:sendProgressStep {networkId} />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
-			<IcSendForm
-				on:icNext
-				bind:destination
-				bind:amount
-				bind:networkId
-				on:icQRCodeScan
-				{source}
-				{simplifiedForm}
-			>
+			<IcSendForm on:icNext bind:destination bind:amount bind:networkId on:icQRCodeScan {source}>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
 						<ButtonBack on:click={back} />

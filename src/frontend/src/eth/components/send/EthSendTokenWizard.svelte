@@ -55,8 +55,7 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendTokenId, sendToken, sendPurpose } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenDecimals, sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Props
@@ -70,8 +69,6 @@
 	// Required for the fee and also to retrieve ck minter information.
 	// i.e. Ethereum or Sepolia "main" token.
 	export let nativeEthereumToken: Token;
-
-	const destinationEditable = sendPurpose === 'send';
 
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
@@ -193,7 +190,7 @@
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_SUCCESS,
 				metadata: {
 					token: $sendToken.symbol
@@ -202,7 +199,7 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_ERROR,
 				metadata: {
 					token: $sendToken.symbol
@@ -258,7 +255,6 @@
 			{amount}
 			{sourceNetwork}
 			{targetNetwork}
-			{destinationEditable}
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
@@ -274,7 +270,6 @@
 			bind:amount
 			bind:network={targetNetwork}
 			{nativeEthereumToken}
-			{destinationEditable}
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}

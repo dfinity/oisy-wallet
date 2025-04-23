@@ -53,6 +53,9 @@ export type ClaimVipRewardResponse =
 	| { AlreadyClaimed: null }
 	| { Success: null }
 	| { InvalidCode: null };
+export interface ClaimedVipReward {
+	campaign_id: string;
+}
 export interface Config {
 	usage_awards_config: [] | [UsageAwardConfig];
 	batch_sizes: [] | [BatchSizes];
@@ -117,6 +120,13 @@ export interface RewardInfo {
 	amount: bigint;
 	campaign_name: [] | [string];
 }
+export type SetReferrerError =
+	| { SelfReferral: null }
+	| { AlreadyHasReferrer: null }
+	| { UnknownReferrer: null }
+	| { NotNewUser: null }
+	| { AnonymousCaller: null };
+export type SetReferrerResponse = { Ok: null } | { Err: SetReferrerError };
 export interface SetSprinkleTimestampArg {
 	total_sprinkle_amount: bigint;
 	min_account_amount: bigint;
@@ -162,6 +172,7 @@ export interface Transaction_Spl {
 	amount: bigint;
 }
 export interface UsageAndHolding {
+	first_activity_ns: [] | [bigint];
 	approx_usd_valuation: number;
 	last_activity_ns: [] | [bigint];
 }
@@ -179,8 +190,10 @@ export interface UsageAwardEvent {
 	campaign_name: [] | [string];
 }
 export interface UsageAwardState {
+	first_activity_ns: [] | [bigint];
 	snapshots: Array<UserSnapshot>;
 	referred_by: [] | [number];
+	last_activity_ns: [] | [bigint];
 	referrer_info: [] | [ReferrerInfo];
 }
 export interface UsageAwardStats {
@@ -213,6 +226,7 @@ export interface UsageWinnersResponse {
 	winners: Array<Principal>;
 }
 export interface UserData {
+	superpowers: [] | [Array<string>];
 	airdrops: Array<RewardInfo>;
 	usage_awards: [] | [Array<RewardInfo>];
 	last_snapshot_timestamp: [] | [bigint];
@@ -242,7 +256,7 @@ export interface VipStats {
 }
 export interface _SERVICE {
 	claim_usage_award: ActorMethod<[UsageAwardEvent, Principal], undefined>;
-	claim_vip_reward: ActorMethod<[VipReward], ClaimVipRewardResponse>;
+	claim_vip_reward: ActorMethod<[VipReward], [ClaimVipRewardResponse, [] | [ClaimedVipReward]]>;
 	config: ActorMethod<[], Config>;
 	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
 	configure_vip: ActorMethod<[VipConfig], undefined>;
@@ -250,13 +264,13 @@ export interface _SERVICE {
 		[LastActivityHistogramRequest],
 		LastActivityHistogramResponse
 	>;
-	new_vip_reward: ActorMethod<[], NewVipRewardResponse>;
+	new_vip_reward: ActorMethod<[[] | [ClaimedVipReward]], NewVipRewardResponse>;
 	public_rewards_info: ActorMethod<[], PublicRewardsInfo>;
 	referrer_info: ActorMethod<[], ReferrerInfo>;
 	referrer_info_for: ActorMethod<[Principal], [] | [ReferrerInfo]>;
 	register_airdrop_recipient: ActorMethod<[UserSnapshot], undefined>;
 	register_snapshot_for: ActorMethod<[Principal, UserSnapshot], undefined>;
-	set_referrer: ActorMethod<[number], undefined>;
+	set_referrer: ActorMethod<[number], SetReferrerResponse>;
 	stats_usage_vs_holding: ActorMethod<[], UsageVsHoldingStats>;
 	status: ActorMethod<[], StatusResponse>;
 	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
