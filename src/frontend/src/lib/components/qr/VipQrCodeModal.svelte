@@ -18,7 +18,7 @@
 		VIP_QR_CODE_ICON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import type { QrCodeType } from '$lib/enums/qr-code-types';
+	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getNewReward } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
