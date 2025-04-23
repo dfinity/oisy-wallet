@@ -1,16 +1,7 @@
-import type {
-	NewVipRewardResponse,
-	ReferrerInfo,
-	RewardInfo,
-	UserData
-} from '$declarations/rewards/rewards.did';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import type {NewVipRewardResponse, ReferrerInfo, RewardInfo, UserData} from '$declarations/rewards/rewards.did';
+import {ICP_TOKEN} from '$env/tokens/tokens.icp.env';
 import * as rewardApi from '$lib/api/reward.api';
-import {
-	MILLISECONDS_IN_DAY,
-	NANO_SECONDS_IN_MILLISECOND,
-	ZERO_BI
-} from '$lib/constants/app.constants';
+import {MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND, ZERO_BI} from '$lib/constants/app.constants';
 import {
 	claimVipReward,
 	getNewReward,
@@ -21,16 +12,17 @@ import {
 	getUserRoles,
 	setReferrer
 } from '$lib/services/reward.services';
-import { i18n } from '$lib/stores/i18n.store';
+import {i18n} from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { AlreadyClaimedError, InvalidCampaignError, InvalidCodeError } from '$lib/types/errors';
-import type { RewardClaimApiResponse, RewardResponseInfo } from '$lib/types/reward';
-import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
-import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
+import {AlreadyClaimedError, InvalidCampaignError, InvalidCodeError} from '$lib/types/errors';
+import type {RewardClaimApiResponse, RewardResponseInfo} from '$lib/types/reward';
+import type {AnyTransactionUiWithCmp} from '$lib/types/transaction';
+import {mockBtcTransactionUi} from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import { toNullable } from '@dfinity/utils';
-import { get } from 'svelte/store';
+import {mockIdentity} from '$tests/mocks/identity.mock';
+import {toNullable} from '@dfinity/utils';
+import {get} from 'svelte/store';
+import {QrCodeType} from "$lib/enums/qr-code-types";
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
@@ -124,7 +116,7 @@ describe('reward-code', () => {
 				.spyOn(rewardApi, 'getNewVipReward')
 				.mockResolvedValue(mockedNewRewardResponse);
 
-			const vipReward = await getNewReward({ campaignId: 'vip', identity: mockIdentity });
+			const vipReward = await getNewReward({ campaignId: QrCodeType.VIP, identity: mockIdentity });
 
 			expect(getNewVipRewardSpy).toHaveBeenCalledWith({
 				rewardType: { campaign_id: 'vip' },
@@ -139,7 +131,7 @@ describe('reward-code', () => {
 			const getNewVipRewardSpy = vi.spyOn(rewardApi, 'getNewVipReward').mockRejectedValue(err);
 			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
-			await getNewReward({ campaignId: 'vip', identity: mockIdentity });
+			await getNewReward({ campaignId: QrCodeType.VIP, identity: mockIdentity });
 
 			expect(getNewVipRewardSpy).toHaveBeenCalledWith({
 				rewardType: { campaign_id: 'vip' },
