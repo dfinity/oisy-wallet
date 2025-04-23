@@ -29,8 +29,8 @@
 		NAVIGATION_MENU_GOLD_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { getUserRoles } from '$lib/services/reward.services';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
+	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
