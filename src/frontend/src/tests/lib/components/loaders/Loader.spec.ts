@@ -3,7 +3,6 @@ import {
 	loadBtcAddressRegtest,
 	loadBtcAddressTestnet
 } from '$btc/services/btc-address.services';
-import * as networksEnv from '$env/networks/networks.env';
 import { loadEthAddress } from '$eth/services/eth-address.services';
 import Loader from '$lib/components/loaders/Loader.svelte';
 import * as appContants from '$lib/constants/app.constants';
@@ -117,8 +116,6 @@ vi.mock('$sol/services/spl.services', () => ({
 describe('Loader', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-
-		vi.spyOn(networksEnv, 'USER_NETWORKS_FEATURE_ENABLED', 'get').mockImplementation(() => true);
 
 		mockAuthStore();
 
