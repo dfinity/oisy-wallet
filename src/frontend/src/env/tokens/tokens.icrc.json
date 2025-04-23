@@ -59,16 +59,6 @@
 			"__bigint__": "10000"
 		}
 	},
-	"vUSD": {
-		"ledgerCanisterId": "aiw2p-tyaaa-aaaam-aebyq-cai",
-		"name": "vUSD",
-		"indexCanisterId": "wdqhz-qyaaa-aaaam-aeccq-cai",
-		"decimals": 6,
-		"symbol": "vUSD",
-		"fee": {
-			"__bigint__": "0"
-		}
-	},
 	"RUGGY": {
 		"ledgerCanisterId": "icaf7-3aaaa-aaaam-qcx3q-cai",
 		"name": "RUGGY",
