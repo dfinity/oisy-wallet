@@ -36,6 +36,7 @@ import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import {asQrCodeType, type QrCodeType} from "$lib/enums/qr-code-types";
 
 const queryUserRoles = async (params: {
 	identity: Identity;
@@ -167,7 +168,7 @@ export const getNewReward = async ({
 	campaignId,
 	identity
 }: {
-	campaignId: string;
+	campaignId: QrCodeType;
 	identity: Identity;
 }): Promise<VipReward | undefined> => {
 	try {
@@ -234,7 +235,7 @@ export const claimVipReward = async (params: {
 }): Promise<RewardClaimResponse> => {
 	try {
 		const campaignId = await updateVipReward(params);
-		return { success: true, campaignId };
+		return { success: true, campaignId: asQrCodeType(campaignId) };
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
