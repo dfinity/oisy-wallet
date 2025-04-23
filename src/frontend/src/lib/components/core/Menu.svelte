@@ -24,7 +24,7 @@
 		NAVIGATION_MENU,
 		NAVIGATION_MENU_VIP_BUTTON,
 		NAVIGATION_MENU_REFERRAL_BUTTON,
-		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON
+		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON, NAVIGATION_MENU_GOLD_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isVipUser } from '$lib/services/reward.services';
@@ -36,14 +36,17 @@
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
+	import {QrCodeType} from "$lib/enums/qr-code-types";
+	import IconBinance from "$lib/components/icons/IconBinance.svelte";
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
 	let isVip = false;
+	let isGold = false;
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
-			({ is_vip: isVip } = await isVipUser({ identity: $authIdentity }));
+			({ is_vip: isVip, is_gold: isGold } = await isVipUser({ identity: $authIdentity }));
 		}
 	});
 
@@ -105,6 +108,17 @@
 			<IconShare size="20" />
 			{$i18n.navigation.text.refer_a_friend}
 		</ButtonMenu>
+
+		{#if isGold}
+			<ButtonMenu
+					ariaLabel={$i18n.navigation.alt.binance_qr_code}
+					testId={NAVIGATION_MENU_GOLD_BUTTON}
+					on:click={() => {}}
+			>
+				<IconBinance size="20" />
+				{$i18n.navigation.text.binance_qr_code}
+			</ButtonMenu>
+		{/if}
 
 		{#if isVip}
 			<ButtonMenu
