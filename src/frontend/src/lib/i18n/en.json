@@ -70,7 +70,7 @@
 			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link",
-			"binance_qr_code": "Generate a binance clubhouse link",
+			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
 			"address_book": "Open address book"
 		},
