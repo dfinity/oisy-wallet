@@ -17,7 +17,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { safeParse } from '$lib/validation/utils.validation';
 	import { UrlSchema } from '@dfinity/zod-schemas';
-	import Badge from '../ui/Badge.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
 
 	export let amount: bigint;
 	export let token: any;
