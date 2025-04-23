@@ -10,9 +10,12 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { formatTokenBigintToNumber, formatUSD } from '$lib/utils/format.utils';
+	import ButtonGroup from '../ui/ButtonGroup.svelte';
+	import ButtonCancel from '../ui/ButtonCancel.svelte';
 
 	const dispatch = createEventDispatcher<{
 		icSelectProvider: string;
+        icCloseProviderList: void;
 	}>();
 
 	const { destinationToken, destinationTokenExchangeRate } =
@@ -56,3 +59,7 @@
 		</ul>
 	</div>
 </div>
+
+<ButtonGroup>
+	<ButtonCancel fullWidth={true} on:click={() => dispatch('icCloseProviderList')} />
+</ButtonGroup>

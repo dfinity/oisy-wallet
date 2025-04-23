@@ -62,12 +62,6 @@
 		{/if}
 	</svelte:fragment>
 
-	<svelte:fragment slot="description">
-		{#if nonNullish(displayURL)}
-			<div class="text-sm text-tertiary">{`displayURL`}</div>
-		{/if}
-	</svelte:fragment>
-
 	<div class="mr-2" slot="logo">
 		<Logo
 			src={dapp.logo}
