@@ -54,6 +54,10 @@ type CandidDuration = variant {
   Hours : nat64;
   Nanoseconds : nat64;
 };
+type ClaimedVipReward = record {
+    /// The campaign ID
+    campaign_id: text;
+};
 type ClaimVipRewardResponse = variant {
     /// The code has been claimed already
     AlreadyClaimed;
@@ -350,6 +354,10 @@ type UserData = record {
     last_snapshot_timestamp : opt nat64;
     /// Very Important Powers
     is_vip : opt bool;
+    /// Super Important Powers
+    ///
+    /// Values are: Campaign IDs such as "vip" or "gold".
+    superpowers: opt vec text;
     /// Sprinkles the user has received
     sprinkles : vec RewardInfo;
 };
@@ -380,7 +388,7 @@ service : (opt Config) -> {
     /// has taken place.  For testing, it can be convenient to call it directly.
     claim_usage_award : (UsageAwardEvent, principal) -> ();
     /// Requests rewards from a VIP token.
-    claim_vip_reward : (VipReward) -> (ClaimVipRewardResponse);
+    claim_vip_reward : (VipReward) -> (ClaimVipRewardResponse, opt ClaimedVipReward);
     /// Retrieves the current configuration of the canister.
     config : () -> (Config) query;
     /// Configures bonuses for using & holding assets in Oisy.
@@ -391,8 +399,8 @@ service : (opt Config) -> {
     last_activity_histogram : (LastActivityHistogramRequest) -> (
       LastActivityHistogramResponse,
     ) query;
-    /// Gets a VIP reward token.
-    new_vip_reward : () -> (NewVipRewardResponse);
+    /// Gets a VIP reward token for a given campaign ID.
+    new_vip_reward : (opt ClaimedVipReward) -> (NewVipRewardResponse);
     /// Public endpoint to query general information with regards to rewards distributed by this canister.
     public_rewards_info : () -> (PublicRewardsInfo) query;
     /// Get or create referrer info for the caller.
@@ -404,7 +412,7 @@ service : (opt Config) -> {
     register_snapshot_for : (principal, UserSnapshot) -> ();
     stats_usage_vs_holding : () -> (UsageVsHoldingStats) query;
     /// Sets a timestamp for a sprinkle event in the future. The sprinkle will be executed
-  set_referrer : (nat32) -> (SetReferrerResponse);
+    set_referrer : (nat32) -> (SetReferrerResponse);
     /// as soon as possible after the timestamp.
     /// Gives information about the current status of the canister.
     status : () -> (StatusResponse) query;
