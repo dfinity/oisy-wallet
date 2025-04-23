@@ -1,7 +1,7 @@
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
+import type { VipRewardStateData } from '$lib/types/reward';
 import { derived, type Readable } from 'svelte/store';
-import type {VipRewardStateData} from "$lib/types/reward";
 
 export const modalEthReceive: Readable<boolean> = derived(
 	modalStore,
