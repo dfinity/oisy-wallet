@@ -21,5 +21,6 @@ export const mapHeaderData = ({
 	oisySymbol: { oisySymbol: name },
 	balance,
 	usdBalance,
-	tokenCount: tokens.length
+	tokenCount: tokens.length,
+	groupData: tokens[0]?.groupData
 });
