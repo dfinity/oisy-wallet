@@ -57,14 +57,14 @@
 	</svelte:fragment>
 
 	<svelte:fragment slot="subtitle">
-		{#if nonNullish(dapp?.displayURL)}
-			<div class="text-sm text-tertiary">{dapp.name}</div>
+		{#if nonNullish(displayURL)}
+			<div class="text-sm text-tertiary">{displayURL}</div>
 		{/if}
 	</svelte:fragment>
 
 	<svelte:fragment slot="description">
-		{#if nonNullish(dapp?.displayURL)}
-			<div class="text-sm text-tertiary">{dapp.displayURL}</div>
+		{#if nonNullish(displayURL)}
+			<div class="text-sm text-tertiary">{`displayURL`}</div>
 		{/if}
 	</svelte:fragment>
 
