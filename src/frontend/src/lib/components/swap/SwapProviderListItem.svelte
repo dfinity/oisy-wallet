@@ -55,13 +55,16 @@
 			<span class="font-bold text-primary">
 				{dapp.name}
 			</span>
-			{#if isBest}
-				<Badge variant="success">Best rate</Badge>
-			{/if}
 		</span>
 	</svelte:fragment>
 
 	<svelte:fragment slot="subtitle">
+		{#if isBest}
+				<Badge variant="success">Best rate</Badge>
+			{/if}
+	</svelte:fragment>
+
+    <svelte:fragment slot="description">
 		{#if nonNullish(displayURL)}
 			<div class="text-sm text-tertiary">{displayURL}</div>
 		{/if}
