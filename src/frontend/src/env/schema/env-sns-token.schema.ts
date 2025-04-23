@@ -3,7 +3,8 @@ import * as z from 'zod';
 
 export const EnvSnsTokenSchema = EnvIcTokenSchema.extend({
 	rootCanisterId: z.string(),
-	metadata: EnvIcrcTokenMetadataSchema
+	metadata: EnvIcrcTokenMetadataSchema,
+	deprecated: z.boolean().optional()
 });
 
 export const EnvSnsTokensSchema = z.array(EnvSnsTokenSchema);
