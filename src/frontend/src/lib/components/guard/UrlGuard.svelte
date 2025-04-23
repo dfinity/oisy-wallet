@@ -17,7 +17,10 @@
 				const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
 				removeSearchParam({ url: $page.url, searchParam: 'code' });
-				modalStore.openVipRewardState({ success: result.success, codeType: QrCodeType.VIP });
+				modalStore.openVipRewardState({
+					success: result.success,
+					codeType: result.campaignId === 'gold' ? QrCodeType.GOLD : QrCodeType.VIP
+				});
 			}
 		}
 
