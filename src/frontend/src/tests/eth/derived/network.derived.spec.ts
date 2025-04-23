@@ -12,6 +12,7 @@ import type { EthereumNetwork } from '$eth/types/network';
 import type { Network } from '$lib/types/network';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('network.derived', () => {
@@ -21,6 +22,7 @@ describe('network.derived', () => {
 			vi.resetAllMocks();
 
 			setupTestnetsStore('enabled');
+			setupUserNetworksStore('allEnabled');
 		});
 
 		it('should return the current network if it is an Ethereum network', () => {
@@ -69,6 +71,7 @@ describe('network.derived', () => {
 			vi.resetAllMocks();
 
 			setupTestnetsStore('enabled');
+			setupUserNetworksStore('allEnabled');
 		});
 
 		it('should return the current network when it is an Ethereum network', () => {
