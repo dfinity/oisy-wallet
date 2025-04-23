@@ -6,6 +6,7 @@
 	import {
 		networkBitcoin,
 		networkEthereum,
+		networkEvm,
 		networkICP,
 		networkSolana
 	} from '$lib/derived/network.derived';
@@ -30,7 +31,7 @@
 	const openToken = () => {
 		const fn = $networkICP
 			? modalStore.openIcToken
-			: $networkEthereum
+			: $networkEthereum || $networkEvm
 				? modalStore.openEthToken
 				: $networkBitcoin
 					? modalStore.openBtcToken
