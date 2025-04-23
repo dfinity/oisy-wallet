@@ -51,12 +51,14 @@
 
 <LogoButton on:click dividers={false}>
 	<svelte:fragment slot="title">
+		<span>
 			<span class="font-bold text-primary">
 				{dapp.name}
 			</span>
 			{#if isBest}
 				<Badge variant="success">Best rate</Badge>
 			{/if}
+		</span>
 	</svelte:fragment>
 
 	<svelte:fragment slot="subtitle">
