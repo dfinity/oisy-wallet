@@ -57,6 +57,7 @@ type AccountSnapshot_3 = record {
   amount : nat64;
 };
 type AddDappSettingsError = variant {
+  MaxHiddenDappIds;
   VersionMismatch;
   DappIdTooLong;
   UserNotFound;
