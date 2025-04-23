@@ -1,12 +1,13 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
 import { ETH_TOKEN_GROUP, ETH_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.eth.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
 	BTC_TESTNET_TOKEN
 } from '$env/tokens/tokens.btc.env';
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO_BI } from '$lib/constants/app.constants';
@@ -273,12 +274,23 @@ describe('token-group.utils', () => {
 	});
 
 	describe('updateTokenGroup', () => {
-		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
-		const anotherToken = { ...SEPOLIA_TOKEN, balance: bn2Bi, usdBalance: 200 };
+		const token = {
+			...ETHEREUM_TOKEN,
+			groupData: ETH_TOKEN_GROUP,
+			balance: bn1Bi,
+			usdBalance: 100
+		};
+		const anotherToken = {
+			...BASE_ETH_TOKEN,
+			groupData: ETH_TOKEN_GROUP,
+			balance: bn2Bi,
+			usdBalance: 200
+		};
 
 		const tokenGroup: TokenUiGroup = {
-			id: anotherToken.id,
+			id: anotherToken.groupData.id,
 			nativeToken: anotherToken,
+			groupData: anotherToken.groupData,
 			tokens: [anotherToken],
 			balance: anotherToken.balance,
 			usdBalance: anotherToken.usdBalance
@@ -296,7 +308,12 @@ describe('token-group.utils', () => {
 		});
 
 		it('should add a token to a token group with multiple tokens successfully', () => {
-			const thirdToken = { ...BTC_TESTNET_TOKEN, balance: bn3Bi, usdBalance: 300 };
+			const thirdToken = {
+				...BTC_TESTNET_TOKEN,
+				groupData: ETH_TOKEN_GROUP,
+				balance: bn3Bi,
+				usdBalance: 300
+			};
 
 			const initialGroup = updateTokenGroup({ token: thirdToken, tokenGroup });
 
@@ -411,9 +428,12 @@ describe('token-group.utils', () => {
 		});
 
 		it('should add token to existing group with more than one token already', () => {
+			assertNonNullish(token.groupData);
+
 			const tokenGroup: TokenUiGroup = {
-				id: token.id,
+				id: token.groupData.id,
 				nativeToken: token,
+				groupData: token.groupData,
 				tokens: [token, anotherToken],
 				balance: bn3Bi,
 				usdBalance: 300
