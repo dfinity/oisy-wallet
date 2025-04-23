@@ -29,7 +29,6 @@
 	} from '$lib/derived/network.derived';
 	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
@@ -63,16 +62,18 @@
 
 <div role="toolbar" class="flex w-full justify-center pt-10">
 	<HeroButtonGroup>
-		{#if $networkICP}
-			<IcReceive token={$tokenWithFallback} />
-		{:else if $networkEthereum}
-			<EthReceive token={$tokenWithFallback} />
-		{:else if $networkBitcoin}
-			<BtcReceive />
-		{:else if $networkSolana}
-			<SolReceive token={$tokenWithFallback} />
-		{:else if $pseudoNetworkChainFusion}
+		{#if $pseudoNetworkChainFusion}
 			<Receive />
+		{:else if nonNullish($pageToken)}
+			{#if $networkICP}
+				<IcReceive token={$pageToken} />
+			{:else if $networkEthereum}
+				<EthReceive token={$pageToken} />
+			{:else if $networkBitcoin}
+				<BtcReceive />
+			{:else if $networkSolana}
+				<SolReceive token={$pageToken} />
+			{/if}
 		{/if}
 
 		{#if sendAction}
