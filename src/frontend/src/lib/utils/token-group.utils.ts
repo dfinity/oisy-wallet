@@ -161,7 +161,7 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 		const putativeExistingGroup = acc[groupId];
 
 		const group: TokenUiGroup = groupSecondaryToken({
-			// Even if we check for the existence of the groupData, the compiler warns that the type of the token is still `TokenUi`.
+			// Even if we check for the existence of the `groupData`, the compiler warns that the type of the token is still `TokenUi`.
 			// We need to cast it to `TokenUiWithGroupData` to access the groupData property.
 			token: token as TokenUiWithGroupData,
 			tokenGroup:
