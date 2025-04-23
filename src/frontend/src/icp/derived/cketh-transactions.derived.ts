@@ -8,21 +8,20 @@ import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const ckEthPendingTransactions: Readable<
-	(token: Token | undefined) => IcPendingTransactionsData
-> = derived(
-	[tokenWithFallback, icPendingTransactionsStore],
-	([$token, $convertEthToCkEthPendingStore]) =>
-		(token: Token | undefined) => {
-			// remove fallback when $token gets removed
-			if (nonNullish(token)) {
-				$token = token;
-			}
+export const ckEthPendingTransactions: Readable<(token?: Token) => IcPendingTransactionsData> =
+	derived(
+		[tokenWithFallback, icPendingTransactionsStore],
+		([$token, $convertEthToCkEthPendingStore]) =>
+			(token?: Token) => {
+				// remove fallback when $token gets removed
+				if (nonNullish(token)) {
+					$token = token;
+				}
 
-			if (!isTokenCkEthLedger($token) && !isTokenCkErc20Ledger($token)) {
-				return [];
-			}
+				if (!isTokenCkEthLedger($token) && !isTokenCkErc20Ledger($token)) {
+					return [];
+				}
 
-			return $convertEthToCkEthPendingStore?.[$token.id] ?? [];
-		}
-);
+				return $convertEthToCkEthPendingStore?.[$token.id] ?? [];
+			}
+	);

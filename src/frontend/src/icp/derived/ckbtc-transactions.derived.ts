@@ -11,11 +11,11 @@ import { derived, type Readable } from 'svelte/store';
 
 // I would rather like to move mapping those pending utxos to a web worker but the dependency on the minter info is conceptually annoying as it would lead to developping even more custom code for ckBTC which already required way to many mumbo jumbo.
 export const ckBtcPendingUtxoTransactions: Readable<
-	(token: Token | undefined) => NonNullable<IcTransactionsData>
+	(token?: Token) => NonNullable<IcTransactionsData>
 > = derived(
 	[tokenWithFallback, ckBtcMinterInfoStore, ckBtcPendingUtxosStore],
 	([$token, $ckBtcMinterInfoStore, $ckBtcPendingUtxosStore]) =>
-		(token: Token | undefined) => {
+		(token?: Token) => {
 			// remove fallback when $token gets removed
 			if (nonNullish(token)) {
 				$token = token;

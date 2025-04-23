@@ -8,27 +8,25 @@ import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-const icExtendedTransactions: Readable<
-	(token: Token | undefined) => NonNullable<IcTransactionsData>
-> = derived(
-	[tokenWithFallback, icTransactionsStore, btcStatusesStore],
-	([$token, $icTransactionsStore, $btcStatusesStore]) =>
-		(token: Token | undefined) =>
-			($icTransactionsStore?.[nonNullish(token) ? token?.id : $token.id] ?? []).map((transaction) =>
-				extendIcTransaction({
-					transaction,
-					token: $token,
-					btcStatuses: $btcStatusesStore?.[$token.id] ?? undefined
-				})
-			)
-);
+const icExtendedTransactions: Readable<(token?: Token) => NonNullable<IcTransactionsData>> =
+	derived(
+		[tokenWithFallback, icTransactionsStore, btcStatusesStore],
+		([$token, $icTransactionsStore, $btcStatusesStore]) =>
+			(token?: Token) =>
+				($icTransactionsStore?.[nonNullish(token) ? token?.id : $token.id] ?? []).map(
+					(transaction) =>
+						extendIcTransaction({
+							transaction,
+							token: $token,
+							btcStatuses: $btcStatusesStore?.[$token.id] ?? undefined
+						})
+				)
+	);
 
-export const icTransactions: Readable<
-	(token: Token | undefined) => NonNullable<IcTransactionsData>
-> = derived(
+export const icTransactions: Readable<(token?: Token) => NonNullable<IcTransactionsData>> = derived(
 	[ckBtcPendingUtxoTransactions, ckEthPendingTransactions, icExtendedTransactions],
 	([$ckBtcPendingUtxoTransactions, $ckEthPendingTransactions, $icExtendedTransactions]) =>
-		(token: Token | undefined) => [
+		(token?: Token) => [
 			...$ckBtcPendingUtxoTransactions(token),
 			...$ckEthPendingTransactions(token),
 			...$icExtendedTransactions(token)

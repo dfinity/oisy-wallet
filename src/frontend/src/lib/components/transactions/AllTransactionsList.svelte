@@ -46,8 +46,6 @@
 		$solTransactions: $solTransactionsStore
 	});
 
-	$: console.log('pending', $icPendingTransactionsStore);
-
 	let sortedTransactions: AllTransactionUiWithCmp[];
 	$: sortedTransactions = transactions.sort(({ transaction: a }, { transaction: b }) =>
 		sortTransactions({ transactionA: a, transactionB: b })

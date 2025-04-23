@@ -54,8 +54,6 @@
 
 	let noTransactions = false;
 	$: noTransactions = nonNullish($token) && $icTransactionsStore?.[$token.id] === null;
-
-	$: console.log($icTransactions);
 </script>
 
 <Info />
