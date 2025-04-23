@@ -12,7 +12,6 @@ describe('EthSendForm', () => {
 	mockContext.set(
 		SEND_CONTEXT_KEY,
 		initSendContext({
-			sendPurpose: 'convert-eth-to-cketh',
 			token: ETHEREUM_TOKEN
 		})
 	);
@@ -37,7 +36,6 @@ describe('EthSendForm', () => {
 	const destinationSelector = 'input[data-tid="destination-input"]';
 	const networkSelector = 'div[id="network"]';
 	const maxFeeEthSelector = 'div[id="max-fee-eth"]';
-	const sendInfoMessageBoxSelector = 'div[data-tid="send-info-message-box"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	it('should render all fields', () => {
@@ -61,12 +59,6 @@ describe('EthSendForm', () => {
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
 
 		expect(maxFeeEth).not.toBeNull();
-
-		const sendInfoMessageBox: HTMLDivElement | null = container.querySelector(
-			sendInfoMessageBoxSelector
-		);
-
-		expect(sendInfoMessageBox).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 
