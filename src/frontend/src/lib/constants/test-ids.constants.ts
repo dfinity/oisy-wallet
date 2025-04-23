@@ -9,6 +9,7 @@ export const LOGIN_BUTTON = 'login-button';
 export const MAX_BUTTON = 'max-button';
 
 export const LOADER_MODAL = 'loader-modal';
+export const BUTTON_MODAL_CLOSE = 'close-modal';
 
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
@@ -94,6 +95,9 @@ export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
 
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
+export const VIP_QR_CODE_ICON = 'vip-qr-code-icon';
+export const VIP_QR_CODE_BINANCE_ICON = 'vip-qr-code-binance-icon';
+export const VIP_STATE_IMAGE_BANNER = 'vip-state-image-banner';
 
 export const REFERRAL_CODE_COPY_BUTTON = 'referral-code-copy-button';
 export const REFERRAL_CODE_SHARE_BUTTON = 'referral-code-share-button';
@@ -117,7 +121,6 @@ export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
 export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
-export const MANAGE_TOKENS_MODAL_CLOSE = 'manage-tokens-modal-close';
 export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
@@ -168,3 +171,5 @@ export const TOKEN_LIST_FILTER = 'token-list-filter';
 
 export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
+
+export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
