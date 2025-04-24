@@ -146,6 +146,12 @@ export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anc
 export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
 
+export const HIDDEN_TRANSACTIONS_INFO_BOX = 'hidden-transactions-info-box';
+
+export const TRANSACTION_MENU = 'transaction-menu';
+export const TRANSACTION_MENU_POPOVER = 'transaction-menu-popover';
+export const TRANSACTION_MENU_HIDDEN_TRANSACTIONS = 'transaction-menu-hidden-transactions';
+
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';

@@ -16,6 +16,7 @@
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		modalBtcTransaction,
 		modalEthTransaction,
@@ -27,10 +28,17 @@
 	import type { OptionToken } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
-	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
+	import {
+		filterReceivedMicroTransactions,
+		getReceivedMicroTransactions,
+		mapAllTransactionsUi,
+		sortTransactions
+	} from '$lib/utils/transactions.utils';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+
+	export let onlyMicroTransactions = false;
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
@@ -44,8 +52,13 @@
 		$solTransactions: $solTransactionsStore
 	});
 
+	let filteredTransactions: AllTransactionUiWithCmp[];
+	$: filteredTransactions = onlyMicroTransactions
+		? getReceivedMicroTransactions({ transactions, exchanges: $exchanges })
+		: filterReceivedMicroTransactions({ transactions, exchanges: $exchanges });
+
 	let sortedTransactions: AllTransactionUiWithCmp[];
-	$: sortedTransactions = transactions.sort(({ transaction: a }, { transaction: b }) =>
+	$: sortedTransactions = filteredTransactions.sort(({ transaction: a }, { transaction: b }) =>
 		sortTransactions({ transactionA: a, transactionB: b })
 	);
 
@@ -99,7 +112,7 @@
 	{/if}
 
 	{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
-		<TransactionsPlaceholder />
+		<TransactionsPlaceholder isHiddenTransactions={onlyMicroTransactions} />
 	{/if}
 </AllTransactionsSkeletons>
 

@@ -889,7 +889,16 @@
 			"transaction_history_unavailable": "Transaction history unavailable",
 			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
 			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
-			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history."
+			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history.",
+			"show_hidden_transactions": "View hidden transactions",
+			"hidden_transactions_title": "Hidden transactions",
+			"hidden_transactions_info": "$oisy_short detects suspicious incoming transactions and hides them from the default transaction list. We recommend to not copy or send assets to those addresses.",
+			"hidden_transaction_history": "You have no hidden transactions",
+			"hidden_receive": "$oisy_short protects you and will detect suspicious transactions and move them to this space here!"
+		},
+		"alt": {
+			"transactions_menu": "Open transactions menu",
+			"show_hidden_transactions_menu_item": "Show hidden transactions"
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
