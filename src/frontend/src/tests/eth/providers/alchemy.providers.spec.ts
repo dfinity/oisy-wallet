@@ -80,7 +80,7 @@ describe('alchemy.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrowError(
+			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrow(
 				replacePlaceholders(en.init.error.no_alchemy_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})
