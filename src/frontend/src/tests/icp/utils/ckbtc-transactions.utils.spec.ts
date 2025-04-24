@@ -18,7 +18,7 @@ describe('ckBtcPendingUtxoTransactions', () => {
 			ckBtcPendingUtxosStore: get(ckBtcPendingUtxosStore)
 		});
 
-		expect(result.length).toEqual(0);
+		expect(result).toHaveLength(0);
 	});
 
 	it('should return the pending transactions', () => {
@@ -30,7 +30,7 @@ describe('ckBtcPendingUtxoTransactions', () => {
 			ckBtcPendingUtxosStore: get(ckBtcPendingUtxosStore)
 		});
 
-		expect(result.length).toEqual(1);
+		expect(result).toHaveLength(1);
 
 		cleanupCkBtcPendingStores();
 	});
@@ -44,7 +44,7 @@ describe('ckBtcPendingUtxoTransactions', () => {
 			ckBtcPendingUtxosStore: get(ckBtcPendingUtxosStore)
 		});
 
-		expect(result.length).toEqual(0);
+		expect(result).toHaveLength(0);
 
 		cleanupCkBtcPendingStores();
 	});
