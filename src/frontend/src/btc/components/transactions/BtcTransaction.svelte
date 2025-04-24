@@ -28,7 +28,7 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openBtcTransaction({id:modalId,data:{ transaction, token }})}
+	on:click={() => modalStore.openBtcTransaction({ id: modalId, data: { transaction, token } })}
 	{amount}
 	{type}
 	timestamp={Number(timestamp)}

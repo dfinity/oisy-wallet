@@ -14,7 +14,7 @@
 		trackEvent({
 			name: TRACK_HELP_SIGNING_IN
 		});
-		modalStore.openAuthHelp({id:modalId,data: true });
+		modalStore.openAuthHelp({ id: modalId, data: true });
 	};
 </script>
 

@@ -36,9 +36,9 @@
 		});
 
 		if (nonNullish(airdrop)) {
-			modalStore.openRewardDetails({id:rewardModalId,data: airdrop });
+			modalStore.openRewardDetails({ id: rewardModalId, data: airdrop });
 		} else {
-			modalStore.openDappDetails({id:dappModalId,data: dappsCarouselSlide });
+			modalStore.openDappDetails({ id: dappModalId, data: dappsCarouselSlide });
 		}
 	};
 

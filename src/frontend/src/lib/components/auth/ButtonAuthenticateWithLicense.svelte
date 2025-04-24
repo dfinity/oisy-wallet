@@ -16,7 +16,7 @@
 		const { success } = await signIn({});
 
 		if (success === 'cancelled' || success === 'error') {
-			modalStore.openAuthHelp({id:modalId,data: false });
+			modalStore.openAuthHelp({ id: modalId, data: false });
 		}
 	};
 </script>

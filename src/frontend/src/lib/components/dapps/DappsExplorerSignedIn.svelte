@@ -37,7 +37,7 @@
 {#if nonNullish(featuredDapp) && nonNullish(featuredDapp.screenshots)}
 	<div class="mb-6 md:mb-10">
 		<DappPromoBanner
-			on:click={() => modalStore.openDappDetails({id:modalId, data:featuredDapp})}
+			on:click={() => modalStore.openDappDetails({ id: modalId, data: featuredDapp })}
 			dAppDescription={featuredDapp}
 		/>
 	</div>
@@ -69,7 +69,7 @@
 		<li class="flex" in:fade>
 			<DappCard
 				on:click={() => {
-					modalStore.openDappDetails({id:modalId, data:dApp});
+					modalStore.openDappDetails({ id: modalId, data: dApp });
 				}}
 				dAppDescription={dApp}
 			/>

@@ -22,11 +22,11 @@
 			await loadRewardResult($authIdentity);
 		if (receivedReward) {
 			if (receivedJackpot) {
-				modalStore.openRewardState({id:modalId,data: receivedJackpot });
+				modalStore.openRewardState({ id: modalId, data: receivedJackpot });
 			} else if (receivedReferral) {
 				modalStore.openReferralState();
 			} else {
-				modalStore.openRewardState({id:modalId,data: false });
+				modalStore.openRewardState({ id: modalId, data: false });
 			}
 		}
 	});

@@ -240,11 +240,11 @@
 				case SESSION_REQUEST_PERSONAL_SIGN:
 				case SESSION_REQUEST_SOL_SIGN_TRANSACTION:
 				case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION: {
-					modalStore.openWalletConnectSign({id:signModalId,data: sessionRequest });
+					modalStore.openWalletConnectSign({ id: signModalId, data: sessionRequest });
 					return;
 				}
 				case SESSION_REQUEST_ETH_SEND_TRANSACTION: {
-					modalStore.openWalletConnectSend({id:sendModalId,data: sessionRequest });
+					modalStore.openWalletConnectSend({ id: sendModalId, data: sessionRequest });
 					return;
 				}
 				default: {

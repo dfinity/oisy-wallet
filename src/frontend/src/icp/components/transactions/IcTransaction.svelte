@@ -44,7 +44,7 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openIcTransaction({id:modalId ,data:{ transaction, token }})}
+	on:click={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}
 	styleClass="block w-full border-0"
 	{amount}
 	{type}

@@ -53,7 +53,8 @@
 
 	const modalId = Symbol();
 
-	const openSettingsModal = (t: SettingsModalType) => modalStore.openSettings({id:modalId,data: t });
+	const openSettingsModal = (t: SettingsModalType) =>
+		modalStore.openSettings({ id: modalId, data: t });
 </script>
 
 <SettingsCard>

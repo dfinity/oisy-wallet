@@ -67,7 +67,7 @@
 					link
 					on:click={() => {
 						dropdown?.close();
-						modalStore.openSettings({id:modalId,data:SettingsModalType.ENABLED_NETWORKS});
+						modalStore.openSettings({ id: modalId, data: SettingsModalType.ENABLED_NETWORKS });
 					}}><IconManage />{$i18n.networks.manage}</Button
 				>
 			</span>

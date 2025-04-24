@@ -35,7 +35,7 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openSolTransaction({id:modalId, data:{ transaction, token }})}
+	on:click={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
 	{amount}
 	{type}
 	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}
