@@ -34,6 +34,18 @@
 	);
 
 	const manageTokensId = Symbol();
+
+	const onClick = () => {
+		codeType === QrCodeType.GOLD && isNullish(goldToken) && nonNullish(goldTokenSymbol)
+				? modalStore.openManageTokens({
+					id: manageTokensId,
+					data: {
+						initialSearch: goldTokenSymbol,
+						message: replaceOisyPlaceholders($i18n.tokens.manage.text.default_message)
+					}
+				})
+				: modalStore.close();
+	}
 </script>
 
 {#if isSuccessful}
@@ -76,17 +88,7 @@
 			colorStyle="secondary-light"
 			type="button"
 			fullWidth
-			on:click={() => {
-				codeType === QrCodeType.GOLD && isNullish(goldToken) && nonNullish(goldTokenSymbol)
-					? modalStore.openManageTokens({
-							id: manageTokensId,
-							data: {
-								initialSearch: goldTokenSymbol,
-								message: replaceOisyPlaceholders($i18n.tokens.manage.text.default_message)
-							}
-						})
-					: modalStore.close();
-			}}
+			on:click={onClick}
 			testId={VIP_STATE_BUTTON}
 			slot="toolbar"
 		>

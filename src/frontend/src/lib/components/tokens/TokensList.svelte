@@ -48,7 +48,7 @@
 
 	let initialSearch: string | undefined;
 	let message: string | undefined;
-	$: {({initialSearch, message} = nonNullish($modalManageTokensData) && $modalManageTokensData)}
+	$: {({initialSearch, message} = nonNullish($modalManageTokensData) ? $modalManageTokensData : {initialSearch: undefined, message: undefined})}
 </script>
 
 <TokensDisplayHandler bind:tokens>
