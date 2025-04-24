@@ -11,6 +11,8 @@
 	let isJackpot: boolean | undefined;
 	$: isJackpot = $modalRewardState ? ($modalStore?.data as boolean | undefined) : undefined;
 
+	const modalId = Symbol();
+
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
 			return;
@@ -20,11 +22,11 @@
 			await loadRewardResult($authIdentity);
 		if (receivedReward) {
 			if (receivedJackpot) {
-				modalStore.openRewardState(receivedJackpot);
+				modalStore.openRewardState({ id: modalId, data: receivedJackpot });
 			} else if (receivedReferral) {
 				modalStore.openReferralState();
 			} else {
-				modalStore.openRewardState(false);
+				modalStore.openRewardState({ id: modalId, data: false });
 			}
 		}
 	});

@@ -30,10 +30,12 @@
 
 	let amount: bigint | undefined;
 	$: amount = nonNullish(value) ? (type === 'send' ? value * -1n : value) : value;
+
+	const modalId = Symbol();
 </script>
 
 <Transaction
-	on:click={() => modalStore.openSolTransaction({ transaction, token })}
+	on:click={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
 	{amount}
 	{type}
 	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}

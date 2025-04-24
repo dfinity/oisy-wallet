@@ -10,11 +10,13 @@
 	export let fullWidth = false;
 	export let licenseAlignment: 'inherit' | 'center' = 'inherit';
 
+	const modalId = Symbol();
+
 	const onClick = async () => {
 		const { success } = await signIn({});
 
 		if (success === 'cancelled' || success === 'error') {
-			modalStore.openAuthHelp(false);
+			modalStore.openAuthHelp({ id: modalId, data: false });
 		}
 	};
 </script>
