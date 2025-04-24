@@ -1,5 +1,4 @@
 use candid::Principal;
-use ic_cdk::api::management_canister::bitcoin::bitcoin_get_utxos;
 use ic_cdk::api::{
     call::{call_with_payment128, CallResult},
     management_canister::bitcoin::{
@@ -22,7 +21,7 @@ async fn get_utxos(
     address: String,
     filter: Option<UtxoFilter>,
 ) -> Result<GetUtxosResponse, String> {
-    let utxos_res = bitcoin_get_utxos(GetUtxosRequest {
+    let utxos_res = _bitcoin_get_utxos_query(GetUtxosRequest {
         address,
         network,
         filter,
@@ -41,7 +40,7 @@ pub async fn _bitcoin_get_utxos_query(arg: GetUtxosRequest) -> CallResult<(GetUt
     };
     call_with_payment128(
         Principal::management_canister(),
-        "bitcoin_get_utxos_query",
+        "bitcoin_get_utxos",
         (arg,),
         cycles,
     )
