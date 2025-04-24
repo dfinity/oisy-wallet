@@ -2,6 +2,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { GLDT_SYMBOL } from '$env/tokens/tokens.icrc.env';
+	import type { IcToken } from '$icp/types/ic-token';
 	import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 	import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
 	import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
@@ -15,7 +16,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import type {IcToken} from "$icp/types/ic-token";
 
 	export let isSuccessful: boolean;
 	export let codeType: QrCodeType = QrCodeType.VIP;
