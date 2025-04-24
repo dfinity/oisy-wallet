@@ -997,6 +997,11 @@
 			"add_new_contact": "Add new contact"
 		}
 	},
+	"contact": {
+		"fields": {
+			"name": "Name"
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
