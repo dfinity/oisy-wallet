@@ -226,7 +226,7 @@ describe('custom-token.services', () => {
 			});
 
 			it.each([undefined, IC_CKBTC_INDEX_CANISTER_ID])(
-				'should result with loaded but toastError if metadata fails with index ID %s',
+				'should result with loaded but console error if metadata fails with index ID %s',
 				async (indexCanisterId) => {
 					backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
 
@@ -254,10 +254,11 @@ describe('custom-token.services', () => {
 
 					expect(result).toBe('loaded');
 
-					expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-						msg: { text: get(i18n).init.error.icrc_canisters },
-						err
-					});
+					expect(spyToastsError).not.toHaveBeenCalled();
+
+					expect(console.error).toHaveBeenCalledTimes(2);
+					expect(console.error).toHaveBeenNthCalledWith(1, err);
+					expect(console.error).toHaveBeenNthCalledWith(2, err);
 				}
 			);
 		});
