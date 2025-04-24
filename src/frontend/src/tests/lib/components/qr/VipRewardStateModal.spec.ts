@@ -1,3 +1,4 @@
+import { GLDT_SYMBOL } from '$env/tokens/tokens.icrc.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import failedVipReward from '$lib/assets/failed-vip-reward.svg';
@@ -12,7 +13,6 @@ import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import {GLDT_SYMBOL} from "$env/tokens/tokens.icrc.env";
 
 describe('VipRewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid=${VIP_STATE_IMAGE_BANNER}]`;
