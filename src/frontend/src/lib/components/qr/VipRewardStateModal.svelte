@@ -32,6 +32,8 @@
 	$: goldToken = $enabledIcTokens.find(
 		(token) => token.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId
 	);
+
+	const manageTokensId = Symbol();
 </script>
 
 {#if isSuccessful}
@@ -77,8 +79,11 @@
 			on:click={() => {
 				codeType === QrCodeType.GOLD && isNullish(goldToken) && nonNullish(goldTokenSymbol)
 					? modalStore.openManageTokens({
-							initialSearch: goldTokenSymbol,
+					id: manageTokensId,
+					data: {
+						initialSearch: goldTokenSymbol,
 							message: replaceOisyPlaceholders($i18n.tokens.manage.text.default_message)
+					}
 						})
 					: modalStore.close();
 			}}
