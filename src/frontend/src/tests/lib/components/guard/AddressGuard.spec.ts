@@ -1,5 +1,4 @@
 import * as btcAddressServices from '$btc/services/btc-address.services';
-import * as networksEnv from '$env/networks/networks.env';
 import * as ethAddressServices from '$eth/services/eth-address.services';
 import * as api from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -38,8 +37,6 @@ describe('AddressGuard', () => {
 		vi.clearAllMocks();
 
 		vi.resetAllMocks();
-
-		vi.spyOn(networksEnv, 'USER_NETWORKS_FEATURE_ENABLED', 'get').mockImplementation(() => true);
 
 		setupUserNetworksStore('allEnabled');
 
