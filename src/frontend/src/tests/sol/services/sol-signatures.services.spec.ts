@@ -255,8 +255,7 @@ describe('sol-signatures.services', () => {
 			await getSolTransactions({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
-				tokenAddress: mockSplAddress,
-				tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
+				tokensList: [{ address: mockSplAddress, owner: TOKEN_PROGRAM_ADDRESS }]
 			});
 
 			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();

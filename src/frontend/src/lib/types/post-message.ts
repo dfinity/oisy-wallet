@@ -1,25 +1,26 @@
-import type {
-	PostMessageDataRequestBtcSchema,
-	PostMessageDataRequestExchangeTimerSchema,
-	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
-	PostMessageDataRequestIcCkSchema,
-	PostMessageDataRequestIcrcSchema,
-	PostMessageDataRequestIcrcStrictSchema,
-	PostMessageDataRequestSchema,
-	PostMessageDataRequestSolSchema,
-	PostMessageDataResponseAuthSchema,
-	PostMessageDataResponseBTCAddressSchema,
-	PostMessageDataResponseErrorSchema,
-	PostMessageDataResponseExchangeErrorSchema,
-	PostMessageDataResponseExchangeSchema,
-	PostMessageDataResponseSchema,
-	PostMessageDataResponseWalletCleanUpSchema,
-	PostMessageDataResponseWalletSchema,
-	PostMessageJsonDataResponseSchema,
-	PostMessageResponseSchema,
-	PostMessageResponseStatusSchema,
-	PostMessageSyncStateSchema,
-	inferPostMessageSchema
+import {
+	PostMessageDataRequestSolTransactionsSchema,
+	type PostMessageDataRequestBtcSchema,
+	type PostMessageDataRequestExchangeTimerSchema,
+	type PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
+	type PostMessageDataRequestIcCkSchema,
+	type PostMessageDataRequestIcrcSchema,
+	type PostMessageDataRequestIcrcStrictSchema,
+	type PostMessageDataRequestSchema,
+	type PostMessageDataRequestSolSchema,
+	type PostMessageDataResponseAuthSchema,
+	type PostMessageDataResponseBTCAddressSchema,
+	type PostMessageDataResponseErrorSchema,
+	type PostMessageDataResponseExchangeErrorSchema,
+	type PostMessageDataResponseExchangeSchema,
+	type PostMessageDataResponseSchema,
+	type PostMessageDataResponseWalletCleanUpSchema,
+	type PostMessageDataResponseWalletSchema,
+	type PostMessageJsonDataResponseSchema,
+	type PostMessageResponseSchema,
+	type PostMessageResponseStatusSchema,
+	type PostMessageSyncStateSchema,
+	type inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 import type * as z from 'zod';
 import type { ZodType } from 'zod';
@@ -46,6 +47,10 @@ export type PostMessageDataRequestIcCkBTCUpdateBalance = z.infer<
 export type PostMessageDataRequestBtc = z.infer<typeof PostMessageDataRequestBtcSchema>;
 
 export type PostMessageDataRequestSol = z.infer<typeof PostMessageDataRequestSolSchema>;
+
+export type PostMessageDataRequestSolTransactions = z.infer<
+	typeof PostMessageDataRequestSolTransactionsSchema
+>;
 
 export type PostMessageResponseStatus = z.infer<typeof PostMessageResponseStatusSchema>;
 

@@ -8,6 +8,7 @@ import { onIcrcWalletMessage } from '$icp/workers/icrc-wallet.worker';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import { onAuthMessage } from '$lib/workers/auth.worker';
 import { onExchangeMessage } from '$lib/workers/exchange.worker';
+import { onSolWalletTransactionsMessage } from '$sol/workers/sol-wallet-transactions.worker';
 import { onSolWalletMessage } from '$sol/workers/sol-wallet.worker';
 
 onmessage = async (msg: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
@@ -21,6 +22,7 @@ onmessage = async (msg: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 		onCkEthMinterInfoMessage(msg),
 		onIcpWalletMessage(msg),
 		onIcrcWalletMessage(msg),
-		onSolWalletMessage(msg)
+		onSolWalletMessage(msg),
+		onSolWalletTransactionsMessage(msg)
 	]);
 };

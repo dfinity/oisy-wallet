@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { InfiniteScroll } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -60,8 +60,8 @@
 		await loadNextSolTransactions({
 			network,
 			address,
-			tokenAddress,
-			tokenOwnerAddress,
+			tokensList:nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress) ?
+				[{ address: tokenAddress, owner: tokenOwnerAddress }] : [],
 			before: lastSignature,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});

@@ -35,10 +35,13 @@ export const PostMessageRequestSchema = z.enum([
 	'triggerIcrcWalletTimer',
 	'stopBtcWalletTimer',
 	'stopSolWalletTimer',
+	'stopSolWalletTransactionsTimer',
 	'startBtcWalletTimer',
 	'startSolWalletTimer',
+	'startSolWalletTransactionsTimer',
 	'triggerBtcWalletTimer',
 	'triggerSolWalletTimer',
+	'triggerSolWalletTransactionsTimer',
 	'stopBtcStatusesTimer',
 	'startBtcStatusesTimer',
 	'triggerBtcStatusesTimer',
@@ -98,10 +101,23 @@ export const PostMessageDataRequestSolSchema = z.object({
 	tokenOwnerAddress: z.custom<SolAddress>().optional()
 });
 
+export const PostMessageDataRequestSolTransactionsSchema = z.object({
+	// TODO: generate zod schema for CertifiedData
+	address: z.custom<CertifiedData<SolAddress>>(),
+	solanaNetwork: z.custom<SolanaNetworkType>(),
+	tokensList: z.array(
+		z.object({
+			address: z.custom<SplTokenAddress>(),
+			owner: z.custom<SolAddress>()
+		})
+	)
+});
+
 export const PostMessageResponseStatusSchema = z.enum([
 	'syncIcWalletStatus',
 	'syncBtcWalletStatus',
 	'syncSolWalletStatus',
+	'syncSolWalletTransactionsStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
 	'syncCkBTCUpdateBalanceStatus'
@@ -116,10 +132,12 @@ export const PostMessageResponseSchema = z.enum([
 	'syncIcrcWallet',
 	'syncBtcWallet',
 	'syncSolWallet',
+	'syncSolWalletTransactions',
 	'syncIcpWalletError',
 	'syncIcrcWalletError',
 	'syncBtcWalletError',
 	'syncSolWalletError',
+	'syncSolWalletTransactionsError',
 	'syncIcpWalletCleanUp',
 	'syncIcrcWalletCleanUp',
 	'syncBtcStatuses',

@@ -25,7 +25,6 @@ import type {
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { findAssociatedTokenPda } from '@solana-program/token';
 import { address as solAddress } from '@solana/kit';
 
 interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
@@ -41,14 +40,12 @@ export const fetchSolTransactionsForSignature = async ({
 	signature,
 	network,
 	address,
-	tokenAddress,
-	tokenOwnerAddress
+	ataAddresses
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
 	address: SolAddress;
-	tokenAddress?: SplTokenAddress;
-	tokenOwnerAddress?: SolAddress;
+	ataAddresses: SolAddress[];
 }): Promise<SolTransactionUi[]> => {
 	const transactionDetail: SolRpcTransaction | null = await fetchTransactionDetailForSignature({
 		signature,
@@ -86,15 +83,6 @@ export const fetchSolTransactionsForSignature = async ({
 			},
 			{ allInstructions: [...instructions], offset: 0 }
 		);
-
-	const [ataAddress] =
-		nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
-			? await findAssociatedTokenPda({
-					owner: solAddress(address),
-					tokenProgram: solAddress(tokenOwnerAddress),
-					mint: solAddress(tokenAddress)
-				})
-			: [undefined];
 
 	const { parsedTransactions } = await allInstructions.reduce<
 		Promise<{
@@ -151,22 +139,27 @@ export const fetchSolTransactionsForSignature = async ({
 			};
 
 			// Ignoring the instruction if the transaction is not related to the address or its associated token account.
-			if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
+			if (
+				from !== address &&
+				to !== address &&
+				!ataAddresses.includes(solAddress(from)) &&
+				!ataAddresses.includes(solAddress(to))
+			) {
 				return { parsedTransactions, cumulativeBalances, addressToToken };
 			}
 
-			// If the token address is not the one we are looking for, we can skip this instruction.
-			// In case of Solana native tokens, the token address is undefined.
-			if (mappedTokenAddress !== tokenAddress) {
-				return { parsedTransactions, cumulativeBalances, addressToToken };
-			}
+			// // If the token address is not the one we are looking for, we can skip this instruction.
+			// // In case of Solana native tokens, the token address is undefined.
+			// if (mappedTokenAddress !== tokenAddress) {
+			// 	return { parsedTransactions, cumulativeBalances, addressToToken };
+			// }
 
 			const newTransaction: SolTransactionUi = {
 				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
 				timestamp: blockTime ?? ZERO_BI,
 				value,
-				type: address === from || ataAddress === from ? 'send' : 'receive',
+				type: address === from || ataAddresses.includes(solAddress(from)) ? 'send' : 'receive',
 				from,
 				to,
 				status,

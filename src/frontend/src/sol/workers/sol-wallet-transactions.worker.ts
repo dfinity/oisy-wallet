@@ -1,0 +1,22 @@
+import type { PostMessage, PostMessageDataRequestSol } from '$lib/types/post-message';
+import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
+
+const scheduler: SolWalletScheduler = new SolWalletScheduler();
+
+export const onSolWalletTransactionsMessage = async ({
+	data: dataMsg
+}: MessageEvent<PostMessage<PostMessageDataRequestSol>>) => {
+	const { msg, data } = dataMsg;
+
+	switch (msg) {
+		case 'stopSolWalletTransactionsTimer':
+			scheduler.stop();
+			return;
+		case 'startSolWalletTransactionsTimer':
+			await scheduler.start(data);
+			return;
+		case 'triggerSolWalletTransactionsTimer':
+			await scheduler.trigger(data);
+			return;
+	}
+};

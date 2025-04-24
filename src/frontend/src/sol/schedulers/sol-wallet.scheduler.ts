@@ -8,14 +8,12 @@ import type {
 import type { CertifiedData } from '$lib/types/store';
 import type { Option } from '$lib/types/utils';
 import { loadSolLamportsBalance } from '$sol/api/solana.api';
-import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
-import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 
 interface LoadSolWalletParams {
 	solanaNetwork: SolanaNetworkType;
@@ -26,20 +24,17 @@ interface LoadSolWalletParams {
 
 interface SolWalletStore {
 	balance: CertifiedData<Option<SolBalance>> | undefined;
-	transactions: Record<string, SolCertifiedTransaction>;
 }
 
 interface SolWalletData {
 	balance: CertifiedData<SolBalance | null>;
-	transactions: SolCertifiedTransaction[];
 }
 
 export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> {
 	private timer = new SchedulerTimer('syncSolWalletStatus');
 
 	private store: SolWalletStore = {
-		balance: undefined,
-		transactions: {}
+		balance: undefined
 	};
 
 	stop() {
@@ -79,23 +74,6 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		certified: false
 	});
 
-	private loadTransactions = async ({
-		solanaNetwork: network,
-		...rest
-	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
-		const transactions = await getSolTransactions({
-			network,
-			...rest
-		});
-
-		const transactionsUi = transactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
-
-		return transactionsUi.filter(({ data: { id } }) => isNullish(this.store.transactions[`${id}`]));
-	};
-
 	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestSol>) => {
 		assertNonNullish(data, 'No data provided to get Solana balance.');
 
@@ -105,62 +83,34 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 				...rest
 			} = data;
 
-			const [balance, transactions] = await Promise.all([
-				this.loadBalance({
-					address,
-					...rest
-				}),
-				this.loadTransactions({
-					address,
-					...rest
-				})
-			]);
+			const balance = await this.loadBalance({
+				address,
+				...rest
+			});
 
-			this.syncWalletData({ response: { balance, transactions } });
+			this.syncWalletData({ response: { balance } });
 		} catch (error: unknown) {
 			this.postMessageWalletError({ error });
 		}
 	};
 
-	private syncWalletData = ({
-		response: { balance, transactions }
-	}: {
-		response: SolWalletData;
-	}) => {
+	private syncWalletData = ({ response: { balance } }: { response: SolWalletData }) => {
 		if (!this.store.balance?.certified && balance.certified) {
 			throw new Error('Balance certification status cannot change from uncertified to certified');
 		}
 
 		const newBalance = isNullish(this.store.balance) || this.store.balance.data !== balance.data;
-		const newTransactions = transactions.length > 0;
 
 		this.store = {
 			...this.store,
-			...(newBalance && { balance }),
-			...(newTransactions && {
-				transactions: {
-					...this.store.transactions,
-					...transactions.reduce(
-						(acc, transaction) => ({
-							...acc,
-							[transaction.data.id]: transaction
-						}),
-						{}
-					)
-				}
-			})
+			...(newBalance && { balance })
 		};
 
-		if (!newBalance && !newTransactions) {
+		if (!newBalance) {
 			return;
 		}
 
-		this.postMessageWallet({
-			wallet: {
-				balance,
-				newTransactions: JSON.stringify(transactions, jsonReplacer)
-			}
-		});
+		this.postMessageWallet({ wallet: { balance } });
 	};
 
 	private postMessageWallet(data: SolPostMessageDataResponseWallet) {
