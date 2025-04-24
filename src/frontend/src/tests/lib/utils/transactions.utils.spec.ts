@@ -518,10 +518,6 @@ describe('transactions.utils', () => {
 			});
 
 			it('should get only received micro transactions', () => {
-				const mockIcSendTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
-					[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified: false }))
-				};
-
 				const transactions = mapAllTransactionsUi({
 					tokens,
 					$btcTransactions: mockBtcTransactions,
