@@ -3,17 +3,19 @@ import {
 	IC_CKETH_LEDGER_CANISTER_ID,
 	STAGING_CKETH_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcrcTransaction } from '$icp/types/ic-transaction';
 import {
 	getCkEthPendingTransactions,
 	mapCkEthereumTransaction
 } from '$icp/utils/cketh-transactions.utils';
 import type { Token } from '$lib/types/token';
-import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
+import {
+	MOCK_CKETH_TOKEN,
+	cleanupCkEthPendingStore,
+	setupCkEthPendingStore
+} from '$tests/mocks/ic-transactions.mock';
 import { Principal } from '@dfinity/principal';
 import { get } from 'svelte/store';
 
@@ -74,28 +76,6 @@ describe('mapCkEthereumTransaction', () => {
 });
 
 describe('getCkEthPendingTransactions', () => {
-	const MOCK_CKETH_TOKEN: Partial<IcCkToken> = {
-		...ETHEREUM_TOKEN,
-		ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID
-	};
-
-	const setupStore = () => {
-		const transactions = [
-			createCertifiedIcTransactionUiMock('tx1'),
-			createCertifiedIcTransactionUiMock('tx2')
-		];
-
-		icPendingTransactionsStore.set({
-			tokenId: (MOCK_CKETH_TOKEN as Token).id,
-			data: transactions
-		});
-	};
-
-	const cleanupStore = () => {
-		icPendingTransactionsStore.reset(ICP_TOKEN.id);
-		icPendingTransactionsStore.reset((MOCK_CKETH_TOKEN as Token).id);
-	};
-
 	it('should return empty array when no pending transactions', () => {
 		const result = getCkEthPendingTransactions({
 			token: MOCK_CKETH_TOKEN as Token,
@@ -106,7 +86,7 @@ describe('getCkEthPendingTransactions', () => {
 	});
 
 	it('should return the pending transactions', () => {
-		setupStore();
+		setupCkEthPendingStore();
 
 		const result = getCkEthPendingTransactions({
 			token: MOCK_CKETH_TOKEN as Token,
@@ -115,11 +95,11 @@ describe('getCkEthPendingTransactions', () => {
 
 		expect(result).toHaveLength(2);
 
-		cleanupStore();
+		cleanupCkEthPendingStore();
 	});
 
 	it('should not return the pending transactions for wrong token', () => {
-		setupStore();
+		setupCkEthPendingStore();
 
 		const result = getCkEthPendingTransactions({
 			token: ICP_TOKEN,
@@ -128,6 +108,6 @@ describe('getCkEthPendingTransactions', () => {
 
 		expect(result).toHaveLength(0);
 
-		cleanupStore();
+		cleanupCkEthPendingStore();
 	});
 });
