@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import { isNotIcToken, isNotIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
@@ -9,7 +10,6 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
-	import type {Snippet} from 'svelte';
 
 	interface Props {
 		token: Token;
