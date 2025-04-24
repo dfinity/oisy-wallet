@@ -141,7 +141,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openIcTransaction: setTypeWithData('ic-transaction'),
 		openBtcTransaction: setTypeWithData('btc-transaction'),
 		openSolTransaction: setTypeWithData('sol-transaction'),
-		openManageTokens: <(params: SetWithOptionalDataParams<ManageTokensData>) => void>setTypeWithData('manage-tokens'),
+		openManageTokens: <(params: SetWithOptionalDataParams<ManageTokensData>) => void>(
+			setTypeWithData('manage-tokens')
+		),
 		openHideToken: setType('hide-token'),
 		openIcHideToken: setType('ic-hide-token'),
 		openEthToken: setType('eth-token'),
