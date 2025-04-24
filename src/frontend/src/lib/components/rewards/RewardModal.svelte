@@ -38,6 +38,9 @@
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
+	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 
 	export let reward: RewardDescription;
 
@@ -51,9 +54,12 @@
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
 		$ethAddress,
-		$icTransactions: $icTransactionsStore,
+		$icTransactionsStore: $icTransactionsStore,
 		$btcStatuses: $btcStatusesStore,
-		$solTransactions: $solTransactionsStore
+		$solTransactions: $solTransactionsStore,
+		$ckBtcMinterInfoStore: $ckBtcMinterInfoStore,
+		$icPendingTransactionsStore: $icPendingTransactionsStore,
+		$ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore
 	});
 
 	let requirementsFulfilled: boolean[];

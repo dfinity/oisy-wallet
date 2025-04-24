@@ -31,6 +31,9 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
+	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
@@ -39,9 +42,12 @@
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
 		$ethAddress,
-		$icTransactions: $icTransactionsStore,
 		$btcStatuses: $btcStatusesStore,
-		$solTransactions: $solTransactionsStore
+		$solTransactions: $solTransactionsStore,
+		$icTransactionsStore: $icTransactionsStore,
+		$ckBtcMinterInfoStore: $ckBtcMinterInfoStore,
+		$icPendingTransactionsStore: $icPendingTransactionsStore,
+		$ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore
 	});
 
 	let sortedTransactions: AllTransactionUiWithCmp[];
