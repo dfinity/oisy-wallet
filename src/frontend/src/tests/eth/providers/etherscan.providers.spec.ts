@@ -140,7 +140,7 @@ describe('etherscan.providers', () => {
 
 		describe('transactions method', () => {
 			it('should call fetch for all history types', async () => {
-					const provider = new EtherscanProvider(network, chainId);
+				const provider = new EtherscanProvider(network, chainId);
 
 				const result = await provider.transactions({ address });
 
@@ -152,7 +152,7 @@ describe('etherscan.providers', () => {
 			});
 
 			it('should call fetch with correct parameters for getHistory', async () => {
-						const provider = new EtherscanProvider(network, chainId);
+				const provider = new EtherscanProvider(network, chainId);
 
 				await provider.transactions({ address });
 
@@ -160,7 +160,7 @@ describe('etherscan.providers', () => {
 
 				expect(mockFetch).toHaveBeenCalledTimes(2);
 				expect(mockFetch).toHaveBeenNthCalledWith(1, 'account', {
-          	chainId,
+					chainId,
 					action: 'txlist',
 					address,
 					startblock: 0,
@@ -170,7 +170,7 @@ describe('etherscan.providers', () => {
 			});
 
 			it('should call fetch with correct parameters for getInternalHistory', async () => {
-			const provider = new EtherscanProvider(network, chainId);
+				const provider = new EtherscanProvider(network, chainId);
 
 				await provider.transactions({ address });
 
@@ -178,7 +178,7 @@ describe('etherscan.providers', () => {
 
 				expect(mockFetch).toHaveBeenCalledTimes(2);
 				expect(mockFetch).toHaveBeenNthCalledWith(2, 'account', {
-          chainId,
+					chainId,
 					action: 'txlistinternal',
 					address,
 					startblock: 0,
@@ -188,7 +188,7 @@ describe('etherscan.providers', () => {
 			});
 
 			it('should handle errors gracefully', async () => {
-			const provider = new EtherscanProvider(network, chainId);
+				const provider = new EtherscanProvider(network, chainId);
 				mockFetch.mockRejectedValue(new Error('Network error'));
 
 				await expect(provider.transactions({ address })).rejects.toThrow('Network error');
