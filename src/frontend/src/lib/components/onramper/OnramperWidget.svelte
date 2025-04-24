@@ -16,10 +16,9 @@
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
-	import type { OnramperId, OnramperNetworkId, OnramperNetworkWallet } from '$lib/types/onramper';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
 
-	let defaultCrypto: OnramperId | undefined = $derived(
+	let defaultCrypto = $derived(
 		$token?.buy?.onramperId ??
 			($networkEthereum
 				? ETHEREUM_TOKEN.buy?.onramperId
@@ -33,16 +32,16 @@
 	);
 
 	// List of Cryptocurrencies that are allowed to be bought
-	let onlyCryptos: OnramperId[] = $derived(
+	let onlyCryptos = $derived(
 		$enabledTokens.map((token) => token.buy?.onramperId).filter(nonNullish)
 	);
 
 	// List of Cryptocurrency Networks to which the tokens are allowed to be bought
-	let onlyCryptoNetworks: OnramperNetworkId[] = $derived(
+	let onlyCryptoNetworks = $derived(
 		$networks.map((network) => network.buy?.onramperId).filter(nonNullish)
 	);
 
-	let networkWallets: OnramperNetworkWallet[] = $derived(
+	let networkWallets = $derived(
 		mapOnramperNetworkWallets({
 			networks: $networks,
 			walletMap: new Map([
@@ -54,7 +53,7 @@
 		})
 	);
 
-	let src: string = $derived(
+	let src = $derived(
 		buildOnramperLink({
 			mode: 'buy',
 			defaultFiat: 'usd',
