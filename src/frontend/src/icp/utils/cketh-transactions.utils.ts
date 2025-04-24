@@ -9,6 +9,7 @@ import {
 	STAGING_CKETH_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
+import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi, IcrcTransaction } from '$icp/types/ic-transaction';
 import {
@@ -17,11 +18,13 @@ import {
 	decodeBurnMemo,
 	decodeMintMemo
 } from '$icp/utils/cketh-memo.utils';
-import { isTokenCkErc20Ledger } from '$icp/utils/ic-send.utils';
+import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
+import type { Token } from '$lib/types/token';
 import {
 	fromNullable,
 	isNullish,
@@ -151,4 +154,18 @@ const burnMemoInfo = (
 		console.error('Failed to decode ckETH burn memo', memo, err);
 		return undefined;
 	}
+};
+
+export const getCkEthPendingTransactions = ({
+	token,
+	icPendingTransactionsStore
+}: {
+	token: Token;
+	icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
+}) => {
+	if (!isTokenCkEthLedger(token) && !isTokenCkErc20Ledger(token)) {
+		return [];
+	}
+
+	return icPendingTransactionsStore?.[token.id] ?? [];
 };
