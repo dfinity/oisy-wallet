@@ -12,7 +12,7 @@ import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import {mockMapIcrcData} from "$tests/utils/map-icrc-data";
+import {mapLocalIcrcData} from "$tests/utils/map-icrc-data";
 import * as icrcNetworks from '$env/networks/networks.icrc.env';
 import {GLDT_IC_DATA} from "$env/networks/networks.icrc.env";
 import {additionalIcrcTokens} from "$env/tokens/tokens.icrc.env";
@@ -93,7 +93,7 @@ describe('VipRewardStateModal', () => {
 	});
 
 	describe('Handle token state', () => {
-		const additionalIcrcData = mockMapIcrcData(additionalIcrcTokens);
+		const additionalIcrcData = mapLocalIcrcData(additionalIcrcTokens);
 		const goldToken = nonNullish(additionalIcrcData?.GLDT)
 		? {
 			...additionalIcrcData.GLDT,
