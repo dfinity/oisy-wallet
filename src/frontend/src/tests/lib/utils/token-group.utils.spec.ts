@@ -481,7 +481,6 @@ describe('token-group.utils', () => {
 			const result = groupTokens(tokens);
 
 			expect(result).toHaveLength(tokens.length);
-
 			result.forEach((tokenResult, index) => {
 				expect(tokenResult).toHaveProperty('token');
 
@@ -605,7 +604,7 @@ describe('token-group.utils', () => {
 			assert('group' in result[0]);
 			assert('group' in result[1]);
 
-			const [{ group: group0 }] = result;
+			const [{ group: group0 }, { group: group1 }] = result;
 
 			expect(group0).toStrictEqual({
 				id: mockSecondToken.groupData?.id,
@@ -614,6 +613,15 @@ describe('token-group.utils', () => {
 				tokens: [mockSecondToken],
 				balance: mockSecondToken.balance,
 				usdBalance: mockSecondToken.usdBalance
+       			});
+
+			expect(group1).toStrictEqual({
+				id: mockToken.groupData?.id,
+				nativeToken: mockToken,
+        	groupData: mockToken.groupData,
+				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
+				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
+				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance
 			});
 		});
 

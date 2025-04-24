@@ -35,7 +35,7 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 
 	return tokenOrGroups
 		.map((tokenOrGroup) =>
-			'group' in tokenOrGroup && tokenOrGroup.group.tokens.length === 1
+			isTokenUiGroup(tokenOrGroup) && tokenOrGroup.group.tokens.length === 1
 				? { token: tokenOrGroup.group.tokens[0] }
 				: tokenOrGroup
 		)
