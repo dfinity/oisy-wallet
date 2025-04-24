@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SOURCE_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+PATH="$SOURCE_DIR:$PATH"
+
+help_text() {
+  cat <<-EOF
+
+	Restores a local dfx server state and releted identities from a saved ZIP file.
+
+	Warning: This is recommended only for CI, as there is limited protection against
+	local identities being clobbered by those in the zip file.
+
+	EOF
+}
+
+# Source the clap.bash file ---------------------------------------------------
+source "$SOURCE_DIR/clap.bash"
+# Define options
+clap.define short=s long=snapshot desc="The file to save to" variable=DFX_SNAPSHOT_FILE default="state.tar.xz"
+clap.define long=pocketic desc="Whether to start dfx with --pocketic" variable=USE_POCKET_IC nargs=0 default=false
+# Source the output file ----------------------------------------------------------
+source "$(clap.build)"
+
+DFX_SNAPSHOT_FILE="$(realpath "$DFX_SNAPSHOT_FILE")"
+
+pushd "$HOME"
+rm -fr .local/share/dfx/network/local
+tar --extract --xz --file "$DFX_SNAPSHOT_FILE"
+POCKET_IC_ARG=()
+if [[ "${USE_POCKET_IC:-}" == "true" ]]; then
+  POCKET_IC_ARG=(--pocketic)
+fi
+# Note: dfx start works here but not in the project dir.
+dfx start "${POCKET_IC_ARG[@]}" --background
+num_canisters="$(curl -s "http://localhost:$(dfx info webserver-port)/_/dashboard" | grep -c '<h3>Execution state</h3>')"
+echo "Approx num canisters: $num_canisters"
+popd
+rm -fr .dfx
+mv "$HOME/.dfx" .
+dfx-sns-demo-healthcheck

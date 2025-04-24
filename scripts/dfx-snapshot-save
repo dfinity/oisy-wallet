@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SOURCE_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+PATH="$SOURCE_DIR:$PATH"
+
+print_help() {
+  cat <<-EOF
+	
+	Saves a snapshot of local state.
+	EOF
+}
+
+# Source the clap.bash file ---------------------------------------------------
+source "$SOURCE_DIR/clap.bash"
+# Define options
+clap.define short=s long=snapshot desc="The file to save to" variable=DFX_SNAPSHOT_FILE default="state.tar.xz"
+clap.define short=i long=identities desc="A comma separated list of identities to save" variable=DFX_IDENTITIES default="default"
+# Source the output file ----------------------------------------------------------
+source "$(clap.build)"
+
+case "$(uname)" in
+Linux)
+  LOCAL_REPLICA_DATA_DIR=".local/share/dfx/network/local"
+  ;;
+Darwin)
+  LOCAL_REPLICA_DATA_DIR="Library/Application Support/org.dfinity.dfx/network/local"
+  ;;
+*)
+  {
+    echo "ERROR: Unsupported OS: $(uname)"
+    exit 1
+  }
+  ;;
+esac
+
+# Get the absolute path to the output file and make sure that the containing dir exists.
+DFX_SNAPSHOT_DIR="$(dirname "$DFX_SNAPSHOT_FILE")"
+mkdir -p "$DFX_SNAPSHOT_DIR"
+DFX_SNAPSHOT_FILE="$(realpath "$DFX_SNAPSHOT_DIR")/$(basename "$DFX_SNAPSHOT_FILE")"
+DFX_SNAPSHOT_TEMP_FILE="$(mktemp "${DFX_SNAPSHOT_FILE}.tmp.XXXX")"
+DFX_SNAPSHOT_TEMP_COMPRESSED="$(mktemp "${DFX_SNAPSHOT_FILE}.tmp.xz.XXXX")"
+
+# Put the identities to save into an array
+IFS=', ' read -r -a DFX_IDENTITIES <<<"$DFX_IDENTITIES"
+
+# Get global state
+pushd "$HOME"
+tar --create --file "$DFX_SNAPSHOT_TEMP_FILE" "$LOCAL_REPLICA_DATA_DIR" .config/dfx/networks.json
+for config_file in identity.json version-manager.json; do
+  config_path=".config/dfx/$config_file"
+  if [[ -f "$config_path" ]]; then
+    tar --append --file "$DFX_SNAPSHOT_TEMP_FILE" "$config_path"
+  fi
+done
+for id in "${DFX_IDENTITIES[@]}"; do
+  tar --append --file "$DFX_SNAPSHOT_TEMP_FILE" ".config/dfx/identity/${id}"
+done
+
+# Get local project state
+popd
+if test -d .dfx; then
+  tar --append --file "$DFX_SNAPSHOT_TEMP_FILE" .dfx
+fi
+xz <"$DFX_SNAPSHOT_TEMP_FILE" >"$DFX_SNAPSHOT_TEMP_COMPRESSED"
+rm "$DFX_SNAPSHOT_TEMP_FILE"
+mv "$DFX_SNAPSHOT_TEMP_COMPRESSED" "$DFX_SNAPSHOT_FILE"
