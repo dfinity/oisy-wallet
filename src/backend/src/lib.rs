@@ -388,7 +388,8 @@ pub async fn btc_select_user_utxos_fee(
             .expect("Could not decode the principal.");
     ic_cdk::println!("Check Point 2: {}", principal);
     let source_address: String = "bc1q0uy4sck2mp6cqst5lcxvpc4yfhmu274jaguasr".to_string();
-    // btc_principal_to_p2wpkh_address(params.network, &principal) .await.map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+    // btc_principal_to_p2wpkh_address(params.network, &principal) .await.map_err(|msg|
+    // SelectedUtxosFeeError::InternalError { msg })?;
 
     ic_cdk::println!("Check Point 3: source_address={}", source_address);
 
