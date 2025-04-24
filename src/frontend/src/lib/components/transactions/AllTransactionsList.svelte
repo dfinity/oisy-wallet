@@ -8,6 +8,9 @@
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import { btcStatusesStore } from '$icp/stores/btc.store';
+	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -31,9 +34,6 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
-	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
@@ -44,10 +44,10 @@
 		$ethAddress,
 		$btcStatuses: $btcStatusesStore,
 		$solTransactions: $solTransactionsStore,
-		$icTransactionsStore: $icTransactionsStore,
-		$ckBtcMinterInfoStore: $ckBtcMinterInfoStore,
-		$icPendingTransactionsStore: $icPendingTransactionsStore,
-		$ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore
+		$icTransactionsStore,
+		$ckBtcMinterInfoStore,
+		$icPendingTransactionsStore,
+		$ckBtcPendingUtxosStore
 	});
 
 	let sortedTransactions: AllTransactionUiWithCmp[];
