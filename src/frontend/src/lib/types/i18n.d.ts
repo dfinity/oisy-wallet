@@ -905,6 +905,7 @@ interface I18nAddress_book {
 }
 
 interface I18nContact {
+	form: { add_new_contact: string };
 	fields: { name: string };
 }
 

@@ -998,6 +998,9 @@
 		}
 	},
 	"contact": {
+		"form": {
+			"add_new_contact": "Add new contact"
+		},
 		"fields": {
 			"name": "Name"
 		}
