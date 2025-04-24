@@ -1,4 +1,4 @@
-import { EnvSnsTokenSchema } from '$env/schema/env-sns-token.schema';
+import { IcTokenDeprecatedSchema } from '$icp/schema/ic-token-deprecated.schema';
 import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
 import { TokenSchema } from '$lib/schema/token.schema';
 import { CanisterIdTextSchema } from '$lib/types/canister';
@@ -38,7 +38,7 @@ export const IcInterfaceSchema = IcCanistersSchema.merge(IcAppMetadataSchema);
 
 export const IcTokenSchema = TokenSchema.merge(IcFeeSchema)
 	.merge(IcInterfaceSchema)
-	.merge(EnvSnsTokenSchema.pick({ deprecated: true }));
+	.merge(IcTokenDeprecatedSchema);
 
 export const IcTokenWithoutIdSchema = IcTokenSchema.omit({ id: true }).strict();
 
