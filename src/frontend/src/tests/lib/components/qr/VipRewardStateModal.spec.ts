@@ -127,13 +127,15 @@ describe('VipRewardStateModal', () => {
 			await waitFor(() => {
 				button?.click();
 
-				expect(get(modalStore)).toEqual(expect.objectContaining({
-					data: {
-						initialSearch: 'GLDT',
-						message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
-					},
-					type: 'manage-tokens'
-				}));
+				expect(get(modalStore)).toEqual(
+					expect.objectContaining({
+						data: {
+							initialSearch: 'GLDT',
+							message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
+						},
+						type: 'manage-tokens'
+					})
+				);
 			});
 		});
 
@@ -152,13 +154,15 @@ describe('VipRewardStateModal', () => {
 			await waitFor(() => {
 				button?.click();
 
-				expect(get(modalStore)).toEqual(expect.objectContaining({
-					data: {
-						initialSearch: 'GLDT',
-						message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
-					},
-					type: 'manage-tokens'
-				}));
+				expect(get(modalStore)).toEqual(
+					expect.objectContaining({
+						data: {
+							initialSearch: 'GLDT',
+							message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
+						},
+						type: 'manage-tokens'
+					})
+				);
 			});
 		});
 
