@@ -30,7 +30,9 @@
 {#if TEST_FE && notEmptyString(branch) && notEmptyString(commit)}
 	<p class="mt-24 text-center text-xs text-primary">
 		{$i18n.settings.text.git_disclaimer}<br />
-		<b>{$i18n.settings.text.git_branch_name}</b>{branch}<br />
-		<b>{$i18n.settings.text.git_commit_hash}</b>{commit}
+		<b>{$i18n.settings.text.git_branch_name}</b>
+		{branch}<br />
+		<b>{$i18n.settings.text.git_commit_hash}</b>
+		{commit}
 	</p>
 {/if}
