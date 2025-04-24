@@ -1,4 +1,4 @@
-import bitcoin from '$icp/assets/bitcoin.svg';
+import bitcoin from '$btc/assets/bitcoin.svg';
 import type { TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 
