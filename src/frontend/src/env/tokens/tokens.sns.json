@@ -392,6 +392,7 @@
 	{
 		"ledgerCanisterId": "itgqj-7qaaa-aaaaq-aadoa-cai",
 		"rootCanisterId": "ibahq-taaaa-aaaaq-aadna-cai",
+		"deprecated": true,
 		"indexCanisterId": "i5e5b-eaaaa-aaaaq-aadpa-cai",
 		"metadata": {
 			"decimals": 8,
