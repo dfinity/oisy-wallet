@@ -157,6 +157,7 @@ jobs:
         if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
         working-directory: .
         run: |
+          set -euxo pipefail # Ensure that the `exit 1` causes this step to fail.
           ./scripts/test.backend.sh -- --ignored candid || {
             echo "The backend API is incompatible with production."
             echo "If this is intentional, please use the conventional commit convention for indicating"
