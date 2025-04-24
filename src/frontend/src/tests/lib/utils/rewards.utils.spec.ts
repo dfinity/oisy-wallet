@@ -34,9 +34,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(false);
-			expect(receivedJackpot).toBe(false);
-			expect(receivedReferral).toBe(false);
+			expect(receivedReward).toBeFalsy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeFalsy();
 		});
 
 		it('should return falsy reward result and set entry in the session storage', async () => {
@@ -55,9 +55,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(false);
-			expect(receivedJackpot).toBe(false);
-			expect(receivedReferral).toBe(false);
+			expect(receivedReward).toBeFalsy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeFalsy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -78,9 +78,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(true);
-			expect(receivedJackpot).toBe(false);
-			expect(receivedReferral).toBe(false);
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeFalsy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -102,9 +102,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(true);
-			expect(receivedJackpot).toBe(true);
-			expect(receivedReferral).toBe(false);
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeTruthy();
+			expect(receivedReferral).toBeFalsy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -126,9 +126,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(true);
-			expect(receivedJackpot).toBe(true);
-			expect(receivedReferral).toBe(false);
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeTruthy();
+			expect(receivedReferral).toBeFalsy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -150,9 +150,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(true);
-			expect(receivedJackpot).toBe(false);
-			expect(receivedReferral).toBe(true);
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeTruthy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -165,7 +165,7 @@ describe('rewards.utils', () => {
 
 			const result = isOngoingCampaign({ startDate, endDate });
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 		});
 
 		it('should return false if the current date is before the start date of the campaign', () => {
@@ -173,7 +173,7 @@ describe('rewards.utils', () => {
 
 			const result = isOngoingCampaign({ startDate, endDate: new Date() });
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 		});
 
 		it('should return false if the current date is after the end date of the campaign', () => {
@@ -181,7 +181,7 @@ describe('rewards.utils', () => {
 
 			const result = isOngoingCampaign({ startDate, endDate: new Date() });
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 		});
 	});
 
@@ -191,7 +191,7 @@ describe('rewards.utils', () => {
 
 			const result = isUpcomingCampaign(startDate);
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 		});
 
 		it('should return false if the current date is after the start date of the campaign', () => {
@@ -199,7 +199,7 @@ describe('rewards.utils', () => {
 
 			const result = isUpcomingCampaign(startDate);
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 		});
 	});
 
