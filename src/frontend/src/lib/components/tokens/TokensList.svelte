@@ -89,7 +89,7 @@
 		{/if}
 
 		{#if $modalManageTokens}
-			<ManageTokensModal initialSearch={initialSearch}>
+			<ManageTokensModal {initialSearch}>
 				{#snippet infoElement()}
 					{#if nonNullish(message)}
 						<MessageBox level="info">
