@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { page } from '$app/stores';
 	import VipRewardStateModal from '$lib/components/qr/VipRewardStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -9,7 +10,6 @@
 	import { loading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { removeSearchParam } from '$lib/utils/nav.utils';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		children?: Snippet;
