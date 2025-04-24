@@ -1,5 +1,7 @@
 import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
-import { isDeprecatedSns, isNotDeprecatedSns } from '$icp/utils/icrc.utils';
+import { icTokenIcrcCustomToken, isDeprecatedSns, isNotDeprecatedSns } from '$icp/utils/icrc.utils';
+import type { TokenStandard } from '$lib/types/token';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 
 describe('icrc.utils', () => {
 	describe('icTokenIcrcCustomToken', () => {
