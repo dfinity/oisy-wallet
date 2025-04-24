@@ -9,10 +9,16 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
+	import type {Snippet} from 'svelte';
 
-	export let token: Token;
+	interface Props {
+		token: Token;
+		children: Snippet;
+	}
 
-	let disableInfiniteScroll = false;
+	let { token, children }: Props = $props();
+
+	let disableInfiniteScroll = $state(false);
 
 	const onIntersect = async () => {
 		if (isNullish($authIdentity)) {
@@ -58,5 +64,5 @@
 </script>
 
 <InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
-	<slot />
+	{@render children()}
 </InfiniteScroll>
