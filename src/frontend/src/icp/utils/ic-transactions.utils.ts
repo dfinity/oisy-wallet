@@ -98,15 +98,13 @@ export const getIcExtendedTransactions = ({
 	token: Token;
 	icTransactionsStore: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
 	btcStatusesStore: CertifiedStoreData<BtcStatusesData>;
-}) => {
-	return (icTransactionsStore?.[token.id] ?? []).map((transaction) =>
+}) => (icTransactionsStore?.[token.id] ?? []).map((transaction) =>
 		extendIcTransaction({
 			transaction,
 			token,
 			btcStatuses: btcStatusesStore?.[token.id] ?? undefined
 		})
 	);
-};
 
 export const getAllIcTransactions = ({
 	token,
@@ -125,10 +123,8 @@ export const getAllIcTransactions = ({
 	ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
 	icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
-}) => {
-	return [
+}) => [
 		...getCkBtcPendingUtxoTransactions({ token, ckBtcPendingUtxosStore, ckBtcMinterInfoStore }),
 		...getCkEthPendingTransactions({ token, icPendingTransactionsStore }),
 		...getIcExtendedTransactions({ token, icTransactionsStore, btcStatusesStore })
 	];
-};
