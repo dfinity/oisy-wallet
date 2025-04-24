@@ -79,5 +79,5 @@ const mapIcrcCustomToken = ({
 	alternativeName,
 	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`,
 	deprecated,
-	...(deprecated === false && { icon: `/icons/sns/${ledgerCanisterId}.png` })
+	...(deprecated !== false && { icon: `/icons/sns/${ledgerCanisterId}.png` })
 });
