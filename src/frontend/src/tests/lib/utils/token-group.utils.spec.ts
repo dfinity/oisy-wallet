@@ -579,7 +579,7 @@ describe('token-group.utils', () => {
 		};
 
 		it('should return an empty array if no tokens are provided', () => {
-			expect(groupTokens([]).length).toBe(0);
+			expect(groupTokens([])).toHaveLength(0);
 		});
 
 		it('should create groups of single-element tokens if none of them have a "main token"', () => {
@@ -587,10 +587,10 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(3);
+			expect(result).toHaveLength(3);
 
 			result.map((group) => {
-				expect(group.tokens.length).toBe(1);
+				expect(group.tokens).toHaveLength(1);
 			});
 
 			expect(result[0].id).toBe(mockToken.id);
@@ -619,10 +619,10 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(2);
+			expect(result).toHaveLength(2);
 
-			expect(result[0].tokens.length).toBe(3);
-			expect(result[1].tokens.length).toBe(1);
+			expect(result[0].tokens).toHaveLength(3);
+			expect(result[1].tokens).toHaveLength(1);
 
 			expect(result[0].id).toBe(mockToken.id);
 			expect(result[1].id).toBe(mockSecondToken.id);
@@ -655,11 +655,11 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(3);
+			expect(result).toHaveLength(3);
 
-			expect(result[0].tokens.length).toBe(2);
-			expect(result[1].tokens.length).toBe(1);
-			expect(result[2].tokens.length).toBe(1);
+			expect(result[0].tokens).toHaveLength(2);
+			expect(result[1].tokens).toHaveLength(1);
+			expect(result[2].tokens).toHaveLength(1);
 
 			expect(result[0].id).toBe(mockToken.id);
 			expect(result[1].id).toBe(mockSecondToken.id);
@@ -686,10 +686,10 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(2);
+			expect(result).toHaveLength(2);
 
-			expect(result[0].tokens.length).toBe(3);
-			expect(result[1].tokens.length).toBe(1);
+			expect(result[0].tokens).toHaveLength(3);
+			expect(result[1].tokens).toHaveLength(1);
 
 			expect(result[0].id).toBe(mockToken.id);
 			expect(result[1].id).toBe(mockSecondToken.id);
@@ -717,10 +717,10 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(2);
+			expect(result).toHaveLength(2);
 
 			result.map((group) => {
-				expect(group.tokens.length).toBe(1);
+				expect(group.tokens).toHaveLength(1);
 			});
 
 			expect(result[0].id).toBe(mockTwinToken1.id);
@@ -745,9 +745,9 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(2);
+			expect(result).toHaveLength(2);
 
-			expect(result[0].tokens.length).not.toBe(3);
+			expect(result[0].tokens).not.toHaveLength(3);
 
 			expect(result[0].id).not.toBe(mockToken.id);
 
@@ -769,9 +769,9 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(1);
+			expect(result).toHaveLength(1);
 
-			expect(result[0].tokens.length).toBe(3);
+			expect(result[0].tokens).toHaveLength(3);
 
 			expect(result[0].id).toBe(mockToken.id);
 

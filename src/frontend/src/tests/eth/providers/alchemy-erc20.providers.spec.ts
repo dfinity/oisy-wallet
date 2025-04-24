@@ -7,36 +7,30 @@ import {
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
-	ALCHEMY_NETWORK_BASE_MAINNET,
-	ALCHEMY_NETWORK_BASE_SEPOLIA,
-	ALCHEMY_NETWORK_BSC_MAINNET,
-	ALCHEMY_NETWORK_BSC_TESTNET,
-	ALCHEMY_NETWORK_MAINNET,
-	ALCHEMY_NETWORK_SEPOLIA,
+	ALCHEMY_JSON_RPC_URL_BASE_MAINNET,
+	ALCHEMY_JSON_RPC_URL_BASE_SEPOLIA,
+	ALCHEMY_JSON_RPC_URL_BSC_MAINNET,
+	ALCHEMY_JSON_RPC_URL_BSC_TESTNET,
+	ALCHEMY_JSON_RPC_URL_MAINNET,
+	ALCHEMY_JSON_RPC_URL_SEPOLIA,
 	ETHEREUM_NETWORK,
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
+import {
+	AlchemyErc20Provider,
+	alchemyErc20Providers
+} from '$eth/providers/alchemy-erc20.providers';
 import type { EthereumNetwork } from '$eth/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
-import { Alchemy, type Network } from 'alchemy-sdk';
-import { vi } from 'vitest';
-
-vi.mock(import('alchemy-sdk'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		Alchemy: vi.fn()
-	};
-});
+import { JsonRpcProvider, type Networkish } from 'ethers/providers';
 
 vi.mock('$env/rest/alchemy.env', () => ({
 	ALCHEMY_API_KEY: 'test-api-key'
 }));
 
-describe('alchemy.providers', () => {
+describe('alchemy-erc20.providers', () => {
 	const ALCHEMY_API_KEY = 'test-api-key';
 
 	const networks: EthereumNetwork[] = [
@@ -48,40 +42,40 @@ describe('alchemy.providers', () => {
 		BSC_TESTNET_NETWORK
 	];
 
-	const alchemyNames: Network[] = [
-		ALCHEMY_NETWORK_MAINNET,
-		ALCHEMY_NETWORK_SEPOLIA,
-		ALCHEMY_NETWORK_BASE_MAINNET,
-		ALCHEMY_NETWORK_BASE_SEPOLIA,
-		ALCHEMY_NETWORK_BSC_MAINNET,
-		ALCHEMY_NETWORK_BSC_TESTNET
+	const alchemyNames: Networkish[] = [
+		ALCHEMY_JSON_RPC_URL_MAINNET,
+		ALCHEMY_JSON_RPC_URL_SEPOLIA,
+		ALCHEMY_JSON_RPC_URL_BASE_MAINNET,
+		ALCHEMY_JSON_RPC_URL_BASE_SEPOLIA,
+		ALCHEMY_JSON_RPC_URL_BSC_MAINNET,
+		ALCHEMY_JSON_RPC_URL_BSC_TESTNET
 	];
 
 	it('should create the correct map of providers', () => {
-		expect(Alchemy).toHaveBeenCalledTimes(networks.length);
+		expect(JsonRpcProvider).toHaveBeenCalledTimes(networks.length);
 
 		networks.forEach((_, index) => {
-			expect(Alchemy).toHaveBeenNthCalledWith(index + 1, {
-				apiKey: ALCHEMY_API_KEY,
-				network: alchemyNames[index]
-			});
+			expect(JsonRpcProvider).toHaveBeenNthCalledWith(
+				index + 1,
+				`${alchemyNames[index]}/${ALCHEMY_API_KEY}`
+			);
 		});
 	});
 
-	describe('alchemyProviders', () => {
+	describe('alchemyErc20Providers', () => {
 		networks.forEach(({ id, name }) => {
 			it(`should return the correct provider for ${name} network`, () => {
-				const provider = alchemyProviders(id);
+				const provider = alchemyErc20Providers(id);
 
-				expect(provider).toBeInstanceOf(AlchemyProvider);
+				expect(provider).toBeInstanceOf(AlchemyErc20Provider);
 
 				expect(provider).toHaveProperty('provider');
 			});
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrow(
-				replacePlaceholders(en.init.error.no_alchemy_provider, {
+			expect(() => alchemyErc20Providers(ICP_NETWORK_ID)).toThrow(
+				replacePlaceholders(en.init.error.no_alchemy_erc20_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})
 			);
