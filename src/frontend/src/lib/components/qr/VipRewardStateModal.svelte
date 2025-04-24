@@ -11,17 +11,17 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { VIP_STATE_BUTTON, VIP_STATE_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
-	import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import {enabledIcTokens} from "$lib/derived/tokens.derived";
 
 	export let isSuccessful: boolean;
 	export let codeType: QrCodeType = QrCodeType.VIP;
 
 	let goldToken: IcTokenToggleable | undefined;
-	$: goldToken = $allIcrcTokens.find((token) => token.symbol === GLDT_SYMBOL);
+	$: goldToken = $enabledIcTokens.find((token) => token.symbol === GLDT_SYMBOL);
 </script>
 
 {#if isSuccessful}
@@ -65,7 +65,7 @@
 			type="button"
 			fullWidth
 			on:click={() => {
-				codeType === QrCodeType.GOLD && (isNullish(goldToken) || !goldToken.enabled)
+				codeType === QrCodeType.GOLD && isNullish(goldToken)
 					? modalStore.openManageTokens({
 							initialSearch: GLDT_SYMBOL,
 							message: replaceOisyPlaceholders($i18n.tokens.manage.text.default_message)
