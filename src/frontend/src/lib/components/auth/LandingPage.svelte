@@ -24,7 +24,7 @@
 		class="ml-auto min-w-[1127px] pt-12 md:m-0 md:flex md:h-full md:content-center md:items-center"
 	>
 		<div class="w-full md:h-md:mt-auto">
-			{#await import(`$lib/assets/main_image-${$themeStore ?? 'light'}.webp`) then { default: src }}
+			{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
 				<Img {src} alt={ariaLabel} />
 			{/await}
 		</div>
