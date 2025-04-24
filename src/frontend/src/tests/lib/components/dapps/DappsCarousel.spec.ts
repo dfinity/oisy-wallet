@@ -1,7 +1,7 @@
 import type { Settings, UserProfile } from '$declarations/backend/backend.did';
-import * as airdrops from '$env/airdrop-campaigns.env';
-import { FEATURED_AIRDROP_CAROUSEL_SLIDE_ID } from '$env/airdrop-campaigns.env';
 import * as dapps from '$env/dapp-descriptions.env';
+import * as rewards from '$env/reward-campaigns.env';
+import { FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
 import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 import { userProfileStore } from '$lib/stores/user-profile.store';
@@ -18,31 +18,34 @@ describe('DappsCarousel', () => {
 		userProfileStore.set({ profile: mockUserProfile, certified: false });
 	});
 
-	it('should render nothing if there is no dApps and airdrops', () => {
+	it('should render nothing if there is no dApps and rewards', () => {
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue([]);
-		vi.spyOn(airdrops, 'airdropCampaigns', 'get').mockReturnValue([]);
+		vi.spyOn(rewards, 'rewardCampaigns', 'get').mockReturnValue([]);
 
 		const { container } = render(DappsCarousel);
+
 		expect(container.textContent).toBe('');
 	});
 
-	it('should render nothing if no dApps has the carousel prop and no airdrops', () => {
-		vi.spyOn(airdrops, 'airdropCampaigns', 'get').mockReturnValue([]);
+	it('should render nothing if no dApps has the carousel prop and no rewards', () => {
+		vi.spyOn(rewards, 'rewardCampaigns', 'get').mockReturnValue([]);
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue(
 			mockDappsDescriptions.map((dapp) => ({ ...dapp, carousel: undefined }))
 		);
 
 		const { container } = render(DappsCarousel);
+
 		expect(container.textContent).toBe('');
 	});
 
-	it('should render nothing if no dApps and featured airdrop is unknown', () => {
-		vi.spyOn(airdrops, 'FEATURED_AIRDROP_CAROUSEL_SLIDE_ID', 'get').mockReturnValue(
-			'test' as typeof FEATURED_AIRDROP_CAROUSEL_SLIDE_ID
+	it('should render nothing if no dApps and featured reward is unknown', () => {
+		vi.spyOn(rewards, 'FEATURED_REWARD_CAROUSEL_SLIDE_ID', 'get').mockReturnValue(
+			'test' as typeof FEATURED_REWARD_CAROUSEL_SLIDE_ID
 		);
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue([]);
 
 		const { container } = render(DappsCarousel);
+
 		expect(container.textContent).toBe('');
 	});
 
@@ -54,7 +57,7 @@ describe('DappsCarousel', () => {
 				dapp_carousel: {
 					...mockUserSettings.dapp.dapp_carousel,
 					hidden_dapp_ids: [
-						FEATURED_AIRDROP_CAROUSEL_SLIDE_ID,
+						FEATURED_REWARD_CAROUSEL_SLIDE_ID,
 						...mockDappsDescriptions.map(({ id }) => id)
 					]
 				}
@@ -69,6 +72,7 @@ describe('DappsCarousel', () => {
 		userProfileStore.set({ profile: userProfile, certified: false });
 
 		const { container } = render(DappsCarousel);
+
 		expect(container.textContent).toBe('');
 	});
 
@@ -76,6 +80,7 @@ describe('DappsCarousel', () => {
 		userProfileStore.reset();
 
 		const { container } = render(DappsCarousel);
+
 		expect(container.textContent).toBe('');
 	});
 
@@ -88,11 +93,13 @@ describe('DappsCarousel', () => {
 		userProfileStore.set({ profile: userProfile, certified: false });
 
 		const { getByTestId } = render(DappsCarousel);
+
 		expect(getByTestId(CAROUSEL_CONTAINER)).toBeInTheDocument();
 	});
 
 	it('should render the Carousel when data exist', () => {
 		const { getByTestId } = render(DappsCarousel);
+
 		expect(getByTestId(CAROUSEL_CONTAINER)).toBeInTheDocument();
 	});
 });

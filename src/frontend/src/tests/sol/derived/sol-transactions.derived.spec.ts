@@ -28,6 +28,7 @@ describe('sol-transactions.derived', () => {
 	describe('solTransactions', () => {
 		it('should return an empty array when transactions store is empty', () => {
 			const result = get(solTransactions);
+
 			expect(result).toEqual([]);
 		});
 
@@ -40,6 +41,7 @@ describe('sol-transactions.derived', () => {
 			solTransactionsStore.nullify(SOLANA_TOKEN_ID);
 
 			const result = get(solTransactions);
+
 			expect(result).toHaveLength(0);
 			expect(result).toEqual([]);
 		});
@@ -51,6 +53,7 @@ describe('sol-transactions.derived', () => {
 			});
 
 			const result = get(solTransactions);
+
 			expect(result).toEqual(transactions.map(({ data }) => data));
 		});
 	});
@@ -59,7 +62,8 @@ describe('sol-transactions.derived', () => {
 		it('should return false when transactions store is empty', () => {
 			solTransactionsStore.reset(SOLANA_TOKEN_ID);
 			const result = get(solTransactionsInitialized);
-			expect(result).toBe(false);
+
+			expect(result).toBeFalsy();
 		});
 
 		it('should return false when transactions are nullish', () => {
@@ -71,7 +75,8 @@ describe('sol-transactions.derived', () => {
 			solTransactionsStore.nullify(SOLANA_TOKEN_ID);
 
 			const result = get(solTransactionsInitialized);
-			expect(result).toBe(false);
+
+			expect(result).toBeFalsy();
 		});
 
 		it('should return true when transactions are initialized', () => {
@@ -81,7 +86,8 @@ describe('sol-transactions.derived', () => {
 			});
 
 			const result = get(solTransactionsInitialized);
-			expect(result).toBe(true);
+
+			expect(result).toBeTruthy();
 		});
 	});
 
@@ -89,7 +95,8 @@ describe('sol-transactions.derived', () => {
 		it('should return true when transactions store is empty', () => {
 			solTransactionsStore.reset(SOLANA_TOKEN_ID);
 			const result = get(solTransactionsNotInitialized);
-			expect(result).toBe(true);
+
+			expect(result).toBeTruthy();
 		});
 
 		it('should return true when transactions are nullish', () => {
@@ -101,7 +108,8 @@ describe('sol-transactions.derived', () => {
 			solTransactionsStore.nullify(SOLANA_TOKEN_ID);
 
 			const result = get(solTransactionsNotInitialized);
-			expect(result).toBe(true);
+
+			expect(result).toBeTruthy();
 		});
 
 		it('should return false when transactions are initialized', () => {
@@ -111,7 +119,8 @@ describe('sol-transactions.derived', () => {
 			});
 
 			const result = get(solTransactionsNotInitialized);
-			expect(result).toBe(false);
+
+			expect(result).toBeFalsy();
 		});
 	});
 });

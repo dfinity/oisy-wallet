@@ -1,7 +1,6 @@
 <script lang="ts">
 	// TODO: component will be removed within migration to the new Send flow
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
@@ -38,7 +37,7 @@
 			<svelte:fragment slot="label">{$i18n.fee.text.estimated_inter_network}</svelte:fragment>
 
 			<ExchangeAmountDisplay
-				amount={BigNumber.from(kytFee)}
+				amount={kytFee}
 				decimals={$sendTokenDecimals}
 				symbol={$sendTokenSymbol}
 				exchangeRate={$sendTokenExchangeRate}

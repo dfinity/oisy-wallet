@@ -1,16 +1,26 @@
-import * as networkEnv from '$env/networks/networks.env';
+import {
+	BASE_NETWORK_ID,
+	BASE_SEPOLIA_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_MAINNET_NETWORK_ID,
+	BSC_TESTNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
+import * as btcNetworkEnv from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK,
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
+import {
 	ETHEREUM_NETWORK,
 	ETHEREUM_NETWORK_ID,
-	ICP_NETWORK,
-	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK,
 	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.env';
+} from '$env/networks/networks.eth.env';
+import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import {
 	SOLANA_DEVNET_NETWORK,
@@ -18,9 +28,9 @@ import {
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_NETWORKS,
-	SOLANA_NETWORKS_IDS,
-	SOLANA_TESTNET_NETWORK_ID
+	SOLANA_TESTNET_NETWORK_ID,
+	SUPPORTED_SOLANA_NETWORKS,
+	SUPPORTED_SOLANA_NETWORKS_IDS
 } from '$env/networks/networks.sol.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -36,6 +46,7 @@ import {
 	isNetworkIdBTCTestnet,
 	isNetworkIdBitcoin,
 	isNetworkIdEthereum,
+	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
@@ -51,31 +62,31 @@ import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 describe('network utils', () => {
 	describe('isNetworkICP', () => {
 		it('should return true for ICP network', () => {
-			expect(isNetworkICP(ICP_NETWORK)).toBe(true);
+			expect(isNetworkICP(ICP_NETWORK)).toBeTruthy();
 		});
 
 		it('should return false for non-ICP network', () => {
-			expect(isNetworkICP(ETHEREUM_NETWORK)).toBe(false);
+			expect(isNetworkICP(ETHEREUM_NETWORK)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkSolana', () => {
-		it.each(SOLANA_NETWORKS)('should return true for Solana network $name', (network) => {
-			expect(isNetworkSolana(network)).toBe(true);
+		it.each(SUPPORTED_SOLANA_NETWORKS)('should return true for Solana network $name', (network) => {
+			expect(isNetworkSolana(network)).toBeTruthy();
 		});
 
 		it('should return false for non-ICP network', () => {
-			expect(isNetworkSolana(ETHEREUM_NETWORK)).toBe(false);
+			expect(isNetworkSolana(ETHEREUM_NETWORK)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdICP', () => {
 		it('should return true for ICP network ID', () => {
-			expect(isNetworkIdICP(ICP_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdICP(ICP_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-ICP network ID', () => {
-			expect(isNetworkIdICP(BTC_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdICP(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
@@ -85,23 +96,36 @@ describe('network utils', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(networkEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
+			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
 				() => allEthereumNetworkIds
 			);
 		});
 
 		it.each(allEthereumNetworkIds)('should return true for Ethereum network ID %s', (id) => {
-			expect(isNetworkIdEthereum(id as NetworkId)).toBe(true);
+			expect(isNetworkIdEthereum(id as NetworkId)).toBeTruthy();
 		});
 
 		it('should return false for non-Ethereum network IDs', () => {
-			expect(isNetworkIdEthereum(BTC_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdEthereum(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkIdEvm', () => {
+		const allEvmNetworkIds = [
+			BASE_NETWORK_ID,
+			BASE_SEPOLIA_NETWORK_ID,
+			BSC_MAINNET_NETWORK_ID,
+			BSC_TESTNET_NETWORK_ID
+		];
+
+		it.each(allEvmNetworkIds)('should return true for EVM network ID %s', (id) => {
+			expect(isNetworkIdEvm(id as NetworkId)).toBeTruthy();
 		});
 
-		it('should return false for Ethereum mainnet network ID when mainnet is disabled', () => {
-			vi.spyOn(networkEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementationOnce(
-				() => allEthereumNetworkIds
-			);
+		it('should return false for non-EVM network IDs', () => {
+			expect(isNetworkIdEvm(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdEvm(ETHEREUM_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
@@ -117,126 +141,125 @@ describe('network utils', () => {
 		});
 
 		it.each(allBitcoinNetworkIds)('should return true for Bitcoin network ID %s', (id) => {
-			expect(isNetworkIdBitcoin(id as NetworkId)).toBe(true);
+			expect(isNetworkIdBitcoin(id as NetworkId)).toBeTruthy();
 		});
 
 		it('should return false for non-Bitcoin network IDs', () => {
-			expect(isNetworkIdBitcoin(ICP_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdBitcoin(ICP_NETWORK_ID)).toBeFalsy();
 		});
 
 		it('should return false for Bitcoin regtest network ID when it is not LOCAL env', () => {
-			vi.spyOn(networkEnv, 'BITCOIN_NETWORKS_IDS', 'get').mockImplementationOnce(() => [
-				BTC_MAINNET_NETWORK_ID,
-				BTC_TESTNET_NETWORK_ID
-			]);
+			vi.spyOn(btcNetworkEnv, 'SUPPORTED_BITCOIN_NETWORKS_IDS', 'get').mockImplementationOnce(
+				() => [BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID]
+			);
 
-			expect(isNetworkIdBitcoin(BTC_REGTEST_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdBitcoin(BTC_REGTEST_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdBTCMainnet', () => {
 		it('should return true for BTC mainnet ID', () => {
-			expect(isNetworkIdBTCMainnet(BTC_MAINNET_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdBTCMainnet(BTC_MAINNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-BTC mainnet ID', () => {
-			expect(isNetworkIdBTCMainnet(BTC_TESTNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdBTCMainnet(BTC_TESTNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdBTCTestnet', () => {
 		it('should return true for BTC testnet ID', () => {
-			expect(isNetworkIdBTCTestnet(BTC_TESTNET_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdBTCTestnet(BTC_TESTNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-BTC testnet ID', () => {
-			expect(isNetworkIdBTCTestnet(BTC_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdBTCTestnet(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdBTCRegtest', () => {
 		it('should return true for BTC regtest ID', () => {
-			expect(isNetworkIdBTCRegtest(BTC_REGTEST_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdBTCRegtest(BTC_REGTEST_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-BTC regtest ID', () => {
-			expect(isNetworkIdBTCRegtest(BTC_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdBTCRegtest(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdSepolia', () => {
 		it('should return true for Sepolia network ID', () => {
-			expect(isNetworkIdSepolia(SEPOLIA_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdSepolia(SEPOLIA_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-Sepolia network ID', () => {
-			expect(isNetworkIdSepolia(ETHEREUM_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSepolia(ETHEREUM_NETWORK_ID)).toBeFalsy();
 
-			expect(isNetworkIdSepolia(ICP_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSepolia(ICP_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdSolana', () => {
-		it.each(SOLANA_NETWORKS_IDS)('should return true for Solana network ID %s', (id) => {
-			expect(isNetworkIdSolana(id)).toBe(true);
+		it.each(SUPPORTED_SOLANA_NETWORKS_IDS)('should return true for Solana network ID %s', (id) => {
+			expect(isNetworkIdSolana(id)).toBeTruthy();
 		});
 
 		it('should return false for non-Solana network IDs', () => {
-			expect(isNetworkIdSolana(ICP_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSolana(ETHEREUM_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSolana(BTC_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSolana(ICP_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSolana(ETHEREUM_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSolana(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 
 		it('should return false for undefined network ID', () => {
-			expect(isNetworkIdSolana(undefined)).toBe(false);
+			expect(isNetworkIdSolana(undefined)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdSOLMainnet', () => {
 		it('should return true for SOL mainnet ID', () => {
-			expect(isNetworkIdSOLMainnet(SOLANA_MAINNET_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdSOLMainnet(SOLANA_MAINNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-SOL mainnet ID', () => {
-			expect(isNetworkIdSOLMainnet(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLMainnet(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLMainnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLMainnet(SOLANA_TESTNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLMainnet(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLMainnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdSOLTestnet', () => {
 		it('should return true for SOL testnet ID', () => {
-			expect(isNetworkIdSOLTestnet(SOLANA_TESTNET_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdSOLTestnet(SOLANA_TESTNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-SOL testnet ID', () => {
-			expect(isNetworkIdSOLTestnet(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLTestnet(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLTestnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLTestnet(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLTestnet(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLTestnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdSOLDevnet', () => {
 		it('should return true for SOL devnet ID', () => {
-			expect(isNetworkIdSOLDevnet(SOLANA_DEVNET_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdSOLDevnet(SOLANA_DEVNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-SOL devnet ID', () => {
-			expect(isNetworkIdSOLDevnet(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLDevnet(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLDevnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLDevnet(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLDevnet(SOLANA_TESTNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLDevnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdSOLLocal', () => {
 		it('should return true for SOL local ID', () => {
-			expect(isNetworkIdSOLLocal(SOLANA_LOCAL_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdSOLLocal(SOLANA_LOCAL_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-SOL local ID', () => {
-			expect(isNetworkIdSOLLocal(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLLocal(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLLocal(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLLocal(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLLocal(SOLANA_TESTNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLLocal(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 

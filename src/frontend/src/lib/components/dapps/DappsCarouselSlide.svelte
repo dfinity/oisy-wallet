@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import type { AirdropDescription } from '$env/types/env-airdrop';
+	import type { RewardDescription } from '$env/types/env-reward';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import {
@@ -15,7 +15,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
-	export let airdrop: AirdropDescription | undefined = undefined;
+	export let airdrop: RewardDescription | undefined = undefined;
 	$: ({
 		id: dappId,
 		carousel: { text, callToAction },
@@ -23,8 +23,8 @@
 		name: dAppName
 	} = dappsCarouselSlide);
 
-	const open = async () => {
-		await trackEvent({
+	const open = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_OPEN,
 			metadata: {
 				dappId
@@ -32,7 +32,7 @@
 		});
 
 		if (nonNullish(airdrop)) {
-			modalStore.openAirdropDetails(airdrop);
+			modalStore.openRewardDetails(airdrop);
 		} else {
 			modalStore.openDappDetails(dappsCarouselSlide);
 		}
@@ -40,8 +40,8 @@
 
 	const dispatch = createEventDispatcher();
 
-	const close = async () => {
-		await trackEvent({
+	const close = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_CLOSE,
 			metadata: {
 				dappId

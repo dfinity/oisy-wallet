@@ -38,7 +38,7 @@
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress: $ethAddress,
+		$ethAddress,
 		$icTransactions: $icTransactionsStore,
 		$btcStatuses: $btcStatusesStore,
 		$solTransactions: $solTransactionsStore
@@ -59,7 +59,7 @@
 	$: ({ transaction: selectedBtcTransaction, token: selectedBtcToken } =
 		mapTransactionModalData<BtcTransactionUi>({
 			$modalOpen: $modalBtcTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 
 	let selectedEthTransaction: EthTransactionUi | undefined;
@@ -67,7 +67,7 @@
 	$: ({ transaction: selectedEthTransaction, token: selectedEthToken } =
 		mapTransactionModalData<EthTransactionUi>({
 			$modalOpen: $modalEthTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 
 	let selectedIcTransaction: IcTransactionUi | undefined;
@@ -75,7 +75,7 @@
 	$: ({ transaction: selectedIcTransaction, token: selectedIcToken } =
 		mapTransactionModalData<IcTransactionUi>({
 			$modalOpen: $modalIcTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 
 	let selectedSolTransaction: SolTransactionUi | undefined;
@@ -83,15 +83,15 @@
 	$: ({ transaction: selectedSolTransaction, token: selectedSolToken } =
 		mapTransactionModalData<SolTransactionUi>({
 			$modalOpen: $modalSolTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 </script>
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
-		{#each Object.entries(groupedTransactions) as [date, transactions], index (date)}
+		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 			<TransactionsDateGroup
-				{date}
+				{formattedDate}
 				{transactions}
 				testId={`all-transactions-date-group-${index}`}
 			/>

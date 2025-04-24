@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onMount } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
@@ -17,7 +17,7 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
+	import { type ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 	import { WizardStepsSign } from '$lib/enums/wizard-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -41,7 +41,7 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 
 	export let listener: OptionWalletConnectListener;
-	export let request: Web3WalletTypes.SessionRequest;
+	export let request: WalletKitTypes.SessionRequest;
 	export let network: SolanaNetwork;
 
 	/**

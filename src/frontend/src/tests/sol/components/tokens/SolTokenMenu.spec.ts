@@ -24,18 +24,20 @@ import {
 	solAddressMainnetStore,
 	solAddressTestnetStore
 } from '$lib/stores/address.store';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { token as tokenStore } from '$lib/stores/token.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolTokenMenu from '$sol/components/tokens/SolTokenMenu.svelte';
 import type { SolanaNetwork } from '$sol/types/network';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('SolTokenMenu', () => {
 	beforeAll(() => {
-		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+		setupTestnetsStore('enabled');
+		setupUserNetworksStore('allEnabled');
 	});
 
 	beforeEach(() => {
@@ -45,7 +47,7 @@ describe('SolTokenMenu', () => {
 		solAddressTestnetStore.reset();
 		solAddressDevnetStore.reset();
 
-		// In component TOkenMenu there is a dependency to the store erc20UserTokensStore that impedes the correct rendering of the component
+		// In component TokenMenu there is a dependency to the store erc20UserTokensStore that impedes the correct rendering of the component
 		// So we need to reset the store before each test
 		// TODO: verify if this dependency can be removed
 		erc20UserTokensStore.resetAll();
@@ -88,6 +90,7 @@ describe('SolTokenMenu', () => {
 
 			await waitFor(() => {
 				const a = queryByTestId(TOKEN_MENU_SOL_EXPLORER_LINK);
+
 				expect(a).not.toBeNull();
 				expect((a as HTMLAnchorElement).href).toEqual(
 					replacePlaceholders(explorerUrl, { $args: `account/${mockSolAddress}/` })
@@ -108,6 +111,7 @@ describe('SolTokenMenu', () => {
 
 		await waitFor(() => {
 			const a = queryByTestId(TOKEN_MENU_SOL_EXPLORER_LINK);
+
 			expect(a).not.toBeNull();
 			expect((a as HTMLAnchorElement).href).toEqual(
 				replacePlaceholders((mockToken.network as SolanaNetwork).explorerUrl ?? '', {

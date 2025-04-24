@@ -1,5 +1,6 @@
 import type {
 	AddUserCredentialError,
+	AllowSigningRequest,
 	BitcoinNetwork,
 	CredentialSpec,
 	GetUserProfileError,
@@ -15,7 +16,8 @@ import type {
 } from '$declarations/signer/signer.did';
 import type { Address, BtcAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
-import { Principal } from '@dfinity/principal';
+import type { UserNetworks } from '$lib/types/user-networks';
+import type { Principal } from '@dfinity/principal';
 
 export interface AddUserCredentialParams {
 	credentialJwt: string;
@@ -23,9 +25,14 @@ export interface AddUserCredentialParams {
 	currentUserVersion?: bigint;
 	credentialSpec: CredentialSpec;
 }
+
 export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialError };
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
+
+export interface AllowSigningParams {
+	request?: AllowSigningRequest;
+}
 
 export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;
@@ -61,6 +68,16 @@ export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
 
 export interface AddUserHiddenDappIdParams {
 	dappId: string;
+	currentUserVersion?: bigint;
+}
+
+export interface SaveUserNetworksSettings {
+	networks: UserNetworks;
+	currentUserVersion?: bigint;
+}
+
+export interface SetUserShowTestnetsParams {
+	showTestnets: boolean;
 	currentUserVersion?: bigint;
 }
 

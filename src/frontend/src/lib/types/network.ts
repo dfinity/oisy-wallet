@@ -1,11 +1,11 @@
-import {
+import type {
 	NetworkAppMetadataSchema,
 	NetworkBuySchema,
 	NetworkEnvironmentSchema,
-	NetworkSchema,
-	type NetworkIdSchema
+	NetworkIdSchema,
+	NetworkSchema
 } from '$lib/schema/network.schema';
-import * as z from 'zod';
+import type * as z from 'zod';
 
 export type NetworkId = z.infer<typeof NetworkIdSchema>;
 

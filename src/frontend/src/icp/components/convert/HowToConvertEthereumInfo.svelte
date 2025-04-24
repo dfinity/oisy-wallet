@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 	import {
 		ckEthereumNativeToken,
@@ -13,26 +13,30 @@
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { HOW_TO_CONVERT_ETHEREUM_INFO } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let formCancelAction: 'back' | 'close' = 'back';
+	interface Props {
+		formCancelAction?: 'back' | 'close';
+	}
 
-	let ckErc20 = false;
-	$: ckErc20 = $tokenCkErc20Ledger;
+	let { formCancelAction = 'back' }: Props = $props();
+
+	const { sourceTokenBalance, sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+
+	const ckErc20 = $derived($tokenCkErc20Ledger);
 
 	const dispatch = createEventDispatcher();
-
-	const { sendBalance, sendTokenDecimals, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<ContentWithToolbar>
+<ContentWithToolbar testId={HOW_TO_CONVERT_ETHEREUM_INFO}>
 	<div>
 		<p>
 			{replacePlaceholders(
@@ -62,7 +66,7 @@
 			<p class="break-normal pt-4">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
-						value: $ckEthereumNativeTokenBalance ?? ZERO,
+						value: $ckEthereumNativeTokenBalance ?? ZERO_BI,
 						unitName: $ckEthereumNativeToken.decimals
 					})}
 					{$ckEthereumNativeToken.symbol}</output
@@ -118,11 +122,11 @@
 
 				<p class="mb-6">
 					{formatToken({
-						value: $sendBalance ?? ZERO,
-						unitName: $sendTokenDecimals,
-						displayDecimals: $sendTokenDecimals
+						value: $sourceTokenBalance ?? ZERO_BI,
+						unitName: $sourceToken.decimals,
+						displayDecimals: $sourceToken.decimals
 					})}
-					{$sendToken.symbol}
+					{$sourceToken.symbol}
 				</p>
 			</Value>
 		</div>

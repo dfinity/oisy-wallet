@@ -33,14 +33,14 @@ export const sendIc = async ({
 }: IcTransferParams & {
 	token: IcToken;
 	targetNetworkId: NetworkId | undefined;
-	sendCompleted: () => Promise<void>;
+	sendCompleted: () => void;
 }): Promise<void> => {
 	await send({
 		progress,
 		...rest
 	});
 
-	await sendCompleted();
+	sendCompleted();
 
 	progress(ProgressStepsSendIc.RELOAD);
 
@@ -115,7 +115,7 @@ export const sendIcrc = ({
 		identity,
 		ledgerCanisterId,
 		to: decodeIcrcAccount(to),
-		amount: amount.toBigInt()
+		amount
 	});
 };
 
@@ -139,11 +139,11 @@ export const sendIcp = ({
 		? icrc1TransferIcp({
 				identity,
 				to: decodeIcrcAccount(to),
-				amount: amount.toBigInt()
+				amount
 			})
 		: transferIcp({
 				identity,
 				to,
-				amount: amount.toBigInt()
+				amount
 			});
 };

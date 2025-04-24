@@ -1,11 +1,10 @@
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import {
-	BTC_MAINNET_NETWORK_ID,
 	ETHEREUM_NETWORK,
 	ETHEREUM_NETWORK_ID,
-	ICP_NETWORK,
-	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK
-} from '$env/networks/networks.env';
+} from '$env/networks/networks.eth.env';
+import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/rest/onramper.env';
 import type { OnramperNetworkWallet, OnramperWalletAddress } from '$lib/types/onramper';
 import type { Option } from '$lib/types/utils';
@@ -50,6 +49,7 @@ describe('onramper.utils', () => {
 				`&networkWallets=bitcoin:${mockBtcAddress},icp:${mockAccountIdentifierText}`;
 
 			const result = buildOnramperLink(params);
+
 			expect(result).toBe(expectedUrl);
 		});
 
@@ -76,6 +76,7 @@ describe('onramper.utils', () => {
 				`&networkWallets=bitcoin:${mockBtcAddress}`;
 
 			const result = buildOnramperLink(params);
+
 			expect(result).toBe(expectedUrl);
 		});
 

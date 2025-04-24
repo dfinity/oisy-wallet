@@ -21,19 +21,18 @@ import {
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/signer.api';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
-import type { TransactionFeeData } from '$lib/types/transaction';
+import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { TransactionResponse } from '@ethersproject/providers';
+import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 const ethPrepareTransaction = ({
@@ -48,7 +47,7 @@ const ethPrepareTransaction = ({
 }: TransferParams &
 	NetworkChainId & { nonce: number; gas: bigint | undefined }): EthSignTransactionRequest => ({
 	to,
-	value: amount.toBigInt(),
+	value: amount,
 	chain_id,
 	nonce: BigInt(nonce),
 	gas: gas ?? ETH_BASE_FEE,
@@ -90,7 +89,7 @@ const erc20PrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };
@@ -128,7 +127,7 @@ const ethHelperContractPrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: amount.toBigInt(),
+		amount,
 		...rest
 	});
 };
@@ -166,7 +165,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };
@@ -183,7 +182,7 @@ const erc20ContractAllowance = async ({
 	networkId: NetworkId;
 	owner: EthAddress;
 	spender: EthAddress;
-} & Pick<SendParams, 'token'>): Promise<BigNumber> => {
+} & Pick<SendParams, 'token'>): Promise<bigint> => {
 	const { allowance } = infuraErc20Providers(networkId);
 
 	return await allowance({
@@ -225,7 +224,7 @@ const erc20ContractPrepareApprove = async ({
 	return prepare({
 		data,
 		to,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };
@@ -274,10 +273,7 @@ export const send = async ({
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-	}): Promise<{ hash: string }> => {
+	RequiredTransactionFeeData): Promise<{ hash: string }> => {
 	progress(ProgressStepsSend.INITIALIZATION);
 
 	const { transactionNeededApproval, nonce } = await approve({
@@ -320,11 +316,7 @@ const sendTransaction = async ({
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	Omit<SendParams, 'lastProgressStep'> &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-		nonce: number;
-	}): Promise<TransactionResponse> => {
+	RequiredTransactionFeeData & { nonce: number }): Promise<TransactionResponse> => {
 	const { id: networkId, chainId } = sourceNetwork;
 
 	const { sendTransaction } = infuraProviders(networkId);
@@ -374,9 +366,9 @@ const sendTransaction = async ({
 		} & Pick<TransferParams, 'maxFeePerGas' | 'maxPriorityFeePerGas'> = {
 		from,
 		nonce,
-		gas: gas.toBigInt(),
-		maxFeePerGas: maxFeePerGas.toBigInt(),
-		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
 		chainId
 	};
 
@@ -446,9 +438,9 @@ const prepareAndSignApproval = async ({
 
 	const approve = await erc20ContractPrepareApprove({
 		...rest,
-		gas: gas.toBigInt(),
-		maxFeePerGas: maxFeePerGas.toBigInt(),
-		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
 		chainId,
 		networkId
 	});
@@ -475,7 +467,7 @@ const resetExistingApprovalToZero = async (
 > =>
 	await prepareAndSignApproval({
 		...params,
-		amount: ZERO
+		amount: ZERO_BI
 	});
 
 const checkExistingApproval = async ({
@@ -497,12 +489,12 @@ const checkExistingApproval = async ({
 	});
 
 	// If there is already an approved allowance that is enough for the required amount, we don't need to approve again.
-	if (preApprovedAmount.gte(amount)) {
+	if (preApprovedAmount >= amount) {
 		return 'existingApprovalIsEnough';
 	}
 
 	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first, before approving the new amount.
-	if (preApprovedAmount.gt(ZERO)) {
+	if (preApprovedAmount > ZERO_BI) {
 		await resetExistingApprovalToZero({
 			...rest,
 			token,

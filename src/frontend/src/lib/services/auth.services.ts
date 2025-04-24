@@ -12,7 +12,6 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
@@ -30,7 +29,7 @@ export const signIn = async (
 	try {
 		await authStore.signIn(params);
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_COUNT_SIGN_IN_SUCCESS
 		});
 
@@ -40,7 +39,7 @@ export const signIn = async (
 		return { success: 'ok' };
 	} catch (err: unknown) {
 		if (err === 'UserInterrupt') {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_SIGN_IN_CANCELLED_COUNT
 			});
 
@@ -48,7 +47,7 @@ export const signIn = async (
 			return { success: 'cancelled' };
 		}
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_SIGN_IN_ERROR_COUNT
 		});
 
@@ -117,11 +116,6 @@ const emptyIdbEthAddress = (): Promise<void> => emptyIdbAddress(deleteIdbEthAddr
 const emptyIdbSolAddress = (): Promise<void> => emptyIdbAddress(deleteIdbSolAddressMainnet);
 
 // eslint-disable-next-line require-await
-const clearTestnetsOption = async () => {
-	testnetsStore.reset({ key: 'testnets' });
-};
-
-// eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
 	sessionStorage.clear();
 };
@@ -139,12 +133,7 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([
-			emptyIdbBtcAddressMainnet(),
-			emptyIdbEthAddress(),
-			emptyIdbSolAddress(),
-			clearTestnetsOption()
-		]);
+		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), emptyIdbSolAddress()]);
 	}
 
 	await clearSessionStorage();

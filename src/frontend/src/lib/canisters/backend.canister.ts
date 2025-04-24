@@ -1,5 +1,7 @@
 import type {
+	AllowSigningResponse,
 	_SERVICE as BackendService,
+	CreateChallengeResponse,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -12,18 +14,23 @@ import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
 	mapBtcPendingTransactionError,
-	mapBtcSelectUserUtxosFeeError
+	mapBtcSelectUserUtxosFeeError,
+	mapCreateChallengeError
 } from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
-	GetUserProfileResponse
+	GetUserProfileResponse,
+	SaveUserNetworksSettings,
+	SetUserShowTestnetsParams
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mapUserNetworks } from '$lib/utils/user-networks.utils';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
@@ -170,14 +177,29 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	allowSigning = async (): Promise<void> => {
+	allowSigning = async ({ request }: AllowSigningParams = {}): Promise<AllowSigningResponse> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		const response = await allow_signing();
+		const response = await allow_signing(toNullable(request));
 
-		if ('Err' in response) {
-			throw mapAllowSigningError(response.Err);
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
 		}
+
+		throw mapAllowSigningError(response.Err);
+	};
+
+	createPowChallenge = async (): Promise<CreateChallengeResponse> => {
+		const { create_pow_challenge } = this.caller({ certified: true });
+
+		const result = await create_pow_challenge();
+		if ('Ok' in result) {
+			const { Ok } = result;
+			return Ok;
+		}
+
+		throw mapCreateChallengeError(result.Err);
 	};
 
 	addUserHiddenDappId = async ({
@@ -188,6 +210,30 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await add_user_hidden_dapp_id({
 			dapp_id: dappId,
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	setUserShowTestnets = async ({
+		showTestnets,
+		currentUserVersion
+	}: SetUserShowTestnetsParams): Promise<void> => {
+		const { set_user_show_testnets } = this.caller({ certified: true });
+
+		await set_user_show_testnets({
+			show_testnets: showTestnets,
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	updateUserNetworkSettings = async ({
+		networks,
+		currentUserVersion
+	}: SaveUserNetworksSettings): Promise<void> => {
+		const { update_user_network_settings } = this.caller({ certified: true });
+
+		await update_user_network_settings({
+			networks: mapUserNetworks(networks),
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};

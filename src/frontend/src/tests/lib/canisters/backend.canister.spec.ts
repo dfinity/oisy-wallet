@@ -6,12 +6,16 @@ import type {
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
+
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
+import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
 import { type ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
@@ -45,7 +49,7 @@ describe('backend.canister', () => {
 	const addUserCredentialParams = {
 		credentialJwt: 'test-credential-jwt',
 		issuerCanisterId: mockPrincipal,
-		currentUserVersion: 0n,
+		currentUserVersion: ZERO_BI,
 		credentialSpec: {
 			arguments: [],
 			credential_type: ''
@@ -422,7 +426,7 @@ describe('backend.canister', () => {
 			expect(service.btc_add_pending_transaction).toHaveBeenCalledWith(
 				btcAddPendingTransactionEndpointParams
 			);
-			expect(res).toEqual(true);
+			expect(res).toBeTruthy();
 		});
 
 		it('should throw an error if btc_add_pending_transaction returns an internal error', async () => {
@@ -606,9 +610,15 @@ describe('backend.canister', () => {
 
 	describe('allowSigning', () => {
 		it('should allow signing', async () => {
-			const response = { Ok: null };
+			const result: Result_2 = {
+				Ok: {
+					status: { Executed: null }, // or { Skipped: null } or { Failed: null }, depending on your scenario
+					challenge_completion: [], // Provide appropriately if challenge completion data exists
+					allowed_cycles: ZERO_BI // Replace with proper value
+				}
+			};
 
-			service.allow_signing.mockResolvedValue(response);
+			service.allow_signing.mockResolvedValue(result);
 
 			const { allowSigning } = await createBackendCanister({
 				serviceOverride: service
@@ -617,7 +627,7 @@ describe('backend.canister', () => {
 			const res = await allowSigning();
 
 			expect(service.allow_signing).toHaveBeenCalledTimes(1);
-			expect(res).toBeUndefined();
+			expect(res).toBeDefined();
 		});
 
 		it('should throw an error if allowSigning throws', async () => {
@@ -693,6 +703,77 @@ describe('backend.canister', () => {
 		});
 	});
 
+	describe('createPowChallenge', () => {
+		const mockPowChallengeSuccess = {
+			start_timestamp_ms: 1_644_001_000_000n,
+			expiry_timestamp_ms: 1_644_001_001_200n,
+			difficulty: 1_000_000
+		};
+
+		let backendCanister: BackendCanister;
+
+		beforeEach(async () => {
+			backendCanister = await createBackendCanister({ serviceOverride: service });
+		});
+
+		it('should successfully create a PoW challenge (Ok case)', async () => {
+			service.create_pow_challenge.mockResolvedValue({ Ok: mockPowChallengeSuccess });
+
+			const result = await backendCanister.createPowChallenge();
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
+			expect(result).toEqual(mockPowChallengeSuccess);
+		});
+
+		it('should handle challenge already in progress error', async () => {
+			service.create_pow_challenge.mockResolvedValue({
+				Err: { ChallengeInProgress: null }
+			});
+
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+				'Challenge is already in progress.'
+			);
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
+		});
+
+		it('should handle randomness generation error', async () => {
+			service.create_pow_challenge.mockResolvedValue({
+				Err: { RandomnessError: 'Failed to generate randomness' }
+			});
+
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+				'Failed to generate randomness'
+			);
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
+		});
+
+		it('should handle missing user profile error', async () => {
+			service.create_pow_challenge.mockResolvedValue({
+				Err: { MissingUserProfile: null }
+			});
+
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+				'User profile is missing.'
+			);
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
+		});
+
+		it('should handle other unexpected errors', async () => {
+			service.create_pow_challenge.mockResolvedValue({
+				Err: { Other: 'Unexpected error occurred.' }
+			});
+
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+				'Unexpected error occurred.'
+			);
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
+		});
+	});
+
 	describe('addUserHiddenDappId', () => {
 		it('should add user hidden dapp id', async () => {
 			const response = { Ok: null };
@@ -723,6 +804,84 @@ describe('backend.canister', () => {
 			});
 
 			const res = addUserHiddenDappId({ dappId: 'test-dapp-id' });
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('setUserShowTestnets', () => {
+		it('should set user show testnets', async () => {
+			const response = { Ok: null };
+
+			service.set_user_show_testnets.mockResolvedValue(response);
+
+			const { setUserShowTestnets } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await setUserShowTestnets({
+				showTestnets: true
+			});
+
+			expect(service.set_user_show_testnets).toHaveBeenCalledWith({
+				show_testnets: true,
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if set_user_show_testnets throws', async () => {
+			service.set_user_show_testnets.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { setUserShowTestnets } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = setUserShowTestnets({
+				showTestnets: true
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('updateUserNetworkSettings', () => {
+		it('should update user network settings', async () => {
+			const response = { Ok: null };
+
+			service.update_user_network_settings.mockResolvedValue(response);
+
+			const { updateUserNetworkSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateUserNetworkSettings({
+				networks: mockUserNetworks
+			});
+
+			expect(service.update_user_network_settings).toHaveBeenCalledWith({
+				networks: mockUserNetworksMap,
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if update_user_network_settings throws', async () => {
+			service.update_user_network_settings.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { updateUserNetworkSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = updateUserNetworkSettings({
+				networks: mockUserNetworks
+			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});

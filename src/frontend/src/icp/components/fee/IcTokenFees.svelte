@@ -27,6 +27,7 @@
 	export let sourceToken: Token;
 	export let sourceTokenExchangeRate: number | undefined = undefined;
 	export let totalSourceTokenFee: bigint | undefined = undefined;
+	export let totalDestinationTokenFee: bigint | undefined = undefined;
 	export let ethereumEstimateFee: bigint | undefined = undefined;
 
 	const { store: bitcoinStoreFeeData } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
@@ -63,6 +64,7 @@
 	$: bitcoinFeeExchangeRate = $exchanges?.[BTC_MAINNET_TOKEN_ID]?.usd;
 
 	$: totalSourceTokenFee = icTokenFee;
+	$: totalDestinationTokenFee = bitcoinEstimatedFee;
 </script>
 
 <FeeDisplay

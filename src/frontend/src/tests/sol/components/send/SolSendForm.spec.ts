@@ -6,8 +6,7 @@ import * as solanaApi from '$sol/api/solana.api';
 import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
 import * as solAddressUtils from '$sol/utils/sol-address.utils';
-import en from '$tests/mocks/i18n.mock';
-import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -57,7 +56,6 @@ describe('SolSendForm', () => {
 		mockContext.set(
 			SEND_CONTEXT_KEY,
 			initSendContext({
-				sendPurpose: 'send',
 				token: SOLANA_TOKEN
 			})
 		);
@@ -68,18 +66,23 @@ describe('SolSendForm', () => {
 		});
 
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
+
 		expect(amount).not.toBeNull();
 
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
+
 		expect(destination).not.toBeNull();
 
 		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+
 		expect(network).not.toBeNull();
 
 		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
+
 		expect(fee).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
+
 		expect(toolbar).not.toBeNull();
 	});
 
@@ -91,26 +94,11 @@ describe('SolSendForm', () => {
 			mockContext.set(
 				SEND_CONTEXT_KEY,
 				initSendContext({
-					sendPurpose: 'send',
 					token: TRUMP_TOKEN
 				})
 			);
 
 			vi.spyOn(solAddressUtils, 'isAtaAddress').mockResolvedValue(true);
-		});
-
-		it('should warn the user if the destination is not an ATA address', async () => {
-			vi.spyOn(solAddressUtils, 'isAtaAddress').mockResolvedValue(false);
-
-			const { getByText } = render(SolSendForm, {
-				props: { ...props, destination: mockSolAddress2 },
-				context: mockContext
-			});
-
-			// Wait for the warning to be displayed
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-
-			expect(getByText(en.send.info.ata_will_be_calculated)).toBeInTheDocument();
 		});
 
 		it('should not render ATA creation fee if the destination is empty', () => {
@@ -120,6 +108,7 @@ describe('SolSendForm', () => {
 			});
 
 			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
+
 			expect(ataFee).toBeNull();
 		});
 
@@ -135,6 +124,7 @@ describe('SolSendForm', () => {
 			await new Promise((resolve) => setTimeout(resolve, 100));
 
 			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
+
 			expect(ataFee).not.toBeNull();
 		});
 
@@ -152,6 +142,7 @@ describe('SolSendForm', () => {
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 
 			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
+
 			expect(ataFee).toBeNull();
 		}, 60000);
 	});

@@ -1,10 +1,34 @@
 <script lang="ts">
+	import type { TagVariant } from '$lib/types/style';
+
 	export let ariaHidden = false;
+
+	const variantClassNames = {
+		default: 'bg-primary text-primary border border-secondary',
+		emphasis: 'bg-error-primary text-white',
+		info: 'bg-brand-subtle-20 text-brand-primary',
+		error: 'bg-error-subtle-20 text-error-primary',
+		warning: 'bg-warning-subtle-20 text-warning-primary',
+		success: 'bg-success-subtle-20 text-success-primary',
+		outline: 'border border-tertiary bg-off-white'
+	};
+
+	export let variant: TagVariant = 'default';
+	export let size: 'xs' | 'sm' | 'md' = 'xs';
 </script>
 
 <span
 	aria-hidden={ariaHidden}
-	class="rounded-md border border-primary bg-primary px-1.5 text-sm text-primary"
+	class="rounded-md {variantClassNames[variant]}"
+	class:text-xs={size === 'sm'}
+	class:text-sm={size === 'xs' || size === 'md'}
+	class:px-1.5={size === 'xs'}
+	class:px-1={size === 'sm' || size === 'md'}
+	class:md:px-2={size === 'sm' || size === 'md'}
+	class:py-0={size === 'xs'}
+	class:md:py-0={size === 'xs'}
+	class:py-0.5={size === 'sm' || size === 'md'}
+	class:md:py-1={size === 'sm' || size === 'md'}
 >
 	<slot />
 </span>

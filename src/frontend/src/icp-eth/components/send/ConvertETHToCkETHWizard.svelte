@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
@@ -12,6 +12,7 @@
 	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { token } from '$lib/stores/token.store';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 
@@ -22,7 +23,12 @@
 	export let currentStep: WizardStep | undefined;
 
 	let steps: WizardSteps;
-	$: steps = howToConvertWizardSteps({ i18n: $i18n, twinToken: $ckEthereumTwinToken });
+	// TODO: this component will be removed completely after Receive modals are migrated to the Convert wizard
+	$: steps = howToConvertWizardSteps({
+		i18n: $i18n,
+		sourceToken: $ckEthereumTwinToken.symbol,
+		destinationToken: $token?.symbol ?? ''
+	});
 
 	// TODO: ETH or Sepolia for addressToken
 </script>

@@ -1,4 +1,14 @@
 export const themeVariables = {
+	screens: {
+		// we need to use rem instead of px because the default tailwind values changed to rem,
+		// and mixing units breaks custom screen definitions
+		xs: '28rem', // 448px
+		'1.5md': '56rem', // 896px
+		'1.5lg': '72rem', // 1152px
+		'1.5xl': '88rem', // 1408px
+		'2.5xl': '108rem', // 1728px
+		'h-md': { raw: '(max-height: 68rem)' } // ~1090px
+	},
 	background: {
 		page: 'var(--color-background-page)',
 		surface: 'var(--color-background-surface)',
@@ -14,6 +24,7 @@ export const themeVariables = {
 		'tertiary-inverted': 'var(--color-background-tertiary-inverted)',
 		disabled: 'var(--color-background-disabled)',
 		'disabled-alt': 'var(--color-background-disabled-alt)',
+		'disabled-alt2': 'var(--color-background-disabled-alt2)',
 		brand: {
 			'subtle-5': 'var(--color-background-brand-subtle-5)',
 			'subtle-10': 'var(--color-background-brand-subtle-10)',
@@ -97,6 +108,7 @@ export const themeVariables = {
 		primary: 'var(--color-foreground-primary)',
 		'primary-inverted': 'var(--color-foreground-primary-inverted)',
 		'primary-inverted-alt': 'var(--color-foreground-primary-inverted-alt)',
+		secondary: 'var(--color-foreground-secondary)',
 		'secondary-inverted': 'var(--color-foreground-secondary-inverted)',
 		tertiary: 'var(--color-foreground-tertiary)',
 		'tertiary-inverted': 'var(--color-foreground-tertiary-inverted)',

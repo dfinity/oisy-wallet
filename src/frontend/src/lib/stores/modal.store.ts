@@ -1,3 +1,6 @@
+import type { QrCodeType } from '$lib/enums/qr-code-types';
+import type { SettingsModalType } from '$lib/enums/settings-modal-types';
+import type { VipRewardStateData } from '$lib/types/reward';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -36,10 +39,15 @@ export interface Modal<T> {
 		| 'receive-bitcoin'
 		| 'about-why-oisy'
 		| 'vip-qr-code'
+		| 'referral-code'
+		| 'referral-state'
+		| 'address-book'
 		| 'dapp-details'
+		| 'vip-reward-state'
+		| 'reward-details'
 		| 'reward-state'
-		| 'airdrop-details'
-		| 'airdrop-state';
+		| 'settings'
+		| 'auth-help';
 	data?: T;
 	id?: symbol;
 }
@@ -79,11 +87,17 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openSolToken: () => void;
 	openReceiveBitcoin: () => void;
 	openAboutWhyOisy: () => void;
-	openVipQrCode: () => void;
+	openVipQrCode: (data: QrCodeType) => void;
+	openReferralCode: () => void;
+	openAddressBook: () => void;
+	openReferralState: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
+	openVipRewardState: (data: VipRewardStateData) => void;
+	openRewardDetails: <D extends T>(data: D) => void;
 	openRewardState: <D extends T>(data: D) => void;
-	openAirdropDetails: <D extends T>(data: D) => void;
-	openAirdropState: <D extends T>(data: D) => void;
+	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
+	openSettings: (data: SettingsModalType) => void;
+	openAuthHelp: (data: boolean) => void;
 	close: () => void;
 }
 
@@ -132,11 +146,17 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openSolToken: setType('sol-token'),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
-		openVipQrCode: setType('vip-qr-code'),
+		openVipQrCode: <(data: QrCodeType) => void>setTypeWithData('vip-qr-code'),
+		openReferralCode: setType('referral-code'),
+		openAddressBook: setType('address-book'),
+		openReferralState: setType('referral-state'),
 		openDappDetails: setTypeWithData('dapp-details'),
+		openVipRewardState: <(data: VipRewardStateData) => void>setTypeWithData('vip-reward-state'),
+		openRewardDetails: setTypeWithData('reward-details'),
 		openRewardState: setTypeWithData('reward-state'),
-		openAirdropDetails: setTypeWithData('airdrop-details'),
-		openAirdropState: setTypeWithData('airdrop-state'),
+		// todo: explicitly define type here as well
+		openSettings: <(data: SettingsModalType) => void>setTypeWithData('settings'),
+		openAuthHelp: <(data: boolean) => void>setTypeWithData('auth-help'),
 		close: () => set(null),
 		subscribe
 	};

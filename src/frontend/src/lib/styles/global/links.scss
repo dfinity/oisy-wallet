@@ -76,6 +76,9 @@ button.nav-item[disabled]:not(.loading) {
 }
 
 div.mobile-nav {
+	// iOS bottom bar offset so the nav doesnt get overrun by OS bottom bar
+	padding-bottom: calc(0.1rem + env(safe-area-inset-bottom));
+
 	a.nav-item:not([disabled]):not(.disabled):not(.loading),
 	button.nav-item:not([disabled]):not(.disabled):not(.loading),
 	a.nav-item:hover:not([disabled]):not(.disabled):not(.loading),
@@ -90,9 +93,6 @@ div.mobile-nav {
 		@apply p-1.5;
 		@apply pt-2.25;
 		@apply text-sm;
-
-		// iOS bottom bar offset so the nav doesnt get overrun by OS bottom bar
-		padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
 
 		svg {
 			width: 24px;

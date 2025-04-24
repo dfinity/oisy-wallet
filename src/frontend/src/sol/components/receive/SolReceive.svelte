@@ -1,11 +1,5 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import {
-		SOLANA_DEVNET_TOKEN,
-		SOLANA_LOCAL_TOKEN,
-		SOLANA_TESTNET_TOKEN,
-		SOLANA_TOKEN
-	} from '$env/tokens/tokens.sol.env';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { modalSolReceive } from '$lib/derived/modal.derived';
@@ -28,6 +22,8 @@
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 
+	export let token: Token;
+
 	let addressData: StorageAddressData<SolAddress>;
 	//TODO consolidate this logic together with btc into $networkAddress like it's done for ICP and ETH
 	$: addressData = isNetworkIdSOLTestnet($networkId)
@@ -38,16 +34,11 @@
 				? $solAddressLocalnetStore
 				: $solAddressMainnetStore;
 
-	let addressToken: Token;
-	$: addressToken = isNetworkIdSOLTestnet($networkId)
-		? SOLANA_TESTNET_TOKEN
-		: isNetworkIdSOLDevnet($networkId)
-			? SOLANA_DEVNET_TOKEN
-			: isNetworkIdSOLLocal($networkId)
-				? SOLANA_LOCAL_TOKEN
-				: SOLANA_TOKEN;
-
 	const isDisabled = (): boolean => isNullish(addressData) || !addressData.certified;
+
+	// TODO: PRODSEC: provide the ATA address too in the receive modal for SPL tokens
+	let address: SolAddress | undefined;
+	$: address = addressData?.data;
 
 	const openReceive = async (modalId: symbol) => {
 		if (isDisabled()) {
@@ -65,9 +56,9 @@
 <ReceiveButtonWithModal open={openReceive} isOpen={$modalSolReceive}>
 	<ReceiveModal
 		slot="modal"
-		address={addressData?.data}
-		{addressToken}
-		network={addressToken.network}
+		{address}
+		addressToken={token}
+		network={token.network}
 		copyAriaLabel={$i18n.receive.solana.text.solana_address_copied}
 	/>
 </ReceiveButtonWithModal>
