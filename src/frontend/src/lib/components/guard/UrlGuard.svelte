@@ -17,7 +17,7 @@
 
 	let { children }: Props = $props();
 
-    const modalId = Symbol();
+	const modalId = Symbol();
 
 	$effect(() => {
 		const handleSearchParams = async () => {
@@ -47,7 +47,7 @@
 					removeSearchParam({ url: $page.url, searchParam: 'referrer' });
 				}
 			}
-		}
+		};
 
 		handleSearchParams();
 	});
