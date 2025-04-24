@@ -35,7 +35,7 @@
 		// After the timeout, we assume that the fetch has failed and open the token modal or redirect the user to the activity page.
 		timer = setTimeout(async () => {
 			if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
-				modalStore.openManageTokens({id: manageTokensId});
+				modalStore.openManageTokens({ id: manageTokensId });
 			} else if (nonNullish($routeNetwork) && nonNullish($routeToken) && isNullish(token)) {
 				toastsShow({
 					text: replacePlaceholders($i18n.transactions.error.loading_token_with_network, {

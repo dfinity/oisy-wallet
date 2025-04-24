@@ -79,11 +79,11 @@
 			on:click={() => {
 				codeType === QrCodeType.GOLD && isNullish(goldToken) && nonNullish(goldTokenSymbol)
 					? modalStore.openManageTokens({
-					id: manageTokensId,
-					data: {
-						initialSearch: goldTokenSymbol,
-							message: replaceOisyPlaceholders($i18n.tokens.manage.text.default_message)
-					}
+							id: manageTokensId,
+							data: {
+								initialSearch: goldTokenSymbol,
+								message: replaceOisyPlaceholders($i18n.tokens.manage.text.default_message)
+							}
 						})
 					: modalStore.close();
 			}}

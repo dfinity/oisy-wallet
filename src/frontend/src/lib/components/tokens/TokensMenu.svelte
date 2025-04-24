@@ -23,7 +23,7 @@
 	};
 
 	const openManageTokens = () => {
-		modalStore.openManageTokens({id: manageTokensId});
+		modalStore.openManageTokens({ id: manageTokensId });
 		visible = false;
 	};
 </script>
