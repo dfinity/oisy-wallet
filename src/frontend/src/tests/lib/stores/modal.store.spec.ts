@@ -21,10 +21,11 @@ describe('modal.store', () => {
 	});
 
 	it('should open wallet-connect-sign modal with data', () => {
+		const id = Symbol('modalId');
 		const data = { value: 12345 };
-		modalStore.openWalletConnectSign(data);
+		modalStore.openWalletConnectSign({ id, data });
 
-		expect(get(modalStore)).toEqual({ type: 'wallet-connect-sign', data });
+		expect(get(modalStore)).toEqual({ type: 'wallet-connect-sign', id, data });
 	});
 
 	it('should open convert-ckbtc-btc modal without modalId', () => {
