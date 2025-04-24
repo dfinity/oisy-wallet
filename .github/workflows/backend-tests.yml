@@ -120,18 +120,18 @@ jobs:
           # The PR title needs a ! before the colon, e.g.:
           # chore(frontend)!: drop support for Node 6
           if [[ "$TITLE" =~ ^([a-z]+)(\([-a-zA-Z0-9,]+\))\!\: ]]; then
-            echo "BREAKING_TITLE=true" | tee -a "$GITHUB_OUTPUT"
+            echo "BREAKING_TITLE=true" | tee -a "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
           # The PR body needs a line declaring the breaking change, e.g.:
           # BREAKING CHANGE: use JavaScript features not available in Node 6.
           if grep -qE '^BREAKING CHANGE: ' <<<"$desc"; then
-            echo "BREAKING_DESCRIPTION=true" | tee -a "$GITHUB_OUTPUT"
+            echo "BREAKING_DESCRIPTION=true" | tee -a "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
       - name: Need to check for breaking changes
         id: check-for-breaking-changes
         # Run if the interface has changed but the PR is NOT marked as a breaking change.
         if: (steps.changes.outputs.api == 'true') && !((needs.conventional-commit.outputs.BREAKING_DESCRIPTION == 'true') && (needs.conventional-commit.outputs.BREAKING_TITLE == 'true'))
-        run: echo "EXPECT_NO_BREAKING_CHANGES=true" >> "$GITHUB_OUTPUT"
+        run: echo "EXPECT_NO_BREAKING_CHANGES=true" | tee -a "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
@@ -157,7 +157,10 @@ jobs:
         if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
         working-directory: .
         run: |
+          set -euxo pipefail # Ensure that the `exit 1` causes this step to fail.
           ./scripts/test.backend.sh -- --ignored candid || {
+            echo HAS_BREAKING_CHANGES=true
+            echo
             echo "The backend API is incompatible with production."
             echo "If this is intentional, please use the conventional commit convention for indicating"
             echo "a breaking change in this PR, then push another commit to re-run this job."
