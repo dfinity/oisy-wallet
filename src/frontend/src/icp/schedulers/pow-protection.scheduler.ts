@@ -93,7 +93,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	 */
 	private requestSignerCycles = async ({ identity }: SchedulerJobData<PostMessageDataRequest>) => {
 		// Step 1: Requests creation of the Proof-of-Work (PoW) challenge and throws when unsuccessful.
-		const response: CreateChallengeResponse = await createPowChallenge({ identity });
+		const {start_timestamp_ms: timestamp, difficulty }: CreateChallengeResponse = await createPowChallenge({ identity });
 
 		// Step 2: Requests allowance for signing operations with solved nonce.
 		const nonce = await this.solvePowChallenge({
