@@ -6,5 +6,3 @@ const additionalIcrcTokensParsed = EnvAdditionalIcrcTokensSchema.safeParse(icrcT
 export const additionalIcrcTokens = additionalIcrcTokensParsed.success
 	? additionalIcrcTokensParsed.data
 	: {};
-
-export const GLDT_SYMBOL = 'GLDT';

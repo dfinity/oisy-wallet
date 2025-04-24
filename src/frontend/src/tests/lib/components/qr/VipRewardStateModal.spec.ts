@@ -1,4 +1,3 @@
-import { GLDT_SYMBOL } from '$env/tokens/tokens.icrc.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import failedVipReward from '$lib/assets/failed-vip-reward.svg';
@@ -13,6 +12,11 @@ import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import {mockMapIcrcData} from "$tests/utils/map-icrc-data";
+import * as icrcNetworks from '$env/networks/networks.icrc.env';
+import {GLDT_IC_DATA} from "$env/networks/networks.icrc.env";
+import {additionalIcrcTokens} from "$env/tokens/tokens.icrc.env";
+import {nonNullish} from "@dfinity/utils";
 
 describe('VipRewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid=${VIP_STATE_IMAGE_BANNER}]`;
@@ -89,14 +93,25 @@ describe('VipRewardStateModal', () => {
 	});
 
 	describe('Handle token state', () => {
+		const additionalIcrcData = mockMapIcrcData(additionalIcrcTokens);
+		const goldToken = nonNullish(additionalIcrcData?.GLDT)
+		? {
+			...additionalIcrcData.GLDT,
+				position: 16
+			} : undefined;
+
 		const mockIcrcCustomToken: IcrcCustomToken = {
 			...mockValidIcToken,
-			symbol: GLDT_SYMBOL,
+			ledgerCanisterId: goldToken?.ledgerCanisterId ?? 'mxzaz-hqaaa-aaaar-qaada-cai',
 			enabled: false
 		};
 
 		beforeEach(() => {
+			vi.clearAllMocks();
+
 			icrcCustomTokensStore.resetAll();
+
+			vi.spyOn(icrcNetworks, 'GLDT_IC_DATA', 'get').mockImplementation(() => goldToken);
 		});
 
 		it('should open manage tokens modal for Gold campaign and undefined token', async () => {
@@ -114,7 +129,7 @@ describe('VipRewardStateModal', () => {
 
 				expect(get(modalStore)).toEqual({
 					data: {
-						initialSearch: GLDT_SYMBOL,
+						initialSearch: 'GLDT',
 						message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
 					},
 					type: 'manage-tokens'
@@ -139,7 +154,7 @@ describe('VipRewardStateModal', () => {
 
 				expect(get(modalStore)).toEqual({
 					data: {
-						initialSearch: GLDT_SYMBOL,
+						initialSearch: 'GLDT',
 						message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
 					},
 					type: 'manage-tokens'
