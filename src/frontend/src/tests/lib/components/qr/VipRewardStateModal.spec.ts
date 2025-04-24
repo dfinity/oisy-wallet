@@ -1,3 +1,5 @@
+import * as icrcNetworks from '$env/networks/networks.icrc.env';
+import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import failedVipReward from '$lib/assets/failed-vip-reward.svg';
@@ -10,13 +12,10 @@ import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mapLocalIcrcData } from '$tests/utils/map-icrc-data';
+import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import {mapLocalIcrcData} from "$tests/utils/map-icrc-data";
-import * as icrcNetworks from '$env/networks/networks.icrc.env';
-import {GLDT_IC_DATA} from "$env/networks/networks.icrc.env";
-import {additionalIcrcTokens} from "$env/tokens/tokens.icrc.env";
-import {nonNullish} from "@dfinity/utils";
 
 describe('VipRewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid=${VIP_STATE_IMAGE_BANNER}]`;
@@ -95,10 +94,11 @@ describe('VipRewardStateModal', () => {
 	describe('Handle token state', () => {
 		const additionalIcrcData = mapLocalIcrcData(additionalIcrcTokens);
 		const goldToken = nonNullish(additionalIcrcData?.GLDT)
-		? {
-			...additionalIcrcData.GLDT,
-				position: 16
-			} : undefined;
+			? {
+					...additionalIcrcData.GLDT,
+					position: 16
+				}
+			: undefined;
 
 		const mockIcrcCustomToken: IcrcCustomToken = {
 			...mockValidIcToken,

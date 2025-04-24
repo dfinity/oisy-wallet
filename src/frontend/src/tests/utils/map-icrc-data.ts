@@ -8,14 +8,15 @@ import { nonNullish } from '@dfinity/utils';
  * Additional ICRC tokens from JSON file
  */
 export const mapLocalIcrcData = (
-    icrcTokens: EnvAdditionalIcrcTokens
-): Record<EnvTokenSymbol, Omit<IcInterface, 'position'>> => Object.entries(icrcTokens).reduce(
-        (acc, [key, value]) => ({
-            ...acc,
-            ...(LOCAL &&
-                nonNullish(value) && {
-                    [key]: value
-                })
-        }),
-        {}
-    );
+	icrcTokens: EnvAdditionalIcrcTokens
+): Record<EnvTokenSymbol, Omit<IcInterface, 'position'>> =>
+	Object.entries(icrcTokens).reduce(
+		(acc, [key, value]) => ({
+			...acc,
+			...(LOCAL &&
+				nonNullish(value) && {
+					[key]: value
+				})
+		}),
+		{}
+	);
