@@ -25,6 +25,7 @@ import {
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('BtcTokenMenu', () => {
@@ -37,6 +38,7 @@ describe('BtcTokenMenu', () => {
 
 	beforeAll(() => {
 		setupTestnetsStore('enabled');
+		setupUserNetworksStore('allEnabled');
 	});
 
 	beforeEach(() => {

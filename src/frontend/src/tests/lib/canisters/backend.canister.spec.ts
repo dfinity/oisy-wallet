@@ -426,7 +426,7 @@ describe('backend.canister', () => {
 			expect(service.btc_add_pending_transaction).toHaveBeenCalledWith(
 				btcAddPendingTransactionEndpointParams
 			);
-			expect(res).toEqual(true);
+			expect(res).toBeTruthy();
 		});
 
 		it('should throw an error if btc_add_pending_transaction returns an internal error', async () => {
@@ -624,7 +624,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = await allowSigning({});
+			const res = await allowSigning();
 
 			expect(service.allow_signing).toHaveBeenCalledTimes(1);
 			expect(res).toBeDefined();
@@ -640,7 +640,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = allowSigning({});
+			const res = allowSigning();
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
@@ -658,9 +658,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(
-				mapIcrc2ApproveError(response.Err.ApproveError)
-			);
+			await expect(allowSigning()).rejects.toThrow(mapIcrc2ApproveError(response.Err.ApproveError));
 		});
 
 		it('should throw a CanisterInternalError if FailedToContactCyclesLedger error is returned', async () => {
@@ -672,7 +670,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(
+			await expect(allowSigning()).rejects.toThrow(
 				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
 			);
 		});
@@ -687,7 +685,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(new CanisterInternalError(errorMsg));
+			await expect(allowSigning()).rejects.toThrow(new CanisterInternalError(errorMsg));
 		});
 
 		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
@@ -699,7 +697,7 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			await expect(allowSigning({})).rejects.toThrow(
+			await expect(allowSigning()).rejects.toThrow(
 				new CanisterInternalError('Unknown AllowSigningError')
 			);
 		});
@@ -732,7 +730,7 @@ describe('backend.canister', () => {
 				Err: { ChallengeInProgress: null }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
 				'Challenge is already in progress.'
 			);
 
@@ -744,7 +742,7 @@ describe('backend.canister', () => {
 				Err: { RandomnessError: 'Failed to generate randomness' }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
 				'Failed to generate randomness'
 			);
 
@@ -756,7 +754,7 @@ describe('backend.canister', () => {
 				Err: { MissingUserProfile: null }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
 				'User profile is missing.'
 			);
 
@@ -768,7 +766,7 @@ describe('backend.canister', () => {
 				Err: { Other: 'Unexpected error occurred.' }
 			});
 
-			await expect(backendCanister.createPowChallenge()).rejects.toThrowError(
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
 				'Unexpected error occurred.'
 			);
 
