@@ -192,7 +192,7 @@ describe('etherscan.providers', () => {
 			const provider = new EtherscanProvider(network, chainId);
 			mockFetch.mockRejectedValue(new Error('Network error'));
 
-			await expect(provider.transactions({ address })).rejects.toThrowError('Network error');
+			await expect(provider.transactions({ address })).rejects.toThrow('Network error');
 		});
 	});
 
@@ -209,7 +209,7 @@ describe('etherscan.providers', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrowError(
+			expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
 				replacePlaceholders(en.init.error.no_etherscan_provider, {
 					$network: ICP_NETWORK_ID.toString()
 				})
