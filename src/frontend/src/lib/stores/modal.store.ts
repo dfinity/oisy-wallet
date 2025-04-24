@@ -1,5 +1,6 @@
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
+import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { VipRewardStateData } from '$lib/types/reward';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
@@ -55,6 +56,7 @@ export interface Modal<T> {
 export type ModalData<T> = Option<Modal<T>>;
 
 type SetWithDataParams<D> = { id: symbol; data: D };
+type SetWithOptionalDataParams<D> = { id: symbol; data?: D };
 
 export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openEthReceive: (id: symbol) => void;
@@ -80,7 +82,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openIcTransaction: <D extends T>(params: SetWithDataParams<D>) => void;
 	openBtcTransaction: <D extends T>(params: SetWithDataParams<D>) => void;
 	openSolTransaction: <D extends T>(params: SetWithDataParams<D>) => void;
-	openManageTokens: () => void;
+	openManageTokens: (params: SetWithOptionalDataParams<ManageTokensData>) => void;
 	openHideToken: () => void;
 	openIcHideToken: () => void;
 	openEthToken: () => void;
@@ -139,7 +141,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openIcTransaction: setTypeWithData('ic-transaction'),
 		openBtcTransaction: setTypeWithData('btc-transaction'),
 		openSolTransaction: setTypeWithData('sol-transaction'),
-		openManageTokens: setType('manage-tokens'),
+		openManageTokens: <(params: SetWithOptionalDataParams<ManageTokensData>) => void>(
+			setTypeWithData('manage-tokens')
+		),
 		openHideToken: setType('hide-token'),
 		openIcHideToken: setType('ic-hide-token'),
 		openEthToken: setType('eth-token'),

@@ -443,7 +443,9 @@ const AAA_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTI
 		}
 	: undefined;
 
-const GLDT_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.GLDT)
+export const GLDT_IC_DATA: IcInterface | undefined = nonNullish(
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.GLDT
+)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.GLDT,
 			position: 16
