@@ -17,7 +17,7 @@ export const ICP_SYMBOL = 'ICP';
 
 export const ICP_TOKEN_ID: TokenId = parseTokenId(ICP_SYMBOL);
 
-export const ICP_TOKEN: RequiredToken<IcToken> = {
+export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated'>> = {
 	id: ICP_TOKEN_ID,
 	network: ICP_NETWORK,
 	standard: 'icp',
