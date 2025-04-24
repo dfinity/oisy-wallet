@@ -1,14 +1,10 @@
-import {
-	ETHEREUM_NETWORK_ID,
-	ETHERSCAN_NETWORK_HOMESTEAD,
-	ETHERSCAN_NETWORK_SEPOLIA,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import type {
 	EtherscanProviderInternalTransaction,
 	EtherscanProviderTransaction
 } from '$eth/types/etherscan-transaction';
+import type { EthereumChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -16,9 +12,10 @@ import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import {
+	EtherscanPlugin,
 	EtherscanProvider as EtherscanProviderLib,
-	type BlockTag,
-	type Networkish
+	Network,
+	type BlockTag
 } from 'ethers/providers';
 import { get } from 'svelte/store';
 
@@ -31,7 +28,10 @@ type TransactionsParams = {
 export class EtherscanProvider {
 	private readonly provider: EtherscanProviderLib;
 
-	constructor(private readonly network: Networkish) {
+	constructor(
+		private readonly network: Network,
+		private readonly chainId: EthereumChainId
+	) {
 		this.provider = new EtherscanProviderLib(this.network, ETHERSCAN_API_KEY);
 	}
 
@@ -45,6 +45,7 @@ export class EtherscanProvider {
 		endBlock
 	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
+			chainId: this.chainId,
 			action: 'txlist',
 			address,
 			startblock: startBlock ?? 0,
@@ -75,8 +76,7 @@ export class EtherscanProvider {
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
 				value: BigInt(value),
-				// Chain ID is not delivered by the Etherscan API so, we naively set 0
-				chainId: 0n
+				chainId: this.chainId
 			})
 		);
 	}
@@ -88,6 +88,7 @@ export class EtherscanProvider {
 		endBlock
 	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
+			chainId: this.chainId,
 			action: 'txlistinternal',
 			address,
 			startblock: startBlock ?? 0,
@@ -118,8 +119,7 @@ export class EtherscanProvider {
 				nonce: 0,
 				gasLimit: BigInt(gas),
 				value: BigInt(value),
-				// Chain ID is not delivered by the Etherscan API so, we naively set 0
-				chainId: 0n
+				chainId: this.chainId
 			})
 		);
 	}
@@ -131,10 +131,17 @@ export class EtherscanProvider {
 	};
 }
 
-const providers: Record<NetworkId, EtherscanProvider> = {
-	[ETHEREUM_NETWORK_ID]: new EtherscanProvider(ETHERSCAN_NETWORK_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new EtherscanProvider(ETHERSCAN_NETWORK_SEPOLIA)
-};
+const ETHERSCAN_PLUGIN = new EtherscanPlugin('https://api.etherscan.io/v2');
+
+const providers: Record<NetworkId, EtherscanProvider> = [ETHEREUM_NETWORK, SEPOLIA_NETWORK].reduce<
+	Record<NetworkId, EtherscanProvider>
+>((acc, { id, name, chainId }) => {
+	const network = new Network(name, chainId);
+
+	network.attachPlugin(ETHERSCAN_PLUGIN);
+
+	return { ...acc, [id]: new EtherscanProvider(network, chainId) };
+}, {});
 
 export const etherscanProviders = (networkId: NetworkId): EtherscanProvider => {
 	const provider = providers[networkId];

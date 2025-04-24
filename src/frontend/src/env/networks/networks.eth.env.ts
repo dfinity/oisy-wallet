@@ -22,9 +22,6 @@ export const INFURA_NETWORK_BASE_SEPOLIA: Networkish = 'base-sepolia';
 export const INFURA_NETWORK_BNB_MAINNET: Networkish = 'bnb';
 export const INFURA_NETWORK_BNB_TESTNET: Networkish = 'bnbt';
 
-export const ETHERSCAN_NETWORK_HOMESTEAD: Networkish = 'homestead';
-export const ETHERSCAN_NETWORK_SEPOLIA: Networkish = 'sepolia';
-
 export const ETHERSCAN_API_URL_HOMESTEAD = 'https://api.etherscan.io/api';
 export const ETHERSCAN_API_URL_SEPOLIA = 'https://api-sepolia.etherscan.io/api';
 
