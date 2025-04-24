@@ -45,6 +45,10 @@
 
 	let filteredTokens: TokenUiOrGroupUi[] | undefined;
 	$: filteredTokens = getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] });
+
+	let initialSearch: string | undefined;
+	let message: string | undefined;
+	$: {({initialSearch, message} = nonNullish($modalManageTokensData) && $modalManageTokensData)}
 </script>
 
 <TokensDisplayHandler bind:tokens>
@@ -85,11 +89,11 @@
 		{/if}
 
 		{#if $modalManageTokens}
-			<ManageTokensModal initialSearch={$modalManageTokensData?.initialSearch}>
+			<ManageTokensModal initialSearch={initialSearch}>
 				{#snippet infoElement()}
-					{#if nonNullish($modalManageTokensData) && nonNullish($modalManageTokensData.message)}
+					{#if nonNullish(message)}
 						<MessageBox level="info">
-							{$modalManageTokensData.message}
+							{message}
 						</MessageBox>
 					{/if}
 				{/snippet}
