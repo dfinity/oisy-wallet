@@ -670,6 +670,7 @@
 			"text": {
 				"title": "Manage tokens",
 				"manage_list": "Manage tokens",
+				"default_message": "Enable the token to see it in your $oisy_short wallet.",
 				"list_settings": "List settings",
 				"do_not_see_import": "Don’t see your token? Import",
 				"import_token": "Import token",
