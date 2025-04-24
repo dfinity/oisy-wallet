@@ -12,7 +12,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { mapLocalIcrcData } from '$tests/utils/map-icrc-data';
+import { mapLocalIcrcData } from '$tests/utils/map-icrc-data.test-utils';
 import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
