@@ -180,7 +180,11 @@ describe('transactions.utils', () => {
 				$ethAddress: undefined,
 				$icTransactions: {},
 				$solTransactions: {},
-				$btcStatuses: undefined
+				$btcStatuses: undefined,
+				$ckBtcPendingUtxosStore: undefined,
+				$icPendingTransactionsStore: undefined,
+				$ckBtcMinterInfoStore: undefined,
+				$icTransactionsStore: undefined
 			};
 
 			it('should map BTC mainnet transactions correctly', () => {
@@ -224,7 +228,11 @@ describe('transactions.utils', () => {
 				$ethAddress: undefined,
 				$icTransactions: {},
 				$solTransactions: {},
-				$btcStatuses: undefined
+				$btcStatuses: undefined,
+				$ckBtcPendingUtxosStore: undefined,
+				$icPendingTransactionsStore: undefined,
+				$ckBtcMinterInfoStore: undefined,
+				$icTransactionsStore: undefined
 			};
 
 			it('should map ETH transactions correctly', () => {
@@ -292,13 +300,16 @@ describe('transactions.utils', () => {
 				$ethTransactions: {},
 				$ethAddress: undefined,
 				$solTransactions: {},
-				$btcStatuses: undefined
+				$btcStatuses: undefined,
+				$ckBtcPendingUtxosStore: undefined,
+				$icPendingTransactionsStore: undefined,
+				$ckBtcMinterInfoStore: undefined
 			};
 
 			it('should map IC transactions correctly', () => {
 				const result = mapAllTransactionsUi({
 					tokens,
-					$icTransactions: mockIcTransactions,
+					$icTransactionsStore: mockIcTransactions,
 					...rest
 				});
 
@@ -309,7 +320,7 @@ describe('transactions.utils', () => {
 			it('should return an empty array if the IC transactions store is not initialized', () => {
 				const result = mapAllTransactionsUi({
 					tokens,
-					$icTransactions: {},
+					$icTransactionsStore: undefined,
 					...rest
 				});
 
@@ -326,7 +337,11 @@ describe('transactions.utils', () => {
 				$ethTransactions: {},
 				$ethAddress: undefined,
 				$icTransactions: {},
-				$btcStatuses: undefined
+				$btcStatuses: undefined,
+				$ckBtcPendingUtxosStore: undefined,
+				$icPendingTransactionsStore: undefined,
+				$ckBtcMinterInfoStore: undefined,
+				$icTransactionsStore: undefined
 			};
 
 			it('should map SOL transactions correctly', () => {
@@ -359,9 +374,12 @@ describe('transactions.utils', () => {
 					$ethTransactions: mockEthTransactions,
 					$ckEthMinterInfo: {},
 					$ethAddress: undefined,
-					$icTransactions: mockIcTransactions,
 					$solTransactions: mockSolTransactions,
-					$btcStatuses: undefined
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: mockIcTransactions
 				});
 
 				expect(result).toHaveLength(
@@ -407,7 +425,10 @@ describe('transactions.utils', () => {
 			$ckEthMinterInfo: {},
 			$ethAddress: undefined,
 			$solTransactions: {},
-			$btcStatuses: undefined
+			$btcStatuses: undefined,
+			$ckBtcPendingUtxosStore: undefined,
+			$icPendingTransactionsStore: undefined,
+			$ckBtcMinterInfoStore: undefined
 		};
 
 		afterEach(() => {
@@ -421,8 +442,8 @@ describe('transactions.utils', () => {
 				const transactions = mapAllTransactionsUi({
 					tokens,
 					$btcTransactions: mockBtcTransactions,
-					$icTransactions: mockIcTransactions,
 					$ethTransactions: mockEthTransactions,
+					$icTransactionsStore: mockIcTransactions,
 					...rest
 				});
 
@@ -452,8 +473,8 @@ describe('transactions.utils', () => {
 				const transactions = mapAllTransactionsUi({
 					tokens,
 					$btcTransactions: mockBtcTransactions,
-					$icTransactions: mockIcSendTransactions,
 					$ethTransactions: mockEthTransactions,
+					$icTransactionsStore: mockIcSendTransactions,
 					...rest
 				});
 
@@ -473,8 +494,8 @@ describe('transactions.utils', () => {
 				const transactions = mapAllTransactionsUi({
 					tokens,
 					$btcTransactions: mockBtcTransactions,
-					$icTransactions: mockIcTransactions,
 					$ethTransactions: mockEthTransactions,
+					$icTransactionsStore: undefined,
 					...rest
 				});
 
@@ -497,15 +518,11 @@ describe('transactions.utils', () => {
 			});
 
 			it('should get only received micro transactions', () => {
-				const mockIcSendTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
-					[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified: false }))
-				};
-
 				const transactions = mapAllTransactionsUi({
 					tokens,
 					$btcTransactions: mockBtcTransactions,
-					$icTransactions: mockIcSendTransactions,
 					$ethTransactions: mockEthTransactions,
+					$icTransactionsStore: undefined,
 					...rest
 				});
 
