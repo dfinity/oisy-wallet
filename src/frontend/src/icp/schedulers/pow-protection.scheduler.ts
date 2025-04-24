@@ -10,7 +10,7 @@ import { hashText } from '@dfinity/utils';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
-	
+
 	stop() {
 		this.timer.stop();
 	}
