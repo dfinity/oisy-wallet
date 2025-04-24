@@ -1,5 +1,5 @@
 import {
-	PostMessageDataRequestSolTransactionsSchema,
+	type PostMessageDataRequestSolTransactionsSchema,
 	type PostMessageDataRequestBtcSchema,
 	type PostMessageDataRequestExchangeTimerSchema,
 	type PostMessageDataRequestIcCkBTCUpdateBalanceSchema,

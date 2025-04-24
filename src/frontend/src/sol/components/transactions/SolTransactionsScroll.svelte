@@ -60,8 +60,10 @@
 		await loadNextSolTransactions({
 			network,
 			address,
-			tokensList:nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress) ?
-				[{ address: tokenAddress, owner: tokenOwnerAddress }] : [],
+			tokensList:
+				nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
+					? [{ address: tokenAddress, owner: tokenOwnerAddress }]
+					: [],
 			before: lastSignature,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
