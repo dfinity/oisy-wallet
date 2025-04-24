@@ -9,8 +9,15 @@
 	import { loading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { removeSearchParam } from '$lib/utils/nav.utils';
+	import type {Snippet} from "svelte";
 
-	$: (async () => {
+	interface Props {
+		children?: Snippet;
+	}
+
+	let { children }: Props = $props();
+
+	$effect(async () => {
 		if (!$loading && $page.url.searchParams.has('code') && nonNullish($authIdentity)) {
 			const rewardCode = $page.url.searchParams.get('code');
 			if (nonNullish(rewardCode)) {
@@ -34,10 +41,10 @@
 				removeSearchParam({ url: $page.url, searchParam: 'referrer' });
 			}
 		}
-	})();
+	});
 </script>
 
-<slot />
+{@render children?.()}
 
 {#if $modalVipRewardState && nonNullish($modalVipRewardStateData)}
 	<VipRewardStateModal
