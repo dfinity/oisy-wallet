@@ -113,7 +113,7 @@ describe('etherscan.providers', () => {
 			expect(EtherscanProviderLib).toHaveBeenCalledWith(network, ETHERSCAN_API_KEY);
 		});
 
-		describe('`transactions` method', () => {
+		describe('transactions method', () => {
 			it('should call fetch for all history types', async () => {
 				const provider = new EtherscanProvider(network);
 
