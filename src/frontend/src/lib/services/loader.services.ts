@@ -5,6 +5,7 @@ import { allowSigning } from '$lib/api/backend.api';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
+	networkEvmMainnetEnabled,
 	networkSolanaMainnetEnabled
 } from '$lib/derived/networks.derived';
 import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
@@ -122,7 +123,7 @@ export const initLoader = async ({
 	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
 	const enabledNetworkIds: NetworkId[] = [
 		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
-		...(get(networkEthereumEnabled) ? [ETHEREUM_NETWORK_ID] : []),
+		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
 		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
 	];
 

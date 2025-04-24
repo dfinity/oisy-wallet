@@ -72,7 +72,7 @@ describe('reward.canister', () => {
 
 				const userData = await getUserInfo(queryParams);
 
-				expect(userData.superpowers.length).toBe(0);
+				expect(userData.superpowers).toHaveLength(0);
 				expect(fromNullable(userData.superpowers)?.includes('vip') === true).toBeFalsy();
 			});
 		});
@@ -117,7 +117,7 @@ describe('reward.canister', () => {
 
 				const userData = await getUserInfo(queryParams);
 
-				expect(userData.superpowers.length).toBe(0);
+				expect(userData.superpowers).toHaveLength(0);
 				expect(fromNullable(userData.superpowers)?.includes('gold') === true).toBeFalsy();
 			});
 		});
