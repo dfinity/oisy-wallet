@@ -20,7 +20,7 @@ jobs:
           persist-credentials: false
 
       - name: Install dfx
-        run: ./scripts/setup dfx
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
       - name: Install canisters
         run: |
@@ -40,6 +40,7 @@ jobs:
           path: .dfx/snapshots/dfx-snapshot
 
   restore-snapshot:
+    needs: create-snapshot
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -50,7 +51,7 @@ jobs:
           persist-credentials: false
 
       - name: Install dfx
-        run: ./scripts/setup dfx
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
       - name: Install canisters
         run: dfx canister create --all
