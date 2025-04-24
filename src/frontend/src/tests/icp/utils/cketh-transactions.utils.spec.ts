@@ -3,9 +3,19 @@ import {
 	IC_CKETH_LEDGER_CANISTER_ID,
 	STAGING_CKETH_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
+import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcrcTransaction } from '$icp/types/ic-transaction';
-import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
+import {
+	getCkEthPendingTransactions,
+	mapCkEthereumTransaction
+} from '$icp/utils/cketh-transactions.utils';
+import type { Token } from '$lib/types/token';
+import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import { Principal } from '@dfinity/principal';
+import { get } from 'svelte/store';
 
 describe('mapCkEthereumTransaction', () => {
 	const mockTransaction: IcrcTransaction = {
@@ -60,5 +70,64 @@ describe('mapCkEthereumTransaction', () => {
 		});
 
 		expect(result.txExplorerUrl).toMatch(new RegExp(`^${CKETH_SEPOLIA_EXPLORER_URL}`));
+	});
+});
+
+describe('getCkEthPendingTransactions', () => {
+	const MOCK_CKETH_TOKEN: Partial<IcCkToken> = {
+		...ETHEREUM_TOKEN,
+		ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID
+	};
+
+	const setupStore = () => {
+		const transactions = [
+			createCertifiedIcTransactionUiMock('tx1'),
+			createCertifiedIcTransactionUiMock('tx2')
+		];
+
+		icPendingTransactionsStore.set({
+			tokenId: (MOCK_CKETH_TOKEN as Token).id,
+			data: transactions
+		});
+	};
+
+	const cleanupStore = () => {
+		icPendingTransactionsStore.reset(ICP_TOKEN.id);
+		icPendingTransactionsStore.reset((MOCK_CKETH_TOKEN as Token).id);
+	};
+
+	it('should return empty array when no pending transactions', () => {
+		const result = getCkEthPendingTransactions({
+			token: MOCK_CKETH_TOKEN as Token,
+			icPendingTransactionsStore: get(icPendingTransactionsStore)
+		});
+
+		expect(result.length).toEqual(0);
+	});
+
+	it('should return the pending transactions', () => {
+		setupStore();
+
+		const result = getCkEthPendingTransactions({
+			token: MOCK_CKETH_TOKEN as Token,
+			icPendingTransactionsStore: get(icPendingTransactionsStore)
+		});
+
+		expect(result.length).toEqual(2);
+
+		cleanupStore();
+	});
+
+	it('should not return the pending transactions for wrong token', () => {
+		setupStore();
+
+		const result = getCkEthPendingTransactions({
+			token: ICP_TOKEN,
+			icPendingTransactionsStore: get(icPendingTransactionsStore)
+		});
+
+		expect(result.length).toEqual(0);
+
+		cleanupStore();
 	});
 });
