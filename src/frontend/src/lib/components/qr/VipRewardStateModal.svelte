@@ -15,13 +15,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import {GLDT_SYMBOL} from "$env/tokens/tokens.icrc.env";
 
 	export let isSuccessful: boolean;
 	export let codeType: QrCodeType = QrCodeType.VIP;
 
-	const goldTokenSymbol = 'GLDT';
 	let goldToken: IcTokenToggleable | undefined;
-	$: goldToken = $allIcrcTokens.find((token) => token.symbol === goldTokenSymbol);
+	$: goldToken = $allIcrcTokens.find((token) => token.symbol === GLDT_SYMBOL);
 </script>
 
 {#if isSuccessful}
@@ -67,7 +67,7 @@
 			on:click={() => {
 				codeType === QrCodeType.GOLD && (isNullish(goldToken) || !goldToken.enabled)
 					? modalStore.openManageTokens({
-							initialSearch: goldTokenSymbol,
+							initialSearch: GLDT_SYMBOL,
 							message: replaceOisyPlaceholders($i18n.tokens.manage.text.default_message)
 						})
 					: modalStore.close();

@@ -12,6 +12,7 @@ import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import {GLDT_SYMBOL} from "$env/tokens/tokens.icrc.env";
 
 describe('VipRewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid=${VIP_STATE_IMAGE_BANNER}]`;
@@ -88,10 +89,9 @@ describe('VipRewardStateModal', () => {
 	});
 
 	describe('Handle token state', () => {
-		const goldTokenSymbol = 'GLDT';
 		const mockIcrcCustomToken: IcrcCustomToken = {
 			...mockValidIcToken,
-			symbol: goldTokenSymbol,
+			symbol: GLDT_SYMBOL,
 			enabled: false
 		};
 
@@ -114,7 +114,7 @@ describe('VipRewardStateModal', () => {
 
 				expect(get(modalStore)).toEqual({
 					data: {
-						initialSearch: goldTokenSymbol,
+						initialSearch: GLDT_SYMBOL,
 						message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
 					},
 					type: 'manage-tokens'
@@ -139,7 +139,7 @@ describe('VipRewardStateModal', () => {
 
 				expect(get(modalStore)).toEqual({
 					data: {
-						initialSearch: goldTokenSymbol,
+						initialSearch: GLDT_SYMBOL,
 						message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
 					},
 					type: 'manage-tokens'
