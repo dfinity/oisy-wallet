@@ -2,6 +2,7 @@ import {
 	BASE_NETWORK,
 	BASE_SEPOLIA_NETWORK
 } from '$env/networks/networks-evm/networks.evm.base.env';
+import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import eth from '$icp-eth/assets/eth.svg';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -21,6 +22,7 @@ export const BASE_ETH_TOKEN: RequiredToken = {
 	symbol: BASE_ETH_SYMBOL,
 	decimals: BASE_ETH_DECIMALS,
 	icon: eth,
+	groupData: ETH_TOKEN_GROUP,
 	buy: {
 		onramperId: 'eth_base'
 	}
