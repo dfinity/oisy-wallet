@@ -32,10 +32,14 @@ export const isTokenUiGroup = (
  *          The group replaces the first token of the group in the list.
  */
 export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
-	const tokenGroups = groupTokens(tokens);
+	const tokenOrGroups = groupTokens(tokens);
 
-	return tokenGroups
-		.map((group) => (group.tokens.length === 1 ? { token: group.tokens[0] } : { group }))
+	return tokenOrGroups
+		.map((tokenOrGroup) =>
+			isTokenUiGroup(tokenOrGroup) && tokenOrGroup.group.tokens.length === 1
+				? { token: tokenOrGroup.group.tokens[0] }
+				: tokenOrGroup
+		)
 		.sort((aa, bb) => {
 			const a = isTokenUiGroup(aa) ? aa.group : aa.token;
 			const b = isTokenUiGroup(bb) ? bb.group : bb.token;
@@ -146,7 +150,7 @@ export const groupSecondaryToken = ({ token, tokenGroup }: GroupTokenParams): To
 	nonNullish(tokenGroup) ? updateTokenGroup({ token, tokenGroup }) : mapNewTokenGroup(token);
 
 /**
- * Function to create a list of TokenUiGroup by grouping a provided list of tokens.
+ * Function to create a list of `TokenUiOrGroupUi` by grouping a provided list of tokens.
  *
  * The function loops through the tokens list and groups them according to a prop key that links a token to its "main token".
  * For example, it could be `twinToken` as per ck token standard. But the logic can be extended to other props, if necessary.
@@ -161,9 +165,9 @@ export const groupSecondaryToken = ({ token, tokenGroup }: GroupTokenParams): To
  * NOTE: The function does not sort the groups by any criteria. It only groups the tokens. So, even if a group ends up having a total balance that would put it in a higher position in the list, it will not be moved.
  *
  * @param {TokenUi[]} tokens - The list of TokenUi objects to group. Each token may or may not have a prop key to identify a "main token".
- * @returns {TokenUiGroup[]} A list where tokens are grouped into a TokenUiGroup, even if they are by themselves.
+ * @returns {TokenUiOrGroupUi[]} A list where tokens are grouped into a `TokenUiOrGroupUi`, even if they are by themselves.
  */
-export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
+export const groupTokens = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	const tokenGroupsMap = tokens.reduce<{
 		[id: TokenId]: TokenUiGroup | undefined;
 	}>(
@@ -192,7 +196,7 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 		{}
 	);
 
-	return Object.getOwnPropertySymbols(tokenGroupsMap).map(
-		(id) => tokenGroupsMap[id as TokenId] as TokenUiGroup
-	);
+	return Object.getOwnPropertySymbols(tokenGroupsMap).map((id) => ({
+		group: tokenGroupsMap[id as TokenId] as TokenUiGroup
+	}));
 };
