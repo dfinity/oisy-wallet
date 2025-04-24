@@ -4,10 +4,19 @@ import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
-import type { BtcStatusesData } from '$icp/stores/btc.store';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { type BtcStatusesData } from '$icp/stores/btc.store';
+import { type CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
+import { type CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
+import { type IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
+import { type IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
+import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
-import { extendIcTransaction } from '$icp/utils/ic-transactions.utils';
+import {
+	extendIcTransaction,
+	getAllIcTransactions,
+	getIcExtendedTransactions
+} from '$icp/utils/ic-transactions.utils';
 import { MICRO_TRANSACTION_USD_THRESHOLD } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
@@ -45,19 +54,25 @@ export const mapAllTransactionsUi = ({
 	$btcTransactions,
 	$ethTransactions,
 	$ckEthMinterInfo,
+	$ckBtcMinterInfoStore,
 	$ethAddress,
-	$icTransactions,
 	$solTransactions,
-	$btcStatuses
+	$btcStatuses,
+	$icTransactionsStore,
+	$ckBtcPendingUtxosStore,
+	$icPendingTransactionsStore
 }: {
 	tokens: Token[];
 	$btcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
 	$ethTransactions: EthTransactionsData;
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
+	$ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	$ethAddress: OptionEthAddress;
-	$icTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
 	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
+	$icTransactionsStore: CertifiedStoreData<IcTransactionsData>;
+	$ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
+	$icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
 }): AllTransactionUiWithCmp[] => {
 	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses(
 		$ckEthMinterInfo?.[ETHEREUM_TOKEN_ID]
@@ -109,7 +124,28 @@ export const mapAllTransactionsUi = ({
 		}
 
 		if (isNetworkIdICP(networkId)) {
-			// TODO: Implement ckBTC and ckETH pending transactions
+			const $icTransactions = getAllIcTransactions({
+				token,
+				icTransactionsStore: $icTransactionsStore,
+				btcStatusesStore: $btcStatuses,
+				ckBtcMinterInfoStore: $ckBtcMinterInfoStore,
+				ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore,
+				icPendingTransactionsStore: $icPendingTransactionsStore,
+				ckEthPendingTransactions: getCkEthPendingTransactions({
+					token,
+					icPendingTransactionsStore: $icPendingTransactionsStore
+				}),
+				ckBtcPendingUtxoTransactions: getCkBtcPendingUtxoTransactions({
+					token,
+					ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore,
+					ckBtcMinterInfoStore: $ckBtcMinterInfoStore
+				}),
+				icExtendedTransactions: getIcExtendedTransactions({
+					token,
+					icTransactionsStore: $icTransactionsStore,
+					btcStatusesStore: $btcStatuses
+				})
+			});
 
 			if (isNullish($icTransactions)) {
 				return acc;
@@ -117,7 +153,7 @@ export const mapAllTransactionsUi = ({
 
 			return [
 				...acc,
-				...($icTransactions[tokenId] ?? []).map((transaction) => ({
+				...($icTransactions ?? []).map((transaction) => ({
 					transaction: extendIcTransaction({
 						transaction,
 						token,
