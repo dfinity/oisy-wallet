@@ -23,8 +23,8 @@
 	export let codeType: QrCodeType = QrCodeType.VIP;
 
 	let goldTokenSymbol: string | undefined;
-	$: [goldTokenSymbol] = Object.entries(additionalIcrcTokens)
-			.find(([_, value]) => (value as EnvIcToken)?.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId) || [];
+	[goldTokenSymbol] = Object.entries(additionalIcrcTokens)
+			.find(([_, value]) => (value as EnvIcToken)?.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId) ?? [];
 
 	let goldToken: IcToken | undefined;
 	$: goldToken = $enabledIcTokens.find((token) => token.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId);
