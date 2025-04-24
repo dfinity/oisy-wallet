@@ -29,7 +29,7 @@ describe('getIcExtendedTransactions', () => {
 			btcStatusesStore: get(btcStatusesStore)
 		});
 
-		expect(result.length).toEqual(0);
+		expect(result).toHaveLength(0);
 	});
 
 	it('should return 3 transactions', () => {
@@ -43,7 +43,7 @@ describe('getIcExtendedTransactions', () => {
 			btcStatusesStore: get(btcStatusesStore)
 		});
 
-		expect(result.length).toEqual(3);
+		expect(result).toHaveLength(3);
 
 		cleanupIcTransactionsStore({
 			tokenId: MOCK_CKETH_TOKEN.id as unknown as symbol & BRAND<'TokenId'>
@@ -78,7 +78,7 @@ describe('getAllIcTransactions', () => {
 			icPendingTransactionsStore: get(icPendingTransactionsStore)
 		});
 
-		expect(result.length).toEqual(0);
+		expect(result).toHaveLength(0);
 	});
 
 	it('should return all transactions for a token', () => {
@@ -111,7 +111,7 @@ describe('getAllIcTransactions', () => {
 			icPendingTransactionsStore: get(icPendingTransactionsStore)
 		});
 
-		expect(result1.length).toEqual(5);
+		expect(result1).toHaveLength(5);
 
 		const ckBtcToken = MOCK_CKBTC_TOKEN as Token;
 
@@ -138,7 +138,7 @@ describe('getAllIcTransactions', () => {
 			icPendingTransactionsStore: get(icPendingTransactionsStore)
 		});
 
-		expect(result2.length).toEqual(1);
+		expect(result2).toHaveLength(1);
 
 		cleanupIcTransactionsStore({ tokenId: ckEthToken.id });
 		cleanupCkBtcPendingStores();
