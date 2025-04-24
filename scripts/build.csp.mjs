@@ -143,6 +143,16 @@ const updateCSP = (indexHtml) => {
 	const ethSepoliaConnectSrc =
 		'https://api-sepolia.etherscan.io https://sepolia.infura.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
 
+	const baseMainnetConnectSrc =
+		'wss://base-mainnet.g.alchemy.com https://base-mainnet.g.alchemy.com https://base-mainnet.infura.io';
+	const baseSepoliaConnectSrc =
+		'wss://base-sepolia.g.alchemy.com https://base-sepolia.g.alchemy.com https://base-sepolia.infura.io';
+	const bnbMainnetConnectSrc =
+		'wss://bnb-mainnet.g.alchemy.com https://bnb-mainnet.g.alchemy.com https://bsc-mainnet.infura.io';
+	const bnbTestnetConnectSrc =
+		'wss://bnb-testnet.g.alchemy.com https://bnb-testnet.g.alchemy.com https://bsc-testnet.infura.io';
+	const evmConnectSrc = `${baseMainnetConnectSrc} ${baseSepoliaConnectSrc} ${bnbMainnetConnectSrc} ${bnbTestnetConnectSrc}`;
+
 	const blockstreamApiConnectSrc = 'https://blockstream.info';
 	const blockchainApiConnectSrc = 'https://blockchain.info';
 
@@ -169,7 +179,7 @@ const updateCSP = (indexHtml) => {
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc};
         img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';
