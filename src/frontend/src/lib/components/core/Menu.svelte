@@ -67,6 +67,9 @@
 
 	let addressesOption = true;
 	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute;
+
+	const goldModalId = Symbol();
+	const vipModalId = Symbol();
 </script>
 
 <ButtonIcon
@@ -114,7 +117,7 @@
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.binance_qr_code}
 				testId={NAVIGATION_MENU_GOLD_BUTTON}
-				on:click={() => modalStore.openVipQrCode(QrCodeType.GOLD)}
+				on:click={() => modalStore.openVipQrCode({ id: vipModalId, data: QrCodeType.GOLD })}
 			>
 				<IconBinance size="20" />
 				{$i18n.navigation.text.binance_qr_code}
@@ -125,7 +128,7 @@
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.vip_qr_code}
 				testId={NAVIGATION_MENU_VIP_BUTTON}
-				on:click={() => modalStore.openVipQrCode(QrCodeType.VIP)}
+				on:click={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
 			>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.vip_qr_code}

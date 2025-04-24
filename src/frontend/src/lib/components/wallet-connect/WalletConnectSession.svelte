@@ -36,6 +36,9 @@
 
 	export let listener: OptionWalletConnectListener;
 
+	const signModalId = Symbol();
+	const sendModalId = Symbol();
+
 	const STEP_CONNECT: WizardStep = {
 		name: 'Connect',
 		title: $i18n.wallet_connect.text.name
@@ -237,11 +240,11 @@
 				case SESSION_REQUEST_PERSONAL_SIGN:
 				case SESSION_REQUEST_SOL_SIGN_TRANSACTION:
 				case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION: {
-					modalStore.openWalletConnectSign(sessionRequest);
+					modalStore.openWalletConnectSign({ id: signModalId, data: sessionRequest });
 					return;
 				}
 				case SESSION_REQUEST_ETH_SEND_TRANSACTION: {
-					modalStore.openWalletConnectSend(sessionRequest);
+					modalStore.openWalletConnectSend({ id: sendModalId, data: sessionRequest });
 					return;
 				}
 				default: {

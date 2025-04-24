@@ -11,6 +11,8 @@
 	export let rewards: RewardDescription[];
 	export let altText: string | undefined = undefined;
 	export let testId: string | undefined = undefined;
+
+	const modalId = Symbol();
 </script>
 
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
@@ -19,7 +21,7 @@
 	{#each rewards as reward (reward.id)}
 		<div in:slide={SLIDE_DURATION} class="mt-4">
 			<RewardCard
-				on:click={() => modalStore.openRewardDetails(reward)}
+				on:click={() => modalStore.openRewardDetails({ id: modalId, data: reward })}
 				{reward}
 				testId={nonNullish(testId) ? `${testId}-${reward.id}` : undefined}
 			/>

@@ -51,7 +51,10 @@
 		}
 	};
 
-	const openSettingsModal = (t: SettingsModalType) => modalStore.openSettings(t);
+	const modalId = Symbol();
+
+	const openSettingsModal = (t: SettingsModalType) =>
+		modalStore.openSettings({ id: modalId, data: t });
 </script>
 
 <SettingsCard>
