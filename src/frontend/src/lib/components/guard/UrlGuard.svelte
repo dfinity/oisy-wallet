@@ -10,6 +10,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { removeSearchParam } from '$lib/utils/nav.utils';
 
+	const modalId = Symbol();
+
 	$: (async () => {
 		if (!$loading && $page.url.searchParams.has('code') && nonNullish($authIdentity)) {
 			const rewardCode = $page.url.searchParams.get('code');
@@ -17,10 +19,10 @@
 				const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
 				removeSearchParam({ url: $page.url, searchParam: 'code' });
-				modalStore.openVipRewardState({
+				modalStore.openVipRewardState({id:modalId,data:{
 					success: result.success,
 					codeType: result.campaignId ?? QrCodeType.VIP
-				});
+				}});
 			}
 		}
 
