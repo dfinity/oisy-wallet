@@ -102,7 +102,7 @@ describe('getCkEthPendingTransactions', () => {
 			icPendingTransactionsStore: get(icPendingTransactionsStore)
 		});
 
-		expect(result.length).toEqual(0);
+		expect(result).toHaveLength(0);
 	});
 
 	it('should return the pending transactions', () => {
@@ -113,7 +113,7 @@ describe('getCkEthPendingTransactions', () => {
 			icPendingTransactionsStore: get(icPendingTransactionsStore)
 		});
 
-		expect(result.length).toEqual(2);
+		expect(result).toHaveLength(2);
 
 		cleanupStore();
 	});
@@ -126,7 +126,7 @@ describe('getCkEthPendingTransactions', () => {
 			icPendingTransactionsStore: get(icPendingTransactionsStore)
 		});
 
-		expect(result.length).toEqual(0);
+		expect(result).toHaveLength(0);
 
 		cleanupStore();
 	});
