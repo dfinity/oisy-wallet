@@ -1,5 +1,7 @@
+import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
+import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { VipRewardStateData } from '$lib/types/reward';
 import { derived, type Readable } from 'svelte/store';
 
@@ -91,6 +93,11 @@ export const modalManageTokens: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'manage-tokens'
 );
+export const modalManageTokensData: Readable<ManageTokensData | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'manage-tokens' ? ($modalStore?.data as ManageTokensData) : undefined
+);
 export const modalHideToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'hide-token'
@@ -134,6 +141,11 @@ export const modalAboutWhyOisy: Readable<boolean> = derived(
 export const modalVipQrCode: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'vip-qr-code'
+);
+export const modalVipQrCodeData: Readable<QrCodeType | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'vip-qr-code' ? ($modalStore?.data as QrCodeType) : undefined
 );
 export const modalReferralCode: Readable<boolean> = derived(
 	modalStore,

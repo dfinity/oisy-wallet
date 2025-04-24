@@ -22,13 +22,13 @@ describe('account.utils', () => {
 		});
 
 		it('should return false if address is undefined', () => {
-			expect(isIcpAccountIdentifier(undefined)).toBe(false);
+			expect(isIcpAccountIdentifier(undefined)).toBeFalsy();
 
 			expect(mockCheckAccountId).not.toHaveBeenCalled();
 		});
 
 		it('should return true if checkAccountId does not throw', () => {
-			expect(isIcpAccountIdentifier('aaaaa-aa')).toBe(true);
+			expect(isIcpAccountIdentifier('aaaaa-aa')).toBeTruthy();
 
 			expect(mockCheckAccountId).toHaveBeenCalledOnce();
 			expect(mockCheckAccountId).toHaveBeenCalledWith('aaaaa-aa');
@@ -39,7 +39,7 @@ describe('account.utils', () => {
 				throw new Error();
 			});
 
-			expect(isIcpAccountIdentifier('aaaaa-aa')).toBe(false);
+			expect(isIcpAccountIdentifier('aaaaa-aa')).toBeFalsy();
 
 			expect(mockCheckAccountId).toHaveBeenCalledOnce();
 			expect(mockCheckAccountId).toHaveBeenCalledWith('aaaaa-aa');
@@ -56,13 +56,13 @@ describe('account.utils', () => {
 		});
 
 		it('should return false if address is undefined', () => {
-			expect(isEthAddress(undefined)).toBe(false);
+			expect(isEthAddress(undefined)).toBeFalsy();
 
 			expect(mockIsAddress).not.toHaveBeenCalled();
 		});
 
 		it('should return true if isAddress returns true', () => {
-			expect(isEthAddress('0xaaaaa')).toBe(true);
+			expect(isEthAddress('0xaaaaa')).toBeTruthy();
 
 			expect(mockIsAddress).toHaveBeenCalledOnce();
 			expect(mockIsAddress).toHaveBeenCalledWith('0xaaaaa');
@@ -71,7 +71,7 @@ describe('account.utils', () => {
 		it('should return false if isAddress returns false', () => {
 			mockIsAddress.mockImplementationOnce(() => false);
 
-			expect(isEthAddress('0xaaaaa')).toBe(false);
+			expect(isEthAddress('0xaaaaa')).toBeFalsy();
 
 			expect(mockIsAddress).toHaveBeenCalledOnce();
 			expect(mockIsAddress).toHaveBeenCalledWith('0xaaaaa');
@@ -88,13 +88,13 @@ describe('account.utils', () => {
 		});
 
 		it('should return true if address is undefined', () => {
-			expect(invalidIcpAddress(undefined)).toBe(true);
+			expect(invalidIcpAddress(undefined)).toBeTruthy();
 
 			expect(mockCheckAccountId).not.toHaveBeenCalled();
 		});
 
 		it('should return false if checkAccountId does not throw', () => {
-			expect(invalidIcpAddress('aaaaa-aa')).toBe(false);
+			expect(invalidIcpAddress('aaaaa-aa')).toBeFalsy();
 
 			expect(mockCheckAccountId).toHaveBeenCalledOnce();
 			expect(mockCheckAccountId).toHaveBeenCalledWith('aaaaa-aa');
@@ -105,7 +105,7 @@ describe('account.utils', () => {
 				throw new Error();
 			});
 
-			expect(invalidIcpAddress('aaaaa-aa')).toBe(true);
+			expect(invalidIcpAddress('aaaaa-aa')).toBeTruthy();
 
 			expect(mockCheckAccountId).toHaveBeenCalledOnce();
 			expect(mockCheckAccountId).toHaveBeenCalledWith('aaaaa-aa');
