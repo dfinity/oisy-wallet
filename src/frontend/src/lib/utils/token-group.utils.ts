@@ -1,5 +1,5 @@
 import { ZERO_BI } from '$lib/constants/app.constants';
-import type { TokenId, TokenUi, TokenUiWithGroupData } from '$lib/types/token';
+import type { TokenId, TokenUi, TokenUiWithGroupable } from '$lib/types/token';
 import type { TokenGroupId, TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import { sumBalances, sumUsdBalances } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -76,7 +76,7 @@ export const filterTokenGroups = ({
 			: hasBalance({ token: tokenOrGroup.token, showZeroBalances })
 	);
 
-const mapNewTokenGroup = (token: TokenUiWithGroupData): TokenUiGroup => ({
+const mapNewTokenGroup = (token: TokenUiWithGroupable): TokenUiGroup => ({
 	id: token.groupData.id,
 	nativeToken: token,
 	groupData: token.groupData,
@@ -86,7 +86,7 @@ const mapNewTokenGroup = (token: TokenUiWithGroupData): TokenUiGroup => ({
 });
 
 interface GroupTokenParams {
-	token: TokenUiWithGroupData;
+	token: TokenUiWithGroupable;
 	tokenGroup: TokenUiGroup | undefined;
 }
 
@@ -158,7 +158,7 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 		const group: TokenUiGroup = groupSecondaryToken({
 			// Even if we check for the existence of the `groupData`, the compiler warns that the type of the token is still `TokenUi`.
 			// We need to cast it to `TokenUiWithGroupData` to access the groupData property.
-			token: token as TokenUiWithGroupData,
+			token: token as TokenUiWithGroupable,
 			tokenGroup:
 				nonNullish(putativeExistingGroup) && 'group' in putativeExistingGroup
 					? putativeExistingGroup.group

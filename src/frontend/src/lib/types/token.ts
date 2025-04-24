@@ -54,7 +54,7 @@ export interface TokenFinancialData {
 
 export type TokenUi<T extends Token = Token> = T & TokenFinancialData;
 
-export type TokenUiWithGroupData<T extends Token = Token> = Omit<TokenUi<T>, 'groupData'> &
+export type TokenUiWithGroupable<T extends Token = Token> = Omit<TokenUi<T>, 'groupData'> &
 	Required<Pick<TokenUi<T>, 'groupData'>>;
 
 export type OptionTokenUi = Option<TokenUi>;
