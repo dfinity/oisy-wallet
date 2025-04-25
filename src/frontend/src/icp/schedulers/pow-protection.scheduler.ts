@@ -1,11 +1,12 @@
 import type { CreateChallengeResponse } from '$declarations/backend/backend.did';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
-import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
+import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import type { PostMessageDataRequest } from '$lib/types/post-message';
 import { hashText } from '@dfinity/utils';
 
-export class PowProtectionScheduler<PostMessageDataRequest>
-	implements Scheduler<PostMessageDataRequest> {
+// TODO: add tests for POW worker/scheduler
+export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
 
 	stop() {
@@ -35,12 +36,12 @@ export class PowProtectionScheduler<PostMessageDataRequest>
 	 * @returns The `nonce` that solves the challenge as a `bigint`.
 	 * @throws An error if `difficulty` is not greater than zero.
 	 */
-	public solvePowChallenge = async ({
-																			timestamp,
-																			difficulty
-																		}: {
-		timestamp: bigint; // The unique timestamp for the challenge
-		difficulty: number; // The difficulty level
+	private solvePowChallenge = async ({
+		timestamp,
+		difficulty
+	}: {
+		timestamp: bigint;
+		difficulty: number;
 	}): Promise<bigint> => {
 		if (difficulty <= 0) {
 			throw new Error('Difficulty must be greater than zero');
@@ -53,6 +54,7 @@ export class PowProtectionScheduler<PostMessageDataRequest>
 		const target = BigInt(Math.floor(0xffffffff / difficulty));
 
 		// Continuously try different nonce values until the challenge is solved
+		// TODO: Check if it is worth introducing a max number of iterations
 		while (true) {
 			// Concatenate the timestamp and nonce as the challenge string
 			const challengeStr = `${timestamp}.${nonce}`;
