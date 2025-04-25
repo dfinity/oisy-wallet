@@ -1,62 +1,64 @@
+import type { AllowSigningResponse, CreateChallengeResponse } from '$declarations/backend/backend.did';
+import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { PowProtectionScheduler } from '$icp/schedulers/pow-protection.scheduler';
+import * as backendApi from '$lib/api/backend.api';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import * as backendApi from '$lib/api/backend.api';
 import type { TestUtil } from '$tests/types/utils';
+import type { MockInstance } from 'vitest';
 
-// Mock data
-const mockPowChallengeResponse = {
-	start_timestamp_ms: 1234567890123n,
-	difficulty: 10,
-	expiry_timestamp_ms: 1234567891123n
-};
+describe('pow-protector.worker', () => {
+	let spyCreatePowChallenge: MockInstance;
+	let spyAllowSigning: MockInstance;
+	let spySolvePowChallenge: MockInstance;
 
-// Fix: Make challenge_completion a proper union type ([] | [ChallengeCompletion])
-const mockAllowSigningResponse = {
-	status: { Executed: null },
-	challenge_completion: [
-		{
-			solved_duration_ms: 123n,
-			next_allowance_ms: 456n,
-			next_difficulty: 11,
-			current_difficulty: 10
+	let originalPostmessage: unknown;
+
+	// Mock for CreateChallengeResponse
+	const mockCreateChallengeResponse: CreateChallengeResponse = {
+		difficulty: 1,
+		start_timestamp_ms: 1234567890n,
+		expiry_timestamp_ms: 1234568890n
+	};
+
+	const mockAllowSigningResponse: AllowSigningResponse = {
+		status: { Executed: null },
+		challenge_completion: [
+			{
+				solved_duration_ms: 1500n,
+				next_allowance_ms: 3600000n,
+				next_difficulty: 2,
+				current_difficulty: 1
+			}
+		],
+		allowed_cycles: 100000000n
+	};
+
+	const mockPostMessageStatusInProgress = {
+		msg: 'syncPowProtectionStatus',
+		data: {
+			state: 'in_progress'
 		}
-	] as [{
-		solved_duration_ms: bigint;
-		next_allowance_ms: bigint;
-		next_difficulty: number;
-		current_difficulty: number;
-	}],
-	allowed_cycles: 100n
-};
+	};
 
-const mockPostMessageStatusInProgress = {
-	msg: 'syncPowProtectionStatus',
-	data: {
-		state: 'in_progress'
-	}
-};
+	const mockPostMessageStatusIdle = {
+		msg: 'syncPowProtectionStatus',
+		data: {
+			state: 'idle'
+		}
+	};
 
-const mockPostMessageStatusIdle = {
-	msg: 'syncPowProtectionStatus',
-	data: {
-		state: 'idle'
-	}
-};
+	const mockPostMessageStatusError = {
+		msg: 'syncPowProtectionStatus',
+		data: {
+			state: 'error'
+		}
+	};
 
-const mockPostMessageStatusError = {
-	msg: 'syncPowProtectionStatusError',
-	data: { error: new Error('API Error') }
-};
-
-const mockNonceValue = 12345n;
-
-describe('PowProtectionScheduler', () => {
-	let scheduler: PowProtectionScheduler;
 	const postMessageMock = vi.fn();
 
 	beforeAll(() => {
-		// Mock the global postMessage function
+		originalPostmessage = window.postMessage;
 		window.postMessage = postMessageMock;
 	});
 
@@ -64,130 +66,225 @@ describe('PowProtectionScheduler', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		// Mock identity resolution
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 
-		// Mock backend API calls
-		vi.spyOn(backendApi, 'createPowChallenge').mockResolvedValue(mockPowChallengeResponse);
-		vi.spyOn(backendApi, 'allowSigning').mockResolvedValue(mockAllowSigningResponse);
+		// Mock the API calls
+		spyCreatePowChallenge = vi
+			.spyOn(backendApi, 'createPowChallenge')
+			.mockResolvedValue(mockCreateChallengeResponse);
+		spyAllowSigning = vi
+			.spyOn(backendApi, 'allowSigning')
+			.mockResolvedValue(mockAllowSigningResponse);
 	});
 
 	afterEach(() => {
 		vi.useRealTimers();
-		if (scheduler) {
-			scheduler.stop();
-		}
 	});
 
 	afterAll(() => {
-		// Restore the global postMessage
-		vi.restoreAllMocks();
+		// @ts-expect-error redo original
+		window.postMessage = originalPostmessage;
 	});
 
-	const initTests = (): TestUtil => ({
-		setup: () => {
-			scheduler = new PowProtectionScheduler();
-			// Override the private method by using prototype and function assignment
-			// This is a workaround since we can't directly spy on private methods
-			scheduler['solvePowChallenge'] = async () => mockNonceValue;
-		},
-		teardown: () => {
-			scheduler.stop();
-		},
-		tests: () => {
-			it('should start the scheduler and execute periodic job', async () => {
-				await scheduler.start(undefined);
+	const initWithSuccess = <PostMessageDataRequest>({
+																										 startData = undefined
+																									 }: {
+		startData?: PostMessageDataRequest | undefined;
+	}): TestUtil => {
+		let scheduler: PowProtectionScheduler<PostMessageDataRequest>;
 
-				expect(scheduler['timer']['timer']).toBeDefined();
-				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
+		return {
+			setup: () => {
+				// Initialize the scheduler here
+				scheduler = new PowProtectionScheduler<PostMessageDataRequest>();
 
-				// First execution
-				await vi.advanceTimersByTimeAsync(5000);
-				expect(backendApi.createPowChallenge).toHaveBeenCalledTimes(1);
-				expect(backendApi.allowSigning).toHaveBeenCalledTimes(1);
+				// Mock the solvePowChallenge method
+				spySolvePowChallenge = vi.spyOn(scheduler, 'solvePowChallenge').mockResolvedValue(42n);
+			},
 
-				// Reset mocks to ensure we can track the next execution clearly
-				vi.clearAllMocks();
-
-				// Second execution
-				await vi.advanceTimersByTimeAsync(5000);
-				expect(backendApi.createPowChallenge).toHaveBeenCalledTimes(1);
-				expect(backendApi.allowSigning).toHaveBeenCalledTimes(1);
-			});
-
-			it('should manually trigger the scheduler job', async () => {
-				await scheduler.trigger(undefined);
-
-				expect(backendApi.createPowChallenge).toHaveBeenCalledTimes(1);
-				expect(backendApi.createPowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
-				expect(backendApi.allowSigning).toHaveBeenCalledTimes(1);
-				expect(backendApi.allowSigning).toHaveBeenCalledWith({
-					identity: mockIdentity,
-					request: { nonce: mockNonceValue }
-				});
-			});
-
-			it('should stop the scheduler and clear the timer', () => {
+			teardown: () => {
 				scheduler.stop();
+			},
 
-				expect(scheduler['timer']['timer']).toBeUndefined();
-				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
-			});
+			tests: () => {
+				it('should start the scheduler with an interval', async () => {
+					await scheduler.start(startData);
 
-			it('should post status updates during job execution', async () => {
-				await scheduler.start(undefined);
-
-				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-
-				scheduler.stop();
-
-				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
-			});
-		}
-	});
-
-	const initErrorTests = (): TestUtil => ({
-		setup: () => {
-			scheduler = new PowProtectionScheduler();
-			// Override the private method
-			scheduler['solvePowChallenge'] = async () => mockNonceValue;
-		},
-		teardown: () => {
-			scheduler.stop();
-		},
-		tests: () => {
-			it('should handle errors during execution gracefully', async () => {
-				const error = new Error('API Error');
-				vi.spyOn(backendApi, 'createPowChallenge').mockRejectedValueOnce(error);
-
-				// Mock the timer's postMsg method to capture the error message correctly
-				scheduler['timer']['postMsg'] = vi.fn();
-
-				await scheduler.start(undefined);
-				await vi.advanceTimersByTimeAsync(5000);
-
-				// Verify the error message was posted correctly
-				expect(scheduler['timer']['postMsg']).toHaveBeenCalledWith({
-					msg: 'syncPowProtectionStatusError',
-					data: { error }
+					expect(scheduler['timer']['timer']).toBeDefined();
 				});
-			});
-		}
-	});
 
-	describe('Normal Scenarios', () => {
-		const { setup, teardown, tests } = initTests();
+				it('should trigger the scheduler manually', async () => {
+					await scheduler.trigger(startData);
+
+					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
+
+					expect(spySolvePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spySolvePowChallenge).toHaveBeenCalledWith({
+						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
+						difficulty: mockCreateChallengeResponse.difficulty
+					});
+
+					expect(spyAllowSigning).toHaveBeenCalledTimes(1);
+					expect(spyAllowSigning).toHaveBeenCalledWith({
+						identity: mockIdentity,
+						request: { nonce: 42n }
+					});
+				});
+
+				it('should stop the scheduler', () => {
+					scheduler.stop();
+
+					expect(scheduler['timer']['timer']).toBeUndefined();
+				});
+
+				it('should trigger pow protection periodically', async () => {
+					await scheduler.start(startData);
+
+					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
+
+					expect(spySolvePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spySolvePowChallenge).toHaveBeenCalledWith({
+						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
+						difficulty: mockCreateChallengeResponse.difficulty
+					});
+
+					expect(spyAllowSigning).toHaveBeenCalledTimes(1);
+					expect(spyAllowSigning).toHaveBeenCalledWith({
+						identity: mockIdentity,
+						request: { nonce: 42n }
+					});
+
+					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
+
+					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(2);
+					expect(spySolvePowChallenge).toHaveBeenCalledTimes(2);
+					expect(spyAllowSigning).toHaveBeenCalledTimes(2);
+
+					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
+
+					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(3);
+					expect(spySolvePowChallenge).toHaveBeenCalledTimes(3);
+					expect(spyAllowSigning).toHaveBeenCalledTimes(3);
+				});
+
+				it('should post messages for status updates', async () => {
+					await scheduler.start(startData);
+
+					expect(postMessageMock).toHaveBeenCalledTimes(2);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageStatusIdle);
+
+					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
+
+					expect(postMessageMock).toHaveBeenCalledTimes(4);
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+
+					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
+
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
+					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+				});
+			}
+		};
+	};
+
+	const initWithErrors = <PostMessageDataRequest>({
+																										startData = undefined,
+																										initErrorMock
+																									}: {
+		startData?: PostMessageDataRequest | undefined;
+		initErrorMock: (err: Error) => void;
+		msg: 'syncPowProtection';
+	}): TestUtil => {
+		let scheduler: PowProtectionScheduler<PostMessageDataRequest>;
+
+		return {
+			setup: () => {
+				// Initialize the scheduler here
+				scheduler = new PowProtectionScheduler<PostMessageDataRequest>();
+			},
+
+			teardown: () => {
+				scheduler.stop();
+			},
+
+			tests: () => {
+				it('should trigger postMessage with error state', async () => {
+					const err = new Error('test');
+					initErrorMock(err);
+
+					await scheduler.start(startData);
+
+					// The pattern is: first in_progress, then error state, then idle
+					expect(postMessageMock).toHaveBeenCalledTimes(3);
+
+					// Check the first call (in_progress)
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+
+					// Check the second call (error state)
+					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageStatusError);
+
+					// Check the third call (idle)
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
+				});
+			}
+		};
+	};
+
+	const startData = {
+		ledgerCanisterId: 'zfcdd-tqaaa-aaaaq-aaaga-cai',
+		env: 'mainnet' as const
+	};
+
+	describe('with successful execution', () => {
+		const { setup, teardown, tests } = initWithSuccess({
+			startData
+		});
 
 		beforeEach(setup);
+
 		afterEach(teardown);
 
 		tests();
 	});
 
-	describe('Error Scenarios', () => {
-		const { setup, teardown, tests } = initErrorTests();
+	describe('with error in createPowChallenge', () => {
+		const initErrorMock = (err: Error) => {
+			spyCreatePowChallenge.mockRejectedValue(err);
+		};
+
+		const { setup, teardown, tests } = initWithErrors({
+			startData,
+			initErrorMock,
+			msg: 'syncPowProtection'
+		});
 
 		beforeEach(setup);
+
+		afterEach(teardown);
+
+		tests();
+	});
+
+	describe('with error in allowSigning', () => {
+		const initErrorMock = (err: Error) => {
+			// Make createPowChallenge succeed but allowSigning fail
+			spyCreatePowChallenge.mockResolvedValue(mockCreateChallengeResponse);
+			spyAllowSigning.mockRejectedValue(err);
+		};
+
+		const { setup, teardown, tests } = initWithErrors({
+			startData,
+			initErrorMock,
+			msg: 'syncPowProtection'
+		});
+
+		beforeEach(setup);
+
 		afterEach(teardown);
 
 		tests();
