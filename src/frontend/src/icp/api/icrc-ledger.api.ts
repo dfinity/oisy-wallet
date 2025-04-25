@@ -125,6 +125,12 @@ export const transfer = async ({
 
 	const { transfer } = await ledgerCanister({ identity, ledgerCanisterId });
 
+	console.log('transfer', {
+		to: toAccount(to),
+		amount,
+		createdAt
+	});
+
 	return transfer({
 		to: toAccount(to),
 		amount,

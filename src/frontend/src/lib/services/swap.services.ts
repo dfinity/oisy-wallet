@@ -407,6 +407,8 @@ export const swapWithIcpSwap = async ({
 		to: toAddress
 	  });
 
+	  console.log(isSourceTokenIcrc2, 'isSourceTokenIcrc2');
+	  
 
 	if (!isSourceTokenIcrc2) {
 		await sendIcrc(transferParams);
