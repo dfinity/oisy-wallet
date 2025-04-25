@@ -244,6 +244,7 @@
 			on:icNext
 			on:icClose={close}
 			on:icQRCodeScan
+			on:icTokensList
 			bind:destination
 			bind:amount
 			bind:network={targetNetwork}

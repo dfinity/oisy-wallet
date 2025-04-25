@@ -47,6 +47,7 @@
 		on:icNext
 		on:icClose
 		on:icQRCodeScan
+		on:icTokensList
 	/>
 {:else if isNetworkIdEvm($sendToken.network.id) && nonNullish($selectedEvmNetwork) && nonNullish($evmNativeToken)}
 	<!--			TODO: use store evmNativeToken here when we adapt the fee context to fetch the EVM fees -->
@@ -64,6 +65,7 @@
 		on:icNext
 		on:icClose
 		on:icQRCodeScan
+		on:icTokensList
 	/>
 {:else if isNetworkIdICP($sendToken.network.id)}
 	<IcSendTokenWizard
@@ -79,6 +81,7 @@
 		on:icNext
 		on:icClose
 		on:icQRCodeScan
+		on:icTokensList
 	/>
 {:else if isNetworkIdBitcoin($sendToken.network.id)}
 	<BtcSendTokenWizard
@@ -92,6 +95,7 @@
 		on:icClose
 		on:icSendBack
 		on:icQRCodeScan
+		on:icTokensList
 	/>
 {:else if isNetworkIdSolana($sendToken.network.id)}
 	<SolSendTokenWizard
@@ -105,6 +109,7 @@
 		on:icClose
 		on:icSendBack
 		on:icQRCodeScan
+		on:icTokensList
 	/>
 {:else}
 	<slot />
