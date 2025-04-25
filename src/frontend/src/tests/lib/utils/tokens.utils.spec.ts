@@ -9,7 +9,6 @@ import {
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
 import {
 	SOLANA_DEVNET_TOKEN,
 	SOLANA_LOCAL_TOKEN,
@@ -143,7 +142,7 @@ describe('tokens.utils', () => {
 		it('should sort deprecated sns tokens at the end', () => {
 			const mockDeprecatedTokenName = {
 				...mockValidToken,
-				ledgerCanisterId: Object.keys(DEPRECATED_SNES)[0]
+				deprecated: true
 			};
 
 			const mockTokensWithDeprecated = [mockDeprecatedTokenName, ...mockTokens];
