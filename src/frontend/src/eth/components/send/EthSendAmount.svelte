@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
@@ -19,6 +19,8 @@
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
 	export let nativeEthereumToken: Token;
+
+	const dispatch = createEventDispatcher();
 
 	let exchangeValueUnit: DisplayUnit = 'usd';
 	let inputUnit: DisplayUnit;
@@ -86,11 +88,13 @@
 		bind:amount
 		displayUnit={inputUnit}
 		bind:amountSetToMax
-		isSelectable={false}
 		exchangeRate={$sendTokenExchangeRate}
 		bind:error={insufficientFundsError}
 		customErrorValidate={customValidate}
 		autofocus={nonNullish($sendToken)}
+		on:click={() => {
+			dispatch('icTokensList');
+		}}
 	>
 		<span slot="title">{$i18n.core.text.amount}</span>
 
