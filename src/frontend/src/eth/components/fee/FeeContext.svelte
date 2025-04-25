@@ -14,6 +14,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
+	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import {
 		toCkErc20HelperContractAddress,
@@ -29,7 +30,6 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -62,7 +62,7 @@
 
 			const feeData = await getFeeData();
 
-			if (isSupportedEthTokenId(sendTokenId)   || isSupportedEvmNativeTokenId(sendTokenId)) {
+			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
 					...feeData,
 					gas: getEthFeeData({
