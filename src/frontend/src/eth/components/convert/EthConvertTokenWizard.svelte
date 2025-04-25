@@ -112,10 +112,12 @@
 			return;
 		}
 
-		dispatch('icNext');
 
 		// This is a simple type check, since it should not happen since the user arrived here from a selected Ethereum network
 		assertNonNullish($selectedEthereumNetwork);
+
+		dispatch('icNext');
+
 
 		try {
 			await executeSend({
