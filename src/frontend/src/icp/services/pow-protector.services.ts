@@ -25,9 +25,10 @@ export const solvePowChallenge = async ({
 	// Target is proportional to 1/difficulty (converted target to bigint)
 	const target = BigInt(Math.floor(0xffffffff / difficulty));
 
+	let prefix: bigint;
+
 	// Continuously try different nonce values until the challenge is solved
-	// TODO: Check if it is worth introducing a max number of iterations
-	while (true) {
+	do {
 		// Concatenate the timestamp and nonce as the challenge string
 		const challengeStr = `${timestamp}.${nonce}`;
 
@@ -35,16 +36,13 @@ export const solvePowChallenge = async ({
 		const hashHex = await hashText(challengeStr);
 
 		// Extract the first 4 bytes of the hash as a number (prefix converted to bigint)
-		const prefix = BigInt(parseInt(hashHex.slice(0, 8), 16));
+		prefix = BigInt(parseInt(hashHex.slice(0, 8), 16));
 
-		// If the prefix satisfies the difficulty target, stop the loop
-		if (prefix <= target) {
-			break;
+		// Increment the nonce if the condition is not satisfied
+		if (prefix > target) {
+			nonce++;
 		}
-
-		// Otherwise, increment the nonce (bigint increment) and try again
-		nonce++;
-	}
+	} while (prefix > target);
 
 	// Return the nonce that solves the challenge (bigint type)
 	return nonce;
