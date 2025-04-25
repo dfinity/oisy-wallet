@@ -1,15 +1,18 @@
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { ETH_TOKEN_GROUP, ETH_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.eth.env';
+import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import { getFilteredTokenGroup, getFilteredTokenList } from '$lib/utils/token-list.utils';
 import { describe, expect, it } from 'vitest';
-import type { BRAND } from 'zod';
 
 // Mock data for tokens
 const token1: TokenUi = {
-	id: 'btc' as unknown as symbol & BRAND<'TokenId'>,
+	id: BTC_MAINNET_TOKEN_ID,
 	network: BTC_MAINNET_NETWORK,
 	standard: 'erc20',
 	category: 'default',
@@ -20,7 +23,7 @@ const token1: TokenUi = {
 };
 
 const token2: TokenUi = {
-	id: 'eth' as unknown as symbol & BRAND<'TokenId'>,
+	id: ETHEREUM_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
 	standard: 'erc20',
 	category: 'default',
@@ -31,7 +34,7 @@ const token2: TokenUi = {
 };
 
 const token3: TokenUi = {
-	id: 'sol' as unknown as symbol & BRAND<'TokenId'>,
+	id: SOLANA_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'spl',
 	category: 'custom',
@@ -42,15 +45,16 @@ const token3: TokenUi = {
 };
 
 const tokenGroup: TokenUiGroup = {
-	id: 'group1' as unknown as symbol & BRAND<'TokenId'>,
+	id: ETH_TOKEN_GROUP_ID,
 	nativeToken: token1,
+	groupData: ETH_TOKEN_GROUP,
 	tokens: [token2, token3]
 };
 
 const tokenGroupUi: TokenUiOrGroupUi = { group: tokenGroup };
 const tokenUi: TokenUiOrGroupUi = { token: token1 };
 
-describe('Token List Utils', () => {
+describe('token-list.utils', () => {
 	describe('getFilteredTokenList', () => {
 		it('should return all tokens when filter is an empty string', () => {
 			const list: TokenUiOrGroupUi[] = [tokenUi, tokenGroupUi];
