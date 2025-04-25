@@ -57,6 +57,12 @@ export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse | n
 		vs_currencies: 'usd'
 	});
 
+export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'bnb',
+		vs_currencies: 'usd'
+	});
+
 export const exchangeRateERC20ToUsd = (
 	contractAddresses: Erc20ContractAddress[]
 ): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
@@ -108,6 +114,7 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 		...(nonNullish(data) ? [data.currentBtcPrice] : []),
 		...(nonNullish(data) ? [data.currentIcpPrice] : []),
 		...(nonNullish(data) ? [data.currentSolPrice] : []),
+		...(nonNullish(data) ? [data.currentBnbPrice] : []),
 		...(nonNullish(data) ? [data.currentErc20Prices] : []),
 		...(nonNullish(data) ? [data.currentIcrcPrices] : []),
 		...(nonNullish(data) ? [data.currentSplPrices] : [])

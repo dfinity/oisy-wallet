@@ -4,5 +4,6 @@ export const CoingeckoCoinsIdSchema = z.enum([
 	'ethereum',
 	'bitcoin',
 	'internet-computer',
-	'solana'
+	'solana',
+	'bnb'
 ]);
