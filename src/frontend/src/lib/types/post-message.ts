@@ -1,5 +1,4 @@
-import type { PostMessageDataRequestPowProtectorSchema } from '$lib/schema/post-message.schema';
-import {
+import { type PostMessageDataRequestPowProtectorSchema ,
 	type PostMessageDataRequestBtcSchema,
 	type PostMessageDataRequestExchangeTimerSchema,
 	type PostMessageDataRequestIcCkBTCUpdateBalanceSchema,

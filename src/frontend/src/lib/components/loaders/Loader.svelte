@@ -11,6 +11,7 @@
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
+	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -54,7 +55,6 @@
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -108,7 +108,7 @@
 		// Instead, we use effect, placeholders and skeleton until those data are loaded.
 		await loadData();
 
-		await  initPowProtectorWorker();
+		await initPowProtectorWorker();
 	};
 
 	let progressModal = false;
