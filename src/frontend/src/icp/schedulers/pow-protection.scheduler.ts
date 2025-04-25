@@ -12,18 +12,16 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		this.timer.stop();
 	}
 
-	async start(data: PostMessageDataRequest | undefined) {
+	async start() {
 		await this.timer.start<PostMessageDataRequest>({
 			interval: POW_CHALLENGE_INTERVAL_MILLIS,
-			job: this.requestSignerCycles,
-			data
+			job: this.requestSignerCycles
 		});
 	}
 
-	async trigger(data: PostMessageDataRequest | undefined) {
+	async trigger() {
 		await this.timer.trigger<PostMessageDataRequest>({
-			job: this.requestSignerCycles,
-			data
+			job: this.requestSignerCycles
 		});
 	}
 

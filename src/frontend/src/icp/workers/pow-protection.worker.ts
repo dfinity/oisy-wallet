@@ -6,17 +6,17 @@ const scheduler = new PowProtectionScheduler();
 export const onPowProtectionMessage = async ({
 	data: dataMsg
 }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
-	const { msg, data } = dataMsg;
+	const { msg } = dataMsg;
 
 	switch (msg) {
 		case 'stopPowProtectionTimer':
 			scheduler.stop();
 			return;
 		case 'startPowProtectionTimer':
-			await scheduler.start(data);
+			await scheduler.start();
 			return;
 		case 'triggerPowProtectionTimer':
-			await scheduler.trigger(data);
+			await scheduler.trigger();
 			return;
 	}
 };
