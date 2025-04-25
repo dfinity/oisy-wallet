@@ -1,9 +1,12 @@
-import type { AllowSigningResponse, CreateChallengeResponse } from '$declarations/backend/backend.did';
+import type {
+	AllowSigningResponse,
+	CreateChallengeResponse
+} from '$declarations/backend/backend.did';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { PowProtectionScheduler } from '$icp/schedulers/pow-protection.scheduler';
+import * as powProtectorServices from '$icp/services/pow-protector.services'; // Import the module containing solvePowChallenge
 import * as backendApi from '$lib/api/backend.api';
 import * as authUtils from '$lib/utils/auth.utils';
-import * as powProtectorServices from '$icp/services/pow-protector.services'; // Import the module containing solvePowChallenge
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import type { MockInstance } from 'vitest';
@@ -93,8 +96,8 @@ describe('pow-protector.worker', () => {
 	});
 
 	const initWithSuccess = <PostMessageDataRequest>({
-																										 startData = undefined
-																									 }: {
+		startData = undefined
+	}: {
 		startData?: PostMessageDataRequest | undefined;
 	}): TestUtil => {
 		let scheduler: PowProtectionScheduler<PostMessageDataRequest>;
@@ -196,9 +199,9 @@ describe('pow-protector.worker', () => {
 	};
 
 	const initWithErrors = <PostMessageDataRequest>({
-																										startData = undefined,
-																										initErrorMock
-																									}: {
+		startData = undefined,
+		initErrorMock
+	}: {
 		startData?: PostMessageDataRequest | undefined;
 		initErrorMock: (err: Error) => void;
 		msg: 'syncPowProtection';
