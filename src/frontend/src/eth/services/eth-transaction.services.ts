@@ -5,6 +5,7 @@ import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
+import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
@@ -20,7 +21,7 @@ export const processTransactionSent = async ({
 	token: Token;
 	transaction: TransactionResponse;
 }) => {
-	if (isSupportedEthTokenId(token.id)) {
+	if (isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id)) {
 		await processEthTransaction({ hash: transaction.hash, token });
 		return;
 	}
