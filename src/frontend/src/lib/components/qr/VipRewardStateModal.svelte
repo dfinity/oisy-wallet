@@ -38,7 +38,6 @@
 			return;
 		}
 
-
 		const token = $icrcTokens.find(
 			({ ledgerCanisterId }) => ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId
 		);
