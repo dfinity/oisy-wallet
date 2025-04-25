@@ -3,7 +3,12 @@
 	export type AvatarVariants = 'xl' | 'lg' | 'md' | 'sm' | 'xs';
 	import IconAvatar from '$lib/components/icons/IconAvatar.svelte';
 
-	const { name, variant = 'md' }: { name?: string; variant?: AvatarVariants } = $props();
+	interface AvatarProps {
+		name?: string;
+		variant?: AvatarVariants;
+		styleClass?: string;
+	}
+	const { name, variant = 'md', styleClass }: AvatarProps = $props();
 
 	const size = $derived(
 		{
@@ -26,13 +31,13 @@
 </script>
 
 {#if !initials}
-	<div class="text-brand-primary">
+	<div class={`text-brand-primary ${styleClass}`}>
 		<IconAvatar size={`${size}`}></IconAvatar>
 	</div>
 {:else}
 	<span
 		style={`width: ${size}px; height: ${size}px; font-size: ${Math.ceil((size * 4) / 10)}px`}
-		class="inline-block inline-flex items-center justify-center rounded-full bg-[lightgray] text-4xl"
+		class={`inline-block inline-flex items-center justify-center rounded-full bg-[lightgray] text-4xl font-bold text-white ${styleClass}`}
 		>{initials}</span
 	>
 {/if}
