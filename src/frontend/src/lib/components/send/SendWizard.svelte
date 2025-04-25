@@ -50,12 +50,11 @@
 		on:icTokensList
 	/>
 {:else if isNetworkIdEvm($sendToken.network.id) && nonNullish($selectedEvmNetwork) && nonNullish($evmNativeToken)}
-	<!--			TODO: use store evmNativeToken here when we adapt the fee context to fetch the EVM fees -->
 	<EthSendTokenWizard
 		{currentStep}
 		{formCancelAction}
 		sourceNetwork={$selectedEvmNetwork}
-		nativeEthereumToken={$ethereumToken}
+		nativeEthereumToken={$evmNativeToken}
 		bind:destination
 		bind:targetNetwork
 		bind:amount
