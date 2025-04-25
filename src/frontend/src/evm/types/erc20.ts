@@ -1,9 +1,4 @@
-import type { Erc20ContractAddress } from '$eth/types/erc20';
-import type { Exchange } from '$lib/types/exchange';
-import type { RequiredToken, Token } from '$lib/types/token';
+import type { RequiredErc20Token } from '$eth/types/erc20';
+import type { TokenLinkedData } from '$lib/types/token';
 
-export type Erc20Token = Erc20Contract & Token;
-
-export type RequiredEvmErc20Token = RequiredToken<Erc20Token>;
-
-export type Erc20Contract = Erc20ContractAddress & { exchange: Exchange };
+export type RequiredEvmErc20Token = Omit<RequiredErc20Token, keyof TokenLinkedData>;
