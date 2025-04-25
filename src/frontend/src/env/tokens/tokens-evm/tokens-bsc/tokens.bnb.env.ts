@@ -1,9 +1,11 @@
 import {
+	BSC_MAINNET_ENABLED,
 	BSC_MAINNET_NETWORK,
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import bnb from '$evm/bsc/assets/bnb.svg';
 import type { RequiredToken, TokenId } from '$lib/types/token';
+import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 const BNB_DECIMALS = 18;
@@ -40,3 +42,9 @@ export const BNB_TESTNET_TOKEN: RequiredToken = {
 	decimals: BNB_DECIMALS,
 	icon: bnb
 };
+
+export const SUPPORTED_BSC_TOKENS: RequiredToken[] = defineSupportedTokens({
+	mainnetFlag: BSC_MAINNET_ENABLED,
+	mainnetTokens: [BNB_MAINNET_TOKEN],
+	testnetTokens: [BNB_TESTNET_TOKEN]
+});
