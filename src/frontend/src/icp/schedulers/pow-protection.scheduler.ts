@@ -1,12 +1,11 @@
 import type { CreateChallengeResponse } from '$declarations/backend/backend.did';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
-import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
-import type { PostMessageDataRequest } from '$lib/types/post-message';
+import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
 import { hashText } from '@dfinity/utils';
 
 // TODO: add tests for POW worker/scheduler
-export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
+export class PowProtectionScheduler<PostMessageDataRequest> implements Scheduler<PostMessageDataRequest> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
 
 	stop() {
@@ -37,9 +36,9 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	 * @throws An error if `difficulty` is not greater than zero.
 	 */
 	private solvePowChallenge = async ({
-		timestamp,
-		difficulty
-	}: {
+																			 timestamp,
+																			 difficulty
+																		 }: {
 		timestamp: bigint;
 		difficulty: number;
 	}): Promise<bigint> => {
