@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
@@ -14,6 +14,8 @@
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
+
+	const dispatch = createEventDispatcher();
 
 	let exchangeValueUnit: DisplayUnit = 'usd';
 	let inputUnit: DisplayUnit;
@@ -41,11 +43,13 @@
 		token={$sendToken}
 		bind:amount
 		displayUnit={inputUnit}
-		isSelectable={false}
 		exchangeRate={$sendTokenExchangeRate}
 		bind:error={amountError}
 		customErrorValidate={customValidate}
 		autofocus={nonNullish($sendToken)}
+		on:click={() => {
+			dispatch('icTokensList');
+		}}
 	>
 		<span slot="title">{$i18n.core.text.amount}</span>
 

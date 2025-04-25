@@ -151,6 +151,7 @@
 	<BtcSendForm
 		on:icNext
 		on:icClose
+		on:icTokensList
 		bind:destination
 		bind:amount
 		on:icQRCodeScan
