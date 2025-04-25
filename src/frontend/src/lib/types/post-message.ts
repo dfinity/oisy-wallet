@@ -1,10 +1,11 @@
-import { type PostMessageDataRequestPowProtectorSchema ,
+import {
 	type PostMessageDataRequestBtcSchema,
 	type PostMessageDataRequestExchangeTimerSchema,
 	type PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
 	type PostMessageDataRequestIcCkSchema,
 	type PostMessageDataRequestIcrcSchema,
 	type PostMessageDataRequestIcrcStrictSchema,
+	type PostMessageDataRequestPowProtectorSchema,
 	type PostMessageDataRequestSchema,
 	type PostMessageDataRequestSolSchema,
 	type PostMessageDataResponseAuthSchema,
