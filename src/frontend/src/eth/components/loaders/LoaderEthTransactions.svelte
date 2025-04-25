@@ -22,9 +22,7 @@
 			return;
 		}
 
-
 		loading = true;
-
 
 		if ($tokenNotInitialized) {
 			tokenIdLoaded = undefined;
@@ -32,13 +30,10 @@
 			return;
 		}
 
-
 		const {
 			network: { id: networkId },
 			id: tokenId
 		} = $tokenWithFallback;
-
-
 
 		// If user browser ICP transactions but switch token to Eth, due to the derived stores, the token can briefly be set to ICP while the navigation is not over.
 		// This prevents the glitch load of ETH transaction with a token ID for ICP.
