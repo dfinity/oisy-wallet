@@ -84,18 +84,56 @@ export const mapKongSwapResult = ({
 	raw: swap
 });
 
+export const calculateLpFee = ({
+	amount,
+	feePercentage
+}: {
+	amount?: bigint;
+	feePercentage?: number; // e.g. 0.003 for 0.3%
+}): bigint => {
+	console.log(amount, feePercentage, 'gfdgfdgfd');
+
+	if (isNullish(amount) || isNullish(feePercentage)) {
+		return ZERO_BI;
+	}
+	const feeFactor = BigInt(Math.floor(feePercentage * 1_000_000));
+	return (amount * feeFactor) / 1_000_000n;
+};
+
 export const mapIcpSwapResult = ({
-	swap
+	swap,
+	sourceToken,
+	sourceAmount
 }: {
 	swap: {
 		receiveAmount: bigint;
 		[key: string]: unknown;
 	};
-}): SwapProviderResult => ({
-	provider: 'icpSwap',
-	receiveAmount: swap.receiveAmount,
-	raw: swap
-});
+	sourceToken?: Token;
+	sourceAmount?: bigint;
+}): SwapProviderResult => {
+	console.log(calculateLpFee({ amount: sourceAmount, feePercentage: 0.003 }));
+
+	console.log({liquidityFees: [
+		{
+			fee: calculateLpFee({ amount: sourceAmount, feePercentage: 0.003 }),
+			token: sourceToken!
+		}
+	]});
+	
+	
+	return {
+		provider: 'icpSwap',
+		receiveAmount: swap.receiveAmount,
+		liquidityFees: [
+			{
+				fee: calculateLpFee({ amount: sourceAmount, feePercentage: 0.003 }),
+				token: sourceToken!
+			}
+		],
+		raw: swap
+	};
+};
 
 interface FetchSwapOptionsParams {
 	identity: Identity;
@@ -119,6 +157,8 @@ export interface SwapQuoteParams {
 export interface SwapResultMapParams<TSwapRaw> {
 	swap: TSwapRaw;
 	tokens?: Token[];
+	sourceToken?: Token;
+	sourceAmount?: bigint;
 }
 
 export interface SwapProvider<TSwapRaw> {
@@ -136,7 +176,8 @@ export const swapProviders: SwapProvider<any>[] = [
 	{
 		id: 'icpSwap',
 		getQuote: getIcpSwapAmounts,
-		mapResult: ({ swap }) => mapIcpSwapResult({ swap })
+		mapResult: ({ swap, sourceToken, sourceAmount }) =>
+			mapIcpSwapResult({ swap, sourceToken, sourceAmount })
 	}
 ];
 
@@ -169,7 +210,12 @@ export const fetchSwapOptions = async ({
 		}
 
 		try {
-			const mapped = swapProviders[index].mapResult({ swap: result.value, tokens });
+			const mapped = swapProviders[index].mapResult({
+				swap: result.value,
+				tokens,
+				sourceToken,
+				sourceAmount
+			});
 			acc.push(mapped);
 		} catch (e: unknown) {
 			console.error('Error mapping swap result:', e);

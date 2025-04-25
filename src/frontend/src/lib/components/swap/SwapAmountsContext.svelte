@@ -31,7 +31,9 @@
 
 		const parsedAmount = Number(amount);
 
-		if (nonNullish($store) && $store.amountForSwap === parsedAmount) {return;}
+		if (nonNullish($store) && $store.amountForSwap === parsedAmount) {
+			return;
+		}
 
 		try {
 			const swaps = await fetchSwapOptions({
@@ -49,7 +51,9 @@
 				return;
 			}
 
-			store.setSwaps({ swaps, amount: parsedAmount });
+			const filteredSwaps = swaps.filter((swap) => Number(swap.receiveAmount) > 0);
+
+			store.setSwaps({ swaps: filteredSwaps, amount: parsedAmount });
 		} catch {
 			store.reset();
 		}

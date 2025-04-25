@@ -15,7 +15,7 @@
 
 	const dispatch = createEventDispatcher<{
 		icSelectProvider: string;
-        icCloseProviderList: void;
+		icCloseProviderList: void;
 	}>();
 
 	const { destinationToken, destinationTokenExchangeRate } =
@@ -30,7 +30,7 @@
 							value: amount,
 							unitName: token.decimals,
 							displayDecimals: token.decimals
-						})
+						}) * $destinationTokenExchangeRate
 					: 0
 		});
 
@@ -39,25 +39,27 @@
 	const handleSelect = (provider: string) => dispatch('icSelectProvider', provider);
 </script>
 
-<div class="my-6 flex flex-col overflow-y-hidden sm:max-h-[26rem]">
-	<div class="gap-6 overflow-y-auto overscroll-contain">
-		<ul class="list-none">
-			{#each $swapAmountsStore?.swaps ?? [] as swap (swap.provider)}
-				{#if nonNullish($destinationToken)}
-					<li class="logo-button-list-item">
-						<SwapProviderListItem
-							on:click={() => handleSelect(swap.provider)}
-							dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
-							amount={swap.receiveAmount}
-							token={$destinationToken}
-							usdBalance={getUsdBalance(swap.receiveAmount, $destinationToken)}
-							isBest={swap.provider === bestProvider}
-						/>
-					</li>
-				{/if}
-			{/each}
-		</ul>
+<div class=" mb-4 overflow-y-auto overscroll-contain">
+	<div class="flex w-full flex-row justify-between border-b border-solid border-primary pb-2">
+		<div class="text-sm text-tertiary"> Swap Provider </div>
+		<div class="text-sm text-tertiary"> You receive </div>
 	</div>
+	<ul class="list-none">
+		{#each $swapAmountsStore?.swaps ?? [] as swap (swap.provider)}
+			{#if nonNullish($destinationToken)}
+				<li class="logo-button-list-item">
+					<SwapProviderListItem
+						on:click={() => handleSelect(swap.provider)}
+						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
+						amount={swap.receiveAmount}
+						token={$destinationToken}
+						usdBalance={getUsdBalance(swap.receiveAmount, $destinationToken)}
+						isBest={swap.provider === bestProvider}
+					/>
+				</li>
+			{/if}
+		{/each}
+	</ul>
 </div>
 
 <ButtonGroup>

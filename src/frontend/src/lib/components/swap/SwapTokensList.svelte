@@ -4,7 +4,7 @@
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
+	import { allIcrcTokens, allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import {
@@ -26,7 +26,7 @@
 
 	let tokens: TokenUi<IcTokenToggleable>[];
 	$: tokens = pinTokensWithBalanceAtTop({
-		$tokens: [{ ...ICP_TOKEN, enabled: true }, ...$allKongSwapCompatibleIcrcTokens].filter(
+		$tokens: [{ ...ICP_TOKEN, enabled: true }, ...$allIcrcTokens].filter(
 			(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
 		),
 		$exchanges,

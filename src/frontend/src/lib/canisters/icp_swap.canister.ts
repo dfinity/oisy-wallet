@@ -3,6 +3,7 @@ import type { _SERVICE as SwapFactoryService } from '$declarations/icp_swap/icp_
 import { idlFactory } from '$declarations/icp_swap/icp_swap.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import type { Principal } from '@dfinity/principal';
 import { Canister, createServices } from '@dfinity/utils';
 
 export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
@@ -48,13 +49,48 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 		throw new Error(`Quote failed: ${JSON.stringify(result.err)}`);
 	};
 
-	swap = async (args: any) => {
+	swap = async (args: { amountIn: string; zeroForOne: boolean; amountOutMinimum: string }) => {
 		const { swap } = this.caller({ certified: true });
 		const result = await swap(args);
-
 		if ('ok' in result) {
 			return result.ok;
 		}
 		throw new Error(`Swap failed: ${JSON.stringify(result.err)}`);
+	};
+
+	deposit = async (args: { token: string; amount: bigint; fee: bigint }) => {
+		const { deposit } = this.caller({ certified: true });
+		const result = await deposit(args);
+		if ('ok' in result) {
+			return result.ok;
+		}
+		throw new Error(`Deposit failed: ${JSON.stringify(result.err)}`);
+	};
+
+	depositFrom = async (args: { token: string; amount: bigint; fee: bigint }) => {
+		const { depositFrom } = this.caller({ certified: true });
+		const result = await depositFrom(args);
+		if ('ok' in result) {
+			return result.ok;
+		}
+		throw new Error(`DepositFrom failed: ${JSON.stringify(result.err)}`);
+	};
+
+	withdraw = async (args: { token: string; amount: bigint; fee: bigint }) => {
+		const { withdraw } = this.caller({ certified: true });
+		const result = await withdraw(args);
+		if ('ok' in result) {
+			return result.ok;
+		}
+		throw new Error(`Withdraw failed: ${JSON.stringify(result.err)}`);
+	};
+
+	getUserUnusedBalance = async (principal: Principal) => {
+		const { getUserUnusedBalance } = this.caller({ certified: false });
+		const result = await getUserUnusedBalance(principal);
+		if ('ok' in result) {
+			return result.ok;
+		}
+		throw new Error(`getUserUnusedBalance failed: ${JSON.stringify(result.err)}`);
 	};
 }

@@ -116,7 +116,7 @@
 	bind:this={modal}
 	bind:currentStep
 	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING}
+	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING || showSelectProviderModal}
 >
 	<svelte:fragment slot="title">{title}</svelte:fragment>
 

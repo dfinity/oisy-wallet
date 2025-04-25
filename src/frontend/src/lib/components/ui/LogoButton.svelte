@@ -6,6 +6,7 @@
 	export let selectable = false;
 	export let selected = false;
 	export let dividers = false;
+	export let dotDividers = true;
 	export let hover = true;
 	export let rounded = true;
 	export let condensed = false;
@@ -59,7 +60,7 @@
 							<span class="font-bold text-primary"><slot name="title" /></span>
 						{/if}
 						{#if hasSubtitleSlot}
-							{#if dividers}
+							{#if dividers && dotDividers}
 								<span class="text-tertiary"> &nbsp;&middot;&nbsp; </span>
 							{/if}
 							<span class="text-tertiary"> <slot name="subtitle" /></span>

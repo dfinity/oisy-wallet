@@ -25,8 +25,6 @@ export const getPool = async ({
 		fee
 	});
 
-	console.log('getPool result:', result);
-
 	return result;
 };
 
@@ -71,7 +69,7 @@ export const getQuote = async ({
 	});
 };
 
-export const executeSwap = async ({
+export const swapTokens = async ({
 	identity,
 	canisterId,
 	amountIn,
@@ -84,13 +82,70 @@ export const executeSwap = async ({
 	zeroForOne: boolean;
 	amountOutMinimum: string;
 }) => {
-	assertNonNullish(identity, 'Identity required');
+	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
+	return swapPool.swap({ amountIn, zeroForOne, amountOutMinimum });
+};
 
-	const swapPoolCanister = await icpSwapFactoryCanister({ identity, canisterId });
+export const deposit = async ({
+	identity,
+	canisterId,
+	token,
+	amount,
+	fee
+}: {
+	identity: any;
+	canisterId: string;
+	token: string;
+	amount: bigint;
+	fee: bigint;
+}) => {
+	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
+	return swapPool.deposit({ token, amount, fee });
+};
 
-	return swapPoolCanister.swap({
-		amountIn,
-		zeroForOne,
-		amountOutMinimum
-	});
+export const depositFrom = async ({
+	identity,
+	canisterId,
+	token,
+	amount,
+	fee
+}: {
+	identity: any;
+	canisterId: string;
+	token: string;
+	amount: bigint;
+	fee: bigint;
+}) => {
+	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
+	return swapPool.depositFrom({ token, amount, fee });
+};
+
+export const withdraw = async ({
+	identity,
+	canisterId,
+	token,
+	amount,
+	fee
+}: {
+	identity: any;
+	canisterId: string;
+	token: string;
+	amount: bigint;
+	fee: bigint;
+}) => {
+	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
+	return swapPool.withdraw({ token, amount, fee });
+};
+
+export const getUserUnusedBalance = async ({
+	identity,
+	canisterId,
+	principal
+}: {
+	identity: any;
+	canisterId: string;
+	principal: Principal;
+}) => {
+	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
+	return swapPool.getUserUnusedBalance(principal);
 };

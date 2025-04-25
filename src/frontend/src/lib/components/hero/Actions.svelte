@@ -79,9 +79,9 @@
 			<Send {isTransactionsPage} />
 		{/if}
 
-		{#if swapAction}
-			<Swap />
-		{/if}
+		<!-- {#if swapAction} -->
+		<Swap />
+		<!-- {/if} -->
 
 		{#if isTransactionsPage}
 			{#if convertEth}

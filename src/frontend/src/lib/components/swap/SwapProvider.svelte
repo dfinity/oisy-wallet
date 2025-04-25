@@ -22,17 +22,19 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 	import { safeParse } from '$lib/validation/utils.validation';
+	import Badge from '$lib/components/ui/Badge.svelte';
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	// let route: string[] | undefined;
 	// $: route = $swapAmountsStore?.swapAmounts?.route;
 
-	// let networkFee: ProviderFee | undefined;
-	// $: networkFee = $swapAmountsStore?.swapAmounts?.networkFee;
+	$: selectedSwap = $swapAmountsStore?.swaps?.find(
+	({ provider }) => provider === $swapAmountsStore?.selectedProvider
+);
 
-	// let liquidityFees: ProviderFee[] | undefined;
-	// $: liquidityFees = $swapAmountsStore?.swapAmounts?.liquidityFees;
+$: liquidityFees = selectedSwap?.liquidityFees ?? [];
+	$: networkFee = selectedSwap?.networkFee ?? undefined;
 
 	$: dApp = nonNullish($bestSwap)
 		? dAppDescriptions.find(({ id }) => id === $bestSwap.provider.toLowerCase())
@@ -40,10 +42,14 @@
 
 	console.log('bestSwap in Proveder', $bestSwap);
 
+	console.log('here', $bestSwap, dApp);
+	
+
 	// TODO: this state - websiteURL - isn't one and should become a local variable
 	let websiteURL: Option<URL>;
 	let displayURL: OptionString;
 	$: if (nonNullish(dApp)) {
+		console.log({liquidityFees})
 		try {
 			const validatedWebsiteUrl = safeParse({
 				schema: UrlSchema,
@@ -70,37 +76,49 @@
 			<svelte:fragment slot="label"
 				>{$i18n.swap.text.swap_provider}
 
-				<Button link on:click={() => dispatch('icShowProviderList')}>Select ></Button>
+				{#if $swapAmountsStore?.swaps.length > 1}
+					<Button link on:click={() => dispatch('icShowProviderList')}>Select ></Button>
+				{/if}
 			</svelte:fragment>
 
 			<svelte:fragment slot="main-value">
-				<div class="flex gap-2">
-					<div class="mt-1">
-						<Logo
-							src={dApp.logo}
-							alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dApp.name })}
-						/>
-					</div>
-					<div class="mr-auto">
-						<div class="text-lg font-bold">{dApp.name}</div>
-						{#if nonNullish(displayURL)}
-							<div class="text-sm text-tertiary">{displayURL}</div>
-						{/if}
+				<div class="flex items-start gap-3">
+					{#if $swapAmountsStore?.swaps.length > 1}
+						<Badge styleClass="mt-1" variant="success">Best rate</Badge>
+					{/if}
+
+					<div class="flex items-start gap-2">
+						<div class="mt-0.5">
+							<Logo
+								src={dApp.logo}
+								alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dApp.name })}
+							/>
+						</div>
+
+						<div>
+							<div class="flex items-center gap-1 text-lg font-bold">
+								{dApp.name}
+							</div>
+
+							{#if nonNullish(displayURL)}
+								<div class="text-sm text-tertiary">{displayURL}</div>
+							{/if}
+						</div>
 					</div>
 				</div>
 			</svelte:fragment>
 		</ModalValue>
 
-		<!-- <svelte:fragment slot="list-items">
-			{#if nonNullish(route) && route.length > 0}
+		<svelte:fragment slot="list-items">
+			<!-- {#if nonNullish(route) && route.length > 0}
 				<SwapRoute {route} />
-			{/if}
+			{/if} -->
 			{#if nonNullish(networkFee)}
 				<SwapNetworkFee {networkFee} />
 			{/if}
 			{#if nonNullish(liquidityFees) && liquidityFees.length > 0}
 				<SwapLiquidityFees {liquidityFees} />
 			{/if}
-		</svelte:fragment> -->
+		</svelte:fragment>
 	</ModalExpandableValues>
 {/if}

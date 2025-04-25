@@ -49,31 +49,30 @@
 	console.log(amount, token, logoSize, usdBalance, dapp, isBest);
 </script>
 
-<LogoButton on:click dividers={false}>
+<LogoButton on:click dividers={true} dotDividers={false}>
 	<svelte:fragment slot="title">
-		<span class="inline-flex items-center gap-2">
-			<span class="font-bold text-primary">
-				{dapp.name}
-			</span>
-			{#if isBest}
-				<Badge variant="success">Best rate</Badge>
-			{/if}
-		</span>
+		{dapp.name}
 	</svelte:fragment>
 
 	<svelte:fragment slot="subtitle">
-		{#if nonNullish(displayURL)}
-			<div class="text-sm text-tertiary">{displayURL}</div>
+		{#if isBest}
+			<span class="inline-flex"> <Badge variant="success">Best rate</Badge> </span>
 		{/if}
 	</svelte:fragment>
 
-	<div class="mr-2" slot="logo">
+	<svelte:fragment slot="description">
+		{#if nonNullish(displayURL)}
+			<span class="text-sm text-tertiary">{displayURL}</span>
+		{/if}
+	</svelte:fragment>
+
+	<svelte:fragment slot="logo">
 		<Logo
 			src={dapp.logo}
 			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dapp.name })}
 			size={logoSize}
 		/>
-	</div>
+	</svelte:fragment>
 
 	<Amount {amount} decimals={token.decimals} symbol={token.symbol} slot="title-end" />
 

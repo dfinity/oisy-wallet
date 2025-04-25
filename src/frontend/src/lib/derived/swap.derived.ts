@@ -58,12 +58,21 @@ export const swappableTokens: Readable<SwappableTokens> = derived(
 	}
 );
 
-export const bestSwap: Readable<SwapProviderResult | null> = derived(swapAmountsStore, ($store) => {
-	if (!$store?.swaps?.length) {
-		return null;
-	}
+export const bestSwap: Readable<SwapProviderResult | null | undefined> = derived(
+	swapAmountsStore,
+	($store) => {
+		if (!$store?.swaps?.length) {
+			return null;
+		}
 
-	return $store.swaps.reduce((best, current) =>
-		BigInt(current.receiveAmount) > BigInt(best.receiveAmount) ? current : best
-	);
-});
+		if ($store?.selectedProvider && nonNullish($store.selectedProvider)) {
+			return $store.swaps.find(
+				(swap) => swap.provider.toLocaleLowerCase() === $store.selectedProvider?.toLocaleLowerCase()
+			);
+		}
+
+		return $store.swaps.reduce((best, current) =>
+			BigInt(current.receiveAmount) > BigInt(best.receiveAmount) ? current : best
+		);
+	}
+);
