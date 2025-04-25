@@ -1,7 +1,7 @@
-import { POW_ENABLED } from '$env/pow.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { POW_FEATURE_ENABLED } from '$env/pow.env';
 import { allowSigning } from '$lib/api/backend.api';
 import {
 	networkBitcoinMainnetEnabled,
@@ -42,7 +42,7 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 		const { identity } = get(authStore);
 
 		await allowSigning({
-			identity,
+			identity
 		});
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
@@ -113,7 +113,7 @@ export const initLoader = async ({
 
 	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 	setProgressModal(true);
-	if (!POW_ENABLED) {
+	if (!POW_FEATURE_ENABLED) {
 		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
 		if (!initSignerAllowanceSuccess) {
