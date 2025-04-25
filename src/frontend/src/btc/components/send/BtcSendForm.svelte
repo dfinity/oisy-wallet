@@ -43,7 +43,7 @@
 </script>
 
 <SendForm on:icNext {source} token={$sendToken} balance={$balance} disabled={invalid} hideSource>
-	<BtcSendAmount slot="amount" bind:amount bind:amountError />
+	<BtcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 
 	<BtcSendDestination
 		slot="destination"
