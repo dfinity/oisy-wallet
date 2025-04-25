@@ -29,6 +29,7 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -61,7 +62,7 @@
 
 			const feeData = await getFeeData();
 
-			if (isSupportedEthTokenId(sendTokenId)) {
+			if (isSupportedEthTokenId(sendTokenId)   || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
 					...feeData,
 					gas: getEthFeeData({

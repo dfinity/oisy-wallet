@@ -15,6 +15,7 @@
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
@@ -52,7 +53,7 @@
 			: ZERO_BI;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
-		if (isSupportedEthTokenId($sendTokenId)) {
+		if (isSupportedEthTokenId($sendTokenId)   || isSupportedEvmNativeTokenId($sendTokenId)) {
 			const total = userAmount + ($minGasFee ?? ZERO_BI);
 
 			if (total > parsedSendBalance) {
