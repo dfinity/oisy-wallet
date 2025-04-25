@@ -5,7 +5,8 @@ import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 
 export class PowProtectionScheduler<PostMessageDataRequest>
-	implements Scheduler<PostMessageDataRequest> {
+	implements Scheduler<PostMessageDataRequest>
+{
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
 
 	stop() {
