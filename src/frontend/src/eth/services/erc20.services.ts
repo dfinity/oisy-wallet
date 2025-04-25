@@ -1,5 +1,9 @@
 import type { UserToken } from '$declarations/backend/backend.did';
 import {
+	SUPPORTED_EVM_NETWORKS,
+	SUPPORTED_EVM_NETWORKS_CHAIN_IDS
+} from '$env/networks/networks-evm/networks.evm.env';
+import {
 	SUPPORTED_ETHEREUM_NETWORKS,
 	SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS
 } from '$env/networks/networks.eth.env';
@@ -93,7 +97,11 @@ const loadUserTokens = async (params: {
 		});
 
 		return contracts
-			.filter(({ chain_id }) => SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id))
+			.filter(({ chain_id }) =>
+				[...SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS, ...SUPPORTED_EVM_NETWORKS_CHAIN_IDS].includes(
+					chain_id
+				)
+			)
 			.map(
 				async ({
 					contract_address: address,
@@ -101,7 +109,7 @@ const loadUserTokens = async (params: {
 					version,
 					enabled
 				}: UserToken): Promise<ContractDataWithCustomToken> => {
-					const network = SUPPORTED_ETHEREUM_NETWORKS.find(
+					const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
 						({ chainId }) => chainId === chain_id
 					) as EthereumNetwork;
 
