@@ -1,3 +1,4 @@
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
@@ -153,6 +154,7 @@ describe('EthConvertTokenWizard', () => {
 		});
 
 		mockPage.reset();
+		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
 
 		ethAddressStore.reset();
 

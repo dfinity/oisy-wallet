@@ -12,13 +12,11 @@ export const selectedEthereumNetwork: Readable<EthereumNetwork | undefined> = de
 		$enabledEthereumNetworks.find(({ id }) => id === $networkId)
 );
 
-export const selectedEthereumNetworkWithFallback: Readable<EthereumNetwork> = derived(
-	[selectedEthereumNetwork],
-	([$selectedEthereumNetwork]) => $selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK
-);
-
+// TODO: make this store return `string | undefined`
 export const explorerUrl: Readable<string> = derived(
-	[selectedEvmNetwork, selectedEthereumNetworkWithFallback],
-	([$selectedEvmNetwork, { explorerUrl }]) =>
-		nonNullish($selectedEvmNetwork) ? $selectedEvmNetwork?.explorerUrl : explorerUrl
+	[selectedEvmNetwork, selectedEthereumNetwork],
+	([$selectedEvmNetwork, $selectedEthereumNetwork]) =>
+		nonNullish($selectedEvmNetwork)
+			? $selectedEvmNetwork?.explorerUrl
+			: ($selectedEthereumNetwork?.explorerUrl ?? DEFAULT_ETHEREUM_NETWORK.explorerUrl)
 );
