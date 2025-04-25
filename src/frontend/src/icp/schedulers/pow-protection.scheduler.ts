@@ -39,8 +39,8 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		timestamp,
 		difficulty
 	}: {
-		timestamp: bigint; // The unique timestamp for the challenge
-		difficulty: number; // The difficulty level
+		timestamp: bigint;
+		difficulty: number;
 	}): Promise<bigint> => {
 		if (difficulty <= 0) {
 			throw new Error('Difficulty must be greater than zero');
