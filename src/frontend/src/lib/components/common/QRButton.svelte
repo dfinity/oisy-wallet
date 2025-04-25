@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconQRCodeScanner } from '@dfinity/gix-components';
+	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
@@ -10,5 +10,5 @@
 	aria-label={$i18n.send.text.open_qr_modal}
 	class="text-brand-primary hover:text-inherit active:text-inherit"
 >
-	<IconQRCodeScanner />
+	<IconScanLine />
 </button>
