@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { metamaskAvailable } from '$eth/derived/metamask.derived';
-	import { selectedEthereumNetworkWithFallback } from '$eth/derived/network.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { openMetamaskTransaction } from '$eth/services/metamask.services';
 	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -9,6 +9,7 @@
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { assertNonNullish } from '@dfinity/utils';
 
 	const receiveModal = async () => {
 		if (!$metamaskAvailable) {
@@ -18,9 +19,12 @@
 			return;
 		}
 
+		// This is a simple type check, since it should not happen since the user arrived here from a selected Ethereum network
+		assertNonNullish($selectedEthereumNetwork)
+
 		await openMetamaskTransaction({
 			address: $ethAddress,
-			network: $selectedEthereumNetworkWithFallback
+			network: $selectedEthereumNetwork
 		});
 	};
 
