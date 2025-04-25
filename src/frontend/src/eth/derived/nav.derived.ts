@@ -10,8 +10,8 @@ export const tokenInitialized: Readable<boolean> = derived(
 	([$routeToken, $routeNetwork, $enabledEthereumTokens, $enabledEvmTokens, $erc20Tokens]) =>
 		nonNullish(
 			[...$enabledEthereumTokens, ...$enabledEvmTokens, ...$erc20Tokens].find(
-				({ name, network: { name: networkName } }) =>
-					name === $routeToken && networkName === $routeNetwork
+				({ name, network: { id: networkId } }) =>
+					name === $routeToken && networkId.description === $routeNetwork
 			)
 		)
 );
