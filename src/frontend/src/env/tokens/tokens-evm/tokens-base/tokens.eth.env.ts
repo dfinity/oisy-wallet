@@ -3,10 +3,6 @@ import {
 	BASE_NETWORK,
 	BASE_SEPOLIA_NETWORK
 } from '$env/networks/networks-evm/networks.evm.base.env';
-import {
-	BNB_MAINNET_TOKEN,
-	BNB_TESTNET_TOKEN
-} from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import eth from '$icp-eth/assets/eth.svg';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
@@ -49,6 +45,6 @@ export const BASE_SEPOLIA_ETH_TOKEN: RequiredToken = {
 
 export const SUPPORTED_BASE_TOKENS: RequiredToken[] = defineSupportedTokens({
 	mainnetFlag: BASE_MAINNET_ENABLED,
-	mainnetTokens: [BNB_MAINNET_TOKEN],
-	testnetTokens: [BNB_TESTNET_TOKEN]
+	mainnetTokens: [BASE_ETH_TOKEN],
+	testnetTokens: [BASE_SEPOLIA_ETH_TOKEN]
 });
