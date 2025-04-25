@@ -3,10 +3,7 @@ import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
-import type {
-	PostMessageDataRequest,
-	PostMessageDataRequestPowProtector
-} from '$lib/types/post-message';
+import type { PostMessageDataRequestPowProtector } from '$lib/types/post-message';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequestPowProtector> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
@@ -16,15 +13,17 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequestP
 	}
 
 	async start() {
-		await this.timer.start<PostMessageDataRequest>({
+		await this.timer.start<PostMessageDataRequestPowProtector>({
 			interval: POW_CHALLENGE_INTERVAL_MILLIS,
-			job: this.requestSignerCycles
+			job: this.requestSignerCycles,
+			data: {}
 		});
 	}
 
 	async trigger() {
-		await this.timer.trigger<PostMessageDataRequest>({
-			job: this.requestSignerCycles
+		await this.timer.trigger<PostMessageDataRequestPowProtector>({
+			job: this.requestSignerCycles,
+			data: {}
 		});
 	}
 
@@ -39,7 +38,9 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequestP
 	 * @param identity - The user's identity for the operation.
 	 * @throws Errors if any step in the sequence fails.
 	 */
-	private requestSignerCycles = async ({ identity }: SchedulerJobData<PostMessageDataRequest>) => {
+	private requestSignerCycles = async ({
+		identity
+	}: SchedulerJobData<PostMessageDataRequestPowProtector>) => {
 		// Step 1: Request creation of the Proof-of-Work (PoW) challenge (throws when unsuccessful).
 		const { start_timestamp_ms: timestamp, difficulty }: CreateChallengeResponse =
 			await createPowChallenge({ identity });
