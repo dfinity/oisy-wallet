@@ -175,6 +175,7 @@
 				on:icSendBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				on:icNext={modal.next}
 				on:icClose={close}
+				on:icTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				on:icQRCodeScan={() =>
 					goToWizardStep({
 						modal,
