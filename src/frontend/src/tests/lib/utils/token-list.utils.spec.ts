@@ -1,48 +1,18 @@
-import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { ETH_TOKEN_GROUP, ETH_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.eth.env';
-import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
-import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import { getFilteredTokenGroup, getFilteredTokenList } from '$lib/utils/token-list.utils';
 import { describe, expect, it } from 'vitest';
 
 // Mock data for tokens
-const token1: TokenUi = {
-	id: BTC_MAINNET_TOKEN_ID,
-	network: BTC_MAINNET_NETWORK,
-	standard: 'erc20',
-	category: 'default',
-	name: 'Bitcoin',
-	symbol: 'BTC',
-	decimals: 8,
-	icon: ''
-};
+const token1: TokenUi = BTC_MAINNET_TOKEN;
 
-const token2: TokenUi = {
-	id: ETHEREUM_TOKEN_ID,
-	network: ETHEREUM_NETWORK,
-	standard: 'erc20',
-	category: 'default',
-	name: 'Ethereum',
-	symbol: 'ETH',
-	decimals: 18,
-	icon: ''
-};
+const token2: TokenUi = ETHEREUM_TOKEN;
 
-const token3: TokenUi = {
-	id: SOLANA_TOKEN_ID,
-	network: SOLANA_MAINNET_NETWORK,
-	standard: 'spl',
-	category: 'custom',
-	name: 'Solana',
-	symbol: 'SOL',
-	decimals: 9,
-	icon: ''
-};
+const token3: TokenUi = SOLANA_TOKEN;
 
 const tokenGroup: TokenUiGroup = {
 	id: ETH_TOKEN_GROUP_ID,
