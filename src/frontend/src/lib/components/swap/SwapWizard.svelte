@@ -25,6 +25,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { bestSwap } from '$lib/derived/swap.derived';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -57,13 +58,23 @@
 			return;
 		}
 
+		console.log('swap', {
+			sourceToken: $sourceToken,
+			destinationToken: $destinationToken,
+			swapAmount,
+			receiveAmount,
+			slippageValue,
+			sourceTokenFee
+		});
+		
+
 		if (
 			isNullish($sourceToken) ||
 			isNullish($destinationToken) ||
 			isNullish(slippageValue) ||
 			isNullish(swapAmount) ||
 			isNullish(sourceTokenFee) ||
-			isNullish($swapAmountsStore?.swapAmounts?.receiveAmount)
+			isNullish($bestSwap?.receiveAmount)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -94,7 +105,7 @@
 				sourceToken: $sourceToken,
 				destinationToken: $destinationToken,
 				swapAmount,
-				receiveAmount: $swapAmountsStore.swapAmounts.receiveAmount,
+				receiveAmount: $bestSwap?.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
 				isSourceTokenIcrc2: $isSourceTokenIcrc2
