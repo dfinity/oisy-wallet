@@ -26,7 +26,10 @@ export const EURC_TOKEN: RequiredSplToken = {
 	owner: TOKEN_PROGRAM_ADDRESS,
 	// TODO: remove this prop when we will use `groupData` for grouping
 	twinToken: ETH_EURC_TOKEN,
-	groupData: EURC_TOKEN_GROUP
+	groupData: EURC_TOKEN_GROUP,
+	buy: {
+		onramperId: 'eurc_solana'
+	}
 };
 
 export const DEVNET_EURC_SYMBOL = 'DevnetEURC';
