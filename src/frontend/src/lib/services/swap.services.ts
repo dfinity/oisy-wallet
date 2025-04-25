@@ -6,6 +6,7 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import {
 	deposit,
+	depositFrom,
 	getPool,
 	getQuote,
 	getUserUnusedBalance,
@@ -378,7 +379,6 @@ export const swapWithIcpSwap = async ({
 	});
 
 	console.log(toAddress, 'toAddress');
-	
 
 	const slippageMinimum = calculateSlippage({
 		quoteAmount: receiveAmount,
@@ -397,7 +397,6 @@ export const swapWithIcpSwap = async ({
 		ledgerCanisterId: sourceToken.ledgerCanisterId
 	};
 
-
 	console.log('Deposit for:', {
 		canisterId: pool.canisterId.toString(),
 		token: sourceToken.ledgerCanisterId,
@@ -405,14 +404,24 @@ export const swapWithIcpSwap = async ({
 		fee: sourceTokenFee.toString(),
 		userPrincipal: identity.getPrincipal().toText(),
 		to: toAddress
-	  });
+	});
 
-	  console.log(isSourceTokenIcrc2, 'isSourceTokenIcrc2');
-	  
+	console.log(isSourceTokenIcrc2, 'isSourceTokenIcrc2');
 
 	if (sourceToken.standard !== 'icrc2') {
+		console.log('Sending tokens... icrc1 or ICP');
+
 		await sendIcrc(transferParams);
+
+		await deposit({
+			identity,
+			canisterId: pool.canisterId.toString(),
+			amount: parsedSwapAmount,
+			fee: sourceTokenFee,
+			token: sourceToken.ledgerCanisterId
+		});
 	} else {
+		console.log('Sending tokens... icrc2');
 		await approve({
 			identity,
 			ledgerCanisterId: sourceToken.ledgerCanisterId,
@@ -422,6 +431,14 @@ export const swapWithIcpSwap = async ({
 				owner: pool.canisterId
 			}
 		});
+
+		await depositFrom({
+			identity,
+			canisterId: pool.canisterId.toString(),
+			amount: parsedSwapAmount,
+			fee: sourceTokenFee,
+			token: sourceToken.ledgerCanisterId
+		});
 	}
 
 	const balanceBefore = await getUserUnusedBalance({
@@ -430,14 +447,6 @@ export const swapWithIcpSwap = async ({
 		principal: identity.getPrincipal()
 	});
 	console.log('Balance in pool before deposit:', balanceBefore);
-
-	await deposit({
-		identity,
-		canisterId: pool.canisterId.toString(),
-		amount: parsedSwapAmount,
-		fee: sourceTokenFee,
-		token: sourceToken.ledgerCanisterId
-	});
 
 	try {
 		await swapTokens({
