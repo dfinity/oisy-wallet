@@ -53,6 +53,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		const target = BigInt(Math.floor(0xffffffff / difficulty));
 
 		// Continuously try different nonce values until the challenge is solved
+// TODO: Check if it is worth introducing a max number of iterations 
 		while (true) {
 			// Concatenate the timestamp and nonce as the challenge string
 			const challengeStr = `${timestamp}.${nonce}`;
