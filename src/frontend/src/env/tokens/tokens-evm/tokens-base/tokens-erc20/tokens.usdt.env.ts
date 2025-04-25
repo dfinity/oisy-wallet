@@ -22,8 +22,5 @@ export const USDT_TOKEN: RequiredEvmErc20Token = {
 	icon: usdt,
 	address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
 	exchange: 'erc20',
-	groupData: USDT_TOKEN_GROUP,
-	buy: {
-		onramperId: 'usdt_ethereum'
-	}
+	groupData: USDT_TOKEN_GROUP
 };

@@ -27,7 +27,7 @@ export const USDC_TOKEN: RequiredEvmErc20Token = {
 	exchange: 'erc20',
 	groupData: USDC_TOKEN_GROUP,
 	buy: {
-		onramperId: 'usdc_ethereum'
+		onramperId: 'usdc_base'
 	}
 };
 
