@@ -28,12 +28,14 @@
 
 	let timer: NodeJS.Timeout | undefined;
 
+	const manageTokensId = Symbol();
+
 	onMount(() => {
 		// Since we do not have the change to check whether the data fetching is completed or not, we need to use this fallback timeout.
 		// After the timeout, we assume that the fetch has failed and open the token modal or redirect the user to the activity page.
 		timer = setTimeout(async () => {
 			if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
-				modalStore.openManageTokens();
+				modalStore.openManageTokens({ id: manageTokensId });
 			} else if (nonNullish($routeNetwork) && nonNullish($routeToken) && isNullish(token)) {
 				toastsShow({
 					text: replacePlaceholders($i18n.transactions.error.loading_token_with_network, {
@@ -58,9 +60,11 @@
 
 {#if $modalManageTokens}
 	<ManageTokensModal onClose={handleClose} initialSearch={token?.name}>
-		<MessageBox slot="info-element" level="info">
-			{$i18n.transactions.text.token_needs_enabling}
-		</MessageBox>
+		{#snippet infoElement()}
+			<MessageBox level="info">
+				{$i18n.transactions.text.token_needs_enabling}
+			</MessageBox>
+		{/snippet}
 	</ManageTokensModal>
 {:else if nonNullish($routeNetwork)}
 	{#if $networkICP}

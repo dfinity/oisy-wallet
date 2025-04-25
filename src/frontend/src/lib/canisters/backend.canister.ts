@@ -1,6 +1,7 @@
 import type {
 	AllowSigningResponse,
 	_SERVICE as BackendService,
+	CreateChallengeResponse,
 	CustomToken,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
@@ -13,7 +14,8 @@ import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
 	mapBtcPendingTransactionError,
-	mapBtcSelectUserUtxosFeeError
+	mapBtcSelectUserUtxosFeeError,
+	mapCreateChallengeError
 } from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
@@ -175,8 +177,9 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	allowSigning = async ({ request }: AllowSigningParams): Promise<AllowSigningResponse> => {
+	allowSigning = async ({ request }: AllowSigningParams = {}): Promise<AllowSigningResponse> => {
 		const { allow_signing } = this.caller({ certified: true });
+
 		const response = await allow_signing(toNullable(request));
 
 		if ('Ok' in response) {
@@ -185,6 +188,18 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapAllowSigningError(response.Err);
+	};
+
+	createPowChallenge = async (): Promise<CreateChallengeResponse> => {
+		const { create_pow_challenge } = this.caller({ certified: true });
+
+		const result = await create_pow_challenge();
+		if ('Ok' in result) {
+			const { Ok } = result;
+			return Ok;
+		}
+
+		throw mapCreateChallengeError(result.Err);
 	};
 
 	addUserHiddenDappId = async ({

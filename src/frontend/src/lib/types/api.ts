@@ -30,6 +30,10 @@ export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialE
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
 
+export interface AllowSigningParams {
+	request?: AllowSigningRequest;
+}
+
 export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;
 	amountSatoshis: bigint;
@@ -92,8 +96,4 @@ export interface KongSwapParams {
 	receiveAddress?: Address;
 	sourceToken: Token;
 	payTransactionId?: TxId;
-}
-
-export interface AllowSigningParams {
-	request?: AllowSigningRequest;
 }

@@ -2,17 +2,11 @@ import * as appNavigation from '$app/navigation';
 import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import Transactions from '$lib/components/transactions/Transactions.svelte';
-import { MANAGE_TOKENS_MODAL_CLOSE } from '$lib/constants/test-ids.constants';
+import { BUTTON_MODAL_CLOSE } from '$lib/constants/test-ids.constants';
 import { modalStore } from '$lib/stores/modal.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-
-// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
-vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
-	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
-});
 
 describe('Transactions', () => {
 	const timeout = 12000;
@@ -57,6 +51,7 @@ describe('Transactions', () => {
 		await new Promise<void>((resolve) =>
 			setTimeout(() => {
 				expect(get(modalStore)).toBeNull();
+
 				resolve();
 			}, timeout)
 		);
@@ -70,6 +65,7 @@ describe('Transactions', () => {
 		await new Promise<void>((resolve) =>
 			setTimeout(() => {
 				expect(get(modalStore)).toBeNull();
+
 				resolve();
 			}, timeout)
 		);
@@ -86,7 +82,7 @@ describe('Transactions', () => {
 				expect(get(modalStore)?.type).toBe('manage-tokens');
 
 				const button: HTMLButtonElement | null = container.querySelector(
-					`button[data-tid='${MANAGE_TOKENS_MODAL_CLOSE}']`
+					`button[data-tid='${BUTTON_MODAL_CLOSE}']`
 				);
 
 				button?.click();
@@ -108,7 +104,7 @@ describe('Transactions', () => {
 				expect(get(modalStore)?.type).toBe('manage-tokens');
 
 				const button: HTMLButtonElement | null = container.querySelector(
-					`button[data-tid='${MANAGE_TOKENS_MODAL_CLOSE}']`
+					`button[data-tid='${BUTTON_MODAL_CLOSE}']`
 				);
 
 				mockPage.mock({ token: ICP_TOKEN.name, network: ICP_NETWORK_SYMBOL });
@@ -129,6 +125,7 @@ describe('Transactions', () => {
 		await new Promise<void>((resolve) =>
 			setTimeout(() => {
 				expect(get(modalStore)).toBeNull();
+
 				resolve();
 			}, timeout)
 		);

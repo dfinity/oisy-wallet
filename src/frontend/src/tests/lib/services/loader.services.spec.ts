@@ -1,5 +1,5 @@
-import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -10,9 +10,17 @@ import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
 import { loading } from '$lib/stores/loader.store';
-import type { LoadIdbAddressError } from '$lib/types/errors';
+import { userProfileStore } from '$lib/stores/user-profile.store';
+import { LoadIdbAddressError } from '$lib/types/errors';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import {
+	mockNetworksSettings,
+	mockUserProfile,
+	mockUserSettings
+} from '$tests/mocks/user-profile.mock';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
+import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import { type MockInstance } from 'vitest';
 
@@ -101,6 +109,8 @@ describe('loader.services', () => {
 			vi.spyOn(authServices, 'signOut').mockImplementation(vi.fn());
 			vi.spyOn(authServices, 'nullishSignOut').mockImplementation(vi.fn());
 			vi.spyOn(api, 'allowSigning').mockImplementation(vi.fn());
+
+			setupUserNetworksStore('allEnabled');
 		});
 
 		it('should sign out if the identity is nullish', async () => {
@@ -142,22 +152,74 @@ describe('loader.services', () => {
 			expect(loadAddresses).not.toHaveBeenCalledOnce();
 		});
 
-		it('should load addresses from the backend if the IDB addresses are not loaded', async () => {
-			mockAuthStore(mockIdentity);
-			authStore.setForTesting(mockIdentity);
+		describe('when the IDB addresses are not loaded', () => {
+			beforeEach(() => {
+				setupUserNetworksStore('allEnabled');
 
-			vi.mocked(loadIdbAddresses).mockResolvedValueOnce({
-				success: false,
-				err: [{ tokenId: ICP_TOKEN_ID }, { tokenId: SOLANA_TOKEN_ID }] as LoadIdbAddressError[]
+				mockAuthStore(mockIdentity);
+				authStore.setForTesting(mockIdentity);
+
+				vi.mocked(loadIdbAddresses).mockResolvedValue({
+					success: false,
+					err: [
+						new LoadIdbAddressError(ETHEREUM_NETWORK_ID),
+						new LoadIdbAddressError(SOLANA_MAINNET_NETWORK_ID)
+					]
+				});
 			});
 
-			await initLoader(mockParams);
+			it('should load addresses from the backend', async () => {
+				await initLoader(mockParams);
 
-			expect(allowSigning).toHaveBeenCalledOnce();
-			expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+				expect(allowSigning).toHaveBeenCalledOnce();
+				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 
-			expect(loadAddresses).toHaveBeenCalledOnce();
-			expect(loadAddresses).toHaveBeenNthCalledWith(1, [ICP_TOKEN_ID, SOLANA_TOKEN_ID]);
+				expect(loadAddresses).toHaveBeenCalledOnce();
+				expect(loadAddresses).toHaveBeenNthCalledWith(1, [
+					ETHEREUM_NETWORK_ID,
+					SOLANA_MAINNET_NETWORK_ID
+				]);
+			});
+
+			it('should load addresses from the backend only for enabled networks', async () => {
+				userProfileStore.set({
+					certified: false,
+					profile: {
+						...mockUserProfile,
+						settings: toNullable({
+							...mockUserSettings,
+							networks: {
+								...mockNetworksSettings,
+								testnets: { show_testnets: true },
+								networks: [
+									[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
+								]
+							}
+						})
+					}
+				});
+
+				await initLoader(mockParams);
+
+				expect(allowSigning).toHaveBeenCalledOnce();
+				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+
+				expect(loadAddresses).toHaveBeenCalledOnce();
+				expect(loadAddresses).toHaveBeenNthCalledWith(1, [SOLANA_MAINNET_NETWORK_ID]);
+			});
+
+			it('should not load addresses from the backend if all networks are disabled', async () => {
+				setupUserNetworksStore('allDisabled');
+
+				await initLoader(mockParams);
+
+				expect(allowSigning).toHaveBeenCalledOnce();
+				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+
+				expect(loadAddresses).toHaveBeenCalledOnce();
+				expect(loadAddresses).toHaveBeenNthCalledWith(1, []);
+			});
 		});
 	});
 });

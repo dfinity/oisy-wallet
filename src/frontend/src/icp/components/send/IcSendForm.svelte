@@ -16,7 +16,6 @@
 	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let source: string;
-	export let simplifiedForm = false;
 
 	const { sendToken, sendBalance, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -39,23 +38,20 @@
 	disabled={invalid}
 	hideSource
 >
-	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
+	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} on:icTokensList />
 
-	<div slot="destination">
-		{#if !simplifiedForm}
-			<IcSendDestination
-				tokenStandard={$sendTokenStandard}
-				bind:destination
-				bind:invalidDestination
-				{networkId}
-				on:icQRCodeScan
-			>
-				<label for="destination" slot="label" class="font-bold">
-					{$i18n.send.text.destination}
-				</label>
-			</IcSendDestination>
-		{/if}
-	</div>
+	<IcSendDestination
+		slot="destination"
+		tokenStandard={$sendTokenStandard}
+		bind:destination
+		bind:invalidDestination
+		{networkId}
+		on:icQRCodeScan
+	>
+		<label for="destination" slot="label" class="font-bold">
+			{$i18n.send.text.destination}
+		</label>
+	</IcSendDestination>
 
 	<IcFeeDisplay slot="fee" {networkId} />
 
