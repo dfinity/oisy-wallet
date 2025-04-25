@@ -6,6 +6,9 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { btcStatusesStore } from '$icp/stores/btc.store';
+	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
@@ -51,9 +54,12 @@
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
 		$ethAddress,
-		$icTransactions: $icTransactionsStore,
+		$icTransactionsStore,
 		$btcStatuses: $btcStatusesStore,
-		$solTransactions: $solTransactionsStore
+		$solTransactions: $solTransactionsStore,
+		$ckBtcMinterInfoStore,
+		$icPendingTransactionsStore,
+		$ckBtcPendingUtxosStore
 	});
 
 	let requirementsFulfilled: boolean[];
