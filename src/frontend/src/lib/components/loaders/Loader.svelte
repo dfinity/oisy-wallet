@@ -54,6 +54,7 @@
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -106,6 +107,8 @@
 		// Once the address initialized, we load the data without displaying a progress step.
 		// Instead, we use effect, placeholders and skeleton until those data are loaded.
 		await loadData();
+
+		await  initPowProtectorWorker();
 	};
 
 	let progressModal = false;
