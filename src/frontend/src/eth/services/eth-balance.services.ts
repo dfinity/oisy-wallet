@@ -2,6 +2,7 @@ import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -15,7 +16,7 @@ import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const reloadEthereumBalance = (token: Token): Promise<ResultSuccess> => {
-	if (isSupportedEthTokenId(token.id)) {
+	if (isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id)) {
 		return loadEthBalance({ networkId: token.network.id, tokenId: token.id });
 	}
 
