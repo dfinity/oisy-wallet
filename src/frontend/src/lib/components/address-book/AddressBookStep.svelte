@@ -9,7 +9,7 @@
 
 <ContentWithToolbar styleClass="mx-2 flex flex-col justify-center">
 	{#if contacts.length === 0}
-		<EmptyAddressBook></EmptyAddressBook>
+		<EmptyAddressBook />
 	{:else}
 		<div class="p-6">
 			<h3>TODO Add contact list here</h3>
