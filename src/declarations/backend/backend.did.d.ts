@@ -60,6 +60,7 @@ export interface AccountSnapshot_3 {
 	amount: bigint;
 }
 export type AddDappSettingsError =
+	| { MaxHiddenDappIds: null }
 	| { VersionMismatch: null }
 	| { DappIdTooLong: null }
 	| { UserNotFound: null };
@@ -290,15 +291,19 @@ export interface NetworkSettings {
 }
 export type NetworkSettingsFor =
 	| { InternetComputer: null }
+	| { BaseSepolia: null }
 	| { SolanaTestnet: null }
 	| { BitcoinRegtest: null }
 	| { SolanaDevnet: null }
 	| { EthereumSepolia: null }
 	| { BitcoinTestnet: null }
+	| { BaseMainnet: null }
+	| { BscMainnet: null }
 	| { SolanaLocal: null }
 	| { EthereumMainnet: null }
 	| { SolanaMainnet: null }
-	| { BitcoinMainnet: null };
+	| { BitcoinMainnet: null }
+	| { BscTestnet: null };
 export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;

@@ -19,25 +19,25 @@ describe('token.validation', () => {
 
 	describe('isToken', () => {
 		it('should return true for a valid Token', () => {
-			expect(isToken(mockValidToken)).toBe(true);
+			expect(isToken(mockValidToken)).toBeTruthy();
 		});
 
 		it('should return true for a valid Token with expansion', () => {
-			expect(isToken(mockValidIcToken)).toBe(true);
+			expect(isToken(mockValidIcToken)).toBeTruthy();
 		});
 
 		it('should return false for an invalid Token', () => {
 			const { id: _, ...invalidToken } = mockValidToken;
 
-			expect(isToken(invalidToken)).toBe(false);
+			expect(isToken(invalidToken)).toBeFalsy();
 
-			expect(isToken({ ...mockValidToken, id: 'invalid-id' })).toBe(false);
+			expect(isToken({ ...mockValidToken, id: 'invalid-id' })).toBeFalsy();
 
-			expect(isToken({ ...mockValidToken, network: 'invalid-network' })).toBe(false);
+			expect(isToken({ ...mockValidToken, network: 'invalid-network' })).toBeFalsy();
 
-			expect(isToken({ ...mockValidToken, standard: 'invalid-standard' })).toBe(false);
+			expect(isToken({ ...mockValidToken, standard: 'invalid-standard' })).toBeFalsy();
 
-			expect(isToken({ ...mockValidToken, category: 'invalid-category' })).toBe(false);
+			expect(isToken({ ...mockValidToken, category: 'invalid-category' })).toBeFalsy();
 		});
 	});
 });

@@ -10,7 +10,7 @@ use crate::{
     types::{
         backend_config::{Config, InitArg},
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
-        dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
+        dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         migration::{ApiEnabled, Migration, MigrationProgress, MigrationReport},
         network::{
             NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
@@ -286,6 +286,10 @@ impl StoredUserProfile {
         let mut new_dapp_settings = new_settings.dapp.clone();
         let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
         let mut new_hidden_dapp_ids = new_dapp_carousel_settings.hidden_dapp_ids.clone();
+
+        if new_hidden_dapp_ids.len() == MAX_DAPP_ID_LIST_LENGTH {
+            return Err(AddDappSettingsError::MaxHiddenDappIds);
+        }
 
         new_hidden_dapp_ids.push(dapp_id);
         new_dapp_carousel_settings.hidden_dapp_ids = new_hidden_dapp_ids;

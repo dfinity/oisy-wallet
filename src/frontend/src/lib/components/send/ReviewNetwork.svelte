@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import bitcoin from '$icp/assets/bitcoin.svg';
+	import bitcoin from '$btc/assets/bitcoin.svg';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendBtcNetwork from '$lib/components/send/SendBtcNetwork.svelte';

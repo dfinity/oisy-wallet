@@ -28,6 +28,7 @@ const config = {
 			$declarations: './src/declarations',
 			$btc: './src/frontend/src/btc',
 			$eth: './src/frontend/src/eth',
+			$evm: './src/frontend/src/evm',
 			$icp: './src/frontend/src/icp',
 			$sol: './src/frontend/src/sol',
 			'$icp-eth': './src/frontend/src/icp-eth',
