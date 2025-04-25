@@ -408,7 +408,7 @@ export const swapWithIcpSwap = async ({
 
 	console.log(isSourceTokenIcrc2, 'isSourceTokenIcrc2');
 
-	if (sourceToken.standard !== 'icrc2') {
+	if (!isSourceTokenIcrc2) {
 		console.log('Sending tokens... icrc1 or ICP');
 
 		await sendIcrc(transferParams);
