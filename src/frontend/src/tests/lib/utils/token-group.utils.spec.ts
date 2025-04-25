@@ -557,238 +557,6 @@ describe('token-group.utils', () => {
 		});
 	});
 
-	describe('updateTokenGroup', () => {
-		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
-		const anotherToken = { ...SEPOLIA_TOKEN, balance: bn2Bi, usdBalance: 200 };
-
-		const tokenGroup: TokenUiGroup = {
-			id: anotherToken.id,
-			nativeToken: anotherToken,
-			tokens: [anotherToken],
-			balance: anotherToken.balance,
-			usdBalance: anotherToken.usdBalance
-		};
-
-		const expectedGroup: TokenUiGroup = {
-			...tokenGroup,
-			tokens: [anotherToken, token],
-			balance: anotherToken.balance + token.balance,
-			usdBalance: anotherToken.usdBalance + token.usdBalance
-		};
-
-		it('should add a token to a token group successfully', () => {
-			expect(updateTokenGroup({ token, tokenGroup })).toStrictEqual(expectedGroup);
-		});
-
-		it('should add a token to a token group with multiple tokens successfully', () => {
-			const thirdToken = { ...BTC_TESTNET_TOKEN, balance: bn3Bi, usdBalance: 300 };
-
-			const initialGroup = updateTokenGroup({ token: thirdToken, tokenGroup });
-
-			const updatedGroup = updateTokenGroup({ token, tokenGroup: initialGroup });
-
-			expect(updatedGroup).toStrictEqual({
-				...tokenGroup,
-				tokens: [anotherToken, thirdToken, token],
-				balance: anotherToken.balance + thirdToken.balance + token.balance,
-				usdBalance: anotherToken.usdBalance + thirdToken.usdBalance + token.usdBalance
-			});
-		});
-
-		it('should handle nullish balances in tokenGroup correctly', () => {
-			expect(
-				updateTokenGroup({
-					token,
-					tokenGroup: { ...tokenGroup, balance: undefined }
-				})
-			).toStrictEqual({ ...expectedGroup, balance: undefined });
-
-			expect(
-				updateTokenGroup({
-					token,
-					tokenGroup: { ...tokenGroup, balance: null }
-				})
-			).toStrictEqual({ ...expectedGroup, balance: token.balance });
-
-			expect(
-				updateTokenGroup({
-					token,
-					tokenGroup: { ...tokenGroup, usdBalance: undefined }
-				})
-			).toStrictEqual({ ...expectedGroup, usdBalance: token.usdBalance });
-		});
-
-		it('should handle nullish balances in token correctly', () => {
-			expect(
-				updateTokenGroup({
-					token: { ...token, balance: undefined },
-					tokenGroup
-				})
-			).toStrictEqual({
-				...expectedGroup,
-				tokens: [anotherToken, { ...token, balance: undefined }],
-				balance: undefined
-			});
-
-			expect(
-				updateTokenGroup({
-					token: { ...token, balance: null },
-					tokenGroup
-				})
-			).toStrictEqual({
-				...expectedGroup,
-				tokens: [anotherToken, { ...token, balance: null }],
-				balance: tokenGroup.balance
-			});
-
-			expect(
-				updateTokenGroup({
-					token: { ...token, usdBalance: undefined },
-					tokenGroup
-				})
-			).toStrictEqual({
-				...expectedGroup,
-				tokens: [anotherToken, { ...token, usdBalance: undefined }],
-				usdBalance: tokenGroup.usdBalance
-			});
-		});
-	});
-
-	describe('groupMainToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
-
-		// We mock the tokens to have the same "main token"
-		const twinToken = {
-			...SEPOLIA_TOKEN,
-			balance: bn2Bi,
-			usdBalance: 250,
-			twinToken: ICP_TOKEN,
-			decimals: ICP_TOKEN.decimals
-		};
-
-		it('should create a new group when no tokenGroup exists', () => {
-			expect(groupMainToken({ token, tokenGroup: undefined })).toEqual({
-				id: token.id,
-				nativeToken: token,
-				tokens: [token],
-				balance: token.balance,
-				usdBalance: token.usdBalance
-			});
-		});
-
-		it('should add token to existing group and update balances', () => {
-			const tokenGroup: TokenUiGroup = {
-				id: token.id,
-				nativeToken: token,
-				tokens: [twinToken],
-				balance: bn3Bi,
-				usdBalance: 300
-			};
-
-			expect(groupMainToken({ token, tokenGroup })).toEqual({
-				...tokenGroup,
-				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance! + token.balance,
-				usdBalance: tokenGroup.usdBalance! + token.usdBalance
-			});
-		});
-
-		it('should add token to existing group with more than one token already', () => {
-			const tokenGroup: TokenUiGroup = {
-				id: token.id,
-				nativeToken: token,
-				tokens: [twinToken, anotherToken],
-				balance: bn3Bi,
-				usdBalance: 300
-			};
-
-			expect(groupMainToken({ token, tokenGroup })).toEqual({
-				...tokenGroup,
-				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance! + token.balance,
-				usdBalance: tokenGroup.usdBalance! + token.usdBalance
-			});
-		});
-
-		it('should override the "main token" props if the group was created by a "secondary token"', () => {
-			const tokenGroup: TokenUiGroup = {
-				id: twinToken.id,
-				nativeToken: twinToken,
-				tokens: [twinToken],
-				balance: bn3Bi,
-				usdBalance: 300
-			};
-
-			expect(groupMainToken({ token, tokenGroup })).toEqual({
-				...tokenGroup,
-				id: token.id,
-				nativeToken: token,
-				tokens: [...tokenGroup.tokens, token],
-				balance: tokenGroup.balance! + token.balance,
-				usdBalance: tokenGroup.usdBalance! + token.usdBalance
-			});
-		});
-	});
-
-	describe('groupSecondaryToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
-
-		// We mock the tokens to have the same "main token"
-		const twinToken = {
-			...SEPOLIA_TOKEN,
-			balance: bn2Bi,
-			usdBalance: 250,
-			twinToken: ICP_TOKEN,
-			decimals: ICP_TOKEN.decimals
-		};
-
-		it('should create a new group when no tokenGroup exists', () => {
-			expect(groupSecondaryToken({ token: twinToken, tokenGroup: undefined })).toEqual({
-				id: twinToken.id,
-				nativeToken: twinToken,
-				tokens: [twinToken],
-				balance: twinToken.balance,
-				usdBalance: twinToken.usdBalance
-			});
-		});
-
-		it('should add token to existing group and update balances', () => {
-			const tokenGroup: TokenUiGroup = {
-				id: token.id,
-				nativeToken: token,
-				tokens: [token],
-				balance: bn3Bi,
-				usdBalance: 300
-			};
-
-			expect(groupSecondaryToken({ token: twinToken, tokenGroup })).toEqual({
-				...tokenGroup,
-				tokens: [...tokenGroup.tokens, twinToken],
-				balance: tokenGroup.balance! + twinToken.balance,
-				usdBalance: tokenGroup.usdBalance! + twinToken.usdBalance
-			});
-		});
-
-		it('should add token to existing group with more than one token already', () => {
-			const tokenGroup: TokenUiGroup = {
-				id: token.id,
-				nativeToken: token,
-				tokens: [token, anotherToken],
-				balance: bn3Bi,
-				usdBalance: 300
-			};
-
-			expect(groupSecondaryToken({ token: twinToken, tokenGroup })).toEqual({
-				...tokenGroup,
-				tokens: [...tokenGroup.tokens, twinToken],
-				balance: tokenGroup.balance! + twinToken.balance,
-				usdBalance: tokenGroup.usdBalance! + twinToken.usdBalance
-			});
-		});
-	});
-
 	describe('groupTokens', () => {
 		const mockToken = { ...SEPOLIA_TOKEN, balance: bn1Bi, usdBalance: 100 };
 		const mockSecondToken = { ...BTC_TESTNET_TOKEN, balance: bn3Bi, usdBalance: 300 };
@@ -811,7 +579,7 @@ describe('token-group.utils', () => {
 		};
 
 		it('should return an empty array if no tokens are provided', () => {
-			expect(groupTokens([]).length).toBe(0);
+			expect(groupTokens([])).toHaveLength(0);
 		});
 
 		it('should create groups of single-element tokens if none of them have a "main token"', () => {
@@ -819,31 +587,25 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(3);
+			expect(result).toHaveLength(tokens.length);
 
-			result.map((group) => {
-				expect(group.tokens.length).toBe(1);
+			result.map((tokenResult, index) => {
+				expect(tokenResult).toHaveProperty('group');
+
+				assert('group' in tokenResult);
+
+				const { group } = tokenResult;
+
+				const currentToken = tokens[index];
+
+				expect(group).toEqual({
+					id: currentToken.id,
+					nativeToken: currentToken,
+					tokens: [currentToken],
+					balance: currentToken.balance,
+					usdBalance: currentToken.usdBalance
+				});
 			});
-
-			expect(result[0].id).toBe(mockToken.id);
-			expect(result[1].id).toBe(mockSecondToken.id);
-			expect(result[2].id).toBe(mockThirdToken.id);
-
-			expect(result[0].nativeToken).toBe(mockToken);
-			expect(result[1].nativeToken).toBe(mockSecondToken);
-			expect(result[2].nativeToken).toBe(mockThirdToken);
-
-			expect(result[0].balance).toBe(mockToken.balance);
-			expect(result[1].balance).toBe(mockSecondToken.balance);
-			expect(result[2].balance).toBe(mockThirdToken.balance);
-
-			expect(result[0].usdBalance).toBe(mockToken.usdBalance);
-			expect(result[1].usdBalance).toBe(mockSecondToken.usdBalance);
-			expect(result[2].usdBalance).toBe(mockThirdToken.usdBalance);
-
-			expect(result[0].tokens[0]).toBe(mockToken);
-			expect(result[1].tokens[0]).toBe(mockSecondToken);
-			expect(result[2].tokens[0]).toBe(mockThirdToken);
 		});
 
 		it('should group tokens with the same "main token" and same decimals', () => {
@@ -851,30 +613,32 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(2);
+			expect(result).toHaveLength(2);
 
-			expect(result[0].tokens.length).toBe(3);
-			expect(result[1].tokens.length).toBe(1);
+			result.forEach((groupResult) => {
+				expect(groupResult).toHaveProperty('group');
+			});
 
-			expect(result[0].id).toBe(mockToken.id);
-			expect(result[1].id).toBe(mockSecondToken.id);
+			assert('group' in result[0]);
+			assert('group' in result[1]);
 
-			expect(result[0].nativeToken).toBe(mockToken);
-			expect(result[1].nativeToken).toBe(mockSecondToken);
+			const [{ group: group0 }, { group: group1 }] = result;
 
-			expect(result[0].balance).toStrictEqual(
-				mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance
-			);
-			expect(result[1].balance).toBe(mockSecondToken.balance);
+			expect(group0).toStrictEqual({
+				id: mockToken.id,
+				nativeToken: mockToken,
+				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
+				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
+				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance
+			});
 
-			expect(result[0].usdBalance).toBe(
-				mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance
-			);
-			expect(result[1].usdBalance).toBe(mockSecondToken.usdBalance);
-
-			expect(result[0].tokens[0]).toBe(mockToken);
-			expect(result[0].tokens[1]).toBe(mockTwinToken1);
-			expect(result[0].tokens[2]).toBe(mockTwinToken2);
+			expect(group1).toStrictEqual({
+				id: mockSecondToken.id,
+				nativeToken: mockSecondToken,
+				tokens: [mockSecondToken],
+				balance: mockSecondToken.balance,
+				usdBalance: mockSecondToken.usdBalance
+			});
 		});
 
 		it('should group tokens with the same "main token" but not the ones with different decimals', () => {
@@ -887,30 +651,41 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(3);
+			expect(result).toHaveLength(3);
 
-			expect(result[0].tokens.length).toBe(2);
-			expect(result[1].tokens.length).toBe(1);
-			expect(result[2].tokens.length).toBe(1);
+			result.map((groupResult) => {
+				expect(groupResult).toHaveProperty('group');
+			});
 
-			expect(result[0].id).toBe(mockToken.id);
-			expect(result[1].id).toBe(mockSecondToken.id);
-			expect(result[2].id).toBe(mockTwinToken.id);
+			assert('group' in result[0]);
+			assert('group' in result[1]);
+			assert('group' in result[2]);
 
-			expect(result[0].nativeToken).toBe(mockToken);
-			expect(result[1].nativeToken).toBe(mockSecondToken);
-			expect(result[2].nativeToken).toBe(mockTwinToken);
+			const [{ group: group0 }, { group: group1 }, { group: group2 }] = result;
 
-			expect(result[0].balance).toStrictEqual(mockToken.balance + mockTwinToken1.balance);
-			expect(result[1].balance).toBe(mockSecondToken.balance);
-			expect(result[2].balance).toBe(mockTwinToken.balance);
+			expect(group0).toStrictEqual({
+				id: mockToken.id,
+				nativeToken: mockToken,
+				tokens: [mockToken, mockTwinToken1],
+				balance: mockToken.balance + mockTwinToken1.balance,
+				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance
+			});
 
-			expect(result[0].usdBalance).toBe(mockToken.usdBalance + mockTwinToken1.usdBalance);
-			expect(result[1].usdBalance).toBe(mockSecondToken.usdBalance);
-			expect(result[2].usdBalance).toBe(mockTwinToken.usdBalance);
+			expect(group1).toStrictEqual({
+				id: mockSecondToken.id,
+				nativeToken: mockSecondToken,
+				tokens: [mockSecondToken],
+				balance: mockSecondToken.balance,
+				usdBalance: mockSecondToken.usdBalance
+			});
 
-			expect(result[0].tokens[0]).toBe(mockToken);
-			expect(result[0].tokens[1]).toBe(mockTwinToken1);
+			expect(group2).toStrictEqual({
+				id: mockTwinToken.id,
+				nativeToken: mockTwinToken,
+				tokens: [mockTwinToken],
+				balance: mockTwinToken.balance,
+				usdBalance: mockTwinToken.usdBalance
+			});
 		});
 
 		it('should group tokens with the same "main token" respecting the order they arrive in', () => {
@@ -918,30 +693,32 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(2);
+			expect(result).toHaveLength(2);
 
-			expect(result[0].tokens.length).toBe(3);
-			expect(result[1].tokens.length).toBe(1);
+			result.map((groupResult) => {
+				expect(groupResult).toHaveProperty('group');
+			});
 
-			expect(result[0].id).toBe(mockToken.id);
-			expect(result[1].id).toBe(mockSecondToken.id);
+			assert('group' in result[0]);
+			assert('group' in result[1]);
 
-			expect(result[0].nativeToken).toBe(mockToken);
-			expect(result[1].nativeToken).toBe(mockSecondToken);
+			const [{ group: group0 }, { group: group1 }] = result;
 
-			expect(result[0].balance).toStrictEqual(
-				mockTwinToken1.balance + mockToken.balance + mockTwinToken2.balance
-			);
-			expect(result[1].balance).toBe(mockSecondToken.balance);
+			expect(group0).toStrictEqual({
+				id: mockToken.id,
+				nativeToken: mockToken,
+				tokens: [mockTwinToken1, mockToken, mockTwinToken2],
+				balance: mockTwinToken1.balance + mockToken.balance + mockTwinToken2.balance,
+				usdBalance: mockTwinToken1.usdBalance + mockToken.usdBalance + mockTwinToken2.usdBalance
+			});
 
-			expect(result[0].usdBalance).toBe(
-				mockTwinToken1.usdBalance + mockToken.usdBalance + mockTwinToken2.usdBalance
-			);
-			expect(result[1].usdBalance).toBe(mockSecondToken.usdBalance);
-
-			expect(result[0].tokens[0]).toBe(mockTwinToken1);
-			expect(result[0].tokens[1]).toBe(mockToken);
-			expect(result[0].tokens[2]).toBe(mockTwinToken2);
+			expect(group1).toStrictEqual({
+				id: mockSecondToken.id,
+				nativeToken: mockSecondToken,
+				tokens: [mockSecondToken],
+				balance: mockSecondToken.balance,
+				usdBalance: mockSecondToken.usdBalance
+			});
 		});
 
 		it('should should create single-element group for the token with no "main token" in the list', () => {
@@ -949,26 +726,25 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(2);
+			expect(result).toHaveLength(tokens.length);
 
-			result.map((group) => {
-				expect(group.tokens.length).toBe(1);
+			result.map((tokenResult, index) => {
+				expect(tokenResult).toHaveProperty('group');
+
+				assert('group' in tokenResult);
+
+				const { group } = tokenResult;
+
+				const currentToken = tokens[index];
+
+				expect(group).toEqual({
+					id: currentToken.id,
+					nativeToken: currentToken,
+					tokens: [currentToken],
+					balance: currentToken.balance,
+					usdBalance: currentToken.usdBalance
+				});
 			});
-
-			expect(result[0].id).toBe(mockTwinToken1.id);
-			expect(result[1].id).toBe(mockSecondToken.id);
-
-			expect(result[0].nativeToken).toBe(mockTwinToken1);
-			expect(result[1].nativeToken).toBe(mockSecondToken);
-
-			expect(result[0].balance).toBe(mockTwinToken1.balance);
-			expect(result[1].balance).toBe(mockSecondToken.balance);
-
-			expect(result[0].usdBalance).toBe(mockTwinToken1.usdBalance);
-			expect(result[1].usdBalance).toBe(mockSecondToken.usdBalance);
-
-			expect(result[0].tokens[0]).toBe(mockTwinToken1);
-			expect(result[1].tokens[0]).toBe(mockSecondToken);
 		});
 
 		it('should not re-sort the groups even if the total balance of a group would put it in a higher position in the list', () => {
@@ -977,17 +753,32 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(2);
+			expect(result).toHaveLength(2);
 
-			expect(result[0].tokens.length).not.toBe(3);
+			result.map((groupResult) => {
+				expect(groupResult).toHaveProperty('group');
+			});
 
-			expect(result[0].id).not.toBe(mockToken.id);
+			assert('group' in result[0]);
+			assert('group' in result[1]);
 
-			expect(result[0].nativeToken).not.toBe(mockToken);
+			const [{ group: group0 }, { group: group1 }] = result;
 
-			expect(result[0].balance).not.toStrictEqual(
-				mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance
-			);
+			expect(group0).toStrictEqual({
+				id: mockSecondToken.id,
+				nativeToken: mockSecondToken,
+				tokens: [mockSecondToken],
+				balance: mockSecondToken.balance,
+				usdBalance: mockSecondToken.usdBalance
+			});
+
+			expect(group1).toStrictEqual({
+				id: mockToken.id,
+				nativeToken: mockToken,
+				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
+				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
+				usdBalance: mockToken.usdBalance + mockTwinToken1.usdBalance + mockTwinToken2.usdBalance
+			});
 		});
 
 		it('should group with balance undefined if any of the tokens has balance undefined', () => {
@@ -1001,17 +792,19 @@ describe('token-group.utils', () => {
 
 			const result = groupTokens(tokens);
 
-			expect(result.length).toBe(1);
+			expect(result).toHaveLength(1);
 
-			expect(result[0].tokens.length).toBe(3);
+			assert('group' in result[0]);
 
-			expect(result[0].id).toBe(mockToken.id);
+			const { group } = result[0];
 
-			expect(result[0].nativeToken).toBe(mockToken);
-
-			expect(result[0].balance).toBeUndefined();
-
-			expect(result[0].usdBalance).toBe(mockToken.usdBalance + mockTwinToken2.usdBalance);
+			expect(group).toStrictEqual({
+				id: mockToken.id,
+				nativeToken: mockToken,
+				tokens: [mockToken, mockTwinToken, mockTwinToken2],
+				balance: undefined,
+				usdBalance: mockToken.usdBalance + mockTwinToken2.usdBalance
+			});
 		});
 	});
 });

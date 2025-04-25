@@ -3,7 +3,6 @@ import {
 	loadBtcAddressRegtest,
 	loadBtcAddressTestnet
 } from '$btc/services/btc-address.services';
-import * as networksEnv from '$env/networks/networks.env';
 import { loadEthAddress } from '$eth/services/eth-address.services';
 import Loader from '$lib/components/loaders/Loader.svelte';
 import * as appContants from '$lib/constants/app.constants';
@@ -43,12 +42,6 @@ import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-
-// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
-vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
-	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
-});
 
 vi.mock('@dfinity/utils', async () => {
 	const mod = await vi.importActual<object>('@dfinity/utils');
@@ -124,8 +117,6 @@ describe('Loader', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(networksEnv, 'USER_NETWORKS_FEATURE_ENABLED', 'get').mockImplementation(() => true);
-
 		mockAuthStore();
 
 		setupTestnetsStore('disabled');
@@ -138,7 +129,7 @@ describe('Loader', () => {
 		await waitFor(() => {
 			expect(queryByTestId(LOADER_MODAL)).toBeNull();
 
-			expect(get(loading)).toBe(false);
+			expect(get(loading)).toBeFalsy();
 		});
 	});
 

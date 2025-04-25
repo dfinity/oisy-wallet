@@ -31,6 +31,8 @@
 		networkBitcoinRegtestEnabled,
 		networkBitcoinTestnetEnabled,
 		networkEthereumEnabled,
+		networkEvmMainnetEnabled,
+		networkEvmTestnetEnabled,
 		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
@@ -120,7 +122,7 @@
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
 	$: if (progressStep === ProgressStepsLoader.DONE) {
-		if ($networkEthereumEnabled && isNullish($ethAddress)) {
+		if (($networkEthereumEnabled || $networkEvmMainnetEnabled) && isNullish($ethAddress)) {
 			debounceLoadEthAddress();
 		}
 
@@ -133,7 +135,7 @@
 		}
 
 		if ($testnetsEnabled) {
-			if ($networkSepoliaEnabled && isNullish($ethAddress)) {
+			if (($networkSepoliaEnabled || $networkEvmTestnetEnabled) && isNullish($ethAddress)) {
 				debounceLoadEthAddress();
 			}
 

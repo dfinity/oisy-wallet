@@ -16,11 +16,12 @@
 	export let network: Network;
 	export let qrCodeAction: ReceiveQRCodeAction;
 	export let copyAriaLabel: string;
+	export let testId: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 </script>
 
-<ContentWithToolbar styleClass="min-h-50vh">
+<ContentWithToolbar styleClass="min-h-50vh" {testId}>
 	<ReceiveAddressQRCodeContent
 		{address}
 		{addressLabel}

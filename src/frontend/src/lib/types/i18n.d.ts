@@ -27,6 +27,7 @@ interface I18nCore {
 		not_available: string;
 		new: string;
 		edit: string;
+		no_results: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -48,6 +49,7 @@ interface I18nNavigation {
 		support: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
+		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
 	};
@@ -64,6 +66,7 @@ interface I18nNavigation {
 		support: string;
 		open_twitter: string;
 		vip_qr_code: string;
+		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
 	};
@@ -623,8 +626,10 @@ interface I18nTokens {
 		text: {
 			title: string;
 			manage_list: string;
+			default_message: string;
 			list_settings: string;
 			do_not_see_import: string;
+			import_token: string;
 			manage_for_network: string;
 			network: string;
 			all_tokens_zero_balance: string;
@@ -863,6 +868,7 @@ interface I18nVip {
 	invitation: {
 		text: {
 			title: string;
+			binance_title: string;
 			invitation_link_copied: string;
 			generate_new_link: string;
 			generating_new_code: string;

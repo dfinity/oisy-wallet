@@ -8,12 +8,14 @@
 
 	let disabled = true;
 	$: disabled = $erc20UserTokensNotInitialized || $authNotSignedIn;
+
+	const manageTokensId = Symbol();
 </script>
 
 <button
 	class="tertiary"
 	data-tid={MANAGE_TOKENS_MODAL_BUTTON}
-	on:click={modalStore.openManageTokens}
+	on:click={() => modalStore.openManageTokens({ id: manageTokensId })}
 	{disabled}
 >
 	<IconManage />
