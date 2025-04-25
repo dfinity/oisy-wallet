@@ -2,6 +2,7 @@ import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { basename, dirname, resolve } from 'node:path';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
+import replace from 'vite-plugin-filter-replace';
 import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
 
 // npm run dev = local
@@ -13,7 +14,29 @@ import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './v
 const network = process.env.DFX_NETWORK ?? 'local';
 
 const config: UserConfig = {
-	plugins: [sveltekit()],
+	plugins: [
+		sveltekit(),
+		// TODO: uninstall `vite-plugin-filter-replace` and remove this when `ethers` package updates the URL too - issue https://github.com/ethers-io/ethers.js/issues/4951
+		replace(
+			[
+				{
+					filter: ['node_modules/ethers'],
+					replace: {
+						from: 'bnbsmartchain-mainnet.infura.io',
+						to: 'bsc-mainnet.infura.io'
+					}
+				},
+				{
+					filter: ['node_modules/ethers'],
+					replace: {
+						from: 'bnbsmartchain-testnet.infura.io',
+						to: 'bsc-testnet.infura.io'
+					}
+				}
+			],
+			{ enforce: 'pre' }
+		)
+	],
 	resolve: {
 		alias: {
 			$declarations: resolve('./src/declarations')
