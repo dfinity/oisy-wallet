@@ -9,9 +9,9 @@ import { hashText } from '@dfinity/utils';
  * @throws An error if `difficulty` is not greater than zero.
  */
 export const solvePowChallenge = async ({
-																					timestamp,
-																					difficulty
-																				}: {
+	timestamp,
+	difficulty
+}: {
 	timestamp: bigint;
 	difficulty: number;
 }): Promise<bigint> => {
