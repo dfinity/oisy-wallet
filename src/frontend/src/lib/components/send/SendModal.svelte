@@ -12,7 +12,16 @@
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
-	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnetNotLoaded,
+		ethAddressNotLoaded,
+		btcAddressRegtestNotLoaded,
+		btcAddressTestnetNotLoaded,
+		solAddressTestnetNotLoaded,
+		solAddressLocalnetNotLoaded,
+		solAddressDevnetNotLoaded,
+		solAddressMainnetNotLoaded
+	} from '$lib/derived/address.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -30,7 +39,17 @@
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdBTCMainnet,
+		isNetworkIdBTCTestnet,
+		isNetworkIdEthereum,
+		isNetworkIdEvm,
+		isNetworkIdBTCRegtest,
+		isNetworkIdSOLMainnet,
+		isNetworkIdSOLDevnet,
+		isNetworkIdSOLLocal,
+		isNetworkIdSOLTestnet
+	} from '$lib/utils/network.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -76,11 +95,28 @@
 			dispatch('nnsClose');
 		});
 
-	const isDisabled = (): boolean => $ethAddressNotLoaded;
+	const isDisabled = ({ network: { id } }: Token): boolean =>
+		isNetworkIdEthereum(id) || isNetworkIdEvm(id)
+			? $ethAddressNotLoaded
+			: isNetworkIdBTCMainnet(id)
+				? $btcAddressMainnetNotLoaded
+				: isNetworkIdBTCTestnet(id)
+					? $btcAddressTestnetNotLoaded
+					: isNetworkIdBTCRegtest(id)
+						? $btcAddressRegtestNotLoaded
+						: isNetworkIdSOLMainnet(id)
+							? $solAddressMainnetNotLoaded
+							: isNetworkIdSOLDevnet(id)
+								? $solAddressDevnetNotLoaded
+								: isNetworkIdSOLLocal(id)
+									? $solAddressLocalnetNotLoaded
+									: isNetworkIdSOLTestnet(id)
+										? $solAddressTestnetNotLoaded
+										: false;
 
 	const nextStep = async ({ detail: token }: CustomEvent<Token>) => {
-		if (isDisabled()) {
-			const status = await waitWalletReady(isDisabled);
+		if (isDisabled(token)) {
+			const status = await waitWalletReady(() => isDisabled(token));
 
 			if (status === 'timeout') {
 				return;
