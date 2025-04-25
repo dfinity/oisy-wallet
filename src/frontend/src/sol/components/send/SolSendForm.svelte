@@ -35,7 +35,7 @@
 	disabled={invalid}
 	hideSource
 >
-	<SolSendAmount slot="amount" bind:amount bind:amountError />
+	<SolSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 
 	<SolSendDestination slot="destination" bind:destination bind:invalidDestination on:icQRCodeScan />
 
