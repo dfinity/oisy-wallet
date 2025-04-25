@@ -10,15 +10,17 @@
 	}
 	const { name, variant = 'md', styleClass }: AvatarProps = $props();
 
-	const size = $derived(
+	const font = $derived(
 		{
-			xl: 100,
-			lg: 64,
-			md: 48,
-			sm: 40,
-			xs: 32
+			xl: 'text-[32px]', // size: 100px
+			lg: 'text-[25.6px]', // size: 64px
+			md: 'text-[19.2px]', // size: 48px
+			sm: 'text-[16px]', // size: 40px
+			xs: 'text-[12.8px]' // size: 32px
 		}[variant]
 	);
+	let size = $derived(variant === 'xl' ? 'size-25' : 'size-[2.5em]');
+	let commonClasses = $derived(`${font} ${size} rounded-full`);
 
 	const initials = $derived(
 		(nonNullish(name) ? name : '')
@@ -31,13 +33,12 @@
 </script>
 
 {#if !initials}
-	<div class={`text-brand-primary ${styleClass}`}>
+	<div class={`${commonClasses} text-brand-primary ${styleClass}`}>
 		<IconAvatar size={`${size}`}></IconAvatar>
 	</div>
 {:else}
 	<span
-		style={`width: ${size}px; height: ${size}px; font-size: ${Math.ceil((size * 4) / 10)}px`}
-		class={`inline-block inline-flex items-center justify-center rounded-full bg-[lightgray] text-4xl font-bold text-white ${styleClass}`}
+		class={`${commonClasses} inline-block inline-flex items-center justify-center bg-[lightgray] font-bold text-white ${styleClass}`}
 		>{initials}</span
 	>
 {/if}
