@@ -83,3 +83,7 @@ export enum ProgressStepsUpdateBalanceCkBtc {
 	RELOAD = 'reload',
 	DONE = 'done'
 }
+
+export enum AddressBookSteps {
+	ADDRESS_BOOK = 'address_book'
+}
