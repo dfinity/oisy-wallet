@@ -336,7 +336,7 @@ export const swapWithIcpSwap = async ({
 }: {
 	identity: Identity;
 	progress: (step: ProgressStepsSwap) => void;
-	sourceToken: IcTokenToggleable;
+	sourceToken: any;
 	destinationToken: IcTokenToggleable;
 	swapAmount: Amount;
 	receiveAmount: bigint;
@@ -410,7 +410,7 @@ export const swapWithIcpSwap = async ({
 	  console.log(isSourceTokenIcrc2, 'isSourceTokenIcrc2');
 	  
 
-	if (!isSourceTokenIcrc2) {
+	if (sourceToken.standard !== 'icrc2') {
 		await sendIcrc(transferParams);
 	} else {
 		await approve({
