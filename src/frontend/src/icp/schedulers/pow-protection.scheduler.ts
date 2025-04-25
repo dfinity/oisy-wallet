@@ -5,6 +5,7 @@ import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/sche
 import type { PostMessageDataRequest } from '$lib/types/post-message';
 import { hashText } from '@dfinity/utils';
 
+// TODO: add tests for POW worker/scheduler
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
 
