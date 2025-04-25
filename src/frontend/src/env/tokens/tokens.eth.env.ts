@@ -57,4 +57,6 @@ export const SUPPORTED_ETHEREUM_TOKENS: RequiredTokenWithLinkedData[] = defineSu
 	testnetTokens: [SEPOLIA_TOKEN]
 });
 
-export const SUPPORTED_ETHEREUM_TOKEN_IDS: symbol[] = SUPPORTED_ETHEREUM_TOKENS.map(({ id }) => id);
+export const SUPPORTED_ETHEREUM_TOKEN_IDS: TokenId[] = SUPPORTED_ETHEREUM_TOKENS.map(
+	({ id }) => id
+);
