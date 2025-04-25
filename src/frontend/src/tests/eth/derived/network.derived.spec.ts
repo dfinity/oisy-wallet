@@ -3,11 +3,7 @@ import { BSC_TESTNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_DEVNET_NETWORK } from '$env/networks/networks.sol.env';
-import {
-	explorerUrl,
-	selectedEthereumNetwork,
-	selectedEthereumNetworkWithFallback
-} from '$eth/derived/network.derived';
+import { explorerUrl, selectedEthereumNetwork } from '$eth/derived/network.derived';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Network } from '$lib/types/network';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -62,59 +58,6 @@ describe('network.derived', () => {
 			mockPage.mock({ network: 'mockNetwork' });
 
 			expect(get(selectedEthereumNetwork)).toBeUndefined();
-		});
-	});
-
-	describe('selectedEthereumNetworkWithFallback', () => {
-		beforeEach(() => {
-			vi.clearAllMocks();
-			vi.resetAllMocks();
-
-			setupTestnetsStore('enabled');
-			setupUserNetworksStore('allEnabled');
-		});
-
-		it('should return the current network when it is an Ethereum network', () => {
-			const networks: Network[] = [ETHEREUM_NETWORK, SEPOLIA_NETWORK];
-
-			networks.forEach((network) => {
-				mockPage.mock({ network: network.id.description });
-
-				expect(get(selectedEthereumNetworkWithFallback)).toEqual(network);
-			});
-		});
-
-		it('should fallback to the default Ethereum network if it is not an Ethereum network', () => {
-			const networks: Network[] = [
-				ICP_NETWORK,
-				BASE_NETWORK,
-				SOLANA_DEVNET_NETWORK,
-				BSC_TESTNET_NETWORK
-			];
-
-			networks.forEach((network) => {
-				mockPage.mock({ network: network.id.description });
-
-				expect(get(selectedEthereumNetworkWithFallback)).toEqual(ETHEREUM_NETWORK);
-			});
-		});
-
-		it('should fallback to the default Ethereum network if Sepolia network is disabled', () => {
-			setupTestnetsStore('disabled');
-
-			const networks: Network[] = [ETHEREUM_NETWORK, SEPOLIA_NETWORK];
-
-			networks.forEach((network) => {
-				mockPage.mock({ network: network.id.description });
-
-				expect(get(selectedEthereumNetworkWithFallback)).toEqual(ETHEREUM_NETWORK);
-			});
-		});
-
-		it('should fallback to the default Ethereum network if no match is found', () => {
-			mockPage.mock({ network: 'mockNetwork' });
-
-			expect(get(selectedEthereumNetworkWithFallback)).toEqual(ETHEREUM_NETWORK);
 		});
 	});
 

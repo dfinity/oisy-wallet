@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
 	import EthConvertProgress from '$eth/components/convert/EthConvertProgress.svelte';
 	import EthConvertReview from '$eth/components/convert/EthConvertReview.svelte';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import { selectedEthereumNetworkWithFallback } from '$eth/derived/network.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { send as executeSend } from '$eth/services/send.services';
 	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
@@ -112,6 +112,9 @@
 			return;
 		}
 
+		// This is a simple type check, since it should not happen since the user arrived here from a selected Ethereum network
+		assertNonNullish($selectedEthereumNetwork);
+
 		dispatch('icNext');
 
 		try {
@@ -127,7 +130,7 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
-				sourceNetwork: $selectedEthereumNetworkWithFallback,
+				sourceNetwork: $selectedEthereumNetwork,
 				targetNetwork: ICP_NETWORK,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[$ethereumToken.id]
@@ -156,39 +159,41 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<FeeContext
-	sendToken={$sourceToken}
-	sendTokenId={$sourceToken.id}
-	amount={sendAmount}
-	{destination}
-	observe={currentStep?.name !== WizardStepsConvert.CONVERTING &&
-		currentStep?.name !== WizardStepsConvert.REVIEW}
-	sourceNetwork={$selectedEthereumNetworkWithFallback}
-	targetNetwork={ICP_NETWORK}
-	nativeEthereumToken={$ethereumToken}
->
-	{#if currentStep?.name === WizardStepsConvert.CONVERT}
-		<EthConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount {destination}>
-			<svelte:fragment slot="cancel">
-				{#if formCancelAction === 'back'}
-					<ButtonBack on:click={back} />
-				{:else}
-					<ButtonCancel on:click={close} />
-				{/if}
-			</svelte:fragment>
-		</EthConvertForm>
-	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<EthConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}>
-			<ButtonBack slot="cancel" on:click={back} />
-		</EthConvertReview>
-	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
-		<EthConvertProgress
-			bind:convertProgressStep
-			sourceTokenId={$sourceToken.id}
-			{destination}
-			nativeEthereumToken={$ethereumToken}
-		/>
-	{:else}
-		<slot />
-	{/if}
-</FeeContext>
+{#if nonNullish($selectedEthereumNetwork)}
+	<FeeContext
+		sendToken={$sourceToken}
+		sendTokenId={$sourceToken.id}
+		amount={sendAmount}
+		{destination}
+		observe={currentStep?.name !== WizardStepsConvert.CONVERTING &&
+			currentStep?.name !== WizardStepsConvert.REVIEW}
+		sourceNetwork={$selectedEthereumNetwork}
+		targetNetwork={ICP_NETWORK}
+		nativeEthereumToken={$ethereumToken}
+	>
+		{#if currentStep?.name === WizardStepsConvert.CONVERT}
+			<EthConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount {destination}>
+				<svelte:fragment slot="cancel">
+					{#if formCancelAction === 'back'}
+						<ButtonBack on:click={back} />
+					{:else}
+						<ButtonCancel on:click={close} />
+					{/if}
+				</svelte:fragment>
+			</EthConvertForm>
+		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
+			<EthConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}>
+				<ButtonBack slot="cancel" on:click={back} />
+			</EthConvertReview>
+		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
+			<EthConvertProgress
+				bind:convertProgressStep
+				sourceTokenId={$sourceToken.id}
+				{destination}
+				nativeEthereumToken={$ethereumToken}
+			/>
+		{:else}
+			<slot />
+		{/if}
+	</FeeContext>
+{/if}
