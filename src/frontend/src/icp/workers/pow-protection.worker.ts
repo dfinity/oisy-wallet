@@ -1,11 +1,11 @@
 import { PowProtectionScheduler } from '$icp/schedulers/pow-protection.scheduler';
-import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
+import type { PostMessage, PostMessageDataRequestPowProtector } from '$lib/types/post-message';
 
 const scheduler = new PowProtectionScheduler();
 
 export const onPowProtectionMessage = async ({
 	data: dataMsg
-}: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
+}: MessageEvent<PostMessage<PostMessageDataRequestPowProtector>>) => {
 	const { msg } = dataMsg;
 
 	switch (msg) {

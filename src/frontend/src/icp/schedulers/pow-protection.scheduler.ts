@@ -3,9 +3,12 @@ import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
-import type { PostMessageDataRequest } from '$lib/types/post-message';
+import type {
+	PostMessageDataRequest,
+	PostMessageDataRequestPowProtector
+} from '$lib/types/post-message';
 
-export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
+export class PowProtectionScheduler implements Scheduler<PostMessageDataRequestPowProtector> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
 
 	stop() {

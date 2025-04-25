@@ -1,31 +1,36 @@
-import type {
-	PostMessageDataRequestBtcSchema,
-	PostMessageDataRequestExchangeTimerSchema,
-	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
-	PostMessageDataRequestIcCkSchema,
-	PostMessageDataRequestIcrcSchema,
-	PostMessageDataRequestIcrcStrictSchema,
-	PostMessageDataRequestSchema,
-	PostMessageDataRequestSolSchema,
-	PostMessageDataResponseAuthSchema,
-	PostMessageDataResponseBTCAddressSchema,
-	PostMessageDataResponseErrorSchema,
-	PostMessageDataResponseExchangeErrorSchema,
-	PostMessageDataResponseExchangeSchema,
-	PostMessageDataResponseSchema,
-	PostMessageDataResponseWalletCleanUpSchema,
-	PostMessageDataResponseWalletSchema,
-	PostMessageJsonDataResponseSchema,
-	PostMessageResponseSchema,
-	PostMessageResponseStatusSchema,
-	PostMessageSyncStateSchema,
-	inferPostMessageSchema
+import type { PostMessageDataRequestPowProtectorSchema } from '$lib/schema/post-message.schema';
+import {
+	type PostMessageDataRequestBtcSchema,
+	type PostMessageDataRequestExchangeTimerSchema,
+	type PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
+	type PostMessageDataRequestIcCkSchema,
+	type PostMessageDataRequestIcrcSchema,
+	type PostMessageDataRequestIcrcStrictSchema,
+	type PostMessageDataRequestSchema,
+	type PostMessageDataRequestSolSchema,
+	type PostMessageDataResponseAuthSchema,
+	type PostMessageDataResponseBTCAddressSchema,
+	type PostMessageDataResponseErrorSchema,
+	type PostMessageDataResponseExchangeErrorSchema,
+	type PostMessageDataResponseExchangeSchema,
+	type PostMessageDataResponseSchema,
+	type PostMessageDataResponseWalletCleanUpSchema,
+	type PostMessageDataResponseWalletSchema,
+	type PostMessageJsonDataResponseSchema,
+	type PostMessageResponseSchema,
+	type PostMessageResponseStatusSchema,
+	type PostMessageSyncStateSchema,
+	type inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 import type * as z from 'zod';
 import type { ZodType } from 'zod';
 
 export type PostMessageDataRequest = z.infer<typeof PostMessageDataRequestSchema>;
 export type PostMessageDataResponse = z.infer<typeof PostMessageDataResponseSchema>;
+
+export type PostMessageDataRequestPowProtector = z.infer<
+	typeof PostMessageDataRequestPowProtectorSchema
+>;
 
 export type PostMessageDataRequestExchangeTimer = z.infer<
 	typeof PostMessageDataRequestExchangeTimerSchema
