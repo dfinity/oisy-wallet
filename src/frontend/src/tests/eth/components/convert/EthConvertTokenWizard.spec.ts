@@ -103,7 +103,7 @@ describe('EthConvertTokenWizard', () => {
 
 		if (nonNullish(minterInfo)) {
 			store.set({
-				tokenId: ETHEREUM_TOKEN.id,
+				id: ETHEREUM_TOKEN.id,
 				data: {
 					certified: true,
 					data: minterInfo
