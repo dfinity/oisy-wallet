@@ -2,6 +2,7 @@ import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import {
+	exchangeRateBNBToUsd,
 	exchangeRateBTCToUsd,
 	exchangeRateERC20ToUsd,
 	exchangeRateETHToUsd,
@@ -86,7 +87,8 @@ const syncExchange = async ({
 			currentIcpPrice,
 			currentIcrcPrices,
 			currentSolPrice,
-			currentSplPrices
+			currentSplPrices,
+			currentBnbPrice
 		] = await Promise.all([
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
@@ -94,7 +96,8 @@ const syncExchange = async ({
 			exchangeRateICPToUsd(),
 			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
 			exchangeRateSOLToUsd(),
-			exchangeRateSPLToUsd(splTokenAddresses)
+			exchangeRateSPLToUsd(splTokenAddresses),
+			exchangeRateBNBToUsd()
 		]);
 
 		postMessage({
@@ -106,7 +109,8 @@ const syncExchange = async ({
 				currentIcpPrice,
 				currentIcrcPrices,
 				currentSolPrice,
-				currentSplPrices
+				currentSplPrices,
+				currentBnbPrice
 			}
 		});
 	} catch (err: unknown) {
