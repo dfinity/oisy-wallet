@@ -377,6 +377,9 @@ export const swapWithIcpSwap = async ({
 		subaccount
 	});
 
+	console.log(toAddress, 'toAddress');
+	
+
 	const slippageMinimum = calculateSlippage({
 		quoteAmount: receiveAmount,
 		slippagePercentage: Number(slippageValue)
@@ -394,6 +397,17 @@ export const swapWithIcpSwap = async ({
 		ledgerCanisterId: sourceToken.ledgerCanisterId
 	};
 
+
+	console.log('Deposit for:', {
+		canisterId: pool.canisterId.toString(),
+		token: sourceToken.ledgerCanisterId,
+		amount: parsedSwapAmount.toString(),
+		fee: sourceTokenFee.toString(),
+		userPrincipal: identity.getPrincipal().toText(),
+		to: toAddress
+	  });
+
+
 	if (!isSourceTokenIcrc2) {
 		await sendIcrc(transferParams);
 	} else {
@@ -407,6 +421,13 @@ export const swapWithIcpSwap = async ({
 			}
 		});
 	}
+
+	const balanceBefore = await getUserUnusedBalance({
+		identity,
+		canisterId: pool.canisterId.toString(),
+		principal: identity.getPrincipal()
+	});
+	console.log('Balance in pool before deposit:', balanceBefore);
 
 	await deposit({
 		identity,
