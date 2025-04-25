@@ -11,7 +11,13 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
-	import { networkBitcoin, networkICP, networkSolana } from '$lib/derived/network.derived';
+	import {
+		networkBitcoin,
+		networkEthereum,
+		networkEvm,
+		networkICP,
+		networkSolana
+	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -71,9 +77,9 @@
 		<IcTransactions />
 	{:else if $networkBitcoin}
 		<BtcTransactions />
+	{:else if $networkEthereum || $networkEvm}
+		<EthTransactions />
 	{:else if $networkSolana}
 		<SolTransactions />
-	{:else if nonNullish($routeToken)}
-		<EthTransactions />
 	{/if}
 {/if}
