@@ -1,9 +1,9 @@
 import type { CreateChallengeResponse } from '$declarations/backend/backend.did';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
-import { solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { PostMessageDataRequestPowProtector } from '$lib/types/post-message';
+import { hashText } from '@dfinity/utils';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequestPowProtector> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
@@ -28,6 +28,54 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequestP
 	}
 
 	/**
+	 * Solves a Proof-of-Work (PoW) challenge by finding a `nonce` that satisfies the given difficulty level
+	 *
+	 * @param timestamp - A unique `bigint` value for the challenge.
+	 * @param difficulty - A positive number influencing the challenge's complexity.
+	 * @returns The `nonce` that solves the challenge as a `bigint`.
+	 * @throws An error if `difficulty` is not greater than zero.
+	 */
+	private solvePowChallenge = async ({
+		timestamp,
+		difficulty
+	}: {
+		timestamp: bigint;
+		difficulty: number;
+	}): Promise<bigint> => {
+		if (difficulty <= 0) {
+			throw new Error('Difficulty must be greater than zero');
+		}
+
+		// This is the value we need to find to solve the challenge (changed to bigint)
+		let nonce = 0n;
+
+		// Target is proportional to 1/difficulty (converted target to bigint)
+		const target = BigInt(Math.floor(0xffffffff / difficulty));
+
+		let prefix: bigint;
+
+		// Continuously try different nonce values until the challenge is solved
+		do {
+			// Concatenate the timestamp and nonce as the challenge string
+			const challengeStr = `${timestamp}.${nonce}`;
+
+			// Hash the string into a hex representation
+			const hashHex = await hashText(challengeStr);
+
+			// Extract the first 4 bytes of the hash as a number (prefix converted to bigint)
+			prefix = BigInt(parseInt(hashHex.slice(0, 8), 16));
+
+			// Increment the nonce if the condition is not satisfied
+			if (prefix > target) {
+				nonce++;
+			}
+		} while (prefix > target);
+
+		// Return the nonce that solves the challenge (bigint type)
+		return nonce;
+	};
+
+	/**
 	 * Initiates the Proof-of-Work (PoW) and signing request cycles.
 	 *
 	 * This method:
@@ -46,7 +94,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequestP
 			await createPowChallenge({ identity });
 
 		// Step 2: Solve the PoW challenge.
-		const nonce = await solvePowChallenge({
+		const nonce = await this.solvePowChallenge({
 			timestamp,
 			difficulty
 		});
