@@ -134,7 +134,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.network }}-${{ github.event.inputs.canister }}
   cancel-in-progress: false
 
-permissions: { }
+permissions: {}
 
 jobs:
   deployment:

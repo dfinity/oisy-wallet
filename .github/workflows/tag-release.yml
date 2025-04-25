@@ -2,12 +2,12 @@ name: Tag on Merge from Release Branch
 
 on:
   pull_request:
-    types: [ closed ]
+    types: [closed]
     branches:
       - main
   merge_group:
 
-permissions: { }
+permissions: {}
 
 jobs:
   release:
