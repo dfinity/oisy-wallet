@@ -6,6 +6,7 @@ import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { PowProtectionScheduler } from '$icp/schedulers/pow-protection.scheduler';
 import * as powProtectorServices from '$icp/services/pow-protector.services';
 import * as backendApi from '$lib/api/backend.api';
+import type { PostMessageDataRequest } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
@@ -95,17 +96,17 @@ describe('pow-protector.worker', () => {
 		window.postMessage = originalPostmessage;
 	});
 
-	const initWithSuccess = <PostMessageDataRequest>({
+	const initWithSuccess = ({
 		startData = undefined
 	}: {
 		startData?: PostMessageDataRequest | undefined;
 	}): TestUtil => {
-		let scheduler: PowProtectionScheduler<PostMessageDataRequest>;
+		let scheduler: PowProtectionScheduler;
 
 		return {
 			setup: () => {
 				// Initialize the scheduler here
-				scheduler = new PowProtectionScheduler<PostMessageDataRequest>();
+				scheduler = new PowProtectionScheduler();
 			},
 
 			teardown: () => {
@@ -198,7 +199,7 @@ describe('pow-protector.worker', () => {
 		};
 	};
 
-	const initWithErrors = <PostMessageDataRequest>({
+	const initWithErrors = ({
 		startData = undefined,
 		initErrorMock
 	}: {
@@ -206,12 +207,12 @@ describe('pow-protector.worker', () => {
 		initErrorMock: (err: Error) => void;
 		msg: 'syncPowProtection';
 	}): TestUtil => {
-		let scheduler: PowProtectionScheduler<PostMessageDataRequest>;
+		let scheduler: PowProtectionScheduler;
 
 		return {
 			setup: () => {
 				// Initialize the scheduler here
-				scheduler = new PowProtectionScheduler<PostMessageDataRequest>();
+				scheduler = new PowProtectionScheduler();
 			},
 
 			teardown: () => {
@@ -241,15 +242,8 @@ describe('pow-protector.worker', () => {
 		};
 	};
 
-	const startData = {
-		ledgerCanisterId: 'zfcdd-tqaaa-aaaaq-aaaga-cai',
-		env: 'mainnet' as const
-	};
-
 	describe('with successful execution', () => {
-		const { setup, teardown, tests } = initWithSuccess({
-			startData
-		});
+		const { setup, teardown, tests } = initWithSuccess({});
 
 		beforeEach(setup);
 
@@ -264,7 +258,6 @@ describe('pow-protector.worker', () => {
 		};
 
 		const { setup, teardown, tests } = initWithErrors({
-			startData,
 			initErrorMock,
 			msg: 'syncPowProtection'
 		});
@@ -284,7 +277,6 @@ describe('pow-protector.worker', () => {
 		};
 
 		const { setup, teardown, tests } = initWithErrors({
-			startData,
 			initErrorMock,
 			msg: 'syncPowProtection'
 		});
