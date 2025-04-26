@@ -7,7 +7,6 @@ import {
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
-import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import { ETHERSCAN_API_KEY, ETHERSCAN_REST_URL } from '$env/rest/etherscan.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EtherscanRestTransaction } from '$eth/types/etherscan-transaction';
