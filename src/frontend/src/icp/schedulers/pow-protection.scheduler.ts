@@ -6,6 +6,7 @@ import type { PostMessageDataRequestPowProtector } from '$lib/types/post-message
 import { hashText } from '@dfinity/utils';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequestPowProtector> {
+
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
 
 	stop() {
