@@ -9,7 +9,7 @@
 	import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import type { TokenId } from '$lib/types/token';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 
 	let tokenIdLoaded: TokenId | undefined = undefined;
 
@@ -37,7 +37,7 @@
 
 		// If user browser ICP transactions but switch token to Eth, due to the derived stores, the token can briefly be set to ICP while the navigation is not over.
 		// This prevents the glitch load of ETH transaction with a token ID for ICP.
-		if (!isNetworkIdEthereum(networkId)) {
+		if (!isNetworkIdEthereum(networkId) && !isNetworkIdEvm(networkId)) {
 			tokenIdLoaded = undefined;
 			loading = false;
 			return;
