@@ -3,7 +3,7 @@ import {
 	ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS
 } from '$env/networks/networks.icrc.env';
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
-import type { ContractAddressText } from '$eth/types/address';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO_BI } from '$lib/constants/app.constants';
@@ -83,14 +83,8 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 	const isSuggestedToken =
 		(ledgerCanisterId &&
 			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
-		('address' in defaultToken &&
-			ERC20_SUGGESTED_TOKENS.map((token) => token.address).includes(
-				(
-					defaultToken as {
-						address: ContractAddressText;
-					}
-				).address
-			));
+		(isTokenErc20(defaultToken) &&
+			ERC20_SUGGESTED_TOKENS.map(({ id }) => id).includes(defaultToken.id));
 
 	return {
 		...defaultToken,
