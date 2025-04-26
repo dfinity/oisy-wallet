@@ -1,12 +1,16 @@
 import {
-	ETHEREUM_NETWORK_ID,
-	ETHERSCAN_API_URL_HOMESTEAD,
-	ETHERSCAN_API_URL_SEPOLIA,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
-import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { ETHERSCAN_API_KEY, ETHERSCAN_REST_URL } from '$env/rest/etherscan.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EtherscanRestTransaction } from '$eth/types/etherscan-transaction';
+import type { EthereumChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -16,7 +20,9 @@ import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export class EtherscanRest {
-	constructor(private readonly apiUrl: string) {}
+	private readonly apiUrl = ETHERSCAN_REST_URL;
+
+	constructor(private readonly chainId: EthereumChainId) {}
 
 	transactions = async ({
 		address,
@@ -26,6 +32,7 @@ export class EtherscanRest {
 		contract: Erc20Token;
 	}): Promise<Transaction[]> => {
 		const url = new URL(this.apiUrl);
+		url.searchParams.set('chainid', this.chainId.toString());
 		url.searchParams.set('module', 'account');
 		url.searchParams.set('action', 'tokentx');
 		url.searchParams.set('contractaddress', contractAddress);
@@ -70,17 +77,23 @@ export class EtherscanRest {
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
 				value: BigInt(value),
-				// Chain ID is not delivered by the Etherscan API so, we naively set 0
-				chainId: 0n
+				chainId: this.chainId
 			})
 		);
 	};
 }
 
-const providers: Record<NetworkId, EtherscanRest> = {
-	[ETHEREUM_NETWORK_ID]: new EtherscanRest(ETHERSCAN_API_URL_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new EtherscanRest(ETHERSCAN_API_URL_SEPOLIA)
-};
+const providers: Record<NetworkId, EtherscanRest> = [
+	ETHEREUM_NETWORK,
+	SEPOLIA_NETWORK,
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK,
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+].reduce<Record<NetworkId, EtherscanRest>>(
+	(acc, { id, chainId }) => ({ ...acc, [id]: new EtherscanRest(chainId) }),
+	{}
+);
 
 export const etherscanRests = (networkId: NetworkId): EtherscanRest => {
 	const provider = providers[networkId];
