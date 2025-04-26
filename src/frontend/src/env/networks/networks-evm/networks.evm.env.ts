@@ -1,6 +1,6 @@
 import { SUPPORTED_BASE_NETWORKS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORKS } from '$env/networks/networks-evm/networks.evm.bsc.env';
-import type { EthereumNetwork } from '$eth/types/network';
+import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import type { Network, NetworkId } from '$lib/types/network';
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
 
@@ -11,6 +11,10 @@ export const SUPPORTED_EVM_NETWORKS: EthereumNetwork[] = EVM_NETWORKS_ENABLED
 	: [];
 
 export const SUPPORTED_EVM_NETWORKS_IDS: NetworkId[] = SUPPORTED_EVM_NETWORKS.map(({ id }) => id);
+
+export const SUPPORTED_EVM_NETWORKS_CHAIN_IDS: EthereumChainId[] = SUPPORTED_EVM_NETWORKS.map(
+	({ chainId }) => chainId
+);
 
 const SUPPORTED_EVM_MAINNET_NETWORKS: Network[] = SUPPORTED_EVM_NETWORKS.filter(
 	({ env }) => env === 'mainnet'
