@@ -95,10 +95,10 @@
 		"indexCanisterId": "v5tde-5aaaa-aaaaq-aabja-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "BoomDAO",
-			"symbol": "BOOM",
+			"name": "Mimic Clay",
+			"symbol": "CLAY",
 			"fee": {
-				"__bigint__": "100000"
+				"__bigint__": "1000000"
 			},
 			"alternativeName": "BOOM DAO",
 			"url": "https://boomdao.xyz/"
