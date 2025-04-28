@@ -19,7 +19,6 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-
 export class EtherscanRest {
 	private readonly apiUrl = ETHERSCAN_REST_URL;
 
