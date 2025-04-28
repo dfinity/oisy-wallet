@@ -34,7 +34,7 @@ export const loadCkEthMinterInfo = async ({
 				certified
 			}),
 		onLoad: ({ response: data, certified }) =>
-			ckEthMinterInfoStore.set({ tokenId, data: { data, certified } }),
+			ckEthMinterInfoStore.set({ id: tokenId, data: { data, certified } }),
 		onUpdateError: ({ error }) => {
 			// We silence the error here because we display a visual error when we try to effectively use the information
 			console.error(error);

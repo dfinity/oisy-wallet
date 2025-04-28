@@ -19,7 +19,7 @@ describe('swap.derived', () => {
 			mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 
 			balancesStore.set({
-				tokenId: ICP_TOKEN_ID,
+				id: ICP_TOKEN_ID,
 				data: { data: bn2Bi, certified: true }
 			});
 
@@ -33,7 +33,7 @@ describe('swap.derived', () => {
 			mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 
 			balancesStore.set({
-				tokenId: ICP_TOKEN_ID,
+				id: ICP_TOKEN_ID,
 				data: { data: ZERO_BI, certified: true }
 			});
 

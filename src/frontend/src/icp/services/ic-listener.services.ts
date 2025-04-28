@@ -19,7 +19,7 @@ export const syncWallet = ({
 	} = data;
 
 	balancesStore.set({
-		tokenId,
+		id: tokenId,
 		data: {
 			data: balance,
 			certified

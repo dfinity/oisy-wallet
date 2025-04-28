@@ -12,7 +12,7 @@ describe('balancesStore', () => {
 	it('should ensure derived stores update at most once when the store changes', async () => {
 		await testDerivedUpdates(() =>
 			balancesStore.set({
-				tokenId: ICP_TOKEN.id,
+				id: ICP_TOKEN.id,
 				data: { data: bn1Bi, certified: true }
 			})
 		);

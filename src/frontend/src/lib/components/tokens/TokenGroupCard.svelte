@@ -29,10 +29,10 @@
 	const hideZeros: boolean = $derived(($tokenGroupStore ?? {})[tokenGroup.id]?.hideZeros ?? true);
 
 	const toggleIsExpanded = (toggle: boolean) =>
-		tokenGroupStore.set({ tokenId: tokenGroup.id, data: { isExpanded: toggle, hideZeros } });
+		tokenGroupStore.set({ id: tokenGroup.id, data: { isExpanded: toggle, hideZeros } });
 
 	const toggleHideZeros = (toggle: boolean) =>
-		tokenGroupStore.set({ tokenId: tokenGroup.id, data: { isExpanded, hideZeros: toggle } });
+		tokenGroupStore.set({ id: tokenGroup.id, data: { isExpanded, hideZeros: toggle } });
 
 	const headerData: CardData = $derived(mapHeaderData(tokenGroup));
 
