@@ -78,7 +78,7 @@ describe('BtcConvertTokenWizard', () => {
 			.mockResolvedValue(pendingBtcTransactionResponse);
 	const mockBtcAddressStore = (address: string | undefined = mockBtcAddress) => {
 		btcAddressStore.set({
-			tokenId: ICP_TOKEN.id,
+			id: ICP_TOKEN.id,
 			data: {
 				certified: true,
 				data: address
