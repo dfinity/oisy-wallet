@@ -1,3 +1,11 @@
+import {
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import type {
@@ -133,9 +141,14 @@ export class EtherscanProvider {
 
 const ETHERSCAN_PLUGIN = new EtherscanPlugin('https://api.etherscan.io/v2');
 
-const providers: Record<NetworkId, EtherscanProvider> = [ETHEREUM_NETWORK, SEPOLIA_NETWORK].reduce<
-	Record<NetworkId, EtherscanProvider>
->((acc, { id, name, chainId }) => {
+const providers: Record<NetworkId, EtherscanProvider> = [
+	ETHEREUM_NETWORK,
+	SEPOLIA_NETWORK,
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK,
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+].reduce<Record<NetworkId, EtherscanProvider>>((acc, { id, name, chainId }) => {
 	const network = new Network(name, chainId);
 
 	network.attachPlugin(ETHERSCAN_PLUGIN);
