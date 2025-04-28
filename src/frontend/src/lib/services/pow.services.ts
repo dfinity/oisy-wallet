@@ -1,5 +1,3 @@
-import { hashToHex } from '$lib/utils/crypto.utils';
-
 /**
  * Solves a Proof-of-Work (PoW) challenge by finding a `nonce` that satisfies the given difficulty level.
  *
