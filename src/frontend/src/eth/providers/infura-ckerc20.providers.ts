@@ -23,21 +23,6 @@ export class InfuraCkErc20Provider {
 		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
 	}
 
-	getFeeData = ({
-		contract: { address: contractAddress },
-		erc20Contract: { address: erc20ContractAddress },
-		to,
-		amount
-	}: {
-		contract: Erc20ContractAddress;
-		erc20Contract: Erc20ContractAddress;
-		to: EthAddress;
-		amount: bigint;
-	}): Promise<bigint> => {
-		const ckEthContract = new Contract(contractAddress, CKERC20_ABI, this.provider);
-		return ckEthContract.deposit.estimateGas(erc20ContractAddress, amount, to);
-	};
-
 	populateTransaction = ({
 		contract: { address: contractAddress },
 		erc20Contract: { address: erc20ContractAddress },
