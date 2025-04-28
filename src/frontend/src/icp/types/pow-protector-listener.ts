@@ -4,4 +4,4 @@ export interface PowProtectorWorkerInitResult {
 	trigger: () => void;
 }
 
-export type IcCkWorker = () => Promise<PowProtectorWorkerInitResult>;
+export type PowProtectorWorker = () => Promise<PowProtectorWorkerInitResult>;

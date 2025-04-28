@@ -1,14 +1,12 @@
-import type { AllowSigningResponse, CreateChallengeResponse } from '$declarations/backend/backend.did';
+import type { CreateChallengeResponse } from '$declarations/backend/backend.did';
+import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
+import { solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
-import { POW_CHALLENGE_INTERVALL_MILLIS } from '$lib/constants/pow.constants';
-import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
-import { solvePowChallenge } from '$lib/services/pow.services';
+import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
-
-	private btcAddress: string | undefined;
 
 	stop() {
 		this.timer.stop();
@@ -16,7 +14,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 
 	async start(data: PostMessageDataRequest | undefined) {
 		await this.timer.start<PostMessageDataRequest>({
-			interval: POW_CHALLENGE_INTERVALL_MILLIS,
+			interval: POW_CHALLENGE_INTERVAL_MILLIS,
 			job: this.requestSignerCycles,
 			data
 		});
@@ -30,30 +28,31 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	}
 
 	/**
-	 * Initiates Proof-of-Work and signing processes sequentially.
-	 * This function coordinates:
-	 * 1. Creation of a PoW challenge.
-	 * 2. Solving the PoW challenge.
-	 * 3. Requesting allowance for signing using the solved nonce.
+	 * Initiates the Proof-of-Work (PoW) and signing request cycles.
 	 *
-	 * Errors at any stage lead to early returns with appropriate logging.
+	 * This method:
+	 * 1. Creates a PoW challenge using the given identity.
+	 * 2. Solves the challenge to find a valid `nonce`.
+	 * 3. Uses the solved `nonce` to request signing permission.
+	 *
+	 * @param identity - The user's identity for the operation.
+	 * @throws Errors if any step in the sequence fails.
 	 */
 	private requestSignerCycles = async ({ identity }: SchedulerJobData<PostMessageDataRequest>) => {
-		// Step 1: Requests creation of the Proof-of-Work (PoW) challenge and throws when unsuccessful.
-		const response: CreateChallengeResponse = await createPowChallenge({ identity });
+		// Step 1: Request creation of the Proof-of-Work (PoW) challenge (throws when unsuccessful).
+		const { start_timestamp_ms: timestamp, difficulty }: CreateChallengeResponse =
+			await createPowChallenge({ identity });
 
-		// Step 2: Requests allowance for signing operations with solved nonce.
+		// Step 2: Solve the PoW challenge.
 		const nonce = await solvePowChallenge({
-			timestamp: response.start_timestamp_ms,
-			difficulty: response.difficulty
+			timestamp,
+			difficulty
 		});
 
-		// Step 3: Requests allowance for signing operations with solved nonce.
-		const allow_signing: AllowSigningResponse = await allowSigning({
+		// Step 3: Request allowance for signing operations with solved nonce.
+		await allowSigning({
 			identity,
-			nonce
+			request: { nonce }
 		});
-
-		console.warn('allow_signing:', allow_signing);
 	};
 }

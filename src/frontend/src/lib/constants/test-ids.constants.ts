@@ -1,6 +1,7 @@
 export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
+export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 
@@ -10,6 +11,8 @@ export const MAX_BUTTON = 'max-button';
 
 export const LOADER_MODAL = 'loader-modal';
 export const BUTTON_MODAL_CLOSE = 'close-modal';
+
+export const MODAL_TITLE = 'modal-title';
 
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
@@ -98,6 +101,7 @@ export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
 export const VIP_QR_CODE_ICON = 'vip-qr-code-icon';
 export const VIP_QR_CODE_BINANCE_ICON = 'vip-qr-code-binance-icon';
 export const VIP_STATE_IMAGE_BANNER = 'vip-state-image-banner';
+export const VIP_STATE_BUTTON = 'vip-state-button';
 
 export const REFERRAL_CODE_COPY_BUTTON = 'referral-code-copy-button';
 export const REFERRAL_CODE_SHARE_BUTTON = 'referral-code-share-button';
@@ -173,3 +177,5 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+
+export const ADDRESS_BOOK_MODAL = 'address-book-modal';

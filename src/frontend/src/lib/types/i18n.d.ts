@@ -49,6 +49,7 @@ interface I18nNavigation {
 		support: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
+		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
 	};
@@ -65,6 +66,7 @@ interface I18nNavigation {
 		support: string;
 		open_twitter: string;
 		vip_qr_code: string;
+		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
 	};
@@ -624,6 +626,7 @@ interface I18nTokens {
 		text: {
 			title: string;
 			manage_list: string;
+			default_message: string;
 			list_settings: string;
 			do_not_see_import: string;
 			import_token: string;

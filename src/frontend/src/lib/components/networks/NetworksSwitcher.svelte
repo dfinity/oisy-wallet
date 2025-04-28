@@ -41,6 +41,8 @@
 		$testnetsEnabled && $networksTestnets.length > 0
 			? SUPPORTED_NETWORKS.length
 			: SUPPORTED_MAINNET_NETWORKS.length;
+
+	const modalId = Symbol();
 </script>
 
 <Dropdown
@@ -65,7 +67,7 @@
 					link
 					on:click={() => {
 						dropdown?.close();
-						modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS);
+						modalStore.openSettings({ id: modalId, data: SettingsModalType.ENABLED_NETWORKS });
 					}}><IconManage />{$i18n.networks.manage}</Button
 				>
 			</span>
