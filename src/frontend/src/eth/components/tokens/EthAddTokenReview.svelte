@@ -16,6 +16,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import type { EthereumNetwork } from '$eth/types/network';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;
@@ -42,7 +43,7 @@
 
 		if (
 			$erc20Tokens?.find(
-				({ address }) => address.toLowerCase() === contractAddress?.toLowerCase()
+				({ address ,network: tokenNetwork}) => address.toLowerCase() === contractAddress?.toLowerCase() && (tokenNetwork as EthereumNetwork).chainId === (network as EthereumNetwork).chainId
 			) !== undefined
 		) {
 			toastsError({
@@ -68,9 +69,10 @@
 
 			if (
 				$erc20Tokens?.find(
-					({ symbol, name }) =>
-						symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
-						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')
+					({ symbol, name , network: tokenNetwork}) =>
+					(	symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
+						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')) &&
+					(tokenNetwork as EthereumNetwork).chainId === (network as EthereumNetwork).chainId
 				) !== undefined
 			) {
 				toastsError({
