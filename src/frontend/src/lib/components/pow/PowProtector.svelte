@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import { POW_ENABLED } from '$env/pow.env';
+	import { POW_FEATURE_ENABLED } from '$env/pow.env';
 	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 	import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
 
-	if (POW_ENABLED) {
+	if (POW_FEATURE_ENABLED) {
 		let powWorker: PowProtectorWorkerInitResult;
 
 		onMount(async () => {
