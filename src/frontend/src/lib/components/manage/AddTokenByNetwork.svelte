@@ -16,7 +16,7 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBitcoin,
-		isNetworkIdEthereum,
+		isNetworkIdEthereum, isNetworkIdEvm,
 		isNetworkIdICP,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
@@ -37,6 +37,9 @@
 	let isEthereumNetwork = false;
 	$: isEthereumNetwork = isNetworkIdEthereum(network?.id);
 
+	let isEvmNetwork = false;
+	$: isEvmNetwork = isNetworkIdEvm(network?.id);
+
 	let isSolanaNetwork = false;
 	$: isSolanaNetwork = isNetworkIdSolana(network?.id);
 
@@ -50,7 +53,7 @@
 			indexCanisterId:
 				nonNullish(indexCanisterId) && notEmptyString(indexCanisterId) ? indexCanisterId : undefined
 		};
-	} else if (isEthereumNetwork) {
+	} else if (isEthereumNetwork || isEvmNetwork) {
 		tokenData = { erc20ContractAddress };
 	} else if (isSolanaNetwork) {
 		tokenData = { splTokenAddress };
@@ -72,7 +75,7 @@
 	let invalid = true;
 	$: invalid = isIcpNetwork
 		? invalidIc
-		: isEthereumNetwork
+		: isEthereumNetwork || isEvmNetwork
 			? invalidErc20
 			: isSolanaNetwork
 				? invalidSpl
@@ -109,7 +112,7 @@
 
 		{#if isIcpNetwork}
 			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
-		{:else if isEthereumNetwork}
+		{:else if isEthereumNetwork  || isEvmNetwork}
 			<EthAddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
 		{:else if isSolanaNetwork}
 			<SolAddTokenForm on:icBack bind:tokenAddress={splTokenAddress} />
