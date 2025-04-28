@@ -29,6 +29,7 @@ import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
+	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSepolia,
 	isNetworkIdSolana
@@ -103,8 +104,7 @@ export const mapAllTransactionsUi = ({
 			];
 		}
 
-		if (isNetworkIdEthereum(networkId)) {
-			// TODO: remove Sepolia transactions when the feature is complete; for now we use it for testing
+		if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
 			const isSepoliaNetwork = isNetworkIdSepolia(networkId);
 
 			return [
