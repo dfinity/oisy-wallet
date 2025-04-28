@@ -186,3 +186,5 @@ export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
 
 export const CONTACT_HEADER_EDIT_BUTTON = 'contact-header-edit-button';
+export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button'
+export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button'
