@@ -59,7 +59,7 @@ export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse | n
 
 export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
-		ids: 'bnb',
+		ids: 'binancecoin',
 		vs_currencies: 'usd'
 	});
 
