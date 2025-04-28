@@ -1,5 +1,13 @@
 import { EXCHANGE_DISABLED } from '$env/exchange.env';
 import {
+	BASE_ETH_TOKEN_ID,
+	BASE_SEPOLIA_ETH_TOKEN_ID
+} from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import {
+	BNB_MAINNET_TOKEN_ID,
+	BNB_TESTNET_TOKEN_ID
+} from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
+import {
 	BTC_MAINNET_TOKEN_ID,
 	BTC_REGTEST_TOKEN_ID,
 	BTC_TESTNET_TOKEN_ID
@@ -40,6 +48,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 		const btcPrice = $exchangeStore?.bitcoin;
 		const icpPrice = $exchangeStore?.['internet-computer'];
 		const solPrice = $exchangeStore?.solana;
+		const bnbPrice = $exchangeStore?.bnb;
 
 		return {
 			// TODO: improve feed price on testnets, for now we assume that 1 token mainnet = 1 token testnet
@@ -53,6 +62,10 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[SOLANA_TESTNET_TOKEN_ID]: solPrice,
 			[SOLANA_DEVNET_TOKEN_ID]: solPrice,
 			[SOLANA_LOCAL_TOKEN_ID]: solPrice,
+			[BASE_ETH_TOKEN_ID]: ethPrice,
+			[BASE_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
+			[BNB_MAINNET_TOKEN_ID]: bnbPrice,
+			[BNB_TESTNET_TOKEN_ID]: bnbPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
 				const token =
 					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??

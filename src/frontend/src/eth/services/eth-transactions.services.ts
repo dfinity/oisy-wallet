@@ -4,6 +4,7 @@ import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { retry } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -27,7 +28,7 @@ export const loadEthereumTransactions = ({
 	updateOnly?: boolean;
 	silent?: boolean;
 }): Promise<ResultSuccess> => {
-	if (isSupportedEthTokenId(tokenId)) {
+	if (isSupportedEthTokenId(tokenId) || isSupportedEvmNativeTokenId(tokenId)) {
 		return loadEthTransactions({ networkId, tokenId, updateOnly, silent });
 	}
 
