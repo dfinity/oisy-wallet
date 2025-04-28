@@ -14,13 +14,17 @@
 	import type { Contact } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let { contact, close }: { contact: Contact; close: () => void } = $props();
+	let {
+		contact,
+		close,
+		edit
+	}: { contact: Contact; close: () => void; edit: (contact: Contact) => void } = $props();
 
 	let hasAddresses = $derived(contact?.addresses && contact.addresses.length > 0);
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-stretch gap-5">
-	<ContactHeader name={contact.name}></ContactHeader>
+	<ContactHeader name={contact.name} edit={() => edit(contact)}></ContactHeader>
 
 	{#if hasAddresses}
 		TODO Render addresses here

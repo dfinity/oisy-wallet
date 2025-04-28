@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import EditContactStep from './EditContactStep.svelte';
 	import ShowContactStep from './ShowContactStep.svelte';
-	import AddContactStep from '$lib/components/address-book/AddContactStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -19,7 +20,11 @@
 			title: $i18n.address_book.show_contact.title
 		},
 		{
-			name: AddressBookSteps.ADD_CONTACT,
+			name: AddressBookSteps.EDIT_CONTACT,
+			title: 'Edit contact'
+		},
+		{
+			name: AddressBookSteps.EDIT_CONTACT_NAME,
 			title: $i18n.contact.form.add_new_contact
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
@@ -44,7 +49,14 @@
 	let currentContact: Contact | undefined = $state();
 
 	function addContact(contact: Contact) {
+		contact.id = `${Date.now()}`;
 		contacts.push(contact);
+		gotoStep(AddressBookSteps.ADDRESS_BOOK);
+	}
+
+	function saveContact(contact: Contact) {
+		const id = contacts.findIndex((c) => contact.id === c.id);
+		contacts[id] = contact;
 		gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	}
 </script>
@@ -69,16 +81,36 @@
 				currentContact = contact;
 				gotoStep(AddressBookSteps.SHOW_CONTACT);
 			}}
-			addContact={() => gotoStep(AddressBookSteps.ADD_CONTACT)}
+			addContact={() => {
+				currentContact = undefined;
+				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+			}}
 		></AddressBookStep>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
-		<ShowContactStep contact={currentContact!} close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
-		></ShowContactStep>
-	{:else if currentStep?.name === AddressBookSteps.ADD_CONTACT}
-		<AddContactStep
-			bind:this={currentComponent}
-			{addContact}
+		<ShowContactStep
+			contact={currentContact!}
 			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
-		></AddContactStep>
+			edit={(contact) => {
+				currentContact = contact;
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
+			}}
+		></ShowContactStep>
+	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT}
+		<EditContactStep
+			contact={currentContact!}
+			close={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+			edit={(contact) => {
+				currentContact = contact;
+				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+			}}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
+		<EditContactNameStep
+			bind:this={currentComponent}
+			contact={currentContact}
+			{addContact}
+			{saveContact}
+			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+		></EditContactNameStep>
 	{/if}
 </WizardModal>

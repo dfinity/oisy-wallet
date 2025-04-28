@@ -907,7 +907,9 @@ interface I18nAddress_book {
 		empty_text: string;
 		add_new_contact: string;
 		add_contact: string;
+		search_contact: string;
 	};
+	edit_contact: { add_address: string; delete_contact: string };
 	show_contact: {
 		title: string;
 		add_address: string;
@@ -917,7 +919,7 @@ interface I18nAddress_book {
 }
 
 interface I18nContact {
-	form: { add_new_contact: string };
+	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
 }
 
