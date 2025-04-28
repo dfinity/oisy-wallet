@@ -48,7 +48,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 		const btcPrice = $exchangeStore?.bitcoin;
 		const icpPrice = $exchangeStore?.['internet-computer'];
 		const solPrice = $exchangeStore?.solana;
-		const bnbPrice = $exchangeStore?.bnb;
+		const bnbPrice = $exchangeStore?.binancecoin;
 
 		return {
 			// TODO: improve feed price on testnets, for now we assume that 1 token mainnet = 1 token testnet
