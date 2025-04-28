@@ -50,7 +50,7 @@ const loadEthBalance = async ({
 		const { balance } = infuraProviders(networkId);
 		const data = await balance(address);
 
-		balancesStore.set({ tokenId, data: { data, certified: false } });
+		balancesStore.set({ id: tokenId, data: { data, certified: false } });
 	} catch (err: unknown) {
 		balancesStore.reset(tokenId);
 
@@ -91,7 +91,7 @@ const loadErc20Balance = async ({
 	try {
 		const { balance } = infuraErc20Providers(contract.network.id);
 		const data = await balance({ address, contract });
-		balancesStore.set({ tokenId: contract.id, data: { data, certified: false } });
+		balancesStore.set({ id: contract.id, data: { data, certified: false } });
 	} catch (err: unknown) {
 		balancesStore.reset(contract.id);
 
