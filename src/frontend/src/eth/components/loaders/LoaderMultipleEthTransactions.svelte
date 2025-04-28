@@ -5,8 +5,7 @@
 		batchLoadTransactions,
 		batchResultsToTokenId
 	} from '$eth/services/eth-transactions-batch.services';
-	import { enabledBaseTokens } from '$evm/base/derived/tokens.derived';
-	import { enabledBscTokens } from '$evm/bsc/derived/tokens.derived';
+	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 	import type { TokenId } from '$lib/types/token';
 
@@ -17,19 +16,13 @@
 		if (
 			isNullish($enabledEthereumTokens) ||
 			isNullish($enabledErc20Tokens) ||
-			isNullish($enabledBscTokens) ||
-			isNullish($enabledBaseTokens)
+			isNullish($enabledEvmTokens)
 		) {
 			return;
 		}
 
 		const loader = batchLoadTransactions({
-			tokens: [
-				...$enabledEthereumTokens,
-				...$enabledErc20Tokens,
-				...$enabledBaseTokens,
-				...$enabledBscTokens
-			],
+			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledEvmTokens],
 			tokensAlreadyLoaded
 		});
 
@@ -40,11 +33,7 @@
 
 	const debounceLoad = debounce(load, 1000);
 
-	$: $enabledEthereumTokens,
-		$enabledErc20Tokens,
-		$enabledBaseTokens,
-		$enabledBscTokens,
-		debounceLoad();
+	$: $enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, debounceLoad();
 </script>
 
 <slot />
