@@ -5,6 +5,7 @@ import {
 	ADDRESS_BOOK_CONTACT_NAME_INPUT,
 	ADDRESS_BOOK_MODAL,
 	ADDRESS_BOOK_SAVE_BUTTON,
+	CONTACT_SHOW_CLOSE_BUTTON,
 	MODAL_TITLE
 } from '$lib/constants/test-ids.constants';
 import en from '$tests/mocks/i18n.mock';
@@ -106,5 +107,29 @@ describe('AddressBookModal', () => {
 		// Both contacts should be displayed
 		expect(getByText('Contact 1', { exact: false })).toBeInTheDocument();
 		expect(getByText('Contact 2', { exact: false })).toBeInTheDocument();
+	});
+
+	it('should navigate to show contact step when a contact is clicked and back to address book when close button is clicked', async () => {
+		render(AddressBookModal);
+
+		// Add a contact
+		await fireEvent.click(screen.getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
+		await fireEvent.input(screen.getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT), {
+			target: { value: 'Test Contact' }
+		});
+		await fireEvent.click(screen.getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		// Click on the contact to navigate to show contact step
+		await fireEvent.click(screen.getByText('Show contact Test Contact'));
+
+		// Should now be on show contact step with the contact name in the title
+		expect(screen.getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
+		expect(screen.getByText('Test Contact')).toBeInTheDocument();
+
+		// Click close button
+		await fireEvent.click(screen.getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
+
+		// Should be back on address book step
+		expect(screen.getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.text.title);
 	});
 });

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import ButtonCancel from '../ui/ButtonCancel.svelte';
-	import ButtonGroup from '../ui/ButtonGroup.svelte';
-	import ContentWithToolbar from '../ui/ContentWithToolbar.svelte';
 	import ContactHeader from '$lib/components/address-book/ContactHeader.svelte';
 	import IconEmptyAddresses from '$lib/components/icons/IconEmptyAddresses.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import {
 		CONTACT_SHOW_ADD_ADDRESS_BUTTON,
 		CONTACT_SHOW_CLOSE_BUTTON

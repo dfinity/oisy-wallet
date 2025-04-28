@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import ShowContactStep from './ShowContactStep.svelte';
 	import AddContactStep from '$lib/components/address-book/AddContactStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
@@ -12,6 +13,10 @@
 		{
 			name: AddressBookSteps.ADDRESS_BOOK,
 			title: $i18n.address_book.text.title
+		},
+		{
+			name: AddressBookSteps.SHOW_CONTACT,
+			title: $i18n.address_book.show_contact.title
 		},
 		{
 			name: AddressBookSteps.ADD_CONTACT,
@@ -36,6 +41,7 @@
 	let currentComponent = $state<any>();
 
 	let contacts: Contact[] = $state([]);
+	let currentContact: Contact | undefined = $state();
 
 	function addContact(contact: Contact) {
 		contacts.push(contact);
@@ -59,8 +65,15 @@
 		<AddressBookStep
 			bind:this={currentComponent}
 			{contacts}
+			showContact={(contact) => {
+				currentContact = contact;
+				gotoStep(AddressBookSteps.SHOW_CONTACT);
+			}}
 			addContact={() => gotoStep(AddressBookSteps.ADD_CONTACT)}
 		></AddressBookStep>
+	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
+		<ShowContactStep contact={currentContact!} close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+		></ShowContactStep>
 	{:else if currentStep?.name === AddressBookSteps.ADD_CONTACT}
 		<AddContactStep
 			bind:this={currentComponent}
