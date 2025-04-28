@@ -5,7 +5,7 @@ import type { OptionString } from '$lib/types/string';
 // To avoid possible issues, we decided to give the parameters as array of objects and not as single object for this specific util.
 // eslint-disable-next-line local-rules/prefer-object-params
 export const parseBoolEnvVar = (value: OptionString, check = true): boolean =>
-	JSON.parse(value?.toLowerCase() ?? 'false') === check;
+	value === undefined || value === null ? false : JSON.parse(value.toLowerCase() ?? 'false') === check;
 
 export const parseEnabledMainnetBoolEnvVar = (value: OptionString): boolean =>
 	parseBoolEnvVar(value, false);
