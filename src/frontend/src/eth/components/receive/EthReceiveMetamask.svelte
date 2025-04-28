@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { assertNonNullish } from '@dfinity/utils';
 	import { metamaskAvailable } from '$eth/derived/metamask.derived';
-	import { selectedEthereumNetworkWithFallback } from '$eth/derived/network.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { openMetamaskTransaction } from '$eth/services/metamask.services';
 	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -18,9 +19,12 @@
 			return;
 		}
 
+		// This is a simple type check, since it should not happen since the user arrived here from a selected Ethereum network
+		assertNonNullish($selectedEthereumNetwork);
+
 		await openMetamaskTransaction({
 			address: $ethAddress,
-			network: $selectedEthereumNetworkWithFallback
+			network: $selectedEthereumNetwork
 		});
 	};
 

@@ -1,5 +1,17 @@
 import {
+	BASE_NETWORK_ID,
+	BASE_SEPOLIA_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_MAINNET_NETWORK_ID,
+	BSC_TESTNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
 	ETHEREUM_NETWORK_ID,
+	INFURA_NETWORK_BASE,
+	INFURA_NETWORK_BASE_SEPOLIA,
+	INFURA_NETWORK_BNB_MAINNET,
+	INFURA_NETWORK_BNB_TESTNET,
 	INFURA_NETWORK_HOMESTEAD,
 	INFURA_NETWORK_SEPOLIA,
 	SEPOLIA_NETWORK_ID
@@ -108,10 +120,18 @@ export class InfuraErc20Provider implements Erc20Provider {
 	};
 }
 
-const providers: Record<NetworkId, InfuraErc20Provider> = {
-	[ETHEREUM_NETWORK_ID]: new InfuraErc20Provider(INFURA_NETWORK_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new InfuraErc20Provider(INFURA_NETWORK_SEPOLIA)
-};
+const providersMap: [NetworkId, Networkish][] = [
+	[ETHEREUM_NETWORK_ID, INFURA_NETWORK_HOMESTEAD],
+	[SEPOLIA_NETWORK_ID, INFURA_NETWORK_SEPOLIA],
+	[BASE_NETWORK_ID, INFURA_NETWORK_BASE],
+	[BASE_SEPOLIA_NETWORK_ID, INFURA_NETWORK_BASE_SEPOLIA],
+	[BSC_MAINNET_NETWORK_ID, INFURA_NETWORK_BNB_MAINNET],
+	[BSC_TESTNET_NETWORK_ID, INFURA_NETWORK_BNB_TESTNET]
+];
+
+const providers: Record<NetworkId, InfuraErc20Provider> = providersMap.reduce<
+	Record<NetworkId, InfuraErc20Provider>
+>((acc, [id, name]) => ({ ...acc, [id]: new InfuraErc20Provider(name) }), {});
 
 export const infuraErc20Providers = (networkId: NetworkId): InfuraErc20Provider => {
 	const provider = providers[networkId];
