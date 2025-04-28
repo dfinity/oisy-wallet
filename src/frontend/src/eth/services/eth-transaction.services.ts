@@ -7,7 +7,6 @@ import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -70,19 +69,15 @@ const processPendingTransaction = async ({
 	const transaction = await getTransaction(hash);
 
 	if (isNullish(transaction)) {
-		const {
-			transaction: {
-				error: { failed_get_transaction }
-			}
-		} = get(i18n);
-
-		toastsError({
-			msg: {
-				text: replacePlaceholders(failed_get_transaction, {
-					$hash: hash
-				})
-			}
-		});
+		// The provider searches in the transaction pool for pending transactions. But that does not guarantee that it found it.
+		// For example, for Base network, it does not work.
+		// So, for now, we do not show the toast error, just a console error.
+		// TODO: implement a better way to handle this, trying to check if it can be improved to show Base pending transactions too
+		console.error(
+			replacePlaceholders(get(i18n).transaction.error.failed_get_transaction, {
+				$hash: hash
+			})
+		);
 		return;
 	}
 
