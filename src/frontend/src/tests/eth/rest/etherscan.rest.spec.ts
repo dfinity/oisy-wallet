@@ -1,9 +1,10 @@
 import {
+	ETHEREUM_NETWORK,
 	ETHEREUM_NETWORK_ID,
-	ETHERSCAN_API_URL_HOMESTEAD,
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ETHERSCAN_REST_URL } from '$env/rest/etherscan.env';
 import { EtherscanRest, etherscanRests } from '$eth/rest/etherscan.rest';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -14,13 +15,17 @@ import type { MockedFunction } from 'vitest';
 
 global.fetch = vi.fn();
 
-vi.mock('$env/rest/etherscan.env', () => ({
-	ETHERSCAN_API_KEY: 'test-api-key'
-}));
+vi.mock(import('$env/rest/etherscan.env'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		ETHERSCAN_API_KEY: 'test-api-key'
+	};
+});
 
 describe('etherscan.rest', () => {
 	describe('EtherscanRest', () => {
-		const API_URL = ETHERSCAN_API_URL_HOMESTEAD;
+		const chainId = ETHEREUM_NETWORK.chainId;
 
 		const mockApiResponse = {
 			status: '1',
@@ -52,7 +57,7 @@ describe('etherscan.rest', () => {
 			gasLimit: 21000n,
 			gasPrice: 20000000000n,
 			value: 1000000000000000000n,
-			chainId: 0n
+			chainId
 		};
 
 		const mockEtherscanErrorResponse = {
@@ -69,7 +74,7 @@ describe('etherscan.rest', () => {
 
 			const mockFetch = fetch as MockedFunction<typeof fetch>;
 
-			const etherscanRest = new EtherscanRest(API_URL);
+			const etherscanRest = new EtherscanRest(chainId);
 
 			const result = await etherscanRest.transactions({
 				address: mockEthAddress,
@@ -80,7 +85,7 @@ describe('etherscan.rest', () => {
 
 			expect(fetch).toHaveBeenCalledOnce();
 			expect(urlString).toBe(
-				`${API_URL}?module=account&action=tokentx&contractaddress=${mockValidErc20Token.address}&address=${mockEthAddress}&startblock=0&endblock=99999999&sort=desc&apikey=test-api-key`
+				`${ETHERSCAN_REST_URL}?chainid=${chainId.toString()}&module=account&action=tokentx&contractaddress=${mockValidErc20Token.address}&address=${mockEthAddress}&startblock=0&endblock=99999999&sort=desc&apikey=test-api-key`
 			);
 
 			expect(result).toEqual([expectedTransaction]);
@@ -92,7 +97,7 @@ describe('etherscan.rest', () => {
 				json: () => mockEtherscanErrorResponse
 			} as unknown as Response);
 
-			const etherscanRest = new EtherscanRest(API_URL);
+			const etherscanRest = new EtherscanRest(chainId);
 
 			await expect(
 				etherscanRest.transactions({
@@ -107,7 +112,7 @@ describe('etherscan.rest', () => {
 				ok: false
 			} as unknown as Response);
 
-			const etherscanRest = new EtherscanRest(API_URL);
+			const etherscanRest = new EtherscanRest(chainId);
 
 			await expect(
 				etherscanRest.transactions({

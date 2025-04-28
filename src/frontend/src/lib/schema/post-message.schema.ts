@@ -27,6 +27,9 @@ export const PostMessageRequestSchema = z.enum([
 	'stopCodeTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
+	'startPowProtectionTimer',
+	'triggerPowProtectionTimer',
+	'stopPowProtectionTimer',
 	'stopIcpWalletTimer',
 	'startIcpWalletTimer',
 	'triggerIcpWalletTimer',
@@ -104,7 +107,8 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncSolWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
-	'syncCkBTCUpdateBalanceStatus'
+	'syncCkBTCUpdateBalanceStatus',
+	'syncPowProtectionStatus'
 ]);
 
 export const PostMessageResponseSchema = z.enum([
@@ -129,6 +133,7 @@ export const PostMessageResponseSchema = z.enum([
 	'syncBtcPendingUtxos',
 	'syncCkBTCUpdateOk',
 	'syncBtcAddress',
+	'syncPowProtection',
 	...PostMessageResponseStatusSchema.options
 ]);
 
@@ -144,7 +149,8 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>(),
-	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>()
+	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
+	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>()
 });
 
 export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataResponseSchema.extend({

@@ -16,6 +16,7 @@ import type { ApproveParams, SendParams, SignAndApproveParams } from '$eth/types
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isDestinationContractAddress, shouldSendWithApproval } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
+import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import {
 	toCkErc20HelperContractAddress,
 	toCkEthHelperContractAddress
@@ -335,9 +336,8 @@ const sendTransaction = async ({
 	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo);
 	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
-	const transferStandard: 'ethereum' | 'erc20' = isSupportedEthTokenId(token.id)
-		? 'ethereum'
-		: 'erc20';
+	const transferStandard: 'ethereum' | 'erc20' =
+		isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id) ? 'ethereum' : 'erc20';
 
 	const networkICP = isNetworkICP(targetNetwork);
 
