@@ -1,3 +1,11 @@
+import {
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
@@ -28,7 +36,14 @@ vi.mock('$env/rest/etherscan.env', () => ({
 describe('etherscan.providers', () => {
 	const ETHERSCAN_API_KEY = 'test-api-key';
 
-	const networks: EthereumNetwork[] = [ETHEREUM_NETWORK, SEPOLIA_NETWORK];
+	const networks: EthereumNetwork[] = [
+		ETHEREUM_NETWORK,
+		SEPOLIA_NETWORK,
+		BASE_NETWORK,
+		BASE_SEPOLIA_NETWORK,
+		BSC_MAINNET_NETWORK,
+		BSC_TESTNET_NETWORK
+	];
 
 	it('should create the correct map of providers', () => {
 		expect(EtherscanProviderLib).toHaveBeenCalledTimes(networks.length);

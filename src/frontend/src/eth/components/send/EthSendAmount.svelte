@@ -3,6 +3,7 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -52,7 +53,7 @@
 			: ZERO_BI;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
-		if (isSupportedEthTokenId($sendTokenId)) {
+		if (isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)) {
 			const total = userAmount + ($minGasFee ?? ZERO_BI);
 
 			if (total > parsedSendBalance) {
