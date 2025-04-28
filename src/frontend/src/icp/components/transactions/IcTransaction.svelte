@@ -33,7 +33,7 @@
 	$: status = pending ? 'pending' : 'confirmed';
 
 	let amount: bigint | undefined;
-	$: amount = nonNullish(value) ? (incoming ? value : value * -1n) : value;
+	$: amount = nonNullish(value) ? (incoming || type === 'burn' ? value : value * -1n) : value;
 
 	let timestamp: number | undefined;
 	$: timestamp = nonNullish(timestampNanoseconds)
