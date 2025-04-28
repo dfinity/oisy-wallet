@@ -21,7 +21,7 @@ async fn get_utxos(
     address: String,
     filter: Option<UtxoFilter>,
 ) -> Result<GetUtxosResponse, String> {
-    let utxos_res = _bitcoin_get_utxos_query(GetUtxosRequest {
+    let utxos_res = bitcoin_get_utxos_query(GetUtxosRequest {
         address,
         network,
         filter,
@@ -32,7 +32,7 @@ async fn get_utxos(
     Ok(utxos_res.0)
 }
 
-pub async fn _bitcoin_get_utxos_query(arg: GetUtxosRequest) -> CallResult<(GetUtxosResponse,)> {
+pub async fn bitcoin_get_utxos_query(arg: GetUtxosRequest) -> CallResult<(GetUtxosResponse,)> {
     let cycles = match arg.network {
         BitcoinNetwork::Mainnet => GET_UTXO_MAINNET,
         BitcoinNetwork::Testnet => GET_UTXO_TESTNET,
@@ -40,7 +40,7 @@ pub async fn _bitcoin_get_utxos_query(arg: GetUtxosRequest) -> CallResult<(GetUt
     };
     call_with_payment128(
         Principal::management_canister(),
-        "bitcoin_get_utxos",
+        "bitcoin_get_utxos_query",
         (arg,),
         cycles,
     )
