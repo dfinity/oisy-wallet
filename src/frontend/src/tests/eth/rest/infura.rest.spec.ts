@@ -20,37 +20,31 @@ describe('infura.rest', () => {
 		const chainId = ETHEREUM_NETWORK.chainId;
 
 		const mockApiResponse = {
-			status: '1',
-			message: 'OK',
-			result: [
-				{
-					low: {
-						suggestedMaxPriorityFeePerGas: '0.05',
-						suggestedMaxFeePerGas: '24.086058416',
-						minWaitTimeEstimate: 15000,
-						maxWaitTimeEstimate: 30000
-					},
-					medium: {
-						suggestedMaxPriorityFeePerGas: '0.1',
-						suggestedMaxFeePerGas: '32.548678862',
-						minWaitTimeEstimate: 15000,
-						maxWaitTimeEstimate: 45000
-					},
-					high: {
-						suggestedMaxPriorityFeePerGas: '0.3',
-						suggestedMaxFeePerGas: '41.161299308',
-						minWaitTimeEstimate: 15000,
-						maxWaitTimeEstimate: 60000
-					},
-					estimatedBaseFee: '24.036058416',
-					networkCongestion: 0.7143,
-					latestPriorityFeeRange: ['0.1', '20'],
-					historicalPriorityFeeRange: ['0.007150439', '113'],
-					historicalBaseFeeRange: ['19.531410688', '36.299069766'],
-					priorityFeeTrend: 'down',
-					baseFeeTrend: 'down'
-				}
-			]
+			low: {
+				suggestedMaxPriorityFeePerGas: '0.05',
+				suggestedMaxFeePerGas: '24.086058416',
+				minWaitTimeEstimate: 15000,
+				maxWaitTimeEstimate: 30000
+			},
+			medium: {
+				suggestedMaxPriorityFeePerGas: '0.1',
+				suggestedMaxFeePerGas: '32.548678862',
+				minWaitTimeEstimate: 15000,
+				maxWaitTimeEstimate: 45000
+			},
+			high: {
+				suggestedMaxPriorityFeePerGas: '0.3',
+				suggestedMaxFeePerGas: '41.161299308',
+				minWaitTimeEstimate: 15000,
+				maxWaitTimeEstimate: 60000
+			},
+			estimatedBaseFee: '24.036058416',
+			networkCongestion: 0.7143,
+			latestPriorityFeeRange: ['0.1', '20'],
+			historicalPriorityFeeRange: ['0.007150439', '113'],
+			historicalBaseFeeRange: ['19.531410688', '36.299069766'],
+			priorityFeeTrend: 'down',
+			baseFeeTrend: 'down'
 		};
 
 		const expectedFeeData: Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> = {
