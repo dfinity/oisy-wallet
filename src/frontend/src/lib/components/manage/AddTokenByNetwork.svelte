@@ -16,7 +16,8 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBitcoin,
-		isNetworkIdEthereum, isNetworkIdEvm,
+		isNetworkIdEthereum,
+		isNetworkIdEvm,
 		isNetworkIdICP,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
@@ -112,7 +113,7 @@
 
 		{#if isIcpNetwork}
 			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
-		{:else if isEthereumNetwork  || isEvmNetwork}
+		{:else if isEthereumNetwork || isEvmNetwork}
 			<EthAddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
 		{:else if isSolanaNetwork}
 			<SolAddTokenForm on:icBack bind:tokenAddress={splTokenAddress} />
