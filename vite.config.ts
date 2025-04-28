@@ -1,7 +1,7 @@
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { basename, dirname, resolve } from 'node:path';
-import { defineConfig, loadEnv, type Plugin, type UserConfig } from 'vite';
+import { defineConfig, loadEnv, type UserConfig } from 'vite';
 import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
 
 // npm run dev = local
@@ -12,31 +12,8 @@ import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './v
 // dfx deploy --network staging = staging
 const network = process.env.DFX_NETWORK ?? 'local';
 
-// TODO: remove this when `ethers` package updates the URL too - issue https://github.com/ethers-io/ethers.js/issues/4951
-function ethersRewritePlugin(): Plugin {
-	return {
-		name: 'vite-plugin-ethers-rewrite',
-		enforce: 'pre',
-		// eslint-disable-next-line local-rules/prefer-object-params
-		transform(code, id) {
-			if (!id.includes('node_modules/ethers')) {
-				return;
-			}
-
-			const replaced = code
-				.replaceAll('bnbsmartchain-mainnet.infura.io', 'bsc-mainnet.infura.io')
-				.replaceAll('bnbsmartchain-testnet.infura.io', 'bsc-testnet.infura.io');
-
-			return {
-				code: replaced,
-				map: null
-			};
-		}
-	};
-}
-
 const config: UserConfig = {
-	plugins: [sveltekit(), ethersRewritePlugin()],
+	plugins: [sveltekit()],
 	resolve: {
 		alias: {
 			$declarations: resolve('./src/declarations')
