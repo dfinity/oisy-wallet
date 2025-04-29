@@ -31,8 +31,6 @@
 	import { getRewardRequirementsFulfilled } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { AllTransactionUiWithCmp } from '$lib/types/transaction';
-	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 	import {
 		areTransactionsStoresLoading,
@@ -42,34 +40,37 @@
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
-	export let reward: RewardDescription;
+	interface Props {
+		reward: RewardDescription;
+	}
 
-	let totalUsdBalance: number;
-	$: totalUsdBalance = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
+	let { reward }: Props = $props();
 
-	let transactions: AllTransactionUiWithCmp[];
-	$: transactions = mapAllTransactionsUi({
-		tokens: $enabledNetworkTokens,
-		$btcTransactions: $btcTransactionsStore,
-		$ethTransactions: $ethTransactionsStore,
-		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress,
-		$icTransactionsStore,
-		$btcStatuses: $btcStatusesStore,
-		$solTransactions: $solTransactionsStore,
-		$ckBtcMinterInfoStore,
-		$icPendingTransactionsStore,
-		$ckBtcPendingUtxosStore
-	});
+	const totalUsdBalance = $derived(sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi));
 
-	let requirementsFulfilled: boolean[];
-	$: requirementsFulfilled = getRewardRequirementsFulfilled({ transactions, totalUsdBalance });
+	const transactions = $derived(
+		mapAllTransactionsUi({
+			tokens: $enabledNetworkTokens,
+			$btcTransactions: $btcTransactionsStore,
+			$ethTransactions: $ethTransactionsStore,
+			$ckEthMinterInfo: $ckEthMinterInfoStore,
+			$ethAddress,
+			$icTransactionsStore,
+			$btcStatuses: $btcStatusesStore,
+			$solTransactions: $solTransactionsStore,
+			$ckBtcMinterInfoStore,
+			$icPendingTransactionsStore,
+			$ckBtcPendingUtxosStore
+		})
+	);
 
-	let isEligible = false;
-	$: isEligible = requirementsFulfilled.reduce((p, c) => p && c);
+	const requirementsFulfilled = $derived(
+		getRewardRequirementsFulfilled({ transactions, totalUsdBalance })
+	);
 
-	let transactionsStores: TransactionsStoreCheckParams[];
-	$: transactionsStores = [
+	const isEligible = $derived(requirementsFulfilled.reduce((p, c) => p && c));
+
+	const transactionsStores = $derived([
 		// We explicitly do not include the Bitcoin transactions store locally, as it may cause lags in the UI.
 		// It could take longer time to be initialized and in case of no transactions (for example, a new user), it would be stuck to show the skeletons.
 		...(LOCAL
@@ -84,11 +85,11 @@
 			transactionsStoreData: $solTransactionsStore,
 			tokens: [...$enabledSolanaTokens, ...$enabledSplTokens]
 		}
-	];
-	let isRequirementsLoading = true;
-	$: isRequirementsLoading = areTransactionsStoresLoading(transactionsStores);
+	]);
 
-	let amountOfRewards = 0;
+	const isRequirementsLoading = $derived(areTransactionsStoresLoading(transactionsStores));
+
+	let amountOfRewards = $state(0);
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={REWARDS_MODAL}>
