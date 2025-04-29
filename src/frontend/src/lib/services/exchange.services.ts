@@ -1,10 +1,9 @@
-import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
-	CoingeckoPlatformId,
+	CoingeckoErc20PriceParams,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
@@ -67,10 +66,7 @@ export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | n
 export const exchangeRateERC20ToUsd = ({
 	coingeckoPlatformId: id,
 	contractAddresses
-}: {
-	coingeckoPlatformId: CoingeckoPlatformId;
-	contractAddresses: Erc20ContractAddress[];
-}): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
+}: CoingeckoErc20PriceParams): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
 	simpleTokenPrice({
 		id,
 		vs_currencies: 'usd',
@@ -95,12 +91,10 @@ export const exchangeRateICRCToUsd = async (
 	}
 
 	const kongSwapPrices = await fetchIcrcPricesFromKongSwap(missingIds);
-	const exchangeRatePrices: CoingeckoSimpleTokenPriceResponse = {
+	return {
 		...(coingeckoPrices ?? {}),
 		...(kongSwapPrices ?? {})
 	};
-
-	return exchangeRatePrices;
 };
 
 export const exchangeRateSPLToUsd = (
