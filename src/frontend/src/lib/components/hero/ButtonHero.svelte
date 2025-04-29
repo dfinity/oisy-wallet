@@ -3,15 +3,19 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 
-	export let disabled = false;
-	export let testId: string | undefined = undefined;
-	export let ariaLabel: string;
+	interface Props {
+		onclick: () => void;
+		disabled?: boolean;
+		ariaLabel: string;
+		testId?: string | undefined;
+	}
+	let { onclick, disabled = false, testId = undefined, ariaLabel }: Props = $props();
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <Button
-	on:click
+	on:click={onclick}
 	{ariaLabel}
 	{disabled}
 	loading={$loading}
