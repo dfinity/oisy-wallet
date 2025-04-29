@@ -116,8 +116,7 @@ describe('etherscan.providers', () => {
 					gasLimit: BigInt(gas),
 					gasPrice: BigInt(gasPrice),
 					value: BigInt(value),
-					// Chain ID is not delivered by the Etherscan API so, we naively set 0
-					chainId: 0n
+					chainId
 				})
 			);
 
@@ -139,8 +138,7 @@ describe('etherscan.providers', () => {
 					nonce: 0,
 					gasLimit: BigInt(gas),
 					value: BigInt(value),
-					// Chain ID is not delivered by the Etherscan API so, we naively set 0
-					chainId: 0n
+					chainId
 				})
 			);
 
@@ -251,7 +249,7 @@ describe('etherscan.providers', () => {
 						gasLimit: 21000n,
 						gasPrice: 20000000000n,
 						value: 1000000000000000000n,
-						chainId: 0n
+						chainId
 					}
 				];
 
