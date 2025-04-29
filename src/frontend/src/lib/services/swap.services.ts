@@ -9,7 +9,6 @@ import {
 	deposit,
 	depositFrom,
 	getPool,
-	getQuote,
 	getUserUnusedBalance,
 	swapTokens,
 	withdraw
@@ -27,12 +26,7 @@ import {
 import type { SwapProviderResult } from '$lib/stores/swap-amounts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Amount } from '$lib/types/send';
-import type {
-	FetchSwapOptionsParams,
-	ICPSwapRawResult,
-	SwapQuoteParams,
-	SwapWithIcpSwapParams
-} from '$lib/types/swap';
+import type { FetchSwapOptionsParams, SwapWithIcpSwapParams } from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { calculateSlippage, getSwapSubaccount } from '$lib/utils/swap.utils';
@@ -161,7 +155,7 @@ export const swapWithIcpSwap = async ({
 	const pool = await getPool({
 		identity,
 		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },
-		token1: { address: destinationToken.ledgerCanisterId, standard: destinationToken.standard },
+		token1: { address: destinationToken.ledgerCanisterId, standard: destinationToken.standard }
 	});
 
 	if (!pool) {
@@ -291,6 +285,9 @@ export const fetchSwapAmounts = async ({
 		swapProviders[ICP_SWAP_PROVIDER].getQuote(params)
 	]);
 
+	console.log('kongResult:', kongResult);
+	console.log('icpResult:', icpResult);
+
 	const results: SwapProviderResult[] = [];
 
 	if (kongResult.status === 'fulfilled') {
@@ -303,9 +300,7 @@ export const fetchSwapAmounts = async ({
 		results.push(swapProviders[ICP_SWAP_PROVIDER].mapQuoteResult({ swap: icpResult.value }));
 	}
 
-
 	console.log('swapCall in service', results);
-	
 
 	return results;
 };

@@ -127,6 +127,9 @@ export const getIcpSwapAmounts = async ({
 	destinationToken,
 	sourceAmount
 }: SwapQuoteParams): Promise<ICPSwapRawResult> => {
+
+	console.log('in Pool');
+	
 	const pool = await getPool({
 		identity,
 		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },
