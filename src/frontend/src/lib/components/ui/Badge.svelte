@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { BadgeVariant } from '$lib/types/style';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		children?: Snippet;
@@ -9,7 +9,12 @@
 		variant?: BadgeVariant;
 	}
 
-	let {children, styleClass = undefined, testId = undefined, variant = 'default'}: Props = $props();
+	let {
+		children,
+		styleClass = undefined,
+		testId = undefined,
+		variant = 'default'
+	}: Props = $props();
 
 	const variantClassNames = {
 		default: 'bg-secondary text-primary border border-secondary',

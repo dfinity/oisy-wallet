@@ -11,7 +11,13 @@
 		variant?: BadgeVariant;
 	}
 
-	let {date, prefix = undefined, suffix = undefined, testId = undefined, variant = 'default'}: Props = $props();
+	let {
+		date,
+		prefix = undefined,
+		suffix = undefined,
+		testId = undefined,
+		variant = 'default'
+	}: Props = $props();
 
 	const formattedDate: string = $derived(`${formatToShortDateString(date)} ${date.getDate()}`);
 </script>
