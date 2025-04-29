@@ -1,6 +1,12 @@
+import { BASE_SEPOLIA_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import { SEPOLIA_TOKEN, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import {
+	BASE_ETH_TOKEN,
+	BASE_SEPOLIA_ETH_TOKEN,
+	BASE_SEPOLIA_ETH_TOKEN_ID
+} from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
 import {
@@ -75,10 +81,21 @@ describe('LoaderEthTransactions', () => {
 		});
 	});
 
+	it('should not load transactions when token is initialized but does not match the network', async () => {
+		render(LoaderEthTransactions);
+
+		mockPage.mock({ token: ETHEREUM_TOKEN.name });
+		token.set(BASE_ETH_TOKEN);
+
+		await waitFor(() => {
+			expect(loadEthereumTransactions).not.toHaveBeenCalled();
+		});
+	});
+
 	it('should load transactions when token is initialized and is an Ethereum native token', async () => {
 		render(LoaderEthTransactions);
 
-		mockPage.mock({ token: SEPOLIA_TOKEN.name });
+		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
 
 		await waitFor(() => {
@@ -89,10 +106,30 @@ describe('LoaderEthTransactions', () => {
 		});
 	});
 
+	it('should load transactions when token is initialized and is an EVM native token', async () => {
+		render(LoaderEthTransactions);
+
+		mockPage.mock({
+			token: BASE_SEPOLIA_ETH_TOKEN.name,
+			network: BASE_SEPOLIA_ETH_TOKEN.network.id.description
+		});
+		token.set(BASE_SEPOLIA_ETH_TOKEN);
+
+		await waitFor(() => {
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				tokenId: BASE_SEPOLIA_ETH_TOKEN_ID,
+				networkId: BASE_SEPOLIA_NETWORK_ID
+			});
+		});
+	});
+
 	it('should load transactions when token is initialized and is an ERC20 token', async () => {
 		render(LoaderEthTransactions);
 
-		mockPage.mock({ token: SEPOLIA_PEPE_TOKEN.name });
+		mockPage.mock({
+			token: SEPOLIA_PEPE_TOKEN.name,
+			network: SEPOLIA_PEPE_TOKEN.network.id.description
+		});
 		token.set(SEPOLIA_PEPE_TOKEN);
 
 		await waitFor(() => {
@@ -106,10 +143,10 @@ describe('LoaderEthTransactions', () => {
 	it('should load transactions when token is initialized and is changed to an Ethereum native token', async () => {
 		render(LoaderEthTransactions);
 
-		mockPage.mock({ token: ICP_TOKEN.name });
+		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 		token.set(ICP_TOKEN);
 
-		mockPage.mock({ token: SEPOLIA_TOKEN.name });
+		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
 
 		await waitFor(() => {
@@ -124,7 +161,7 @@ describe('LoaderEthTransactions', () => {
 	it('should load transactions twice when token is changed but still an Ethereum token', async () => {
 		render(LoaderEthTransactions);
 
-		mockPage.mock({ token: SEPOLIA_TOKEN.name });
+		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
 
 		await waitFor(() => {
@@ -134,7 +171,10 @@ describe('LoaderEthTransactions', () => {
 			});
 		});
 
-		mockPage.mock({ token: SEPOLIA_PEPE_TOKEN.name });
+		mockPage.mock({
+			token: SEPOLIA_PEPE_TOKEN.name,
+			network: SEPOLIA_TOKEN.network.id.description
+		});
 		token.set(SEPOLIA_PEPE_TOKEN);
 
 		await waitFor(() => {
@@ -153,10 +193,10 @@ describe('LoaderEthTransactions', () => {
 		const n = 3;
 
 		Array.from({ length: n }).forEach(() => {
-			mockPage.mock({ token: ICP_TOKEN.name });
+			mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 			token.set(ICP_TOKEN);
 
-			mockPage.mock({ token: SEPOLIA_TOKEN.name });
+			mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 			token.set(SEPOLIA_TOKEN);
 		});
 
@@ -169,15 +209,21 @@ describe('LoaderEthTransactions', () => {
 	it('should re-call the load function if it fails the first time but the token is the same', async () => {
 		mockLoadTransactions.mockResolvedValue({ success: false });
 
-		mockPage.mock({ token: SEPOLIA_PEPE_TOKEN.name });
+		mockPage.mock({
+			token: SEPOLIA_PEPE_TOKEN.name,
+			network: SEPOLIA_PEPE_TOKEN.network.id.description
+		});
 		token.set(SEPOLIA_PEPE_TOKEN);
 
 		render(LoaderEthTransactions);
 
-		mockPage.mock({ token: ICP_TOKEN.name });
+		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 		token.set(ICP_TOKEN);
 
-		mockPage.mock({ token: SEPOLIA_PEPE_TOKEN.name });
+		mockPage.mock({
+			token: SEPOLIA_PEPE_TOKEN.name,
+			network: SEPOLIA_PEPE_TOKEN.network.id.description
+		});
 		token.set(SEPOLIA_PEPE_TOKEN);
 
 		await waitFor(() => {
@@ -188,7 +234,7 @@ describe('LoaderEthTransactions', () => {
 	it('should call the load function everytime it re-renders even if the token is was already loaded in a previous rendering', async () => {
 		render(LoaderEthTransactions);
 
-		mockPage.mock({ token: SEPOLIA_TOKEN.name });
+		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
 
 		await waitFor(() => {
@@ -197,10 +243,10 @@ describe('LoaderEthTransactions', () => {
 
 		render(LoaderEthTransactions);
 
-		mockPage.mock({ token: ICP_TOKEN.name });
+		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 		token.set(ICP_TOKEN);
 
-		mockPage.mock({ token: SEPOLIA_TOKEN.name });
+		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
 
 		await waitFor(() => {
@@ -213,7 +259,7 @@ describe('LoaderEthTransactions', () => {
 
 		render(LoaderEthTransactions);
 
-		mockPage.mock({ token: SEPOLIA_TOKEN.name });
+		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
 
 		await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
