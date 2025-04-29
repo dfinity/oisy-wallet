@@ -22,7 +22,7 @@
 	} from '$lib/derived/balances.derived';
 	import { exchangeNotInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import {
-		networkBitcoin,
+		networkBitcoin, networkBsc,
 		networkEthereum,
 		networkICP,
 		networkSolana,
@@ -68,13 +68,16 @@
 
 	let isGLDTToken = false;
 	$: isGLDTToken = nonNullish($pageToken) ? isGLDTTokenUtil($pageToken) : false;
+
+	let isGradientToRight = false;
+	$: isGradientToRight =($networkSolana && !isTrumpToken) || isGLDTToken || $networkBsc
 </script>
 
 <div
 	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-pos-0 p-6 text-center text-primary-inverted transition-all duration-500 ease-in-out"
 	class:from-default-0={$pseudoNetworkChainFusion}
 	class:to-default-100={$pseudoNetworkChainFusion}
-	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || $networkSolana}
+	class:bg-pos-100={!$pseudoNetworkChainFusion}
 	class:bg-cover={isTrumpToken}
 	class:from-trump-0={isTrumpToken}
 	class:to-trump-100={isTrumpToken}
@@ -87,11 +90,13 @@
 	class:to-btc-100={$networkBitcoin}
 	class:from-eth-0={$networkEthereum}
 	class:to-eth-100={$networkEthereum}
+	class:from-bsc-0={$networkBsc}
+	class:to-bsc-100={$networkBsc}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
-	class:bg-linear-to-b={!(($networkSolana && !isTrumpToken) || isGLDTToken)}
-	class:bg-gradient-to-r={($networkSolana && !isTrumpToken) || isGLDTToken}
+	class:bg-linear-to-b={!isGradientToRight}
+	class:bg-gradient-to-r={isGradientToRight}
 >
 	{#if isTransactionsPage}
 		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">

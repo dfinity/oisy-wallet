@@ -6,6 +6,7 @@ import type { OptionEthAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
 import {
 	isNetworkIdBitcoin,
+	isNetworkIdBsc,
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdICP,
@@ -41,6 +42,10 @@ export const networkEthereum: Readable<boolean> = derived([networkId], ([$networ
 
 export const networkEvm: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdEvm($networkId)
+);
+
+export const networkBsc: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdBsc($networkId)
 );
 
 export const networkSolana: Readable<boolean> = derived([networkId], ([$networkId]) =>

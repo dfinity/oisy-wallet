@@ -143,6 +143,8 @@ export const themeVariables = {
 		'btc-100': '#DE7900',
 		'eth-0': '#627EEA',
 		'eth-100': '#E18DFF',
+		'bsc-0': '#FB8202',
+		'bsc-100': '#FEBE38',
 		'sol-0': '#904EFA',
 		'sol-100': '#1DE59D',
 		'trump-0': '#232BCC',
