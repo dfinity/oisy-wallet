@@ -22,8 +22,8 @@ export const batchLoadTransactions = ({
 			}
 
 			const promise = (async (): PromiseResult => {
-				console.log({ tokenId, networkId });
 				const result = await loadEthereumTransactions({ tokenId, networkId });
+				console.log({ tokenId, networkId, result });
 				return { ...result, tokenId };
 			})();
 
