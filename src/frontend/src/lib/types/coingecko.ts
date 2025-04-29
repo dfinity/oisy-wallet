@@ -11,7 +11,12 @@ export type CoingeckoCoinsId = z.infer<typeof CoingeckoCoinsIdSchema>;
 
 // We are interested only in the ERC20 <> USD on Ethereum and in the ICRC <> USD on Internet Computer, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/asset_platforms
-export type CoingeckoPlatformId = 'ethereum' | 'internet-computer' | 'solana';
+export type CoingeckoPlatformId =
+	| 'ethereum'
+	| 'internet-computer'
+	| 'solana'
+	| 'base'
+	| 'binance-smart-chain';
 
 // We only support conversion in USD for now, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/simple/supported_vs_currencies
