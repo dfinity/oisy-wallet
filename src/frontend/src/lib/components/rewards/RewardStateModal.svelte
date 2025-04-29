@@ -23,7 +23,7 @@
 		jackpot?: boolean;
 	}
 
-	let {jackpot = false}: Props = $props();
+	let { jackpot = false }: Props = $props();
 
 	// TODO At the moment the selected campaign is hardcoded. In the future this should be configurable from the outside.
 	const reward: RewardDescription | undefined = rewardCampaigns.find(
