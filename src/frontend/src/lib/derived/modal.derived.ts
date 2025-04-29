@@ -1,10 +1,10 @@
+import type { RewardDescription } from '$env/types/env-reward';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { VipRewardStateData } from '$lib/types/reward';
 import { derived, type Readable } from 'svelte/store';
-import type {RewardDescription} from "$env/types/env-reward";
 
 export const modalEthReceive: Readable<boolean> = derived(
 	modalStore,
@@ -179,7 +179,8 @@ export const modalRewardDetails: Readable<boolean> = derived(
 );
 export const modalRewardDetailsData: Readable<RewardDescription | undefined> = derived(
 	modalStore,
-	($modalStore) => ($modalStore?.type === 'reward-details' ? ($modalStore?.data as RewardDescription) : undefined)
+	($modalStore) =>
+		$modalStore?.type === 'reward-details' ? ($modalStore?.data as RewardDescription) : undefined
 );
 export const modalRewardState: Readable<boolean> = derived(
 	modalStore,

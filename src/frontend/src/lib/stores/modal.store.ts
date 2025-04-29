@@ -1,10 +1,10 @@
+import type { RewardDescription } from '$env/types/env-reward';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { VipRewardStateData } from '$lib/types/reward';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
-import type {RewardDescription} from "$env/types/env-reward";
 
 export interface Modal<T> {
 	type:
@@ -161,7 +161,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openVipRewardState: <(params: SetWithDataParams<VipRewardStateData>) => void>(
 			setTypeWithData('vip-reward-state')
 		),
-		openRewardDetails: <(params: SetWithDataParams<RewardDescription>) => void>setTypeWithData('reward-details'),
+		openRewardDetails: <(params: SetWithDataParams<RewardDescription>) => void>(
+			setTypeWithData('reward-details')
+		),
 		openRewardState: setTypeWithData('reward-state'),
 		// todo: explicitly define type here as well
 		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(

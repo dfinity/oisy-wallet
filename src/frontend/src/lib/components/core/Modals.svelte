@@ -6,6 +6,7 @@
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
+	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
@@ -17,9 +18,9 @@
 		modalSettingsState,
 		modalReferralCode,
 		modalAddressBook,
-		modalVipQrCodeData, modalRewardDetailsData
+		modalVipQrCodeData,
+		modalRewardDetailsData
 	} from '$lib/derived/modal.derived';
-	import RewardModal from "$lib/components/rewards/RewardModal.svelte";
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
