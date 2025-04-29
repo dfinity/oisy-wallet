@@ -10,7 +10,7 @@
 		testId?: string | undefined;
 	}
 
-	let {onclick, disabled = false, testId = undefined, ariaLabel}: Props = $props();
+	let { onclick, disabled = false, testId = undefined, ariaLabel }: Props = $props();
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
