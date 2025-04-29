@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { validateBtcAddressMainnet } from '$btc/services/btc-address.services';
-	import { POW_ENABLED } from '$env/pow.env';
+	import { POW_FEATURE_ENABLED } from '$env/pow.env';
 	import { validateEthAddress } from '$eth/services/eth-address.services';
 	import {
 		networkBitcoinMainnetEnabled,
@@ -19,7 +19,7 @@
 	let signerAllowanceLoaded = false;
 
 	const loadSignerAllowanceAndValidateAddresses = async () => {
-		if (!POW_ENABLED) {
+		if (!POW_FEATURE_ENABLED) {
 			const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
 			if (!initSignerAllowanceSuccess) {
