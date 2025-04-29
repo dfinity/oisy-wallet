@@ -25,7 +25,7 @@
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
 
 	interface Props {
-		amountOfRewards: number;
+		amountOfRewards?: number;
 	}
 
 	let { amountOfRewards = $bindable(0) }: Props = $props();
