@@ -96,13 +96,15 @@ Translations are handled in JSON files but, as we are consuming these through a 
 
 ## Faucets
 
-A list of useful faucets and ERC20 tokens on Sepolia:
+A list of useful faucets:
 
-- ETH: [Ethereum Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia) from Alchemy
-- ckERC20:
+- Ethereum and EVM networks:
+  - ETH: [Alchemy mixed faucets](https://www.alchemy.com/faucets/)
+  - BNB: [BNB Testnet Faucet](https://www.bnbchain.org/en/testnet-faucet)
   - USDC and EURC: [Circle faucet](https://faucet.circle.com/)
-  - LINK: [Chainlink Sepolia faucet](https://faucets.chain.link/sepolia)
-- ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
+  - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
+  - Others:
+    - ChainLink: [all faucets](https://faucets.chain.link/)
 - Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
 - SOL: [Solana Foundation Faucet](https://faucet.solana.com/) or [Sol Faucet](https://solfaucet.com/)
 
