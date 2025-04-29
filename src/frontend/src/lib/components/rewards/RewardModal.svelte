@@ -31,8 +31,6 @@
 	import { getRewardRequirementsFulfilled } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { AllTransactionUiWithCmp } from '$lib/types/transaction';
-	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 	import {
 		areTransactionsStoresLoading,
