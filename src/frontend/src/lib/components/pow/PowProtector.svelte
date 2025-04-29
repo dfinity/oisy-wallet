@@ -1,16 +1,14 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
-	import { POW_FEATURE_ENABLED } from '$env/pow.env';
+	import { onDestroy, onMount ,type  Snippet } from 'svelte';
 	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 	import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		children?: Snippet;
 	}
 	let { children }: Props = $props();
 
-	if (POW_FEATURE_ENABLED) {
+	if (false) {
 		let powWorker: PowProtectorWorkerInitResult;
 
 		onMount(async () => {
