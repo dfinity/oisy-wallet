@@ -183,6 +183,9 @@ describe('AddressGuard', () => {
 								testnets: { show_testnets: true },
 								networks: [
 									[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ BaseMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
 								]
 							}
@@ -202,6 +205,37 @@ describe('AddressGuard', () => {
 					expect(validateBitcoinSpy).not.toHaveBeenCalled();
 					expect(validateEthereumSpy).not.toHaveBeenCalled();
 					expect(validateSolanaSpy).toHaveBeenCalledOnce();
+				});
+			});
+
+			it('should validate Ethereum address if even only one EVM network is enabled', async () => {
+				userProfileStore.set({
+					certified: false,
+					profile: {
+						...mockUserProfile,
+						settings: toNullable({
+							...mockUserSettings,
+							networks: {
+								...mockNetworksSettings,
+								testnets: { show_testnets: true },
+								networks: [
+									[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ BaseMainnet: null }, { enabled: true, is_testnet: false }],
+									[{ BscMainnet: null }, { enabled: false, is_testnet: false }]
+								]
+							}
+						})
+					}
+				});
+
+				render(AddressGuard);
+
+				const validateEthereumSpy = vi.spyOn(ethAddressServices, 'validateEthAddress');
+
+				emit({ message: 'oisyValidateAddresses' });
+
+				await waitFor(() => {
+					expect(validateEthereumSpy).toHaveBeenCalled();
 				});
 			});
 

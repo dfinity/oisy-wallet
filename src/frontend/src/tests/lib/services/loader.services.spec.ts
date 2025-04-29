@@ -193,6 +193,8 @@ describe('loader.services', () => {
 								testnets: { show_testnets: true },
 								networks: [
 									[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ BaseMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
 								]
 							}
@@ -207,6 +209,36 @@ describe('loader.services', () => {
 
 				expect(loadAddresses).toHaveBeenCalledOnce();
 				expect(loadAddresses).toHaveBeenNthCalledWith(1, [SOLANA_MAINNET_NETWORK_ID]);
+			});
+
+			it('should load Ethereum address from the backend if even only one EVM network is enabled', async () => {
+				userProfileStore.set({
+					certified: false,
+					profile: {
+						...mockUserProfile,
+						settings: toNullable({
+							...mockUserSettings,
+							networks: {
+								...mockNetworksSettings,
+								testnets: { show_testnets: true },
+								networks: [
+									[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ BaseMainnet: null }, { enabled: true, is_testnet: false }],
+									[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ SolanaMainnet: null }, { enabled: false, is_testnet: false }]
+								]
+							}
+						})
+					}
+				});
+
+				await initLoader(mockParams);
+
+				expect(allowSigning).toHaveBeenCalledOnce();
+				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
+
+				expect(loadAddresses).toHaveBeenCalledOnce();
+				expect(loadAddresses).toHaveBeenNthCalledWith(1, [ETHEREUM_NETWORK_ID]);
 			});
 
 			it('should not load addresses from the backend if all networks are disabled', async () => {
