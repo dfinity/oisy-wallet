@@ -116,7 +116,7 @@ const syncExchange = async ({
 		] = await Promise.all([
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
-			...erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params)),
+			Promise.all(erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params))),
 			exchangeRateICPToUsd(),
 			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
 			exchangeRateSOLToUsd(),
