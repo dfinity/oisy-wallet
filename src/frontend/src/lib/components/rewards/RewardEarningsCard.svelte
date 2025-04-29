@@ -14,13 +14,15 @@
 		loading?: boolean;
 	}
 
-	let {amount, usdAmount, token, loading = true}: Props = $props();
+	let { amount, usdAmount, token, loading = true }: Props = $props();
 
-	const displayAmount = $derived(formatToken({
-		value: amount,
-		unitName: token?.decimals,
-		displayDecimals: EIGHT_DECIMALS
-	}));
+	const displayAmount = $derived(
+		formatToken({
+			value: amount,
+			unitName: token?.decimals,
+			displayDecimals: EIGHT_DECIMALS
+		})
+	);
 
 	const displayUsdAmount = $derived(formatUSD({ value: usdAmount }));
 </script>
