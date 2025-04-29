@@ -25,14 +25,18 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let codeType: QrCodeType = QrCodeType.VIP;
+	interface Props {
+		codeType?: QrCodeType;
+	}
 
-	let counter = CODE_REGENERATE_INTERVAL_IN_SECONDS;
-	let countdown: NodeJS.Timeout | undefined;
+	let { codeType = QrCodeType.VIP }: Props = $props();
+
+	let counter = $state(CODE_REGENERATE_INTERVAL_IN_SECONDS);
+	let countdown: NodeJS.Timeout | undefined = $state();
 	const maxRetriesToGetRewardCode = 3;
-	let retriesToGetRewardCode = 0;
+	let retriesToGetRewardCode = $state(0);
 
-	let code: string;
+	let code: string | undefined = $state();
 	const generateCode = async () => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
@@ -78,8 +82,7 @@
 	onMount(regenerateCode);
 	onDestroy(() => clearInterval(countdown));
 
-	let qrCodeUrl;
-	$: qrCodeUrl = `${window.location.origin}/?code=${code}`;
+	const qrCodeUrl = $derived(`${window.location.origin}/?code=${code}`);
 </script>
 
 <svelte:window on:visibilitychange={onVisibilityChange} />
