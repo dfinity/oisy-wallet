@@ -19,7 +19,7 @@
 	ariaLabel={$i18n.send.text.send}
 >
 	{#snippet icon()}
-		<IconlyBuy size="28" slot="icon" />
+		<IconlyBuy size="28" />
 	{/snippet}
 	{#snippet label()}
 		{$i18n.buy.text.buy}

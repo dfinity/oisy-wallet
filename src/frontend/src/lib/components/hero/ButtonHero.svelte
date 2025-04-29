@@ -4,8 +4,8 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 
 	interface Props {
-		icon?: Snippet;
-		label?: Snippet;
+		icon: Snippet;
+		label: Snippet;
 		onclick: () => void;
 		disabled?: boolean;
 		ariaLabel: string;
