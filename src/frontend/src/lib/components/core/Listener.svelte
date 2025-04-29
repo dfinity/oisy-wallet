@@ -6,7 +6,8 @@
 	import type { OptionToken } from '$lib/types/token';
 	import {
 		isNetworkIdBitcoin,
-		isNetworkIdEthereum, isNetworkIdEvm,
+		isNetworkIdEthereum,
+		isNetworkIdEvm,
 		isNetworkIdICP
 	} from '$lib/utils/network.utils';
 
@@ -21,7 +22,7 @@
 	<BitcoinListener>
 		<slot />
 	</BitcoinListener>
-{:else if isNetworkIdEthereum(token.network.id) ||  isNetworkIdEvm(token.network.id)}
+{:else if isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)}
 	<EthListener {token}>
 		<slot />
 	</EthListener>
