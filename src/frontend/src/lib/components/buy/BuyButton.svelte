@@ -5,10 +5,16 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+
+	interface Props {
+		onclick: () => void;
+	}
+
+	let { onclick }: Props = $props();
 </script>
 
 <ButtonHero
-	on:click
+	{onclick}
 	disabled={$isBusy || isNullishOrEmpty(ONRAMPER_API_KEY)}
 	ariaLabel={$i18n.send.text.send}
 >

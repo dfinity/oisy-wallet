@@ -8,7 +8,7 @@
 	const modalId = Symbol();
 </script>
 
-<SwapButton on:click={() => open(modalId)} />
+<SwapButton onclick={() => open(modalId)} />
 
 {#if isOpen && $modalStore?.id === modalId}
 	<slot />

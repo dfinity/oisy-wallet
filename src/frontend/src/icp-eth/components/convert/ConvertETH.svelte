@@ -80,7 +80,7 @@
 
 <CkEthLoader {nativeTokenId}>
 	<ButtonHero
-		on:click={async () => await openConvert()}
+		onclick={async () => await openConvert()}
 		disabled={isNetworkDisabled || $isBusy || $outflowActionsDisabled}
 		{ariaLabel}
 	>

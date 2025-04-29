@@ -38,7 +38,7 @@
 
 <ButtonHero
 	disabled={$networkBitcoinMainnetDisabled || $isBusy || $outflowActionsDisabled}
-	on:click={async () => await openConvert()}
+	onclick={async () => await openConvert()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >
 	<IconCkConvert size="28" slot="icon" />
