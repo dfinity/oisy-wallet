@@ -1,7 +1,7 @@
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import usdc from '$eth/assets/usdc.svg';
-import type { RequiredEvmErc20Token } from '$evm/types/erc20';
+import type { RequiredEvmBep20Token } from '$evm/types/bep20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -11,7 +11,7 @@ export const USDC_SYMBOL = 'USDC';
 
 export const USDC_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
 
-export const USDC_TOKEN: RequiredEvmErc20Token = {
+export const USDC_TOKEN: RequiredEvmBep20Token = {
 	id: USDC_TOKEN_ID,
 	network: BSC_MAINNET_NETWORK,
 	standard: 'erc20',
