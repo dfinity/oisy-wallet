@@ -72,10 +72,10 @@
 	$: isGLDTToken = nonNullish($pageToken) ? isGLDTTokenUtil($pageToken) : false;
 
 	let isGradientToRight = false;
-	$: isGradientToRight = ($networkSolana && !isTrumpToken);
+	$: isGradientToRight = $networkSolana && !isTrumpToken;
 
 	let isGradientToBottomRight = false;
-	$: isGradientToBottomRight = (isGLDTToken || $networkBsc);
+	$: isGradientToBottomRight = isGLDTToken || $networkBsc;
 </script>
 
 <div
