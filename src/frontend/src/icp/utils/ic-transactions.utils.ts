@@ -1,5 +1,8 @@
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
+import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
+import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
+import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import type {
@@ -8,8 +11,15 @@ import type {
 	IcpTransaction,
 	IcrcTransaction
 } from '$icp/types/ic-transaction';
-import { extendCkBTCTransaction, mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
-import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
+import {
+	extendCkBTCTransaction,
+	getCkBtcPendingUtxoTransactions,
+	mapCkBTCTransaction
+} from '$icp/utils/ckbtc-transactions.utils';
+import {
+	getCkEthPendingTransactions,
+	mapCkEthereumTransaction
+} from '$icp/utils/cketh-transactions.utils';
 import {
 	isTokenCkBtcLedger,
 	isTokenCkErc20Ledger,
@@ -17,6 +27,8 @@ import {
 } from '$icp/utils/ic-send.utils';
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import type { CertifiedTransaction, TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 
@@ -77,3 +89,43 @@ export const extendIcTransaction = ({
 
 	return transaction;
 };
+
+export const getIcExtendedTransactions = ({
+	token,
+	icTransactionsStore,
+	btcStatusesStore
+}: {
+	token: Token;
+	icTransactionsStore: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+	btcStatusesStore: CertifiedStoreData<BtcStatusesData>;
+}) =>
+	(icTransactionsStore?.[token.id] ?? []).map((transaction) =>
+		extendIcTransaction({
+			transaction,
+			token,
+			btcStatuses: btcStatusesStore?.[token.id] ?? undefined
+		})
+	);
+
+export const getAllIcTransactions = ({
+	token,
+	icTransactionsStore,
+	btcStatusesStore,
+	ckBtcMinterInfoStore,
+	ckBtcPendingUtxosStore,
+	icPendingTransactionsStore
+}: {
+	token: Token;
+	ckBtcPendingUtxoTransactions: CertifiedTransaction<IcTransactionUi>[];
+	ckEthPendingTransactions: CertifiedTransaction<IcTransactionUi>[];
+	icExtendedTransactions: CertifiedTransaction<IcTransactionUi>[];
+	icTransactionsStore: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+	btcStatusesStore: CertifiedStoreData<BtcStatusesData>;
+	ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
+	ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
+	icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
+}) => [
+	...getCkBtcPendingUtxoTransactions({ token, ckBtcPendingUtxosStore, ckBtcMinterInfoStore }),
+	...getCkEthPendingTransactions({ token, icPendingTransactionsStore }),
+	...getIcExtendedTransactions({ token, icTransactionsStore, btcStatusesStore })
+];

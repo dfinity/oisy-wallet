@@ -1,3 +1,4 @@
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
@@ -8,6 +9,7 @@ import {
 } from '$eth/stores/fee.store';
 import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
 import { HOW_TO_CONVERT_ETHEREUM_INFO } from '$lib/constants/test-ids.constants';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -30,6 +32,13 @@ describe('HowToConvertEthereumModal', () => {
 				})
 			]
 		]);
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		mockPage.reset();
+		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
+	});
 
 	it('should render convert info on initial render', () => {
 		const { getByTestId } = render(HowToConvertEthereumModal, {

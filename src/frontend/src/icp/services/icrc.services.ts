@@ -237,7 +237,7 @@ export const loadDisabledIcrcTokensBalances = ({
 			});
 
 			balancesStore.set({
-				tokenId: id,
+				id,
 				data: {
 					data: icrcTokenBalance,
 					certified: true
