@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {getContext, type Snippet} from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 
@@ -11,7 +11,7 @@
 		ariaLabel: string;
 		testId?: string | undefined;
 	}
-	let {icon, label, onclick, disabled = false, testId = undefined, ariaLabel }: Props = $props();
+	let { icon, label, onclick, disabled = false, testId = undefined, ariaLabel }: Props = $props();
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
