@@ -255,7 +255,9 @@ div.popover {
 }
 
 div.toggle {
-	zoom: 1.45;
+	scale: 1.45;
+	transform-origin: 50%;
+	margin-inline: var(--padding);
 
 	--card-background-contrast: var(--color-background-disabled-alt);
 	--card-background: var(--color-base-white);
@@ -289,11 +291,13 @@ div.toggle {
 	}
 
 	@media (width < theme(--breakpoint-lg)) {
-		zoom: 1.6;
+		scale: 1.6;
+		margin-inline: var(--padding);
 	}
 
 	@media (width < theme(--breakpoint-sm)) {
-		zoom: 1.8;
+		scale: 1.8;
+		margin-inline: var(--padding-2x);
 	}
 }
 
