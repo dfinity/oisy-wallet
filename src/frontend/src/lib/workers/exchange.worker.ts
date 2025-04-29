@@ -92,7 +92,10 @@ const syncExchange = async ({
 		] = await Promise.all([
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
-			exchangeRateERC20ToUsd(erc20ContractAddresses),
+			exchangeRateERC20ToUsd({
+				coingeckoPlatformId: 'ethereum',
+				contractAddresses: erc20ContractAddresses
+			}),
 			exchangeRateICPToUsd(),
 			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
 			exchangeRateSOLToUsd(),
