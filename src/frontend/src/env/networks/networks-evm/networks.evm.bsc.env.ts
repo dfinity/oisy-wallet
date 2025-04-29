@@ -47,3 +47,5 @@ export const SUPPORTED_BSC_NETWORKS: EthereumNetwork[] = defineSupportedNetworks
 	mainnetNetworks: [BSC_MAINNET_NETWORK],
 	testnetNetworks: [BSC_TESTNET_NETWORK]
 });
+
+export const SUPPORTED_BSC_NETWORKS_IDS: NetworkId[] = SUPPORTED_BSC_NETWORKS.map(({ id }) => id);
