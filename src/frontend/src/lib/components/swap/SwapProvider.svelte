@@ -9,7 +9,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
-	import { activeSwap } from '$lib/derived/swap.derived';
+	import { activeSwap, bestSwapProvider } from '$lib/derived/swap.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -35,6 +35,8 @@
 	$: dApp = nonNullish($activeSwap)
 		? dAppDescriptions.find(({ id }) => id === $activeSwap.provider.toLowerCase())
 		: undefined;
+
+	$: bestRate = $bestSwapProvider === $activeSwap?.provider;
 
 	// TODO: this state - websiteURL - isn't one and should become a local variable
 	let websiteURL: Option<URL>;
@@ -77,7 +79,7 @@
 
 			<svelte:fragment slot="main-value">
 				<div class="flex items-start gap-3">
-					{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1}
+					{#if bestRate}
 						<Badge styleClass="mt-1" variant="success">Best rate</Badge>
 					{/if}
 

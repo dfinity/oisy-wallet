@@ -74,3 +74,15 @@ export const activeSwap: Readable<SwapProviderResult | null | undefined> = deriv
 		return $store.swaps[0];
 	}
 );
+
+export const bestSwapProvider: Readable<string | null> = derived(swapAmountsStore, ($store) => {
+	if (!$store?.swaps?.length) {
+		return null;
+	}
+
+	const sorted = [...$store.swaps].sort(
+		(a, b) => Number(b.receiveAmount) - Number(a.receiveAmount)
+	);
+
+	return sorted[0]?.provider ?? null;
+});

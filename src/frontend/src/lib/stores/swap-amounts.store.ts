@@ -18,13 +18,13 @@ export interface SwapProviderResult {
 export interface SwapAmountsStoreData {
 	swaps: SwapProviderResult[];
 	amountForSwap?: OptionAmount;
-	selectedProvider?: string;
+	selectedProvider?: SwapProvider;
 }
 
 export interface SwapAmountsStore extends Readable<Option<SwapAmountsStoreData>> {
 	setSwaps: (params: { swaps: SwapProviderResult[]; amount: OptionAmount }) => void;
 	reset: () => void;
-	setSelectedProvider: (provider: string) => void;
+	setSelectedProvider: (provider: SwapProvider) => void;
 }
 
 export const initSwapAmountsStore = (): SwapAmountsStore => {
@@ -44,7 +44,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 			});
 		},
 
-		setSelectedProvider(provider: string) {
+		setSelectedProvider(provider: SwapProvider) {
 			update((data) => {
 				if (!data) {
 					return data;
