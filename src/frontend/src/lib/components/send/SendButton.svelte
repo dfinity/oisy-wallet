@@ -11,7 +11,7 @@
 		onclick: () => void;
 	}
 
-	let {onclick}: Props = $props();
+	let { onclick }: Props = $props();
 
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>

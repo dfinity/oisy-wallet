@@ -10,7 +10,7 @@
 		onclick: () => void;
 	}
 
-	let {onclick}: Props = $props();
+	let { onclick }: Props = $props();
 </script>
 
 <ButtonHero
