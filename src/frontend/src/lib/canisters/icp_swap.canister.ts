@@ -4,7 +4,7 @@ import type {
 	SwapArgs as ICPSwapSwapRequest,
 	WithdrawArgs as ICPSwapWithdrawRequest,
 	_SERVICE as SwapFactoryService
-} from '$declarations/icp_swap/icp_swap.did.ts';
+} from '$declarations/icp_swap/icp_swap.did';
 
 import { idlFactory } from '$declarations/icp_swap/icp_swap.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
