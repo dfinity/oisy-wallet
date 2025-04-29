@@ -32,6 +32,65 @@ describe('etherscan.providers', () => {
 		const address = mockEthAddress;
 		const ETHERSCAN_API_KEY = 'test-api-key';
 
+		const normalTransactions: EtherscanProviderTransaction[] = createMockEtherscanTransactions(3);
+
+		const internalTransactions: EtherscanProviderInternalTransaction[] =
+			createMockEtherscanInternalTransactions(5);
+
+		const expectedNormalTransactions: Transaction[] = normalTransactions.map(
+			({
+				blockNumber,
+				timeStamp,
+				hash,
+				nonce,
+				from,
+				to,
+				value,
+				gas,
+				gasPrice
+			}: EtherscanProviderTransaction): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				nonce: parseInt(nonce),
+				gasLimit: BigInt(gas),
+				gasPrice: BigInt(gasPrice),
+				value: BigInt(value),
+				// Chain ID is not delivered by the Etherscan API so, we naively set 0
+				chainId: 0n
+			})
+		);
+
+		const expectedInternalTransactions: Transaction[] = internalTransactions.map(
+			({
+				blockNumber,
+				timeStamp,
+				hash,
+				from,
+				to,
+				value,
+				gas
+			}: EtherscanProviderInternalTransaction): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				nonce: 0,
+				gasLimit: BigInt(gas),
+				value: BigInt(value),
+				// Chain ID is not delivered by the Etherscan API so, we naively set 0
+				chainId: 0n
+			})
+		);
+
+		const expectedTransactions: Transaction[] = [
+			...expectedNormalTransactions,
+			...expectedInternalTransactions
+		];
+
 		const mockFetch = vi.fn();
 		const mockProvider = EtherscanProviderLib as MockedClass<typeof EtherscanProviderLib>;
 		mockProvider.prototype.fetch = mockFetch;
