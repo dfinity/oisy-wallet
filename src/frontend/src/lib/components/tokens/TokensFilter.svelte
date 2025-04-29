@@ -11,7 +11,7 @@
 
 	let { overflowableContent }: { overflowableContent?: Snippet } = $props();
 
-	let inputValue = $state($tokenListStore.filter);
+	let inputValue = $derived($tokenListStore.filter);
 
 	// reset search if not coming from home (switching networks) or transactions page
 	afterNavigate(({ from }) => {
