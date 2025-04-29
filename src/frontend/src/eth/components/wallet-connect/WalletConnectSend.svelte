@@ -6,6 +6,7 @@
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
+	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
@@ -27,7 +28,9 @@
 
 	let sourceNetwork: EthereumNetwork | undefined;
 	$: sourceNetwork = nonNullish(chainId)
-		? $enabledEthereumNetworks.find(({ chainId: cId }) => cId === BigInt(chainId))
+		? [...$enabledEthereumNetworks, ...$enabledEvmNetworks].find(
+				({ chainId: cId }) => cId === BigInt(chainId)
+			)
 		: undefined;
 </script>
 
