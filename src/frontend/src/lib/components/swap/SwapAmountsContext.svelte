@@ -44,6 +44,8 @@
 				tokens: $tokens
 			});
 
+			console.log(swapAmounts, 'swapAmounts');
+
 			if (swapAmounts.length === 0) {
 				store.reset();
 				return;

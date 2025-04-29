@@ -303,5 +303,9 @@ export const fetchSwapAmounts = async ({
 		results.push(swapProviders[ICP_SWAP_PROVIDER].mapQuoteResult({ swap: icpResult.value }));
 	}
 
+
+	console.log('swapCall in service', results);
+	
+
 	return results;
 };

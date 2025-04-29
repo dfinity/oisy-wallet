@@ -58,6 +58,10 @@
 	}
 
 	const dispatch = createEventDispatcher();
+
+	$: console.log('selectedSwap', selectedSwap);
+	$: console.log('swapAmountsStore', $swapAmountsStore);
+	
 </script>
 
 {#if nonNullish(dApp)}

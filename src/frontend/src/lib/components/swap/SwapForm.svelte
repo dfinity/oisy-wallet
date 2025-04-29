@@ -120,6 +120,9 @@
 					isSwapFlow: true
 				})
 			: undefined;
+
+	$: console.log($activeSwap, 'activeSwap');
+	$: console.log($swapAmountsStore, 'swapAmountsStore');
 </script>
 
 <ContentWithToolbar>
