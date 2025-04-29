@@ -5,23 +5,24 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EIGHT_DECIMALS, ZERO_BI } from '$lib/constants/app.constants';
-	import type { AmountString } from '$lib/types/amount';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 
-	export let amount: bigint;
-	export let usdAmount: number;
-	export let token: IcToken | undefined;
-	export let loading = true;
+	interface Props {
+		amount: bigint;
+		usdAmount: number;
+		token: IcToken | undefined;
+		loading?: boolean;
+	}
 
-	let displayAmount: AmountString;
-	$: displayAmount = formatToken({
+	let {amount, usdAmount, token, loading = true}: Props = $props();
+
+	const displayAmount = $derived(formatToken({
 		value: amount,
 		unitName: token?.decimals,
 		displayDecimals: EIGHT_DECIMALS
-	});
+	}));
 
-	let displayUsdAmount: string;
-	$: displayUsdAmount = formatUSD({ value: usdAmount });
+	const displayUsdAmount = $derived(formatUSD({ value: usdAmount }));
 </script>
 
 {#if nonNullish(token)}
