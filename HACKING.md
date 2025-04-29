@@ -99,12 +99,12 @@ Translations are handled in JSON files but, as we are consuming these through a 
 A list of useful faucets:
 
 - Ethereum and EVM networks:
-    - ETH: [Alchemy mixed faucets](https://www.alchemy.com/faucets/)
-    - BNB: [BNB Testnet Faucet](https://www.bnbchain.org/en/testnet-faucet)
-    - USDC and EURC: [Circle faucet](https://faucet.circle.com/)
-    - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
-    - Others:
-        - ChainLink: [all faucets](https://faucets.chain.link/)
+  - ETH: [Alchemy mixed faucets](https://www.alchemy.com/faucets/)
+  - BNB: [BNB Testnet Faucet](https://www.bnbchain.org/en/testnet-faucet)
+  - USDC and EURC: [Circle faucet](https://faucet.circle.com/)
+  - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
+  - Others:
+    - ChainLink: [all faucets](https://faucets.chain.link/)
 - Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
 - SOL: [Solana Foundation Faucet](https://faucet.solana.com/) or [Sol Faucet](https://solfaucet.com/)
 
