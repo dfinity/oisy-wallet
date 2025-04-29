@@ -1,8 +1,20 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { BadgeVariant } from '$lib/types/style';
 
-	export let styleClass: string | undefined = undefined;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		children?: Snippet;
+		styleClass?: string | undefined;
+		testId?: string | undefined;
+		variant?: BadgeVariant;
+	}
+
+	let {
+		children,
+		styleClass = undefined,
+		testId = undefined,
+		variant = 'default'
+	}: Props = $props();
 
 	const variantClassNames = {
 		default: 'bg-secondary text-primary border border-secondary',
@@ -12,8 +24,6 @@
 		success: 'bg-success-subtle-20 text-success-primary',
 		outline: 'border border-tertiary bg-off-white'
 	};
-
-	export let variant: BadgeVariant = 'default';
 </script>
 
 <span
@@ -23,6 +33,6 @@
 	]} {styleClass ?? ''}"
 >
 	<span class="inline-block min-w-0 truncate">
-		<slot />
+		{@render children?.()}
 	</span>
 </span>
