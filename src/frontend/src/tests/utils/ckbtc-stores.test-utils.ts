@@ -25,7 +25,7 @@ export const setupCkBTCStores = (): TokenId => {
 	token.set(mockToken);
 
 	ckBtcMinterInfoStore.set({
-		tokenId,
+		id: tokenId,
 		data: {
 			data: mockCkBtcMinterInfo,
 			certified: true
@@ -33,7 +33,7 @@ export const setupCkBTCStores = (): TokenId => {
 	});
 
 	ckBtcPendingUtxosStore.set({
-		tokenId,
+		id: tokenId,
 		data: {
 			data: [mockPendingUtxo],
 			certified: true

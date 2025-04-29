@@ -26,7 +26,7 @@ describe('certified-setter.store', () => {
 
 		describe('set', () => {
 			it('should set data for a specific tokenId', () => {
-				mockStore.set({ tokenId: SEPOLIA_TOKEN_ID, data });
+				mockStore.set({ id: SEPOLIA_TOKEN_ID, data });
 
 				const state = get(mockStore);
 
@@ -36,8 +36,8 @@ describe('certified-setter.store', () => {
 			it('should update data for a specific tokenId', () => {
 				const updatedData: MockData = { name: 'Updated Item', values: [4, 5, 6] };
 
-				mockStore.set({ tokenId: SEPOLIA_TOKEN_ID, data });
-				mockStore.set({ tokenId: SEPOLIA_TOKEN_ID, data: updatedData });
+				mockStore.set({ id: SEPOLIA_TOKEN_ID, data });
+				mockStore.set({ id: SEPOLIA_TOKEN_ID, data: updatedData });
 
 				const state = get(mockStore);
 
@@ -45,7 +45,7 @@ describe('certified-setter.store', () => {
 			});
 
 			it('should not throw an error when setting an unknown tokenId', () => {
-				expect(() => mockStore.set({ tokenId: SEPOLIA_TOKEN_ID, data })).not.toThrow();
+				expect(() => mockStore.set({ id: SEPOLIA_TOKEN_ID, data })).not.toThrow();
 			});
 		});
 	});
