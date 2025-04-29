@@ -22,7 +22,8 @@
 	} from '$lib/derived/balances.derived';
 	import { exchangeNotInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import {
-		networkBitcoin, networkBsc,
+		networkBitcoin,
+		networkBsc,
 		networkEthereum,
 		networkICP,
 		networkSolana,
@@ -70,7 +71,7 @@
 	$: isGLDTToken = nonNullish($pageToken) ? isGLDTTokenUtil($pageToken) : false;
 
 	let isGradientToRight = false;
-	$: isGradientToRight =($networkSolana && !isTrumpToken) || isGLDTToken || $networkBsc
+	$: isGradientToRight = ($networkSolana && !isTrumpToken) || isGLDTToken || $networkBsc;
 </script>
 
 <div
