@@ -11,15 +11,15 @@ describe('sol-address.utils', () => {
 		});
 
 		it('should return false if the address is empty', () => {
-			expect(isSolAddress(parseSolAddress(''))).toBe(false);
+			expect(isSolAddress(parseSolAddress(''))).toBeFalsy();
 		});
 
 		it('should return false if the address is invalid', () => {
-			expect(isSolAddress(parseSolAddress('not-an-address'))).toBe(false);
+			expect(isSolAddress(parseSolAddress('not-an-address'))).toBeFalsy();
 
-			expect(isSolAddress(parseSolAddress(mockEthAddress))).toBe(false);
+			expect(isSolAddress(parseSolAddress(mockEthAddress))).toBeFalsy();
 
-			expect(isSolAddress(parseSolAddress(mockBtcAddress))).toBe(false);
+			expect(isSolAddress(parseSolAddress(mockBtcAddress))).toBeFalsy();
 		});
 
 		it('should return true if the address is valid', () => {
@@ -27,7 +27,7 @@ describe('sol-address.utils', () => {
 		});
 
 		it('should return false if the address contains spaces', () => {
-			expect(isSolAddress(parseSolAddress(` ${mockSolAddress} `))).toBe(false);
+			expect(isSolAddress(parseSolAddress(` ${mockSolAddress} `))).toBeFalsy();
 		});
 	});
 
@@ -37,15 +37,15 @@ describe('sol-address.utils', () => {
 		});
 
 		it('should return true if the address is empty', () => {
-			expect(invalidSolAddress(parseSolAddress(''))).toBe(true);
+			expect(invalidSolAddress(parseSolAddress(''))).toBeTruthy();
 		});
 
 		it('should return true if the address is invalid', () => {
-			expect(invalidSolAddress(parseSolAddress('not-an-address'))).toBe(true);
+			expect(invalidSolAddress(parseSolAddress('not-an-address'))).toBeTruthy();
 
-			expect(invalidSolAddress(parseSolAddress(mockEthAddress))).toBe(true);
+			expect(invalidSolAddress(parseSolAddress(mockEthAddress))).toBeTruthy();
 
-			expect(invalidSolAddress(parseSolAddress(mockBtcAddress))).toBe(true);
+			expect(invalidSolAddress(parseSolAddress(mockBtcAddress))).toBeTruthy();
 		});
 
 		it('should return false if the address is valid', () => {
@@ -53,7 +53,7 @@ describe('sol-address.utils', () => {
 		});
 
 		it('should return true if the address contains spaces', () => {
-			expect(invalidSolAddress(parseSolAddress(` ${mockSolAddress} `))).toBe(true);
+			expect(invalidSolAddress(parseSolAddress(` ${mockSolAddress} `))).toBeTruthy();
 		});
 	});
 });
