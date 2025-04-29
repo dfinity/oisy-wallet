@@ -4,18 +4,18 @@
 
 	interface Props {
 		onclick: () => void;
-		colorStyle: ButtonColorStyle;
-		type: 'submit' | 'reset' | 'button';
-		disabled: boolean;
-		loading: boolean;
-		loadingAsSkeleton: true;
-		fullWidth: boolean;
-		link: boolean;
-		inlineLink: boolean;
-		paddingSmall: boolean;
-		testId: string | undefined;
-		ariaLabel: string | undefined;
-		styleClass: string;
+		colorStyle?: ButtonColorStyle;
+		type?: 'submit' | 'reset' | 'button';
+		disabled?: boolean;
+		loading?: boolean;
+		loadingAsSkeleton?: boolean;
+		fullWidth?: boolean;
+		link?: boolean;
+		inlineLink?: boolean;
+		paddingSmall?: boolean;
+		testId?: string | undefined;
+		ariaLabel?: string | undefined;
+		styleClass?: string;
 		children: Snippet;
 	}
 
