@@ -12,7 +12,7 @@
 		requirementsFulfilled: boolean[];
 	}
 
-	let { loading = true, reward, isEligible = false, requirementsFulfilled }: Props = $props;
+	let { loading = true, reward, isEligible = false, requirementsFulfilled }: Props = $props();
 
 	const isRequirementFulfilled = (index: number) =>
 		(reward.requirements.length === requirementsFulfilled.length && requirementsFulfilled[index]) ??
