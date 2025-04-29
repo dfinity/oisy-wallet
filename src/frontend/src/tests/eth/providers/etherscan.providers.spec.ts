@@ -100,7 +100,7 @@ describe('etherscan.providers', () => {
 		});
 
 		it('should initialise the provider with the correct network and API key', () => {
-			const provider = new EtherscanProvider(network);
+			const provider = new EtherscanProvider(network, chainId);
 
 			expect(provider).toBeDefined();
 			expect(EtherscanProviderLib).toHaveBeenCalledWith(network, ETHERSCAN_API_KEY);
@@ -198,6 +198,7 @@ describe('etherscan.providers', () => {
 
 				expect(mockFetch).toHaveBeenCalledTimes(2);
 				expect(mockFetch).toHaveBeenNthCalledWith(1, 'account', {
+					chainId,
 					action: 'txlist',
 					address,
 					startblock: 0,
@@ -215,6 +216,7 @@ describe('etherscan.providers', () => {
 
 				expect(mockFetch).toHaveBeenCalledTimes(2);
 				expect(mockFetch).toHaveBeenNthCalledWith(2, 'account', {
+					chainId,
 					action: 'txlistinternal',
 					address,
 					startblock: 0,
@@ -224,7 +226,7 @@ describe('etherscan.providers', () => {
 			});
 
 			it('should handle errors gracefully', async () => {
-				const provider = new EtherscanProvider(network);
+				const provider = new EtherscanProvider(network, chainId);
 				mockFetch.mockRejectedValue(new Error('Network error'));
 
 				await expect(provider.transactions({ address })).rejects.toThrow('Network error');
