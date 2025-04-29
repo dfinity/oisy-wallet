@@ -4,7 +4,7 @@
 	import { getContext } from 'svelte';
 	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
-	import { selectedEthereumNetworkWithFallback } from '$eth/derived/network.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { selectedEvmNetwork } from '$evm/derived/network.derived';
 	import { evmNativeToken } from '$evm/derived/token.derived';
@@ -32,11 +32,11 @@
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-{#if isNetworkIdEthereum($sendToken.network.id)}
+{#if isNetworkIdEthereum($sendToken.network.id) && nonNullish($selectedEthereumNetwork)}
 	<EthSendTokenWizard
 		{currentStep}
 		{formCancelAction}
-		sourceNetwork={$selectedEthereumNetworkWithFallback}
+		sourceNetwork={$selectedEthereumNetwork}
 		nativeEthereumToken={$ethereumToken}
 		bind:destination
 		bind:targetNetwork
@@ -47,14 +47,14 @@
 		on:icNext
 		on:icClose
 		on:icQRCodeScan
+		on:icTokensList
 	/>
 {:else if isNetworkIdEvm($sendToken.network.id) && nonNullish($selectedEvmNetwork) && nonNullish($evmNativeToken)}
-	<!--			TODO: use store evmNativeToken here when we adapt the fee context to fetch the EVM fees -->
 	<EthSendTokenWizard
 		{currentStep}
 		{formCancelAction}
 		sourceNetwork={$selectedEvmNetwork}
-		nativeEthereumToken={$ethereumToken}
+		nativeEthereumToken={$evmNativeToken}
 		bind:destination
 		bind:targetNetwork
 		bind:amount
@@ -64,6 +64,7 @@
 		on:icNext
 		on:icClose
 		on:icQRCodeScan
+		on:icTokensList
 	/>
 {:else if isNetworkIdICP($sendToken.network.id)}
 	<IcSendTokenWizard
@@ -79,6 +80,7 @@
 		on:icNext
 		on:icClose
 		on:icQRCodeScan
+		on:icTokensList
 	/>
 {:else if isNetworkIdBitcoin($sendToken.network.id)}
 	<BtcSendTokenWizard
@@ -92,6 +94,7 @@
 		on:icClose
 		on:icSendBack
 		on:icQRCodeScan
+		on:icTokensList
 	/>
 {:else if isNetworkIdSolana($sendToken.network.id)}
 	<SolSendTokenWizard
@@ -105,6 +108,7 @@
 		on:icClose
 		on:icSendBack
 		on:icQRCodeScan
+		on:icTokensList
 	/>
 {:else}
 	<slot />

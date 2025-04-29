@@ -1,8 +1,12 @@
 import {
-	ETHEREUM_NETWORK_ID,
-	ETHERSCAN_NETWORK_HOMESTEAD,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 import type {
@@ -10,6 +14,7 @@ import type {
 	EtherscanProviderTokenTransferTransaction,
 	EtherscanProviderTransaction
 } from '$eth/types/etherscan-transaction';
+import type { EthereumNetwork } from '$eth/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -19,77 +24,55 @@ import {
 	createMockEtherscanTransactions
 } from '$tests/mocks/etherscan.mock';
 import en from '$tests/mocks/i18n.mock';
-import { EtherscanProvider as EtherscanProviderLib } from 'ethers/providers';
-import type { MockedClass } from 'vitest';
+import {
+	EtherscanPlugin,
+	EtherscanProvider as EtherscanProviderLib,
+	Network
+} from 'ethers/providers';
+import { type MockedClass } from 'vitest';
 
 vi.mock('$env/rest/etherscan.env', () => ({
 	ETHERSCAN_API_KEY: 'test-api-key'
 }));
 
 describe('etherscan.providers', () => {
+	const ETHERSCAN_API_KEY = 'test-api-key';
+
+	const networks: EthereumNetwork[] = [
+		ETHEREUM_NETWORK,
+		SEPOLIA_NETWORK,
+		BASE_NETWORK,
+		BASE_SEPOLIA_NETWORK,
+		BSC_MAINNET_NETWORK,
+		BSC_TESTNET_NETWORK
+	];
+
+	it('should create the correct map of providers', () => {
+		expect(EtherscanProviderLib).toHaveBeenCalledTimes(networks.length);
+
+		networks.forEach(({ name, chainId }, index) => {
+			expect(EtherscanProviderLib).toHaveBeenNthCalledWith(
+				index + 1,
+				new Network(name, chainId),
+				ETHERSCAN_API_KEY
+			);
+		});
+	});
+
+	it('should attach the custom plugin to the providers', () => {
+		const ETHERSCAN_PLUGIN = new EtherscanPlugin('https://api.etherscan.io/v2');
+
+		expect(Network.prototype.attachPlugin).toHaveBeenCalledTimes(networks.length);
+
+		networks.forEach((_, index) => {
+			expect(Network.prototype.attachPlugin).toHaveBeenNthCalledWith(index + 1, ETHERSCAN_PLUGIN);
+		});
+	});
+
 	describe('EtherscanProvider', () => {
-		const network = ETHERSCAN_NETWORK_HOMESTEAD;
+		const network: Network = new Network(ETHEREUM_NETWORK.name, ETHEREUM_NETWORK.chainId);
+		const chainId = ETHEREUM_NETWORK.chainId;
 		const address = mockEthAddress;
-		const ETHERSCAN_API_KEY = 'test-api-key';
-
-		const normalTransactions: EtherscanProviderTransaction[] = createMockEtherscanTransactions(3);
-
-		const internalTransactions: EtherscanProviderInternalTransaction[] =
-			createMockEtherscanInternalTransactions(5);
-
-		const expectedNormalTransactions: Transaction[] = normalTransactions.map(
-			({
-				blockNumber,
-				timeStamp,
-				hash,
-				nonce,
-				from,
-				to,
-				value,
-				gas,
-				gasPrice
-			}: EtherscanProviderTransaction): Transaction => ({
-				hash,
-				blockNumber: parseInt(blockNumber),
-				timestamp: parseInt(timeStamp),
-				from,
-				to,
-				nonce: parseInt(nonce),
-				gasLimit: BigInt(gas),
-				gasPrice: BigInt(gasPrice),
-				value: BigInt(value),
-				// Chain ID is not delivered by the Etherscan API so, we naively set 0
-				chainId: 0n
-			})
-		);
-
-		const expectedInternalTransactions: Transaction[] = internalTransactions.map(
-			({
-				blockNumber,
-				timeStamp,
-				hash,
-				from,
-				to,
-				value,
-				gas
-			}: EtherscanProviderInternalTransaction): Transaction => ({
-				hash,
-				blockNumber: parseInt(blockNumber),
-				timestamp: parseInt(timeStamp),
-				from,
-				to,
-				nonce: 0,
-				gasLimit: BigInt(gas),
-				value: BigInt(value),
-				// Chain ID is not delivered by the Etherscan API so, we naively set 0
-				chainId: 0n
-			})
-		);
-
-		const expectedTransactions: Transaction[] = [
-			...expectedNormalTransactions,
-			...expectedInternalTransactions
-		];
 
 		const mockFetch = vi.fn();
 		const mockProvider = EtherscanProviderLib as MockedClass<typeof EtherscanProviderLib>;
@@ -231,93 +214,96 @@ describe('etherscan.providers', () => {
 
 				await expect(provider.transactions({ address })).rejects.toThrow('Network error');
 			});
-		});
 
-		describe('erc20Transactions method', () => {
-			const mockApiResponse: EtherscanProviderTokenTransferTransaction[] = [
-				{
-					nonce: '1',
-					gas: '21000',
-					gasPrice: '20000000000',
-					hash: '0x123abc',
-					blockNumber: '123456',
-					blockHash: '0x456def',
-					timeStamp: '1697049600',
-					confirmations: '10',
-					from: '0xabc...',
-					to: '0xdef...',
-					value: '1000000000000000000',
-					contractAddress: mockValidErc20Token.address,
-					tokenName: mockValidErc20Token.name,
-					tokenSymbol: mockValidErc20Token.symbol,
-					tokenDecimal: mockValidErc20Token.decimals.toString(),
-					transactionIndex: '0',
-					gasUsed: '21000',
-					cumulativeGasUsed: '21000',
-					input: '0x'
-				}
-			];
+			describe('erc20Transactions method', () => {
+				const mockApiResponse: EtherscanProviderTokenTransferTransaction[] = [
+					{
+						nonce: '1',
+						gas: '21000',
+						gasPrice: '20000000000',
+						hash: '0x123abc',
+						blockNumber: '123456',
+						blockHash: '0x456def',
+						timeStamp: '1697049600',
+						confirmations: '10',
+						from: '0xabc...',
+						to: '0xdef...',
+						value: '1000000000000000000',
+						contractAddress: mockValidErc20Token.address,
+						tokenName: mockValidErc20Token.name,
+						tokenSymbol: mockValidErc20Token.symbol,
+						tokenDecimal: mockValidErc20Token.decimals.toString(),
+						transactionIndex: '0',
+						gasUsed: '21000',
+						cumulativeGasUsed: '21000',
+						input: '0x'
+					}
+				];
 
-			const expectedTransactions: Transaction[] = [
-				{
-					hash: '0x123abc',
-					blockNumber: 123456,
-					timestamp: 1697049600,
-					from: '0xabc...',
-					to: '0xdef...',
-					nonce: 1,
-					gasLimit: 21000n,
-					gasPrice: 20000000000n,
-					value: 1000000000000000000n,
-					chainId: 0n
-				}
-			];
+				const expectedTransactions: Transaction[] = [
+					{
+						hash: '0x123abc',
+						blockNumber: 123456,
+						timestamp: 1697049600,
+						from: '0xabc...',
+						to: '0xdef...',
+						nonce: 1,
+						gasLimit: 21000n,
+						gasPrice: 20000000000n,
+						value: 1000000000000000000n,
+						chainId: 0n
+					}
+				];
 
-			beforeEach(() => {
-				mockFetch.mockResolvedValue(mockApiResponse);
-			});
-
-			it('should fetch and map transactions correctly', async () => {
-				const provider = new EtherscanProvider(network, chainId);
-
-				const result = await provider.erc20Transactions({
-					address: mockEthAddress,
-					contract: mockValidErc20Token
+				beforeEach(() => {
+					mockFetch.mockResolvedValue(mockApiResponse);
 				});
 
-				expect(provider).toBeDefined();
+				it('should fetch and map transactions correctly', async () => {
+					const provider = new EtherscanProvider(network, chainId);
 
-				expect(mockFetch).toHaveBeenCalledTimes(1);
+					const result = await provider.erc20Transactions({
+						address: mockEthAddress,
+						contract: mockValidErc20Token
+					});
 
-				expect(result).toStrictEqual(expectedTransactions);
+					expect(provider).toBeDefined();
+
+					expect(mockFetch).toHaveBeenCalledTimes(1);
+
+					expect(result).toStrictEqual(expectedTransactions);
+				});
+
+				it('should throw an error if the API call fails', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+					mockFetch.mockRejectedValue(new Error('Network error'));
+
+					await expect(
+						provider.erc20Transactions({ address: mockEthAddress, contract: mockValidErc20Token })
+					).rejects.toThrow('Network error');
+				});
+			});
+		});
+
+		describe('etherscanProviders', () => {
+			networks.forEach(({ id, name }) => {
+				it(`should return the correct provider for ${name} network`, () => {
+					const provider = etherscanProviders(id);
+
+					expect(provider).toBeInstanceOf(EtherscanProvider);
+
+					expect(provider).toHaveProperty('network');
+					expect(provider).toHaveProperty('chainId');
+				});
 			});
 
-			it('should throw an error if the API call fails', async () => {
-				const provider = new EtherscanProvider(network, chainId);
-				mockFetch.mockRejectedValue(new Error('Network error'));
-
-				await expect(
-					provider.erc20Transactions({ address: mockEthAddress, contract: mockValidErc20Token })
-				).rejects.toThrow('Network error');
+			it('should throw an error for an unsupported network ID', () => {
+				expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
+					replacePlaceholders(en.init.error.no_etherscan_provider, {
+						$network: ICP_NETWORK_ID.toString()
+					})
+				);
 			});
-		});
-	});
-
-	describe('etherscanProviders', () => {
-		it('should return the correct provider for Ethereum network', () => {
-			expect(etherscanProviders(ETHEREUM_NETWORK_ID)).toBeInstanceOf(EtherscanProvider);
-		});
-
-		it('should return the correct provider for Sepolia network', () => {
-			expect(etherscanProviders(SEPOLIA_NETWORK_ID)).toBeInstanceOf(EtherscanProvider);
-		});
-
-		it('should throw an error for an unsupported network ID', () => {
-			expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
-				replacePlaceholders(en.init.error.no_etherscan_provider, {
-					$network: ICP_NETWORK_ID.toString()
-				})
-			);
 		});
 	});
 });
