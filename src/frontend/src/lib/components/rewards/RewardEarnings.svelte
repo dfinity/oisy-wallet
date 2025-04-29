@@ -28,35 +28,40 @@
 		amountOfRewards: number;
 	}
 
-	let {amountOfRewards = 0}: Props = $props();
+	let { amountOfRewards = 0 }: Props = $props();
 
 	let ckBtcReward = $state(ZERO_BI);
 	const ckBtcToken = $derived(findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens }));
-	const ckBtcRewardUsd = $derived(nonNullish(ckBtcToken)
-		? (calculateTokenUsdAmount({
-				amount: ckBtcReward,
-				token: ckBtcToken,
-				$exchanges
-			}) ?? 0)
-		: 0);
+	const ckBtcRewardUsd = $derived(
+		nonNullish(ckBtcToken)
+			? (calculateTokenUsdAmount({
+					amount: ckBtcReward,
+					token: ckBtcToken,
+					$exchanges
+				}) ?? 0)
+			: 0
+	);
 
 	let ckUsdcReward = $state(ZERO_BI);
 	const ckUsdcToken = $derived(findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $tokens }));
-	const ckUsdcRewardUsd = $derived(nonNullish(ckUsdcToken)
-		? (calculateTokenUsdAmount({
-				amount: ckUsdcReward,
-				token: ckUsdcToken,
-				$exchanges
-			}) ?? 0)
-		: 0);
+	const ckUsdcRewardUsd = $derived(
+		nonNullish(ckUsdcToken)
+			? (calculateTokenUsdAmount({
+					amount: ckUsdcReward,
+					token: ckUsdcToken,
+					$exchanges
+				}) ?? 0)
+			: 0
+	);
 
 	let icpReward = $state(ZERO_BI);
-	const icpRewardUsd =
-		$derived(calculateTokenUsdAmount({
+	const icpRewardUsd = $derived(
+		calculateTokenUsdAmount({
 			amount: icpReward,
 			token: ICP_TOKEN,
 			$exchanges
-		}) ?? 0);
+		}) ?? 0
+	);
 
 	const totalRewardUsd = $derived(ckBtcRewardUsd + ckUsdcRewardUsd + icpRewardUsd);
 
