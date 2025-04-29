@@ -5,8 +5,8 @@ import * as z from 'zod';
 const TokenGroupIdStringSchema = z.string();
 
 export const parseTokenGroupId = (
-	tokenIdString: z.infer<typeof TokenGroupIdStringSchema>
+	tokenGroupIdString: z.infer<typeof TokenGroupIdStringSchema>
 ): TokenGroupId => {
-	const validString = TokenGroupIdStringSchema.parse(tokenIdString);
+	const validString = TokenGroupIdStringSchema.parse(tokenGroupIdString);
 	return TokenGroupIdSchema.parse(Symbol(validString));
 };
