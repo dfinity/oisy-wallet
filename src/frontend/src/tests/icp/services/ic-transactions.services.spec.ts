@@ -26,7 +26,7 @@ describe('ic-transactions.services', () => {
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
 			icTransactionsStore.append({ tokenId, transactions: mockTransactions });
-			balancesStore.set({ tokenId, data: { data: bn1Bi, certified: false } });
+			balancesStore.set({ id: tokenId, data: { data: bn1Bi, certified: false } });
 		});
 
 		it('should reset transactions store and balances store', () => {

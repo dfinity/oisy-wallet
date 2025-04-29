@@ -64,11 +64,11 @@ describe('convertStore', () => {
 		const icpBalance = bn2Bi;
 
 		balancesStore.set({
-			tokenId: ETHEREUM_TOKEN.id,
+			id: ETHEREUM_TOKEN.id,
 			data: { data: ethBalance, certified: true }
 		});
 		balancesStore.set({
-			tokenId: ICP_TOKEN.id,
+			id: ICP_TOKEN.id,
 			data: { data: icpBalance, certified: true }
 		});
 
@@ -88,7 +88,7 @@ describe('convertStore', () => {
 	it('should have balance for fee set if sourceToken is ERC20', () => {
 		const ethBalance = bn1Bi;
 		balancesStore.set({
-			tokenId: SEPOLIA_TOKEN_ID,
+			id: SEPOLIA_TOKEN_ID,
 			data: { data: ethBalance, certified: true }
 		});
 
@@ -103,7 +103,7 @@ describe('convertStore', () => {
 	it('should have balance for fee set if sourceToken is ckERC20', () => {
 		const ckEthBalance = bn1Bi;
 		balancesStore.set({
-			tokenId: parseTokenId('ckETH'),
+			id: parseTokenId('ckETH'),
 			data: { data: ckEthBalance, certified: true }
 		});
 
@@ -124,7 +124,7 @@ describe('convertStore', () => {
 			certified: true
 		};
 		ckEthMinterInfoStore.set({
-			tokenId: ETHEREUM_TOKEN_ID,
+			id: ETHEREUM_TOKEN_ID,
 			data: mockCkEthMinterInfo
 		});
 
@@ -142,7 +142,7 @@ describe('convertStore', () => {
 	it('should have minter info fee set if sourceToken is ckBTC', () => {
 		const mockCkBtcMinterInfo = { data: mockCkBtcMinterInfoData, certified: true };
 		ckBtcMinterInfoStore.set({
-			tokenId: mockValidToken.id,
+			id: mockValidToken.id,
 			data: mockCkBtcMinterInfo
 		});
 
