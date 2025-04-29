@@ -4,6 +4,7 @@ import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
+	CoingeckoPlatformId,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
@@ -63,11 +64,15 @@ export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | n
 		vs_currencies: 'usd'
 	});
 
-export const exchangeRateERC20ToUsd = (
-	contractAddresses: Erc20ContractAddress[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
+export const exchangeRateERC20ToUsd = ({
+	coingeckoPlatformId: id,
+	contractAddresses
+}: {
+	coingeckoPlatformId: CoingeckoPlatformId;
+	contractAddresses: Erc20ContractAddress[];
+}): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
 	simpleTokenPrice({
-		id: 'ethereum',
+		id,
 		vs_currencies: 'usd',
 		contract_addresses: contractAddresses.map(({ address }) => address.toLowerCase()),
 		include_market_cap: true

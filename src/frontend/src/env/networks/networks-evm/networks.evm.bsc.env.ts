@@ -25,6 +25,7 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 	iconLight: bscMainnetIconLight,
 	iconDark: bscMainnetIconDark,
 	explorerUrl: BSC_EXPLORER_URL,
+	exchange: { coingeckoId: 'binance-smart-chain' },
 	buy: { onramperId: 'bsc' }
 };
 
@@ -48,4 +49,4 @@ export const SUPPORTED_BSC_NETWORKS: EthereumNetwork[] = defineSupportedNetworks
 	testnetNetworks: [BSC_TESTNET_NETWORK]
 });
 
-export const SUPPORTED_BSC_NETWORKS_IDS: NetworkId[] = SUPPORTED_BSC_NETWORKS.map(({ id }) => id);
+export const SUPPORTED_BSC_NETWORK_IDS: NetworkId[] = SUPPORTED_BSC_NETWORKS.map(({ id }) => id);
