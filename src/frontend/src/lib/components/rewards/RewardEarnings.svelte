@@ -28,7 +28,7 @@
 		amountOfRewards: number;
 	}
 
-	let { amountOfRewards = 0 }: Props = $props();
+	let { amountOfRewards = $bindable(0) }: Props = $props();
 
 	let ckBtcReward = $state(ZERO_BI);
 	const ckBtcToken = $derived(findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens }));
@@ -94,7 +94,9 @@
 		loading = false;
 	};
 
-	$effect(() => loadRewards({ ckBtcToken, ckUsdcToken, icpToken: ICP_TOKEN }));
+	$effect(() => {
+		loadRewards({ ckBtcToken, ckUsdcToken, icpToken: ICP_TOKEN });
+	});
 
 	const gotoActivity = async () => {
 		await goto(
