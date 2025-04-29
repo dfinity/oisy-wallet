@@ -9,12 +9,12 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
-	import { fetchSwapOptions } from '$lib/utils/swap.utils';
+	import { fetchSwapAmounts } from '$lib/services/swap.services';
+	import type { IcToken } from '$icp/types/ic-token';
 
 	export let amount: OptionAmount = undefined;
-	export let sourceToken: Token | undefined;
-	export let destinationToken: Token | undefined;
+	export let sourceToken: IcToken | undefined;
+	export let destinationToken: IcToken | undefined;
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -36,7 +36,7 @@
 		}
 
 		try {
-			const swaps = await fetchSwapOptions({
+			const swapAmounts = await fetchSwapAmounts({
 				identity: $authIdentity,
 				sourceToken,
 				destinationToken,
@@ -44,14 +44,14 @@
 				tokens: $tokens
 			});
 
-			console.log('swaps', swaps);
-
-			if (swaps.length === 0) {
+			if (swapAmounts.length === 0) {
 				store.reset();
 				return;
 			}
 
-			const filteredSwaps = swaps.filter((swap) => Number(swap.receiveAmount) > 0);
+			const filteredSwaps = swapAmounts
+				.filter((swap) => Number(swap.receiveAmount) > 0)
+				.sort((a, b) => Number(b.receiveAmount) - Number(a.receiveAmount));
 
 			store.setSwaps({ swaps: filteredSwaps, amount: parsedAmount });
 		} catch {

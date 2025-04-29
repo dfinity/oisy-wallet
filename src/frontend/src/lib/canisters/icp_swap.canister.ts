@@ -1,10 +1,17 @@
-import type { _SERVICE as SwapFactoryService } from '$declarations/icp_swap/icp_swap.did';
+import type {
+	DepositArgs as ICPSwapDepositRequest,
+	GetPoolArgs as ICPSwapGetPoolArgs,
+	SwapArgs as ICPSwapSwapRequest,
+	WithdrawArgs as ICPSwapWithdrawRequest,
+	_SERVICE as SwapFactoryService
+} from '$declarations/icp_swap/icp_swap.did';
 
 import { idlFactory } from '$declarations/icp_swap/icp_swap.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import type { Principal } from '@dfinity/principal';
 import { Canister, createServices } from '@dfinity/utils';
+import { mapIcpSwapCanisterError } from './icp_swap.errors';
 
 export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 	static async create({
@@ -14,10 +21,7 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 		const agent = await getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<SwapFactoryService>({
-			options: {
-				...options,
-				agent
-			},
+			options: { ...options, agent },
 			idlFactory,
 			certifiedIdlFactory: idlFactory
 		});
@@ -25,72 +29,123 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 		return new ICPSwapFactoryCanister(canisterId, service, certifiedService);
 	}
 
-	getPool = async (args: {
-		token0: { address: string; standard: string };
-		token1: { address: string; standard: string };
-		fee: bigint;
-	}) => {
+	/**
+	 * Fetches pool information by given tokens and fee.
+	 * Read-only (uncertified query call).
+	 *
+	 * @param args - Pool search parameters: token0, token1, and fee.
+	 * @returns Pool information containing the canister ID.
+	 * @throws CanisterInternalError if fetching pool fails.
+	 */
+	getPool = async (args: ICPSwapGetPoolArgs) => {
 		const { getPool } = this.caller({ certified: false });
-		const result = await getPool(args);
+		const response = await getPool(args);
 
-		if ('ok' in result) {
-			return result.ok;
+		if ('ok' in response) {
+			return response.ok;
 		}
-		throw new Error(`getPool failed: ${JSON.stringify(result.err)}`);
+		throw mapIcpSwapCanisterError(response.err);
 	};
 
-	quote = async (args: any) => {
+	/**
+	 * Provides a quote for swapping tokens based on input parameters.
+	 *
+	 * @param args - Swap quote parameters: amountIn, zeroForOne, amountOutMinimum.
+	 * @returns Estimated output amount (bigint).
+	 * @throws CanisterInternalError if fetching quote fails.
+	 */
+	quote = async (args: ICPSwapSwapRequest) => {
 		const { quote } = this.caller({ certified: false });
-		const result = await quote(args);
+		const response = await quote(args);
 
-		if ('ok' in result) {
-			return result.ok;
+		if ('ok' in response) {
+			return response.ok;
 		}
-		throw new Error(`Quote failed: ${JSON.stringify(result.err)}`);
+		throw mapIcpSwapCanisterError(response.err);
 	};
 
-	swap = async (args: { amountIn: string; zeroForOne: boolean; amountOutMinimum: string }) => {
+	/**
+	 * Executes a swap transaction between two tokens.
+	 *
+	 * @param args - Swap parameters: amountIn, zeroForOne, amountOutMinimum.
+	 * @returns Amount of tokens received (bigint).
+	 * @throws CanisterInternalError if swap fails.
+	 */
+	swap = async (args: ICPSwapSwapRequest) => {
 		const { swap } = this.caller({ certified: true });
-		const result = await swap(args);
-		if ('ok' in result) {
-			return result.ok;
+		const response = await swap(args);
+
+		if ('ok' in response) {
+			return response.ok;
 		}
-		throw new Error(`Swap failed: ${JSON.stringify(result.err)}`);
+		throw mapIcpSwapCanisterError(response.err);
 	};
 
-	deposit = async (args: { token: string; amount: bigint; fee: bigint }) => {
+	/**
+	 * Deposits tokens into the swap pool.
+	 *
+	 * @param args - Deposit parameters: token Principal, amount, and fee.
+	 * @returns Amount of tokens deposited (bigint).
+	 * @throws CanisterInternalError if deposit fails.
+	 */
+	deposit = async (args: ICPSwapDepositRequest) => {
 		const { deposit } = this.caller({ certified: true });
-		const result = await deposit(args);
-		if ('ok' in result) {
-			return result.ok;
+		const response = await deposit(args);
+
+		if ('ok' in response) {
+			return response.ok;
 		}
-		throw new Error(`Deposit failed: ${JSON.stringify(result.err)}`);
+		throw mapIcpSwapCanisterError(response.err);
 	};
 
-	depositFrom = async (args: { token: string; amount: bigint; fee: bigint }) => {
+	/**
+	 * Deposits tokens into the swap pool using an approval from another account.
+	 *
+	 * @param args - DepositFrom parameters: token Principal, amount, and fee.
+	 * @returns Amount of tokens deposited (bigint).
+	 * @throws CanisterInternalError if depositFrom fails.
+	 */
+	depositFrom = async (args: ICPSwapDepositRequest) => {
 		const { depositFrom } = this.caller({ certified: true });
-		const result = await depositFrom(args);
-		if ('ok' in result) {
-			return result.ok;
+		const response = await depositFrom(args);
+
+		if ('ok' in response) {
+			return response.ok;
 		}
-		throw new Error(`DepositFrom failed: ${JSON.stringify(result.err)}`);
+		throw mapIcpSwapCanisterError(response.err);
 	};
 
-	withdraw = async (args: { token: string; amount: bigint; fee: bigint }) => {
+	/**
+	 * Withdraws tokens from the swap pool to the user's account.
+	 *
+	 * @param args - Withdraw parameters: token Principal, amount, and fee.
+	 * @returns Amount of tokens withdrawn (bigint).
+	 * @throws CanisterInternalError if withdrawal fails.
+	 */
+	withdraw = async (args: ICPSwapWithdrawRequest) => {
 		const { withdraw } = this.caller({ certified: true });
-		const result = await withdraw(args);
-		if ('ok' in result) {
-			return result.ok;
+		const response = await withdraw(args);
+
+		if ('ok' in response) {
+			return response.ok;
 		}
-		throw new Error(`Withdraw failed: ${JSON.stringify(result.err)}`);
+		throw mapIcpSwapCanisterError(response.err);
 	};
 
+	/**
+	 * Retrieves the user's unused token balances within the pool.
+	 *
+	 * @param principal - Principal of the user.
+	 * @returns Object containing balance0 and balance1 (both bigint).
+	 * @throws CanisterInternalError if fetching balances fails.
+	 */
 	getUserUnusedBalance = async (principal: Principal) => {
 		const { getUserUnusedBalance } = this.caller({ certified: false });
-		const result = await getUserUnusedBalance(principal);
-		if ('ok' in result) {
-			return result.ok;
+		const response = await getUserUnusedBalance(principal);
+
+		if ('ok' in response) {
+			return response.ok;
 		}
-		throw new Error(`getUserUnusedBalance failed: ${JSON.stringify(result.err)}`);
+		throw mapIcpSwapCanisterError(response.err);
 	};
 }

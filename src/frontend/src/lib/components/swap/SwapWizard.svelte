@@ -25,7 +25,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { bestSwap } from '$lib/derived/swap.derived';
+	import { activeSwap } from '$lib/derived/swap.derived';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -49,24 +49,11 @@
 		? $icTokenFeeStore?.[$sourceToken.symbol]
 		: undefined;
 
-	const swap = async () => {
-
-		console.log('here');
-		
+	const swap = async () => {		
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
 		}
-
-		console.log('swap', {
-			sourceToken: $sourceToken,
-			destinationToken: $destinationToken,
-			swapAmount,
-			receiveAmount,
-			slippageValue,
-			sourceTokenFee
-		});
-		
 
 		if (
 			isNullish($sourceToken) ||
@@ -74,7 +61,7 @@
 			isNullish(slippageValue) ||
 			isNullish(swapAmount) ||
 			isNullish(sourceTokenFee) ||
-			isNullish($bestSwap?.receiveAmount)
+			isNullish($activeSwap?.receiveAmount)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -105,7 +92,7 @@
 				sourceToken: $sourceToken,
 				destinationToken: $destinationToken,
 				swapAmount,
-				receiveAmount: $bestSwap?.receiveAmount,
+				receiveAmount: $activeSwap?.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
 				isSourceTokenIcrc2: $isSourceTokenIcrc2
@@ -155,10 +142,7 @@
 	};
 
 	const close = () => dispatch('icClose');
-	const back = () => dispatch('icBack');
-
-	console.log('step', currentStep?.name);
-	
+	const back = () => dispatch('icBack');	
 </script>
 
 <IcTokenFeeContext token={$sourceToken}>

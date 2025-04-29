@@ -12,7 +12,7 @@ export interface SwapProviderResult {
 	route?: string[];
 	liquidityFees?: ProviderFee[];
 	networkFee?: ProviderFee;
-	raw: unknown;
+	rawSwap: unknown;
 }
 
 export interface SwapAmountsStoreData {

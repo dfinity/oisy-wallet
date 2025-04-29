@@ -9,15 +9,13 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
-	import { bestSwap } from '$lib/derived/swap.derived';
+	import { activeSwap } from '$lib/derived/swap.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
-	import { type OisyDappDescription } from '$lib/types/dapp-description';
 	import type { OptionString } from '$lib/types/string';
-	import type { ProviderFee } from '$lib/types/swap';
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
@@ -26,30 +24,22 @@
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	// let route: string[] | undefined;
-	// $: route = $swapAmountsStore?.swapAmounts?.route;
-
 	$: selectedSwap = $swapAmountsStore?.swaps?.find(
-	({ provider }) => provider === $swapAmountsStore?.selectedProvider
-);
+		({ provider }) => provider === $swapAmountsStore?.selectedProvider
+	);
 
-$: liquidityFees = selectedSwap?.liquidityFees ?? [];
+	$: route = selectedSwap?.route;
+	$: liquidityFees = selectedSwap?.liquidityFees ?? [];
 	$: networkFee = selectedSwap?.networkFee ?? undefined;
 
-	$: dApp = nonNullish($bestSwap)
-		? dAppDescriptions.find(({ id }) => id === $bestSwap.provider.toLowerCase())
+	$: dApp = nonNullish($activeSwap)
+		? dAppDescriptions.find(({ id }) => id === $activeSwap.provider.toLowerCase())
 		: undefined;
-
-	console.log('bestSwap in Proveder', $bestSwap);
-
-	console.log('here', $bestSwap, dApp);
-	
 
 	// TODO: this state - websiteURL - isn't one and should become a local variable
 	let websiteURL: Option<URL>;
 	let displayURL: OptionString;
 	$: if (nonNullish(dApp)) {
-		console.log({liquidityFees})
 		try {
 			const validatedWebsiteUrl = safeParse({
 				schema: UrlSchema,
@@ -76,14 +66,14 @@ $: liquidityFees = selectedSwap?.liquidityFees ?? [];
 			<svelte:fragment slot="label"
 				>{$i18n.swap.text.swap_provider}
 
-				{#if $swapAmountsStore?.swaps.length > 1}
+				{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1}
 					<Button link on:click={() => dispatch('icShowProviderList')}>Select ></Button>
 				{/if}
 			</svelte:fragment>
 
 			<svelte:fragment slot="main-value">
 				<div class="flex items-start gap-3">
-					{#if $swapAmountsStore?.swaps.length > 1}
+					{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1}
 						<Badge styleClass="mt-1" variant="success">Best rate</Badge>
 					{/if}
 
@@ -110,9 +100,9 @@ $: liquidityFees = selectedSwap?.liquidityFees ?? [];
 		</ModalValue>
 
 		<svelte:fragment slot="list-items">
-			<!-- {#if nonNullish(route) && route.length > 0}
+			{#if nonNullish(route) && route.length > 0}
 				<SwapRoute {route} />
-			{/if} -->
+			{/if}
 			{#if nonNullish(networkFee)}
 				<SwapNetworkFee {networkFee} />
 			{/if}

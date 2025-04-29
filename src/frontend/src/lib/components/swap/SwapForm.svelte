@@ -21,7 +21,7 @@
 	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { SWAP_SLIPPAGE_INVALID_VALUE } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { bestSwap } from '$lib/derived/swap.derived';
+	import { activeSwap } from '$lib/derived/swap.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -63,9 +63,9 @@
 	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 
 	$: receiveAmount =
-		nonNullish($destinationToken) && nonNullish($bestSwap)
+		nonNullish($destinationToken) && nonNullish($activeSwap)
 			? formatTokenBigintToNumber({
-					value: $bestSwap.receiveAmount,
+					value: $activeSwap.receiveAmount,
 					unitName: $destinationToken.decimals,
 					displayDecimals: $destinationToken.decimals
 				})
@@ -181,7 +181,7 @@
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if $bestSwap === null}
+						{#if $activeSwap === null}
 							<div transition:slide={SLIDE_DURATION} class="text-error-primary">
 								{$i18n.swap.text.swap_is_not_offered}
 							</div>

@@ -69,15 +69,6 @@
 			return;
 		}
 
-		// const poolWithSlippage = await getQuoteWithSlippage({
-		// 	identity: $authIdentity,
-		// 	amountIn: 100000000n,
-		// 	zeroForOne: false,
-		// 	slippagePercentage: 1.0
-		// });
-
-		// console.log(poolWithSlippage);
-
 		busy.start({ msg: $i18n.init.info.hold_loading });
 
 		// 1. If loadKongSwapTokens succeeds within 10s - show modal.

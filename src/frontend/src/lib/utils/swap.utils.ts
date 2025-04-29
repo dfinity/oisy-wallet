@@ -4,12 +4,13 @@ import type {
 } from '$declarations/kong_backend/kong_backend.did';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO_BI } from '$lib/constants/app.constants';
+import { ICP_SWAP_PROVIDER, KONG_SWAP_PROVIDER } from '$lib/constants/swap.constants';
 import type { SwapProviderResult } from '$lib/stores/swap-amounts.store';
-import type { ProviderFee } from '$lib/types/swap';
+import type { ICPSwapRawResult, ProviderFee } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { findToken } from '$lib/utils/tokens.utils';
+import type { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { parseToken } from './parse.utils';
 
 export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] =>
 	transactions.length === 0
@@ -57,6 +58,40 @@ export const getNetworkFee = ({
 export const getKongIcTokenIdentifier = (token: Token): string =>
 	isIcToken(token) ? `IC.${token.ledgerCanisterId}` : '';
 
+export const mapIcpSwapResult = ({ swap }: { swap: ICPSwapRawResult }): SwapProviderResult => ({
+	provider: ICP_SWAP_PROVIDER,
+	receiveAmount: swap.receiveAmount,
+	rawSwap: swap
+});
+
+export const mapKongSwapResult = ({
+	swap,
+	tokens
+}: {
+	swap: SwapAmountsReply;
+	tokens: Token[];
+}): SwapProviderResult => ({
+	provider: KONG_SWAP_PROVIDER,
+	slippage: swap.slippage,
+	receiveAmount: swap.receive_amount,
+	route: getSwapRoute(swap.txs ?? []),
+	liquidityFees: getLiquidityFees({ transactions: swap.txs ?? [], tokens }),
+	networkFee: getNetworkFee({ transactions: swap.txs ?? [], tokens }),
+	rawSwap: swap
+});
+
+/**
+ * Calculates the minimum acceptable amount after applying slippage tolerance.
+ *
+ * This is typically used when performing swaps to ensure that
+ * the received amount doesn't fall below the expected slippage tolerance.
+ *
+ * @param params - Parameters to calculate slippage
+ * @param params.quoteAmount - The quoted amount without slippage (in smallest token units, e.g., wei)
+ * @param params.slippagePercentage - The allowed slippage percentage (e.g., 0.5 for 0.5%)
+ * @returns The minimum amount after slippage, as bigint
+ *
+ */
 export const calculateSlippage = ({
 	quoteAmount,
 	slippagePercentage
@@ -68,161 +103,21 @@ export const calculateSlippage = ({
 	return (quoteAmount * slippageFactor) / 10000n;
 };
 
-export const mapKongSwapResult = ({
-	swap,
-	tokens
-}: {
-	swap: SwapAmountsReply;
-	tokens: Token[];
-}): SwapProviderResult => ({
-	provider: 'kongSwap',
-	slippage: swap.slippage,
-	receiveAmount: swap.receive_amount,
-	route: getSwapRoute(swap.txs ?? []),
-	liquidityFees: getLiquidityFees({ transactions: swap.txs ?? [], tokens }),
-	networkFee: getNetworkFee({ transactions: swap.txs ?? [], tokens }),
-	raw: swap
-});
-
-export const calculateLpFee = ({
-	amount,
-	feePercentage
-}: {
-	amount?: bigint;
-	feePercentage?: number; // e.g. 0.003 for 0.3%
-}): bigint => {
-	console.log(amount, feePercentage, 'gfdgfdgfd');
-
-	if (isNullish(amount) || isNullish(feePercentage)) {
-		return ZERO_BI;
-	}
-	const feeFactor = BigInt(Math.floor(feePercentage * 1_000_000));
-	return (amount * feeFactor) / 1_000_000n;
-};
-
-export const mapIcpSwapResult = ({
-	swap,
-	sourceToken,
-	sourceAmount
-}: {
-	swap: {
-		receiveAmount: bigint;
-		[key: string]: unknown;
-	};
-	sourceToken?: Token;
-	sourceAmount?: bigint;
-}): SwapProviderResult => {
-	console.log(calculateLpFee({ amount: sourceAmount, feePercentage: 0.003 }));
-
-	console.log({liquidityFees: [
-		{
-			fee: calculateLpFee({ amount: sourceAmount, feePercentage: 0.003 }),
-			token: sourceToken!
-		}
-	]});
-	
-	
-	return {
-		provider: 'icpSwap',
-		receiveAmount: swap.receiveAmount,
-		liquidityFees: [
-			{
-				fee: calculateLpFee({ amount: sourceAmount, feePercentage: 0.003 }),
-				token: sourceToken!
-			}
-		],
-		raw: swap
-	};
-};
-
-interface FetchSwapOptionsParams {
-	identity: Identity;
-	sourceToken: Token;
-	destinationToken: Token;
-	amount: number;
-	tokens: Token[];
+/**
+ * Generates a 32-byte subaccount identifier from a Principal.
+ *
+ * In ICPSwap, users' token deposits
+ * are often isolated using a "subaccount" derived from their Principal,
+ * to allow smart contracts to distinguish between different users' funds.
+ *
+ * @param principal - The user's Principal (account identifier)
+ * @returns A 32-byte Uint8Array representing the subaccount
+ *
+ */
+export function getSwapSubaccount(principal: Principal): Uint8Array {
+	const principalBytes = principal.toUint8Array();
+	const subaccount = new Uint8Array(32);
+	subaccount[0] = principalBytes.length;
+	subaccount.set(principalBytes, 1);
+	return subaccount;
 }
-
-import { kongSwapAmounts } from '$lib/api/kong_backend.api';
-import { getIcpSwapAmounts } from '$lib/services/swap.services';
-import type { Identity } from '@dfinity/agent';
-
-export interface SwapQuoteParams {
-	identity: Identity;
-	sourceToken: Token;
-	destinationToken: Token;
-	sourceAmount: bigint;
-}
-
-export interface SwapResultMapParams<TSwapRaw> {
-	swap: TSwapRaw;
-	tokens?: Token[];
-	sourceToken?: Token;
-	sourceAmount?: bigint;
-}
-
-export interface SwapProvider<TSwapRaw> {
-	id: string;
-	getQuote: (params: SwapQuoteParams) => Promise<TSwapRaw>;
-	mapResult: (params: SwapResultMapParams<TSwapRaw>) => SwapProviderResult;
-}
-
-export const swapProviders: SwapProvider<any>[] = [
-	{
-		id: 'kongSwap',
-		getQuote: kongSwapAmounts,
-		mapResult: ({ swap, tokens }) => mapKongSwapResult({ swap, tokens: tokens ?? [] })
-	},
-	{
-		id: 'icpSwap',
-		getQuote: getIcpSwapAmounts,
-		mapResult: ({ swap, sourceToken, sourceAmount }) =>
-			mapIcpSwapResult({ swap, sourceToken, sourceAmount })
-	}
-];
-
-export const fetchSwapOptions = async ({
-	identity,
-	sourceToken,
-	destinationToken,
-	amount,
-	tokens
-}: FetchSwapOptionsParams): Promise<SwapProviderResult[]> => {
-	const sourceAmount = parseToken({
-		value: `${amount}`,
-		unitName: sourceToken.decimals
-	});
-
-	const baseParams = {
-		identity,
-		sourceToken,
-		destinationToken,
-		sourceAmount
-	};
-
-	const results = await Promise.allSettled(
-		swapProviders.map((provider) => provider.getQuote(baseParams))
-	);
-
-	const swaps = results.reduce<SwapProviderResult[]>((acc, result, index) => {
-		if (result.status !== 'fulfilled') {
-			return acc;
-		}
-
-		try {
-			const mapped = swapProviders[index].mapResult({
-				swap: result.value,
-				tokens,
-				sourceToken,
-				sourceAmount
-			});
-			acc.push(mapped);
-		} catch (e: unknown) {
-			console.error('Error mapping swap result:', e);
-		}
-
-		return acc;
-	}, []);
-
-	return swaps;
-};

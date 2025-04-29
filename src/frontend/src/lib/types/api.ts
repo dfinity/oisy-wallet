@@ -105,3 +105,43 @@ export interface KongSwapParams {
 export interface AllowSigningParams {
 	request?: AllowSigningRequest;
 }
+
+export interface ICPSwapGetPoolParams {
+	token0: {
+		address: string;
+		standard: string;
+	};
+	token1: {
+		address: string;
+		standard: string;
+	};
+	fee?: bigint;
+}
+
+export interface ICPSwapQuoteParams {
+	amountIn: string;
+	zeroForOne: boolean;
+	amountOutMinimum?: string;
+}
+
+export interface ICPSwapSwapParams {
+	amountIn: string;
+	zeroForOne: boolean;
+	amountOutMinimum: string;
+}
+
+export interface ICPSwapDepositParams {
+	token: string;
+	amount: bigint;
+	fee: bigint;
+}
+
+export interface ICPSwapWithdrawParams {
+	token: string;
+	amount: bigint;
+	fee: bigint;
+}
+
+export interface ICPSwapGetUserUnusedBalanceParams {
+	principal: Principal;
+}

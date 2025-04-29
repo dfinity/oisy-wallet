@@ -3,7 +3,7 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapProviderListItem from './SwapProviderListItem.svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
-	import { bestSwap } from '$lib/derived/swap.derived';
+	import { activeSwap } from '$lib/derived/swap.derived';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
@@ -34,7 +34,8 @@
 					: 0
 		});
 
-	const bestProvider = $bestSwap?.provider;
+	const bestRateProvider =
+		$activeSwap?.provider.toLowerCase() === $swapAmountsStore?.swaps[0].provider.toLowerCase();
 
 	const handleSelect = (provider: string) => dispatch('icSelectProvider', provider);
 </script>
@@ -46,7 +47,7 @@
 	</div>
 	<ul class="list-none">
 		{#each $swapAmountsStore?.swaps ?? [] as swap (swap.provider)}
-			{#if nonNullish($destinationToken)}
+			{#if nonNullish($destinationToken) && nonNullish($swapAmountsStore)}
 				<li class="logo-button-list-item">
 					<SwapProviderListItem
 						on:click={() => handleSelect(swap.provider)}
@@ -54,7 +55,7 @@
 						amount={swap.receiveAmount}
 						token={$destinationToken}
 						usdBalance={getUsdBalance(swap.receiveAmount, $destinationToken)}
-						isBest={swap.provider === bestProvider}
+						isBest={bestRateProvider}
 					/>
 				</li>
 			{/if}

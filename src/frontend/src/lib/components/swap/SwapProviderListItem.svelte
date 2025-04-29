@@ -1,19 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
-	import TokenExchangeBalance from '../tokens/TokenExchangeBalance.svelte';
 	import Amount from '../ui/Amount.svelte';
 	import Logo from '../ui/Logo.svelte';
-	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { CardData } from '$lib/types/token-card';
-	import { formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { safeParse } from '$lib/validation/utils.validation';
 	import { UrlSchema } from '@dfinity/zod-schemas';
@@ -45,8 +37,6 @@
 			displayURL = null;
 		}
 	}
-
-	console.log(amount, token, logoSize, usdBalance, dapp, isBest);
 </script>
 
 <LogoButton on:click dividers={true} dotDividers={false}>

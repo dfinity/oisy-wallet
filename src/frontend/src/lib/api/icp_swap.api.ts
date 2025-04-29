@@ -1,48 +1,46 @@
-import { ICPSwapFactoryCanister } from '$lib/canisters/icp_swap.canister'; // ваш canister
+import { ICPSwapFactoryCanister } from '$lib/canisters/icp_swap.canister';
+import type {
+	ICPSwapDepositParams,
+	ICPSwapGetPoolParams,
+	ICPSwapGetUserUnusedBalanceParams,
+	ICPSwapQuoteParams,
+	ICPSwapSwapParams,
+	ICPSwapWithdrawParams
+} from '$lib/types/api';
+import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 const SWAP_FACTORY_CANISTER_ID = '4mmnk-kiaaa-aaaag-qbllq-cai';
+
+let icpSwapInstance: ICPSwapFactoryCanister | undefined;
+
+export const icpSwapFactoryCanister = async ({
+	identity,
+	canisterId = SWAP_FACTORY_CANISTER_ID,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams): Promise<ICPSwapFactoryCanister> => {
+	assertNonNullish(identity, nullishIdentityErrorMessage);
+
+	if (isNullish(icpSwapInstance)) {
+		icpSwapInstance = await ICPSwapFactoryCanister.create({
+			identity,
+			canisterId: Principal.fromText(canisterId)
+		});
+	}
+
+	return icpSwapInstance;
+};
 
 export const getPool = async ({
 	identity,
 	token0,
 	token1,
-	fee,
-	canisterId = SWAP_FACTORY_CANISTER_ID
-}: {
-	identity: any;
-	token0: { address: string; standard: string };
-	token1: { address: string; standard: string };
-	fee: bigint;
-	canisterId?: string;
-}) => {
-	const swapFactoryCanister = await icpSwapFactoryCanister({ identity, canisterId });
-
-	const result = await swapFactoryCanister.getPool({
-		token0: { address: token0.address, standard: token0.standard },
-		token1: { address: token1.address, standard: token1.standard },
-		fee
-	});
-
-	return result;
-};
-
-const icpSwapFactoryCanister = async ({
-	identity,
-	canisterId = SWAP_FACTORY_CANISTER_ID
-}: {
-	identity: any;
-	canisterId: string;
-}) => {
-	assertNonNullish(identity, 'Identity is required');
-
-	const canister = await ICPSwapFactoryCanister.create({
-		identity,
-		canisterId: Principal.fromText(canisterId)
-	});
-
-	return canister;
+	fee = 3000n,
+	canisterId
+}: CanisterApiFunctionParams<ICPSwapGetPoolParams>) => {
+	const swapFactory = await icpSwapFactoryCanister({ identity, canisterId });
+	return swapFactory.getPool({ token0, token1, fee });
 };
 
 export const getQuote = async ({
@@ -51,22 +49,9 @@ export const getQuote = async ({
 	amountIn,
 	zeroForOne,
 	amountOutMinimum = '0'
-}: {
-	identity: any;
-	canisterId: string;
-	amountIn: string;
-	zeroForOne: boolean;
-	amountOutMinimum?: string;
-}) => {
-	assertNonNullish(identity, 'Identity required');
-
-	const swapPoolCanister = await icpSwapFactoryCanister({ identity, canisterId });
-
-	return swapPoolCanister.quote({
-		amountIn,
-		zeroForOne,
-		amountOutMinimum
-	});
+}: CanisterApiFunctionParams<ICPSwapQuoteParams>) => {
+	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
+	return swapPool.quote({ amountIn, zeroForOne, amountOutMinimum });
 };
 
 export const swapTokens = async ({
@@ -75,13 +60,7 @@ export const swapTokens = async ({
 	amountIn,
 	zeroForOne,
 	amountOutMinimum
-}: {
-	identity: any;
-	canisterId: string;
-	amountIn: string;
-	zeroForOne: boolean;
-	amountOutMinimum: string;
-}) => {
+}: CanisterApiFunctionParams<ICPSwapSwapParams>) => {
 	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
 	return swapPool.swap({ amountIn, zeroForOne, amountOutMinimum });
 };
@@ -92,15 +71,13 @@ export const deposit = async ({
 	token,
 	amount,
 	fee
-}: {
-	identity: any;
-	canisterId: string;
-	token: string;
-	amount: bigint;
-	fee: bigint;
-}) => {
+}: CanisterApiFunctionParams<ICPSwapDepositParams>) => {
 	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
-	return swapPool.deposit({ token, amount, fee });
+	return swapPool.deposit({
+		token,
+		amount,
+		fee
+	});
 };
 
 export const depositFrom = async ({
@@ -109,15 +86,13 @@ export const depositFrom = async ({
 	token,
 	amount,
 	fee
-}: {
-	identity: any;
-	canisterId: string;
-	token: string;
-	amount: bigint;
-	fee: bigint;
-}) => {
+}: CanisterApiFunctionParams<ICPSwapDepositParams>) => {
 	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
-	return swapPool.depositFrom({ token, amount, fee });
+	return swapPool.depositFrom({
+		token,
+		amount,
+		fee
+	});
 };
 
 export const withdraw = async ({
@@ -126,26 +101,20 @@ export const withdraw = async ({
 	token,
 	amount,
 	fee
-}: {
-	identity: any;
-	canisterId: string;
-	token: string;
-	amount: bigint;
-	fee: bigint;
-}) => {
+}: CanisterApiFunctionParams<ICPSwapWithdrawParams>) => {
 	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
-	return swapPool.withdraw({ token, amount, fee });
+	return swapPool.withdraw({
+		token,
+		amount,
+		fee
+	});
 };
 
 export const getUserUnusedBalance = async ({
 	identity,
 	canisterId,
 	principal
-}: {
-	identity: any;
-	canisterId: string;
-	principal: Principal;
-}) => {
+}: CanisterApiFunctionParams<ICPSwapGetUserUnusedBalanceParams>) => {
 	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
 	return swapPool.getUserUnusedBalance(principal);
 };
