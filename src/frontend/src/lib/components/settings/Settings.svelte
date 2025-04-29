@@ -79,9 +79,6 @@
 		<svelte:fragment slot="key">
 			{$i18n.settings.text.session_duration}
 		</svelte:fragment>
-		<output slot="value" class="mr-1.5">
-			<Button link disabled>{$i18n.core.text.edit} ></Button>
-		</output>
 
 		<svelte:fragment slot="info">
 			{#if nonNullish(remainingTimeMilliseconds)}
