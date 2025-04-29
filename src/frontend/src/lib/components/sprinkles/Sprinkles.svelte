@@ -2,10 +2,10 @@
 	import Confetti from 'svelte-confetti';
 
 	interface Props {
-		type?: 'box' | 'page' | 'page-jackpot'
+		type?: 'box' | 'page' | 'page-jackpot';
 	}
 
-	let {type = 'page'}: Props = $props();
+	let { type = 'page' }: Props = $props();
 
 	const colorArray = [
 		'url(/images/sprinkles/oisy-sprinkle-01.svg)',
