@@ -4,10 +4,16 @@
 	import { SWAP_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	interface Props {
+		onclick: () => void;
+	}
+
+	let { onclick }: Props = $props();
 </script>
 
 <ButtonHero
-	on:click
+	{onclick}
 	disabled={$isBusy}
 	testId={SWAP_TOKENS_MODAL_OPEN_BUTTON}
 	ariaLabel={$i18n.swap.text.swap}

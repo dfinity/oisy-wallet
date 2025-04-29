@@ -57,7 +57,7 @@
 </script>
 
 <ButtonHero
-	on:click={async () => await openConvert()}
+	onclick={async () => await openConvert()}
 	disabled={$networkBitcoinMainnetDisabled ||
 		$isBusy ||
 		$outflowActionsDisabled ||
