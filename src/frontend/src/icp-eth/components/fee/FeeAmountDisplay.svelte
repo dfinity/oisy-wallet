@@ -18,9 +18,7 @@
 	export let feeExchangeRate: number | undefined = undefined;
 
 	let balance: Exclude<OptionBalance, null>;
-	$: balance = nonNullish($balancesStore)
-		? ($balancesStore[feeTokenId]?.data ?? ZERO)
-		: undefined;
+	$: balance = nonNullish($balancesStore) ? ($balancesStore[feeTokenId]?.data ?? ZERO) : undefined;
 
 	let insufficientFeeFunds = false;
 
