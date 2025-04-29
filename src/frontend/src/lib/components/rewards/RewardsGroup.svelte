@@ -21,7 +21,7 @@
 	{#each rewards as reward (reward.id)}
 		<div in:slide={SLIDE_DURATION} class="mt-4">
 			<RewardCard
-				on:click={() => modalStore.openRewardDetails({ id: modalId, data: reward })}
+				onclick={() => modalStore.openRewardDetails({ id: modalId, data: reward })}
 				{reward}
 				testId={nonNullish(testId) ? `${testId}-${reward.id}` : undefined}
 			/>
