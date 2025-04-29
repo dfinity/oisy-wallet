@@ -15,16 +15,16 @@ export const batchLoadTransactions = ({
 	tokens: Token[];
 	tokensAlreadyLoaded: TokenId[];
 }): AsyncGenerator<PromiseSettledResult<ResultByToken>[]> => {
-	const promises = tokens.reduce<PromiseResult[]>(
+	const promises = tokens.reduce<(() => Promise<ResultByToken>)[]>(
 		(acc, { network: { id: networkId }, id: tokenId }) => {
 			if (tokensAlreadyLoaded.includes(tokenId)) {
 				return acc;
 			}
 
-			const promise = (async (): PromiseResult => {
+			const promise = async (): PromiseResult => {
 				const result = await loadEthereumTransactions({ tokenId, networkId });
 				return { ...result, tokenId };
-			})();
+			};
 
 			return [...acc, promise];
 		},
