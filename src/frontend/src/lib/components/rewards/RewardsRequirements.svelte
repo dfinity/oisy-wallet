@@ -5,10 +5,14 @@
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let loading = true;
-	export let reward: RewardDescription;
-	export let isEligible = false;
-	export let requirementsFulfilled: boolean[];
+	interface Props {
+		loading?: boolean;
+		reward: RewardDescription;
+		isEligible?: boolean;
+		requirementsFulfilled: boolean[];
+	}
+
+	let { loading = true, reward, isEligible = false, requirementsFulfilled }: Props = $props();
 
 	const isRequirementFulfilled = (index: number) =>
 		(reward.requirements.length === requirementsFulfilled.length && requirementsFulfilled[index]) ??
