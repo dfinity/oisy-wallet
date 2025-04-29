@@ -27,7 +27,8 @@ export const BTC_MAINNET_TOKEN: TokenWithLinkedData = {
 	decimals: BTC_DECIMALS,
 	icon: bitcoin,
 	twinTokenSymbol: 'ckBTC',
-	groupData: BTC_TOKEN_GROUP
+	groupData: BTC_TOKEN_GROUP,
+	buy: { onramperId: 'btc' }
 };
 
 export const BTC_TESTNET_SYMBOL = 'BTC (Testnet)';
