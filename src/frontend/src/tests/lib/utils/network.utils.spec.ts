@@ -44,6 +44,7 @@ import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdBTCRegtest,
 	isNetworkIdBTCTestnet,
+	isNetworkIdBase,
 	isNetworkIdBitcoin,
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
@@ -126,6 +127,22 @@ describe('network utils', () => {
 			expect(isNetworkIdEvm(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 
 			expect(isNetworkIdEvm(ETHEREUM_NETWORK_ID)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkIdBase', () => {
+		const allBaseNetworkIds = [BASE_NETWORK_ID, BASE_SEPOLIA_NETWORK_ID];
+
+		it.each(allBaseNetworkIds)('should return true for Base network ID %s', (id) => {
+			expect(isNetworkIdBase(id as NetworkId)).toBeTruthy();
+		});
+
+		it('should return false for non-EVM network IDs', () => {
+			expect(isNetworkIdBase(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdBase(ETHEREUM_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdBase(BSC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
