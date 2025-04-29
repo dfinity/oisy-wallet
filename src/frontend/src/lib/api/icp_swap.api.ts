@@ -21,16 +21,13 @@ export const icpSwapFactoryCanister = async ({
 	canisterId = SWAP_FACTORY_CANISTER_ID,
 	nullishIdentityErrorMessage
 }: CanisterApiFunctionParams): Promise<ICPSwapFactoryCanister> => {
-	assertNonNullish(identity, nullishIdentityErrorMessage);
+	assertNonNullish(identity, 'Identity is required');
+	const canister = await ICPSwapFactoryCanister.create({
+		identity,
+		canisterId: Principal.fromText(canisterId)
+	});
 
-	if (isNullish(icpSwapInstance)) {
-		icpSwapInstance = await ICPSwapFactoryCanister.create({
-			identity,
-			canisterId: Principal.fromText(canisterId)
-		});
-	}
-
-	return icpSwapInstance;
+	return canister;
 };
 
 export const getPool = async ({
@@ -135,6 +132,8 @@ export const getIcpSwapAmounts = async ({
 		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },
 		token1: { address: destinationToken.ledgerCanisterId, standard: destinationToken.standard }
 	});
+
+	console.log(Object.keys(pool))
 
 	if (!pool) {
 		throw new Error('Pool not found');
