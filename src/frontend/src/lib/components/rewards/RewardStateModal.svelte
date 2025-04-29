@@ -19,7 +19,11 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let jackpot = false;
+	interface Props {
+		jackpot?: boolean;
+	}
+
+	let { jackpot = false }: Props = $props();
 
 	// TODO At the moment the selected campaign is hardcoded. In the future this should be configurable from the outside.
 	const reward: RewardDescription | undefined = rewardCampaigns.find(
