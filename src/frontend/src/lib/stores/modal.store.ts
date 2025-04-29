@@ -98,7 +98,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReferralState: () => void;
 	openDappDetails: <D extends T>(params: SetWithDataParams<D>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
-	openRewardDetails: <D extends T>(params: SetWithDataParams<RewardDescription>) => void;
+	openRewardDetails: (params: SetWithDataParams<RewardDescription>) => void;
 	openRewardState: <D extends T>(params: SetWithDataParams<D>) => void;
 	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
 	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
