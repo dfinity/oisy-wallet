@@ -24,7 +24,7 @@ export const kongSwapProvider: SwapProvider<SwapAmountsReply> = {
 export const icpSwapProvider: SwapProvider<ICPSwapRawResult> = {
 	id: ICP_SWAP_PROVIDER,
 	getQuote: getIcpSwapAmounts,
-	mapQuoteResult: ({ swap }: MapSwapQuoteParams<ICPSwapRawResult>) => mapIcpSwapResult({ swap })
+	mapQuoteResult: ({ swap, slippage }: MapSwapQuoteParams<ICPSwapRawResult>) => mapIcpSwapResult({ swap, slippage })
 };
 
 // export const swapProviders = [kongSwapProvider, icpSwapProvider] as const;

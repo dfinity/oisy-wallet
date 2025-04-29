@@ -44,11 +44,11 @@ export interface FetchSwapOptionsParams {
 export interface MapSwapQuoteParams<TSwapRaw> {
 	swap: TSwapRaw;
 	tokens?: Token[];
+	slippage?: OptionAmount;
 }
 
 export interface ICPSwapRawResult {
 	receiveAmount: bigint;
-	slippage: OptionAmount;
 };
 export interface SwapWithIcpSwapParams {
 	identity: Identity;

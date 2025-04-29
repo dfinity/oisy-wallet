@@ -6,6 +6,7 @@ import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO_BI } from '$lib/constants/app.constants';
 import { ICP_SWAP_PROVIDER, KONG_SWAP_PROVIDER } from '$lib/constants/swap.constants';
 import type { SwapProviderResult } from '$lib/stores/swap-amounts.store';
+import type { OptionAmount } from '$lib/types/send';
 import type { ICPSwapRawResult, ProviderFee } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { findToken } from '$lib/utils/tokens.utils';
@@ -58,13 +59,20 @@ export const getNetworkFee = ({
 export const getKongIcTokenIdentifier = (token: Token): string =>
 	isIcToken(token) ? `IC.${token.ledgerCanisterId}` : '';
 
-export const mapIcpSwapResult = ({ swap }: { swap: ICPSwapRawResult }): SwapProviderResult => ({
+export const mapIcpSwapResult = ({
+	swap,
+	slippage
+}: {
+	swap: ICPSwapRawResult;
+	slippage: OptionAmount;
+}): SwapProviderResult => ({
 	provider: ICP_SWAP_PROVIDER,
 	receiveAmount: swap.receiveAmount,
-	receiveOutMinimum: calculateSlippage({
-		quoteAmount: swap.receiveAmount,
-		slippagePercentage: Number(swap.slippage)
-	}) || undefined,
+	receiveOutMinimum:
+		calculateSlippage({
+			quoteAmount: swap.receiveAmount,
+			slippagePercentage: Number(slippage)
+		}) || undefined,
 	rawSwap: swap
 });
 
