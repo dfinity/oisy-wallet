@@ -14,7 +14,7 @@
 		testId?: string | undefined;
 	}
 
-	let {title, rewards, altText = undefined, testId = undefined}: Props = $props();
+	let { title, rewards, altText = undefined, testId = undefined }: Props = $props();
 
 	const modalId = Symbol();
 </script>
