@@ -5,7 +5,7 @@ import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { SwapProviderResult } from '$lib/stores/swap-amounts.store';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
-import type { Amount } from './send';
+import type { Amount, OptionAmount } from './send';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
@@ -38,6 +38,7 @@ export interface FetchSwapOptionsParams {
 	destinationToken: IcToken;
 	amount: number;
 	tokens: Token[];
+	slippage: OptionAmount
 }
 
 export interface MapSwapQuoteParams<TSwapRaw> {
@@ -47,7 +48,8 @@ export interface MapSwapQuoteParams<TSwapRaw> {
 
 export interface ICPSwapRawResult {
 	receiveAmount: bigint;
-}
+	slippage: OptionAmount;
+};
 export interface SwapWithIcpSwapParams {
 	identity: Identity;
 	progress: (step: ProgressStepsSwap) => void;

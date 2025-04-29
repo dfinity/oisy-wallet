@@ -150,6 +150,7 @@
 		amount={swapAmount}
 		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
+		slippageValue={slippageValue}
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapForm

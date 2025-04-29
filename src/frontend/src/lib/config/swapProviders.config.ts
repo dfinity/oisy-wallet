@@ -1,5 +1,5 @@
-import { kongSwapAmounts } from '$lib/api/kong_backend.api';
 import { getIcpSwapAmounts } from '$lib/api/icp_swap.api';
+import { kongSwapAmounts } from '$lib/api/kong_backend.api';
 import { mapIcpSwapResult, mapKongSwapResult } from '$lib/utils/swap.utils';
 
 import { ICP_SWAP_PROVIDER, KONG_SWAP_PROVIDER } from '$lib/constants/swap.constants';

@@ -28,6 +28,7 @@
 		({ provider }) => provider === $swapAmountsStore?.selectedProvider
 	);
 
+	$: receiveOutMinimum = selectedSwap?.receiveOutMinimum;
 	$: route = selectedSwap?.route;
 	$: liquidityFees = selectedSwap?.liquidityFees ?? [];
 	$: networkFee = selectedSwap?.networkFee ?? undefined;
@@ -114,6 +115,9 @@
 			{/if}
 			{#if nonNullish(liquidityFees) && liquidityFees.length > 0}
 				<SwapLiquidityFees {liquidityFees} />
+			{/if}
+			{#if nonNullish(receiveOutMinimum)}
+				<span>{receiveOutMinimum}</span>
 			{/if}
 		</svelte:fragment>
 	</ModalExpandableValues>

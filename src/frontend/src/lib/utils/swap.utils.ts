@@ -61,6 +61,10 @@ export const getKongIcTokenIdentifier = (token: Token): string =>
 export const mapIcpSwapResult = ({ swap }: { swap: ICPSwapRawResult }): SwapProviderResult => ({
 	provider: ICP_SWAP_PROVIDER,
 	receiveAmount: swap.receiveAmount,
+	receiveOutMinimum: calculateSlippage({
+		quoteAmount: swap.receiveAmount,
+		slippagePercentage: Number(swap.slippage)
+	}) || undefined,
 	rawSwap: swap
 });
 

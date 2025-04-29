@@ -15,6 +15,7 @@
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: IcToken | undefined;
 	export let destinationToken: IcToken | undefined;
+	export let slippageValue: OptionAmount;
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -41,7 +42,8 @@
 				sourceToken,
 				destinationToken,
 				amount: parsedAmount,
-				tokens: $tokens
+				tokens: $tokens,
+				slippage: slippageValue,
 			});
 
 			console.log(swapAmounts, 'swapAmounts');

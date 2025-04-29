@@ -34,8 +34,6 @@
 					: 0
 		});
 
-	$: bestRate = $bestSwapProvider === $activeSwap?.provider;
-
 	const handleSelect = (provider: string) => dispatch('icSelectProvider', provider);
 </script>
 
@@ -54,7 +52,7 @@
 						amount={swap.receiveAmount}
 						token={$destinationToken}
 						usdBalance={getUsdBalance(swap.receiveAmount, $destinationToken)}
-						isBest={bestRate}
+						isBest={$bestSwapProvider === swap.provider}
 					/>
 				</li>
 			{/if}

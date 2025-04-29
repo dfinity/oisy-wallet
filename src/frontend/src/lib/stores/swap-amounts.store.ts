@@ -11,6 +11,7 @@ export interface SwapProviderResult {
 	slippage?: number;
 	route?: string[];
 	liquidityFees?: ProviderFee[];
+	receiveOutMinimum?: bigint;
 	networkFee?: ProviderFee;
 	rawSwap: unknown;
 }

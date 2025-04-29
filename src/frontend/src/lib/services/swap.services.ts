@@ -271,7 +271,8 @@ export const fetchSwapAmounts = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	tokens
+	tokens,
+	slippage
 }: FetchSwapOptionsParams): Promise<SwapProviderResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -285,9 +286,6 @@ export const fetchSwapAmounts = async ({
 		swapProviders[ICP_SWAP_PROVIDER].getQuote(params)
 	]);
 
-	console.log('kongResult:', kongResult);
-	console.log('icpResult:', icpResult);
-
 	const results: SwapProviderResult[] = [];
 
 	if (kongResult.status === 'fulfilled') {
@@ -297,10 +295,8 @@ export const fetchSwapAmounts = async ({
 	}
 
 	if (icpResult.status === 'fulfilled') {
-		results.push(swapProviders[ICP_SWAP_PROVIDER].mapQuoteResult({ swap: icpResult.value }));
+		results.push(swapProviders[ICP_SWAP_PROVIDER].mapQuoteResult({ swap: icpResult.value, slippage }));
 	}
-
-	console.log('swapCall in service', results);
 
 	return results;
 };
