@@ -34,21 +34,23 @@ import { derived, type Readable } from 'svelte/store';
 export const userNetworks: Readable<UserNetworks> = derived(
 	[userSettingsNetworks, testnetsEnabled],
 	([$userSettingsNetworks, $testnetsEnabled]) => {
+		const defaultMainnetUserNetworks: UserNetworks =
+			SUPPORTED_MAINNET_NETWORKS_IDS.reduce<UserNetworks>(
+				(acc, id) => ({ ...acc, [id]: { enabled: true, isTestnet: false } }),
+				{}
+			);
+
+		const defaultTestnetUserNetworks: UserNetworks =
+			SUPPORTED_TESTNET_NETWORKS_IDS.reduce<UserNetworks>(
+				(acc, id) => ({ ...acc, [id]: { enabled: $testnetsEnabled, isTestnet: true } }),
+				{}
+			);
+
 		const userNetworks = $userSettingsNetworks?.networks;
 
 		if (isNullish(userNetworks) || userNetworks.length === 0) {
 			// Returning all mainnets (and testnets if enabled) by default
-			return {
-				...SUPPORTED_MAINNET_NETWORKS_IDS.reduce<UserNetworks>(
-					(acc, id) => ({ ...acc, [id]: { enabled: true, isTestnet: false } }),
-					{}
-				),
-				...($testnetsEnabled &&
-					SUPPORTED_TESTNET_NETWORKS_IDS.reduce<UserNetworks>(
-						(acc, id) => ({ ...acc, [id]: { enabled: $testnetsEnabled, isTestnet: true } }),
-						{}
-					))
-			};
+			return { ...defaultMainnetUserNetworks, ...($testnetsEnabled && defaultTestnetUserNetworks) };
 		}
 
 		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId => {
@@ -102,6 +104,7 @@ export const userNetworks: Readable<UserNetworks> = derived(
 		};
 
 		return {
+			...defaultMainnetUserNetworks,
 			...userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
 				const networkId: NetworkId = keyToNetworkId(key);
 				return { ...acc, [networkId]: { enabled, isTestnet } };
