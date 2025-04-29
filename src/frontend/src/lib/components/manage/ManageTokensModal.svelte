@@ -28,7 +28,12 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNetworkIdEthereum, isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdEthereum,
+		isNetworkIdEvm,
+		isNetworkIdICP,
+		isNetworkIdSolana
+	} from '$lib/utils/network.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
@@ -231,7 +236,7 @@
 				{ledgerCanisterId}
 				{indexCanisterId}
 			/>
-		{:else if nonNullish(network) && isNetworkIdEthereum(network?.id)}
+		{:else if nonNullish(network) && (isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id))}
 			<EthAddTokenReview
 				on:icBack={modal.back}
 				on:icSave={saveErc20Token}

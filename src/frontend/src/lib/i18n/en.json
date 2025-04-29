@@ -226,7 +226,7 @@
 		"text": {
 			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum and Solana",
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base and BNB",
 			"done": "Enjoy $oisy_short"
 		},
 		"alt": {
