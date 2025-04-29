@@ -201,7 +201,7 @@ describe('user-snapshot.services', () => {
 			);
 			// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(() => [
+			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORK_IDS', 'get').mockImplementation(() => [
 				ETHEREUM_NETWORK_ID,
 				SEPOLIA_NETWORK_ID
 			]);

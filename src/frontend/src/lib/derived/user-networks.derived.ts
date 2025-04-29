@@ -14,7 +14,7 @@ import {
 } from '$env/networks/networks.btc.env';
 import {
 	SUPPORTED_MAINNET_NETWORKS_IDS,
-	SUPPORTED_TESTNET_NETWORKS_IDS
+	SUPPORTED_TESTNET_NETWORK_IDS
 } from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
@@ -41,7 +41,7 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			);
 
 		const defaultTestnetUserNetworks: UserNetworks =
-			SUPPORTED_TESTNET_NETWORKS_IDS.reduce<UserNetworks>(
+			SUPPORTED_TESTNET_NETWORK_IDS.reduce<UserNetworks>(
 				(acc, id) => ({ ...acc, [id]: { enabled: $testnetsEnabled, isTestnet: true } }),
 				{}
 			);

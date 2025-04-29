@@ -10,7 +10,7 @@ export const SUPPORTED_EVM_NETWORKS: EthereumNetwork[] = EVM_NETWORKS_ENABLED
 	? [...SUPPORTED_BASE_NETWORKS, ...SUPPORTED_BSC_NETWORKS]
 	: [];
 
-export const SUPPORTED_EVM_NETWORKS_IDS: NetworkId[] = SUPPORTED_EVM_NETWORKS.map(({ id }) => id);
+export const SUPPORTED_EVM_NETWORK_IDS: NetworkId[] = SUPPORTED_EVM_NETWORKS.map(({ id }) => id);
 
 export const SUPPORTED_EVM_NETWORKS_CHAIN_IDS: EthereumChainId[] = SUPPORTED_EVM_NETWORKS.map(
 	({ chainId }) => chainId
@@ -24,10 +24,10 @@ const SUPPORTED_EVM_TESTNET_NETWORKS: Network[] = SUPPORTED_EVM_NETWORKS.filter(
 	({ env }) => env === 'testnet'
 );
 
-export const SUPPORTED_EVM_MAINNET_NETWORKS_IDS: NetworkId[] = SUPPORTED_EVM_MAINNET_NETWORKS.map(
+export const SUPPORTED_EVM_MAINNET_NETWORK_IDS: NetworkId[] = SUPPORTED_EVM_MAINNET_NETWORKS.map(
 	({ id }) => id
 );
 
-export const SUPPORTED_EVM_TESTNET_NETWORKS_IDS: NetworkId[] = SUPPORTED_EVM_TESTNET_NETWORKS.map(
+export const SUPPORTED_EVM_TESTNET_NETWORK_IDS: NetworkId[] = SUPPORTED_EVM_TESTNET_NETWORKS.map(
 	({ id }) => id
 );

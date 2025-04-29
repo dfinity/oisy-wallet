@@ -83,7 +83,7 @@ export const SUPPORTED_ETHEREUM_NETWORKS: EthereumNetwork[] = defineSupportedNet
 	testnetNetworks: [SEPOLIA_NETWORK]
 });
 
-export const SUPPORTED_ETHEREUM_NETWORKS_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NETWORKS.map(
+export const SUPPORTED_ETHEREUM_NETWORK_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NETWORKS.map(
 	({ id }) => id
 );
 
