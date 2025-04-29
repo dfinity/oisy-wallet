@@ -13,7 +13,7 @@
 		testId?: string | undefined;
 	}
 
-	let {onclick, reward, testId = undefined}: Props = $props();
+	let { onclick, reward, testId = undefined }: Props = $props();
 </script>
 
 <button
