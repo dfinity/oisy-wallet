@@ -26,10 +26,10 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		codeType: QrCodeType
+		codeType: QrCodeType;
 	}
 
-	let {codeType = QrCodeType.VIP}: Props = $props();
+	let { codeType = QrCodeType.VIP }: Props = $props();
 
 	let counter = $state(CODE_REGENERATE_INTERVAL_IN_SECONDS);
 	let countdown: NodeJS.Timeout | undefined = $state();

@@ -7,7 +7,7 @@
 		testId: string | undefined;
 	}
 
-	let {onclick, testId = undefined}: Props = $props();
+	let { onclick, testId = undefined }: Props = $props();
 </script>
 
 <Button colorStyle="primary" paddingSmall {testId} fullWidth type="button" {onclick}>

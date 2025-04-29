@@ -9,7 +9,7 @@
 		testId: string | undefined;
 	}
 
-	let {onclick, disabled = false, fullWidth = false, testId = undefined}: Props = $props();
+	let { onclick, disabled = false, fullWidth = false, testId = undefined }: Props = $props();
 </script>
 
 <Button {testId} colorStyle="secondary-light" type="button" {fullWidth} {disabled} {onclick}>

@@ -6,10 +6,10 @@
 		onclick: () => void;
 		disabled: boolean;
 		fullWidth: boolean;
-		testId: string | undefined
+		testId: string | undefined;
 	}
 
-	let {onclick, disabled = false, fullWidth = false, testId = undefined}: Props = $props();
+	let { onclick, disabled = false, fullWidth = false, testId = undefined }: Props = $props();
 </script>
 
 <Button colorStyle="secondary-light" type="button" {disabled} {fullWidth} {testId} {onclick}>

@@ -11,7 +11,7 @@
 		dAppDescription: FeaturedOisyDappDescription;
 	}
 
-	let {onclick, dAppDescription}: Props = $props();
+	let { onclick, dAppDescription }: Props = $props();
 </script>
 
 <article class="relative flex items-end overflow-hidden rounded-2xl">

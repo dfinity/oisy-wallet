@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { ButtonColorStyle } from '$lib/types/style';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		onclick: () => void;
@@ -19,8 +19,22 @@
 		children: Snippet;
 	}
 
-	let {onclick, colorStyle = 'primary', type = 'submit', disabled = false, loading = false, loadingAsSkeleton = false,
-	fullWidth = false, link = false, inlineLink = false, paddingSmall = false, testId = undefined, ariaLabel = undefined, styleClass = '', children}: Props = $props();
+	let {
+		onclick,
+		colorStyle = 'primary',
+		type = 'submit',
+		disabled = false,
+		loading = false,
+		loadingAsSkeleton = false,
+		fullWidth = false,
+		link = false,
+		inlineLink = false,
+		paddingSmall = false,
+		testId = undefined,
+		ariaLabel = undefined,
+		styleClass = '',
+		children
+	}: Props = $props();
 </script>
 
 <button
