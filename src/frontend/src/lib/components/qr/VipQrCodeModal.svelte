@@ -26,7 +26,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		codeType: QrCodeType;
+		codeType?: QrCodeType;
 	}
 
 	let { codeType = QrCodeType.VIP }: Props = $props();
