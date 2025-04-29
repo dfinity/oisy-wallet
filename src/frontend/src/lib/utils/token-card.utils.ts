@@ -8,8 +8,8 @@ import { nonNullish } from '@dfinity/utils';
  * @returns {CardData} The card data for the token group
  */
 export const mapHeaderData = ({
-	nativeToken: { name, symbol, decimals, icon, network },
-	groupData,
+	groupData: { name, symbol, icon },
+	nativeToken: { decimals, network },
 	tokens,
 	balance,
 	usdBalance
@@ -23,6 +23,5 @@ export const mapHeaderData = ({
 	oisySymbol: { oisySymbol: name },
 	balance,
 	usdBalance,
-	tokenCount: tokens.length,
-	groupData
+	tokenCount: tokens.length
 });
