@@ -15,6 +15,7 @@ import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { initSolWalletWorker } from '$sol/services/worker.sol-wallet.services';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -31,18 +32,18 @@ describe('SolLoaderWallets', () => {
 		solAddressTestnetStore.reset();
 		solAddressDevnetStore.reset();
 		solAddressMainnetStore.reset();
-		setupTestnetsStore('reset');
+
+		setupTestnetsStore('enabled');
+		setupUserNetworksStore('allEnabled');
 
 		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 	});
 
 	it('should not initialize wallet workers when no addresses are available', () => {
-		setupTestnetsStore('enabled');
-
 		render(SolLoaderWallets);
 
 		// With testnets enabled, we expect mainnet + testnet + devnet tokens
-		expect(get(enabledSolanaTokens).length).toBe(3);
+		expect(get(enabledSolanaTokens)).toHaveLength(3);
 		expect(initSolWalletWorker).not.toHaveBeenCalled();
 	});
 
@@ -50,7 +51,6 @@ describe('SolLoaderWallets', () => {
 		const testnetAddress = parseSolAddress('testnet-address');
 		const mainnetAddress = parseSolAddress('mainnet-address');
 
-		setupTestnetsStore('enabled');
 		solAddressTestnetStore.set({ data: testnetAddress, certified: true });
 		solAddressMainnetStore.set({ data: mainnetAddress, certified: true });
 
@@ -62,12 +62,11 @@ describe('SolLoaderWallets', () => {
 				(networkId === SOLANA_TOKEN.network.id && mainnetAddress)
 		);
 
-		expect(walletWorkerTokens.length).toBe(2);
+		expect(walletWorkerTokens).toHaveLength(2);
 	});
 
 	it('should update wallet workers when addresses change', async () => {
 		const devnetAddress = parseSolAddress('devnet-address');
-		setupTestnetsStore('enabled');
 
 		const { rerender } = render(SolLoaderWallets);
 
@@ -81,11 +80,10 @@ describe('SolLoaderWallets', () => {
 				networkId === SOLANA_DEVNET_TOKEN.network.id && devnetAddress
 		);
 
-		expect(walletWorkerTokens.length).toBe(1);
+		expect(walletWorkerTokens).toHaveLength(1);
 	});
 
 	it('should handle all networks having addresses', () => {
-		setupTestnetsStore('enabled');
 		solAddressLocalnetStore.set({ data: parseSolAddress('local-address'), certified: true });
 		solAddressTestnetStore.set({ data: parseSolAddress('testnet-address'), certified: true });
 		solAddressDevnetStore.set({ data: parseSolAddress('devnet-address'), certified: true });
@@ -100,16 +98,15 @@ describe('SolLoaderWallets', () => {
 				networkId === SOLANA_DEVNET_TOKEN.network.id
 		);
 
-		expect(walletWorkerTokens.length).toBe(3);
+		expect(walletWorkerTokens).toHaveLength(3);
 	});
 
 	it('should include local network token when LOCAL is true', () => {
 		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
-		setupTestnetsStore('enabled');
 
 		render(SolLoaderWallets);
 
 		// With LOCAL true and testnets enabled, we expect mainnet + testnet + devnet + local tokens
-		expect(get(enabledSolanaTokens).length).toBe(4);
+		expect(get(enabledSolanaTokens)).toHaveLength(4);
 	});
 });

@@ -1,7 +1,8 @@
-import type { Erc20ContractAddress } from '$eth/types/erc20';
+import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import {
+	exchangeRateBNBToUsd,
 	exchangeRateBTCToUsd,
 	exchangeRateERC20ToUsd,
 	exchangeRateETHToUsd,
@@ -10,6 +11,7 @@ import {
 	exchangeRateSOLToUsd,
 	exchangeRateSPLToUsd
 } from '$lib/services/exchange.services';
+import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -67,7 +69,7 @@ const syncExchange = async ({
 	icrcLedgerCanisterIds,
 	splTokenAddresses
 }: {
-	erc20ContractAddresses: Erc20ContractAddress[];
+	erc20ContractAddresses: Erc20ContractAddressWithNetwork[];
 	icrcLedgerCanisterIds: LedgerCanisterIdText[];
 	splTokenAddresses: SplTokenAddress[];
 }) => {
@@ -78,7 +80,34 @@ const syncExchange = async ({
 
 	syncInProgress = true;
 
+	const erc20PriceParams: CoingeckoErc20PriceParams[] = erc20ContractAddresses.reduce<
+		CoingeckoErc20PriceParams[]
+	>((acc, { address, coingeckoId }) => {
+		if (
+			coingeckoId !== 'ethereum' &&
+			coingeckoId !== 'base' &&
+			coingeckoId !== 'binance-smart-chain'
+		) {
+			return acc;
+		}
+
+		const existing = acc.find(({ coingeckoPlatformId }) => coingeckoPlatformId === coingeckoId);
+
+		return [
+			...acc,
+			{
+				...existing,
+				coingeckoPlatformId: coingeckoId,
+				contractAddresses: [...(existing?.contractAddresses ?? []), { address, coingeckoId }]
+			}
+		];
+	}, []);
+
 	try {
+		const erc20Prices = await Promise.all(
+			erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params))
+		);
+
 		const [
 			currentEthPrice,
 			currentBtcPrice,
@@ -86,15 +115,17 @@ const syncExchange = async ({
 			currentIcpPrice,
 			currentIcrcPrices,
 			currentSolPrice,
-			currentSplPrices
+			currentSplPrices,
+			currentBnbPrice
 		] = await Promise.all([
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
-			exchangeRateERC20ToUsd(erc20ContractAddresses),
+			erc20Prices.reduce((acc, prices) => ({ ...acc, ...prices }), {}),
 			exchangeRateICPToUsd(),
 			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
 			exchangeRateSOLToUsd(),
-			exchangeRateSPLToUsd(splTokenAddresses)
+			exchangeRateSPLToUsd(splTokenAddresses),
+			exchangeRateBNBToUsd()
 		]);
 
 		postMessage({
@@ -106,7 +137,8 @@ const syncExchange = async ({
 				currentIcpPrice,
 				currentIcrcPrices,
 				currentSolPrice,
-				currentSplPrices
+				currentSplPrices,
+				currentBnbPrice
 			}
 		});
 	} catch (err: unknown) {

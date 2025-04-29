@@ -1,4 +1,4 @@
-import { icTokenIcrcCustomToken, isDeprecatedSns } from '$icp/utils/icrc.utils';
+import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO_BI } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -48,11 +48,11 @@ export const sortTokens = <T extends Token>({
 		...pinnedTokens,
 		...otherTokens.sort((a, b) => {
 			// Deprecated SNSes such as CTS
-			if (isIcToken(a) && isDeprecatedSns(a)) {
+			if (isIcToken(a) && (a.deprecated ?? false)) {
 				return 1;
 			}
 
-			if (isIcToken(b) && isDeprecatedSns(b)) {
+			if (isIcToken(b) && (b.deprecated ?? false)) {
 				return -1;
 			}
 
@@ -199,9 +199,7 @@ export const filterTokens = <T extends Token>({
 		token.name.toLowerCase().includes(filter.toLowerCase()) ||
 		token.symbol.toLowerCase().includes(filter.toLowerCase()) ||
 		(icTokenIcrcCustomToken(token) &&
-			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase())) ||
-		token.network.name.toLowerCase().includes(filter.toLowerCase()) ||
-		(token.network.id.description ?? '').toLowerCase().includes(filter.toLowerCase());
+			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase()));
 
 	return isNullishOrEmpty(filter)
 		? tokens

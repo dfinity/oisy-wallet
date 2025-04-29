@@ -13,18 +13,19 @@ export const BSC_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_BSC_MAINNET_DISABLED
 );
 
-export const BSC_NETWORK_SYMBOL = 'BSC';
+export const BSC_MAINNET_NETWORK_SYMBOL = 'BSC';
 
-export const BSC_NETWORK_ID: NetworkId = parseNetworkId(BSC_NETWORK_SYMBOL);
+export const BSC_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(BSC_MAINNET_NETWORK_SYMBOL);
 
-export const BSC_NETWORK: EthereumNetwork = {
-	id: BSC_NETWORK_ID,
+export const BSC_MAINNET_NETWORK: EthereumNetwork = {
+	id: BSC_MAINNET_NETWORK_ID,
 	env: 'mainnet',
 	name: 'BNB Smart Chain',
 	chainId: 56n,
 	iconLight: bscMainnetIconLight,
 	iconDark: bscMainnetIconDark,
 	explorerUrl: BSC_EXPLORER_URL,
+	exchange: { coingeckoId: 'binance-smart-chain' },
 	buy: { onramperId: 'bsc' }
 };
 
@@ -44,6 +45,8 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 
 export const SUPPORTED_BSC_NETWORKS: EthereumNetwork[] = defineSupportedNetworks({
 	mainnetFlag: BSC_MAINNET_ENABLED,
-	mainnetNetworks: [BSC_NETWORK],
+	mainnetNetworks: [BSC_MAINNET_NETWORK],
 	testnetNetworks: [BSC_TESTNET_NETWORK]
 });
+
+export const SUPPORTED_BSC_NETWORK_IDS: NetworkId[] = SUPPORTED_BSC_NETWORKS.map(({ id }) => id);

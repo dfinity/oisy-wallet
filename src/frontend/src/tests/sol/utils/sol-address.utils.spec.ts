@@ -7,7 +7,7 @@ import { mockSolAddress } from '$tests/mocks/sol.mock';
 describe('sol-address.utils', () => {
 	describe('isSolAddress', () => {
 		it('should return false if the address is undefined', () => {
-			expect(isSolAddress(undefined)).toBe(false);
+			expect(isSolAddress(undefined)).toBeFalsy();
 		});
 
 		it('should return false if the address is empty', () => {
@@ -23,7 +23,7 @@ describe('sol-address.utils', () => {
 		});
 
 		it('should return true if the address is valid', () => {
-			expect(isSolAddress(mockSolAddress)).toBe(true);
+			expect(isSolAddress(mockSolAddress)).toBeTruthy();
 		});
 
 		it('should return false if the address contains spaces', () => {
@@ -33,7 +33,7 @@ describe('sol-address.utils', () => {
 
 	describe('invalidSolAddress', () => {
 		it('should return true if the address is undefined', () => {
-			expect(invalidSolAddress(undefined)).toBe(true);
+			expect(invalidSolAddress(undefined)).toBeTruthy();
 		});
 
 		it('should return true if the address is empty', () => {
@@ -49,7 +49,7 @@ describe('sol-address.utils', () => {
 		});
 
 		it('should return false if the address is valid', () => {
-			expect(invalidSolAddress(mockSolAddress)).toBe(false);
+			expect(invalidSolAddress(mockSolAddress)).toBeFalsy();
 		});
 
 		it('should return true if the address contains spaces', () => {

@@ -8,11 +8,13 @@
 	export let styleClass = '';
 	export let testId: string | undefined = undefined;
 
+	const modalId = Symbol();
+
 	const onClick = () => {
 		trackEvent({
 			name: TRACK_HELP_SIGNING_IN
 		});
-		modalStore.openAuthHelp(true);
+		modalStore.openAuthHelp({ id: modalId, data: true });
 	};
 </script>
 
