@@ -104,6 +104,10 @@ const syncExchange = async ({
 	}, []);
 
 	try {
+		const erc20Prices = await Promise.all(
+			erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params))
+		);
+
 		const [
 			currentEthPrice,
 			currentBtcPrice,
@@ -116,7 +120,7 @@ const syncExchange = async ({
 		] = await Promise.all([
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
-			Promise.all(erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params))),
+			erc20Prices.reduce((acc, prices) => ({ ...acc, ...prices }), {}),
 			exchangeRateICPToUsd(),
 			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
 			exchangeRateSOLToUsd(),
