@@ -51,6 +51,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	iconLight: ethereumIconLight,
 	iconDark: ethereumIconDark,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
+	exchange: { coingeckoId: 'ethereum' },
 	buy: { onramperId: 'ethereum' }
 };
 
