@@ -144,10 +144,10 @@ describe('network utils', () => {
 			expect(isNetworkIdBase(ETHEREUM_NETWORK_ID)).toBeFalsy();
 
 			expect(isNetworkIdBase(BSC_MAINNET_NETWORK_ID)).toBeFalsy();
-    })
-})
+		});
+	});
 
-describe('isNetworkIdBsc', () => {
+	describe('isNetworkIdBsc', () => {
 		const allBscNetworkIds = [BSC_MAINNET_NETWORK_ID, BSC_TESTNET_NETWORK_ID];
 
 		it.each(allBscNetworkIds)('should return true for Base network ID %s', (id) => {

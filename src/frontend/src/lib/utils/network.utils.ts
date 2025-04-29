@@ -1,6 +1,6 @@
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
-import { SUPPORTED_BSC_NETWORKS_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_BASE_NETWORKS_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
+import { SUPPORTED_BSC_NETWORKS_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_EVM_NETWORKS_IDS } from '$env/networks/networks-evm/networks.evm.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
