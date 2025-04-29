@@ -18,6 +18,10 @@
 	ariaLabel={$i18n.receive.text.receive}
 	testId={RECEIVE_TOKENS_MODAL_OPEN_BUTTON}
 >
-	<IconQr size="28" slot="icon" />
-	{$i18n.receive.text.receive}
+	{#snippet icon()}
+		<IconQr size="28" />
+	{/snippet}
+	{#snippet label()}
+		{$i18n.receive.text.receive}
+	{/snippet}
 </ButtonHero>
