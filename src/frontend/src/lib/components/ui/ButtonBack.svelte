@@ -4,9 +4,9 @@
 
 	interface Props {
 		onclick: () => void;
-		disabled: boolean;
-		fullWidth: boolean;
-		testId: string | undefined;
+		disabled?: boolean;
+		fullWidth?: boolean;
+		testId?: string | undefined;
 	}
 
 	let { onclick, disabled = false, fullWidth = false, testId = undefined }: Props = $props();

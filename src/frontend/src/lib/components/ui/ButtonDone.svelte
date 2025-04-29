@@ -4,7 +4,7 @@
 
 	interface Props {
 		onclick: () => void;
-		testId: string | undefined;
+		testId?: string | undefined;
 	}
 
 	let { onclick, testId = undefined }: Props = $props();

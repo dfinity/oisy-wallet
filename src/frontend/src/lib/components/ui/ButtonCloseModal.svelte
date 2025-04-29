@@ -11,7 +11,7 @@
 	colorStyle={isPrimary ? 'primary' : 'secondary-light'}
 	type="button"
 	fullWidth
-	on:click={modalStore.close}
+	onclick={modalStore.close}
 >
 	{$i18n.core.text.close}
 </Button>
