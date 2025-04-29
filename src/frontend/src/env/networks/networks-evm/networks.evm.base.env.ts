@@ -25,6 +25,7 @@ export const BASE_NETWORK: EthereumNetwork = {
 	iconLight: baseMainnetIconLight,
 	iconDark: baseMainnetIconDark,
 	explorerUrl: BASE_EXPLORER_URL,
+	exchange: { coingeckoId: 'base' },
 	buy: { onramperId: 'base' }
 };
 
