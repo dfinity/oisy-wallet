@@ -10,7 +10,7 @@
 	$: definedModalId = modalId ?? Symbol();
 </script>
 
-<ReceiveButton on:click={async () => await open(definedModalId)} />
+<ReceiveButton onclick={async () => await open(definedModalId)} />
 
 {#if isOpen && $modalStore?.id === definedModalId}
 	<slot name="modal" />

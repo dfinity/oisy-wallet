@@ -5,6 +5,7 @@
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -68,15 +69,13 @@
 	<div class="gap-6 overflow-y-auto overscroll-contain">
 		<TokensSkeletons {loading}>
 			{#if noTokensMatch}
-				<p class="text-primary">
-					{#if noResults}
-						{@render noResults()}
-					{:else}
-						<p class="text-primary">
-							{$i18n.core.text.no_results}
-						</p>
-					{/if}
-				</p>
+				{#if noResults}
+					{@render noResults()}
+				{:else}
+					<p class="text-primary" data-tid={MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS}>
+						{$i18n.core.text.no_results}
+					</p>
+				{/if}
 			{:else}
 				<ul class="list-none">
 					{#each $filteredTokens as token (token.id)}

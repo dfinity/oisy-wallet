@@ -4,7 +4,7 @@ import {
 	BASE_SEPOLIA_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.base.env';
 import {
-	BSC_NETWORK_ID,
+	BSC_MAINNET_NETWORK_ID,
 	BSC_TESTNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
@@ -14,8 +14,7 @@ import {
 } from '$env/networks/networks.btc.env';
 import {
 	SUPPORTED_MAINNET_NETWORKS_IDS,
-	SUPPORTED_TESTNET_NETWORKS_IDS,
-	USER_NETWORKS_FEATURE_ENABLED
+	SUPPORTED_TESTNET_NETWORK_IDS
 } from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
@@ -35,21 +34,23 @@ import { derived, type Readable } from 'svelte/store';
 export const userNetworks: Readable<UserNetworks> = derived(
 	[userSettingsNetworks, testnetsEnabled],
 	([$userSettingsNetworks, $testnetsEnabled]) => {
+		const defaultMainnetUserNetworks: UserNetworks =
+			SUPPORTED_MAINNET_NETWORKS_IDS.reduce<UserNetworks>(
+				(acc, id) => ({ ...acc, [id]: { enabled: true, isTestnet: false } }),
+				{}
+			);
+
+		const defaultTestnetUserNetworks: UserNetworks =
+			SUPPORTED_TESTNET_NETWORK_IDS.reduce<UserNetworks>(
+				(acc, id) => ({ ...acc, [id]: { enabled: $testnetsEnabled, isTestnet: true } }),
+				{}
+			);
+
 		const userNetworks = $userSettingsNetworks?.networks;
 
-		if (isNullish(userNetworks) || userNetworks.length === 0 || !USER_NETWORKS_FEATURE_ENABLED) {
+		if (isNullish(userNetworks) || userNetworks.length === 0) {
 			// Returning all mainnets (and testnets if enabled) by default
-			return {
-				...SUPPORTED_MAINNET_NETWORKS_IDS.reduce<UserNetworks>(
-					(acc, id) => ({ ...acc, [id]: { enabled: true, isTestnet: false } }),
-					{}
-				),
-				...($testnetsEnabled &&
-					SUPPORTED_TESTNET_NETWORKS_IDS.reduce<UserNetworks>(
-						(acc, id) => ({ ...acc, [id]: { enabled: $testnetsEnabled, isTestnet: true } }),
-						{}
-					))
-			};
+			return { ...defaultMainnetUserNetworks, ...($testnetsEnabled && defaultTestnetUserNetworks) };
 		}
 
 		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId => {
@@ -90,7 +91,7 @@ export const userNetworks: Readable<UserNetworks> = derived(
 				return BASE_SEPOLIA_NETWORK_ID;
 			}
 			if ('BscMainnet' in key) {
-				return BSC_NETWORK_ID;
+				return BSC_MAINNET_NETWORK_ID;
 			}
 			if ('BscTestnet' in key) {
 				return BSC_TESTNET_NETWORK_ID;
@@ -103,6 +104,7 @@ export const userNetworks: Readable<UserNetworks> = derived(
 		};
 
 		return {
+			...defaultMainnetUserNetworks,
 			...userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
 				const networkId: NetworkId = keyToNetworkId(key);
 				return { ...acc, [networkId]: { enabled, isTestnet } };

@@ -201,7 +201,7 @@ describe('user-snapshot.services', () => {
 			);
 			// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(() => [
+			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORK_IDS', 'get').mockImplementation(() => [
 				ETHEREUM_NETWORK_ID,
 				SEPOLIA_NETWORK_ID
 			]);
@@ -216,23 +216,23 @@ describe('user-snapshot.services', () => {
 			});
 
 			balancesStore.set({
-				tokenId: ICP_TOKEN.id,
+				id: ICP_TOKEN.id,
 				data: { data: mockIcAmount * 2n, certified }
 			});
 			balancesStore.set({
-				tokenId: ETHEREUM_TOKEN.id,
+				id: ETHEREUM_TOKEN.id,
 				data: { data: mockIcAmount + mockSplAmount, certified }
 			});
 			balancesStore.set({
-				tokenId: SOLANA_TOKEN.id,
+				id: SOLANA_TOKEN.id,
 				data: { data: mockSplAmount * 5n, certified }
 			});
 			balancesStore.set({
-				tokenId: mockValidIcToken.id,
+				id: mockValidIcToken.id,
 				data: { data: mockIcAmount, certified }
 			});
 			balancesStore.set({
-				tokenId: mockValidSplToken.id,
+				id: mockValidSplToken.id,
 				data: { data: mockSplAmount, certified }
 			});
 
@@ -309,7 +309,7 @@ describe('user-snapshot.services', () => {
 
 		it('should not include ICRC testnet tokens', async () => {
 			balancesStore.set({
-				tokenId: mockIcrcTestnetToken.id,
+				id: mockIcrcTestnetToken.id,
 				data: { data: 987n, certified }
 			});
 
@@ -323,11 +323,11 @@ describe('user-snapshot.services', () => {
 
 		it('should not include tokens with zero balance', async () => {
 			balancesStore.set({
-				tokenId: mockValidIcToken.id,
+				id: mockValidIcToken.id,
 				data: { data: ZERO_BI, certified }
 			});
 			balancesStore.set({
-				tokenId: ETHEREUM_TOKEN.id,
+				id: ETHEREUM_TOKEN.id,
 				data: { data: ZERO_BI, certified }
 			});
 

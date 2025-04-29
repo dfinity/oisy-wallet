@@ -1,5 +1,5 @@
 <script lang="ts">
-	import bitcoin from '$icp/assets/bitcoin.svg';
+	import bitcoin from '$btc/assets/bitcoin.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -22,7 +22,7 @@
 		{$i18n.info.bitcoin.note}
 	</p>
 
-	<button class="primary mt-6" disabled={$isBusy} on:click={openReceive}>
+	<button class="primary mt-6" disabled={$isBusy} onclick={openReceive}>
 		{$i18n.info.bitcoin.how_to}</button
 	>
 </div>

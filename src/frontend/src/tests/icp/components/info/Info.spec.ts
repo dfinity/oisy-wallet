@@ -17,12 +17,6 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
-vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
-	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
-});
-
 describe('Info', () => {
 	const mockCkBtcToken = {
 		...mockValidIcCkToken,
@@ -88,8 +82,7 @@ describe('Info', () => {
 			});
 		});
 
-		// TODO: unskip after Info components are migrated to the Convert wizard
-		it.skip('should not render bitcoin info if network is not enabled', async () => {
+		it('should not render bitcoin info if network is not enabled', async () => {
 			mockEnabledToken();
 			const { getByText } = render(Info);
 
@@ -104,8 +97,7 @@ describe('Info', () => {
 			});
 		});
 
-		// TODO: unskip after Info components are migrated to the Convert wizard
-		it.skip('should not render bitcoin info if page token is not set', async () => {
+		it('should not render bitcoin info if page token is not set', async () => {
 			mockEnabledToken(mockCkBtcToken);
 			const { getByText } = render(Info);
 
