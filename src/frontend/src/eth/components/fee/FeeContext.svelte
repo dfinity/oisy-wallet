@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { debounce } from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { infuraProviders } from '$eth/providers/infura.providers';
+	import { InfuraGasRest } from '$eth/rest/infura.rest';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import {
 		getCkErc20FeeData,
@@ -62,9 +63,22 @@
 
 			const feeData = await getFeeData();
 
+			const { getSuggestedFeeData } = new InfuraGasRest(
+				(sendToken.network as EthereumNetwork).chainId
+			);
+
+			const {
+				maxFeePerGas: suggestedMaxFeePerGas,
+				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
+			} = await getSuggestedFeeData();
+
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
 					...feeData,
+					...(isNullish(feeData.maxFeePerGas) && { maxFeePerGas: suggestedMaxFeePerGas }),
+					...(isNullish(feeData.maxPriorityFeePerGas) && {
+						maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
+					}),
 					gas: getEthFeeData({
 						...params,
 						helperContractAddress: toCkEthHelperContractAddress(

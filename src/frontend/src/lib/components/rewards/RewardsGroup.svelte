@@ -7,10 +7,14 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let title: string;
-	export let rewards: RewardDescription[];
-	export let altText: string | undefined = undefined;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		title: string;
+		rewards: RewardDescription[];
+		altText?: string | undefined;
+		testId?: string | undefined;
+	}
+
+	let { title, rewards, altText = undefined, testId = undefined }: Props = $props();
 
 	const modalId = Symbol();
 </script>
@@ -21,7 +25,7 @@
 	{#each rewards as reward (reward.id)}
 		<div in:slide={SLIDE_DURATION} class="mt-4">
 			<RewardCard
-				on:click={() => modalStore.openRewardDetails({ id: modalId, data: reward })}
+				onclick={() => modalStore.openRewardDetails({ id: modalId, data: reward })}
 				{reward}
 				testId={nonNullish(testId) ? `${testId}-${reward.id}` : undefined}
 			/>
