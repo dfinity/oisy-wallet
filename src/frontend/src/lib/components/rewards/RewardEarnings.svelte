@@ -24,45 +24,48 @@
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
 
-	export let amountOfRewards = 0;
+	interface Props {
+		amountOfRewards?: number;
+	}
 
-	let ckBtcToken: IcToken | undefined;
-	$: ckBtcToken = findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens });
-	let ckBtcReward: bigint = ZERO_BI;
-	let ckBtcRewardUsd: number;
-	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
-		? (calculateTokenUsdAmount({
-				amount: ckBtcReward,
-				token: ckBtcToken,
-				$exchanges
-			}) ?? 0)
-		: 0;
+	let { amountOfRewards = $bindable(0) }: Props = $props();
 
-	let ckUsdcToken: IcToken | undefined;
-	$: ckUsdcToken = findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $tokens });
-	let ckUsdcReward: bigint = ZERO_BI;
-	let ckUsdcRewardUsd: number;
-	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
-		? (calculateTokenUsdAmount({
-				amount: ckUsdcReward,
-				token: ckUsdcToken,
-				$exchanges
-			}) ?? 0)
-		: 0;
+	let ckBtcReward = $state(ZERO_BI);
+	const ckBtcToken = $derived(findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens }));
+	const ckBtcRewardUsd = $derived(
+		nonNullish(ckBtcToken)
+			? (calculateTokenUsdAmount({
+					amount: ckBtcReward,
+					token: ckBtcToken,
+					$exchanges
+				}) ?? 0)
+			: 0
+	);
 
-	let icpReward: bigint = ZERO_BI;
-	let icpRewardUsd: number;
-	$: icpRewardUsd =
+	let ckUsdcReward = $state(ZERO_BI);
+	const ckUsdcToken = $derived(findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $tokens }));
+	const ckUsdcRewardUsd = $derived(
+		nonNullish(ckUsdcToken)
+			? (calculateTokenUsdAmount({
+					amount: ckUsdcReward,
+					token: ckUsdcToken,
+					$exchanges
+				}) ?? 0)
+			: 0
+	);
+
+	let icpReward = $state(ZERO_BI);
+	const icpRewardUsd = $derived(
 		calculateTokenUsdAmount({
 			amount: icpReward,
 			token: ICP_TOKEN,
 			$exchanges
-		}) ?? 0;
+		}) ?? 0
+	);
 
-	let totalRewardUsd: number;
-	$: totalRewardUsd = ckBtcRewardUsd + ckUsdcRewardUsd + icpRewardUsd;
+	const totalRewardUsd = $derived(ckBtcRewardUsd + ckUsdcRewardUsd + icpRewardUsd);
 
-	let loading = true;
+	let loading = $state(true);
 
 	const loadRewards = async ({
 		ckBtcToken,
@@ -91,7 +94,9 @@
 		loading = false;
 	};
 
-	$: loadRewards({ ckBtcToken, ckUsdcToken, icpToken: ICP_TOKEN });
+	$effect(() => {
+		loadRewards({ ckBtcToken, ckUsdcToken, icpToken: ICP_TOKEN });
+	});
 
 	const gotoActivity = async () => {
 		await goto(
