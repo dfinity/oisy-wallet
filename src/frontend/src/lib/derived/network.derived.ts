@@ -7,6 +7,7 @@ import type { Network, NetworkId } from '$lib/types/network';
 import {
 	isNetworkIdBase,
 	isNetworkIdBitcoin,
+	isNetworkIdBsc,
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdICP,
@@ -46,6 +47,10 @@ export const networkEvm: Readable<boolean> = derived([networkId], ([$networkId])
 
 export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdBase($networkId)
+);
+
+export const networkBsc: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdBsc($networkId)
 );
 
 export const networkSolana: Readable<boolean> = derived([networkId], ([$networkId]) =>
