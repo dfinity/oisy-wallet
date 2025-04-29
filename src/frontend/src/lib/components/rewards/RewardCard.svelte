@@ -7,12 +7,17 @@
 	import { REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let reward: RewardDescription;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		onclick: () => void;
+		reward: RewardDescription;
+		testId?: string | undefined;
+	}
+
+	let { onclick, reward, testId = undefined }: Props = $props();
 </script>
 
 <button
-	on:click
+	{onclick}
 	class="relative w-full flex-1 rounded-lg bg-primary p-4 pt-12 shadow"
 	data-tid={testId}
 >
