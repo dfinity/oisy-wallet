@@ -6,7 +6,6 @@
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
-	import AirdropModalDetails from '$lib/components/rewards/RewardModalDetails.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
@@ -18,8 +17,9 @@
 		modalSettingsState,
 		modalReferralCode,
 		modalAddressBook,
-		modalVipQrCodeData
+		modalVipQrCodeData, modalRewardDetailsData
 	} from '$lib/derived/modal.derived';
+	import RewardModal from "$lib/components/rewards/RewardModal.svelte";
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
@@ -33,8 +33,8 @@
 		<IcHideTokenModal />
 	{:else if $modalDAppDetails}
 		<DappModalDetails />
-	{:else if $modalRewardDetails}
-		<AirdropModalDetails />
+	{:else if $modalRewardDetails && nonNullish($modalRewardDetailsData)}
+		<RewardModal reward={$modalRewardDetailsData} />
 	{:else if $modalVipQrCode && nonNullish($modalVipQrCodeData)}
 		<VipQrCodeModal codeType={$modalVipQrCodeData} />
 	{:else if $modalSettingsState}

@@ -4,6 +4,7 @@ import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { VipRewardStateData } from '$lib/types/reward';
 import { derived, type Readable } from 'svelte/store';
+import type {RewardDescription} from "$env/types/env-reward";
 
 export const modalEthReceive: Readable<boolean> = derived(
 	modalStore,
@@ -175,6 +176,10 @@ export const modalVipRewardStateData: Readable<VipRewardStateData | undefined> =
 export const modalRewardDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'reward-details'
+);
+export const modalRewardDetailsData: Readable<RewardDescription | undefined> = derived(
+	modalStore,
+	($modalStore) => ($modalStore?.type === 'reward-details' ? ($modalStore?.data as RewardDescription) : undefined)
 );
 export const modalRewardState: Readable<boolean> = derived(
 	modalStore,
