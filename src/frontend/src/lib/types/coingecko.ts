@@ -2,6 +2,7 @@
 
 // We are only interested in specific coin <> USD for now, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/coins/list
+import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { EthAddress } from '$lib/types/address';
 import type { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
@@ -74,3 +75,8 @@ export type CoingeckoSimpleTokenPriceResponse = CoingeckoResponse<CoingeckoSimpl
 export type CoingeckoPriceResponse =
 	| CoingeckoSimplePriceResponse
 	| CoingeckoSimpleTokenPriceResponse;
+
+export type CoingeckoErc20PriceParams = {
+	coingeckoPlatformId: CoingeckoPlatformId;
+	contractAddresses: Erc20ContractAddress[];
+};
