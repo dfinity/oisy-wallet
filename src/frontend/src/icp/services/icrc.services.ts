@@ -252,8 +252,9 @@ export const loadDisabledIcrcTokensExchanges = async ({
 	disabledIcrcTokens: IcToken[];
 }): Promise<void> => {
 	const [currentErc20Prices, currentIcrcPrices] = await Promise.all([
-		exchangeRateERC20ToUsd(
-			disabledIcrcTokens.reduce<Erc20ContractAddress[]>((acc, token) => {
+		exchangeRateERC20ToUsd({
+			coingeckoPlatformId: 'ethereum',
+			contractAddresses: disabledIcrcTokens.reduce<Erc20ContractAddress[]>((acc, token) => {
 				const twinTokenAddress = ((token as Partial<IcCkToken>).twinToken as Erc20Token | undefined)
 					?.address;
 
@@ -266,7 +267,7 @@ export const loadDisabledIcrcTokensExchanges = async ({
 						]
 					: acc;
 			}, [])
-		),
+		}),
 		exchangeRateICRCToUsd(
 			disabledIcrcTokens.reduce<LedgerCanisterIdText[]>(
 				(acc, { ledgerCanisterId }) =>
