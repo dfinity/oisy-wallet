@@ -49,11 +49,11 @@ describe('modalTokensListStore', () => {
 		mockPage.reset();
 
 		balancesStore.set({
-			tokenId: mockToken1.id,
+			id: mockToken1.id,
 			data: { data: ckBtcBalance, certified: true }
 		});
 		balancesStore.set({
-			tokenId: mockToken2.id,
+			id: mockToken2.id,
 			data: { data: icpBalance, certified: true }
 		});
 
@@ -121,7 +121,7 @@ describe('modalTokensListStore', () => {
 		});
 
 		balancesStore.set({
-			tokenId: mockToken2.id,
+			id: mockToken2.id,
 			data: { data: ZERO_BI, certified: true }
 		});
 
