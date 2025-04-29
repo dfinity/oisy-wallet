@@ -4,10 +4,13 @@ import type { OptionString } from '$lib/types/string';
 // Example: `parseBoolEnvVar(import.meta.env.ENV_VARIABLE)` is type-accepted even if it should be `parseBoolEnvVar({ value: import.meta.env.ENV_VARIABLE })`
 // To avoid possible issues, we decided to give the parameters as array of objects and not as single object for this specific util.
 // eslint-disable-next-line local-rules/prefer-object-params
-export const parseBoolEnvVar = (value: OptionString, check = true): boolean =>
-	value === undefined || value === null
-		? false
-		: JSON.parse(value.toLowerCase() ?? 'false') === check;
+export const parseBoolEnvVar = (value: OptionString, defaultValue?: boolean): boolean =>
+	value === null || value === undefined || value === ''
+		? (defaultValue ??
+			(() => {
+				throw new Error('Null or undefined value provided with no default value');
+			})())
+		: JSON.parse(value.toLowerCase());
 
 export const parseEnabledMainnetBoolEnvVar = (value: OptionString): boolean =>
 	parseBoolEnvVar(value, false);
