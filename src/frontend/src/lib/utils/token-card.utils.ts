@@ -9,6 +9,7 @@ import { nonNullish } from '@dfinity/utils';
  */
 export const mapHeaderData = ({
 	nativeToken: { name, symbol, decimals, icon, network },
+	groupData,
 	tokens,
 	balance,
 	usdBalance
@@ -23,5 +24,5 @@ export const mapHeaderData = ({
 	balance,
 	usdBalance,
 	tokenCount: tokens.length,
-	groupData: tokens[0]?.groupData // TODO: this can be directly the prop of TokenUiGroup type
+	groupData
 });
