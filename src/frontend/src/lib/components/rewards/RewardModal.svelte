@@ -46,25 +46,29 @@
 		reward: RewardDescription;
 	}
 
-	let {reward}: Props = $props();
+	let { reward }: Props = $props();
 
 	const totalUsdBalance = $derived(sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi));
 
-	const transactions = $derived(mapAllTransactionsUi({
-		tokens: $enabledNetworkTokens,
-		$btcTransactions: $btcTransactionsStore,
-		$ethTransactions: $ethTransactionsStore,
-		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress,
-		$icTransactionsStore,
-		$btcStatuses: $btcStatusesStore,
-		$solTransactions: $solTransactionsStore,
-		$ckBtcMinterInfoStore,
-		$icPendingTransactionsStore,
-		$ckBtcPendingUtxosStore
-	}));
+	const transactions = $derived(
+		mapAllTransactionsUi({
+			tokens: $enabledNetworkTokens,
+			$btcTransactions: $btcTransactionsStore,
+			$ethTransactions: $ethTransactionsStore,
+			$ckEthMinterInfo: $ckEthMinterInfoStore,
+			$ethAddress,
+			$icTransactionsStore,
+			$btcStatuses: $btcStatusesStore,
+			$solTransactions: $solTransactionsStore,
+			$ckBtcMinterInfoStore,
+			$icPendingTransactionsStore,
+			$ckBtcPendingUtxosStore
+		})
+	);
 
-	const requirementsFulfilled = $derived(getRewardRequirementsFulfilled({ transactions, totalUsdBalance }));
+	const requirementsFulfilled = $derived(
+		getRewardRequirementsFulfilled({ transactions, totalUsdBalance })
+	);
 
 	const isEligible = $derived(requirementsFulfilled.reduce((p, c) => p && c));
 
