@@ -48,4 +48,4 @@ export const SUPPORTED_BASE_NETWORKS: EthereumNetwork[] = defineSupportedNetwork
 	testnetNetworks: [BASE_SEPOLIA_NETWORK]
 });
 
-export const SUPPORTED_BASE_NETWORKS_IDS: NetworkId[] = SUPPORTED_BASE_NETWORKS.map(({ id }) => id);
+export const SUPPORTED_BASE_NETWORK_IDS: NetworkId[] = SUPPORTED_BASE_NETWORKS.map(({ id }) => id);
