@@ -8,6 +8,7 @@ import type {
 	ICPSwapWithdrawParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
+import type { ICPSwapRawResult, SwapQuoteParams } from '$lib/types/swap';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 
@@ -117,4 +118,33 @@ export const getUserUnusedBalance = async ({
 }: CanisterApiFunctionParams<ICPSwapGetUserUnusedBalanceParams>) => {
 	const swapPool = await icpSwapFactoryCanister({ identity, canisterId });
 	return swapPool.getUserUnusedBalance(principal);
+};
+
+
+export const getIcpSwapAmounts = async ({
+	identity,
+	sourceToken,
+	destinationToken,
+	sourceAmount
+}: SwapQuoteParams): Promise<ICPSwapRawResult> => {
+	const pool = await getPool({
+		identity,
+		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },
+		token1: { address: destinationToken.ledgerCanisterId, standard: destinationToken.standard }
+	});
+
+	if (!pool) {
+		throw new Error('Pool not found');
+	}
+
+	const quote = await getQuote({
+		identity,
+		canisterId: pool.canisterId.toString(),
+		amountIn: sourceAmount.toString(),
+		zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId
+	});
+
+	return {
+		receiveAmount: quote
+	};
 };
