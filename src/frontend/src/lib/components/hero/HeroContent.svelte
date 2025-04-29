@@ -22,6 +22,7 @@
 	} from '$lib/derived/balances.derived';
 	import { exchangeNotInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import {
+		networkBase,
 		networkBitcoin,
 		networkEthereum,
 		networkICP,
@@ -87,6 +88,8 @@
 	class:to-btc-100={$networkBitcoin}
 	class:from-eth-0={$networkEthereum}
 	class:to-eth-100={$networkEthereum}
+	class:from-base-0={$networkBase}
+	class:to-base-100={$networkBase}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
