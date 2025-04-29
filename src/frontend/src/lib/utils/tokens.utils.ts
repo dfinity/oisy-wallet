@@ -199,9 +199,7 @@ export const filterTokens = <T extends Token>({
 		token.name.toLowerCase().includes(filter.toLowerCase()) ||
 		token.symbol.toLowerCase().includes(filter.toLowerCase()) ||
 		(icTokenIcrcCustomToken(token) &&
-			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase())) ||
-		token.network.name.toLowerCase().includes(filter.toLowerCase()) ||
-		(token.network.id.description ?? '').toLowerCase().includes(filter.toLowerCase());
+			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase()));
 
 	return isNullishOrEmpty(filter)
 		? tokens
