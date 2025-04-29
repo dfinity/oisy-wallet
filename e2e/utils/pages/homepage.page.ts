@@ -253,10 +253,8 @@ abstract class Homepage {
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
 		await this.waitForByTestId({ testId: `${TOKEN_CARD}-ICP-ICP`, options });
-		await this.waitForByTestId({ testId: `${TOKEN_CARD}-ETH-ETH`, options });
 
 		await this.waitForByTestId({ testId: `${TOKEN_BALANCE}-ICP-ICP`, options });
-		await this.waitForByTestId({ testId: `${TOKEN_BALANCE}-ETH-ETH`, options });
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
