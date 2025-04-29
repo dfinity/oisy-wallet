@@ -42,13 +42,15 @@
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
-	export let reward: RewardDescription;
+	interface Props {
+		reward: RewardDescription;
+	}
 
-	let totalUsdBalance: number;
-	$: totalUsdBalance = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
+	let {reward}: Props = $props();
 
-	let transactions: AllTransactionUiWithCmp[];
-	$: transactions = mapAllTransactionsUi({
+	const totalUsdBalance = $derived(sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi));
+
+	const transactions = $derived(mapAllTransactionsUi({
 		tokens: $enabledNetworkTokens,
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
@@ -60,16 +62,13 @@
 		$ckBtcMinterInfoStore,
 		$icPendingTransactionsStore,
 		$ckBtcPendingUtxosStore
-	});
+	}));
 
-	let requirementsFulfilled: boolean[];
-	$: requirementsFulfilled = getRewardRequirementsFulfilled({ transactions, totalUsdBalance });
+	const requirementsFulfilled = $derived(getRewardRequirementsFulfilled({ transactions, totalUsdBalance }));
 
-	let isEligible = false;
-	$: isEligible = requirementsFulfilled.reduce((p, c) => p && c);
+	const isEligible = $derived(requirementsFulfilled.reduce((p, c) => p && c));
 
-	let transactionsStores: TransactionsStoreCheckParams[];
-	$: transactionsStores = [
+	const transactionsStores = $derived([
 		// We explicitly do not include the Bitcoin transactions store locally, as it may cause lags in the UI.
 		// It could take longer time to be initialized and in case of no transactions (for example, a new user), it would be stuck to show the skeletons.
 		...(LOCAL
@@ -84,11 +83,11 @@
 			transactionsStoreData: $solTransactionsStore,
 			tokens: [...$enabledSolanaTokens, ...$enabledSplTokens]
 		}
-	];
-	let isRequirementsLoading = true;
-	$: isRequirementsLoading = areTransactionsStoresLoading(transactionsStores);
+	]);
 
-	let amountOfRewards = 0;
+	const isRequirementsLoading = $derived(areTransactionsStoresLoading(transactionsStores));
+
+	let amountOfRewards = $state(0);
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={REWARDS_MODAL}>
