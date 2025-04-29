@@ -19,7 +19,7 @@
 		variant = 'default'
 	}: Props = $props();
 
-	const formattedDate: string = $derived(`${formatToShortDateString(date)} ${date.getDate()}`);
+	const formattedDate = $derived(`${formatToShortDateString(date)} ${date.getDate()}`);
 </script>
 
 <Badge {testId} {variant}>
