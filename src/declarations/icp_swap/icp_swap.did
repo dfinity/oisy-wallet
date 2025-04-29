@@ -1,6 +1,13 @@
-type Token = record { address: text; standard: text };
+type Token = record {
+  address: text;
+  standard: text;
+};
 
-type GetPoolArgs = record { fee: nat; token0: Token; token1: Token };
+type GetPoolArgs = record {
+  fee: nat;
+  token0: Token;
+  token1: Token;
+};
 
 type PoolData = record {
   fee: nat;
@@ -18,8 +25,41 @@ type Error = variant {
   InsufficientFunds;
 };
 
+type Result = variant { ok: nat; err: Error };
+type Result_2 = variant { ok: vec PoolData; err: Error };
 type Result_3 = variant { ok: PoolData; err: Error };
 
-service SwapFactory {
+type SwapArgs = record {
+  amountIn: text;
+  zeroForOne: bool;
+  amountOutMinimum: text;
+};
+
+type DepositArgs = record {
+  fee: nat;
+  token: text;
+  amount: nat;
+};
+
+type WithdrawArgs = record {
+  fee: nat;
+  token: text;
+  amount: nat;
+};
+
+service : {
   getPool: (GetPoolArgs) -> (Result_3) query;
+  getPools: () -> (Result_2) query;
+  quote: (SwapArgs) -> (Result) query;
+  swap: (SwapArgs) -> (Result);
+  deposit: (DepositArgs) -> (Result);
+  depositFrom: (DepositArgs) -> (Result);
+  withdraw: (WithdrawArgs) -> (Result);
+  getUserUnusedBalance: (principal) -> (variant {
+    ok: record {
+      balance0: nat;
+      balance1: nat;
+    };
+    err: Error;
+  }) query;
 };
