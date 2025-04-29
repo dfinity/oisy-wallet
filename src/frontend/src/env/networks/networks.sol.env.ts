@@ -106,7 +106,7 @@ export const SUPPORTED_SOLANA_NETWORKS: Network[] = defineSupportedNetworks({
 	localNetworks: [SOLANA_LOCAL_NETWORK]
 });
 
-export const SUPPORTED_SOLANA_NETWORKS_IDS: NetworkId[] = SUPPORTED_SOLANA_NETWORKS.map(
+export const SUPPORTED_SOLANA_NETWORK_IDS: NetworkId[] = SUPPORTED_SOLANA_NETWORKS.map(
 	({ id }) => id
 );
 

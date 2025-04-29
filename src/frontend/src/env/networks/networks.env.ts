@@ -29,6 +29,6 @@ export const SUPPORTED_MAINNET_NETWORKS_IDS: NetworkId[] = SUPPORTED_MAINNET_NET
 	({ id }) => id
 );
 
-export const SUPPORTED_TESTNET_NETWORKS_IDS: NetworkId[] = SUPPORTED_TESTNET_NETWORKS.map(
+export const SUPPORTED_TESTNET_NETWORK_IDS: NetworkId[] = SUPPORTED_TESTNET_NETWORKS.map(
 	({ id }) => id
 );

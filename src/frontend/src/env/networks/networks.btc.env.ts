@@ -68,6 +68,6 @@ export const SUPPORTED_BITCOIN_NETWORKS: BitcoinNetwork[] = defineSupportedNetwo
 	localNetworks: [BTC_REGTEST_NETWORK]
 });
 
-export const SUPPORTED_BITCOIN_NETWORKS_IDS: NetworkId[] = SUPPORTED_BITCOIN_NETWORKS.map(
+export const SUPPORTED_BITCOIN_NETWORK_IDS: NetworkId[] = SUPPORTED_BITCOIN_NETWORKS.map(
 	({ id }) => id
 );

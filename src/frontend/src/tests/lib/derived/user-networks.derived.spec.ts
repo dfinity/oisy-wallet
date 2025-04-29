@@ -1,6 +1,6 @@
 import {
 	SUPPORTED_MAINNET_NETWORKS_IDS,
-	SUPPORTED_TESTNET_NETWORKS_IDS
+	SUPPORTED_TESTNET_NETWORK_IDS
 } from '$env/networks/networks.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
@@ -31,7 +31,7 @@ describe('user-networks.derived', () => {
 			{}
 		);
 
-		const expectedTestnets: UserNetworks = SUPPORTED_TESTNET_NETWORKS_IDS.reduce<UserNetworks>(
+		const expectedTestnets: UserNetworks = SUPPORTED_TESTNET_NETWORK_IDS.reduce<UserNetworks>(
 			(acc, id) => ({
 				...acc,
 				[id]: { enabled: true, isTestnet: true }
