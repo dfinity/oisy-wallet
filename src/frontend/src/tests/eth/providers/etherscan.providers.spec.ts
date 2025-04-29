@@ -47,7 +47,7 @@ describe('etherscan.providers', () => {
 			expect(EtherscanProviderLib).toHaveBeenCalledWith(network, ETHERSCAN_API_KEY);
 		});
 
-		describe('`transactions` method', () => {
+		describe('transactions method', () => {
 			const normalTransactions: EtherscanProviderTransaction[] = createMockEtherscanTransactions(3);
 
 			const internalTransactions: EtherscanProviderInternalTransaction[] =
@@ -119,7 +119,7 @@ describe('etherscan.providers', () => {
 			});
 
 			it('should call fetch for all history types', async () => {
-				const provider = new EtherscanProvider(network);
+				const provider = new EtherscanProvider(network, chainId);
 
 				const result = await provider.transactions({ address });
 
@@ -131,7 +131,7 @@ describe('etherscan.providers', () => {
 			});
 
 			it('should call fetch with correct parameters for getHistory', async () => {
-				const provider = new EtherscanProvider(network);
+				const provider = new EtherscanProvider(network, chainId);
 
 				await provider.transactions({ address });
 
@@ -148,7 +148,7 @@ describe('etherscan.providers', () => {
 			});
 
 			it('should call fetch with correct parameters for getInternalHistory', async () => {
-				const provider = new EtherscanProvider(network);
+				const provider = new EtherscanProvider(network, chainId);
 
 				await provider.transactions({ address });
 
@@ -172,7 +172,7 @@ describe('etherscan.providers', () => {
 			});
 		});
 
-		describe('`erc20Transactions` method', () => {
+		describe('erc20Transactions method', () => {
 			const mockApiResponse: EtherscanProviderTokenTransferTransaction[] = [
 				{
 					nonce: '1',
@@ -217,7 +217,7 @@ describe('etherscan.providers', () => {
 			});
 
 			it('should fetch and map transactions correctly', async () => {
-				const provider = new EtherscanProvider(network);
+				const provider = new EtherscanProvider(network, chainId);
 
 				const result = await provider.erc20Transactions({
 					address: mockEthAddress,
@@ -232,7 +232,7 @@ describe('etherscan.providers', () => {
 			});
 
 			it('should throw an error if the API call fails', async () => {
-				const provider = new EtherscanProvider(network);
+				const provider = new EtherscanProvider(network, chainId);
 				mockFetch.mockRejectedValue(new Error('Network error'));
 
 				await expect(
