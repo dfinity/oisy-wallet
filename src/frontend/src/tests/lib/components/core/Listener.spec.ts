@@ -41,6 +41,7 @@ describe('Listener', () => {
 		vi.spyOn(networkUtils, 'isNetworkIdICP').mockReturnValueOnce(false);
 		vi.spyOn(networkUtils, 'isNetworkIdBitcoin').mockReturnValueOnce(false);
 		vi.spyOn(networkUtils, 'isNetworkIdEthereum').mockReturnValueOnce(false);
+		vi.spyOn(networkUtils, 'isNetworkIdEvm').mockReturnValueOnce(false);
 
 		const { container } = render(Listener, {
 			props: { token: ICP_TOKEN }
