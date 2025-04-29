@@ -478,7 +478,7 @@ describe('tokens.utils', () => {
 		it('should filter correctly by network', () => {
 			expect(
 				filterTokens({ tokens: [...mockTokens, PEPE_TOKEN], filter: 'ethereum' })
-			).toStrictEqual([ETHEREUM_TOKEN, PEPE_TOKEN]);
+			).toStrictEqual([ETHEREUM_TOKEN]);
 		});
 	});
 
