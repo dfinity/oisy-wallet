@@ -8,6 +8,7 @@
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import type { Token } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 
 	export let request: WalletKitTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -15,7 +16,7 @@
 	export let listener: OptionWalletConnectListener;
 
 	let token: Token | undefined;
-	$: token = $enabledEthereumTokens.find(
+	$: token = [...$enabledEthereumTokens, ...$enabledEvmTokens].find(
 		({ network: { id: networkId } }) => networkId === sourceNetwork.id
 	);
 </script>
