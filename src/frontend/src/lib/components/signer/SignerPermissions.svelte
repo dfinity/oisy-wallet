@@ -123,7 +123,7 @@
 		{/if}
 
 		<ButtonGroup>
-			<Button colorStyle="error" on:click={onReject}>
+			<Button colorStyle="error" onclick={onReject}>
 				{$i18n.core.text.reject}
 			</Button>
 			<Button colorStyle="success" type="submit">

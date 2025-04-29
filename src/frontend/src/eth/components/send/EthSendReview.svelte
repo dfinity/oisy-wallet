@@ -53,8 +53,8 @@
 	</SendData>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={() => dispatch('icBack')} />
-		<Button disabled={invalid} on:click={() => dispatch('icSend')}>
+		<ButtonBack onclick={() => dispatch('icBack')} />
+		<Button disabled={invalid} onclick={() => dispatch('icSend')}>
 			{$i18n.send.text.send}
 		</Button>
 	</ButtonGroup>

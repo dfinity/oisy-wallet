@@ -72,9 +72,9 @@
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={() => dispatch('icBack')} />
+		<ButtonBack onclick={() => dispatch('icBack')} />
 
-		<Button on:click={() => dispatch('icSwap')}>
+		<Button onclick={() => dispatch('icSwap')}>
 			{$i18n.swap.text.swap_button}
 		</Button>
 	</ButtonGroup>

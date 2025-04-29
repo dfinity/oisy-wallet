@@ -10,7 +10,7 @@
 
 	const modalId = Symbol();
 
-	const onClick = () => {
+	const onclick = () => {
 		trackEvent({
 			name: TRACK_HELP_SIGNING_IN
 		});
@@ -20,5 +20,5 @@
 
 <span data-tid={testId} class={`${styleClass} flex flex-row justify-center gap-1 md:justify-start`}>
 	{$i18n.auth.help.text.need_help}
-	<Button link inlineLink on:click={onClick}>{$i18n.auth.help.text.sign_in}</Button>
+	<Button link inlineLink {onclick}>{$i18n.auth.help.text.sign_in}</Button>
 </span>

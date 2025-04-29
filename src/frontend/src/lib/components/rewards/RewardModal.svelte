@@ -133,7 +133,7 @@
 			/>
 		{/if}
 
-		<Button paddingSmall type="button" fullWidth on:click={modalStore.close} slot="toolbar">
+		<Button paddingSmall type="button" fullWidth onclick={modalStore.close} slot="toolbar">
 			{$i18n.rewards.text.modal_button_text}
 		</Button>
 	</ContentWithToolbar>

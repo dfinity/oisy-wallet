@@ -37,7 +37,7 @@
 {#if nonNullish(featuredDapp) && nonNullish(featuredDapp.screenshots)}
 	<div class="mb-6 md:mb-10">
 		<DappPromoBanner
-			on:click={() => modalStore.openDappDetails({ id: modalId, data: featuredDapp })}
+			onclick={() => modalStore.openDappDetails({ id: modalId, data: featuredDapp })}
 			dAppDescription={featuredDapp}
 		/>
 	</div>

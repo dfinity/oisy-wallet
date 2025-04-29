@@ -43,7 +43,7 @@
 		return 'success';
 	};
 
-	const onClick = () => {
+	const onclick = () => {
 		const result = connect();
 
 		if (result === 'error') {
@@ -78,7 +78,7 @@
 				styleClass="inset-center"
 				colorStyle="primary"
 				paddingSmall
-				on:click={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</Button
+				onclick={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</Button
 			>
 		{/if}
 	</div>
@@ -90,7 +90,7 @@
 	</div>
 
 	<ButtonGroup slot="toolbar">
-		<Button disabled={invalid} on:click={onClick}>
+		<Button disabled={invalid} {onclick}>
 			{$i18n.wallet_connect.text.connect}
 		</Button>
 	</ButtonGroup>
