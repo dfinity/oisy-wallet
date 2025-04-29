@@ -59,7 +59,7 @@ export const PostMessageDataRequestSchema = z.never();
 export const PostMessageDataResponseSchema = z.object({}).strict();
 
 export const PostMessageDataRequestExchangeTimerSchema = z.object({
-	// TODO: generate zod schema for Erc20AddressWithNetwork
+	// TODO: generate zod schema for Erc20ContractAddressWithNetwork
 	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
 	splAddresses: z.array(z.custom<SplTokenAddress>())
