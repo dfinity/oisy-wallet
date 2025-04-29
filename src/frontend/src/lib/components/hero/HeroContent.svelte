@@ -72,7 +72,10 @@
 	$: isGLDTToken = nonNullish($pageToken) ? isGLDTTokenUtil($pageToken) : false;
 
 	let isGradientToRight = false;
-	$: isGradientToRight = ($networkSolana && !isTrumpToken) || isGLDTToken || $networkBsc;
+	$: isGradientToRight = $networkSolana && !isTrumpToken;
+
+	let isGradientToBottomRight = false;
+	$: isGradientToBottomRight = isGLDTToken || $networkBsc;
 </script>
 
 <div
@@ -99,8 +102,9 @@
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
-	class:bg-linear-to-b={!isGradientToRight}
+	class:bg-linear-to-b={!isGradientToRight && !isGradientToBottomRight}
 	class:bg-gradient-to-r={isGradientToRight}
+	class:bg-linear-105={isGradientToBottomRight}
 >
 	{#if isTransactionsPage}
 		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
