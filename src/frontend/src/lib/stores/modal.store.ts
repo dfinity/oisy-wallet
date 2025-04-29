@@ -1,3 +1,4 @@
+import type { RewardDescription } from '$env/types/env-reward';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
@@ -97,7 +98,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReferralState: () => void;
 	openDappDetails: <D extends T>(params: SetWithDataParams<D>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
-	openRewardDetails: <D extends T>(params: SetWithDataParams<D>) => void;
+	openRewardDetails: (params: SetWithDataParams<RewardDescription>) => void;
 	openRewardState: <D extends T>(params: SetWithDataParams<D>) => void;
 	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
 	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
@@ -160,7 +161,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openVipRewardState: <(params: SetWithDataParams<VipRewardStateData>) => void>(
 			setTypeWithData('vip-reward-state')
 		),
-		openRewardDetails: setTypeWithData('reward-details'),
+		openRewardDetails: <(params: SetWithDataParams<RewardDescription>) => void>(
+			setTypeWithData('reward-details')
+		),
 		openRewardState: setTypeWithData('reward-state'),
 		// todo: explicitly define type here as well
 		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(
