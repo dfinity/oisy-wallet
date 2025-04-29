@@ -25,6 +25,7 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 	iconLight: bscMainnetIconLight,
 	iconDark: bscMainnetIconDark,
 	explorerUrl: BSC_EXPLORER_URL,
+	exchange: { coingeckoId: 'binance-smart-chain' },
 	buy: { onramperId: 'bsc' }
 };
 
