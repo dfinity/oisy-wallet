@@ -10,6 +10,6 @@ export const batch = async function* <T>({
 		const batch = promises.slice(i, i + batchSize);
 		const results = await Promise.allSettled(batch);
 		yield results;
-		await new Promise((resolve) => setTimeout(resolve, 3000));
+		await new Promise((resolve) => setTimeout(resolve, 10000));
 	}
 };
