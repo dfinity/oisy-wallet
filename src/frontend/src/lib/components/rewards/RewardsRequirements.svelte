@@ -6,9 +6,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		loading: boolean;
+		loading?: boolean;
 		reward: RewardDescription;
-		isEligible: boolean;
+		isEligible?: boolean;
 		requirementsFulfilled: boolean[];
 	}
 
