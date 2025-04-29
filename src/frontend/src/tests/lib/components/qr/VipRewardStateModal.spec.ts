@@ -1,6 +1,10 @@
 import * as icrcNetworks from '$env/networks/networks.icrc.env';
 import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
+import { setCustomToken } from '$icp-eth/services/custom-token.services';
+import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
+import type { IcTokenWithoutId } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
@@ -8,14 +12,22 @@ import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
 import VipRewardStateModal from '$lib/components/qr/VipRewardStateModal.svelte';
 import { VIP_STATE_BUTTON, VIP_STATE_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 import { QrCodeType } from '$lib/enums/qr-code-types';
+import { autoLoadSingleToken } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mapLocalIcrcData } from '$tests/utils/map-icrc-data.test-utils';
 import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+
+vi.mock('$lib/services/token.services', () => ({
+	autoLoadSingleToken: vi.fn()
+}));
 
 describe('VipRewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid=${VIP_STATE_IMAGE_BANNER}]`;
@@ -100,6 +112,13 @@ describe('VipRewardStateModal', () => {
 				}
 			: undefined;
 
+		const { id: _, ...mockValidIcTokenWithoutId } = mockValidIcToken;
+
+		const mockIcrcDefaultToken: IcTokenWithoutId = {
+			...mockValidIcTokenWithoutId,
+			ledgerCanisterId: goldToken?.ledgerCanisterId ?? 'mxzaz-hqaaa-aaaar-qaada-cai'
+		};
+
 		const mockIcrcCustomToken: IcrcCustomToken = {
 			...mockValidIcToken,
 			ledgerCanisterId: goldToken?.ledgerCanisterId ?? 'mxzaz-hqaaa-aaaar-qaada-cai',
@@ -109,12 +128,17 @@ describe('VipRewardStateModal', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
+			mockAuthStore();
+
+			icrcDefaultTokensStore.resetAll();
+			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
+
 			icrcCustomTokensStore.resetAll();
 
 			vi.spyOn(icrcNetworks, 'GLDT_IC_DATA', 'get').mockImplementation(() => goldToken);
 		});
 
-		it('should open manage tokens modal for Gold campaign and undefined token', async () => {
+		it('should auto-enable GLDT token for Gold campaign and undefined token', () => {
 			const { container } = render(VipRewardStateModal, {
 				isSuccessful: true,
 				codeType: QrCodeType.GOLD
@@ -124,22 +148,22 @@ describe('VipRewardStateModal', () => {
 
 			expect(button).toBeInTheDocument();
 
-			await waitFor(() => {
-				button?.click();
+			button?.click();
 
-				expect(get(modalStore)).toEqual(
-					expect.objectContaining({
-						data: {
-							initialSearch: 'GLDT',
-							message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
-						},
-						type: 'manage-tokens'
-					})
-				);
+			expect(autoLoadSingleToken).toHaveBeenCalledOnce();
+			expect(autoLoadSingleToken).toHaveBeenNthCalledWith(1, {
+				token: expect.objectContaining({
+					...mockIcrcDefaultToken,
+					enabled: false
+				}),
+				identity: mockIdentity,
+				setToken: setCustomToken,
+				loadTokens: loadCustomTokens,
+				errorMessage: en.init.error.icrc_custom_token
 			});
 		});
 
-		it('should open manage tokens modal for Gold campaign and disabled token', async () => {
+		it('should auto-enable GLDT token for Gold campaign and disabled token', () => {
 			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
 
 			const { container } = render(VipRewardStateModal, {
@@ -151,18 +175,18 @@ describe('VipRewardStateModal', () => {
 
 			expect(button).toBeInTheDocument();
 
-			await waitFor(() => {
-				button?.click();
+			button?.click();
 
-				expect(get(modalStore)).toEqual(
-					expect.objectContaining({
-						data: {
-							initialSearch: 'GLDT',
-							message: replaceOisyPlaceholders(get(i18n).tokens.manage.text.default_message)
-						},
-						type: 'manage-tokens'
-					})
-				);
+			expect(autoLoadSingleToken).toHaveBeenCalledOnce();
+			expect(autoLoadSingleToken).toHaveBeenNthCalledWith(1, {
+				token: expect.objectContaining({
+					...mockIcrcDefaultToken,
+					enabled: false
+				}),
+				identity: mockIdentity,
+				setToken: setCustomToken,
+				loadTokens: loadCustomTokens,
+				errorMessage: en.init.error.icrc_custom_token
 			});
 		});
 
