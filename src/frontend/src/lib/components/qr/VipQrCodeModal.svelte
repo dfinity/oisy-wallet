@@ -36,7 +36,7 @@
 	const maxRetriesToGetRewardCode = 3;
 	let retriesToGetRewardCode = $state(0);
 
-	let code: string = $state();
+	let code: string | undefined = $state();
 	const generateCode = async () => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
