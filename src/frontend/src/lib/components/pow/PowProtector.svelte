@@ -7,6 +7,7 @@
 	interface Props {
 		children?: Snippet;
 	}
+	
 	let { children }: Props = $props();
 
 	if (POW_FEATURE_ENABLED) {
