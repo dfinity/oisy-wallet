@@ -6,10 +6,10 @@ export const batch = async function* <T>({
 	batchSize: number;
 }): AsyncGenerator<PromiseSettledResult<T>[]> {
 	for (let i = 0; i < promises.length; i += batchSize) {
+		console.log({ i, nextI: i + batchSize });
 		const batch = promises.slice(i, i + batchSize);
 		const results = await Promise.allSettled(batch);
-		console.log({ batch, results });
 		yield results;
-		await new Promise((resolve) => setTimeout(resolve, 1100));
+		await new Promise((resolve) => setTimeout(resolve, 3000));
 	}
 };
