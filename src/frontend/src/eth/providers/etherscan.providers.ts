@@ -134,7 +134,7 @@ export class EtherscanProvider {
 
 	transactions = async (params: TransactionsParams): Promise<Transaction[]> => {
 		const results = await Promise.all([this.getHistory(params), this.getInternalHistory(params)]);
-
+		console.log({ results: results.flat(), params });
 		return results.flat();
 	};
 }
