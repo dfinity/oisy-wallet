@@ -3,9 +3,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
-	import { REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
+	import {REWARDS_BANNER, REWARDS_STATUS_BUTTON} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import Img from "$lib/components/ui/Img.svelte";
 
 	interface Props {
 		onclick: () => void;
@@ -18,38 +18,37 @@
 
 <button
 	{onclick}
-	class="relative w-full flex-1 rounded-lg bg-primary p-4 pt-12 shadow"
+	class="flex flex-col"
 	data-tid={testId}
 >
-	<span class="absolute -top-5 left-4">
-		<Logo
-			src={reward.logo}
-			size="xl"
-			ring
-			color="white"
-			testId={nonNullish(testId) ? `${testId}-logo` : undefined}
-		/>
-	</span>
-	<span class="absolute right-4 top-3">
-		<RewardDateBadge
-			date={reward.endDate}
-			testId={nonNullish(testId) ? `${testId}-badge` : undefined}
-		/>
-	</span>
-	<article class="h-full">
-		<section>
-			<p class="m-0 text-start text-lg font-semibold">{reward.cardTitle}</p>
+	<div class="-mb-7">
+		<div class="max-h-66 overflow-hidden rounded-2xl">
+			<Img src={reward.logo} testId={REWARDS_BANNER} />
+		</div>
+	</div>
 
-			<p class="m-0 mt-2 text-start text-xs text-tertiary">
-				<Html text={reward.oneLiner} />
-			</p>
-		</section>
-		<section class="bottom-4 left-4 mt-3 flex">
-			<div
-				data-tid={REWARDS_STATUS_BUTTON}
-				class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
-				>{$i18n.rewards.text.check_status}
-			</div>
-		</section>
-	</article>
+	<div class="relative p-4 rounded-lg bg-primary">
+		<span class="absolute right-4 top-4">
+			<RewardDateBadge
+				date={reward.endDate}
+				testId={nonNullish(testId) ? `${testId}-badge` : undefined}
+			/>
+		</span>
+		<article class="h-full">
+			<section>
+				<p class="m-0 text-start text-lg font-semibold">{reward.cardTitle}</p>
+
+				<p class="m-0 mt-2 text-start text-xs text-tertiary">
+					<Html text={reward.oneLiner} />
+				</p>
+			</section>
+			<section class="bottom-4 left-4 mt-3 flex">
+				<div
+					data-tid={REWARDS_STATUS_BUTTON}
+					class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
+					>{$i18n.rewards.text.check_status}
+				</div>
+			</section>
+		</article>
+	</div>
 </button>
