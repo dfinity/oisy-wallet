@@ -1,4 +1,4 @@
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	formatSecondsToNormalizedDate,
 	formatToken,
@@ -68,19 +68,19 @@ describe('format.utils', () => {
 		});
 
 		it('should format zero with default parameters', () => {
-			expect(formatToken({ value: ZERO_BI })).toBe('0');
+			expect(formatToken({ value: ZERO })).toBe('0');
 		});
 
 		it('should format zero with specified displayDecimals', () => {
-			expect(formatToken({ value: ZERO_BI, displayDecimals: 2 })).toBe('0');
+			expect(formatToken({ value: ZERO, displayDecimals: 2 })).toBe('0');
 		});
 
 		it('should format zero with trailing zeros', () => {
-			expect(formatToken({ value: ZERO_BI, trailingZeros: true })).toBe('0.0000');
+			expect(formatToken({ value: ZERO, trailingZeros: true })).toBe('0.0000');
 		});
 
 		it('should format zero with specified displayDecimals and trailing zeros', () => {
-			expect(formatToken({ value: ZERO_BI, displayDecimals: 2, trailingZeros: true })).toBe('0.00');
+			expect(formatToken({ value: ZERO, displayDecimals: 2, trailingZeros: true })).toBe('0.00');
 		});
 
 		it('should format value with different unitName', () => {
@@ -298,7 +298,7 @@ describe('format.utils', () => {
 
 			expect(
 				formatTokenBigintToNumber({
-					value: ZERO_BI
+					value: ZERO
 				})
 			).toBe(0);
 		});
