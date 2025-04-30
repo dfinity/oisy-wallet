@@ -103,7 +103,7 @@ export const exchangeRateSPLToUsd = (
 	simpleTokenPrice({
 		id: 'solana',
 		vs_currencies: 'usd',
-		contract_addresses: tokenAddresses.map((tokenAddresses) => tokenAddresses),
+		contract_addresses: tokenAddresses,
 		include_market_cap: true
 	});
 
