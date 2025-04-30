@@ -307,9 +307,5 @@
 		{/each}
 	</div>
 
-	<ButtonDone
-		testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON}
-		on:click={modalStore.close}
-		slot="toolbar"
-	/>
+	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} onclick={modalStore.close} slot="toolbar" />
 </ContentWithToolbar>
