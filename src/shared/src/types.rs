@@ -9,7 +9,6 @@ pub mod backend_config;
 pub mod bitcoin;
 pub mod custom_token;
 pub mod dapp;
-pub mod migration;
 pub mod network;
 pub mod number;
 pub mod pow;
