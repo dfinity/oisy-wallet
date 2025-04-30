@@ -63,6 +63,7 @@ export interface Config {
 	index_canisters: Array<Principal>;
 	vip_config: [] | [VipConfig];
 	processing_interval_s: [] | [number];
+	vip_campaigns: [] | [Array<[string, VipConfig]>];
 	readonly_admins: Array<Principal>;
 	oisy_canister: [] | [Principal];
 }
@@ -92,6 +93,7 @@ export interface LedgerConfig {
 export type NewVipRewardResponse =
 	| { Anonymous: null }
 	| { NotImportantPerson: null }
+	| { UnknownCampaign: null }
 	| { VipReward: VipReward };
 export type PublicAirdropStatus =
 	| {
@@ -260,6 +262,7 @@ export interface _SERVICE {
 	config: ActorMethod<[], Config>;
 	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
 	configure_vip: ActorMethod<[VipConfig], undefined>;
+	configure_vips: ActorMethod<[Array<[string, VipConfig]>], undefined>;
 	last_activity_histogram: ActorMethod<
 		[LastActivityHistogramRequest],
 		LastActivityHistogramResponse
@@ -280,7 +283,7 @@ export interface _SERVICE {
 	user_info: ActorMethod<[], UserData>;
 	user_info_for: ActorMethod<[Principal], UserData>;
 	user_stats: ActorMethod<[Principal], UsageAwardState>;
-	vip_stats: ActorMethod<[], VipStats>;
+	vip_stats: ActorMethod<[[] | [string]], VipStats>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
