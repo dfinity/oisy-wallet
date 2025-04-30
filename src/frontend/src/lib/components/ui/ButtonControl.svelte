@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type {Snippet} from "svelte";
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		children: Snippet;
@@ -8,7 +8,7 @@
 		styleClass?: string | undefined;
 	}
 
-	let {children, onclick, ariaLabel, styleClass = undefined}: Props = $props();
+	let { children, onclick, ariaLabel, styleClass = undefined }: Props = $props();
 </script>
 
 <button
