@@ -1,8 +1,13 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { TokenId, TokenUi, TokenUiGroupable } from '$lib/types/token';
 import type { TokenGroupId, TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
+import { parseTokenToDecimals } from '$lib/utils/parse.utils';
 import { sumBalances, sumUsdBalances } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+// We normalize all tokens in a group to the same number of decimals.
+// It should be the highest possible since it needs to include all values and not rounding them.
+const TOKEN_GROUP_DECIMALS = 18;
 
 /**
  * Type guard to check if an object is of type TokenUiGroup.
@@ -77,6 +82,7 @@ export const filterTokenGroups = ({
 
 const mapNewTokenGroup = (token: TokenUiGroupable): TokenUiGroup => ({
 	id: token.groupData.id,
+	decimals: token.decimals,
 	nativeToken: token,
 	groupData: token.groupData,
 	tokens: [token],
@@ -104,12 +110,29 @@ interface UpdateTokenGroupParams extends GroupTokenParams {
  * @param {TokenUiGroup} params.tokenGroup - The group where the token should be added.
  * @returns {TokenUiGroup} The updated group with the new token.
  */
-export const updateTokenGroup = ({ token, tokenGroup }: UpdateTokenGroupParams): TokenUiGroup => ({
-	...tokenGroup,
-	tokens: [...tokenGroup.tokens, token],
-	balance: sumBalances([tokenGroup.balance, token.balance]),
-	usdBalance: sumUsdBalances([tokenGroup.usdBalance, token.usdBalance])
-});
+export const updateTokenGroup = ({ token, tokenGroup }: UpdateTokenGroupParams): TokenUiGroup => {
+	const newTokens: TokenUiGroup['tokens'] = [...tokenGroup.tokens, token];
+
+	const newDecimals = Math.max(...newTokens.map(({ decimals }) => decimals));
+
+	return {
+		...tokenGroup,
+		tokens: newTokens,
+		decimals: newDecimals,
+		balance: sumBalances(
+			[tokenGroup, token].map(({ balance, decimals }) =>
+				nonNullish(balance)
+					? parseTokenToDecimals({
+							value: balance,
+							oldUnitName: decimals,
+							newUnitName: newDecimals
+						})
+					: balance
+			)
+		),
+		usdBalance: sumUsdBalances([tokenGroup.usdBalance, token.usdBalance])
+	};
+};
 
 /**
  * Function to group a "secondary token" with an existing group or create a new group with the token as a "secondary token".
