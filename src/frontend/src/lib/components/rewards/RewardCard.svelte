@@ -30,13 +30,15 @@
 	<div class="relative rounded-lg bg-primary p-4">
 		<article class="h-full">
 			<section>
-				<div class="text-start text-lg font-semibold flex items-center flex-col-reverse md:flex-row">
-					<div class="flex items-center mr-auto md:flex-row flex-col">
+				<div
+					class="flex flex-col-reverse items-center text-start text-lg font-semibold md:flex-row"
+				>
+					<div class="mr-auto flex flex-col items-center md:flex-row">
 						<div>
 							{reward.cardTitle}
 						</div>
 						{#if !hasEnded}
-							<span class="inline-flex mr-auto md:mx-1">
+							<span class="mr-auto inline-flex md:mx-1">
 								<Badge variant="success">
 									{$i18n.rewards.text.youre_eligible}
 								</Badge>
@@ -44,7 +46,7 @@
 						{/if}
 					</div>
 
-					<span class="md:ml-auto mr-auto inline-flex">
+					<span class="mr-auto inline-flex md:ml-auto">
 						<RewardDateBadge
 							date={reward.endDate}
 							testId={nonNullish(testId) ? `${testId}-badge` : undefined}
