@@ -5,7 +5,7 @@ import type { RequiredEvmBep20Token } from '$evm/types/bep20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
-export const USDT_DECIMALS = 6;
+export const USDT_DECIMALS = 18;
 
 export const USDT_SYMBOL = 'USDT';
 
