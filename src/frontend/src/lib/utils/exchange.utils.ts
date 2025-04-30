@@ -1,5 +1,5 @@
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { OptionBalance } from '$lib/types/balance';
 import type {
 	CoingeckoSimpleTokenPrice,
@@ -26,7 +26,7 @@ export const usdValue = ({
 					displayDecimals: decimals
 				})
 			) * exchangeRate
-		: Number(ZERO_BI);
+		: Number(ZERO);
 
 export const formatKongSwapToCoingeckoPrices = (
 	tokens: KongSwapToken[]
