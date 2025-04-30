@@ -54,25 +54,30 @@ This guide provides detailed instructions for setting up and running the OISY wa
    - The following tools are recommended for installation:
 
      a. **cargo-binstall** (version specified in dev-tools.json):
+
      ```powershell
      cargo install cargo-binstall@1.7.4
      ```
 
      b. **ic-wasm** (using cargo-binstall):
+
      ```powershell
      cargo binstall --force --no-confirm ic-wasm@0.8.5
      ```
 
      c. **didc**:
+
      - Download from https://github.com/dfinity/candid/releases/download/2024-07-29/didc-win64.exe
      - Rename to `didc.exe` and place it in a directory that's in your PATH
 
      d. **candid-extractor** (using cargo-binstall):
+
      ```powershell
      cargo binstall --force --no-confirm candid-extractor@0.1.4
      ```
 
      e. **shfmt** (if you have Go installed):
+
      ```powershell
      go install mvdan.cc/sh/v3/cmd/shfmt@v3.5.1
      ```
