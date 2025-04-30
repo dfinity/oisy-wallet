@@ -10,7 +10,7 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import { last } from '$lib/utils/array.utils';
@@ -200,7 +200,7 @@ describe('token-group.utils', () => {
 				{ ...tokens[0], balance: bn2Bi, usdBalance: 0 }, // BTC
 				{ ...tokens[2], balance: bn2Bi, usdBalance: 0 }, // ETH
 				{ ...tokens[3], balance: bn1Bi, usdBalance: 0 }, // ckETH
-				{ ...tokens[1], balance: ZERO_BI, usdBalance: 0 } // ckBTC
+				{ ...tokens[1], balance: ZERO, usdBalance: 0 } // ckBTC
 			];
 
 			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
@@ -223,9 +223,9 @@ describe('token-group.utils', () => {
 
 	describe('filterTokenGroups', () => {
 		const reorderedTokens = [
-			{ ...tokens[0], balance: ZERO_BI, usdBalance: 0 }, // BTC
-			{ ...tokens[4], balance: ZERO_BI, usdBalance: 0 }, // ICP
-			{ ...tokens[1], balance: ZERO_BI, usdBalance: 0 } // ckBTC
+			{ ...tokens[0], balance: ZERO, usdBalance: 0 }, // BTC
+			{ ...tokens[4], balance: ZERO, usdBalance: 0 }, // ICP
+			{ ...tokens[1], balance: ZERO, usdBalance: 0 } // ckBTC
 		];
 
 		it('should give me all token groups', () => {
@@ -240,7 +240,7 @@ describe('token-group.utils', () => {
 			const customReorderedTokens = [
 				...reorderedTokens,
 				{ ...tokens[2], balance: bn2Bi, usdBalance: 0 }, // ETH
-				{ ...tokens[3], balance: ZERO_BI, usdBalance: 0 } // ckETH
+				{ ...tokens[3], balance: ZERO, usdBalance: 0 } // ckETH
 			];
 			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
 
@@ -257,8 +257,8 @@ describe('token-group.utils', () => {
 		it('should give me only token groups where at least one token has a usd balance', () => {
 			const customReorderedTokens = [
 				...reorderedTokens,
-				{ ...tokens[2], balance: ZERO_BI, usdBalance: 0 }, // ETH
-				{ ...tokens[3], balance: ZERO_BI, usdBalance: 1 } // ckETH
+				{ ...tokens[2], balance: ZERO, usdBalance: 0 }, // ETH
+				{ ...tokens[3], balance: ZERO, usdBalance: 1 } // ckETH
 			];
 			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
 

@@ -6,7 +6,7 @@ import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionBalance } from '$lib/types/balance';
@@ -31,7 +31,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  */
 export const getMaxTransactionAmount = ({
 	balance,
-	fee = ZERO_BI,
+	fee = ZERO,
 	tokenDecimals,
 	tokenStandard
 }: {
@@ -41,11 +41,11 @@ export const getMaxTransactionAmount = ({
 	tokenStandard: TokenStandard;
 }): number => {
 	const value =
-		(balance ?? ZERO_BI) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO_BI);
+		(balance ?? ZERO) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO);
 
 	return Number(
-		value <= ZERO_BI
-			? ZERO_BI
+		value <= ZERO
+			? ZERO
 			: formatToken({
 					value,
 					unitName: tokenDecimals,
