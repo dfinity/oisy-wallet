@@ -1,9 +1,17 @@
+import type { BtcTransactionUi } from '$btc/types/btc';
 import type { RewardDescription } from '$env/types/env-reward';
+import type { EthTransactionUi } from '$eth/types/eth-transaction';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
+import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { VipRewardStateData } from '$lib/types/reward';
+import type { Token } from '$lib/types/token';
+import type { AnyTransactionUi } from '$lib/types/transaction';
 import type { Option } from '$lib/types/utils';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { WalletKitTypes } from '@reown/walletkit';
 import { writable, type Readable } from 'svelte/store';
 
 export interface Modal<T> {
@@ -59,6 +67,8 @@ export type ModalData<T> = Option<Modal<T>>;
 type SetWithDataParams<D> = { id: symbol; data: D };
 type SetWithOptionalDataParams<D> = { id: symbol; data?: D };
 
+type OpenTransactionParams<T extends AnyTransactionUi> = { transaction: T; token: Token };
+
 export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openEthReceive: (id: symbol) => void;
 	openIcpReceive: (id: symbol) => void;
@@ -77,12 +87,12 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openConvertToTwinTokenEth: () => void;
 	openHowToConvertToTwinTokenEth: () => void;
 	openWalletConnectAuth: () => void;
-	openWalletConnectSign: <D extends T>(params: SetWithDataParams<D>) => void;
-	openWalletConnectSend: <D extends T>(params: SetWithDataParams<D>) => void;
-	openEthTransaction: <D extends T>(params: SetWithDataParams<D>) => void;
-	openIcTransaction: <D extends T>(params: SetWithDataParams<D>) => void;
-	openBtcTransaction: <D extends T>(params: SetWithDataParams<D>) => void;
-	openSolTransaction: <D extends T>(params: SetWithDataParams<D>) => void;
+	openWalletConnectSign: (params: SetWithDataParams<WalletKitTypes.SessionRequest>) => void;
+	openWalletConnectSend: (params: SetWithDataParams<WalletKitTypes.SessionRequest>) => void;
+	openEthTransaction: (params: SetWithDataParams<OpenTransactionParams<EthTransactionUi>>) => void;
+	openIcTransaction: (params: SetWithDataParams<OpenTransactionParams<IcTransactionUi>>) => void;
+	openBtcTransaction: (params: SetWithDataParams<OpenTransactionParams<BtcTransactionUi>>) => void;
+	openSolTransaction: (params: SetWithDataParams<OpenTransactionParams<SolTransactionUi>>) => void;
 	openManageTokens: (params: SetWithOptionalDataParams<ManageTokensData>) => void;
 	openHideToken: () => void;
 	openIcHideToken: () => void;
@@ -96,11 +106,10 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReferralCode: () => void;
 	openAddressBook: () => void;
 	openReferralState: () => void;
-	openDappDetails: <D extends T>(params: SetWithDataParams<D>) => void;
+	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
 	openRewardDetails: (params: SetWithDataParams<RewardDescription>) => void;
 	openRewardState: (params: SetWithDataParams<boolean>) => void;
-	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
 	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
 	close: () => void;
@@ -136,12 +145,24 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openConvertToTwinTokenEth: setType('convert-to-twin-token-eth'),
 		openHowToConvertToTwinTokenEth: setType('how-to-convert-to-twin-token-eth'),
 		openWalletConnectAuth: setType('wallet-connect-auth'),
-		openWalletConnectSign: setTypeWithData('wallet-connect-sign'),
-		openWalletConnectSend: setTypeWithData('wallet-connect-send'),
-		openEthTransaction: setTypeWithData('eth-transaction'),
-		openIcTransaction: setTypeWithData('ic-transaction'),
-		openBtcTransaction: setTypeWithData('btc-transaction'),
-		openSolTransaction: setTypeWithData('sol-transaction'),
+		openWalletConnectSign: <(params: SetWithDataParams<WalletKitTypes.SessionRequest>) => void>(
+			setTypeWithData('wallet-connect-sign')
+		),
+		openWalletConnectSend: <(params: SetWithDataParams<WalletKitTypes.SessionRequest>) => void>(
+			setTypeWithData('wallet-connect-send')
+		),
+		openEthTransaction: <
+			(params: SetWithDataParams<OpenTransactionParams<EthTransactionUi>>) => void
+		>setTypeWithData('eth-transaction'),
+		openIcTransaction: <
+			(params: SetWithDataParams<OpenTransactionParams<IcTransactionUi>>) => void
+		>setTypeWithData('ic-transaction'),
+		openBtcTransaction: <
+			(params: SetWithDataParams<OpenTransactionParams<BtcTransactionUi>>) => void
+		>setTypeWithData('btc-transaction'),
+		openSolTransaction: <
+			(params: SetWithDataParams<OpenTransactionParams<SolTransactionUi>>) => void
+		>setTypeWithData('sol-transaction'),
 		openManageTokens: <(params: SetWithOptionalDataParams<ManageTokensData>) => void>(
 			setTypeWithData('manage-tokens')
 		),
@@ -157,7 +178,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openReferralCode: setType('referral-code'),
 		openAddressBook: setType('address-book'),
 		openReferralState: setType('referral-state'),
-		openDappDetails: setTypeWithData('dapp-details'),
+		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
+			setTypeWithData('dapp-details')
+		),
 		openVipRewardState: <(params: SetWithDataParams<VipRewardStateData>) => void>(
 			setTypeWithData('vip-reward-state')
 		),
@@ -165,7 +188,6 @@ const initModalStore = <T>(): ModalStore<T> => {
 			setTypeWithData('reward-details')
 		),
 		openRewardState: <(params: SetWithDataParams<boolean>) => void>setTypeWithData('reward-state'),
-		// todo: explicitly define type here as well
 		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(
 			setTypeWithData('settings')
 		),
