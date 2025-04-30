@@ -12,7 +12,7 @@
 		licenseAlignment?: 'inherit' | 'center';
 	}
 
-	let {fullWidth = false, licenseAlignment = 'inherit'}: Props = $props();
+	let { fullWidth = false, licenseAlignment = 'inherit' }: Props = $props();
 
 	const modalId = Symbol();
 
