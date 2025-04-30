@@ -1,4 +1,4 @@
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { TokenId, TokenUi, TokenUiGroupable } from '$lib/types/token';
 import type { TokenGroupId, TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import { sumBalances, sumUsdBalances } from '$lib/utils/token.utils';
@@ -45,14 +45,13 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 
 			return (
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+((b.balance ?? ZERO_BI) > (a.balance ?? ZERO_BI)) -
-					+((b.balance ?? ZERO_BI) < (a.balance ?? ZERO_BI))
+				+((b.balance ?? ZERO) > (a.balance ?? ZERO)) - +((b.balance ?? ZERO) < (a.balance ?? ZERO))
 			);
 		});
 };
 
 const hasBalance = ({ token, showZeroBalances }: { token: TokenUi; showZeroBalances: boolean }) =>
-	Number(token.balance ?? ZERO_BI) || Number(token.usdBalance ?? ZERO_BI) || showZeroBalances;
+	Number(token.balance ?? ZERO) || Number(token.usdBalance ?? ZERO) || showZeroBalances;
 
 /**
  * Function to create a list of TokenUiOrGroupUi, filtering out all groups that do not have at least
