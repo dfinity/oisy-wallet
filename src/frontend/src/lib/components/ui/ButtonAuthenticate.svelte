@@ -7,7 +7,7 @@
 		fullWidth?: boolean;
 	}
 
-	let {onclick, fullWidth = false}: Props = $props();
+	let { onclick, fullWidth = false }: Props = $props();
 </script>
 
 <button
