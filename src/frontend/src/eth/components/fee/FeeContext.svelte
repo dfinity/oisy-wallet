@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { InfuraGasRest } from '$eth/rest/infura.rest';
@@ -61,7 +61,7 @@
 
 			const { getFeeData } = infuraProviders(sendToken.network.id);
 
-			const feeData = await getFeeData();
+			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
 			const { getSuggestedFeeData } = new InfuraGasRest(
 				(sendToken.network as EthereumNetwork).chainId
@@ -72,13 +72,15 @@
 				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
 			} = await getSuggestedFeeData();
 
+			const feeData = {
+				...feeDataRest,
+				maxFeePerGas: maxFeePerGas ?? suggestedMaxFeePerGas,
+				maxPriorityFeePerGas: maxPriorityFeePerGas ?? suggestedMaxPriorityFeePerGas
+			};
+
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
 					...feeData,
-					...(isNullish(feeData.maxFeePerGas) && { maxFeePerGas: suggestedMaxFeePerGas }),
-					...(isNullish(feeData.maxPriorityFeePerGas) && {
-						maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
-					}),
 					gas: getEthFeeData({
 						...params,
 						helperContractAddress: toCkEthHelperContractAddress(
