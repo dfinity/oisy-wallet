@@ -65,7 +65,7 @@
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
-			<MessageBox>
+			<MessageBox level="error">
 				{$failedSwapError}
 			</MessageBox>
 		</div>
