@@ -61,7 +61,7 @@
 
 			const { getFeeData } = infuraProviders(sendToken.network.id);
 
-			const feeData = await getFeeData();
+			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
 			const { getSuggestedFeeData } = new InfuraGasRest(
 				(sendToken.network as EthereumNetwork).chainId
@@ -72,17 +72,15 @@
 				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
 			} = await getSuggestedFeeData();
 
-			const adjustedFeeData = {
-				...feeData,
-				...(isNullish(feeData.maxFeePerGas) && { maxFeePerGas: suggestedMaxFeePerGas }),
-				...(isNullish(feeData.maxPriorityFeePerGas) && {
-					maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
-				})
+			const feeData = {
+				...feeDataRest,
+				maxFeePerGas: maxFeePerGas ?? suggestedMaxFeePerGas,
+				maxPriorityFeePerGas: maxPriorityFeePerGas ?? suggestedMaxPriorityFeePerGas
 			};
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
-					...adjustedFeeData,
+					...feeData,
 					gas: getEthFeeData({
 						...params,
 						helperContractAddress: toCkEthHelperContractAddress(
@@ -102,7 +100,7 @@
 
 			if (isSupportedErc20TwinTokenId(sendTokenId)) {
 				feeStore.setFee({
-					...adjustedFeeData,
+					...feeData,
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
 						erc20HelperContractAddress: toCkErc20HelperContractAddress(
@@ -114,7 +112,7 @@
 			}
 
 			feeStore.setFee({
-				...adjustedFeeData,
+				...feeData,
 				gas: await getErc20FeeData({
 					...erc20GasFeeParams,
 					targetNetwork,
