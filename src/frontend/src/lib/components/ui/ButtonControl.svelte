@@ -5,10 +5,10 @@
 		children: Snippet;
 		onclick: () => void;
 		ariaLabel: string;
-		styleClass?: string | undefined;
+		styleClass?: string;
 	}
 
-	let { children, onclick, ariaLabel, styleClass = undefined }: Props = $props();
+	let { children, onclick, ariaLabel, styleClass }: Props = $props();
 </script>
 
 <button
