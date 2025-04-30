@@ -28,24 +28,29 @@
 	</div>
 
 	<div class="relative rounded-lg bg-primary p-4">
-		<span class="absolute right-4 top-4">
-			<RewardDateBadge
-				date={reward.endDate}
-				testId={nonNullish(testId) ? `${testId}-badge` : undefined}
-			/>
-		</span>
 		<article class="h-full">
 			<section>
-				<p class="m-0 flex items-center text-start text-lg font-semibold">
-					{reward.cardTitle}
-					{#if !hasEnded}
-						<span class="ml-1 inline-flex">
-							<Badge variant="success">
-								{$i18n.rewards.text.youre_eligible}
-							</Badge>
-						</span>
-					{/if}
-				</p>
+				<div class="text-start text-lg font-semibold flex items-center flex-col-reverse md:flex-row">
+					<div class="flex items-center mr-auto md:flex-row flex-col">
+						<div>
+							{reward.cardTitle}
+						</div>
+						{#if !hasEnded}
+							<span class="inline-flex mr-auto md:mx-1">
+								<Badge variant="success">
+									{$i18n.rewards.text.youre_eligible}
+								</Badge>
+							</span>
+						{/if}
+					</div>
+
+					<span class="md:ml-auto mr-auto inline-flex">
+						<RewardDateBadge
+							date={reward.endDate}
+							testId={nonNullish(testId) ? `${testId}-badge` : undefined}
+						/>
+					</span>
+				</div>
 
 				<p class="m-0 mt-2 text-start text-xs text-tertiary">
 					<Html text={reward.oneLiner} />
