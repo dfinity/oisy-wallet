@@ -8,6 +8,12 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { loadRewardResult } from '$lib/utils/rewards.utils';
 
+	interface Props {
+		children?: Snippet;
+	}
+
+	let { children }: Props = $props();
+
 	let isJackpot: boolean | undefined;
 	$: isJackpot = $modalRewardState ? ($modalStore?.data as boolean | undefined) : undefined;
 
@@ -32,7 +38,7 @@
 	});
 </script>
 
-<slot />
+{@render children?.()}
 
 {#if $modalRewardState && nonNullish(isJackpot)}
 	<RewardStateModal jackpot={isJackpot} />
