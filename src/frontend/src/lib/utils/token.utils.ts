@@ -168,10 +168,7 @@ export const mapTokenUi = <T extends Token>({
 	})
 });
 
-export const sumBalances = ([balance1, balance2]: [
-	TokenUi['balance'],
-	TokenUi['balance']
-]): TokenUi['balance'] =>
+export const sumBalances = ([balance1, balance2]: TokenUi['balance'][]): TokenUi['balance'] =>
 	nonNullish(balance1) && nonNullish(balance2)
 		? balance1 + balance2
 		: balance1 === undefined || balance2 === undefined
