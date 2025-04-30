@@ -50,10 +50,10 @@ export const idlFactory = ({ IDL }) => {`
 export const init = ({ IDL }) => {`
 					);
 
+					// To avoid race conditions, we first create a temporary file with the new content.
+					// Then we rename it to the original file name.
 					const tempPath = `${factoryPath}.tmp`;
-
 					await writeFile(tempPath, cleanInit, 'utf8');
-
 					renameSync(tempPath, factoryPath);
 
 					resolve();
