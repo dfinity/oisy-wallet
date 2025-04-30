@@ -8,8 +8,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	let ariaLabel: string;
-	$: ariaLabel = replaceOisyPlaceholders($i18n.auth.alt.preview);
+	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 </script>
 
 <div
