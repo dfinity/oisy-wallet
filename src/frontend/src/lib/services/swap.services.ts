@@ -230,7 +230,7 @@ export const swapWithIcpSwap = async ({
 		console.warn('🧾 Unused balance in pool:', unused);
 
 		throw new Error(
-			`Swap failed, check unused balance, https://icpswap.com/pool/${pool.canisterId.toString()}`
+			`Swap failed, check unused balance, https://icpswap.com/pool/${pool.canisterId.toString()}, https://app.icpswap.com/swap?input=${sourceToken.ledgerCanisterId}&output=${destinationToken.ledgerCanisterId}`
 		);
 	}
 
