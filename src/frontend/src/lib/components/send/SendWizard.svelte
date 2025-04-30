@@ -6,11 +6,15 @@
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
+	import type { EthereumNetwork } from '$eth/types/network';
 	import { selectedEvmNetwork } from '$evm/derived/network.derived';
 	import { evmNativeToken } from '$evm/derived/token.derived';
+	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
+	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network, NetworkId } from '$lib/types/network';
+	import type { Token } from '$lib/types/token';
 	import {
 		isNetworkIdEthereum,
 		isNetworkIdICP,
@@ -30,13 +34,21 @@
 	export let formCancelAction: 'back' | 'close' = 'back';
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let fallbackEvmToken: Token | undefined;
+	$: fallbackEvmToken = $enabledEvmTokens.find(
+		({ network: { id: networkId } }) => $sendToken.network.id === networkId
+	);
+
+	let evmNativeEthereumToken: Token | undefined;
+	$: evmNativeEthereumToken = $evmNativeToken ?? fallbackEvmToken;
 </script>
 
-{#if isNetworkIdEthereum($sendToken.network.id) && nonNullish($selectedEthereumNetwork)}
+{#if isNetworkIdEthereum($sendToken.network.id)}
 	<EthSendTokenWizard
 		{currentStep}
 		{formCancelAction}
-		sourceNetwork={$selectedEthereumNetwork}
+		sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 		nativeEthereumToken={$ethereumToken}
 		bind:destination
 		bind:targetNetwork
@@ -49,12 +61,12 @@
 		on:icQRCodeScan
 		on:icTokensList
 	/>
-{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish($selectedEvmNetwork) && nonNullish($evmNativeToken)}
+{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken)}
 	<EthSendTokenWizard
 		{currentStep}
 		{formCancelAction}
-		sourceNetwork={$selectedEvmNetwork}
-		nativeEthereumToken={$evmNativeToken}
+		sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
+		nativeEthereumToken={evmNativeEthereumToken}
 		bind:destination
 		bind:targetNetwork
 		bind:amount
