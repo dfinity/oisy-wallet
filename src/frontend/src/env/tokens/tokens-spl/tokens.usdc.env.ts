@@ -1,6 +1,5 @@
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
-import { USDC_TOKEN as ETH_USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -24,8 +23,6 @@ export const USDC_TOKEN: RequiredSplToken = {
 	icon: usdc,
 	address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
 	owner: TOKEN_PROGRAM_ADDRESS,
-	// TODO: remove this prop when we will use `groupData` for grouping
-	twinToken: ETH_USDC_TOKEN,
 	groupData: USDC_TOKEN_GROUP,
 	buy: {
 		onramperId: 'usdc_solana'
