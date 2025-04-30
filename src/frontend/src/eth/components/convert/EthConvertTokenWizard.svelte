@@ -175,15 +175,15 @@
 			<EthConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount {destination}>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
-						<ButtonBack on:click={back} />
+						<ButtonBack onclick={back} />
 					{:else}
-						<ButtonCancel on:click={close} />
+						<ButtonCancel onclick={close} />
 					{/if}
 				</svelte:fragment>
 			</EthConvertForm>
 		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 			<EthConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}>
-				<ButtonBack slot="cancel" on:click={back} />
+				<ButtonBack slot="cancel" onclick={back} />
 			</EthConvertReview>
 		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 			<EthConvertProgress
