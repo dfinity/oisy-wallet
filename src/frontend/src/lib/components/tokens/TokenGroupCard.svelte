@@ -51,6 +51,7 @@
 	const truncatedTokens: TokenUi[] = $derived(
 		filteredTokens.filter((token) => {
 			const totalBalance = filteredTokens.reduce((p, c) => p + BigInt(c.balance ?? 0n), ZERO_BI);
+
 			// Only include tokens with a balance
 			return (
 				(token.balance ?? 0n) > 0n ||
@@ -62,7 +63,7 @@
 
 	// Show all if hideZeros = false and sort
 	const tokensToShow: TokenUi[] = $derived(
-		(hideZeros ? filteredTokens : truncatedTokens).sort((a, b) => {
+		(hideZeros ? truncatedTokens : filteredTokens).sort((a, b) => {
 			const balanceA = BigInt(a.balance ?? 0n);
 			const balanceB = BigInt(b.balance ?? 0n);
 			// higher balances show first
