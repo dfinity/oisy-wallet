@@ -99,7 +99,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openDappDetails: <D extends T>(params: SetWithDataParams<D>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
 	openRewardDetails: (params: SetWithDataParams<RewardDescription>) => void;
-	openRewardState: <D extends T>(params: SetWithDataParams<D>) => void;
+	openRewardState: (params: SetWithDataParams<boolean>) => void;
 	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
 	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
@@ -164,7 +164,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openRewardDetails: <(params: SetWithDataParams<RewardDescription>) => void>(
 			setTypeWithData('reward-details')
 		),
-		openRewardState: setTypeWithData('reward-state'),
+		openRewardState: <(params: SetWithDataParams<boolean>) => void>setTypeWithData('reward-state'),
 		// todo: explicitly define type here as well
 		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(
 			setTypeWithData('settings')
