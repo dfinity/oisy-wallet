@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { closeSync, existsSync, openSync, readdirSync, writeSync } from 'node:fs';
+import { existsSync, readdirSync, renameSync } from 'node:fs';
 import { readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -50,10 +50,11 @@ export const idlFactory = ({ IDL }) => {`
 export const init = ({ IDL }) => {`
 					);
 
-					const fd = openSync(factoryPath, 'w');
+					const tempPath = `${factoryPath}.tmp`;
 
-					writeSync(fd, cleanInit, 0, 'utf-8');
-					closeSync(fd);
+					await writeFile(tempPath, cleanInit, 'utf8');
+
+					renameSync(tempPath, factoryPath);
 
 					resolve();
 				};
