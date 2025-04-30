@@ -8,7 +8,7 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import RewardEarningsCard from '$lib/components/rewards/RewardEarningsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -30,7 +30,7 @@
 
 	let { amountOfRewards = $bindable(0) }: Props = $props();
 
-	let ckBtcReward = $state(ZERO_BI);
+	let ckBtcReward = $state(ZERO);
 	const ckBtcToken = $derived(findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens }));
 	const ckBtcRewardUsd = $derived(
 		nonNullish(ckBtcToken)
@@ -42,7 +42,7 @@
 			: 0
 	);
 
-	let ckUsdcReward = $state(ZERO_BI);
+	let ckUsdcReward = $state(ZERO);
 	const ckUsdcToken = $derived(findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $tokens }));
 	const ckUsdcRewardUsd = $derived(
 		nonNullish(ckUsdcToken)
@@ -54,7 +54,7 @@
 			: 0
 	);
 
-	let icpReward = $state(ZERO_BI);
+	let icpReward = $state(ZERO);
 	const icpRewardUsd = $derived(
 		calculateTokenUsdAmount({
 			amount: icpReward,

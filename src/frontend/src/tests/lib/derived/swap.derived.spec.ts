@@ -1,5 +1,5 @@
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { swappableTokens } from '$lib/derived/swap.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { bn2Bi } from '$tests/mocks/balances.mock';
@@ -34,7 +34,7 @@ describe('swap.derived', () => {
 
 			balancesStore.set({
 				id: ICP_TOKEN_ID,
-				data: { data: ZERO_BI, certified: true }
+				data: { data: ZERO, certified: true }
 			});
 
 			const tokens = get(swappableTokens);

@@ -1,4 +1,4 @@
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -36,7 +36,7 @@ export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,
 	signature: signature(mockSignature),
-	timestamp: ZERO_BI,
+	timestamp: ZERO,
 	type: 'send',
 	value: 100n,
 	from: 'sender',

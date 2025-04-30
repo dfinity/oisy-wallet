@@ -1,4 +1,4 @@
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Network } from '$lib/types/network';
@@ -44,7 +44,7 @@ export const initModalTokensListContext = (
 			});
 
 			return $filterZeroBalance
-				? pinnedWithBalance.filter(({ balance }) => (balance ?? ZERO_BI) > ZERO_BI)
+				? pinnedWithBalance.filter(({ balance }) => (balance ?? ZERO) > ZERO)
 				: pinnedWithBalance;
 		}
 	);

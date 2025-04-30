@@ -4,7 +4,7 @@
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { EIGHT_DECIMALS, ZERO_BI } from '$lib/constants/app.constants';
+	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -29,13 +29,13 @@
 
 {#if nonNullish(token)}
 	<div
-		class={`relative w-1/3 rounded-xl p-2 text-center text-sm text-primary-inverted md:text-base ${amount > ZERO_BI ? 'bg-success-primary' : 'bg-tertiary-inverted'}`}
+		class={`relative w-1/3 rounded-xl p-2 text-center text-sm text-primary-inverted md:text-base ${amount > ZERO ? 'bg-success-primary' : 'bg-tertiary-inverted'}`}
 		class:transition={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
 		class:animate-pulse={loading}
 	>
-		{#if amount > ZERO_BI}
+		{#if amount > ZERO}
 			<Sprinkles type="box" />
 		{/if}
 

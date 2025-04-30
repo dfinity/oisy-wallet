@@ -3,7 +3,7 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import * as exchanges from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initModalTokensListContext } from '$lib/stores/modal-tokens-list.store';
@@ -122,7 +122,7 @@ describe('modalTokensListStore', () => {
 
 		balancesStore.set({
 			id: mockToken2.id,
-			data: { data: ZERO_BI, certified: true }
+			data: { data: ZERO, certified: true }
 		});
 
 		expect(get(filterNetwork)).toBe(ICP_NETWORK);

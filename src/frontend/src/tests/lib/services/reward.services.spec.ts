@@ -9,7 +9,7 @@ import * as rewardApi from '$lib/api/reward.api';
 import {
 	MILLISECONDS_IN_DAY,
 	NANO_SECONDS_IN_MILLISECOND,
-	ZERO_BI
+	ZERO
 } from '$lib/constants/app.constants';
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import {
@@ -522,9 +522,9 @@ describe('reward-code', () => {
 						getMockReward({ ledgerCanisterId: null, amount: 1000n }),
 						getMockReward({ ledgerCanisterId: 'invalid', amount: 1000n }),
 						getMockReward({ ledgerCanisterId: undefined, amount: 1000n }),
-						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: ZERO_BI }),
-						getMockReward({ ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId, amount: ZERO_BI }),
-						getMockReward({ ledgerCanisterId: mockIcpToken.ledgerCanisterId, amount: ZERO_BI })
+						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: ZERO }),
+						getMockReward({ ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId, amount: ZERO }),
+						getMockReward({ ledgerCanisterId: mockIcpToken.ledgerCanisterId, amount: ZERO })
 					]
 				]
 			});

@@ -1,7 +1,7 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcToken } from '$icp/validation/ic-token.validation';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -50,7 +50,7 @@ export const swappableTokens: Readable<SwappableTokens> = derived(
 			return { sourceToken: undefined, destinationToken: undefined };
 		}
 
-		if (balance > ZERO_BI) {
+		if (balance > ZERO) {
 			return { sourceToken: selectedToken, destinationToken: undefined };
 		}
 		return { sourceToken: undefined, destinationToken: selectedToken };

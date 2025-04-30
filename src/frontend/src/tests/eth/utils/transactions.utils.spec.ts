@@ -7,7 +7,7 @@ import {
 	mapAddressToName,
 	mapEthTransactionUi
 } from '$eth/utils/transactions.utils';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
@@ -27,8 +27,8 @@ const transaction: Transaction = {
 	to: '0xabcd',
 	timestamp: 1670000000,
 	nonce: 1,
-	gasLimit: ZERO_BI,
-	value: ZERO_BI,
+	gasLimit: ZERO,
+	value: ZERO,
 	chainId: 1n
 };
 
