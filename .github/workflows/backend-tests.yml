@@ -124,7 +124,7 @@ jobs:
           fi
           # The PR body needs a line declaring the breaking change, e.g.:
           # BREAKING CHANGE: use JavaScript features not available in Node 6.
-          if grep -qE '^BREAKING CHANGE: ' <<<"$desc"; then
+          if grep -qE '^BREAKING CHANGE: ' <<<"$DESCRIPTION"; then
             echo "BREAKING_DESCRIPTION=true" | tee -a "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
       - name: Need to check for breaking changes
