@@ -14,6 +14,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import { last } from '$lib/utils/array.utils';
+import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
 import {
 	filterTokenGroups,
 	groupSecondaryToken,
@@ -289,6 +290,7 @@ describe('token-group.utils', () => {
 
 		const tokenGroup: TokenUiGroup = {
 			id: anotherToken.groupData.id,
+			decimals: anotherToken.decimals,
 			nativeToken: anotherToken,
 			groupData: anotherToken.groupData,
 			tokens: [anotherToken],
@@ -296,10 +298,25 @@ describe('token-group.utils', () => {
 			usdBalance: anotherToken.usdBalance
 		};
 
+		const expectedDecimals = Math.max(anotherToken.decimals, token.decimals);
+
+		const expectedBalance =
+			normalizeTokenToDecimals({
+				value: anotherToken.balance,
+				oldUnitName: anotherToken.decimals,
+				newUnitName: expectedDecimals
+			}) +
+			normalizeTokenToDecimals({
+				value: token.balance,
+				oldUnitName: token.decimals,
+				newUnitName: expectedDecimals
+			});
+
 		const expectedGroup: TokenUiGroup = {
 			...tokenGroup,
+			decimals: expectedDecimals,
 			tokens: [anotherToken, token],
-			balance: anotherToken.balance + token.balance,
+			balance: expectedBalance,
 			usdBalance: anotherToken.usdBalance + token.usdBalance
 		};
 
@@ -310,6 +327,7 @@ describe('token-group.utils', () => {
 		it('should add a token to a token group with multiple tokens successfully', () => {
 			const thirdToken = {
 				...BTC_TESTNET_TOKEN,
+				decimals: expectedDecimals,
 				groupData: ETH_TOKEN_GROUP,
 				balance: bn3Bi,
 				usdBalance: 300
@@ -322,7 +340,7 @@ describe('token-group.utils', () => {
 			expect(updatedGroup).toStrictEqual({
 				...tokenGroup,
 				tokens: [anotherToken, thirdToken, token],
-				balance: anotherToken.balance + thirdToken.balance + token.balance,
+				balance: expectedBalance + thirdToken.balance,
 				usdBalance: anotherToken.usdBalance + thirdToken.usdBalance + token.usdBalance
 			});
 		});
@@ -384,15 +402,72 @@ describe('token-group.utils', () => {
 				usdBalance: tokenGroup.usdBalance
 			});
 		});
+
+		it('should handle tokens with different decimals', () => {
+			assertNonNullish(tokenGroup.usdBalance);
+
+			const newDecimals = expectedGroup.decimals * 2;
+
+			const newToken = { ...token, decimals: newDecimals };
+
+			const initialGroup = updateTokenGroup({
+				token: newToken,
+				tokenGroup
+			});
+
+			const expectedBalance =
+				normalizeTokenToDecimals({
+					value: anotherToken.balance,
+					oldUnitName: anotherToken.decimals,
+					newUnitName: newDecimals
+				}) + newToken.balance;
+
+			expect(initialGroup).toStrictEqual({
+				...tokenGroup,
+				decimals: newDecimals,
+				tokens: [...tokenGroup.tokens, newToken],
+				balance: expectedBalance,
+				usdBalance: tokenGroup.usdBalance + newToken.usdBalance
+			});
+
+			const thirdToken = {
+				...BTC_TESTNET_TOKEN,
+				decimals: newDecimals * 2,
+				groupData: ETH_TOKEN_GROUP,
+				balance: bn3Bi,
+				usdBalance: 300
+			};
+
+			const updatedGroup = updateTokenGroup({ token: thirdToken, tokenGroup: initialGroup });
+
+			assertNonNullish(initialGroup.balance);
+
+			expect(updatedGroup).toStrictEqual({
+				...initialGroup,
+				decimals: newDecimals * 2,
+				tokens: [...initialGroup.tokens, thirdToken],
+				balance:
+					normalizeTokenToDecimals({
+						value: initialGroup.balance,
+						oldUnitName: initialGroup.decimals,
+						newUnitName: newDecimals * 2
+					}) + thirdToken.balance,
+				usdBalance: anotherToken.usdBalance + thirdToken.usdBalance + token.usdBalance
+			});
+		});
 	});
 
 	describe('groupSecondaryToken', () => {
-		const token = { ...ETHEREUM_TOKEN, balance: bn1Bi, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
+		// We normalize the decimals, to avoid having to mock the normalizing of balances
+		const decimals = ETHEREUM_TOKEN.decimals;
 
-		// We mock the tokens to have the same "main token"
+		const token = { ...ETHEREUM_TOKEN, decimals, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...BTC_REGTEST_TOKEN, decimals, balance: bn2Bi, usdBalance: 200 };
+
+		// We mock the tokens to have the same group data
 		const twinToken = {
 			...SOLANA_TOKEN,
+			decimals,
 			balance: bn2Bi,
 			usdBalance: 250,
 			groupData: ETH_TOKEN_GROUP
@@ -401,6 +476,7 @@ describe('token-group.utils', () => {
 		it('should create a new group when no tokenGroup exists', () => {
 			expect(groupSecondaryToken({ token: twinToken, tokenGroup: undefined })).toEqual({
 				id: ETH_TOKEN_GROUP_ID,
+				decimals,
 				nativeToken: twinToken,
 				groupData: ETH_TOKEN_GROUP,
 				tokens: [twinToken],
@@ -412,6 +488,7 @@ describe('token-group.utils', () => {
 		it('should add token to existing group and update balances', () => {
 			const tokenGroup: TokenUiGroup = {
 				id: ETH_TOKEN_GROUP_ID,
+				decimals,
 				nativeToken: token,
 				groupData: ETH_TOKEN_GROUP,
 				tokens: [token],
@@ -419,11 +496,14 @@ describe('token-group.utils', () => {
 				usdBalance: 300
 			};
 
+			assertNonNullish(tokenGroup.balance);
+			assertNonNullish(tokenGroup.usdBalance);
+
 			expect(groupSecondaryToken({ token: twinToken, tokenGroup })).toEqual({
 				...tokenGroup,
 				tokens: [...tokenGroup.tokens, twinToken],
-				balance: tokenGroup.balance! + twinToken.balance,
-				usdBalance: tokenGroup.usdBalance! + twinToken.usdBalance
+				balance: tokenGroup.balance + twinToken.balance,
+				usdBalance: tokenGroup.usdBalance + twinToken.usdBalance
 			});
 		});
 
@@ -432,6 +512,7 @@ describe('token-group.utils', () => {
 
 			const tokenGroup: TokenUiGroup = {
 				id: token.groupData.id,
+				decimals,
 				nativeToken: token,
 				groupData: token.groupData,
 				tokens: [token, anotherToken],
@@ -439,29 +520,37 @@ describe('token-group.utils', () => {
 				usdBalance: 300
 			};
 
+			assertNonNullish(tokenGroup.balance);
+			assertNonNullish(tokenGroup.usdBalance);
+
 			expect(groupSecondaryToken({ token: twinToken, tokenGroup })).toEqual({
 				...tokenGroup,
 				tokens: [...tokenGroup.tokens, twinToken],
-				balance: tokenGroup.balance! + twinToken.balance,
-				usdBalance: tokenGroup.usdBalance! + twinToken.usdBalance
+				balance: tokenGroup.balance + twinToken.balance,
+				usdBalance: tokenGroup.usdBalance + twinToken.usdBalance
 			});
 		});
 	});
 
 	describe('groupTokens', () => {
-		const mockToken = { ...ETHEREUM_TOKEN, balance: bn1Bi, usdBalance: 100 };
-		const mockSecondToken = { ...BTC_MAINNET_TOKEN, balance: bn3Bi, usdBalance: 300 };
-		const mockThirdToken = { ...ICP_TOKEN, balance: bn2Bi, usdBalance: 200 };
+		// We normalize the decimals, to avoid having to mock the normalizing of balances
+		const decimals = ETHEREUM_TOKEN.decimals;
+
+		const mockToken = { ...ETHEREUM_TOKEN, decimals, balance: bn1Bi, usdBalance: 100 };
+		const mockSecondToken = { ...BTC_MAINNET_TOKEN, decimals, balance: bn3Bi, usdBalance: 300 };
+		const mockThirdToken = { ...ICP_TOKEN, decimals, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const mockTwinToken1 = {
 			...mockValidIcToken,
+			decimals,
 			balance: bn2Bi,
 			usdBalance: 250,
 			groupData: mockToken.groupData
 		};
 		const mockTwinToken2 = {
 			...mockValidIcToken,
+			decimals,
 			balance: bn1Bi,
 			usdBalance: 450,
 			groupData: mockToken.groupData
@@ -509,6 +598,7 @@ describe('token-group.utils', () => {
 
 				expect(group).toEqual({
 					id: currentToken.groupData?.id,
+					decimals: currentToken.decimals,
 					nativeToken: currentToken,
 					groupData: currentToken.groupData,
 					tokens: [currentToken],
@@ -538,6 +628,7 @@ describe('token-group.utils', () => {
 
 			expect(group0).toStrictEqual({
 				id: mockToken.groupData?.id,
+				decimals,
 				nativeToken: mockToken,
 				groupData: mockToken.groupData,
 				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
@@ -547,6 +638,7 @@ describe('token-group.utils', () => {
 
 			expect(group1).toStrictEqual({
 				id: mockSecondToken.groupData?.id,
+				decimals: mockSecondToken.decimals,
 				nativeToken: mockSecondToken,
 				groupData: mockSecondToken.groupData,
 				tokens: [mockSecondToken],
@@ -573,6 +665,7 @@ describe('token-group.utils', () => {
 
 			expect(group0).toStrictEqual({
 				id: mockTwinToken1.groupData?.id,
+				decimals,
 				nativeToken: mockTwinToken1,
 				groupData: mockTwinToken1.groupData,
 				tokens: [mockTwinToken1, mockToken, mockTwinToken2],
@@ -582,6 +675,7 @@ describe('token-group.utils', () => {
 
 			expect(group1).toStrictEqual({
 				id: mockSecondToken.groupData?.id,
+				decimals,
 				nativeToken: mockSecondToken,
 				groupData: mockSecondToken.groupData,
 				tokens: [mockSecondToken],
@@ -609,6 +703,7 @@ describe('token-group.utils', () => {
 
 			expect(group0).toStrictEqual({
 				id: mockSecondToken.groupData?.id,
+				decimals,
 				nativeToken: mockSecondToken,
 				groupData: mockSecondToken.groupData,
 				tokens: [mockSecondToken],
@@ -618,6 +713,7 @@ describe('token-group.utils', () => {
 
 			expect(group1).toStrictEqual({
 				id: mockToken.groupData?.id,
+				decimals,
 				nativeToken: mockToken,
 				groupData: mockToken.groupData,
 				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
@@ -645,6 +741,7 @@ describe('token-group.utils', () => {
 
 			expect(group).toStrictEqual({
 				id: mockToken.groupData?.id,
+				decimals,
 				nativeToken: mockToken,
 				groupData: mockToken.groupData,
 				tokens: [mockToken, mockTwinToken, mockTwinToken2],
