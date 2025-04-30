@@ -57,7 +57,9 @@ export const initModalTokensListContext = (
 				isNullish($filterNetwork)
 			]);
 
-			if (!$sortByBalance) {return filteredByNetwork;}
+			if (!$sortByBalance) {
+				return filteredByNetwork;
+			}
 
 			const pinnedWithBalance = pinTokensWithBalanceAtTop({
 				$tokens: filteredByNetwork,
