@@ -1,6 +1,8 @@
 # OISY Wallet Development on Linux
 
-This guide provides detailed instructions for setting up and running the OISY wallet project on Linux distributions.
+This guide provides detailed instructions for setting up and running the **OISY wallet** project on Linux distributions.
+
+---
 
 ## Table of Contents
 
@@ -15,318 +17,369 @@ This guide provides detailed instructions for setting up and running the OISY wa
 - [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
 
+---
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed on your Linux system:
 
-- [x] Install the [IC SDK](https://internetcomputer.org/docs/current/developer-docs/setup/install/index.mdx) for Linux.
-- [x] Install [Node.js](https://nodejs.org/) (LTS version recommended).
-- [x] Install [Git](https://git-scm.com/download/linux).
-- [x] Install [Rust](https://www.rust-lang.org/tools/install) using rustup.
+- [x] **IC SDK** — <https://internetcomputer.org/docs/current/developer-docs/setup/install/index.mdx>
+- [x] **Node.js** (LTS version recommended) — <https://nodejs.org/>
+- [x] **Git** — <https://git-scm.com/download/linux>
+- [x] **Rust** (via *rustup*) — <https://www.rust-lang.org/tools/install>
+
+---
 
 ## Environment Setup
 
-1. **Install the IC SDK**:
+### 1  Install the IC SDK
 
-   ```bash
-   sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
-   ```
+```bash
+sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+```
 
-2. **Install Node.js** (if not already installed):
+### 2  Install Node.js *(if not already installed)*
 
-   ```bash
-   # Using NVM (recommended)
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-   source ~/.bashrc  # or source ~/.zshrc if using zsh
-   nvm install --lts
+```bash
+# Using NVM (recommended)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.nvm/nvm.sh  # or source the appropriate shell file
+nvm install --lts
+nvm use --lts
 
-   # Or using package manager (Ubuntu/Debian)
-   curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-   sudo apt-get install -y nodejs
-   ```
+# — OR —  Using apt on Debian/Ubuntu
+sudo apt update && sudo apt install -y curl build-essential
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
 
-3. **Install Rust**:
+### 3  Install Rust
 
-   ```bash
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   source $HOME/.cargo/env
-   rustup target add wasm32-unknown-unknown
-   ```
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+rustup target add wasm32-unknown-unknown
+```
 
-4. **Install required system dependencies**:
+You can also run the project helper script:
 
-   ```bash
-   # For Ubuntu/Debian
-   sudo apt update
-   sudo apt install -y build-essential pkg-config libssl-dev llvm clang
+```bash
+chmod +x ./scripts/setup-rust
+./scripts/setup-rust
+```
 
-   # For Fedora
-   sudo dnf install -y gcc gcc-c++ make openssl-devel llvm clang
+> **Note:** After either method, be sure to `source "$HOME/.cargo/env"` or restart your shell.
 
-   # For Arch Linux
-   sudo pacman -S base-devel openssl llvm clang
-   ```
+### 4  Install required system dependencies
 
-5. **Clone the repository**:
-   ```bash
-   git clone https://github.com/dfinity/oisy-wallet.git
-   cd oisy-wallet
-   ```
+```bash
+# Ubuntu / Debian
+sudo apt update
+sudo apt install -y build-essential pkg-config libssl-dev llvm clang jq curl golang-go
+
+# Fedora
+sudo dnf install -y gcc gcc-c++ make openssl-devel llvm clang jq curl golang
+
+# Arch Linux
+sudo pacman -S base-devel openssl llvm clang jq curl go
+```
+
+The additional packages include:
+- `jq` - Required for parsing the dev-tools.json file
+- `curl` - Required for downloading tools
+- `golang-go` - Required for installing shfmt
+
+### 5  Install essential development tools
+
+The project defines both required and optional packages along with their respective versions in `dev-tools.json`. The following tools are essential for development:
+
+- cargo-binstall
+- ic-wasm
+- didc
+- candid-extractor
+- shfmt
+
+#### Option 1: Using the setup script (recommended)
+
+The project provides a setup script that can install tools with the correct versions:
+
+```bash
+# Make the script executable
+chmod +x ./scripts/setup
+
+# Install cargo-binstall first (required for installing other tools)
+./scripts/setup cargo-binstall
+
+# Install other essential tools
+./scripts/setup ic-wasm
+./scripts/setup didc
+./scripts/setup candid-extractor
+./scripts/setup shfmt
+```
+
+You can view all available tools with:
+
+```bash
+jq -r 'keys[]' dev-tools.json
+```
+
+#### Option 2: Manual installation
+
+If the setup script doesn't work for you, here's how to install the essential tools manually:
+
+1. **cargo‑binstall** — installs other Rust binaries more easily:
+
+```bash
+cargo install cargo-binstall --version 1.7.4  # Check dev-tools.json for current version
+```
+
+2. Install tools with *cargo binstall*:
+
+```bash
+cargo binstall ic-wasm --version 0.8.5 --no-confirm
+cargo binstall candid-extractor --version 0.1.4 --no-confirm
+```
+
+3. **didc** — manual installation if cargo-binstall fails:
+
+```bash
+# Create local bin directory if it doesn't exist
+mkdir -p ~/.local/bin
+
+# Download didc binary
+curl -L "https://github.com/dfinity/candid/releases/download/2024-07-29/didc-linux64" -o ~/.local/bin/didc
+chmod +x ~/.local/bin/didc
+
+# Ensure ~/.local/bin is in your PATH
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+4. **shfmt** — using Go:
+
+```bash
+# Install shfmt
+go install mvdan.cc/sh/v3/cmd/shfmt@v3.5.1  # Check dev-tools.json for current version
+
+# Ensure Go binaries are in your PATH
+echo 'export PATH="$HOME/go/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 6  Clone the repository
+
+```bash
+git clone https://github.com/dfinity/oisy-wallet.git
+cd oisy-wallet
+```
+
+---
 
 ## Running the Local Replica
 
-Open a terminal window _in the project directory_, and run the following command to start the local replica. The replica will not start unless [dfx.json](dfx.json) exists in the current directory.
+From the **project root**:
 
 ```bash
 dfx start --background
 ```
 
-When you're done with development, or you're switching to a different dfx project, running
+When you finish development or switch to another `dfx` project, stop the replica:
 
 ```bash
 dfx stop
 ```
 
-from the project directory will stop the local replica.
+---
 
 ## Deploying OISY Locally
 
-Make sure you are in the project root directory.
+1. **Install frontend dependencies**
 
-1. **Install frontend dependencies**:
+```bash
+npm ci
+```
 
-   ```bash
-   npm ci
-   ```
+2. **Configure environment variables**
 
-2. **Configure environment variables**:
+```bash
+cp .env.example .env.development
+nano .env.development  # set any API keys as needed
+```
 
-   - Create a `.env.development` file by copying the [.env.example](.env.example) file:
+3. **Deploy**
 
-   ```bash
-   cp .env.example .env.development
-   ```
+```bash
+npm run deploy
+```
 
-   - Edit the `.env.development` file to set the API keys for the services that OISY needs:
+Successful output ends with URLs similar to:
 
-   ```bash
-   nano .env.development  # or use your preferred text editor
-   ```
+```
+Frontend  ➜  http://127.0.0.1:4943/?canisterId=br5f7-7uaaa-aaaaa-qaaca-cai
+Backend   ➜  http://127.0.0.1:4943/?canisterId=bd3sg-teaaa-aaaaa-qaaba-cai&id=bkyz2-fmaaa-aaaaa-qaaaq-cai
+Internet Identity ➜ http://127.0.0.1:4943/?canisterId=bd3sg-teaaa-aaaaa-qaaba-cai&id=be2us-64aaa-aaaaa-qaabq-cai
+```
 
-   - For local development, you can keep most settings as they are in the example file.
+Open the **Frontend** URL to access your wallet.
 
-3. **Deploy the project locally**:
-
-   ```bash
-   npm run deploy
-   ```
-
-   It should output something like the following:
-
-   ```
-   ...
-   Deployed canisters.
-   URLs:
-     Frontend canister via browser
-       frontend: http://127.0.0.1:4943/?canisterId=br5f7-7uaaa-aaaaa-qaaca-cai
-     Backend canister via Candid interface:
-       backend: http://127.0.0.1:4943/?canisterId=bd3sg-teaaa-aaaaa-qaaba-cai&id=bkyz2-fmaaa-aaaaa-qaaaq-cai
-       internet_identity: http://127.0.0.1:4943/?canisterId=bd3sg-teaaa-aaaaa-qaaba-cai&id=be2us-64aaa-aaaaa-qaabq-cai
-   ```
-
-4. **Access the wallet**:
-   - Open your browser and navigate to the **frontend** URL to access the OISY Wallet that is running locally.
+---
 
 ## Frontend Development
 
-If you want to work on the frontend in development mode:
+```bash
+dfx start --background   # ensure replica is up
+npm run dev              # Vite dev server
+```
 
-1. **Ensure the local replica is running**:
+Visit the URL shown (typically `http://localhost:5173/`). Live‑reload is enabled.
 
-   ```bash
-   dfx start --background
-   ```
+### Build only
 
-2. **Start the frontend development server**:
+```bash
+npm run build
+```
 
-   ```bash
-   npm run dev
-   ```
-
-3. **Access the development server**:
-
-   - Open your browser and navigate to the URL shown in the terminal (typically http://localhost:5173/).
-   - Changes to the frontend code will be automatically reflected in the browser.
-
-4. **Building the frontend only**:
-   - If you want to build the frontend without deploying:
-   ```bash
-   npm run build
-   ```
+---
 
 ## Backend Development
-
-If you want to deploy only the backend:
 
 ```bash
 dfx deploy backend
 ```
 
+---
+
 ## Bitcoin Development
 
-To develop with Bitcoin functionality locally:
+### 1  Environment variable
 
-1. **Configure Bitcoin environment variables**:
+Ensure this line is **absent or commented** in `.env.development`:
 
-   - Ensure the following line is disabled or completely absent in your `.env.development` file:
+```bash
+# VITE_BITCOIN_MAINNET_DISABLED=true
+```
 
-   ```
-   VITE_BITCOIN_MAINNET_DISABLED=false    # or remove this line
-   ```
+### 2  Local Bitcoin node (Regtest)
 
-2. **Set up a local Bitcoin node (Regtest)**:
+```bash
+chmod +x ./scripts/setup.bitcoin-node.sh
+./scripts/setup.bitcoin-node.sh          # initial setup
+./scripts/setup.bitcoin-node.sh --reset  # reset if needed
+```
 
-   ```bash
-   ./scripts/setup.bitcoin-node.sh
-   ```
+### 3  Start DFX with Bitcoin support
 
-   - This script will download and set up a local Bitcoin node from [Bitcoin.org](https://bitcoin.org/en/download).
-   - To reset the node if needed:
+```bash
+chmod +x ./scripts/dfx.start-with-bitcoin.sh
+./scripts/dfx.start-with-bitcoin.sh --clean   # add --clean if you were running without BTC before
+```
 
-   ```bash
-   ./scripts/setup.bitcoin-node.sh --reset
-   ```
+### 4  Mine test Bitcoins
 
-3. **Start DFX with Bitcoin support**:
+```bash
+chmod +x ./scripts/add.tokens.bitcoin.sh
+./scripts/add.tokens.bitcoin.sh --amount <blocks> --address <regtest_address>
 
-   ```bash
-   ./scripts/dfx.start-with-bitcoin.sh
-   ```
+# Mine one more block to confirm:
+./scripts/add.tokens.bitcoin.sh
+```
 
-   - If you were running a local replica before without Bitcoin, use the `--clean` flag:
+*(One block equals 50 BTC in regtest.)*
 
-   ```bash
-   ./scripts/dfx.start-with-bitcoin.sh --clean
-   ```
+---
 
-4. **Mine test Bitcoins**:
-   - To get test Bitcoins for your wallet address:
-   ```bash
-   ./scripts/add.tokens.bitcoin.sh --amount <amount-in-blocks> --address <test-user-address>
-   ```
-   - Note: One block equals 50 Bitcoin.
-   - After transactions, mine a new block to make transferred tokens available:
-   ```bash
-   ./scripts/add.tokens.bitcoin.sh
-   ```
+## Internationalization (i18n)
 
-## Internationalization
+```bash
+npm run i18n   # generate interfaces
+```
 
-OISY supports internationalization through JSON files. To work with translations:
+Add a new locale:
 
-1. **Generate interfaces for translations**:
+1. Copy `src/frontend/src/lib/i18n/en.json` → `de.json` (or other code).
+2. Translate the values.
+3. Update imports in `src/frontend/src/lib/stores/i18n.store.ts`.
 
-   ```bash
-   npm run i18n
-   ```
-
-2. **Add a new language**:
-   - Copy `src/frontend/src/lib/i18n/en.json` to a new file with the appropriate language code (e.g., `de.json` for German).
-   - Translate each key in the newly created file.
-   - Update the imports in `src/frontend/src/lib/stores/i18n.store.ts`.
+---
 
 ## Testing
 
-To run tests on your Linux machine:
+```bash
+# backend
+npm run test:backend
 
-1. **Run backend tests**:
+# frontend
+npm run test:frontend
 
-   ```bash
-   npm run test:backend
-   ```
+# end‑to‑end
+npm run e2e
+npm run e2e:snapshots   # generate snapshots
+```
 
-2. **Run frontend tests**:
-
-   ```bash
-   npm run test:frontend
-   ```
-
-3. **Run E2E tests**:
-
-   ```bash
-   npm run e2e
-   ```
-
-4. **Generate E2E snapshots**:
-   ```bash
-   npm run e2e:snapshots
-   ```
+---
 
 ## Troubleshooting
 
-1. **LLVM/Clang issues**:
+### LLVM / Clang errors
 
-   - If you encounter errors related to LLVM or Clang during Rust compilation:
+```bash
+# Ubuntu / Debian
+sudo apt install -y llvm clang
+# Fedora
+sudo dnf install -y llvm clang
+# Arch
+sudo pacman -S llvm clang
+```
 
-   ```bash
-   # For Ubuntu/Debian
-   sudo apt install -y llvm clang
+### DFX permission issues
 
-   # For Fedora
-   sudo dnf install -y llvm clang
+```bash
+echo $PATH
+which dfx
+chmod +x $(which dfx)
+```
 
-   # For Arch Linux
-   sudo pacman -S llvm clang
-   ```
+### Node version conflicts
 
-2. **Permission issues with DFX**:
+```bash
+nvm use --lts
+node -v
+```
 
-   - If you encounter permission errors when running dfx commands:
+### DFX cache problems
 
-   ```bash
-   chmod +x "$(which dfx)"
-   ```
+```bash
+dfx cache delete
+dfx cache install
+```
 
-3. **Node.js version conflicts**:
+### Missing SSL libraries
 
-   - If you have multiple Node.js versions installed, ensure you're using the correct one:
+```bash
+# Ubuntu / Debian
+sudo apt install -y libssl-dev
+# Fedora
+sudo dnf install -y openssl-devel
+# Arch
+sudo pacman -S openssl
+```
 
-   ```bash
-   # If using NVM
-   nvm use --lts
-   ```
+### Port conflicts (default 4943)
 
-4. **DFX cache issues**:
+```bash
+sudo lsof -i :4943      # identify process
+sudo kill <PID>         # terminate if appropriate
+```
 
-   - If you encounter unexpected behavior, try clearing the DFX cache:
+You can also change the bind port in `dfx.json`:
 
-   ```bash
-   dfx cache delete
-   ```
+```json
+"networks": {
+  "local": {
+    "bind": "127.0.0.1:8000",
+    "type": "ephemeral"
+  }
+}
+```
 
-5. **Missing SSL libraries**:
-
-   - If you encounter SSL-related errors during compilation:
-
-   ```bash
-   # For Ubuntu/Debian
-   sudo apt install -y libssl-dev
-
-   # For Fedora
-   sudo dnf install -y openssl-devel
-
-   # For Arch Linux
-   sudo pacman -S openssl
-   ```
-
-6. **Port conflicts**:
-
-   - If you encounter port conflicts when starting the local replica:
-
-   ```bash
-   # Check if port 4943 is in use
-   sudo lsof -i :4943
-
-   # Kill the process using the port
-   sudo kill <PID>
-   ```
+---
