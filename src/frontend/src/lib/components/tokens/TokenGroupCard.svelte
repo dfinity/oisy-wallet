@@ -6,7 +6,7 @@
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -50,7 +50,7 @@
 	// list of tokens that should display with a "show more" button for not displayed ones
 	const truncatedTokens: TokenUi[] = $derived(
 		filteredTokens.filter((token) => {
-			const totalBalance = filteredTokens.reduce((p, c) => p + BigInt(c.balance ?? 0n), ZERO_BI);
+			const totalBalance = filteredTokens.reduce((p, c) => p + BigInt(c.balance ?? 0n), ZERO);
 			// Only include tokens with a balance
 			return (
 				(token.balance ?? 0n) > 0n ||

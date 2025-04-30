@@ -25,7 +25,7 @@ import { registerAirdropRecipient } from '$lib/api/reward.api';
 import {
 	NANO_SECONDS_IN_MILLISECOND,
 	NANO_SECONDS_IN_SECOND,
-	ZERO_BI
+	ZERO
 } from '$lib/constants/app.constants';
 import {
 	btcAddressMainnet,
@@ -89,8 +89,8 @@ const toBaseTransaction = ({
 	'value' | 'timestamp'
 >): Omit<Transaction_Icrc | Transaction_Spl, 'counterparty'> => ({
 	transaction_type: toTransactionType(type),
-	timestamp: (timestamp ?? ZERO_BI) * NANO_SECONDS_IN_SECOND,
-	amount: value ?? ZERO_BI,
+	timestamp: (timestamp ?? ZERO) * NANO_SECONDS_IN_SECOND,
+	amount: value ?? ZERO,
 	network: {}
 });
 
@@ -105,7 +105,7 @@ const toIcrcTransaction = ({
 
 	return {
 		...toBaseTransaction({ type, value, timestamp }),
-		timestamp: timestamp ?? ZERO_BI,
+		timestamp: timestamp ?? ZERO,
 		// TODO: use correct value when the Rewards canister is updated to accept account identifiers
 		counterparty: Principal.anonymous()
 	};
@@ -128,8 +128,8 @@ const toSplTransaction = ({
 		// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 		...toBaseTransaction({
 			type: type === 'deposit' ? 'send' : type === 'withdraw' ? 'receive' : type,
-			value: BigInt(value ?? ZERO_BI),
-			timestamp: BigInt(timestamp ?? ZERO_BI)
+			value: BigInt(value ?? ZERO),
+			timestamp: BigInt(timestamp ?? ZERO)
 		}),
 		// in case it's a BTC tx, "to" is an array
 		counterparty: address === from ? (Array.isArray(to) ? to[0] : to) : from
@@ -287,7 +287,7 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 	return allTokens.reduce<AccountSnapshotFor[]>((acc, token) => {
 		const balance = balances[token.id]?.data;
 
-		if (isNullish(balance) || balance === ZERO_BI) {
+		if (isNullish(balance) || balance === ZERO) {
 			return acc;
 		}
 
