@@ -59,6 +59,6 @@
 		</p>
 	{/snippet}
 	{#snippet toolbar()}
-		<ButtonCancel fullWidth={true} on:click={() => dispatch('icCloseTokensList')} />
+		<ButtonCancel fullWidth={true} onclick={() => dispatch('icCloseTokensList')} />
 	{/snippet}
 </ModalTokensList>
