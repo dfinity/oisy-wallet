@@ -226,7 +226,7 @@ jobs:
         with:
           pattern: snapshots-*
           merge-multiple: true
-          path: e2e
+          path: e2e/snapshots
 
       - name: Check for Final Changes
         id: e2e-check-snapshots
