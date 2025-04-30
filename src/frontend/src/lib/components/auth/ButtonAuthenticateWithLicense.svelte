@@ -7,8 +7,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let fullWidth = false;
-	export let licenseAlignment: 'inherit' | 'center' = 'inherit';
+	interface Props {
+		fullWidth?: boolean;
+		licenseAlignment?: 'inherit' | 'center';
+	}
+
+	let { fullWidth = false, licenseAlignment = 'inherit' }: Props = $props();
 
 	const modalId = Symbol();
 
