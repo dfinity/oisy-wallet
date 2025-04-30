@@ -8,7 +8,7 @@ export const parseToken = ({
 	unitName?: BigNumberish;
 }): bigint => parseUnits(value, unitName);
 
-export const parseTokenToDecimals = ({
+export const normalizeTokenToDecimals = ({
 	value,
 	oldUnitName,
 	newUnitName

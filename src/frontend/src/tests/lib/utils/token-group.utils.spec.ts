@@ -14,7 +14,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import { last } from '$lib/utils/array.utils';
-import { parseTokenToDecimals } from '$lib/utils/parse.utils';
+import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
 import {
 	filterTokenGroups,
 	groupSecondaryToken,
@@ -301,12 +301,12 @@ describe('token-group.utils', () => {
 		const expectedDecimals = Math.max(anotherToken.decimals, token.decimals);
 
 		const expectedBalance =
-			parseTokenToDecimals({
+			normalizeTokenToDecimals({
 				value: anotherToken.balance,
 				oldUnitName: anotherToken.decimals,
 				newUnitName: expectedDecimals
 			}) +
-			parseTokenToDecimals({
+			normalizeTokenToDecimals({
 				value: token.balance,
 				oldUnitName: token.decimals,
 				newUnitName: expectedDecimals
@@ -416,7 +416,7 @@ describe('token-group.utils', () => {
 			});
 
 			const expectedBalance =
-				parseTokenToDecimals({
+				normalizeTokenToDecimals({
 					value: anotherToken.balance,
 					oldUnitName: anotherToken.decimals,
 					newUnitName: newDecimals
@@ -447,7 +447,7 @@ describe('token-group.utils', () => {
 				decimals: newDecimals * 2,
 				tokens: [...initialGroup.tokens, thirdToken],
 				balance:
-					parseTokenToDecimals({
+					normalizeTokenToDecimals({
 						value: initialGroup.balance,
 						oldUnitName: initialGroup.decimals,
 						newUnitName: newDecimals * 2

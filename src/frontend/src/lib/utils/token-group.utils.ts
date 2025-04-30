@@ -1,7 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { TokenId, TokenUi, TokenUiGroupable } from '$lib/types/token';
 import type { TokenGroupId, TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
-import { parseTokenToDecimals } from '$lib/utils/parse.utils';
+import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
 import { sumBalances, sumUsdBalances } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -118,7 +118,7 @@ export const updateTokenGroup = ({ token, tokenGroup }: UpdateTokenGroupParams):
 		balance: sumBalances(
 			[tokenGroup, token].map(({ balance, decimals }) =>
 				nonNullish(balance)
-					? parseTokenToDecimals({
+					? normalizeTokenToDecimals({
 							value: balance,
 							oldUnitName: decimals,
 							newUnitName: newDecimals
