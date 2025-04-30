@@ -6,6 +6,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import Badge from "$lib/components/ui/Badge.svelte";
 
 	interface Props {
 		onclick: () => void;
@@ -32,7 +33,14 @@
 		</span>
 		<article class="h-full">
 			<section>
-				<p class="m-0 text-start text-lg font-semibold">{reward.cardTitle}</p>
+				<p class="m-0 text-start text-lg font-semibold flex items-center">
+					{reward.cardTitle}
+					<span class="ml-1 inline-flex">
+						<Badge variant="success">
+							{$i18n.rewards.text.youre_eligible}
+						</Badge>
+					</span>
+				</p>
 
 				<p class="m-0 mt-2 text-start text-xs text-tertiary">
 					<Html text={reward.oneLiner} />
