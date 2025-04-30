@@ -39,6 +39,4 @@ export class LocalCommandRunner implements CommandRunner {
 }
 
 // 3) createCommandRunner: always returns LocalCommandRunner
-export const createCommandRunner = (): CommandRunner => {
-	return new LocalCommandRunner();
-};
+export const createCommandRunner = (): CommandRunner => new LocalCommandRunner();
