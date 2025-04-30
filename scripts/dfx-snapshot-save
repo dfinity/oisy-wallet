@@ -15,6 +15,7 @@ source "$SOURCE_DIR/clap.bash"
 # Define options
 clap.define short=s long=snapshot desc="The file to save to" variable=DFX_SNAPSHOT_FILE default="state.tar.xz"
 clap.define short=i long=identities desc="A comma separated list of identities to save" variable=DFX_IDENTITIES default="default"
+clap.define short=h long=home desc="Root of the global state" variable=DFX_HOME default="$HOME"
 # Source the output file ----------------------------------------------------------
 source "$(clap.build)"
 
@@ -44,7 +45,7 @@ DFX_SNAPSHOT_TEMP_COMPRESSED="$(mktemp "${DFX_SNAPSHOT_FILE}.tmp.xz.XXXX")"
 IFS=', ' read -r -a DFX_IDENTITIES <<<"$DFX_IDENTITIES"
 
 # Get global state
-pushd "$HOME"
+pushd "$DFX_HOME"
 tar --create --file "$DFX_SNAPSHOT_TEMP_FILE" "$LOCAL_REPLICA_DATA_DIR" .config/dfx/networks.json
 for config_file in identity.json version-manager.json; do
   config_path=".config/dfx/$config_file"
