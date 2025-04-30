@@ -14,5 +14,5 @@
 <ContentWithToolbar>
 	<IcReceiveWalletAddress on:icQRCode />
 
-	<ButtonDone on:click={close} slot="toolbar" />
+	<ButtonDone onclick={close} slot="toolbar" />
 </ContentWithToolbar>

@@ -77,5 +77,5 @@
 		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_icp_deposit}</svelte:fragment>
 	</ReceiveAddress>
 
-	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} on:click={close} slot="toolbar" />
+	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} onclick={close} slot="toolbar" />
 </ContentWithToolbar>
