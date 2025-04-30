@@ -24,7 +24,7 @@
 
 <GixInput {...props} bind:value>
 	<svelte:fragment slot="inner-end">
-		{#if (typeof value === 'string' ? notEmptyString(value) : nonNullish(value)) && showResetButton}
+		{#if nonNullish(value) && notEmptyString(value.toString()) && showResetButton}
 			<button
 				class="text-tertiary"
 				on:click={reset}
