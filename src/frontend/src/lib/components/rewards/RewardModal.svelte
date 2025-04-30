@@ -39,6 +39,7 @@
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import {isEndedCampaign} from "$lib/utils/rewards.utils";
 
 	interface Props {
 		reward: RewardDescription;
@@ -89,6 +90,8 @@
 
 	const isRequirementsLoading = $derived(areTransactionsStoresLoading(transactionsStores));
 
+	const hasEnded = $derived(isEndedCampaign(reward.endDate));
+
 	let amountOfRewards = $state(0);
 </script>
 
@@ -111,27 +114,29 @@
 		</div>
 		<p class="my-3"><Html text={reward.description} /></p>
 
-		<ExternalLink
-			href={reward.learnMoreHref}
-			ariaLabel={$i18n.rewards.text.learn_more}
-			iconVisible={false}
-			asButton
-			styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
-		>
-			{$i18n.rewards.text.learn_more}
-		</ExternalLink>
+		{#if !hasEnded}
+			<ExternalLink
+				href={reward.learnMoreHref}
+				ariaLabel={$i18n.rewards.text.learn_more}
+				iconVisible={false}
+				asButton
+				styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
+			>
+				{$i18n.rewards.text.learn_more}
+			</ExternalLink>
 
-		<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2" />
+			<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2" />
 
-		{#if reward.requirements.length > 0}
-			<Hr spacing="md" />
+			{#if reward.requirements.length > 0}
+				<Hr spacing="md" />
 
-			<RewardsRequirements
-				loading={isRequirementsLoading}
-				{reward}
-				{isEligible}
-				{requirementsFulfilled}
-			/>
+				<RewardsRequirements
+					loading={isRequirementsLoading}
+					{reward}
+					{isEligible}
+					{requirementsFulfilled}
+				/>
+			{/if}
 		{/if}
 
 		<Button paddingSmall type="button" fullWidth on:click={modalStore.close} slot="toolbar">

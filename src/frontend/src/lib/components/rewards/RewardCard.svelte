@@ -7,6 +7,7 @@
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Badge from "$lib/components/ui/Badge.svelte";
+	import {isEndedCampaign} from "$lib/utils/rewards.utils";
 
 	interface Props {
 		onclick: () => void;
@@ -15,12 +16,14 @@
 	}
 
 	let { onclick, reward, testId = undefined }: Props = $props();
+
+	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
 
 <button {onclick} class="flex flex-col" data-tid={testId}>
 	<div class="-mb-7">
 		<div class="max-h-66 overflow-hidden rounded-2xl">
-			<Img src={reward.logo} testId={REWARDS_BANNER} />
+			<Img src={reward.logo} testId={REWARDS_BANNER} grayscale={hasEnded} />
 		</div>
 	</div>
 
@@ -35,11 +38,13 @@
 			<section>
 				<p class="m-0 text-start text-lg font-semibold flex items-center">
 					{reward.cardTitle}
-					<span class="ml-1 inline-flex">
-						<Badge variant="success">
-							{$i18n.rewards.text.youre_eligible}
-						</Badge>
-					</span>
+					{#if !hasEnded}
+						<span class="ml-1 inline-flex">
+							<Badge variant="success">
+								{$i18n.rewards.text.youre_eligible}
+							</Badge>
+						</span>
+					{/if}
 				</p>
 
 				<p class="m-0 mt-2 text-start text-xs text-tertiary">

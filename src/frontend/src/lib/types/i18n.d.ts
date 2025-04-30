@@ -163,6 +163,7 @@ interface I18nRewards {
 		active_campaigns: string;
 		upcoming_campaigns: string;
 		active_date: string;
+		ended_date: string;
 		participate_title: string;
 		share: string;
 		learn_more: string;
@@ -181,6 +182,8 @@ interface I18nRewards {
 		carousel_slide_cta: string;
 		sprinkles_earned: string;
 		youre_eligible: string;
+		ongoing: string;
+		ended: string;
 	};
 	alt: { upcoming_campaigns: string };
 }
