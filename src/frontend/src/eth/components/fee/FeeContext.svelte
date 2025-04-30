@@ -31,6 +31,7 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import type { FeeData } from 'ethers/providers';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -63,6 +64,7 @@
 
 			const feeData = await getFeeData();
 
+
 			const { getSuggestedFeeData } = new InfuraGasRest(
 				(sendToken.network as EthereumNetwork).chainId
 			);
@@ -72,13 +74,19 @@
 				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
 			} = await getSuggestedFeeData();
 
+			const adjustedFeeData = {
+				...feeData,
+				...(isNullish(feeData.maxFeePerGas) && { maxFeePerGas: suggestedMaxFeePerGas }),
+				...(isNullish(feeData.maxPriorityFeePerGas) && {
+					maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
+				})
+			};
+
+
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
+
 				feeStore.setFee({
-					...feeData,
-					...(isNullish(feeData.maxFeePerGas) && { maxFeePerGas: suggestedMaxFeePerGas }),
-					...(isNullish(feeData.maxPriorityFeePerGas) && {
-						maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
-					}),
+					...adjustedFeeData,
 					gas: getEthFeeData({
 						...params,
 						helperContractAddress: toCkEthHelperContractAddress(
@@ -89,6 +97,7 @@
 				return;
 			}
 
+
 			const erc20GasFeeParams = {
 				contract: sendToken as Erc20Token,
 				amount: parseToken({ value: `${amount ?? '1'}` }),
@@ -98,7 +107,7 @@
 
 			if (isSupportedErc20TwinTokenId(sendTokenId)) {
 				feeStore.setFee({
-					...feeData,
+					...adjustedFeeData,
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
 						erc20HelperContractAddress: toCkErc20HelperContractAddress(
@@ -110,7 +119,7 @@
 			}
 
 			feeStore.setFee({
-				...feeData,
+				...adjustedFeeData,
 				gas: await getErc20FeeData({
 					...erc20GasFeeParams,
 					targetNetwork,
