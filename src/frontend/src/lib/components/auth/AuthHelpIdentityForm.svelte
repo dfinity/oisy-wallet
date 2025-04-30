@@ -8,7 +8,6 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { TRACK_COUNT_LEGACY_SIGN_IN_CLICK } from '$lib/constants/analytics.contants';
 	import { OISY_FIND_INTERNET_IDENTITY_URL } from '$lib/constants/oisy.constants';
 	import {
 		HELP_AUTH_BACK_BUTTON,
@@ -17,7 +16,6 @@
 		HELP_AUTH_LEARN_MORE_LINK,
 		HELP_AUTH_LEGACY_SIGN_IN_BUTTON
 	} from '$lib/constants/test-ids.constants';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -27,10 +25,8 @@
 	export let hideBack = false;
 
 	const onLegacySignIn = async () => {
-		await trackEvent({
-			name: TRACK_COUNT_LEGACY_SIGN_IN_CLICK
-		});
 		onDone();
+
 		await signIn({ domain: 'ic0.app' });
 	};
 </script>
@@ -58,10 +54,11 @@
 			</p>
 			<p class="mb-0">
 				<ExternalLink
-					styleClass="font-semibold flex flex-row-reverse"
+					styleClass="font-semibold"
 					ariaLabel={$i18n.auth.help.alt.identity_learn_more}
 					href={OISY_FIND_INTERNET_IDENTITY_URL}
 					testId={HELP_AUTH_LEARN_MORE_LINK}
+					iconAsLast
 				>
 					{replaceOisyPlaceholders($i18n.auth.help.text.identity_learn_more)}
 				</ExternalLink>
@@ -71,8 +68,8 @@
 
 	<ButtonGroup slot="toolbar">
 		{#if !hideBack}
-			<ButtonBack on:click={onBack} testId={HELP_AUTH_BACK_BUTTON} />
+			<ButtonBack onclick={onBack} testId={HELP_AUTH_BACK_BUTTON} />
 		{/if}
-		<ButtonDone on:click={onDone} testId={HELP_AUTH_DONE_BUTTON} />
+		<ButtonDone onclick={onDone} testId={HELP_AUTH_DONE_BUTTON} />
 	</ButtonGroup>
 </ContentWithToolbar>

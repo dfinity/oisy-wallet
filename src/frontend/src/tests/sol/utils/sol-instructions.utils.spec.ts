@@ -1,5 +1,5 @@
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -61,6 +61,7 @@ describe('sol-instructions.utils', () => {
 				instruction,
 				network
 			});
+
 			expect(result).toBeUndefined();
 		});
 
@@ -306,7 +307,7 @@ describe('sol-instructions.utils', () => {
 						network
 					})
 				).resolves.toEqual({
-					value: ZERO_BI,
+					value: ZERO,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
@@ -330,7 +331,7 @@ describe('sol-instructions.utils', () => {
 						cumulativeBalances: { [mockSolAddress2]: 100n }
 					})
 				).resolves.toEqual({
-					value: ZERO_BI,
+					value: ZERO,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
@@ -606,7 +607,7 @@ describe('sol-instructions.utils', () => {
 						network
 					})
 				).resolves.toEqual({
-					value: ZERO_BI,
+					value: ZERO,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
@@ -630,7 +631,7 @@ describe('sol-instructions.utils', () => {
 						cumulativeBalances: { [mockSolAddress2]: 100n }
 					})
 				).resolves.toEqual({
-					value: ZERO_BI,
+					value: ZERO,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});

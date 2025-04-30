@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -21,7 +21,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { balance } from '$lib/derived/balances.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -34,6 +34,8 @@
 	export let amount: OptionAmount = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
 	export let networkId: NetworkId | undefined = undefined;
+
+	const dispatch = createEventDispatcher();
 
 	const { sendToken, sendTokenExchangeRate, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -88,9 +90,9 @@
 		}
 
 		const assertBalance = (): IcAmountAssertionError | undefined => {
-			const total = userAmount + (fee ?? ZERO_BI);
+			const total = userAmount + (fee ?? ZERO);
 
-			if (total > ($balance ?? ZERO_BI)) {
+			if (total > ($balance ?? ZERO)) {
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
 
@@ -130,11 +132,13 @@
 		token={$sendToken}
 		bind:amount
 		displayUnit={inputUnit}
-		isSelectable={false}
 		exchangeRate={$sendTokenExchangeRate}
 		bind:error={amountError}
 		customErrorValidate={customValidate}
 		autofocus={nonNullish($sendToken)}
+		on:click={() => {
+			dispatch('icTokensList');
+		}}
 	>
 		<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -158,7 +162,7 @@
 					error={nonNullish(amountError)}
 					balance={$sendBalance}
 					token={$sendToken}
-					fee={fee ?? ZERO_BI}
+					fee={fee ?? ZERO}
 				/>
 			{/if}
 		</svelte:fragment>

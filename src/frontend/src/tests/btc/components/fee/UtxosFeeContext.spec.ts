@@ -50,7 +50,7 @@ describe('UtxosFeeContext', () => {
 
 		await waitFor(() => {
 			expect(selectUtxosFeeSpy).toHaveBeenCalledOnce();
-			expect(selectUtxosFeeSpy).toBeCalledWith({
+			expect(selectUtxosFeeSpy).toHaveBeenCalledWith({
 				amount,
 				network: 'mainnet',
 				identity: mockIdentity
@@ -226,7 +226,7 @@ describe('UtxosFeeContext', () => {
 		});
 	});
 
-	it('should call selectUtxosFee and reset store if new amount is 10x bigger than previous value ', async () => {
+	it('should call selectUtxosFee and reset store if new amount is 10x bigger than previous value', async () => {
 		const selectUtxosFeeSpy = mockBtcSendApi();
 		const resetSpy = vi.spyOn(store, 'reset');
 

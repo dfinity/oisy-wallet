@@ -7,7 +7,6 @@
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
 	import { sendBtc } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
-	import SendQrCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
@@ -30,7 +29,6 @@
 		isNetworkIdBTCTestnet,
 		mapNetworkIdToBitcoinNetwork
 	} from '$lib/utils/network.utils';
-	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
@@ -153,6 +151,7 @@
 	<BtcSendForm
 		on:icNext
 		on:icClose
+		on:icTokensList
 		bind:destination
 		bind:amount
 		on:icQRCodeScan
@@ -161,20 +160,12 @@
 	>
 		<svelte:fragment slot="cancel">
 			{#if formCancelAction === 'back'}
-				<ButtonBack on:click={back} />
+				<ButtonBack onclick={back} />
 			{:else}
-				<ButtonCancel on:click={close} />
+				<ButtonCancel onclick={close} />
 			{/if}
 		</svelte:fragment>
 	</BtcSendForm>
-{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-	<SendQrCodeScan
-		expectedToken={$sendToken}
-		bind:destination
-		bind:amount
-		{decodeQrCode}
-		on:icQRCodeBack
-	/>
 {:else}
 	<slot />
 {/if}

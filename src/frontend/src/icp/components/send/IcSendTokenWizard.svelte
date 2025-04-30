@@ -25,7 +25,6 @@
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
-	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
@@ -50,7 +49,6 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 
 	/**
 	 * Props
@@ -70,10 +68,8 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendToken, sendTokenSymbol, sendPurpose } =
+	const { sendTokenDecimals, sendToken, sendTokenSymbol } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	const simplifiedForm = sendPurpose === 'convert-cketh-to-eth';
 
 	/**
 	 * Send
@@ -123,8 +119,8 @@
 				ckErc20ToErc20MaxCkEthFees
 			};
 
-			const trackAnalyticsOnSendComplete = async () => {
-				await trackEvent({
+			const trackAnalyticsOnSendComplete = () => {
+				trackEvent({
 					name: isNetworkIdBitcoin(networkId)
 						? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
 						: isConvertCkEthToEth({ token: $sendToken, networkId })
@@ -149,7 +145,7 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
 					: isConvertCkEthToEth({ token: $sendToken, networkId })
@@ -202,29 +198,21 @@
 		{:else if currentStep?.name === WizardStepsSend.SEND}
 			<IcSendForm
 				on:icNext
+				on:icTokensList
 				bind:destination
 				bind:amount
 				bind:networkId
 				on:icQRCodeScan
 				{source}
-				{simplifiedForm}
 			>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
-						<ButtonBack on:click={back} />
+						<ButtonBack onclick={back} />
 					{:else}
-						<ButtonCancel on:click={close} />
+						<ButtonCancel onclick={close} />
 					{/if}
 				</svelte:fragment>
 			</IcSendForm>
-		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-			<SendQRCodeScan
-				expectedToken={$sendToken}
-				bind:destination
-				bind:amount
-				{decodeQrCode}
-				on:icQRCodeBack
-			/>
 		{:else}
 			<slot />
 		{/if}

@@ -2,11 +2,23 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let disabled = false;
-	export let testId: string | undefined = undefined;
-	export let fullWidth = false;
+	interface Props {
+		onclick: () => void;
+		disabled?: boolean;
+		fullWidth?: boolean;
+		testId?: string;
+	}
+
+	let { onclick, disabled = false, fullWidth = false, testId }: Props = $props();
 </script>
 
-<Button {testId} colorStyle="secondary-light" type="button" {fullWidth} {disabled} on:click>
+<Button
+	{testId}
+	colorStyle="secondary-light"
+	type="button"
+	{fullWidth}
+	{disabled}
+	on:click={onclick}
+>
 	{$i18n.core.text.cancel}
 </Button>
