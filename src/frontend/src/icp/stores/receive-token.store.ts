@@ -17,7 +17,7 @@ const initReceiveTokenStore = (token: IcToken): ReceiveTokenStore => {
 	return {
 		subscribe,
 
-		set(token) {
+		set: (token) => {
 			set(token);
 		}
 	};

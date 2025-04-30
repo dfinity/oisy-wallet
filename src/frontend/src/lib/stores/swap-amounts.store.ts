@@ -28,11 +28,11 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 	return {
 		subscribe,
 
-		reset() {
+		reset: () => {
 			set(null);
 		},
 
-		setSwapAmounts(data: SwapAmountsStoreData) {
+		setSwapAmounts: (data: SwapAmountsStoreData) => {
 			set(data);
 		}
 	};
