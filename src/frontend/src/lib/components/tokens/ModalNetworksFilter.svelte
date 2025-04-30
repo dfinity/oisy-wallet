@@ -37,6 +37,6 @@
 	/>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={back} />
+		<ButtonBack onclick={back} />
 	</ButtonGroup>
 </ContentWithToolbar>

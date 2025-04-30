@@ -61,7 +61,7 @@
 	</DestinationWizardStepSection>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={back} />
+		<ButtonBack onclick={back} />
 
 		<Button on:click={apply} {disabled}>
 			{$i18n.core.text.apply}
