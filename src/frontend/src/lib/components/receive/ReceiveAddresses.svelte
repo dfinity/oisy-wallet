@@ -309,7 +309,7 @@
 
 	<ButtonDone
 		testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON}
-		on:click={modalStore.close}
+		onclick={modalStore.close}
 		slot="toolbar"
 	/>
 </ContentWithToolbar>
