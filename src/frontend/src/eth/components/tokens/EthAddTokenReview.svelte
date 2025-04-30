@@ -141,7 +141,7 @@
 	<AddTokenWarning />
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={() => dispatch('icBack')} />
+		<ButtonBack onclick={() => dispatch('icBack')} />
 		<Button disabled={invalid} on:click={() => dispatch('icSave')}>
 			{$i18n.tokens.import.text.add_the_token}
 		</Button>

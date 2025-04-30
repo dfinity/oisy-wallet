@@ -103,7 +103,7 @@
 	<div slot="toolbar" in:fade>
 		{#if nonNullish(token)}
 			<ButtonGroup>
-				<ButtonBack on:click={back} />
+				<ButtonBack onclick={back} />
 				<Button disabled={invalid} on:click={() => dispatch('icSave')}>
 					{$i18n.tokens.import.text.add_the_token}
 				</Button>

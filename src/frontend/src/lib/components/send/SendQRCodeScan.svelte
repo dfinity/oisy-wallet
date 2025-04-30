@@ -79,7 +79,7 @@
 </div>
 
 <ButtonGroup>
-	<ButtonBack on:click={back} />
+	<ButtonBack onclick={back} />
 </ButtonGroup>
 
 <style lang="scss">
