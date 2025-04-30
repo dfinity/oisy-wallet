@@ -51,7 +51,7 @@ export const isEndedCampaign = (endDate: Date) => {
 	const endDiff = endDate.getTime() - currentDate.getTime();
 
 	return endDiff <= 0;
-}
+};
 
 export const getRewardsBalance = (rewards: RewardResponseInfo[]): bigint =>
 	rewards.reduce<bigint>((total, { amount }) => total + amount, ZERO);

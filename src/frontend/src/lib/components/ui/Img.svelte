@@ -24,7 +24,7 @@
 	on:load
 	on:error
 	class:rounded-full={rounded}
-	class:grayscale={grayscale}
+	class:grayscale
 	class={styleClass}
 	style={fitHeight ? `max-width: inherit; height: ${height};` : undefined}
 />

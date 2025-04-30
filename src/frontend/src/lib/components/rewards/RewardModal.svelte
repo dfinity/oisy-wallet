@@ -31,6 +31,7 @@
 	import { getRewardRequirementsFulfilled } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 	import {
 		areTransactionsStoresLoading,
@@ -39,7 +40,6 @@
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import {isEndedCampaign} from "$lib/utils/rewards.utils";
 
 	interface Props {
 		reward: RewardDescription;

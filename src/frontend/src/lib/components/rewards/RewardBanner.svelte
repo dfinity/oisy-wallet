@@ -2,7 +2,7 @@
 	import type { RewardDescription } from '$env/types/env-reward';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
-	import {isEndedCampaign} from "$lib/utils/rewards.utils";
+	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		reward: RewardDescription;

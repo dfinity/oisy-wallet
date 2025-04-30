@@ -3,11 +3,11 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import Badge from "$lib/components/ui/Badge.svelte";
-	import {isEndedCampaign} from "$lib/utils/rewards.utils";
+	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		onclick: () => void;
@@ -36,7 +36,7 @@
 		</span>
 		<article class="h-full">
 			<section>
-				<p class="m-0 text-start text-lg font-semibold flex items-center">
+				<p class="m-0 flex items-center text-start text-lg font-semibold">
 					{reward.cardTitle}
 					{#if !hasEnded}
 						<span class="ml-1 inline-flex">

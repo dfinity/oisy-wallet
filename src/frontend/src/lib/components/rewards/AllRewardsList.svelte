@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
+	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
 	import {
-		REWARDS_ACTIVE_CAMPAIGNS_CONTAINER, REWARDS_ENDED_CAMPAIGNS_CONTAINER,
+		REWARDS_ACTIVE_CAMPAIGNS_CONTAINER,
+		REWARDS_ENDED_CAMPAIGNS_CONTAINER,
 		REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
+	import { RewardStates } from '$lib/enums/reward-states';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import {isEndedCampaign, isOngoingCampaign, isUpcomingCampaign} from '$lib/utils/rewards.utils';
-	import RewardsFilter from "$lib/components/rewards/RewardsFilter.svelte";
-	import {RewardStates} from "$lib/enums/reward-states";
+	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 
@@ -22,10 +23,15 @@
 		isUpcomingCampaign(startDate)
 	);
 
-	const endedCampaigns: RewardDescription[] = rewardCampaigns.filter(({ endDate }) => isEndedCampaign(endDate));
+	const endedCampaigns: RewardDescription[] = rewardCampaigns.filter(({ endDate }) =>
+		isEndedCampaign(endDate)
+	);
 </script>
 
-<RewardsFilter bind:rewardState={selectedRewardState} endedCampaignsAmount={endedCampaigns.length} />
+<RewardsFilter
+	bind:rewardState={selectedRewardState}
+	endedCampaignsAmount={endedCampaigns.length}
+/>
 
 {#if selectedRewardState === RewardStates.ONGOING}
 	<RewardsGroup rewards={ongoingCampaigns} testId={REWARDS_ACTIVE_CAMPAIGNS_CONTAINER} />
@@ -37,9 +43,5 @@
 		testId={REWARDS_UPCOMING_CAMPAIGNS_CONTAINER}
 	/>
 {:else if selectedRewardState === RewardStates.ENDED}
-	<RewardsGroup
-		rewards={endedCampaigns}
-		testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER}
-	/>
+	<RewardsGroup rewards={endedCampaigns} testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER} />
 {/if}
-

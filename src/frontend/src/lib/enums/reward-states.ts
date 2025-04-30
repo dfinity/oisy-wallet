@@ -1,4 +1,4 @@
 export enum RewardStates {
-    ONGOING = 'ongoing',
-    ENDED = 'ended'
+	ONGOING = 'ongoing',
+	ENDED = 'ended'
 }
