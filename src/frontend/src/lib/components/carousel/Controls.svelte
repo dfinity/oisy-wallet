@@ -8,7 +8,7 @@
 		onPrevious: () => void;
 	}
 
-	let {onNext, onPrevious}: Props = $props();
+	let { onNext, onPrevious }: Props = $props();
 </script>
 
 <div class="mr-3 flex items-center">
