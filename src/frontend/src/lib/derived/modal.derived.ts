@@ -186,6 +186,11 @@ export const modalRewardState: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'reward-state'
 );
+export const modalRewardStateData: Readable<boolean | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'reward-state' ? ($modalStore?.data as boolean) : undefined
+);
 
 export const modalWalletConnect: Readable<boolean> = derived(
 	[modalWalletConnectAuth, modalWalletConnectSign, modalWalletConnectSend],
