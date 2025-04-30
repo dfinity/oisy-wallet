@@ -16,7 +16,7 @@ import {
 	SOLANA_TOKEN
 } from '$env/tokens/tokens.sol.env';
 import * as appContants from '$lib/constants/app.constants';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -213,9 +213,9 @@ describe('tokens.utils', () => {
 
 		it('should return the same array if all tokens have no balance', () => {
 			const newBalances: CertifiedStoreData<BalancesData> = {
-				[ICP_TOKEN.id]: { data: ZERO_BI, certified },
-				[BTC_MAINNET_TOKEN.id]: { data: ZERO_BI, certified },
-				[ETHEREUM_TOKEN.id]: { data: ZERO_BI, certified }
+				[ICP_TOKEN.id]: { data: ZERO, certified },
+				[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
+				[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
 			};
 
 			const result = pinTokensWithBalanceAtTop({
@@ -233,9 +233,9 @@ describe('tokens.utils', () => {
 
 		it('should sort only tokens with non-zero balances and leave untouched the rest', () => {
 			const newBalances: CertifiedStoreData<BalancesData> = {
-				[ICP_TOKEN.id]: { data: ZERO_BI, certified },
+				[ICP_TOKEN.id]: { data: ZERO, certified },
 				[BTC_MAINNET_TOKEN.id]: { data: bn1Bi, certified },
-				[ETHEREUM_TOKEN.id]: { data: ZERO_BI, certified }
+				[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
 			};
 
 			const result = pinTokensWithBalanceAtTop({
@@ -368,10 +368,10 @@ describe('tokens.utils', () => {
 
 		it('should return a dictionary with correct balances if all token balances are 0', () => {
 			const balances = {
-				[ICP_TOKEN.id]: { data: ZERO_BI, certified },
-				[BTC_MAINNET_TOKEN.id]: { data: ZERO_BI, certified },
-				[ETHEREUM_TOKEN.id]: { data: ZERO_BI, certified },
-				[BTC_TESTNET_TOKEN.id]: { data: ZERO_BI, certified }
+				[ICP_TOKEN.id]: { data: ZERO, certified },
+				[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
+				[ETHEREUM_TOKEN.id]: { data: ZERO, certified },
+				[BTC_TESTNET_TOKEN.id]: { data: ZERO, certified }
 			};
 			const tokens = [...mockTokens, BTC_TESTNET_TOKEN];
 
@@ -382,9 +382,9 @@ describe('tokens.utils', () => {
 			});
 
 			expect(result).toEqual({
-				[BTC_MAINNET_NETWORK_ID]: Number(ZERO_BI),
-				[ETHEREUM_NETWORK_ID]: Number(ZERO_BI),
-				[ICP_NETWORK_ID]: Number(ZERO_BI)
+				[BTC_MAINNET_NETWORK_ID]: Number(ZERO),
+				[ETHEREUM_NETWORK_ID]: Number(ZERO),
+				[ICP_NETWORK_ID]: Number(ZERO)
 			});
 		});
 
@@ -475,10 +475,10 @@ describe('tokens.utils', () => {
 			expect(filterTokens({ tokens: mockTokens, filter: '' })).toStrictEqual(mockTokens);
 		});
 
-		it('should filter correctly by network', () => {
+		it('should not filter by network', () => {
 			expect(
 				filterTokens({ tokens: [...mockTokens, PEPE_TOKEN], filter: 'ethereum' })
-			).toStrictEqual([ETHEREUM_TOKEN, PEPE_TOKEN]);
+			).toStrictEqual([ETHEREUM_TOKEN]);
 		});
 	});
 
