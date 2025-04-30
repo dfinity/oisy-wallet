@@ -5,7 +5,7 @@ import type { Network } from '$lib/types/network';
 import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { filterTokens, pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
 
 export interface ModalTokensListData {
@@ -13,6 +13,7 @@ export interface ModalTokensListData {
 	filterQuery?: string;
 	filterNetwork?: Network;
 	filterZeroBalance?: boolean;
+	sortByBalance?: boolean;
 }
 
 export const initModalTokensListContext = (
@@ -25,10 +26,29 @@ export const initModalTokensListContext = (
 	const filterQuery = derived([data], ([{ filterQuery }]) => filterQuery);
 	const filterNetwork = derived([data], ([{ filterNetwork }]) => filterNetwork);
 	const filterZeroBalance = derived([data], ([{ filterZeroBalance }]) => filterZeroBalance);
+	const sortByBalance = derived([data], ([{ sortByBalance }]) =>
+		nonNullish(sortByBalance) ? sortByBalance : true
+	);
 
 	const filteredTokens = derived(
-		[tokens, filterQuery, filterNetwork, filterZeroBalance, exchanges, balancesStore],
-		([$tokens, $filterQuery, $filterNetwork, $filterZeroBalance, $exchanges, $balances]) => {
+		[
+			tokens,
+			filterQuery,
+			filterNetwork,
+			filterZeroBalance,
+			sortByBalance,
+			exchanges,
+			balancesStore
+		],
+		([
+			$tokens,
+			$filterQuery,
+			$filterNetwork,
+			$filterZeroBalance,
+			$sortByBalance,
+			$exchanges,
+			$balances
+		]) => {
 			const filteredByQuery = filterTokens({ tokens: $tokens, filter: $filterQuery ?? '' });
 
 			const filteredByNetwork = filterTokensForSelectedNetwork([
@@ -37,11 +57,15 @@ export const initModalTokensListContext = (
 				isNullish($filterNetwork)
 			]);
 
-			const pinnedWithBalance = pinTokensWithBalanceAtTop({
-				$tokens: filteredByNetwork,
-				$balances,
-				$exchanges
-			});
+			if (!sortByBalance) return filteredByNetwork;
+
+			const pinnedWithBalance = sortByBalance
+				? pinTokensWithBalanceAtTop({
+						$tokens: filteredByNetwork,
+						$balances,
+						$exchanges
+					})
+				: [];
 
 			return $filterZeroBalance
 				? pinnedWithBalance.filter(({ balance }) => (balance ?? ZERO) > ZERO)
