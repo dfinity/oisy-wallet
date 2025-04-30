@@ -602,7 +602,7 @@
 			"all_tokens_with_zero_hidden": "All assets with zero balance are currently hidden",
 			"filter_nothing_found": "Oops, nothing found",
 			"filter_nothing_found_description": "Type token ticker or name to filter list",
-			"filter_placeholder": "Token name or symbol...",
+			"filter_placeholder": "Filter by token or symbol",
 			"filter_button": "Open/close filter",
 			"buy_or_receive": "Buy or receive your first tokens now to see them in the list",
 			"initializing": "Initializing...",

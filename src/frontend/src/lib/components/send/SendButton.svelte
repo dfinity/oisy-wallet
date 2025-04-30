@@ -22,6 +22,10 @@
 	ariaLabel={$i18n.send.text.send}
 	testId={SEND_TOKENS_MODAL_OPEN_BUTTON}
 >
-	<IconlySend size="28" slot="icon" />
-	{$i18n.send.text.send}
+	{#snippet icon()}
+		<IconlySend size="28" />
+	{/snippet}
+	{#snippet label()}
+		{$i18n.send.text.send}
+	{/snippet}
 </ButtonHero>
