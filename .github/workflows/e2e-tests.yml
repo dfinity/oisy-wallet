@@ -184,7 +184,7 @@ jobs:
         if: steps.check_snapshots.outputs.CHANGES == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: snapshots-${{ matrix.os }}
+          name: snapshots-${{ matrix.os }}-${{ matrix.test }}
           path: e2e/snapshots/**/*.spec.ts-snapshots/**/*-${{ steps.set_snapshot_output.outputs.os_suffix }}.png
           retention-days: 3
 
