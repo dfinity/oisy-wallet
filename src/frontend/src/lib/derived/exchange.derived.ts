@@ -27,7 +27,7 @@ import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const exchangeInitialized: Readable<boolean> = derived(
@@ -85,19 +85,6 @@ export const exchanges: Readable<ExchangesData> = derived(
 					}),
 					{}
 				),
-			...$splTokens.reduce((acc, { id, twinToken }) => {
-				if (isNullish(twinToken)) {
-					return acc;
-				}
-
-				const address = (twinToken as Partial<Erc20Token>).address;
-				const price = nonNullish(address) ? $exchangeStore?.[address.toLowerCase()] : undefined;
-
-				return {
-					...acc,
-					[id]: price
-				};
-			}, {}),
 			...$icrcTokens.reduce((acc, token) => {
 				const { id, ledgerCanisterId, exchangeCoinId } = token;
 
