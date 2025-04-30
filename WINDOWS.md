@@ -47,11 +47,44 @@ This guide provides detailed instructions for setting up and running the OISY wa
    rustup target add wasm32-unknown-unknown
    ```
 
-3. **Configure Environment Variables**:
+3. **Install Required Development Tools**:
+
+   - The project uses several development tools with specific versions defined in [dev-tools.json](dev-tools.json).
+   - While Linux users can use the `./scripts/setup` script, Windows users need to install these tools manually.
+   - The following tools are recommended for installation:
+
+     a. **cargo-binstall** (version specified in dev-tools.json):
+     ```powershell
+     cargo install cargo-binstall@1.7.4
+     ```
+
+     b. **ic-wasm** (using cargo-binstall):
+     ```powershell
+     cargo binstall --force --no-confirm ic-wasm@0.8.5
+     ```
+
+     c. **didc**:
+     - Download from https://github.com/dfinity/candid/releases/download/2024-07-29/didc-win64.exe
+     - Rename to `didc.exe` and place it in a directory that's in your PATH
+
+     d. **candid-extractor** (using cargo-binstall):
+     ```powershell
+     cargo binstall --force --no-confirm candid-extractor@0.1.4
+     ```
+
+     e. **shfmt** (if you have Go installed):
+     ```powershell
+     go install mvdan.cc/sh/v3/cmd/shfmt@v3.5.1
+     ```
+
+   - Note: The versions above are based on the current dev-tools.json file. Check the file for the most up-to-date versions.
+
+4. **Configure Environment Variables**:
    - Ensure that the following are added to your PATH:
      - Node.js installation directory
      - Rust bin directory (usually added automatically by the installer)
      - DFX installation directory
+     - Directory containing the development tools installed above
 
 ### Running the Local Replica
 
@@ -325,6 +358,16 @@ Using Windows Subsystem for Linux (WSL) can provide a more Linux-like developmen
 
 3. **Install Rust**:
 
+   You can use the project's setup-rust script:
+
+   ```bash
+   git clone https://github.com/dfinity/oisy-wallet.git
+   cd oisy-wallet
+   ./scripts/setup-rust
+   ```
+
+   Or manually install:
+
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    source $HOME/.cargo/env
@@ -343,7 +386,21 @@ Using Windows Subsystem for Linux (WSL) can provide a more Linux-like developmen
    sudo apt install -y build-essential pkg-config libssl-dev llvm clang
    ```
 
-6. **Clone the repository**:
+6. **Install required development tools**:
+
+   The project uses several development tools with specific versions defined in [dev-tools.json](dev-tools.json).
+   In WSL, you can use the setup script to install them:
+
+   ```bash
+   # Install recommended tools
+   ./scripts/setup cargo-binstall
+   ./scripts/setup ic-wasm
+   ./scripts/setup didc
+   ./scripts/setup candid-extractor
+   ./scripts/setup shfmt
+   ```
+
+7. **Clone the repository** (if you haven't already):
    ```bash
    git clone https://github.com/dfinity/oisy-wallet.git
    cd oisy-wallet
