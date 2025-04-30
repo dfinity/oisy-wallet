@@ -26,7 +26,7 @@ jobs:
         run: |
           timeout 2 strace -f -eopen,openat dfx start || true
           echo HOME=$HOME
-          echo PWD=$PWD
+          echo HERE=$PWD
           dfx start --clean --background
           dfx canister create --all # This is enough for the demo
           dfx identity get-principal
