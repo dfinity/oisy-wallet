@@ -6,6 +6,7 @@ This guide provides detailed instructions for setting up and running the OISY wa
 
 - [Prerequisites](#prerequisites)
 - [Environment Setup](#environment-setup)
+- [Development Tools](#development-tools)
 - [Running the Local Replica](#running-the-local-replica)
 - [Deploying OISY Locally](#deploying-oisy-locally)
 - [Frontend Development](#frontend-development)
@@ -86,6 +87,36 @@ Before you begin, ensure you have the following installed on your macOS system:
    git clone https://github.com/dfinity/oisy-wallet.git
    cd oisy-wallet
    ```
+
+## Development Tools
+
+The project uses several development tools defined in `dev-tools.json` with their specific versions. You can install these tools using the setup script:
+
+```bash
+./scripts/setup <tool-name>
+```
+
+For example, to install cargo-binstall:
+
+```bash
+./scripts/setup cargo-binstall
+```
+
+Not all packages in `dev-tools.json` are required. The essential ones recommended for installation are:
+
+- cargo-binstall
+- ic-wasm
+- didc
+- candid-extractor
+- shfmt
+
+You can also leverage the Rust setup script:
+
+```bash
+./scripts/setup-rust
+```
+
+This script installs Rust with the correct version specified in `rust-toolchain.toml` and also installs the nightly version specified in `dev-tools.json`.
 
 ## Running the Local Replica
 
