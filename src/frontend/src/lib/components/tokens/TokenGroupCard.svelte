@@ -92,7 +92,6 @@
 				}}
 				testIdPrefix={TOKEN_GROUP}
 				on:click={() => toggleIsExpanded(!isExpanded)}
-				asGroup
 			/>
 		</div>
 	</MultipleListeners>
