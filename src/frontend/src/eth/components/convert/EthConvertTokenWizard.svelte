@@ -177,7 +177,7 @@
 					{#if formCancelAction === 'back'}
 						<ButtonBack on:click={back} />
 					{:else}
-						<ButtonCancel on:click={close} />
+						<ButtonCancel onclick={close} />
 					{/if}
 				</svelte:fragment>
 			</EthConvertForm>

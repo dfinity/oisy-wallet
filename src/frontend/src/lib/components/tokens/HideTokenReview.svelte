@@ -37,7 +37,7 @@
 	</p>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel on:click={() => dispatch('icCancel')} />
+		<ButtonCancel onclick={() => dispatch('icCancel')} />
 		<Button on:click={() => dispatch('icHide')}>
 			{$i18n.tokens.hide.confirm}
 		</Button>
