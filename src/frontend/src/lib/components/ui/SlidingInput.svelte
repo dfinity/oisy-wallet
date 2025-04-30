@@ -92,12 +92,15 @@
 				out:fade
 				class="input-field condensed absolute right-0 -mt-[11px] mr-px flex overflow-hidden"
 				class:w-full={nonNullish(overflowableContent)}
-				class:md:w-[250px]={nonNullish(overflowableContent)}
-				class:w-[250px]={isNullish(overflowableContent)}
+				class:md:w-[270px]={nonNullish(overflowableContent)}
+				class:w-[270px]={isNullish(overflowableContent)}
 			>
+				<!-- We add "search" in the inputs name to prevent browsers form displaying autofill, see: -->
+				<!-- https://stackoverflow.com/a/68260636/2244209 -->
+				<!-- Additionally, we have to avoid placeholders with word "name" as that can bring autofill as well -->
 				<InputTextWithAction
 					bind:inputElement
-					name="slidingInput"
+					name="search_slidingInput"
 					placeholder={inputPlaceholder ?? ''}
 					bind:value={inputValue}
 					testId={`${testIdPrefix}-input`}

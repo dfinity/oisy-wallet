@@ -25,6 +25,7 @@ export const BASE_NETWORK: EthereumNetwork = {
 	iconLight: baseMainnetIconLight,
 	iconDark: baseMainnetIconDark,
 	explorerUrl: BASE_EXPLORER_URL,
+	exchange: { coingeckoId: 'base' },
 	buy: { onramperId: 'base' }
 };
 
@@ -47,3 +48,5 @@ export const SUPPORTED_BASE_NETWORKS: EthereumNetwork[] = defineSupportedNetwork
 	mainnetNetworks: [BASE_NETWORK],
 	testnetNetworks: [BASE_SEPOLIA_NETWORK]
 });
+
+export const SUPPORTED_BASE_NETWORK_IDS: NetworkId[] = SUPPORTED_BASE_NETWORKS.map(({ id }) => id);

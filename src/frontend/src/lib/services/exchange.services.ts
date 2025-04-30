@@ -1,9 +1,9 @@
-import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
+	CoingeckoErc20PriceParams,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
@@ -21,7 +21,7 @@ const fetchIcrcPricesFromCoingecko = (
 	simpleTokenPrice({
 		id: 'internet-computer',
 		vs_currencies: 'usd',
-		contract_addresses: ledgerCanisterIds.map((id) => id.toLowerCase()),
+		contract_addresses: ledgerCanisterIds,
 		include_market_cap: true
 	});
 
@@ -63,13 +63,14 @@ export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | n
 		vs_currencies: 'usd'
 	});
 
-export const exchangeRateERC20ToUsd = (
-	contractAddresses: Erc20ContractAddress[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
+export const exchangeRateERC20ToUsd = ({
+	coingeckoPlatformId: id,
+	contractAddresses
+}: CoingeckoErc20PriceParams): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
 	simpleTokenPrice({
-		id: 'ethereum',
+		id,
 		vs_currencies: 'usd',
-		contract_addresses: contractAddresses.map(({ address }) => address.toLowerCase()),
+		contract_addresses: contractAddresses.map(({ address }) => address),
 		include_market_cap: true
 	});
 
@@ -90,12 +91,10 @@ export const exchangeRateICRCToUsd = async (
 	}
 
 	const kongSwapPrices = await fetchIcrcPricesFromKongSwap(missingIds);
-	const exchangeRatePrices: CoingeckoSimpleTokenPriceResponse = {
+	return {
 		...(coingeckoPrices ?? {}),
 		...(kongSwapPrices ?? {})
 	};
-
-	return exchangeRatePrices;
 };
 
 export const exchangeRateSPLToUsd = (
@@ -104,7 +103,7 @@ export const exchangeRateSPLToUsd = (
 	simpleTokenPrice({
 		id: 'solana',
 		vs_currencies: 'usd',
-		contract_addresses: tokenAddresses.map((tokenAddresses) => tokenAddresses.toLowerCase()),
+		contract_addresses: tokenAddresses,
 		include_market_cap: true
 	});
 
