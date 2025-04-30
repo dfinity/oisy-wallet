@@ -1,5 +1,7 @@
+import type { RewardDescription } from '$env/types/env-reward';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
+import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { VipRewardStateData } from '$lib/types/reward';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
@@ -54,6 +56,9 @@ export interface Modal<T> {
 
 export type ModalData<T> = Option<Modal<T>>;
 
+type SetWithDataParams<D> = { id: symbol; data: D };
+type SetWithOptionalDataParams<D> = { id: symbol; data?: D };
+
 export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openEthReceive: (id: symbol) => void;
 	openIcpReceive: (id: symbol) => void;
@@ -72,13 +77,13 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openConvertToTwinTokenEth: () => void;
 	openHowToConvertToTwinTokenEth: () => void;
 	openWalletConnectAuth: () => void;
-	openWalletConnectSign: <D extends T>(data: D) => void;
-	openWalletConnectSend: <D extends T>(data: D) => void;
-	openEthTransaction: <D extends T>(data: D) => void;
-	openIcTransaction: <D extends T>(data: D) => void;
-	openBtcTransaction: <D extends T>(data: D) => void;
-	openSolTransaction: <D extends T>(data: D) => void;
-	openManageTokens: () => void;
+	openWalletConnectSign: <D extends T>(params: SetWithDataParams<D>) => void;
+	openWalletConnectSend: <D extends T>(params: SetWithDataParams<D>) => void;
+	openEthTransaction: <D extends T>(params: SetWithDataParams<D>) => void;
+	openIcTransaction: <D extends T>(params: SetWithDataParams<D>) => void;
+	openBtcTransaction: <D extends T>(params: SetWithDataParams<D>) => void;
+	openSolTransaction: <D extends T>(params: SetWithDataParams<D>) => void;
+	openManageTokens: (params: SetWithOptionalDataParams<ManageTokensData>) => void;
 	openHideToken: () => void;
 	openIcHideToken: () => void;
 	openEthToken: () => void;
@@ -87,17 +92,17 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openSolToken: () => void;
 	openReceiveBitcoin: () => void;
 	openAboutWhyOisy: () => void;
-	openVipQrCode: (data: QrCodeType) => void;
+	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
 	openReferralCode: () => void;
 	openAddressBook: () => void;
 	openReferralState: () => void;
-	openDappDetails: <D extends T>(data: D) => void;
-	openVipRewardState: (data: VipRewardStateData) => void;
-	openRewardDetails: <D extends T>(data: D) => void;
-	openRewardState: <D extends T>(data: D) => void;
+	openDappDetails: <D extends T>(params: SetWithDataParams<D>) => void;
+	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
+	openRewardDetails: (params: SetWithDataParams<RewardDescription>) => void;
+	openRewardState: <D extends T>(params: SetWithDataParams<D>) => void;
 	// todo: type methods above accordingly, otherwise data will be typed as unknown without making use of generics
-	openSettings: (data: SettingsModalType) => void;
-	openAuthHelp: (data: boolean) => void;
+	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
+	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
 	close: () => void;
 }
 
@@ -110,8 +115,8 @@ const initModalStore = <T>(): ModalStore<T> => {
 
 	const setTypeWithData =
 		(type: Modal<T>['type']) =>
-		<D extends T>(data: D) =>
-			set({ type, data });
+		<D extends T>({ id, data }: { id: symbol; data: D }) =>
+			set({ type, id, data });
 
 	return {
 		openEthReceive: setTypeWithId('eth-receive'),
@@ -137,7 +142,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openIcTransaction: setTypeWithData('ic-transaction'),
 		openBtcTransaction: setTypeWithData('btc-transaction'),
 		openSolTransaction: setTypeWithData('sol-transaction'),
-		openManageTokens: setType('manage-tokens'),
+		openManageTokens: <(params: SetWithOptionalDataParams<ManageTokensData>) => void>(
+			setTypeWithData('manage-tokens')
+		),
 		openHideToken: setType('hide-token'),
 		openIcHideToken: setType('ic-hide-token'),
 		openEthToken: setType('eth-token'),
@@ -146,17 +153,23 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openSolToken: setType('sol-token'),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
-		openVipQrCode: <(data: QrCodeType) => void>setTypeWithData('vip-qr-code'),
+		openVipQrCode: <(params: SetWithDataParams<QrCodeType>) => void>setTypeWithData('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
 		openAddressBook: setType('address-book'),
 		openReferralState: setType('referral-state'),
 		openDappDetails: setTypeWithData('dapp-details'),
-		openVipRewardState: <(data: VipRewardStateData) => void>setTypeWithData('vip-reward-state'),
-		openRewardDetails: setTypeWithData('reward-details'),
+		openVipRewardState: <(params: SetWithDataParams<VipRewardStateData>) => void>(
+			setTypeWithData('vip-reward-state')
+		),
+		openRewardDetails: <(params: SetWithDataParams<RewardDescription>) => void>(
+			setTypeWithData('reward-details')
+		),
 		openRewardState: setTypeWithData('reward-state'),
 		// todo: explicitly define type here as well
-		openSettings: <(data: SettingsModalType) => void>setTypeWithData('settings'),
-		openAuthHelp: <(data: boolean) => void>setTypeWithData('auth-help'),
+		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(
+			setTypeWithData('settings')
+		),
+		openAuthHelp: <(params: SetWithDataParams<boolean>) => void>setTypeWithData('auth-help'),
 		close: () => set(null),
 		subscribe
 	};

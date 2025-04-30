@@ -27,7 +27,13 @@
 </script>
 
 <SendForm on:icNext token={$sendToken} balance={$sendBalance} disabled={invalid} hideSource>
-	<EthSendAmount slot="amount" {nativeEthereumToken} bind:amount bind:insufficientFunds />
+	<EthSendAmount
+		slot="amount"
+		{nativeEthereumToken}
+		bind:amount
+		bind:insufficientFunds
+		on:icTokensList
+	/>
 
 	<EthSendDestination
 		slot="destination"

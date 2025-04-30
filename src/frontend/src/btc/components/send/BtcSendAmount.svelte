@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -14,6 +14,8 @@
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
+
+	const dispatch = createEventDispatcher();
 
 	let exchangeValueUnit: DisplayUnit = 'usd';
 	let inputUnit: DisplayUnit;
@@ -26,11 +28,11 @@
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
-		if (invalidAmount(Number(userAmount)) || userAmount === ZERO_BI) {
+		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
 			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
-		if (userAmount > ($sendBalance ?? ZERO_BI)) {
+		if (userAmount > ($sendBalance ?? ZERO)) {
 			return new BtcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 		}
 	};
@@ -41,11 +43,13 @@
 		token={$sendToken}
 		bind:amount
 		displayUnit={inputUnit}
-		isSelectable={false}
 		exchangeRate={$sendTokenExchangeRate}
 		bind:error={amountError}
 		customErrorValidate={customValidate}
 		autofocus={nonNullish($sendToken)}
+		on:click={() => {
+			dispatch('icTokensList');
+		}}
 	>
 		<span slot="title">{$i18n.core.text.amount}</span>
 

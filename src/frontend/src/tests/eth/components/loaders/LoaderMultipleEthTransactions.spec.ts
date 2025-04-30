@@ -1,5 +1,12 @@
-import * as networksEnv from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
+import {
+	BASE_ETH_TOKEN,
+	BASE_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import {
+	BNB_MAINNET_TOKEN,
+	BNB_TESTNET_TOKEN
+} from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import {
 	ETHEREUM_TOKEN,
 	ETHEREUM_TOKEN_ID,
@@ -56,13 +63,19 @@ describe('LoaderMultipleEthTransactions', () => {
 
 	const mockAdditionalTokens = mockAdditionalCertifiedTokens.map(({ data: token }) => token);
 
-	const expectedTokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN, ...mockErc20UserTokens];
+	const expectedTokens = [
+		ETHEREUM_TOKEN,
+		SEPOLIA_TOKEN,
+		...mockErc20UserTokens,
+		BASE_ETH_TOKEN,
+		BASE_SEPOLIA_ETH_TOKEN,
+		BNB_MAINNET_TOKEN,
+		BNB_TESTNET_TOKEN
+	];
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
-
-		vi.spyOn(networksEnv, 'USER_NETWORKS_FEATURE_ENABLED', 'get').mockImplementation(() => true);
 
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
@@ -119,7 +132,12 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		const expectedTokens = [ETHEREUM_TOKEN, ...mockMainnetErc20UserTokens];
+		const expectedTokens = [
+			ETHEREUM_TOKEN,
+			...mockMainnetErc20UserTokens,
+			BASE_ETH_TOKEN,
+			BNB_MAINNET_TOKEN
+		];
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 
@@ -141,7 +159,12 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		const expectedTokens = [SEPOLIA_TOKEN, ...mockSepoliaErc20UserTokens];
+		const expectedTokens = [
+			SEPOLIA_TOKEN,
+			...mockSepoliaErc20UserTokens,
+			BASE_SEPOLIA_ETH_TOKEN,
+			BNB_TESTNET_TOKEN
+		];
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 

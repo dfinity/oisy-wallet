@@ -2,6 +2,14 @@ import type { BtcTransactionUi } from '$btc/types/btc';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN, PEPE_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import {
+	BASE_ETH_TOKEN,
+	BASE_ETH_TOKEN_ID
+} from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import {
+	BNB_MAINNET_TOKEN,
+	BNB_MAINNET_TOKEN_ID
+} from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import { BONK_TOKEN, BONK_TOKEN_ID } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import {
 	BTC_MAINNET_TOKEN,
@@ -50,9 +58,10 @@ describe('transactions.utils', () => {
 	describe('mapAllTransactionsUi', () => {
 		const btcTokens = [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN];
 		const ethTokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN];
+		const evmTokens = [BASE_ETH_TOKEN, BNB_MAINNET_TOKEN];
 		const icTokens = [ICP_TOKEN];
 		const solTokens = [SOLANA_TOKEN];
-		const tokens = [...btcTokens, ...ethTokens, ...icTokens, ...solTokens];
+		const tokens = [...btcTokens, ...ethTokens, ...evmTokens, ...icTokens, ...solTokens];
 
 		const certified = false;
 
@@ -71,10 +80,16 @@ describe('transactions.utils', () => {
 
 		const mockErc20Transactions: Transaction[] = createMockEthTransactions(4);
 
+		const mockBaseMainnetTransactions: Transaction[] = createMockEthTransactions(3);
+
+		const mockBnbMainnetTransactions: Transaction[] = createMockEthTransactions(2);
+
 		const mockEthTransactions: EthTransactionsData = {
 			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions,
 			[SEPOLIA_TOKEN_ID]: mockSepoliaTransactions,
-			[PEPE_TOKEN_ID]: mockErc20Transactions
+			[PEPE_TOKEN_ID]: mockErc20Transactions,
+			[BASE_ETH_TOKEN_ID]: mockBaseMainnetTransactions,
+			[BNB_MAINNET_TOKEN_ID]: mockBnbMainnetTransactions
 		};
 
 		const mockIcTransactionsUi: IcTransactionUi[] = createMockIcTransactionsUi(7);
@@ -121,6 +136,30 @@ describe('transactions.utils', () => {
 			}))
 		];
 
+		const expectedBaseMainnetTransactions: AllTransactionUiWithCmp[] = [
+			...mockBaseMainnetTransactions.map((transaction) => ({
+				transaction: {
+					...transaction,
+					id: transaction.hash ?? '',
+					type
+				},
+				token: BASE_ETH_TOKEN,
+				component: 'ethereum' as const
+			}))
+		];
+
+		const expectedBnbMainnetTransactions: AllTransactionUiWithCmp[] = [
+			...mockBnbMainnetTransactions.map((transaction) => ({
+				transaction: {
+					...transaction,
+					id: transaction.hash ?? '',
+					type
+				},
+				token: BNB_MAINNET_TOKEN,
+				component: 'ethereum' as const
+			}))
+		];
+
 		const expectedErc20Transactions: AllTransactionUiWithCmp[] = [
 			...mockErc20Transactions.map((transaction) => ({
 				transaction: {
@@ -136,7 +175,9 @@ describe('transactions.utils', () => {
 		const expectedEthTransactions: AllTransactionUiWithCmp[] = [
 			...expectedEthMainnetTransactions,
 			...expectedSepoliaTransactions,
-			...expectedErc20Transactions
+			...expectedErc20Transactions,
+			...expectedBaseMainnetTransactions,
+			...expectedBnbMainnetTransactions
 		];
 
 		const expectedIcTransactions: AllTransactionUiWithCmp[] = [
@@ -165,7 +206,7 @@ describe('transactions.utils', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(() => [
+			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORK_IDS', 'get').mockImplementation(() => [
 				ETHEREUM_NETWORK_ID,
 				SEPOLIA_NETWORK_ID
 			]);
@@ -180,7 +221,11 @@ describe('transactions.utils', () => {
 				$ethAddress: undefined,
 				$icTransactions: {},
 				$solTransactions: {},
-				$btcStatuses: undefined
+				$btcStatuses: undefined,
+				$ckBtcPendingUtxosStore: undefined,
+				$icPendingTransactionsStore: undefined,
+				$ckBtcMinterInfoStore: undefined,
+				$icTransactionsStore: undefined
 			};
 
 			it('should map BTC mainnet transactions correctly', () => {
@@ -216,7 +261,7 @@ describe('transactions.utils', () => {
 		});
 
 		describe('ETH transactions', () => {
-			const tokens = [...ethTokens];
+			const tokens = [...ethTokens, ...evmTokens];
 
 			const rest = {
 				$btcTransactions: undefined,
@@ -224,7 +269,11 @@ describe('transactions.utils', () => {
 				$ethAddress: undefined,
 				$icTransactions: {},
 				$solTransactions: {},
-				$btcStatuses: undefined
+				$btcStatuses: undefined,
+				$ckBtcPendingUtxosStore: undefined,
+				$icPendingTransactionsStore: undefined,
+				$ckBtcMinterInfoStore: undefined,
+				$icTransactionsStore: undefined
 			};
 
 			it('should map ETH transactions correctly', () => {
@@ -237,7 +286,9 @@ describe('transactions.utils', () => {
 				expect(result).toHaveLength(
 					mockEthMainnetTransactions.length +
 						mockSepoliaTransactions.length +
-						mockErc20Transactions.length
+						mockErc20Transactions.length +
+						mockBaseMainnetTransactions.length +
+						mockBnbMainnetTransactions.length
 				);
 				expect(result).toEqual(expectedEthTransactions);
 			});
@@ -292,13 +343,16 @@ describe('transactions.utils', () => {
 				$ethTransactions: {},
 				$ethAddress: undefined,
 				$solTransactions: {},
-				$btcStatuses: undefined
+				$btcStatuses: undefined,
+				$ckBtcPendingUtxosStore: undefined,
+				$icPendingTransactionsStore: undefined,
+				$ckBtcMinterInfoStore: undefined
 			};
 
 			it('should map IC transactions correctly', () => {
 				const result = mapAllTransactionsUi({
 					tokens,
-					$icTransactions: mockIcTransactions,
+					$icTransactionsStore: mockIcTransactions,
 					...rest
 				});
 
@@ -309,7 +363,7 @@ describe('transactions.utils', () => {
 			it('should return an empty array if the IC transactions store is not initialized', () => {
 				const result = mapAllTransactionsUi({
 					tokens,
-					$icTransactions: {},
+					$icTransactionsStore: undefined,
 					...rest
 				});
 
@@ -326,7 +380,11 @@ describe('transactions.utils', () => {
 				$ethTransactions: {},
 				$ethAddress: undefined,
 				$icTransactions: {},
-				$btcStatuses: undefined
+				$btcStatuses: undefined,
+				$ckBtcPendingUtxosStore: undefined,
+				$icPendingTransactionsStore: undefined,
+				$ckBtcMinterInfoStore: undefined,
+				$icTransactionsStore: undefined
 			};
 
 			it('should map SOL transactions correctly', () => {
@@ -359,9 +417,12 @@ describe('transactions.utils', () => {
 					$ethTransactions: mockEthTransactions,
 					$ckEthMinterInfo: {},
 					$ethAddress: undefined,
-					$icTransactions: mockIcTransactions,
 					$solTransactions: mockSolTransactions,
-					$btcStatuses: undefined
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: mockIcTransactions
 				});
 
 				expect(result).toHaveLength(
@@ -370,7 +431,9 @@ describe('transactions.utils', () => {
 						mockSepoliaTransactions.length +
 						mockErc20Transactions.length +
 						mockIcTransactionsUi.length +
-						mockSolTransactionsUi.length
+						mockSolTransactionsUi.length +
+						mockBnbMainnetTransactions.length +
+						mockBaseMainnetTransactions.length
 				);
 
 				expect(result).toEqual(expectedTransactions);
@@ -407,7 +470,10 @@ describe('transactions.utils', () => {
 			$ckEthMinterInfo: {},
 			$ethAddress: undefined,
 			$solTransactions: {},
-			$btcStatuses: undefined
+			$btcStatuses: undefined,
+			$ckBtcPendingUtxosStore: undefined,
+			$icPendingTransactionsStore: undefined,
+			$ckBtcMinterInfoStore: undefined
 		};
 
 		afterEach(() => {
@@ -421,8 +487,8 @@ describe('transactions.utils', () => {
 				const transactions = mapAllTransactionsUi({
 					tokens,
 					$btcTransactions: mockBtcTransactions,
-					$icTransactions: mockIcTransactions,
 					$ethTransactions: mockEthTransactions,
+					$icTransactionsStore: mockIcTransactions,
 					...rest
 				});
 
@@ -432,7 +498,7 @@ describe('transactions.utils', () => {
 						getMockExchanges({ token: ICP_TOKEN, usd: 20000000000000000000000 }) ?? mockExchanges
 				});
 
-				expect(filteredTransactions.length).toBe(7);
+				expect(filteredTransactions).toHaveLength(7);
 
 				filteredTransactions = filterReceivedMicroTransactions({
 					transactions,
@@ -441,7 +507,7 @@ describe('transactions.utils', () => {
 						mockExchanges
 				});
 
-				expect(filteredTransactions.length).toBe(10);
+				expect(filteredTransactions).toHaveLength(10);
 			});
 
 			it('should filter only received micro transactions', () => {
@@ -452,8 +518,8 @@ describe('transactions.utils', () => {
 				const transactions = mapAllTransactionsUi({
 					tokens,
 					$btcTransactions: mockBtcTransactions,
-					$icTransactions: mockIcSendTransactions,
 					$ethTransactions: mockEthTransactions,
+					$icTransactionsStore: mockIcSendTransactions,
 					...rest
 				});
 
@@ -464,7 +530,7 @@ describe('transactions.utils', () => {
 						mockExchanges
 				});
 
-				expect(filteredTransactions.length).toBe(10);
+				expect(filteredTransactions).toHaveLength(10);
 			});
 		});
 
@@ -473,8 +539,8 @@ describe('transactions.utils', () => {
 				const transactions = mapAllTransactionsUi({
 					tokens,
 					$btcTransactions: mockBtcTransactions,
-					$icTransactions: mockIcTransactions,
 					$ethTransactions: mockEthTransactions,
+					$icTransactionsStore: undefined,
 					...rest
 				});
 
@@ -484,7 +550,7 @@ describe('transactions.utils', () => {
 						getMockExchanges({ token: ICP_TOKEN, usd: 20000000000000000000000 }) ?? mockExchanges
 				});
 
-				expect(microTransactions.length).toBe(8);
+				expect(microTransactions).toHaveLength(8);
 
 				microTransactions = getReceivedMicroTransactions({
 					transactions,
@@ -493,19 +559,15 @@ describe('transactions.utils', () => {
 						mockExchanges
 				});
 
-				expect(microTransactions.length).toBe(5);
+				expect(microTransactions).toHaveLength(5);
 			});
 
 			it('should get only received micro transactions', () => {
-				const mockIcSendTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
-					[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified: false }))
-				};
-
 				const transactions = mapAllTransactionsUi({
 					tokens,
 					$btcTransactions: mockBtcTransactions,
-					$icTransactions: mockIcSendTransactions,
 					$ethTransactions: mockEthTransactions,
+					$icTransactionsStore: undefined,
 					...rest
 				});
 
@@ -516,7 +578,7 @@ describe('transactions.utils', () => {
 						mockExchanges
 				});
 
-				expect(microTransactions.length).toBe(5);
+				expect(microTransactions).toHaveLength(5);
 			});
 		});
 	});

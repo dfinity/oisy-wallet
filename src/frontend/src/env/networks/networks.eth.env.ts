@@ -22,14 +22,12 @@ export const INFURA_NETWORK_BASE_SEPOLIA: Networkish = 'base-sepolia';
 export const INFURA_NETWORK_BNB_MAINNET: Networkish = 'bnb';
 export const INFURA_NETWORK_BNB_TESTNET: Networkish = 'bnbt';
 
-export const ETHERSCAN_NETWORK_HOMESTEAD: Networkish = 'homestead';
-export const ETHERSCAN_NETWORK_SEPOLIA: Networkish = 'sepolia';
-
-export const ETHERSCAN_API_URL_HOMESTEAD = 'https://api.etherscan.io/api';
-export const ETHERSCAN_API_URL_SEPOLIA = 'https://api-sepolia.etherscan.io/api';
-
 export const ALCHEMY_JSON_RPC_URL_MAINNET = 'https://eth-mainnet.g.alchemy.com/v2';
 export const ALCHEMY_JSON_RPC_URL_SEPOLIA = 'https://eth-sepolia.g.alchemy.com/v2';
+export const ALCHEMY_JSON_RPC_URL_BASE_MAINNET = 'https://base-mainnet.g.alchemy.com/v2';
+export const ALCHEMY_JSON_RPC_URL_BASE_SEPOLIA = 'https://base-sepolia.g.alchemy.com/v2';
+export const ALCHEMY_JSON_RPC_URL_BSC_MAINNET = 'https://bnb-mainnet.g.alchemy.com/v2';
+export const ALCHEMY_JSON_RPC_URL_BSC_TESTNET = 'https://bnb-testnet.g.alchemy.com/v2';
 
 export const ALCHEMY_NETWORK_MAINNET: Network = Network.ETH_MAINNET;
 export const ALCHEMY_NETWORK_SEPOLIA: Network = Network.ETH_SEPOLIA;
@@ -53,6 +51,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	iconLight: ethereumIconLight,
 	iconDark: ethereumIconDark,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
+	exchange: { coingeckoId: 'ethereum' },
 	buy: { onramperId: 'ethereum' }
 };
 
@@ -85,7 +84,7 @@ export const SUPPORTED_ETHEREUM_NETWORKS: EthereumNetwork[] = defineSupportedNet
 	testnetNetworks: [SEPOLIA_NETWORK]
 });
 
-export const SUPPORTED_ETHEREUM_NETWORKS_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NETWORKS.map(
+export const SUPPORTED_ETHEREUM_NETWORK_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NETWORKS.map(
 	({ id }) => id
 );
 

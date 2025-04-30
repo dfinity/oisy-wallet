@@ -244,6 +244,7 @@
 			on:icNext
 			on:icClose={close}
 			on:icQRCodeScan
+			on:icTokensList
 			bind:destination
 			bind:amount
 			bind:network={targetNetwork}
@@ -251,7 +252,7 @@
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<ButtonBack on:click={back} />
+					<ButtonBack onclick={back} />
 				{:else}
 					<ButtonCancel on:click={close} />
 				{/if}

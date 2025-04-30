@@ -1,15 +1,19 @@
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
-import { routeToken } from '$lib/derived/nav.derived';
+import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const tokenInitialized: Readable<boolean> = derived(
-	[routeToken, enabledErc20Tokens],
-	([$routeToken, $erc20Tokens]) =>
-		$routeToken === ETHEREUM_TOKEN.name ||
-		$routeToken === SEPOLIA_TOKEN.name ||
-		nonNullish($erc20Tokens.find(({ name }) => name === $routeToken))
+	[routeToken, routeNetwork, enabledEthereumTokens, enabledEvmTokens, enabledErc20Tokens],
+	([$routeToken, $routeNetwork, $enabledEthereumTokens, $enabledEvmTokens, $erc20Tokens]) =>
+		nonNullish(
+			[...$enabledEthereumTokens, ...$enabledEvmTokens, ...$erc20Tokens].find(
+				({ name, network: { id: networkId } }) =>
+					name === $routeToken && networkId.description === $routeNetwork
+			)
+		)
 );
 
 export const tokenNotInitialized: Readable<boolean> = derived(
