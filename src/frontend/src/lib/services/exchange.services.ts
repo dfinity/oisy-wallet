@@ -21,7 +21,7 @@ const fetchIcrcPricesFromCoingecko = (
 	simpleTokenPrice({
 		id: 'internet-computer',
 		vs_currencies: 'usd',
-		contract_addresses: ledgerCanisterIds.map((id) => id.toLowerCase()),
+		contract_addresses: ledgerCanisterIds,
 		include_market_cap: true
 	});
 
