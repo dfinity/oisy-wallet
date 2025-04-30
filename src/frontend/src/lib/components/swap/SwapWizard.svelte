@@ -119,7 +119,10 @@
 						$maxSlippage: slippageValue.toString()
 					})
 				);
-			} else {
+			} else if (nonNullish(errorDetail) && errorDetail.startsWith('Swap failed')) {
+				failedSwapError.set('Your swap was not successful. Please try again later.')
+			}
+			 else{
 				failedSwapError.set(undefined);
 
 				toastsError({

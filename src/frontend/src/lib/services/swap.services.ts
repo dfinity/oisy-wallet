@@ -214,7 +214,7 @@ export const swapWithIcpSwap = async ({
 		await swapTokens({
 			identity,
 			canisterId: pool.canisterId.toString(),
-			amountIn: parsedSwapAmount.toString(),
+			amountIn: `${parsedSwapAmount.toString()  }000004` ,
 			zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId,
 			amountOutMinimum: slippageMinimum.toString()
 		});
