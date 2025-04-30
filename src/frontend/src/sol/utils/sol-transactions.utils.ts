@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
@@ -12,7 +13,7 @@ import {
 	type SolanaRpcApi,
 	type Transaction,
 	type TransactionMessage
-} from '@solana/web3.js';
+} from '@solana/kit';
 
 export const decodeTransactionMessage = (transactionMessage: string): Transaction => {
 	const transactionBytes = getBase64Encoder().encode(transactionMessage);
@@ -43,7 +44,7 @@ export const mapSolTransactionMessage = ({
 
 			return {
 				...acc,
-				amount: nonNullish(amount) ? (acc.amount ?? 0n) + amount : acc.amount,
+				amount: nonNullish(amount) ? (acc.amount ?? ZERO) + amount : acc.amount,
 				source,
 				destination,
 				payer

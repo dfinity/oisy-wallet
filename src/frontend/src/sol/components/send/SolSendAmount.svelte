@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from 'alchemy-sdk';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -30,6 +29,8 @@
 	export let amount: OptionAmount = undefined;
 	export let amountError: SolAmountAssertionError | undefined;
 
+	const dispatch = createEventDispatcher();
+
 	let exchangeValueUnit: DisplayUnit = 'usd';
 	let inputUnit: DisplayUnit;
 	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
@@ -48,27 +49,27 @@
 				? SOLANA_LOCAL_TOKEN
 				: SOLANA_TOKEN;
 
-	$: customValidate = (userAmount: BigNumber): Error | undefined => {
-		if (invalidAmount(userAmount.toNumber()) || userAmount.isZero()) {
+	const customValidate = (userAmount: bigint): Error | undefined => {
+		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
 			return new SolAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
 		if (nonNullish($sendBalance) && $sendTokenStandard === 'solana') {
-			const total = userAmount.add($fee ?? ZERO);
+			const total = userAmount + ($fee ?? ZERO);
 
-			if (total.gt($sendBalance)) {
+			if (total > $sendBalance) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
 			}
 
 			return;
 		}
 
-		if (userAmount.gt($sendBalance ?? ZERO)) {
+		if (userAmount > ($sendBalance ?? ZERO)) {
 			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds);
 		}
 
 		const solBalance = $balancesStore?.[solanaNativeToken.id]?.data ?? ZERO;
-		if (nonNullish($fee) && solBalance.lt($fee)) {
+		if (nonNullish($fee) && solBalance < $fee) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_solana_funds_to_cover_the_fees
 			);
@@ -81,11 +82,13 @@
 		token={$sendToken}
 		bind:amount
 		displayUnit={inputUnit}
-		isSelectable={false}
 		exchangeRate={$sendTokenExchangeRate}
 		bind:error={amountError}
 		customErrorValidate={customValidate}
 		autofocus={nonNullish($sendToken)}
+		on:click={() => {
+			dispatch('icTokensList');
+		}}
 	>
 		<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -109,7 +112,7 @@
 					error={nonNullish(amountError)}
 					balance={$sendBalance}
 					token={$sendToken}
-					fee={BigNumber.from($fee ?? 0)}
+					fee={$fee ?? ZERO}
 				/>
 			{/if}
 		</svelte:fragment>

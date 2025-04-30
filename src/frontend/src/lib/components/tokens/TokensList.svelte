@@ -1,19 +1,24 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
-	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
-	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
+	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
+	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import { modalManageTokens } from '$lib/derived/modal.derived';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
+	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
+	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined;
 
@@ -37,12 +42,21 @@
 
 	let loading: boolean;
 	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
+
+	let filteredTokens: TokenUiOrGroupUi[] | undefined;
+	$: filteredTokens = getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] });
+
+	let initialSearch: string | undefined;
+	let message: string | undefined;
+	$: ({ initialSearch, message } = nonNullish($modalManageTokensData)
+		? $modalManageTokensData
+		: { initialSearch: undefined, message: undefined });
 </script>
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="mb-3 flex flex-col gap-3">
-			{#each tokens ?? [] as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 				<div
 					class="overflow-hidden rounded-xl"
 					transition:fade
@@ -59,21 +73,33 @@
 						{@const { token } = tokenOrGroup}
 
 						<Listener {token}>
-							<TokenCardWithUrl styleClass="rounded-xl px-3 py-2 hover:bg-brand-subtle-10" {token}>
-								<TokenCardContent data={token} />
-							</TokenCardWithUrl>
+							<div class="transition duration-300 hover:bg-primary">
+								<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
+							</div>
 						</Listener>
 					{/if}
 				</div>
 			{/each}
 		</div>
 
-		{#if tokens?.length === 0}
-			<NoTokensPlaceholder />
+		{#if filteredTokens?.length === 0}
+			{#if $tokenListStore.filter === ''}
+				<NoTokensPlaceholder />
+			{:else}
+				<NothingFoundPlaceholder />
+			{/if}
 		{/if}
 
 		{#if $modalManageTokens}
-			<ManageTokensModal />
+			<ManageTokensModal {initialSearch}>
+				{#snippet infoElement()}
+					{#if nonNullish(message)}
+						<MessageBox level="info">
+							{message}
+						</MessageBox>
+					{/if}
+				{/snippet}
+			</ManageTokensModal>
 		{/if}
 	</TokensSkeletons>
 </TokensDisplayHandler>

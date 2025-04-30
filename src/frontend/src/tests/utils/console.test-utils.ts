@@ -45,3 +45,12 @@ export const failTestsThatLogToConsole = () => {
 export const allowLoggingForDebugging = () => {
 	isLoggingAllowed = true;
 };
+
+export const disableConsoleLog = () => {
+	// eslint-disable-next-line vitest/no-duplicate-hooks,vitest/prefer-hooks-in-order
+	beforeEach(() => {
+		// We mock console just to avoid unnecessary logs while running the tests
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+	});
+};

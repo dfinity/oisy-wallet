@@ -1,5 +1,16 @@
+import * as baseEnv from '$env/networks/networks-evm/networks.evm.base.env';
+import * as bscEnv from '$env/networks/networks-evm/networks.evm.bsc.env';
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import * as solEnv from '$env/networks/networks.sol.env';
+import {
+	BASE_ETH_TOKEN,
+	BASE_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import {
+	BNB_MAINNET_TOKEN,
+	BNB_TESTNET_TOKEN
+} from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -23,15 +34,16 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
 import { tokens } from '$lib/derived/tokens.derived';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
-import { splUserTokensStore } from '$sol/stores/spl-user-tokens.store';
 import type { SplToken } from '$sol/types/spl';
-import type { SplUserToken } from '$sol/types/spl-user-token';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('tokens.derived', () => {
@@ -69,10 +81,10 @@ describe('tokens.derived', () => {
 		symbol: 'SplDefaultTokenId1'
 	};
 
-	const mockSplUserToken: SplUserToken = {
+	const mockSplCustomToken: SplCustomToken = {
 		...mockValidSplToken,
-		id: parseTokenId('SplUserTokenId2'),
-		symbol: 'SplUserTokenId2',
+		id: parseTokenId('SplCustomTokenId2'),
+		symbol: 'SplCustomTokenId2',
 		address: `${mockValidSplToken.address}2`,
 		version: undefined,
 		enabled: true
@@ -87,13 +99,16 @@ describe('tokens.derived', () => {
 			icrcDefaultTokensStore.resetAll();
 			icrcCustomTokensStore.resetAll();
 			splDefaultTokensStore.reset();
-			splUserTokensStore.resetAll();
+			splCustomTokensStore.resetAll();
 
-			testnetsStore.reset({ key: 'testnets' });
+			setupTestnetsStore('reset');
+			setupUserNetworksStore('allEnabled');
 
 			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-
+			vi.spyOn(solEnv, 'SOL_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+			vi.spyOn(baseEnv, 'BASE_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+			vi.spyOn(bscEnv, 'BSC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
 		});
 
@@ -103,7 +118,7 @@ describe('tokens.derived', () => {
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
 			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
 			splDefaultTokensStore.add(mockSplDefaultToken);
-			splUserTokensStore.setAll([{ data: mockSplUserToken, certified: false }]);
+			splCustomTokensStore.setAll([{ data: mockSplCustomToken, certified: false }]);
 
 			const result = get(tokens);
 
@@ -112,28 +127,38 @@ describe('tokens.derived', () => {
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
 				SOLANA_TOKEN,
+				BASE_ETH_TOKEN,
+				BNB_MAINNET_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20UserToken,
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[6].id },
-				{ ...mockIcrcCustomToken, id: result[7].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[8].id },
+				{ ...mockIcrcCustomToken, id: result[9].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
-				mockSplUserToken
+				mockSplCustomToken
 			]);
 		});
 
 		it('should return only native tokens when the other token lists are empty', () => {
-			expect(get(tokens)).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, SOLANA_TOKEN]);
+			expect(get(tokens)).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN,
+				ETHEREUM_TOKEN,
+				SOLANA_TOKEN,
+				BASE_ETH_TOKEN,
+				BNB_MAINNET_TOKEN
+			]);
 		});
 
 		it('should return only ICP and SOL when all the token lists are empty (including native tokens)', () => {
 			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => false);
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => false);
+			vi.spyOn(bscEnv, 'BSC_MAINNET_ENABLED', 'get').mockImplementation(() => false);
 
-			expect(get(tokens)).toEqual([ICP_TOKEN, SOLANA_TOKEN]);
+			expect(get(tokens)).toEqual([ICP_TOKEN, SOLANA_TOKEN, BASE_ETH_TOKEN]);
 		});
 
 		it('should return testnet tokens too when testnets are enabled', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 
 			expect(get(tokens)).toEqual([
 				ICP_TOKEN,
@@ -143,12 +168,16 @@ describe('tokens.derived', () => {
 				SEPOLIA_TOKEN,
 				SOLANA_TOKEN,
 				SOLANA_TESTNET_TOKEN,
-				SOLANA_DEVNET_TOKEN
+				SOLANA_DEVNET_TOKEN,
+				BASE_ETH_TOKEN,
+				BASE_SEPOLIA_ETH_TOKEN,
+				BNB_MAINNET_TOKEN,
+				BNB_TESTNET_TOKEN
 			]);
 		});
 
 		it('should return local tokens too when testnets are enabled and env is LOCAL', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			expect(get(tokens)).toEqual([
@@ -161,7 +190,11 @@ describe('tokens.derived', () => {
 				SOLANA_TOKEN,
 				SOLANA_TESTNET_TOKEN,
 				SOLANA_DEVNET_TOKEN,
-				SOLANA_LOCAL_TOKEN
+				SOLANA_LOCAL_TOKEN,
+				BASE_ETH_TOKEN,
+				BASE_SEPOLIA_ETH_TOKEN,
+				BNB_MAINNET_TOKEN,
+				BNB_TESTNET_TOKEN
 			]);
 		});
 	});

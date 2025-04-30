@@ -5,10 +5,14 @@
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let loading = true;
-	export let reward: RewardDescription;
-	export let isEligible = false;
-	export let requirementsFulfilled: boolean[];
+	interface Props {
+		loading?: boolean;
+		reward: RewardDescription;
+		isEligible?: boolean;
+		requirementsFulfilled: boolean[];
+	}
+
+	let { loading = true, reward, isEligible = false, requirementsFulfilled }: Props = $props();
 
 	const isRequirementFulfilled = (index: number) =>
 		(reward.requirements.length === requirementsFulfilled.length && requirementsFulfilled[index]) ??
@@ -16,13 +20,18 @@
 </script>
 
 {#if reward.requirements.length > 0}
-	<span class="text-md font-semibold"
-		>{$i18n.rewards.text.requirements_title}
-	</span>{#if isEligible}<span class="inline-flex pl-3"
-			><Badge variant="success">{$i18n.rewards.text.youre_eligible}</Badge></span
-		>{/if}
+	<span class="text-base font-semibold">
+		{$i18n.rewards.text.requirements_title}
+	</span>
+	{#if isEligible}
+		<span class="inline-flex pl-3">
+			<Badge variant="success">
+				{$i18n.rewards.text.youre_eligible}
+			</Badge>
+		</span>
+	{/if}
 	<ul class="list-none">
-		{#each reward.requirements as requirement, i}
+		{#each reward.requirements as requirement, i (requirement)}
 			<li class="flex gap-2 pt-1">
 				<span
 					class="flex w-full flex-row"

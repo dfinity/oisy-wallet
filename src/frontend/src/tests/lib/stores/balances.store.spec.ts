@@ -1,8 +1,8 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { balancesStore } from '$lib/stores/balances.store';
+import { bn1Bi } from '$tests/mocks/balances.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
-import { BigNumber } from 'alchemy-sdk';
 
 describe('balancesStore', () => {
 	beforeEach(() => {
@@ -12,8 +12,8 @@ describe('balancesStore', () => {
 	it('should ensure derived stores update at most once when the store changes', async () => {
 		await testDerivedUpdates(() =>
 			balancesStore.set({
-				tokenId: ICP_TOKEN.id,
-				data: { data: BigNumber.from(1n), certified: true }
+				id: ICP_TOKEN.id,
+				data: { data: bn1Bi, certified: true }
 			})
 		);
 	});

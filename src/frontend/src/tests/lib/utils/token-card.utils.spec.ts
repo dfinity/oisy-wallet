@@ -1,31 +1,37 @@
-import { SEPOLIA_NETWORK } from '$env/networks/networks.env';
+import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import { mapHeaderData } from '$lib/utils/token-card.utils';
-import { bn1 } from '$tests/mocks/balances.mock';
+import { bn1Bi } from '$tests/mocks/balances.mock';
 
 describe('mapHeaderData', () => {
+	const mockGroup = ETH_TOKEN_GROUP;
+
+	const mockToken = SEPOLIA_TOKEN;
+
 	// We mock the token group with a mix of data just to verify that the function works correctly
 	const tokenGroup: TokenUiGroup = {
-		id: SEPOLIA_TOKEN.id,
-		nativeToken: SEPOLIA_TOKEN,
-		tokens: [SEPOLIA_TOKEN, ICP_TOKEN],
-		balance: bn1,
+		id: mockGroup.id,
+		decimals: mockToken.decimals,
+		nativeToken: mockToken,
+		groupData: mockGroup,
+		tokens: [mockToken, ICP_TOKEN],
+		balance: bn1Bi,
 		usdBalance: 300
 	};
 
 	it('should correctly map the token group to card data', () => {
 		const expected: CardData = {
-			name: SEPOLIA_TOKEN.name,
-			symbol: SEPOLIA_TOKEN.symbol,
-			decimals: SEPOLIA_TOKEN.decimals,
-			icon: SEPOLIA_TOKEN.icon,
-			network: SEPOLIA_NETWORK,
-			oisyName: { oisyName: `${SEPOLIA_TOKEN.symbol}, ${ICP_TOKEN.symbol}` },
-			oisySymbol: { oisySymbol: SEPOLIA_TOKEN.name },
-			balance: bn1,
+			name: mockGroup.name,
+			symbol: mockGroup.symbol,
+			decimals: mockToken.decimals,
+			icon: mockGroup.icon,
+			network: mockToken.network,
+			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
+			oisySymbol: { oisySymbol: mockGroup.name },
+			balance: bn1Bi,
 			usdBalance: 300,
 			tokenCount: 2
 		};
@@ -37,13 +43,13 @@ describe('mapHeaderData', () => {
 		const { balance: _balance, usdBalance: _usdBalance, ...rest } = tokenGroup;
 
 		const expected: CardData = {
-			name: SEPOLIA_TOKEN.name,
-			symbol: SEPOLIA_TOKEN.symbol,
-			decimals: SEPOLIA_TOKEN.decimals,
-			icon: SEPOLIA_TOKEN.icon,
-			network: SEPOLIA_NETWORK,
-			oisyName: { oisyName: `${SEPOLIA_TOKEN.symbol}, ${ICP_TOKEN.symbol}` },
-			oisySymbol: { oisySymbol: SEPOLIA_TOKEN.name },
+			name: mockGroup.name,
+			symbol: mockGroup.symbol,
+			decimals: mockToken.decimals,
+			icon: mockGroup.icon,
+			network: mockToken.network,
+			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
+			oisySymbol: { oisySymbol: mockGroup.name },
 			tokenCount: 2
 		};
 

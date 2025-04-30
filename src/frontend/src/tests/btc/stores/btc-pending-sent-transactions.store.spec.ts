@@ -7,7 +7,7 @@ const pendingTransactionMock1 = {
 	utxos: [
 		{
 			height: 100,
-			value: BigInt(5000),
+			value: 5000n,
 			outpoint: {
 				txid: new Uint8Array([1, 2, 3]),
 				vout: 0
@@ -20,7 +20,7 @@ const pendingTransactionMock2 = {
 	utxos: [
 		{
 			height: 101,
-			value: BigInt(6000),
+			value: 6000n,
 			outpoint: {
 				txid: new Uint8Array([4, 5, 6]),
 				vout: 1
@@ -36,6 +36,7 @@ describe('btcPendingSentTransactionsStore', () => {
 
 	it('should initialize with an empty store', () => {
 		const storeData = get(btcPendingSentTransactionsStore);
+
 		expect(storeData).toEqual({});
 	});
 
@@ -46,6 +47,7 @@ describe('btcPendingSentTransactionsStore', () => {
 		btcPendingSentTransactionsStore.setPendingTransactions({ address, pendingTransactions });
 
 		const storeData = get(btcPendingSentTransactionsStore);
+
 		expect(storeData[address].data).toEqual(pendingTransactions);
 	});
 
@@ -54,6 +56,7 @@ describe('btcPendingSentTransactionsStore', () => {
 		btcPendingSentTransactionsStore.setPendingTransactionsError({ address });
 
 		const storeData = get(btcPendingSentTransactionsStore);
+
 		expect(storeData[address].data).toBeNull();
 	});
 
@@ -62,9 +65,11 @@ describe('btcPendingSentTransactionsStore', () => {
 		const pendingTransactions: Array<PendingTransaction> = [pendingTransactionMock1];
 
 		btcPendingSentTransactionsStore.setPendingTransactions({ address, pendingTransactions });
+
 		expect(get(btcPendingSentTransactionsStore)[address].data).toEqual(pendingTransactions);
 
 		btcPendingSentTransactionsStore.setPendingTransactionsError({ address });
+
 		expect(get(btcPendingSentTransactionsStore)[address].data).toBeNull();
 	});
 
@@ -75,7 +80,8 @@ describe('btcPendingSentTransactionsStore', () => {
 		btcPendingSentTransactionsStore.setPendingTransactions({ address, pendingTransactions });
 
 		const storeData = get(btcPendingSentTransactionsStore);
-		expect(storeData[address].certified).toEqual(true);
+
+		expect(storeData[address].certified).toBeTruthy();
 	});
 
 	it('should update pending transactions for an existing address', () => {
@@ -95,6 +101,7 @@ describe('btcPendingSentTransactionsStore', () => {
 		});
 
 		const storeData = get(btcPendingSentTransactionsStore);
+
 		expect(storeData[address].data).toEqual(newPendingTransactions);
 	});
 
@@ -116,6 +123,7 @@ describe('btcPendingSentTransactionsStore', () => {
 		});
 
 		const storeData = get(btcPendingSentTransactionsStore);
+
 		expect(storeData[address1].data).toEqual(pendingTransactions1);
 		expect(storeData[address2].data).toEqual(pendingTransactions2);
 	});

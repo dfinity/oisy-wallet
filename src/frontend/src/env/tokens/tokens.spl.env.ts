@@ -1,3 +1,4 @@
+import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
@@ -25,4 +26,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 
 const SPL_TOKENS_DEVNET: RequiredSplToken[] = [DEVNET_USDC_TOKEN, DEVNET_EURC_TOKEN];
 
-export const SPL_TOKENS: RequiredSplToken[] = [...SPL_TOKENS_MAINNET, ...SPL_TOKENS_DEVNET];
+export const SPL_TOKENS: RequiredSplToken[] = [
+	...(SOL_MAINNET_ENABLED ? SPL_TOKENS_MAINNET : []),
+	...SPL_TOKENS_DEVNET
+];

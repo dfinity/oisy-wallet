@@ -30,6 +30,8 @@
 
 	<ConvertReviewNetworks />
 
+	<slot name="destination" />
+
 	<slot name="fee" />
 
 	<slot name="info-message" />

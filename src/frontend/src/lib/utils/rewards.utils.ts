@@ -1,9 +1,8 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { getRewards } from '$lib/services/reward-code.services';
+import { getRewards } from '$lib/services/reward.services';
 import type { RewardResponseInfo, RewardResult } from '$lib/types/reward';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
 
@@ -19,11 +18,17 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 
 		if (newRewards.length > 0) {
 			const containsJackpot: boolean = newRewards.some(({ name }) => name === 'jackpot');
-			return { receivedReward: true, receivedJackpot: containsJackpot };
+			const containsReferral: boolean = newRewards.some(({ name }) => name === 'referral');
+
+			return {
+				receivedReward: true,
+				receivedJackpot: containsJackpot,
+				receivedReferral: containsReferral
+			};
 		}
 	}
 
-	return { receivedReward: false, receivedJackpot: false };
+	return { receivedReward: false, receivedJackpot: false, receivedReferral: false };
 };
 
 export const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
@@ -41,5 +46,5 @@ export const isUpcomingCampaign = (startDate: Date) => {
 	return startDiff > 0;
 };
 
-export const getRewardsBalance = (rewards: RewardResponseInfo[]) =>
-	rewards.reduce((total, { amount }) => total.add(BigNumber.from(amount)), ZERO);
+export const getRewardsBalance = (rewards: RewardResponseInfo[]): bigint =>
+	rewards.reduce<bigint>((total, { amount }) => total + amount, ZERO);

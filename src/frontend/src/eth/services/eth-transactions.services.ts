@@ -1,8 +1,10 @@
+import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { retry } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -17,24 +19,40 @@ import { get } from 'svelte/store';
 
 export const loadEthereumTransactions = ({
 	networkId,
-	tokenId
+	tokenId,
+	updateOnly = false,
+	silent = false
 }: {
 	tokenId: TokenId;
 	networkId: NetworkId;
+	updateOnly?: boolean;
+	silent?: boolean;
 }): Promise<ResultSuccess> => {
-	if (isSupportedEthTokenId(tokenId)) {
-		return loadEthTransactions({ networkId, tokenId });
+	if (isSupportedEthTokenId(tokenId) || isSupportedEvmNativeTokenId(tokenId)) {
+		return loadEthTransactions({ networkId, tokenId, updateOnly, silent });
 	}
 
-	return loadErc20Transactions({ networkId, tokenId });
+	return loadErc20Transactions({ networkId, tokenId, updateOnly });
 };
+
+// If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
+// Plus, we add new transactions to the existing ones.
+export const reloadEthereumTransactions = (params: {
+	tokenId: TokenId;
+	networkId: NetworkId;
+	silent?: boolean;
+}): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
 const loadEthTransactions = async ({
 	networkId,
-	tokenId
+	tokenId,
+	updateOnly = false,
+	silent = false
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
+	updateOnly?: boolean;
+	silent?: boolean;
 }): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
@@ -55,20 +73,32 @@ const loadEthTransactions = async ({
 	try {
 		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const transactions = await transactionsProviders({ address });
-		ethTransactionsStore.set({ tokenId, transactions });
+
+		if (updateOnly) {
+			transactions.forEach((transaction) => ethTransactionsStore.update({ tokenId, transaction }));
+		} else {
+			ethTransactionsStore.set({ tokenId, transactions });
+		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
 
-		const {
-			transactions: {
-				error: { loading_transactions }
-			}
-		} = get(i18n);
+		if (!silent) {
+			const {
+				transactions: {
+					error: { loading_transactions_symbol }
+				}
+			} = get(i18n);
 
-		toastsErrorNoTrace({
-			msg: { text: loading_transactions },
-			err
-		});
+			toastsErrorNoTrace({
+				msg: {
+					text: replacePlaceholders(loading_transactions_symbol, {
+						$symbol: ETHEREUM_NETWORK_SYMBOL
+					})
+				},
+				err
+			});
+		}
+
 		return { success: false };
 	}
 
@@ -77,10 +107,12 @@ const loadEthTransactions = async ({
 
 const loadErc20Transactions = async ({
 	networkId,
-	tokenId
+	tokenId,
+	updateOnly = false
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
+	updateOnly?: boolean;
 }): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
@@ -121,7 +153,12 @@ const loadErc20Transactions = async ({
 			request: async () => await transactionsRest({ contract: token, address }),
 			onRetry: async () => await randomWait({})
 		});
-		ethTransactionsStore.set({ tokenId, transactions });
+
+		if (updateOnly) {
+			transactions.forEach((transaction) => ethTransactionsStore.update({ tokenId, transaction }));
+		} else {
+			ethTransactionsStore.set({ tokenId, transactions });
+		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
 

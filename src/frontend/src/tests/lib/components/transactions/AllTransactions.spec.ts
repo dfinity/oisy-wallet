@@ -16,7 +16,7 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-describe('Activity', () => {
+describe('AllTransactions', () => {
 	const customIcrcToken: IcrcCustomToken = {
 		...mockValidIcToken,
 		version: 1n,
@@ -29,7 +29,9 @@ describe('Activity', () => {
 		const title: HTMLHeadingElement | null = container.querySelector('h1');
 
 		expect(title).not.toBeNull();
+
 		assertNonNullish(title, 'Title not found');
+
 		expect(title).toBeInTheDocument();
 		expect(title.textContent).toBe(en.activity.text.title);
 	});

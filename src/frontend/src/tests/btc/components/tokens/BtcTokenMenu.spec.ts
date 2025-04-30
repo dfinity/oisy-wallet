@@ -9,7 +9,7 @@ import {
 	BTC_MAINNET_NETWORK,
 	BTC_REGTEST_NETWORK,
 	BTC_TESTNET_NETWORK
-} from '$env/networks/networks.env';
+} from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -22,9 +22,10 @@ import {
 	btcAddressRegtestStore,
 	btcAddressTestnetStore
 } from '$lib/stores/address.store';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('BtcTokenMenu', () => {
@@ -36,7 +37,8 @@ describe('BtcTokenMenu', () => {
 	const explorerLinkSelector = 'a[data-tid="btc-explorer-link"]';
 
 	beforeAll(() => {
-		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+		setupTestnetsStore('enabled');
+		setupUserNetworksStore('allEnabled');
 	});
 
 	beforeEach(() => {

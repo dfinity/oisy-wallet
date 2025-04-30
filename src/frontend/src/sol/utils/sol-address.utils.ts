@@ -2,7 +2,7 @@ import type { SolAddress } from '$lib/types/address';
 import { getAccountOwner } from '$sol/api/solana.api';
 import type { SolanaNetworkType } from '$sol/types/network';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { assertIsAddress } from '@solana/web3.js';
+import { assertIsAddress } from '@solana/kit';
 
 export const isSolAddress = (address: SolAddress | undefined): boolean => {
 	if (isNullish(address)) {

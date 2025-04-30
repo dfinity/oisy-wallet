@@ -6,6 +6,7 @@
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
@@ -15,9 +16,8 @@
 	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let source: string;
-	export let simplifiedForm = false;
 
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
@@ -38,13 +38,20 @@
 	disabled={invalid}
 	hideSource
 >
-	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
+	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} on:icTokensList />
 
-	<div slot="destination">
-		{#if !simplifiedForm}
-			<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
-		{/if}
-	</div>
+	<IcSendDestination
+		slot="destination"
+		tokenStandard={$sendTokenStandard}
+		bind:destination
+		bind:invalidDestination
+		{networkId}
+		on:icQRCodeScan
+	>
+		<label for="destination" slot="label" class="font-bold">
+			{$i18n.send.text.destination}
+		</label>
+	</IcSendDestination>
 
 	<IcFeeDisplay slot="fee" {networkId} />
 

@@ -127,7 +127,7 @@ const extractStartScript = (htmlFile) => {
  * Browsers that supports the 'strict-dynamic' rule will ignore these backwards directives (CSP 3).
  */
 const updateCSP = (indexHtml) => {
-	const sw = /<script[\s\S]*?>([\s\S]*?)<\/script>/gm;
+	const sw = /<script[\s\S]*?>([\s\S]*?)<\/script[^\S\r\n]*[^>]*?>/gim;
 
 	const indexHashes = [];
 
@@ -143,10 +143,26 @@ const updateCSP = (indexHtml) => {
 	const ethSepoliaConnectSrc =
 		'https://api-sepolia.etherscan.io https://sepolia.infura.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
 
+	const baseMainnetConnectSrc =
+		'wss://base-mainnet.g.alchemy.com https://base-mainnet.g.alchemy.com https://base-mainnet.infura.io';
+	const baseSepoliaConnectSrc =
+		'wss://base-sepolia.g.alchemy.com https://base-sepolia.g.alchemy.com https://base-sepolia.infura.io';
+	const bnbMainnetConnectSrc =
+		'wss://bnb-mainnet.g.alchemy.com https://bnb-mainnet.g.alchemy.com https://bsc-mainnet.infura.io';
+	const bnbTestnetConnectSrc =
+		'wss://bnb-testnet.g.alchemy.com https://bnb-testnet.g.alchemy.com https://bsc-testnet.infura.io';
+	const evmConnectSrc = `${baseMainnetConnectSrc} ${baseSepoliaConnectSrc} ${bnbMainnetConnectSrc} ${bnbTestnetConnectSrc}`;
+
+	const infuraConnectSrc = 'https://gas.api.infura.io';
+
 	const blockstreamApiConnectSrc = 'https://blockstream.info';
 	const blockchainApiConnectSrc = 'https://blockchain.info';
 
 	const coingeckoApiConnectSrc = 'https://pro-api.coingecko.com';
+
+	const kongSwapApiConnectSrc = 'https://api.kongswap.io';
+
+	const plausibleApiConnectSrc = 'https://plausible.io/api/event';
 
 	const walletConnectSrc =
 		'wss://relay.walletconnect.com wss://relay.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org';
@@ -165,7 +181,7 @@ const updateCSP = (indexHtml) => {
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${infuraConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc};
         img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';

@@ -28,6 +28,8 @@
 	$: filteredDapps = dAppDescriptions.filter(
 		({ tags }) => isNullish(selectedTag) || tags.includes(selectedTag)
 	);
+
+	const modalId = Symbol();
 </script>
 
 <PageTitle>{$i18n.dapps.text.title}</PageTitle>
@@ -35,7 +37,7 @@
 {#if nonNullish(featuredDapp) && nonNullish(featuredDapp.screenshots)}
 	<div class="mb-6 md:mb-10">
 		<DappPromoBanner
-			on:click={() => modalStore.openDappDetails(featuredDapp)}
+			on:click={() => modalStore.openDappDetails({ id: modalId, data: featuredDapp })}
 			dAppDescription={featuredDapp}
 		/>
 	</div>
@@ -48,9 +50,10 @@
 		on:click={() => (selectedTag = undefined)}
 		styleClass="text-nowrap max-w-fit text-sm"
 		colorStyle={selectedTag === undefined ? 'primary' : 'tertiary'}
-		>{$i18n.dapps.text.all_dapps}</Button
 	>
-	{#each uniqueTags as tag}
+		{$i18n.dapps.text.all_dapps}
+	</Button>
+	{#each uniqueTags as tag (tag)}
 		<Button
 			paddingSmall
 			ariaLabel={replacePlaceholders($i18n.dapps.alt.show_tag, { $tag: tag })}
@@ -62,11 +65,11 @@
 </div>
 
 <ul class="mt-10 grid list-none grid-cols-2 flex-row gap-x-4 gap-y-10 md:grid-cols-3">
-	{#each filteredDapps as dApp}
+	{#each filteredDapps as dApp (dApp.id)}
 		<li class="flex" in:fade>
 			<DappCard
 				on:click={() => {
-					modalStore.openDappDetails(dApp);
+					modalStore.openDappDetails({ id: modalId, data: dApp });
 				}}
 				dAppDescription={dApp}
 			/>

@@ -16,6 +16,7 @@
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
 	export let airdrop: RewardDescription | undefined = undefined;
+
 	$: ({
 		id: dappId,
 		carousel: { text, callToAction },
@@ -23,8 +24,11 @@
 		name: dAppName
 	} = dappsCarouselSlide);
 
-	const open = async () => {
-		await trackEvent({
+	const rewardModalId = Symbol();
+	const dappModalId = Symbol();
+
+	const open = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_OPEN,
 			metadata: {
 				dappId
@@ -32,16 +36,16 @@
 		});
 
 		if (nonNullish(airdrop)) {
-			modalStore.openRewardDetails(airdrop);
+			modalStore.openRewardDetails({ id: rewardModalId, data: airdrop });
 		} else {
-			modalStore.openDappDetails(dappsCarouselSlide);
+			modalStore.openDappDetails({ id: dappModalId, data: dappsCarouselSlide });
 		}
 	};
 
 	const dispatch = createEventDispatcher();
 
-	const close = async () => {
-		await trackEvent({
+	const close = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_CLOSE,
 			metadata: {
 				dappId

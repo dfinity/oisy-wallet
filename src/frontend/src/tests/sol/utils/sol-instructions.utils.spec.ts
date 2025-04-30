@@ -1,4 +1,5 @@
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -11,7 +12,7 @@ import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
-import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/web3.js';
+import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers', () => ({
@@ -31,7 +32,6 @@ describe('sol-instructions.utils', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.resetAllMocks();
 	});
 
 	describe('mapSolParsedInstruction', () => {
@@ -61,12 +61,11 @@ describe('sol-instructions.utils', () => {
 				instruction,
 				network
 			});
+
 			expect(result).toBeUndefined();
 		});
 
 		it('should log a warning if the program address is unrecognized', async () => {
-			const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
 			const instruction: SolRpcInstruction = {
 				...mockInstruction,
 				programId: address(mockSolAddress),
@@ -79,7 +78,7 @@ describe('sol-instructions.utils', () => {
 			});
 
 			expect(result).toBeUndefined();
-			expect(consoleWarnSpy).toHaveBeenCalledWith(
+			expect(console.warn).toHaveBeenCalledWith(
 				`Could not map Solana instruction of type ${instruction.parsed.type} for program ${instruction.programAddress}`,
 				instruction
 			);
@@ -308,7 +307,7 @@ describe('sol-instructions.utils', () => {
 						network
 					})
 				).resolves.toEqual({
-					value: 0n,
+					value: ZERO,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
@@ -332,7 +331,7 @@ describe('sol-instructions.utils', () => {
 						cumulativeBalances: { [mockSolAddress2]: 100n }
 					})
 				).resolves.toEqual({
-					value: 0n,
+					value: ZERO,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
@@ -586,6 +585,158 @@ describe('sol-instructions.utils', () => {
 					value: 50n,
 					from: mockSolAddress,
 					to: mockSolAddress2,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
+			it('should map a valid `closeAccount` instruction', async () => {
+				const mockCloseAccountInstruction: SolRpcInstruction = {
+					...mockTokenInstruction,
+					parsed: {
+						type: 'closeAccount',
+						info: {
+							destination: mockSolAddress2,
+							account: mockSolAddress
+						}
+					}
+				};
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network
+					})
+				).resolves.toEqual({
+					value: ZERO,
+					from: mockSolAddress,
+					to: mockSolAddress2
+				});
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network,
+						cumulativeBalances: { [mockSolAddress]: 100n }
+					})
+				).resolves.toEqual({
+					value: 100n,
+					from: mockSolAddress,
+					to: mockSolAddress2
+				});
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network,
+						cumulativeBalances: { [mockSolAddress2]: 100n }
+					})
+				).resolves.toEqual({
+					value: ZERO,
+					from: mockSolAddress,
+					to: mockSolAddress2
+				});
+			});
+
+			it('should map a valid `mintTo` instruction', async () => {
+				const mockMintToInstruction: SolRpcInstruction = {
+					...mockTokenInstruction,
+					parsed: {
+						type: 'mintTo',
+						info: {
+							account: mockSolAddress,
+							mint: mockTokenAddress,
+							amount: '12345'
+						}
+					}
+				};
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockMintToInstruction,
+						network
+					})
+				).resolves.toEqual({
+					value: 12345n,
+					from: mockTokenAddress,
+					to: mockSolAddress,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
+			it('should map a valid `burn` instruction', async () => {
+				const mockBurnInstruction: SolRpcInstruction = {
+					...mockTokenInstruction,
+					parsed: {
+						type: 'burn',
+						info: {
+							account: mockSolAddress,
+							mint: mockTokenAddress,
+							amount: '12345'
+						}
+					}
+				};
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockBurnInstruction,
+						network
+					})
+				).resolves.toEqual({
+					value: 12345n,
+					from: mockSolAddress,
+					to: mockTokenAddress,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
+			it('should map a valid `mintToChecked` instruction', async () => {
+				const mockMintToCheckedInstruction: SolRpcInstruction = {
+					...mockTokenInstruction,
+					parsed: {
+						type: 'mintToChecked',
+						info: {
+							account: mockSolAddress,
+							mint: mockTokenAddress,
+							tokenAmount: { amount: '12345' }
+						}
+					}
+				};
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockMintToCheckedInstruction,
+						network
+					})
+				).resolves.toEqual({
+					value: 12345n,
+					from: mockTokenAddress,
+					to: mockSolAddress,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
+			it('should map a valid `burnChecked` instruction', async () => {
+				const mockBurnCheckedInstruction: SolRpcInstruction = {
+					...mockTokenInstruction,
+					parsed: {
+						type: 'burnChecked',
+						info: {
+							account: mockSolAddress,
+							mint: mockTokenAddress,
+							tokenAmount: { amount: '12345' }
+						}
+					}
+				};
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockBurnCheckedInstruction,
+						network
+					})
+				).resolves.toEqual({
+					value: 12345n,
+					from: mockSolAddress,
+					to: mockTokenAddress,
 					tokenAddress: mockTokenAddress
 				});
 			});

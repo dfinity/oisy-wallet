@@ -35,7 +35,7 @@ describe('manage-tokens.services', () => {
 		};
 
 		beforeEach(() => {
-			vi.resetAllMocks();
+			vi.clearAllMocks();
 
 			vi.spyOn(toastsStore, 'toastsError');
 		});
@@ -70,6 +70,7 @@ describe('manage-tokens.services', () => {
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsAddToken.DONE);
 
 			await new Promise((resolve) => setTimeout(resolve, 750));
+
 			expect(mockOnSuccess).toHaveBeenCalledOnce();
 		});
 

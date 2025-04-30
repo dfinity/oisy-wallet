@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -50,11 +49,9 @@
 	<ContentWithToolbar>
 		<Value ref="id" element="div">
 			<svelte:fragment slot="label">{$i18n.transaction.text.id}</svelte:fragment>
-			<output>{id}</output><Copy
-				value={`${id}`}
-				text={$i18n.transaction.text.id_copied}
-				inline
-			/>{#if nonNullish(txExplorerUrl)}
+			<output>{id}</output>
+			<Copy value={`${id}`} text={$i18n.transaction.text.id_copied} inline />
+			{#if nonNullish(txExplorerUrl)}
 				<ExternalLink
 					iconSize="18"
 					href={txExplorerUrl}
@@ -90,11 +87,9 @@
 
 				{#if nonNullish(from)}
 					<p>
-						<output>{from}</output><Copy
-							value={from}
-							text={$i18n.transaction.text.from_copied}
-							inline
-						/>{#if nonNullish(fromExplorerUrl)}
+						<output>{from}</output>
+						<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
+						{#if nonNullish(fromExplorerUrl)}
 							<ExternalLink
 								iconSize="18"
 								href={fromExplorerUrl}
@@ -120,11 +115,9 @@
 
 				{#if nonNullish(to)}
 					<p>
-						<output>{to}</output><Copy
-							value={to}
-							text={$i18n.transaction.text.to_copied}
-							inline
-						/>{#if nonNullish(toExplorerUrl)}
+						<output>{to}</output>
+						<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
+						{#if nonNullish(toExplorerUrl)}
 							<ExternalLink
 								iconSize="18"
 								href={toExplorerUrl}
@@ -144,7 +137,7 @@
 				{#if nonNullish(token)}
 					<output>
 						{formatToken({
-							value: BigNumber.from(value),
+							value,
 							unitName: token.decimals,
 							displayDecimals: token.decimals
 						})}

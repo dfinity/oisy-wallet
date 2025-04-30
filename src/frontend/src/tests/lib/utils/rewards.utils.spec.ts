@@ -10,9 +10,8 @@ import {
 	loadRewardResult
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { BigNumber } from '@ethersproject/bignumber';
 
-describe('rewards utils', () => {
+describe('rewards.utils', () => {
 	describe('loadRewardResult', () => {
 		beforeEach(() => {
 			sessionStorage.clear();
@@ -21,9 +20,10 @@ describe('rewards utils', () => {
 		const lastTimestamp = BigInt(Date.now());
 		const mockedReward: RewardInfo = {
 			timestamp: lastTimestamp,
-			amount: BigInt(1000000),
+			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
-			name: ['airdrop']
+			name: ['airdrop'],
+			campaign_name: []
 		};
 
 		it('should return falsy reward result if result was already loaded', async () => {
@@ -31,15 +31,18 @@ describe('rewards utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 
-			const { receivedReward, receivedJackpot } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(false);
-			expect(receivedJackpot).toBe(false);
+			expect(receivedReward).toBeFalsy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeFalsy();
 		});
 
 		it('should return falsy reward result and set entry in the session storage', async () => {
 			const mockedUserData: UserData = {
 				is_vip: [false],
+				superpowers: [],
 				airdrops: [],
 				usage_awards: [],
 				last_snapshot_timestamp: [lastTimestamp],
@@ -49,10 +52,12 @@ describe('rewards utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(false);
-			expect(receivedJackpot).toBe(false);
+			expect(receivedReward).toBeFalsy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeFalsy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -60,6 +65,7 @@ describe('rewards utils', () => {
 		it('should return isReward as true and set entry in the session storage', async () => {
 			const mockedUserData: UserData = {
 				is_vip: [false],
+				superpowers: [],
 				airdrops: [],
 				usage_awards: [[mockedReward]],
 				last_snapshot_timestamp: [lastTimestamp],
@@ -69,10 +75,12 @@ describe('rewards utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(true);
-			expect(receivedJackpot).toBe(false);
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeFalsy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -81,6 +89,7 @@ describe('rewards utils', () => {
 			const customMockedReward: RewardInfo = { ...mockedReward, name: ['jackpot'] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
+				superpowers: [],
 				airdrops: [],
 				usage_awards: [[customMockedReward]],
 				last_snapshot_timestamp: [lastTimestamp],
@@ -90,10 +99,12 @@ describe('rewards utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(true);
-			expect(receivedJackpot).toBe(true);
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeTruthy();
+			expect(receivedReferral).toBeFalsy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -102,6 +113,7 @@ describe('rewards utils', () => {
 			const customMockedReward: RewardInfo = { ...mockedReward, name: ['jackpot'] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
+				superpowers: [],
 				airdrops: [],
 				usage_awards: [[mockedReward, customMockedReward]],
 				last_snapshot_timestamp: [lastTimestamp],
@@ -111,10 +123,36 @@ describe('rewards utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot } = await loadRewardResult(mockIdentity);
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(true);
-			expect(receivedJackpot).toBe(true);
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeTruthy();
+			expect(receivedReferral).toBeFalsy();
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return isReferral as true and set entry in the session storage', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: ['referral'] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[customMockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { receivedReward, receivedJackpot, receivedReferral } =
+				await loadRewardResult(mockIdentity);
+
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeTruthy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -127,7 +165,7 @@ describe('rewards utils', () => {
 
 			const result = isOngoingCampaign({ startDate, endDate });
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 		});
 
 		it('should return false if the current date is before the start date of the campaign', () => {
@@ -135,7 +173,7 @@ describe('rewards utils', () => {
 
 			const result = isOngoingCampaign({ startDate, endDate: new Date() });
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 		});
 
 		it('should return false if the current date is after the end date of the campaign', () => {
@@ -143,7 +181,7 @@ describe('rewards utils', () => {
 
 			const result = isOngoingCampaign({ startDate, endDate: new Date() });
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 		});
 	});
 
@@ -153,7 +191,7 @@ describe('rewards utils', () => {
 
 			const result = isUpcomingCampaign(startDate);
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 		});
 
 		it('should return false if the current date is after the start date of the campaign', () => {
@@ -161,7 +199,7 @@ describe('rewards utils', () => {
 
 			const result = isUpcomingCampaign(startDate);
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 		});
 	});
 
@@ -169,22 +207,23 @@ describe('rewards utils', () => {
 		const lastTimestamp = BigInt(Date.now());
 
 		const mockedReward: RewardResponseInfo = {
-			amount: BigInt(100),
+			amount: 100n,
 			timestamp: lastTimestamp,
 			name: 'airdrop',
+			campaignName: 'exodus',
 			ledger: mockIdentity.getPrincipal()
 		};
 
 		it('should return the correct rewards balance of multiple rewards', () => {
 			const mockedRewards: RewardResponseInfo[] = [
 				mockedReward,
-				{ ...mockedReward, amount: BigInt(200) },
-				{ ...mockedReward, amount: BigInt(300) }
+				{ ...mockedReward, amount: 200n },
+				{ ...mockedReward, amount: 300n }
 			];
 
 			const result = getRewardsBalance(mockedRewards);
 
-			expect(result).toEqual(BigNumber.from(600));
+			expect(result).toEqual(600n);
 		});
 
 		it('should return the correct rewards balance of a single airdrop', () => {
@@ -192,7 +231,7 @@ describe('rewards utils', () => {
 
 			const result = getRewardsBalance(mockedRewards);
 
-			expect(result).toEqual(BigNumber.from(100));
+			expect(result).toEqual(100n);
 		});
 
 		it('should return zero for an empty list of rewards', () => {

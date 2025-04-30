@@ -1,7 +1,8 @@
+use std::sync::LazyLock;
+
 use candid::Principal;
-use lazy_static::lazy_static;
 use shared::types::{
-    custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
+    custom_token::{CustomToken, IcrcToken, SplToken, SplTokenId, Token},
     TokenVersion,
 };
 
@@ -11,53 +12,49 @@ use crate::utils::{
     pocketic::{setup, PicCanisterTrait},
 };
 
-lazy_static! {
-    static ref ICRC_TOKEN: IcrcToken = IcrcToken {
-        ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai".to_string()).unwrap(),
-        index_id: Some(Principal::from_text("dnqcx-eyaaa-aaaaq-aacrq-cai".to_string()).unwrap()),
-    };
-    static ref USER_TOKEN: CustomToken = CustomToken {
-        token: Token::Icrc(ICRC_TOKEN.clone()),
-        enabled: true,
-        version: None,
-    };
-    static ref USER_TOKEN_ID: CustomTokenId = CustomTokenId::Icrc(ICRC_TOKEN.ledger_id.clone());
-    static ref ANOTHER_USER_TOKEN: CustomToken = CustomToken {
-        token: Token::Icrc(IcrcToken {
-            ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),
-            index_id: Some(
-                Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap()
-            ),
-        }),
-        enabled: true,
-        version: None,
-    };
-    static ref USER_TOKEN_NO_INDEX: CustomToken = CustomToken {
-        token: Token::Icrc(IcrcToken {
-            ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai".to_string()).unwrap(),
-            index_id: None,
-        }),
-        enabled: true,
-        version: None,
-    };
-    static ref SPL_TOKEN_ID: SplTokenId =
-        SplTokenId("AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM".to_string());
-    static ref SPL_TOKEN: CustomToken = CustomToken {
-        token: Token::SplMainnet(SplToken {
-            token_address: SPL_TOKEN_ID.clone(),
-            symbol: Some("BOOONDOGGLE".to_string()),
-            decimals: Some(u8::MAX),
-        }),
-        enabled: true,
-        version: None,
-    };
-    static ref CUSTOM_SPL_TOKEN_ID: CustomTokenId = CustomTokenId::SolMainnet(SPL_TOKEN_ID.clone());
-    static ref LOTS_OF_CUSTOM_TOKENS: Vec<CustomToken> = vec![
+static ICRC_TOKEN: LazyLock<IcrcToken> = LazyLock::new(|| IcrcToken {
+    ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai").unwrap(),
+    index_id: Some(Principal::from_text("dnqcx-eyaaa-aaaaq-aacrq-cai").unwrap()),
+});
+static USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Icrc(ICRC_TOKEN.clone()),
+    enabled: true,
+    version: None,
+});
+static ANOTHER_USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Icrc(IcrcToken {
+        ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai").unwrap(),
+        index_id: Some(Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai").unwrap()),
+    }),
+    enabled: true,
+    version: None,
+});
+static USER_TOKEN_NO_INDEX: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Icrc(IcrcToken {
+        ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai").unwrap(),
+        index_id: None,
+    }),
+    enabled: true,
+    version: None,
+});
+static SPL_TOKEN_ID: LazyLock<SplTokenId> =
+    LazyLock::new(|| SplTokenId("AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM".to_string()));
+static SPL_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::SplMainnet(SplToken {
+        token_address: SPL_TOKEN_ID.clone(),
+        symbol: Some("BOOONDOGGLE".to_string()),
+        decimals: Some(u8::MAX),
+    }),
+    enabled: true,
+    version: None,
+});
+static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
+    vec![
         USER_TOKEN.clone(),
         ANOTHER_USER_TOKEN.clone(),
         SPL_TOKEN.clone(),
-    ];
-}
+    ]
+});
 
 #[test]
 fn test_add_custom_tokens() {
@@ -81,7 +78,7 @@ fn test_add_custom_token(user_token: &CustomToken) {
 
     let after_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
-    let expected_tokens: Vec<CustomToken> = vec![user_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<CustomToken> = vec![user_token.with_incremented_version()];
     assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
 
@@ -106,7 +103,7 @@ fn test_update_custom_token(user_token: &CustomToken) {
 
     let results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
-    let expected_tokens: Vec<CustomToken> = vec![user_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<CustomToken> = vec![user_token.with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -115,7 +112,7 @@ fn test_update_custom_token(user_token: &CustomToken) {
     let update_token: CustomToken = CustomToken {
         enabled: false,
         token: user_token.token.clone(),
-        version: results.unwrap().get(0).unwrap().version,
+        version: results.unwrap().first().unwrap().version,
     };
 
     let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
@@ -124,8 +121,7 @@ fn test_update_custom_token(user_token: &CustomToken) {
 
     let updated_results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
-    let expected_updated_tokens: Vec<CustomToken> =
-        vec![update_token.clone_with_incremented_version()];
+    let expected_updated_tokens: Vec<CustomToken> = vec![update_token.with_incremented_version()];
 
     assert!(updated_results.is_ok());
 
@@ -163,8 +159,8 @@ fn test_add_many_custom_tokens(user_token: &CustomToken) {
     let after_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![
-        user_token.clone_with_incremented_version(),
-        ANOTHER_USER_TOKEN.clone_with_incremented_version(),
+        user_token.with_incremented_version(),
+        ANOTHER_USER_TOKEN.with_incremented_version(),
     ];
     assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
@@ -195,8 +191,8 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
     assert!(results.is_ok());
 
     let expected_tokens: Vec<CustomToken> = vec![
-        user_token.clone_with_incremented_version(),
-        ANOTHER_USER_TOKEN.clone_with_incremented_version(),
+        user_token.with_incremented_version(),
+        ANOTHER_USER_TOKEN.with_incremented_version(),
     ];
 
     assert_custom_tokens_eq(results.clone().unwrap(), expected_tokens);
@@ -204,7 +200,7 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
     let update_token: CustomToken = CustomToken {
         enabled: false,
         token: user_token.token.clone(),
-        version: results.clone().unwrap().get(0).unwrap().version,
+        version: results.clone().unwrap().first().unwrap().version,
     };
 
     let update_another_token: CustomToken = CustomToken {
@@ -225,8 +221,8 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
     assert!(updated_results.is_ok());
 
     let expected_update_tokens: Vec<CustomToken> = vec![
-        update_token.clone_with_incremented_version(),
-        update_another_token.clone_with_incremented_version(),
+        update_token.with_incremented_version(),
+        update_another_token.with_incremented_version(),
     ];
 
     let updated_tokens = updated_results.unwrap();
@@ -247,8 +243,8 @@ fn test_list_custom_tokens() {
     let results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![
-        USER_TOKEN.clone_with_incremented_version(),
-        ANOTHER_USER_TOKEN.clone_with_incremented_version(),
+        USER_TOKEN.with_incremented_version(),
+        ANOTHER_USER_TOKEN.with_incremented_version(),
     ];
 
     assert!(results.is_ok());

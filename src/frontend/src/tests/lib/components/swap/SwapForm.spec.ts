@@ -23,8 +23,9 @@ describe('SwapForm', () => {
 		swapAmounts: {
 			slippage: 0,
 			receiveAmount: 2000000n,
-			liquidityProvidersFee: undefined,
-			gasFee: undefined
+			route: [],
+			liquidityFees: [],
+			networkFee: undefined
 		}
 	};
 
@@ -150,12 +151,14 @@ describe('SwapForm', () => {
 				const button = buttons[buttonIndex];
 
 				await fireEvent.click(button);
+
 				expect(sourceTokenExchangeValue).toHaveTextContent(`1 ${mockValidIcToken.symbol}`);
 				expect(destinationTokenExchangeValue).toHaveTextContent(`2 ${mockValidIcCkToken.symbol}`);
 				expect(sourceInput).toHaveValue('1');
 				expect(destinationInput).toHaveValue('0.02');
 
 				await fireEvent.click(button);
+
 				expect(sourceTokenExchangeValue).toHaveTextContent('$10.00');
 				expect(destinationTokenExchangeValue).toHaveTextContent('$0.04');
 				expect(sourceInput).toHaveValue('1');

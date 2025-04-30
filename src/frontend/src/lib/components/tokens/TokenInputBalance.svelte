@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import type { Balance } from '$lib/types/balance';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	export let token: Token;
-	export let balance: BigNumber | undefined = undefined;
+	export let balance: Balance | undefined = undefined;
 	export let testId: string | undefined = undefined;
 </script>
 

@@ -1,14 +1,25 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import HideTokenModal from '$eth/components/tokens/HideTokenModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
+	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
-	import AirdropModalDetails from '$lib/components/rewards/RewardModalDetails.svelte';
+	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
+	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
+	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
+	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalDAppDetails,
 		modalHideToken,
 		modalIcHideToken,
-		modalRewardDetails
+		modalVipQrCode,
+		modalRewardDetails,
+		modalSettingsState,
+		modalReferralCode,
+		modalAddressBook,
+		modalVipQrCodeData,
+		modalRewardDetailsData
 	} from '$lib/derived/modal.derived';
 
 	/**
@@ -23,7 +34,15 @@
 		<IcHideTokenModal />
 	{:else if $modalDAppDetails}
 		<DappModalDetails />
-	{:else if $modalRewardDetails}
-		<AirdropModalDetails />
+	{:else if $modalRewardDetails && nonNullish($modalRewardDetailsData)}
+		<RewardModal reward={$modalRewardDetailsData} />
+	{:else if $modalVipQrCode && nonNullish($modalVipQrCodeData)}
+		<VipQrCodeModal codeType={$modalVipQrCodeData} />
+	{:else if $modalSettingsState}
+		<SettingsModal />
+	{:else if $modalReferralCode}
+		<ReferralCodeModal />
+	{:else if $modalAddressBook}
+		<AddressBookModal />
 	{/if}
 {/if}

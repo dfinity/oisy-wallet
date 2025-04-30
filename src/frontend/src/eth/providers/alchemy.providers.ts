@@ -1,17 +1,36 @@
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
-import { ALCHEMY_NETWORK_MAINNET, ALCHEMY_NETWORK_SEPOLIA } from '$env/networks/networks.eth.env';
+import {
+	BASE_NETWORK_ID,
+	BASE_SEPOLIA_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_MAINNET_NETWORK_ID,
+	BSC_TESTNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
+	ALCHEMY_NETWORK_BASE_MAINNET,
+	ALCHEMY_NETWORK_BASE_SEPOLIA,
+	ALCHEMY_NETWORK_BSC_MAINNET,
+	ALCHEMY_NETWORK_BSC_TESTNET,
+	ALCHEMY_NETWORK_MAINNET,
+	ALCHEMY_NETWORK_SEPOLIA,
+	ETHEREUM_NETWORK_ID,
+	SEPOLIA_NETWORK_ID
+} from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
+import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
-import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
+import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 
-const configs: Record<NetworkId, AlchemySettings> = {
+type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
+
+const configs: Record<NetworkId, AlchemyConfig> = {
 	[ETHEREUM_NETWORK_ID]: {
 		apiKey: ALCHEMY_API_KEY,
 		network: ALCHEMY_NETWORK_MAINNET
@@ -19,10 +38,26 @@ const configs: Record<NetworkId, AlchemySettings> = {
 	[SEPOLIA_NETWORK_ID]: {
 		apiKey: ALCHEMY_API_KEY,
 		network: ALCHEMY_NETWORK_SEPOLIA
+	},
+	[BASE_NETWORK_ID]: {
+		apiKey: ALCHEMY_API_KEY,
+		network: ALCHEMY_NETWORK_BASE_MAINNET
+	},
+	[BASE_SEPOLIA_NETWORK_ID]: {
+		apiKey: ALCHEMY_API_KEY,
+		network: ALCHEMY_NETWORK_BASE_SEPOLIA
+	},
+	[BSC_MAINNET_NETWORK_ID]: {
+		apiKey: ALCHEMY_API_KEY,
+		network: ALCHEMY_NETWORK_BSC_MAINNET
+	},
+	[BSC_TESTNET_NETWORK_ID]: {
+		apiKey: ALCHEMY_API_KEY,
+		network: ALCHEMY_NETWORK_BSC_TESTNET
 	}
 };
 
-const alchemyConfig = (networkId: NetworkId): AlchemySettings => {
+const alchemyConfig = (networkId: NetworkId): AlchemyConfig => {
 	const provider = configs[networkId];
 
 	assertNonNullish(
@@ -80,7 +115,7 @@ export const initPendingTransactionsListener = ({
 	provider.ws.on(
 		{
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
-			toAddress: toAddress,
+			toAddress,
 			hashesOnly
 		},
 		listener
@@ -106,13 +141,32 @@ export class AlchemyProvider {
 		});
 	}
 
-	getTransaction = (hash: string): Promise<TransactionResponse | null> =>
-		this.provider.core.getTransaction(hash);
+	getTransaction = async (hash: string): Promise<TransactionResponseWithBigInt | null> => {
+		const transaction = await this.provider.core.getTransaction(hash);
+
+		if (isNullish(transaction)) {
+			return transaction;
+		}
+
+		const { value, gasLimit, gasPrice, chainId, ...rest } = transaction;
+
+		return {
+			...rest,
+			value: value.toBigInt(),
+			gasLimit: gasLimit.toBigInt(),
+			gasPrice: gasPrice?.toBigInt(),
+			chainId: BigInt(chainId)
+		};
+	};
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = {
 	[ETHEREUM_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_MAINNET),
-	[SEPOLIA_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_SEPOLIA)
+	[SEPOLIA_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_SEPOLIA),
+	[BASE_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BASE_MAINNET),
+	[BASE_SEPOLIA_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BASE_SEPOLIA),
+	[BSC_MAINNET_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BSC_MAINNET),
+	[BSC_TESTNET_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BSC_TESTNET)
 };
 
 export const alchemyProviders = (networkId: NetworkId): AlchemyProvider => {

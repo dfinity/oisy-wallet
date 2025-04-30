@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import { isNotIcToken, isNotIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
@@ -10,9 +11,14 @@
 	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
 
-	export let token: Token;
+	interface Props {
+		token: Token;
+		children: Snippet;
+	}
 
-	let disableInfiniteScroll = false;
+	let { token, children }: Props = $props();
+
+	let disableInfiniteScroll = $state(false);
 
 	const onIntersect = async () => {
 		if (isNullish($authIdentity)) {
@@ -27,7 +33,9 @@
 			return;
 		}
 
-		if (typeof lastId !== 'bigint') {
+		try {
+			BigInt(lastId.replace('-self', ''));
+		} catch {
 			// Pseudo transactions are displayed at the end of the list. There is not such use case in Oisy.
 			// Additionally, if it would be the case, that would mean that we display pseudo transactions at the end of the list and therefore we could assume all valid transactions have been fetched
 			return;
@@ -48,7 +56,7 @@
 			owner: $authIdentity.getPrincipal(),
 			identity: $authIdentity,
 			maxResults: WALLET_PAGINATION,
-			start: lastId,
+			start: BigInt(lastId.replace('-self', '')),
 			token,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
@@ -56,5 +64,5 @@
 </script>
 
 <InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
-	<slot />
+	{@render children()}
 </InfiniteScroll>

@@ -1,29 +1,42 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import AirdropStateModal from '$lib/components/rewards/RewardStateModal.svelte';
+	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
+	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalRewardState } from '$lib/derived/modal.derived';
+	import {
+		modalReferralState,
+		modalRewardState,
+		modalRewardStateData
+	} from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { loadRewardResult } from '$lib/utils/rewards.utils';
 
-	let isJackpot: boolean | undefined;
-	$: isJackpot = $modalRewardState ? ($modalStore?.data as boolean | undefined) : undefined;
+	const modalId = Symbol();
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
 			return;
 		}
 
-		const { receivedReward, receivedJackpot } = await loadRewardResult($authIdentity);
+		const { receivedReward, receivedJackpot, receivedReferral } =
+			await loadRewardResult($authIdentity);
 		if (receivedReward) {
-			modalStore.openRewardState(receivedJackpot);
+			if (receivedJackpot) {
+				modalStore.openRewardState({ id: modalId, data: receivedJackpot });
+			} else if (receivedReferral) {
+				modalStore.openReferralState();
+			} else {
+				modalStore.openRewardState({ id: modalId, data: false });
+			}
 		}
 	});
 </script>
 
 <slot />
 
-{#if $modalRewardState && nonNullish(isJackpot)}
-	<AirdropStateModal jackpot={isJackpot} />
+{#if $modalRewardState && nonNullish($modalRewardStateData)}
+	<RewardStateModal jackpot={$modalRewardStateData} />
+{:else if $modalReferralState}
+	<ReferralStateModal />
 {/if}

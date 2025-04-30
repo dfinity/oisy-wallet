@@ -42,6 +42,7 @@
 	--focus-border-color: var(---color-border-brand-primary);
 	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
+	--input-width: 100%;
 	--animation-time-short: 0.2s;
 
 	// General GIX
@@ -122,6 +123,10 @@ div.input-field input[id] {
 	padding: var(--padding-1_5x);
 }
 
+.input-field.condensed input {
+	padding-block: var(--padding-1_5x) !important;
+}
+
 div.input-field input[id]::placeholder {
 	color: var(--color-foreground-tertiary) !important;
 }
@@ -187,10 +192,14 @@ div.modal {
 
 		& > div.container {
 			border-radius: 0;
+			max-width: 100% !important;
 		}
 	}
 
 	div.container {
+		// hack for fixing blurry text/content on Mac OS when modal content scroll bar is showing
+		border-radius: 0 !important;
+
 		// If using ContentWithToolbar, we need to set some padding manually
 		& > div.content div.stretch {
 			--dialog-padding-x: 12px;
@@ -236,29 +245,31 @@ div.popover {
 	--background-contrast: var(--overlay-background-contrast);
 
 	.wrapper {
-		padding: var(--padding-0_75x);
-		--padding: var(--padding-0_75x);
+		padding: var(--padding-0_5x);
+		--padding: var(--padding-0_5x);
 
 		--border-radius: 16px;
 
 		max-width: calc(100vw - (2 * var(--padding)));
-
-		@media (width >= theme(--breakpoint-sm)) {
-			max-width: 300px !important;
-		}
 	}
 }
 
 div.toggle {
-	zoom: 1.45;
+	scale: 1.45;
+	transform-origin: 50%;
+	margin-inline: var(--padding);
 
-	--card-background-contrast: var(--color-background-brand-subtle-20);
+	--card-background-contrast: var(--color-background-disabled-alt);
 	--card-background: var(--color-base-white);
+
+	&:hover {
+		--card-background-contrast: var(--color-background-disabled-alt2);
+	}
 
 	&:disabled,
 	&.disabled {
-		--card-background: var(--color-background-primary-alt);
-		--card-background-contrast: var(--color-background-disabled-alt);
+		--card-background: var(--color-background-disabled);
+		--card-background-contrast: var(--color-background-disabled);
 	}
 
 	&:has(input[type='checkbox']:checked) {
@@ -277,6 +288,16 @@ div.toggle {
 			--card-background: var(--color-background-primary-alt);
 			--card-background-contrast: var(--color-background-brand-subtle-20);
 		}
+	}
+
+	@media (width < theme(--breakpoint-lg)) {
+		scale: 1.6;
+		margin-inline: var(--padding);
+	}
+
+	@media (width < theme(--breakpoint-sm)) {
+		scale: 1.8;
+		margin-inline: var(--padding-2x);
 	}
 }
 

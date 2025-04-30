@@ -1,16 +1,25 @@
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.env';
-import { ETH_MAINNET_ENABLED } from '$env/networks/networks.eth.env';
+import {
+	ETH_MAINNET_ENABLED,
+	ETHEREUM_NETWORK,
+	SEPOLIA_NETWORK
+} from '$env/networks/networks.eth.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import { testnets } from '$lib/derived/testnets.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
+import { userNetworks } from '$lib/derived/user-networks.derived';
 import type { NetworkId } from '$lib/types/network';
+import { defineEnabledNetworks } from '$lib/utils/networks.utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const enabledEthereumNetworks: Readable<EthereumNetwork[]> = derived(
-	[testnets],
-	([$testnets]) => [
-		...(ETH_MAINNET_ENABLED ? [ETHEREUM_NETWORK] : []),
-		...($testnets ? [SEPOLIA_NETWORK] : [])
-	]
+	[testnetsEnabled, userNetworks],
+	([$testnetsEnabled, $userNetworks]) =>
+		defineEnabledNetworks({
+			$testnetsEnabled,
+			$userNetworks,
+			mainnetFlag: ETH_MAINNET_ENABLED,
+			mainnetNetworks: [ETHEREUM_NETWORK],
+			testnetNetworks: [SEPOLIA_NETWORK]
+		})
 );
 
 export const enabledEthereumNetworksIds: Readable<NetworkId[]> = derived(

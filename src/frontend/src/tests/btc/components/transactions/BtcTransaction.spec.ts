@@ -8,7 +8,7 @@ describe('BtcTransaction', () => {
 		id: 'test',
 		type: 'send',
 		status: 'confirmed',
-		value: BigInt(40827),
+		value: 40827n,
 		confirmations: 88822,
 		from: '0xD379F3d4578DE7aC47a5928811B3407Ef03F7C49'
 	};

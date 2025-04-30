@@ -8,6 +8,9 @@
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import { btcStatusesStore } from '$icp/stores/btc.store';
+	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -39,10 +42,13 @@
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress: $ethAddress,
-		$icTransactions: $icTransactionsStore,
+		$ethAddress,
 		$btcStatuses: $btcStatusesStore,
-		$solTransactions: $solTransactionsStore
+		$solTransactions: $solTransactionsStore,
+		$icTransactionsStore,
+		$ckBtcMinterInfoStore,
+		$icPendingTransactionsStore,
+		$ckBtcPendingUtxosStore
 	});
 
 	let sortedTransactions: AllTransactionUiWithCmp[];
@@ -60,7 +66,7 @@
 	$: ({ transaction: selectedBtcTransaction, token: selectedBtcToken } =
 		mapTransactionModalData<BtcTransactionUi>({
 			$modalOpen: $modalBtcTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 
 	let selectedEthTransaction: EthTransactionUi | undefined;
@@ -68,7 +74,7 @@
 	$: ({ transaction: selectedEthTransaction, token: selectedEthToken } =
 		mapTransactionModalData<EthTransactionUi>({
 			$modalOpen: $modalEthTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 
 	let selectedIcTransaction: IcTransactionUi | undefined;
@@ -76,7 +82,7 @@
 	$: ({ transaction: selectedIcTransaction, token: selectedIcToken } =
 		mapTransactionModalData<IcTransactionUi>({
 			$modalOpen: $modalIcTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 
 	let selectedSolTransaction: SolTransactionUi | undefined;
@@ -84,16 +90,16 @@
 	$: ({ transaction: selectedSolTransaction, token: selectedSolToken } =
 		mapTransactionModalData<SolTransactionUi>({
 			$modalOpen: $modalSolTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 </script>
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
   <AllTransactionsScroll>
-		{#each Object.entries(groupedTransactions) as [date, transactions], index (date)}
+		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 			<TransactionsDateGroup
-				{date}
+				{formattedDate}
 				{transactions}
 				testId={`all-transactions-date-group-${index}`}
 			/>

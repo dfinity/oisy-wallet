@@ -1,16 +1,23 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import { REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let reward: RewardDescription;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		onclick: () => void;
+		reward: RewardDescription;
+		testId?: string | undefined;
+	}
+
+	let { onclick, reward, testId = undefined }: Props = $props();
 </script>
 
 <button
-	on:click
+	{onclick}
 	class="relative w-full flex-1 rounded-lg bg-primary p-4 pt-12 shadow"
 	data-tid={testId}
 >
@@ -34,13 +41,15 @@
 			<p class="m-0 text-start text-lg font-semibold">{reward.cardTitle}</p>
 
 			<p class="m-0 mt-2 text-start text-xs text-tertiary">
-				{reward.oneLiner}
+				<Html text={reward.oneLiner} />
 			</p>
 		</section>
 		<section class="bottom-4 left-4 mt-3 flex">
-			<div class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
+			<div
+				data-tid={REWARDS_STATUS_BUTTON}
+				class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
 				>{$i18n.rewards.text.check_status}
-			</div></section
-		>
+			</div>
+		</section>
 	</article>
 </button>

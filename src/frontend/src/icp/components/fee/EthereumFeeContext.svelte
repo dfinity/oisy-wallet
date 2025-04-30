@@ -16,6 +16,7 @@
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
@@ -52,7 +53,7 @@
 	// See https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
 	let maxTransactionFeePlusLedgerApproveCkEth: bigint | undefined = undefined;
 	$: maxTransactionFeePlusLedgerApproveCkEth = nonNullish(maxTransactionFeeCkEth)
-		? maxTransactionFeeCkEth + (tokenCkEth?.fee ?? 0n)
+		? maxTransactionFeeCkEth + (tokenCkEth?.fee ?? ZERO)
 		: undefined;
 
 	let maxTransactionFee: bigint | undefined = undefined;

@@ -1,9 +1,11 @@
-import type { EnvIcToken, EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
-import { AnonymousIdentity, HttpAgent } from '@dfinity/agent';
+import type { EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import { AnonymousIdentity, type HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister, mapTokenMetadata } from '@dfinity/ledger-icrc';
 import type { IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc/dist/types/types/ledger.responses';
 import { Principal } from '@dfinity/principal';
-import { createAgent, isNullish } from '@dfinity/utils';
+import { createAgent } from '@dfinity/utils';
+import { closeSync, openSync, writeSync } from 'node:fs';
 
 export const agent: HttpAgent = await createAgent({
 	identity: new AnonymousIdentity(),
@@ -19,21 +21,30 @@ const getMetadata = async (ledgerCanisterId: Principal): Promise<IcrcTokenMetada
 	return await metadata({ certified: true });
 };
 
-export const loadMetadata = async <T extends EnvIcToken>(
-	token: T
-): Promise<(T & EnvIcrcTokenMetadataWithIcon) | undefined> => {
-	const { ledgerCanisterId } = token;
-
+export const loadMetadata = async (
+	ledgerCanisterId: LedgerCanisterIdText
+): Promise<EnvIcrcTokenMetadataWithIcon | undefined> => {
 	const metadata = await getMetadata(Principal.from(ledgerCanisterId));
 
-	const mappedMetadata = mapTokenMetadata(metadata);
+	return mapTokenMetadata(metadata);
+};
 
-	if (isNullish(mappedMetadata)) {
-		return;
+export const saveLogo = ({ logoData, file }: { logoData: string; file: string }) => {
+	const [encoding, encodedStr] = logoData.split(';')[1].split(',');
+
+	const svgContent = Buffer.from(encodedStr, encoding as BufferEncoding).toString('utf-8');
+
+	try {
+		const fd = openSync(file, 'wx');
+
+		writeSync(fd, svgContent, 0, 'utf-8');
+		closeSync(fd);
+	} catch (err: unknown) {
+		if (typeof err === 'object' && err !== null && 'code' in err && err.code === 'EEXIST') {
+			// File already exists, do nothing
+			return;
+		}
+
+		throw err;
 	}
-
-	return {
-		...token,
-		...mappedMetadata
-	};
 };

@@ -5,8 +5,8 @@ import { ZERO } from '$lib/constants/app.constants';
 import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { Balance } from '$lib/types/balance';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { derived, type Readable } from 'svelte/store';
 
 export interface SwappableTokens {
@@ -45,12 +45,12 @@ export const swappableTokens: Readable<SwappableTokens> = derived(
 			return { sourceToken: undefined, destinationToken: undefined };
 		}
 
-		const balance: BigNumber | undefined = $balancesStore?.[selectedToken.id]?.data;
+		const balance: Balance | undefined = $balancesStore?.[selectedToken.id]?.data;
 		if (isNullish(balance)) {
 			return { sourceToken: undefined, destinationToken: undefined };
 		}
 
-		if (balance.gt(ZERO)) {
+		if (balance > ZERO) {
 			return { sourceToken: selectedToken, destinationToken: undefined };
 		}
 		return { sourceToken: undefined, destinationToken: selectedToken };

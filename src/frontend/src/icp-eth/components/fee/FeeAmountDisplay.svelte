@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { debounce, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { slide } from 'svelte/transition';
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -12,7 +11,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let fee: BigNumber;
+	export let fee: bigint;
 	export let feeSymbol: string;
 	export let feeTokenId: TokenId;
 	export let feeDecimals: number;
@@ -24,7 +23,7 @@
 	let insufficientFeeFunds = false;
 
 	const debounceCheckFeeFunds = debounce(
-		() => (insufficientFeeFunds = nonNullish(balance) && balance.lt(fee))
+		() => (insufficientFeeFunds = nonNullish(balance) && balance < fee)
 	);
 
 	$: balance, fee, debounceCheckFeeFunds();

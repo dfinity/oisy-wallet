@@ -58,8 +58,10 @@
 		</svelte:fragment>
 	</ModalValue>
 
-	<SwapProvider />
-	<SwapFees />
+	<div class="flex flex-col gap-3">
+		<SwapProvider />
+		<SwapFees />
+	</div>
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
@@ -70,7 +72,7 @@
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={() => dispatch('icBack')} />
+		<ButtonBack onclick={() => dispatch('icBack')} />
 
 		<Button on:click={() => dispatch('icSwap')}>
 			{$i18n.swap.text.swap_button}

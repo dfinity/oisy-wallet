@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import type { RewardDescription } from '$env/types/env-reward';
@@ -6,19 +7,25 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let title: string;
-	export let rewards: RewardDescription[];
-	export let altText: string | undefined = undefined;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		title: string;
+		rewards: RewardDescription[];
+		altText?: string | undefined;
+		testId?: string | undefined;
+	}
+
+	let { title, rewards, altText = undefined, testId = undefined }: Props = $props();
+
+	const modalId = Symbol();
 </script>
 
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
 	<span class="text-lg font-bold first-letter:capitalize">{title}</span>
 
-	{#each rewards as reward}
+	{#each rewards as reward (reward.id)}
 		<div in:slide={SLIDE_DURATION} class="mt-4">
 			<RewardCard
-				on:click={() => modalStore.openRewardDetails(reward)}
+				onclick={() => modalStore.openRewardDetails({ id: modalId, data: reward })}
 				{reward}
 				testId={nonNullish(testId) ? `${testId}-${reward.id}` : undefined}
 			/>
@@ -26,6 +33,6 @@
 	{/each}
 
 	{#if nonNullish(altText) && rewards.length === 0}
-		<span class="text-misty-rose">{altText}</span>
+		<span><Html text={altText} /></span>
 	{/if}
 </div>

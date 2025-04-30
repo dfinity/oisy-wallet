@@ -1,26 +1,31 @@
 import {
+	ETHEREUM_NETWORK,
 	ETHEREUM_NETWORK_ID,
-	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.env';
-import { ETHERSCAN_API_URL_HOMESTEAD } from '$env/networks/networks.eth.env';
+} from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ETHERSCAN_REST_URL } from '$env/rest/etherscan.env';
 import { EtherscanRest, etherscanRests } from '$eth/rest/etherscan.rest';
+import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
-import { BigNumber } from 'ethers';
 import type { MockedFunction } from 'vitest';
 
 global.fetch = vi.fn();
 
-vi.mock('$env/rest/etherscan.env', () => ({
-	ETHERSCAN_API_KEY: 'test-api-key'
-}));
+vi.mock(import('$env/rest/etherscan.env'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		ETHERSCAN_API_KEY: 'test-api-key'
+	};
+});
 
 describe('etherscan.rest', () => {
 	describe('EtherscanRest', () => {
-		const API_URL = ETHERSCAN_API_URL_HOMESTEAD;
+		const chainId = ETHEREUM_NETWORK.chainId;
 
 		const mockApiResponse = {
 			status: '1',
@@ -42,6 +47,19 @@ describe('etherscan.rest', () => {
 			]
 		};
 
+		const expectedTransaction: Transaction = {
+			hash: '0x123abc',
+			blockNumber: 123456,
+			timestamp: 1697049600,
+			from: '0xabc...',
+			to: '0xdef...',
+			nonce: 1,
+			gasLimit: 21000n,
+			gasPrice: 20000000000n,
+			value: 1000000000000000000n,
+			chainId
+		};
+
 		const mockEtherscanErrorResponse = {
 			status: '0',
 			message: 'NOTOK',
@@ -56,7 +74,7 @@ describe('etherscan.rest', () => {
 
 			const mockFetch = fetch as MockedFunction<typeof fetch>;
 
-			const etherscanRest = new EtherscanRest(API_URL);
+			const etherscanRest = new EtherscanRest(chainId);
 
 			const result = await etherscanRest.transactions({
 				address: mockEthAddress,
@@ -67,25 +85,10 @@ describe('etherscan.rest', () => {
 
 			expect(fetch).toHaveBeenCalledOnce();
 			expect(urlString).toBe(
-				`${API_URL}?module=account&action=tokentx&contractaddress=${mockValidErc20Token.address}&address=${mockEthAddress}&startblock=0&endblock=99999999&sort=desc&apikey=test-api-key`
+				`${ETHERSCAN_REST_URL}?chainid=${chainId.toString()}&module=account&action=tokentx&contractaddress=${mockValidErc20Token.address}&address=${mockEthAddress}&startblock=0&endblock=99999999&sort=desc&apikey=test-api-key`
 			);
 
-			expect(result).toEqual([
-				{
-					hash: '0x123abc',
-					blockNumber: 123456,
-					blockHash: '0x456def',
-					timestamp: 1697049600,
-					confirmations: '10',
-					from: '0xabc...',
-					to: '0xdef...',
-					nonce: 1,
-					gasLimit: BigNumber.from('21000'),
-					gasPrice: BigNumber.from('20000000000'),
-					value: BigNumber.from('1000000000000000000'),
-					chainId: 0
-				}
-			]);
+			expect(result).toEqual([expectedTransaction]);
 		});
 
 		it('should throw an error if the API response status is not OK', async () => {
@@ -94,7 +97,7 @@ describe('etherscan.rest', () => {
 				json: () => mockEtherscanErrorResponse
 			} as unknown as Response);
 
-			const etherscanRest = new EtherscanRest(API_URL);
+			const etherscanRest = new EtherscanRest(chainId);
 
 			await expect(
 				etherscanRest.transactions({
@@ -109,7 +112,7 @@ describe('etherscan.rest', () => {
 				ok: false
 			} as unknown as Response);
 
-			const etherscanRest = new EtherscanRest(API_URL);
+			const etherscanRest = new EtherscanRest(chainId);
 
 			await expect(
 				etherscanRest.transactions({
@@ -130,7 +133,7 @@ describe('etherscan.rest', () => {
 		});
 
 		it('should throw an error for an unsupported network ID', () => {
-			expect(() => etherscanRests(ICP_NETWORK_ID)).toThrowError(
+			expect(() => etherscanRests(ICP_NETWORK_ID)).toThrow(
 				replacePlaceholders(en.init.error.no_etherscan_rest_api, {
 					$network: ICP_NETWORK_ID.toString()
 				})
