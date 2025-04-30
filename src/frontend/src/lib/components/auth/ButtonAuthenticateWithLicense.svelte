@@ -16,7 +16,7 @@
 
 	const modalId = Symbol();
 
-	const onClick = async () => {
+	const onclick = async () => {
 		const { success } = await signIn({});
 
 		if (success === 'cancelled' || success === 'error') {
@@ -29,7 +29,7 @@
 	class="flex w-full flex-col items-center md:items-start"
 	class:md:items-center={licenseAlignment === 'center'}
 >
-	<ButtonAuthenticate on:click={onClick} {fullWidth} />
+	<ButtonAuthenticate {onclick} {fullWidth} />
 
 	<span
 		class={`mt-4 flex flex-col text-sm text-tertiary ${licenseAlignment === 'center' ? 'text-center' : ''}`}
