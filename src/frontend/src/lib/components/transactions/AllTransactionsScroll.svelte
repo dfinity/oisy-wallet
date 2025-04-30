@@ -10,11 +10,17 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { TokenId } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		children?: Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	let disableInfiniteScroll: Record<TokenId, boolean> = {};
 
 	const onIntersect = async () => {
-		console.log('onIntersect');
 
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
@@ -56,13 +62,11 @@
 		);
 	};
 
-	let allDisabledInfiniteScroll = false;
-	$: disableInfiniteScroll,
-		(allDisabledInfiniteScroll = Object.getOwnPropertySymbols(disableInfiniteScroll).every(
-			(tokenId) => disableInfiniteScroll?.[tokenId as TokenId]
-		));
+	let allDisabledInfiniteScroll = $derived(Object.getOwnPropertySymbols(disableInfiniteScroll).every(
+		(tokenId) => disableInfiniteScroll?.[tokenId as TokenId]
+	))
 </script>
 
 <InfiniteScroll on:nnsIntersect={onIntersect} disabled={allDisabledInfiniteScroll}>
-	<slot />
+	{@render children?.()}
 </InfiniteScroll>
