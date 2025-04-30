@@ -3,10 +3,10 @@
 
 	interface Props {
 		children: Snippet;
-		testId?: string | undefined;
+		testId?: string;
 	}
 
-	let { children, testId = undefined }: Props = $props();
+	let { children, testId }: Props = $props();
 </script>
 
 <div class="mb-2 flex w-full gap-3" data-tid={testId}>
