@@ -30,6 +30,6 @@
 		styleClass="text-nowrap max-w-28 text-sm"
 		colorStyle={rewardState === RewardStates.ENDED ? 'primary' : 'tertiary'}
 	>
-		{replacePlaceholders($i18n.rewards.text.ended, { $amount: endedCampaignsAmount })}
+		{replacePlaceholders($i18n.rewards.text.ended, { $amount: endedCampaignsAmount.toString() })}
 	</Button>
 </div>
