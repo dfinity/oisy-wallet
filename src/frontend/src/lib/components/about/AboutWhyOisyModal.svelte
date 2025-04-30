@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import AboutFeatureItem from './AboutFeatureItem.svelte';
 	import CoverWhyOisy from '$lib/assets/cover-why-oisy.png';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
@@ -15,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import AboutFeatureItem from '$lib/components/about/AboutFeatureItem.svelte';
 
 	const features = [
 		{
