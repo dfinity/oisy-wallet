@@ -3,9 +3,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
-	import {REWARDS_BANNER, REWARDS_STATUS_BUTTON} from '$lib/constants/test-ids.constants';
+	import Img from '$lib/components/ui/Img.svelte';
+	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import Img from "$lib/components/ui/Img.svelte";
 
 	interface Props {
 		onclick: () => void;
@@ -16,18 +16,14 @@
 	let { onclick, reward, testId = undefined }: Props = $props();
 </script>
 
-<button
-	{onclick}
-	class="flex flex-col"
-	data-tid={testId}
->
+<button {onclick} class="flex flex-col" data-tid={testId}>
 	<div class="-mb-7">
 		<div class="max-h-66 overflow-hidden rounded-2xl">
 			<Img src={reward.logo} testId={REWARDS_BANNER} />
 		</div>
 	</div>
 
-	<div class="relative p-4 rounded-lg bg-primary">
+	<div class="relative rounded-lg bg-primary p-4">
 		<span class="absolute right-4 top-4">
 			<RewardDateBadge
 				date={reward.endDate}

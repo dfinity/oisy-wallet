@@ -19,10 +19,7 @@
 	);
 </script>
 
-<RewardsGroup
-	rewards={ongoingCampaigns}
-	testId={REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}
-/>
+<RewardsGroup rewards={ongoingCampaigns} testId={REWARDS_ACTIVE_CAMPAIGNS_CONTAINER} />
 
 <RewardsGroup
 	title={$i18n.rewards.text.upcoming_campaigns}
