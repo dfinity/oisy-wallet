@@ -70,7 +70,7 @@ export const exchangeRateERC20ToUsd = ({
 	simpleTokenPrice({
 		id,
 		vs_currencies: 'usd',
-		contract_addresses: contractAddresses.map(({ address }) => address.toLowerCase()),
+		contract_addresses: contractAddresses.map(({ address }) => address),
 		include_market_cap: true
 	});
 
@@ -103,7 +103,7 @@ export const exchangeRateSPLToUsd = (
 	simpleTokenPrice({
 		id: 'solana',
 		vs_currencies: 'usd',
-		contract_addresses: tokenAddresses.map((tokenAddresses) => tokenAddresses.toLowerCase()),
+		contract_addresses: tokenAddresses.map((tokenAddresses) => tokenAddresses),
 		include_market_cap: true
 	});
 
