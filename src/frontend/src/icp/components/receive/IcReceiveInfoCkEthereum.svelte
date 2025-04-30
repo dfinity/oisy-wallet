@@ -56,6 +56,6 @@
 			>
 		</Button>
 
-		<ButtonDone on:click={close} />
+		<ButtonDone onclick={close} />
 	</div>
 </ContentWithToolbar>

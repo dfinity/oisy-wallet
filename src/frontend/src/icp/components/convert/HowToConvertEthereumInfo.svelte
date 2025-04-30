@@ -163,7 +163,7 @@
 		{#if formCancelAction === 'back'}
 			<ButtonBack fullWidth on:click={() => dispatch('icBack')} />
 		{:else}
-			<ButtonDone on:click={modalStore.close} />
+			<ButtonDone onclick={modalStore.close} />
 		{/if}
 	</svelte:fragment>
 </ContentWithToolbar>
