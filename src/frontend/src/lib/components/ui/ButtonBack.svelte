@@ -9,9 +9,16 @@
 		testId?: string | undefined;
 	}
 
-	let {onclick, disabled = false, fullWidth = false, testId = undefined}: Props = $props();
+	let { onclick, disabled = false, fullWidth = false, testId = undefined }: Props = $props();
 </script>
 
-<Button colorStyle="secondary-light" type="button" {disabled} {fullWidth} {testId} on:click={onclick}>
+<Button
+	colorStyle="secondary-light"
+	type="button"
+	{disabled}
+	{fullWidth}
+	{testId}
+	on:click={onclick}
+>
 	{$i18n.core.text.back}
 </Button>
