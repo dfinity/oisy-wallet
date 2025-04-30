@@ -21,7 +21,7 @@ const fetchIcrcPricesFromCoingecko = (
 	simpleTokenPrice({
 		id: 'internet-computer',
 		vs_currencies: 'usd',
-		contract_addresses: ledgerCanisterIds.map((id) => id.toLowerCase()),
+		contract_addresses: ledgerCanisterIds,
 		include_market_cap: true
 	});
 
@@ -70,7 +70,7 @@ export const exchangeRateERC20ToUsd = ({
 	simpleTokenPrice({
 		id,
 		vs_currencies: 'usd',
-		contract_addresses: contractAddresses.map(({ address }) => address.toLowerCase()),
+		contract_addresses: contractAddresses.map(({ address }) => address),
 		include_market_cap: true
 	});
 
@@ -103,7 +103,7 @@ export const exchangeRateSPLToUsd = (
 	simpleTokenPrice({
 		id: 'solana',
 		vs_currencies: 'usd',
-		contract_addresses: tokenAddresses.map((tokenAddresses) => tokenAddresses.toLowerCase()),
+		contract_addresses: tokenAddresses,
 		include_market_cap: true
 	});
 
