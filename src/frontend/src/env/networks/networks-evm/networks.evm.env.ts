@@ -3,9 +3,10 @@ import { SUPPORTED_BSC_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import type { Network, NetworkId } from '$lib/types/network';
 
-export const SUPPORTED_EVM_NETWORKS: EthereumNetwork[] = EVM_NETWORKS_ENABLED
-	? [...SUPPORTED_BASE_NETWORKS, ...SUPPORTED_BSC_NETWORKS]
-	: [];
+export const SUPPORTED_EVM_NETWORKS: EthereumNetwork[] = [
+	...SUPPORTED_BASE_NETWORKS,
+	...SUPPORTED_BSC_NETWORKS
+];
 
 export const SUPPORTED_EVM_NETWORK_IDS: NetworkId[] = SUPPORTED_EVM_NETWORKS.map(({ id }) => id);
 
