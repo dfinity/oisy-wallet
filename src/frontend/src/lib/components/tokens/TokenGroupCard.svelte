@@ -62,7 +62,7 @@
 
 	// Show all if hideZeros = false and sort
 	const tokensToShow: TokenUi[] = $derived(
-		(hideZeros ? filteredTokens : truncatedTokens).sort((a, b) => {
+		(hideZeros ? truncatedTokens : filteredTokens).sort((a, b) => {
 			const balanceA = BigInt(a.balance ?? 0n);
 			const balanceB = BigInt(b.balance ?? 0n);
 			// higher balances show first
