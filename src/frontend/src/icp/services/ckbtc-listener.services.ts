@@ -31,7 +31,7 @@ export const syncBtcStatuses = ({
 	const data: CertifiedData<BtcWithdrawalStatuses> = JSON.parse(json, jsonReviver);
 
 	btcStatusesStore.set({
-		tokenId,
+		id: tokenId,
 		data
 	});
 };
@@ -69,7 +69,7 @@ export const syncBtcPendingUtxos = ({
 	const data: CertifiedData<PendingUtxo[]> = JSON.parse(json, jsonReviver);
 
 	ckBtcPendingUtxosStore.set({
-		tokenId,
+		id: tokenId,
 		data
 	});
 };
@@ -82,7 +82,7 @@ export const syncBtcAddress = ({
 	tokenId: TokenId;
 }) => {
 	btcAddressStore.set({
-		tokenId,
+		id: tokenId,
 		data
 	});
 };
@@ -93,7 +93,7 @@ export const syncCkBtcMinterInfo = ({ data: postMsgData, tokenId }: SyncCkMinter
 	const data: CertifiedData<MinterInfo> = JSON.parse(json, jsonReviver);
 
 	ckBtcMinterInfoStore.set({
-		tokenId,
+		id: tokenId,
 		data
 	});
 };
