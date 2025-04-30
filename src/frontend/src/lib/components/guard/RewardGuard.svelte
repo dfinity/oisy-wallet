@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount ,type  Snippet } from 'svelte';
-		import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
+	import { onMount, type Snippet } from 'svelte';
+	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
