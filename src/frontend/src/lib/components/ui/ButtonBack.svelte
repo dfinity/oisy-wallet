@@ -6,7 +6,7 @@
 		onclick: () => void;
 		disabled?: boolean;
 		fullWidth?: boolean;
-		testId?: string | undefined;
+		testId?: string;
 	}
 
 	let { onclick, disabled = false, fullWidth = false, testId = undefined }: Props = $props();
