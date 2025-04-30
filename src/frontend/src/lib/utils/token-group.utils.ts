@@ -5,10 +5,6 @@ import { parseTokenToDecimals } from '$lib/utils/parse.utils';
 import { sumBalances, sumUsdBalances } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-// We normalize all tokens in a group to the same number of decimals.
-// It should be the highest possible since it needs to include all values and not rounding them.
-const TOKEN_GROUP_DECIMALS = 18;
-
 /**
  * Type guard to check if an object is of type TokenUiGroup.
  *
