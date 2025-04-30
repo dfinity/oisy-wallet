@@ -223,7 +223,7 @@
 	</div>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel on:click={() => dispatch('icClose')} />
+		<ButtonCancel onclick={() => dispatch('icClose')} />
 
 		<Button disabled={invalid} on:click={() => dispatch('icNext')}>
 			{$i18n.swap.text.review_button}
