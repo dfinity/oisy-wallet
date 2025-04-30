@@ -31,7 +31,6 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import type { FeeData } from 'ethers/providers';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -64,7 +63,6 @@
 
 			const feeData = await getFeeData();
 
-
 			const { getSuggestedFeeData } = new InfuraGasRest(
 				(sendToken.network as EthereumNetwork).chainId
 			);
@@ -82,9 +80,7 @@
 				})
 			};
 
-
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
-
 				feeStore.setFee({
 					...adjustedFeeData,
 					gas: getEthFeeData({
@@ -96,7 +92,6 @@
 				});
 				return;
 			}
-
 
 			const erc20GasFeeParams = {
 				contract: sendToken as Erc20Token,
