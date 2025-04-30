@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { InfuraGasRest } from '$eth/rest/infura.rest';
