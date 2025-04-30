@@ -26,19 +26,19 @@ Before you begin, ensure you have the following installed on your Linux system:
 - [x] **IC SDK** — <https://internetcomputer.org/docs/current/developer-docs/setup/install/index.mdx>
 - [x] **Node.js** (LTS version recommended) — <https://nodejs.org/>
 - [x] **Git** — <https://git-scm.com/download/linux>
-- [x] **Rust** (via *rustup*) — <https://www.rust-lang.org/tools/install>
+- [x] **Rust** (via _rustup_) — <https://www.rust-lang.org/tools/install>
 
 ---
 
 ## Environment Setup
 
-### 1  Install the IC SDK
+### 1 Install the IC SDK
 
 ```bash
 sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
 ```
 
-### 2  Install Node.js *(if not already installed)*
+### 2 Install Node.js _(if not already installed)_
 
 ```bash
 # Using NVM (recommended)
@@ -53,7 +53,7 @@ curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-### 3  Install Rust
+### 3 Install Rust
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -70,7 +70,7 @@ chmod +x ./scripts/setup-rust
 
 > **Note:** After either method, be sure to `source "$HOME/.cargo/env"` or restart your shell.
 
-### 4  Install required system dependencies
+### 4 Install required system dependencies
 
 ```bash
 # Ubuntu / Debian
@@ -85,11 +85,12 @@ sudo pacman -S base-devel openssl llvm clang jq curl go
 ```
 
 The additional packages include:
+
 - `jq` - Required for parsing the dev-tools.json file
 - `curl` - Required for downloading tools
 - `golang-go` - Required for installing shfmt
 
-### 5  Install essential development tools
+### 5 Install essential development tools
 
 The project defines both required and optional packages along with their respective versions in `dev-tools.json`. The following tools are essential for development:
 
@@ -133,7 +134,7 @@ If the setup script doesn't work for you, here's how to install the essential to
 cargo install cargo-binstall --version 1.7.4  # Check dev-tools.json for current version
 ```
 
-2. Install tools with *cargo binstall*:
+2. Install tools with _cargo binstall_:
 
 ```bash
 cargo binstall ic-wasm --version 0.8.5 --no-confirm
@@ -166,7 +167,7 @@ echo 'export PATH="$HOME/go/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### 6  Clone the repository
+### 6 Clone the repository
 
 ```bash
 git clone https://github.com/dfinity/oisy-wallet.git
@@ -251,7 +252,7 @@ dfx deploy backend
 
 ## Bitcoin Development
 
-### 1  Environment variable
+### 1 Environment variable
 
 Ensure this line is **absent or commented** in `.env.development`:
 
@@ -259,7 +260,7 @@ Ensure this line is **absent or commented** in `.env.development`:
 # VITE_BITCOIN_MAINNET_DISABLED=true
 ```
 
-### 2  Local Bitcoin node (Regtest)
+### 2 Local Bitcoin node (Regtest)
 
 ```bash
 chmod +x ./scripts/setup.bitcoin-node.sh
@@ -267,14 +268,14 @@ chmod +x ./scripts/setup.bitcoin-node.sh
 ./scripts/setup.bitcoin-node.sh --reset  # reset if needed
 ```
 
-### 3  Start DFX with Bitcoin support
+### 3 Start DFX with Bitcoin support
 
 ```bash
 chmod +x ./scripts/dfx.start-with-bitcoin.sh
 ./scripts/dfx.start-with-bitcoin.sh --clean   # add --clean if you were running without BTC before
 ```
 
-### 4  Mine test Bitcoins
+### 4 Mine test Bitcoins
 
 ```bash
 chmod +x ./scripts/add.tokens.bitcoin.sh
@@ -284,7 +285,7 @@ chmod +x ./scripts/add.tokens.bitcoin.sh
 ./scripts/add.tokens.bitcoin.sh
 ```
 
-*(One block equals 50 BTC in regtest.)*
+_(One block equals 50 BTC in regtest.)_
 
 ---
 
