@@ -4,7 +4,7 @@ import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { initIcpWalletScheduler } from '$icp/workers/icp-wallet.worker';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
-import { WALLET_TIMER_INTERVAL_MILLIS, ZERO_BI } from '$lib/constants/app.constants';
+import { WALLET_TIMER_INTERVAL_MILLIS, ZERO } from '$lib/constants/app.constants';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
@@ -439,7 +439,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		const mockTransaction: TransactionWithIdIcp = {
 			id: 123n,
 			transaction: {
-				memo: ZERO_BI,
+				memo: ZERO,
 				icrc1_memo: [],
 				operation: {
 					Transfer: {

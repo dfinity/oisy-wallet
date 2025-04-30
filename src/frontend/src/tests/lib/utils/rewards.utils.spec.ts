@@ -1,6 +1,6 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
@@ -239,7 +239,7 @@ describe('rewards.utils', () => {
 
 			const result = getRewardsBalance(mockedRewards);
 
-			expect(result).toEqual(ZERO_BI);
+			expect(result).toEqual(ZERO);
 		});
 	});
 });
