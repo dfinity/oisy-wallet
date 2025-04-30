@@ -24,7 +24,9 @@ jobs:
 
       - name: Install canisters
         run: |
-          timeout 2 strace -f -eopen,openat dfx start
+          timeout 2 strace -f -eopen,openat dfx start || true
+          echo HOME=$HOME
+          echo PWD=$PWD
           dfx start --clean --background
           dfx canister create --all # This is enough for the demo
           dfx identity get-principal
