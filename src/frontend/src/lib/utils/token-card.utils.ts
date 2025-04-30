@@ -8,8 +8,10 @@ import type { TokenUiGroup } from '$lib/types/token-group';
  */
 export const mapHeaderData = ({
 	groupData: { name, symbol, icon },
-	nativeToken: { decimals, network },
+	// TODO: check if we still need network prop
+	nativeToken: { network },
 	tokens,
+	decimals,
 	balance,
 	usdBalance
 }: TokenUiGroup): CardData => ({
