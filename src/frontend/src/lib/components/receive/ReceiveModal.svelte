@@ -32,6 +32,6 @@
 
 		<slot name="content" />
 
-		<ButtonDone on:click={modalStore.close} slot="toolbar" />
+		<ButtonDone onclick={modalStore.close} slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>
