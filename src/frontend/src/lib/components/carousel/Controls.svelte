@@ -3,8 +3,12 @@
 	import ButtonControl from '$lib/components/ui/ButtonControl.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let onNext: () => void;
-	export let onPrevious: () => void;
+	interface Props {
+		onNext: () => void;
+		onPrevious: () => void;
+	}
+
+	let { onNext, onPrevious }: Props = $props();
 </script>
 
 <div class="mr-3 flex items-center">
