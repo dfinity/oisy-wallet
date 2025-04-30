@@ -5,7 +5,7 @@ import type {
 	IcpTransaction
 } from '$icp/types/ic-transaction';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Tokens, Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
@@ -93,7 +93,7 @@ export const mapIcpTransaction = ({
 		incoming: boolean | undefined;
 		fee: Tokens;
 		amount: Tokens;
-	}): bigint => amount.e8s + (incoming === false ? fee.e8s : ZERO_BI);
+	}): bigint => amount.e8s + (incoming === false ? fee.e8s : ZERO);
 
 	if ('Approve' in operation) {
 		return {

@@ -30,7 +30,7 @@ import {
 	SOLANA_MAINNET_NETWORK_ID,
 	SOLANA_TESTNET_NETWORK_ID,
 	SUPPORTED_SOLANA_NETWORKS,
-	SUPPORTED_SOLANA_NETWORKS_IDS
+	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -46,6 +46,7 @@ import {
 	isNetworkIdBTCTestnet,
 	isNetworkIdBase,
 	isNetworkIdBitcoin,
+	isNetworkIdBsc,
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdICP,
@@ -97,7 +98,7 @@ describe('network utils', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
+			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORK_IDS', 'get').mockImplementation(
 				() => allEthereumNetworkIds
 			);
 		});
@@ -146,6 +147,22 @@ describe('network utils', () => {
 		});
 	});
 
+	describe('isNetworkIdBsc', () => {
+		const allBscNetworkIds = [BSC_MAINNET_NETWORK_ID, BSC_TESTNET_NETWORK_ID];
+
+		it.each(allBscNetworkIds)('should return true for Base network ID %s', (id) => {
+			expect(isNetworkIdBsc(id as NetworkId)).toBeTruthy();
+		});
+
+		it('should return false for non-EVM network IDs', () => {
+			expect(isNetworkIdBsc(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdBsc(ETHEREUM_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdBsc(BASE_NETWORK_ID)).toBeFalsy();
+		});
+	});
+
 	describe('isNetworkIdBitcoin', () => {
 		const allBitcoinNetworkIds = [
 			BTC_MAINNET_NETWORK_ID,
@@ -166,9 +183,10 @@ describe('network utils', () => {
 		});
 
 		it('should return false for Bitcoin regtest network ID when it is not LOCAL env', () => {
-			vi.spyOn(btcNetworkEnv, 'SUPPORTED_BITCOIN_NETWORKS_IDS', 'get').mockImplementationOnce(
-				() => [BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID]
-			);
+			vi.spyOn(btcNetworkEnv, 'SUPPORTED_BITCOIN_NETWORK_IDS', 'get').mockImplementationOnce(() => [
+				BTC_MAINNET_NETWORK_ID,
+				BTC_TESTNET_NETWORK_ID
+			]);
 
 			expect(isNetworkIdBitcoin(BTC_REGTEST_NETWORK_ID)).toBeFalsy();
 		});
@@ -217,7 +235,7 @@ describe('network utils', () => {
 	});
 
 	describe('isNetworkIdSolana', () => {
-		it.each(SUPPORTED_SOLANA_NETWORKS_IDS)('should return true for Solana network ID %s', (id) => {
+		it.each(SUPPORTED_SOLANA_NETWORK_IDS)('should return true for Solana network ID %s', (id) => {
 			expect(isNetworkIdSolana(id)).toBeTruthy();
 		});
 
