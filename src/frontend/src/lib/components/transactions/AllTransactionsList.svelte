@@ -96,15 +96,15 @@
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
-  <AllTransactionsScroll>
-		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-			<TransactionsDateGroup
-				{formattedDate}
-				{transactions}
-				testId={`all-transactions-date-group-${index}`}
-			/>
-		{/each}
-    </AllTransactionsScroll>
+		<AllTransactionsScroll>
+			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+				<TransactionsDateGroup
+					{formattedDate}
+					{transactions}
+					testId={`all-transactions-date-group-${index}`}
+				/>
+			{/each}
+		</AllTransactionsScroll>
 	{/if}
 
 	{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}

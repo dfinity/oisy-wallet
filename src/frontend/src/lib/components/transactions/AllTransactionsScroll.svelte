@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { isIcToken, isIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
@@ -10,7 +11,6 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { TokenId } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		children?: Snippet;
@@ -21,7 +21,6 @@
 	let disableInfiniteScroll: Record<TokenId, boolean> = {};
 
 	const onIntersect = async () => {
-
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
@@ -62,9 +61,11 @@
 		);
 	};
 
-	let allDisabledInfiniteScroll = $derived(Object.getOwnPropertySymbols(disableInfiniteScroll).every(
-		(tokenId) => disableInfiniteScroll?.[tokenId as TokenId]
-	))
+	let allDisabledInfiniteScroll = $derived(
+		Object.getOwnPropertySymbols(disableInfiniteScroll).every(
+			(tokenId) => disableInfiniteScroll?.[tokenId as TokenId]
+		)
+	);
 </script>
 
 <InfiniteScroll on:nnsIntersect={onIntersect} disabled={allDisabledInfiniteScroll}>
