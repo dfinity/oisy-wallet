@@ -120,7 +120,7 @@
 					})
 				);
 			} else if (nonNullish(errorDetail) && errorDetail.startsWith('Swap failed')) {
-				failedSwapError.set('Your swap was not successful. Please try again later.')
+				failedSwapError.set('Your swap was not successful. Please try again later.' + errorDetail)
 			}
 			 else{
 				failedSwapError.set(undefined);

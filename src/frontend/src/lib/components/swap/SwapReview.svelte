@@ -67,6 +67,9 @@
 		<div class="mt-4">
 			<MessageBox level="error">
 				{$failedSwapError}
+				<a href={`https://icpswap.com/pool/${failedSwapError}`} target="_blank" rel="noopener noreferrer">
+					Go to ICP Swap to withdraw
+				  </a>
 			</MessageBox>
 		</div>
 	{/if}

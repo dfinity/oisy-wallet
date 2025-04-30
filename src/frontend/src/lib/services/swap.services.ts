@@ -214,7 +214,7 @@ export const swapWithIcpSwap = async ({
 		await swapTokens({
 			identity,
 			canisterId: pool.canisterId.toString(),
-			amountIn: `${parsedSwapAmount.toString()  }000004` ,
+			amountIn: `${parsedSwapAmount.toString()	}000004`,
 			zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId,
 			amountOutMinimum: slippageMinimum.toString()
 		});
@@ -229,7 +229,9 @@ export const swapWithIcpSwap = async ({
 		});
 		console.warn('🧾 Unused balance in pool:', unused);
 
-		throw new Error('Swap failed, but token is deposited in pool');
+		throw new Error(
+			`Swap failed, check unused balance, https://icpswap.com/pool/${pool.canisterId.toString()}`
+		);
 	}
 
 	try {
@@ -295,7 +297,9 @@ export const fetchSwapAmounts = async ({
 	}
 
 	if (icpResult.status === 'fulfilled') {
-		results.push(swapProviders[ICP_SWAP_PROVIDER].mapQuoteResult({ swap: icpResult.value, slippage }));
+		results.push(
+			swapProviders[ICP_SWAP_PROVIDER].mapQuoteResult({ swap: icpResult.value, slippage })
+		);
 	}
 
 	return results;
