@@ -5,7 +5,7 @@ import type { Network } from '$lib/types/network';
 import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { filterTokens, pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
 
 export interface ModalTokensListData {
@@ -26,9 +26,7 @@ export const initModalTokensListContext = (
 	const filterQuery = derived([data], ([{ filterQuery }]) => filterQuery);
 	const filterNetwork = derived([data], ([{ filterNetwork }]) => filterNetwork);
 	const filterZeroBalance = derived([data], ([{ filterZeroBalance }]) => filterZeroBalance);
-	const sortByBalance = derived([data], ([{ sortByBalance }]) =>
-		nonNullish(sortByBalance) ? sortByBalance : true
-	);
+	const sortByBalance = derived([data], ([{ sortByBalance }]) => sortByBalance ?? true);
 
 	const filteredTokens = derived(
 		[
