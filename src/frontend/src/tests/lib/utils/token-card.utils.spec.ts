@@ -14,6 +14,7 @@ describe('mapHeaderData', () => {
 	// We mock the token group with a mix of data just to verify that the function works correctly
 	const tokenGroup: TokenUiGroup = {
 		id: mockGroup.id,
+		decimals: mockToken.decimals,
 		nativeToken: mockToken,
 		groupData: mockGroup,
 		tokens: [mockToken, ICP_TOKEN],
