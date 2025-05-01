@@ -1,12 +1,19 @@
-import type { Erc20ContractAddress } from '$eth/types/erc20';
-import { IcCanistersSchema, IcCanistersStrictSchema, IcCkMetadataSchema } from '$icp/schema/ic-token.schema';
+import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
+import {
+	IcCanistersSchema,
+	IcCanistersStrictSchema,
+	IcCkMetadataSchema
+} from '$icp/schema/ic-token.schema';
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { SyncStateSchema } from '$lib/schema/sync.schema';
 import type { BtcAddress, SolAddress } from '$lib/types/address';
 import { CanisterIdTextSchema, type OptionCanisterIdText } from '$lib/types/canister';
-import type { CoingeckoSimplePriceResponse, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
+import type {
+	CoingeckoSimplePriceResponse,
+	CoingeckoSimpleTokenPriceResponse
+} from '$lib/types/coingecko';
 import type { CertifiedData } from '$lib/types/store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -52,8 +59,8 @@ export const PostMessageDataRequestSchema = z.never();
 export const PostMessageDataResponseSchema = z.object({}).strict();
 
 export const PostMessageDataRequestExchangeTimerSchema = z.object({
-	// TODO: generate zod schema for Erc20ContractAddress
-	erc20Addresses: z.array(z.custom<Erc20ContractAddress>()),
+	// TODO: generate zod schema for Erc20ContractAddressWithNetwork
+	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
 	splAddresses: z.array(z.custom<SplTokenAddress>())
 });

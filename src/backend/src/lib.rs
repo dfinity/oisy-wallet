@@ -9,7 +9,7 @@ use heap_state::{
 };
 use ic_cdk::{api::time, eprintln};
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
-use ic_cdk_timers::{clear_timer, set_timer, set_timer_interval};
+use ic_cdk_timers::{set_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
@@ -22,7 +22,7 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
-        backend_config::{Arg, Config, Guards, InitArg},
+        backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
@@ -31,7 +31,6 @@ use shared::{
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        migration::{Migration, MigrationProgress, MigrationReport},
         network::{
             SaveNetworksSettingsError, SaveNetworksSettingsRequest, SaveTestnetsSettingsError,
             SetShowTestnetsRequest,
@@ -64,7 +63,7 @@ use user_profile_model::UserProfileModel;
 
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
-    guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
+    guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
@@ -78,7 +77,6 @@ mod config;
 mod guards;
 mod heap_state;
 mod impls;
-mod migrate;
 mod oisy_user;
 mod pow;
 pub mod signer;
@@ -112,7 +110,6 @@ thread_local! {
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
-            migration: None,
         })
     );
 }
@@ -139,21 +136,6 @@ fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     })
 }
 
-/// Modifies `state.config` with the provided function.
-fn modify_state_config(state: &mut State, f: impl FnOnce(&mut Config)) {
-    let config: &Candid<Config> = state
-        .config
-        .get()
-        .as_ref()
-        .expect("config is not initialized");
-    let mut config: Config = (*config).clone();
-    f(&mut config);
-    state
-        .config
-        .set(Some(Candid(config)))
-        .expect("setting config should succeed");
-}
-
 pub struct State {
     config: ConfigCell,
     /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the
@@ -165,7 +147,6 @@ pub struct State {
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
     pow_challenge: PowChallengeMap,
-    migration: Option<Migration>,
 }
 
 fn set_config(arg: InitArg) {
@@ -280,7 +261,7 @@ fn parse_eth_address(address: &str) -> [u8; 20] {
     }
 }
 
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_user_token(token: UserToken) {
     assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
@@ -297,7 +278,7 @@ pub fn set_user_token(token: UserToken) {
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_token, &token, &find));
 }
 
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 pub fn set_many_user_tokens(tokens: Vec<UserToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -316,7 +297,7 @@ pub fn set_many_user_tokens(tokens: Vec<UserToken>) {
     });
 }
 
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn remove_user_token(token_id: UserTokenId) {
     let addr = parse_eth_address(&token_id.contract_address);
@@ -329,7 +310,7 @@ pub fn remove_user_token(token_id: UserTokenId) {
     mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_token, &find));
 }
 
-#[query(guard = "may_read_user_data")]
+#[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn list_user_tokens() -> Vec<UserToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
@@ -337,7 +318,7 @@ pub fn list_user_tokens() -> Vec<UserToken> {
 }
 
 /// Add, remove or update custom token for the user.
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
@@ -349,7 +330,7 @@ pub fn set_custom_token(token: CustomToken) {
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
 }
 
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -364,7 +345,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     });
 }
 
-#[query(guard = "may_read_user_data")]
+#[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
@@ -377,7 +358,7 @@ const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 ///
 /// # Errors
 /// Errors are enumerated by: `SelectedUtxosFeeError`.
-#[update(guard = "may_read_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 pub async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
 ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
@@ -444,7 +425,7 @@ pub async fn btc_select_user_utxos_fee(
 ///
 /// # Errors
 /// Errors are enumerated by: `BtcAddPendingTransactionError`.
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 pub async fn btc_add_pending_transaction(
     params: BtcAddPendingTransactionRequest,
 ) -> Result<(), BtcAddPendingTransactionError> {
@@ -475,7 +456,7 @@ pub async fn btc_add_pending_transaction(
 ///
 /// # Errors
 /// Errors are enumerated by: `BtcGetPendingTransactionsError`.
-#[update(guard = "may_read_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 pub async fn btc_get_pending_transactions(
     params: BtcGetPendingTransactionsRequest,
 ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
@@ -514,7 +495,7 @@ pub async fn btc_get_pending_transactions(
 ///
 /// # Errors
 /// Errors are enumerated by: `AddUserCredentialError`.
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn add_user_credential(
     request: AddUserCredentialRequest,
@@ -560,7 +541,7 @@ pub fn add_user_credential(
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 pub fn update_user_network_settings(
     request: SaveNetworksSettingsRequest,
 ) -> Result<(), SaveNetworksSettingsError> {
@@ -587,7 +568,7 @@ pub fn update_user_network_settings(
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)] // canister methods are necessary
 pub fn set_user_show_testnets(
     request: SetShowTestnetsRequest,
@@ -617,7 +598,7 @@ pub fn set_user_show_testnets(
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 pub fn add_user_hidden_dapp_id(
     request: AddHiddenDappIdRequest,
 ) -> Result<(), AddDappSettingsError> {
@@ -639,7 +620,7 @@ pub fn add_user_hidden_dapp_id(
 
 /// It create a new user profile for the caller.
 /// If the user has already a profile, it will return that profile.
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
@@ -683,7 +664,7 @@ pub fn create_user_profile() -> UserProfile {
 ///
 /// # Panics
 /// - If the caller is anonymous.  See: `may_read_user_data`.
-#[query(guard = "may_read_user_data")]
+#[query(guard = "caller_is_not_anonymous")]
 pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -707,7 +688,7 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 /// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
 /// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
 ///   internal errors.
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 #[candid_method(update)]
 pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
     let challenge = pow::create_pow_challenge().await?;
@@ -725,7 +706,7 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
 /// - `Ok(false)` if no user profile exists for the caller.
 /// # Errors
 /// Does not return any error
-#[query(guard = "may_read_user_data")]
+#[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn has_user_profile() -> HasUserProfileResponse {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
@@ -747,7 +728,7 @@ pub fn has_user_profile() -> HasUserProfileResponse {
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
-#[update(guard = "may_read_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 pub async fn allow_signing(
     request: Option<AllowSigningRequest>,
 ) -> Result<AllowSigningResponse, AllowSigningError> {
@@ -831,20 +812,6 @@ pub async fn get_canister_status() -> std_canister_status::CanisterStatusResultV
     std_canister_status::get_canister_status_v2().await
 }
 
-/// Gets the state of any migration currently in progress.
-#[query(guard = "caller_is_allowed")]
-#[must_use]
-pub fn migration() -> Option<MigrationReport> {
-    read_state(|s| s.migration.as_ref().map(MigrationReport::from))
-}
-
-/// Sets the lock state of the canister APIs.  This can be used to enable or disable the APIs, or to
-/// enable an API in read-only mode.
-#[update(guard = "caller_is_controller")]
-pub fn set_guards(guards: Guards) {
-    mutate_state(|state| modify_state_config(state, |config| config.api = Some(guards)));
-}
-
 /// Gets statistics about the canister.
 ///
 /// Note: This is a private method, restricted to authorized users, as some stats may not be
@@ -853,78 +820,6 @@ pub fn set_guards(guards: Guards) {
 #[must_use]
 pub fn stats() -> Stats {
     read_state(|s| Stats::from(s))
-}
-
-/// Bulk uploads data to this canister.
-///
-/// Note: In case of conflict, existing data is overwritten.  This situation is expected to occur
-/// only if a migration failed and had to be restarted.
-#[update(guard = "caller_is_controller")]
-#[allow(clippy::needless_pass_by_value)]
-pub fn bulk_up(data: Vec<u8>) {
-    migrate::bulk_up(&data);
-}
-
-/// Starts user data migration to a given canister.
-///
-/// # Errors
-/// - There is a current migration in progress to a different canister.
-#[update(guard = "caller_is_controller")]
-pub fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
-    mutate_state(|s| {
-        if let Some(migration) = &s.migration {
-            if migration.to == to {
-                Ok(MigrationReport::from(migration))
-            } else {
-                Err("migration in progress to a different canister".to_string())
-            }
-        } else {
-            let timer_id =
-                set_timer_interval(Duration::from_secs(0), || ic_cdk::spawn(step_migration()));
-            let migration = Migration {
-                to,
-                progress: MigrationProgress::Pending,
-                timer_id,
-            };
-            let migration_report = MigrationReport::from(&migration);
-            s.migration = Some(migration);
-            Ok(migration_report)
-        }
-    })
-}
-
-/// Switch off the migration timer; migrate with manual API calls instead.
-///
-/// # Errors
-/// - There is no migration in progress.
-#[update(guard = "caller_is_controller")]
-pub fn migration_stop_timer() -> Result<(), String> {
-    mutate_state(|s| {
-        if let Some(migration) = &s.migration {
-            clear_timer(migration.timer_id);
-            Ok(())
-        } else {
-            Err("no migration in progress".to_string())
-        }
-    })
-}
-
-/// Steps the migration.
-///
-/// On error, the migration is marked as failed and the timer is cleared.
-#[update(guard = "caller_is_controller")]
-pub async fn step_migration() {
-    let result = migrate::step_migration().await;
-    eprintln!("Stepped migration: {:?}", result);
-    if let Err(err) = result {
-        mutate_state(|s| {
-            if let Some(migration) = &mut s.migration {
-                migration.progress = MigrationProgress::Failed(err);
-                clear_timer(migration.timer_id);
-            }
-            eprintln!("Migration failed: {err:?}");
-        });
-    }
 }
 
 /// Gets account creation timestamps.
@@ -942,13 +837,13 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
 }
 
 /// Saves a snapshot of the user's account.
-#[update(guard = "may_write_user_data")]
+#[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)] // Canister API methods are always pass by value.
 pub fn set_snapshot(snapshot: UserSnapshot) {
     todo!("TODO: Set snapshot to: {:?}", snapshot);
 }
 /// Gets the caller's last snapshot.
-#[query(guard = "may_read_user_data")]
+#[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_snapshot() -> Option<UserSnapshot> {
     todo!()
