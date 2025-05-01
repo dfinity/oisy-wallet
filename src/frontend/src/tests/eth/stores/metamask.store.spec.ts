@@ -20,6 +20,8 @@ describe('metamask.store', () => {
 		it.each([true, false])('should set the available value to %s', (available) => {
 			metamaskStore.reset();
 
+			expect(get(metamaskStore)).toStrictEqual({ available: undefined });
+
 			metamaskStore.set(available);
 
 			expect(get(metamaskStore)).toStrictEqual({ available });
