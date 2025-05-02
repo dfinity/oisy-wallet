@@ -1,10 +1,11 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
 	getRewardsBalance,
+	isEndedCampaign,
 	isOngoingCampaign,
 	isUpcomingCampaign,
 	loadRewardResult
@@ -203,6 +204,24 @@ describe('rewards.utils', () => {
 		});
 	});
 
+	describe('isEndedCampaign', () => {
+		it('should return false if the current date is before the end date of the campaign', () => {
+			const endDate = new Date(Date.now() + 86400000);
+
+			const result = isEndedCampaign(endDate);
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return true if the current date is after the end date of the campaign', () => {
+			const endDate = new Date(Date.now() - 86400000);
+
+			const result = isEndedCampaign(endDate);
+
+			expect(result).toBeTruthy();
+		});
+	});
+
 	describe('getRewardsBalance', () => {
 		const lastTimestamp = BigInt(Date.now());
 
@@ -239,7 +258,7 @@ describe('rewards.utils', () => {
 
 			const result = getRewardsBalance(mockedRewards);
 
-			expect(result).toEqual(ZERO_BI);
+			expect(result).toEqual(ZERO);
 		});
 	});
 });
