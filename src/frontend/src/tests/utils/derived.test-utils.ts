@@ -36,10 +36,8 @@ import { pageToken } from '$lib/derived/page-token.derived';
 import { hideZeroBalances, showZeroBalances } from '$lib/derived/settings.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import {
-	tokenDecimals,
 	tokenId,
 	tokenStandard,
-	tokenSymbol,
 	tokenToggleable,
 	tokenWithFallback
 } from '$lib/derived/token.derived';
@@ -94,10 +92,8 @@ const derivedList: Record<string, Readable<unknown>> = {
 	selectedNetwork,
 	showZeroBalances,
 	testnetsEnabled,
-	tokenDecimals,
 	tokenId,
 	tokenStandard,
-	tokenSymbol,
 	tokenToggleable,
 	tokenWithFallback,
 	tokenWithFallbackAsIcToken,
