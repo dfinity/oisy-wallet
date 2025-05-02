@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import { Collapsible, Backdrop } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	let {
