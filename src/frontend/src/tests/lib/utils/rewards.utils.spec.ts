@@ -2,7 +2,6 @@ import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import {
 	INITIAL_REWARD_RESULT,
-	getRewardsBalance,
 	isEndedCampaign,
 	isOngoingCampaign,
 	isUpcomingCampaign,

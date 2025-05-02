@@ -51,4 +51,3 @@ export const isEndedCampaign = (endDate: Date) => {
 
 	return endDiff <= 0;
 };
-
