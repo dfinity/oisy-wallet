@@ -23,8 +23,6 @@ export const SUPPORTED_TESTNET_NETWORKS: Network[] = SUPPORTED_NETWORKS.filter(
 	({ env }) => env === 'testnet'
 );
 
-export const SUPPORTED_NETWORKS_IDS: NetworkId[] = SUPPORTED_NETWORKS.map(({ id }) => id);
-
 export const SUPPORTED_MAINNET_NETWORKS_IDS: NetworkId[] = SUPPORTED_MAINNET_NETWORKS.map(
 	({ id }) => id
 );

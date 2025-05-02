@@ -1,8 +1,4 @@
-import {
-	KongSwapTokenSchema,
-	KongSwapTokensSchema,
-	KongSwapTokenWithMetricsSchema
-} from '$lib/types/kongswap';
+import { KongSwapTokenSchema, KongSwapTokenWithMetricsSchema } from '$lib/types/kongswap';
 import { createMockKongSwapToken } from '$tests/mocks/kongswap.mock';
 import { describe, expect, it } from 'vitest';
 
@@ -134,45 +130,6 @@ describe('Schema: KongSwapTokenMetricsSchema', () => {
 			metrics: { volume_24h: 'NaN' }
 		});
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(mock.metrics);
-
-		expect(parsed.success).toBeFalsy();
-	});
-});
-
-describe('Schema: KongSwapTokensSchema (paginated list)', () => {
-	it('validates a paginated response with multiple valid tokens', () => {
-		const token1 = createMockKongSwapToken({});
-		const token2 = createMockKongSwapToken({});
-
-		const parsed = KongSwapTokensSchema.safeParse({
-			items: [
-				{ ...token1.token, metrics: token1.metrics },
-				{ ...token2.token, metrics: token2.metrics }
-			],
-			page: 1,
-			limit: 10,
-			total_count: 2,
-			total_pages: 1
-		});
-
-		expect(parsed.success).toBeTruthy();
-	});
-
-	it('rejects paginated list if one item is invalid', () => {
-		const valid = createMockKongSwapToken({});
-		const invalid = { ...createMockKongSwapToken({}) };
-		(invalid.token as Record<string, unknown>).token_id = 'invalid';
-
-		const parsed = KongSwapTokensSchema.safeParse({
-			items: [
-				{ ...valid.token, metrics: valid.metrics },
-				{ ...invalid.token, metrics: invalid.metrics }
-			],
-			page: 1,
-			limit: 10,
-			total_count: 2,
-			total_pages: 1
-		});
 
 		expect(parsed.success).toBeFalsy();
 	});
