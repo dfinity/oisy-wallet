@@ -49,7 +49,7 @@
 						{/if}
 					</div>
 
-					<span class="mr-auto inline-flex md:ml-auto">
+					<span class="mr-auto md:mr-0 inline-flex md:ml-auto">
 						<RewardDateBadge
 							date={reward.endDate}
 							testId={nonNullish(testId) ? `${testId}-date-badge` : undefined}
