@@ -47,14 +47,14 @@ describe('Menu', () => {
 		menuButton?.click();
 	};
 
-	async function waitForElement({
+	const waitForElement = async ({
 		selector,
 		shouldExist = true
 	}: {
 		selector: string;
 		shouldExist?: boolean;
-	}) {
-		return await waitFor(() => {
+	}) =>
+		await waitFor(() => {
 			const element = container.querySelector(selector);
 			if (shouldExist) {
 				if (element == null) {
@@ -67,7 +67,6 @@ describe('Menu', () => {
 			}
 			return element;
 		});
-	}
 
 	it('renders the vip menu item', async () => {
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(['vip']));

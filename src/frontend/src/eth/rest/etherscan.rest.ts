@@ -1,12 +1,5 @@
-import {
-	BASE_NETWORK,
-	BASE_SEPOLIA_NETWORK
-} from '$env/networks/networks-evm/networks.evm.base.env';
-import {
-	BSC_MAINNET_NETWORK,
-	BSC_TESTNET_NETWORK
-} from '$env/networks/networks-evm/networks.evm.bsc.env';
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY, ETHERSCAN_REST_URL } from '$env/rest/etherscan.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EtherscanRestTransaction } from '$eth/types/etherscan-transaction';
@@ -84,12 +77,8 @@ export class EtherscanRest {
 }
 
 const providers: Record<NetworkId, EtherscanRest> = [
-	ETHEREUM_NETWORK,
-	SEPOLIA_NETWORK,
-	BASE_NETWORK,
-	BASE_SEPOLIA_NETWORK,
-	BSC_MAINNET_NETWORK,
-	BSC_TESTNET_NETWORK
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, EtherscanRest>>(
 	(acc, { id, chainId }) => ({ ...acc, [id]: new EtherscanRest(chainId) }),
 	{}
