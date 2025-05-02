@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
@@ -11,6 +11,7 @@
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { send as executeSend } from '$eth/services/send.services';
 	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
+	import type { EthereumNetwork } from '$eth/types/network';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
@@ -26,6 +27,7 @@
 		TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR,
 		TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS
 	} from '$lib/constants/analytics.contants';
+	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -53,6 +55,9 @@
 	$: destination = isTokenErc20($sourceToken)
 		? ($ckErc20HelperContractAddress ?? '')
 		: ($ckEthHelperContractAddress ?? '');
+
+	let sourceNetwork: EthereumNetwork;
+	$: sourceNetwork = $selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK;
 
 	const dispatch = createEventDispatcher();
 
@@ -112,9 +117,6 @@
 			return;
 		}
 
-		// This is a simple type check, since it should not happen since the user arrived here from a selected Ethereum network
-		assertNonNullish($selectedEthereumNetwork);
-
 		dispatch('icNext');
 
 		try {
@@ -130,7 +132,7 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
-				sourceNetwork: $selectedEthereumNetwork,
+				sourceNetwork,
 				targetNetwork: ICP_NETWORK,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[$ethereumToken.id]
@@ -159,41 +161,39 @@
 	const back = () => dispatch('icBack');
 </script>
 
-{#if nonNullish($selectedEthereumNetwork)}
-	<FeeContext
-		sendToken={$sourceToken}
-		sendTokenId={$sourceToken.id}
-		amount={sendAmount}
-		{destination}
-		observe={currentStep?.name !== WizardStepsConvert.CONVERTING &&
-			currentStep?.name !== WizardStepsConvert.REVIEW}
-		sourceNetwork={$selectedEthereumNetwork}
-		targetNetwork={ICP_NETWORK}
-		nativeEthereumToken={$ethereumToken}
-	>
-		{#if currentStep?.name === WizardStepsConvert.CONVERT}
-			<EthConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount {destination}>
-				<svelte:fragment slot="cancel">
-					{#if formCancelAction === 'back'}
-						<ButtonBack onclick={back} />
-					{:else}
-						<ButtonCancel onclick={close} />
-					{/if}
-				</svelte:fragment>
-			</EthConvertForm>
-		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-			<EthConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}>
-				<ButtonBack slot="cancel" onclick={back} />
-			</EthConvertReview>
-		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
-			<EthConvertProgress
-				bind:convertProgressStep
-				sourceTokenId={$sourceToken.id}
-				{destination}
-				nativeEthereumToken={$ethereumToken}
-			/>
-		{:else}
-			<slot />
-		{/if}
-	</FeeContext>
-{/if}
+<FeeContext
+	sendToken={$sourceToken}
+	sendTokenId={$sourceToken.id}
+	amount={sendAmount}
+	{destination}
+	observe={currentStep?.name !== WizardStepsConvert.CONVERTING &&
+		currentStep?.name !== WizardStepsConvert.REVIEW}
+	{sourceNetwork}
+	targetNetwork={ICP_NETWORK}
+	nativeEthereumToken={$ethereumToken}
+>
+	{#if currentStep?.name === WizardStepsConvert.CONVERT}
+		<EthConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount {destination}>
+			<svelte:fragment slot="cancel">
+				{#if formCancelAction === 'back'}
+					<ButtonBack onclick={back} />
+				{:else}
+					<ButtonCancel onclick={close} />
+				{/if}
+			</svelte:fragment>
+		</EthConvertForm>
+	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
+		<EthConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}>
+			<ButtonBack slot="cancel" onclick={back} />
+		</EthConvertReview>
+	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
+		<EthConvertProgress
+			bind:convertProgressStep
+			sourceTokenId={$sourceToken.id}
+			{destination}
+			nativeEthereumToken={$ethereumToken}
+		/>
+	{:else}
+		<slot />
+	{/if}
+</FeeContext>
