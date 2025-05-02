@@ -39,7 +39,10 @@
 						</div>
 						{#if !hasEnded}
 							<span class="mr-auto inline-flex md:mx-1">
-								<Badge variant="success" testId={nonNullish(testId) ? `${testId}-badge` : undefined}>
+								<Badge
+									variant="success"
+									testId={nonNullish(testId) ? `${testId}-badge` : undefined}
+								>
 									{$i18n.rewards.text.youre_eligible}
 								</Badge>
 							</span>

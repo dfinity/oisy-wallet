@@ -1,9 +1,9 @@
 import type { RewardDescription } from '$env/types/env-reward';
 import RewardCard from '$lib/components/rewards/RewardCard.svelte';
+import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import {REWARDS_BANNER, REWARDS_STATUS_BUTTON} from "$lib/constants/test-ids.constants";
 
 describe('RewardCard', () => {
 	const testId = 'testId';
@@ -29,15 +29,19 @@ describe('RewardCard', () => {
 		expect(getByText(mockedReward.oneLiner)).toBeInTheDocument();
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 
 		const eligibleBadge: HTMLSpanElement | null = container.querySelector(eligibleBadgeSelector);
+
 		expect(eligibleBadge).toBeInTheDocument();
 
 		const dateBadge: HTMLSpanElement | null = container.querySelector(dateBadgeSelector);
+
 		expect(dateBadge).toBeInTheDocument();
 
 		const statusButton: HTMLDivElement | null = container.querySelector(statusButtonSelector);
+
 		expect(statusButton).toBeInTheDocument();
 	});
 
@@ -58,16 +62,20 @@ describe('RewardCard', () => {
 		expect(getByText(mockedReward.oneLiner)).toBeInTheDocument();
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 		expect(imageBanner).toHaveClass('grayscale');
 
 		const eligibleBadge: HTMLSpanElement | null = container.querySelector(eligibleBadgeSelector);
+
 		expect(eligibleBadge).not.toBeInTheDocument();
 
 		const dateBadge: HTMLSpanElement | null = container.querySelector(dateBadgeSelector);
+
 		expect(dateBadge).toBeInTheDocument();
 
 		const statusButton: HTMLDivElement | null = container.querySelector(statusButtonSelector);
+
 		expect(statusButton).toBeInTheDocument();
 	});
 });

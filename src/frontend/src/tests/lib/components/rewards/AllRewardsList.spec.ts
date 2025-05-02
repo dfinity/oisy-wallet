@@ -1,13 +1,14 @@
+import * as rewardCampaigns from '$env/reward-campaigns.env';
 import AllRewardsList from '$lib/components/rewards/AllRewardsList.svelte';
 import {
 	REWARDS_ACTIVE_CAMPAIGNS_CONTAINER,
-	REWARDS_ENDED_CAMPAIGNS_CONTAINER, REWARDS_FILTER,
+	REWARDS_ENDED_CAMPAIGNS_CONTAINER,
+	REWARDS_FILTER,
 	REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 } from '$lib/constants/test-ids.constants';
-import {render, waitFor} from '@testing-library/svelte';
-import * as rewardCampaigns from '$env/reward-campaigns.env';
-import {mockRewardCampaigns} from "$tests/mocks/reward-campaigns.mock";
-import {beforeEach} from "vitest";
+import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
+import { render, waitFor } from '@testing-library/svelte';
+import { beforeEach } from 'vitest';
 
 describe('AllRewardsList', () => {
 	const activeCampaignContainerSelector = `div[data-tid="${REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}"]`;
@@ -19,7 +20,9 @@ describe('AllRewardsList', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(rewardCampaigns, 'rewardCampaigns', 'get').mockImplementation(() => mockRewardCampaigns);
+		vi.spyOn(rewardCampaigns, 'rewardCampaigns', 'get').mockImplementation(
+			() => mockRewardCampaigns
+		);
 	});
 
 	it('should render reward filter and ongoing campaigns', () => {
@@ -28,21 +31,25 @@ describe('AllRewardsList', () => {
 		const rewardsFilterContainer: HTMLDivElement | null = container.querySelector(
 			rewardsFilterContainerSelector
 		);
+
 		expect(rewardsFilterContainer).toBeInTheDocument();
 
 		const activeCampaignContainer: HTMLDivElement | null = container.querySelector(
 			activeCampaignContainerSelector
 		);
+
 		expect(activeCampaignContainer).toBeInTheDocument();
 
 		const upcomingCampaignContainer: HTMLDivElement | null = container.querySelector(
 			upcomingCampaignContainerSelector
 		);
+
 		expect(upcomingCampaignContainer).toBeInTheDocument();
 
 		const endedCampaignContainer: HTMLDivElement | null = container.querySelector(
 			endedCampaignContainerSelector
 		);
+
 		expect(endedCampaignContainer).not.toBeInTheDocument();
 	});
 
@@ -52,27 +59,33 @@ describe('AllRewardsList', () => {
 		const rewardsFilterContainer: HTMLDivElement | null = container.querySelector(
 			rewardsFilterContainerSelector
 		);
+
 		expect(rewardsFilterContainer).toBeInTheDocument();
 
 		const rewardsFilterEndedButton: HTMLButtonElement | null = container.querySelector(
 			rewardsFilterEndedButtonSelector
 		);
+
 		expect(rewardsFilterEndedButton).toBeInTheDocument();
+
 		await waitFor(() => rewardsFilterEndedButton?.click());
 
 		const activeCampaignContainer: HTMLDivElement | null = container.querySelector(
 			activeCampaignContainerSelector
 		);
+
 		expect(activeCampaignContainer).not.toBeInTheDocument();
 
 		const upcomingCampaignContainer: HTMLDivElement | null = container.querySelector(
 			upcomingCampaignContainerSelector
 		);
+
 		expect(upcomingCampaignContainer).not.toBeInTheDocument();
 
 		const endedCampaignContainer: HTMLDivElement | null = container.querySelector(
 			endedCampaignContainerSelector
 		);
+
 		expect(endedCampaignContainer).toBeInTheDocument();
 	});
 });

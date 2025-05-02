@@ -1,37 +1,39 @@
-import {render, waitFor} from "@testing-library/svelte";
-import RewardsFilterTest from "$tests/lib/components/rewards/RewardsFilter.test.svelte";
-import {RewardStates} from "$lib/enums/reward-states";
-import {REWARDS_FILTER} from "$lib/constants/test-ids.constants";
-import {writable, get} from 'svelte/store';
+import { REWARDS_FILTER } from '$lib/constants/test-ids.constants';
+import { RewardStates } from '$lib/enums/reward-states';
+import RewardsFilterTest from '$tests/lib/components/rewards/RewardsFilter.test.svelte';
+import { render, waitFor } from '@testing-library/svelte';
+import { get, writable } from 'svelte/store';
 
 describe('RewardsFilter', () => {
-    const rewardsFilterOngoingButtonSelector = `button[data-tid="${REWARDS_FILTER}-ongoing-button"]`;
-    const rewardsFilterEndedButtonSelector = `button[data-tid="${REWARDS_FILTER}-ended-button"]`;
+	const rewardsFilterOngoingButtonSelector = `button[data-tid="${REWARDS_FILTER}-ongoing-button"]`;
+	const rewardsFilterEndedButtonSelector = `button[data-tid="${REWARDS_FILTER}-ended-button"]`;
 
-    it('should render rewards filter', async () => {
-        const boundValue = writable(RewardStates.ONGOING)
-        const { container } = render(RewardsFilterTest, {
-            props: {
-                rewardState: boundValue
-            }
-        });
+	it('should render rewards filter', async () => {
+		const boundValue = writable(RewardStates.ONGOING);
+		const { container } = render(RewardsFilterTest, {
+			props: {
+				rewardState: boundValue
+			}
+		});
 
-        const rewardsFilterOngoingButton: HTMLButtonElement | null = container.querySelector(
-            rewardsFilterOngoingButtonSelector
-        );
-        expect(rewardsFilterOngoingButton).toBeInTheDocument();
+		const rewardsFilterOngoingButton: HTMLButtonElement | null = container.querySelector(
+			rewardsFilterOngoingButtonSelector
+		);
 
-        const rewardsFilterEndedButton: HTMLButtonElement | null = container.querySelector(
-            rewardsFilterEndedButtonSelector
-        );
-        expect(rewardsFilterEndedButton).toBeInTheDocument();
+		expect(rewardsFilterOngoingButton).toBeInTheDocument();
 
-        await waitFor(() => rewardsFilterEndedButton?.click());
+		const rewardsFilterEndedButton: HTMLButtonElement | null = container.querySelector(
+			rewardsFilterEndedButtonSelector
+		);
 
-        expect(get(boundValue)).toBe(RewardStates.ENDED);
+		expect(rewardsFilterEndedButton).toBeInTheDocument();
 
-        await waitFor(() => rewardsFilterOngoingButton?.click());
+		await waitFor(() => rewardsFilterEndedButton?.click());
 
-        expect(get(boundValue)).toBe(RewardStates.ONGOING);
-    });
+		expect(get(boundValue)).toBe(RewardStates.ENDED);
+
+		await waitFor(() => rewardsFilterOngoingButton?.click());
+
+		expect(get(boundValue)).toBe(RewardStates.ONGOING);
+	});
 });
