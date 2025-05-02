@@ -29,13 +29,3 @@ export const mockUserNetworksOnlyMainnetsComplete: UserNetworks = {
 		{}
 	)
 };
-
-export const mockUserNetworksComplete: UserNetworks = {
-	...SUPPORTED_NETWORKS.reduce<UserNetworks>(
-		(acc, { id, env }) => ({
-			...acc,
-			[id]: { enabled: true, isTestnet: env === 'testnet' }
-		}),
-		{}
-	)
-};
