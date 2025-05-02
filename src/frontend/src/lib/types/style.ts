@@ -9,7 +9,7 @@ export type ButtonColorStyle =
 	| 'error'
 	| 'success';
 
-export type BadgeVariant = 'default' | 'info' | 'error' | 'warning' | 'success' | 'outline';
+export type BadgeVariant = 'default' | 'info' | 'error' | 'warning' | 'success' | 'outline' | 'disabled';
 
 export type TagVariant =
 	| 'default'
