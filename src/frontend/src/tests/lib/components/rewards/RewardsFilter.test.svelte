@@ -4,9 +4,10 @@
 
 	interface Props {
 		rewardState: RewardStates;
+        endedCampaignsAmount?: number;
 	}
 
-	let { rewardState = $bindable() }: Props = $props();
+	let { rewardState = $bindable(), endedCampaignsAmount = 1 }: Props = $props();
 </script>
 
-<RewardsFilter bind:rewardState={$rewardState} />
+<RewardsFilter bind:rewardState={$rewardState} {endedCampaignsAmount} />
