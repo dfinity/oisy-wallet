@@ -3,6 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { nonNullish } from '@dfinity/utils';
 
 	let {
 		content,
@@ -11,7 +12,7 @@
 	}: {
 		content: Snippet;
 		contentHeader: Snippet;
-		bottomSheetFooter: Snippet<[closeFn: () => void]>;
+		bottomSheetFooter?: Snippet<[closeFn: () => void]>;
 	} = $props();
 
 	let expanded = $state(false);
@@ -19,29 +20,26 @@
 	$effect(() => {
 		document.body.classList.toggle('overflow-hidden', expanded);
 	});
-
-	let fullH = $state(false);
 </script>
 
 <Responsive down="md">
 	{#if expanded}
 		<div
-			class="z-199 rounded-t-4xl fixed bottom-0 left-0 right-0 flex min-h-[40vh] flex-col justify-between bg-primary pt-8"
+			class="z-6 rounded-t-4xl fixed bottom-0 left-0 right-0 flex min-h-[40vh] flex-col justify-between bg-primary pt-4"
 			transition:slide={{ axis: 'y', duration: 500 }}
 		>
-			<span
-				class="absolute left-[calc(50%-1.5rem)] top-4 h-[0.4rem] w-[3rem] rounded-full bg-disabled-alt"
-			></span>
 			<div class="flex p-4">
 				{@render content()}
 			</div>
-			<div class="flex border-t border-disabled p-4">
-				{@render bottomSheetFooter(() => {
-					expanded = false;
-				})}
-			</div>
+			{#if nonNullish(bottomSheetFooter)}
+				<div class="flex border-t border-disabled p-4">
+					{@render bottomSheetFooter(() => {
+						expanded = false;
+					})}
+				</div>
+			{/if}
 		</div>
-		<div class="z-198 fixed bottom-0 left-0 right-0 top-0">
+		<div class="z-5 fixed bottom-0 left-0 right-0 top-0">
 			<Backdrop on:nnsClose={() => (expanded = false)} />
 		</div>
 	{/if}
