@@ -1,10 +1,7 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import { ZERO } from '$lib/constants/app.constants';
-import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
-	getRewardsBalance,
 	isEndedCampaign,
 	isOngoingCampaign,
 	isUpcomingCampaign,
@@ -219,46 +216,6 @@ describe('rewards.utils', () => {
 			const result = isEndedCampaign(endDate);
 
 			expect(result).toBeTruthy();
-		});
-	});
-
-	describe('getRewardsBalance', () => {
-		const lastTimestamp = BigInt(Date.now());
-
-		const mockedReward: RewardResponseInfo = {
-			amount: 100n,
-			timestamp: lastTimestamp,
-			name: 'airdrop',
-			campaignName: 'exodus',
-			ledger: mockIdentity.getPrincipal()
-		};
-
-		it('should return the correct rewards balance of multiple rewards', () => {
-			const mockedRewards: RewardResponseInfo[] = [
-				mockedReward,
-				{ ...mockedReward, amount: 200n },
-				{ ...mockedReward, amount: 300n }
-			];
-
-			const result = getRewardsBalance(mockedRewards);
-
-			expect(result).toEqual(600n);
-		});
-
-		it('should return the correct rewards balance of a single airdrop', () => {
-			const mockedRewards: RewardResponseInfo[] = [mockedReward];
-
-			const result = getRewardsBalance(mockedRewards);
-
-			expect(result).toEqual(100n);
-		});
-
-		it('should return zero for an empty list of rewards', () => {
-			const mockedRewards: RewardResponseInfo[] = [];
-
-			const result = getRewardsBalance(mockedRewards);
-
-			expect(result).toEqual(ZERO);
 		});
 	});
 });
