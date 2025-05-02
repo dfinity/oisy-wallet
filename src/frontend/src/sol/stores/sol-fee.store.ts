@@ -11,7 +11,7 @@ export const initFeeStore = (): FeeStore => {
 
 	return {
 		subscribe,
-		setFee(data: bigint | undefined) {
+		setFee: (data: bigint | undefined) => {
 			set(data);
 		}
 	};
