@@ -5,35 +5,35 @@ import { render, waitFor } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
 
 describe('RewardsFilter', () => {
-    const rewardsFilterOngoingButtonSelector = `button[data-tid="${REWARDS_FILTER}-ongoing-button"]`;
-    const rewardsFilterEndedButtonSelector = `button[data-tid="${REWARDS_FILTER}-ended-button"]`;
+	const rewardsFilterOngoingButtonSelector = `button[data-tid="${REWARDS_FILTER}-ongoing-button"]`;
+	const rewardsFilterEndedButtonSelector = `button[data-tid="${REWARDS_FILTER}-ended-button"]`;
 
-    it('should render rewards filter', async () => {
-        const boundValue = writable(RewardStates.ONGOING);
-        const { container } = render(RewardsFilterTest, {
-            props: {
-                rewardState: boundValue
-            }
-        });
+	it('should render rewards filter', async () => {
+		const boundValue = writable(RewardStates.ONGOING);
+		const { container } = render(RewardsFilterTest, {
+			props: {
+				rewardState: boundValue
+			}
+		});
 
-        const rewardsFilterOngoingButton: HTMLButtonElement | null = container.querySelector(
-            rewardsFilterOngoingButtonSelector
-        );
+		const rewardsFilterOngoingButton: HTMLButtonElement | null = container.querySelector(
+			rewardsFilterOngoingButtonSelector
+		);
 
-        expect(rewardsFilterOngoingButton).toBeInTheDocument();
+		expect(rewardsFilterOngoingButton).toBeInTheDocument();
 
-        const rewardsFilterEndedButton: HTMLButtonElement | null = container.querySelector(
-            rewardsFilterEndedButtonSelector
-        );
+		const rewardsFilterEndedButton: HTMLButtonElement | null = container.querySelector(
+			rewardsFilterEndedButtonSelector
+		);
 
-        expect(rewardsFilterEndedButton).toBeInTheDocument();
+		expect(rewardsFilterEndedButton).toBeInTheDocument();
 
-        await waitFor(() => rewardsFilterEndedButton?.click());
+		await waitFor(() => rewardsFilterEndedButton?.click());
 
-        expect(get(boundValue)).toBe(RewardStates.ENDED);
+		expect(get(boundValue)).toBe(RewardStates.ENDED);
 
-        await waitFor(() => rewardsFilterOngoingButton?.click());
+		await waitFor(() => rewardsFilterOngoingButton?.click());
 
-        expect(get(boundValue)).toBe(RewardStates.ONGOING);
-    });
+		expect(get(boundValue)).toBe(RewardStates.ONGOING);
+	});
 });
