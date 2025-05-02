@@ -5,9 +5,10 @@ import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
 	getRewardsBalance,
+	isEndedCampaign,
 	isOngoingCampaign,
 	isUpcomingCampaign,
-	loadRewardResult, isEndedCampaign
+	loadRewardResult
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
