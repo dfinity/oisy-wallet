@@ -6,7 +6,6 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		onclick: () => void;
@@ -15,8 +14,6 @@
 	}
 
 	let { onclick, reward, testId = undefined }: Props = $props();
-
-	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
 
 <button {onclick} class="flex flex-col" data-tid={testId}>
