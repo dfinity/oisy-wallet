@@ -25,21 +25,21 @@
 <Responsive down="md">
 	{#if expanded}
 		<div
-			class="z-6 rounded-t-4xl fixed bottom-0 left-0 right-0 flex min-h-[40vh] flex-col justify-between bg-primary pt-4"
+			class="rounded-t-4xl fixed bottom-0 left-0 right-0 z-10 flex max-h-[100vh] flex-col justify-between bg-primary pt-4"
 			transition:slide={{ axis: 'y', duration: 500 }}
 		>
-			<div class="flex p-4">
+			<div class="flex min-h-[35vh] overflow-y-auto p-4">
 				{@render content()}
 			</div>
 			{#if nonNullish(bottomSheetFooter)}
-				<div class="flex border-t border-disabled p-4">
+				<div class="top-0 flex border-t border-disabled bg-primary p-4">
 					{@render bottomSheetFooter(() => {
 						expanded = false;
 					})}
 				</div>
 			{/if}
 		</div>
-		<div class="z-5 fixed bottom-0 left-0 right-0 top-0">
+		<div class="z-9 fixed bottom-0 left-0 right-0 top-0">
 			<Backdrop on:nnsClose={() => (expanded = false)} />
 		</div>
 	{/if}
