@@ -53,7 +53,7 @@ use shared::{
         Stats, Timestamp,
     },
 };
-use signer::AllowSigningError;
+use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
@@ -362,19 +362,10 @@ const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 pub async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
 ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
-    ic_cdk::println!("Check Point 1");
-
-    let principal: Principal =
-        Principal::from_text("ejrt7-mhyue-6oq2j-63k56-qvvae-3uep4-dh34y-zbtzw-7ulf6-2ohv7-dqe")
-            .expect("Could not decode the principal.");
-    ic_cdk::println!("Check Point 2: {}", principal);
-    let source_address: String = "bc1q0uy4sck2mp6cqst5lcxvpc4yfhmu274jaguasr".to_string();
-    // btc_principal_to_p2wpkh_address(params.network, &principal) .await.map_err(|msg|
-    // SelectedUtxosFeeError::InternalError { msg })?;
-
-    ic_cdk::println!("Check Point 3: source_address={}", source_address);
-
-    ic_cdk::println!("Check Point 4");
+    let principal = ic_cdk::caller();
+    let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+        .await
+        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
     let all_utxos = bitcoin_api::get_all_utxos(
         params.network,
         source_address.clone(),
@@ -387,14 +378,14 @@ pub async fn btc_select_user_utxos_fee(
     .await
     .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
     let now_ns = time();
-    ic_cdk::println!("Check Point 5");
+
     let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
         pending_transactions.prune_pending_transactions(principal, &all_utxos, now_ns);
         !pending_transactions
             .get_pending_transactions(&principal, &source_address)
             .is_empty()
     });
-    ic_cdk::println!("Check Point 6");
+
     if has_pending_transactions {
         return Err(SelectedUtxosFeeError::PendingTransactions);
     }

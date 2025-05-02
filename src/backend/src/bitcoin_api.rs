@@ -1,16 +1,8 @@
-use candid::Principal;
-use ic_cdk::api::{
-    call::{call_with_payment128, CallResult},
-    management_canister::bitcoin::{
-        bitcoin_get_current_fee_percentiles, BitcoinNetwork, GetCurrentFeePercentilesRequest,
-        GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Utxo, UtxoFilter,
-    },
+use ic_cdk::api::management_canister::bitcoin::{
+    bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, BitcoinNetwork,
+    GetCurrentFeePercentilesRequest, GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Utxo,
+    UtxoFilter,
 };
-
-#[allow(dead_code)]
-const GET_UTXO_MAINNET: u128 = 10_000_000_000;
-#[allow(dead_code)]
-const GET_UTXO_TESTNET: u128 = 4_000_000_000;
 
 /// Returns the UTXOs of the given bitcoin address.
 ///
@@ -21,7 +13,7 @@ async fn get_utxos(
     address: String,
     filter: Option<UtxoFilter>,
 ) -> Result<GetUtxosResponse, String> {
-    let utxos_res = bitcoin_get_utxos_query(GetUtxosRequest {
+    let utxos_res = bitcoin_get_utxos(GetUtxosRequest {
         address,
         network,
         filter,
@@ -31,22 +23,6 @@ async fn get_utxos(
 
     Ok(utxos_res.0)
 }
-
-pub async fn bitcoin_get_utxos_query(arg: GetUtxosRequest) -> CallResult<(GetUtxosResponse,)> {
-    let cycles = match arg.network {
-        BitcoinNetwork::Mainnet => GET_UTXO_MAINNET,
-        BitcoinNetwork::Testnet => GET_UTXO_TESTNET,
-        BitcoinNetwork::Regtest => 0,
-    };
-    call_with_payment128(
-        Principal::management_canister(),
-        "bitcoin_get_utxos_query",
-        (arg,),
-        cycles,
-    )
-    .await
-}
-
 /// Returns all the UTXOs of a specific address.
 /// API interface returns a paginated view of the utxos but we need to get them all.
 pub async fn get_all_utxos(
