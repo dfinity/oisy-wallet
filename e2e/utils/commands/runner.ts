@@ -13,16 +13,15 @@ export interface CommandRunner {
 const execAsync = promisify(exec);
 
 // 1) Wrap 'exec' in a promise using promisify
-function execPromise({
+const execPromise = ({
 	command
 }: {
 	command: string;
-}): Promise<{ stdout: string; stderr: string }> {
-	return execAsync(command).catch((err: ExecException & { stdout: string; stderr: string }) => {
+}): Promise<{ stdout: string; stderr: string }> =>
+	execAsync(command).catch((err: ExecException & { stdout: string; stderr: string }) => {
 		// Mimic the original error handling: reject with new Error(stderr)
 		throw new Error(err.stderr);
 	});
-}
 
 // 2) LocalCommandRunner
 export class LocalCommandRunner implements CommandRunner {
@@ -40,6 +39,4 @@ export class LocalCommandRunner implements CommandRunner {
 }
 
 // 3) createCommandRunner: always returns LocalCommandRunner
-export function createCommandRunner(): CommandRunner {
-	return new LocalCommandRunner();
-}
+export const createCommandRunner = (): CommandRunner => new LocalCommandRunner();

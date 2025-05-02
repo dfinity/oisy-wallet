@@ -34,13 +34,13 @@ const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore 
 
 	return {
 		subscribe,
-		setPendingTransactions({
+		setPendingTransactions: ({
 			address,
 			pendingTransactions
 		}: {
 			address: Address;
 			pendingTransactions: Array<PendingTransaction>;
-		}) {
+		}) => {
 			update((state) => ({
 				...state,
 				[address]: {
@@ -49,7 +49,7 @@ const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore 
 				}
 			}));
 		},
-		setPendingTransactionsError({ address }: { address: Address }) {
+		setPendingTransactionsError: ({ address }: { address: Address }) => {
 			update((state) => ({
 				...state,
 				[address]: {
@@ -58,7 +58,7 @@ const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore 
 				}
 			}));
 		},
-		reset() {
+		reset: () => {
 			set({});
 		}
 	};

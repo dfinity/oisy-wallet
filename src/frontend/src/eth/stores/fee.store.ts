@@ -16,7 +16,7 @@ export const initFeeStore = (): FeeStore => {
 	return {
 		subscribe,
 
-		setFee(data: TransactionFeeData) {
+		setFee: (data: TransactionFeeData) => {
 			set(data);
 		}
 	};

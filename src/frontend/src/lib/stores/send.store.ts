@@ -18,7 +18,7 @@ const initSendStore = (token: Token): SendStore => {
 	return {
 		subscribe,
 
-		set(token: Token) {
+		set: (token: Token) => {
 			setStore(token);
 		}
 	};
