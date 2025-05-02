@@ -1,4 +1,8 @@
+import type { AddressTypeSchema } from '$lib/schema/address.schema';
 import type { Option } from '$lib/types/utils';
+import type * as z from 'zod';
+
+export type AddressType = z.infer<typeof AddressTypeSchema>;
 
 export type Address = string;
 
