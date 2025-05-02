@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import AboutFeatureItem from './AboutFeatureItem.svelte';
 	import CoverWhyOisy from '$lib/assets/cover-why-oisy.png';
+	import AboutFeatureItem from '$lib/components/about/AboutFeatureItem.svelte';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconIcLogoPlain from '$lib/components/icons/IconIcLogoPlain.svelte';
