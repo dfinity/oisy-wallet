@@ -136,7 +136,7 @@ export const requestPouhCredential = ({
 				},
 				credentialSubject
 			},
-			onError() {
+			onError: () => {
 				toastsError({
 					msg: { text: authI18n.error.error_requesting_pouh_credential }
 				});
