@@ -2,10 +2,10 @@
 	import { Collapsible, Backdrop } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import GixBottomSheet from '$lib/components/ui/GixBottomSheet.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import GixBottomSheet from '$lib/components/ui/GixBottomSheet.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	let {
 		content,
