@@ -1,6 +1,11 @@
+import { SUPPORTED_BITCOIN_NETWORKS } from '$env/networks/networks.btc.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { SUPPORTED_SOLANA_NETWORKS } from '$env/networks/networks.sol.env';
 import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type { StorageAddressData } from '$lib/stores/address.store';
 import { type Address, type AddressType, type OptionAddress } from '$lib/types/address';
+import type { Network } from '$lib/types/network';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { isSolAddress } from '$sol/utils/sol-address.utils';
 import { parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';
@@ -54,3 +59,13 @@ export const recognizeAddress = (address: string | undefined): AddressType | und
 
 	return detectedTypes[0];
 };
+
+const ADDRESS_TYPE_TO_NETWORKS: { [key in AddressType]: Network[] } = {
+	ICP: [ICP_NETWORK],
+	BTC: SUPPORTED_BITCOIN_NETWORKS,
+	ETH: SUPPORTED_ETHEREUM_NETWORKS,
+	SOL: SUPPORTED_SOLANA_NETWORKS
+};
+
+export const getNetworksForAddressType = (addressType: AddressType): Network[] =>
+	ADDRESS_TYPE_TO_NETWORKS[addressType];

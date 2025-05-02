@@ -1007,6 +1007,12 @@
 			"name": "Name"
 		}
 	},
+	"address": {
+		"form": {
+			"invalid_address": "Invalid address",
+			"valid_for_networks": "Valid for networks:"
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
