@@ -3,10 +3,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
-	import {REWARDS_BANNER, REWARDS_STATUS_BUTTON} from '$lib/constants/test-ids.constants';
+	import Img from '$lib/components/ui/Img.svelte';
+	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {isEndedCampaign} from "$lib/utils/rewards.utils";
-	import Img from "$lib/components/ui/Img.svelte";
+	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		onclick: () => void;
@@ -30,7 +30,7 @@
 		<article class="h-full">
 			<section>
 				<div
-						class="flex flex-col-reverse items-center text-start text-lg font-semibold md:flex-row"
+					class="flex flex-col-reverse items-center text-start text-lg font-semibold md:flex-row"
 				>
 					<div class="mr-auto flex flex-col items-center md:flex-row">
 						<div>
@@ -40,8 +40,8 @@
 
 					<span class="mr-auto inline-flex md:ml-auto md:mr-0">
 						<RewardDateBadge
-								date={reward.endDate}
-								testId={nonNullish(testId) ? `${testId}-date-badge` : undefined}
+							date={reward.endDate}
+							testId={nonNullish(testId) ? `${testId}-date-badge` : undefined}
 						/>
 					</span>
 				</div>
@@ -51,9 +51,9 @@
 			</section>
 			<section class="bottom-4 left-4 mt-3 flex">
 				<div
-						data-tid={REWARDS_STATUS_BUTTON}
-						class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
-				>{$i18n.rewards.text.check_status}
+					data-tid={REWARDS_STATUS_BUTTON}
+					class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
+					>{$i18n.rewards.text.check_status}
 				</div>
 			</section>
 		</article>
