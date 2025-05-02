@@ -75,12 +75,9 @@ export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
 export const AMOUNT_DATA = 'amount-data';
-export const AMOUNT_INPUT = 'amount-input';
 export const DESTINATION_INPUT = 'destination-input';
 
 export const IN_PROGRESS_MODAL = 'in-progress-modal';
-
-export const TESTNET_TOGGLE = 'testnet-toggle';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
 export const CAROUSEL_SLIDE = 'carousel-slide';
@@ -179,7 +176,6 @@ export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code'
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
 
 export const ADDRESS_BOOK_MODAL = 'address-book-modal';
-export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
 export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';

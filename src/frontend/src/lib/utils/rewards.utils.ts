@@ -1,4 +1,3 @@
-import { ZERO } from '$lib/constants/app.constants';
 import { getRewards } from '$lib/services/reward.services';
 import type { RewardResponseInfo, RewardResult } from '$lib/types/reward';
 import type { Identity } from '@dfinity/agent';
@@ -52,6 +51,3 @@ export const isEndedCampaign = (endDate: Date) => {
 
 	return endDiff <= 0;
 };
-
-export const getRewardsBalance = (rewards: RewardResponseInfo[]): bigint =>
-	rewards.reduce<bigint>((total, { amount }) => total + amount, ZERO);
