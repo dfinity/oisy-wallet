@@ -72,11 +72,11 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialized (user profile settings and addresses are loaded).
  */
 export const initLoader = async ({
-																	 identity,
-																	 validateAddresses,
-																	 progressAndLoad,
-																	 setProgressModal
-																 }: {
+	identity,
+	validateAddresses,
+	progressAndLoad,
+	setProgressModal
+}: {
 	identity: OptionIdentity;
 	validateAddresses: () => void;
 	progressAndLoad: () => Promise<void>;

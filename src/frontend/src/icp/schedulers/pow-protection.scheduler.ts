@@ -3,7 +3,11 @@ import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
-import type { PostMessageDataRequest } from '$lib/types/post-message';
+import type {
+	PostMessageDataRequest,
+	PostMessageDataResponseError,
+	PostMessageDataResponsePowProtector
+} from '$lib/types/post-message';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
@@ -39,20 +43,48 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	 * @throws Errors if any step in the sequence fails.
 	 */
 	private requestSignerCycles = async ({ identity }: SchedulerJobData<PostMessageDataRequest>) => {
-		// Step 1: Request creation of the Proof-of-Work (PoW) challenge (throws when unsuccessful).
-		const { start_timestamp_ms: timestamp, difficulty }: CreateChallengeResponse =
-			await createPowChallenge({ identity });
+		try {
+			// Step 1: Request creation of the Proof-of-Work (PoW) challenge (throws when unsuccessful).
+			const { start_timestamp_ms: timestamp, difficulty }: CreateChallengeResponse =
+				await createPowChallenge({ identity });
 
-		// Step 2: Solve the PoW challenge.
-		const nonce = await solvePowChallenge({
-			timestamp,
-			difficulty
-		});
+			// Step 2: Solve the PoW challenge.
+			const nonce = await solvePowChallenge({
+				timestamp,
+				difficulty
+			});
 
-		// Step 3: Request allowance for signing operations with solved nonce.
-		await allowSigning({
-			identity,
-			request: { nonce }
-		});
+			// Step 3: Request allowance for signing operations with solved nonce.
+			const response = await allowSigning({
+				identity,
+				request: { nonce }
+			});
+
+			// Step 4: Publish a postMessage event containing the response data, which will be handled by pow-protector.listener.ts
+			this.postMessagePow({
+				status: Object.keys(response.status)[0] as 'Skipped' | 'Failed' | 'Executed',
+				challengeCompletion: response.challenge_completion,
+				allowedCycles: BigInt(response.allowed_cycles)
+			});
+		} catch (error) {
+			// Publish a postMessage event containing the error, which will be handled by pow-protector.listener.ts
+			this.postMessagePowError({ error });
+		}
 	};
+
+	private postMessagePow(data: PostMessageDataResponsePowProtector) {
+		this.timer.postMsg<PostMessageDataResponsePowProtector>({
+			msg: 'syncPowProtection',
+			data
+		});
+	}
+
+	protected postMessagePowError({ error }: { error: unknown }) {
+		this.timer.postMsg<PostMessageDataResponseError>({
+			msg: 'syncPowProtectionError',
+			data: {
+				error
+			}
+		});
+	}
 }

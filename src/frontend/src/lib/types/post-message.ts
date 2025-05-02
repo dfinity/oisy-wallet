@@ -1,25 +1,26 @@
-import type {
-	inferPostMessageSchema,
-	PostMessageDataRequestBtcSchema,
-	PostMessageDataRequestExchangeTimerSchema,
-	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
-	PostMessageDataRequestIcCkSchema,
-	PostMessageDataRequestIcrcSchema,
-	PostMessageDataRequestIcrcStrictSchema,
-	PostMessageDataRequestSchema,
-	PostMessageDataRequestSolSchema,
-	PostMessageDataResponseAuthSchema,
-	PostMessageDataResponseBTCAddressSchema,
-	PostMessageDataResponseErrorSchema,
-	PostMessageDataResponseExchangeErrorSchema,
-	PostMessageDataResponseExchangeSchema,
-	PostMessageDataResponseSchema,
-	PostMessageDataResponseWalletCleanUpSchema,
-	PostMessageDataResponseWalletSchema,
-	PostMessageJsonDataResponseSchema,
-	PostMessageResponseSchema,
-	PostMessageResponseStatusSchema,
-	PostMessageSyncStateSchema
+import {
+	type PostMessageDataResponsePowProtectorSchema,
+	type PostMessageDataRequestBtcSchema,
+	type PostMessageDataRequestExchangeTimerSchema,
+	type PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
+	type PostMessageDataRequestIcCkSchema,
+	type PostMessageDataRequestIcrcSchema,
+	type PostMessageDataRequestIcrcStrictSchema,
+	type PostMessageDataRequestSchema,
+	type PostMessageDataRequestSolSchema,
+	type PostMessageDataResponseAuthSchema,
+	type PostMessageDataResponseBTCAddressSchema,
+	type PostMessageDataResponseErrorSchema,
+	type PostMessageDataResponseExchangeErrorSchema,
+	type PostMessageDataResponseExchangeSchema,
+	type PostMessageDataResponseSchema,
+	type PostMessageDataResponseWalletCleanUpSchema,
+	type PostMessageDataResponseWalletSchema,
+	type PostMessageJsonDataResponseSchema,
+	type PostMessageResponseSchema,
+	type PostMessageResponseStatusSchema,
+	type PostMessageSyncStateSchema,
+	type inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 import type * as z from 'zod';
 import type { ZodType } from 'zod';
@@ -73,6 +74,10 @@ export type PostMessageSyncState = z.infer<typeof PostMessageSyncStateSchema>;
 
 export type PostMessageDataResponseBTCAddress = z.infer<
 	typeof PostMessageDataResponseBTCAddressSchema
+>;
+
+export type PostMessageDataResponsePowProtector = z.infer<
+	typeof PostMessageDataResponsePowProtectorSchema
 >;
 
 export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> = z.infer<

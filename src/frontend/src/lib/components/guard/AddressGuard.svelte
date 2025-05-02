@@ -9,7 +9,11 @@
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { initSignerAllowance } from '$lib/services/loader.services';
-	import { btcAddressMainnetStore, ethAddressStore, solAddressMainnetStore } from '$lib/stores/address.store';
+	import {
+		btcAddressMainnetStore,
+		ethAddressStore,
+		solAddressMainnetStore
+	} from '$lib/stores/address.store';
 	import { validateSolAddressMainnet } from '$sol/services/sol-address.services';
 
 	let signerAllowanceLoaded = false;

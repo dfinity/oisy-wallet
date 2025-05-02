@@ -193,6 +193,11 @@ type DefiniteCanisterSettingsArgs = record {
   compute_allocation : nat;
 };
 type EthAddress = variant { Public : text };
+type GetAllowedCyclesError = variant {
+  Other : text;
+  FailedToContactCyclesLedger;
+};
+type GetAllowedCyclesResponse = record { allowed_cycles : nat };
 type GetUserProfileError = variant { NotFound };
 type HasUserProfileResponse = record { has_user_profile : bool };
 type HttpRequest = record {
@@ -265,6 +270,10 @@ type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok; Err : AddDappSettingsError };
+type Result_10 = variant {
+  Ok : TopUpCyclesLedgerResponse;
+  Err : TopUpCyclesLedgerError;
+};
 type Result_2 = variant { Ok : AllowSigningResponse; Err : AllowSigningError };
 type Result_3 = variant { Ok; Err : BtcAddPendingTransactionError };
 type Result_4 = variant {
@@ -279,12 +288,12 @@ type Result_6 = variant {
   Ok : CreateChallengeResponse;
   Err : CreateChallengeError;
 };
-type Result_7 = variant { Ok : UserProfile; Err : GetUserProfileError };
-type Result_8 = variant { Ok; Err : SaveTestnetsSettingsError };
-type Result_9 = variant {
-  Ok : TopUpCyclesLedgerResponse;
-  Err : TopUpCyclesLedgerError;
+type Result_7 = variant {
+  Ok : GetAllowedCyclesResponse;
+  Err : GetAllowedCyclesError;
 };
+type Result_8 = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result_9 = variant { Ok; Err : SaveTestnetsSettingsError };
 type SaveNetworksSettingsRequest = record {
   networks : vec record { NetworkSettingsFor; NetworkSettings };
   current_user_version : opt nat64;
@@ -420,9 +429,10 @@ service : (Arg) -> {
   get_account_creation_timestamps : () -> (
       vec record { principal; nat64 },
     ) query;
+  get_allowed_cycles : () -> (Result_7);
   get_canister_status : () -> (CanisterStatusResultV2);
   get_snapshot : () -> (opt UserSnapshot) query;
-  get_user_profile : () -> (Result_7) query;
+  get_user_profile : () -> (Result_8) query;
   has_user_profile : () -> (HasUserProfileResponse) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
@@ -436,9 +446,9 @@ service : (Arg) -> {
   set_many_custom_tokens : (vec CustomToken) -> ();
   set_many_user_tokens : (vec UserToken) -> ();
   set_snapshot : (UserSnapshot) -> ();
-  set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_8);
+  set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_9);
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
-  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_9);
-  update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_8);
+  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_10);
+  update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_9);
 }

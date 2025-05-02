@@ -3,6 +3,7 @@ import type {
 	BtcAddPendingTransactionError,
 	ChallengeCompletionError,
 	CreateChallengeError,
+	GetAllowedCyclesError,
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -32,6 +33,18 @@ export const mapBtcSelectUserUtxosFeeError = (
 	}
 
 	return new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError');
+};
+
+export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterInternalError => {
+	if ('FailedToContactCyclesLedger' in err) {
+		return new CanisterInternalError('The Cycles Ledger cannot be contacted.');
+	}
+
+	if ('Other' in err) {
+		return new CanisterInternalError(err.Other);
+	}
+
+	return new CanisterInternalError('Unknown GetAllowedCyclesError');
 };
 
 export const mapAllowSigningError = (

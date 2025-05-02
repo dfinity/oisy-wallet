@@ -1,10 +1,17 @@
 //! Types related to the signer & topping up the cycles ledger account for use with the signer.
 
+use candid::Nat;
 use ic_cycles_ledger_client::ApproveError;
 
 use super::{CandidType, Debug, Deserialize};
 use crate::types::pow::{AllowSigningStatus, ChallengeCompletion, ChallengeCompletionError};
 /// Types related to topping up the cycles ledger account for use with the signer.
+
+#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub enum GetAllowedCyclesError {
+    FailedToContactCyclesLedger,
+    Other(String),
+}
 
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum AllowSigningError {
@@ -24,6 +31,11 @@ pub struct AllowSigningResponse {
     pub status: AllowSigningStatus,
     pub allowed_cycles: u64,
     pub challenge_completion: Option<ChallengeCompletion>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct GetAllowedCyclesResponse {
+    pub allowed_cycles: Nat,
 }
 
 pub mod topup {
