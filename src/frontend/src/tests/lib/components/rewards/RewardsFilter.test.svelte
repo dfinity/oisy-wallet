@@ -4,7 +4,7 @@
 
 	interface Props {
 		rewardState: RewardStates;
-        endedCampaignsAmount?: number;
+		endedCampaignsAmount?: number;
 	}
 
 	let { rewardState = $bindable(), endedCampaignsAmount = 1 }: Props = $props();
