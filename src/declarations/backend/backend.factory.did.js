@@ -5,10 +5,6 @@ export const idlFactory = ({ IDL }) => {
 		Enabled: IDL.Null,
 		Disabled: IDL.Null
 	});
-	const Guards = IDL.Record({
-		user_data: ApiEnabled,
-		threshold_key: ApiEnabled
-	});
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
 		ii_canister_id: IDL.Principal,
