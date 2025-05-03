@@ -39,7 +39,7 @@ describe('Menu', () => {
 	});
 
 	const openMenu = () => {
-		container = render(Menu).container;
+		({ container } = render(Menu));
 		const menuButton: HTMLButtonElement | null = container.querySelector(menuButtonSelector);
 
 		expect(menuButton).toBeInTheDocument();

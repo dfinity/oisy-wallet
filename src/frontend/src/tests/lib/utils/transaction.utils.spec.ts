@@ -192,7 +192,7 @@ describe('transaction.utils', () => {
 		const type = 'ic-transaction';
 
 		const mockToken = ICP_TOKEN;
-		const mockIcTransactionUi = createMockIcTransactionsUi(1)[0];
+		const [mockIcTransactionUi] = createMockIcTransactionsUi(1);
 
 		const mockModalStore = {
 			type,
