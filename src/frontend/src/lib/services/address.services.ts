@@ -1,5 +1,5 @@
 import { warnSignOut } from '$lib/services/auth.services';
-import { type AddressStore, type StorageAddressData } from '$lib/stores/address.store';
+import type { AddressStore, StorageAddressData } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
