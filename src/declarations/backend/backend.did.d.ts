@@ -7,6 +7,8 @@ export interface AccountSnapshot {
 	token_address: EthAddress;
 	network: {};
 	approx_usd_per_token: number;
+	last_transactions: Array<Transaction>;
+	account: EthAddress;
 	timestamp: bigint;
 	amount: bigint;
 }
@@ -100,7 +102,9 @@ export type ApproveError =
 	| { BadFee: { expected_fee: bigint } }
 	| { AllowanceChanged: { current_allowance: bigint } }
 	| { CreatedInFuture: { ledger_time: bigint } }
-	| { TooOld: null };
+	| { TooOld: null }
+	| { Expired: { ledger_time: bigint } }
+	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
 export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };

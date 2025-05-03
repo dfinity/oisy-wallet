@@ -1,6 +1,13 @@
 // @ts-ignore
 export const idlFactory = ({ IDL }) => {
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
+	const SupportedCredential = IDL.Record({
+		ii_canister_id: IDL.Principal,
+		issuer_origin: IDL.Text,
+		issuer_canister_id: IDL.Principal,
+		ii_origin: IDL.Text,
+		credential_type: CredentialType
+	});
 	const InitArg = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
 		ecdsa_key_name: IDL.Text,
