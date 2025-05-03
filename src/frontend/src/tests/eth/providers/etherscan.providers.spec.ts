@@ -55,7 +55,7 @@ describe('etherscan.providers', () => {
 
 	describe('EtherscanProvider', () => {
 		const network: Network = new Network(ETHEREUM_NETWORK.name, ETHEREUM_NETWORK.chainId);
-		const chainId = ETHEREUM_NETWORK.chainId;
+		const { chainId } = ETHEREUM_NETWORK;
 		const address = mockEthAddress;
 
 		const normalTransactions: EtherscanProviderTransaction[] = createMockEtherscanTransactions(3);

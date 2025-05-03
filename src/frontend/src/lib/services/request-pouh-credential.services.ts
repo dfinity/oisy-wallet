@@ -57,7 +57,7 @@ const addPouhCredential = async ({
 				});
 				return { success: false };
 			}
-			const errorKey = Object.keys(response.Err)[0];
+			const [errorKey] = Object.keys(response.Err);
 			toastsError({
 				msg: {
 					text: replacePlaceholders(
