@@ -8,19 +8,21 @@
 	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
-		title: string;
+		title?: string;
 		rewards: RewardDescription[];
-		altText?: string | undefined;
-		testId?: string | undefined;
+		altText?: string;
+		testId?: string;
 	}
 
-	let { title, rewards, altText = undefined, testId = undefined }: Props = $props();
+	let { title, rewards, altText, testId }: Props = $props();
 
 	const modalId = Symbol();
 </script>
 
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
-	<span class="text-lg font-bold first-letter:capitalize">{title}</span>
+	{#if nonNullish(title)}
+		<span class="text-lg font-bold first-letter:capitalize">{title}</span>
+	{/if}
 
 	{#each rewards as reward (reward.id)}
 		<div in:slide={SLIDE_DURATION} class="mt-4">

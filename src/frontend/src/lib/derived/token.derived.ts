@@ -25,16 +25,6 @@ export const tokenStandard: Readable<OptionTokenStandard> = derived(
 	([$token]) => $token?.standard
 );
 
-export const tokenSymbol: Readable<string | undefined> = derived(
-	[token],
-	([$token]) => $token?.symbol
-);
-
-export const tokenDecimals: Readable<number | undefined> = derived(
-	[token],
-	([$token]) => $token?.decimals
-);
-
 export const tokenToggleable: Readable<boolean> = derived([token], ([$token]) => {
 	if (nonNullish($token)) {
 		return icTokenIcrcCustomToken($token)
