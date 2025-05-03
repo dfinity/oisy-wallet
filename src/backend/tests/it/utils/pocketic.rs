@@ -217,6 +217,7 @@ impl Default for BackendBuilder {
 // Customisation
 impl BackendBuilder {
     /// Sets custom controllers for the backend canister.
+    #[allow(dead_code)]
     pub fn with_controllers(mut self, controllers: Vec<Principal>) -> Self {
         self.controllers = controllers;
         self
@@ -436,7 +437,6 @@ pub(crate) fn init_arg() -> Arg {
             issuer_origin: ISSUER_ORIGIN.to_string(),
             credential_type: CredentialType::ProofOfUniqueness,
         }]),
-        api: None,
         cfs_canister_id: Some(
             Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
         ),
