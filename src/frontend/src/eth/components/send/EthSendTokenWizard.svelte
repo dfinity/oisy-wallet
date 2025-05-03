@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type WizardStep } from '@dfinity/gix-components';
+	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';

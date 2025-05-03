@@ -28,7 +28,7 @@ import {
 	TOKEN_CARD,
 	TOKEN_GROUP
 } from '$lib/constants/test-ids.constants';
-import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
+import type { InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';

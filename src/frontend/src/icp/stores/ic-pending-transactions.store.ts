@@ -1,4 +1,4 @@
-import { type IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
+import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
 import type { CertifiedData } from '$lib/types/store';

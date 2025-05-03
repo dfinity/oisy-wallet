@@ -1,7 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
-import { type UserConfig } from 'vite';
+import type { UserConfig } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
 

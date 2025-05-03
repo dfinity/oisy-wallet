@@ -1,5 +1,5 @@
 import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
-import { type SchedulerJobData, type SchedulerJobParams } from '$lib/schedulers/scheduler';
+import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { CertifiedData } from '$lib/types/store';
 import { isNullish, queryAndUpdate } from '@dfinity/utils';
 

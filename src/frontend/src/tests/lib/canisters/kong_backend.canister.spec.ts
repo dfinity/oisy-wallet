@@ -12,7 +12,7 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { getKongIcTokenIdentifier } from '$lib/utils/swap.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import type { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';

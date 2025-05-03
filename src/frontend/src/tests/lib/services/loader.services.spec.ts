@@ -22,7 +22,7 @@ import {
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/load-user-profile.services', () => ({
 	loadUserProfile: vi.fn(() => Promise.resolve({ success: true }))

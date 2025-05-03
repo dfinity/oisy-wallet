@@ -1,5 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { type BalancesData } from '$lib/stores/balances.store';
+import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TokenId } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';

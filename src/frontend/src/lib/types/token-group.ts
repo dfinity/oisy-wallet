@@ -1,7 +1,7 @@
-import {
-	type TokenGroupIdSchema,
-	type TokenGroupPropSchema,
-	type TokenGroupSchema
+import type {
+	TokenGroupIdSchema,
+	TokenGroupPropSchema,
+	TokenGroupSchema
 } from '$lib/schema/token-group.schema';
 import type { TokenFinancialData, TokenUi } from '$lib/types/token';
 import type * as z from 'zod';
