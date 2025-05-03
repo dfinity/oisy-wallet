@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input as GixInput, IconClose } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import { type ComponentProps } from 'svelte';
+	import type { ComponentProps } from 'svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	type GixInputProps = ComponentProps<GixInput>;

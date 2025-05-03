@@ -1,7 +1,7 @@
 import { IcWalletScheduler, type IcWalletMsg } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import type { GetTransactions } from '$icp/types/ic.post-message';
-import { type SchedulerJobData, type SchedulerJobParams } from '$lib/schedulers/scheduler';
+import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessageDataResponseWalletCleanUp } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';

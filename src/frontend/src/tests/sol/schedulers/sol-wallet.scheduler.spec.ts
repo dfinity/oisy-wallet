@@ -13,7 +13,7 @@ import { mockSolAddress } from '$tests/mocks/sol.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/kit';
-import { type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 describe('sol-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;
