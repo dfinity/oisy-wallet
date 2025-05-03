@@ -158,7 +158,7 @@ export const loadTokenAccount = async ({
 		return undefined;
 	}
 
-	const { pubkey: accountAddress } = response.value[0];
+	const [{ pubkey: accountAddress }] = response.value;
 
 	return accountAddress;
 };

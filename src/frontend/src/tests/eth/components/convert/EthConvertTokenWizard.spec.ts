@@ -12,8 +12,8 @@ import {
 	type FeeStoreData
 } from '$eth/stores/fee.store';
 import * as ckEthDerived from '$icp-eth/derived/cketh.derived';
+import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import * as ckEthStores from '$icp-eth/stores/cketh.store';
-import { type CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
@@ -43,7 +43,7 @@ import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { InfuraProvider } from 'ethers/providers';
 import { get, readable, writable } from 'svelte/store';
-import { type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
@@ -177,7 +177,7 @@ describe('EthConvertTokenWizard', () => {
 
 		await clickConvertButton(container);
 
-		const args = sendSpy.mock.calls[0][0];
+		const [[args]] = sendSpy.mock.calls;
 
 		expect(sendSpy).toHaveBeenCalledOnce();
 		expect(stringifyJson({ value: args })).toBe(

@@ -743,8 +743,8 @@ describe('post-message.schema', () => {
 		});
 		const SchemaWithCustomData = inferPostMessageSchema(CustomDataSchema);
 
-		const validRequestMsg = PostMessageRequestSchema.options[0];
-		const validResponseMsg = PostMessageResponseSchema.options[0];
+		const [validRequestMsg] = PostMessageRequestSchema.options;
+		const [validResponseMsg] = PostMessageResponseSchema.options;
 		const validData = { additionalInfo: 'sample info' };
 
 		it('should validate with a valid request msg and data matching dataSchema', () => {

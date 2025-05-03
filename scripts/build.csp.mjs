@@ -133,7 +133,7 @@ const updateCSP = (indexHtml) => {
 
 	let m;
 	while ((m = sw.exec(indexHtml))) {
-		const content = m[1];
+		const [_, content] = m;
 
 		indexHashes.push(`'sha256-${createHash('sha256').update(content).digest('base64')}'`);
 	}

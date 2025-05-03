@@ -17,7 +17,7 @@ vi.mock(import('$env/rest/infura.env'), async (importOriginal) => {
 
 describe('infura.rest', () => {
 	describe('InfuraGasRest', () => {
-		const chainId = ETHEREUM_NETWORK.chainId;
+		const { chainId } = ETHEREUM_NETWORK;
 
 		const mockApiResponse = {
 			low: {

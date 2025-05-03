@@ -459,7 +459,7 @@ describe('token-group.utils', () => {
 
 	describe('groupSecondaryToken', () => {
 		// We normalize the decimals, to avoid having to mock the normalizing of balances
-		const decimals = ETHEREUM_TOKEN.decimals;
+		const { decimals } = ETHEREUM_TOKEN;
 
 		const token = { ...ETHEREUM_TOKEN, decimals, balance: bn1Bi, usdBalance: 100 };
 		const anotherToken = { ...BTC_REGTEST_TOKEN, decimals, balance: bn2Bi, usdBalance: 200 };
@@ -534,7 +534,7 @@ describe('token-group.utils', () => {
 
 	describe('groupTokens', () => {
 		// We normalize the decimals, to avoid having to mock the normalizing of balances
-		const decimals = ETHEREUM_TOKEN.decimals;
+		const { decimals } = ETHEREUM_TOKEN;
 
 		const mockToken = { ...ETHEREUM_TOKEN, decimals, balance: bn1Bi, usdBalance: 100 };
 		const mockSecondToken = { ...BTC_MAINNET_TOKEN, decimals, balance: bn3Bi, usdBalance: 300 };

@@ -49,11 +49,11 @@
 		}
 
 		if (nonNullish(qrResponse.destination)) {
-			destination = qrResponse.destination;
+			({ destination } = qrResponse);
 		}
 
 		if (nonNullish(qrResponse.amount)) {
-			amount = qrResponse.amount;
+			({ amount } = qrResponse);
 		}
 
 		back();

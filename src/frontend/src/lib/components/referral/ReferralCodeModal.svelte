@@ -39,8 +39,7 @@
 
 		const referrerInfo = await getReferrerInfo({ identity: $authIdentity });
 		if (nonNullish(referrerInfo)) {
-			referralCode = referrerInfo.referralCode;
-			numberOfReferrals = referrerInfo.numberOfReferrals;
+			({ referralCode, numberOfReferrals } = referrerInfo);
 		}
 	});
 </script>

@@ -38,10 +38,7 @@
 	let copyAriaLabel: string | undefined;
 
 	const displayQRCode = ({ detail }: CustomEvent<ReceiveQRCode>) => {
-		address = detail.address;
-		addressLabel = detail.addressLabel;
-		addressToken = detail.addressToken;
-		copyAriaLabel = detail.copyAriaLabel;
+		({ address, addressLabel, addressToken, copyAriaLabel } = detail);
 		modal.next();
 	};
 

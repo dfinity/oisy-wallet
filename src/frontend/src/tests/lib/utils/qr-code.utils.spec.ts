@@ -32,7 +32,7 @@ describe('decodeUrn', () => {
 
 			const result = decodeQrCodeUrn(urn);
 
-			const standard = token.standard;
+			const { standard } = token;
 			const expectedPrefix =
 				standard === 'erc20'
 					? 'ethereum'

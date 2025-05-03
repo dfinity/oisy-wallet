@@ -46,7 +46,7 @@ const mapPendingTransaction = ({
 	token: IcToken;
 	value: bigint;
 } & IcCkLinkedAssets): IcTransactionUi => {
-	const explorerUrl = (twinToken.network as EthereumNetwork).explorerUrl;
+	const { explorerUrl } = twinToken.network as EthereumNetwork;
 
 	const { symbol: twinTokenSymbol } = twinToken;
 	const { symbol } = token;

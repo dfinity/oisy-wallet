@@ -114,7 +114,7 @@ const buildOrchestratorInfo = async (orchestratorId: Principal): Promise<TokensA
 		async (acc, [key, value]) => {
 			const { tokens: accTokens, icons: accIcons } = await acc;
 
-			const token = value[0];
+			const [token] = value;
 
 			const { ledgerCanisterId, ...rest } = token;
 
