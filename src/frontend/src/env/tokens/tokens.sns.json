@@ -95,8 +95,8 @@
 		"indexCanisterId": "v5tde-5aaaa-aaaaq-aabja-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "Mimic Clay",
-			"symbol": "CLAY",
+			"name": "BOOM",
+			"symbol": "BOOM",
 			"fee": {
 				"__bigint__": "1000000"
 			},
