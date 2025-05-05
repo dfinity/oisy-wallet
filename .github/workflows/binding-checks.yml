@@ -97,7 +97,7 @@ jobs:
 
       - name: Format
         if: steps.changes.outputs.src == 'true'
-        run: npm run format:dir --dir=src/declarations
+        run: npm run format
 
       - name: Check bindings
         id: check_changes
