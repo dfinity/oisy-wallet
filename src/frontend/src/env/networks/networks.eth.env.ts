@@ -48,8 +48,6 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	buy: { onramperId: 'ethereum' }
 };
 
-export const { chainId: ETHEREUM_NETWORK_CHAIN_ID } = ETHEREUM_NETWORK;
-
 export const SEPOLIA_NETWORK_SYMBOL = 'SepoliaETH';
 
 export const SEPOLIA_NETWORK_ID: NetworkId = parseNetworkId(SEPOLIA_NETWORK_SYMBOL);
@@ -64,8 +62,6 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	explorerUrl: SEPOLIA_EXPLORER_URL,
 	providers: { infura: 'sepolia' }
 };
-
-export const { chainId: SEPOLIA_NETWORK_CHAIN_ID } = SEPOLIA_NETWORK;
 
 /**
  * Some functions, such as when we load the user's custom tokens, require knowing all the networks.
