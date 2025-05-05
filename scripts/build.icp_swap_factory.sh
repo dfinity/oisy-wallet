@@ -40,7 +40,7 @@ download() {
   else
     echo "Downloading ${!asset_url} --> ${!asset_file}"
     mkdir -p "$(dirname "${!asset_file}")"
-    curl -sSL "${!asset_url}" > "${!asset_file}"
+    curl -sSL "${!asset_url}" >"${!asset_file}"
   fi
 }
 
@@ -50,7 +50,7 @@ download wasm
 
 # Compress Wasm
 echo "Compressing Wasm: $WASM_FILE_GZ"
-gzip -c "$WASM_FILE" > "$WASM_FILE_GZ"
+gzip -c "$WASM_FILE" >"$WASM_FILE_GZ"
 
 # Generate init args
 echo "Generating init args..."
