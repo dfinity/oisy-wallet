@@ -99,7 +99,7 @@
 	<span class="text-center text-xl" slot="title">{reward.title}</span>
 
 	<ContentWithToolbar>
-		<RewardBanner />
+		<RewardBanner {reward} />
 
 		<RewardEarnings bind:amountOfRewards />
 		{#if amountOfRewards > 0}
