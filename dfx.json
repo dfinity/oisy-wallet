@@ -50,6 +50,27 @@
 				}
 			}
 		},
+		"icp_swap_factory": {
+			"type": "custom",
+			"build": "scripts/build.icp_swap_factory.sh",
+			"candid": "target/icp_swap_factory.did",
+			"wasm": "target/icp_swap_factory.wasm.gz",
+			"init_arg_file": "target/icp_swap_factory.arg.did",
+			"shrink": false,
+			"specified_id": "4mmnk-kiaaa-aaaag-qbllq-cai",
+			"remote": {
+				"id": {
+					"ic": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"beta": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_be_1": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_1": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_2": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_3": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_4": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"staging": "4mmnk-kiaaa-aaaag-qbllq-cai"
+				}
+			}
+		},
 		"backend": {
 			"candid": "src/backend/backend.did",
 			"package": "backend",
