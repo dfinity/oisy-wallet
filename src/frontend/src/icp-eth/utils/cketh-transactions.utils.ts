@@ -59,7 +59,7 @@ const mapPendingTransaction = ({
 
 	return {
 		id: `${hash}`,
-		incoming: false,
+		incoming: true,
 		type: 'burn',
 		status: 'pending',
 		from,
