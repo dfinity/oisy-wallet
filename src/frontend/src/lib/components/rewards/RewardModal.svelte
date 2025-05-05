@@ -31,6 +31,7 @@
 	import { getRewardRequirementsFulfilled } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 	import {
 		areTransactionsStoresLoading,
@@ -89,6 +90,8 @@
 
 	const isRequirementsLoading = $derived(areTransactionsStoresLoading(transactionsStores));
 
+	const hasEnded = $derived(isEndedCampaign(reward.endDate));
+
 	let amountOfRewards = $state(0);
 </script>
 
@@ -105,33 +108,35 @@
 
 		<div class="flex w-full justify-between text-lg font-semibold">
 			<span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
-			<span class="inline-flex">
+			<span>
 				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
 			</span>
 		</div>
 		<p class="my-3"><Html text={reward.description} /></p>
 
-		<ExternalLink
-			href={reward.learnMoreHref}
-			ariaLabel={$i18n.rewards.text.learn_more}
-			iconVisible={false}
-			asButton
-			styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
-		>
-			{$i18n.rewards.text.learn_more}
-		</ExternalLink>
+		{#if !hasEnded}
+			<ExternalLink
+				href={reward.learnMoreHref}
+				ariaLabel={$i18n.rewards.text.learn_more}
+				iconVisible={false}
+				asButton
+				styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
+			>
+				{$i18n.rewards.text.learn_more}
+			</ExternalLink>
 
-		<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2" />
+			<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2" />
 
-		{#if reward.requirements.length > 0}
-			<Hr spacing="md" />
+			{#if reward.requirements.length > 0}
+				<Hr spacing="md" />
 
-			<RewardsRequirements
-				loading={isRequirementsLoading}
-				{reward}
-				{isEligible}
-				{requirementsFulfilled}
-			/>
+				<RewardsRequirements
+					loading={isRequirementsLoading}
+					{reward}
+					{isEligible}
+					{requirementsFulfilled}
+				/>
+			{/if}
 		{/if}
 
 		<Button paddingSmall type="button" fullWidth on:click={modalStore.close} slot="toolbar">
