@@ -38,14 +38,6 @@ type AirDropConfig = record {
   token_configs : vec TokenConfig
 };
 
-/// Batch sizes for the processing
-type BatchSizes = record {
-  user_fetching : nat16;
-  sprinkle : nat16;
-  block_processing : nat16;
-  airdrop : nat16;
-  block_fetching : nat16
-};
 type CandidDuration = variant {
   Minutes : nat64;
   Seconds : nat64;
@@ -69,12 +61,7 @@ type ClaimVipRewardResponse = variant {
 
 type Config = record {
   usage_awards_config : opt UsageAwardConfig;
-  batch_sizes : opt BatchSizes;
   airdrop_config : opt AirDropConfig;
-  /// List of index canisters to track the user's balance
-  /// (in addition to the ledger index configured in the sprinkle)
-  /// Useful to shorten the time for this canister to sync (and for testing).
-  index_canisters : vec principal;
   /// The VIP configuration
   vip_config : opt VipConfig;
   /// VIP Campaigns
@@ -84,9 +71,6 @@ type Config = record {
     /// The campaign configuration
     VipConfig
   };
-  /// The interval at which the canister make progress in seconds.
-  /// Trade-off between the canister's responsiveness and the cycles consumed.
-  processing_interval_s : opt nat16;
   /// Admin principals that have privileges to _read_ configuration and internal status.
   readonly_admins : vec principal;
   /// Oisy canister to fetch users from
@@ -146,12 +130,6 @@ type PublicAirdropStatus = variant {
   };
   /// The airdrop will start in the future
   Upcoming
-};
-type PublicRewardsInfo = record {
-  /// The status of the airdrop. If absent, then no airdrop is configured (and none happened in the past).
-  airdrop : opt PublicAirdropStatus;
-  /// Information about the last sprinkle event, if any.
-  last_sprinkle : opt PublicSprinkleInfo
 };
 type PublicSprinkleInfo = record {
   /// When a sprinkle event was scheduled
@@ -412,8 +390,6 @@ service : (opt Config) -> {
   ) query;
   /// Gets a VIP reward token for a given campaign ID.
   new_vip_reward : (opt ClaimedVipReward) -> (NewVipRewardResponse);
-  /// Public endpoint to query general information with regards to rewards distributed by this canister.
-  public_rewards_info : () -> (PublicRewardsInfo) query;
   /// Get or create referrer info for the caller.
   referrer_info : () -> (ReferrerInfo);
   /// Get the referrer info for a user.
@@ -422,11 +398,8 @@ service : (opt Config) -> {
   register_airdrop_recipient : (UserSnapshot) -> ();
   register_snapshot_for : (principal, UserSnapshot) -> ();
   stats_usage_vs_holding : () -> (UsageVsHoldingStats) query;
-  /// Sets a timestamp for a sprinkle event in the future. The sprinkle will be executed
+  /// Sets the caller's referrer.
   set_referrer : (nat32) -> (SetReferrerResponse);
-  /// as soon as possible after the timestamp.
-  /// Gives information about the current status of the canister.
-  status : () -> (StatusResponse) query;
   /// Runs the provided award event.  This is normally done automatically.  It can be useful
   /// to trigger an event directly when testing.
   trigger_usage_award_event : (UsageAwardEvent) -> ();
