@@ -25,8 +25,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let referralCode: number = $state();
-	let numberOfReferrals: number = $state();
+	let referralCode = $state();
+	let numberOfReferrals = $state();
 
 	const referralUrl = $derived(`${window.location.origin}/?referrer=${referralCode}`);
 
