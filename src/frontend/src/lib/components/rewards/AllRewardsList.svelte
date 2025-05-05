@@ -14,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
+	import Img from "$lib/components/ui/Img.svelte";
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 
