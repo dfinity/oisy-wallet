@@ -8,6 +8,7 @@
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import {replacePlaceholders} from "$lib/utils/i18n.utils";
 
 	interface Props {
 		onclick: () => void;
