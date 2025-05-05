@@ -8,7 +8,6 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { beforeEach } from 'vitest';
 
 describe('AllRewardsList', () => {
 	const activeCampaignContainerSelector = `div[data-tid="${REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}"]`;
