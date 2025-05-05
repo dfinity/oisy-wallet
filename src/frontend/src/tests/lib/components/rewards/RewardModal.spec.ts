@@ -7,7 +7,7 @@ import { render } from '@testing-library/svelte';
 describe('RewardModal', () => {
 	const imageBannerSelector = `img[data-tid="${REWARDS_MODAL_IMAGE_BANNER}"]`;
 
-	it('should render modal content', () => {
+	it('should render active modal content', () => {
 		Object.defineProperty(window, 'navigator', {
 			writable: true,
 			value: {
@@ -30,6 +30,36 @@ describe('RewardModal', () => {
 
 		mockedReward.requirements.forEach((requirement: string) => {
 			expect(getByText(requirement)).toBeInTheDocument();
+		});
+
+		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
+		expect(imageBanner).toBeInTheDocument();
+	});
+
+	it('should render ended modal content', () => {
+		Object.defineProperty(window, 'navigator', {
+			writable: true,
+			value: {
+				userAgentData: {
+					mobile: false
+				}
+			}
+		});
+
+		const mockedReward: RewardDescription = { ...mockRewardCampaigns[2] };
+
+		const { container, getByText, queryByText } = render(RewardModal, {
+			props: {
+				reward: mockedReward
+			}
+		});
+
+		expect(getByText(mockedReward.title)).toBeInTheDocument();
+		expect(getByText(mockedReward.description)).toBeInTheDocument();
+
+		mockedReward.requirements.forEach((requirement: string) => {
+			expect(queryByText(requirement)).not.toBeInTheDocument();
 		});
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
