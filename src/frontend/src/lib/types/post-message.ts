@@ -1,5 +1,4 @@
 import {
-	type PostMessageDataResponsePowProtectorSchema,
 	type PostMessageDataRequestBtcSchema,
 	type PostMessageDataRequestExchangeTimerSchema,
 	type PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
@@ -13,6 +12,7 @@ import {
 	type PostMessageDataResponseErrorSchema,
 	type PostMessageDataResponseExchangeErrorSchema,
 	type PostMessageDataResponseExchangeSchema,
+	type PostMessageDataResponsePowProtectorSchema,
 	type PostMessageDataResponseSchema,
 	type PostMessageDataResponseWalletCleanUpSchema,
 	type PostMessageDataResponseWalletSchema,
