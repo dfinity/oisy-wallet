@@ -14,7 +14,15 @@
 	// TODO: make it more functional
 	let tokensAlreadyLoaded: TokenId[] = [];
 
+	let loading = false;
+
 	const load = async () => {
+		if (loading) {
+			return;
+		}
+
+		loading = true;
+
 		if (
 			isNullish($enabledEthereumTokens) ||
 			isNullish($enabledErc20Tokens) ||
@@ -31,6 +39,8 @@
 		for await (const results of loader) {
 			tokensAlreadyLoaded = [...tokensAlreadyLoaded, ...batchResultsToTokenId(results)];
 		}
+
+		loading = false;
 	};
 
 	const debounceLoad = debounce(load, 1000);
