@@ -25,11 +25,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let referralCode: number;
-	let numberOfReferrals: number;
+	let referralCode: number = $state();
+	let numberOfReferrals: number = $state();
 
-	let referralUrl;
-	$: referralUrl = `${window.location.origin}/?referrer=${referralCode}`;
+	const referralUrl = $derived(`${window.location.origin}/?referrer=${referralCode}`);
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
