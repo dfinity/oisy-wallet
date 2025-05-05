@@ -95,10 +95,6 @@ jobs:
         if: steps.changes.outputs.src == 'true'
         run: npm run generate
 
-      - name: Format
-        if: steps.changes.outputs.src == 'true'
-        run: npm run format
-
       - name: Check bindings
         id: check_changes
         if: steps.changes.outputs.src == 'true'
