@@ -28,6 +28,7 @@ interface I18nCore {
 		new: string;
 		edit: string;
 		no_results: string;
+		paste: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
