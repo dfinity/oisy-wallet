@@ -9,11 +9,11 @@
 	let {
 		content,
 		contentHeader,
-		bottomSheetFooter
+		contentFooter
 	}: {
 		content: Snippet;
 		contentHeader: Snippet;
-		bottomSheetFooter?: Snippet<[closeFn: () => void]>;
+		contentFooter?: Snippet<[closeFn: () => void]>;
 	} = $props();
 
 	let expanded = $state(false);
@@ -22,7 +22,7 @@
 <Responsive down="md">
 	{#if expanded}
 		<div class="z-14 fixed bottom-0 left-0 right-0 top-0">
-			<BottomSheet on:nnsClose={() => (expanded = false)}>
+			<BottomSheet on:nnsClose={() => (expanded = false)} transition>
 				<div slot="header" class="w-full p-4">
 					<ButtonIcon
 						on:click={() => (expanded = false)}
@@ -36,8 +36,8 @@
 					{@render content()}
 				</div>
 				<div slot="footer" class="w-full p-4">
-					{#if nonNullish(bottomSheetFooter)}
-						{@render bottomSheetFooter(() => {
+					{#if nonNullish(contentFooter)}
+						{@render contentFooter(() => {
 							expanded = false;
 						})}
 					{/if}
