@@ -163,6 +163,7 @@ interface I18nRewards {
 		active_campaigns: string;
 		upcoming_campaigns: string;
 		active_date: string;
+		ended_date: string;
 		participate_title: string;
 		share: string;
 		learn_more: string;
