@@ -60,6 +60,7 @@ export const idlFactory = ({ IDL }) => {
 		index_canisters: IDL.Vec(IDL.Principal),
 		vip_config: IDL.Opt(VipConfig),
 		processing_interval_s: IDL.Opt(IDL.Nat16),
+		vip_campaigns: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, VipConfig))),
 		readonly_admins: IDL.Vec(IDL.Principal),
 		oisy_canister: IDL.Opt(IDL.Principal)
 	});
@@ -91,6 +92,7 @@ export const idlFactory = ({ IDL }) => {
 	const NewVipRewardResponse = IDL.Variant({
 		Anonymous: IDL.Null,
 		NotImportantPerson: IDL.Null,
+		UnknownCampaign: IDL.Null,
 		VipReward: VipReward
 	});
 	const PublicAirdropStatus = IDL.Variant({
@@ -259,6 +261,7 @@ export const idlFactory = ({ IDL }) => {
 		config: IDL.Func([], [Config]),
 		configure_usage_awards: IDL.Func([UsageAwardConfig], [], []),
 		configure_vip: IDL.Func([VipConfig], [], []),
+		configure_vips: IDL.Func([IDL.Vec(IDL.Tuple(IDL.Text, VipConfig))], [], []),
 		last_activity_histogram: IDL.Func(
 			[LastActivityHistogramRequest],
 			[LastActivityHistogramResponse]
@@ -279,7 +282,7 @@ export const idlFactory = ({ IDL }) => {
 		user_info: IDL.Func([], [UserData]),
 		user_info_for: IDL.Func([IDL.Principal], [UserData]),
 		user_stats: IDL.Func([IDL.Principal], [UsageAwardState]),
-		vip_stats: IDL.Func([], [VipStats])
+		vip_stats: IDL.Func([IDL.Opt(IDL.Text)], [VipStats])
 	});
 };
 // @ts-ignore
@@ -344,6 +347,7 @@ export const init = ({ IDL }) => {
 		index_canisters: IDL.Vec(IDL.Principal),
 		vip_config: IDL.Opt(VipConfig),
 		processing_interval_s: IDL.Opt(IDL.Nat16),
+		vip_campaigns: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, VipConfig))),
 		readonly_admins: IDL.Vec(IDL.Principal),
 		oisy_canister: IDL.Opt(IDL.Principal)
 	});
