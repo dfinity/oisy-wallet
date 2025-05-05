@@ -5,8 +5,8 @@ import { render, waitFor } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
 
 describe('RewardsFilter', () => {
-	const rewardsFilterOngoingButtonSelector = `button[data-tid="${REWARDS_FILTER}-ongoing-button"]`;
-	const rewardsFilterEndedButtonSelector = `button[data-tid="${REWARDS_FILTER}-ended-button"]`;
+	const rewardsFilterOngoingButtonSelector = `button[data-tid="${REWARDS_FILTER}-${RewardStates.ONGOING}-button"]`;
+	const rewardsFilterEndedButtonSelector = `button[data-tid="${REWARDS_FILTER}-${RewardStates.ENDED}-button"]`;
 
 	it('should render rewards filter', async () => {
 		const boundValue = writable(RewardStates.ONGOING);
