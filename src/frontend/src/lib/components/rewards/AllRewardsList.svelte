@@ -1,13 +1,10 @@
 <script lang="ts">
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
-	import rewardBanner from '$lib/assets/rewards-banner.svg';
 	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import {
 		REWARDS_ACTIVE_CAMPAIGNS_CONTAINER,
-		REWARDS_BANNER,
 		REWARDS_ENDED_CAMPAIGNS_CONTAINER,
 		REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
@@ -30,12 +27,6 @@
 		isEndedCampaign(endDate)
 	);
 </script>
-
-<div class="relative mb-6 flex items-end md:mb-10">
-	<div class="max-h-66 overflow-hidden rounded-2xl">
-		<Img src={rewardBanner} testId={REWARDS_BANNER} />
-	</div>
-</div>
 
 <RewardsFilter
 	bind:rewardState={selectedRewardState}
