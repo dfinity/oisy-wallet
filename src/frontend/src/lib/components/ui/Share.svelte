@@ -9,7 +9,7 @@
 		testId?: string;
 	}
 
-	let {text, href, styleClass, testId}: Props = $props()
+	let { text, href, styleClass, testId }: Props = $props();
 </script>
 
 <ExternalLink
