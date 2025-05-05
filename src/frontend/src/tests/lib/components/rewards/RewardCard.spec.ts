@@ -20,7 +20,7 @@ describe('RewardCard', () => {
 
 		const { container, getByText } = render(RewardCard, {
 			props: {
-                onclick: vi.fn(),
+				onclick: vi.fn(),
 				reward: mockedReward,
 				testId
 			}
