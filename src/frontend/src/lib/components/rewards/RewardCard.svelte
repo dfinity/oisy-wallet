@@ -6,7 +6,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {replacePlaceholders} from "$lib/utils/i18n.utils.js";
+	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
 	interface Props {
 		onclick: () => void;
@@ -20,9 +20,13 @@
 <button {onclick} class="flex flex-col" data-tid={testId}>
 	<div class="-mb-7">
 		<div class="max-h-66 overflow-hidden rounded-2xl">
-			<Img src={reward.logo} testId={REWARDS_BANNER} alt={replacePlaceholders($i18n.rewards.alt.reward_logo, {
-				$campaignName: reward.cardTitle
-			})} />
+			<Img
+				src={reward.logo}
+				testId={REWARDS_BANNER}
+				alt={replacePlaceholders($i18n.rewards.alt.reward_logo, {
+					$campaignName: reward.cardTitle
+				})}
+			/>
 		</div>
 	</div>
 
