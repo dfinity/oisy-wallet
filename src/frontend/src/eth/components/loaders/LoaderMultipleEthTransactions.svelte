@@ -6,6 +6,8 @@
 		batchResultsToTokenId
 	} from '$eth/services/eth-transactions-batch.services';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 	import type { TokenId } from '$lib/types/token';
 
@@ -36,4 +38,6 @@
 	$: $enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, debounceLoad();
 </script>
 
-<slot />
+<IntervalLoader {load} interval={WALLET_TIMER_INTERVAL_MILLIS}>
+	<slot />
+</IntervalLoader>
