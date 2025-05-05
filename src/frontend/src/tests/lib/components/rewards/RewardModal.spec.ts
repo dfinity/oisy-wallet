@@ -33,6 +33,7 @@ describe('RewardModal', () => {
 		});
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 	});
 
@@ -62,6 +63,7 @@ describe('RewardModal', () => {
 		});
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 	});
 });
