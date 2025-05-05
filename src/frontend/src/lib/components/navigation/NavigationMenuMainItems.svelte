@@ -96,20 +96,20 @@
 </NavigationItem>
 
 <NavigationItem
-    href={networkUrl({
-        path: AppPath.Rewards,
-        networkId: $networkId,
-        usePreviousRoute: isTransactionsRoute,
-        fromRoute
-    })}
-    ariaLabel={$i18n.navigation.alt.airdrops}
-    selected={isRouteRewards(pageData)}
-    testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
-    tag={$i18n.core.text.new}
-    tagVariant="emphasis"
+	href={networkUrl({
+		path: AppPath.Rewards,
+		networkId: $networkId,
+		usePreviousRoute: isTransactionsRoute,
+		fromRoute
+	})}
+	ariaLabel={$i18n.navigation.alt.airdrops}
+	selected={isRouteRewards(pageData)}
+	testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+	tag={$i18n.core.text.new}
+	tagVariant="emphasis"
 >
-    <IconGift />
-    {$i18n.navigation.text.airdrops}
+	<IconGift />
+	{$i18n.navigation.text.airdrops}
 </NavigationItem>
 
 <NavigationItem
