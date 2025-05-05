@@ -185,7 +185,7 @@ interface I18nRewards {
 		ongoing: string;
 		ended: string;
 	};
-	alt: { upcoming_campaigns: string };
+	alt: { upcoming_campaigns: string; reward_logo: string };
 }
 
 interface I18nFooter {
