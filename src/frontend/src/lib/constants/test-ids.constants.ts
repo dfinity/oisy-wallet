@@ -131,6 +131,7 @@ export const THEME_SELECTOR_CARD = 'theme-selector-card';
 
 export const REWARDS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-reward-campaigns-container';
 export const REWARDS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-reward-campaigns-container';
+export const REWARDS_ENDED_CAMPAIGNS_CONTAINER = 'ended-reward-campaigns-container';
 export const REWARDS_FILTER = 'rewards-filter';
 export const REWARDS_MODAL = 'rewards-modal';
 export const REWARDS_MODAL_DATE_BADGE = 'rewards-modal-date-badge';
