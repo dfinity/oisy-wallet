@@ -1,4 +1,5 @@
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
 import type { TokenId } from '$lib/types/token';
@@ -21,8 +22,7 @@ export const USDC_TOKEN: RequiredEvmBep20Token = {
 	icon: usdc,
 	address: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
 	exchange: 'erc20',
-	// TODO: reintegrate the groupData when the sum of balances is fixed: the tokens have different decimals, so it cannot work for now
-	// groupData: USDC_TOKEN_GROUP,
+	groupData: USDC_TOKEN_GROUP,
 	buy: {
 		onramperId: 'usdc_bsc'
 	}

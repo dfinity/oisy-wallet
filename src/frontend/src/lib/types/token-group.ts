@@ -1,7 +1,7 @@
-import {
-	type TokenGroupIdSchema,
-	type TokenGroupPropSchema,
-	type TokenGroupSchema
+import type {
+	TokenGroupIdSchema,
+	TokenGroupPropSchema,
+	TokenGroupSchema
 } from '$lib/schema/token-group.schema';
 import type { TokenFinancialData, TokenUi } from '$lib/types/token';
 import type * as z from 'zod';
@@ -14,6 +14,7 @@ export type TokenGroup = z.infer<typeof TokenGroupPropSchema>;
 
 export type TokenUiGroup = {
 	id: TokenGroupId;
+	decimals: number;
 	// TODO: remove deprecated field when groupData is completely integrated
 	nativeToken: TokenUi;
 	groupData: TokenGroupData;

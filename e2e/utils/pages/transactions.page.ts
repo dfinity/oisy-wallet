@@ -24,6 +24,14 @@ export const TransactionCases: TransactionsConfig[] = [
 	{
 		tokenSymbol: 'SOL',
 		networkId: 'SOL'
+	},
+	{
+		tokenSymbol: 'ETH',
+		networkId: 'BASE'
+	},
+	{
+		tokenSymbol: 'BNB',
+		networkId: 'BSC'
 	}
 ];
 
@@ -39,6 +47,7 @@ export class TransactionsPage extends HomepageLoggedIn {
 		tokenSymbol: string;
 		networkId: string;
 	}) => {
+		await this.toggleNetworkSelector({ networkSymbol: networkId });
 		const testId = `${TOKEN_CARD}-${tokenSymbol}-${networkId}`;
 		await this.clickByTestId({ testId });
 		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({

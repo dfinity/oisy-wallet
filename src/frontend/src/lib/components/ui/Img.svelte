@@ -7,6 +7,7 @@
 	export let height: string | undefined = undefined;
 	export let rounded = false;
 	export let fitHeight = false;
+	export let grayscale = false;
 	export let styleClass: string | undefined = undefined;
 	export let testId: string | undefined = undefined;
 </script>
@@ -23,6 +24,7 @@
 	on:load
 	on:error
 	class:rounded-full={rounded}
+	class:grayscale
 	class={styleClass}
 	style={fitHeight ? `max-width: inherit; height: ${height};` : undefined}
 />

@@ -35,13 +35,6 @@ export interface AirDropConfig {
 	start_timestamp_ns: bigint;
 	token_configs: Array<TokenConfig>;
 }
-export interface BatchSizes {
-	user_fetching: number;
-	sprinkle: number;
-	block_processing: number;
-	airdrop: number;
-	block_fetching: number;
-}
 export type CandidDuration =
 	| { Minutes: bigint }
 	| { Seconds: bigint }
@@ -58,11 +51,9 @@ export interface ClaimedVipReward {
 }
 export interface Config {
 	usage_awards_config: [] | [UsageAwardConfig];
-	batch_sizes: [] | [BatchSizes];
 	airdrop_config: [] | [AirDropConfig];
-	index_canisters: Array<Principal>;
 	vip_config: [] | [VipConfig];
-	processing_interval_s: [] | [number];
+	vip_campaigns: [] | [Array<[string, VipConfig]>];
 	readonly_admins: Array<Principal>;
 	oisy_canister: [] | [Principal];
 }
@@ -92,6 +83,7 @@ export interface LedgerConfig {
 export type NewVipRewardResponse =
 	| { Anonymous: null }
 	| { NotImportantPerson: null }
+	| { UnknownCampaign: null }
 	| { VipReward: VipReward };
 export type PublicAirdropStatus =
 	| {
@@ -99,10 +91,6 @@ export type PublicAirdropStatus =
 	  }
 	| { Completed: { total_airdrops: bigint } }
 	| { Upcoming: null };
-export interface PublicRewardsInfo {
-	airdrop: [] | [PublicAirdropStatus];
-	last_sprinkle: [] | [PublicSprinkleInfo];
-}
 export interface PublicSprinkleInfo {
 	timestamp_ns: bigint;
 	total_amount: bigint;
@@ -260,19 +248,18 @@ export interface _SERVICE {
 	config: ActorMethod<[], Config>;
 	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
 	configure_vip: ActorMethod<[VipConfig], undefined>;
+	configure_vips: ActorMethod<[Array<[string, VipConfig]>], undefined>;
 	last_activity_histogram: ActorMethod<
 		[LastActivityHistogramRequest],
 		LastActivityHistogramResponse
 	>;
 	new_vip_reward: ActorMethod<[[] | [ClaimedVipReward]], NewVipRewardResponse>;
-	public_rewards_info: ActorMethod<[], PublicRewardsInfo>;
 	referrer_info: ActorMethod<[], ReferrerInfo>;
 	referrer_info_for: ActorMethod<[Principal], [] | [ReferrerInfo]>;
 	register_airdrop_recipient: ActorMethod<[UserSnapshot], undefined>;
 	register_snapshot_for: ActorMethod<[Principal, UserSnapshot], undefined>;
 	set_referrer: ActorMethod<[number], SetReferrerResponse>;
 	stats_usage_vs_holding: ActorMethod<[], UsageVsHoldingStats>;
-	status: ActorMethod<[], StatusResponse>;
 	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
 	usage_eligible: ActorMethod<[Principal], [boolean, boolean]>;
 	usage_stats: ActorMethod<[], UsageAwardStats>;
@@ -280,7 +267,7 @@ export interface _SERVICE {
 	user_info: ActorMethod<[], UserData>;
 	user_info_for: ActorMethod<[Principal], UserData>;
 	user_stats: ActorMethod<[Principal], UsageAwardState>;
-	vip_stats: ActorMethod<[], VipStats>;
+	vip_stats: ActorMethod<[[] | [string]], VipStats>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

@@ -1,4 +1,5 @@
 import { modalStore } from '$lib/stores/modal.store';
+import type { WalletKitTypes } from '@reown/walletkit';
 import { get } from 'svelte/store';
 
 describe('modal.store', () => {
@@ -22,7 +23,7 @@ describe('modal.store', () => {
 
 	it('should open wallet-connect-sign modal with data', () => {
 		const id = Symbol('modalId');
-		const data = { value: 12345 };
+		const data = { value: 12345 } as unknown as WalletKitTypes.SessionRequest;
 		modalStore.openWalletConnectSign({ id, data });
 
 		expect(get(modalStore)).toEqual({ type: 'wallet-connect-sign', id, data });

@@ -65,10 +65,10 @@
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let network: Network | undefined = undefined;
-	$: network = $sendToken.network;
+	$: ({ network } = $sendToken);
 
 	let networkId: NetworkId | undefined = undefined;
-	$: networkId = $sendToken.network.id;
+	$: ({ id: networkId } = network);
 
 	let source: OptionSolAddress;
 	let solanaNativeToken: Token;
@@ -223,7 +223,7 @@
 				{#if formCancelAction === 'back'}
 					<ButtonBack onclick={back} />
 				{:else}
-					<ButtonCancel on:click={close} />
+					<ButtonCancel onclick={close} />
 				{/if}
 			</svelte:fragment>
 		</SolSendForm>

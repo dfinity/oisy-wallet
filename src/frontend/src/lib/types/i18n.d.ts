@@ -163,6 +163,7 @@ interface I18nRewards {
 		active_campaigns: string;
 		upcoming_campaigns: string;
 		active_date: string;
+		ended_date: string;
 		participate_title: string;
 		share: string;
 		learn_more: string;
@@ -181,8 +182,10 @@ interface I18nRewards {
 		carousel_slide_cta: string;
 		sprinkles_earned: string;
 		youre_eligible: string;
+		ongoing: string;
+		ended: string;
 	};
-	alt: { upcoming_campaigns: string };
+	alt: { upcoming_campaigns: string; reward_logo: string };
 }
 
 interface I18nFooter {
@@ -904,6 +907,11 @@ interface I18nAddress_book {
 	text: { title: string; empty_title: string; empty_text: string; add_new_contact: string };
 }
 
+interface I18nContact {
+	form: { add_new_contact: string };
+	fields: { name: string };
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -998,6 +1006,7 @@ interface I18n {
 	vip: I18nVip;
 	referral: I18nReferral;
 	address_book: I18nAddress_book;
+	contact: I18nContact;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;

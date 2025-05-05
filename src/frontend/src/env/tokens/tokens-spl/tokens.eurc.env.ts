@@ -1,6 +1,5 @@
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { EURC_TOKEN_GROUP } from '$env/tokens/groups/groups.eurc.env';
-import { EURC_TOKEN as ETH_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import eurc from '$eth/assets/eurc.svg';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -24,8 +23,6 @@ export const EURC_TOKEN: RequiredSplToken = {
 	icon: eurc,
 	address: 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr',
 	owner: TOKEN_PROGRAM_ADDRESS,
-	// TODO: remove this prop when we will use `groupData` for grouping
-	twinToken: ETH_EURC_TOKEN,
 	groupData: EURC_TOKEN_GROUP,
 	buy: {
 		onramperId: 'eurc_solana'

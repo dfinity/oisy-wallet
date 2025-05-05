@@ -70,6 +70,6 @@
 		{#if !hideBack}
 			<ButtonBack onclick={onBack} testId={HELP_AUTH_BACK_BUTTON} />
 		{/if}
-		<ButtonDone on:click={onDone} testId={HELP_AUTH_DONE_BUTTON} />
+		<ButtonDone onclick={onDone} testId={HELP_AUTH_DONE_BUTTON} />
 	</ButtonGroup>
 </ContentWithToolbar>
