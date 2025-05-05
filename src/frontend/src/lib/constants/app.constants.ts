@@ -11,7 +11,8 @@ export const STAGING = MODE === 'staging' || TEST_FE || MODE === 'audit' || MODE
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
-export const TEST = parseBoolEnvVar(import.meta.env.TEST);
+export const TEST =
+	parseBoolEnvVar(import.meta.env.TEST) || parseBoolEnvVar(import.meta.env.STORYBOOK);
 
 const MAINNET_DOMAIN = 'icp0.io';
 
