@@ -4,7 +4,7 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_NETWORKS } from '$env/networks/networks.sol.env';
 import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type { StorageAddressData } from '$lib/stores/address.store';
-import { type Address, type AddressType, type OptionAddress } from '$lib/types/address';
+import type { Address, AddressType, OptionAddress } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { isSolAddress } from '$sol/utils/sol-address.utils';
