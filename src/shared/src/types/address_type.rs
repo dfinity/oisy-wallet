@@ -10,11 +10,6 @@ pub enum AddressType {
     BTC,
     ETH,
     SOL,
-    ADA,
-    DOT,
-    AVAX,
-    BSC,
-    MATIC,
 }
 
 impl fmt::Display for AddressType {
@@ -24,11 +19,6 @@ impl fmt::Display for AddressType {
             AddressType::BTC => write!(f, "BTC"),
             AddressType::ETH => write!(f, "ETH"),
             AddressType::SOL => write!(f, "SOL"),
-            AddressType::ADA => write!(f, "ADA"),
-            AddressType::DOT => write!(f, "DOT"),
-            AddressType::AVAX => write!(f, "AVAX"),
-            AddressType::BSC => write!(f, "BSC"),
-            AddressType::MATIC => write!(f, "MATIC"),
         }
     }
 }
@@ -39,11 +29,6 @@ impl From<&str> for AddressType {
             "BTC" => AddressType::BTC,
             "ETH" => AddressType::ETH,
             "SOL" => AddressType::SOL,
-            "ADA" => AddressType::ADA,
-            "DOT" => AddressType::DOT,
-            "AVAX" => AddressType::AVAX,
-            "BSC" => AddressType::BSC,
-            "MATIC" => AddressType::MATIC,
             _ => AddressType::ICP,
         }
     }
