@@ -9,18 +9,10 @@ import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
-import type { Networkish } from 'ethers/providers';
 
 export const ETH_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED
 );
-
-export const INFURA_NETWORK_HOMESTEAD: Networkish = 'homestead';
-export const INFURA_NETWORK_SEPOLIA: Networkish = 'sepolia';
-export const INFURA_NETWORK_BASE: Networkish = 'base';
-export const INFURA_NETWORK_BASE_SEPOLIA: Networkish = 'base-sepolia';
-export const INFURA_NETWORK_BNB_MAINNET: Networkish = 'bnb';
-export const INFURA_NETWORK_BNB_TESTNET: Networkish = 'bnbt';
 
 export const ALCHEMY_JSON_RPC_URL_MAINNET = 'https://eth-mainnet.g.alchemy.com/v2';
 export const ALCHEMY_JSON_RPC_URL_SEPOLIA = 'https://eth-sepolia.g.alchemy.com/v2';
@@ -51,6 +43,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	iconLight: ethereumIconLight,
 	iconDark: ethereumIconDark,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
+	providers: { infura: 'homestead' },
 	exchange: { coingeckoId: 'ethereum' },
 	buy: { onramperId: 'ethereum' }
 };
@@ -66,7 +59,8 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	chainId: 11155111n,
 	iconLight: sepoliaIconLight,
 	iconDark: sepoliaIconDark,
-	explorerUrl: SEPOLIA_EXPLORER_URL
+	explorerUrl: SEPOLIA_EXPLORER_URL,
+	providers: { infura: 'sepolia' }
 };
 
 /**

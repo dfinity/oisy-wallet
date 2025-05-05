@@ -1,9 +1,4 @@
-import {
-	ETHEREUM_NETWORK_ID,
-	INFURA_NETWORK_HOMESTEAD,
-	INFURA_NETWORK_SEPOLIA,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC20_ICP_ABI } from '$eth/constants/erc20-icp.constants';
 import type { Erc20Provider, PopulateTransactionParams } from '$eth/types/contracts-providers';
@@ -52,10 +47,12 @@ export class InfuraErc20IcpProvider implements Erc20Provider {
 	};
 }
 
-const providers: Record<NetworkId, InfuraErc20IcpProvider> = {
-	[ETHEREUM_NETWORK_ID]: new InfuraErc20IcpProvider(INFURA_NETWORK_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new InfuraErc20IcpProvider(INFURA_NETWORK_SEPOLIA)
-};
+const providers: Record<NetworkId, InfuraErc20IcpProvider> = SUPPORTED_ETHEREUM_NETWORKS.reduce<
+	Record<NetworkId, InfuraErc20IcpProvider>
+>(
+	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraErc20IcpProvider(infura) }),
+	{}
+);
 
 export const infuraErc20IcpProviders = (networkId: NetworkId): InfuraErc20IcpProvider => {
 	const provider = providers[networkId];
