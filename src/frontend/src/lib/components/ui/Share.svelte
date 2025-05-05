@@ -2,10 +2,14 @@
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 
-	export let text: string;
-	export let href: string;
-	export let styleClass: string | undefined = undefined;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		text: string;
+		href: string;
+		styleClass?: string;
+		testId?: string;
+	}
+
+	let { text, href, styleClass, testId }: Props = $props();
 </script>
 
 <ExternalLink
