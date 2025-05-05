@@ -4,6 +4,7 @@
 	import rewardBanner from '$lib/assets/rewards-banner.svg';
 	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import {
 		REWARDS_ACTIVE_CAMPAIGNS_CONTAINER,
 		REWARDS_BANNER,
@@ -14,7 +15,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
-	import Img from "$lib/components/ui/Img.svelte";
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 
