@@ -25,7 +25,7 @@ vi.mock(import('$env/rest/etherscan.env'), async (importOriginal) => {
 
 describe('etherscan.rest', () => {
 	describe('EtherscanRest', () => {
-		const chainId = ETHEREUM_NETWORK.chainId;
+		const { chainId } = ETHEREUM_NETWORK;
 
 		const mockApiResponse = {
 			status: '1',
