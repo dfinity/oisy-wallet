@@ -12,10 +12,10 @@
 	interface Props {
 		onclick: () => void;
 		reward: RewardDescription;
-		testId?: string | undefined;
+		testId?: string;
 	}
 
-	let { onclick, reward, testId = undefined }: Props = $props();
+	let { onclick, reward, testId }: Props = $props();
 
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
@@ -23,7 +23,9 @@
 <button {onclick} class="flex flex-col" data-tid={testId}>
 	<div class="-mb-7">
 		<div class="max-h-66 overflow-hidden rounded-2xl">
-			<Img src={reward.logo} testId={REWARDS_BANNER} grayscale={hasEnded} />
+			<Img src={reward.logo} testId={REWARDS_BANNER} grayscale={hasEnded} alt={replacePlaceholders($i18n.rewards.alt.reward_logo, {
+					$campaignName: reward.cardTitle
+				})} />
 		</div>
 	</div>
 

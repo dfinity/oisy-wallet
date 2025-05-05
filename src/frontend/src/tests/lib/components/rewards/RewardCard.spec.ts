@@ -20,6 +20,7 @@ describe('RewardCard', () => {
 
 		const { container, getByText } = render(RewardCard, {
 			props: {
+                onclick: vi.fn(),
 				reward: mockedReward,
 				testId
 			}
@@ -53,6 +54,7 @@ describe('RewardCard', () => {
 
 		const { container, getByText } = render(RewardCard, {
 			props: {
+				onclick: vi.fn(),
 				reward: mockedReward,
 				testId
 			}
