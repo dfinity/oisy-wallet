@@ -6,7 +6,6 @@ print_help() {
 Creates the ICP Swap Factory installation files:
 
 - The Wasm and Candid files are downloaded.
-- The installation args are computed based on the DFX_NETWORK environment variable.
 
 The files are installed at the locations defined for 'icp_swap_factory' in 'dfx.json'.
 EOF
@@ -21,7 +20,9 @@ DFX_NETWORK="${DFX_NETWORK:-local}"
 export ICP_SWAP_FACTORY_BUILDENV="$DFX_NETWORK"
 
 FACTORY_RELEASE_URL="https://raw.githubusercontent.com/ICPSwap-Labs/docs/refs/heads/main/_canister/SwapFactory"
+# shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${FACTORY_RELEASE_URL}/SwapFactory.did"
+# shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 WASM_URL="${FACTORY_RELEASE_URL}/SwapFactory.wasm"
 
 CANDID_FILE="$(jq -r .canisters.icp_swap_factory.candid dfx.json)"
