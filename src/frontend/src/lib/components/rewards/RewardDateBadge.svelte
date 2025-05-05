@@ -5,10 +5,10 @@
 
 	interface Props {
 		date: Date;
-		testId?: string | undefined;
+		testId?: string;
 	}
 
-	let { date, testId = undefined }: Props = $props();
+	let { date, testId }: Props = $props();
 
 	const hasEnded = $derived(isEndedCampaign(date));
 </script>
