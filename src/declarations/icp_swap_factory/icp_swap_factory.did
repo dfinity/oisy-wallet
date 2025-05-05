@@ -1,0 +1,291 @@
+type UpgradePoolArgs = record {poolIds: vec principal;};
+type Token = 
+ record {
+   address: text;
+   standard: text;
+ };
+type SwapFactory = 
+ service {
+   addPasscode: (principal, Passcode) -> (Result_1);
+   addPoolControllers: (principal, vec principal) -> ();
+   addPoolInstallers: (vec PoolInstaller) -> ();
+   addPoolInstallersValidate: (vec PoolInstaller) ->
+    (variant {
+       Err: text;
+       Ok: text;
+     });
+   batchAddPoolControllers: (vec principal, vec principal) -> ();
+   batchClearRemovedPool: (vec principal) -> ();
+   batchRemovePoolControllers: (vec principal, vec principal) -> ();
+   batchRemovePools: (vec principal) -> (Result_1);
+   batchSetPoolAdmins: (vec principal, vec principal) -> ();
+   batchSetPoolAvailable: (vec principal, bool) -> ();
+   batchSetPoolIcrc28TrustedOrigins: (vec principal, vec text) -> (Result_1);
+   batchSetPoolLimitOrderAvailable: (vec principal, bool) -> ();
+   clearPoolUpgradeTaskHis: () -> ();
+   clearRemovedPool: (principal) -> (text);
+   clearUpgradeFailedPoolList: () -> ();
+   createPool: (CreatePoolArgs) -> (Result_8);
+   deletePasscode: (principal, Passcode) -> (Result_1);
+   getAdmins: () -> (vec principal) query;
+   getCurrentUpgradeTask: () -> (Result_13) query;
+   getCycleInfo: () -> (Result_12);
+   getGovernanceCid: () -> (Result_11) query;
+   getInitArgs: () -> (Result_10) query;
+   getInstallerModuleHash: () -> (opt blob) query;
+   getNextPoolVersion: () -> (text) query;
+   getPasscodesByPrincipal: (principal) -> (Result_9) query;
+   getPendingUpgradePoolList: () -> (Result_7) query;
+   /// get pool by token addresses and fee.
+   getPool: (GetPoolArgs) -> (Result_8) query;
+   getPoolInstallers: () -> (vec PoolInstaller) query;
+   getPoolUpgradeTaskHis: (principal) -> (Result_7) query;
+   getPoolUpgradeTaskHisList: () -> (Result_6) query;
+   getPools: () -> (Result_4) query;
+   getPrincipalPasscodes: () -> (Result_5) query;
+   getRemovedPools: () -> (Result_4) query;
+   getUpgradeFailedPoolList: () -> (Result_3) query;
+   getVersion: () -> (text) query;
+   icrc10_supported_standards: () ->
+    (vec record {
+           name: text;
+           url: text;
+         }) query;
+   icrc21_canister_call_consent_message: (Icrc21ConsentMessageRequest) ->
+    (Icrc21ConsentMessageResponse);
+   icrc28_trusted_origins: () -> (Icrc28TrustedOriginsResponse);
+   removePool: (GetPoolArgs) -> (text);
+   removePoolControllers: (principal, vec principal) -> ();
+   removePoolInstaller: (principal) -> ();
+   removePoolInstallerValidate: (principal) ->
+    (variant {
+       Err: text;
+       Ok: text;
+     });
+   retryAllFailedUpgrades: () -> (Result_1);
+   setAdmins: (vec principal) -> ();
+   setIcrc28TrustedOrigins: (vec text) -> (Result_2);
+   setInstallerModuleHash: (blob) -> ();
+   setInstallerModuleHashValidate: (blob) -> (variant {
+                                                Err: text;
+                                                Ok: text;
+                                              });
+   setPoolAdmins: (principal, vec principal) -> ();
+   setPoolAvailable: (principal, bool) -> ();
+   setUpgradePoolList: (UpgradePoolArgs) -> (Result_1);
+   upgradePoolTokenStandard: (principal, principal) -> (Result);
+ };
+type Result_9 = 
+ variant {
+   err: Error;
+   ok: vec Passcode;
+ };
+type Result_8 = 
+ variant {
+   err: Error;
+   ok: PoolData;
+ };
+type Result_7 = 
+ variant {
+   err: Error;
+   ok: vec PoolUpgradeTask;
+ };
+type Result_6 = 
+ variant {
+   err: Error;
+   ok: vec record {
+             principal;
+             vec PoolUpgradeTask;
+           };
+ };
+type Result_5 = 
+ variant {
+   err: Error;
+   ok: vec record {
+             principal;
+             vec Passcode;
+           };
+ };
+type Result_4 = 
+ variant {
+   err: Error;
+   ok: vec PoolData;
+ };
+type Result_3 = 
+ variant {
+   err: Error;
+   ok: vec FailedPoolInfo;
+ };
+type Result_2 = 
+ variant {
+   err: Error;
+   ok: bool;
+ };
+type Result_13 = 
+ variant {
+   err: Error;
+   ok: opt PoolUpgradeTask;
+ };
+type Result_12 = 
+ variant {
+   err: Error;
+   ok: CycleInfo;
+ };
+type Result_11 = 
+ variant {
+   err: Error;
+   ok: opt principal;
+ };
+type Result_10 = 
+ variant {
+   err: Error;
+   ok:
+    record {
+      backupCid: principal;
+      feeReceiverCid: principal;
+      governanceCid: opt principal;
+      infoCid: principal;
+      passcodeManagerCid: principal;
+      trustedCanisterManagerCid: principal;
+    };
+ };
+type Result_1 = 
+ variant {
+   err: Error;
+   ok;
+ };
+type Result = 
+ variant {
+   err: Error;
+   ok: text;
+ };
+type PoolUpgradeTaskStep = 
+ record {
+   isDone: bool;
+   timestamp: nat;
+ };
+type PoolUpgradeTask = 
+ record {
+   backup: record {
+             isDone: bool;
+             isSent: bool;
+             retryCount: nat;
+             timestamp: nat;
+           };
+   moduleHashAfter: opt blob;
+   moduleHashBefore: opt blob;
+   poolData: PoolData;
+   start: PoolUpgradeTaskStep;
+   stop: PoolUpgradeTaskStep;
+   turnOffAvailable: PoolUpgradeTaskStep;
+   turnOnAvailable: PoolUpgradeTaskStep;
+   upgrade: PoolUpgradeTaskStep;
+ };
+type PoolInstaller = 
+ record {
+   canisterId: principal;
+   subnet: text;
+   subnetType: text;
+   weight: nat;
+ };
+type PoolData = 
+ record {
+   canisterId: principal;
+   fee: nat;
+   key: text;
+   tickSpacing: int;
+   token0: Token;
+   token1: Token;
+ };
+type Passcode = 
+ record {
+   fee: nat;
+   token0: principal;
+   token1: principal;
+ };
+type Icrc28TrustedOriginsResponse = record {trusted_origins: vec text;};
+type Icrc21ErrorInfo = record {description: text;};
+type Icrc21Error = 
+ variant {
+   ConsentMessageUnavailable: Icrc21ErrorInfo;
+   GenericError: record {
+                   description: text;
+                   error_code: nat;
+                 };
+   InsufficientPayment: Icrc21ErrorInfo;
+   UnsupportedCanisterCall: Icrc21ErrorInfo;
+ };
+type Icrc21ConsentMessageSpec = 
+ record {
+   device_spec:
+    opt
+     variant {
+       GenericDisplay;
+       LineDisplay:
+        record {
+          characters_per_line: nat16;
+          lines_per_page: nat16;
+        };
+     };
+   metadata: Icrc21ConsentMessageMetadata;
+ };
+type Icrc21ConsentMessageResponse = 
+ variant {
+   Err: Icrc21Error;
+   Ok: Icrc21ConsentInfo;
+ };
+type Icrc21ConsentMessageRequest = 
+ record {
+   arg: blob;
+   method: text;
+   user_preferences: Icrc21ConsentMessageSpec;
+ };
+type Icrc21ConsentMessageMetadata = 
+ record {
+   language: text;
+   utc_offset_minutes: opt int16;
+ };
+type Icrc21ConsentMessage = 
+ variant {
+   GenericDisplayMessage: text;
+   LineDisplayMessage: record {pages: vec record {lines: vec text;};};
+ };
+type Icrc21ConsentInfo = 
+ record {
+   consent_message: Icrc21ConsentMessage;
+   metadata: Icrc21ConsentMessageMetadata;
+ };
+type GetPoolArgs = 
+ record {
+   fee: nat;
+   token0: Token;
+   token1: Token;
+ };
+type FailedPoolInfo = 
+ record {
+   errorMsg: text;
+   task: PoolUpgradeTask;
+   timestamp: nat;
+ };
+type Error = 
+ variant {
+   CommonError;
+   InsufficientFunds;
+   InternalError: text;
+   UnsupportedToken: text;
+ };
+type CycleInfo = 
+ record {
+   available: nat;
+   balance: nat;
+ };
+type CreatePoolArgs = 
+ record {
+   fee: nat;
+   sqrtPriceX96: text;
+   subnet: opt text;
+   token0: Token;
+   token1: Token;
+ };
+service : (principal, principal, principal, principal, principal, opt
+                                                                   principal) -> SwapFactory

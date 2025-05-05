@@ -12,7 +12,10 @@ const deleteFolder = async (canister) => {
 
 const promises = Object.keys(canisters)
 	.filter(
-		(canister) => !['backend', 'frontend', 'signer', 'rewards', 'kong_backend'].includes(canister)
+		(canister) =>
+			!['backend', 'frontend', 'signer', 'rewards', 'kong_backend', 'icp_swap_factory'].includes(
+				canister
+			)
 	)
 	.map(deleteFolder);
 
