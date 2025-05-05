@@ -23,7 +23,7 @@
 		on:click={() => (rewardState = RewardStates.ONGOING)}
 		styleClass="text-nowrap max-w-28 text-sm"
 		colorStyle={rewardState === RewardStates.ONGOING ? 'primary' : 'tertiary'}
-		testId={`${REWARDS_FILTER}-ongoing-button`}
+		testId={`${REWARDS_FILTER}-${RewardStates.ONGOING}-button`}
 	>
 		{$i18n.rewards.text.ongoing}
 	</Button>
@@ -34,7 +34,7 @@
 		on:click={() => (rewardState = RewardStates.ENDED)}
 		styleClass="text-nowrap max-w-28 text-sm"
 		colorStyle={rewardState === RewardStates.ENDED ? 'primary' : 'tertiary'}
-		testId={`${REWARDS_FILTER}-ended-button`}
+		testId={`${REWARDS_FILTER}-${RewardStates.ENDED}-button`}
 		disabled={endedCampaignsAmount === 0}
 	>
 		{replacePlaceholders($i18n.rewards.text.ended, { $amount: endedCampaignsAmount.toString() })}
