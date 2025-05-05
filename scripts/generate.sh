@@ -64,4 +64,4 @@ done
 # Clean up..
 node scripts/did.update.types.mjs
 node scripts/did.delete.types.mjs
-# npm run format
+npm run format
