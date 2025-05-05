@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import { trackEvent as trackEventServices } from '$lib/services/analytics.services';
 	import type { TrackEventParams } from '$lib/types/analytics';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		children?: Snippet;
@@ -23,8 +23,23 @@
 		iconAsLast?: boolean;
 	}
 
-	let {children, href, ariaLabel, iconSize = '20', iconVisible = true, inline = false, color = 'inherit', fullWidth = false, styleClass = '',
-	trackEvent, testId, asMenuItem = false, asMenuItemCondensed = false, asButton = false, iconAsLast = false}: Props = $props();
+	let {
+		children,
+		href,
+		ariaLabel,
+		iconSize = '20',
+		iconVisible = true,
+		inline = false,
+		color = 'inherit',
+		fullWidth = false,
+		styleClass = '',
+		trackEvent,
+		testId,
+		asMenuItem = false,
+		asMenuItemCondensed = false,
+		asButton = false,
+		iconAsLast = false
+	}: Props = $props();
 
 	const onclick = () => {
 		if (isNullish(trackEvent)) {
