@@ -34,32 +34,27 @@ export interface AirDropConfig {
   'start_timestamp_ns' : bigint,
   'token_configs' : Array<TokenConfig>,
 }
-export interface BatchSizes {
-  'user_fetching' : number,
-  'sprinkle' : number,
-  'block_processing' : number,
-  'airdrop' : number,
-  'block_fetching' : number,
+export type CandidDuration =
+	| { Minutes: bigint }
+	| { Seconds: bigint }
+	| { Days: bigint }
+	| { Forever: null }
+	| { Hours: bigint }
+	| { Nanoseconds: bigint };
+export type ClaimVipRewardResponse =
+	| { AlreadyClaimed: null }
+	| { Success: null }
+	| { InvalidCode: null };
+export interface ClaimedVipReward {
+	campaign_id: string;
 }
-export type CandidDuration = { 'Minutes' : bigint } |
-  { 'Seconds' : bigint } |
-  { 'Days' : bigint } |
-  { 'Forever' : null } |
-  { 'Hours' : bigint } |
-  { 'Nanoseconds' : bigint };
-export type ClaimVipRewardResponse = { 'AlreadyClaimed' : null } |
-  { 'Success' : null } |
-  { 'InvalidCode' : null };
-export interface ClaimedVipReward { 'campaign_id' : string }
 export interface Config {
-  'usage_awards_config' : [] | [UsageAwardConfig],
-  'batch_sizes' : [] | [BatchSizes],
-  'airdrop_config' : [] | [AirDropConfig],
-  'index_canisters' : Array<Principal>,
-  'vip_config' : [] | [VipConfig],
-  'processing_interval_s' : [] | [number],
-  'readonly_admins' : Array<Principal>,
-  'oisy_canister' : [] | [Principal],
+	usage_awards_config: [] | [UsageAwardConfig];
+	airdrop_config: [] | [AirDropConfig];
+	vip_config: [] | [VipConfig];
+	vip_campaigns: [] | [Array<[string, VipConfig]>];
+	readonly_admins: Array<Principal>;
+	oisy_canister: [] | [Principal];
 }
 export interface LastActivityHistogram {
   'older' : number,
@@ -80,22 +75,21 @@ export interface LastActivityHistogramResponse {
   'response' : LastActivityHistogram,
 }
 export interface LedgerConfig {
-  'ledger_index' : Principal,
-  'ledger' : Principal,
-  'ledger_account' : Account,
+	ledger_index: Principal;
+	ledger: Principal;
+	ledger_account: Account;
 }
-export type NewVipRewardResponse = { 'Anonymous' : null } |
-  { 'NotImportantPerson' : null } |
-  { 'VipReward' : VipReward };
-export type PublicAirdropStatus = {
-    'Ongoing' : { 'remaining_airdrops' : bigint, 'total_airdrops' : bigint }
-  } |
-  { 'Completed' : { 'total_airdrops' : bigint } } |
-  { 'Upcoming' : null };
-export interface PublicRewardsInfo {
-  'airdrop' : [] | [PublicAirdropStatus],
-  'last_sprinkle' : [] | [PublicSprinkleInfo],
-}
+export type NewVipRewardResponse =
+	| { Anonymous: null }
+	| { NotImportantPerson: null }
+	| { UnknownCampaign: null }
+	| { VipReward: VipReward };
+export type PublicAirdropStatus =
+	| {
+			Ongoing: { remaining_airdrops: bigint; total_airdrops: bigint };
+	  }
+	| { Completed: { total_airdrops: bigint } }
+	| { Upcoming: null };
 export interface PublicSprinkleInfo {
   'timestamp_ns' : bigint,
   'total_amount' : bigint,
@@ -245,41 +239,31 @@ export interface VipStats {
   'total_issued' : number,
 }
 export interface _SERVICE {
-  'claim_usage_award' : ActorMethod<[UsageAwardEvent, Principal], undefined>,
-  'claim_vip_reward' : ActorMethod<
-    [VipReward],
-    [ClaimVipRewardResponse, [] | [ClaimedVipReward]]
-  >,
-  'config' : ActorMethod<[], Config>,
-  'configure_usage_awards' : ActorMethod<[UsageAwardConfig], undefined>,
-  'configure_vip' : ActorMethod<[VipConfig], undefined>,
-  'last_activity_histogram' : ActorMethod<
-    [LastActivityHistogramRequest],
-    LastActivityHistogramResponse
-  >,
-  'new_vip_reward' : ActorMethod<
-    [[] | [ClaimedVipReward]],
-    NewVipRewardResponse
-  >,
-  'public_rewards_info' : ActorMethod<[], PublicRewardsInfo>,
-  'referrer_info' : ActorMethod<[], ReferrerInfo>,
-  'referrer_info_for' : ActorMethod<[Principal], [] | [ReferrerInfo]>,
-  'register_airdrop_recipient' : ActorMethod<[UserSnapshot], undefined>,
-  'register_snapshot_for' : ActorMethod<[Principal, UserSnapshot], undefined>,
-  'set_referrer' : ActorMethod<[number], SetReferrerResponse>,
-  'stats_usage_vs_holding' : ActorMethod<[], UsageVsHoldingStats>,
-  'status' : ActorMethod<[], StatusResponse>,
-  'trigger_usage_award_event' : ActorMethod<[UsageAwardEvent], undefined>,
-  'usage_eligible' : ActorMethod<[Principal], [boolean, boolean]>,
-  'usage_stats' : ActorMethod<[], UsageAwardStats>,
-  'usage_winners' : ActorMethod<
-    [[] | [UsageWinnersRequest]],
-    UsageWinnersResponse
-  >,
-  'user_info' : ActorMethod<[], UserData>,
-  'user_info_for' : ActorMethod<[Principal], UserData>,
-  'user_stats' : ActorMethod<[Principal], UsageAwardState>,
-  'vip_stats' : ActorMethod<[], VipStats>,
+	claim_usage_award: ActorMethod<[UsageAwardEvent, Principal], undefined>;
+	claim_vip_reward: ActorMethod<[VipReward], [ClaimVipRewardResponse, [] | [ClaimedVipReward]]>;
+	config: ActorMethod<[], Config>;
+	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
+	configure_vip: ActorMethod<[VipConfig], undefined>;
+	configure_vips: ActorMethod<[Array<[string, VipConfig]>], undefined>;
+	last_activity_histogram: ActorMethod<
+		[LastActivityHistogramRequest],
+		LastActivityHistogramResponse
+	>;
+	new_vip_reward: ActorMethod<[[] | [ClaimedVipReward]], NewVipRewardResponse>;
+	referrer_info: ActorMethod<[], ReferrerInfo>;
+	referrer_info_for: ActorMethod<[Principal], [] | [ReferrerInfo]>;
+	register_airdrop_recipient: ActorMethod<[UserSnapshot], undefined>;
+	register_snapshot_for: ActorMethod<[Principal, UserSnapshot], undefined>;
+	set_referrer: ActorMethod<[number], SetReferrerResponse>;
+	stats_usage_vs_holding: ActorMethod<[], UsageVsHoldingStats>;
+	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
+	usage_eligible: ActorMethod<[Principal], [boolean, boolean]>;
+	usage_stats: ActorMethod<[], UsageAwardStats>;
+	usage_winners: ActorMethod<[[] | [UsageWinnersRequest]], UsageWinnersResponse>;
+	user_info: ActorMethod<[], UserData>;
+	user_info_for: ActorMethod<[Principal], UserData>;
+	user_stats: ActorMethod<[Principal], UsageAwardState>;
+	vip_stats: ActorMethod<[[] | [string]], VipStats>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
