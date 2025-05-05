@@ -728,6 +728,7 @@ pub fn has_user_profile() -> HasUserProfileResponse {
 /// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 /// - `Other`: If another error occurred during the operation
 #[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::unused_async)]
 pub async fn get_allowed_cycles() -> Result<GetAllowedCyclesResponse, GetAllowedCyclesError> {
     // TODO call the get_allowed_cycles implementation
     Ok(GetAllowedCyclesResponse {
