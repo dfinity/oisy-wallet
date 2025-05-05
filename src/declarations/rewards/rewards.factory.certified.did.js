@@ -1,3 +1,2 @@
 // @ts-ignore
-export const idlFactory = ({ IDL }) => {
-};
+export const idlFactory = ({ IDL }) => {};
