@@ -182,7 +182,7 @@ interface I18nRewards {
 		sprinkles_earned: string;
 		youre_eligible: string;
 	};
-	alt: { upcoming_campaigns: string };
+	alt: { upcoming_campaigns: string; reward_logo: string };
 }
 
 interface I18nFooter {

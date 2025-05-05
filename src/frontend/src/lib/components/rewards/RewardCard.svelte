@@ -6,20 +6,23 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {replacePlaceholders} from "$lib/utils/i18n.utils.js";
 
 	interface Props {
 		onclick: () => void;
 		reward: RewardDescription;
-		testId?: string | undefined;
+		testId?: string;
 	}
 
-	let { onclick, reward, testId = undefined }: Props = $props();
+	let { onclick, reward, testId }: Props = $props();
 </script>
 
 <button {onclick} class="flex flex-col" data-tid={testId}>
 	<div class="-mb-7">
 		<div class="max-h-66 overflow-hidden rounded-2xl">
-			<Img src={reward.logo} testId={REWARDS_BANNER} />
+			<Img src={reward.logo} testId={REWARDS_BANNER} alt={replacePlaceholders($i18n.rewards.alt.reward_logo, {
+				$campaignName: reward.cardTitle
+			})} />
 		</div>
 	</div>
 
@@ -30,9 +33,7 @@
 					class="flex flex-col-reverse items-center text-start text-lg font-semibold md:flex-row"
 				>
 					<div class="mr-auto flex flex-col items-center md:flex-row">
-						<div>
-							{reward.cardTitle}
-						</div>
+						{reward.cardTitle}
 					</div>
 
 					<span class="mr-auto inline-flex md:ml-auto md:mr-0">
