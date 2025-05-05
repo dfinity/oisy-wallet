@@ -3,10 +3,8 @@
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import {
 		REWARDS_ACTIVE_CAMPAIGNS_CONTAINER,
-		REWARDS_BANNER,
 		REWARDS_ENDED_CAMPAIGNS_CONTAINER,
 		REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
