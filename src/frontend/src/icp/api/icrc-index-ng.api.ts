@@ -1,9 +1,9 @@
+import type { IndexCanisterIdText } from '$icp/types/canister';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import { type Identity } from '@dfinity/agent';
+import type { Identity } from '@dfinity/agent';
 import { IcrcIndexNgCanister, type IcrcIndexNgGetTransactions } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
@@ -20,7 +20,7 @@ export const getTransactions = async ({
 	identity: OptionIdentity;
 	start?: bigint;
 	maxResults?: bigint;
-	indexCanisterId: CanisterIdText;
+	indexCanisterId: IndexCanisterIdText;
 } & QueryParams): Promise<IcrcIndexNgGetTransactions> => {
 	assertNonNullish(identity);
 
@@ -40,7 +40,7 @@ export const getLedgerId = async ({
 	certified = true
 }: {
 	identity: OptionIdentity;
-	indexCanisterId: CanisterIdText;
+	indexCanisterId: IndexCanisterIdText;
 } & QueryParams): Promise<Principal> => {
 	assertNonNullish(identity);
 
@@ -54,7 +54,7 @@ const indexNgCanister = async ({
 	indexCanisterId
 }: {
 	identity: Identity;
-	indexCanisterId: CanisterIdText;
+	indexCanisterId: IndexCanisterIdText;
 }): Promise<IcrcIndexNgCanister> => {
 	const agent = await getAgent({ identity });
 
