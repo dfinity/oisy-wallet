@@ -13,7 +13,7 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
-	import { type OisyDappDescription } from '$lib/types/dapp-description';
+	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import type { OptionString } from '$lib/types/string';
 	import type { ProviderFee } from '$lib/types/swap';
 	import type { Option } from '$lib/types/utils';

@@ -18,7 +18,6 @@ import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
-import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -34,16 +33,6 @@ export const ckEthereumTwinToken: Readable<Token> = derived(
 export const ckEthereumTwinTokenStandard: Readable<TokenStandard> = derived(
 	[ckEthereumTwinToken],
 	([{ standard }]) => standard
-);
-
-export const ckEthereumTwinTokenNetwork: Readable<EthereumNetwork> = derived(
-	[ckEthereumTwinToken],
-	([{ network }]) => network as EthereumNetwork
-);
-
-export const ckEthereumTwinTokenNetworkId: Readable<NetworkId> = derived(
-	[ckEthereumTwinTokenNetwork],
-	([{ id }]) => id
 );
 
 /**
