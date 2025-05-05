@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { randomUUID } from 'node:crypto';
 import { existsSync, readdirSync, renameSync } from 'node:fs';
 import { readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -52,7 +53,7 @@ export const init = ({ IDL }) => {`
 
 					// To avoid race conditions, we first create a temporary file with the new content.
 					// Then we rename it to the original file name.
-					const tempPath = `${factoryPath}.tmp`;
+					const tempPath = `${factoryPath}.${randomUUID()}.tmp`;
 					await writeFile(tempPath, cleanInit, 'utf8');
 					renameSync(tempPath, factoryPath);
 
