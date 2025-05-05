@@ -60,6 +60,8 @@
 		? groupTransactionsByDate(sortedTransactions)
 		: undefined;
 
+	$: console.log(groupedTransactions);
+
 	let selectedBtcTransaction: BtcTransactionUi | undefined;
 	let selectedBtcToken: OptionToken;
 	$: ({ transaction: selectedBtcTransaction, token: selectedBtcToken } =
