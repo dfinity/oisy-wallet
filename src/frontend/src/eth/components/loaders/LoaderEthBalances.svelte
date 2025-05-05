@@ -4,6 +4,8 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 
@@ -37,4 +39,6 @@
 	});
 </script>
 
-{@render children?.()}
+<IntervalLoader {load} interval={WALLET_TIMER_INTERVAL_MILLIS}>
+	{@render children?.()}
+</IntervalLoader>
