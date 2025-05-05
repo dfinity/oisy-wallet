@@ -2,18 +2,19 @@
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import rewardBanner from '$lib/assets/rewards-banner.svg';
+	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import {
 		REWARDS_ACTIVE_CAMPAIGNS_CONTAINER,
-		REWARDS_BANNER, REWARDS_ENDED_CAMPAIGNS_CONTAINER,
+		REWARDS_BANNER,
+		REWARDS_ENDED_CAMPAIGNS_CONTAINER,
 		REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
 	import { RewardStates } from '$lib/enums/reward-states';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import {isEndedCampaign, isOngoingCampaign, isUpcomingCampaign} from '$lib/utils/rewards.utils';
-	import RewardsFilter from "$lib/components/rewards/RewardsFilter.svelte";
+	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 

@@ -2,7 +2,8 @@ import * as rewardCampaigns from '$env/reward-campaigns.env';
 import AllRewardsList from '$lib/components/rewards/AllRewardsList.svelte';
 import {
 	REWARDS_ACTIVE_CAMPAIGNS_CONTAINER,
-	REWARDS_ENDED_CAMPAIGNS_CONTAINER, REWARDS_FILTER,
+	REWARDS_ENDED_CAMPAIGNS_CONTAINER,
+	REWARDS_FILTER,
 	REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 } from '$lib/constants/test-ids.constants';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
@@ -35,7 +36,9 @@ describe('AllRewardsList', () => {
 		const activeCampaignContainer: HTMLDivElement | null = container.querySelector(
 			activeCampaignContainerSelector
 		);
+
 		expect(activeCampaignContainer).toBeInTheDocument();
+
 		const upcomingCampaignContainer: HTMLDivElement | null = container.querySelector(
 			upcomingCampaignContainerSelector
 		);
@@ -48,7 +51,6 @@ describe('AllRewardsList', () => {
 
 		expect(endedCampaignContainer).not.toBeInTheDocument();
 	});
-
 
 	it('should render reward filter and ended campaigns', async () => {
 		const { container } = render(AllRewardsList);
