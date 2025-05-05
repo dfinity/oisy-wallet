@@ -93,7 +93,6 @@ export interface AllowSigningResponse {
 	allowed_cycles: bigint;
 }
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
-export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type ApproveError =
 	| {
 			GenericError: { message: string; error_code: bigint };
@@ -157,7 +156,6 @@ export type ChallengeCompletionError =
 	| { MissingUserProfile: null }
 	| { ChallengeAlreadySolved: null };
 export interface Config {
-	api: [] | [Guards];
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
 	cfs_canister_id: [] | [Principal];
@@ -200,10 +198,6 @@ export interface DefiniteCanisterSettingsArgs {
 }
 export type EthAddress = { Public: string };
 export type GetUserProfileError = { NotFound: null };
-export interface Guards {
-	user_data: ApiEnabled;
-	threshold_key: ApiEnabled;
-}
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
@@ -236,7 +230,6 @@ export type Icrcv2AccountId =
 			};
 	  };
 export interface InitArg {
-	api: [] | [Guards];
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
 	cfs_canister_id: [] | [Principal];
@@ -255,35 +248,6 @@ export interface ListUsersRequest {
 export interface ListUsersResponse {
 	users: Array<OisyUser>;
 	matches_max_length: bigint;
-}
-export type MigrationError =
-	| { TargetLockFailed: null }
-	| { TargetUnlockFailed: null }
-	| { CouldNotGetTargetPostStats: null }
-	| { CouldNotGetTargetPriorStats: null }
-	| { DataMigrationFailed: null }
-	| { TargetStatsMismatch: [Stats, Stats] }
-	| { Unknown: null }
-	| { TargetCanisterNotEmpty: Stats }
-	| { NoMigrationInProgress: null };
-export type MigrationProgress =
-	| {
-			MigratedUserTokensUpTo: [] | [Principal];
-	  }
-	| { Failed: MigrationError }
-	| { MigratedUserTimestampsUpTo: [] | [Principal] }
-	| { MigratedCustomTokensUpTo: [] | [Principal] }
-	| { CheckingDataMigration: null }
-	| { MigratedUserProfilesUpTo: [] | [[bigint, Principal]] }
-	| { UnlockingTarget: null }
-	| { Unlocking: null }
-	| { Completed: null }
-	| { Pending: null }
-	| { LockingTarget: null }
-	| { CheckingTarget: null };
-export interface MigrationReport {
-	to: Principal;
-	progress: MigrationProgress;
 }
 export interface NetworkSettings {
 	enabled: boolean;
@@ -323,8 +287,6 @@ export interface PendingTransaction {
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: null } | { Err: AddDappSettingsError };
-export type Result_10 = { Ok: null } | { Err: SaveTestnetsSettingsError };
-export type Result_11 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
 export type Result_2 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type Result_3 = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type Result_4 =
@@ -333,8 +295,8 @@ export type Result_4 =
 export type Result_5 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
 export type Result_6 = { Ok: CreateChallengeResponse } | { Err: CreateChallengeError };
 export type Result_7 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_8 = { Ok: MigrationReport } | { Err: string };
-export type Result_9 = { Ok: null } | { Err: string };
+export type Result_8 = { Ok: null } | { Err: SaveTestnetsSettingsError };
+export type Result_9 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -475,7 +437,6 @@ export interface _SERVICE {
 	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_3>;
 	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_4>;
 	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_5>;
-	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
 	config: ActorMethod<[], Config>;
 	create_pow_challenge: ActorMethod<[], Result_6>;
 	create_user_profile: ActorMethod<[], UserProfile>;
@@ -492,21 +453,16 @@ export interface _SERVICE {
 	>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
-	migrate_user_data_to: ActorMethod<[Principal], Result_8>;
-	migration: ActorMethod<[], [] | [MigrationReport]>;
-	migration_stop_timer: ActorMethod<[], Result_9>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
-	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_snapshot: ActorMethod<[UserSnapshot], undefined>;
-	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_10>;
+	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_8>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
-	step_migration: ActorMethod<[], undefined>;
-	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_11>;
-	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_10>;
+	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_9>;
+	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_8>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
