@@ -15,7 +15,14 @@
 
 	let { children }: Props = $props();
 
+	let loading = false;
+
 	const load = async () => {
+		if (loading) {
+			return;
+		}
+		loading = true;
+
 		if (isNullish($ethAddress)) {
 			return;
 		}
@@ -28,6 +35,8 @@
 				erc20Tokens: $enabledErc20Tokens
 			})
 		]);
+
+		loading = false;
 	};
 
 	const debounceLoad = debounce(load, 500);
