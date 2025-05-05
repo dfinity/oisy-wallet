@@ -21,11 +21,11 @@ export const initUtxosFeeStore = (): UtxosFeeStore => {
 	return {
 		subscribe,
 
-		reset() {
+		reset: () => {
 			set(null);
 		},
 
-		setUtxosFee(data: UtxosFeeStoreData) {
+		setUtxosFee: (data: UtxosFeeStoreData) => {
 			set(data);
 		}
 	};
