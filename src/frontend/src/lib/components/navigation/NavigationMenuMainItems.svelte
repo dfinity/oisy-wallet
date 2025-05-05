@@ -82,23 +82,6 @@
 
 <NavigationItem
 	href={networkUrl({
-		path: AppPath.Rewards,
-		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute,
-		fromRoute
-	})}
-	ariaLabel={$i18n.navigation.alt.airdrops}
-	selected={isRouteRewards(pageData)}
-	testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
-	tag={$i18n.core.text.new}
-	tagVariant="emphasis"
->
-	<IconGift />
-	{$i18n.navigation.text.airdrops}
-</NavigationItem>
-
-<NavigationItem
-	href={networkUrl({
 		path: AppPath.Explore,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
@@ -110,6 +93,23 @@
 >
 	<AnimatedIconUfo />
 	{$i18n.navigation.text.dapp_explorer}
+</NavigationItem>
+
+<NavigationItem
+    href={networkUrl({
+        path: AppPath.Rewards,
+        networkId: $networkId,
+        usePreviousRoute: isTransactionsRoute,
+        fromRoute
+    })}
+    ariaLabel={$i18n.navigation.alt.airdrops}
+    selected={isRouteRewards(pageData)}
+    testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+    tag={$i18n.core.text.new}
+    tagVariant="emphasis"
+>
+    <IconGift />
+    {$i18n.navigation.text.airdrops}
 </NavigationItem>
 
 <NavigationItem
