@@ -189,7 +189,9 @@
 			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
 			"carousel_slide_cta": "Learn more",
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
-			"youre_eligible": "You're eligible!"
+			"youre_eligible": "You're eligible!",
+			"ongoing": "Ongoing",
+			"ended": "Ended ($amount)"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop."
