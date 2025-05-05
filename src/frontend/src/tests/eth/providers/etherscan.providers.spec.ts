@@ -20,7 +20,7 @@ import {
 	EtherscanProvider as EtherscanProviderLib,
 	Network
 } from 'ethers/providers';
-import { type MockedClass } from 'vitest';
+import type { MockedClass } from 'vitest';
 
 vi.mock('$env/rest/etherscan.env', () => ({
 	ETHERSCAN_API_KEY: 'test-api-key'

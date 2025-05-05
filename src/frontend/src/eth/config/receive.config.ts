@@ -1,5 +1,5 @@
 import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
-import { type ConvertWizardStepsParams } from '$lib/config/convert.config';
+import type { ConvertWizardStepsParams } from '$lib/config/convert.config';
 import { WizardStepsReceive } from '$lib/enums/wizard-steps';
 import type { WizardSteps } from '@dfinity/gix-components';
 
