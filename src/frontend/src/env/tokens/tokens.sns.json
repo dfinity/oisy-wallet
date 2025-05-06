@@ -65,13 +65,13 @@
 		"indexCanisterId": "5ithz-aqaaa-aaaaq-aaa4a-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "GHOST",
-			"symbol": "GHOST",
+			"name": "Mimic Clay",
+			"symbol": "CLAY",
 			"fee": {
 				"__bigint__": "100000000"
 			},
-			"alternativeName": "Ghost",
-			"url": "https://yadjb-mqaaa-aaaan-qaqlq-cai.raw.ic0.app/"
+			"alternativeName": "Mimic",
+			"url": "https://github.com/dragginzgame/mimic"
 		}
 	},
 	{
@@ -408,13 +408,13 @@
 		"indexCanisterId": "n535v-yiaaa-aaaaq-aadsq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "DOGMI",
-			"symbol": "DOGMI",
+			"name": "Poked",
+			"symbol": "POKED",
 			"fee": {
 				"__bigint__": "100000000000"
 			},
-			"alternativeName": "DOGMI",
-			"url": "https://qu2gy-uqaaa-aaaal-qcv6a-cai.icp0.io"
+			"alternativeName": "PokedBots",
+			"url": "https://www.pokedbots.com"
 		}
 	},
 	{
