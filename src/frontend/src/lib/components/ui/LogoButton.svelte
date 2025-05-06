@@ -54,19 +54,19 @@
 				{/if}
 				<span class="mr-2 flex"><slot name="logo" /></span>
 				<span class="flex min-w-0 flex-col text-left">
-					<span class="truncate text-nowrap text-lg">
+					<span class="truncate text-nowrap">
 						{#if hasTitleSlot}
-							<span class="font-bold text-primary"><slot name="title" /></span>
+							<span class="text-lg font-bold text-primary"><slot name="title" /></span>
 						{/if}
 						{#if hasSubtitleSlot}
 							{#if dividers}
 								<span class="text-tertiary"> &nbsp;&middot;&nbsp; </span>
 							{/if}
-							<span class="text-tertiary"> <slot name="subtitle" /></span>
+							<span class="text-base text-tertiary"> <slot name="subtitle" /></span>
 						{/if}
 					</span>
 					{#if hasDescriptionSlot}
-						<span class="truncate text-base text-tertiary">
+						<span class="truncate text-sm text-tertiary">
 							<slot name="description" />
 						</span>
 					{/if}
@@ -81,7 +81,7 @@
 						</span>
 					{/if}
 					{#if hasDescriptionEndSlot}
-						<span class="text-base text-tertiary">
+						<span class="text-sm text-tertiary">
 							<slot name="description-end" />
 						</span>
 					{/if}
