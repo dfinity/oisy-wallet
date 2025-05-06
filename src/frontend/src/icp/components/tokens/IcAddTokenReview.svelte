@@ -76,6 +76,8 @@
 
 	{#if nonNullish(token)}
 		{@const safeNetwork = token.token.network}
+		{@const safeLedgerCanisterId = token.token.ledgerCanisterId}
+		{@const safeIndexCanisterId = token.token.indexCanisterId}
 		<div in:fade>
 			<Value ref="network" element="div">
 				{#snippet label()}
@@ -89,7 +91,7 @@
 			<Value ref="ledgerId" element="div">
 				{#snippet label()}{$i18n.tokens.import.text.ledger_canister_id}{/snippet}
 				{#snippet content()}
-					{token.token.ledgerCanisterId}
+					{safeLedgerCanisterId}
 				{/snippet}
 			</Value>
 
@@ -99,7 +101,7 @@
 						{$i18n.tokens.import.text.index_canister_id}
 					{/snippet}
 					{#snippet content()}
-						{token.token.indexCanisterId}
+						{safeIndexCanisterId}
 					{/snippet}
 				</Value>
 			{/if}

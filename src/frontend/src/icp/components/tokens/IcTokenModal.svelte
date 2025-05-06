@@ -62,13 +62,14 @@
 					{/if}
 
 					{#if nonNullish(ckToken.indexCanisterId)}
+						{@const safeIndexCanisterId = ckToken.indexCanisterId}
 						<Value ref="name">
 							{#snippet label()}
 								{$i18n.tokens.import.text.index_canister_id}
 							{/snippet}
 							{#snippet content()}
-								<output>{ckToken.indexCanisterId}</output><Copy
-									value={ckToken.indexCanisterId}
+								<output>{safeIndexCanisterId}</output><Copy
+									value={safeIndexCanisterId}
 									text={$i18n.tokens.import.text.index_canister_id_copied}
 									inline
 								/>
@@ -77,13 +78,14 @@
 					{/if}
 
 					{#if nonNullish(ckToken.minterCanisterId)}
+						{@const safeMinterCanisterId = ckToken.minterCanisterId}
 						<Value ref="name">
 							{#snippet label()}
 								{$i18n.tokens.import.text.minter_canister_id}
 							{/snippet}
 							{#snippet content()}
-								<output>{ckToken.minterCanisterId}</output><Copy
-									value={ckToken.minterCanisterId}
+								<output>{safeMinterCanisterId}</output><Copy
+									value={safeMinterCanisterId}
 									text={$i18n.tokens.import.text.minter_canister_id_copied}
 									inline
 								/>
