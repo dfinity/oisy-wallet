@@ -1,4 +1,5 @@
-// https://raw.githubusercontent.com/Psychedelic/dank/refs/heads/develop/candid/xtc.did
+////////// BEGIN ERC-20 //////////
+
 type Time = int;
 
 type Operation =
