@@ -22,27 +22,35 @@
 {#if nonNullish($symbol) && nonNullish($sendTokenId) && nonNullish($decimals)}
 	{#if nonNullish($fee)}
 		<Value ref="fee">
-			<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+			{#snippet label()}
+				{$i18n.fee.text.fee}
+			{/snippet}
 
-			<ExchangeAmountDisplay
-				amount={$fee}
-				decimals={$decimals}
-				symbol={$symbol}
-				exchangeRate={$sendTokenExchangeRate}
-			/>
+			{#snippet content()}
+				<ExchangeAmountDisplay
+					amount={$fee}
+					decimals={$decimals}
+					symbol={$symbol}
+					exchangeRate={$sendTokenExchangeRate}
+				/>
+			{/snippet}
 		</Value>
 	{/if}
 	{#if nonNullish($ataFee)}
 		<div transition:slide={SLIDE_DURATION}>
 			<Value ref="ataFee">
-				<svelte:fragment slot="label">{$i18n.fee.text.ata_fee}</svelte:fragment>
+				{#snippet label()}
+					{$i18n.fee.text.ata_fee}
+				{/snippet}
 
-				<ExchangeAmountDisplay
-					amount={$ataFee}
-					decimals={$decimals}
-					symbol={$symbol}
-					exchangeRate={$sendTokenExchangeRate}
-				/>
+				{#snippet content()}
+					<ExchangeAmountDisplay
+						amount={$ataFee}
+						decimals={$decimals}
+						symbol={$symbol}
+						exchangeRate={$sendTokenExchangeRate}
+					/>
+				{/snippet}
 			</Value>
 		</div>
 	{/if}

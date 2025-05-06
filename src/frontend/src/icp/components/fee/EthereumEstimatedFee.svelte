@@ -32,21 +32,25 @@
 {#if nonNullish($store)}
 	<div transition:slide={SLIDE_DURATION}>
 		<Value ref="kyt-fee">
-			<svelte:fragment slot="label">{$i18n.fee.text.estimated_eth}</svelte:fragment>
+			{#snippet label()}
+				{$i18n.fee.text.estimated_eth}
+			{/snippet}
 
-			<div>
-				{#if nonNullish(maxTransactionFee)}
-					<FeeAmountDisplay
-						fee={maxTransactionFee}
-						feeSymbol={feeToken.symbol}
-						feeTokenId={feeToken.id}
-						feeDecimals={feeToken.decimals}
-						feeExchangeRate={ethFeeExchangeRate}
-					/>
-				{:else}
-					&ZeroWidthSpace;
-				{/if}
-			</div>
+			{#snippet content()}
+				<div>
+					{#if nonNullish(maxTransactionFee)}
+						<FeeAmountDisplay
+							fee={maxTransactionFee}
+							feeSymbol={feeToken.symbol}
+							feeTokenId={feeToken.id}
+							feeDecimals={feeToken.decimals}
+							feeExchangeRate={ethFeeExchangeRate}
+						/>
+					{:else}
+						&ZeroWidthSpace;
+					{/if}
+				</div>
+			{/snippet}
 		</Value>
 	</div>
 {/if}

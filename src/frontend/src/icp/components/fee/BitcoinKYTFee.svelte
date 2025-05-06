@@ -34,14 +34,18 @@
 {#if ckBTC && btcNetwork && nonNullish(kytFee)}
 	<div transition:slide={SLIDE_DURATION}>
 		<Value ref="kyt-fee">
-			<svelte:fragment slot="label">{$i18n.fee.text.estimated_inter_network}</svelte:fragment>
+			{#snippet label()}
+				{$i18n.fee.text.estimated_inter_network}
+			{/snippet}
 
-			<ExchangeAmountDisplay
-				amount={kytFee}
-				decimals={$sendTokenDecimals}
-				symbol={$sendTokenSymbol}
-				exchangeRate={$sendTokenExchangeRate}
-			/>
+			{#snippet content()}
+				<ExchangeAmountDisplay
+					amount={kytFee}
+					decimals={$sendTokenDecimals}
+					symbol={$sendTokenSymbol}
+					exchangeRate={$sendTokenExchangeRate}
+				/>
+			{/snippet}
 		</Value>
 	</div>
 {/if}

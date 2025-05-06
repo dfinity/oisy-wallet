@@ -6,6 +6,11 @@
 </script>
 
 <Value ref="destination" element="div">
-	<svelte:fragment slot="label">{$i18n.send.text.destination}</svelte:fragment>
-	{destination}
+	{#snippet label()}
+		{$i18n.send.text.destination}
+	{/snippet}
+
+	{#snippet content()}
+		{destination}
+	{/snippet}
 </Value>

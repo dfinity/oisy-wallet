@@ -26,29 +26,37 @@
 
 {#if nonNullish(sourceNetwork)}
 	<Value ref="network" element="div">
-		<svelte:fragment slot="label"
-			>{#if showDestinationNetwork}{$i18n.send.text.source_network}{:else}{$i18n.send.text
-					.network}{/if}</svelte:fragment
-		>
-		<NetworkWithLogo network={sourceNetwork} />
+		{#snippet label()}
+			{#if showDestinationNetwork}{$i18n.send.text.source_network}{:else}{$i18n.send.text
+					.network}{/if}
+		{/snippet}
+
+		{#snippet content()}
+			<NetworkWithLogo network={sourceNetwork} />
+		{/snippet}
 	</Value>
 {/if}
 
 {#if nonNullish(destinationNetworkId) && showDestinationNetwork}
 	<Value ref="destination-network" element="div">
-		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
-		{#if isNetworkBitcoin}
-			<span class="flex gap-1">
-				<SendBtcNetwork networkId={destinationNetworkId} />
-				<Logo
-					src={bitcoin}
-					alt={replacePlaceholders($i18n.core.alt.logo, {
-						$name: $i18n.receive.bitcoin.text.bitcoin
-					})}
-				/>
-			</span>
-		{:else if isNetworkEthereum}
-			<NetworkWithLogo network={$ckEthereumTwinToken.network} />
-		{/if}
+		{#snippet label()}
+			{$i18n.send.text.destination_network}
+		{/snippet}
+
+		{#snippet content()}
+			{#if isNetworkBitcoin}
+				<span class="flex gap-1">
+					<SendBtcNetwork networkId={destinationNetworkId} />
+					<Logo
+						src={bitcoin}
+						alt={replacePlaceholders($i18n.core.alt.logo, {
+							$name: $i18n.receive.bitcoin.text.bitcoin
+						})}
+					/>
+				</span>
+			{:else if isNetworkEthereum}
+				<NetworkWithLogo network={$ckEthereumTwinToken.network} />
+			{/if}
+		{/snippet}
 	</Value>
 {/if}

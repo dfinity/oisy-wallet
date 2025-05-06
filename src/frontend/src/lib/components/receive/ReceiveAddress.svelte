@@ -25,43 +25,47 @@
 
 <div>
 	<Value ref={labelRef} element="div">
-		<svelte:fragment slot="label"><slot name="title" /></svelte:fragment>
+		{#snippet label()}
+			<slot name="title" />
+		{/snippet}
 
-		{#if text}
-			<p class="mb-1.5 break-normal py-2 text-tertiary">
-				<slot name="text" />
-			</p>
-		{/if}
+		{#snippet content()}
+			{#if text}
+				<p class="mb-1.5 break-normal py-2 text-tertiary">
+					<slot name="text" />
+				</p>
+			{/if}
 
-		<div
-			class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
-			class:mt-3={!text}
-			data-tid={testId}
-		>
-			<div class="h-8 w-8">
-				<NetworkLogo {network} color="white" size="sm" />
+			<div
+				class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
+				class:mt-3={!text}
+				data-tid={testId}
+			>
+				<div class="h-8 w-8">
+					<NetworkLogo {network} color="white" size="sm" />
+				</div>
+
+				{#if nonNullish(address)}
+					<output
+						id="ic-wallet-address"
+						class="break-all text-sm"
+						data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
+						in:fade>{address}</output
+					>
+				{:else}
+					<span class="w-full"><SkeletonText /></span>
+				{/if}
+
+				{#if nonNullish(address)}
+					<div in:fade>
+						<ReceiveActions on:click {address} {copyAriaLabel} {qrCodeAction} {copyButtonTestId} />
+					</div>
+				{:else}
+					<div class="min-w-20">&ZeroWidthSpace;</div>
+				{/if}
 			</div>
 
-			{#if nonNullish(address)}
-				<output
-					id="ic-wallet-address"
-					class="break-all text-sm"
-					data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
-					in:fade>{address}</output
-				>
-			{:else}
-				<span class="w-full"><SkeletonText /></span>
-			{/if}
-
-			{#if nonNullish(address)}
-				<div in:fade>
-					<ReceiveActions on:click {address} {copyAriaLabel} {qrCodeAction} {copyButtonTestId} />
-				</div>
-			{:else}
-				<div class="min-w-20">&ZeroWidthSpace;</div>
-			{/if}
-		</div>
-
-		<slot />
+			<slot />
+		{/snippet}
 	</Value>
 </div>

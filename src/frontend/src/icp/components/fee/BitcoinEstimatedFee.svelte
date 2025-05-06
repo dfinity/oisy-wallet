@@ -30,14 +30,18 @@
 {#if nonNullish(bitcoinEstimatedFee)}
 	<div transition:slide={SLIDE_DURATION}>
 		<Value ref="bitcoin-estimated-fee">
-			<svelte:fragment slot="label">{$i18n.fee.text.estimated_btc}</svelte:fragment>
+			{#snippet label()}
+				{$i18n.fee.text.estimated_btc}
+			{/snippet}
 
-			<ExchangeAmountDisplay
-				amount={bitcoinEstimatedFee}
-				decimals={BTC_DECIMALS}
-				symbol={BTC_MAINNET_SYMBOL}
-				exchangeRate={btcFeeExchangeRate}
-			/>
+			{#snippet content()}
+				<ExchangeAmountDisplay
+					amount={bitcoinEstimatedFee}
+					decimals={BTC_DECIMALS}
+					symbol={BTC_MAINNET_SYMBOL}
+					exchangeRate={btcFeeExchangeRate}
+				/>
+			{/snippet}
 		</Value>
 	</div>
 {/if}

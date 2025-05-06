@@ -10,40 +10,65 @@
 </script>
 
 <Value ref="network">
-	<svelte:fragment slot="label">{$i18n.tokens.details.network}</svelte:fragment>
-	<span class="flex items-center gap-1">
-		<output>{token.network.name}</output>
-		<NetworkLogo network={token.network} />
-	</span>
+	{#snippet label()}
+		{$i18n.tokens.details.network}
+	{/snippet}
+
+	{#snippet content()}
+		<span class="flex items-center gap-1">
+			<output>{token.network.name}</output>
+			<NetworkLogo network={token.network} />
+		</span>
+	{/snippet}
 </Value>
 
 <Value ref="name">
-	<svelte:fragment slot="label">{$i18n.tokens.details.token}</svelte:fragment>
-	<span class="flex items-center gap-1">
-		<output>{token.name}</output>
-		<Logo
-			src={token.icon}
-			alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.name })}
-			color="white"
-		/>
-	</span>
+	{#snippet label()}
+		{$i18n.tokens.details.token}
+	{/snippet}
+
+	{#snippet content()}
+		<span class="flex items-center gap-1">
+			<output>{token.name}</output>
+			<Logo
+				src={token.icon}
+				alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.name })}
+				color="white"
+			/>
+		</span>
+	{/snippet}
 </Value>
 
 <slot />
 
 {#if ['icrc', 'erc20'].includes(token.standard)}
 	<Value ref="symbol">
-		<svelte:fragment slot="label">{$i18n.tokens.details.standard}</svelte:fragment>
-		<output class="inline-block first-letter:capitalize">{token.standard}</output>
+		{#snippet label()}
+			{$i18n.tokens.details.standard}
+		{/snippet}
+
+		{#snippet content()}
+			<output class="inline-block first-letter:capitalize">{token.standard}</output>
+		{/snippet}
 	</Value>
 {/if}
 
 <Value ref="symbol">
-	<svelte:fragment slot="label">{$i18n.core.text.symbol}</svelte:fragment>
-	<output>{token.symbol}</output>
+	{#snippet label()}
+		{$i18n.core.text.symbol}
+	{/snippet}
+
+	{#snippet content()}
+		<output>{token.symbol}</output>
+	{/snippet}
 </Value>
 
 <Value ref="decimals">
-	<svelte:fragment slot="label">{$i18n.core.text.decimals}</svelte:fragment>
-	<output>{token.decimals}</output>
+	{#snippet label()}
+		{$i18n.core.text.decimals}
+	{/snippet}
+
+	{#snippet content()}
+		<output>{token.decimals}</output>
+	{/snippet}
 </Value>

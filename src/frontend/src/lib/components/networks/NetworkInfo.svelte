@@ -8,6 +8,10 @@
 </script>
 
 <Value ref="network" element="div">
-	<svelte:fragment slot="label">{$i18n.networks.network}</svelte:fragment>
-	<NetworkWithLogo {network} />
+	{#snippet label()}
+		{$i18n.networks.network}
+	{/snippet}
+	{#snippet content()}
+		<NetworkWithLogo {network} />
+	{/snippet}
 </Value>

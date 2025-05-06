@@ -114,20 +114,22 @@
 
 		<div>
 			<Value element="div">
-				<svelte:fragment slot="label"
-					>{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
+				{#snippet label()}
+					{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
 						$token: $ckEthereumTwinToken.symbol
-					})}</svelte:fragment
-				>
-
-				<p class="mb-6">
-					{formatToken({
-						value: $sourceTokenBalance ?? ZERO,
-						unitName: $sourceToken.decimals,
-						displayDecimals: $sourceToken.decimals
 					})}
-					{$sourceToken.symbol}
-				</p>
+				{/snippet}
+
+				{#snippet content()}
+					<p class="mb-6">
+						{formatToken({
+							value: $sourceTokenBalance ?? ZERO,
+							unitName: $sourceToken.decimals,
+							displayDecimals: $sourceToken.decimals
+						})}
+						{$sourceToken.symbol}
+					</p>
+				{/snippet}
 			</Value>
 		</div>
 
@@ -140,21 +142,23 @@
 
 		<div>
 			<Value element="div">
-				<svelte:fragment slot="label"
-					>{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
+				{#snippet label()}
+					{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
 						$token: $ckEthereumTwinToken.symbol,
 						$ckToken: $tokenWithFallback.symbol
-					})}</svelte:fragment
-				>
+					})}
+				{/snippet}
 
-				<Button
-					colorStyle="secondary"
-					fullWidth
-					styleClass="mb-4 mt-3"
-					on:click={() => dispatch('icConvert')}
-				>
-					<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
-				</Button>
+				{#snippet content()}
+					<Button
+						colorStyle="secondary"
+						fullWidth
+						styleClass="mb-4 mt-3"
+						on:click={() => dispatch('icConvert')}
+					>
+						<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
+					</Button>
+				{/snippet}
 			</Value>
 		</div>
 	</div>
