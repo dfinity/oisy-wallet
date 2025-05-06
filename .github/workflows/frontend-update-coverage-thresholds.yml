@@ -53,7 +53,7 @@ jobs:
 
       - name: Format
         if: steps.check_changes.outputs.changes_detected == 'true'
-        run: npm run format
+        run: npm run format:file --file=vitest.config.ts
 
       - name: Stage Changes on main
         if: steps.check_changes.outputs.changes_detected == 'true'

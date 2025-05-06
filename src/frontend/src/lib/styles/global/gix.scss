@@ -36,6 +36,10 @@
 
 	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 
+	--bottom-sheet-border-color: var(--color-border-primary);
+	--bottom-sheet-z-index: var(--modal-z-index);
+	--card-background: var(--color-background-primary);
+
 	// Input
 	--input-background: var(--color-background-primary);
 	--focus-background: var(--color-background-primary);
