@@ -144,7 +144,9 @@
 				<span slot="title">{token.symbol}</span>
 				<span slot="subtitle">{token.name}</span>
 
-				<TokenLogo slot="logo" color="white" data={token} badge={{ type: 'network' }} />
+				<span slot="logo" class="mr-2">
+					<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
+				</span>
 
 				<span class="break-all" slot="description">
 					{token.network.name}
