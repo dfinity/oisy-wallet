@@ -302,7 +302,7 @@ export const getKnownDestinations = (transactions: AnyTransactionUi[]): KnownDes
 											? Math.max(Number(acc[address].timestamp), Number(timestamp))
 											: nonNullish(timestamp)
 												? Number(timestamp)
-												: undefined
+												: acc[address].timestamp
 								}
 							}),
 							{}
