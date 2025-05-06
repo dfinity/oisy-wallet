@@ -2,7 +2,7 @@ import {
 	deleteIdbBtcAddressMainnet,
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet
-} from '$lib/api/idb.api';
+} from '$lib/api/idb-addresses.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,

@@ -13,7 +13,7 @@ import type {
 	IdbEthAddress,
 	IdbSolAddress,
 	SetIdbAddressParams
-} from '$lib/types/idb';
+} from '$lib/types/idb-addresses';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { createStore, del, get, set, update, type UseStore } from 'idb-keyval';

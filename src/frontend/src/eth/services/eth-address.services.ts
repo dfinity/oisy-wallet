@@ -1,5 +1,9 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-import { getIdbEthAddress, setIdbEthAddress, updateIdbEthAddressLastUsage } from '$lib/api/idb.api';
+import {
+	getIdbEthAddress,
+	setIdbEthAddress,
+	updateIdbEthAddressLastUsage
+} from '$lib/api/idb-addresses.api';
 import { getEthAddress } from '$lib/api/signer.api';
 import {
 	certifyAddress,
