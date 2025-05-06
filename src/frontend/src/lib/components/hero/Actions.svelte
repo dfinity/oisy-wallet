@@ -34,6 +34,7 @@
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
+	import {token} from "$lib/stores/token.store";
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -71,7 +72,7 @@
 		{:else if $networkBitcoin}
 			<BtcReceive />
 		{:else if $networkSolana}
-			<SolReceive token={$tokenWithFallback} />
+			<SolReceive token={$token} />
 		{:else if $pseudoNetworkChainFusion}
 			<Receive />
 		{/if}

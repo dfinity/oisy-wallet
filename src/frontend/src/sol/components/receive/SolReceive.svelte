@@ -21,8 +21,10 @@
 		isNetworkIdSOLLocal,
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
+	import {DEFAULT_SOLANA_TOKEN} from "$lib/constants/tokens.constants";
 
-	export let token: Token;
+	export let token: Token = DEFAULT_SOLANA_TOKEN;
+	$: token = token ?? DEFAULT_SOLANA_TOKEN;
 
 	let addressData: StorageAddressData<SolAddress>;
 	//TODO consolidate this logic together with btc into $networkAddress like it's done for ICP and ETH
