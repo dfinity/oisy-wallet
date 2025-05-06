@@ -469,7 +469,9 @@
 		},
 		"xtc_ledger": {
 			"type": "custom",
-			"candid": "https://raw.githubusercontent.com/Psychedelic/dank/refs/heads/develop/candid/xtc.did",
+			"build": "scripts/build.xtc_ledger.sh",
+			"candid": "target/xtc_ledger.did",
+			"wasm": "target/xtc_ledger.wasm.gz",
 			"specified_id": "aanaa-xaaaa-aaaah-aaeiq-cai",
 			"remote": {
 				"id": {

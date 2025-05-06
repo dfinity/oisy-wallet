@@ -51,6 +51,8 @@ DFX_NETWORK=ic ./scripts/build.signer.sh
 DFX_NETWORK=ic ./scripts/build.kong_backend.sh
 # .. downloads candid for the icp_swap_factory
 DFX_NETWORK=ic ./scripts/build.icp_swap_factory.sh
+# .. downloads candid for the icp_swap_factory
+DFX_NETWORK=ic ./scripts/build.xtc_ledger.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
