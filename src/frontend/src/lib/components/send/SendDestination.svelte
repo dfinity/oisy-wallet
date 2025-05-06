@@ -15,7 +15,7 @@
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const back = () => dispatch('icBack');
+	const onIcSendDestinationStep = () => dispatch('icSendDestinationStep');
 </script>
 
 <div class="mb-10 mt-6">
@@ -30,7 +30,11 @@
 
 		<div class="w-full truncate pl-2 pr-4 text-sm sm:text-base">{destination}</div>
 
-		<button class="text-brand-primary" onclick={back} aria-label={$i18n.core.text.back}>
+		<button
+			class="text-brand-primary"
+			onclick={onIcSendDestinationStep}
+			aria-label={$i18n.core.text.back}
+		>
 			<IconPenLine />
 		</button>
 	</div>
