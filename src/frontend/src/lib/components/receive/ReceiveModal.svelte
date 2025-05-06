@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
+	import type { Snippet } from 'svelte';
 	import { isNullish } from '@dfinity/utils';
 	import ReceiveAddressQRCodeContent from '$lib/components/receive/ReceiveAddressQRCodeContent.svelte';
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
@@ -12,14 +13,18 @@
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 
-	export let address: OptionAddress<Address> = undefined;
-	export let addressToken: Token | undefined = undefined;
+	interface Props {
+		content?: Snippet;
+		address?: OptionAddress<Address>;
+		addressToken?: Token | undefined;
+		network: Network;
+		copyAriaLabel: string;
+	}
 
-	export let network: Network;
-	export let copyAriaLabel: string;
+	let { content, address, addressToken, network, copyAriaLabel }: Props = $props();
 
-	let title: string | undefined;
-	$: title = isNullish($token) ? network.name : addressToken?.symbol;
+    let title: string | undefined;
+    $: title = isNullish($token) ? network.name : addressToken?.symbol;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -35,7 +40,7 @@
 			qrCodeAction={{ enabled: false }}
 		/>
 
-		<slot name="content" />
+		{@render content?.()}
 
 		<ButtonDone onclick={modalStore.close} slot="toolbar" />
 	</ContentWithToolbar>
