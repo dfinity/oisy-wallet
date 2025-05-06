@@ -137,8 +137,8 @@ export const themeVariables = {
 	gradient: {
 		'default-0': '#016DFC',
 		'default-100': '#004EB5',
-		'icp-0': '#3B00B9',
-		'icp-100': '#7014A4',
+		'icp-0': '#3607B1',
+		'icp-100': '#1E0071',
 		'btc-0': '#F7931A',
 		'btc-100': '#DE7900',
 		'eth-0': '#627EEA',
