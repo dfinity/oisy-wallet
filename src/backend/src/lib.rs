@@ -41,8 +41,8 @@ use shared::{
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
-            GetAllowedCyclesResponse,
+            AllowSigningRequest, AllowSigningResponse
+            ,
         },
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
