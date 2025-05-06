@@ -42,31 +42,41 @@
 	<ContentWithToolbar>
 		{#if nonNullish(hash)}
 			<Value ref="hash">
-				<svelte:fragment slot="label">{$i18n.transaction.text.hash}</svelte:fragment>
-				<output>{shortenWithMiddleEllipsis({ text: hash })}</output>
-				<Copy
-					value={hash}
-					text={replacePlaceholders($i18n.transaction.text.hash_copied, {
-						$hash: hash
-					})}
-					inline
-				/>
-				{#if nonNullish(txExplorerUrl)}
-					<ExternalLink
-						iconSize="18"
-						href={txExplorerUrl}
-						ariaLabel={$i18n.transaction.alt.open_block_explorer}
+				{#snippet label()}
+					{$i18n.transaction.text.hash}
+				{/snippet}
+
+				{#snippet content()}
+					<output>{shortenWithMiddleEllipsis({ text: hash })}</output>
+					<Copy
+						value={hash}
+						text={replacePlaceholders($i18n.transaction.text.hash_copied, {
+							$hash: hash
+						})}
 						inline
-						color="blue"
 					/>
-				{/if}
+					{#if nonNullish(txExplorerUrl)}
+						<ExternalLink
+							iconSize="18"
+							href={txExplorerUrl}
+							ariaLabel={$i18n.transaction.alt.open_block_explorer}
+							inline
+							color="blue"
+						/>
+					{/if}
+				{/snippet}
 			</Value>
 		{/if}
 
 		{#if nonNullish(blockNumber)}
 			<Value ref="blockNumber">
-				<svelte:fragment slot="label">{$i18n.transaction.text.block}</svelte:fragment>
-				<output>{blockNumber}</output>
+				{#snippet label()}
+					{$i18n.transaction.text.block}
+				{/snippet}
+
+				{#snippet content()}
+					<output>{blockNumber}</output>
+				{/snippet}
 			</Value>
 		{/if}
 
@@ -76,51 +86,72 @@
 
 		{#if nonNullish(timestamp)}
 			<Value ref="timestamp">
-				<svelte:fragment slot="label">{$i18n.transaction.text.timestamp}</svelte:fragment>
-				<output>{formatSecondsToDate(Number(timestamp))}</output>
+				{#snippet label()}
+					{$i18n.transaction.text.timestamp}
+				{/snippet}
+
+				{#snippet content()}
+					<output>{formatSecondsToDate(Number(timestamp))}</output>
+				{/snippet}
 			</Value>
 		{/if}
 
 		<Value ref="type">
-			<svelte:fragment slot="label">{$i18n.transaction.text.type}</svelte:fragment>
-			<p class="first-letter:capitalize">{typeLabel}</p>
+			{#snippet label()}
+				{$i18n.transaction.text.type}
+			{/snippet}
+
+			{#snippet content()}
+				<p class="first-letter:capitalize">{typeLabel}</p>
+			{/snippet}
 		</Value>
 
 		<Value ref="from">
-			<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
+			{#snippet label()}{$i18n.transaction.text.from}{/snippet}
 
-			<TransactionAddress
-				address={from}
-				explorerUrl={fromExplorerUrl}
-				copiedText={$i18n.transaction.text.from_copied}
-			/>
+			{#snippet content()}
+				<TransactionAddress
+					address={from}
+					explorerUrl={fromExplorerUrl}
+					copiedText={$i18n.transaction.text.from_copied}
+				/>
+			{/snippet}
 		</Value>
 
 		<slot name="transaction-custom-to" />
 
 		{#if nonNullish(to)}
 			<Value ref="to">
-				<svelte:fragment slot="label">{sendToLabel}</svelte:fragment>
+				{#snippet label()}
+					{sendToLabel}
+				{/snippet}
 
-				<TransactionAddress
-					address={to}
-					explorerUrl={toExplorerUrl}
-					copiedText={$i18n.transaction.text.to_copied}
-				/>
+				{#snippet content()}
+					<TransactionAddress
+						address={to}
+						explorerUrl={toExplorerUrl}
+						copiedText={$i18n.transaction.text.to_copied}
+					/>
+				{/snippet}
 			</Value>
 		{/if}
 
 		{#if nonNullish(value) && nonNullish(token)}
 			<Value ref="amount">
-				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-				<output>
-					{formatToken({
-						value,
-						unitName: token.decimals,
-						displayDecimals: token.decimals
-					})}
-					{token.symbol}
-				</output>
+				{#snippet label()}
+					{$i18n.core.text.amount}
+				{/snippet}
+
+				{#snippet content()}
+					<output>
+						{formatToken({
+							value,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					</output>
+				{/snippet}
 			</Value>
 		{/if}
 

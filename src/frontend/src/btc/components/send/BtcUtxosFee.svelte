@@ -57,16 +57,20 @@
 </script>
 
 <Value ref="utxos-fee" element="div">
-	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+	{#snippet label()}
+		{$i18n.fee.text.fee}
+	{/snippet}
 
-	{#if isNullish(utxosFee)}
-		<span class="mt-2 block w-full max-w-[140px]"><SkeletonText /></span>
-	{:else}
-		<ExchangeAmountDisplay
-			amount={utxosFee.feeSatoshis}
-			decimals={$sendTokenDecimals}
-			symbol={$sendTokenSymbol}
-			exchangeRate={$sendTokenExchangeRate}
-		/>
-	{/if}
+	{#snippet content()}
+		{#if isNullish(utxosFee)}
+			<span class="mt-2 block w-full max-w-[140px]"><SkeletonText /></span>
+		{:else}
+			<ExchangeAmountDisplay
+				amount={utxosFee.feeSatoshis}
+				decimals={$sendTokenDecimals}
+				symbol={$sendTokenSymbol}
+				exchangeRate={$sendTokenExchangeRate}
+			/>
+		{/if}
+	{/snippet}
 </Value>
