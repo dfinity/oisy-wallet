@@ -74,16 +74,14 @@
 		{/if}
 	</div>
 
-	{#if nonNullish(token)}
+	{#if nonNullish(token) && nonNullish(token.token)}
 		<div in:fade>
 			<Value ref="network" element="div">
 				{#snippet label()}
 					{$i18n.tokens.manage.text.network}
 				{/snippet}
 				{#snippet content()}
-					{#if nonNullish(token)}
-						<NetworkWithLogo network={token.token.network} />
-					{/if}
+					<NetworkWithLogo network={token.token.network} />
 				{/snippet}
 			</Value>
 
