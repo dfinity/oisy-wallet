@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import IconRandom from '$lib/components/icons/IconRandom.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
@@ -18,18 +18,8 @@
 
 	let sizePx = $state(logoSizes[size]);
 
-	let loaded = $state(false);
-
-	$effect(() => {
-		loaded = isNullish(src);
-		loadingError = false;
-	});
-
-	let loadingError = $state(false);
-	const onError = () => {
-		loadingError = true;
-		loaded = true;
-	};
+	let loadingError: boolean | undefined = $state();
+	let loaded = $derived(nonNullish(src) && nonNullish(loadingError) && !loadingError);
 </script>
 
 <div
@@ -47,8 +37,8 @@
 			{alt}
 			fitHeight
 			height={sizePx}
-			on:load={() => (loaded = true)}
-			on:error={onError}
+			on:load={() => (loadingError = false)}
+			on:error={() => (loadingError = true)}
 			rounded
 		/>
 	{:else}
