@@ -170,7 +170,7 @@ jobs:
             exit 1
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
-  backend-tests-passed:
+  backend-tests-pass:
     needs:
       - tests
       - breaking-interface
