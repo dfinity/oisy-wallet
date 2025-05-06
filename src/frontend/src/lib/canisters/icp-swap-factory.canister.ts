@@ -7,7 +7,7 @@ import { idlFactory as factoryIdlFactory } from '$declarations/icp_swap_factory/
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices } from '@dfinity/utils';
-import { mapIcpSwapFactoryError } from './icp-swap.errors';
+import { mapIcpSwapFactoryError } from '$lib/canisters/icp-swap.errors';
 
 export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 	static async create({ identity, ...options }: CreateCanisterOptions<SwapFactoryService>) {
