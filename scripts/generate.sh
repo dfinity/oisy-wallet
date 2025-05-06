@@ -49,6 +49,8 @@ function install_did_files() {
 DFX_NETWORK=ic ./scripts/build.signer.sh
 # .. downloads candid for the kong_backend
 DFX_NETWORK=ic ./scripts/build.kong_backend.sh
+# .. downloads candid for the icp_swap_pool
+DFX_NETWORK=ic ./scripts/build.icp_swap_pool.sh
 # .. downloads candid for the icp_swap_factory
 DFX_NETWORK=ic ./scripts/build.icp_swap_factory.sh
 # Download .did files listed in dfx.json

@@ -18,6 +18,7 @@ dfx deploy ckusdc_index
 
 dfx deploy kong_backend
 dfx deploy icp_swap_factory
+dfx deploy icp_swap_pool
 
 dfx deploy internet_identity
 dfx deploy pouh_issuer

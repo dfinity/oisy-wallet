@@ -50,6 +50,27 @@
 				}
 			}
 		},
+		"icp_swap_pool": {
+			"type": "custom",
+			"build": "scripts/build.icp_swap_pool.sh",
+			"candid": "target/icp_swap_pool.did",
+			"wasm": "target/icp_swap_pool.wasm.gz",
+			"init_arg_file": "target/icp_swap_pool.arg.did",
+			"shrink": false,
+			"specified_id": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+			"remote": {
+				"id": {
+					"ic": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"beta": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_be_1": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_1": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_2": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_3": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_4": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"staging": "xmiu5-jqaaa-aaaag-qbz7q-cai"
+				}
+			}
+		},
 		"icp_swap_factory": {
 			"type": "custom",
 			"build": "scripts/build.icp_swap_factory.sh",
