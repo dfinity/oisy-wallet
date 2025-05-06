@@ -77,6 +77,11 @@ describe('LoaderMultipleEthTransactions', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
+		vi.stubGlobal(
+			'setInterval',
+			vi.fn(() => 123456789)
+		);
+
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
 
@@ -87,6 +92,8 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	afterEach(() => {
+		vi.unstubAllGlobals();
+
 		vi.useRealTimers();
 	});
 
