@@ -9,6 +9,8 @@
 	import type { OptionAddress, Address } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import {isNullish} from "@dfinity/utils";
+	import {token} from "$lib/stores/token.store";
 
 	export let address: OptionAddress<Address> = undefined;
 	export let addressToken: Token | undefined = undefined;
@@ -18,7 +20,7 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<ReceiveTitle slot="title" {addressToken} />
+	<ReceiveTitle slot="title" title={isNullish($token) ? network.name : addressToken.symbol} />
 
 	<ContentWithToolbar>
 		<ReceiveAddressQRCodeContent
