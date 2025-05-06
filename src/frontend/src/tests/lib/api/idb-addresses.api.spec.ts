@@ -11,7 +11,7 @@ import {
 	updateIdbBtcAddressMainnetLastUsage,
 	updateIdbEthAddressLastUsage,
 	updateIdbSolAddressMainnetLastUsage
-} from '$lib/api/idb.api';
+} from '$lib/api/idb-addresses.api';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 
@@ -29,7 +29,7 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
-describe('idb.api', () => {
+describe('idb-addresses.api', () => {
 	const mockAddress = {
 		address: '0x123',
 		lastUsedTimestamp: Date.now(),
