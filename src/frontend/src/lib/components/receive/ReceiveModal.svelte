@@ -2,7 +2,6 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { derived } from 'svelte/store';
 	import ReceiveAddressQRCodeContent from '$lib/components/receive/ReceiveAddressQRCodeContent.svelte';
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
