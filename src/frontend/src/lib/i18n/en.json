@@ -24,7 +24,8 @@
 			"not_available": "n/a",
 			"new": "New",
 			"edit": "Edit",
-			"no_results": "No results"
+			"no_results": "No results",
+			"to": "To"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
