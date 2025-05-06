@@ -1,4 +1,5 @@
 import type {
+	AddUserCredentialResult,
 	AllowSigningResponse,
 	_SERVICE as BackendService,
 	CreateChallengeResponse,
@@ -19,7 +20,6 @@ import {
 } from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
-	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
@@ -105,7 +105,7 @@ export class BackendCanister extends Canister<BackendService> {
 		issuerCanisterId,
 		currentUserVersion,
 		credentialSpec
-	}: AddUserCredentialParams): Promise<AddUserCredentialResponse> => {
+	}: AddUserCredentialParams): Promise<AddUserCredentialResult> => {
 		const { add_user_credential } = this.caller({ certified: true });
 
 		return add_user_credential({
