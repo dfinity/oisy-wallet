@@ -34,7 +34,9 @@ export default {
 			textColor: themeVariables.foreground,
 			backgroundImage: {
 				'trump-token-hero-image':
-					'url(/images/trump-token-hero-image.webp), linear-gradient(to bottom, #232bcc, #000797)'
+					'url(/images/trump-token-hero-image.webp), linear-gradient(to bottom, #232bcc, #000797)',
+				'vchf-token-hero-image':
+					'url(/images/vchf-token-hero-image.webp), radial-gradient(#DA291C, #AD1207)'
 			},
 			backgroundSize: {
 				'size-200': '200% 200%'
