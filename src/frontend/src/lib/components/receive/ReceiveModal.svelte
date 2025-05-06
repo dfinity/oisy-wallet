@@ -12,6 +12,7 @@
 	import type { OptionAddress, Address } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import {derived} from "svelte/store";
 
 	interface Props {
 		content?: Snippet;
@@ -23,8 +24,7 @@
 
 	let { content, address, addressToken, network, copyAriaLabel }: Props = $props();
 
-    let title: string | undefined;
-    $: title = isNullish($token) ? network.name : addressToken?.symbol;
+    const title = $derived(isNullish($token) ? network.name : addressToken?.symbol);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
