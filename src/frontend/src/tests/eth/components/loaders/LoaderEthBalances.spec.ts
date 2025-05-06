@@ -19,6 +19,7 @@ import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 
 vi.mock('$eth/services/eth-balance.services', () => ({
 	loadEthBalances: vi.fn(),
@@ -65,7 +66,7 @@ describe('LoaderEthBalances', () => {
 	it('should call `loadEthBalances` on mount', async () => {
 		render(LoaderEthBalances);
 
-		await vi.advanceTimersByTimeAsync(1000);
+		await tick();
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
@@ -76,7 +77,7 @@ describe('LoaderEthBalances', () => {
 
 		render(LoaderEthBalances);
 
-		await vi.advanceTimersByTimeAsync(1000);
+		await tick();
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, allTokens);
@@ -85,7 +86,7 @@ describe('LoaderEthBalances', () => {
 	it('should call `loadErc20Balances` on mount', async () => {
 		render(LoaderEthBalances);
 
-		await vi.advanceTimersByTimeAsync(1000);
+		await tick();
 
 		expect(loadErc20Balances).toHaveBeenCalledOnce();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
@@ -106,9 +107,14 @@ describe('LoaderEthBalances', () => {
 	});
 
 	it('should re-trigger loading balances when address changes', async () => {
+		vi.stubGlobal(
+			'setInterval',
+			vi.fn(() => 123456789)
+		);
+
 		render(LoaderEthBalances);
 
-		await vi.advanceTimersByTimeAsync(1000);
+		await tick();
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
@@ -131,6 +137,8 @@ describe('LoaderEthBalances', () => {
 			address: mockEthAddress2,
 			erc20Tokens: mockErc20DefaultTokens
 		});
+
+		vi.unstubAllGlobals();
 	});
 
 	it('should not handle errors', async () => {
@@ -144,7 +152,7 @@ describe('LoaderEthBalances', () => {
 			}
 		});
 
-		await vi.advanceTimersByTimeAsync(1000);
+		await tick();
 
 		expect(getByTestId(testId)).toBeInTheDocument();
 
