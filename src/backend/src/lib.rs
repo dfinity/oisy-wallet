@@ -500,6 +500,7 @@ pub async fn btc_get_pending_transactions(
 /// Errors are enumerated by: `AddUserCredentialError`.
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
+#[must_use]
 pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredentialResult {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);

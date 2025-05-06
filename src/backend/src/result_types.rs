@@ -12,7 +12,7 @@ pub enum AddUserCredentialResult {
 impl From<Result<(), AddUserCredentialError>> for AddUserCredentialResult {
     fn from(result: Result<(), AddUserCredentialError>) -> Self {
         match result {
-            Ok(_) => AddUserCredentialResult::Ok(),
+            Ok(()) => AddUserCredentialResult::Ok(),
             Err(err) => AddUserCredentialResult::Err(err),
         }
     }
