@@ -1,15 +1,8 @@
-import {
-	BASE_NETWORK,
-	BASE_SEPOLIA_NETWORK
-} from '$env/networks/networks-evm/networks.evm.base.env';
-import {
-	BSC_MAINNET_NETWORK,
-	BSC_TESTNET_NETWORK
-} from '$env/networks/networks-evm/networks.evm.bsc.env';
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY, ETHERSCAN_REST_URL } from '$env/rest/etherscan.env';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { EtherscanRestTransaction } from '$eth/types/etherscan-transaction';
+import type { EtherscanProviderTokenTransferTransaction } from '$eth/types/etherscan-transaction';
 import type { EthereumChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
@@ -50,7 +43,8 @@ export class EtherscanRest {
 			throw new Error(`Fetching transactions with Etherscan API failed.`);
 		}
 
-		const { result }: { result: EtherscanRestTransaction[] | string } = await response.json();
+		const { result }: { result: EtherscanProviderTokenTransferTransaction[] | string } =
+			await response.json();
 
 		if (typeof result === 'string') {
 			throw new Error(result);
@@ -67,7 +61,7 @@ export class EtherscanRest {
 				from,
 				to,
 				value
-			}: EtherscanRestTransaction): Transaction => ({
+			}: EtherscanProviderTokenTransferTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
 				timestamp: parseInt(timeStamp),
@@ -84,12 +78,8 @@ export class EtherscanRest {
 }
 
 const providers: Record<NetworkId, EtherscanRest> = [
-	ETHEREUM_NETWORK,
-	SEPOLIA_NETWORK,
-	BASE_NETWORK,
-	BASE_SEPOLIA_NETWORK,
-	BSC_MAINNET_NETWORK,
-	BSC_TESTNET_NETWORK
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, EtherscanRest>>(
 	(acc, { id, chainId }) => ({ ...acc, [id]: new EtherscanRest(chainId) }),
 	{}

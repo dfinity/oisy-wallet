@@ -28,7 +28,7 @@ import {
 	TOKEN_CARD,
 	TOKEN_GROUP
 } from '$lib/constants/test-ids.constants';
-import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
+import type { InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
@@ -557,8 +557,8 @@ export class HomepageLoggedOut extends Homepage {
 export class HomepageLoggedIn extends Homepage {
 	readonly #iiPage: InternetIdentityPage;
 
-	constructor({ page, iiPage, viewportSize }: HomepageLoggedInParams) {
-		super({ page, viewportSize });
+	constructor({ iiPage, ...rest }: HomepageLoggedInParams) {
+		super(rest);
 
 		this.#iiPage = iiPage;
 	}

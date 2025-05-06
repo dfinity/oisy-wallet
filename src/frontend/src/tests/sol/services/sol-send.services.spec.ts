@@ -30,7 +30,7 @@ import {
 	type SolanaRpcApi,
 	type SolanaRpcSubscriptionsApi
 } from '@solana/kit';
-import { type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock(import('@solana/kit'), async (importOriginal) => {
 	const actual = await importOriginal();
