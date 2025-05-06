@@ -31,7 +31,6 @@
 	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { token } from '$lib/stores/token.store';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
