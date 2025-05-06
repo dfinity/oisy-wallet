@@ -19,7 +19,7 @@
 	let sizePx = $state(logoSizes[size]);
 
 	let loadingError: boolean | null = $state(null);
-	let loaded = $derived(!isNullish(src) && nonNullish(loadingError) && !loadingError);
+	let loaded = $derived(nonNullish(src) && nonNullish(loadingError) && !loadingError);
 </script>
 
 <div
