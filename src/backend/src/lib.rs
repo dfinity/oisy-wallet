@@ -718,7 +718,7 @@ pub fn has_user_profile() -> HasUserProfileResponse {
     }
 }
 
-/// Retrieves the amount of cycles that the signer canister is allowed to spend
+/// Retrieves the number of cycles that the signer canister is allowed to spend
 /// on behalf of the current user
 /// # Returns
 /// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
