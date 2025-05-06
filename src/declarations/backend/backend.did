@@ -78,10 +78,7 @@ type AddUserCredentialRequest = record {
   current_user_version : opt nat64;
   credential_spec : CredentialSpec;
 };
-type AddUserCredentialResult = variant {
-  Ok : record {};
-  Err : AddUserCredentialError;
-};
+type AddUserCredentialResult = variant { Ok; Err : AddUserCredentialError };
 type AllowSigningError = variant {
   ApproveError : ApproveError;
   PowChallenge : ChallengeCompletionError;

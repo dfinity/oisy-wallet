@@ -79,7 +79,7 @@ export interface AddUserCredentialRequest {
 	current_user_version: [] | [bigint];
 	credential_spec: CredentialSpec;
 }
-export type AddUserCredentialResult = { Ok: {} } | { Err: AddUserCredentialError };
+export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
 	| { PowChallenge: ChallengeCompletionError }

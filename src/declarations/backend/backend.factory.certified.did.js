@@ -35,7 +35,7 @@ export const idlFactory = ({ IDL }) => {
 		UserNotFound: IDL.Null
 	});
 	const AddUserCredentialResult = IDL.Variant({
-		Ok: IDL.Record({}),
+		Ok: IDL.Null,
 		Err: AddUserCredentialError
 	});
 	const AddHiddenDappIdRequest = IDL.Record({
