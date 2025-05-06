@@ -29,6 +29,7 @@ interface I18nCore {
 		edit: string;
 		no_results: string;
 		to: string;
+		more_items: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -412,6 +413,7 @@ interface I18nSend {
 		scan_qr: string;
 		select_token: string;
 		select_network_filter: string;
+		send_again: string;
 	};
 	placeholder: {
 		enter_eth_address: string;

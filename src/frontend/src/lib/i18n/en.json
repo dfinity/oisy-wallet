@@ -25,7 +25,8 @@
 			"new": "New",
 			"edit": "Edit",
 			"no_results": "No results",
-			"to": "To"
+			"to": "To",
+			"more_items": "+$items more"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -443,7 +444,8 @@
 			"open_qr_modal": "Start QR Code scan for transaction details",
 			"scan_qr": "Scan QR Code",
 			"select_token": "Select token to send",
-			"select_network_filter": "Select network filter"
+			"select_network_filter": "Select network filter",
+			"send_again": "Send again"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
