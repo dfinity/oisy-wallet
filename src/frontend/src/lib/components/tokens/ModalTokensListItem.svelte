@@ -9,7 +9,7 @@
 	import type { CardData } from '$lib/types/token-card';
 
 	export let data: CardData;
-	export let logoSize: LogoSize = 'md';
+	export let logoSize: LogoSize = 'lg';
 
 	const { oisyName, oisySymbol, symbol, name, network } = data;
 </script>
