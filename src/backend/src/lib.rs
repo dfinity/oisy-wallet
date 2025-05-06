@@ -70,6 +70,7 @@ use crate::{
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
+use crate::result_types::AddUserCredentialResult;
 
 mod assertions;
 mod bitcoin_api;
@@ -89,6 +90,7 @@ mod user_profile_model;
 
 #[cfg(test)]
 mod tests;
+mod result_types;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -496,11 +498,11 @@ pub async fn btc_get_pending_transactions(
 ///
 /// # Errors
 /// Errors are enumerated by: `AddUserCredentialError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_not_anonymous")]å
 #[allow(clippy::needless_pass_by_value)]
 pub fn add_user_credential(
     request: AddUserCredentialRequest,
-) -> Result<(), AddUserCredentialError> {
+) -> AddUserCredentialResult {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
     let current_time_ns = u128::from(time());
@@ -530,7 +532,7 @@ pub fn add_user_credential(
             )
         }),
         Err(_) => Err(AddUserCredentialError::InvalidCredential),
-    }
+    }.into()
 }
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
