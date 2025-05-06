@@ -1,6 +1,7 @@
 import { icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import {
+	DEFAULT_BASE_TOKEN,
 	DEFAULT_BITCOIN_TOKEN,
 	DEFAULT_BSC_TOKEN,
 	DEFAULT_ETHEREUM_TOKEN,
@@ -28,17 +29,17 @@ export const defaultFallbackToken: Readable<Token> = derived(
 		if ($networkBitcoin) {
 			return DEFAULT_BITCOIN_TOKEN;
 		}
+		if ($networkSolana) {
+			return DEFAULT_SOLANA_TOKEN;
+		}
 		if ($networkEthereum) {
 			return DEFAULT_ETHEREUM_TOKEN;
 		}
 		if ($networkBase) {
-			return DEFAULT_ETHEREUM_TOKEN; // TODO
+			return DEFAULT_BASE_TOKEN;
 		}
 		if ($networkEvm) {
 			return DEFAULT_BSC_TOKEN;
-		}
-		if ($networkSolana) {
-			return DEFAULT_SOLANA_TOKEN;
 		}
 
 		return DEFAULT_ETHEREUM_TOKEN;
