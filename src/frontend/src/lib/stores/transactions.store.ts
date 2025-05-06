@@ -14,7 +14,6 @@ export type CertifiedTransaction<T extends TransactionTypes> = CertifiedData<T>;
 export type TransactionsStoreParams<T extends TransactionTypes> = {
 	tokenId: TokenId;
 	transactions: CertifiedTransaction<T>[];
-	identity: OptionIdentity;
 };
 
 export type NullableCertifiedTransactions = null;
