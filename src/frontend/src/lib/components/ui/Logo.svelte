@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import IconRandom from '$lib/components/icons/IconRandom.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
@@ -18,7 +18,7 @@
 
 	let sizePx = $state(logoSizes[size]);
 
-	let loadingError: boolean | null = $state(null);
+	let loadingError: boolean | undefined = $state();
 	let loaded = $derived(nonNullish(src) && nonNullish(loadingError) && !loadingError);
 </script>
 
