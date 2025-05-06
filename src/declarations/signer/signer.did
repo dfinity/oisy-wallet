@@ -1,5 +1,4 @@
 type Account = record { owner : principal; subaccount : opt blob };
-type Account = record { owner : principal; subaccount : opt blob };
 type Arg = variant { Upgrade; Init : InitArg };
 type BitcoinAddressType = variant { P2WPKH };
 type BitcoinNetwork = variant { mainnet; regtest; testnet };

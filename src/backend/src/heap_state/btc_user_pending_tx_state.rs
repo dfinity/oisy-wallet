@@ -136,8 +136,9 @@ impl BtcUserPendingTransactions {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use ic_cdk::bitcoin_canister::{Outpoint, Utxo};
+
+    use super::*;
 
     const UTXO_1: Utxo = Utxo {
         outpoint: Outpoint {

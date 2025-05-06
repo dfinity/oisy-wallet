@@ -2,10 +2,12 @@
 
 use bitcoin::{Address, CompressedPublicKey};
 use candid::{Nat, Principal};
-use ic_cdk::api::management_canister::ecdsa::EcdsaPublicKeyArgument;
-use ic_cdk::api::{canister_cycle_balance, canister_self, msg_caller};
-use ic_cdk::bitcoin_canister::Network;
-use ic_cdk::management_canister::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId};
+use ic_cdk::{
+    api::{canister_cycle_balance, canister_self, msg_caller},
+    bitcoin_canister::Network
+    ,
+    management_canister::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs},
+};
 use ic_cycles_ledger_client::{
     Account, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
 };
@@ -115,19 +117,21 @@ async fn cfs_ecdsa_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
     let btc_schema = vec![0_u8];
     let derivation_path = vec![btc_schema, principal.as_slice().to_vec()];
     let cfs_canister_id = maybe_cfs_canister_id.ok_or("Missing CFS canister id")?;
-    if let Ok((key,)) = ecdsa_public_key(EcdsaPublicKeyArgument {
+
+    // Updated for ic-cdk 0.18.0 with proper return type handling
+    let arg = EcdsaPublicKeyArgs {
         canister_id: Some(cfs_canister_id),
         derivation_path,
         key_id: EcdsaKeyId {
             curve: EcdsaCurve::Secp256k1,
             name: ecdsa_key_name,
         },
-    })
-    .await
-    {
-        Ok(key.public_key)
-    } else {
-        Err("Failed to get ecdsa public key".to_string())
+    };
+
+    let result = ecdsa_public_key(&arg).await;
+    match result {
+        Ok(response) => Ok(response.public_key),
+        Err(err) => Err(format!("Failed to get ECDSA public key: {}", err)),
     }
 }
 
@@ -212,15 +216,18 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
             to_send.clone().0.try_into().unwrap_or_else(|err| {
                 unreachable!("Failed to convert cycle amount to u128: {}", err)
             });
-        let result: DepositResult =
-            ic_cdk::call::Call::unbounded_wait(*CYCLES_LEDGER, "deposit", (arg,), to_send_128)
+
+        // Using call::call_with_payment128 from ic_cdk
+        let result =
+            ic_cdk::api::call::call_with_payment128(*CYCLES_LEDGER, "deposit", (arg,), to_send_128)
                 .await
                 .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
-                    available: backend_cycles,
+                    available: backend_cycles.clone(),
                     tried_to_send: to_send.clone(),
-                })?
-                .0;
-        let new_ledger_balance = result.balance;
+                })?;
+
+        let (deposit_result,): (DepositResult,) = result;
+        let new_ledger_balance = deposit_result.balance;
 
         Ok(TopUpCyclesLedgerResponse {
             ledger_balance: new_ledger_balance,

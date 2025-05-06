@@ -116,6 +116,7 @@ pub fn estimate_fee(
 #[cfg(test)]
 mod tests {
     use ic_cdk::bitcoin_canister::Outpoint;
+
     // Import the outer scope
     use super::*;
 
