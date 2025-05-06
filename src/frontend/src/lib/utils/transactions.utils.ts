@@ -17,14 +17,14 @@ import {
 	getAllIcTransactions,
 	getIcExtendedTransactions
 } from '$icp/utils/ic-transactions.utils';
-import { MICRO_TRANSACTION_USD_THRESHOLD } from '$lib/constants/app.constants';
+import { MICRO_TRANSACTION_USD_THRESHOLD, ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
-import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
+import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
@@ -285,3 +285,29 @@ export const areTransactionsStoresLoading = (
 
 	return (someNullish || someNotInitialized) && allEmpty;
 };
+
+export const getKnownDestinations = (transactions: AnyTransactionUi[]): KnownDestinations =>
+	transactions.reduce<KnownDestinations>(
+		(acc, { timestamp, value, to, type }) =>
+			nonNullish(to) && type === 'send' && nonNullish(value) && value > ZERO
+				? {
+						...acc,
+						...(Array.isArray(to) ? to : [to]).reduce(
+							(innerAcc, address) => ({
+								...innerAcc,
+								[address]: {
+									amounts: [...(nonNullish(acc[address]) ? acc[address].amounts : []), value],
+									timestamp:
+										nonNullish(acc[address]?.timestamp) && nonNullish(timestamp)
+											? Math.max(Number(acc[address].timestamp), Number(timestamp))
+											: nonNullish(timestamp)
+												? Number(timestamp)
+												: acc[address].timestamp
+								}
+							}),
+							{}
+						)
+					}
+				: acc,
+		{}
+	);
