@@ -24,6 +24,14 @@ export const TransactionCases: TransactionsConfig[] = [
 	{
 		tokenSymbol: 'SOL',
 		networkId: 'SOL'
+	},
+	{
+		tokenSymbol: 'ETH',
+		networkId: 'BASE'
+	},
+	{
+		tokenSymbol: 'BNB',
+		networkId: 'BSC'
 	}
 ];
 
