@@ -75,7 +75,11 @@
 	</div>
 
 	{#if nonNullish(token)}
-		{@const {network: safeNetwork, ledgerCanisterId: safeLedgerCanisterId, indexCanisterId: safeIndexCanisterId} = token.token}
+		{@const {
+			network: safeNetwork,
+			ledgerCanisterId: safeLedgerCanisterId,
+			indexCanisterId: safeIndexCanisterId
+		} = token.token}
 		<div in:fade>
 			<Value ref="network" element="div">
 				{#snippet label()}

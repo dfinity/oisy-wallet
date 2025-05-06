@@ -62,7 +62,7 @@
 					{/if}
 
 					{#if nonNullish(ckToken.indexCanisterId)}
-						{@const {indexCanisterId: safeIndexCanisterId} = ckToken}
+						{@const { indexCanisterId: safeIndexCanisterId } = ckToken}
 						<Value ref="name">
 							{#snippet label()}
 								{$i18n.tokens.import.text.index_canister_id}
@@ -78,7 +78,7 @@
 					{/if}
 
 					{#if nonNullish(ckToken.minterCanisterId)}
-						{@const {minterCanisterId: safeMinterCanisterId} = ckToken}
+						{@const { minterCanisterId: safeMinterCanisterId } = ckToken}
 						<Value ref="name">
 							{#snippet label()}
 								{$i18n.tokens.import.text.minter_canister_id}
