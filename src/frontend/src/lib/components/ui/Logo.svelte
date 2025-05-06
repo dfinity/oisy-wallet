@@ -1,32 +1,25 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import IconRandom from '$lib/components/icons/IconRandom.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
 	import type { LogoSize } from '$lib/types/components';
 
-	export let src: string | undefined;
-	export let alt = '';
-	export let size: LogoSize = 'xxs';
-	export let color: 'off-white' | 'white' = 'off-white';
-	export let ring = false;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		src?: string;
+		alt?: string;
+		size?: LogoSize;
+		color?: 'off-white' | 'white';
+		ring?: boolean;
+		testId?: string;
+	}
 
-	let sizePx = logoSizes[size];
+	let { src, alt = '', size = 'xxs', color = 'off-white', ring = false, testId }: Props = $props();
 
-	let loaded = false;
+	let sizePx = $state(logoSizes[size]);
 
-	$: src,
-		(() => {
-			loaded = isNullish(src);
-			loadingError = false;
-		})();
-
-	let loadingError = false;
-	const onError = () => {
-		loadingError = true;
-		loaded = true;
-	};
+	let loadingError: boolean | undefined = $state();
+	let loaded = $derived(nonNullish(src) && nonNullish(loadingError) && !loadingError);
 </script>
 
 <div
@@ -44,8 +37,8 @@
 			{alt}
 			fitHeight
 			height={sizePx}
-			on:load={() => (loaded = true)}
-			on:error={onError}
+			on:load={() => (loadingError = false)}
+			on:error={() => (loadingError = true)}
 			rounded
 		/>
 	{:else}

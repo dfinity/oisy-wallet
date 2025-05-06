@@ -182,8 +182,10 @@ interface I18nRewards {
 		carousel_slide_cta: string;
 		sprinkles_earned: string;
 		youre_eligible: string;
+		ongoing: string;
+		ended: string;
 	};
-	alt: { upcoming_campaigns: string };
+	alt: { upcoming_campaigns: string; reward_logo: string };
 }
 
 interface I18nFooter {
