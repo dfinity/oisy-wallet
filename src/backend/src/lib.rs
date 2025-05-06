@@ -1,7 +1,7 @@
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
-use candid::{candid_method, Principal};
+use candid::{candid_method, Nat, Principal};
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
@@ -41,7 +41,8 @@ use shared::{
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest, AllowSigningResponse,
+            AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
+            GetAllowedCyclesResponse,
         },
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
@@ -715,6 +716,24 @@ pub fn has_user_profile() -> HasUserProfileResponse {
     HasUserProfileResponse {
         has_user_profile: user_profile::has_user_profile(stored_principal),
     }
+}
+
+/// Retrieves the number of cycles that the signer canister is allowed to spend
+/// on behalf of the current user
+/// # Returns
+/// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
+/// - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong
+///
+/// # Errors
+/// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
+/// - `Other`: If another error occurred during the operation
+#[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::unused_async)]
+pub async fn get_allowed_cycles() -> Result<GetAllowedCyclesResponse, GetAllowedCyclesError> {
+    // TODO call the get_allowed_cycles implementation
+    Ok(GetAllowedCyclesResponse {
+        allowed_cycles: { Nat::from(1u32) },
+    })
 }
 
 /// This function authorizes the caller to spend a specific
