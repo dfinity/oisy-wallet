@@ -498,7 +498,7 @@ pub async fn btc_get_pending_transactions(
 ///
 /// # Errors
 /// Errors are enumerated by: `AddUserCredentialError`.
-#[update(guard = "caller_is_not_anonymous")]å
+#[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn add_user_credential(
     request: AddUserCredentialRequest,
