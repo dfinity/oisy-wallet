@@ -5,7 +5,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Address } from '$lib/types/address';
 import { LoadIdbAddressError } from '$lib/types/errors';
-import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb';
+import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb-addresses';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';

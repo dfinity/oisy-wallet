@@ -12,7 +12,7 @@ import {
 	setIdbSolAddressMainnet,
 	setIdbSolAddressTestnet,
 	updateIdbSolAddressMainnetLastUsage
-} from '$lib/api/idb.api';
+} from '$lib/api/idb-addresses.api';
 import { getSchnorrPublicKey } from '$lib/api/signer.api';
 import {
 	certifyAddress,
