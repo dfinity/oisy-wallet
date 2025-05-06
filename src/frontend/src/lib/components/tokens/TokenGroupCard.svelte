@@ -77,6 +77,10 @@
 		})
 	);
 
+	$effect(() => {
+		console.log(tokensToShow);
+	});
+
 	// Count tokens that are not displayed
 	const notDisplayedCount: number = $derived(filteredTokens.length - tokensToShow.length);
 </script>
