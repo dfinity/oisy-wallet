@@ -24,7 +24,7 @@
 
 	let { content, address, addressToken, network, copyAriaLabel }: Props = $props();
 
-	const title = $derived(isNullish($token) ? network.name : addressToken?.symbol);
+	const title: string | undefined = $derived(isNullish($token) ? network.name : addressToken?.symbol);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
