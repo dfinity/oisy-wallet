@@ -75,24 +75,36 @@
 	</div>
 
 	{#if nonNullish(token)}
+		{@const {
+			network: safeNetwork,
+			ledgerCanisterId: safeLedgerCanisterId,
+			indexCanisterId: safeIndexCanisterId
+		} = token.token}
 		<div in:fade>
 			<Value ref="network" element="div">
-				<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
-				<NetworkWithLogo network={token.token.network} />
+				{#snippet label()}
+					{$i18n.tokens.manage.text.network}
+				{/snippet}
+				{#snippet content()}
+					<NetworkWithLogo network={safeNetwork} />
+				{/snippet}
 			</Value>
 
 			<Value ref="ledgerId" element="div">
-				<svelte:fragment slot="label">{$i18n.tokens.import.text.ledger_canister_id}</svelte:fragment
-				>
-				{token.token.ledgerCanisterId}
+				{#snippet label()}{$i18n.tokens.import.text.ledger_canister_id}{/snippet}
+				{#snippet content()}
+					{safeLedgerCanisterId}
+				{/snippet}
 			</Value>
 
 			{#if nonNullish(indexCanisterId)}
 				<Value ref="indexId" element="div">
-					<svelte:fragment slot="label"
-						>{$i18n.tokens.import.text.index_canister_id}</svelte:fragment
-					>
-					{token.token.indexCanisterId}
+					{#snippet label()}
+						{$i18n.tokens.import.text.index_canister_id}
+					{/snippet}
+					{#snippet content()}
+						{safeIndexCanisterId}
+					{/snippet}
 				</Value>
 			{/if}
 
