@@ -1,16 +1,21 @@
 //! Tests the ledger account logic.
 
-use crate::pow::call_create_user_profile;
-use crate::utils::{
-    mock::VC_HOLDER,
-    pocketic::{controller, pic_canister::PicCanisterTrait, setup},
-};
 use candid::{Nat, Principal};
-use shared::types::signer::topup::{
-    TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult, MAX_PERCENTAGE,
-    MIN_PERCENTAGE,
+use shared::types::signer::{
+    topup::{
+        TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult, MAX_PERCENTAGE,
+        MIN_PERCENTAGE,
+    },
+    GetAllowedCyclesError, GetAllowedCyclesResponse,
 };
-use shared::types::signer::{GetAllowedCyclesError, GetAllowedCyclesResponse};
+
+use crate::{
+    pow::call_create_user_profile,
+    utils::{
+        mock::VC_HOLDER,
+        pocketic::{controller, pic_canister::PicCanisterTrait, setup},
+    },
+};
 
 #[test]
 fn test_topup_cannot_be_called_if_not_controller() {
