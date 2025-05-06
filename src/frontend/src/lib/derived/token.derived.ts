@@ -6,6 +6,13 @@ import {
 	DEFAULT_ETHEREUM_TOKEN,
 	DEFAULT_SOLANA_TOKEN
 } from '$lib/constants/tokens.constants';
+import {
+	networkBase,
+	networkBitcoin,
+	networkEthereum,
+	networkEvm,
+	networkSolana
+} from '$lib/derived/network.derived';
 import { token } from '$lib/stores/token.store';
 import type { OptionTokenId, OptionTokenStandard, Token } from '$lib/types/token';
 import {
@@ -14,32 +21,19 @@ import {
 } from '$lib/utils/token-toggle.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
-import {
-	networkBase,
-	networkBitcoin,
-	networkEthereum,
-	networkEvm,
-	networkSolana
-} from "$lib/derived/network.derived";
 
 export const defaultFallbackToken: Readable<Token> = derived(
-	[
-		networkBitcoin,
-		networkEthereum,
-		networkBase,
-		networkEvm,
-		networkSolana
-	],
+	[networkBitcoin, networkEthereum, networkBase, networkEvm, networkSolana],
 	([$networkBitcoin, $networkEthereum, $networkBase, $networkEvm, $networkSolana]) => {
 		if ($networkBitcoin) {
 			return DEFAULT_BITCOIN_TOKEN;
-		} else if ($networkEthereum) {
+		} if ($networkEthereum) {
 			return DEFAULT_ETHEREUM_TOKEN;
-		} else if ($networkBase) {
+		} if ($networkBase) {
 			return DEFAULT_ETHEREUM_TOKEN; // TODO
-		} else if ($networkEvm) {
+		} if ($networkEvm) {
 			return DEFAULT_BSC_TOKEN;
-		} else if ($networkSolana) {
+		} if ($networkSolana) {
 			return DEFAULT_SOLANA_TOKEN;
 		}
 
