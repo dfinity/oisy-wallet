@@ -3,7 +3,6 @@
 	import type { NavigationTarget, Page } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { REWARDS_ENABLED } from '$env/rewards.env';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
@@ -96,24 +95,22 @@
 	{$i18n.navigation.text.dapp_explorer}
 </NavigationItem>
 
-{#if REWARDS_ENABLED}
-	<NavigationItem
-		href={networkUrl({
-			path: AppPath.Rewards,
-			networkId: $networkId,
-			usePreviousRoute: isTransactionsRoute,
-			fromRoute
-		})}
-		ariaLabel={$i18n.navigation.alt.airdrops}
-		selected={isRouteRewards(pageData)}
-		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
-		tag={$i18n.core.text.new}
-		tagVariant="emphasis"
-	>
-		<IconGift />
-		{$i18n.navigation.text.airdrops}
-	</NavigationItem>
-{/if}
+<NavigationItem
+	href={networkUrl({
+		path: AppPath.Rewards,
+		networkId: $networkId,
+		usePreviousRoute: isTransactionsRoute,
+		fromRoute
+	})}
+	ariaLabel={$i18n.navigation.alt.airdrops}
+	selected={isRouteRewards(pageData)}
+	testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+	tag={$i18n.core.text.new}
+	tagVariant="emphasis"
+>
+	<IconGift />
+	{$i18n.navigation.text.airdrops}
+</NavigationItem>
 
 <NavigationItem
 	href={networkUrl({
