@@ -60,9 +60,9 @@
 						{/if}
 						{#if hasSubtitleSlot}
 							{#if dividers}
-								<span class="text-tertiary"> &nbsp;&middot;&nbsp; </span>
+								<span class="text-lg text-tertiary">&nbsp;&middot;&nbsp;</span>
 							{/if}
-							<span class="text-base text-tertiary"> <slot name="subtitle" /></span>
+							<span class="text-base text-tertiary"><slot name="subtitle" /></span>
 						{/if}
 					</span>
 					{#if hasDescriptionSlot}
