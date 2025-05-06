@@ -1,8 +1,10 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
+import type { Erc20Token } from '$eth/types/erc20';
 import type {
 	EtherscanProviderInternalTransaction,
+	EtherscanProviderTokenTransferTransaction,
 	EtherscanProviderTransaction
 } from '$eth/types/etherscan-transaction';
 import type { EthereumChainId } from '$eth/types/network';
@@ -129,6 +131,58 @@ export class EtherscanProvider {
 		const results = await Promise.all([this.getHistory(params), this.getInternalHistory(params)]);
 
 		return results.flat();
+	};
+
+	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address
+	erc20Transactions = async ({
+		address,
+		contract: { address: contractAddress }
+	}: {
+		address: EthAddress;
+		contract: Erc20Token;
+	}): Promise<Transaction[]> => {
+		const params = {
+			action: 'tokentx',
+			contractAddress,
+			address,
+			startblock: 0,
+			endblock: 99999999,
+			sort: 'desc'
+		};
+
+		const result: EtherscanProviderTokenTransferTransaction[] | string = await this.provider.fetch(
+			'account',
+			params
+		);
+
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(
+			({
+				nonce,
+				gas,
+				gasPrice,
+				hash,
+				blockNumber,
+				timeStamp,
+				from,
+				to,
+				value
+			}: EtherscanProviderTokenTransferTransaction): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				nonce: parseInt(nonce),
+				gasLimit: BigInt(gas),
+				gasPrice: BigInt(gasPrice),
+				value: BigInt(value),
+				chainId: this.chainId
+			})
+		);
 	};
 }
 

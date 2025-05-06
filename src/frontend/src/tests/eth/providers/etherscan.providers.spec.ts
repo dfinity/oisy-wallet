@@ -4,11 +4,13 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 import type {
 	EtherscanProviderInternalTransaction,
+	EtherscanProviderTokenTransferTransaction,
 	EtherscanProviderTransaction
 } from '$eth/types/etherscan-transaction';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import {
 	createMockEtherscanInternalTransactions,
@@ -58,73 +60,7 @@ describe('etherscan.providers', () => {
 		const { chainId } = ETHEREUM_NETWORK;
 		const address = mockEthAddress;
 
-		const normalTransactions: EtherscanProviderTransaction[] = createMockEtherscanTransactions(3);
-
-		const internalTransactions: EtherscanProviderInternalTransaction[] =
-			createMockEtherscanInternalTransactions(5);
-
-		const expectedNormalTransactions: Transaction[] = normalTransactions.map(
-			({
-				blockNumber,
-				timeStamp,
-				hash,
-				nonce,
-				from,
-				to,
-				value,
-				gas,
-				gasPrice
-			}: EtherscanProviderTransaction): Transaction => ({
-				hash,
-				blockNumber: parseInt(blockNumber),
-				timestamp: parseInt(timeStamp),
-				from,
-				to,
-				nonce: parseInt(nonce),
-				gasLimit: BigInt(gas),
-				gasPrice: BigInt(gasPrice),
-				value: BigInt(value),
-				chainId
-			})
-		);
-
-		const expectedInternalTransactions: Transaction[] = internalTransactions.map(
-			({
-				blockNumber,
-				timeStamp,
-				hash,
-				from,
-				to,
-				value,
-				gas
-			}: EtherscanProviderInternalTransaction): Transaction => ({
-				hash,
-				blockNumber: parseInt(blockNumber),
-				timestamp: parseInt(timeStamp),
-				from,
-				to,
-				nonce: 0,
-				gasLimit: BigInt(gas),
-				value: BigInt(value),
-				chainId
-			})
-		);
-
-		const expectedTransactions: Transaction[] = [
-			...expectedNormalTransactions,
-			...expectedInternalTransactions
-		];
-
-		const mockFetch = vi
-			.fn()
-			// eslint-disable-next-line local-rules/prefer-object-params
-			.mockImplementation((_, { action }) =>
-				action === 'txlist'
-					? normalTransactions
-					: action === 'txlistinternal'
-						? internalTransactions
-						: []
-			);
+		const mockFetch = vi.fn();
 		const mockProvider = EtherscanProviderLib as MockedClass<typeof EtherscanProviderLib>;
 		mockProvider.prototype.fetch = mockFetch;
 
@@ -140,6 +76,74 @@ describe('etherscan.providers', () => {
 		});
 
 		describe('transactions method', () => {
+			const normalTransactions: EtherscanProviderTransaction[] = createMockEtherscanTransactions(3);
+
+			const internalTransactions: EtherscanProviderInternalTransaction[] =
+				createMockEtherscanInternalTransactions(5);
+
+			const expectedNormalTransactions: Transaction[] = normalTransactions.map(
+				({
+					blockNumber,
+					timeStamp,
+					hash,
+					nonce,
+					from,
+					to,
+					value,
+					gas,
+					gasPrice
+				}: EtherscanProviderTransaction): Transaction => ({
+					hash,
+					blockNumber: parseInt(blockNumber),
+					timestamp: parseInt(timeStamp),
+					from,
+					to,
+					nonce: parseInt(nonce),
+					gasLimit: BigInt(gas),
+					gasPrice: BigInt(gasPrice),
+					value: BigInt(value),
+					chainId
+				})
+			);
+
+			const expectedInternalTransactions: Transaction[] = internalTransactions.map(
+				({
+					blockNumber,
+					timeStamp,
+					hash,
+					from,
+					to,
+					value,
+					gas
+				}: EtherscanProviderInternalTransaction): Transaction => ({
+					hash,
+					blockNumber: parseInt(blockNumber),
+					timestamp: parseInt(timeStamp),
+					from,
+					to,
+					nonce: 0,
+					gasLimit: BigInt(gas),
+					value: BigInt(value),
+					chainId
+				})
+			);
+
+			const expectedTransactions: Transaction[] = [
+				...expectedNormalTransactions,
+				...expectedInternalTransactions
+			];
+
+			beforeEach(() => {
+				// eslint-disable-next-line local-rules/prefer-object-params
+				mockFetch.mockImplementation((_, { action }) =>
+					action === 'txlist'
+						? normalTransactions
+						: action === 'txlistinternal'
+							? internalTransactions
+							: []
+				);
+			});
+
 			it('should call fetch for all history types', async () => {
 				const provider = new EtherscanProvider(network, chainId);
 
@@ -194,27 +198,96 @@ describe('etherscan.providers', () => {
 
 				await expect(provider.transactions({ address })).rejects.toThrow('Network error');
 			});
-		});
-	});
 
-	describe('etherscanProviders', () => {
-		networks.forEach(({ id, name }) => {
-			it(`should return the correct provider for ${name} network`, () => {
-				const provider = etherscanProviders(id);
+			describe('erc20Transactions method', () => {
+				const mockApiResponse: EtherscanProviderTokenTransferTransaction[] = [
+					{
+						nonce: '1',
+						gas: '21000',
+						gasPrice: '20000000000',
+						hash: '0x123abc',
+						blockNumber: '123456',
+						blockHash: '0x456def',
+						timeStamp: '1697049600',
+						confirmations: '10',
+						from: '0xabc...',
+						to: '0xdef...',
+						value: '1000000000000000000',
+						contractAddress: mockValidErc20Token.address,
+						tokenName: mockValidErc20Token.name,
+						tokenSymbol: mockValidErc20Token.symbol,
+						tokenDecimal: mockValidErc20Token.decimals.toString(),
+						transactionIndex: '0',
+						gasUsed: '21000',
+						cumulativeGasUsed: '21000',
+						input: '0x'
+					}
+				];
 
-				expect(provider).toBeInstanceOf(EtherscanProvider);
+				const expectedTransactions: Transaction[] = [
+					{
+						hash: '0x123abc',
+						blockNumber: 123456,
+						timestamp: 1697049600,
+						from: '0xabc...',
+						to: '0xdef...',
+						nonce: 1,
+						gasLimit: 21000n,
+						gasPrice: 20000000000n,
+						value: 1000000000000000000n,
+						chainId
+					}
+				];
 
-				expect(provider).toHaveProperty('network');
-				expect(provider).toHaveProperty('chainId');
+				beforeEach(() => {
+					mockFetch.mockResolvedValue(mockApiResponse);
+				});
+
+				it('should fetch and map transactions correctly', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+
+					const result = await provider.erc20Transactions({
+						address: mockEthAddress,
+						contract: mockValidErc20Token
+					});
+
+					expect(provider).toBeDefined();
+
+					expect(mockFetch).toHaveBeenCalledTimes(1);
+
+					expect(result).toStrictEqual(expectedTransactions);
+				});
+
+				it('should throw an error if the API call fails', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+					mockFetch.mockRejectedValue(new Error('Network error'));
+
+					await expect(
+						provider.erc20Transactions({ address: mockEthAddress, contract: mockValidErc20Token })
+					).rejects.toThrow('Network error');
+				});
 			});
 		});
 
-		it('should throw an error for an unsupported network ID', () => {
-			expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
-				replacePlaceholders(en.init.error.no_etherscan_provider, {
-					$network: ICP_NETWORK_ID.toString()
-				})
-			);
+		describe('etherscanProviders', () => {
+			networks.forEach(({ id, name }) => {
+				it(`should return the correct provider for ${name} network`, () => {
+					const provider = etherscanProviders(id);
+
+					expect(provider).toBeInstanceOf(EtherscanProvider);
+
+					expect(provider).toHaveProperty('network');
+					expect(provider).toHaveProperty('chainId');
+				});
+			});
+
+			it('should throw an error for an unsupported network ID', () => {
+				expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
+					replacePlaceholders(en.init.error.no_etherscan_provider, {
+						$network: ICP_NETWORK_ID.toString()
+					})
+				);
+			});
 		});
 	});
 });
