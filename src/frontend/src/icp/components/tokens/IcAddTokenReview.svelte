@@ -81,7 +81,9 @@
 					{$i18n.tokens.manage.text.network}
 				{/snippet}
 				{#snippet content()}
-					<NetworkWithLogo network={token.token.network} />
+					{#if nonNullish(token)}
+						<NetworkWithLogo network={token.token.network} />
+					{/if}
 				{/snippet}
 			</Value>
 
