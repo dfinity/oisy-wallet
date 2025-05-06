@@ -15,10 +15,13 @@
 
 	export let network: Network;
 	export let copyAriaLabel: string;
+
+	let title: string | undefined;
+	$: title = isNullish($token) ? network.name : addressToken?.symbol;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<ReceiveTitle slot="title" {addressToken} />
+	<ReceiveTitle slot="title" {title} />
 
 	<ContentWithToolbar>
 		<ReceiveAddressQRCodeContent
