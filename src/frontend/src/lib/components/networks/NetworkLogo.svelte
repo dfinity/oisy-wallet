@@ -5,10 +5,14 @@
 	import type { Network } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let network: Network;
-	export let size: LogoSize = 'xxs';
-	export let color: 'off-white' | 'white' = 'off-white';
-	export let testId: string | undefined = undefined;
+	interface Props {
+		network: Network;
+		size?: LogoSize;
+		color?: 'off-white' | 'white';
+		testId?: string;
+	}
+
+	let { network, size = 'xxs', color = 'off-white', testId }: Props = $props();
 </script>
 
 <div class="dark-hidden block" data-tid={`${testId}-light-container`}>
