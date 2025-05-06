@@ -4,7 +4,9 @@ use shared::types::user_profile::AddUserCredentialError;
 
 #[derive(Clone, Debug, CandidType, Serialize, Deserialize, Eq, PartialEq)]
 pub enum AddUserCredentialResult {
+    /// The user's credential was added successfully.
     Ok(),
+    /// The user's credential was not added due to an error.
     Err(AddUserCredentialError),
 }
 impl From<Result<(), AddUserCredentialError>> for AddUserCredentialResult {
