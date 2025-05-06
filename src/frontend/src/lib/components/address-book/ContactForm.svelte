@@ -19,6 +19,7 @@
 			name="name"
 			placeholder=""
 			bind:value={contact.name}
+			showResetButton
 			testId={ADDRESS_BOOK_CONTACT_NAME_INPUT}
 		/>
 	</div>
