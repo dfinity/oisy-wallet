@@ -9,7 +9,6 @@ use std::{
 };
 
 use candid::{encode_one, CandidType, Principal};
-use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{CallError, PocketIc, PocketIcBuilder};

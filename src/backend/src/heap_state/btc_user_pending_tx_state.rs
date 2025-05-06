@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use candid::Principal;
-use ic_cdk::api::management_canister::bitcoin::Utxo;
+use ic_cdk::bitcoin_canister::Utxo;
 
 #[allow(dead_code)]
 const MAX_PENDING_TRANSACTIONS: usize = 1000;
@@ -136,9 +136,8 @@ impl BtcUserPendingTransactions {
 
 #[cfg(test)]
 mod tests {
-    use ic_cdk::api::management_canister::bitcoin::Outpoint;
-
     use super::*;
+    use ic_cdk::bitcoin_canister::{Outpoint, Utxo};
 
     const UTXO_1: Utxo = Utxo {
         outpoint: Outpoint {

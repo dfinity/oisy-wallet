@@ -1,11 +1,11 @@
 use candid::CandidType;
-use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Utxo};
+use ic_cdk::bitcoin_canister::{Network, Utxo};
 use serde::Deserialize;
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct SelectedUtxosFeeRequest {
     pub amount_satoshis: u64,
-    pub network: BitcoinNetwork,
+    pub network: Network,
     pub min_confirmations: Option<u32>,
 }
 
@@ -26,7 +26,7 @@ pub struct BtcAddPendingTransactionRequest {
     pub txid: Vec<u8>,
     pub utxos: Vec<Utxo>,
     pub address: String,
-    pub network: BitcoinNetwork,
+    pub network: Network,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -37,7 +37,7 @@ pub enum BtcAddPendingTransactionError {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct BtcGetPendingTransactionsRequest {
     pub address: String,
-    pub network: BitcoinNetwork,
+    pub network: Network,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

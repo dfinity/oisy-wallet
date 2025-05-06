@@ -1,5 +1,5 @@
 use candid::Principal;
-use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Outpoint, Utxo};
+use ic_cdk::bitcoin_canister::{Network, Outpoint, Utxo};
 use shared::types::bitcoin::{
     BtcAddPendingTransactionError, BtcAddPendingTransactionRequest, BtcGetPendingTransactionsError,
     BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsRequest, SelectedUtxosFeeError,
@@ -14,35 +14,6 @@ use crate::utils::{
 const MOCK_ADDRESS: &str = "bcrt1qpg7udjvq7gx2fp480pgt4hnhj3qc4nhrkstc33";
 
 #[test]
-fn test_select_user_utxos_fee_should_succeed() {
-    let pic_setup = setup();
-
-    let caller =
-        Principal::from_text("ejrt7-mhyue-6oq2j-63k56-qvvae-3uep4-dh34y-zbtzw-7ulf6-2ohv7-dqe")
-            .unwrap();
-
-    let request = SelectedUtxosFeeRequest {
-        amount_satoshis: 100_000_000u64,
-        network: BitcoinNetwork::Regtest,
-        min_confirmations: None,
-    };
-    let response = pic_setup.update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
-        caller,
-        "btc_select_user_utxos_fee",
-        request,
-    );
-
-    assert!(response.is_ok());
-
-    let response = response
-        .expect("Call failed")
-        .expect("Request was not successful");
-
-    assert_eq!(response.utxos.len(), 0);
-    assert_eq!(response.fee_satoshis, 0);
-}
-
-#[test]
 fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
     let pic_setup = setup();
 
@@ -50,7 +21,7 @@ fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
-        network: BitcoinNetwork::Regtest,
+        network: Network::Regtest,
         min_confirmations: None,
     };
     let response = pic_setup.update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
@@ -92,7 +63,7 @@ fn test_select_user_utxos_fee_pending_transaction_error() {
         txid: txid.clone(),
         utxos: utxos.clone(),
         address: address.clone(),
-        network: BitcoinNetwork::Regtest,
+        network: Network::Regtest,
     };
 
     let add_response = pic_setup.update::<Result<(), BtcAddPendingTransactionError>>(
@@ -105,7 +76,7 @@ fn test_select_user_utxos_fee_pending_transaction_error() {
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
-        network: BitcoinNetwork::Regtest,
+        network: Network::Regtest,
         min_confirmations: None,
     };
     let select_response = pic_setup
@@ -146,7 +117,7 @@ fn test_add_and_read_pending_transactions() {
         txid: txid.clone(),
         utxos: utxos.clone(),
         address: address.clone(),
-        network: BitcoinNetwork::Regtest,
+        network: Network::Regtest,
     };
 
     let add_response = pic_setup.update::<Result<(), BtcAddPendingTransactionError>>(
@@ -159,7 +130,7 @@ fn test_add_and_read_pending_transactions() {
 
     let read_request = BtcGetPendingTransactionsRequest {
         address: address.clone(),
-        network: BitcoinNetwork::Regtest,
+        network: Network::Regtest,
     };
     let read_response = pic_setup.update::<Result<
         BtcGetPendingTransactionsReponse,
