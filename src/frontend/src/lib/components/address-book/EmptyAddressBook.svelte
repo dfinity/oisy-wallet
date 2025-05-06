@@ -2,7 +2,10 @@
 	import IconAddressBook from '$lib/components/icons/IconAddressBook.svelte';
 	import IconCircleArrowRight from '$lib/components/icons/lucide/IconCircleArrowRight.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { ADDRESS_BOOK_ADD_CONTACT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	let { addContact }: { addContact: () => void } = $props();
 </script>
 
 <div class="flex flex-col items-center gap-8 md:gap-10">
@@ -15,8 +18,7 @@
 		<span>{$i18n.address_book.text.empty_text}</span>
 	</div>
 
-	<!-- TODO: Add open modal when new contact modal is impemented -->
-	<Button disabled>
+	<Button on:click={() => addContact()} testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}>
 		{$i18n.address_book.text.add_new_contact}
 		<IconCircleArrowRight />
 	</Button>

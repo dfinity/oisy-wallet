@@ -999,7 +999,8 @@
 			"title": "Address book",
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
-			"add_new_contact": "Add new contact"
+			"add_new_contact": "Add new contact",
+			"add_contact": "Add contact"
 		}
 	},
 	"contact": {
