@@ -24,8 +24,8 @@ const commandRunner = createCommandRunner();
 export type FlowPageParams = HomepageLoggedInParams;
 
 export class FlowPage extends HomepageLoggedIn {
-	constructor({ page, iiPage }: FlowPageParams) {
-		super({ page, iiPage });
+	constructor(params: FlowPageParams) {
+		super(params);
 	}
 
 	async receiveTokens(): Promise<void> {
