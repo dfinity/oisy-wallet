@@ -8,8 +8,8 @@ import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 export type SettingsPageParams = HomepageLoggedInParams;
 
 export class SettingsPage extends HomepageLoggedIn {
-	constructor({ page, iiPage, viewportSize }: SettingsPageParams) {
-		super({ page, iiPage, viewportSize });
+	constructor(params: SettingsPageParams) {
+		super(params);
 	}
 
 	override async extendWaitForReady(): Promise<void> {
