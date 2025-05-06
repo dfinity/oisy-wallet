@@ -61,6 +61,33 @@ export const idlFactory = ({ IDL }) => {
 		InvalidCode: IDL.Null
 	});
 	const ClaimedVipReward = IDL.Record({ campaign_id: IDL.Text });
+	const Criterion = IDL.Variant({
+		MinTransactions: IDL.Nat32,
+		MinReferrals: IDL.Nat32,
+		MinLogins: IDL.Record({
+			duration: CandidDuration,
+			count: IDL.Nat32
+		}),
+		MinTotalAssetsUsd: IDL.Nat32,
+		MinTokens: IDL.Nat32
+	});
+	const CriterionEligibility = IDL.Record({
+		satisfied: IDL.Bool,
+		criterion: Criterion
+	});
+	const CampaignEligibility = IDL.Record({
+		available: IDL.Bool,
+		eligible: IDL.Bool,
+		criteria: IDL.Vec(CriterionEligibility)
+	});
+	const EligibilityReport = IDL.Record({
+		campaigns: IDL.Vec(IDL.Tuple(IDL.Text, CampaignEligibility))
+	});
+	const EligibilityError = IDL.Variant({ NotAuthorized: IDL.Null });
+	const EligibilityResponse = IDL.Variant({
+		Ok: EligibilityReport,
+		Err: EligibilityError
+	});
 	const LastActivityHistogramRequest = IDL.Record({
 		bucket_count: IDL.Nat32,
 		bucket_duration: CandidDuration
@@ -184,6 +211,7 @@ export const idlFactory = ({ IDL }) => {
 		ledger: IDL.Principal,
 		timestamp: IDL.Nat64,
 		amount: IDL.Nat,
+		campaign_id: IDL.Text,
 		campaign_name: IDL.Opt(IDL.Text)
 	});
 	const UserData = IDL.Record({
@@ -217,6 +245,7 @@ export const idlFactory = ({ IDL }) => {
 		configure_usage_awards: IDL.Func([UsageAwardConfig], [], []),
 		configure_vip: IDL.Func([VipConfig], [], []),
 		configure_vips: IDL.Func([IDL.Vec(IDL.Tuple(IDL.Text, VipConfig))], [], []),
+		eligible: IDL.Func([IDL.Opt(IDL.Principal)], [EligibilityResponse], ['query']),
 		last_activity_histogram: IDL.Func(
 			[LastActivityHistogramRequest],
 			[LastActivityHistogramResponse],
