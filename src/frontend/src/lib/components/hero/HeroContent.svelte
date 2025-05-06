@@ -82,8 +82,6 @@
 
 	let isGradientToBottomRight = false;
 	$: isGradientToBottomRight = isGLDTToken || $networkBsc;
-
-	$: console.log($pageToken);
 </script>
 
 <div
