@@ -1,5 +1,6 @@
 import type {
 	GetPoolArgs,
+	PoolData,
 	_SERVICE as SwapFactoryService
 } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import { idlFactory as certifiedFactoryIdlFactory } from '$declarations/icp_swap_factory/icp_swap_factory.factory.certified.did';
@@ -30,7 +31,7 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 	 * @returns Pool information containing the canister ID.
 	 * @throws CanisterInternalError if fetching pool fails.
 	 */
-	getPool = async (args: GetPoolArgs) => {
+	getPool = async (args: GetPoolArgs): Promise<PoolData> => {
 		const { getPool } = this.caller({ certified: false });
 		const result = await getPool(args);
 
