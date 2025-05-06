@@ -5,7 +5,7 @@
 	import { ADDRESS_BOOK_ADD_CONTACT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let { addContact } = $props();
+	let { addContact }: { addContact: () => void } = $props();
 </script>
 
 <div class="flex flex-col items-center gap-8 md:gap-10">

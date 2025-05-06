@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import AddContactStep from '$lib/components/address-book/AddContactStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
@@ -7,6 +8,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Contact } from '$lib/types/contact';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	const steps: WizardSteps = [
 		{
@@ -19,23 +21,24 @@
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
-	const gotoStep = (name: AddressBookSteps) => {
-		const index = steps.findIndex((step) => step.name === name);
-		if (index < 0) {
-			throw new Error(`Step ${name} not found`);
-		}
-		modal?.set(index);
-	};
-
 	let currentStep: WizardStep | undefined = $state();
 	let modal: WizardModal | undefined = $state();
 	const close = () => modalStore.close();
 
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let currentComponent = $state<any>();
+	let addContactStep = $state<AddContactStep>();
 
 	let contacts: Contact[] = $state([]);
+
+	const gotoStep = (stepName: AddressBookSteps) => {
+		if (nonNullish(modal)) {
+			goToWizardStep({
+				modal,
+				steps,
+				stepName
+			});
+		}
+	};
 
 	const addContact = (contact: Contact) => {
 		contacts = [...contacts, contact];
@@ -52,18 +55,17 @@
 	on:nnsClose={close}
 >
 	<svelte:fragment slot="title"
-		>{currentComponent?.title ?? currentStep?.title ?? ''}</svelte:fragment
+		>{currentStepName === AddressBookSteps.ADD_CONTACT && nonNullish(addContactStep)
+			? addContactStep.title
+			: (currentStep?.title ?? '')}</svelte:fragment
 	>
 
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
-		<AddressBookStep
-			bind:this={currentComponent}
-			{contacts}
-			addContact={() => gotoStep(AddressBookSteps.ADD_CONTACT)}
+		<AddressBookStep {contacts} addContact={() => gotoStep(AddressBookSteps.ADD_CONTACT)}
 		></AddressBookStep>
 	{:else if currentStep?.name === AddressBookSteps.ADD_CONTACT}
 		<AddContactStep
-			bind:this={currentComponent}
+			bind:this={addContactStep}
 			{addContact}
 			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		></AddContactStep>
