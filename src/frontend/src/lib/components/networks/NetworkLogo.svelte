@@ -12,7 +12,7 @@
 		testId?: string;
 	}
 
-	let {network, size = 'xxs', color = 'off-white', testId}: Props = $props();
+	let { network, size = 'xxs', color = 'off-white', testId }: Props = $props();
 </script>
 
 <div class="dark-hidden block" data-tid={`${testId}-light-container`}>
