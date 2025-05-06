@@ -507,7 +507,7 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
 
     let (vc_flow_signers, root_pk_raw, credential_type, derivation_origin) =
         read_config(|config| find_credential_config(&request, config))
-            .ok_or(AddUserCredentialError::ConfigurationError)?;
+            .ok_or(AddUserCredentialError::ConfigurationError).into();
 
     match validate_ii_presentation_and_claims(
         &request.credential_jwt,
