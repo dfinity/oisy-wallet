@@ -1,8 +1,8 @@
+import { SUPPORTED_BASE_TOKENS } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { SUPPORTED_BSC_TOKENS } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
-import {SUPPORTED_BSC_TOKENS} from "$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env";
-import {SUPPORTED_BASE_TOKENS} from "$env/tokens/tokens-evm/tokens-base/tokens.eth.env";
 
 export const [DEFAULT_ETHEREUM_TOKEN] = SUPPORTED_ETHEREUM_TOKENS;
 
