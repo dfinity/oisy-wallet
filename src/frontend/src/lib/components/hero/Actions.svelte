@@ -72,7 +72,7 @@
 		{:else if $networkBitcoin}
 			<BtcReceive />
 		{:else if $networkSolana}
-			<SolReceive token={$token} />
+			<SolReceive token={$tokenWithFallback} />
 		{:else if $pseudoNetworkChainFusion}
 			<Receive />
 		{/if}
