@@ -18,18 +18,8 @@
 
 	let sizePx = $state(logoSizes[size]);
 
-	let loaded = $state(false);
-
-	$effect(() => {
-		loaded = isNullish(src);
-		loadingError = false;
-	});
-
-	let loadingError = $state(false);
-	const onError = () => {
-		loadingError = true;
-		loaded = true;
-	};
+	let loadingError: boolean | null = $state(null);
+	let loaded = $derived(!isNullish(src) && nonNullish(loadingError) && !loadingError);
 </script>
 
 <div
@@ -47,8 +37,8 @@
 			{alt}
 			fitHeight
 			height={sizePx}
-			on:load={() => (loaded = true)}
-			on:error={onError}
+			on:load={() => (loadingError = false)}
+			on:error={() => (loadingError = true)}
 			rounded
 		/>
 	{:else}
