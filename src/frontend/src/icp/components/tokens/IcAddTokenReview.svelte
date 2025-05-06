@@ -75,13 +75,13 @@
 	</div>
 
 	{#if nonNullish(token)}
+		{@const safeNetwork = token.token.network}
 		<div in:fade>
 			<Value ref="network" element="div">
 				{#snippet label()}
 					{$i18n.tokens.manage.text.network}
 				{/snippet}
 				{#snippet content()}
-					{@const safeNetwork = token.token.network}
 					<NetworkWithLogo network={safeNetwork} />
 				{/snippet}
 			</Value>
