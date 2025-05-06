@@ -17,7 +17,6 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use oisy_user::oisy_users;
 use serde_bytes::ByteBuf;
-use shared::types::signer::{GetAllowedCyclesError, GetAllowedCyclesResponse};
 use shared::{
     http::{HttpRequest, HttpResponse},
     metrics::get_metrics,
@@ -42,7 +41,8 @@ use shared::{
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest, AllowSigningResponse,
+            AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
+            GetAllowedCyclesResponse,
         },
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
