@@ -35,6 +35,11 @@ export interface AirDropConfig {
 	start_timestamp_ns: bigint;
 	token_configs: Array<TokenConfig>;
 }
+export interface CampaignEligibility {
+	available: boolean;
+	eligible: boolean;
+	criteria: Array<CriterionEligibility>;
+}
 export type CandidDuration =
 	| { Minutes: bigint }
 	| { Seconds: bigint }
@@ -57,6 +62,21 @@ export interface Config {
 	readonly_admins: Array<Principal>;
 	oisy_canister: [] | [Principal];
 }
+export type Criterion =
+	| { MinTransactions: number }
+	| { MinReferrals: number }
+	| { MinLogins: { duration: CandidDuration; count: number } }
+	| { MinTotalAssetsUsd: number }
+	| { MinTokens: number };
+export interface CriterionEligibility {
+	satisfied: boolean;
+	criterion: Criterion;
+}
+export type EligibilityError = { NotAuthorized: null };
+export interface EligibilityReport {
+	campaigns: Array<[string, CampaignEligibility]>;
+}
+export type EligibilityResponse = { Ok: EligibilityReport } | { Err: EligibilityError };
 export interface LastActivityHistogram {
 	older: number;
 	unknown: number;
@@ -106,6 +126,7 @@ export interface RewardInfo {
 	ledger: Principal;
 	timestamp: bigint;
 	amount: bigint;
+	campaign_id: string;
 	campaign_name: [] | [string];
 }
 export type SetReferrerError =
@@ -249,6 +270,7 @@ export interface _SERVICE {
 	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
 	configure_vip: ActorMethod<[VipConfig], undefined>;
 	configure_vips: ActorMethod<[Array<[string, VipConfig]>], undefined>;
+	eligible: ActorMethod<[[] | [Principal]], EligibilityResponse>;
 	last_activity_histogram: ActorMethod<
 		[LastActivityHistogramRequest],
 		LastActivityHistogramResponse

@@ -37,7 +37,17 @@ type AirDropConfig = record {
   /// The tokens to distribute during the airdrop
   token_configs : vec TokenConfig
 };
-
+///
+type CampaignEligibility = record {
+  ///
+  available : bool;
+  ///
+  eligible : bool;
+  ///
+  criteria : vec CriterionEligibility;
+  ///
+};
+/// A span of time.
 type CandidDuration = variant {
   Minutes : nat64;
   Seconds : nat64;
@@ -75,6 +85,58 @@ type Config = record {
   readonly_admins : vec principal;
   /// Oisy canister to fetch users from
   oisy_canister : opt principal
+};
+/// A requirement that a user must satisfy to be eligible for an airdrop.
+type Criterion = variant {
+  /// The user must have made at least this many transactions.
+  MinTransactions : nat32;
+  /// The user must have made at least this many successful referrals.
+  MinReferrals : nat32;
+  /// The user must have logged in a certain number of times recently.
+  MinLogins : record {
+    /// "recent" is defined by this duration.
+    duration : CandidDuration;
+    /// The user must have logged in at least this many times recently.
+    count : nat32
+  };
+  /// The minimum total assets at the last valuation.
+  MinTotalAssetsUsd : nat32;
+  /// The minimum number of distrinct tokens that the user must hold.
+  MinTokens : nat32
+};
+/// Whether a user satisfies a given criterion.
+type CriterionEligibility = record {
+  /// Whether the user satisfies the criterion
+  satisfied : bool;
+  ///
+  criterion : Criterion;
+  ///
+};
+///
+type EligibilityError = variant {
+  ///
+  NotAuthorized;
+  ///
+};
+///
+type EligibilityReport = record {
+  ///
+  campaigns : vec record {
+    ///
+    text;
+    ///
+    CampaignEligibility;
+    ///
+  };
+  ///
+};
+///
+type EligibilityResponse = variant {
+  ///
+  Ok : EligibilityReport;
+  ///
+  Err : EligibilityError;
+  ///
 };
 type LastActivityHistogram = record {
   older : nat32;
@@ -154,6 +216,8 @@ type RewardInfo = record {
   name : opt text;
   /// The campaign name of the reward
   campaign_name : opt text;
+  /// The campaign id of the reward
+  campaign_id : text;
   /// Ledger canister id of the token that was awarded.
   ledger : principal;
   /// The timestamp when the reward was awarded.
@@ -384,6 +448,8 @@ service : (opt Config) -> {
   configure_vip : (VipConfig) -> ();
   /// Configures VIP campaigns
   configure_vips : (vec record { text; VipConfig }) -> ();
+  /// Eligibility of the caller or specified principal for airdrops.
+  eligible : (opt principal) -> (EligibilityResponse) query;
   /// A histogram of when users were last active
   last_activity_histogram : (LastActivityHistogramRequest) -> (
     LastActivityHistogramResponse
@@ -397,9 +463,9 @@ service : (opt Config) -> {
   /// Provides a user's account IDs for airdrop.
   register_airdrop_recipient : (UserSnapshot) -> ();
   register_snapshot_for : (principal, UserSnapshot) -> ();
-  stats_usage_vs_holding : () -> (UsageVsHoldingStats) query;
   /// Sets the caller's referrer.
   set_referrer : (nat32) -> (SetReferrerResponse);
+  stats_usage_vs_holding : () -> (UsageVsHoldingStats) query;
   /// Runs the provided award event.  This is normally done automatically.  It can be useful
   /// to trigger an event directly when testing.
   trigger_usage_award_event : (UsageAwardEvent) -> ();

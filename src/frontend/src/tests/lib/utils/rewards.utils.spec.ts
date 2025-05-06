@@ -21,7 +21,8 @@ describe('rewards.utils', () => {
 			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: ['airdrop'],
-			campaign_name: []
+			campaign_name: ['deuteronomy'], // Note: This is no longer optional and will be superceded by campaign_id.
+			campaign_id: 'deuteronomy'
 		};
 
 		it('should return falsy reward result if result was already loaded', async () => {

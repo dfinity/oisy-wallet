@@ -101,10 +101,16 @@ const queryRewards = async (params: {
 	};
 };
 
-const mapRewardsInfo = ({ name, campaign_name, ...rest }: RewardInfo): RewardResponseInfo => ({
+const mapRewardsInfo = ({
+	name,
+	campaign_name,
+	campaign_id,
+	...rest
+}: RewardInfo): RewardResponseInfo => ({
 	...rest,
 	name: fromNullable(name),
-	campaignName: fromNullable(campaign_name)
+	campaignName: fromNullable(campaign_name),
+	campaignId: campaign_id
 });
 
 /**
