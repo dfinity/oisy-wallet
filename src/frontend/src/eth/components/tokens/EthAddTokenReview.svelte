@@ -102,40 +102,56 @@
 
 <ContentWithToolbar>
 	<Value ref="contractAddress" element="div">
-		<svelte:fragment slot="label">{$i18n.tokens.text.contract_address}</svelte:fragment>
-		{contractAddress}
+		{#snippet label()}{$i18n.tokens.text.contract_address}{/snippet}
+		{#snippet content()}{contractAddress}{/snippet}
 	</Value>
 
 	<Value ref="contractName" element="div">
-		<svelte:fragment slot="label">{$i18n.core.text.name}</svelte:fragment>
-		{#if isNullish(metadata)}
-			&#8203;
-		{:else}
-			<span in:fade>{metadata.name}</span>
-		{/if}
+		{#snippet label()}
+			{$i18n.core.text.name}
+		{/snippet}
+		{#snippet content()}
+			{#if isNullish(metadata)}
+				&#8203;
+			{:else}
+				<span in:fade>{metadata.name}</span>
+			{/if}
+		{/snippet}
 	</Value>
 
 	<Value ref="network" element="div">
-		<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
-		<NetworkWithLogo {network} />
+		{#snippet label()}
+			{$i18n.tokens.manage.text.network}
+		{/snippet}
+		{#snippet content()}
+			<NetworkWithLogo {network} />
+		{/snippet}
 	</Value>
 
 	<Value ref="contractSymbol" element="div">
-		<svelte:fragment slot="label">{$i18n.core.text.symbol}</svelte:fragment>
-		{#if isNullish(metadata)}
-			&#8203;
-		{:else}
-			<span in:fade>{metadata.symbol}</span>
-		{/if}
+		{#snippet label()}
+			{$i18n.core.text.symbol}
+		{/snippet}
+		{#snippet content()}
+			{#if isNullish(metadata)}
+				&#8203;
+			{:else}
+				<span in:fade>{metadata.symbol}</span>
+			{/if}
+		{/snippet}
 	</Value>
 
 	<Value ref="contractDecimals" element="div">
-		<svelte:fragment slot="label">{$i18n.core.text.decimals}</svelte:fragment>
-		{#if isNullish(metadata)}
-			&#8203;
-		{:else}
-			<span in:fade>{metadata.decimals}</span>
-		{/if}
+		{#snippet label()}
+			{$i18n.core.text.decimals}
+		{/snippet}
+		{#snippet content()}
+			{#if isNullish(metadata)}
+				&#8203;
+			{:else}
+				<span in:fade>{metadata.decimals}</span>
+			{/if}
+		{/snippet}
 	</Value>
 
 	<AddTokenWarning />
