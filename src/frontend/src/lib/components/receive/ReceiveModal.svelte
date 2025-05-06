@@ -9,10 +9,10 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
 	import type { OptionAddress, Address } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import {pageToken} from "$lib/derived/page-token.derived";
 
 	interface Props {
 		content?: Snippet;
@@ -24,7 +24,7 @@
 
 	let { content, address, addressToken, network, copyAriaLabel }: Props = $props();
 
-	const title: string | undefined = $derived(isNullish($token) ? network.name : addressToken?.symbol);
+	const title: string | undefined = $derived(isNullish($pageToken) ? network.name : addressToken?.symbol);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
