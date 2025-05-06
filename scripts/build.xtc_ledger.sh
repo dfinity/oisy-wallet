@@ -3,7 +3,7 @@ set -euo pipefail
 
 print_help() {
   cat <<-EOF
-	Creates the Kong Backend installation files:
+	Creates the XTC Token installation files:
 
 	- The Wasm and Candid files are downloaded.
 
@@ -16,13 +16,14 @@ print_help() {
   exit 0
 }
 
-KONG_BUILDENV="$DFX_NETWORK"
-export KONG_BUILDENV
+XTC_BUILDENV="$DFX_NETWORK"
+export XTC_BUILDENV
 
-KONG_REPO_URL="https://raw.githubusercontent.com/Psychedelic/dank/refs/heads/develop/candid"
+XTC_REPO_URL="https://raw.githubusercontent.com/Psychedelic/dank/refs/heads/develop/candid"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
-CANDID_URL="${KONG_REPO_URL}/xtc.did"
+CANDID_URL="${XTC_REPO_URL}/xtc.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
+# Fake wasm since we really don't need to deploy it
 WASM_URL="https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-v1.0.1/cycles-ledger.wasm.gz"
 
 CANDID_FILE="$(jq -r .canisters.xtc_ledger.candid dfx.json)"
@@ -39,7 +40,7 @@ download() {
   asset_file="${asset^^}_FILE"
   : 'If the asset file already exists, ask the user whether to overwrite it.'
   if test -e "${!asset_file}" && read -r -p "Overwrite existing ${!asset_file}? [y/N] " response && [[ "${response,,}" != y* ]]; then
-    echo "Using existing kong $asset file."
+    echo "Using existing XTC $asset file."
   else
     echo "Downloading ${!asset_url} --> ${!asset_file}"
     mkdir -p "$(dirname "${!asset_file}")"
@@ -58,7 +59,7 @@ download wasm
 ####
 # Success
 cat <<EOF
-SUCCESS: The kong_backend installation files have been created:
-kong_backend candid:       $CANDID_FILE
-kong_backend Wasm:         $WASM_FILE
+SUCCESS: The xtc_ledger installation files have been created:
+xtc_ledger candid:       $CANDID_FILE
+xtc_ledger Wasm:         $WASM_FILE
 EOF
