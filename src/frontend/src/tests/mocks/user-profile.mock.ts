@@ -18,23 +18,6 @@ export const mockUserNetworksMap: Array<[NetworkSettingsFor, NetworkSettings]> =
 	[{ SolanaDevnet: null }, { enabled: true, is_testnet: true }]
 ];
 
-export const mockUserNetworksMapComplete: Array<[NetworkSettingsFor, NetworkSettings]> = [
-	[{ InternetComputer: null }, { enabled: true, is_testnet: false }],
-	[{ BitcoinMainnet: null }, { enabled: true, is_testnet: false }],
-	[{ BitcoinTestnet: null }, { enabled: false, is_testnet: true }],
-	[{ BitcoinRegtest: null }, { enabled: true, is_testnet: true }],
-	[{ EthereumMainnet: null }, { enabled: true, is_testnet: false }],
-	[{ EthereumSepolia: null }, { enabled: false, is_testnet: false }],
-	[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
-	[{ SolanaTestnet: null }, { enabled: true, is_testnet: true }],
-	[{ SolanaDevnet: null }, { enabled: true, is_testnet: true }],
-	[{ SolanaLocal: null }, { enabled: true, is_testnet: true }],
-	[{ BaseMainnet: null }, { enabled: true, is_testnet: false }],
-	[{ BaseSepolia: null }, { enabled: true, is_testnet: true }],
-	[{ BscMainnet: null }, { enabled: true, is_testnet: false }],
-	[{ BscTestnet: null }, { enabled: true, is_testnet: true }]
-];
-
 export const mockNetworksSettings: NetworksSettings = {
 	networks: mockUserNetworksMap,
 	testnets: { show_testnets: false }

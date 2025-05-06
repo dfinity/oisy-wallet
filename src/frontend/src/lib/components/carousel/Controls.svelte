@@ -12,10 +12,10 @@
 </script>
 
 <div class="mr-3 flex items-center">
-	<ButtonControl ariaLabel={$i18n.carousel.text.prev_slide} styleClass="mr-1" on:click={onPrevious}>
+	<ButtonControl ariaLabel={$i18n.carousel.text.prev_slide} styleClass="mr-1" onclick={onPrevious}>
 		<IconWest />
 	</ButtonControl>
-	<ButtonControl ariaLabel={$i18n.carousel.text.next_slide} on:click={onNext}>
+	<ButtonControl ariaLabel={$i18n.carousel.text.next_slide} onclick={onNext}>
 		<IconEast />
 	</ButtonControl>
 </div>
