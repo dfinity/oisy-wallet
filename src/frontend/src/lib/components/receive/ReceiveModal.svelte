@@ -9,6 +9,8 @@
 	import type { OptionAddress, Address } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import {token} from "$lib/stores/token.store";
+	import {isNullish} from "@dfinity/utils";
 
 	export let address: OptionAddress<Address> = undefined;
 	export let addressToken: Token | undefined = undefined;
