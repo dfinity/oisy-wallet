@@ -23,7 +23,7 @@
 
 	let { content, address, addressToken, network, copyAriaLabel }: Props = $props();
 
-	const title: string | undefined = $derived(
+	const title = $derived(
 		isNullish($pageToken) ? network.name : addressToken?.symbol
 	);
 </script>
