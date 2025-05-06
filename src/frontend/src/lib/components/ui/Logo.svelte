@@ -14,7 +14,7 @@
 		testId?: string;
 	}
 
-	let {src, alt = '', size = 'xxs', color = 'off-white', ring = false, testId}: Props = $props();
+	let { src, alt = '', size = 'xxs', color = 'off-white', ring = false, testId }: Props = $props();
 
 	let sizePx = $state(logoSizes[size]);
 
