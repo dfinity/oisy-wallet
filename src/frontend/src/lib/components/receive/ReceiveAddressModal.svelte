@@ -13,13 +13,14 @@
 	import type { Token } from '$lib/types/token';
 
 	interface Props {
-		infoCmp:| typeof ReceiveAddresses
-				| typeof IcReceiveInfoCkBTC
-				| typeof IcReceiveInfoICP
-				| typeof IcReceiveInfoIcrc;
+		infoCmp:
+			| typeof ReceiveAddresses
+			| typeof IcReceiveInfoCkBTC
+			| typeof IcReceiveInfoICP
+			| typeof IcReceiveInfoIcrc;
 	}
 
-	let {infoCmp}: Props = $props();
+	let { infoCmp }: Props = $props();
 
 	const steps: WizardSteps = [
 		{
