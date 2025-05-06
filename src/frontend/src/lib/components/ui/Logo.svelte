@@ -5,24 +5,27 @@
 	import { logoSizes } from '$lib/constants/components.constants';
 	import type { LogoSize } from '$lib/types/components';
 
-	export let src: string | undefined;
-	export let alt = '';
-	export let size: LogoSize = 'xxs';
-	export let color: 'off-white' | 'white' = 'off-white';
-	export let ring = false;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		src?: string;
+		alt?: string;
+		size?: LogoSize;
+		color?: 'off-white' | 'white';
+		ring?: boolean;
+		testId?: string;
+	}
 
-	let sizePx = logoSizes[size];
+	let { src, alt = '', size = 'xxs', color = 'off-white', ring = false, testId }: Props = $props();
 
-	let loaded = false;
+	let sizePx = $state(logoSizes[size]);
 
-	$: src,
-		(() => {
-			loaded = isNullish(src);
-			loadingError = false;
-		})();
+	let loaded = $state(false);
 
-	let loadingError = false;
+	$effect(() => {
+		loaded = isNullish(src);
+		loadingError = false;
+	});
+
+	let loadingError = $state(false);
 	const onError = () => {
 		loadingError = true;
 		loaded = true;
