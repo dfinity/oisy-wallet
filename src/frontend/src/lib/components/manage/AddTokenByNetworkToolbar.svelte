@@ -10,6 +10,6 @@
 </script>
 
 <ButtonGroup>
-	<ButtonBack on:click={() => dispatch('icBack')} />
+	<ButtonBack onclick={() => dispatch('icBack')} />
 	<ButtonNext disabled={invalid} />
 </ButtonGroup>

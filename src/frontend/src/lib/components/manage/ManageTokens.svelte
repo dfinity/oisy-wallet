@@ -67,7 +67,8 @@
 			tokens: [],
 			filterZeroBalance: false,
 			filterNetwork: $selectedNetwork,
-			filterQuery: nonNullish(initialSearch) ? initialSearch : ''
+			filterQuery: nonNullish(initialSearch) ? initialSearch : '',
+			sortByBalance: false
 		})
 	);
 
@@ -143,7 +144,9 @@
 			<LogoButton dividers hover={false}>
 				<TokenName slot="title" data={token} />
 
-				<TokenLogo slot="logo" color="white" data={token} badge={{ type: 'network' }} />
+				<span slot="logo" class="mr-2">
+					<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
+				</span>
 
 				<span class="break-all" slot="description">
 					{token.symbol}

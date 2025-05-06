@@ -1,12 +1,12 @@
-import {
-	type TokenAppearanceSchema,
-	type TokenBuySchema,
-	type TokenBuyableSchema,
-	type TokenCategorySchema,
-	type TokenIdSchema,
-	type TokenMetadataSchema,
-	type TokenSchema,
-	type TokenStandardSchema
+import type {
+	TokenAppearanceSchema,
+	TokenBuySchema,
+	TokenBuyableSchema,
+	TokenCategorySchema,
+	TokenIdSchema,
+	TokenMetadataSchema,
+	TokenSchema,
+	TokenStandardSchema
 } from '$lib/schema/token.schema';
 import type { OptionBalance } from '$lib/types/balance';
 import type { TokenGroup } from '$lib/types/token-group';
@@ -53,5 +53,8 @@ export interface TokenFinancialData {
 }
 
 export type TokenUi<T extends Token = Token> = T & TokenFinancialData;
+
+export type TokenUiGroupable<T extends Token = Token> = Omit<TokenUi<T>, 'groupData'> &
+	Required<Pick<TokenUi<T>, 'groupData'>>;
 
 export type OptionTokenUi = Option<TokenUi>;

@@ -7,21 +7,27 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let title: string;
-	export let rewards: RewardDescription[];
-	export let altText: string | undefined = undefined;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		title?: string;
+		rewards: RewardDescription[];
+		altText?: string;
+		testId?: string;
+	}
+
+	let { title, rewards, altText, testId }: Props = $props();
 
 	const modalId = Symbol();
 </script>
 
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
-	<span class="text-lg font-bold first-letter:capitalize">{title}</span>
+	{#if nonNullish(title)}
+		<span class="text-lg font-bold first-letter:capitalize">{title}</span>
+	{/if}
 
 	{#each rewards as reward (reward.id)}
 		<div in:slide={SLIDE_DURATION} class="mt-4">
 			<RewardCard
-				on:click={() => modalStore.openRewardDetails({ id: modalId, data: reward })}
+				onclick={() => modalStore.openRewardDetails({ id: modalId, data: reward })}
 				{reward}
 				testId={nonNullish(testId) ? `${testId}-${reward.id}` : undefined}
 			/>

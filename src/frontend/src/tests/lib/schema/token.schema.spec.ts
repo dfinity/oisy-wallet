@@ -213,7 +213,7 @@ describe('token.schema', () => {
 	});
 
 	describe('TokenSchema', () => {
-		const { chainId: _, explorerUrl: __, ...mockNetwork } = SEPOLIA_NETWORK;
+		const { chainId: _, explorerUrl: __, providers: ___, ...mockNetwork } = SEPOLIA_NETWORK;
 
 		const validTokenWithRequiredFields = {
 			id: parseTokenId('TokenId'),

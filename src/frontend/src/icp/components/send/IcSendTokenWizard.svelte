@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type WizardStep } from '@dfinity/gix-components';
+	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
@@ -196,12 +196,20 @@
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
 			<IcSendProgress bind:sendProgressStep {networkId} />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
-			<IcSendForm on:icNext bind:destination bind:amount bind:networkId on:icQRCodeScan {source}>
+			<IcSendForm
+				on:icNext
+				on:icTokensList
+				bind:destination
+				bind:amount
+				bind:networkId
+				on:icQRCodeScan
+				{source}
+			>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
-						<ButtonBack on:click={back} />
+						<ButtonBack onclick={back} />
 					{:else}
-						<ButtonCancel on:click={close} />
+						<ButtonCancel onclick={close} />
 					{/if}
 				</svelte:fragment>
 			</IcSendForm>

@@ -9,14 +9,14 @@ import type {
 
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import type { ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
@@ -49,7 +49,7 @@ describe('backend.canister', () => {
 	const addUserCredentialParams = {
 		credentialJwt: 'test-credential-jwt',
 		issuerCanisterId: mockPrincipal,
-		currentUserVersion: ZERO_BI,
+		currentUserVersion: ZERO,
 		credentialSpec: {
 			arguments: [],
 			credential_type: ''
@@ -614,7 +614,7 @@ describe('backend.canister', () => {
 				Ok: {
 					status: { Executed: null }, // or { Skipped: null } or { Failed: null }, depending on your scenario
 					challenge_completion: [], // Provide appropriately if challenge completion data exists
-					allowed_cycles: ZERO_BI // Replace with proper value
+					allowed_cycles: ZERO // Replace with proper value
 				}
 			};
 

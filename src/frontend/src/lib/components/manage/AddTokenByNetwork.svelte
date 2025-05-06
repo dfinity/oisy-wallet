@@ -17,6 +17,7 @@
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
+		isNetworkIdEvm,
 		isNetworkIdICP,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
@@ -37,6 +38,9 @@
 	let isEthereumNetwork = false;
 	$: isEthereumNetwork = isNetworkIdEthereum(network?.id);
 
+	let isEvmNetwork = false;
+	$: isEvmNetwork = isNetworkIdEvm(network?.id);
+
 	let isSolanaNetwork = false;
 	$: isSolanaNetwork = isNetworkIdSolana(network?.id);
 
@@ -50,7 +54,7 @@
 			indexCanisterId:
 				nonNullish(indexCanisterId) && notEmptyString(indexCanisterId) ? indexCanisterId : undefined
 		};
-	} else if (isEthereumNetwork) {
+	} else if (isEthereumNetwork || isEvmNetwork) {
 		tokenData = { erc20ContractAddress };
 	} else if (isSolanaNetwork) {
 		tokenData = { splTokenAddress };
@@ -72,7 +76,7 @@
 	let invalid = true;
 	$: invalid = isIcpNetwork
 		? invalidIc
-		: isEthereumNetwork
+		: isEthereumNetwork || isEvmNetwork
 			? invalidErc20
 			: isSolanaNetwork
 				? invalidSpl
@@ -92,24 +96,28 @@
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
 			<Value ref="network" element="div">
-				<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
+				{#snippet label()}
+					{$i18n.tokens.manage.text.network}
+				{/snippet}
 
-				<div id="network" class="network mt-1 pt-0.5">
-					<Dropdown name="network" bind:selectedValue={networkName}>
-						<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
-							>{$i18n.tokens.manage.placeholder.select_network}</option
-						>
-						{#each availableNetworks as network (network.id)}
-							<DropdownItem value={network.name}>{network.name}</DropdownItem>
-						{/each}
-					</Dropdown>
-				</div>
+				{#snippet content()}
+					<div id="network" class="network mt-1 pt-0.5">
+						<Dropdown name="network" bind:selectedValue={networkName}>
+							<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
+								>{$i18n.tokens.manage.placeholder.select_network}</option
+							>
+							{#each availableNetworks as network (network.id)}
+								<DropdownItem value={network.name}>{network.name}</DropdownItem>
+							{/each}
+						</Dropdown>
+					</div>
+				{/snippet}
 			</Value>
 		{/if}
 
 		{#if isIcpNetwork}
 			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
-		{:else if isEthereumNetwork}
+		{:else if isEthereumNetwork || isEvmNetwork}
 			<EthAddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
 		{:else if isSolanaNetwork}
 			<SolAddTokenForm on:icBack bind:tokenAddress={splTokenAddress} />

@@ -4,7 +4,7 @@
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -49,7 +49,7 @@
 		});
 
 	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance === ZERO_BI;
+	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance === ZERO;
 
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(totalFee)

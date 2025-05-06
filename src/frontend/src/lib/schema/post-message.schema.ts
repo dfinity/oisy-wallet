@@ -1,4 +1,4 @@
-import type { Erc20ContractAddress } from '$eth/types/erc20';
+import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import {
 	IcCanistersSchema,
 	IcCanistersStrictSchema,
@@ -27,6 +27,9 @@ export const PostMessageRequestSchema = z.enum([
 	'stopCodeTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
+	'startPowProtectionTimer',
+	'triggerPowProtectionTimer',
+	'stopPowProtectionTimer',
 	'stopIcpWalletTimer',
 	'startIcpWalletTimer',
 	'triggerIcpWalletTimer',
@@ -56,8 +59,8 @@ export const PostMessageDataRequestSchema = z.never();
 export const PostMessageDataResponseSchema = z.object({}).strict();
 
 export const PostMessageDataRequestExchangeTimerSchema = z.object({
-	// TODO: generate zod schema for Erc20ContractAddress
-	erc20Addresses: z.array(z.custom<Erc20ContractAddress>()),
+	// TODO: generate zod schema for Erc20ContractAddressWithNetwork
+	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
 	splAddresses: z.array(z.custom<SplTokenAddress>())
 });
@@ -104,7 +107,8 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncSolWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
-	'syncCkBTCUpdateBalanceStatus'
+	'syncCkBTCUpdateBalanceStatus',
+	'syncPowProtectionStatus'
 ]);
 
 export const PostMessageResponseSchema = z.enum([
@@ -129,6 +133,7 @@ export const PostMessageResponseSchema = z.enum([
 	'syncBtcPendingUtxos',
 	'syncCkBTCUpdateOk',
 	'syncBtcAddress',
+	'syncPowProtection',
 	...PostMessageResponseStatusSchema.options
 ]);
 
@@ -144,7 +149,8 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>(),
-	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>()
+	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
+	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>()
 });
 
 export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataResponseSchema.extend({

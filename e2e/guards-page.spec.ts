@@ -13,9 +13,7 @@ testWithII(
 		// We load the transaction page for ICP. This way we know ICP is supported.
 		const transactionsPage = new TransactionsPage({
 			page,
-			iiPage,
-			tokenSymbol: 'ICP',
-			networkId: 'ICP'
+			iiPage
 		});
 
 		await transactionsPage.waitForReady();

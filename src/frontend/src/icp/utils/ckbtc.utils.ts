@@ -1,6 +1,6 @@
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { Option } from '$lib/types/utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -19,7 +19,7 @@ export const assertCkBTCUserInputAmount = ({
 }): IcAmountAssertionError | undefined => {
 	// We skip validation checks here for zero because it makes the UI/UX ungraceful.
 	// e.g. user enters 0. and an error gets displayed.
-	if (amount === ZERO_BI) {
+	if (amount === ZERO) {
 		return undefined;
 	}
 
@@ -32,7 +32,7 @@ export const assertCkBTCUserInputAmount = ({
 		certified: infoCertified
 	} = minterInfo;
 
-	if ((amount ?? ZERO_BI) < retrieveBtcMinAmount) {
+	if ((amount ?? ZERO) < retrieveBtcMinAmount) {
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_ckbtc_amount, {
 				$amount: formatToken({

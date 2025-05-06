@@ -41,7 +41,7 @@
 	<slot name="info" />
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={() => dispatch('icBack')} />
+		<ButtonBack onclick={() => dispatch('icBack')} />
 		<Button {disabled} on:click={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
 			{$i18n.send.text.send}
 		</Button>

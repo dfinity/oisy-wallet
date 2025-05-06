@@ -52,7 +52,7 @@ export const MOCK_CKBTC_TOKEN: Partial<IcCkToken> = {
 
 export const setupCkBtcPendingStores = () => {
 	ckBtcPendingUtxosStore.set({
-		tokenId: (MOCK_CKBTC_TOKEN as Token).id,
+		id: (MOCK_CKBTC_TOKEN as Token).id,
 		data: {
 			data: [
 				{
@@ -64,7 +64,7 @@ export const setupCkBtcPendingStores = () => {
 		}
 	});
 	ckBtcMinterInfoStore.set({
-		tokenId: (MOCK_CKBTC_TOKEN as Token).id,
+		id: (MOCK_CKBTC_TOKEN as Token).id,
 		data: {
 			data: mockCkBtcMinterInfo,
 			certified: true

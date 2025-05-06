@@ -25,6 +25,8 @@ export const BASE_NETWORK: EthereumNetwork = {
 	iconLight: baseMainnetIconLight,
 	iconDark: baseMainnetIconDark,
 	explorerUrl: BASE_EXPLORER_URL,
+	providers: { infura: 'base' },
+	exchange: { coingeckoId: 'base' },
 	buy: { onramperId: 'base' }
 };
 
@@ -39,7 +41,8 @@ export const BASE_SEPOLIA_NETWORK: EthereumNetwork = {
 	chainId: 84532n,
 	iconLight: baseSepoliaIconLight,
 	iconDark: baseSepoliaIconDark,
-	explorerUrl: BASE_SEPOLIA_EXPLORER_URL
+	explorerUrl: BASE_SEPOLIA_EXPLORER_URL,
+	providers: { infura: 'base-sepolia' }
 };
 
 export const SUPPORTED_BASE_NETWORKS: EthereumNetwork[] = defineSupportedNetworks({
@@ -47,3 +50,5 @@ export const SUPPORTED_BASE_NETWORKS: EthereumNetwork[] = defineSupportedNetwork
 	mainnetNetworks: [BASE_NETWORK],
 	testnetNetworks: [BASE_SEPOLIA_NETWORK]
 });
+
+export const SUPPORTED_BASE_NETWORK_IDS: NetworkId[] = SUPPORTED_BASE_NETWORKS.map(({ id }) => id);

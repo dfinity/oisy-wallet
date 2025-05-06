@@ -13,7 +13,7 @@
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { HOW_TO_CONVERT_ETHEREUM_INFO } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
@@ -66,7 +66,7 @@
 			<p class="break-normal pt-4">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
-						value: $ckEthereumNativeTokenBalance ?? ZERO_BI,
+						value: $ckEthereumNativeTokenBalance ?? ZERO,
 						unitName: $ckEthereumNativeToken.decimals
 					})}
 					{$ckEthereumNativeToken.symbol}</output
@@ -114,20 +114,22 @@
 
 		<div>
 			<Value element="div">
-				<svelte:fragment slot="label"
-					>{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
+				{#snippet label()}
+					{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
 						$token: $ckEthereumTwinToken.symbol
-					})}</svelte:fragment
-				>
-
-				<p class="mb-6">
-					{formatToken({
-						value: $sourceTokenBalance ?? ZERO_BI,
-						unitName: $sourceToken.decimals,
-						displayDecimals: $sourceToken.decimals
 					})}
-					{$sourceToken.symbol}
-				</p>
+				{/snippet}
+
+				{#snippet content()}
+					<p class="mb-6">
+						{formatToken({
+							value: $sourceTokenBalance ?? ZERO,
+							unitName: $sourceToken.decimals,
+							displayDecimals: $sourceToken.decimals
+						})}
+						{$sourceToken.symbol}
+					</p>
+				{/snippet}
 			</Value>
 		</div>
 
@@ -140,30 +142,32 @@
 
 		<div>
 			<Value element="div">
-				<svelte:fragment slot="label"
-					>{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
+				{#snippet label()}
+					{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
 						$token: $ckEthereumTwinToken.symbol,
 						$ckToken: $tokenWithFallback.symbol
-					})}</svelte:fragment
-				>
+					})}
+				{/snippet}
 
-				<Button
-					colorStyle="secondary"
-					fullWidth
-					styleClass="mb-4 mt-3"
-					on:click={() => dispatch('icConvert')}
-				>
-					<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
-				</Button>
+				{#snippet content()}
+					<Button
+						colorStyle="secondary"
+						fullWidth
+						styleClass="mb-4 mt-3"
+						on:click={() => dispatch('icConvert')}
+					>
+						<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
+					</Button>
+				{/snippet}
 			</Value>
 		</div>
 	</div>
 
 	<svelte:fragment slot="toolbar">
 		{#if formCancelAction === 'back'}
-			<ButtonBack fullWidth on:click={() => dispatch('icBack')} />
+			<ButtonBack fullWidth onclick={() => dispatch('icBack')} />
 		{:else}
-			<ButtonDone on:click={modalStore.close} />
+			<ButtonDone onclick={modalStore.close} />
 		{/if}
 	</svelte:fragment>
 </ContentWithToolbar>

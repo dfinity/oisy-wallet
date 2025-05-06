@@ -17,7 +17,7 @@
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -65,10 +65,10 @@
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let network: Network | undefined = undefined;
-	$: network = $sendToken.network;
+	$: ({ network } = $sendToken);
 
 	let networkId: NetworkId | undefined = undefined;
-	$: networkId = $sendToken.network.id;
+	$: ({ id: networkId } = network);
 
 	let source: OptionSolAddress;
 	let solanaNativeToken: Token;
@@ -162,7 +162,7 @@
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
 				}),
-				prioritizationFee: $prioritizationFeeStore ?? ZERO_BI,
+				prioritizationFee: $prioritizationFeeStore ?? ZERO,
 				destination,
 				source
 			});
@@ -213,6 +213,7 @@
 		<SolSendForm
 			on:icNext
 			on:icClose
+			on:icTokensList
 			bind:destination
 			bind:amount
 			on:icQRCodeScan
@@ -220,9 +221,9 @@
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<ButtonBack on:click={back} />
+					<ButtonBack onclick={back} />
 				{:else}
-					<ButtonCancel on:click={close} />
+					<ButtonCancel onclick={close} />
 				{/if}
 			</svelte:fragment>
 		</SolSendForm>
