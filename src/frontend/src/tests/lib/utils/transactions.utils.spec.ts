@@ -1,4 +1,5 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
+import type { BtcTransactionType } from '$btc/types/btc-transaction';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN, PEPE_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.pepe.env';
@@ -28,7 +29,8 @@ import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
+import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { Token } from '$lib/types/token';
@@ -40,6 +42,7 @@ import type {
 import {
 	areTransactionsStoresLoading,
 	filterReceivedMicroTransactions,
+	getKnownDestinations,
 	getReceivedMicroTransactions,
 	isTransactionsStoreEmpty,
 	isTransactionsStoreInitialized,
@@ -1079,6 +1082,103 @@ describe('transactions.utils', () => {
 
 		it('should return false for an empty input array', () => {
 			expect(areTransactionsStoresLoading([])).toBeFalsy();
+		});
+	});
+
+	describe('getKnownDestinations', () => {
+		it('should correctly return a single known destinations', () => {
+			const icTransactionsUi = createMockIcTransactionsUi(7);
+			const expectedIcKnownDestinations = {
+				[icTransactionsUi[0].to as string]: {
+					amounts: icTransactionsUi.map(({ value }) => value),
+					timestamp: Number(icTransactionsUi[0].timestamp)
+				}
+			};
+
+			expect(getKnownDestinations(icTransactionsUi)).toEqual(expectedIcKnownDestinations);
+		});
+
+		it('should correctly return multiple known destinations', () => {
+			const [icTransactionsUi1] = createMockIcTransactionsUi(1);
+			const icTransactionsUi2 = {
+				...createMockIcTransactionsUi(1)[0],
+				to: icTransactionsUi1.from
+			};
+
+			expect(getKnownDestinations([icTransactionsUi1, icTransactionsUi2])).toEqual({
+				[icTransactionsUi1.to as string]: {
+					amounts: [icTransactionsUi1.value],
+					timestamp: Number(icTransactionsUi1.timestamp)
+				},
+				[icTransactionsUi2.to as string]: {
+					amounts: [icTransactionsUi2.value],
+					timestamp: Number(icTransactionsUi2.timestamp)
+				}
+			});
+		});
+
+		it('should correctly return multiple known destinations if a tx has "to" as an array', () => {
+			const [mockTransaction] = createMockBtcTransactionsUi(1);
+			const btcTransactionsUi = {
+				...mockTransaction,
+				type: 'send' as BtcTransactionType,
+				to: [mockTransaction.to, mockTransaction.from] as string[]
+			};
+
+			expect(getKnownDestinations([btcTransactionsUi])).toEqual({
+				[btcTransactionsUi.to[0] as string]: {
+					amounts: [btcTransactionsUi.value],
+					timestamp: Number(btcTransactionsUi.timestamp)
+				},
+				[btcTransactionsUi.to[1] as string]: {
+					amounts: [btcTransactionsUi.value],
+					timestamp: Number(btcTransactionsUi.timestamp)
+				}
+			});
+		});
+
+		it('should correctly take the latest timestamp', () => {
+			const icTransactionsUi = createMockIcTransactionsUi(7).map(
+				({ timestamp, ...rest }, index) => ({
+					...rest,
+					timestamp: (timestamp ?? ZERO) + BigInt(index)
+				})
+			);
+			const expectedIcKnownDestinations = {
+				[icTransactionsUi[0].to as string]: {
+					amounts: icTransactionsUi.map(({ value }) => value),
+					timestamp: Number(icTransactionsUi[icTransactionsUi.length - 1].timestamp)
+				}
+			};
+
+			expect(getKnownDestinations(icTransactionsUi)).toEqual(expectedIcKnownDestinations);
+		});
+
+		it('should correctly return an empty array if all txs do not have values', () => {
+			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ value: _, ...rest }) => ({
+				...rest,
+				value: undefined
+			}));
+
+			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+		});
+
+		it('should correctly return an empty array if all txs have zero values', () => {
+			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ value: _, ...rest }) => ({
+				...rest,
+				value: ZERO
+			}));
+
+			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+		});
+
+		it('should correctly return an empty array if all txs are receive', () => {
+			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ type: _, ...rest }) => ({
+				...rest,
+				type: 'receive' as IcTransactionType
+			}));
+
+			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
 		});
 	});
 });
