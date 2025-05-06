@@ -45,10 +45,10 @@
 		</span>
 	{:else if badge?.type === 'network'}
 		<div
-			class="absolute -bottom-1 -right-1"
+			class="absolute -bottom-0.5 -right-1"
 			class:scale-60={logoSize === 'xs'}
 			class:-right-1.75={logoSize === 'xs'}
-			class:-bottom-1.5={logoSize === 'xs'}
+			class:-bottom-1={logoSize === 'xs'}
 		>
 			<NetworkLogo {network} {color} testId={`network-${badgeTestId}`} />
 		</div>
