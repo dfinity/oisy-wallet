@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import type { Snippet } from 'svelte';
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
+	import { derived } from 'svelte/store';
 	import ReceiveAddressQRCodeContent from '$lib/components/receive/ReceiveAddressQRCodeContent.svelte';
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
@@ -12,7 +13,6 @@
 	import type { OptionAddress, Address } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
-	import {derived} from "svelte/store";
 
 	interface Props {
 		content?: Snippet;
@@ -24,7 +24,7 @@
 
 	let { content, address, addressToken, network, copyAriaLabel }: Props = $props();
 
-    const title = $derived(isNullish($token) ? network.name : addressToken?.symbol);
+	const title = $derived(isNullish($token) ? network.name : addressToken?.symbol);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
