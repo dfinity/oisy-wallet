@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	export type AvatarVariants = 'xl' | 'lg' | 'md' | 'sm' | 'xs';
 	import IconAvatar from '$lib/components/icons/IconAvatar.svelte';
+	import type { AvatarVariants } from '$lib/types/style';
 
 	interface AvatarProps {
 		name?: string;
