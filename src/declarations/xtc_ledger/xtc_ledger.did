@@ -1,0 +1,235 @@
+////////// BEGIN ERC-20 //////////
+
+type Time = int;
+
+type Operation =
+ variant {
+   approve;
+   mint;
+   transfer;
+   transferFrom;
+   burn;
+   canisterCalled;
+   canisterCreated;
+ };
+
+type Metadata =
+ record {
+   decimals: nat8;
+   fee: nat;
+   logo: text;
+   name: text;
+   owner: principal;
+   symbol: text;
+   totalSupply: nat;
+ };
+
+type TxRecord =
+ record {
+   caller: opt principal;
+   from: principal;
+   to: principal;
+   amount: nat;
+   fee: nat;
+   op: Operation;
+   timestamp: Time;
+   index: nat;
+   status: TransactionStatus;
+ };
+
+type TxError = variant {
+  InsufficientAllowance;
+  InsufficientBalance;
+  ErrorOperationStyle;
+  Unauthorized;
+  LedgerTrap;
+  ErrorTo;
+  Other;
+  BlockUsed;
+  FetchRateFailed;
+  NotifyDfxFailed;
+  UnexpectedCyclesResponse;
+  AmountTooSmall;
+  InsufficientXTCFee;
+};
+type TxReceipt = variant { Ok : nat; Err : TxError };
+
+////////// END ERC-20 //////////
+
+type TransactionId = nat64;
+
+type BurnError = variant {
+    InsufficientBalance;
+    InvalidTokenContract;
+    NotSufficientLiquidity;
+};
+
+type BurnResult = variant {
+    Ok : TransactionId;
+    Err: BurnError;
+};
+
+type TxReceiptLegacy =
+ variant {
+   Err: variant {
+          InsufficientAllowance;
+          InsufficientBalance;
+        };
+   Ok: nat;
+ };
+
+type MintError = variant {
+    NotSufficientLiquidity;
+};
+
+type MintResult = variant {
+    Ok : TransactionId;
+    Err: MintError;
+};
+
+type ResultCall = variant {
+    Ok : record { return: blob };
+    Err : text;
+};
+
+type CreateResult = variant {
+    Ok : record { canister_id: principal };
+    Err: text;
+};
+
+type EventDetail = variant {
+    Transfer : record {
+        from : principal;
+        to   : principal;
+    };
+    Mint     : record {
+        to   : principal;
+    };
+    Burn     : record {
+        from : principal;
+        to   : principal;
+    };
+    CanisterCalled : record {
+        from : principal;
+        canister : principal;
+        method_name: text;
+    };
+    CanisterCreated : record {
+        from : principal;
+        canister : principal;
+    };
+    TransferFrom : record {
+        caller : principal;
+        from : principal;
+        to   : principal;
+    };
+    Approve : record {
+        from : principal;
+        to   : principal;
+    };
+};
+
+type TransactionStatus = variant {
+    SUCCEEDED;
+    FAILED;
+};
+
+type Event = record {
+    fee       : nat64;
+    kind      : EventDetail;
+    cycles    : nat64;
+    timestamp : nat64;
+    status : TransactionStatus;
+};
+
+type EventsConnection = record {
+    data            : vec Event;
+    next_offset     : TransactionId;
+    next_canister_id: opt principal;
+};
+
+type Stats = record {
+    supply: nat;
+    fee: nat;
+    history_events: nat64;
+    balance: nat64;
+    // Usage statistics
+    transfers_count: nat64;
+    transfers_from_count: nat64;
+    approvals_count: nat64;
+    mints_count: nat64;
+    burns_count: nat64;
+    proxy_calls_count: nat64;
+    canisters_created_count: nat64;
+};
+
+type ResultSend = variant {
+    Ok : null;
+    Err: text;
+};
+
+service : {
+
+   ////////// BEGIN ERC-20 //////////
+   allowance: (principal, principal) -> (nat) query;
+   approve: (principal, nat) -> (TxReceipt);
+   balanceOf: (principal) -> (nat) query;
+   decimals: () -> (nat8) query;
+   getMetadata: () -> (Metadata) query;
+   getTransaction: (nat) -> (TxRecord);
+   getTransactions: (nat, nat) -> (vec TxRecord);
+   historySize: () -> (nat) query;
+   logo: () -> (text) query;
+   nameErc20: () -> (text) query;
+   name: () -> (text) query;
+   symbol: () -> (text) query;
+   totalSupply: () -> (nat) query;
+   transferErc20: (principal, nat) -> (TxReceiptLegacy);
+   transfer: (principal, nat) -> (TxReceipt);
+   transferFrom: (principal, principal, nat) -> (TxReceipt);
+   mint: (principal, nat) -> (MintResult);
+   isBlockUsed : (nat64) -> (bool) query;
+   getBlockUsed : () -> (vec nat64) query;
+   ////////// END ERC-20 //////////
+
+    get_map_block_used: (nat64) -> (opt nat64) query; // ICP burned block
+    mint_by_icp: (opt vec nat8, nat64) -> (TxReceipt);
+    mint_by_icp_recover: (opt vec nat8, nat64, principal) -> (TxReceipt);
+
+    burn: (record { canister_id: principal; amount: nat64 }) -> (BurnResult);
+    balance: (opt principal) -> (amount: nat64);
+
+    // History
+    get_transaction : (id: TransactionId) -> (opt Event);
+    events : (record { offset: opt nat64; limit: nat16 }) -> (EventsConnection) query;
+
+    // Management
+    halt : () -> ();
+
+    // Usage statistics
+    stats : () -> (Stats) query;
+
+    // ----------- Cycles wallet compatible API
+
+    wallet_balance: () -> (record { amount: nat64 }) query;
+    wallet_send: (record { canister: principal; amount: nat64 }) -> (ResultSend);
+
+    // Managing canister
+    wallet_create_canister: (record {
+        cycles: nat64;
+        controller: opt principal;  // If omitted, set the controller to the caller.
+    }) -> (CreateResult);
+
+    wallet_create_wallet: (record {
+        cycles: nat64;
+        controller: opt principal;
+    }) -> (CreateResult);
+
+    // Call Forwarding
+    wallet_call: (record {
+        canister: principal;
+        method_name: text;
+        args: blob;
+        cycles: nat64;
+    }) -> (ResultCall);
+}
