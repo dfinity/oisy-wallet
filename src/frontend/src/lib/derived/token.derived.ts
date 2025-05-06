@@ -27,13 +27,17 @@ export const defaultFallbackToken: Readable<Token> = derived(
 	([$networkBitcoin, $networkEthereum, $networkBase, $networkEvm, $networkSolana]) => {
 		if ($networkBitcoin) {
 			return DEFAULT_BITCOIN_TOKEN;
-		} if ($networkEthereum) {
+		}
+		if ($networkEthereum) {
 			return DEFAULT_ETHEREUM_TOKEN;
-		} if ($networkBase) {
+		}
+		if ($networkBase) {
 			return DEFAULT_ETHEREUM_TOKEN; // TODO
-		} if ($networkEvm) {
+		}
+		if ($networkEvm) {
 			return DEFAULT_BSC_TOKEN;
-		} if ($networkSolana) {
+		}
+		if ($networkSolana) {
 			return DEFAULT_SOLANA_TOKEN;
 		}
 
