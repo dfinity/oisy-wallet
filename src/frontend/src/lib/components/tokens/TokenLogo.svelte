@@ -37,7 +37,7 @@
 	/>
 	{#if badge?.type === 'tokenCount' && badge.count > 0}
 		<span
-			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
+			class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: name })}
 			data-tid={`token-count-${badgeTestId}`}
 		>
@@ -45,10 +45,12 @@
 		</span>
 	{:else if badge?.type === 'network'}
 		<div
-			class="absolute -bottom-1 -right-1"
+			class="absolute"
 			class:scale-60={logoSize === 'xs'}
+			class:-right-1={logoSize !== 'xs'}
 			class:-right-1.75={logoSize === 'xs'}
-			class:-bottom-1.5={logoSize === 'xs'}
+			class:bottom-0={logoSize !== 'xs'}
+			class:-bottom-1={logoSize === 'xs'}
 		>
 			<NetworkLogo {network} {color} testId={`network-${badgeTestId}`} />
 		</div>
