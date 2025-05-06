@@ -57,35 +57,47 @@
 	<svelte:fragment slot="transaction-confirmations">
 		{#if nonNullish(confirmations)}
 			<Value ref="confirmations">
-				<svelte:fragment slot="label">{$i18n.transaction.text.confirmations}</svelte:fragment>
-				{confirmations}
+				{#snippet label()}
+					{$i18n.transaction.text.confirmations}
+				{/snippet}
+				{#snippet content()}
+					{confirmations}
+				{/snippet}
 			</Value>
 		{/if}
 	</svelte:fragment>
 
 	<Value ref="status" slot="transaction-status">
-		<svelte:fragment slot="label">{$i18n.transaction.text.status}</svelte:fragment>
-		{`${$i18n.transaction.status[status]}`}
+		{#snippet label()}
+			{$i18n.transaction.text.status}
+		{/snippet}
+		{#snippet content()}
+			{`${$i18n.transaction.status[status]}`}
+		{/snippet}
 	</Value>
 
 	<svelte:fragment slot="transaction-custom-to">
 		{#if nonNullish(to)}
 			<Value ref="recipients">
-				<svelte:fragment slot="label">{$i18n.transaction.text.to}</svelte:fragment>
+				{#snippet label()}
+					{$i18n.transaction.text.to}
+				{/snippet}
 
-				<ul class="list-none">
-					{#each to as address, index (`${address}-${index}`)}
-						<li>
-							<TransactionAddress
-								{address}
-								explorerUrl={nonNullish(explorerUrl)
-									? `${explorerUrl}/address/${address}`
-									: undefined}
-								copiedText={$i18n.transaction.text.to_copied}
-							/>
-						</li>
-					{/each}
-				</ul>
+				{#snippet content()}
+					<ul class="list-none">
+						{#each to as address, index (`${address}-${index}`)}
+							<li>
+								<TransactionAddress
+									{address}
+									explorerUrl={nonNullish(explorerUrl)
+										? `${explorerUrl}/address/${address}`
+										: undefined}
+									copiedText={$i18n.transaction.text.to_copied}
+								/>
+							</li>
+						{/each}
+					</ul>
+				{/snippet}
 			</Value>
 		{/if}
 	</svelte:fragment>
