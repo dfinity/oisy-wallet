@@ -19,14 +19,14 @@
 	let sizePx = $state(logoSizes[size]);
 
 	let loadingError: boolean | undefined = $state();
-	let loaded = $derived((nonNullish(src) && nonNullish(loadingError)) || isNullish(src));
+	let isReady = $derived((nonNullish(src) && nonNullish(loadingError)) || isNullish(src));
 </script>
 
 <div
 	class="flex items-center justify-center overflow-hidden rounded-full ring-primary"
-	class:bg-off-white={color === 'off-white' && !loaded}
-	class:bg-white={color === 'white' && !loaded}
-	class:opacity-10={!loaded}
+	class:bg-off-white={color === 'off-white' && !isReady}
+	class:bg-white={color === 'white' && !isReady}
+	class:opacity-10={!isReady}
 	class:ring-2={ring}
 	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
 	data-tid={testId}
