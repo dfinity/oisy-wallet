@@ -1,5 +1,5 @@
 import type {
-	ClaimedVipReward,
+	ClaimedVipReward, EligibilityResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	SetReferrerResponse,
@@ -24,6 +24,16 @@ export const getUserInfo = async ({
 
 	return getUserInfo({ certified });
 };
+
+export const isEligible = async ({
+	identity, principal
+}: CanisterApiFunctionParams<{
+	principal: Principal
+}>): Promise<EligibilityResponse> => {
+	const { isEligible } = await rewardCanister({ identity });
+
+	return isEligible(principal);
+}
 
 export const getNewVipReward = async ({
 	rewardType,

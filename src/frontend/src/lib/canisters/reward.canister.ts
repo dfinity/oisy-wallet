@@ -6,7 +6,7 @@ import type {
 	SetReferrerResponse,
 	UserData,
 	UserSnapshot,
-	VipReward
+	VipReward, EligibilityResponse
 } from '$declarations/rewards/rewards.did';
 import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/rewards.factory.certified.did';
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
@@ -20,6 +20,7 @@ import {
 	toNullable,
 	type QueryParams
 } from '@dfinity/utils';
+import type {Principal} from "@dfinity/principal";
 
 export class RewardCanister extends Canister<RewardService> {
 	static async create({
@@ -38,6 +39,12 @@ export class RewardCanister extends Canister<RewardService> {
 		});
 
 		return new RewardCanister(canisterId, service, certifiedService);
+	}
+
+	isEligible = (principal: Principal): Promise<EligibilityResponse> => {
+		const { eligible } = this.caller({ certified: true });
+
+		return eligible(toNullable(principal));
 	}
 
 	getUserInfo = ({ certified = true }: QueryParams): Promise<UserData> => {

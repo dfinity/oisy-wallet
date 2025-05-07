@@ -1,5 +1,5 @@
 import type {
-	ClaimedVipReward,
+	ClaimedVipReward, EligibilityReport, EligibilityResponse,
 	ReferrerInfo,
 	RewardInfo,
 	SetReferrerResponse,
@@ -12,7 +12,8 @@ import {
 	getReferrerInfo as getReferrerInfoApi,
 	getUserInfo,
 	getUserInfo as getUserInfoApi,
-	setReferrer as setReferrerApi
+	setReferrer as setReferrerApi,
+	isEligible as isEligibleApi
 } from '$lib/api/reward.api';
 import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
 import { QrCodeType, asQrCodeType } from '$lib/enums/qr-code-types';
@@ -20,6 +21,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import {
 	AlreadyClaimedError,
+	EligibilityError,
 	InvalidCampaignError,
 	InvalidCodeError,
 	UserNotVipError
@@ -37,6 +39,7 @@ import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import {Principal} from "@dfinity/principal";
 
 const queryUserRoles = async (params: {
 	identity: Identity;
@@ -83,6 +86,27 @@ export const getUserRoles = async (params: { identity: Identity }): Promise<User
 		return { isVip: false, isGold: false };
 	}
 };
+
+const queryEligibilityReport = async(params: {identity: Identity, principal: Principal}): Promise<EligibilityReport> => {
+	const response = await isEligibleApi({...params, nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity});
+
+	if ('Ok' in response) {
+		return response.Ok;
+	}
+	if ('Err' in response) {
+		throw new EligibilityError();
+	}
+	throw new Error('Unknown error');
+}
+
+export const getEligibilityReport = async (params: { identity: Identity, principal: string }): Promise<EligibilityReport> => {
+	try {
+		return await queryEligibilityReport({...params, principal: Principal.fromText(params.principal)});
+	} catch (err: unknown) {
+		console.log("HMMM")
+		return {campaigns: []};
+	}
+}
 
 const queryRewards = async (params: {
 	identity: Identity;
