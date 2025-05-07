@@ -8,19 +8,19 @@
 	import type { KnownDestinations } from '$lib/types/transactions';
 
 	interface Props {
-		data?: KnownDestinations;
+		knownDestinations?: KnownDestinations;
 		destination: string;
 	}
-	let { data, destination = $bindable() }: Props = $props();
+	let { knownDestinations, destination = $bindable() }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let destinations = $derived(nonNullish(data) ? Object.keys(data) : []);
+	let destinations = $derived(nonNullish(knownDestinations) ? Object.keys(knownDestinations) : []);
 </script>
 
-{#if nonNullish(data) && destinations.length > 0}
+{#if nonNullish(knownDestinations) && destinations.length > 0}
 	<div class="my-10" in:fade>
 		<div class="mb-2 font-bold">
 			{$i18n.send.text.recently_used}
@@ -32,7 +32,7 @@
 					<KnownDestination
 						token={$sendToken}
 						destination={recentDestination}
-						{...data[recentDestination]}
+						{...knownDestinations[recentDestination]}
 						on:click={() => {
 							destination = recentDestination;
 							dispatch('icNext');

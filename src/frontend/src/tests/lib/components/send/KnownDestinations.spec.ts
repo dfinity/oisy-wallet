@@ -18,7 +18,7 @@ describe('KnownDestinations', () => {
 		const { getByText } = render(KnownDestinations, {
 			props: {
 				destination: mockBtcAddress,
-				data: {
+				knownDestinations: {
 					[mockBtcAddress]: {
 						amounts: [10000000n],
 						timestamp: 1671234567890
