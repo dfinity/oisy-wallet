@@ -33,9 +33,9 @@ export class ICPSwapPoolCanister extends Canister<SwapPoolService> {
 	 * @returns Estimated output amount (bigint).
 	 * @throws CanisterInternalError if fetching quote fails.
 	 */
-	quote = async ({ amountIn, zeroForOne, amountOutMinimum }: SwapArgs): Promise<bigint> => {
+	quote = async (args: SwapArgs): Promise<bigint> => {
 		const { quote } = this.caller({ certified: false });
-		const result: Result = await quote({ amountIn, zeroForOne, amountOutMinimum });
+		const result: Result = await quote(args);
 
 		if ('ok' in result) {
 			return result.ok;
@@ -51,9 +51,9 @@ export class ICPSwapPoolCanister extends Canister<SwapPoolService> {
 	 * @returns Amount of tokens received (bigint).
 	 * @throws CanisterInternalError if swap fails.
 	 */
-	swap = async ({ amountIn, zeroForOne, amountOutMinimum }: SwapArgs): Promise<bigint> => {
+	swap = async (args: SwapArgs): Promise<bigint> => {
 		const { swap } = this.caller({ certified: true });
-		const result: Result = await swap({ amountIn, zeroForOne, amountOutMinimum });
+		const result: Result = await swap(args);
 
 		if ('ok' in result) {
 			return result.ok;
@@ -69,9 +69,9 @@ export class ICPSwapPoolCanister extends Canister<SwapPoolService> {
 	 * @returns Amount of tokens deposited (bigint).
 	 * @throws CanisterInternalError if deposit fails.
 	 */
-	deposit = async ({ token, amount, fee }: DepositArgs): Promise<bigint> => {
+	deposit = async (args: DepositArgs): Promise<bigint> => {
 		const { deposit } = this.caller({ certified: true });
-		const result: Result = await deposit({ token, amount, fee });
+		const result: Result = await deposit(args);
 
 		if ('ok' in result) {
 			return result.ok;
@@ -87,9 +87,9 @@ export class ICPSwapPoolCanister extends Canister<SwapPoolService> {
 	 * @returns Amount of tokens deposited (bigint).
 	 * @throws CanisterInternalError if depositFrom fails.
 	 */
-	depositFrom = async ({ token, amount, fee }: DepositArgs): Promise<bigint> => {
+	depositFrom = async (args: DepositArgs): Promise<bigint> => {
 		const { depositFrom } = this.caller({ certified: true });
-		const result: Result = await depositFrom({ token, amount, fee });
+		const result: Result = await depositFrom(args);
 
 		if ('ok' in result) {
 			return result.ok;
@@ -105,9 +105,9 @@ export class ICPSwapPoolCanister extends Canister<SwapPoolService> {
 	 * @returns Amount of tokens withdrawn (bigint).
 	 * @throws CanisterInternalError if withdrawal fails.
 	 */
-	withdraw = async ({ token, amount, fee }: WithdrawArgs): Promise<bigint> => {
+	withdraw = async (args: WithdrawArgs): Promise<bigint> => {
 		const { withdraw } = this.caller({ certified: true });
-		const result: Result = await withdraw({ token, amount, fee });
+		const result: Result = await withdraw(args);
 
 		if ('ok' in result) {
 			return result.ok;

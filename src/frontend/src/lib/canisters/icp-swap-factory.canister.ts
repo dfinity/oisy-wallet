@@ -31,13 +31,9 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 	 * @returns Pool information containing the canister ID.
 	 * @throws CanisterInternalError if fetching pool fails.
 	 */
-	getPool = async ({ token0, token1, fee }: GetPoolArgs): Promise<PoolData> => {
+	getPool = async (args: GetPoolArgs): Promise<PoolData> => {
 		const { getPool } = this.caller({ certified: false });
-		console.log('here', getPool, token0, token1, fee);
-		
-		const result = await getPool({ token0, token1, fee });
-
-		console.log(`getPool result: ${result}`);
+		const result = await getPool(args);
 
 		if ('ok' in result) {
 			return result.ok;
