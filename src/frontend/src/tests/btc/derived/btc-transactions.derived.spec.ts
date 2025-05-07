@@ -84,7 +84,7 @@ describe('btc-transactions.derived', () => {
 		});
 	});
 
-	describe.only('solKnownDestinations', () => {
+	describe('solKnownDestinations', () => {
 		const transactions = [
 			{
 				certified: true,
