@@ -69,7 +69,7 @@
 		loadBalance = $balance;
 
 		await loadCkEthereumPendingTransactions({
-			token: $tokenAsIcToken,
+			token: token as IcToken,
 			lastObservedBlockNumber,
 			identity: $authIdentity,
 			toAddress,
