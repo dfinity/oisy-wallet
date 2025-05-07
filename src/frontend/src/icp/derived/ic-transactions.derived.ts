@@ -7,6 +7,8 @@ import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.
 import { icTransactionsStore, type IcTransactionsData } from '$icp/stores/ic-transactions.store';
 import { getAllIcTransactions, getIcExtendedTransactions } from '$icp/utils/ic-transactions.utils';
 import { tokenWithFallback } from '$lib/derived/token.derived';
+import type { KnownDestinations } from '$lib/types/transactions';
+import { getKnownDestinations } from '$lib/utils/transactions.utils';
 import { derived, type Readable } from 'svelte/store';
 
 const icExtendedTransactions: Readable<NonNullable<IcTransactionsData>> = derived(
@@ -53,4 +55,12 @@ export const icTransactions: Readable<NonNullable<IcTransactionsData>> = derived
 			icExtendedTransactions: $icExtendedTransactions,
 			icTransactionsStore: $icTransactionsStore
 		})
+);
+
+export const icKnownDestinations: Readable<KnownDestinations> = derived(
+	[tokenWithFallback, icTransactionsStore],
+	([$tokenWithFallback, $icTransactionsStore]) =>
+		getKnownDestinations(
+			($icTransactionsStore?.[$tokenWithFallback.id] ?? []).map(({ data }) => data)
+		)
 );
