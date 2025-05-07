@@ -557,8 +557,8 @@ export class HomepageLoggedOut extends Homepage {
 export class HomepageLoggedIn extends Homepage {
 	readonly #iiPage: InternetIdentityPage;
 
-	constructor({ page, iiPage, viewportSize }: HomepageLoggedInParams) {
-		super({ page, viewportSize });
+	constructor({ iiPage, ...rest }: HomepageLoggedInParams) {
+		super(rest);
 
 		this.#iiPage = iiPage;
 	}

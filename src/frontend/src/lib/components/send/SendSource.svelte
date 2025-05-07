@@ -14,20 +14,30 @@
 </script>
 
 <Value ref="source" element="div">
-	<svelte:fragment slot="label">{$i18n.send.text.source}</svelte:fragment>
-	{source}
+	{#snippet label()}
+		{$i18n.send.text.source}
+	{/snippet}
+
+	{#snippet content()}
+		{source}
+	{/snippet}
 </Value>
 
 <Value ref="balance" element="div">
-	<svelte:fragment slot="label">{$i18n.send.text.balance}</svelte:fragment>
-	{#if nonNullish(token)}
-		<ExchangeAmountDisplay
-			amount={balance ?? ZERO}
-			decimals={token.decimals}
-			symbol={token.symbol}
-			{exchangeRate}
-		/>
-	{:else}
-		&ZeroWidthSpace;
-	{/if}
+	{#snippet label()}
+		{$i18n.send.text.balance}
+	{/snippet}
+
+	{#snippet content()}
+		{#if nonNullish(token)}
+			<ExchangeAmountDisplay
+				amount={balance ?? ZERO}
+				decimals={token.decimals}
+				symbol={token.symbol}
+				{exchangeRate}
+			/>
+		{:else}
+			&ZeroWidthSpace;
+		{/if}
+	{/snippet}
 </Value>
