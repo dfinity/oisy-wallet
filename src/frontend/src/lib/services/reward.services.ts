@@ -68,8 +68,9 @@ export const getEligibilityReport = async (params: {
 			certified: false
 		});
 	} catch (err: unknown) {
+		const { vip } = get(i18n);
 		toastsError({
-			msg: { text: 'HMMM' },
+			msg: { text: vip.reward.error.loading_eligibility },
 			err
 		});
 		return { campaigns: [] };
