@@ -414,6 +414,7 @@ interface I18nSend {
 		select_token: string;
 		select_network_filter: string;
 		send_again: string;
+		recently_used: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
