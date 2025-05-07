@@ -29,7 +29,8 @@ const idbSolTransactionsStore = idbTransactionsStore(SOLANA_MAINNET_NETWORK_SYMB
 
 export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData>({
 	identity,
-	tokens,
+	tokenId,
+	networkId,
 	transactionsStoreData,
 	idbTransactionsStore
 }: SetIdbTransactionsParams<T> & {
@@ -39,26 +40,22 @@ export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData
 		return;
 	}
 
-	await Promise.all(
-		tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
-			const transactions = transactionsStoreData?.[tokenId];
+	const transactions = transactionsStoreData?.[tokenId];
 
-			if (isNullish(transactions)) {
-				return;
-			}
+	if (isNullish(transactions)) {
+		return;
+	}
 
-			const key: IDBValidKey[] = [
-				identity.getPrincipal().toText(),
-				tokenId.description ?? '',
-				networkId.description ?? ''
-			];
+	const key: IDBValidKey[] = [
+		identity.getPrincipal().toText(),
+		tokenId.description ?? '',
+		networkId.description ?? ''
+	];
 
-			await idbSet(
-				key,
-				transactions.map((transaction) => ('data' in transaction ? transaction.data : transaction)),
-				idbTransactionsStore
-			);
-		})
+	await idbSet(
+		key,
+		transactions.map((transaction) => ('data' in transaction ? transaction.data : transaction)),
+		idbTransactionsStore
 	);
 };
 
