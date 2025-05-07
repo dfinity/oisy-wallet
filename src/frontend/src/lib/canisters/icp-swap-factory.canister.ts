@@ -33,9 +33,11 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 	 */
 	getPool = async ({ token0, token1, fee }: GetPoolArgs): Promise<PoolData> => {
 		const { getPool } = this.caller({ certified: false });
+		console.log('here', getPool, token0, token1, fee);
+		
 		const result = await getPool({ token0, token1, fee });
 
-		console.log(`getPool result: ${JSON.stringify(result)}`);
+		console.log(`getPool result: ${result}`);
 
 		if ('ok' in result) {
 			return result.ok;
