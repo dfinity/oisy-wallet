@@ -7,19 +7,22 @@
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { OptionToken, Token as TokenType } from '$lib/types/token';
 	import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
-	import { ckEthereumNativeToken as derivedCkEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
+	import { nonNullish } from '@dfinity/utils';
 
 	export interface Props {
 		token: OptionToken;
+		ckEthereumNativeToken?: TokenType;
 		children?: Snippet;
 	}
 
-	let { token, children }: Props = $props();
+	let { token, ckEthereumNativeToken: ckEthereumNativeTokenProp, children }: Props = $props();
 
 	let ckEthereumNativeToken: TokenType = $derived(
-		SUPPORTED_ETHEREUM_TOKENS.find(
-			(t) => (token as IcCkToken)?.twinToken?.network.id === t.network.id
-		) ?? $derivedCkEthereumNativeToken
+		nonNullish(ckEthereumNativeTokenProp)
+			? ckEthereumNativeTokenProp
+			: (SUPPORTED_ETHEREUM_TOKENS.find(
+					(t) => (token as IcCkToken)?.twinToken?.network.id === t.network.id
+				) as TokenType)
 	);
 
 	let minterCanisterId: CanisterIdText | undefined = $derived(

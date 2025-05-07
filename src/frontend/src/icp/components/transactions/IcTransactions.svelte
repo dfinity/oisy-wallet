@@ -78,7 +78,11 @@
 </Header>
 
 <IcTransactionsSkeletons>
-	<svelte:component this={additionalListener} token={$token ?? ICP_TOKEN}>
+	<svelte:component
+		this={additionalListener}
+		token={$token ?? ICP_TOKEN}
+		ckEthereumNativeToken={$ckEthereumNativeToken}
+	>
 		{#if $icTransactions.length > 0}
 			<IcTransactionsScroll token={$token ?? ICP_TOKEN}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
