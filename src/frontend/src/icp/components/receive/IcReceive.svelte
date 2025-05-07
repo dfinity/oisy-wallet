@@ -16,7 +16,6 @@
 		isTokenCkEthLedger
 	} from '$icp/utils/ic-send.utils';
 	import { isTokenIcrc } from '$icp/utils/icrc.utils';
-	import { loadTokenAndRun } from '$lib/services/token.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 
