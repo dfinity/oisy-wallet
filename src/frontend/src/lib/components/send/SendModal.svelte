@@ -5,7 +5,7 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
@@ -185,7 +185,7 @@
 		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-			<SendQRCodeScan
+			<SendQrCodeScan
 				expectedToken={$token}
 				bind:destination
 				bind:amount

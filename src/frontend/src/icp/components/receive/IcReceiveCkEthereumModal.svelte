@@ -10,7 +10,7 @@
 	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
-	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
+	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import {
 		WizardStepsConvert,
@@ -108,7 +108,7 @@
 					on:icConvert={() => goToStep(WizardStepsConvert.CONVERT)}
 				/>
 			{:else if currentStep?.name === WizardStepsReceive.QR_CODE}
-				<ReceiveAddressQRCode
+				<ReceiveAddressQrCode
 					on:icBack={modal?.back}
 					address={$icrcAccountIdentifierText ?? ''}
 					addressToken={ICP_TOKEN}
