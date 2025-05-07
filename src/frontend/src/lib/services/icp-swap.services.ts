@@ -1,0 +1,35 @@
+import { getPool } from '$lib/api/icp-swap-factory.api';
+import { getQuote } from '$lib/api/icp-swap-pool.api';
+import { i18n } from '$lib/stores/i18n.store';
+import type { ICPSwapAmountReply, ICPSwapQuoteParams } from '$lib/types/api';
+import { isNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
+
+export const icpSwapAmounts = async ({
+	identity,
+	sourceToken,
+	destinationToken,
+	sourceAmount,
+	fee = 3000n // The only supported pool fee on ICPSwap at the moment (0.3%)
+}: ICPSwapQuoteParams): Promise<ICPSwapAmountReply> => {
+	const pool = await getPool({
+		identity,
+		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },
+		token1: { address: destinationToken.ledgerCanisterId, standard: destinationToken.standard },
+		fee
+	});
+
+	if (isNullish(pool)) {
+		throw new Error(get(i18n).swap.error.pool_not_found);
+	}
+
+	const quote = await getQuote({
+		identity,
+		canisterId: pool.canisterId.toString(),
+		amountIn: sourceAmount.toString(),
+		zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId,
+		amountOutMinimum: '0' // No minimum here as this is just a quote; slippage protection applies only during actual swap
+	});
+
+	return { receiveAmount: quote };
+};
