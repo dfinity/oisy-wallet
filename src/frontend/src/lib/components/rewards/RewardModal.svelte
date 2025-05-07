@@ -71,7 +71,7 @@
 			{#if criteria.length > 0}
 				<Hr spacing="md" />
 
-				<RewardsRequirements {reward} {isEligible} {criteria} />
+				<RewardsRequirements {isEligible} {criteria} />
 			{/if}
 		{/if}
 

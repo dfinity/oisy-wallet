@@ -1,18 +1,16 @@
 <script lang="ts">
 	import type { CriterionEligibility } from '$declarations/rewards/rewards.did';
-	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		reward: RewardDescription;
 		isEligible: boolean;
 		criteria: CriterionEligibility[];
 	}
 
-	let { reward, isEligible, criteria }: Props = $props();
+	let { isEligible, criteria }: Props = $props();
 </script>
 
 {#if criteria.length > 0}
