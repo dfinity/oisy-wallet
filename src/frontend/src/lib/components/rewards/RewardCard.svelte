@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import type { RewardDescription } from '$env/types/env-reward';
+	import {
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from '$icp/stores/reward.store';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -9,8 +14,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
-	import {getContext} from "svelte";
-	import {REWARD_ELIGIBILITY_CONTEXT_KEY, type RewardEligibilityContext} from "$icp/stores/reward.store";
 
 	interface Props {
 		onclick: () => void;
@@ -20,7 +23,7 @@
 
 	let { onclick, reward, testId }: Props = $props();
 
-	const {store} = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
+	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 	const isEligible = $derived(store.getCampaignEligibility(reward.id)?.eligible ?? false);

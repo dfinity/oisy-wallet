@@ -1,6 +1,15 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { setContext } from 'svelte';
+	import type { EligibilityReport } from '$declarations/rewards/rewards.did';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
+	import {
+		initRewardEligibilityStore,
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from '$icp/stores/reward.store';
+	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
 	import {
@@ -8,22 +17,15 @@
 		REWARDS_ENDED_CAMPAIGNS_CONTAINER,
 		REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
+	import { modalRewardDetails, modalRewardDetailsData } from '$lib/derived/modal.derived';
 	import { RewardStates } from '$lib/enums/reward-states';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
-	import { setContext} from "svelte";
-	import {
-		initRewardEligibilityStore,
-		REWARD_ELIGIBILITY_CONTEXT_KEY,
-		type RewardEligibilityContext
-	} from "$icp/stores/reward.store";
-	import type {EligibilityReport} from "$declarations/rewards/rewards.did";
-	import {modalRewardDetails, modalRewardDetailsData} from "$lib/derived/modal.derived";
-	import {nonNullish} from "@dfinity/utils";
-	import RewardModal from "$lib/components/rewards/RewardModal.svelte";
 
-	const report: EligibilityReport = {campaigns: [['OISY Airdrop #1', {available: true, eligible: true, criteria: []}]]}; // TODO replace this with api call
+	const report: EligibilityReport = {
+		campaigns: [['OISY Airdrop #1', { available: true, eligible: true, criteria: [] }]]
+	}; // TODO replace this with api call
 	setContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY, {
 		store: initRewardEligibilityStore(report)
 	});

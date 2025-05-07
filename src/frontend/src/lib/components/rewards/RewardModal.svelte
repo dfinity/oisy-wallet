@@ -128,11 +128,7 @@
 			{#if reward.requirements.length > 0}
 				<Hr spacing="md" />
 
-				<RewardsRequirements
-					loading={isRequirementsLoading}
-					{reward}
-					{requirementsFulfilled}
-				/>
+				<RewardsRequirements loading={isRequirementsLoading} {reward} {requirementsFulfilled} />
 			{/if}
 		{/if}
 

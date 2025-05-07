@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { IconCheckCircleFill } from '@dfinity/gix-components';
+	import { getContext } from 'svelte';
 	import type { RewardDescription } from '$env/types/env-reward';
+	import {
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from '$icp/stores/reward.store';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {getContext} from "svelte";
-	import {REWARD_ELIGIBILITY_CONTEXT_KEY, type RewardEligibilityContext} from "$icp/stores/reward.store";
 
 	interface Props {
 		loading?: boolean;
@@ -15,7 +18,7 @@
 
 	let { loading = true, reward, requirementsFulfilled }: Props = $props();
 
-	const {store} = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
+	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
 	const isEligible = $derived(store.getCampaignEligibility(reward.id)?.eligible ?? false);
 
