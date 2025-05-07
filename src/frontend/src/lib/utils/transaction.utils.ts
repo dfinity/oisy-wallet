@@ -73,7 +73,8 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 						| SolTransactionUi
 				)?.status === 'pending'
 			) {
-				console.log('mapping pending:', acc[pendingKey], transaction);
+				// because this list is not sorted afterwards, we append the pending ones on top of all other ones
+				// in order to do this we need to remove the existing pending attribute not to overwrite it
 				const curPending = acc[pendingKey] ?? [];
 				delete acc[pendingKey];
 				return { [pendingKey]: [...curPending, transaction], ...acc };
