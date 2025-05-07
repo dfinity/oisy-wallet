@@ -6,6 +6,7 @@ import type { IcTransaction } from '$icp/types/ic-transaction';
 import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
+import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -25,7 +26,7 @@ const getTransactions = async ({
 	maxResults?: bigint;
 	token: IcToken & IcCanistersStrict;
 }): Promise<IcTransaction[]> => {
-	if (standard === 'icrc') {
+	if (isTokenIcrc({ standard })) {
 		const { transactions } = await getTransactionsIcrc({
 			indexCanisterId,
 			...rest
