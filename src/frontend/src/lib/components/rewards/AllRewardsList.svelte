@@ -37,7 +37,7 @@
 			}
 
 			const report = await getEligibilityReport({ identity: $authIdentity });
-			store.setReport(report);
+			store.setEligibilityReport(report);
 		};
 		loadEligibilityReport();
 	});

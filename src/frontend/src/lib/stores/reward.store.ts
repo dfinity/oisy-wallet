@@ -6,7 +6,7 @@ export type RewardEligibilityData = {
 };
 
 export interface RewardEligibilityStore extends Readable<RewardEligibilityData> {
-	setReport: (eligibilityReport: EligibilityReport) => void;
+	setEligibilityReport: (eligibilityReport: EligibilityReport) => void;
 }
 
 export const initRewardEligibilityStore = (): RewardEligibilityStore => {
@@ -15,7 +15,7 @@ export const initRewardEligibilityStore = (): RewardEligibilityStore => {
 	return {
 		subscribe,
 
-		setReport: (eligibilityReport: EligibilityReport) => {
+		setEligibilityReport: (eligibilityReport: EligibilityReport) => {
 			set({ eligibilityReport });
 		}
 	};
