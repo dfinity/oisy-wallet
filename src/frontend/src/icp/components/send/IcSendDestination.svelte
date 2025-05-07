@@ -45,6 +45,4 @@
 	{inputPlaceholder}
 	on:icQRCodeScan
 	onQRButtonClick={() => dispatch('icQRCodeScan')}
->
-	<slot name="label" slot="label" />
-</SendInputDestination>
+/>

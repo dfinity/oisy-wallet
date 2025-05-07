@@ -427,6 +427,7 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
+		unknown_destination: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
