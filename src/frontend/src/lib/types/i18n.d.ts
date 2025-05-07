@@ -553,7 +553,6 @@ interface I18nSwap {
 		unexpected: string;
 		unexpected_missing_data: string;
 		slippage_exceeded: string;
-		pool_not_found: string;
 	};
 }
 
