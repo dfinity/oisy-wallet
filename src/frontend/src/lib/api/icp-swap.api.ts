@@ -12,7 +12,7 @@ import type {
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 export const getPool = async ({
 	identity,
@@ -145,7 +145,7 @@ export const getIcpSwapAmounts = async ({
 		fee
 	});
 
-	if (!pool) {
+	if (isNullish(pool)) {
 		throw new Error('Pool not found');
 	}
 
