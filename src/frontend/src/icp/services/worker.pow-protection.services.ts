@@ -3,7 +3,7 @@ import {
 	syncPowProtectionError,
 	type PowProtectorWorker,
 	type PowProtectorWorkerInitResult
-} from '$icp/types/pow-protector-listener';
+} from '$icp/services/pow-protector-listener';
 import type {
 	PostMessage,
 	PostMessageDataResponse,

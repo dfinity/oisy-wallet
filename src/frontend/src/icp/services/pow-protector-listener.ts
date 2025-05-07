@@ -1,3 +1,4 @@
+import { btcAddressStore } from '$icp/stores/btc.store';
 import type { PostMessageDataResponsePowProtector } from '$lib/types/post-message';
 
 export interface PowProtectorWorkerInitResult {
@@ -8,7 +9,12 @@ export interface PowProtectorWorkerInitResult {
 
 export type PowProtectorWorker = () => Promise<PowProtectorWorkerInitResult>;
 
-export const syncPowProtection = ({ _data }: { _data: PostMessageDataResponsePowProtector }) => {};
+export const syncPowProtection = ({ data }: { data: PostMessageDataResponsePowProtector }) => {
+	btcAddressStore.set({
+		id: tokenId,
+		data
+	});
+};
 
 export const syncPowProtectionError = ({
 	_error: _err,
