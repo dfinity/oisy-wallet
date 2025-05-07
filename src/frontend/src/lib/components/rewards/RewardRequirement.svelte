@@ -4,6 +4,7 @@
     import type {CriterionEligibility} from "$declarations/rewards/rewards.did";
     import {i18n} from "$lib/stores/i18n.store";
     import {replacePlaceholders} from "$lib/utils/i18n.utils.js";
+    import {nonNullish} from "@dfinity/utils";
 
     interface Props {
         criterion: CriterionEligibility;
@@ -11,7 +12,7 @@
 
     let {criterion}: Props = $props();
 
-    const getCriteriaText = (criterion: CriterionEligibility): string => {
+    const getCriterionText = (criterion: CriterionEligibility): string => {
         if ('MinLogins' in criterion.criterion) {
             const {duration, count} = criterion.criterion.MinLogins;
             const {Days: days} = duration
@@ -38,23 +39,27 @@
             });
         }
     }
+
+    const criterionText = $derived(getCriterionText(criterion));
 </script>
 
-<span
-        class="flex w-full flex-row"
-        class:transition={!criterion.satisfied}
-        class:duration-500={!criterion.satisfied}
-        class:ease-in-out={!criterion.satisfied}
->
+{#if nonNullish(criterionText)}
     <span
-            data-tid={`${REWARDS_REQUIREMENTS_STATUS}`}
-            class="-mt-0.5 mr-2"
-            class:text-success-primary={criterion.satisfied}
-            class:text-disabled={!criterion.satisfied}
+            class="flex w-full flex-row"
+            class:transition={!criterion.satisfied}
+            class:duration-500={!criterion.satisfied}
+            class:ease-in-out={!criterion.satisfied}
     >
-        <IconCheckCircleFill size={32} />
+        <span
+                data-tid={`${REWARDS_REQUIREMENTS_STATUS}`}
+                class="-mt-0.5 mr-2"
+                class:text-success-primary={criterion.satisfied}
+                class:text-disabled={!criterion.satisfied}
+        >
+            <IconCheckCircleFill size={32} />
+        </span>
+        <span>
+            {criterionText}
+        </span>
     </span>
-    <span>
-        {getCriteriaText(criterion)}
-    </span>
-</span>
+{/if}

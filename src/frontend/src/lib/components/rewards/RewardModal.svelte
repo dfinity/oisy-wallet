@@ -14,6 +14,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import {getContext} from "svelte";
+	import {REWARD_ELIGIBILITY_CONTEXT_KEY, type RewardEligibilityContext} from "$icp/stores/reward.store";
 
 	interface Props {
 		reward: RewardDescription;
@@ -21,6 +23,9 @@
 
 	let { reward }: Props = $props();
 
+	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
+
+	const criteria = $derived(store.getCampaignEligibility(reward.id)?.criteria ?? []);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 
 	let amountOfRewards = $state(0);
@@ -58,7 +63,7 @@
 
 			<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2" />
 
-			{#if reward.requirements.length > 0}
+			{#if criteria.length > 0}
 				<Hr spacing="md" />
 
 				<RewardsRequirements {reward} />
