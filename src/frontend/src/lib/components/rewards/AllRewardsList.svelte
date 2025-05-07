@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import {isNullish, nonNullish} from '@dfinity/utils';
 	import {onMount, setContext} from 'svelte';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
@@ -22,6 +22,8 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
 	import {getEligibilityReport} from "$lib/services/reward.services";
+	import {authIdentity} from "$lib/derived/auth.derived";
+	import {nullishSignOut} from "$lib/services/auth.services";
 
 	const {store} = setContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY, {
 		store: initRewardEligibilityStore()
@@ -29,7 +31,12 @@
 
 	onMount(() => {
 		const loadEligibilityReport = async () => {
-			const report = await getEligibilityReport();
+			if (isNullish($authIdentity)) {
+				await nullishSignOut();
+				return;
+			}
+
+			const report = await getEligibilityReport({identity: $authIdentity});
 			store.setReport(report);
 		}
 		loadEligibilityReport();
