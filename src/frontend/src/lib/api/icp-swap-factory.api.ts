@@ -15,10 +15,14 @@ const icpSwapFactoryCanister = async ({
 }: CanisterApiFunctionParams): Promise<ICPSwapFactoryCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
+	console.log('icpSwapFactoryCanister', canisterId);
+
 	const canister = await ICPSwapFactoryCanister.create({
 		identity,
 		canisterId: Principal.fromText(canisterId)
 	});
+
+	console.log('icpSwapFactoryCanister canister', canister);
 
 	return canister;
 };
