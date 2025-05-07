@@ -63,11 +63,13 @@ export interface Config {
 	oisy_canister: [] | [Principal];
 }
 export type Criterion =
-	| { MinTransactions: number }
-	| { MinReferrals: number }
+	| {
+			MinTransactions: { duration: CandidDuration; count: number };
+	  }
+	| { MinReferrals: { count: number } }
 	| { MinLogins: { duration: CandidDuration; count: number } }
-	| { MinTotalAssetsUsd: number }
-	| { MinTokens: number };
+	| { MinTotalAssetsUsd: { usd: number } }
+	| { MinTokens: { count: number } };
 export interface CriterionEligibility {
 	satisfied: boolean;
 	criterion: Criterion;
@@ -216,8 +218,7 @@ export interface UsageAwardStats {
 }
 export interface UsageCriteria {
 	measurement_duration: CandidDuration;
-	min_transactions: number;
-	min_logins: number;
+	criteria: Array<Criterion>;
 	min_valuation_usd: bigint;
 }
 export interface UsageVsHoldingStats {
