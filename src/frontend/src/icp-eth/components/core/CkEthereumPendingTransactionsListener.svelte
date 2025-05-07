@@ -5,6 +5,7 @@
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
+	import type { IcToken } from '$icp/types/ic-token';
 	import {
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
@@ -27,7 +28,6 @@
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionToken } from '$lib/types/token';
-	import type { IcToken } from '$icp/types/ic-token';
 
 	export let token: OptionToken;
 
