@@ -1,17 +1,12 @@
 //! Utilities for setting up a test environment using `PocketIC`.
 pub mod pic_canister;
-use std::{
-    env,
-    fs::read,
-    ops::RangeBounds,
-    sync::Arc,
-    time::{Duration, UNIX_EPOCH},
-};
+use std::{env, fs::read, ops::RangeBounds, sync::Arc, time::Duration};
 
 use candid::{encode_one, CandidType, Principal};
+use ic_cdk::bitcoin_canister::Network;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
-use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
+use pocket_ic::{PocketIc, PocketIcBuilder};
 use shared::types::{
     backend_config::{Arg, InitArg},
     user_profile::{OisyUser, UserProfile},
@@ -40,7 +35,7 @@ const DEFAULT_CYCLES_LEDGER_CANISTER_ENABLED: &str = "false";
 #[derive(CandidType)]
 struct BitcoinInitConfig {
     stability_threshold: Option<u64>,
-    network: Option<BitcoinNetwork>,
+    network: Option<Network>,
     blocks_source: Option<String>,
     syncing: Option<String>,
     fees: Option<String>,
@@ -141,7 +136,7 @@ impl BackendBuilder {
     pub fn default_bitcoin_arg() -> Vec<u8> {
         let init_config = BitcoinInitConfig {
             stability_threshold: None,
-            network: Some(BitcoinNetwork::Regtest),
+            network: Some(Network::Regtest),
             blocks_source: None,
             syncing: None,
             fees: None,
@@ -404,22 +399,15 @@ impl PicBackend {
         // needed.
         self.pic.advance_time(Duration::from_secs(100_000));
 
-        self.pic
-            .upgrade_canister(
-                self.canister_id,
-                wasm_bytes,
-                encode_one(&arg).unwrap(),
-                Some(controller()),
-            )
-            .map_err(|e| match e {
-                CallError::Reject(e) => e,
-                CallError::UserError(e) => {
-                    format!(
-                        "Upgrade canister error. RejectionCode: {:?}, Error: {}",
-                        e.code, e.description
-                    )
-                }
-            })
+        match self.pic.upgrade_canister(
+            self.canister_id,
+            wasm_bytes,
+            encode_one(&arg).unwrap(),
+            Some(controller()),
+        ) {
+            Ok(_) => Ok(()),
+            Err(reject_code) => Err(format!("Upgrade canister error: {:?}", reject_code)),
+        }
     }
 }
 
@@ -470,12 +458,11 @@ impl PicBackend {
             let caller = Principal::self_authenticating(i.to_string());
             let response = self.update::<UserProfile>(caller, "create_user_profile", ());
             let timestamp = self.pic.get_time();
-            let timestamp_nanos = timestamp
-                .duration_since(UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_nanos();
+            // Convert timestamp to nanos using the pocket_ic-specific API
+            let timestamp_nanos = timestamp.as_nanos_since_unix_epoch();
+
             let expected_user = OisyUser {
-                updated_timestamp: timestamp_nanos as u64,
+                updated_timestamp: timestamp_nanos,
                 pouh_verified: false,
                 principal: caller,
             };
