@@ -718,7 +718,7 @@ pub fn has_user_profile() -> HasUserProfileResponse {
     }
 }
 
-/// Retrieves the number of cycles that the signer canister is allowed to spend
+/// Retrieves the amount of cycles that the signer canister is allowed to spend
 /// on behalf of the current user
 /// # Returns
 /// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
@@ -728,12 +728,9 @@ pub fn has_user_profile() -> HasUserProfileResponse {
 /// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 /// - `Other`: If another error occurred during the operation
 #[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::unused_async)]
 pub async fn get_allowed_cycles() -> Result<GetAllowedCyclesResponse, GetAllowedCyclesError> {
-    // TODO call the get_allowed_cycles implementation
-    Ok(GetAllowedCyclesResponse {
-        allowed_cycles: { Nat::from(1u32) },
-    })
+    let allowed_cycles: Nat = signer::get_allowed_cycles().await?;
+    Ok(GetAllowedCyclesResponse { allowed_cycles })
 }
 
 /// This function authorizes the caller to spend a specific

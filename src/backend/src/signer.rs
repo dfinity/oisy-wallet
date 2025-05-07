@@ -9,10 +9,11 @@ use ic_cdk::api::{
     },
 };
 use ic_cycles_ledger_client::{
-    Account, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
+    Account, AllowanceArgs, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
 };
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
+use shared::types::signer::GetAllowedCyclesError;
 pub(crate) use shared::types::signer::{
     topup::{
         TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
@@ -52,6 +53,46 @@ const fn per_user_cycles_allowance() -> u64 {
     // Creating the allowance costs 1 ledger fee.
     // Every usage costs 1 ledger fee + 1 signer fee.
     LEDGER_FEE + (LEDGER_FEE + SIGNER_FEE) * SIGNING_OPS_PER_LOGIN
+}
+
+/// Retrieves the amount of cycles that the signer canister is allowed to spend
+/// on behalf of the current canister.
+///
+/// This function calls `icrc_2_allowance` on the cycles ledger to get the
+/// current allowance. The allowance is queried using the current canister
+/// identity as the account owner, and the signer canister as the spender,
+/// with the caller's principal encoded as the subaccount.
+///
+/// # Returns
+/// - On success: `Ok(Nat)` containing the number of cycles that are allowed to be spent
+/// - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong
+///
+/// # Errors
+/// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
+pub async fn get_allowed_cycles() -> Result<Nat, GetAllowedCyclesError> {
+    let cycles_ledger: Principal = *CYCLES_LEDGER;
+    let signer: Principal = *SIGNER;
+    let caller = ic_cdk::caller();
+
+    // Create the AllowanceArgs structure as specified in the JSON
+    let allowance_args = AllowanceArgs {
+        account: Account {
+            owner: ic_cdk::id(),
+            subaccount: None,
+        },
+        spender: Account {
+            owner: signer,
+            subaccount: Some(principal2account(&caller)),
+        },
+    };
+
+    // Call icrc_2_allowance on the CyclesLedgerService
+    let (allowance,) = CyclesLedgerService(cycles_ledger)
+        .icrc_2_allowance(&allowance_args)
+        .await
+        .map_err(|_| GetAllowedCyclesError::FailedToContactCyclesLedger)?;
+
+    Ok(allowance.allowance)
 }
 
 /// Enables the user to sign transactions.
