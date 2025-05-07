@@ -1,3 +1,5 @@
+import type { BtcTransactionUi } from '$btc/types/btc';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import IconConvert from '$lib/components/icons/IconConvert.svelte';
 import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
@@ -15,6 +17,7 @@ import type {
 	TransactionType
 } from '$lib/types/transaction';
 import { formatSecondsToNormalizedDate } from '$lib/utils/format.utils';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Component } from 'svelte';
 import { get } from 'svelte/store';
@@ -58,9 +61,20 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 ): TransactionsUiDateGroup<T> => {
 	const currentDate = new Date();
 	const undefinedKey = get(i18n).transaction.label.no_date_available;
+	const pendingKey = get(i18n).transaction.status.pending;
 
 	return transactions.reduce<TransactionsUiDateGroup<T>>((acc, transaction) => {
 		if (isNullish(transaction.transaction.timestamp)) {
+			if (
+				(
+					transaction.transaction as unknown as
+						| BtcTransactionUi
+						| IcTransactionUi
+						| SolTransactionUi
+				)?.status === 'pending'
+			) {
+				return { [pendingKey]: [...(acc['pending'] ?? []), transaction], ...acc };
+			}
 			return { ...acc, [undefinedKey]: [...(acc['undefined'] ?? []), transaction] };
 		}
 
