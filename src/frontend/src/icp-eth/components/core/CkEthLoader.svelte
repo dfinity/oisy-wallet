@@ -17,6 +17,7 @@
 	import type { TokenId } from '$lib/types/token';
 
 	export let nativeTokenId: TokenId;
+	export let isSendFlow = false;
 
 	const load = async () => {
 		if (
@@ -26,7 +27,7 @@
 			return;
 		}
 
-		if (!$ethToCkETHEnabled && !$erc20ToCkErc20Enabled) {
+		if (!isSendFlow && !$ethToCkETHEnabled && !$erc20ToCkErc20Enabled) {
 			return;
 		}
 
@@ -64,6 +65,7 @@
 		$erc20ToCkErc20Enabled,
 		$icrcDefaultTokensStore,
 		nativeTokenId,
+		isSendFlow,
 		(async () => await load())();
 </script>
 
