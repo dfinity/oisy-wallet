@@ -5,7 +5,7 @@ import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
 
-let canister: ICPSwapFactoryCanister | undefined = undefined;
+// let canister: ICPSwapFactoryCanister | undefined = undefined;
 
 const icpSwapFactoryCanister = async ({
 	identity,
@@ -17,7 +17,7 @@ const icpSwapFactoryCanister = async ({
 	console.log(`ICPSwapFactoryCanister: ${canisterId}`);
 	
 
-	canister = await ICPSwapFactoryCanister.create({
+	const canister = await ICPSwapFactoryCanister.create({
 		identity,
 		canisterId: Principal.fromText(canisterId)
 	});
@@ -34,11 +34,15 @@ export const getPool = async ({
 	canisterId,
 	...restParams
 }: CanisterApiFunctionParams<ICPSwapGetPoolParams>): Promise<PoolData> => {
+	
 	const { getPool } = await icpSwapFactoryCanister({
 		identity,
 		canisterId,
 		nullishIdentityErrorMessage
 	});
+
+	console.log(`getPool: ${JSON.stringify(getPool)}`);
+	
 
 	return getPool(restParams);
 };
