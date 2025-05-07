@@ -1,4 +1,4 @@
-import { sortedBtcTransactions } from '$btc/derived/btc-transactions.derived';
+import { btcKnownDestinations, sortedBtcTransactions } from '$btc/derived/btc-transactions.derived';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import { BTC_MAINNET_TOKEN, BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
@@ -7,17 +7,17 @@ import { token } from '$lib/stores/token.store';
 import { get } from 'svelte/store';
 
 describe('btc-transactions.derived', () => {
-	describe('sortedBtcTransactions', () => {
-		const createMockTransaction = (id: string): BtcTransactionUi => ({
-			id,
-			timestamp: nowInBigIntNanoSeconds(),
-			type: 'send',
-			value: 100n,
-			from: 'sender',
-			to: ['receiver'],
-			status: 'pending'
-		});
+	const createMockTransaction = (id: string): BtcTransactionUi => ({
+		id,
+		timestamp: nowInBigIntNanoSeconds(),
+		type: 'send',
+		value: 100n,
+		from: 'sender',
+		to: ['receiver'],
+		status: 'pending'
+	});
 
+	describe('sortedBtcTransactions', () => {
 		const tokenId = BTC_MAINNET_TOKEN_ID;
 
 		beforeEach(() => {
@@ -81,6 +81,42 @@ describe('btc-transactions.derived', () => {
 			const result = get(sortedBtcTransactions);
 
 			expect(result).toEqual([]);
+		});
+	});
+
+	describe('solKnownDestinations', () => {
+		const transactions = [
+			{
+				certified: true,
+				data: createMockTransaction('tx1')
+			},
+			{
+				certified: true,
+				data: createMockTransaction('tx2')
+			}
+		];
+
+		beforeEach(() => {
+			token.set(BTC_MAINNET_TOKEN);
+			btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
+		});
+
+		it('should return known destinations if transactions store has some data', () => {
+			btcTransactionsStore.append({
+				tokenId: BTC_MAINNET_TOKEN_ID,
+				transactions
+			});
+
+			expect(get(btcKnownDestinations)).toEqual({
+				[transactions[0].data.to?.[0] ?? '']: {
+					amounts: transactions.map(({ data }) => data.value),
+					timestamp: Number(transactions[0].data.timestamp)
+				}
+			});
+		});
+
+		it('should return empty object if transactions store does not have data', () => {
+			expect(get(btcKnownDestinations)).toEqual({});
 		});
 	});
 });
