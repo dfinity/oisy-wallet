@@ -1,11 +1,12 @@
 import type {
 	ClaimVipRewardResponse,
 	ClaimedVipReward,
+	EligibilityResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
 	UserData,
-	UserSnapshot, EligibilityResponse
+	UserSnapshot
 } from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -36,7 +37,7 @@ describe('reward.canister', () => {
 			const mockEligibilityResponse: EligibilityResponse = { Ok: { campaigns: [] } };
 			service.eligible.mockResolvedValue(mockEligibilityResponse);
 
-			const {isEligible} = await createRewardCanister({
+			const { isEligible } = await createRewardCanister({
 				serviceOverride: service
 			});
 
@@ -52,7 +53,7 @@ describe('reward.canister', () => {
 				throw mockResponseError;
 			});
 
-			const {isEligible} = await createRewardCanister({
+			const { isEligible } = await createRewardCanister({
 				serviceOverride: service
 			});
 
