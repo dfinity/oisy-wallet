@@ -6,7 +6,6 @@ import {
 } from '$icp/services/pow-protector-listener';
 import type {
 	PostMessage,
-	PostMessageDataResponse,
 	PostMessageDataResponseError,
 	PostMessageDataResponsePowProtector
 } from '$lib/types/post-message';
@@ -17,8 +16,6 @@ export const initPowProtectorWorker: PowProtectorWorker =
 		const PowWorker = await import('$lib/workers/workers?worker');
 		const worker: Worker = new PowWorker.default();
 
-		worker.onmessage = ({ data: _data }: MessageEvent<PostMessage<PostMessageDataResponse>>) => {};
-
 		worker.onmessage = ({
 			data
 		}: MessageEvent<
@@ -27,11 +24,15 @@ export const initPowProtectorWorker: PowProtectorWorker =
 			const { msg } = data;
 
 			switch (msg) {
-				case 'syncPowProtection':
-					syncPowProtection({
-						_data: data.data as PostMessageDataResponsePowProtector
-					});
+				case 'syncPowProtection': {
+					// Check if data.data exists and has to be handled
+					if (data.data && 'challengeCompletion' in data.data) {
+						syncPowProtection({
+							data: data.data
+						});
+					}
 					return;
+				}
 
 				case 'syncPowProtectionError':
 					syncPowProtectionError({

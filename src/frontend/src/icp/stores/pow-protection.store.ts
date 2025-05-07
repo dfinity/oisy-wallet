@@ -8,24 +8,25 @@ export type BtcStatusesData = CertifiedData<BtcWithdrawalStatuses>;
 export const btcStatusesStore = initCertifiedSetterStore<BtcStatusesData>();
  */
 
-interface ChallengeCompletionStoreData {
+// Define the types we need for mapping the data
+export type ChallengeCompletionStoreData = {
 	solvedDurationMs: bigint;
 	nextAllowanceMs: bigint;
 	nextDifficulty: number;
 	currentDifficulty: number;
-}
+};
 
-interface AllowSigningStoreData {
+export type AllowSigningStoreData = {
 	status: string;
-	challengeCompletion: ChallengeCompletionStoreData;
+	challengeCompletion: ChallengeCompletionStoreData | null;
 	allowedCycles: bigint;
-}
+};
 
 export interface AllowSigningStore extends Readable<AllowSigningStoreData> {
 	setAllowSigningStoreData: (data: AllowSigningStoreData) => void;
 }
 
-export const initBitcoinFeeStore = (): AllowSigningStore => {
+export const initAllowSigningStore = (): AllowSigningStore => {
 	const { subscribe, set } = writable<AllowSigningStoreData>(undefined);
 
 	return {
@@ -36,3 +37,5 @@ export const initBitcoinFeeStore = (): AllowSigningStore => {
 		}
 	};
 };
+
+export const allowSigningPowStore = initAllowSigningStore();

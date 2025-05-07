@@ -36,8 +36,8 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	 *
 	 * This method:
 	 * 1. Creates a PoW challenge using the given identity.
-	 * 2. Solves the challenge to find a valid `nonce`.
-	 * 3. Uses the solved `nonce` to request signing permission.
+	 * 2. Solves the challenge to find a valid nonce.
+	 * 3. Uses the solved nonce to request signing permission.
 	 *
 	 * @param identity - The user's identity for the operation.
 	 * @throws Errors if any step in the sequence fails.
@@ -63,7 +63,18 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 			// Step 4: Publish a postMessage event containing the response data, which will be handled by pow-protector.listener.ts
 			this.postMessagePow({
 				status: Object.keys(response.status)[0] as 'Skipped' | 'Failed' | 'Executed',
-				challengeCompletion: response.challenge_completion,
+				challengeCompletion: response.challenge_completion
+					? (() => {
+							const [completion] = response.challenge_completion;
+							return {
+								solvedDurationMs: BigInt(completion?.solved_duration_ms ?? 0),
+								nextAllowanceMs: BigInt(completion?.next_allowance_ms ?? 0),
+								nextDifficulty: Number(completion?.next_difficulty ?? 0),
+								currentDifficulty: Number(completion?.current_difficulty ?? 0)
+							};
+						})()
+					: undefined,
+
 				allowedCycles: BigInt(response.allowed_cycles)
 			});
 		} catch (error) {

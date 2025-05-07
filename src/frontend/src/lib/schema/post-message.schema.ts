@@ -191,7 +191,12 @@ export const PostMessageDataResponseBTCAddressSchema = PostMessageDataResponseSc
 	address: z.custom<BtcAddressData>()
 }).strict();
 
-export const ChallengeCompletionSchema = PostMessageDataResponseSchema.extend({});
+export const ChallengeCompletionSchema = z.object({
+	solvedDurationMs: z.custom<bigint>(),
+	nextAllowanceMs: z.custom<bigint>(),
+	nextDifficulty: z.number(),
+	currentDifficulty: z.number()
+});
 
 export const PostMessageDataResponsePowProtectorSchema = PostMessageDataResponseSchema.extend({
 	status: z.enum(['Skipped', 'Failed', 'Executed']),
