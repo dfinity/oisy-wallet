@@ -184,6 +184,9 @@ export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input'
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
 
+export const ADDRESS_LIST_ITEM_COPY_BUTTON = 'address-list-item-copy-button';
+export const ADDRESS_LIST_ITEM_INFO_BUTTON = 'address-list-item-info-button';
+
 export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
 
 export const SEND_DESTINATION_SECTION = 'send-destination-section';
