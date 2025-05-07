@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { initBtcStatusesWorker } from '$icp/services/worker.btc-statuses.services';
 	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import type { OptionToken, Token } from '$lib/types/token';
-	import type { Snippet } from 'svelte';
 
 	export interface Props {
 		token: OptionToken;
