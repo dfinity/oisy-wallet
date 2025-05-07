@@ -156,3 +156,6 @@ export const FAILURE_THRESHOLD = 3;
 
 // Micro transaction
 export const MICRO_TRANSACTION_USD_THRESHOLD = 0.01;
+
+// Known destinations
+export const MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS = 3;
