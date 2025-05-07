@@ -6,12 +6,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { TokenStandard } from '$lib/types/token';
+	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
 	export let tokenStandard: TokenStandard;
 	export let invalidDestination = false;
+	export let knownDestinations: KnownDestinations | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -41,6 +43,7 @@
 <SendInputDestination
 	bind:destination
 	bind:invalidDestination
+	{knownDestinations}
 	{isInvalidDestination}
 	{inputPlaceholder}
 	on:icQRCodeScan
