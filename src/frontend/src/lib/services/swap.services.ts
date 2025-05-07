@@ -1,6 +1,8 @@
+import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
+import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -8,6 +10,7 @@ import { setCustomToken } from '$lib/api/backend.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { swapProviders } from '$lib/providers/swap.providers';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	kongSwapTokensStore,
@@ -15,6 +18,7 @@ import {
 } from '$lib/stores/kong-swap-tokens.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Amount } from '$lib/types/send';
+import { SwapProvider, type ICPSwapResult, type SwapMappedResult } from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -117,4 +121,59 @@ export const loadKongSwapTokens = async ({ identity }: { identity: Identity }): 
 			{}
 		)
 	);
+};
+interface FetchSwapAmountsParams {
+	identity: Identity;
+	sourceToken: IcToken;
+	destinationToken: IcToken;
+	amount: string | number;
+	tokens: IcToken[];
+	slippage: string | number;
+}
+
+export const fetchSwapAmounts = async ({
+	identity,
+	sourceToken,
+	destinationToken,
+	amount,
+	tokens,
+	slippage
+}: any): Promise<SwapMappedResult[]> => {
+	const sourceAmount = parseToken({
+		value: `${amount}`,
+		unitName: sourceToken.decimals
+	});
+
+	const baseParams = { identity, sourceToken, destinationToken, sourceAmount };
+
+	const settledResults = await Promise.allSettled(
+		swapProviders.map((provider) => provider.getQuote(baseParams))
+	);
+
+	return swapProviders.reduce<SwapMappedResult[]>((acc, provider, index) => {
+		const result = settledResults[index];
+		if (result.status !== 'fulfilled') {
+			return acc;
+		}
+
+		switch (provider.key) {
+			case SwapProvider.KONG_SWAP: {
+				const mapped = provider.mapQuoteResult({
+					swap: result.value as SwapAmountsReply,
+					tokens
+				});
+				acc.push(mapped);
+				break;
+			}
+			case SwapProvider.ICP_SWAP: {
+				const mapped = provider.mapQuoteResult({
+					swap: result.value as ICPSwapResult,
+					slippage
+				});
+				acc.push(mapped);
+				break;
+			}
+		}
+		return acc;
+	}, []);
 };

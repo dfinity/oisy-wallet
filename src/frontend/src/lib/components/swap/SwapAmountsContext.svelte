@@ -13,6 +13,7 @@
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
+	import { fetchSwapAmounts } from '$lib/services/swap.services';
 
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: Token | undefined;
@@ -50,6 +51,17 @@
 					unitName: sourceToken.decimals
 				})
 			});
+
+			const newSwapAmounts = fetchSwapAmounts({
+				identity: $authIdentity,
+				sourceToken,
+				destinationToken,
+				amount: parsedAmount,
+				tokens: $tokens,
+				slippage: 1.5
+			});
+
+			console.log(newSwapAmounts);
 
 			if (isNullish(swapAmounts)) {
 				store.reset();
