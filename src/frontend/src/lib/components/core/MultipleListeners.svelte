@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import type { TokenToListener } from '$lib/types/listener';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapListeners } from '$lib/utils/listener.utils';
-	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 
 	export let tokens: OptionToken[];
 
