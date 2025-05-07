@@ -46,22 +46,22 @@
   },
   "cargo-audit": {
     "method": "cargo-binstall",
-    "version": "0.13.1"
-  },
-  "cargo-edit": {
-    "method": "cargo-binstall",
-    "version": "0.13.0"
-  },
-  "cargo-sort": {
-    "method": "cargo-binstall",
-    "version": "1.0.9"
-  },
-  "candid-extractor": {
-    "method": "cargo-binstall",
-    "version": "0.1.4"
-  },
-  "zizmor": {
-    "method": "cargo-binstall",
-    "version": "1.5.2"
-  }
+		"version": "0.21.2"
+	},
+	"cargo-edit": {
+		"method": "cargo-binstall",
+		"version": "0.13.0"
+	},
+	"cargo-sort": {
+		"method": "cargo-binstall",
+		"version": "1.0.9"
+	},
+	"candid-extractor": {
+		"method": "cargo-binstall",
+		"version": "0.1.4"
+	},
+	"zizmor": {
+		"method": "cargo-binstall",
+		"version": "1.5.2"
+	}
 }
