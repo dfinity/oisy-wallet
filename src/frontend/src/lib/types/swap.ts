@@ -1,4 +1,5 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type { IcToken } from '$icp/types/ic-token';
 import type { Token } from '$lib/types/token';
 
 export type SwapSelectTokenType = 'source' | 'destination';
@@ -36,3 +37,13 @@ export type SwapMappedResult =
 			networkFee?: ProviderFee;
 			swapDetails: SwapAmountsReply;
 	  };
+
+export type KongQuoteResult = {
+	swap: SwapAmountsReply;
+	tokens: IcToken[];
+};
+
+export type IcpQuoteResult = {
+	swap: ICPSwapResult;
+	slippage: Slippage;
+};
