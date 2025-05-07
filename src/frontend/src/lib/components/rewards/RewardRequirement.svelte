@@ -18,8 +18,8 @@
             if ('Days' in duration) {
                 const days = duration.Days;
                 return replacePlaceholders($i18n.rewards.requirements.min_logins, {
-                    $logins: count,
-                    $days: days
+                    $logins: count.toString(),
+                    $days: days.toString()
                 });
             }
         }
