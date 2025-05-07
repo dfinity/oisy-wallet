@@ -1,6 +1,13 @@
+import { ethereumTokenId } from '$eth/derived/token.derived';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
+import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
+import { ethAddress } from '$lib/derived/address.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import type { Transaction } from '$lib/types/transaction';
+import type { KnownDestinations } from '$lib/types/transactions';
+import { getKnownDestinations } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -41,4 +48,23 @@ export const ethTransactionsInitialized: Readable<boolean> = derived(
 export const ethTransactionsNotInitialized: Readable<boolean> = derived(
 	[ethTransactionsInitialized],
 	([$ethTransactionsInitialized]) => !$ethTransactionsInitialized
+);
+
+export const ethKnownDestinations: Readable<KnownDestinations> = derived(
+	[sortedEthTransactions, ckEthMinterInfoStore, ethereumTokenId, ethAddress],
+	([$sortedEthTransactions, $ckEthMinterInfoStore, $ethereumTokenId, $ethAddress]) => {
+		const ckMinterInfoAddresses = toCkMinterInfoAddresses(
+			$ckEthMinterInfoStore?.[$ethereumTokenId]
+		);
+
+		const mappedTransactions = $sortedEthTransactions.map((transaction) =>
+			mapEthTransactionUi({
+				transaction,
+				ckMinterInfoAddresses,
+				$ethAddress
+			})
+		);
+
+		return getKnownDestinations(mappedTransactions);
+	}
 );
