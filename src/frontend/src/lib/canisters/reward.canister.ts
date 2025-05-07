@@ -42,10 +42,10 @@ export class RewardCanister extends Canister<RewardService> {
 		return new RewardCanister(canisterId, service, certifiedService);
 	}
 
-	isEligible = (principal: Principal): Promise<EligibilityResponse> => {
-		const { eligible } = this.caller({ certified: true });
+	isEligible = ({certified = true}: QueryParams): Promise<EligibilityResponse> => {
+		const { eligible } = this.caller({ certified });
 
-		return eligible(toNullable(principal));
+		return eligible([]);
 	};
 
 	getUserInfo = ({ certified = true }: QueryParams): Promise<UserData> => {

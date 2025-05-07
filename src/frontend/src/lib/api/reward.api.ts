@@ -17,6 +17,15 @@ import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 
 let canister: RewardCanister | undefined = undefined;
 
+export const isEligible = async ({
+									 identity,
+									 certified
+								 }: CanisterApiFunctionParams<QueryParams>): Promise<EligibilityResponse> => {
+	const { isEligible } = await rewardCanister({ identity });
+
+	return isEligible({certified});
+};
+
 export const getUserInfo = async ({
 	identity,
 	certified
@@ -24,17 +33,6 @@ export const getUserInfo = async ({
 	const { getUserInfo } = await rewardCanister({ identity });
 
 	return getUserInfo({ certified });
-};
-
-export const isEligible = async ({
-	identity,
-	principal
-}: CanisterApiFunctionParams<{
-	principal: Principal;
-}>): Promise<EligibilityResponse> => {
-	const { isEligible } = await rewardCanister({ identity });
-
-	return isEligible(principal);
 };
 
 export const getNewVipReward = async ({

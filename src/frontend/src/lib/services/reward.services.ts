@@ -38,9 +38,42 @@ import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
 import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+const queryEligibilityReport = async (params: {
+	identity: Identity;
+	certified: boolean;
+}): Promise<EligibilityReport> => {
+	const response = await isEligibleApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+	if ('Ok' in response) {
+		return response.Ok;
+	}
+	if ('Err' in response) {
+		throw new EligibilityError();
+	}
+	throw new Error('Unknown error');
+};
+
+export const getEligibilityReport = async (params: {
+	identity: Identity;
+}): Promise<EligibilityReport> => {
+	try {
+		return await queryEligibilityReport({
+			...params, certified: false
+		});
+	} catch (err: unknown) {
+		toastsError({
+			msg: { text: 'HMMM' },
+			err
+		});
+		return { campaigns: [] };
+	}
+};
 
 const queryUserRoles = async (params: {
 	identity: Identity;
@@ -85,42 +118,6 @@ export const getUserRoles = async (params: { identity: Identity }): Promise<User
 		});
 
 		return { isVip: false, isGold: false };
-	}
-};
-
-const queryEligibilityReport = async (params: {
-	identity: Identity;
-	principal: Principal;
-}): Promise<EligibilityReport> => {
-	const response = await isEligibleApi({
-		...params,
-		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-	});
-
-	if ('Ok' in response) {
-		return response.Ok;
-	}
-	if ('Err' in response) {
-		throw new EligibilityError();
-	}
-	throw new Error('Unknown error');
-};
-
-export const getEligibilityReport = async (params: {
-	identity: Identity;
-	principal: string;
-}): Promise<EligibilityReport> => {
-	try {
-		return await queryEligibilityReport({
-			...params,
-			principal: Principal.fromText(params.principal)
-		});
-	} catch (err: unknown) {
-		toastsError({
-			msg: { text: 'HMMM' },
-			err
-		});
-		return { campaigns: [] };
 	}
 };
 
