@@ -59,7 +59,7 @@ const mapPendingTransaction = ({
 
 	return {
 		id: `${hash}`,
-		incoming: false,
+		incoming: true, // we mark this as incoming so we display a positive balance, as all pending mapped ckEth txs are incoming
 		type: 'burn',
 		status: 'pending',
 		from,
