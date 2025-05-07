@@ -177,7 +177,6 @@
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
-			"requirements_title": "Eligibility criteria",
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
@@ -193,6 +192,12 @@
 			"youre_eligible": "You're eligible!",
 			"ongoing": "Ongoing",
 			"ended": "Ended ($amount)"
+		},
+		"requirements": {
+			"requirements_title": "Eligibility criteria",
+			"min_logins": "Login $loginsx in last $days days",
+			"min_transactions": "Complete $transactions transactions in last $days days",
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",

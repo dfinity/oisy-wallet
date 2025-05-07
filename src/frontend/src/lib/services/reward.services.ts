@@ -383,28 +383,6 @@ export const setReferrer = async (params: {
 	}
 };
 
-// Todo: for the moment we evaluate if requirements are fulfilled in frontend
-// this will change once we get this info from rewards canister
-export const getRewardRequirementsFulfilled = ({
-	transactions,
-	totalUsdBalance
-}: {
-	transactions: AnyTransactionUiWithCmp[];
-	totalUsdBalance: number;
-}): boolean[] => {
-	const req1 = true; // logged in once in last 7 days
-	const req2: boolean =
-		transactions.filter((trx) =>
-			trx.transaction.timestamp
-				? new Date().getTime() - MILLISECONDS_IN_DAY * 7 <
-					formatNanosecondsToTimestamp(BigInt(trx.transaction.timestamp))
-				: false
-		).length >= 2; // at least 2 transactions in last 7 days
-	const req3: boolean = totalUsdBalance >= 20; // at least 20$ balance
-
-	return [req1, req2, req3];
-};
-
 export const getUserRewardsTokenAmounts = async ({
 	ckBtcToken,
 	ckUsdcToken,

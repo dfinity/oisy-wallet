@@ -1,4 +1,4 @@
-import type { CampaignEligibility, EligibilityReport } from '$declarations/rewards/rewards.did';
+import type {CampaignEligibility, EligibilityReport} from '$declarations/rewards/rewards.did';
 import { writable, type Readable } from 'svelte/store';
 
 export type RewardEligibilityData = {
