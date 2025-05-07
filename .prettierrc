@@ -20,6 +20,17 @@
         "parser": "svelte",
         "htmlWhitespaceSensitivity": "strict"
       }
+    },
+    {
+      "files": "*.did",
+      "options": {
+        "plugins": [
+          "prettier-plugin-svelte",
+          "prettier-plugin-organize-imports",
+          "prettier-plugin-motoko"
+        ],
+        "semi": false
+      }
     }
   ]
 }

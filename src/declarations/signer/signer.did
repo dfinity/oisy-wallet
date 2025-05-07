@@ -4,48 +4,48 @@ type BitcoinAddressType = variant { P2WPKH };
 type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type BtcTxOutput = record { destination_address : text; sent_satoshis : nat64 };
 type BuildP2wpkhTxError = variant {
-  NotEnoughFunds : record { available : nat64; required : nat64 };
-  WrongBitcoinNetwork;
-  NotP2WPKHSourceAddress;
-  InvalidDestinationAddress : GetAddressResponse;
-  InvalidSourceAddress : GetAddressResponse;
+	NotEnoughFunds : record { available : nat64; required : nat64 };
+	WrongBitcoinNetwork;
+	NotP2WPKHSourceAddress;
+	InvalidDestinationAddress : GetAddressResponse;
+	InvalidSourceAddress : GetAddressResponse
 };
 type CallerPaysIcrc2Tokens = record { ledger : principal };
 type CanisterStatusResultV2 = record {
-  controller : principal;
-  status : CanisterStatusType;
-  freezing_threshold : nat;
-  balance : vec record { blob; nat };
-  memory_size : nat;
-  cycles : nat;
-  settings : DefiniteCanisterSettingsArgs;
-  idle_cycles_burned_per_day : nat;
-  module_hash : opt blob;
+	controller : principal;
+	status : CanisterStatusType;
+	freezing_threshold : nat;
+	balance : vec record { blob; nat };
+	memory_size : nat;
+	cycles : nat;
+	settings : DefiniteCanisterSettingsArgs;
+	idle_cycles_burned_per_day : nat;
+	module_hash : opt blob
 };
 type CanisterStatusType = variant { stopped; stopping; running };
 type Config = record {
-  ecdsa_key_name : text;
-  ic_root_key_raw : opt blob;
-  cycles_ledger : principal;
+	ecdsa_key_name : text;
+	ic_root_key_raw : opt blob;
+	cycles_ledger : principal
 };
 type DefiniteCanisterSettingsArgs = record {
-  controller : principal;
-  freezing_threshold : nat;
-  controllers : vec principal;
-  memory_allocation : nat;
-  compute_allocation : nat;
+	controller : principal;
+	freezing_threshold : nat;
+	controllers : vec principal;
+	memory_allocation : nat;
+	compute_allocation : nat
 };
 type EcdsaCurve = variant { secp256k1 };
 type EcdsaKeyId = record { name : text; curve : EcdsaCurve };
 type EcdsaPublicKeyArgument = record {
-  key_id : EcdsaKeyId;
-  canister_id : opt principal;
-  derivation_path : vec blob;
+	key_id : EcdsaKeyId;
+	canister_id : opt principal;
+	derivation_path : vec blob
 };
 type EcdsaPublicKeyResponse = record { public_key : blob; chain_code : blob };
 type EthAddressError = variant {
-  SigningError : record { RejectionCode_1; text };
-  PaymentError : PaymentError;
+	SigningError : record { RejectionCode_1; text };
+	PaymentError : PaymentError
 };
 type EthAddressRequest = record { "principal" : opt principal };
 type EthAddressResponse = record { address : text };
@@ -54,86 +54,86 @@ type EthPersonalSignResponse = record { signature : text };
 type EthSignPrehashRequest = record { hash : text };
 type EthSignPrehashResponse = record { signature : text };
 type EthSignTransactionRequest = record {
-  to : text;
-  gas : nat;
-  value : nat;
-  max_priority_fee_per_gas : nat;
-  data : opt text;
-  max_fee_per_gas : nat;
-  chain_id : nat;
-  nonce : nat;
+	to : text;
+	gas : nat;
+	value : nat;
+	max_priority_fee_per_gas : nat;
+	data : opt text;
+	max_fee_per_gas : nat;
+	chain_id : nat;
+	nonce : nat
 };
 type GetAddressError = variant {
-  InternalError : record { msg : text };
-  PaymentError : PaymentError;
+	InternalError : record { msg : text };
+	PaymentError : PaymentError
 };
 type GetAddressRequest = record {
-  network : BitcoinNetwork;
-  address_type : BitcoinAddressType;
+	network : BitcoinNetwork;
+	address_type : BitcoinAddressType
 };
 type GetAddressResponse = record { address : text };
 type GetBalanceRequest = record {
-  network : BitcoinNetwork;
-  address_type : BitcoinAddressType;
-  min_confirmations : opt nat32;
+	network : BitcoinNetwork;
+	address_type : BitcoinAddressType;
+	min_confirmations : opt nat32
 };
 type GetBalanceResponse = record { balance : nat64 };
 type HttpRequest = record {
-  url : text;
-  method : text;
-  body : blob;
-  headers : vec record { text; text };
+	url : text;
+	method : text;
+	body : blob;
+	headers : vec record { text; text }
 };
 type HttpResponse = record {
-  body : blob;
-  headers : vec record { text; text };
-  status_code : nat16;
+	body : blob;
+	headers : vec record { text; text };
+	status_code : nat16
 };
 type InitArg = record {
-  ecdsa_key_name : text;
-  ic_root_key_der : opt blob;
-  cycles_ledger : opt principal;
+	ecdsa_key_name : text;
+	ic_root_key_der : opt blob;
+	cycles_ledger : opt principal
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PatronPaysIcrc2Tokens = record { ledger : principal; patron : Account };
 type PaymentError = variant {
-  LedgerWithdrawFromError : record {
-    error : WithdrawFromError;
-    ledger : principal;
-  };
-  LedgerUnreachable : CallerPaysIcrc2Tokens;
-  InvalidPatron;
-  LedgerTransferFromError : record {
-    error : TransferFromError;
-    ledger : principal;
-  };
-  UnsupportedPaymentType;
-  InsufficientFunds : record { needed : nat64; available : nat64 };
+	LedgerWithdrawFromError : record {
+		error : WithdrawFromError;
+		ledger : principal
+	};
+	LedgerUnreachable : CallerPaysIcrc2Tokens;
+	InvalidPatron;
+	LedgerTransferFromError : record {
+		error : TransferFromError;
+		ledger : principal
+	};
+	UnsupportedPaymentType;
+	InsufficientFunds : record { needed : nat64; available : nat64 }
 };
 type PaymentType = variant {
-  PatronPaysIcrc2Tokens : PatronPaysIcrc2Tokens;
-  AttachedCycles;
-  CallerPaysIcrc2Cycles;
-  CallerPaysIcrc2Tokens : CallerPaysIcrc2Tokens;
-  PatronPaysIcrc2Cycles : Account;
+	PatronPaysIcrc2Tokens : PatronPaysIcrc2Tokens;
+	AttachedCycles;
+	CallerPaysIcrc2Cycles;
+	CallerPaysIcrc2Tokens : CallerPaysIcrc2Tokens;
+	PatronPaysIcrc2Cycles : Account
 };
 type RejectionCode = variant {
-  NoError;
-  CanisterError;
-  SysTransient;
-  DestinationInvalid;
-  Unknown;
-  SysFatal;
-  CanisterReject;
+	NoError;
+	CanisterError;
+	SysTransient;
+	DestinationInvalid;
+	Unknown;
+	SysFatal;
+	CanisterReject
 };
 type RejectionCode_1 = variant {
-  NoError;
-  CanisterError;
-  SysTransient;
-  DestinationInvalid;
-  Unknown;
-  SysFatal;
-  CanisterReject;
+	NoError;
+	CanisterError;
+	SysTransient;
+	DestinationInvalid;
+	Unknown;
+	SysFatal;
+	CanisterReject
 };
 type Result = variant { Ok : GetAddressResponse; Err : GetAddressError };
 type Result_1 = variant { Ok : GetBalanceResponse; Err : GetAddressError };
@@ -142,104 +142,104 @@ type Result_3 = variant { Ok : EthAddressResponse; Err : EthAddressError };
 type Result_4 = variant { Ok : EthPersonalSignResponse; Err : EthAddressError };
 type Result_5 = variant { Ok : EthSignPrehashResponse; Err : EthAddressError };
 type Result_6 = variant {
-  Ok : record { EcdsaPublicKeyResponse };
-  Err : EthAddressError;
+	Ok : record { EcdsaPublicKeyResponse };
+	Err : EthAddressError
 };
 type Result_7 = variant {
-  Ok : record { SignWithEcdsaResponse };
-  Err : EthAddressError;
+	Ok : record { SignWithEcdsaResponse };
+	Err : EthAddressError
 };
 type Result_8 = variant {
-  Ok : record { EcdsaPublicKeyResponse };
-  Err : EthAddressError;
+	Ok : record { EcdsaPublicKeyResponse };
+	Err : EthAddressError
 };
 type Result_9 = variant {
-  Ok : record { SignWithEcdsaResponse };
-  Err : EthAddressError;
+	Ok : record { SignWithEcdsaResponse };
+	Err : EthAddressError
 };
 type SchnorrAlgorithm = variant { ed25519; bip340secp256k1 };
 type SchnorrKeyId = record { algorithm : SchnorrAlgorithm; name : text };
 type SchnorrPublicKeyArgument = record {
-  key_id : SchnorrKeyId;
-  canister_id : opt principal;
-  derivation_path : vec blob;
+	key_id : SchnorrKeyId;
+	canister_id : opt principal;
+	derivation_path : vec blob
 };
 type SendBtcError = variant {
-  BuildP2wpkhError : BuildP2wpkhTxError;
-  InternalError : record { msg : text };
-  PaymentError : PaymentError;
+	BuildP2wpkhError : BuildP2wpkhTxError;
+	InternalError : record { msg : text };
+	PaymentError : PaymentError
 };
 type SendBtcRequest = record {
-  fee_satoshis : opt nat64;
-  network : BitcoinNetwork;
-  utxos_to_spend : vec Utxo;
-  address_type : BitcoinAddressType;
-  outputs : vec BtcTxOutput;
+	fee_satoshis : opt nat64;
+	network : BitcoinNetwork;
+	utxos_to_spend : vec Utxo;
+	address_type : BitcoinAddressType;
+	outputs : vec BtcTxOutput
 };
 type SendBtcResponse = record { txid : text };
 type SignWithEcdsaArgument = record {
-  key_id : EcdsaKeyId;
-  derivation_path : vec blob;
-  message_hash : blob;
+	key_id : EcdsaKeyId;
+	derivation_path : vec blob;
+	message_hash : blob
 };
 type SignWithEcdsaResponse = record { signature : blob };
 type SignWithSchnorrArgument = record {
-  key_id : SchnorrKeyId;
-  derivation_path : vec blob;
-  message : blob;
+	key_id : SchnorrKeyId;
+	derivation_path : vec blob;
+	message : blob
 };
 type TransferFromError = variant {
-  GenericError : record { message : text; error_code : nat };
-  TemporarilyUnavailable;
-  InsufficientAllowance : record { allowance : nat };
-  BadBurn : record { min_burn_amount : nat };
-  Duplicate : record { duplicate_of : nat };
-  BadFee : record { expected_fee : nat };
-  CreatedInFuture : record { ledger_time : nat64 };
-  TooOld;
-  InsufficientFunds : record { balance : nat };
+	GenericError : record { message : text; error_code : nat };
+	TemporarilyUnavailable;
+	InsufficientAllowance : record { allowance : nat };
+	BadBurn : record { min_burn_amount : nat };
+	Duplicate : record { duplicate_of : nat };
+	BadFee : record { expected_fee : nat };
+	CreatedInFuture : record { ledger_time : nat64 };
+	TooOld;
+	InsufficientFunds : record { balance : nat }
 };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 type WithdrawFromError = variant {
-  GenericError : record { message : text; error_code : nat };
-  TemporarilyUnavailable;
-  InsufficientAllowance : record { allowance : nat };
-  Duplicate : record { duplicate_of : nat };
-  InvalidReceiver : record { receiver : principal };
-  CreatedInFuture : record { ledger_time : nat64 };
-  TooOld;
-  FailedToWithdrawFrom : record {
-    withdraw_from_block : opt nat;
-    rejection_code : RejectionCode_1;
-    refund_block : opt nat;
-    approval_refund_block : opt nat;
-    rejection_reason : text;
-  };
-  InsufficientFunds : record { balance : nat };
+	GenericError : record { message : text; error_code : nat };
+	TemporarilyUnavailable;
+	InsufficientAllowance : record { allowance : nat };
+	Duplicate : record { duplicate_of : nat };
+	InvalidReceiver : record { receiver : principal };
+	CreatedInFuture : record { ledger_time : nat64 };
+	TooOld;
+	FailedToWithdrawFrom : record {
+		withdraw_from_block : opt nat;
+		rejection_code : RejectionCode_1;
+		refund_block : opt nat;
+		approval_refund_block : opt nat;
+		rejection_reason : text
+	};
+	InsufficientFunds : record { balance : nat }
 };
 service : (Arg) -> {
-  btc_caller_address : (GetAddressRequest, opt PaymentType) -> (Result);
-  btc_caller_balance : (GetBalanceRequest, opt PaymentType) -> (Result_1);
-  btc_caller_send : (SendBtcRequest, opt PaymentType) -> (Result_2);
-  config : () -> (Config) query;
-  eth_address : (EthAddressRequest, opt PaymentType) -> (Result_3);
-  eth_address_of_caller : (opt PaymentType) -> (Result_3);
-  eth_personal_sign : (EthPersonalSignRequest, opt PaymentType) -> (Result_4);
-  eth_sign_prehash : (EthSignPrehashRequest, opt PaymentType) -> (Result_5);
-  eth_sign_transaction : (EthSignTransactionRequest, opt PaymentType) -> (
-      Result_5,
-    );
-  generic_caller_ecdsa_public_key : (
-      EcdsaPublicKeyArgument,
-      opt PaymentType,
-    ) -> (Result_6);
-  generic_sign_with_ecdsa : (opt PaymentType, SignWithEcdsaArgument) -> (
-      Result_7,
-    );
-  get_canister_status : () -> (CanisterStatusResultV2);
-  http_request : (HttpRequest) -> (HttpResponse) query;
-  schnorr_public_key : (SchnorrPublicKeyArgument, opt PaymentType) -> (
-      Result_8,
-    );
-  schnorr_sign : (SignWithSchnorrArgument, opt PaymentType) -> (Result_9);
+	btc_caller_address : (GetAddressRequest, opt PaymentType) -> (Result);
+	btc_caller_balance : (GetBalanceRequest, opt PaymentType) -> (Result_1);
+	btc_caller_send : (SendBtcRequest, opt PaymentType) -> (Result_2);
+	config : () -> (Config) query;
+	eth_address : (EthAddressRequest, opt PaymentType) -> (Result_3);
+	eth_address_of_caller : (opt PaymentType) -> (Result_3);
+	eth_personal_sign : (EthPersonalSignRequest, opt PaymentType) -> (Result_4);
+	eth_sign_prehash : (EthSignPrehashRequest, opt PaymentType) -> (Result_5);
+	eth_sign_transaction : (EthSignTransactionRequest, opt PaymentType) -> (
+		Result_5
+	);
+	generic_caller_ecdsa_public_key : (
+		EcdsaPublicKeyArgument,
+		opt PaymentType
+	) -> (Result_6);
+	generic_sign_with_ecdsa : (opt PaymentType, SignWithEcdsaArgument) -> (
+		Result_7
+	);
+	get_canister_status : () -> (CanisterStatusResultV2);
+	http_request : (HttpRequest) -> (HttpResponse) query;
+	schnorr_public_key : (SchnorrPublicKeyArgument, opt PaymentType) -> (
+		Result_8
+	);
+	schnorr_sign : (SignWithSchnorrArgument, opt PaymentType) -> (Result_9)
 }
