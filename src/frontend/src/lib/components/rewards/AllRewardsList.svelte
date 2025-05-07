@@ -12,6 +12,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
+	import { setContext} from "svelte";
+	import {
+		initRewardEligibilityStore,
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from "$icp/stores/reward.store";
+	import type {EligibilityReport} from "$declarations/rewards/rewards.did";
+
+	const report: EligibilityReport = {campaigns: [['OISY Airdrop #1', {available: true, eligible: true, criteria: []}]]}; // TODO replace this with api call
+	setContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY, {
+		store: initRewardEligibilityStore(report)
+	});
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 

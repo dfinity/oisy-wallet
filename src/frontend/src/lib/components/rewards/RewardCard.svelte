@@ -9,6 +9,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import {getContext} from "svelte";
+	import {REWARD_ELIGIBILITY_CONTEXT_KEY, type RewardEligibilityContext} from "$icp/stores/reward.store";
 
 	interface Props {
 		onclick: () => void;
@@ -18,7 +20,10 @@
 
 	let { onclick, reward, testId }: Props = $props();
 
+	const {store} = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
+
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
+	const isEligible = $derived(store.getCampaignEligibility(reward.id).eligible ?? false);
 </script>
 
 <button {onclick} class="flex flex-col" data-tid={testId}>
@@ -45,7 +50,7 @@
 						<div>
 							{reward.cardTitle}
 						</div>
-						{#if !hasEnded}
+						{#if isEligible && !hasEnded}
 							<span class="mr-auto inline-flex md:mx-1">
 								<Badge
 									variant="success"
