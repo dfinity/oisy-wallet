@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Toasts, SystemThemeListener } from '@dfinity/gix-components';
-	import { onMount, type Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { mockIdentity } from '../../tests/mocks/identity.mock';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
@@ -14,7 +14,7 @@
 	modalStore.close();
 </script>
 
-<div class="bg-primary text-primary">
+<div class="bg-page text-primary">
 	{@render children()}
 	<Modals />
 	<Banner />
