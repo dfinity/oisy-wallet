@@ -3,6 +3,7 @@ import type {
 	_SERVICE as BackendService,
 	CreateChallengeResponse,
 	CustomToken,
+	GetAllowedCyclesResponse,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -15,7 +16,8 @@ import {
 	mapAllowSigningError,
 	mapBtcPendingTransactionError,
 	mapBtcSelectUserUtxosFeeError,
-	mapCreateChallengeError
+	mapCreateChallengeError,
+	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
@@ -175,6 +177,19 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
+	};
+
+	getAllowedCycles = async (): Promise<GetAllowedCyclesResponse> => {
+		const { get_allowed_cycles } = this.caller({ certified: true });
+
+		const response = await get_allowed_cycles();
+
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
+		}
+
+		throw mapGetAllowedCyclesError(response.Err);
 	};
 
 	allowSigning = async ({ request }: AllowSigningParams = {}): Promise<AllowSigningResponse> => {
