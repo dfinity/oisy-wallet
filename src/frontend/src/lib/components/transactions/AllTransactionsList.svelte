@@ -55,6 +55,8 @@
 		sortTransactions({ transactionA: a, transactionB: b })
 	);
 
+	$: console.log(sortedTransactions);
+
 	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUiWithCmp> | undefined;
 	$: groupedTransactions = nonNullish(sortedTransactions)
 		? groupTransactionsByDate(sortedTransactions)
