@@ -39,10 +39,12 @@
 	$: timestamp = nonNullish(timestampNanoseconds)
 		? Number(timestampNanoseconds / NANO_SECONDS_IN_SECOND)
 		: undefined;
+
+	const modalId = Symbol();
 </script>
 
 <Transaction
-	on:click={() => modalStore.openIcTransaction({ transaction, token })}
+	on:click={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}
 	styleClass="block w-full border-0"
 	{amount}
 	{type}

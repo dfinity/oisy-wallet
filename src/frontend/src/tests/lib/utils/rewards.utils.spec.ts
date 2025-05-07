@@ -1,10 +1,8 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import { ZERO_BI } from '$lib/constants/app.constants';
-import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
-	getRewardsBalance,
+	isEndedCampaign,
 	isOngoingCampaign,
 	isUpcomingCampaign,
 	loadRewardResult
@@ -23,7 +21,8 @@ describe('rewards.utils', () => {
 			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: ['airdrop'],
-			campaign_name: []
+			campaign_name: ['deuteronomy'], // Note: This is no longer optional and will be superceded by campaign_id.
+			campaign_id: 'deuteronomy'
 		};
 
 		it('should return falsy reward result if result was already loaded', async () => {
@@ -34,9 +33,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(false);
-			expect(receivedJackpot).toBe(false);
-			expect(receivedReferral).toBe(false);
+			expect(receivedReward).toBeFalsy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeFalsy();
 		});
 
 		it('should return falsy reward result and set entry in the session storage', async () => {
@@ -55,9 +54,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(false);
-			expect(receivedJackpot).toBe(false);
-			expect(receivedReferral).toBe(false);
+			expect(receivedReward).toBeFalsy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeFalsy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -78,9 +77,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(true);
-			expect(receivedJackpot).toBe(false);
-			expect(receivedReferral).toBe(false);
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeFalsy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -102,9 +101,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(true);
-			expect(receivedJackpot).toBe(true);
-			expect(receivedReferral).toBe(false);
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeTruthy();
+			expect(receivedReferral).toBeFalsy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -126,9 +125,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(true);
-			expect(receivedJackpot).toBe(true);
-			expect(receivedReferral).toBe(false);
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeTruthy();
+			expect(receivedReferral).toBeFalsy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -150,9 +149,9 @@ describe('rewards.utils', () => {
 			const { receivedReward, receivedJackpot, receivedReferral } =
 				await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBe(true);
-			expect(receivedJackpot).toBe(false);
-			expect(receivedReferral).toBe(true);
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeTruthy();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -165,7 +164,7 @@ describe('rewards.utils', () => {
 
 			const result = isOngoingCampaign({ startDate, endDate });
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 		});
 
 		it('should return false if the current date is before the start date of the campaign', () => {
@@ -173,7 +172,7 @@ describe('rewards.utils', () => {
 
 			const result = isOngoingCampaign({ startDate, endDate: new Date() });
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 		});
 
 		it('should return false if the current date is after the end date of the campaign', () => {
@@ -181,7 +180,7 @@ describe('rewards.utils', () => {
 
 			const result = isOngoingCampaign({ startDate, endDate: new Date() });
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 		});
 	});
 
@@ -191,7 +190,7 @@ describe('rewards.utils', () => {
 
 			const result = isUpcomingCampaign(startDate);
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 		});
 
 		it('should return false if the current date is after the start date of the campaign', () => {
@@ -199,47 +198,25 @@ describe('rewards.utils', () => {
 
 			const result = isUpcomingCampaign(startDate);
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 		});
 	});
 
-	describe('getRewardsBalance', () => {
-		const lastTimestamp = BigInt(Date.now());
+	describe('isEndedCampaign', () => {
+		it('should return false if the current date is before the end date of the campaign', () => {
+			const endDate = new Date(Date.now() + 86400000);
 
-		const mockedReward: RewardResponseInfo = {
-			amount: 100n,
-			timestamp: lastTimestamp,
-			name: 'airdrop',
-			campaignName: 'exodus',
-			ledger: mockIdentity.getPrincipal()
-		};
+			const result = isEndedCampaign(endDate);
 
-		it('should return the correct rewards balance of multiple rewards', () => {
-			const mockedRewards: RewardResponseInfo[] = [
-				mockedReward,
-				{ ...mockedReward, amount: 200n },
-				{ ...mockedReward, amount: 300n }
-			];
-
-			const result = getRewardsBalance(mockedRewards);
-
-			expect(result).toEqual(600n);
+			expect(result).toBeFalsy();
 		});
 
-		it('should return the correct rewards balance of a single airdrop', () => {
-			const mockedRewards: RewardResponseInfo[] = [mockedReward];
+		it('should return true if the current date is after the end date of the campaign', () => {
+			const endDate = new Date(Date.now() - 86400000);
 
-			const result = getRewardsBalance(mockedRewards);
+			const result = isEndedCampaign(endDate);
 
-			expect(result).toEqual(100n);
-		});
-
-		it('should return zero for an empty list of rewards', () => {
-			const mockedRewards: RewardResponseInfo[] = [];
-
-			const result = getRewardsBalance(mockedRewards);
-
-			expect(result).toEqual(ZERO_BI);
+			expect(result).toBeTruthy();
 		});
 	});
 });

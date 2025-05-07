@@ -53,7 +53,7 @@ describe('validateUserAmount', () => {
 		});
 
 		expect(assertErc20AmountSpy).toHaveBeenCalledOnce();
-		expect(assertErc20AmountSpy).toBeCalledWith({
+		expect(assertErc20AmountSpy).toHaveBeenCalledWith({
 			userAmount,
 			balance,
 			balanceForFee: balance,
@@ -75,7 +75,7 @@ describe('validateUserAmount', () => {
 		});
 
 		expect(assertCkErc20AmountSpy).toHaveBeenCalledOnce();
-		expect(assertCkErc20AmountSpy).toBeCalledWith({
+		expect(assertCkErc20AmountSpy).toHaveBeenCalledWith({
 			userAmount,
 			balance,
 			balanceForFee: balance,
@@ -97,7 +97,7 @@ describe('validateUserAmount', () => {
 		});
 
 		expect(assertCkEthAmountSpy).toHaveBeenCalledOnce();
-		expect(assertCkEthAmountSpy).toBeCalledWith({
+		expect(assertCkEthAmountSpy).toHaveBeenCalledWith({
 			userAmount,
 			balance,
 			fee,
@@ -118,7 +118,7 @@ describe('validateUserAmount', () => {
 		});
 
 		expect(assertCkBtcAmountSpy).toHaveBeenCalledOnce();
-		expect(assertCkBtcAmountSpy).toBeCalledWith({
+		expect(assertCkBtcAmountSpy).toHaveBeenCalledWith({
 			userAmount,
 			balance,
 			fee,
@@ -135,7 +135,7 @@ describe('validateUserAmount', () => {
 		});
 
 		expect(assertAmountSpy).toHaveBeenCalledOnce();
-		expect(assertAmountSpy).toBeCalledWith({
+		expect(assertAmountSpy).toHaveBeenCalledWith({
 			userAmount,
 			balance,
 			fee
@@ -151,7 +151,7 @@ describe('validateUserAmount', () => {
 		});
 
 		expect(assertAmountSpy).toHaveBeenCalledOnce();
-		expect(assertAmountSpy).toBeCalledWith({
+		expect(assertAmountSpy).toHaveBeenCalledWith({
 			userAmount,
 			balance,
 			fee
@@ -171,7 +171,7 @@ describe('validateUserAmount', () => {
 		});
 
 		expect(assertAmountSpy).toHaveBeenCalledOnce();
-		expect(assertAmountSpy).toBeCalledWith({
+		expect(assertAmountSpy).toHaveBeenCalledWith({
 			userAmount,
 			balance,
 			fee

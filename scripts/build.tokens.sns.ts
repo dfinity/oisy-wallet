@@ -190,6 +190,7 @@ const mapDeprecatedSnsMetadata = ({
 		...(nonNullish(DEPRECATED_SNES[ledgerCanisterId]) && DEPRECATED_SNES[ledgerCanisterId])
 	},
 	ledgerCanisterId,
+	...(nonNullish(DEPRECATED_SNES[ledgerCanisterId]) && { deprecated: true }),
 	...rest
 });
 

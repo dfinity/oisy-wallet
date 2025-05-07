@@ -48,6 +48,7 @@ describe('UrlGuard', () => {
 				});
 
 				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
 					data: { success: true, codeType: QrCodeType.VIP },
 					type: 'vip-reward-state'
 				});
@@ -81,6 +82,7 @@ describe('UrlGuard', () => {
 				});
 
 				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
 					data: { success: false, codeType: QrCodeType.VIP },
 					type: 'vip-reward-state'
 				});

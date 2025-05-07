@@ -12,6 +12,8 @@ export const MAX_BUTTON = 'max-button';
 export const LOADER_MODAL = 'loader-modal';
 export const BUTTON_MODAL_CLOSE = 'close-modal';
 
+export const MODAL_TITLE = 'modal-title';
+
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
@@ -73,12 +75,9 @@ export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
 export const AMOUNT_DATA = 'amount-data';
-export const AMOUNT_INPUT = 'amount-input';
 export const DESTINATION_INPUT = 'destination-input';
 
 export const IN_PROGRESS_MODAL = 'in-progress-modal';
-
-export const TESTNET_TOGGLE = 'testnet-toggle';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
 export const CAROUSEL_SLIDE = 'carousel-slide';
@@ -99,6 +98,7 @@ export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
 export const VIP_QR_CODE_ICON = 'vip-qr-code-icon';
 export const VIP_QR_CODE_BINANCE_ICON = 'vip-qr-code-binance-icon';
 export const VIP_STATE_IMAGE_BANNER = 'vip-state-image-banner';
+export const VIP_STATE_BUTTON = 'vip-state-button';
 
 export const REFERRAL_CODE_COPY_BUTTON = 'referral-code-copy-button';
 export const REFERRAL_CODE_SHARE_BUTTON = 'referral-code-share-button';
@@ -131,6 +131,8 @@ export const THEME_SELECTOR_CARD = 'theme-selector-card';
 
 export const REWARDS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-reward-campaigns-container';
 export const REWARDS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-reward-campaigns-container';
+export const REWARDS_ENDED_CAMPAIGNS_CONTAINER = 'ended-reward-campaigns-container';
+export const REWARDS_FILTER = 'rewards-filter';
 export const REWARDS_MODAL = 'rewards-modal';
 export const REWARDS_MODAL_DATE_BADGE = 'rewards-modal-date-badge';
 export const REWARDS_MODAL_IMAGE_BANNER = 'rewards-modal-image-banner';
@@ -174,3 +176,10 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+
+export const ADDRESS_BOOK_MODAL = 'address-book-modal';
+export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
+export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
+export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
+export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
+export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';

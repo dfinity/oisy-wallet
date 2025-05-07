@@ -6,6 +6,7 @@ import {
 } from '$eth/services/eth-transaction.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
@@ -18,7 +19,7 @@ export const initTransactionsListener = ({
 	token: Token;
 	address: EthAddress;
 }): WebSocketListener => {
-	if (isSupportedEthTokenId(token.id)) {
+	if (isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id)) {
 		return initMinedTransactionsListenerProvider({
 			toAddress: address,
 			listener: async ({ transaction: { hash } }: { transaction: { hash: string } }) =>

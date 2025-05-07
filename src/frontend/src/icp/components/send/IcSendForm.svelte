@@ -38,7 +38,7 @@
 	disabled={invalid}
 	hideSource
 >
-	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
+	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} on:icTokensList />
 
 	<IcSendDestination
 		slot="destination"

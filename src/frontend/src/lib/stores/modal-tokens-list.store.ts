@@ -1,4 +1,4 @@
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Network } from '$lib/types/network';
@@ -13,6 +13,7 @@ export interface ModalTokensListData {
 	filterQuery?: string;
 	filterNetwork?: Network;
 	filterZeroBalance?: boolean;
+	sortByBalance?: boolean;
 }
 
 export const initModalTokensListContext = (
@@ -25,10 +26,27 @@ export const initModalTokensListContext = (
 	const filterQuery = derived([data], ([{ filterQuery }]) => filterQuery);
 	const filterNetwork = derived([data], ([{ filterNetwork }]) => filterNetwork);
 	const filterZeroBalance = derived([data], ([{ filterZeroBalance }]) => filterZeroBalance);
+	const sortByBalance = derived([data], ([{ sortByBalance }]) => sortByBalance ?? true);
 
 	const filteredTokens = derived(
-		[tokens, filterQuery, filterNetwork, filterZeroBalance, exchanges, balancesStore],
-		([$tokens, $filterQuery, $filterNetwork, $filterZeroBalance, $exchanges, $balances]) => {
+		[
+			tokens,
+			filterQuery,
+			filterNetwork,
+			filterZeroBalance,
+			sortByBalance,
+			exchanges,
+			balancesStore
+		],
+		([
+			$tokens,
+			$filterQuery,
+			$filterNetwork,
+			$filterZeroBalance,
+			$sortByBalance,
+			$exchanges,
+			$balances
+		]) => {
 			const filteredByQuery = filterTokens({ tokens: $tokens, filter: $filterQuery ?? '' });
 
 			const filteredByNetwork = filterTokensForSelectedNetwork([
@@ -37,6 +55,10 @@ export const initModalTokensListContext = (
 				isNullish($filterNetwork)
 			]);
 
+			if (!$sortByBalance) {
+				return filteredByNetwork;
+			}
+
 			const pinnedWithBalance = pinTokensWithBalanceAtTop({
 				$tokens: filteredByNetwork,
 				$balances,
@@ -44,7 +66,7 @@ export const initModalTokensListContext = (
 			});
 
 			return $filterZeroBalance
-				? pinnedWithBalance.filter(({ balance }) => (balance ?? ZERO_BI) > ZERO_BI)
+				? pinnedWithBalance.filter(({ balance }) => (balance ?? ZERO) > ZERO)
 				: pinnedWithBalance;
 		}
 	);

@@ -25,6 +25,8 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 	iconLight: bscMainnetIconLight,
 	iconDark: bscMainnetIconDark,
 	explorerUrl: BSC_EXPLORER_URL,
+	providers: { infura: 'bnb' },
+	exchange: { coingeckoId: 'binance-smart-chain' },
 	buy: { onramperId: 'bsc' }
 };
 
@@ -39,7 +41,8 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 	chainId: 97n,
 	iconLight: bscTestnetIconLight,
 	iconDark: bscTestnetIconDark,
-	explorerUrl: BSC_TESTNET_EXPLORER_URL
+	explorerUrl: BSC_TESTNET_EXPLORER_URL,
+	providers: { infura: 'bnbt' }
 };
 
 export const SUPPORTED_BSC_NETWORKS: EthereumNetwork[] = defineSupportedNetworks({
@@ -47,3 +50,5 @@ export const SUPPORTED_BSC_NETWORKS: EthereumNetwork[] = defineSupportedNetworks
 	mainnetNetworks: [BSC_MAINNET_NETWORK],
 	testnetNetworks: [BSC_TESTNET_NETWORK]
 });
+
+export const SUPPORTED_BSC_NETWORK_IDS: NetworkId[] = SUPPORTED_BSC_NETWORKS.map(({ id }) => id);

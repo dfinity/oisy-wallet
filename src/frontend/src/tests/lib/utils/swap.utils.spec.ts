@@ -2,7 +2,7 @@ import type { SwapAmountsTxReply } from '$declarations/kong_backend/kong_backend
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
@@ -14,7 +14,7 @@ import { mockTokens } from '$tests/mocks/tokens.mock';
 
 describe('swap utils', () => {
 	const ICP_LP_FEE = 4271n;
-	const ICP_GAS_FEE = ZERO_BI;
+	const ICP_GAS_FEE = ZERO;
 
 	const ETH_LP_FEE = 4267n;
 	const ETH_GAS_FEE = 10000n;
@@ -61,7 +61,7 @@ describe('swap utils', () => {
 		it('should return an empty list', () => {
 			const route = getSwapRoute([]);
 
-			expect(route.length).toBe(0);
+			expect(route).toHaveLength(0);
 		});
 	});
 
@@ -69,7 +69,7 @@ describe('swap utils', () => {
 		it('should return a list of liquidity fees', () => {
 			const liquidityFees = getLiquidityFees({ transactions, tokens: mockTokens });
 
-			expect(liquidityFees.length).toBe(2);
+			expect(liquidityFees).toHaveLength(2);
 
 			expect(liquidityFees[0].fee).toBe(ICP_LP_FEE);
 			expect(liquidityFees[0].token).toBe(ICP_TOKEN);
@@ -81,13 +81,13 @@ describe('swap utils', () => {
 		it('should return an empty list if no transactions are provided', () => {
 			const liquidityFees = getLiquidityFees({ transactions: [], tokens: mockTokens });
 
-			expect(liquidityFees.length).toBe(0);
+			expect(liquidityFees).toHaveLength(0);
 		});
 
 		it('should return a subset if token cannot be found', () => {
 			const liquidityFees = getLiquidityFees({ transactions, tokens: [ICP_TOKEN] });
 
-			expect(liquidityFees.length).toBe(1);
+			expect(liquidityFees).toHaveLength(1);
 
 			expect(liquidityFees[0].fee).toBe(ICP_LP_FEE);
 			expect(liquidityFees[0].token).toBe(ICP_TOKEN);

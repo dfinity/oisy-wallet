@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import { isNotIcToken, isNotIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
@@ -10,9 +11,14 @@
 	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
 
-	export let token: Token;
+	interface Props {
+		token: Token;
+		children: Snippet;
+	}
 
-	let disableInfiniteScroll = false;
+	let { token, children }: Props = $props();
+
+	let disableInfiniteScroll = $state(false);
 
 	const onIntersect = async () => {
 		if (isNullish($authIdentity)) {
@@ -58,5 +64,5 @@
 </script>
 
 <InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
-	<slot />
+	{@render children()}
 </InfiniteScroll>

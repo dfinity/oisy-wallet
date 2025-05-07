@@ -28,6 +28,8 @@ interface I18nCore {
 		new: string;
 		edit: string;
 		no_results: string;
+		to: string;
+		more_items: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -163,6 +165,7 @@ interface I18nRewards {
 		active_campaigns: string;
 		upcoming_campaigns: string;
 		active_date: string;
+		ended_date: string;
 		participate_title: string;
 		share: string;
 		learn_more: string;
@@ -181,8 +184,10 @@ interface I18nRewards {
 		carousel_slide_cta: string;
 		sprinkles_earned: string;
 		youre_eligible: string;
+		ongoing: string;
+		ended: string;
 	};
-	alt: { upcoming_campaigns: string };
+	alt: { upcoming_campaigns: string; reward_logo: string };
 }
 
 interface I18nFooter {
@@ -408,6 +413,8 @@ interface I18nSend {
 		scan_qr: string;
 		select_token: string;
 		select_network_filter: string;
+		send_again: string;
+		recently_used: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -626,6 +633,7 @@ interface I18nTokens {
 		text: {
 			title: string;
 			manage_list: string;
+			default_message: string;
 			list_settings: string;
 			do_not_see_import: string;
 			import_token: string;
@@ -900,7 +908,18 @@ interface I18nReferral {
 }
 
 interface I18nAddress_book {
-	text: { title: string; empty_title: string; empty_text: string; add_new_contact: string };
+	text: {
+		title: string;
+		empty_title: string;
+		empty_text: string;
+		add_new_contact: string;
+		add_contact: string;
+	};
+}
+
+interface I18nContact {
+	form: { add_new_contact: string };
+	fields: { name: string };
 }
 
 interface I18nSigner {
@@ -997,6 +1016,7 @@ interface I18n {
 	vip: I18nVip;
 	referral: I18nReferral;
 	address_book: I18nAddress_book;
+	contact: I18nContact;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;

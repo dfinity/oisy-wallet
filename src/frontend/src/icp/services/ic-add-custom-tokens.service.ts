@@ -2,7 +2,7 @@ import { getLedgerId, getTransactions as getTransactionsIcrc } from '$icp/api/ic
 import { balance, metadata } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcToken, IcTokenWithoutId } from '$icp/types/ic-token';
 import { mapIcrcToken } from '$icp/utils/icrc.utils';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -190,7 +190,7 @@ const loadIndexBalance = async ({
 			indexCanisterId,
 			identity,
 			owner: identity.getPrincipal(),
-			maxResults: ZERO_BI,
+			maxResults: ZERO,
 			certified: true
 		});
 

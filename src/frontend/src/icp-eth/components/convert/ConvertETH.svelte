@@ -80,11 +80,15 @@
 
 <CkEthLoader {nativeTokenId}>
 	<ButtonHero
-		on:click={async () => await openConvert()}
+		onclick={async () => await openConvert()}
 		disabled={isNetworkDisabled || $isBusy || $outflowActionsDisabled}
 		{ariaLabel}
 	>
-		<slot name="icon" slot="icon" />
-		<slot />
+		{#snippet icon()}
+			<slot name="icon" />
+		{/snippet}
+		{#snippet label()}
+			<slot />
+		{/snippet}
 	</ButtonHero>
 </CkEthLoader>

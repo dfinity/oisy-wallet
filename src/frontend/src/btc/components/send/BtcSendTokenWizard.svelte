@@ -151,6 +151,7 @@
 	<BtcSendForm
 		on:icNext
 		on:icClose
+		on:icTokensList
 		bind:destination
 		bind:amount
 		on:icQRCodeScan
@@ -159,9 +160,9 @@
 	>
 		<svelte:fragment slot="cancel">
 			{#if formCancelAction === 'back'}
-				<ButtonBack on:click={back} />
+				<ButtonBack onclick={back} />
 			{:else}
-				<ButtonCancel on:click={close} />
+				<ButtonCancel onclick={close} />
 			{/if}
 		</svelte:fragment>
 	</BtcSendForm>

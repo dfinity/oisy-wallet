@@ -7,8 +7,9 @@
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
-	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { btcStatusesStore } from '$icp/stores/btc.store';
+	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
@@ -41,9 +42,12 @@
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
 		$ethAddress,
-		$icTransactions,
 		$btcStatuses: $btcStatusesStore,
-		$solTransactions: $solTransactionsStore
+		$solTransactions: $solTransactionsStore,
+		$icTransactionsStore,
+		$ckBtcMinterInfoStore,
+		$icPendingTransactionsStore,
+		$ckBtcPendingUtxosStore
 	});
 
 	let sortedTransactions: AllTransactionUiWithCmp[];

@@ -38,10 +38,7 @@
 	let copyAriaLabel: string | undefined;
 
 	const displayQRCode = ({ detail }: CustomEvent<ReceiveQRCode>) => {
-		address = detail.address;
-		addressLabel = detail.addressLabel;
-		addressToken = detail.addressToken;
-		copyAriaLabel = detail.copyAriaLabel;
+		({ address, addressLabel, addressToken, copyAriaLabel } = detail);
 		modal.next();
 	};
 
@@ -57,7 +54,7 @@
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose testId={RECEIVE_TOKENS_MODAL}>
 	<svelte:fragment slot="title">
 		{#if currentStep?.name === steps[1].name}
-			<ReceiveTitle {addressToken} />
+			<ReceiveTitle title={addressToken?.network.name} />
 		{:else}
 			{$i18n.receive.text.receive}
 		{/if}</svelte:fragment

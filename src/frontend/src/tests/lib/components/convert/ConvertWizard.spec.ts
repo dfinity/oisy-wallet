@@ -3,6 +3,7 @@ import {
 	UTXOS_FEE_CONTEXT_KEY,
 	type UtxosFeeContext
 } from '$btc/stores/utxos-fee.store';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -34,6 +35,7 @@ import {
 import type { Token } from '$lib/types/token';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -70,6 +72,12 @@ describe('ConvertWizard', () => {
 			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		mockPage.reset();
+	});
+
 	it('should display BTC convert wizard if sourceToken network is BTC', () => {
 		const { getByTestId } = render(ConvertWizard, {
 			props,
@@ -80,6 +88,8 @@ describe('ConvertWizard', () => {
 	});
 
 	it('should display ETH convert wizard if sourceToken network is ETH', () => {
+		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
+
 		const { getByTestId } = render(ConvertWizard, {
 			props,
 			context: mockContext(SEPOLIA_TOKEN)

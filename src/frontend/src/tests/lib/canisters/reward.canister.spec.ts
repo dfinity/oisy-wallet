@@ -10,7 +10,7 @@ import type {
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import type { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
@@ -72,7 +72,7 @@ describe('reward.canister', () => {
 
 				const userData = await getUserInfo(queryParams);
 
-				expect(userData.superpowers.length).toBe(0);
+				expect(userData.superpowers).toHaveLength(0);
 				expect(fromNullable(userData.superpowers)?.includes('vip') === true).toBeFalsy();
 			});
 		});
@@ -117,7 +117,7 @@ describe('reward.canister', () => {
 
 				const userData = await getUserInfo(queryParams);
 
-				expect(userData.superpowers.length).toBe(0);
+				expect(userData.superpowers).toHaveLength(0);
 				expect(fromNullable(userData.superpowers)?.includes('gold') === true).toBeFalsy();
 			});
 		});

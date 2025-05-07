@@ -9,30 +9,24 @@ import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
-import type { Networkish } from 'ethers/providers';
 
 export const ETH_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED
 );
 
-export const INFURA_NETWORK_HOMESTEAD: Networkish = 'homestead';
-export const INFURA_NETWORK_SEPOLIA: Networkish = 'sepolia';
-export const INFURA_NETWORK_BASE: Networkish = 'base';
-export const INFURA_NETWORK_BASE_SEPOLIA: Networkish = 'base-sepolia';
-export const INFURA_NETWORK_BNB_MAINNET: Networkish = 'bnb';
-export const INFURA_NETWORK_BNB_TESTNET: Networkish = 'bnbt';
-
-export const ETHERSCAN_NETWORK_HOMESTEAD: Networkish = 'homestead';
-export const ETHERSCAN_NETWORK_SEPOLIA: Networkish = 'sepolia';
-
-export const ETHERSCAN_API_URL_HOMESTEAD = 'https://api.etherscan.io/api';
-export const ETHERSCAN_API_URL_SEPOLIA = 'https://api-sepolia.etherscan.io/api';
-
 export const ALCHEMY_JSON_RPC_URL_MAINNET = 'https://eth-mainnet.g.alchemy.com/v2';
 export const ALCHEMY_JSON_RPC_URL_SEPOLIA = 'https://eth-sepolia.g.alchemy.com/v2';
+export const ALCHEMY_JSON_RPC_URL_BASE_MAINNET = 'https://base-mainnet.g.alchemy.com/v2';
+export const ALCHEMY_JSON_RPC_URL_BASE_SEPOLIA = 'https://base-sepolia.g.alchemy.com/v2';
+export const ALCHEMY_JSON_RPC_URL_BSC_MAINNET = 'https://bnb-mainnet.g.alchemy.com/v2';
+export const ALCHEMY_JSON_RPC_URL_BSC_TESTNET = 'https://bnb-testnet.g.alchemy.com/v2';
 
 export const ALCHEMY_NETWORK_MAINNET: Network = Network.ETH_MAINNET;
 export const ALCHEMY_NETWORK_SEPOLIA: Network = Network.ETH_SEPOLIA;
+export const ALCHEMY_NETWORK_BASE_MAINNET: Network = Network.BASE_MAINNET;
+export const ALCHEMY_NETWORK_BASE_SEPOLIA: Network = Network.BASE_SEPOLIA;
+export const ALCHEMY_NETWORK_BSC_MAINNET: Network = Network.BNB_MAINNET;
+export const ALCHEMY_NETWORK_BSC_TESTNET: Network = Network.BNB_TESTNET;
 
 /**
  * Ethereum
@@ -49,10 +43,10 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	iconLight: ethereumIconLight,
 	iconDark: ethereumIconDark,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
+	providers: { infura: 'homestead' },
+	exchange: { coingeckoId: 'ethereum' },
 	buy: { onramperId: 'ethereum' }
 };
-
-export const { chainId: ETHEREUM_NETWORK_CHAIN_ID } = ETHEREUM_NETWORK;
 
 export const SEPOLIA_NETWORK_SYMBOL = 'SepoliaETH';
 
@@ -65,10 +59,9 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	chainId: 11155111n,
 	iconLight: sepoliaIconLight,
 	iconDark: sepoliaIconDark,
-	explorerUrl: SEPOLIA_EXPLORER_URL
+	explorerUrl: SEPOLIA_EXPLORER_URL,
+	providers: { infura: 'sepolia' }
 };
-
-export const { chainId: SEPOLIA_NETWORK_CHAIN_ID } = SEPOLIA_NETWORK;
 
 /**
  * Some functions, such as when we load the user's custom tokens, require knowing all the networks.
@@ -81,7 +74,7 @@ export const SUPPORTED_ETHEREUM_NETWORKS: EthereumNetwork[] = defineSupportedNet
 	testnetNetworks: [SEPOLIA_NETWORK]
 });
 
-export const SUPPORTED_ETHEREUM_NETWORKS_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NETWORKS.map(
+export const SUPPORTED_ETHEREUM_NETWORK_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NETWORKS.map(
 	({ id }) => id
 );
 

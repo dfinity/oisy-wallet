@@ -2,6 +2,7 @@ import type {
 	NetworkAppMetadataSchema,
 	NetworkBuySchema,
 	NetworkEnvironmentSchema,
+	NetworkExchangeSchema,
 	NetworkIdSchema,
 	NetworkSchema
 } from '$lib/schema/network.schema';
@@ -12,6 +13,8 @@ export type NetworkId = z.infer<typeof NetworkIdSchema>;
 export type NetworkEnvironment = z.infer<typeof NetworkEnvironmentSchema>;
 
 export type Network = z.infer<typeof NetworkSchema>;
+
+export type NetworkExchange = z.infer<typeof NetworkExchangeSchema>;
 
 export type NetworkBuy = z.infer<typeof NetworkBuySchema>;
 

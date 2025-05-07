@@ -5,21 +5,31 @@ import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
+import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
+import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
+import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
 import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
+import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
-import { extendIcTransaction } from '$icp/utils/ic-transactions.utils';
-import { MICRO_TRANSACTION_USD_THRESHOLD } from '$lib/constants/app.constants';
+import {
+	extendIcTransaction,
+	getAllIcTransactions,
+	getIcExtendedTransactions
+} from '$icp/utils/ic-transactions.utils';
+import { MICRO_TRANSACTION_USD_THRESHOLD, ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
-import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
+import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
+	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSepolia,
 	isNetworkIdSolana
@@ -45,19 +55,25 @@ export const mapAllTransactionsUi = ({
 	$btcTransactions,
 	$ethTransactions,
 	$ckEthMinterInfo,
+	$ckBtcMinterInfoStore,
 	$ethAddress,
-	$icTransactions,
 	$solTransactions,
-	$btcStatuses
+	$btcStatuses,
+	$icTransactionsStore,
+	$ckBtcPendingUtxosStore,
+	$icPendingTransactionsStore
 }: {
 	tokens: Token[];
 	$btcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
 	$ethTransactions: EthTransactionsData;
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
+	$ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	$ethAddress: OptionEthAddress;
-	$icTransactions: (token: Token | undefined) => NonNullable<IcTransactionsData>;
 	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
+	$icTransactionsStore: CertifiedStoreData<IcTransactionsData>;
+	$ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
+	$icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
 }): AllTransactionUiWithCmp[] => {
 	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses(
 		$ckEthMinterInfo?.[ETHEREUM_TOKEN_ID]
@@ -88,8 +104,7 @@ export const mapAllTransactionsUi = ({
 			];
 		}
 
-		if (isNetworkIdEthereum(networkId)) {
-			// TODO: remove Sepolia transactions when the feature is complete; for now we use it for testing
+		if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
 			const isSepoliaNetwork = isNetworkIdSepolia(networkId);
 
 			return [
@@ -109,7 +124,28 @@ export const mapAllTransactionsUi = ({
 		}
 
 		if (isNetworkIdICP(networkId)) {
-			// TODO: Implement ckBTC and ckETH pending transactions
+			const $icTransactions = getAllIcTransactions({
+				token,
+				icTransactionsStore: $icTransactionsStore,
+				btcStatusesStore: $btcStatuses,
+				ckBtcMinterInfoStore: $ckBtcMinterInfoStore,
+				ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore,
+				icPendingTransactionsStore: $icPendingTransactionsStore,
+				ckEthPendingTransactions: getCkEthPendingTransactions({
+					token,
+					icPendingTransactionsStore: $icPendingTransactionsStore
+				}),
+				ckBtcPendingUtxoTransactions: getCkBtcPendingUtxoTransactions({
+					token,
+					ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore,
+					ckBtcMinterInfoStore: $ckBtcMinterInfoStore
+				}),
+				icExtendedTransactions: getIcExtendedTransactions({
+					token,
+					icTransactionsStore: $icTransactionsStore,
+					btcStatusesStore: $btcStatuses
+				})
+			});
 
 			if (isNullish($icTransactions)) {
 				return acc;
@@ -117,7 +153,7 @@ export const mapAllTransactionsUi = ({
 
 			return [
 				...acc,
-				...($icTransactions(token) ?? []).map((transaction) => ({
+				...($icTransactions ?? []).map((transaction) => ({
 					transaction: extendIcTransaction({
 						transaction,
 						token,
@@ -249,3 +285,29 @@ export const areTransactionsStoresLoading = (
 
 	return (someNullish || someNotInitialized) && allEmpty;
 };
+
+export const getKnownDestinations = (transactions: AnyTransactionUi[]): KnownDestinations =>
+	transactions.reduce<KnownDestinations>(
+		(acc, { timestamp, value, to, type }) =>
+			nonNullish(to) && type === 'send' && nonNullish(value) && value > ZERO
+				? {
+						...acc,
+						...(Array.isArray(to) ? to : [to]).reduce(
+							(innerAcc, address) => ({
+								...innerAcc,
+								[address]: {
+									amounts: [...(nonNullish(acc[address]) ? acc[address].amounts : []), value],
+									timestamp:
+										nonNullish(acc[address]?.timestamp) && nonNullish(timestamp)
+											? Math.max(Number(acc[address].timestamp), Number(timestamp))
+											: nonNullish(timestamp)
+												? Number(timestamp)
+												: acc[address].timestamp
+								}
+							}),
+							{}
+						)
+					}
+				: acc,
+		{}
+	);

@@ -25,7 +25,7 @@
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -139,7 +139,7 @@
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	let amount: bigint;
-	$: amount = BigInt(firstTransaction?.value ?? ZERO_BI);
+	$: amount = BigInt(firstTransaction?.value ?? ZERO);
 
 	const send = async () => {
 		const { success } = await sendServices({
@@ -162,7 +162,7 @@
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	{@const data = firstTransaction.data}
+	{@const { data } = firstTransaction}
 
 	<WalletConnectModalTitle slot="title"
 		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle

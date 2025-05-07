@@ -18,13 +18,14 @@ export const mockUserNetworks: UserNetworks = {
 	[SOLANA_DEVNET_NETWORK_ID]: { enabled: true, isTestnet: true }
 };
 
-export const mockUserNetworksComplete: UserNetworks = {
+export const mockUserNetworksOnlyMainnetsComplete: UserNetworks = {
 	...SUPPORTED_NETWORKS.reduce<UserNetworks>(
 		(acc, { id, env }) => ({
 			...acc,
-			[id]: { enabled: true, isTestnet: env === 'testnet' }
+			...(env === 'mainnet' && {
+				[id]: { enabled: true, isTestnet: false }
+			})
 		}),
 		{}
-	),
-	...mockUserNetworks
+	)
 };

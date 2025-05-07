@@ -49,11 +49,11 @@
 		}
 
 		if (nonNullish(qrResponse.destination)) {
-			destination = qrResponse.destination;
+			({ destination } = qrResponse);
 		}
 
 		if (nonNullish(qrResponse.amount)) {
-			amount = qrResponse.amount;
+			({ amount } = qrResponse);
 		}
 
 		back();
@@ -79,7 +79,7 @@
 </div>
 
 <ButtonGroup>
-	<ButtonBack on:click={back} />
+	<ButtonBack onclick={back} />
 </ButtonGroup>
 
 <style lang="scss">

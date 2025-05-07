@@ -23,10 +23,12 @@
 
 	let amount: bigint | undefined;
 	$: amount = nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined;
+
+	const modalId = Symbol();
 </script>
 
 <Transaction
-	on:click={() => modalStore.openBtcTransaction({ transaction, token })}
+	on:click={() => modalStore.openBtcTransaction({ id: modalId, data: { transaction, token } })}
 	{amount}
 	{type}
 	timestamp={Number(timestamp)}
