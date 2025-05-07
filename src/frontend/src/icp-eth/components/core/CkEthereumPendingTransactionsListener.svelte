@@ -27,6 +27,7 @@
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionToken } from '$lib/types/token';
+	import type { IcToken } from '$icp/types/ic-token';
 
 	export let token: OptionToken;
 
@@ -108,7 +109,7 @@
 
 				await loadPendingCkEthereumTransaction({
 					hash,
-					token: $tokenAsIcToken,
+					token: token as IcToken,
 					twinToken: $ckEthereumTwinToken,
 					networkId
 				});
