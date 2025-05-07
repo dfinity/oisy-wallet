@@ -1,26 +1,18 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
 	import type { RewardDescription } from '$env/types/env-reward';
-	import {
-		REWARD_ELIGIBILITY_CONTEXT_KEY,
-		type RewardEligibilityContext
-	} from '$icp/stores/reward.store';
 	import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type {CriterionEligibility} from "$declarations/rewards/rewards.did";
 
 	interface Props {
 		reward: RewardDescription;
+		isEligible: boolean;
+		criteria: CriterionEligibility[];
 	}
 
-	let { reward }: Props = $props();
-
-	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
-
-	const campaignEligibility = $derived(store.getCampaignEligibility(reward.id));
-	const isEligible = $derived(campaignEligibility?.eligible ?? false);
-	const criteria = $derived(campaignEligibility?.criteria ?? []);
+	let { reward, isEligible, criteria }: Props = $props();
 </script>
 
 {#if criteria.length > 0}

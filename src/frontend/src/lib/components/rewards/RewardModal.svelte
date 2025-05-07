@@ -28,7 +28,9 @@
 
 	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
-	const criteria = $derived(store.getCampaignEligibility(reward.id)?.criteria ?? []);
+	const campaignEligibility = $derived(store.getCampaignEligibility(reward.id));
+	const isEligible = $derived(campaignEligibility?.eligible ?? false);
+	const criteria = $derived(campaignEligibility?.criteria ?? []);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 
 	let amountOfRewards = $state(0);
@@ -69,7 +71,7 @@
 			{#if criteria.length > 0}
 				<Hr spacing="md" />
 
-				<RewardsRequirements {reward} />
+				<RewardsRequirements {reward} {isEligible} {criteria} />
 			{/if}
 		{/if}
 
