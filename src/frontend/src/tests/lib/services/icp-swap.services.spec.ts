@@ -27,7 +27,7 @@ describe('icpSwapAmounts', () => {
 	});
 
 	it('returns receiveAmount when everything succeeds', async () => {
-		vi.spyOn(factoryApi, 'getPool').mockResolvedValue(mockPool);
+		vi.spyOn(factoryApi, 'getPoolCanister').mockResolvedValue(mockPool);
 		vi.spyOn(poolApi, 'getQuote').mockResolvedValue(999n);
 
 		const result = await icpSwapAmounts(params);
@@ -37,7 +37,7 @@ describe('icpSwapAmounts', () => {
 
 	it('uses correct zeroForOne = true when source is token0', async () => {
 		const getQuoteSpy = vi.spyOn(poolApi, 'getQuote').mockResolvedValue(888n);
-		vi.spyOn(factoryApi, 'getPool').mockResolvedValue(mockPool);
+		vi.spyOn(factoryApi, 'getPoolCanister').mockResolvedValue(mockPool);
 
 		await icpSwapAmounts(params);
 
@@ -58,7 +58,7 @@ describe('icpSwapAmounts', () => {
 		};
 
 		const getQuoteSpy = vi.spyOn(poolApi, 'getQuote').mockResolvedValue(888n);
-		vi.spyOn(factoryApi, 'getPool').mockResolvedValue(flippedPool);
+		vi.spyOn(factoryApi, 'getPoolCanister').mockResolvedValue(flippedPool);
 
 		await icpSwapAmounts(params);
 
