@@ -3,7 +3,7 @@ import { ICPSwapFactoryCanister } from '$lib/canisters/icp-swap-factory.canister
 import type { ICPSwapGetPoolParams } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 let canister: ICPSwapFactoryCanister | undefined = undefined;
 
