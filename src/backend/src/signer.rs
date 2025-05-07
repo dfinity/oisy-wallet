@@ -4,8 +4,7 @@ use bitcoin::{Address, CompressedPublicKey};
 use candid::{Nat, Principal};
 use ic_cdk::{
     api::{canister_cycle_balance, canister_self, msg_caller},
-    bitcoin_canister::Network
-    ,
+    bitcoin_canister::Network,
     management_canister::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs},
 };
 use ic_cycles_ledger_client::{
@@ -35,8 +34,8 @@ const LEDGER_FEE: u64 = 1_000_000_000u64;
 /// - The endpoint prices can be seen here: <https://github.com/dfinity/chain-fusion-signer/blob/main/src/signer/canister/src/lib.rs>
 /// - At the time of writing, the endpoint prices in the chain fusion signer repo are placeholders.
 ///   Initial measurements indicate that a typical real fee will be about 80T.
-/// - PAPI is likely to offer an endpoint returning a pricelist in the future, so we can periodically
-///   check the price and adjust this value.
+/// - PAPI is likely to offer an endpoint returning a pricelist in the future, so we can
+///   periodically check the price and adjust this value.
 const SIGNER_FEE: u64 = 80_000_000_000;
 /// A reasonable number of signing operations per user per login.
 ///
@@ -131,7 +130,7 @@ async fn cfs_ecdsa_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
     let result = ecdsa_public_key(&arg).await;
     match result {
         Ok(response) => Ok(response.public_key),
-        Err(err) => Err(format!("Failed to get ECDSA public key: {}", err)),
+        Err(err) => Err(format!("Failed to get ECDSA public key: {err}")),
     }
 }
 

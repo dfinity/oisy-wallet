@@ -3786,6 +3786,7 @@ dependencies = [
  "ic-cycles-ledger-client",
  "ic-metrics-encoder",
  "ic-verifiable-credentials",
+ "pretty_assertions",
  "serde",
  "serde_bytes",
  "sha2 0.10.9",

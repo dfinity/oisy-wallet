@@ -1,5 +1,3 @@
-use std::{cell::RefCell, time::Duration};
-
 use bitcoin_utils::estimate_fee;
 use candid::{candid_method, Principal};
 use config::find_credential_config;
@@ -7,7 +5,7 @@ use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
     btc_user_pending_tx_state::StoredPendingTransaction, state::with_btc_pending_transactions,
 };
-use ic_cdk::{api::{time, msg_caller}, eprintln};
+use ic_cdk::{api::time, eprintln};
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use ic_stable_structures::{
@@ -54,6 +52,7 @@ use shared::{
     },
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
+use std::{cell::RefCell, time::Duration};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
@@ -165,12 +164,12 @@ fn start_periodic_housekeeping_timers() {
     // Run housekeeping tasks once, immediately but asynchronously.
     let immediate = Duration::ZERO;
     set_timer(immediate, || {
-        ic_cdk::spawn(hourly_housekeeping_tasks())
+        ic_cdk::futures::spawn(hourly_housekeeping_tasks());
     });
 
     // Then periodically:
     let hour = Duration::from_secs(60 * 60);
-    let _ = set_timer_interval(hour, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+    let _ = set_timer_interval(hour, || ic_cdk::futures::spawn(hourly_housekeeping_tasks()));
 }
 
 /// Runs hourly housekeeping tasks:
@@ -257,9 +256,10 @@ pub fn http_request(request: HttpRequest) -> HttpResponse {
 fn parse_eth_address(address: &str) -> [u8; 20] {
     match address.parse() {
         Ok(H160(addr)) => addr,
-        Err(err) => ic_cdk::trap(&format!(
-            "failed to parse contract address {address}: {err}",
-        )),
+        Err(err) => {
+            let error_msg = format!("failed to parse contract address {address}: {err}");
+            ic_cdk::trap(&error_msg);
+        }
     }
 }
 
@@ -271,7 +271,7 @@ pub fn set_user_token(token: UserToken) {
 
     let addr = parse_eth_address(&token.contract_address);
 
-    let stored_principal = StoredPrincipal(msg_caller());
+    let stored_principal = StoredPrincipal(ic_cdk::api::msg_caller());
 
     let find = |t: &UserToken| {
         t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
@@ -282,7 +282,7 @@ pub fn set_user_token(token: UserToken) {
 
 #[update(guard = "caller_is_not_anonymous")]
 pub fn set_many_user_tokens(tokens: Vec<UserToken>) {
-    let stored_principal = StoredPrincipal(msg_caller());
+    let stored_principal = StoredPrincipal(ic_cdk::api::msg_caller());
 
     mutate_state(|s| {
         for token in tokens {
@@ -303,7 +303,7 @@ pub fn set_many_user_tokens(tokens: Vec<UserToken>) {
 #[allow(clippy::needless_pass_by_value)]
 pub fn remove_user_token(token_id: UserTokenId) {
     let addr = parse_eth_address(&token_id.contract_address);
-    let stored_principal = StoredPrincipal(msg_caller());
+    let stored_principal = StoredPrincipal(ic_cdk::api::msg_caller());
 
     let find = |t: &UserToken| {
         t.chain_id == token_id.chain_id && parse_eth_address(&t.contract_address) == addr
@@ -315,7 +315,7 @@ pub fn remove_user_token(token_id: UserTokenId) {
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn list_user_tokens() -> Vec<UserToken> {
-    let stored_principal = StoredPrincipal(msg_caller());
+    let stored_principal = StoredPrincipal(ic_cdk::api::msg_caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
@@ -323,7 +323,7 @@ pub fn list_user_tokens() -> Vec<UserToken> {
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_custom_token(token: CustomToken) {
-    let stored_principal = StoredPrincipal(msg_caller());
+    let stored_principal = StoredPrincipal(ic_cdk::api::msg_caller());
 
     let find = |t: &CustomToken| -> bool {
         CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
@@ -334,7 +334,7 @@ pub fn set_custom_token(token: CustomToken) {
 
 #[update(guard = "caller_is_not_anonymous")]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
-    let stored_principal = StoredPrincipal(msg_caller());
+    let stored_principal = StoredPrincipal(ic_cdk::api::msg_caller());
 
     mutate_state(|s| {
         for token in tokens {
@@ -350,7 +350,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn list_custom_tokens() -> Vec<CustomToken> {
-    let stored_principal = StoredPrincipal(msg_caller());
+    let stored_principal = StoredPrincipal(ic_cdk::api::msg_caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
 }
 
@@ -364,7 +364,7 @@ const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 pub async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
 ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
-    let principal = msg_caller();
+    let principal = ic_cdk::api::msg_caller();
     let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
         .await
         .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
@@ -377,8 +377,8 @@ pub async fn btc_select_user_utxos_fee(
                 .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
         ),
     )
-        .await
-        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+    .await
+    .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
     let now_ns = time();
 
     let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
@@ -400,4 +400,455 @@ pub async fn btc_select_user_utxos_fee(
     let output_count = 2;
     let mut available_utxos = all_utxos.clone();
     let selected_utxos =
-        bitcoin_utils
+        bitcoin_utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
+
+    // Fee calculation might still take into account default tx size and expected output.
+    // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be present.
+    if selected_utxos.is_empty() {
+        return Ok(SelectedUtxosFeeResponse {
+            utxos: selected_utxos,
+            fee_satoshis: 0,
+        });
+    }
+
+    let fee_satoshis = estimate_fee(
+        selected_utxos.len() as u64,
+        median_fee_millisatoshi_per_vbyte,
+        output_count as u64,
+    );
+
+    Ok(SelectedUtxosFeeResponse {
+        utxos: selected_utxos,
+        fee_satoshis,
+    })
+}
+
+/// Adds a pending Bitcoin transaction for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `BtcAddPendingTransactionError`.
+#[update(guard = "caller_is_not_anonymous")]
+pub async fn btc_add_pending_transaction(
+    params: BtcAddPendingTransactionRequest,
+) -> Result<(), BtcAddPendingTransactionError> {
+    let principal = ic_cdk::api::msg_caller();
+    let current_utxos = bitcoin_api::get_all_utxos(
+        params.network,
+        params.address.clone(),
+        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+    )
+    .await
+    .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+    let now_ns = time();
+
+    with_btc_pending_transactions(|pending_transactions| {
+        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+        let current_pending_transaction = StoredPendingTransaction {
+            txid: params.txid,
+            utxos: params.utxos,
+            created_at_timestamp_ns: now_ns,
+        };
+        pending_transactions
+            .add_pending_transaction(principal, params.address, current_pending_transaction)
+            .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
+    })
+}
+
+/// Returns the pending Bitcoin transactions for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `BtcGetPendingTransactionsError`.
+#[update(guard = "caller_is_not_anonymous")]
+pub async fn btc_get_pending_transactions(
+    params: BtcGetPendingTransactionsRequest,
+) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
+    let principal = ic_cdk::api::msg_caller();
+    let now_ns = time();
+
+    let current_utxos = bitcoin_api::get_all_utxos(
+        params.network,
+        params.address.clone(),
+        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+    )
+    .await
+    .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
+
+    let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
+        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+        pending_transactions
+            .get_pending_transactions(&principal, &params.address)
+            .clone()
+    });
+
+    let pending_transactions = stored_transactions
+        .iter()
+        .map(|tx| PendingTransaction {
+            txid: tx.txid.clone(),
+            utxos: tx.utxos.clone(),
+        })
+        .collect();
+
+    Ok(BtcGetPendingTransactionsReponse {
+        transactions: pending_transactions,
+    })
+}
+
+/// Adds a verifiable credential to the user profile.
+///
+/// # Errors
+/// Errors are enumerated by: `AddUserCredentialError`.
+#[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
+pub fn add_user_credential(
+    request: AddUserCredentialRequest,
+) -> Result<(), AddUserCredentialError> {
+    let user_principal = ic_cdk::api::msg_caller();
+    let stored_principal = StoredPrincipal(user_principal);
+    let current_time_ns = u128::from(time());
+
+    let (vc_flow_signers, root_pk_raw, credential_type, derivation_origin) =
+        read_config(|config| find_credential_config(&request, config))
+            .ok_or(AddUserCredentialError::ConfigurationError)?;
+
+    match validate_ii_presentation_and_claims(
+        &request.credential_jwt,
+        user_principal,
+        derivation_origin,
+        &vc_flow_signers,
+        &request.credential_spec,
+        &root_pk_raw,
+        current_time_ns,
+    ) {
+        Ok(()) => mutate_state(|s| {
+            let mut user_profile_model =
+                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+            add_credential(
+                stored_principal,
+                request.current_user_version,
+                &credential_type,
+                vc_flow_signers.issuer_origin,
+                &mut user_profile_model,
+            )
+        }),
+        Err(_) => Err(AddUserCredentialError::InvalidCredential),
+    }
+}
+
+/// Updates the user's preference to enable (or disable) networks in the interface, merging with any
+/// existing settings.
+///
+/// # Returns
+/// - Returns `Ok(())` if the network settings were updated successfully, or if they were already
+///   set to the same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "caller_is_not_anonymous")]
+pub fn update_user_network_settings(
+    request: SaveNetworksSettingsRequest,
+) -> Result<(), SaveNetworksSettingsError> {
+    let user_principal = ic_cdk::api::msg_caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        update_network_settings(
+            stored_principal,
+            request.current_user_version,
+            request.networks,
+            &mut user_profile_model,
+        )
+    })
+}
+
+/// Sets the user's preference to show (or hide) testnets in the interface.
+///
+/// # Returns
+/// - Returns `Ok(())` if the testnets setting was saved successfully, or if it was already set to
+///   the same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)] // canister methods are necessary
+pub fn set_user_show_testnets(
+    request: SetShowTestnetsRequest,
+) -> Result<(), SaveTestnetsSettingsError> {
+    let user_principal = ic_cdk::api::msg_caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        set_show_testnets(
+            stored_principal,
+            request.current_user_version,
+            request.show_testnets,
+            &mut user_profile_model,
+        )
+    })
+}
+
+/// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
+///
+/// # Arguments
+/// * `request` - The request to add a hidden dApp ID.
+///
+/// # Returns
+/// - Returns `Ok(())` if the dApp ID was added successfully, or if it was already in the list.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "caller_is_not_anonymous")]
+pub fn add_user_hidden_dapp_id(
+    request: AddHiddenDappIdRequest,
+) -> Result<(), AddDappSettingsError> {
+    request.check()?;
+    let user_principal = ic_cdk::api::msg_caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        add_hidden_dapp_id(
+            stored_principal,
+            request.current_user_version,
+            request.dapp_id,
+            &mut user_profile_model,
+        )
+    })
+}
+
+/// It create a new user profile for the caller.
+/// If the user has already a profile, it will return that profile.
+#[update(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn create_user_profile() -> UserProfile {
+    let stored_principal = StoredPrincipal(ic_cdk::api::msg_caller());
+
+    let user_profile: UserProfile = mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        let stored_user = create_profile(stored_principal, &mut user_profile_model);
+
+        UserProfile::from(&stored_user)
+    });
+
+    // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
+    // Spawn the async task for allow_signing after returning UserProfile synchronously
+    ic_cdk::futures::spawn(async move {
+        // Upon initial user login, we have to that ensure allow_signing is called to handle
+        // cases where users lack the cycles required for signer operations. To
+        // guarantee correct functionality, create_user_profile(..) must be invoked
+        // before any signer-related calls (e.g., get_eth_address). Spawns the async
+        // task separately after returning UserProfile synchronously
+        if let Err(e) = signer::allow_signing(None).await {
+            // We don't return errors or panic here because:
+            // 1. The user profile was already created successfully
+            // 2. This is running in a spawned task, so we can't return errors to the original
+            //    caller
+            ic_cdk::println!(
+                "Error enabling signing for user {}: {:?}",
+                stored_principal.0,
+                e
+            );
+        }
+    });
+
+    user_profile
+}
+
+/// Returns the caller's user profile.
+///
+/// # Errors
+/// Errors are enumerated by: `GetUserProfileError`.
+///
+/// # Panics
+/// - If the caller is anonymous.  See: `may_read_user_data`.
+#[query(guard = "caller_is_not_anonymous")]
+pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
+    let stored_principal = StoredPrincipal(ic_cdk::api::msg_caller());
+
+    mutate_state(|s| {
+        let user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        match find_profile(stored_principal, &user_profile_model) {
+            Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
+            Err(err) => Err(err),
+        }
+    })
+}
+
+/// Creates a new proof-of-work challenge for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `CreateChallengeError`.
+///
+/// # Returns
+///
+/// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
+/// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
+///   internal errors.
+#[update(guard = "caller_is_not_anonymous")]
+#[candid_method(update)]
+pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
+    let challenge = pow::create_pow_challenge().await?;
+
+    Ok(CreateChallengeResponse {
+        difficulty: challenge.difficulty,
+        start_timestamp_ms: challenge.start_timestamp_ms,
+        expiry_timestamp_ms: challenge.expiry_timestamp_ms,
+    })
+}
+/// Checks if the caller has an associated user profile.
+///
+/// # Returns
+/// - `Ok(true)` if a user profile exists for the caller.
+/// - `Ok(false)` if no user profile exists for the caller.
+/// # Errors
+/// Does not return any error
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn has_user_profile() -> HasUserProfileResponse {
+    let stored_principal = StoredPrincipal(ic_cdk::api::msg_caller());
+
+    // candid does not support to directly return a bool
+    HasUserProfileResponse {
+        has_user_profile: user_profile::has_user_profile(stored_principal),
+    }
+}
+
+/// This function authorizes the caller to spend a specific
+//  amount of cycles on behalf of the OISY backend for chain-fusion signer operations (e.g.,
+// providing public keys, creating signatures, etc.) by calling the `icrc_2_approve` on the
+// cycles ledger.
+///
+/// Note:
+/// - The chain fusion signer performs threshold key operations including providing public keys,
+///   creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
+///
+/// # Errors
+/// Errors are enumerated by: `AllowSigningError`.
+#[update(guard = "caller_is_not_anonymous")]
+pub async fn allow_signing(
+    request: Option<AllowSigningRequest>,
+) -> Result<AllowSigningResponse, AllowSigningError> {
+    let principal = ic_cdk::api::msg_caller();
+
+    // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED is
+    // disabled
+    if !POW_ENABLED {
+        // Passing None to apply the old cycle calculation logic
+        signer::allow_signing(None).await?;
+        // Returning a placeholder response that can be ignored by the frontend.
+        return Ok(AllowSigningResponse {
+            status: AllowSigningStatus::Skipped,
+            allowed_cycles: 0u64,
+            challenge_completion: None,
+        });
+    }
+
+    // we atill need to make a valid request has been sent request
+    let request = request.ok_or(AllowSigningError::Other("Invalid request".to_string()))?;
+
+    // The Proof-of-Work (PoW) protection is explicitly enforced at the HTTP entry-point level.
+    // This ensures internal calls to the business service remains unrestricted and does not require
+    // PoW protection.
+    let challenge_completion: ChallengeCompletion =
+        pow::complete_challenge(request.nonce).map_err(AllowSigningError::PowChallenge)?;
+
+    // Grant cycles proportional to difficulty
+    let allowed_cycles = u64::from(challenge_completion.current_difficulty) * CYCLES_PER_DIFFICULTY;
+
+    ic_cdk::println!(
+        "Allowing principle {} to spend {} cycles on signer operations",
+        principal.to_string(),
+        allowed_cycles,
+    );
+
+    // Allow the caller to pay for cycles consumed by signer operations
+    signer::allow_signing(Some(allowed_cycles)).await?;
+
+    Ok(AllowSigningResponse {
+        status: AllowSigningStatus::Executed,
+        allowed_cycles,
+        challenge_completion: Some(challenge_completion),
+    })
+}
+
+#[query(guard = "caller_is_allowed")]
+#[allow(clippy::needless_pass_by_value)]
+#[must_use]
+pub fn list_users(request: ListUsersRequest) -> ListUsersResponse {
+    // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles
+    // consumption when reading BTreeMap.
+
+    let (users, matches_max_length): (Vec<OisyUser>, u64) =
+        read_state(|s| oisy_users(&request, &s.user_profile));
+
+    ListUsersResponse {
+        users,
+        matches_max_length,
+    }
+}
+
+#[query(guard = "caller_is_allowed")]
+#[allow(clippy::needless_pass_by_value)]
+#[must_use]
+pub fn list_user_creation_timestamps(
+    request: ListUsersRequest,
+) -> ListUserCreationTimestampsResponse {
+    let (creation_timestamps, matches_max_length): (Vec<Timestamp>, u64) =
+        read_state(|s| oisy_user_creation_timestamps(&request, &s.user_profile));
+
+    ListUserCreationTimestampsResponse {
+        creation_timestamps,
+        matches_max_length,
+    }
+}
+
+/// API method to get cycle balance and burn rate.
+#[update]
+pub async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
+    std_canister_status::get_canister_status_v2().await
+}
+
+/// Gets statistics about the canister.
+///
+/// Note: This is a private method, restricted to authorized users, as some stats may not be
+/// suitable for public consumption.
+#[query(guard = "caller_is_allowed")]
+#[must_use]
+pub fn stats() -> Stats {
+    read_state(|s| Stats::from(s))
+}
+
+/// Gets account creation timestamps.
+#[query(guard = "caller_is_allowed")]
+#[must_use]
+pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
+    read_state(|s| {
+        s.user_profile
+            .iter()
+            .map(|((_updated, StoredPrincipal(principal)), user)| {
+                (principal, user.created_timestamp)
+            })
+            .collect()
+    })
+}
+
+/// Saves a snapshot of the user's account.
+#[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)] // Canister API methods are always pass by value.
+pub fn set_snapshot(snapshot: UserSnapshot) {
+    todo!("TODO: Set snapshot to: {:?}", snapshot);
+}
+/// Gets the caller's last snapshot.
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn get_snapshot() -> Option<UserSnapshot> {
+    todo!()
+}
+
+export_candid!();

@@ -24,7 +24,7 @@ pub fn add_to_user_token<T>(
         }
     } else {
         if tokens.len() == MAX_TOKEN_LIST_LENGTH {
-            ic_cdk::trap(&format!(
+            ic_cdk::trap(format!(
                 "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
             ));
         }

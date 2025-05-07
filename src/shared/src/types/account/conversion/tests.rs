@@ -5,7 +5,7 @@ use std::fmt::Debug;
 use candid::Principal;
 
 use super::*;
-
+use pretty_assertions::assert_eq;
 struct TestVector<T: Eq + Debug> {
     name: &'static str,
     input: &'static str,

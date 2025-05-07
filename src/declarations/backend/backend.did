@@ -91,7 +91,6 @@ type AllowSigningResponse = record {
   allowed_cycles : nat64;
 };
 type AllowSigningStatus = variant { Skipped; Failed; Executed };
-type ApiEnabled = variant { ReadOnly; Enabled; Disabled };
 type ApproveError = variant {
   GenericError : record { message : text; error_code : nat };
   TemporarilyUnavailable;
@@ -156,7 +155,6 @@ type ChallengeCompletionError = variant {
   ChallengeAlreadySolved;
 };
 type Config = record {
-  api : opt Guards;
   derivation_origin : opt text;
   ecdsa_key_name : text;
   cfs_canister_id : opt principal;
@@ -195,8 +193,12 @@ type DefiniteCanisterSettingsArgs = record {
   compute_allocation : nat;
 };
 type EthAddress = variant { Public : text };
+type GetAllowedCyclesError = variant {
+  Other : text;
+  FailedToContactCyclesLedger;
+};
+type GetAllowedCyclesResponse = record { allowed_cycles : nat };
 type GetUserProfileError = variant { NotFound };
-type Guards = record { user_data : ApiEnabled; threshold_key : ApiEnabled };
 type HasUserProfileResponse = record { has_user_profile : bool };
 type HttpRequest = record {
   url : text;
@@ -219,7 +221,6 @@ type Icrcv2AccountId = variant {
   WithPrincipal : record { owner : principal; subaccount : opt blob };
 };
 type InitArg = record {
-  api : opt Guards;
   derivation_origin : opt text;
   ecdsa_key_name : text;
   cfs_canister_id : opt principal;
@@ -239,32 +240,6 @@ type ListUsersResponse = record {
   users : vec OisyUser;
   matches_max_length : nat64;
 };
-type MigrationError = variant {
-  TargetLockFailed;
-  TargetUnlockFailed;
-  CouldNotGetTargetPostStats;
-  CouldNotGetTargetPriorStats;
-  DataMigrationFailed;
-  TargetStatsMismatch : record { Stats; Stats };
-  Unknown;
-  TargetCanisterNotEmpty : Stats;
-  NoMigrationInProgress;
-};
-type MigrationProgress = variant {
-  MigratedUserTokensUpTo : opt principal;
-  Failed : MigrationError;
-  MigratedUserTimestampsUpTo : opt principal;
-  MigratedCustomTokensUpTo : opt principal;
-  CheckingDataMigration;
-  MigratedUserProfilesUpTo : opt record { nat64; principal };
-  UnlockingTarget;
-  Unlocking;
-  Completed;
-  Pending;
-  LockingTarget;
-  CheckingTarget;
-};
-type MigrationReport = record { to : principal; progress : MigrationProgress };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
 type NetworkSettingsFor = variant {
   InternetComputer;
@@ -295,8 +270,7 @@ type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok; Err : AddDappSettingsError };
-type Result_10 = variant { Ok; Err : SaveTestnetsSettingsError };
-type Result_11 = variant {
+type Result_10 = variant {
   Ok : TopUpCyclesLedgerResponse;
   Err : TopUpCyclesLedgerError;
 };
@@ -314,9 +288,12 @@ type Result_6 = variant {
   Ok : CreateChallengeResponse;
   Err : CreateChallengeError;
 };
-type Result_7 = variant { Ok : UserProfile; Err : GetUserProfileError };
-type Result_8 = variant { Ok : MigrationReport; Err : text };
-type Result_9 = variant { Ok; Err : text };
+type Result_7 = variant {
+  Ok : GetAllowedCyclesResponse;
+  Err : GetAllowedCyclesError;
+};
+type Result_8 = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result_9 = variant { Ok; Err : SaveTestnetsSettingsError };
 type SaveNetworksSettingsRequest = record {
   networks : vec record { NetworkSettingsFor; NetworkSettings };
   current_user_version : opt nat64;
@@ -446,16 +423,16 @@ service : (Arg) -> {
       Result_4,
     );
   btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_5);
-  bulk_up : (blob) -> ();
   config : () -> (Config) query;
   create_pow_challenge : () -> (Result_6);
   create_user_profile : () -> (UserProfile);
   get_account_creation_timestamps : () -> (
       vec record { principal; nat64 },
     ) query;
+  get_allowed_cycles : () -> (Result_7);
   get_canister_status : () -> (CanisterStatusResultV2);
   get_snapshot : () -> (opt UserSnapshot) query;
-  get_user_profile : () -> (Result_7) query;
+  get_user_profile : () -> (Result_8) query;
   has_user_profile : () -> (HasUserProfileResponse) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
@@ -464,19 +441,14 @@ service : (Arg) -> {
     ) query;
   list_user_tokens : () -> (vec UserToken) query;
   list_users : (ListUsersRequest) -> (ListUsersResponse) query;
-  migrate_user_data_to : (principal) -> (Result_8);
-  migration : () -> (opt MigrationReport) query;
-  migration_stop_timer : () -> (Result_9);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();
-  set_guards : (Guards) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
   set_many_user_tokens : (vec UserToken) -> ();
   set_snapshot : (UserSnapshot) -> ();
-  set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_10);
+  set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_9);
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
-  step_migration : () -> ();
-  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_11);
-  update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_10);
+  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_10);
+  update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_9);
 }

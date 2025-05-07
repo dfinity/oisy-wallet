@@ -1,10 +1,5 @@
 //! A moment-in-time summary of an account.
 
-#[cfg(test)]
-use candid::Principal;
-use candid::{CandidType, Deserialize};
-use serde::Serialize;
-
 use crate::types::{
     account::{AccountId, BtcAddress, EthAddress, Icrcv2AccountId, SolPrincipal},
     network::marker_trait::{
@@ -15,6 +10,10 @@ use crate::types::{
     token_id::{BtcTokenId, EthTokenId, IcrcTokenId, SolTokenId, TokenId},
     transaction::Transaction,
 };
+#[cfg(test)]
+use candid::Principal;
+use candid::{CandidType, Deserialize};
+use serde::Serialize;
 /// Snapshot of an account.
 ///
 /// # Generic Parameters
@@ -275,7 +274,7 @@ fn can_calculate_approx_usd_valuation() {
         amount: 1_000_000,
         last_transactions: vec![],
     });
-    assert_eq!(
+    pretty_assertions::assert_eq!(
         ComparableFloat(snapshot.approx_usd_valuation()),
         ComparableFloat(10.99)
     );

@@ -2,9 +2,9 @@
 
 mod custom_token {
     //! Tests for the `custom_token` module.
-    use candid::{Decode, Encode};
 
     use crate::{types::custom_token::*, validate::Validate};
+    use candid::{Decode, Encode};
 
     mod spl {
         //! Tests for the spl module.
