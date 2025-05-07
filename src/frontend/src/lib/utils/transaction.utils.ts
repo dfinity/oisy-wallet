@@ -73,6 +73,10 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 						| SolTransactionUi
 				)?.status === 'pending'
 			) {
+				console.log('mapping pending:', {
+					[pendingKey]: [...(acc[pendingKey] ?? []), transaction],
+					...acc
+				});
 				return { [pendingKey]: [...(acc[pendingKey] ?? []), transaction], ...acc };
 			}
 			return { ...acc, [undefinedKey]: [...(acc['undefined'] ?? []), transaction] };
