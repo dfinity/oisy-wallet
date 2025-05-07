@@ -1014,6 +1014,14 @@
 			"name": "Name"
 		}
 	},
+	"address": {
+		"types": {
+			"ICP": "Internet Computer",
+			"BTC": "Bitcoin",
+			"ETH": "Ethereum",
+			"SOL": "Solana"
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
