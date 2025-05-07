@@ -7,3 +7,6 @@ export const SWAP_SLIPPAGE_INVALID_VALUE = 50;
 
 export const SWAP_VALUE_DIFFERENCE_WARNING_VALUE = -1;
 export const SWAP_VALUE_DIFFERENCE_ERROR_VALUE = -5;
+
+export const KONG_SWAP_PROVIDER = 'kongSwap';
+export const ICP_SWAP_PROVIDER = 'icpSwap';
