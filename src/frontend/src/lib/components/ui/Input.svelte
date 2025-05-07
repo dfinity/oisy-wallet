@@ -27,7 +27,7 @@
 		{#if nonNullish(value) && notEmptyString(value.toString()) && showResetButton}
 			<button
 				class="text-tertiary"
-				on:click={reset}
+				onclick={reset}
 				aria-label={resetButtonAriaLabel ?? $i18n.convert.text.input_reset_button}
 			>
 				<IconClose />
