@@ -445,7 +445,8 @@
 			"scan_qr": "Scan QR Code",
 			"select_token": "Select token to send",
 			"select_network_filter": "Select network filter",
-			"send_again": "Send again"
+			"send_again": "Send again",
+			"recently_used": "Recently used"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
