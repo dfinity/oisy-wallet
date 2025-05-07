@@ -3,7 +3,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
-	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
+	import { loadNextIcTransactions } from '$icp/services/ic-transactions.services';
 	import { isNotIcToken, isNotIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -52,7 +52,7 @@
 			return;
 		}
 
-		await loadNextTransactions({
+		await loadNextIcTransactions({
 			owner: $authIdentity.getPrincipal(),
 			identity: $authIdentity,
 			maxResults: WALLET_PAGINATION,
