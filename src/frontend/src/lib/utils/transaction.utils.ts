@@ -74,7 +74,9 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 				)?.status === 'pending'
 			) {
 				console.log('mapping pending:', acc[pendingKey], transaction);
-				return { [pendingKey]: [...(acc[pendingKey] ?? []), transaction], ...acc };
+				const curPending = acc[pendingKey] ?? [];
+				delete acc[pendingKey];
+				return { [pendingKey]: [...curPending, transaction], ...acc };
 			}
 			return { ...acc, [undefinedKey]: [...(acc['undefined'] ?? []), transaction] };
 		}
