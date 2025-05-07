@@ -3,6 +3,7 @@ import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
+import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
@@ -49,7 +50,7 @@ export const swap = async ({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
 	});
-	const { standard, ledgerCanisterId } = sourceToken;
+	const { ledgerCanisterId } = sourceToken;
 	const transferParams = {
 		identity,
 		token: sourceToken,
@@ -58,7 +59,7 @@ export const swap = async ({
 	};
 
 	const txBlockIndex = !isSourceTokenIcrc2
-		? standard === 'icrc'
+		? isTokenIcrc(sourceToken)
 			? await sendIcrc({
 					...transferParams,
 					ledgerCanisterId
