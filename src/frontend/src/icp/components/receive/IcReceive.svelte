@@ -17,7 +17,6 @@
 		isTokenCkErc20Ledger,
 		isTokenCkEthLedger
 	} from '$icp/utils/ic-send.utils';
-	import { loadTokenAndRun } from '$lib/services/token.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 
@@ -33,7 +32,7 @@
 	$: icrc = token.standard === 'icrc';
 
 	const open: LoadTokenAndOpenModal = async (callback: () => Promise<void>) => {
-		await loadTokenAndRun({ token, callback });
+		await callback();
 	};
 
 	const dispatch = createEventDispatcher();
