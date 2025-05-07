@@ -4,15 +4,20 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {getContext} from "svelte";
+	import {REWARD_ELIGIBILITY_CONTEXT_KEY, type RewardEligibilityContext} from "$icp/stores/reward.store";
 
 	interface Props {
 		loading?: boolean;
 		reward: RewardDescription;
-		isEligible?: boolean;
 		requirementsFulfilled: boolean[];
 	}
 
-	let { loading = true, reward, isEligible = false, requirementsFulfilled }: Props = $props();
+	let { loading = true, reward, requirementsFulfilled }: Props = $props();
+
+	const {store} = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
+
+	const isEligible = $derived(store.getCampaignEligibility(reward.id).eligible ?? false);
 
 	const isRequirementFulfilled = (index: number) =>
 		(reward.requirements.length === requirementsFulfilled.length && requirementsFulfilled[index]) ??

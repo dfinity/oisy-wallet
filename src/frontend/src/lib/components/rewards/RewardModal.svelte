@@ -69,8 +69,6 @@
 		getRewardRequirementsFulfilled({ transactions, totalUsdBalance })
 	);
 
-	const isEligible = $derived(requirementsFulfilled.reduce((p, c) => p && c));
-
 	const transactionsStores = $derived([
 		// We explicitly do not include the Bitcoin transactions store locally, as it may cause lags in the UI.
 		// It could take longer time to be initialized and in case of no transactions (for example, a new user), it would be stuck to show the skeletons.
@@ -133,7 +131,6 @@
 				<RewardsRequirements
 					loading={isRequirementsLoading}
 					{reward}
-					{isEligible}
 					{requirementsFulfilled}
 				/>
 			{/if}

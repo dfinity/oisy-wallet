@@ -19,6 +19,9 @@
 		type RewardEligibilityContext
 	} from "$icp/stores/reward.store";
 	import type {EligibilityReport} from "$declarations/rewards/rewards.did";
+	import {modalRewardDetails, modalRewardDetailsData} from "$lib/derived/modal.derived";
+	import {nonNullish} from "@dfinity/utils";
+	import RewardModal from "$lib/components/rewards/RewardModal.svelte";
 
 	const report: EligibilityReport = {campaigns: [['OISY Airdrop #1', {available: true, eligible: true, criteria: []}]]}; // TODO replace this with api call
 	setContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY, {
@@ -56,4 +59,8 @@
 	/>
 {:else if selectedRewardState === RewardStates.ENDED}
 	<RewardsGroup rewards={endedCampaigns} testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER} />
+{/if}
+
+{#if $modalRewardDetails && nonNullish($modalRewardDetailsData)}
+	<RewardModal reward={$modalRewardDetailsData} />
 {/if}
