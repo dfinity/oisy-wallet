@@ -26,3 +26,5 @@ export type TagVariant =
 	| 'warning'
 	| 'success'
 	| 'outline';
+
+export type AvatarVariants = 'xl' | 'lg' | 'md' | 'sm' | 'xs';
