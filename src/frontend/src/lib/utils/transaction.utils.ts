@@ -61,7 +61,7 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 ): TransactionsUiDateGroup<T> => {
 	const currentDate = new Date();
 	const undefinedKey = get(i18n).transaction.label.no_date_available;
-	const pendingKey = get(i18n).transaction.status.pending;
+	const pendingKey = get(i18n).transactions.text.pending;
 
 	return transactions.reduce<TransactionsUiDateGroup<T>>((acc, transaction) => {
 		if (isNullish(transaction.transaction.timestamp)) {
