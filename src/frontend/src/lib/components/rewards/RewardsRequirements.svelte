@@ -5,10 +5,10 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
 	} from '$icp/stores/reward.store';
+	import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import RewardRequirement from "$lib/components/rewards/RewardRequirement.svelte";
-	import {REWARDS_REQUIREMENTS_STATUS} from "$lib/constants/test-ids.constants";
 
 	interface Props {
 		reward: RewardDescription;

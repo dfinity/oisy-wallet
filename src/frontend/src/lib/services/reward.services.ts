@@ -16,7 +16,7 @@ import {
 	isEligible as isEligibleApi,
 	setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
-import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { QrCodeType, asQrCodeType } from '$lib/enums/qr-code-types';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -34,9 +34,7 @@ import type {
 	RewardsResponse,
 	UserRoleResult
 } from '$lib/types/reward';
-import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
-import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';

@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
+	import { getContext } from 'svelte';
 	import type { RewardDescription } from '$env/types/env-reward';
+	import {
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from '$icp/stores/reward.store';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import RewardEarnings from '$lib/components/rewards/RewardEarnings.svelte';
@@ -14,8 +19,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
-	import {getContext} from "svelte";
-	import {REWARD_ELIGIBILITY_CONTEXT_KEY, type RewardEligibilityContext} from "$icp/stores/reward.store";
 
 	interface Props {
 		reward: RewardDescription;
