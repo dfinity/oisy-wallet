@@ -2,10 +2,6 @@
 	import { Html, Modal } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
 	import type { RewardDescription } from '$env/types/env-reward';
-	import {
-		REWARD_ELIGIBILITY_CONTEXT_KEY,
-		type RewardEligibilityContext
-	} from '$lib/stores/reward.store';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import RewardEarnings from '$lib/components/rewards/RewardEarnings.svelte';
@@ -18,6 +14,10 @@
 	import { REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import {
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from '$lib/stores/reward.store';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
@@ -28,7 +28,9 @@
 
 	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
-	const [_, campaignEligibility] = $derived($store?.eligibilityReport?.campaigns?.find(([id, _]) => id === reward.id) ?? [])
+	const [_, campaignEligibility] = $derived(
+		$store?.eligibilityReport?.campaigns?.find(([id, _]) => id === reward.id) ?? []
+	);
 	const isEligible = $derived(campaignEligibility?.eligible ?? false);
 	const criteria = $derived(campaignEligibility?.criteria ?? []);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
