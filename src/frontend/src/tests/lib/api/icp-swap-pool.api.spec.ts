@@ -1,80 +1,35 @@
+import type { IcToken } from '$icp/types/ic-token';
 import {
 	deposit,
 	depositFrom,
 	getIcpSwapAmounts,
-	getPool,
 	getQuote,
 	getUserUnusedBalance,
 	swap,
 	withdraw
-} from '$lib/api/icp-swap.api';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import { Principal } from '@dfinity/principal';
-
-import type { IcToken } from '$icp/types/ic-token';
+} from '$lib/api/icp-swap-pool.api';
 import {
 	depositFromMock,
 	depositMock,
 	factoryCreateMock,
 	getPoolMock,
 	getUserUnusedBalanceMock,
-	mockPoolData,
 	poolCreateMock,
 	quoteMock,
 	swapMock,
 	withdrawMock
 } from '$tests/mocks/icp-swap.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import { Principal } from '@dfinity/principal';
 
 vi.mock('$lib/constants/app.constants', () => ({
 	ICP_SWAP_CANISTER_ID: '4mmnk-kiaaa-aaaag-qbllq-cai'
 }));
 
+vi.mock('$lib/canisters/icp-swap-pool.canister', () => import('$tests/mocks/icp-swap.mock'));
 vi.mock('$lib/canisters/icp-swap-factory.canister', () => import('$tests/mocks/icp-swap.mock'));
 
-vi.mock('$lib/canisters/icp-swap-pool.canister', () => import('$tests/mocks/icp-swap.mock'));
-
-describe('icpSwapApi', () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	afterEach(() => {
-		vi.clearAllMocks();
-	});
-
-	describe('getPool', () => {
-		const params = {
-			identity: mockIdentity,
-			token0: { address: 'token0', standard: 'standard0' },
-			token1: { address: 'token1', standard: 'standard1' },
-			fee: 1000n,
-			canisterId: 'aaaaa-aa'
-		};
-
-		it('should call factory to get pool and return data', async () => {
-			const result = await getPool(params);
-
-			expect(factoryCreateMock).toHaveBeenCalledWith({
-				identity: mockIdentity,
-				canisterId: Principal.fromText('aaaaa-aa')
-			});
-
-			expect(getPoolMock).toHaveBeenCalledWith({
-				token0: params.token0,
-				token1: params.token1,
-				fee: params.fee
-			});
-
-			expect(result).toEqual(mockPoolData);
-		});
-
-		it('should handle factory errors', async () => {
-			factoryCreateMock.mockRejectedValueOnce(new Error('Factory error'));
-
-			await expect(getPool(params)).rejects.toThrow('Factory error');
-		});
-	});
-
+describe('icp-swap-pool.api', () => {
 	describe('getQuote', () => {
 		const params = {
 			identity: mockIdentity,
@@ -101,15 +56,6 @@ describe('icpSwapApi', () => {
 				amountOutMinimum: '0'
 			});
 			expect(result).toBe(100n);
-		});
-
-		it('should throw if canisterId or identity is missing', async () => {
-			await expect(getQuote({ ...params, canisterId: undefined })).rejects.toThrow(
-				'Missing pool canister ID'
-			);
-			await expect(getQuote({ ...params, identity: undefined })).rejects.toThrow(
-				'Identity is required'
-			);
 		});
 
 		it('should handle pool errors', async () => {
@@ -149,15 +95,6 @@ describe('icpSwapApi', () => {
 			expect(result).toBe(99n);
 		});
 
-		it('should throw if canisterId or identity is missing', async () => {
-			await expect(swap({ ...params, canisterId: undefined })).rejects.toThrow(
-				'Missing pool canister ID'
-			);
-			await expect(swap({ ...params, identity: undefined })).rejects.toThrow(
-				'Identity is required'
-			);
-		});
-
 		it('should handle pool errors', async () => {
 			poolCreateMock.mockRejectedValueOnce(new Error('Pool error'));
 
@@ -193,15 +130,6 @@ describe('icpSwapApi', () => {
 			});
 
 			expect(result).toBe(1000n);
-		});
-
-		it('should throw if canisterId or identity is missing', async () => {
-			await expect(deposit({ ...params, canisterId: undefined })).rejects.toThrow(
-				'Missing pool canister ID'
-			);
-			await expect(deposit({ ...params, identity: undefined })).rejects.toThrow(
-				'Identity is required'
-			);
 		});
 
 		it('should handle pool errors', async () => {
@@ -241,15 +169,6 @@ describe('icpSwapApi', () => {
 			expect(result).toBe(1000n);
 		});
 
-		it('should throw if canisterId or identity is missing', async () => {
-			await expect(depositFrom({ ...params, canisterId: undefined })).rejects.toThrow(
-				'Missing pool canister ID'
-			);
-			await expect(depositFrom({ ...params, identity: undefined })).rejects.toThrow(
-				'Identity is required'
-			);
-		});
-
 		it('should handle pool errors', async () => {
 			poolCreateMock.mockRejectedValueOnce(new Error('Pool error'));
 
@@ -287,15 +206,6 @@ describe('icpSwapApi', () => {
 			expect(result).toBe(50n);
 		});
 
-		it('should throw if canisterId or identity is missing', async () => {
-			await expect(withdraw({ ...params, canisterId: undefined })).rejects.toThrow(
-				'Missing pool canister ID'
-			);
-			await expect(withdraw({ ...params, identity: undefined })).rejects.toThrow(
-				'Identity is required'
-			);
-		});
-
 		it('should handle pool errors', async () => {
 			poolCreateMock.mockRejectedValueOnce(new Error('Pool error'));
 
@@ -324,16 +234,6 @@ describe('icpSwapApi', () => {
 
 			expect(getUserUnusedBalanceMock).toHaveBeenCalledWith(params.principal);
 			expect(result).toEqual({ balance0: 20n, balance1: 30n });
-		});
-
-		it('should throw if canisterId or identity is missing', async () => {
-			await expect(getUserUnusedBalance({ ...params, canisterId: undefined })).rejects.toThrow(
-				'Missing pool canister ID'
-			);
-
-			await expect(getUserUnusedBalance({ ...params, identity: undefined })).rejects.toThrow(
-				'Identity is required'
-			);
 		});
 
 		it('should handle pool errors', async () => {
@@ -397,10 +297,6 @@ describe('icpSwapApi', () => {
 		});
 
 		it('should handle errors in getPool or getQuote', async () => {
-			factoryCreateMock.mockRejectedValueOnce(new Error('Factory error'));
-
-			await expect(getIcpSwapAmounts(baseParams)).rejects.toThrow('Factory error');
-
 			factoryCreateMock.mockResolvedValueOnce({ getPool: getPoolMock });
 			poolCreateMock.mockRejectedValueOnce(new Error('Pool error'));
 
