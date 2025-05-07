@@ -22,11 +22,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
+	import {bigint} from "zod";
 
 	const report: EligibilityReport = {
 		campaigns: [['OISY Airdrop #1', { available: true, eligible: true, criteria: [
-				{satisfied: true, criterion: {MinLogins: {duration: {Days: 6}, count: 2}}},
-				{satisfied: false, criterion: {MinTransactions: {duration: {Days: 6}, count: 3}}},
+				{satisfied: true, criterion: {MinLogins: {duration: {Days: bigint(6)}, count: 2}}},
+				{satisfied: false, criterion: {MinTransactions: {duration: {Days: bigint(6)}, count: 3}}},
 				{satisfied: false, criterion: {MinTotalAssetsUsd: {usd: 21}}}
 			] }]]
 	}; // TODO replace this with api call

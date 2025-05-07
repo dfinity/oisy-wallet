@@ -25,18 +25,19 @@
         }
         if ('MinTransactions' in criterion.criterion) {
             const {duration, count} = criterion.criterion.MinTransactions;
-            const {Days: days} = duration
-
-            return replacePlaceholders($i18n.rewards.requirements.min_transactions, {
-                $transactions: count,
-                $days: days
-            });
+            if ('Days' in duration) {
+                const days = duration.Days;
+                return replacePlaceholders($i18n.rewards.requirements.min_transactions, {
+                    $transactions: count.toString(),
+                    $days: days.toString()
+                });
+            }
         }
         if ('MinTotalAssetsUsd' in criterion.criterion) {
             const {usd} = criterion.criterion.MinTotalAssetsUsd;
 
             return replacePlaceholders($i18n.rewards.requirements.min_total_assets_usd, {
-                $usd: usd
+                $usd: usd.toString()
             });
         }
     }
