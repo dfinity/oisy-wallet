@@ -52,7 +52,7 @@
 				})
 			});
 
-			const newSwapAmounts = fetchSwapAmounts({
+			const newSwapAmounts = await fetchSwapAmounts({
 				identity: $authIdentity,
 				sourceToken,
 				destinationToken,
