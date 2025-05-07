@@ -1,5 +1,6 @@
 import type {
-	ClaimedVipReward, EligibilityReport, EligibilityResponse,
+	ClaimedVipReward,
+	EligibilityReport,
 	ReferrerInfo,
 	RewardInfo,
 	SetReferrerResponse,
@@ -12,8 +13,8 @@ import {
 	getReferrerInfo as getReferrerInfoApi,
 	getUserInfo,
 	getUserInfo as getUserInfoApi,
-	setReferrer as setReferrerApi,
-	isEligible as isEligibleApi
+	isEligible as isEligibleApi,
+	setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
 import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
 import { QrCodeType, asQrCodeType } from '$lib/enums/qr-code-types';
@@ -37,9 +38,9 @@ import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
 import type { Identity } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import {Principal} from "@dfinity/principal";
 
 const queryUserRoles = async (params: {
 	identity: Identity;
@@ -87,8 +88,14 @@ export const getUserRoles = async (params: { identity: Identity }): Promise<User
 	}
 };
 
-const queryEligibilityReport = async(params: {identity: Identity, principal: Principal}): Promise<EligibilityReport> => {
-	const response = await isEligibleApi({...params, nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity});
+const queryEligibilityReport = async (params: {
+	identity: Identity;
+	principal: Principal;
+}): Promise<EligibilityReport> => {
+	const response = await isEligibleApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
 
 	if ('Ok' in response) {
 		return response.Ok;
@@ -97,19 +104,25 @@ const queryEligibilityReport = async(params: {identity: Identity, principal: Pri
 		throw new EligibilityError();
 	}
 	throw new Error('Unknown error');
-}
+};
 
-export const getEligibilityReport = async (params: { identity: Identity, principal: string }): Promise<EligibilityReport> => {
+export const getEligibilityReport = async (params: {
+	identity: Identity;
+	principal: string;
+}): Promise<EligibilityReport> => {
 	try {
-		return await queryEligibilityReport({...params, principal: Principal.fromText(params.principal)});
+		return await queryEligibilityReport({
+			...params,
+			principal: Principal.fromText(params.principal)
+		});
 	} catch (err: unknown) {
 		toastsError({
 			msg: { text: 'HMMM' },
 			err
 		});
-		return {campaigns: []};
+		return { campaigns: [] };
 	}
-}
+};
 
 const queryRewards = async (params: {
 	identity: Identity;
