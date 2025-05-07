@@ -24,9 +24,9 @@
 	let { token, destination, amounts, timestamp }: Props = $props();
 
 	// we only display the first 3 amounts, and the rest is displayed as "+N more"
-	let amountsToDisplay = $state(amounts.slice(0, MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS));
+	let amountsToDisplay = $derived(amounts.slice(0, MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS));
 
-	let restAmountsNumber = $state(amounts.length - amountsToDisplay.length);
+	let restAmountsNumber = $derived(amounts.length - amountsToDisplay.length);
 
 	let currentDate = $state(new Date());
 </script>
