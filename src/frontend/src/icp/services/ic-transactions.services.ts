@@ -11,6 +11,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { Principal } from '@dfinity/principal';
 import { queryAndUpdate } from '@dfinity/utils';
@@ -68,6 +69,7 @@ export const loadNextTransactions = ({
 
 			icTransactionsStore.append({
 				tokenId: token.id,
+				networkId: token.network.id,
 				transactions: transactions.map((transaction) => ({
 					data: mapIcTransaction({
 						transaction,
@@ -112,7 +114,11 @@ export const onLoadTransactionsError = ({
 	});
 };
 
-export const onTransactionsCleanUp = (data: { tokenId: TokenId; transactionIds: string[] }) => {
+export const onTransactionsCleanUp = (data: {
+	tokenId: TokenId;
+	networkId: NetworkId;
+	transactionIds: string[];
+}) => {
 	icTransactionsStore.cleanUp(data);
 
 	toastsError({
