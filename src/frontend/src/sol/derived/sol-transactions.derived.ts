@@ -1,4 +1,6 @@
 import { tokenWithFallback } from '$lib/derived/token.derived';
+import type { KnownDestinations } from '$lib/types/transactions';
+import { getKnownDestinations } from '$lib/utils/transactions.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { nonNullish } from '@dfinity/utils';
@@ -18,4 +20,9 @@ export const solTransactionsInitialized: Readable<boolean> = derived(
 export const solTransactionsNotInitialized: Readable<boolean> = derived(
 	[solTransactionsInitialized],
 	([$solTransactionsInitialized]) => !$solTransactionsInitialized
+);
+
+export const solKnownDestinations: Readable<KnownDestinations> = derived(
+	[solTransactions],
+	([$solTransactions]) => getKnownDestinations($solTransactions)
 );
