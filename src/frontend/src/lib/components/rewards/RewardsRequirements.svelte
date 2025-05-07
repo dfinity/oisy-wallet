@@ -8,6 +8,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import RewardRequirement from "$lib/components/rewards/RewardRequirement.svelte";
+	import {REWARDS_REQUIREMENTS_STATUS} from "$lib/constants/test-ids.constants";
 
 	interface Props {
 		reward: RewardDescription;
@@ -34,9 +35,9 @@
 		</span>
 	{/if}
 	<ul class="list-none">
-		{#each criteria as criterion}
+		{#each criteria as criterion, i}
 			<li class="flex gap-2 pt-1">
-				<RewardRequirement {criterion} />
+				<RewardRequirement {criterion} testId={`${REWARDS_REQUIREMENTS_STATUS}-${i}`} />
 			</li>
 		{/each}
 	</ul>

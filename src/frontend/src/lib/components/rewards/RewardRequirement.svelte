@@ -8,9 +8,10 @@
 
     interface Props {
         criterion: CriterionEligibility;
+        testId?: string;
     }
 
-    let {criterion}: Props = $props();
+    let {criterion, testId}: Props = $props();
 
     const getCriterionText = (criterion: CriterionEligibility): string | undefined => {
         if ('MinLogins' in criterion.criterion) {
@@ -53,7 +54,7 @@
             class:ease-in-out={!criterion.satisfied}
     >
         <span
-                data-tid={`${REWARDS_REQUIREMENTS_STATUS}`}
+                data-tid={testId}
                 class="-mt-0.5 mr-2"
                 class:text-success-primary={criterion.satisfied}
                 class:text-disabled={!criterion.satisfied}
