@@ -12,15 +12,16 @@
 
     let {criterion}: Props = $props();
 
-    const getCriterionText = (criterion: CriterionEligibility): string => {
+    const getCriterionText = (criterion: CriterionEligibility): string | undefined => {
         if ('MinLogins' in criterion.criterion) {
             const {duration, count} = criterion.criterion.MinLogins;
-            const {Days: days} = duration
-
-            return replacePlaceholders($i18n.rewards.requirements.min_logins, {
-                $logins: count,
-                $days: days
-            });
+            if ('Days' in duration) {
+                const days = duration.Days;
+                return replacePlaceholders($i18n.rewards.requirements.min_logins, {
+                    $logins: count,
+                    $days: days
+                });
+            }
         }
         if ('MinTransactions' in criterion.criterion) {
             const {duration, count} = criterion.criterion.MinTransactions;
