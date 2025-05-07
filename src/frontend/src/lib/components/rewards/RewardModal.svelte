@@ -5,7 +5,7 @@
 	import {
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
-	} from '$icp/stores/reward.store';
+	} from '$lib/stores/reward.store';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import RewardEarnings from '$lib/components/rewards/RewardEarnings.svelte';
@@ -28,7 +28,7 @@
 
 	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
-	const campaignEligibility = $derived(store.getCampaignEligibility(reward.id));
+	const [_, campaignEligibility] = $derived($store?.eligibilityReport?.campaigns?.find(([id, _]) => id === reward.id) ?? [])
 	const isEligible = $derived(campaignEligibility?.eligible ?? false);
 	const criteria = $derived(campaignEligibility?.criteria ?? []);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));

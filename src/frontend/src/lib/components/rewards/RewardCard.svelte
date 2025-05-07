@@ -6,7 +6,7 @@
 	import {
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
-	} from '$icp/stores/reward.store';
+	} from '$lib/stores/reward.store';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -25,8 +25,9 @@
 
 	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
+	const [_, campaignEligibility] = $derived($store?.eligibilityReport?.campaigns?.find(([id, _]) => id === reward.id) ?? [])
+	const isEligible = $derived(campaignEligibility?.eligible ?? false);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
-	const isEligible = $derived(store.getCampaignEligibility(reward.id)?.eligible ?? false);
 </script>
 
 <button {onclick} class="flex flex-col" data-tid={testId}>

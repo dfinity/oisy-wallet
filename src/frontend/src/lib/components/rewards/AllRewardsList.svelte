@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { setContext } from 'svelte';
-	import type { EligibilityReport } from '$declarations/rewards/rewards.did';
+	import {onMount, setContext} from 'svelte';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import {
 		initRewardEligibilityStore,
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
-	} from '$icp/stores/reward.store';
+	} from '$lib/stores/reward.store';
 	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
@@ -22,31 +21,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
+	import {getEligibilityReport} from "$lib/services/reward.services";
 
-	const report: EligibilityReport = {
-		campaigns: [
-			[
-				'OISY Airdrop #1',
-				{
-					available: true,
-					eligible: true,
-					criteria: [
-						{
-							satisfied: true,
-							criterion: { MinLogins: { duration: { Days: BigInt(6) }, count: 2 } }
-						},
-						{
-							satisfied: false,
-							criterion: { MinTransactions: { duration: { Days: BigInt(6) }, count: 3 } }
-						},
-						{ satisfied: false, criterion: { MinTotalAssetsUsd: { usd: 21 } } }
-					]
-				}
-			]
-		]
-	}; // TODO replace this with api call
-	setContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY, {
-		store: initRewardEligibilityStore(report)
+	const {store} = setContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY, {
+		store: initRewardEligibilityStore()
+	});
+
+	onMount(() => {
+		const loadEligibilityReport = async () => {
+			const report = await getEligibilityReport();
+			store.setReport(report);
+		}
+		loadEligibilityReport();
 	});
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
