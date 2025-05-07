@@ -31,7 +31,7 @@
 
 	let loadBalance: OptionBalance = undefined;
 
-	let {twinToken} = (token as IcCkToken);
+	let { twinToken } = token as IcCkToken;
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
@@ -45,7 +45,7 @@
 			return;
 		}
 
-		const {twinToken} = (token as IcCkToken);
+		const { twinToken } = token as IcCkToken;
 
 		if (isNullish(twinToken)) {
 			return;
