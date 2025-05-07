@@ -142,6 +142,7 @@ export class EtherscanProvider {
 		contract: Erc20Token;
 	}): Promise<Transaction[]> => {
 		const params = {
+			chainId: this.chainId,
 			action: 'tokentx',
 			contractAddress,
 			address,
