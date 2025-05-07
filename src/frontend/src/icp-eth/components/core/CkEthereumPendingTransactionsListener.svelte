@@ -22,12 +22,13 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
-	import { tokenId } from '$lib/derived/token.derived';
-	import { token } from '$lib/stores/token.store';
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { NetworkId } from '$lib/types/network';
+	import type { OptionToken } from '$lib/types/token';
+
+	export let token: OptionToken;
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -36,12 +37,12 @@
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionEthAddress }) => {
-		if (isNullish($tokenId) || isNullish($token)) {
+		if (isNullish(token) || isNullish(token.id)) {
 			return;
 		}
 
 		if (isNullish(toAddress)) {
-			icPendingTransactionsStore.reset($tokenId);
+			icPendingTransactionsStore.reset(token.id);
 			return;
 		}
 

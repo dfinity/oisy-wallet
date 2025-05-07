@@ -5,11 +5,11 @@
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import CkEthereumPendingTransactionsListener from '$icp-eth/components/core/CkEthereumPendingTransactionsListener.svelte';
 	import type { CanisterIdText } from '$lib/types/canister';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { OptionToken, Token as TokenType } from '$lib/types/token';
 
 	export interface Props {
 		token: OptionToken;
-		ckEthereumNativeToken: Token;
+		ckEthereumNativeToken: TokenType;
 		children?: Snippet;
 	}
 
@@ -22,7 +22,7 @@
 
 <IcCkListener initFn={initCkETHMinterInfoWorker} token={ckEthereumNativeToken} {minterCanisterId} />
 
-<CkEthereumPendingTransactionsListener />
+<CkEthereumPendingTransactionsListener {token} />
 
 {#if children}
 	{@render children()}
