@@ -24,10 +24,22 @@ export const idlFactory = ({ IDL }) => {
 		num_users_per_event: IDL.Nat32,
 		campaign_name: IDL.Opt(IDL.Text)
 	});
+	const Criterion = IDL.Variant({
+		MinTransactions: IDL.Record({
+			duration: CandidDuration,
+			count: IDL.Nat32
+		}),
+		MinReferrals: IDL.Record({ count: IDL.Nat32 }),
+		MinLogins: IDL.Record({
+			duration: CandidDuration,
+			count: IDL.Nat32
+		}),
+		MinTotalAssetsUsd: IDL.Record({ usd: IDL.Nat32 }),
+		MinTokens: IDL.Record({ count: IDL.Nat32 })
+	});
 	const UsageCriteria = IDL.Record({
 		measurement_duration: CandidDuration,
-		min_transactions: IDL.Nat32,
-		min_logins: IDL.Nat32,
+		criteria: IDL.Vec(Criterion),
 		min_valuation_usd: IDL.Nat64
 	});
 	const UsageAwardConfig = IDL.Record({
@@ -61,16 +73,6 @@ export const idlFactory = ({ IDL }) => {
 		InvalidCode: IDL.Null
 	});
 	const ClaimedVipReward = IDL.Record({ campaign_id: IDL.Text });
-	const Criterion = IDL.Variant({
-		MinTransactions: IDL.Nat32,
-		MinReferrals: IDL.Nat32,
-		MinLogins: IDL.Record({
-			duration: CandidDuration,
-			count: IDL.Nat32
-		}),
-		MinTotalAssetsUsd: IDL.Nat32,
-		MinTokens: IDL.Nat32
-	});
 	const CriterionEligibility = IDL.Record({
 		satisfied: IDL.Bool,
 		criterion: Criterion
@@ -294,10 +296,22 @@ export const init = ({ IDL }) => {
 		num_users_per_event: IDL.Nat32,
 		campaign_name: IDL.Opt(IDL.Text)
 	});
+	const Criterion = IDL.Variant({
+		MinTransactions: IDL.Record({
+			duration: CandidDuration,
+			count: IDL.Nat32
+		}),
+		MinReferrals: IDL.Record({ count: IDL.Nat32 }),
+		MinLogins: IDL.Record({
+			duration: CandidDuration,
+			count: IDL.Nat32
+		}),
+		MinTotalAssetsUsd: IDL.Record({ usd: IDL.Nat32 }),
+		MinTokens: IDL.Record({ count: IDL.Nat32 })
+	});
 	const UsageCriteria = IDL.Record({
 		measurement_duration: CandidDuration,
-		min_transactions: IDL.Nat32,
-		min_logins: IDL.Nat32,
+		criteria: IDL.Vec(Criterion),
 		min_valuation_usd: IDL.Nat64
 	});
 	const UsageAwardConfig = IDL.Record({
