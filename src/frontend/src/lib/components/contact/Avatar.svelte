@@ -11,6 +11,7 @@
 	const { name, variant = 'md', styleClass }: AvatarProps = $props();
 	// This constant is needed because all classes need to be somewhere in the
 	// sourcecode. Otherwise tailwind will not include the classes in the css.
+	// Compare: https://v3.tailwindcss.com/docs/content-configuration#class-detection-in-depth
 	const COLORS = [
 		`bg-contact-1`,
 		`bg-contact-2`,
@@ -34,8 +35,8 @@
 	);
 	let size = $derived(variant === 'xl' ? 'size-25' : 'size-[2.5em]');
 
-	let bgColor = $derived.by(() => {
-		const trimmedName = name?.trim?.();
+	const computeContactColor = (contactName?: string) => {
+		const trimmedName = contactName?.trim?.();
 		if (isEmptyString(trimmedName)) {
 			return '';
 		}
@@ -46,7 +47,8 @@
 		}
 
 		return COLORS[hash];
-	});
+	};
+	let bgColor = $derived(computeContactColor(name));
 
 	let commonClasses = $derived(`${font} ${size} ${bgColor} rounded-full`);
 
@@ -66,7 +68,7 @@
 	</div>
 {:else}
 	<span
-		class={`${commonClasses} text-white inline-block inline-flex items-center justify-center font-bold transition-colors duration-[1s] ${styleClass}`}
+		class={`${commonClasses} inline-block inline-flex items-center justify-center font-bold text-white transition-colors duration-1000 ${styleClass}`}
 		>{initials}</span
 	>
 {/if}
