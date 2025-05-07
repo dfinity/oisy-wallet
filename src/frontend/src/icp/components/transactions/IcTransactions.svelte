@@ -29,6 +29,7 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { hasIndexCanister } from '$icp/validation/ic-token.validation';
+	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
@@ -37,7 +38,6 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
-	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
