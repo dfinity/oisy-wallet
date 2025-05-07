@@ -4,7 +4,7 @@
 	import type IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
 	import type IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
 	import type IcReceiveInfoIcrc from '$icp/components/receive/IcReceiveInfoIcrc.svelte';
-	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
+	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import type ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
 	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
@@ -61,7 +61,7 @@
 	>
 
 	{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
-		<ReceiveAddressQRCode
+		<ReceiveAddressQrCode
 			on:icBack={displayAddresses}
 			{address}
 			{addressLabel}
