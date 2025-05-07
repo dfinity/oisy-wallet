@@ -17,6 +17,9 @@ export const icpSwapAmounts = async ({
 		fee
 	});
 
+    console.log(`Pool: ${pool.canisterId.toString()}`);
+    
+
 	const quote = await getQuote({
 		identity,
 		canisterId: pool.canisterId.toString(),
@@ -24,6 +27,9 @@ export const icpSwapAmounts = async ({
 		zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId,
 		amountOutMinimum: '0' // No minimum here as this is just a quote; slippage protection applies only during actual swap
 	});
+
+    console.log(`Quote: ${quote}`);
+    
 
 	return { receiveAmount: quote };
 };
