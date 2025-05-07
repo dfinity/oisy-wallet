@@ -20,6 +20,7 @@
 	import { loadTokenAndRun } from '$lib/services/token.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
+	import { isTokenIcrc } from '$icp/utils/icrc.utils';
 
 	export let token: Token;
 
@@ -30,7 +31,7 @@
 	$: ckBTC = isTokenCkBtcLedger(token);
 
 	let icrc = false;
-	$: icrc = token.standard === 'icrc';
+	$: icrc =isTokenIcrc(token)
 
 	const open: LoadTokenAndOpenModal = async (callback: () => Promise<void>) => {
 		await loadTokenAndRun({ token, callback });

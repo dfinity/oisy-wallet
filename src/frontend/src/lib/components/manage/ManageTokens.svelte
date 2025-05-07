@@ -8,7 +8,7 @@
 	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
@@ -111,7 +111,7 @@
 			spl: SplTokenToggleable[];
 		}>(
 			({ icrc, erc20, spl }, token) => ({
-				icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
+				icrc: [...icrc, ...(isTokenIcrc(token) ? [token as IcrcCustomToken] : [])],
 				erc20: [
 					...erc20,
 					...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
