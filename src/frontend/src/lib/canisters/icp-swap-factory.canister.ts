@@ -36,7 +36,6 @@ export class ICPSwapFactoryCanister extends Canister<SwapFactoryService> {
 		const result = await getPool(args);
 
 		console.log(`getPool result: ${JSON.stringify(result)}`);
-		
 
 		if ('ok' in result) {
 			return result.ok;

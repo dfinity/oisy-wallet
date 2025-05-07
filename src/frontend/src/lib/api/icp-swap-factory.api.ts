@@ -13,7 +13,7 @@ export const getPool = async ({
 	canisterId,
 	...restParams
 }: CanisterApiFunctionParams<ICPSwapGetPoolParams>): Promise<PoolData> => {
-	const factory = await icpSwapFactoryCanister({
+	const { getPool } = await icpSwapFactoryCanister({
 		identity,
 		canisterId,
 		nullishIdentityErrorMessage
@@ -21,7 +21,7 @@ export const getPool = async ({
 
 	console.log(`getPool: ${JSON.stringify(getPool)}`);
 
-	return factory.getPool(restParams);
+	return getPool(restParams);
 };
 
 const icpSwapFactoryCanister = async ({
