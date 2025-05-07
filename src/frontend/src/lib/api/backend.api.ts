@@ -2,6 +2,7 @@ import type {
 	AllowSigningResponse,
 	CreateChallengeResponse,
 	CustomToken,
+	GetAllowedCyclesResponse,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -146,6 +147,15 @@ export const createPowChallenge = async ({
 	const { createPowChallenge } = await backendCanister({ identity });
 	return createPowChallenge();
 };
+
+export const getAllowedCycles = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<GetAllowedCyclesResponse> => {
+	const { getAllowedCycles } = await backendCanister({ identity });
+
+	return getAllowedCycles();
+};
+
 export const allowSigning = async ({
 	identity,
 	...params
