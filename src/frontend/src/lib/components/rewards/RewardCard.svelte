@@ -23,7 +23,7 @@
 	const {store} = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
-	const isEligible = $derived(store.getCampaignEligibility(reward.id).eligible ?? false);
+	const isEligible = $derived(store.getCampaignEligibility(reward.id)?.eligible ?? false);
 </script>
 
 <button {onclick} class="flex flex-col" data-tid={testId}>

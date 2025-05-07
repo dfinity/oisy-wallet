@@ -17,7 +17,7 @@
 
 	const {store} = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
-	const isEligible = $derived(store.getCampaignEligibility(reward.id).eligible ?? false);
+	const isEligible = $derived(store.getCampaignEligibility(reward.id)?.eligible ?? false);
 
 	const isRequirementFulfilled = (index: number) =>
 		(reward.requirements.length === requirementsFulfilled.length && requirementsFulfilled[index]) ??
