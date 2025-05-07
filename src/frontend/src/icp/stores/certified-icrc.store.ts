@@ -32,7 +32,7 @@ export const initCertifiedIcrcTokensStore = <T extends IcToken>(): CertifiedIcrc
 			id:
 				(state ?? []).find(
 					({ data: { ledgerCanisterId } }) => ledgerCanisterId === data.ledgerCanisterId
-				)?.data.id ?? Symbol(data.symbol)
+				)?.data.id ?? data.id
 		} as T
 	});
 
