@@ -103,7 +103,10 @@ export const getEligibilityReport = async (params: { identity: Identity, princip
 	try {
 		return await queryEligibilityReport({...params, principal: Principal.fromText(params.principal)});
 	} catch (err: unknown) {
-		console.log("HMMM")
+		toastsError({
+			msg: { text: 'HMMM' },
+			err
+		});
 		return {campaigns: []};
 	}
 }
