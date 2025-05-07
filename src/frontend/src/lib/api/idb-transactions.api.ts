@@ -27,7 +27,7 @@ const idbEthTransactionsStore = idbTransactionsStore(ETHEREUM_NETWORK_SYMBOL.toL
 const idbIcTransactionsStore = idbTransactionsStore(ICP_NETWORK_SYMBOL.toLowerCase());
 const idbSolTransactionsStore = idbTransactionsStore(SOLANA_MAINNET_NETWORK_SYMBOL.toLowerCase());
 
-const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData>({
+export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData>({
 	identity,
 	tokens,
 	transactionsStoreData,
