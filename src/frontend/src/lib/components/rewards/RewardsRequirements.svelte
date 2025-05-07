@@ -22,7 +22,7 @@
 	const criteria = $derived(campaignEligibility?.criteria ?? []);
 </script>
 
-{#if reward.requirements.length > 0}
+{#if criteria.length > 0}
 	<span class="text-base font-semibold">
 		{$i18n.rewards.requirements.requirements_title}
 	</span>
