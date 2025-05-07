@@ -9,8 +9,12 @@
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
-	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
-	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
+	import IcTransactionsBtcListeners, {
+		type Props as IcTransactionsCkBTCListenersProps
+	} from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
+	import IcTransactionsCkEthereumListeners, {
+		type Props as IcTransactionsCkEthereumListenersProps
+	} from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import IcTransactionsScroll from '$icp/components/transactions/IcTransactionsScroll.svelte';
@@ -33,11 +37,14 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
 
-	let additionalListener: Component;
+	let additionalListener:
+		| Component<IcTransactionsCkBTCListenersProps>
+		| Component<IcTransactionsCkEthereumListenersProps>;
 	$: additionalListener = $tokenCkBtcLedger
 		? IcTransactionsBtcListeners
 		: ckEthereum
@@ -71,7 +78,11 @@
 </Header>
 
 <IcTransactionsSkeletons>
-	<svelte:component this={additionalListener}>
+	<svelte:component
+		this={additionalListener}
+		token={$token}
+		ckEthereumNativeToken={$ckEthereumNativeToken}
+	>
 		{#if $icTransactions.length > 0}
 			<IcTransactionsScroll token={$token ?? ICP_TOKEN}>
 				{#each $icTransactions() as transaction, index (`${transaction.data.id}-${index}`)}

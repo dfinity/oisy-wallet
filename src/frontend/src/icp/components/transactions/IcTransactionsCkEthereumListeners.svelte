@@ -7,7 +7,7 @@
 	import type { OptionToken, Token } from '$lib/types/token';
 	import type { Snippet } from 'svelte';
 
-	interface Props {
+	export interface Props {
 		token: OptionToken;
 		ckEthereumNativeToken: Token;
 		children?: Snippet;
