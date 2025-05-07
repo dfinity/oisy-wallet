@@ -14,7 +14,6 @@
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
@@ -142,14 +141,15 @@
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
-				<TokenName slot="title" data={token} />
+				<span slot="title">{token.symbol}</span>
+				<span slot="subtitle">{token.name}</span>
 
 				<span slot="logo" class="mr-2">
 					<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
 				</span>
 
 				<span class="break-all" slot="description">
-					{token.symbol}
+					{token.network.name}
 				</span>
 
 				<svelte:fragment slot="action">
