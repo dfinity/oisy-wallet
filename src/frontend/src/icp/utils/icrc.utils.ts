@@ -103,8 +103,15 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	];
 };
 
+export const isTokenIcp = (token: Partial<IcToken>): token is IcToken => token.standard === 'icp';
+
+export const isTokenIcrc = (token: Partial<IcToken>): token is IcToken => token.standard === 'icrc';
+
+export const isTokenIc = (token: Partial<IcToken>): token is IcToken =>
+	isTokenIcp(token) || isTokenIcrc(token);
+
 export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
-	(token.standard === 'icp' || token.standard === 'icrc') && 'enabled' in token;
+	isTokenIc(token) && 'enabled' in token;
 
 const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>
 	'minterCanisterId' in token && 'twinToken' in token;
