@@ -89,9 +89,9 @@ type Config = record {
 /// A requirement that a user must satisfy to be eligible for an airdrop.
 type Criterion = variant {
   /// The user must have made at least this many transactions.
-  MinTransactions : nat32;
+  MinTransactions : record { count : nat32; duration : CandidDuration };
   /// The user must have made at least this many successful referrals.
-  MinReferrals : nat32;
+  MinReferrals : record { count : nat32 };
   /// The user must have logged in a certain number of times recently.
   MinLogins : record {
     /// "recent" is defined by this duration.
@@ -100,9 +100,9 @@ type Criterion = variant {
     count : nat32
   };
   /// The minimum total assets at the last valuation.
-  MinTotalAssetsUsd : nat32;
+  MinTotalAssetsUsd : record { usd : nat32 };
   /// The minimum number of distrinct tokens that the user must hold.
-  MinTokens : nat32
+  MinTokens : record { count : nat32 }
 };
 /// Whether a user satisfies a given criterion.
 type CriterionEligibility = record {
@@ -373,9 +373,8 @@ type UsageAwardStats = record {
   eligible_snapshots : nat64
 };
 type UsageCriteria = record {
+  criteria : vec Criterion;
   measurement_duration : CandidDuration;
-  min_transactions : nat32;
-  min_logins : nat32;
   min_valuation_usd : nat64
 };
 ///
