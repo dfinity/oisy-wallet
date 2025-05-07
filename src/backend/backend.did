@@ -273,8 +273,8 @@ type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result_7 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_8 = variant { Ok; Err : SaveTestnetsSettingsError };
 type Result_9 = variant {
-  Ok : TopUpCyclesLedgerResponse;
-  Err : TopUpCyclesLedgerError;
+	Ok : TopUpCyclesLedgerResponse;
+	Err : TopUpCyclesLedgerError
 };
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
@@ -396,5 +396,4 @@ type UserToken = record {
 };
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
-service : (Arg) -> {
-}
+service : (Arg) -> {}
