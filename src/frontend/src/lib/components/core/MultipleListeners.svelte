@@ -3,6 +3,7 @@
 	import type { TokenToListener } from '$lib/types/listener';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapListeners } from '$lib/utils/listener.utils';
+	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 
 	export let tokens: OptionToken[];
 
@@ -11,7 +12,7 @@
 </script>
 
 {#each listeners as { token, listener } (token.id)}
-	<svelte:component this={listener} {token} />
+	<svelte:component this={listener} {token} ckEthereumNativeToken={$ckEthereumNativeToken} />
 {/each}
 
 <slot />

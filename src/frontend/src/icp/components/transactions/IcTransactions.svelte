@@ -80,7 +80,7 @@
 <IcTransactionsSkeletons>
 	<svelte:component
 		this={additionalListener}
-		token={$token}
+		token={$token ?? ICP_TOKEN}
 		ckEthereumNativeToken={$ckEthereumNativeToken}
 	>
 		{#if $icTransactions.length > 0}
