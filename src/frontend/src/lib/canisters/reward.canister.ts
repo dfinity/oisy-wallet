@@ -14,7 +14,6 @@ import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.fa
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import type { RewardClaimApiResponse } from '$lib/types/reward';
-import type { Principal } from '@dfinity/principal';
 import {
 	Canister,
 	createServices,
@@ -42,7 +41,7 @@ export class RewardCanister extends Canister<RewardService> {
 		return new RewardCanister(canisterId, service, certifiedService);
 	}
 
-	isEligible = ({certified = true}: QueryParams): Promise<EligibilityResponse> => {
+	isEligible = ({ certified = true }: QueryParams): Promise<EligibilityResponse> => {
 		const { eligible } = this.caller({ certified });
 
 		return eligible([]);

@@ -64,7 +64,8 @@ export const getEligibilityReport = async (params: {
 }): Promise<EligibilityReport> => {
 	try {
 		return await queryEligibilityReport({
-			...params, certified: false
+			...params,
+			certified: false
 		});
 	} catch (err: unknown) {
 		toastsError({
