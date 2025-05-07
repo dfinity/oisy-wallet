@@ -9,6 +9,7 @@
 	export let hover = true;
 	export let rounded = true;
 	export let condensed = false;
+	export let styleClass: string | undefined = undefined;
 	export let testId: string | undefined = undefined;
 
 	let hasTitleSlot: boolean;
