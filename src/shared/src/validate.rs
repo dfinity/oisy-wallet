@@ -2,6 +2,8 @@
 #[cfg(test)]
 mod tests;
 
+use serde::{Deserialize as SerdeDeserialize, Deserializer};
+
 pub trait Validate {
     /// Verifies that an object is semantically valid.
     ///
@@ -22,12 +24,12 @@ pub trait Validate {
 
 macro_rules! validate_on_deserialize {
     ($type:ty) => {
-        impl<'de> Deserialize<'de> for $type {
+        impl<'de> SerdeDeserialize<'de> for $type {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: Deserializer<'de>,
             {
-                let unchecked = <$type>::deserialize(deserializer)?;
+                let unchecked = <$type as SerdeDeserialize>::deserialize(deserializer)?;
                 unchecked.validated().map_err(de::Error::custom)
             }
         }
