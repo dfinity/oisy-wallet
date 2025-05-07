@@ -73,7 +73,7 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 						| SolTransactionUi
 				)?.status === 'pending'
 			) {
-				return { [pendingKey]: [...(acc['pending'] ?? []), transaction], ...acc };
+				return { [pendingKey]: [...(acc[pendingKey] ?? []), transaction], ...acc };
 			}
 			return { ...acc, [undefinedKey]: [...(acc['undefined'] ?? []), transaction] };
 		}
