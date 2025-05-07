@@ -1,7 +1,7 @@
 import type BitcoinListener from '$btc/components/core/BitcoinListener.svelte';
 import type EthListener from '$eth/components/core/EthListener.svelte';
-import IcTransactionsCkBTCListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
-import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
+import type IcTransactionsCkBTCListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
+import type IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 import type { Token } from '$lib/types/token';
 
 export interface WalletWorker {
