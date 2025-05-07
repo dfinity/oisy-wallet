@@ -1,5 +1,4 @@
 <script lang="ts">
-    import {REWARDS_REQUIREMENTS_STATUS} from "$lib/constants/test-ids.constants";
     import {IconCheckCircleFill} from "@dfinity/gix-components";
     import type {CriterionEligibility} from "$declarations/rewards/rewards.did";
     import {i18n} from "$lib/stores/i18n.store";

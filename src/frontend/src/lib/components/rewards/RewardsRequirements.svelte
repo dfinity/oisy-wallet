@@ -35,7 +35,7 @@
 		</span>
 	{/if}
 	<ul class="list-none">
-		{#each criteria as criterion, i}
+		{#each criteria as criterion, i (criterion)}
 			<li class="flex gap-2 pt-1">
 				<RewardRequirement {criterion} testId={`${REWARDS_REQUIREMENTS_STATUS}-${i}`} />
 			</li>
