@@ -7,8 +7,8 @@ import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 export type ExplorerPageParams = HomepageLoggedInParams;
 
 export class ExplorerPage extends HomepageLoggedIn {
-	constructor({ page, iiPage, viewportSize }: ExplorerPageParams) {
-		super({ page, iiPage, viewportSize });
+	constructor(params: ExplorerPageParams) {
+		super(params);
 	}
 
 	override async extendWaitForReady(): Promise<void> {

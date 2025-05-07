@@ -24,7 +24,9 @@
 			"not_available": "n/a",
 			"new": "New",
 			"edit": "Edit",
-			"no_results": "No results"
+			"no_results": "No results",
+			"to": "To",
+			"more_items": "+$items more"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -194,7 +196,8 @@
 			"ended": "Ended ($amount)"
 		},
 		"alt": {
-			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop."
+			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
+			"reward_logo": "Logo of the campaign $campaignName"
 		}
 	},
 	"footer": {
@@ -441,7 +444,9 @@
 			"open_qr_modal": "Start QR Code scan for transaction details",
 			"scan_qr": "Scan QR Code",
 			"select_token": "Select token to send",
-			"select_network_filter": "Select network filter"
+			"select_network_filter": "Select network filter",
+			"send_again": "Send again",
+			"recently_used": "Recently used"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
@@ -997,7 +1002,8 @@
 			"title": "Address book",
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
-			"add_new_contact": "Add new contact"
+			"add_new_contact": "Add new contact",
+			"add_contact": "Add contact"
 		}
 	},
 	"contact": {
