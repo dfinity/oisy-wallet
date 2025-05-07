@@ -1,24 +1,20 @@
 import type { IcToken } from '$icp/types/ic-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { CertifiedData } from '$lib/types/store';
-import type { TokenId } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export type CertifiedIcrcTokensData<T extends IcToken> = Option<CertifiedData<T>[]>;
 
-export interface CertifiedIcrcTokensStore<D extends Omit<IcToken, 'id'>, T extends IcToken>
+export interface CertifiedIcrcTokensStore<T extends IcToken>
 	extends Readable<CertifiedIcrcTokensData<T>> {
-	set: (token: CertifiedData<D>) => void;
-	setAll: (tokens: CertifiedData<D>[]) => void;
+	set: (token: CertifiedData<T>) => void;
+	setAll: (tokens: CertifiedData<T>[]) => void;
 	reset: (ledgerCanisterId: CanisterIdText) => void;
 	resetAll: () => void;
 }
 
-export const initCertifiedIcrcTokensStore = <
-	D extends Omit<IcToken, 'id'>,
-	T extends D & { id: TokenId }
->(): CertifiedIcrcTokensStore<D, T> => {
+export const initCertifiedIcrcTokensStore = <T extends IcToken>(): CertifiedIcrcTokensStore<T> => {
 	const { subscribe, update, set } = writable<CertifiedIcrcTokensData<T>>(undefined);
 
 	const updateToken = ({
@@ -26,7 +22,7 @@ export const initCertifiedIcrcTokensStore = <
 		token: { data, certified }
 	}: {
 		state: CertifiedIcrcTokensData<T>;
-		token: CertifiedData<D>;
+		token: CertifiedData<T>;
 	}) => ({
 		certified,
 		data: {
@@ -36,19 +32,19 @@ export const initCertifiedIcrcTokensStore = <
 			id:
 				(state ?? []).find(
 					({ data: { ledgerCanisterId } }) => ledgerCanisterId === data.ledgerCanisterId
-				)?.data.id ?? Symbol(data.symbol)
-		} as T
+				)?.data.id ?? data.id
+		}
 	});
 
 	return {
-		set: ({ data, ...rest }: CertifiedData<D>) =>
+		set: ({ data, ...rest }: CertifiedData<T>) =>
 			update((state) => [
 				...(state ?? []).filter(
 					({ data: { ledgerCanisterId } }) => ledgerCanisterId !== data.ledgerCanisterId
 				),
 				updateToken({ state, token: { data, ...rest } })
 			]),
-		setAll: (tokens: CertifiedData<D>[]) =>
+		setAll: (tokens: CertifiedData<T>[]) =>
 			update((state) => [
 				...(state ?? []).filter(
 					({ data: { ledgerCanisterId } }) =>

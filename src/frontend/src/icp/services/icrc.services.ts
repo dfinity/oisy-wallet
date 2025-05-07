@@ -7,7 +7,7 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkToken, IcInterface, IcToken } from '$icp/types/ic-token';
-import type { IcrcCustomTokenWithoutId } from '$icp/types/icrc-custom-token';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	mapIcrcToken,
@@ -44,7 +44,7 @@ const loadDefaultIcrcTokens = async () => {
 };
 
 export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
-	queryAndUpdate<IcrcCustomTokenWithoutId[]>({
+	queryAndUpdate<IcrcCustomToken[]>({
 		request: (params) => loadIcrcCustomTokens(params),
 		onLoad: loadIcrcCustomData,
 		onUpdateError: ({ error: err }) => {
@@ -110,7 +110,7 @@ const loadIcrcData = ({
 const loadIcrcCustomTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
-}): Promise<IcrcCustomTokenWithoutId[]> => {
+}): Promise<IcrcCustomToken[]> => {
 	const tokens = await listCustomTokens({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
@@ -133,14 +133,14 @@ const loadCustomIcrcTokensData = async ({
 	tokens: CustomToken[];
 	certified: boolean;
 	identity: OptionIdentity;
-}): Promise<IcrcCustomTokenWithoutId[]> => {
+}): Promise<IcrcCustomToken[]> => {
 	const indexedIcrcCustomTokens = buildIndexedIcrcCustomTokens();
 
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
 		custom_token: CustomToken,
 		index: number
-	): Promise<IcrcCustomTokenWithoutId | undefined> => {
+	): Promise<IcrcCustomToken | undefined> => {
 		const { enabled, version: v, token } = custom_token;
 
 		if (!('Icrc' in token)) {
@@ -187,7 +187,7 @@ const loadCustomIcrcTokensData = async ({
 
 	const results = await Promise.allSettled(tokens.map(requestIcrcCustomTokenMetadata));
 
-	return results.reduce<IcrcCustomTokenWithoutId[]>((acc, result, index) => {
+	return results.reduce<IcrcCustomToken[]>((acc, result, index) => {
 		if (result.status !== 'fulfilled') {
 			// For development purposes, we want to see the error in the console.
 			console.error(result.reason);
@@ -216,7 +216,7 @@ const loadIcrcCustomData = ({
 	certified
 }: {
 	certified: boolean;
-	response: IcrcCustomTokenWithoutId[];
+	response: IcrcCustomToken[];
 }) => {
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };

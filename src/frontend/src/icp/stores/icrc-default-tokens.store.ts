@@ -1,4 +1,4 @@
 import { initCertifiedIcrcTokensStore } from '$icp/stores/certified-icrc.store';
-import type { IcToken, IcTokenWithoutId } from '$icp/types/ic-token';
+import type { IcToken } from '$icp/types/ic-token';
 
-export const icrcDefaultTokensStore = initCertifiedIcrcTokensStore<IcTokenWithoutId, IcToken>();
+export const icrcDefaultTokensStore = initCertifiedIcrcTokensStore<IcToken>();

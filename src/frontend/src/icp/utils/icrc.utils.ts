@@ -1,9 +1,14 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
-import type { IcTokenWithoutIdExtended, IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import type {
+	IcTokenExtended,
+	IcTokenWithoutIdExtended,
+	IcrcCustomToken
+} from '$icp/types/icrc-custom-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
 import {
 	IcrcMetadataResponseEntries,
 	mapTokenMetadata,
@@ -23,7 +28,7 @@ export const mapIcrcToken = ({
 	icrcCustomTokens,
 	ledgerCanisterId,
 	...rest
-}: IcrcLoadData): IcTokenWithoutIdExtended | undefined => {
+}: IcrcLoadData): IcTokenExtended | undefined => {
 	const token = mapOptionalToken(metadata);
 
 	if (isNullish(token)) {
@@ -35,6 +40,7 @@ export const mapIcrcToken = ({
 	const icon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
 
 	return {
+		id: parseTokenId(symbol),
 		network: ICP_NETWORK,
 		standard: 'icrc',
 		symbol,

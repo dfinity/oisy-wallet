@@ -4,7 +4,7 @@ import { setCustomToken } from '$icp-eth/services/custom-token.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
-import type { IcTokenWithoutId } from '$icp/types/ic-token';
+import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
@@ -112,10 +112,8 @@ describe('VipRewardStateModal', () => {
 				}
 			: undefined;
 
-		const { id: _, ...mockValidIcTokenWithoutId } = mockValidIcToken;
-
-		const mockIcrcDefaultToken: IcTokenWithoutId = {
-			...mockValidIcTokenWithoutId,
+		const mockIcrcDefaultToken: IcToken = {
+			...mockValidIcToken,
 			ledgerCanisterId: goldToken?.ledgerCanisterId ?? 'mxzaz-hqaaa-aaaar-qaada-cai'
 		};
 
