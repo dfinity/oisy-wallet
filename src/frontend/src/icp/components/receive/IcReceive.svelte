@@ -1,13 +1,11 @@
 <script lang="ts">
-	import { createEventDispatcher, setContext } from 'svelte';
+	import { setContext } from 'svelte';
 	import IcReceiveCkBTC from '$icp/components/receive/IcReceiveCkBTC.svelte';
 	import IcReceiveCkEthereum from '$icp/components/receive/IcReceiveCkEthereum.svelte';
 	import IcReceiveIcp from '$icp/components/receive/IcReceiveICP.svelte';
 	import IcReceiveIcrc from '$icp/components/receive/IcReceiveIcrc.svelte';
 	import {
-		type CloseModalAndResetToken,
 		initReceiveTokenContext,
-		type LoadTokenAndOpenModal,
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
@@ -33,16 +31,12 @@
 	let icrc = false;
 	$: icrc = isTokenIcrc(token);
 
-	const open: LoadTokenAndOpenModal = async (callback: () => Promise<void>) => {
-		await loadTokenAndRun({ token, callback });
+	const open = async (callback: () => Promise<void>) => {
+		await callback();
 	};
 
-	const dispatch = createEventDispatcher();
-
-	const close: CloseModalAndResetToken = () => {
+	const close = () => {
 		modalStore.close();
-		// We are resetting the token in the parent. That way we can know if we are using a global page $token or a selected token.
-		dispatch('nnsClose');
 	};
 
 	/**
