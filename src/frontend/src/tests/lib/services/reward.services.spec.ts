@@ -15,7 +15,8 @@ import {
 } from '$lib/constants/app.constants';
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import {
-	claimVipReward, getEligibilityReport,
+	claimVipReward,
+	getEligibilityReport,
 	getNewReward,
 	getReferrerInfo,
 	getRewardRequirementsFulfilled,
@@ -34,7 +35,6 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import {isEligible} from "$lib/api/reward.api";
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
@@ -45,11 +45,14 @@ describe('reward-code', () => {
 
 	describe('getEligibilityReport', () => {
 		const campaignId = 'deuteronomy';
-		const campaign: CampaignEligibility = {eligible: true, available: true, criteria: []};
-		const mockEligibilityResponse: EligibilityResponse = { Ok: {campaigns: [[campaignId, campaign]]}};
+		const campaign: CampaignEligibility = { eligible: true, available: true, criteria: [] };
+		const mockEligibilityResponse: EligibilityResponse = {
+			Ok: { campaigns: [[campaignId, campaign]] }
+		};
 
 		it('should return eligibility report', async () => {
-			const getEligibilityReportSpy = vi.spyOn(rewardApi, 'isEligible')
+			const getEligibilityReportSpy = vi
+				.spyOn(rewardApi, 'isEligible')
 				.mockResolvedValueOnce(mockEligibilityResponse);
 
 			const eligibilityReport = await getEligibilityReport({ identity: mockIdentity });
@@ -59,16 +62,17 @@ describe('reward-code', () => {
 				certified: false,
 				nullishIdentityErrorMessage
 			});
-			expect(eligibilityReport.campaigns.length).toEqual(1);
+			expect(eligibilityReport.campaigns).toHaveLength(1);
 
-			const [_ , campaignEligibility] = eligibilityReport.campaigns.find(([id, _]) => id === campaignId) ?? []
+			const [_, campaignEligibility] =
+				eligibilityReport.campaigns.find(([id, _]) => id === campaignId) ?? [];
+
 			expect(campaignEligibility).toEqual(campaign);
 		});
 
-		it ('should display an error message', async () => {
+		it('should display an error message', async () => {
 			const err = new Error('test');
-			const getEligibilityReportSpy = vi.spyOn(rewardApi, 'isEligible')
-				.mockRejectedValue(err);
+			const getEligibilityReportSpy = vi.spyOn(rewardApi, 'isEligible').mockRejectedValue(err);
 			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
 			await getEligibilityReport({ identity: mockIdentity });
