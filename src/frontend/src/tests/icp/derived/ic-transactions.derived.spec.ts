@@ -4,7 +4,7 @@ import {
 	IC_CKETH_MINTER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { icTransactions } from '$icp/derived/ic-transactions.derived';
+import { icKnownDestinations, icTransactions } from '$icp/derived/ic-transactions.derived';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
@@ -156,6 +156,31 @@ describe('ic-transactions.derived', () => {
 				},
 				...transactions
 			]);
+		});
+	});
+
+	describe('icKnownDestinations', () => {
+		beforeEach(() => {
+			icTransactionsStore.reset(ICP_TOKEN_ID);
+		});
+
+		it('should return known destinations if transactions store has some data', () => {
+			token.set(ICP_TOKEN);
+			icTransactionsStore.append({
+				tokenId: ICP_TOKEN_ID,
+				transactions
+			});
+
+			expect(get(icKnownDestinations)).toEqual({
+				[transactions[0].data.to as string]: {
+					amounts: transactions.map(({ data }) => data.value),
+					timestamp: Number(transactions[0].data.timestamp)
+				}
+			});
+		});
+
+		it('should return empty object if transactions store does not have data', () => {
+			expect(get(icKnownDestinations)).toEqual({});
 		});
 	});
 });
