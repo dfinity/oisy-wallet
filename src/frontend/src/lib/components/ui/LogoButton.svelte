@@ -32,7 +32,7 @@
 </script>
 
 <div
-	class="flex"
+	class={`flex ${styleClass ?? ''}`}
 	class:w-full={dividers}
 	class:hover:bg-brand-subtle-10={hover}
 	class:rounded-lg={rounded}
