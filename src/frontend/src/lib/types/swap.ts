@@ -1,11 +1,14 @@
+import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { Token } from '$lib/types/token';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
 export type DisplayUnit = 'token' | 'usd';
 
-export type SwapProvider = 'kongSwap' | 'icpSwap';
-
+export enum SwapProvider {
+	ICP_SWAP = 'icpSwap',
+	KONG_SWAP = 'kongSwap'
+}
 export interface ProviderFee {
 	fee: bigint;
 	token: Token;
@@ -17,13 +20,19 @@ export interface ICPSwapResult {
 
 export type Slippage = string | number;
 
-export interface SwapMappedResult {
-	provider: SwapProvider;
-	receiveAmount: bigint;
-	slippage?: number;
-	route?: string[];
-	liquidityFees?: ProviderFee[];
-	receiveOutMinimum?: bigint;
-	networkFee?: ProviderFee;
-	swapDetails: unknown;
-}
+export type SwapMappedResult =
+	| {
+			provider: SwapProvider.ICP_SWAP;
+			receiveAmount: bigint;
+			receiveOutMinimum: bigint;
+			swapDetails: ICPSwapResult;
+	  }
+	| {
+			provider: SwapProvider.KONG_SWAP;
+			receiveAmount: bigint;
+			slippage: number;
+			route: string[];
+			liquidityFees: ProviderFee[];
+			networkFee?: ProviderFee;
+			swapDetails: SwapAmountsReply;
+	  };

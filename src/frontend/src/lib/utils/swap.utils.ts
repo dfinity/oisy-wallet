@@ -4,12 +4,14 @@ import type {
 } from '$declarations/kong_backend/kong_backend.did';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
+import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 import {
-	ICP_SWAP_PROVIDER,
-	KONG_SWAP_PROVIDER,
-	SWAP_DEFAULT_SLIPPAGE_VALUE
-} from '$lib/constants/swap.constants';
-import type { ICPSwapResult, ProviderFee, Slippage, SwapMappedResult } from '$lib/types/swap';
+	SwapProvider,
+	type ICPSwapResult,
+	type ProviderFee,
+	type Slippage,
+	type SwapMappedResult
+} from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -70,7 +72,7 @@ export const mapIcpSwapResult = ({
 	const parsedSlippage = Number(slippage);
 	const slippagePercentage = parsedSlippage > 0 ? parsedSlippage : SWAP_DEFAULT_SLIPPAGE_VALUE;
 	return {
-		provider: ICP_SWAP_PROVIDER,
+		provider: SwapProvider.ICP_SWAP,
 		receiveAmount: swap.receiveAmount,
 		receiveOutMinimum: calculateSlippage({
 			quoteAmount: swap.receiveAmount,
@@ -87,7 +89,7 @@ export const mapKongSwapResult = ({
 	swap: SwapAmountsReply;
 	tokens: Token[];
 }): SwapMappedResult => ({
-	provider: KONG_SWAP_PROVIDER,
+	provider: SwapProvider.KONG_SWAP,
 	slippage: swap.slippage,
 	receiveAmount: swap.receive_amount,
 	route: getSwapRoute(swap.txs ?? []),
@@ -115,6 +117,6 @@ export const calculateSlippage = ({
 	quoteAmount: bigint;
 	slippagePercentage: number;
 }): bigint => {
-	const slippageFactor = BigInt(10000 - Math.floor(slippagePercentage * 100));
-	return (quoteAmount * slippageFactor) / 10000n;
+	const factor = 1 - slippagePercentage / 100;
+	return BigInt(Math.floor(Number(quoteAmount) * factor));
 };

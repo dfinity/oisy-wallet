@@ -149,6 +149,9 @@ describe('swap utils', () => {
 			const result = mapIcpSwapResult({ swap: baseSwap, slippage: '0.5' });
 
 			expect(result.provider).toBe(ICP_SWAP_PROVIDER);
+
+			assert(result.provider === ICP_SWAP_PROVIDER);
+
 			expect(result.receiveAmount).toBe(1000n);
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({ quoteAmount: 1000n, slippagePercentage: 0.5 })
@@ -159,6 +162,8 @@ describe('swap utils', () => {
 		it('should return mapped result with numeric slippage', () => {
 			const result = mapIcpSwapResult({ swap: baseSwap, slippage: 0.3 });
 
+			assert(result.provider === ICP_SWAP_PROVIDER);
+
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({ quoteAmount: 1000n, slippagePercentage: 0.3 })
 			);
@@ -166,6 +171,8 @@ describe('swap utils', () => {
 
 		it('should fallback to default slippage if value is NaN', () => {
 			const result = mapIcpSwapResult({ swap: baseSwap, slippage: 'string' });
+
+			assert(result.provider === ICP_SWAP_PROVIDER);
 
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({
@@ -177,6 +184,8 @@ describe('swap utils', () => {
 
 		it('should fallback to default slippage if empty string is passed', () => {
 			const result = mapIcpSwapResult({ swap: baseSwap, slippage: '' });
+
+			assert(result.provider === ICP_SWAP_PROVIDER);
 
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({
@@ -208,9 +217,34 @@ describe('swap utils', () => {
 			const result = mapKongSwapResult({ swap, tokens });
 
 			expect(result.provider).toBe(KONG_SWAP_PROVIDER);
+
+			assert(result.provider === KONG_SWAP_PROVIDER);
+
 			expect(result.slippage).toBe(0.3);
 			expect(result.receiveAmount).toBe(2000n);
 			expect(result.swapDetails).toBe(swap);
+		});
+	});
+
+	describe('calculateSlippage', () => {
+		it('returns exact same amount for 0% slippage', () => {
+			expect(calculateSlippage({ quoteAmount: 1000n, slippagePercentage: 0 })).toBe(1000n);
+		});
+
+		it('reduces amount correctly for 0.5% slippage', () => {
+			expect(calculateSlippage({ quoteAmount: 10000n, slippagePercentage: 0.5 })).toBe(9950n);
+		});
+
+		it('reduces amount correctly for 1.23% slippage (rounded down)', () => {
+			expect(calculateSlippage({ quoteAmount: 10000n, slippagePercentage: 1.23 })).toBe(9877n);
+		});
+
+		it('handles high precision decimals by rounding down the factor', () => {
+			expect(calculateSlippage({ quoteAmount: 10000n, slippagePercentage: 0.001 })).toBe(9999n);
+		});
+
+		it('returns 0 for full slippage (100%)', () => {
+			expect(calculateSlippage({ quoteAmount: 12345n, slippagePercentage: 100 })).toBe(0n);
 		});
 	});
 });
