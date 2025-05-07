@@ -1,11 +1,12 @@
 import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import { ICPSwapFactoryCanister } from '$lib/canisters/icp-swap-factory.canister';
+import { ICP_SWAP_CANISTER_ID } from '$lib/constants/app.constants';
 import type { ICPSwapGetPoolParams } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 
-// let canister: ICPSwapFactoryCanister | undefined = undefined;
+let canister: ICPSwapFactoryCanister | undefined = undefined;
 
 export const getPool = async ({
 	identity,
@@ -13,15 +14,17 @@ export const getPool = async ({
 	canisterId,
 	...restParams
 }: CanisterApiFunctionParams<ICPSwapGetPoolParams>): Promise<PoolData> => {
-	const { getPool } = await icpSwapFactoryCanister({
+	const { getPool: pool } = await icpSwapFactoryCanister({
 		identity,
 		canisterId,
 		nullishIdentityErrorMessage
 	});
 
-	console.log(`getPool: ${JSON.stringify(getPool)}`);
+	console.log('env variable', ICP_SWAP_CANISTER_ID);
+	
+	console.log(`getPool: ${JSON.stringify(pool)}`);
 
-	return getPool(restParams);
+	return pool(restParams);
 };
 
 const icpSwapFactoryCanister = async ({
@@ -32,14 +35,16 @@ const icpSwapFactoryCanister = async ({
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
 	console.log(`ICPSwapFactoryCanister: ${canisterId}`);
-	
 
-	// if (isNullish(canister)) {
-	const canister = await ICPSwapFactoryCanister.create({
-		identity,
-		canisterId: Principal.fromText(canisterId)
-	});
-	// }
+	if (isNullish(canister)) {
+		canister = await ICPSwapFactoryCanister.create({
+			identity,
+			canisterId: Principal.fromText(canisterId)
+		});
+	}
+
+	console.log('getPool method exists:', typeof canister.getPool === 'function');
+
 
 	console.log(`ICPSwapFactoryCanister: ${canister.getPool}`);
 
