@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import QRButton from '$lib/components/common/QRButton.svelte';
+	import QrButton from '$lib/components/common/QrButton.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -34,7 +34,7 @@
 	>
 		<svelte:fragment slot="inner-end">
 			{#if nonNullish(onQRButtonClick)}
-				<QRButton on:click={onQRButtonClick} />
+				<QrButton on:click={onQRButtonClick} />
 			{/if}
 		</svelte:fragment>
 	</InputTextWithAction>
