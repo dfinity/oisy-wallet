@@ -15,6 +15,7 @@
 		isTokenCkErc20Ledger,
 		isTokenCkEthLedger
 	} from '$icp/utils/ic-send.utils';
+	import { isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 
@@ -27,7 +28,7 @@
 	$: ckBTC = isTokenCkBtcLedger(token);
 
 	let icrc = false;
-	$: icrc = token.standard === 'icrc';
+	$: icrc = isTokenIcrc(token);
 
 	const open = async (callback: () => Promise<void>) => {
 		await callback();
