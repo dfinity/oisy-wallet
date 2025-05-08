@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import IconAvatar from '$lib/components/icons/IconAvatar.svelte';
+	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
 	import type { AvatarVariants } from '$lib/types/style';
+	import { selectColorForName } from '$lib/utils/contact.utils';
 
 	interface AvatarProps {
 		name?: string;
@@ -20,7 +22,10 @@
 		}[variant]
 	);
 	let size = $derived(variant === 'xl' ? 'size-25' : 'size-[2.5em]');
-	let commonClasses = $derived(`${font} ${size} rounded-full`);
+
+	let bgColor = $derived(selectColorForName({ name, colors: CONTACT_BACKGROUND_COLORS }));
+
+	let commonClasses = $derived(`${font} ${size} ${bgColor} rounded-full`);
 
 	const initials = $derived(
 		(nonNullish(name) ? name : '')
@@ -38,7 +43,7 @@
 	</div>
 {:else}
 	<span
-		class={`${commonClasses} inline-block inline-flex items-center justify-center bg-[lightgray] font-bold text-white ${styleClass}`}
+		class={`${commonClasses} inline-block inline-flex items-center justify-center font-bold text-white transition-colors duration-1000 ${styleClass}`}
 		>{initials}</span
 	>
 {/if}

@@ -9,6 +9,7 @@
 	export let hover = true;
 	export let rounded = true;
 	export let condensed = false;
+	export let styleClass: string | undefined = undefined;
 	export let testId: string | undefined = undefined;
 
 	let hasTitleSlot: boolean;
@@ -31,7 +32,7 @@
 </script>
 
 <div
-	class="flex"
+	class={`flex ${styleClass ?? ''}`}
 	class:w-full={dividers}
 	class:hover:bg-brand-subtle-10={hover}
 	class:rounded-lg={rounded}
