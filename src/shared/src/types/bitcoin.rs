@@ -4,6 +4,24 @@ use candid::CandidType;
 use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Utxo};
 use serde::Deserialize;
 
+/// The maximum length of a bitcoin address, expressed as a string.
+/// - The longest current format seems to be `Bech32` and `Bech32m` which are up to 62 characters
+///   long.
+/// - Some obsolete formats seem to be at most 160 characters long.
+pub const MAX_ADDRESS_LEN: usize = 62;
+
+/// The maximum length of a single `txid`:
+///
+/// - 32 bytes (represented as 64 hexadecimal characters) <https://learnmeabitcoin.com/technical/transaction/input/txid/>
+pub const MAX_TXID_LEN: usize = 32;
+/// The maximum number of UTXOs in the pending transaction:
+///
+/// - Theoretically, it seems that the maximum can be over 1000;
+/// - practically the limit seems to be about 200;
+/// - Typical transactions apparently take 1-3 UTXOs;
+/// - Consolidation transactions typically take many more, however that doesn't apply to this API.
+pub const MAX_UTXOS_LEN: usize = 128;
+
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct SelectedUtxosFeeRequest {
     pub amount_satoshis: u64,
@@ -16,9 +34,6 @@ pub struct SelectedUtxosFeeRequest {
 pub struct SelectedUtxosFeeResponse {
     pub utxos: Vec<Utxo>,
     pub fee_satoshis: u64,
-}
-impl SelectedUtxosFeeResponse {
-    pub const MAX_UTXOS_LEN: usize = 32;
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -35,11 +50,6 @@ pub struct BtcAddPendingTransactionRequest {
     pub address: String,
     pub network: BitcoinNetwork,
 }
-impl BtcAddPendingTransactionRequest {
-    pub const MAX_ADDRESS_LEN: usize = 160;
-    pub const MAX_TXID_LEN: usize = 32;
-    pub const MAX_UTXOS_LEN: usize = 32;
-}
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcAddPendingTransactionError {
@@ -52,13 +62,6 @@ pub struct BtcGetPendingTransactionsRequest {
     pub address: String,
     pub network: BitcoinNetwork,
 }
-impl BtcGetPendingTransactionsRequest {
-    /// The maximum length of a bitcoin address, expressed as a string.
-    /// - The longest current format seems to be `Bech32` and `Bech32m` which are up to 62
-    ///   characters long.
-    /// - Some obsolete formats seem to be at most 160 characters long.
-    pub const MAX_ADDRESS_LEN: usize = 62;
-}
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[serde(remote = "Self")]
@@ -66,23 +69,8 @@ pub struct PendingTransaction {
     pub txid: Vec<u8>,
     pub utxos: Vec<Utxo>,
 }
-impl PendingTransaction {
-    /// The maximum length of a single `txid`:
-    ///
-    /// - 32 bytes (represented as 64 hexadecimal characters) <https://learnmeabitcoin.com/technical/transaction/input/txid/>
-    pub const MAX_TXID_LEN: usize = 32;
-    /// The maximum number of UTXOs in the pending transaction:
-    ///
-    /// - Theoretically, it seems that the maximum can be over 1000;
-    /// - practically the limit seems to be about 200;
-    /// - Typical transactions apparently take 1-3 UTXOs;
-    /// - Consolidation transactions typically take many more, however that doesn't apply to this
-    ///   API.
-    pub const MAX_UTXOS_LEN: usize = 128;
-}
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-#[serde(remote = "Self")]
 pub struct BtcGetPendingTransactionsReponse {
     pub transactions: Vec<PendingTransaction>,
 }

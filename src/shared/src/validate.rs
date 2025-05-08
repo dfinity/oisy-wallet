@@ -76,3 +76,13 @@ macro_rules! test_validate_on_deserialize {
 }
 #[cfg(test)]
 pub(crate) use test_validate_on_deserialize;
+
+#[cfg(test)]
+pub struct TestVector<T>
+where
+    T: candid::CandidType + Validate,
+{
+    pub input: T,
+    pub valid: bool,
+    pub description: &'static str,
+}

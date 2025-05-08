@@ -1,5 +1,32 @@
 //! Tests for the types module.
 
+mod bitcoin {
+    //! Tests for the bitcoin types.
+    mod btc_add_pending_transaction_request {
+        use candid::{Decode, Encode};
+        use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
+
+        use crate::{
+            types::bitcoin::{BtcAddPendingTransactionRequest, MAX_TXID_LEN},
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
+
+        fn test_vectors() -> Vec<TestVector<BtcAddPendingTransactionRequest>> {
+            vec![TestVector {
+                input: BtcAddPendingTransactionRequest {
+                    txid: vec![0; MAX_TXID_LEN],
+                    utxos: vec![],
+                    address: "".to_string(),
+                    network: BitcoinNetwork::Mainnet,
+                },
+                valid: true,
+                description: "Valid BtcAddPendingTransactionRequest",
+            }]
+        }
+        test_validate_on_deserialize!(BtcAddPendingTransactionRequest);
+    }
+}
+
 mod custom_token {
     //! Tests for the `custom_token` module.
     use candid::{Decode, Encode};
