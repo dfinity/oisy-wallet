@@ -1,4 +1,5 @@
 import type {
+	AddUserCredentialResult,
 	AllowSigningResponse,
 	CreateChallengeResponse,
 	CustomToken,
@@ -12,7 +13,6 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
 	AddUserCredentialParams,
-	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
@@ -108,7 +108,7 @@ export const getUserProfile = async ({
 export const addUserCredential = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResponse> => {
+}: CanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResult> => {
 	const { addUserCredential } = await backendCanister({ identity });
 
 	return addUserCredential(params);

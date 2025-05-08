@@ -66,6 +66,7 @@ use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     oisy_user::oisy_user_creation_timestamps,
+    result_types::AddUserCredentialResult,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
@@ -87,6 +88,7 @@ mod types;
 mod user_profile;
 mod user_profile_model;
 
+mod result_types;
 #[cfg(test)]
 mod tests;
 
@@ -498,16 +500,17 @@ pub async fn btc_get_pending_transactions(
 /// Errors are enumerated by: `AddUserCredentialError`.
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
-pub fn add_user_credential(
-    request: AddUserCredentialRequest,
-) -> Result<(), AddUserCredentialError> {
+#[must_use]
+pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredentialResult {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
     let current_time_ns = u128::from(time());
 
-    let (vc_flow_signers, root_pk_raw, credential_type, derivation_origin) =
+    let Some((vc_flow_signers, root_pk_raw, credential_type, derivation_origin)) =
         read_config(|config| find_credential_config(&request, config))
-            .ok_or(AddUserCredentialError::ConfigurationError)?;
+    else {
+        return AddUserCredentialResult::Err(AddUserCredentialError::ConfigurationError);
+    };
 
     match validate_ii_presentation_and_claims(
         &request.credential_jwt,
@@ -531,6 +534,7 @@ pub fn add_user_credential(
         }),
         Err(_) => Err(AddUserCredentialError::InvalidCredential),
     }
+    .into()
 }
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
