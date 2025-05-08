@@ -4,7 +4,6 @@
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-
 	import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 	import {
 		loadPendingCkEthereumTransaction,
