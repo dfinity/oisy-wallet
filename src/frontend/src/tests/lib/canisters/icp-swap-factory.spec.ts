@@ -15,10 +15,7 @@ import { mock } from 'vitest-mock-extended';
 describe('icp_swap_factory.canister', () => {
 	const createFactory = ({
 		serviceOverride
-	}: Pick<
-		CreateCanisterOptions<SwapFactoryService>,
-		'serviceOverride'
-	>): Promise<ICPSwapFactoryCanister> =>
+	}: Pick<CreateCanisterOptions<SwapFactoryService>, 'serviceOverride'>) =>
 		ICPSwapFactoryCanister.create({
 			canisterId: Principal.fromText('4mmnk-kiaaa-aaaag-qbllq-cai'),
 			identity: mockIdentity,
