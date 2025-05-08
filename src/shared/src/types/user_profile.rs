@@ -7,7 +7,13 @@ use ic_verifiable_credentials::issuer_api::CredentialSpec;
 use super::{verifiable_credential::CredentialType, Timestamp};
 use crate::types::{settings::Settings, Version};
 
+pub mod impls;
+
+/// The maximum supported length for an issuer.
+pub const MAX_ISSUER_LENGTH: usize = 100;
+
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
 pub struct UserCredential {
     pub credential_type: CredentialType,
     pub verified_date_timestamp: Option<Timestamp>,
