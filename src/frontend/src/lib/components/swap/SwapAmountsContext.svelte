@@ -13,7 +13,6 @@
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
-	import { fetchSwapAmounts } from '$lib/services/swap.services';
 
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: Token | undefined;
