@@ -28,6 +28,7 @@ interface I18nCore {
 		new: string;
 		edit: string;
 		no_results: string;
+		paste: string;
 		to: string;
 		more_items: string;
 	};
