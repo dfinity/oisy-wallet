@@ -19,7 +19,7 @@
 	let expanded = $state(false);
 </script>
 
-<Responsive down="md">
+<Responsive down="sm">
 	{#if expanded}
 		<div class="z-14 fixed bottom-0 left-0 right-0 top-0">
 			<BottomSheet on:nnsClose={() => (expanded = false)} transition>
@@ -54,7 +54,7 @@
 		{@render contentHeader()}
 	</div>
 
-	<Responsive up="1.5md">
+	<Responsive up="md">
 		{@render content()}
 	</Responsive>
 </Collapsible>
