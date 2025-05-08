@@ -4,7 +4,8 @@
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-	import type { IcCkToken, IcToken } from '$icp/types/ic-token';
+	import type { IcToken } from '$icp/types/ic-token';
+	import { isIcCkToken } from '$icp/validation/ic-token.validation';
 	import {
 		loadPendingCkEthereumTransaction,
 		loadCkEthereumPendingTransactions
@@ -29,12 +30,13 @@
 
 	let loadBalance: OptionBalance = undefined;
 
-	let { twinToken } = token as IcCkToken;
+	let twinToken: Token | undefined;
+	$: twinToken = nonNullish(token) && isIcCkToken(token) ? token.twinToken : undefined;
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionEthAddress }) => {
-		if (isNullish(token) || isNullish(token.id)) {
+		if (isNullish(token)) {
 			return;
 		}
 
@@ -42,8 +44,6 @@
 			icPendingTransactionsStore.reset(token.id);
 			return;
 		}
-
-		const { twinToken } = token as IcCkToken;
 
 		if (isNullish(twinToken)) {
 			return;
@@ -89,10 +89,6 @@
 		}
 
 		if (isNullish(twinToken)) {
-			return;
-		}
-
-		if (isNullish(twinToken.network.id)) {
 			return;
 		}
 

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Component } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import Info from '$icp/components/info/Info.svelte';
@@ -9,12 +8,8 @@
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
-	import IcTransactionsBtcListeners, {
-		type Props as IcTransactionsCkBTCListenersProps
-	} from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
-	import IcTransactionsCkEthereumListeners, {
-		type Props as IcTransactionsCkEthereumListenersProps
-	} from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
+	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
+	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import IcTransactionsScroll from '$icp/components/transactions/IcTransactionsScroll.svelte';
@@ -43,8 +38,9 @@
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
 
 	let additionalListener:
-		| Component<IcTransactionsCkBTCListenersProps>
-		| Component<IcTransactionsCkEthereumListenersProps>;
+		| typeof IcTransactionsBtcListeners
+		| typeof IcTransactionsCkEthereumListeners
+		| typeof IcTransactionsNoListener;
 	$: additionalListener = $tokenCkBtcLedger
 		? IcTransactionsBtcListeners
 		: ckEthereum

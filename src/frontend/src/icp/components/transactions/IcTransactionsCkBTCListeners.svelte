@@ -8,17 +8,15 @@
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import type { OptionToken, Token } from '$lib/types/token';
 
-	export interface Props {
+	interface Props {
 		token: OptionToken;
 		children?: Snippet;
 	}
 
 	let { token, children }: Props = $props();
-
 	let minterInfoLoaded: boolean = $derived(
 		nonNullish(token?.id) && $ckBtcMinterInfoStore?.[token.id]?.certified === true
 	);
-
 	let twinToken: Token | undefined = $derived((token as OptionIcCkToken)?.twinToken);
 </script>
 
