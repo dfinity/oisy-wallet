@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish, isEmptyString, fromNullishNullable } from '@dfinity/utils';
 	import type { TransactionResponse } from 'ethers/providers';
 	import { onDestroy } from 'svelte';
+	import type { BRAND } from 'zod';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
@@ -18,6 +19,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
+	import type { CertifiedStoreData } from '$lib/stores/certified.store.js';
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { WebSocketListener } from '$lib/types/listener';
