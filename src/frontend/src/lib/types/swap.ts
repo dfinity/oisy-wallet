@@ -49,15 +49,6 @@ export type IcpQuoteResult = {
 	slippage: Slippage;
 };
 
-export interface FetchSwapAmountsParams {
-	identity: Identity;
-	sourceToken: IcToken;
-	destinationToken: IcToken;
-	amount: string | number;
-	tokens: IcToken[];
-	slippage: string | number;
-}
-
 type KongQuoteParams = {
 	swap: SwapAmountsReply;
 	tokens: IcToken[];
