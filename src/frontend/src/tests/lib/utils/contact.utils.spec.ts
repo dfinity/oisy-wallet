@@ -1,9 +1,10 @@
 import { selectColorForName } from '$lib/utils/contact.utils';
+import type { NonEmptyArray } from 'alchemy-sdk';
 
 describe('contact.utils', () => {
 	describe('selectColorForName', () => {
 		it('should return a color from the array based on the name', () => {
-			const colors = ['red', 'green', 'blue'];
+			const colors: NonEmptyArray<string> = ['red', 'green', 'blue'];
 
 			expect(selectColorForName({ colors, name: 'John 1' })).toEqual('red');
 			expect(selectColorForName({ colors, name: 'John 2' })).toEqual('green');
@@ -13,7 +14,7 @@ describe('contact.utils', () => {
 		});
 
 		it('should return the same color for the same name', () => {
-			const colors = ['red', 'green', 'blue'];
+			const colors: NonEmptyArray<string> = ['red', 'green', 'blue'];
 			const name = 'John Doe';
 
 			const result1 = selectColorForName({ colors, name });
@@ -23,17 +24,11 @@ describe('contact.utils', () => {
 		});
 
 		it('should return undefined if name is empty', () => {
-			const colors = ['red', 'green', 'blue'];
+			const colors: NonEmptyArray<string> = ['red', 'green', 'blue'];
 
 			expect(selectColorForName({ colors, name: '' })).toBeUndefined();
 			expect(selectColorForName({ colors, name: '   ' })).toBeUndefined();
 			expect(selectColorForName({ colors, name: undefined })).toBeUndefined();
-		});
-
-		it('should throw an error if colors array is empty', () => {
-			expect(() => selectColorForName({ colors: [], name: 'John Doe' })).toThrow(
-				'Colors array cannot be empty'
-			);
 		});
 	});
 });

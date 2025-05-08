@@ -1,5 +1,7 @@
+import type { NonEmptyArray } from '$lib/types/utils';
+
 // Available contact background colors
-export const CONTACT_BACKGROUND_COLORS = [
+export const CONTACT_BACKGROUND_COLORS: NonEmptyArray<string> = [
 	`bg-contact-1`,
 	`bg-contact-2`,
 	`bg-contact-3`,

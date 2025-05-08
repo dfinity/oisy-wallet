@@ -1,16 +1,13 @@
+import type { NonEmptyArray } from '$lib/types/utils';
 import { isEmptyString } from '@dfinity/utils';
 
 export const selectColorForName = <T>({
 	colors,
 	name
 }: {
-	colors: T[];
-	name?: string;
+	colors: NonEmptyArray<T>;
+	name: string | undefined;
 }): T | undefined => {
-	if (colors.length === 0) {
-		throw new Error('Colors array cannot be empty');
-	}
-
 	const trimmedName = name?.trim?.();
 	if (isEmptyString(trimmedName)) {
 		return undefined;
