@@ -22,12 +22,16 @@ pub struct UserCredential {
 
 // Used in the endpoint
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
 pub struct UserProfile {
     pub settings: Option<Settings>,
     pub credentials: Vec<UserCredential>,
     pub created_timestamp: Timestamp,
     pub updated_timestamp: Timestamp,
     pub version: Option<Version>,
+}
+impl UserProfile {
+    pub const MAX_CREDENTIALS: usize = 100;
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
