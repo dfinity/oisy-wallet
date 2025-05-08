@@ -18,14 +18,20 @@ describe('eth-transactions.derived', () => {
 	describe('ethKnownDestinations', () => {
 		beforeEach(() => {
 			ethTransactionsStore.reset();
-			ckEthMinterInfoStore.set({
-				id: ETHEREUM_TOKEN_ID,
-				data: mockCkEthMinterInfo
-			});
 			ethAddressStore.set({ certified: true, data: mockEthAddress });
 		});
 
-		it('should return known destinations if transactions store has some data', () => {
+		it('should return known destinations if transactions store has some data and helper addresses available', () => {
+			ckEthMinterInfoStore.set({
+				id: ETHEREUM_TOKEN_ID,
+				data: {
+					...mockCkEthMinterInfo,
+					data: {
+						...mockCkEthMinterInfo.data,
+						eth_helper_contract_address: ['test']
+					}
+				}
+			});
 			ethTransactionsStore.add({
 				tokenId: ETHEREUM_TOKEN_ID,
 				transactions
@@ -40,6 +46,15 @@ describe('eth-transactions.derived', () => {
 		});
 
 		it('should return empty object if transactions store does not have data', () => {
+			expect(get(ethKnownDestinations)).toEqual({});
+		});
+
+		it('should return empty object if helper addresses are not available', () => {
+			ckEthMinterInfoStore.set({
+				id: ETHEREUM_TOKEN_ID,
+				data: mockCkEthMinterInfo
+			});
+
 			expect(get(ethKnownDestinations)).toEqual({});
 		});
 	});

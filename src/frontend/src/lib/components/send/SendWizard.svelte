@@ -32,7 +32,6 @@
 	export let amount: number | undefined;
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
-	export let formCancelAction: 'back' | 'close' = 'back';
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -51,7 +50,7 @@
 			{currentStep}
 			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			nativeEthereumToken={$ethereumToken}
-			bind:destination
+			{destination}
 			bind:targetNetwork
 			bind:amount
 			bind:sendProgressStep
@@ -66,7 +65,7 @@
 			{currentStep}
 			sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
 			nativeEthereumToken={evmNativeEthereumToken}
-			bind:destination
+			{destination}
 			bind:targetNetwork
 			bind:amount
 			bind:sendProgressStep
@@ -80,7 +79,7 @@
 		<IcSendTokenWizard
 			{source}
 			{currentStep}
-			bind:destination
+			{destination}
 			bind:networkId
 			bind:amount
 			bind:sendProgressStep
@@ -93,7 +92,7 @@
 	{:else if isNetworkIdBitcoin($sendToken.network.id)}
 		<BtcSendTokenWizard
 			{currentStep}
-			bind:destination
+			{destination}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
@@ -105,7 +104,7 @@
 	{:else if isNetworkIdSolana($sendToken.network.id)}
 		<SolSendTokenWizard
 			{currentStep}
-			bind:destination
+			{destination}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
