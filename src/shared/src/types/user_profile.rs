@@ -34,6 +34,7 @@ impl UserProfile {
     pub const MAX_CREDENTIALS: usize = 100;
 }
 
+// TODO: Move out of shared.  If this type is the internal storage type, it shouldn't be here.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct StoredUserProfile {
     pub settings: Option<Settings>,
@@ -44,11 +45,21 @@ pub struct StoredUserProfile {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
 pub struct AddUserCredentialRequest {
     pub credential_jwt: String,
     pub credential_spec: CredentialSpec,
     pub issuer_canister_id: Principal,
     pub current_user_version: Option<Version>,
+}
+impl AddUserCredentialRequest {
+    /// The maximum supported length for a credential JWT.
+    pub const MAX_CREDENTIAL_JWT_LENGTH: usize = 8 << 10;
+    /// The maximum number of `CredentialSpec.arguments`.
+    pub const MAX_CREDENTIAL_SPEC_ARGUMENTS: usize = 10;
+    // 8K
+    /// The maximum supported length for a credential type.
+    pub const MAX_CREDENTIAL_TYPE_LENGTH: usize = 16;
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
