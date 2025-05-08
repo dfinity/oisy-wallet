@@ -1,6 +1,6 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { IcToken } from '$icp/types/ic-token';
-import * as kongBackendApi  from '$lib/api/kong_backend.api';
+import * as kongBackendApi from '$lib/api/kong_backend.api';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import { fetchSwapAmounts, loadKongSwapTokens } from '$lib/services/swap.services';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
@@ -11,16 +11,16 @@ import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mo
 import { get } from 'svelte/store';
 
 vi.mock(import('$env/icp-swap.env'), async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    ICP_SWAP_ENABLED: true
-  };
+	const actual = await importOriginal();
+	return {
+		...actual,
+		ICP_SWAP_ENABLED: true
+	};
 });
 
 vi.mock('$lib/api/kong_backend.api', () => ({
 	kongSwapAmounts: vi.fn(),
-  kongTokens: vi.fn()
+	kongTokens: vi.fn()
 }));
 
 vi.mock('$lib/services/icp-swap.services', () => ({
