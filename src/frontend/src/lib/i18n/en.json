@@ -877,7 +877,8 @@
 			"converting_twin_token": "Converting $twinToken to $ckToken",
 			"converting_ck_token": "Converting $ckToken to $twinToken",
 			"twin_network": "$twinNetwork network",
-			"no_date_available": "No Date Available"
+			"no_date_available": "No Date Available",
+			"pending": "Pending"
 		},
 		"alt": {
 			"open_block_explorer": "Open this transaction on a block explorer",
