@@ -7,7 +7,7 @@ mod bitcoin {
         use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Outpoint, Utxo};
 
         use crate::{
-            types::bitcoin::{BtcAddPendingTransactionRequest, MAX_TXID_LEN},
+            types::bitcoin::{BtcAddPendingTransactionRequest, MAX_TXID_LEN, MAX_UTXOS_LEN},
             validate::{test_validate_on_deserialize, TestVector, Validate},
         };
 
@@ -62,6 +62,26 @@ mod bitcoin {
                             value: 0,
                             height: 0,
                         }],
+                        address: "".to_string(),
+                        network: BitcoinNetwork::Mainnet,
+                    },
+                    valid: false,
+                },
+                TestVector {
+                    description: "With too many utxos",
+                    input: BtcAddPendingTransactionRequest {
+                        txid: vec![0; MAX_TXID_LEN],
+                        utxos: vec![
+                            Utxo {
+                                outpoint: Outpoint {
+                                    txid: vec![0; MAX_TXID_LEN],
+                                    vout: 0
+                                },
+                                value: 0,
+                                height: 0,
+                            };
+                            MAX_UTXOS_LEN + 1
+                        ],
                         address: "".to_string(),
                         network: BitcoinNetwork::Mainnet,
                     },
