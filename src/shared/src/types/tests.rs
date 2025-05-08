@@ -356,11 +356,16 @@ mod custom_token {
 
 mod user_profile {
     //! Tests for the `user_profile` types.
-    use candid::{Decode, Encode};
+    use std::collections::HashMap;
+
+    use candid::{Decode, Encode, Principal};
+    use ic_verifiable_credentials::issuer_api::{ArgumentValue, CredentialSpec};
 
     use crate::{
         types::{
-            user_profile::{UserCredential, UserProfile, MAX_ISSUER_LENGTH},
+            user_profile::{
+                AddUserCredentialRequest, UserCredential, UserProfile, MAX_ISSUER_LENGTH,
+            },
             verifiable_credential::CredentialType,
         },
         validate::{test_validate_on_deserialize, TestVector, Validate},
@@ -420,6 +425,76 @@ mod user_profile {
                     updated_timestamp: 0,
                     version: None,
                     settings: None,
+                },
+                valid: false,
+            },
+        ]
+    );
+
+    test_validate_on_deserialize!(
+        AddUserCredentialRequest,
+        vec![
+            TestVector {
+                description: "AddUserCredentialRequest with max length credential_jwt",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
+                        arguments: None,
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "AddUserCredentialRequest with credential_jwt too long",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1"
+                        .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH + 1),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
+                        arguments: None,
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "AddUserCredentialRequest with credential_type too long",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH + 1),
+                        arguments: None,
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "AddUserCredentialRequest with too many arguments",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
+                        arguments: Some({
+                            let mut args = HashMap::new();
+                            for i in 0..AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENTS + 1
+                            {
+                                args.insert(i.to_string(), ArgumentValue::Int(i as i32));
+                            }
+                            args
+                        }),
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
                 },
                 valid: false,
             },
