@@ -75,28 +75,49 @@ describe('mapListeners', () => {
 		]);
 	});
 
-	it('should handle IC CK listeners correctly', () => {
-		const mockCkBtcToken = {
-			...BTC_MAINNET_TOKEN,
-			network: ICP_NETWORK,
-			ledgerCanisterId: CKBTC_LEDGER_CANISTER_IDS[0]
-		} as unknown as IcCkToken;
-		const mockCkEthToken = {
-			...ETHEREUM_TOKEN,
-			network: ICP_NETWORK,
-			ledgerCanisterId: CKETH_LEDGER_CANISTER_IDS[0]
-		} as unknown as IcCkToken as unknown as IcCkToken;
-		const mockCkUSDCToken = {
-			...USDC_TOKEN,
-			network: ICP_NETWORK,
-			ledgerCanisterId: CKERC20_LEDGER_CANISTER_IDS[0]
-		} as unknown as IcCkToken as unknown as IcCkToken;
+	const mockCkBtcToken = {
+		...BTC_MAINNET_TOKEN,
+		network: ICP_NETWORK,
+		ledgerCanisterId: CKBTC_LEDGER_CANISTER_IDS[0]
+	} as unknown as IcCkToken;
+	const mockCkEthToken = {
+		...ETHEREUM_TOKEN,
+		network: ICP_NETWORK,
+		ledgerCanisterId: CKETH_LEDGER_CANISTER_IDS[0]
+	} as unknown as IcCkToken as unknown as IcCkToken;
+	const mockCkUSDCToken = {
+		...USDC_TOKEN,
+		network: ICP_NETWORK,
+		ledgerCanisterId: CKERC20_LEDGER_CANISTER_IDS[0]
+	} as unknown as IcCkToken as unknown as IcCkToken;
+
+	it('should handle IC CK tokens correctly', () => {
 		const tokens: OptionToken[] = [mockCkBtcToken, mockCkEthToken, mockCkUSDCToken];
 
 		expect(mapListeners(tokens)).toEqual([
 			{ token: mockCkBtcToken, listener: IcTransactionsCkBTCListeners },
 			{ token: mockCkEthToken, listener: IcTransactionsCkEthereumListeners },
 			{ token: mockCkUSDCToken, listener: IcTransactionsCkEthereumListeners }
+		]);
+	});
+
+	it('should handle all tokens correctly', () => {
+		const tokens: OptionToken[] = [
+			mockCkBtcToken,
+			mockCkEthToken,
+			mockCkUSDCToken,
+			BTC_MAINNET_TOKEN,
+			BASE_ETH_TOKEN,
+			BNB_TESTNET_TOKEN
+		];
+
+		expect(mapListeners(tokens)).toEqual([
+			{ token: mockCkBtcToken, listener: IcTransactionsCkBTCListeners },
+			{ token: mockCkEthToken, listener: IcTransactionsCkEthereumListeners },
+			{ token: mockCkUSDCToken, listener: IcTransactionsCkEthereumListeners },
+			{ token: BTC_MAINNET_TOKEN, listener: BitcoinListener },
+			{ token: BASE_ETH_TOKEN, listener: EthListener },
+			{ token: BNB_TESTNET_TOKEN, listener: EthListener }
 		]);
 	});
 });
