@@ -24,7 +24,9 @@
 			"not_available": "n/a",
 			"new": "New",
 			"edit": "Edit",
-			"no_results": "No results"
+			"no_results": "No results",
+			"to": "To",
+			"more_items": "+$items more"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -442,7 +444,9 @@
 			"open_qr_modal": "Start QR Code scan for transaction details",
 			"scan_qr": "Scan QR Code",
 			"select_token": "Select token to send",
-			"select_network_filter": "Select network filter"
+			"select_network_filter": "Select network filter",
+			"send_again": "Send again",
+			"recently_used": "Recently used"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
@@ -454,7 +458,8 @@
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
-			"no_available_utxos": "You won't have available utxos to perform this transaction."
+			"no_available_utxos": "You won't have available utxos to perform this transaction.",
+			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -999,7 +1004,8 @@
 			"title": "Address book",
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
-			"add_new_contact": "Add new contact"
+			"add_new_contact": "Add new contact",
+			"add_contact": "Add contact"
 		}
 	},
 	"contact": {

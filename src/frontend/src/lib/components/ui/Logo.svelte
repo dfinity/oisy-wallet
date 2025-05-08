@@ -18,25 +18,15 @@
 
 	let sizePx = $state(logoSizes[size]);
 
-	let loaded = $state(false);
-
-	$effect(() => {
-		loaded = isNullish(src);
-		loadingError = false;
-	});
-
-	let loadingError = $state(false);
-	const onError = () => {
-		loadingError = true;
-		loaded = true;
-	};
+	let loadingError: boolean | undefined = $state();
+	let isReady = $derived((nonNullish(src) && nonNullish(loadingError)) || isNullish(src));
 </script>
 
 <div
 	class="flex items-center justify-center overflow-hidden rounded-full ring-primary"
-	class:bg-off-white={color === 'off-white' && !loaded}
-	class:bg-white={color === 'white' && !loaded}
-	class:opacity-10={!loaded}
+	class:bg-off-white={color === 'off-white' && !isReady}
+	class:bg-white={color === 'white' && !isReady}
+	class:opacity-10={!isReady}
 	class:ring-2={ring}
 	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
 	data-tid={testId}
@@ -47,8 +37,8 @@
 			{alt}
 			fitHeight
 			height={sizePx}
-			on:load={() => (loaded = true)}
-			on:error={onError}
+			on:load={() => (loadingError = false)}
+			on:error={() => (loadingError = true)}
 			rounded
 		/>
 	{:else}
