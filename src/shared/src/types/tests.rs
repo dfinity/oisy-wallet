@@ -12,26 +12,28 @@ mod bitcoin {
         };
 
         fn test_vectors() -> Vec<TestVector<BtcAddPendingTransactionRequest>> {
-            vec![TestVector {
-                input: BtcAddPendingTransactionRequest {
-                    txid: vec![0; MAX_TXID_LEN],
-                    utxos: vec![],
-                    address: "".to_string(),
-                    network: BitcoinNetwork::Mainnet,
+            vec![
+                TestVector {
+                    input: BtcAddPendingTransactionRequest {
+                        txid: vec![0; MAX_TXID_LEN],
+                        utxos: vec![],
+                        address: "".to_string(),
+                        network: BitcoinNetwork::Mainnet,
+                    },
+                    valid: true,
+                    description: "BtcAddPendingTransactionRequest with max length txid",
                 },
-                valid: true,
-                description: "BtcAddPendingTransactionRequest with max length txid",
-            }, TestVector {
-                input: BtcAddPendingTransactionRequest {
-                    txid: vec![0; MAX_TXID_LEN + 1],
-                    utxos: vec![],
-                    address: "".to_string(),
-                    network: BitcoinNetwork::Mainnet,
+                TestVector {
+                    input: BtcAddPendingTransactionRequest {
+                        txid: vec![0; MAX_TXID_LEN + 1],
+                        utxos: vec![],
+                        address: "".to_string(),
+                        network: BitcoinNetwork::Mainnet,
+                    },
+                    valid: false,
+                    description: "BtcAddPendingTransactionRequest with txid too long",
                 },
-                valid: false,
-                description: "BtcAddPendingTransactionRequest with txid too long",
-            },
-        ]
+            ]
         }
         test_validate_on_deserialize!(BtcAddPendingTransactionRequest);
     }
