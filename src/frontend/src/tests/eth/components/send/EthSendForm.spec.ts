@@ -2,7 +2,10 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 import { FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
-import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
+import {
+	SEND_DESTINATION_SECTION,
+	TOKEN_INPUT_CURRENCY_TOKEN
+} from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
@@ -33,13 +36,11 @@ describe('EthSendForm', () => {
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
-	const destinationSelector = 'input[data-tid="destination-input"]';
-	const networkSelector = 'div[id="network"]';
 	const maxFeeEthSelector = 'div[id="max-fee-eth"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	it('should render all fields', () => {
-		const { container } = render(EthSendForm, {
+		const { container, getByTestId } = render(EthSendForm, {
 			props,
 			context: mockContext
 		});
@@ -48,13 +49,7 @@ describe('EthSendForm', () => {
 
 		expect(amount).not.toBeNull();
 
-		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
-
-		expect(destination).not.toBeNull();
-
-		const network: HTMLDivElement | null = container.querySelector(networkSelector);
-
-		expect(network).not.toBeNull();
+		expect(getByTestId(SEND_DESTINATION_SECTION)).toBeInTheDocument();
 
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
 

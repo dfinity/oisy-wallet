@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { notEmptyString } from '@dfinity/utils';
+	import { isNullish, notEmptyString } from '@dfinity/utils';
 	import ContactForm from '$lib/components/address-book/ContactForm.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -57,7 +57,11 @@
 	<ContactForm bind:contact bind:this={form}></ContactForm>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => close()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
+		<ButtonCancel
+			onclick={() => onClose!()}
+			disabled={isNullish(onClose)}
+			testId={ADDRESS_BOOK_CANCEL_BUTTON}
+		></ButtonCancel>
 		<Button
 			colorStyle="primary"
 			on:click={() => handleSave()}

@@ -194,3 +194,5 @@ export const CONTACT_HEADER_EDIT_BUTTON = 'contact-header-edit-button';
 export const CONTACT_HEADER_EDITING_EDIT_BUTTON = 'contact-header-editing-edit-button';
 
 export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
+
+export const SEND_DESTINATION_SECTION = 'send-destination-section';
