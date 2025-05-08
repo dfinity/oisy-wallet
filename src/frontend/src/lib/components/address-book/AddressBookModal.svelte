@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import AddContactStep from '$lib/components/address-book/AddContactStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
+	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
+	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
+	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Contact } from '$lib/types/contact';
+	import type { Address, Contact } from '$lib/types/contact';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	const steps: WizardSteps = [
@@ -16,8 +20,24 @@
 			title: $i18n.address_book.text.title
 		},
 		{
-			name: AddressBookSteps.ADD_CONTACT,
+			name: AddressBookSteps.SHOW_CONTACT,
+			title: $i18n.address_book.show_contact.title
+		},
+		{
+			name: AddressBookSteps.EDIT_CONTACT,
+			title: $i18n.contact.form.edit_contact
+		},
+		{
+			name: AddressBookSteps.EDIT_CONTACT_NAME,
 			title: $i18n.contact.form.add_new_contact
+		},
+		{
+			name: AddressBookSteps.SHOW_ADDRESS,
+			title: 'Show address'
+		},
+		{
+			name: AddressBookSteps.EDIT_ADDRESS,
+			title: 'Edit address'
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
@@ -26,9 +46,17 @@
 	const close = () => modalStore.close();
 
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
-	let addContactStep = $state<AddContactStep>();
+	let editContactNameStep = $state<EditContactNameStep>();
 
-	let contacts: Contact[] = $state([]);
+	let contacts: Contact[] = $state([
+		{
+			id: 'pf',
+			name: 'Peter Fox',
+			addresses: [{ id: 'f1', address_type: 'ETH', address: 'xxxxxxx', alias: 'Private' }]
+		}
+	]);
+	let currentContact: Contact | undefined = $state();
+	let currentAddress: Address | undefined = $state();
 
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
@@ -41,8 +69,57 @@
 	};
 
 	const addContact = (contact: Contact) => {
-		contacts = [...contacts, contact];
+		currentContact = {
+			...contact,
+			id: `${Date.now()}`
+		};
+		contacts = [...contacts, currentContact];
 		gotoStep(AddressBookSteps.ADDRESS_BOOK);
+	};
+
+	const saveContact = (contact: Contact) => {
+		const index = contacts.findIndex((c) => contact.id === c.id);
+		contacts[index] = contact;
+		gotoStep(AddressBookSteps.ADDRESS_BOOK);
+	};
+
+	const deleteContact = (id: string) => {
+		contacts = contacts.filter((contact) => contact.id !== id);
+		currentContact = undefined;
+		gotoStep(AddressBookSteps.ADDRESS_BOOK);
+	};
+
+	const addAddress = (address: Partial<Address>) => {
+		currentAddress = {
+			...address,
+			id: `${Date.now()}`
+		} as Address;
+		const addresses = [...currentContact!.addresses, currentAddress];
+		currentContact = {
+			...currentContact!,
+			addresses
+		};
+		saveContact(currentContact);
+		gotoStep(AddressBookSteps.SHOW_CONTACT);
+	};
+
+	const saveAddress = (address: Address) => {
+		const { addresses } = currentContact!;
+		const index = addresses.findIndex((a) => address.id === a.id);
+		addresses[index] = { ...address };
+		gotoStep(AddressBookSteps.SHOW_CONTACT);
+	};
+
+	const deleteAddress = (id: string) => {
+		if (nonNullish(currentContact)) {
+			const updatedAddresses = currentContact.addresses.filter((address) => address.id !== id);
+			currentContact = {
+				...currentContact,
+				addresses: updatedAddresses
+			};
+			saveContact(currentContact);
+			gotoStep(AddressBookSteps.SHOW_CONTACT);
+		}
 	};
 </script>
 
@@ -55,19 +132,81 @@
 	on:nnsClose={close}
 >
 	<svelte:fragment slot="title"
-		>{currentStepName === AddressBookSteps.ADD_CONTACT && nonNullish(addContactStep)
-			? addContactStep.title
+		>{currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)
+			? editContactNameStep.title
 			: (currentStep?.title ?? '')}</svelte:fragment
 	>
 
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
-		<AddressBookStep {contacts} addContact={() => gotoStep(AddressBookSteps.ADD_CONTACT)}
+		<AddressBookStep
+			{contacts}
+			showContact={(contact) => {
+				currentContact = contact;
+				gotoStep(AddressBookSteps.SHOW_CONTACT);
+			}}
+			addContact={() => {
+				currentContact = undefined;
+				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+			}}
 		></AddressBookStep>
-	{:else if currentStep?.name === AddressBookSteps.ADD_CONTACT}
-		<AddContactStep
-			bind:this={addContactStep}
-			{addContact}
+	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
+		<ShowContactStep
 			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
-		></AddContactStep>
+			contact={currentContact!}
+			edit={(contact) => {
+				currentContact = contact;
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
+			}}
+			addAddress={() => {
+				currentAddress = undefined;
+				gotoStep(AddressBookSteps.EDIT_ADDRESS);
+			}}
+			showAddress={(address) => {
+				currentAddress = address;
+				gotoStep(AddressBookSteps.SHOW_ADDRESS);
+			}}
+		></ShowContactStep>
+	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT}
+		<EditContactStep
+			contact={currentContact!}
+			close={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+			edit={(contact) => {
+				currentContact = contact;
+				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+			}}
+			editAddress={(address) => {
+				currentAddress = address;
+				gotoStep(AddressBookSteps.EDIT_ADDRESS);
+			}}
+			addAddress={() => {
+				currentAddress = undefined;
+				gotoStep(AddressBookSteps.EDIT_ADDRESS);
+			}}
+			{deleteContact}
+			{deleteAddress}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
+		<EditContactNameStep
+			bind:this={editContactNameStep}
+			contact={currentContact}
+			{addContact}
+			{saveContact}
+			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+		></EditContactNameStep>
+	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
+		{JSON.stringify(currentAddress)}
+		<Button
+			on:click={() => {
+				gotoStep(AddressBookSteps.SHOW_CONTACT);
+			}}>back</Button
+		>
+	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS}
+		<EditAddressStep
+			contact={currentContact!}
+			address={currentAddress}
+			{saveAddress}
+			{addAddress}
+			close={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+		></EditAddressStep>
 	{/if}
 </WizardModal>

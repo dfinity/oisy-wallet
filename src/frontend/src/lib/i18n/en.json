@@ -1005,15 +1005,41 @@
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
 			"add_new_contact": "Add new contact",
-			"add_contact": "Add contact"
+			"add_contact": "Add contact",
+			"search_contact": "Search contact"
+		},
+		"edit_contact": {
+			"add_address": "Add address",
+			"delete_contact": "Delete contact"
+		},
+		"show_contact": {
+			"title": "Contact",
+			"add_address": "Add address",
+			"show_address_text": "Associated addresses will appear here",
+			"add_first_address": "Add first address to contactName!"
 		}
 	},
 	"contact": {
 		"form": {
+			"edit_contact": "Edit contact",
 			"add_new_contact": "Add new contact"
 		},
 		"fields": {
 			"name": "Name"
+		}
+	},
+	"address": {
+		"form": {
+			"edit_address": "Edit address",
+			"new_address": "New address",
+			"address_placeholder": "Enter, paste or scan address",
+			"alias_placeholder": "E.g., “Mom’s wallet“",
+			"invalid_address": "Invalid address",
+			"valid_for_networks": "Valid for networks:"
+		},
+		"fields": {
+			"alias": "Alias",
+			"address": "Address"
 		}
 	},
 	"signer": {
