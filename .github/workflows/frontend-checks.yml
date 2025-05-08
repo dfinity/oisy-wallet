@@ -133,7 +133,7 @@ jobs:
       - name: Check ic-domains
         run: scripts/build.ic-domains.test
 
-  may-merge:
+  frontend-checks-pass:
     if: always()
     needs: ['format', 'lint', 'check', 'test', 'config']
     runs-on: ubuntu-24.04
