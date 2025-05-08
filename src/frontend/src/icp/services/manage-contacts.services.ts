@@ -32,7 +32,7 @@ export const loadContacts = async (): Promise<Contact[]> => {
 export const saveContact = async (contact: Partial<Contact>) => {
 	const validated = crudContactSchema.parse(contact);
 	// TODO: Add real implementation
-	await new Promise(r => setTimeout(r, DELAY))
+	await new Promise((r) => setTimeout(r, DELAY));
 	const newContact: z.infer<typeof ContactSchema> = {
 		...validated,
 		id: validated.id ?? `${Date.now()}`,
@@ -48,6 +48,6 @@ export const saveContact = async (contact: Partial<Contact>) => {
 
 export const deleteContact = async (id: Contact['id']) => {
 	// TODO: Add real implementation
-	await new Promise(r => setTimeout(r, DELAY))
+	await new Promise((r) => setTimeout(r, DELAY));
 	contactsStore.removeContact(id);
 };
