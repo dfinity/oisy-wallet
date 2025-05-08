@@ -60,7 +60,7 @@ impl AddUserCredentialRequest {
     pub const MAX_CREDENTIAL_SPEC_ARGUMENTS: usize = 10;
     // 8K
     /// The maximum supported length for a credential type.
-    pub const MAX_CREDENTIAL_TYPE_LENGTH: usize = 16;
+    pub const MAX_CREDENTIAL_TYPE_LENGTH: usize = 32;
 }
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
