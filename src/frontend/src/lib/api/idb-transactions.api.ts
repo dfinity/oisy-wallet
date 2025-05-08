@@ -6,6 +6,7 @@ import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { nullishSignOut } from '$lib/services/auth.services';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type {
@@ -37,6 +38,7 @@ export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData
 	idbTransactionsStore: UseStore;
 }) => {
 	if (isNullish(identity)) {
+		await nullishSignOut();
 		return;
 	}
 
