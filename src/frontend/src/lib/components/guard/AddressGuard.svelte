@@ -8,7 +8,7 @@
 		networkEvmMainnetEnabled,
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
-	import { initSignerAllowance } from '$lib/services/loader.services';
+	import { hasRequiredCycles, initSignerAllowance } from '$lib/services/loader.services';
 	import {
 		btcAddressMainnetStore,
 		ethAddressStore,
@@ -19,17 +19,22 @@
 	let signerAllowanceLoaded = false;
 
 	const loadSignerAllowanceAndValidateAddresses = async () => {
-		if (!POW_FEATURE_ENABLED) {
-			const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
+		let initSignerAllowanceSuccess = false;
 
-			if (!initSignerAllowanceSuccess) {
-				// Sign-out is handled within the service.
-				return;
-			}
+		if (POW_FEATURE_ENABLED) {
+			// The new feature checks whether the user has sufficient cycles to continue
+			initSignerAllowanceSuccess = (await hasRequiredCycles()).success;
+		} else {
+			// Until we remove the feature flag, we must preserve the previous behavior
+			initSignerAllowanceSuccess = (await initSignerAllowance()).success;
+		}
+
+		if (!initSignerAllowanceSuccess) {
+			// Sign-out is handled within the service.
+			return;
 		}
 
 		signerAllowanceLoaded = true;
-
 		await validateAddresses();
 	};
 
@@ -57,8 +62,7 @@
 		$networkBitcoinMainnetEnabled,
 		$networkEthereumEnabled,
 		$networkEvmMainnetEnabled,
-		$networkSolanaMainnetEnabled,
-		(async () => await validateAddresses())();
+		$networkSolanaMainnetEnabled(async () => await validateAddresses())();
 </script>
 
 <svelte:window on:oisyValidateAddresses={loadSignerAllowanceAndValidateAddresses} />
