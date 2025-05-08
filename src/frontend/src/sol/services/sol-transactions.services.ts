@@ -209,15 +209,12 @@ export const fetchSolTransactionsForSignature = async ({
 export const loadNextSolTransactions = async ({
 	signalEnd,
 	...rest
-}: LoadNextSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
+}: LoadNextSolTransactionsParams): Promise<void> => {
 	const transactions = await loadSolTransactions(rest);
 
 	if (transactions.length === 0) {
 		signalEnd();
-		return [];
 	}
-
-	return transactions;
 };
 
 const networkToSolTokenIdMap = {

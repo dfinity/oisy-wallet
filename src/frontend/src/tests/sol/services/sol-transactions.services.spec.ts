@@ -360,16 +360,15 @@ describe('sol-transactions.services', () => {
 	});
 
 	describe('loadNextSolTransactions', () => {
-		it('should load and return transactions successfully', async () => {
+		it('should load transactions successfully', async () => {
 			spyGetTransactions.mockResolvedValue(mockTransactions);
 
-			const transactions = await loadNextSolTransactions({
+			await loadNextSolTransactions({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				signalEnd
 			});
 
-			expect(transactions).toEqual(mockCertifiedTransactions);
 			expect(signalEnd).not.toHaveBeenCalled();
 			expect(spyGetTransactions).toHaveBeenCalledWith({
 				address: mockSolAddress,
@@ -401,13 +400,12 @@ describe('sol-transactions.services', () => {
 		it('should signal end when no transactions are returned', async () => {
 			spyGetTransactions.mockResolvedValue([]);
 
-			const transactions = await loadNextSolTransactions({
+			await loadNextSolTransactions({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				signalEnd
 			});
 
-			expect(transactions).toEqual([]);
 			expect(signalEnd).toHaveBeenCalled();
 		});
 
@@ -429,13 +427,11 @@ describe('sol-transactions.services', () => {
 			const error = new Error('Failed to load transactions');
 			spyGetTransactions.mockRejectedValue(error);
 
-			const transactions = await loadNextSolTransactions({
+			await loadNextSolTransactions({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				signalEnd
 			});
-
-			expect(transactions).toEqual([]);
 
 			const storeData = get(solTransactionsStore)?.[SOLANA_TOKEN_ID];
 
