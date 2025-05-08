@@ -20,7 +20,7 @@
 	$: invalidDestination = isNullishOrEmpty(destination) || !isEthAddress(destination);
 
 	let invalid = true;
-	$: invalid = invalid = invalidDestination || insufficientFunds || isNullish(amount);
+	$: invalid = invalidDestination || insufficientFunds || isNullish(amount);
 
 	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
