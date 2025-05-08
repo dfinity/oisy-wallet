@@ -47,3 +47,42 @@ export type SwapMappedResult =
 			networkFee?: ProviderFee;
 			swapDetails: SwapAmountsReply;
 	  };
+
+export type KongQuoteResult = {
+	swap: SwapAmountsReply;
+	tokens: IcToken[];
+};
+
+export type IcpQuoteResult = {
+	swap: ICPSwapResult;
+	slippage: Slippage;
+};
+
+type KongQuoteParams = {
+	swap: SwapAmountsReply;
+	tokens: IcToken[];
+};
+
+type IcpQuoteParams = {
+	swap: ICPSwapResult;
+	slippage: Slippage;
+};
+
+type SwapQuoteParams = {
+	identity: Identity;
+	sourceToken: IcToken;
+	destinationToken: IcToken;
+	sourceAmount: bigint;
+};
+interface BaseSwapProvider<T extends SwapProvider, QuoteResult, QuoteMapParams> {
+	key: T;
+	getQuote: (params: SwapQuoteParams) => Promise<QuoteResult>;
+	mapQuoteResult: (params: QuoteMapParams) => SwapMappedResult;
+	isEnabled: boolean;
+}
+
+type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsReply, KongQuoteParams>;
+
+type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, IcpQuoteParams>;
+
+export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
