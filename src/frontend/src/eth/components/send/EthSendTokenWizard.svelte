@@ -247,7 +247,6 @@
 			on:icTokensList
 			bind:destination
 			bind:amount
-			bind:network={targetNetwork}
 			{nativeEthereumToken}
 		>
 			<svelte:fragment slot="cancel">
