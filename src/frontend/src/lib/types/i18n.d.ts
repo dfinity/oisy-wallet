@@ -28,6 +28,8 @@ interface I18nCore {
 		new: string;
 		edit: string;
 		no_results: string;
+		to: string;
+		more_items: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -411,6 +413,8 @@ interface I18nSend {
 		scan_qr: string;
 		select_token: string;
 		select_network_filter: string;
+		send_again: string;
+		recently_used: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -423,6 +427,7 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
+		unknown_destination: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -904,7 +909,13 @@ interface I18nReferral {
 }
 
 interface I18nAddress_book {
-	text: { title: string; empty_title: string; empty_text: string; add_new_contact: string };
+	text: {
+		title: string;
+		empty_title: string;
+		empty_text: string;
+		add_new_contact: string;
+		add_contact: string;
+	};
 }
 
 interface I18nContact {
