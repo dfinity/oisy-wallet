@@ -11,7 +11,8 @@ mod bitcoin {
             validate::{test_validate_on_deserialize, TestVector, Validate},
         };
 
-        fn test_vectors() -> Vec<TestVector<BtcAddPendingTransactionRequest>> {
+        test_validate_on_deserialize!(
+            BtcAddPendingTransactionRequest,
             vec![
                 TestVector {
                     description: "BtcAddPendingTransactionRequest with max length txid",
@@ -88,8 +89,7 @@ mod bitcoin {
                     valid: false,
                 },
             ]
-        }
-        test_validate_on_deserialize!(BtcAddPendingTransactionRequest);
+        );
     }
 }
 

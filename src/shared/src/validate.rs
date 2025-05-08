@@ -74,8 +74,9 @@ macro_rules! test_validate_on_deserialize {
         }
     };
     ($type:ty, $test_vectors:expr) => {
-        #[test]
-        fn stringify!($type)_validates_on_deserialize() {
+        paste::paste! {
+            #[test]
+            fn [<$type:snake _validates_on_deserialize>]() {
             for TestVector {
                 input,
                 valid,
@@ -101,6 +102,7 @@ macro_rules! test_validate_on_deserialize {
                     assert_eq!(input, result.unwrap());
                 }
             }
+        }
         }
     };
 }
