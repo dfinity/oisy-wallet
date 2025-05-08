@@ -1,5 +1,3 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import IconConvert from '$lib/components/icons/IconConvert.svelte';
 import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
@@ -17,7 +15,6 @@ import type {
 	TransactionType
 } from '$lib/types/transaction';
 import { formatSecondsToNormalizedDate } from '$lib/utils/format.utils';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Component } from 'svelte';
 import { get } from 'svelte/store';
@@ -65,19 +62,11 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 
 	return transactions.reduce<TransactionsUiDateGroup<T>>((acc, transaction) => {
 		if (isNullish(transaction.transaction.timestamp)) {
-			if (
-				(
-					transaction.transaction as unknown as
-						| BtcTransactionUi
-						| IcTransactionUi
-						| SolTransactionUi
-				)?.status === 'pending'
-			) {
-				// because this list is not sorted afterwards, we append the pending ones on top of all other ones
-				// in order to do this we need to remove the existing pending attribute not to overwrite it
-				const curPending = acc[pendingKey] ?? [];
-				delete acc[pendingKey];
-				return { [pendingKey]: [...curPending, transaction], ...acc };
+			if ('status' in transaction.transaction && transaction.transaction.status === 'pending') {
+				// since we want pending txs on top, we have to add it before the spread of acc. But that will overwrite the existing
+				// pending property so we destructure pending and the rest so that restAcc doesnt have the pending property and can therefor not overwrite it
+				const { [pendingKey]: currPending, ...restAcc } = acc;
+				return { [pendingKey]: [...(currPending ?? []), transaction], ...restAcc };
 			}
 			return { ...acc, [undefinedKey]: [...(acc['undefined'] ?? []), transaction] };
 		}
