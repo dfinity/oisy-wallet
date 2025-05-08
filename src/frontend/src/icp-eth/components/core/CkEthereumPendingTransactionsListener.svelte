@@ -92,10 +92,6 @@
 			return;
 		}
 
-		if (isNullish(twinToken.network.id)) {
-			return;
-		}
-
 		if (isNullish($ethAddress)) {
 			return;
 		}
