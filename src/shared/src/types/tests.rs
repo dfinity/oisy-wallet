@@ -4,7 +4,7 @@ mod bitcoin {
     //! Tests for the bitcoin types.
     mod btc_add_pending_transaction_request {
         use candid::{Decode, Encode};
-        use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
+        use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Outpoint, Utxo};
 
         use crate::{
             types::bitcoin::{BtcAddPendingTransactionRequest, MAX_TXID_LEN},
@@ -32,6 +32,23 @@ mod bitcoin {
                     },
                     valid: false,
                     description: "BtcAddPendingTransactionRequest with txid too long",
+                },
+                TestVector {
+                    description: "With a utxo that is too long",
+                    input: BtcAddPendingTransactionRequest {
+                        txid: vec![0; MAX_TXID_LEN],
+                        utxos: vec![Utxo {
+                            outpoint: Outpoint {
+                                txid: vec![0; MAX_TXID_LEN + 1],
+                                vout: 0,
+                            },
+                            value: 0,
+                            height: 0,
+                        }],
+                        address: "".to_string(),
+                        network: BitcoinNetwork::Mainnet,
+                    },
+                    valid: false,
                 },
             ]
         }
