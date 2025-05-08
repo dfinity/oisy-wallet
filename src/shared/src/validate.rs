@@ -73,6 +73,36 @@ macro_rules! test_validate_on_deserialize {
             }
         }
     };
+    ($type:ty, $test_vectors:expr) => {
+        #[test]
+        fn stringify!($type)_validates_on_deserialize() {
+            for TestVector {
+                input,
+                valid,
+                description,
+            } in $test_vectors
+            {
+                let result = input.validate();
+                assert_eq!(
+                    valid,
+                    result.is_ok(),
+                    "Validation does not match for: {}",
+                    description
+                );
+                let candid = Encode!(&input).unwrap();
+                let result: Result<$type, _> = Decode!(&candid, $type);
+                assert_eq!(
+                    valid,
+                    result.is_ok(),
+                    "Candid deserialization did not match for: {}",
+                    description
+                );
+                if valid {
+                    assert_eq!(input, result.unwrap());
+                }
+            }
+        }
+    };
 }
 #[cfg(test)]
 pub(crate) use test_validate_on_deserialize;
