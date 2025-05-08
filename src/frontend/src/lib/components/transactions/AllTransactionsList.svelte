@@ -34,6 +34,7 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import AllTransactionsLoader from '$lib/components/transactions/AllTransactionsLoader.svelte';
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
@@ -94,19 +95,21 @@
 </script>
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
-	{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
-		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-			<TransactionsDateGroup
-				{formattedDate}
-				{transactions}
-				testId={`all-transactions-date-group-${index}`}
-			/>
-		{/each}
-	{/if}
+	<AllTransactionsLoader {transactions}>
+		{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
+			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+				<TransactionsDateGroup
+					{formattedDate}
+					{transactions}
+					testId={`all-transactions-date-group-${index}`}
+				/>
+			{/each}
+		{/if}
 
-	{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
-		<TransactionsPlaceholder />
-	{/if}
+		{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
+			<TransactionsPlaceholder />
+		{/if}
+	</AllTransactionsLoader>
 </AllTransactionsSkeletons>
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
