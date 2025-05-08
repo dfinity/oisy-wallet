@@ -9,8 +9,12 @@
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
-	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
-	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
+	import IcTransactionsBtcListeners, {
+		type Props as IcTransactionsCkBTCListenersProps
+	} from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
+	import IcTransactionsCkEthereumListeners, {
+		type Props as IcTransactionsCkEthereumListenersProps
+	} from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import IcTransactionsScroll from '$icp/components/transactions/IcTransactionsScroll.svelte';
@@ -25,6 +29,7 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { hasIndexCanister } from '$icp/validation/ic-token.validation';
+	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
@@ -37,7 +42,9 @@
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
 
-	let additionalListener: Component;
+	let additionalListener:
+		| Component<IcTransactionsCkBTCListenersProps>
+		| Component<IcTransactionsCkEthereumListenersProps>;
 	$: additionalListener = $tokenCkBtcLedger
 		? IcTransactionsBtcListeners
 		: ckEthereum
@@ -71,7 +78,11 @@
 </Header>
 
 <IcTransactionsSkeletons>
-	<svelte:component this={additionalListener}>
+	<svelte:component
+		this={additionalListener}
+		token={$token ?? ICP_TOKEN}
+		ckEthereumNativeToken={$ckEthereumNativeToken}
+	>
 		{#if $icTransactions.length > 0}
 			<IcTransactionsScroll token={$token ?? ICP_TOKEN}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}

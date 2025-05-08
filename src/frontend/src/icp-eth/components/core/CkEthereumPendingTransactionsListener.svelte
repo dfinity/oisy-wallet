@@ -3,13 +3,10 @@
 	import type { TransactionResponse } from 'ethers/providers';
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
-	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-	import {
-		ckEthereumNativeTokenId,
-		ckEthereumTwinToken,
-		ckEthereumTwinTokenStandard
-	} from '$icp-eth/derived/cketh.derived';
+	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+
+	import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 	import {
 		loadPendingCkEthereumTransaction,
 		loadCkEthereumPendingTransactions
@@ -22,35 +19,38 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
-	import { tokenId } from '$lib/derived/token.derived';
-	import { token } from '$lib/stores/token.store';
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { WebSocketListener } from '$lib/types/listener';
-	import type { NetworkId } from '$lib/types/network';
+	import type { OptionToken, Token } from '$lib/types/token';
+
+	export let token: OptionToken;
+	export let ckEthereumNativeToken: Token;
 
 	let listener: WebSocketListener | undefined = undefined;
 
 	let loadBalance: OptionBalance = undefined;
 
+	let { twinToken } = token as IcCkToken;
+
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionEthAddress }) => {
-		if (isNullish($tokenId) || isNullish($token)) {
+		if (isNullish(token) || isNullish(token.id)) {
 			return;
 		}
 
 		if (isNullish(toAddress)) {
-			icPendingTransactionsStore.reset($tokenId);
+			icPendingTransactionsStore.reset(token.id);
 			return;
 		}
 
-		if (isNullish($ckEthereumTwinToken)) {
+		if (isNullish(twinToken)) {
 			return;
 		}
 
 		const lastObservedBlockNumber = fromNullishNullable(
-			$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.last_observed_block_number
+			$ckEthMinterInfoStore?.[ckEthereumNativeToken.id]?.data.last_observed_block_number
 		);
 
 		// The ckETH minter info has not yet been fetched. We require this information to query all transactions above a certain block index. These can be considered as pending, given that they have not yet been seen by the minter.
@@ -67,20 +67,20 @@
 		loadBalance = $balance;
 
 		await loadCkEthereumPendingTransactions({
-			token: $tokenAsIcToken,
+			token: token as IcToken,
 			lastObservedBlockNumber,
 			identity: $authIdentity,
 			toAddress,
-			twinToken: $ckEthereumTwinToken
+			twinToken
 		});
 	};
 
 	const init = async ({
 		toAddress,
-		networkId
+		twinToken
 	}: {
 		toAddress: OptionEthAddress;
-		networkId: NetworkId | undefined;
+		twinToken: OptionToken;
 	}) => {
 		await listener?.disconnect();
 
@@ -88,7 +88,11 @@
 			return;
 		}
 
-		if (isNullish(networkId)) {
+		if (isNullish(twinToken)) {
+			return;
+		}
+
+		if (isNullish(twinToken.network.id)) {
 			return;
 		}
 
@@ -107,23 +111,22 @@
 
 				await loadPendingCkEthereumTransaction({
 					hash,
-					token: $tokenAsIcToken,
-					twinToken: $ckEthereumTwinToken,
-					networkId
+					token: token as IcToken,
+					twinToken,
+					networkId: twinToken.network.id
 				});
 			},
-			networkId
+			networkId: twinToken.network.id
 		});
 	};
 
 	let toContractAddress = '';
 	$: toContractAddress =
-		$ckEthereumTwinTokenStandard === 'erc20'
-			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '')
-			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '');
+		nonNullish(twinToken) && twinToken.standard === 'erc20'
+			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '')
+			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '');
 
-	$: (async () =>
-		await init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();
+	$: (async () => await init({ toAddress: toContractAddress, twinToken }))();
 
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
