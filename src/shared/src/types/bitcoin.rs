@@ -13,7 +13,7 @@ pub const MAX_ADDRESS_LEN: usize = 62;
 /// The maximum length of a single `txid`:
 ///
 /// - 32 bytes (represented as 64 hexadecimal characters) <https://learnmeabitcoin.com/technical/transaction/input/txid/>
-pub const MAX_TXID_LEN: usize = 32;
+pub const MAX_TXID_BYTES: usize = 32;
 /// The maximum number of UTXOs in the pending transaction:
 ///
 /// - Theoretically, it seems that the maximum can be over 1000;

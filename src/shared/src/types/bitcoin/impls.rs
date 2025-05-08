@@ -6,12 +6,12 @@ use serde::{de, Deserializer};
 
 use super::{
     BtcAddPendingTransactionRequest, BtcGetPendingTransactionsRequest, PendingTransaction,
-    SelectedUtxosFeeResponse, MAX_ADDRESS_LEN, MAX_TXID_LEN, MAX_UTXOS_LEN,
+    SelectedUtxosFeeResponse, MAX_ADDRESS_LEN, MAX_TXID_BYTES, MAX_UTXOS_LEN,
 };
 use crate::validate::{validate_on_deserialize, Validate};
 
 fn validate_utxo(utxo: &Utxo) -> Result<(), candid::Error> {
-    if utxo.outpoint.txid.len() > MAX_TXID_LEN {
+    if utxo.outpoint.txid.len() > MAX_TXID_BYTES {
         return Err(candid::Error::msg("Invalid transaction ID in utxo"));
     }
     Ok(())
@@ -26,7 +26,7 @@ fn validate_utxo_vec(utxos: &[Utxo]) -> Result<(), candid::Error> {
     Ok(())
 }
 fn validate_txid_vec(txid: &[u8]) -> Result<(), candid::Error> {
-    if txid.len() != MAX_TXID_LEN {
+    if txid.len() != MAX_TXID_BYTES {
         return Err(candid::Error::msg("Invalid transaction ID"));
     }
     Ok(())
