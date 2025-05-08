@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Component } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import Info from '$icp/components/info/Info.svelte';
@@ -25,6 +24,7 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { hasIndexCanister } from '$icp/validation/ic-token.validation';
+	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
@@ -37,7 +37,10 @@
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
 
-	let additionalListener: Component;
+	let additionalListener:
+		| typeof IcTransactionsBtcListeners
+		| typeof IcTransactionsCkEthereumListeners
+		| typeof IcTransactionsNoListener;
 	$: additionalListener = $tokenCkBtcLedger
 		? IcTransactionsBtcListeners
 		: ckEthereum
@@ -71,7 +74,11 @@
 </Header>
 
 <IcTransactionsSkeletons>
-	<svelte:component this={additionalListener}>
+	<svelte:component
+		this={additionalListener}
+		token={$token ?? ICP_TOKEN}
+		ckEthereumNativeToken={$ckEthereumNativeToken}
+	>
 		{#if $icTransactions.length > 0}
 			<IcTransactionsScroll token={$token ?? ICP_TOKEN}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
