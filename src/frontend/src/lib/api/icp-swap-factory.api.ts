@@ -8,6 +8,21 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 let canister: ICPSwapFactoryCanister | undefined = undefined;
 
+export const getPoolCanister = async ({
+	identity,
+	nullishIdentityErrorMessage,
+	canisterId,
+	...restParams
+}: CanisterApiFunctionParams<ICPSwapGetPoolParams>): Promise<PoolData> => {
+	const { getPool } = await icpSwapFactoryCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return getPool(restParams);
+};
+
 const icpSwapFactoryCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
@@ -23,19 +38,4 @@ const icpSwapFactoryCanister = async ({
 	}
 
 	return canister;
-};
-
-export const getPool = async ({
-	identity,
-	nullishIdentityErrorMessage,
-	canisterId,
-	...restParams
-}: CanisterApiFunctionParams<ICPSwapGetPoolParams>): Promise<PoolData> => {
-	const { getPool } = await icpSwapFactoryCanister({
-		identity,
-		canisterId,
-		nullishIdentityErrorMessage
-	});
-
-	return getPool(restParams);
 };
