@@ -19,7 +19,7 @@
 </script>
 
 <Responsive down="sm">
-	<div class="z-14 absolute bottom-0 left-0 right-0 top-0">
+	<div class="z-14 fixed bottom-0 left-0 right-0 top-0" transition:fade={{ delay: 300 }}>
 		<BottomSheet on:nnsClose={() => onClose()} transition>
 			<div slot="header" class="w-full p-4">
 				<ButtonIcon
@@ -39,9 +39,7 @@
 				{/if}
 			</div>
 		</BottomSheet>
-		<div class="fixed bottom-0 left-0 right-0 top-0" transition:fade={{ delay: 300 }}>
-			<Backdrop on:nnsClose={() => onClose()} />
-		</div>
+		<Backdrop on:nnsClose={() => onClose()} />
 	</div>
 </Responsive>
 
