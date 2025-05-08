@@ -14,7 +14,7 @@ import {
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
-import type { GetSolTransactionsParams } from '$sol/types/sol-api';
+import type { GetSolTransactionsParams, LoadNextSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	ParsedAccount,
 	SolMappedTransaction,
@@ -27,10 +27,6 @@ import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { address as solAddress } from '@solana/kit';
-
-interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
-	signalEnd: () => void;
-}
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
