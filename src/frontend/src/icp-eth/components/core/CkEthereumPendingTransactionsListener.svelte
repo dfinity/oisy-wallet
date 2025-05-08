@@ -23,6 +23,7 @@
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import type { CertifiedStoreData } from '$lib/stores/certified.store.js';
+	import type { BRAND } from 'zod';
 
 	export let token: OptionToken;
 	export let ckEthereumNativeToken: Token;
@@ -43,7 +44,7 @@
 	}: {
 		toAddress: OptionEthAddress;
 		balance: OptionBalance;
-		ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
+		ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData, symbol & BRAND<'TokenId'>>;
 		twinToken: IcCkToken | undefined;
 	}) => {
 		if (isNullish(token) || isNullish(token.id)) {
@@ -60,7 +61,7 @@
 		}
 
 		const lastObservedBlockNumber = fromNullishNullable(
-			$ckEthMinterInfoStore?.[ckEthereumNativeToken.id]?.data.last_observed_block_number
+			ckEthMinterInfo?.[ckEthereumNativeToken.id]?.data.last_observed_block_number
 		);
 
 		// The ckETH minter info has not yet been fetched. We require this information to query all transactions above a certain block index. These can be considered as pending, given that they have not yet been seen by the minter.
@@ -146,7 +147,7 @@
 			toAddress: toContractAddress,
 			balance: $balance,
 			ckEthMinterInfo: $ckEthMinterInfoStore,
-			twinToken
+			twinToken: twinToken as IcCkToken | undefined
 		}))();
 
 	onDestroy(async () => await listener?.disconnect());
