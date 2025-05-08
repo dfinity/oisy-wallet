@@ -134,6 +134,39 @@ mod bitcoin {
                 },
                 valid: false,
             },
+            TestVector {
+                description: "PendingTransaction with too many utxos",
+                input: PendingTransaction {
+                    txid: vec![0; MAX_TXID_BYTES],
+                    utxos: vec![
+                        Utxo {
+                            outpoint: Outpoint {
+                                txid: vec![0; MAX_TXID_BYTES],
+                                vout: 0,
+                            },
+                            value: 0,
+                            height: 0,
+                        };
+                        MAX_UTXOS_LEN + 1
+                    ],
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "PendingTransaction with a utxo that is too long",
+                input: PendingTransaction {
+                    txid: vec![0; MAX_TXID_BYTES],
+                    utxos: vec![Utxo {
+                        outpoint: Outpoint {
+                            txid: vec![0; MAX_TXID_BYTES + 1],
+                            vout: 0,
+                        },
+                        value: 0,
+                        height: 0,
+                    }],
+                },
+                valid: false,
+            },
         ]
     );
 }
