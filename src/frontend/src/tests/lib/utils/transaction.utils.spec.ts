@@ -96,9 +96,7 @@ describe('transaction.utils', () => {
 			vi.mock('$lib/utils/format.utils', () => ({
 				formatSecondsToNormalizedDate: vi
 					.fn()
-					.mockImplementation(({ seconds, currentDate: _ }): string =>
-						seconds < 100000 ? seconds.toString() : new Date(seconds).toString()
-					)
+					.mockImplementation(({ seconds, currentDate: _ }): string => seconds.toString())
 			}));
 		});
 
