@@ -183,3 +183,8 @@ export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
 export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
+
+export const SEND_DESTINATION_WIZARD_STEP_ETH = 'send-destination-wizard-step-eth';
+export const SEND_DESTINATION_WIZARD_STEP_BTC = 'send-destination-wizard-step-btc';
+export const SEND_DESTINATION_WIZARD_STEP_SOL = 'send-destination-wizard-step-sol';
+export const SEND_DESTINATION_WIZARD_STEP_IC = 'send-destination-wizard-step-ic';
