@@ -8,7 +8,6 @@
 	import { sendBtc } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
@@ -34,7 +33,6 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
-	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -151,20 +149,14 @@
 	<BtcSendForm
 		on:icNext
 		on:icClose
+		on:icBack
 		on:icTokensList
 		bind:destination
 		bind:amount
-		on:icQRCodeScan
 		{source}
 		{networkId}
 	>
-		<svelte:fragment slot="cancel">
-			{#if formCancelAction === 'back'}
-				<ButtonBack onclick={back} />
-			{:else}
-				<ButtonCancel onclick={close} />
-			{/if}
-		</svelte:fragment>
+		<ButtonBack onclick={back} slot="cancel" />
 	</BtcSendForm>
 {:else}
 	<slot />
