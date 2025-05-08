@@ -1,8 +1,7 @@
 //! Methods for the `user_profile` types
 
-use std::collections::HashMap;
-
 use candid::Deserialize;
+use ic_verifiable_credentials::issuer_api::ArgumentValue;
 use serde::{de, Deserializer};
 
 use super::{AddUserCredentialRequest, UserCredential, UserProfile, MAX_ISSUER_LENGTH};
@@ -65,6 +64,26 @@ impl Validate for AddUserCredentialRequest {
                     "Too many arguments: {credential_spec_args_len} > {}",
                     AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENTS,
                 )));
+            }
+            for (key, value) in args {
+                if key.len() > AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH {
+                    return Err(candid::Error::msg(format!(
+                        "Argument key is too long: {} > {}",
+                        key.len(),
+                        AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH
+                    )));
+                }
+                if let ArgumentValue::String(value) = value {
+                    if value.len()
+                        > AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_VALUE_LENGTH
+                    {
+                        return Err(candid::Error::msg(format!(
+                            "Argument value is too long: {} > {}",
+                            value.len(),
+                            AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_VALUE_LENGTH
+                        )));
+                    }
+                }
             }
         }
         Ok(())

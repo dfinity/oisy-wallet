@@ -498,6 +498,42 @@ mod user_profile {
                 },
                 valid: false,
             },
+            TestVector {
+                description: "AddUserCredentialRequest with argument key too long",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
+                        arguments: Some({
+                            let mut args = HashMap::new();
+                            args.insert("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH + 1), ArgumentValue::Int(0));
+                            args
+                        }),
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "AddUserCredentialRequest with argument value too long",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
+                        arguments: Some({
+                            let mut args = HashMap::new();
+                            args.insert("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH), ArgumentValue::Int(0));
+                            args
+                        }),
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
         ]
     );
 }
