@@ -180,15 +180,13 @@ mod custom_token {
     mod spl {
         //! Tests for the spl module.
         use super::*;
-        use crate::{types::MAX_SYMBOL_LENGTH, validate::test_validate_on_deserialize};
+        use crate::{
+            types::MAX_SYMBOL_LENGTH,
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
 
-        struct TestVector {
-            input: SplToken,
-            valid: bool,
-            description: &'static str,
-        }
-
-        fn test_vectors() -> Vec<TestVector> {
+        test_validate_on_deserialize!(
+            SplToken,
             vec![
                 TestVector {
                     input: SplToken {
@@ -245,8 +243,7 @@ mod custom_token {
                     description: "Minimum decimals",
                 },
             ]
-        }
-        test_validate_on_deserialize!(SplToken);
+        );
     }
 
     mod icrc {
