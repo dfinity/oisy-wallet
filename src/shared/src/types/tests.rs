@@ -175,7 +175,7 @@ mod custom_token {
     //! Tests for the `custom_token` module.
     use candid::{Decode, Encode};
 
-    use crate::{types::custom_token::*, validate::Validate};
+    use crate::types::custom_token::*;
 
     mod spl {
         //! Tests for the spl module.
@@ -251,25 +251,25 @@ mod custom_token {
         use candid::Principal;
 
         use super::*;
-        use crate::validate::test_validate_on_deserialize;
-        struct TestVector {
-            input: IcrcToken,
-            valid: bool,
-            description: &'static str,
-        }
-        fn test_vectors() -> Vec<TestVector> {
-            // Principals to use in the test vectors
-            let canister_id1 = Principal::from_text("um5iw-rqaaa-aaaaq-qaaba-cai").unwrap();
-            let canister_id2 = Principal::from_text("rdmx6-jaaaa-aaaaa-aaadq-cai").unwrap();
-            let user_id = Principal::from_text(
-                "tdb26-jop6k-aogll-7ltgs-eruif-6kk7m-qpktf-gdiqx-mxtrf-vb5e6-eqe",
-            )
-            .unwrap();
+        use crate::validate::{test_validate_on_deserialize, TestVector, Validate};
 
+        fn canister_id1() -> Principal {
+            Principal::from_text("um5iw-rqaaa-aaaaq-qaaba-cai").unwrap()
+        }
+        fn canister_id2() -> Principal {
+            Principal::from_text("rdmx6-jaaaa-aaaaa-aaadq-cai").unwrap()
+        }
+        fn user_id() -> Principal {
+            Principal::from_text("tdb26-jop6k-aogll-7ltgs-eruif-6kk7m-qpktf-gdiqx-mxtrf-vb5e6-eqe")
+                .unwrap()
+        }
+
+        test_validate_on_deserialize!(
+            IcrcToken,
             vec![
                 TestVector {
                     input: IcrcToken {
-                        ledger_id: canister_id1,
+                        ledger_id: canister_id1(),
                         index_id: None,
                     },
                     valid: true,
@@ -277,8 +277,8 @@ mod custom_token {
                 },
                 TestVector {
                     input: IcrcToken {
-                        ledger_id: canister_id2,
-                        index_id: Some(canister_id1),
+                        ledger_id: canister_id2(),
+                        index_id: Some(canister_id1()),
                     },
                     valid: true,
                     description: "IcrcToken with valid ledger_id and index",
@@ -301,7 +301,7 @@ mod custom_token {
                 },
                 TestVector {
                     input: IcrcToken {
-                        ledger_id: canister_id1,
+                        ledger_id: canister_id1(),
                         index_id: Some(Principal::anonymous()),
                     },
                     valid: false,
@@ -310,7 +310,7 @@ mod custom_token {
                 TestVector {
                     input: IcrcToken {
                         ledger_id: Principal::management_canister(),
-                        index_id: Some(canister_id2),
+                        index_id: Some(canister_id2()),
                     },
                     valid: false,
                     description: "IcrcToken with the management canister as ledger_id",
@@ -343,14 +343,13 @@ mod custom_token {
                 },
                 TestVector {
                     input: IcrcToken {
-                        ledger_id: user_id,
+                        ledger_id: user_id(),
                         index_id: None,
                     },
                     valid: false,
                     description: "IcrcToken with user or network principal as ledger_id",
                 },
             ]
-        }
-        test_validate_on_deserialize! {IcrcToken}
+        );
     }
 }
