@@ -13,19 +13,19 @@ export interface ContactsStore extends Writable<ContactsStoreData> {
 export const initContactsStore = (): ContactsStore => {
 	const { set, update, subscribe } = writable<ContactsStoreData>(undefined);
 
-	function reset() {
+	const reset = () => {
 		set(undefined);
 	}
 
-	function addContact(contact: Contact) {
+	const addContact = (contact: Contact) => {
 		update((contacts) => [...contacts!, contact]);
 	}
 
-	function updateContact(contact: Contact) {
+	const updateContact = (contact: Contact) => {
 		update((contacts) => contacts!.map((c) => (c.id === contact.id ? contact : c)));
 	}
 
-	function removeContact(id: Contact['id']) {
+	const removeContact = (id: Contact['id']) => {
 		update((contacts) => contacts!.filter((c) => c.id !== id));
 	}
 

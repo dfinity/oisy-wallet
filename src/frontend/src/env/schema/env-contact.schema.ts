@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+// TODO: Use correct schema that matches the backend
+
 export const AddressTypeSchema = z.enum(['BTC', 'ETH', 'SOL', 'ICP']);
 
 export const AddressSchema = z.object({

@@ -1,6 +1,5 @@
 import { ContactSchema } from '$env/schema/env-contact.schema';
 import { contactsStore } from '$icp/stores/contacts.store';
-import { busy } from '$lib/stores/busy.store';
 import type { z } from 'zod';
 
 type Contact = z.infer<typeof ContactSchema>;
@@ -14,6 +13,7 @@ const DELAY = 1000;
 
 export const loadContacts = async (): Promise<Contact[]> => {
 	contactsStore.reset();
+	// TODO: Add real implementation
 	await new Promise((r) => setTimeout(r, DELAY));
 	const contacts = [
 		{
@@ -30,9 +30,9 @@ export const loadContacts = async (): Promise<Contact[]> => {
 };
 
 export const saveContact = async (contact: Partial<Contact>) => {
-	// busy.start({ msg: get(i18n).init.info.hold_loading });
 	const validated = crudContactSchema.parse(contact);
-	await busy.showWhile(() => new Promise((r) => setTimeout(r, DELAY)));
+	// TODO: Add real implementation
+	await new Promise(r => setTimeout(r, DELAY))
 	const newContact: z.infer<typeof ContactSchema> = {
 		...validated,
 		id: validated.id ?? `${Date.now()}`,
@@ -47,6 +47,7 @@ export const saveContact = async (contact: Partial<Contact>) => {
 };
 
 export const deleteContact = async (id: Contact['id']) => {
-	await busy.showWhile(() => new Promise((r) => setTimeout(r, DELAY)));
+	// TODO: Add real implementation
+	await new Promise(r => setTimeout(r, DELAY))
 	contactsStore.removeContact(id);
 };
