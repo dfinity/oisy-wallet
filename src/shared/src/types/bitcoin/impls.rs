@@ -66,6 +66,7 @@ impl Validate for BtcAddPendingTransactionRequest {
     }
 }
 validate_on_deserialize!(BtcAddPendingTransactionRequest);
+
 impl Validate for BtcGetPendingTransactionsRequest {
     fn validate(&self) -> Result<(), candid::Error> {
         validate_address(&self.address)

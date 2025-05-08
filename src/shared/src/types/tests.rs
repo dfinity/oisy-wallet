@@ -6,7 +6,7 @@ mod bitcoin {
     use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Outpoint, Utxo};
 
     use crate::{
-        types::bitcoin::{BtcAddPendingTransactionRequest, MAX_TXID_BYTES, MAX_UTXOS_LEN},
+        types::bitcoin::{BtcAddPendingTransactionRequest, BtcGetPendingTransactionsRequest, MAX_ADDRESS_LEN, MAX_TXID_BYTES, MAX_UTXOS_LEN},
         validate::{test_validate_on_deserialize, TestVector, Validate},
     };
 
@@ -89,6 +89,25 @@ mod bitcoin {
             },
         ]
     );
+
+    test_validate_on_deserialize!(BtcGetPendingTransactionsRequest, vec![
+        TestVector {
+            description: "BtcGetPendingTransactionsRequest with max length address",
+            input: BtcGetPendingTransactionsRequest {
+                address: "1".repeat(MAX_ADDRESS_LEN),
+                network: BitcoinNetwork::Mainnet,
+            },
+            valid: true,
+        },
+        TestVector {
+            description: "BtcGetPendingTransactionsRequest with address too long",
+            input: BtcGetPendingTransactionsRequest {
+                address: "1".repeat(MAX_ADDRESS_LEN + 1),
+                network: BitcoinNetwork::Mainnet,
+            },
+            valid: false,
+        },
+    ]);
 }
 
 mod custom_token {
