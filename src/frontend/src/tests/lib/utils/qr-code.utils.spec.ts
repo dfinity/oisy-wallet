@@ -1,5 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { EthereumNetwork } from '$eth/types/network';
+import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import { decodeQrCode, decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
@@ -32,11 +33,11 @@ describe('decodeUrn', () => {
 
 			const result = decodeQrCodeUrn(urn);
 
-			const standard = token.standard;
+			const { standard } = token;
 			const expectedPrefix =
 				standard === 'erc20'
 					? 'ethereum'
-					: standard === 'icrc'
+					: isTokenIcrc(token)
 						? token.name.toLowerCase()
 						: standard;
 			const expectedResult: DecodedUrn = {

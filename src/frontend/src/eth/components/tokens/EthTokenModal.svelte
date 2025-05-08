@@ -27,18 +27,22 @@
 			<Token token={$token}>
 				{#if nonNullish(contractAddress)}
 					<Value ref="contractAddress">
-						<svelte:fragment slot="label">{$i18n.tokens.text.contract_address}</svelte:fragment>
-						<output>{contractAddress}</output><Copy
-							value={contractAddress}
-							text={$i18n.tokens.details.contract_address_copied}
-							inline
-						/><ExternalLink
-							iconSize="18"
-							href={`${$explorerUrlStore}/address/${contractAddress}`}
-							ariaLabel={$i18n.tokens.alt.open_contract_address_block_explorer}
-							inline
-							color="blue"
-						/>
+						{#snippet label()}
+							{$i18n.tokens.text.contract_address}
+						{/snippet}
+						{#snippet content()}
+							<output>{contractAddress}</output><Copy
+								value={contractAddress}
+								text={$i18n.tokens.details.contract_address_copied}
+								inline
+							/><ExternalLink
+								iconSize="18"
+								href={`${$explorerUrlStore}/address/${contractAddress}`}
+								ariaLabel={$i18n.tokens.alt.open_contract_address_block_explorer}
+								inline
+								color="blue"
+							/>
+						{/snippet}
 					</Value>
 				{/if}
 			</Token>

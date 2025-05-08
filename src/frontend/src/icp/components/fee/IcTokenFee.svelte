@@ -16,14 +16,18 @@
 </script>
 
 <Value ref="fee">
-	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+	{#snippet label()}
+		{$i18n.fee.text.fee}
+	{/snippet}
 
-	{#if nonNullish(fee)}
-		<ExchangeAmountDisplay
-			amount={fee}
-			decimals={$sendTokenDecimals}
-			symbol={$sendTokenSymbol}
-			exchangeRate={$sendTokenExchangeRate}
-		/>
-	{/if}
+	{#snippet content()}
+		{#if nonNullish(fee)}
+			<ExchangeAmountDisplay
+				amount={fee}
+				decimals={$sendTokenDecimals}
+				symbol={$sendTokenSymbol}
+				exchangeRate={$sendTokenExchangeRate}
+			/>
+		{/if}
+	{/snippet}
 </Value>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type WizardStep } from '@dfinity/gix-components';
+	import type { WizardStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';

@@ -16,7 +16,7 @@ import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import type { ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
@@ -605,6 +605,79 @@ describe('backend.canister', () => {
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
 			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('getAllowedCycles', () => {
+		it('should return allowed cycles when response is successful', async () => {
+			const mockAllowedCycles = 1000000n;
+
+			service.get_allowed_cycles.mockResolvedValue({
+				Ok: { allowed_cycles: mockAllowedCycles }
+			});
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const result = await getAllowedCycles();
+
+			expect(service.get_allowed_cycles).toHaveBeenCalledTimes(1);
+			expect(result).toEqual({ allowed_cycles: mockAllowedCycles });
+		});
+
+		it('should throw CanisterInternalError when FailedToContactCyclesLedger error is returned', async () => {
+			service.get_allowed_cycles.mockResolvedValue({
+				Err: { FailedToContactCyclesLedger: null }
+			});
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getAllowedCycles()).rejects.toThrow(
+				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
+			);
+		});
+
+		it('should throw CanisterInternalError with custom message when Other error is returned', async () => {
+			const errorMsg = 'Custom error message';
+			service.get_allowed_cycles.mockResolvedValue({
+				Err: { Other: errorMsg }
+			});
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getAllowedCycles()).rejects.toThrow(new CanisterInternalError(errorMsg));
+		});
+
+		it('should throw unknown GetAllowedCyclesError for unrecognized errors', async () => {
+			service.get_allowed_cycles.mockResolvedValue({
+				Err: { Other: 'Some unknown error' }
+			});
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getAllowedCycles()).rejects.toThrow(
+				new CanisterInternalError('Some unknown error')
+			);
+		});
+
+		it('should throw an error if get_allowed_cycles throws', async () => {
+			service.get_allowed_cycles.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getAllowedCycles()).rejects.toThrow(mockResponseError);
 		});
 	});
 

@@ -14,9 +14,11 @@ import type {
 	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
 } from '$declarations/signer/signer.did';
+import type { IcToken } from '$icp/types/ic-token';
 import type { Address, BtcAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { UserNetworks } from '$lib/types/user-networks';
+import type { Identity } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
 
 export interface AddUserCredentialParams {
@@ -96,4 +98,44 @@ export interface KongSwapParams {
 	receiveAddress?: Address;
 	sourceToken: Token;
 	payTransactionId?: TxId;
+}
+
+export interface ICPSwapGetPoolParams {
+	token0: {
+		address: string;
+		standard: string;
+	};
+	token1: {
+		address: string;
+		standard: string;
+	};
+	fee: bigint;
+}
+
+export interface ICPSwapQuoteSwapParams {
+	amountIn: string;
+	zeroForOne: boolean;
+	amountOutMinimum: string;
+}
+
+export interface ICPSwapDepositWithdrawParams {
+	token: string;
+	amount: bigint;
+	fee: bigint;
+}
+
+export interface ICPSwapGetUserUnusedBalanceParams {
+	principal: Principal;
+}
+
+export interface ICPSwapQuoteParams {
+	identity: Identity;
+	sourceToken: IcToken;
+	destinationToken: IcToken;
+	sourceAmount: bigint;
+	fee?: bigint;
+}
+
+export interface ICPSwapAmountReply {
+	receiveAmount: bigint;
 }

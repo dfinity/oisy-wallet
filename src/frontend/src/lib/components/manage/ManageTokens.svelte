@@ -8,13 +8,12 @@
 	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
@@ -112,7 +111,7 @@
 			spl: SplTokenToggleable[];
 		}>(
 			({ icrc, erc20, spl }, token) => ({
-				icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
+				icrc: [...icrc, ...(isTokenIcrc(token) ? [token as IcrcCustomToken] : [])],
 				erc20: [
 					...erc20,
 					...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
@@ -142,12 +141,15 @@
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
-				<TokenName slot="title" data={token} />
+				<span slot="title">{token.symbol}</span>
+				<span slot="subtitle">{token.name}</span>
 
-				<TokenLogo slot="logo" color="white" data={token} badge={{ type: 'network' }} />
+				<span slot="logo" class="mr-2">
+					<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
+				</span>
 
 				<span class="break-all" slot="description">
-					{token.symbol}
+					{token.network.name}
 				</span>
 
 				<svelte:fragment slot="action">

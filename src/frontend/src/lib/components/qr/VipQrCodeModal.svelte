@@ -45,7 +45,7 @@
 
 		const vipReward = await getNewReward({ campaignId: codeType, identity: $authIdentity });
 		if (nonNullish(vipReward)) {
-			code = vipReward.code;
+			({ code } = vipReward);
 		} else {
 			retriesToGetRewardCode++;
 		}

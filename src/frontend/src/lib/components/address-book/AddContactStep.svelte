@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
-	import Avatar from '$lib/components/address-book/Avatar.svelte';
 	import ContactForm from '$lib/components/address-book/ContactForm.svelte';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
