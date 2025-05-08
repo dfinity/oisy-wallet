@@ -54,10 +54,8 @@ pub struct AddUserCredentialRequest {
     pub current_user_version: Option<Version>,
 }
 impl AddUserCredentialRequest {
-    /// The maximum supported length for a credential JWT.
-    pub const MAX_CREDENTIAL_JWT_LENGTH: usize = 8 << 10;
     /// The maximum number of `CredentialSpec.arguments`.
-    pub const MAX_CREDENTIAL_SPEC_ARGUMENTS: usize = 10;
+    pub const MAX_CREDENTIAL_SPEC_ARGUMENTS: usize = 32;
     /// The maximum supported argument key length.
     pub const MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH: usize = 32;
     /// The maximum supported argument value length.

@@ -41,13 +41,6 @@ impl Validate for UserProfile {
 validate_on_deserialize!(AddUserCredentialRequest);
 impl Validate for AddUserCredentialRequest {
     fn validate(&self) -> Result<(), candid::Error> {
-        if self.credential_jwt.len() > AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH {
-            return Err(candid::Error::msg(format!(
-                "Credential JWT is too long: {} > {}",
-                self.credential_jwt.len(),
-                AddUserCredentialRequest::MAX_CREDENTIAL_JWT_LENGTH
-            )));
-        }
         if self.credential_spec.credential_type.len()
             > AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH
         {
