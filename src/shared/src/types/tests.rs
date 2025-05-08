@@ -2,95 +2,93 @@
 
 mod bitcoin {
     //! Tests for the bitcoin types.
-    mod btc_add_pending_transaction_request {
-        use candid::{Decode, Encode};
-        use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Outpoint, Utxo};
+    use candid::{Decode, Encode};
+    use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Outpoint, Utxo};
 
-        use crate::{
-            types::bitcoin::{BtcAddPendingTransactionRequest, MAX_TXID_BYTES, MAX_UTXOS_LEN},
-            validate::{test_validate_on_deserialize, TestVector, Validate},
-        };
+    use crate::{
+        types::bitcoin::{BtcAddPendingTransactionRequest, MAX_TXID_BYTES, MAX_UTXOS_LEN},
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
 
-        test_validate_on_deserialize!(
-            BtcAddPendingTransactionRequest,
-            vec![
-                TestVector {
-                    description: "BtcAddPendingTransactionRequest with max length txid",
-                    input: BtcAddPendingTransactionRequest {
-                        txid: vec![0; MAX_TXID_BYTES],
-                        utxos: vec![],
-                        address: "".to_string(),
-                        network: BitcoinNetwork::Mainnet,
-                    },
-                    valid: true,
+    test_validate_on_deserialize!(
+        BtcAddPendingTransactionRequest,
+        vec![
+            TestVector {
+                description: "BtcAddPendingTransactionRequest with max length txid",
+                input: BtcAddPendingTransactionRequest {
+                    txid: vec![0; MAX_TXID_BYTES],
+                    utxos: vec![],
+                    address: "".to_string(),
+                    network: BitcoinNetwork::Mainnet,
                 },
-                TestVector {
-                    description: "BtcAddPendingTransactionRequest with txid too long",
-                    input: BtcAddPendingTransactionRequest {
-                        txid: vec![0; MAX_TXID_BYTES + 1],
-                        utxos: vec![],
-                        address: "".to_string(),
-                        network: BitcoinNetwork::Mainnet,
-                    },
-                    valid: false,
+                valid: true,
+            },
+            TestVector {
+                description: "BtcAddPendingTransactionRequest with txid too long",
+                input: BtcAddPendingTransactionRequest {
+                    txid: vec![0; MAX_TXID_BYTES + 1],
+                    utxos: vec![],
+                    address: "".to_string(),
+                    network: BitcoinNetwork::Mainnet,
                 },
-                TestVector {
-                    description: "With a utxo of maximal length",
-                    input: BtcAddPendingTransactionRequest {
-                        txid: vec![0; MAX_TXID_BYTES],
-                        utxos: vec![Utxo {
+                valid: false,
+            },
+            TestVector {
+                description: "With a utxo of maximal length",
+                input: BtcAddPendingTransactionRequest {
+                    txid: vec![0; MAX_TXID_BYTES],
+                    utxos: vec![Utxo {
+                        outpoint: Outpoint {
+                            txid: vec![0; MAX_TXID_BYTES],
+                            vout: 0,
+                        },
+                        value: 0,
+                        height: 0,
+                    }],
+                    address: "".to_string(),
+                    network: BitcoinNetwork::Mainnet,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "With a utxo that is too long",
+                input: BtcAddPendingTransactionRequest {
+                    txid: vec![0; MAX_TXID_BYTES],
+                    utxos: vec![Utxo {
+                        outpoint: Outpoint {
+                            txid: vec![0; MAX_TXID_BYTES + 1],
+                            vout: 0,
+                        },
+                        value: 0,
+                        height: 0,
+                    }],
+                    address: "".to_string(),
+                    network: BitcoinNetwork::Mainnet,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "With too many utxos",
+                input: BtcAddPendingTransactionRequest {
+                    txid: vec![0; MAX_TXID_BYTES],
+                    utxos: vec![
+                        Utxo {
                             outpoint: Outpoint {
                                 txid: vec![0; MAX_TXID_BYTES],
-                                vout: 0,
+                                vout: 0
                             },
                             value: 0,
                             height: 0,
-                        }],
-                        address: "".to_string(),
-                        network: BitcoinNetwork::Mainnet,
-                    },
-                    valid: true,
+                        };
+                        MAX_UTXOS_LEN + 1
+                    ],
+                    address: "".to_string(),
+                    network: BitcoinNetwork::Mainnet,
                 },
-                TestVector {
-                    description: "With a utxo that is too long",
-                    input: BtcAddPendingTransactionRequest {
-                        txid: vec![0; MAX_TXID_BYTES],
-                        utxos: vec![Utxo {
-                            outpoint: Outpoint {
-                                txid: vec![0; MAX_TXID_BYTES + 1],
-                                vout: 0,
-                            },
-                            value: 0,
-                            height: 0,
-                        }],
-                        address: "".to_string(),
-                        network: BitcoinNetwork::Mainnet,
-                    },
-                    valid: false,
-                },
-                TestVector {
-                    description: "With too many utxos",
-                    input: BtcAddPendingTransactionRequest {
-                        txid: vec![0; MAX_TXID_BYTES],
-                        utxos: vec![
-                            Utxo {
-                                outpoint: Outpoint {
-                                    txid: vec![0; MAX_TXID_BYTES],
-                                    vout: 0
-                                },
-                                value: 0,
-                                height: 0,
-                            };
-                            MAX_UTXOS_LEN + 1
-                        ],
-                        address: "".to_string(),
-                        network: BitcoinNetwork::Mainnet,
-                    },
-                    valid: false,
-                },
-            ]
-        );
-    }
+                valid: false,
+            },
+        ]
+    );
 }
 
 mod custom_token {
