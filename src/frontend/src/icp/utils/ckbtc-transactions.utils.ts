@@ -123,7 +123,7 @@ export const mapCkBTCPendingUtxo = ({
 		type: 'receive',
 		status: 'pending',
 		fromLabel: 'transaction.label.twin_network',
-		typeLabel: 'transaction.label.receiving_twin_token',
+		typeLabel: 'transaction.label.converting_twin_token',
 		value: value - kytFee,
 		txExplorerUrl: `${bitcoinExplorerUrl}/tx/${id}`
 	};

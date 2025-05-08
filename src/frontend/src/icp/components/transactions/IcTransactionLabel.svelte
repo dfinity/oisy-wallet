@@ -16,5 +16,6 @@
 
 {replacePlaceholders(resolveText({ i18n: $i18n, path: label }) ?? fallback, {
 	$twinToken: twinToken?.symbol ?? '',
-	$twinNetwork: twinToken?.network.name ?? ''
+	$twinNetwork: twinToken?.network.name ?? '',
+	$ckToken: token?.symbol ?? ''
 })}
