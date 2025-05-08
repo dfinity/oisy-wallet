@@ -96,7 +96,9 @@ describe('transaction.utils', () => {
 			vi.mock('$lib/utils/format.utils', () => ({
 				formatSecondsToNormalizedDate: vi
 					.fn()
-					.mockImplementation(({ seconds, currentDate: _ }): string => seconds.toString())
+					.mockImplementation(({ seconds, currentDate: _ }): string =>
+						seconds < 100000 ? seconds.toString() : new Date(seconds).toString()
+					)
 			}));
 		});
 
@@ -190,7 +192,7 @@ describe('transaction.utils', () => {
 			});
 		});
 
-		it('should place pending transactions in its own category', () => {
+		it('should place pending transactions in its own category and on top', () => {
 			const expectedPendingTransactions = [
 				{
 					component: mockTransactions[0].component,
@@ -204,7 +206,7 @@ describe('transaction.utils', () => {
 			const transactions = [
 				...mockTransactions.map((t) => ({
 					...t,
-					transaction: { ...t.transaction, timestamp: 1746623135 }
+					transaction: { ...t.transaction, timestamp: new Date().getTime() }
 				})),
 				expectedPendingTransactions[0],
 				expectedPendingTransactions[1]
@@ -213,6 +215,8 @@ describe('transaction.utils', () => {
 			const groupedList = groupTransactionsByDate(transactions);
 
 			expect(groupedList[get(i18n).transactions.text.pending]).toEqual(expectedPendingTransactions);
+
+			expect(Object.keys(groupedList).indexOf(get(i18n).transactions.text.pending)).toEqual(0);
 		});
 	});
 
