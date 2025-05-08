@@ -11,9 +11,9 @@
 	let cmp: typeof StaticSteps | typeof ProgressStepsCmp;
 	$: cmp = type === 'static' ? StaticSteps : ProgressStepsCmp;
 
-	let dynamicSteps: [ProgressStep, ...ProgressStep[]] = [
+	let dynamicSteps: ProgressSteps = [
 		// TODO: have a look if there is a better solution than casting
-		...(steps as [ProgressStep, ...ProgressStep[]])
+		...(steps as ProgressSteps)
 	];
 
 	const updateSteps = () => {
