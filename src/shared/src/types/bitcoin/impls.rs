@@ -25,9 +25,9 @@ fn validate_utxo_vec(utxos: &[Utxo]) -> Result<(), candid::Error> {
     }
     Ok(())
 }
-fn validate_txid_vec(txid: &[u8]) -> Result<(), candid::Error> {
+fn validate_txid_bytes(txid: &[u8]) -> Result<(), candid::Error> {
     if txid.len() != MAX_TXID_BYTES {
-        return Err(candid::Error::msg("Invalid transaction ID"));
+        return Err(candid::Error::msg("Transaction ID has too many bytes"));
     }
     Ok(())
 }
@@ -47,7 +47,7 @@ validate_on_deserialize!(SelectedUtxosFeeResponse);
 
 impl Validate for BtcAddPendingTransactionRequest {
     fn validate(&self) -> Result<(), candid::Error> {
-        validate_txid_vec(&self.txid)?;
+        validate_txid_bytes(&self.txid)?;
         validate_utxo_vec(&self.utxos)?;
         validate_address(&self.address)
     }
@@ -62,7 +62,7 @@ validate_on_deserialize!(BtcGetPendingTransactionsRequest);
 
 impl Validate for PendingTransaction {
     fn validate(&self) -> Result<(), candid::Error> {
-        validate_txid_vec(&self.txid)?;
+        validate_txid_bytes(&self.txid)?;
         validate_utxo_vec(&self.utxos)
     }
 }
