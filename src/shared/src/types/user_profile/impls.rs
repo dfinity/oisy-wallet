@@ -58,16 +58,14 @@ impl Validate for AddUserCredentialRequest {
                 AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH
             )));
         }
-        let credential_spec_args_len = self
-            .credential_spec
-            .arguments
-            .as_ref()
-            .map_or(0, HashMap::len);
-        if credential_spec_args_len > AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENTS {
-            return Err(candid::Error::msg(format!(
-                "Too many arguments: {credential_spec_args_len} > {}",
-                AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENTS,
-            )));
+        if let Some(args) = &self.credential_spec.arguments {
+            let credential_spec_args_len = args.len();
+            if credential_spec_args_len > AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENTS {
+                return Err(candid::Error::msg(format!(
+                    "Too many arguments: {credential_spec_args_len} > {}",
+                    AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENTS,
+                )));
+            }
         }
         Ok(())
     }

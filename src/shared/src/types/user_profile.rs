@@ -58,6 +58,10 @@ impl AddUserCredentialRequest {
     pub const MAX_CREDENTIAL_JWT_LENGTH: usize = 8 << 10;
     /// The maximum number of `CredentialSpec.arguments`.
     pub const MAX_CREDENTIAL_SPEC_ARGUMENTS: usize = 10;
+    /// The maximum supported argument key length.
+    pub const MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH: usize = 32;
+    /// The maximum supported argument value length.
+    pub const MAX_CREDENTIAL_SPEC_ARGUMENT_VALUE_LENGTH: usize = 1024;
     // 8K
     /// The maximum supported length for a credential type.
     pub const MAX_CREDENTIAL_TYPE_LENGTH: usize = 32;
