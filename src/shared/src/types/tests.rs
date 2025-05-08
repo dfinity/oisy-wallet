@@ -6,7 +6,10 @@ mod bitcoin {
     use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Outpoint, Utxo};
 
     use crate::{
-        types::bitcoin::{BtcAddPendingTransactionRequest, BtcGetPendingTransactionsRequest, MAX_ADDRESS_LEN, MAX_TXID_BYTES, MAX_UTXOS_LEN},
+        types::bitcoin::{
+            BtcAddPendingTransactionRequest, BtcGetPendingTransactionsRequest, PendingTransaction,
+            MAX_ADDRESS_LEN, MAX_TXID_BYTES, MAX_UTXOS_LEN,
+        },
         validate::{test_validate_on_deserialize, TestVector, Validate},
     };
 
@@ -90,24 +93,49 @@ mod bitcoin {
         ]
     );
 
-    test_validate_on_deserialize!(BtcGetPendingTransactionsRequest, vec![
-        TestVector {
-            description: "BtcGetPendingTransactionsRequest with max length address",
-            input: BtcGetPendingTransactionsRequest {
-                address: "1".repeat(MAX_ADDRESS_LEN),
-                network: BitcoinNetwork::Mainnet,
+    test_validate_on_deserialize!(
+        BtcGetPendingTransactionsRequest,
+        vec![
+            TestVector {
+                description: "BtcGetPendingTransactionsRequest with max length address",
+                input: BtcGetPendingTransactionsRequest {
+                    address: "1".repeat(MAX_ADDRESS_LEN),
+                    network: BitcoinNetwork::Mainnet,
+                },
+                valid: true,
             },
-            valid: true,
-        },
-        TestVector {
-            description: "BtcGetPendingTransactionsRequest with address too long",
-            input: BtcGetPendingTransactionsRequest {
-                address: "1".repeat(MAX_ADDRESS_LEN + 1),
-                network: BitcoinNetwork::Mainnet,
+            TestVector {
+                description: "BtcGetPendingTransactionsRequest with address too long",
+                input: BtcGetPendingTransactionsRequest {
+                    address: "1".repeat(MAX_ADDRESS_LEN + 1),
+                    network: BitcoinNetwork::Mainnet,
+                },
+                valid: false,
             },
-            valid: false,
-        },
-    ]);
+        ]
+    );
+
+    test_validate_on_deserialize!(
+        PendingTransaction,
+        vec![
+            TestVector {
+                description: "PendingTransaction with max length txid",
+                input: PendingTransaction {
+                    txid: vec![0; MAX_TXID_BYTES],
+                    utxos: vec![],
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "PendingTransaction with txid too long",
+                input: PendingTransaction {
+                    txid: vec![0; MAX_TXID_BYTES + 1],
+                    utxos: vec![],
+                },
+                valid: false,
+            },
+        ]
+    );
 }
 
 mod custom_token {
