@@ -139,10 +139,12 @@ export const fetchSwapAmounts = async ({
 		value: `${amount}`,
 		unitName: sourceToken.decimals
 	});
-	const params = { identity, sourceToken, destinationToken, sourceAmount };
-	const enabledProviders = swapProviders.filter((provider) => provider.isEnabled);
+	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
+
 	const settledResults = await Promise.allSettled(
-		enabledProviders.map((provider) => provider.getQuote(params))
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({ identity, sourceToken, destinationToken, sourceAmount })
+		)
 	);
 
 	return enabledProviders.reduce<SwapMappedResult[]>((acc, provider, index) => {
@@ -155,9 +157,7 @@ export const fetchSwapAmounts = async ({
 			const swap = result.value as SwapAmountsReply;
 			const mapped = provider.mapQuoteResult({ swap, tokens });
 			acc.push(mapped);
-		}
-
-		if (provider.key === SwapProvider.ICP_SWAP) {
+		} else if (provider.key === SwapProvider.ICP_SWAP) {
 			const swap = result.value as ICPSwapResult;
 			const mapped = provider.mapQuoteResult({ swap, slippage });
 			acc.push(mapped);
