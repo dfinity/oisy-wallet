@@ -4,12 +4,12 @@
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-	import type { IcToken } from '$icp/types/ic-token';
+	import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 	import {
 		loadPendingCkEthereumTransaction,
 		loadCkEthereumPendingTransactions
 	} from '$icp-eth/services/eth.services';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { type CkEthMinterInfoData, ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import {
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
@@ -34,7 +34,17 @@
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
-	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionEthAddress }) => {
+	const loadPendingTransactions = async ({
+		toAddress,
+		balance,
+		ckEthMinterInfo,
+		twinToken
+	}: {
+		toAddress: OptionEthAddress;
+		balance: OptionBalance;
+		ckEthMinterInfo: CkEthMinterInfoData;
+		twinToken: IcCkToken | undefined;
+	}) => {
 		if (isNullish(token) || isNullish(token.id)) {
 			return;
 		}
@@ -59,11 +69,11 @@
 
 		// We keep track of what balance was used to fetch the pending transactions to avoid triggering unnecessary reload.
 		// In addition, a transaction might be emitted by the socket (Alchemy) as pending but, might require a few extra time to be delivered as pending by the API (Ehterscan) which can lead to a "race condition" where a pending transaction is displayed and then hidden few seconds later.
-		if (nonNullish(loadBalance) && nonNullish($balance) && loadBalance === $balance) {
+		if (nonNullish(loadBalance) && nonNullish(balance) && loadBalance === balance) {
 			return;
 		}
 
-		loadBalance = $balance;
+		loadBalance = balance;
 
 		await loadCkEthereumPendingTransactions({
 			token: token as IcToken,
@@ -130,11 +140,13 @@
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
-	$: $balance,
-		$ckEthMinterInfoStore,
-		twinToken,
-		toContractAddress,
-		(async () => await loadPendingTransactions({ toAddress: toContractAddress }))();
+	$: (async () =>
+		await loadPendingTransactions({
+			toAddress: toContractAddress,
+			balance: $balance,
+			ckEthMinterInfo: $ckEthMinterInfoStore,
+			twinToken
+		}))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>
