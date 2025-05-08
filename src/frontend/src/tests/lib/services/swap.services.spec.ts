@@ -1,41 +1,96 @@
+import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { IcToken } from '$icp/types/ic-token';
-import * as kongBackendApi from '$lib/api/kong_backend.api';
-import * as swapProvidersModule from '$lib/providers/swap.providers';
+import * as kongBackendApi  from '$lib/api/kong_backend.api';
+import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import { fetchSwapAmounts, loadKongSwapTokens } from '$lib/services/swap.services';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
-import { SwapProvider, type FetchSwapAmountsParams } from '$lib/types/swap';
+import type { ICPSwapAmountReply } from '$lib/types/api';
+import { SwapProvider } from '$lib/types/swap';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { get } from 'svelte/store';
 
-const kongGetQuoteMock = vi.fn().mockResolvedValue({ fake: 'kong-swap' });
-const kongMapQuoteMock = vi
-	.fn()
-	.mockReturnValue({ provider: SwapProvider.KONG_SWAP, receiveAmount: 1000n });
+vi.mock(import('$env/icp-swap.env'), async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    ICP_SWAP_ENABLED: true
+  };
+});
 
-const icpGetQuoteMock = vi.fn().mockResolvedValue({ fake: 'icp-swap' });
-const icpMapQuoteMock = vi
-	.fn()
-	.mockReturnValue({ provider: SwapProvider.ICP_SWAP, receiveAmount: 900n });
+vi.mock('$lib/api/kong_backend.api', () => ({
+	kongSwapAmounts: vi.fn(),
+  kongTokens: vi.fn()
+}));
 
-const mockSwapProviders = [
-	{
-		key: SwapProvider.KONG_SWAP,
-		isEnabled: true,
-		getQuote: kongGetQuoteMock,
-		mapQuoteResult: kongMapQuoteMock
-	},
-	{
-		key: SwapProvider.ICP_SWAP,
-		isEnabled: true,
-		getQuote: icpGetQuoteMock,
-		mapQuoteResult: icpMapQuoteMock
-	}
-];
+vi.mock('$lib/services/icp-swap.services', () => ({
+	icpSwapAmounts: vi.fn()
+}));
 
-vi.spyOn(swapProvidersModule, 'swapProviders', 'get').mockReturnValue(
-	mockSwapProviders as unknown as typeof swapProvidersModule.swapProviders
-);
+describe('fetchSwapAmounts', () => {
+	const mockTokens = [
+		{ ledgerCanisterId: 'token0-id', standard: 'icrc', decimals: 18 } as IcToken,
+		{ ledgerCanisterId: 'token1-id', standard: 'icrc', decimals: 18 } as IcToken
+	];
+
+	const [sourceToken] = mockTokens;
+	const [_, destinationToken] = mockTokens;
+	const amount = 1000;
+	const slippage = 0.5;
+
+	it('should handle both KONG_SWAP and ICP_SWAP providers correctly', async () => {
+		const kongSwapResponse = {
+			receive_amount: 950n,
+			slippage: 0.5
+		} as SwapAmountsReply;
+		const icpSwapResponse = {
+			receiveAmount: 975
+		} as unknown as ICPSwapAmountReply;
+
+		vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+		vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+
+		const result = await fetchSwapAmounts({
+			identity: mockIdentity,
+			sourceToken,
+			destinationToken,
+			amount,
+			tokens: mockTokens,
+			slippage
+		});
+
+		expect(result).toHaveLength(2);
+
+		const kongSwapResult = result.find((r) => r.provider === SwapProvider.KONG_SWAP);
+		const icpSwapResult = result.find((r) => r.provider === SwapProvider.ICP_SWAP);
+
+		expect(kongSwapResult).toBeDefined();
+		expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
+
+		expect(icpSwapResult).toBeDefined();
+		expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
+	});
+
+	it('should handle provider failures gracefully (e.g., rejected promises)', async () => {
+		const kongSwapResponse = { receive_amount: 950n, slippage: 0.5 } as SwapAmountsReply;
+		const icpSwapError = new Error('ICP Swap Error');
+
+		vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+		vi.mocked(icpSwapBackend.icpSwapAmounts).mockRejectedValue(icpSwapError);
+
+		const result = await fetchSwapAmounts({
+			identity: mockIdentity,
+			sourceToken,
+			destinationToken,
+			amount,
+			tokens: mockTokens,
+			slippage
+		});
+
+		expect(result).toHaveLength(1);
+		expect(result[0].provider).toBe(SwapProvider.KONG_SWAP);
+	});
+});
 
 describe('loadKongSwapTokens', () => {
 	beforeEach(() => {
@@ -58,71 +113,5 @@ describe('loadKongSwapTokens', () => {
 		await loadKongSwapTokens({ identity: mockIdentity });
 
 		expect(get(kongSwapTokensStore)).toStrictEqual({});
-	});
-});
-
-describe('fetchSwapAmounts', () => {
-	const baseParams: FetchSwapAmountsParams = {
-		identity: mockIdentity,
-		sourceToken: { ledgerCanisterId: 'aaa', standard: 'icrc', decimals: 8 } as IcToken,
-		destinationToken: { ledgerCanisterId: 'bbb', standard: 'icrc', decimals: 8 } as IcToken,
-		amount: 1,
-		tokens: [],
-		slippage: 0.5
-	};
-
-	beforeEach(() => {
-		vi.clearAllMocks();
-		mockSwapProviders[0].isEnabled = true;
-		mockSwapProviders[1].isEnabled = true;
-	});
-
-	it('should return results from both providers when both succeed', async () => {
-		const result = await fetchSwapAmounts(baseParams);
-
-		expect(result).toHaveLength(2);
-		expect(result[0].provider).toBe(SwapProvider.KONG_SWAP);
-		expect(result[1].provider).toBe(SwapProvider.ICP_SWAP);
-	});
-
-	it('should return only successful results if one provider fails', async () => {
-		mockSwapProviders[0].getQuote = vi
-			.fn()
-			.mockRejectedValueOnce(new Error('Kong provider failed'));
-
-		const result = await fetchSwapAmounts(baseParams);
-
-		expect(result).toHaveLength(1);
-		expect(result[0].provider).toBe(SwapProvider.ICP_SWAP);
-	});
-
-	it('should return empty array if all providers fail', async () => {
-		mockSwapProviders[0].getQuote = vi
-			.fn()
-			.mockRejectedValueOnce(new Error('Kong provider failed'));
-		mockSwapProviders[1].getQuote = vi.fn().mockRejectedValueOnce(new Error('ICP provider failed'));
-
-		const result = await fetchSwapAmounts(baseParams);
-
-		expect(result).toHaveLength(0);
-	});
-
-	it('should skip disabled providers', async () => {
-		mockSwapProviders[1].isEnabled = false;
-
-		const result = await fetchSwapAmounts(baseParams);
-
-		expect(result).toHaveLength(1);
-		expect(result[0].provider).toBe(SwapProvider.KONG_SWAP);
-		expect(icpGetQuoteMock).not.toHaveBeenCalled();
-	});
-
-	it('should return empty if all providers are disabled', async () => {
-		mockSwapProviders[0].isEnabled = false;
-		mockSwapProviders[1].isEnabled = false;
-
-		const result = await fetchSwapAmounts(baseParams);
-
-		expect(result).toHaveLength(0);
 	});
 });

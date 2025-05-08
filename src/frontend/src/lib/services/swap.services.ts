@@ -145,7 +145,7 @@ export const fetchSwapAmounts = async ({
 		enabledProviders.map(({ getQuote }) =>
 			getQuote({ identity, sourceToken, destinationToken, sourceAmount })
 		)
-	);
+	);	
 
 	return enabledProviders.reduce<SwapMappedResult[]>((acc, provider, index) => {
 		const result = settledResults[index];

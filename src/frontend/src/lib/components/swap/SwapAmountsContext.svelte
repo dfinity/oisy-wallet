@@ -14,11 +14,10 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
 	import { fetchSwapAmounts } from '$lib/services/swap.services';
-	import type { IcToken } from '$icp/types/ic-token';
 
 	export let amount: OptionAmount = undefined;
-	export let sourceToken: IcToken | undefined;
-	export let destinationToken: IcToken | undefined;
+	export let sourceToken: Token | undefined;
+	export let destinationToken: Token | undefined;
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -52,16 +51,6 @@
 					unitName: sourceToken.decimals
 				})
 			});
-
-			const newSwapAmounts = await fetchSwapAmounts({
-				identity: $authIdentity,
-				sourceToken,
-				destinationToken,
-				amount: parsedAmount,
-				tokens: $tokens,
-				slippage: 1.5
-			});
-			console.log(newSwapAmounts);
 
 			if (isNullish(swapAmounts)) {
 				store.reset();

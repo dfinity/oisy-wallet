@@ -15,6 +15,6 @@ export const swapProviders: SwapProviderConfig[] = [
 		key: SwapProvider.ICP_SWAP,
 		getQuote: icpSwapAmounts,
 		mapQuoteResult: ({ swap, slippage }) => mapIcpSwapResult({ swap, slippage }),
-		isEnabled: true
+		isEnabled: ICP_SWAP_ENABLED
 	}
 ];
