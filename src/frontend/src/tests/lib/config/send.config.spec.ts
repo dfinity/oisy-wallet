@@ -10,6 +10,10 @@ import type { WizardSteps } from '@dfinity/gix-components';
 describe('send.config', () => {
 	const expectedBaseConfig: WizardSteps = [
 		{
+			name: WizardStepsSend.DESTINATION,
+			title: en.send.text.send
+		},
+		{
 			name: WizardStepsSend.SEND,
 			title: en.send.text.send
 		},
