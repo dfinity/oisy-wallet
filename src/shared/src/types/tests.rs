@@ -353,3 +353,40 @@ mod custom_token {
         );
     }
 }
+
+mod user_profile {
+    //! Tests for the `user_profile` types.
+    use candid::{Decode, Encode};
+
+    use crate::{
+        types::{
+            user_profile::{UserCredential, MAX_ISSUER_LENGTH},
+            verifiable_credential::CredentialType,
+        },
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    test_validate_on_deserialize!(
+        UserCredential,
+        vec![
+            TestVector {
+                description: "UserCredential with max length issuer",
+                input: UserCredential {
+                    credential_type: CredentialType::ProofOfUniqueness,
+                    issuer: "1".repeat(MAX_ISSUER_LENGTH),
+                    verified_date_timestamp: None,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "UserCredential with issuer too long",
+                input: UserCredential {
+                    credential_type: CredentialType::ProofOfUniqueness,
+                    issuer: "1".repeat(MAX_ISSUER_LENGTH + 1),
+                    verified_date_timestamp: None,
+                },
+                valid: false,
+            },
+        ]
+    );
+}
