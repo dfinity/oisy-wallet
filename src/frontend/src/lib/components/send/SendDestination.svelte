@@ -2,6 +2,7 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import { SEND_DESTINATION_SECTION } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
@@ -18,7 +19,7 @@
 	const onIcSendDestinationStep = () => dispatch('icSendDestinationStep');
 </script>
 
-<div class="mb-10 mt-6">
+<div class="mb-10 mt-6" data-tid={SEND_DESTINATION_SECTION}>
 	<div class="font-bold">{$i18n.core.text.to}</div>
 
 	<div

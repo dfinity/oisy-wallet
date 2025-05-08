@@ -3,7 +3,10 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { BITCOIN_FEE_CONTEXT_KEY, initBitcoinFeeStore } from '$icp/stores/bitcoin-fee.store';
 import { ETHEREUM_FEE_CONTEXT_KEY, initEthereumFeeStore } from '$icp/stores/ethereum-fee.store';
-import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
+import {
+	SEND_DESTINATION_SECTION,
+	TOKEN_INPUT_CURRENCY_TOKEN
+} from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
 
@@ -33,14 +36,12 @@ describe('IcSendForm', () => {
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
-	const destinationSelector = 'input[data-tid="destination-input"]';
-	const networkSelector = 'div[id="network"]';
 	const feeSelector = 'p[id="fee"]';
 	const ethereumEstimatedFeeSelector = 'p[id="kyt-fee"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	it('should render all fields', () => {
-		const { container } = render(IcSendForm, {
+		const { container, getByTestId } = render(IcSendForm, {
 			props,
 			context: mockContext
 		});
@@ -49,13 +50,7 @@ describe('IcSendForm', () => {
 
 		expect(amount).not.toBeNull();
 
-		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
-
-		expect(destination).not.toBeNull();
-
-		const network: HTMLDivElement | null = container.querySelector(networkSelector);
-
-		expect(network).not.toBeNull();
+		expect(getByTestId(SEND_DESTINATION_SECTION)).toBeInTheDocument();
 
 		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
 
