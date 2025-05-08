@@ -5,6 +5,7 @@
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import type { IcCkToken, IcToken } from '$icp/types/ic-token';
+	import { isIcCkToken } from '$icp/validation/ic-token.validation';
 	import {
 		loadPendingCkEthereumTransaction,
 		loadCkEthereumPendingTransactions
@@ -21,7 +22,7 @@
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { OptionToken, Token } from '$lib/types/token';
-	import { isIcCkToken } from '$icp/validation/ic-token.validation';
+	import type { CertifiedStoreData } from '$lib/stores/certified.store.js';
 
 	export let token: OptionToken;
 	export let ckEthereumNativeToken: Token;
@@ -42,7 +43,7 @@
 	}: {
 		toAddress: OptionEthAddress;
 		balance: OptionBalance;
-		ckEthMinterInfo: CkEthMinterInfoData;
+		ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 		twinToken: IcCkToken | undefined;
 	}) => {
 		if (isNullish(token) || isNullish(token.id)) {
