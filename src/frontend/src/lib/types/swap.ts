@@ -1,6 +1,7 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { IcToken } from '$icp/types/ic-token';
 import type { Token } from '$lib/types/token';
+import type { Identity } from '@dfinity/agent';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
@@ -47,3 +48,41 @@ export type IcpQuoteResult = {
 	swap: ICPSwapResult;
 	slippage: Slippage;
 };
+
+export interface FetchSwapAmountsParams {
+	identity: Identity;
+	sourceToken: IcToken;
+	destinationToken: IcToken;
+	amount: string | number;
+	tokens: IcToken[];
+	slippage: string | number;
+}
+
+type KongQuoteParams = {
+	swap: SwapAmountsReply;
+	tokens: IcToken[];
+};
+
+type IcpQuoteParams = {
+	swap: ICPSwapResult;
+	slippage: Slippage;
+};
+
+type SwapQuoteParams = {
+	identity: Identity;
+	sourceToken: IcToken;
+	destinationToken: IcToken;
+	sourceAmount: bigint;
+};
+interface BaseSwapProvider<T extends SwapProvider, QuoteResult, QuoteMapParams> {
+	key: T;
+	getQuote: (params: SwapQuoteParams) => Promise<QuoteResult>;
+	mapQuoteResult: (params: QuoteMapParams) => SwapMappedResult;
+	isEnabled: boolean;
+}
+
+type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsReply, KongQuoteParams>;
+
+type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, IcpQuoteParams>;
+
+export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
