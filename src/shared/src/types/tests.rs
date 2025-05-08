@@ -14,6 +14,7 @@ mod bitcoin {
         fn test_vectors() -> Vec<TestVector<BtcAddPendingTransactionRequest>> {
             vec![
                 TestVector {
+                    description: "BtcAddPendingTransactionRequest with max length txid",
                     input: BtcAddPendingTransactionRequest {
                         txid: vec![0; MAX_TXID_LEN],
                         utxos: vec![],
@@ -21,9 +22,9 @@ mod bitcoin {
                         network: BitcoinNetwork::Mainnet,
                     },
                     valid: true,
-                    description: "BtcAddPendingTransactionRequest with max length txid",
                 },
                 TestVector {
+                    description: "BtcAddPendingTransactionRequest with txid too long",
                     input: BtcAddPendingTransactionRequest {
                         txid: vec![0; MAX_TXID_LEN + 1],
                         utxos: vec![],
@@ -31,7 +32,23 @@ mod bitcoin {
                         network: BitcoinNetwork::Mainnet,
                     },
                     valid: false,
-                    description: "BtcAddPendingTransactionRequest with txid too long",
+                },
+                TestVector {
+                    description: "With a utxo of maximal length",
+                    input: BtcAddPendingTransactionRequest {
+                        txid: vec![0; MAX_TXID_LEN],
+                        utxos: vec![Utxo {
+                            outpoint: Outpoint {
+                                txid: vec![0; MAX_TXID_LEN],
+                                vout: 0,
+                            },
+                            value: 0,
+                            height: 0,
+                        }],
+                        address: "".to_string(),
+                        network: BitcoinNetwork::Mainnet,
+                    },
+                    valid: true,
                 },
                 TestVector {
                     description: "With a utxo that is too long",

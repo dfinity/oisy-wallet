@@ -82,7 +82,7 @@ pub struct TestVector<T>
 where
     T: candid::CandidType + Validate,
 {
+    pub description: &'static str,
     pub input: T,
     pub valid: bool,
-    pub description: &'static str,
 }
