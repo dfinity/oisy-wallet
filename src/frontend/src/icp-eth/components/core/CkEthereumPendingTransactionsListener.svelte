@@ -4,7 +4,6 @@
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 
 	import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 	import {
@@ -133,7 +132,7 @@
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
 	$: $balance,
 		$ckEthMinterInfoStore,
-		$ckEthereumTwinToken,
+		twinToken,
 		toContractAddress,
 		(async () => await loadPendingTransactions({ toAddress: toContractAddress }))();
 
