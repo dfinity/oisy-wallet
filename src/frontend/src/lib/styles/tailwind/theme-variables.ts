@@ -62,6 +62,17 @@ export const themeVariables = {
 			secondary: 'var(--color-background-error-secondary)',
 			tertiary: 'var(--color-background-error-tertiary)',
 			light: 'var(--color-background-error-light)'
+		},
+		contact: {
+			'1': 'var(--color-background-contact-1)',
+			'2': 'var(--color-background-contact-2)',
+			'3': 'var(--color-background-contact-3)',
+			'4': 'var(--color-background-contact-4)',
+			'5': 'var(--color-background-contact-5)',
+			'6': 'var(--color-background-contact-6)',
+			'7': 'var(--color-background-contact-7)',
+			'8': 'var(--color-background-contact-8)',
+			'9': 'var(--color-background-contact-9)'
 		}
 	},
 	border: {
@@ -137,8 +148,8 @@ export const themeVariables = {
 	gradient: {
 		'default-0': '#016DFC',
 		'default-100': '#004EB5',
-		'icp-0': '#3B00B9',
-		'icp-100': '#7014A4',
+		'icp-0': '#3607B1',
+		'icp-100': '#1E0071',
 		'btc-0': '#F7931A',
 		'btc-100': '#DE7900',
 		'eth-0': '#627EEA',
