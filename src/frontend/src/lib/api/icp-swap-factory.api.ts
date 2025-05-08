@@ -26,7 +26,7 @@ export const getPoolCanister = async ({
 const icpSwapFactoryCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
-	canisterId = ICP_SWAP_CANISTER_ID
+	canisterId = '4mmnk-kiaaa-aaaag-qbllq-cai'
 }: CanisterApiFunctionParams): Promise<ICPSwapFactoryCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
