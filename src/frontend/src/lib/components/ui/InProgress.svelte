@@ -6,7 +6,7 @@
 	import type { NonEmptyArray } from '$lib/types/utils';
 
 	export let progressStep: string;
-	export let steps:NonEmptyArray<ProgressStep | StaticStep>;
+	export let steps: NonEmptyArray<ProgressStep | StaticStep>;
 	export let type: 'progress' | 'static' = 'progress';
 
 	let cmp: typeof StaticSteps | typeof ProgressStepsCmp;

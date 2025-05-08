@@ -4,7 +4,7 @@
 	import type { StaticStep } from '$lib/types/steps';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
-	export let steps:NonEmptyArray<StaticStep>;
+	export let steps: NonEmptyArray<StaticStep>;
 </script>
 
 {#each steps as { text, state, progressLabel, step }, i (step)}
