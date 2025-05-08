@@ -72,7 +72,10 @@ fn test_select_user_utxos_fee_pending_transaction_error() {
         add_request,
     );
 
-    assert!(add_response.is_ok());
+    assert!(
+        add_response.is_ok(),
+        "btc_add_pending_transaction failed: {add_response:?}"
+    );
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
@@ -126,7 +129,10 @@ fn test_add_and_read_pending_transactions() {
         add_request,
     );
 
-    assert!(add_response.is_ok());
+    assert!(
+        add_response.is_ok(),
+        "btc_add_pending_transaction failed with: {add_response:?}"
+    );
 
     let read_request = BtcGetPendingTransactionsRequest {
         address: address.clone(),

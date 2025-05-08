@@ -37,6 +37,7 @@ pretty_assertions = "1.4.1"
 strum = "0.26.3"
 strum_macros = "0.26.4"
 bitcoin = "0.32.5"
+paste = "1.0.15"
 
 [workspace.lints.rust]
 deprecated = "allow" # Why is this allowed?
