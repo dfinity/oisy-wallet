@@ -1,4 +1,8 @@
-import { CAROUSEL_SLIDE_NAVIGATION, TOKEN_CARD } from '$lib/constants/test-ids.constants';
+import {
+	CAROUSEL_SLIDE_NAVIGATION,
+	NO_TRANSACTIONS_PLACEHOLDER,
+	TOKEN_CARD
+} from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
 type TransactionsPageParams = HomepageLoggedInParams;
@@ -53,6 +57,7 @@ export class TransactionsPage extends HomepageLoggedIn {
 		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({
 			state: 'hidden'
 		});
+		await this.waitForByTestId({ testId: NO_TRANSACTIONS_PLACEHOLDER });
 		await this.waitForLoadState();
 		await this.takeScreenshot();
 	};
