@@ -280,7 +280,7 @@ jobs:
             ${{ env.MODIFIED_FILES }}
             ```
 
-  may-merge-e2e:
+  e2e-tests-pass:
     if: always()
     needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
     runs-on: ubuntu-24.04

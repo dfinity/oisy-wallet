@@ -170,7 +170,7 @@ jobs:
             exit 1
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
-  may-merge:
+  backend-tests-pass:
     needs:
       - tests
       - breaking-interface
