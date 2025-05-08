@@ -78,6 +78,7 @@ type AddUserCredentialRequest = record {
 	current_user_version : opt nat64;
 	credential_spec : CredentialSpec
 };
+type AddUserCredentialResult = variant { Ok; Err : AddUserCredentialError };
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
 	PowChallenge : ChallengeCompletionError;
@@ -268,32 +269,31 @@ type OisyUser = record {
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
-type Result = variant { Ok; Err : AddUserCredentialError };
-type Result_1 = variant { Ok; Err : AddDappSettingsError };
-type Result_10 = variant {
-	Ok : TopUpCyclesLedgerResponse;
-	Err : TopUpCyclesLedgerError
-};
-type Result_2 = variant { Ok : AllowSigningResponse; Err : AllowSigningError };
-type Result_3 = variant { Ok; Err : BtcAddPendingTransactionError };
-type Result_4 = variant {
+type Result = variant { Ok; Err : AddDappSettingsError };
+type Result_1 = variant { Ok : AllowSigningResponse; Err : AllowSigningError };
+type Result_2 = variant { Ok; Err : BtcAddPendingTransactionError };
+type Result_3 = variant {
 	Ok : BtcGetPendingTransactionsReponse;
 	Err : BtcAddPendingTransactionError
 };
-type Result_5 = variant {
+type Result_4 = variant {
 	Ok : SelectedUtxosFeeResponse;
 	Err : SelectedUtxosFeeError
 };
-type Result_6 = variant {
+type Result_5 = variant {
 	Ok : CreateChallengeResponse;
 	Err : CreateChallengeError
 };
-type Result_7 = variant {
+type Result_6 = variant {
 	Ok : GetAllowedCyclesResponse;
 	Err : GetAllowedCyclesError
 };
-type Result_8 = variant { Ok : UserProfile; Err : GetUserProfileError };
-type Result_9 = variant { Ok; Err : SaveTestnetsSettingsError };
+type Result_7 = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result_8 = variant { Ok; Err : SaveTestnetsSettingsError };
+type Result_9 = variant {
+	Ok : TopUpCyclesLedgerResponse;
+	Err : TopUpCyclesLedgerError
+};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -415,24 +415,24 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
-	add_user_credential : (AddUserCredentialRequest) -> (Result);
-	add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (Result_1);
-	allow_signing : (opt AllowSigningRequest) -> (Result_2);
-	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (Result_3);
+	add_user_credential : (AddUserCredentialRequest) -> (AddUserCredentialResult);
+	add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (Result);
+	allow_signing : (opt AllowSigningRequest) -> (Result_1);
+	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (Result_2);
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
-		Result_4
+		Result_3
 	);
-	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_5);
+	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_4);
 	config : () -> (Config) query;
-	create_pow_challenge : () -> (Result_6);
+	create_pow_challenge : () -> (Result_5);
 	create_user_profile : () -> (UserProfile);
 	get_account_creation_timestamps : () -> (
 		vec record { principal; nat64 }
 	) query;
-	get_allowed_cycles : () -> (Result_7);
+	get_allowed_cycles : () -> (Result_6);
 	get_canister_status : () -> (CanisterStatusResultV2);
 	get_snapshot : () -> (opt UserSnapshot) query;
-	get_user_profile : () -> (Result_8) query;
+	get_user_profile : () -> (Result_7) query;
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	http_request : (HttpRequest) -> (HttpResponse) query;
 	list_custom_tokens : () -> (vec CustomToken) query;
@@ -446,9 +446,9 @@ service : (Arg) -> {
 	set_many_custom_tokens : (vec CustomToken) -> ();
 	set_many_user_tokens : (vec UserToken) -> ();
 	set_snapshot : (UserSnapshot) -> ();
-	set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_9);
+	set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_8);
 	set_user_token : (UserToken) -> ();
 	stats : () -> (Stats) query;
-	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_10);
-	update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_9)
+	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_9);
+	update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_8)
 }
