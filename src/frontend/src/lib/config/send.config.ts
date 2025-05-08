@@ -8,6 +8,10 @@ interface SendWizardStepsParams extends WizardStepsParams {
 
 export const sendWizardSteps = ({ i18n, converting }: SendWizardStepsParams): WizardSteps => [
 	{
+		name: WizardStepsSend.DESTINATION,
+		title: i18n.send.text.send
+	},
+	{
 		name: WizardStepsSend.SEND,
 		title: i18n.send.text.send
 	},
