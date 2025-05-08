@@ -21,6 +21,7 @@
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { OptionToken, Token } from '$lib/types/token';
+	import { isIcCkToken } from '$icp/validation/ic-token.validation';
 
 	export let token: OptionToken;
 	export let ckEthereumNativeToken: Token;
@@ -29,7 +30,7 @@
 
 	let loadBalance: OptionBalance = undefined;
 
-	let { twinToken } = token as IcCkToken;
+	const twinToken = nonNullish(token) && isIcCkToken(token) ? token.twinToken : undefined;
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
