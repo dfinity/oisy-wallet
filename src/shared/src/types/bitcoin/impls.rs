@@ -11,14 +11,21 @@ use super::{
 use crate::validate::{validate_on_deserialize, Validate};
 
 fn validate_utxo(utxo: &Utxo) -> Result<(), candid::Error> {
-    if utxo.outpoint.txid.len() > MAX_TXID_BYTES {
-        return Err(candid::Error::msg("Invalid transaction ID in utxo"));
+    let len = utxo.outpoint.txid.len();
+    if len > MAX_TXID_BYTES {
+        return Err(candid::Error::msg(format!(
+            "Transaction ID in utxo has too many bytes: {len} > {MAX_TXID_BYTES}"
+        )));
     }
     Ok(())
 }
 fn validate_utxo_vec(utxos: &[Utxo]) -> Result<(), candid::Error> {
     if utxos.len() > MAX_UTXOS_LEN {
-        return Err(candid::Error::msg("Too many UTXOs"));
+        return Err(candid::Error::msg(format!(
+            "Too many UTXOs: {} > {}",
+            utxos.len(),
+            MAX_UTXOS_LEN
+        )));
     }
     for utxo in utxos {
         validate_utxo(utxo)?;
@@ -26,14 +33,20 @@ fn validate_utxo_vec(utxos: &[Utxo]) -> Result<(), candid::Error> {
     Ok(())
 }
 fn validate_txid_bytes(txid: &[u8]) -> Result<(), candid::Error> {
-    if txid.len() != MAX_TXID_BYTES {
-        return Err(candid::Error::msg("Transaction ID has too many bytes"));
+    let len = txid.len();
+    if len > MAX_TXID_BYTES {
+        return Err(candid::Error::msg(format!(
+            "Transaction ID has too many bytes: {len} > {MAX_TXID_BYTES}"
+        )));
     }
     Ok(())
 }
 fn validate_address(address: &str) -> Result<(), candid::Error> {
-    if address.len() > MAX_ADDRESS_LEN {
-        return Err(candid::Error::msg("Bitcoin address too long"));
+    let len = address.len();
+    if len > MAX_ADDRESS_LEN {
+        return Err(candid::Error::msg(format!(
+            "Bitcoin address too long: {len} > {MAX_ADDRESS_LEN}"
+        )));
     }
     Ok(())
 }
