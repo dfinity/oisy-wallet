@@ -14,7 +14,7 @@ export const CONTACT_BACKGROUND_COLORS: NonEmptyArray<string> = [
 ];
 
 // Available contact text colors
-export const CONTACT_TEXT_COLORS = [
+export const CONTACT_TEXT_COLORS: NonEmptyArray<string> = [
 	`text-contact-1`,
 	`text-contact-2`,
 	`text-contact-3`,
