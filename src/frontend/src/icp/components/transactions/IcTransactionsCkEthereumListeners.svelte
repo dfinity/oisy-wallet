@@ -9,7 +9,7 @@
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { OptionToken, Token as TokenType } from '$lib/types/token';
 
-	export interface Props {
+	interface Props {
 		token: OptionToken;
 		ckEthereumNativeToken?: TokenType;
 		children?: Snippet;

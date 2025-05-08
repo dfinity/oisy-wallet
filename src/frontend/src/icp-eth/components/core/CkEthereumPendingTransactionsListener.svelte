@@ -4,13 +4,13 @@
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-	import type { IcCkToken, IcToken } from '$icp/types/ic-token';
+	import type { IcToken } from '$icp/types/ic-token';
 	import { isIcCkToken } from '$icp/validation/ic-token.validation';
 	import {
 		loadPendingCkEthereumTransaction,
 		loadCkEthereumPendingTransactions
 	} from '$icp-eth/services/eth.services';
-	import { type CkEthMinterInfoData, ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import {
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
@@ -22,8 +22,6 @@
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { OptionToken, Token } from '$lib/types/token';
-	import type { CertifiedStoreData } from '$lib/stores/certified.store.js';
-	import type { BRAND } from 'zod';
 
 	export let token: OptionToken;
 	export let ckEthereumNativeToken: Token;
@@ -32,21 +30,12 @@
 
 	let loadBalance: OptionBalance = undefined;
 
-	const twinToken = nonNullish(token) && isIcCkToken(token) ? token.twinToken : undefined;
+	let twinToken: Token | undefined;
+	$: twinToken = nonNullish(token) && isIcCkToken(token) ? token.twinToken : undefined;
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
-	const loadPendingTransactions = async ({
-		toAddress,
-		balance,
-		ckEthMinterInfo,
-		twinToken
-	}: {
-		toAddress: OptionEthAddress;
-		balance: OptionBalance;
-		ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData, symbol & BRAND<'TokenId'>>;
-		twinToken: IcCkToken | undefined;
-	}) => {
+	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionEthAddress }) => {
 		if (isNullish(token) || isNullish(token.id)) {
 			return;
 		}
@@ -61,7 +50,7 @@
 		}
 
 		const lastObservedBlockNumber = fromNullishNullable(
-			ckEthMinterInfo?.[ckEthereumNativeToken.id]?.data.last_observed_block_number
+			$ckEthMinterInfoStore?.[ckEthereumNativeToken.id]?.data.last_observed_block_number
 		);
 
 		// The ckETH minter info has not yet been fetched. We require this information to query all transactions above a certain block index. These can be considered as pending, given that they have not yet been seen by the minter.
@@ -71,11 +60,11 @@
 
 		// We keep track of what balance was used to fetch the pending transactions to avoid triggering unnecessary reload.
 		// In addition, a transaction might be emitted by the socket (Alchemy) as pending but, might require a few extra time to be delivered as pending by the API (Ehterscan) which can lead to a "race condition" where a pending transaction is displayed and then hidden few seconds later.
-		if (nonNullish(loadBalance) && nonNullish(balance) && loadBalance === balance) {
+		if (nonNullish(loadBalance) && nonNullish($balance) && loadBalance === $balance) {
 			return;
 		}
 
-		loadBalance = balance;
+		loadBalance = $balance;
 
 		await loadCkEthereumPendingTransactions({
 			token: token as IcToken,
@@ -142,13 +131,11 @@
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
-	$: (async () =>
-		await loadPendingTransactions({
-			toAddress: toContractAddress,
-			balance: $balance,
-			ckEthMinterInfo: $ckEthMinterInfoStore,
-			twinToken: twinToken as IcCkToken | undefined
-		}))();
+	$: $balance,
+		$ckEthMinterInfoStore,
+		twinToken,
+		toContractAddress,
+		(async () => await loadPendingTransactions({ toAddress: toContractAddress }))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>

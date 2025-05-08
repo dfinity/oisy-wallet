@@ -8,7 +8,7 @@
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import type { OptionToken, Token } from '$lib/types/token';
 
-	export interface Props {
+	interface Props {
 		token: OptionToken;
 		children?: Snippet;
 	}
