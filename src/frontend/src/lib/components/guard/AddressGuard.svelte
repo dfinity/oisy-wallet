@@ -62,7 +62,8 @@
 		$networkBitcoinMainnetEnabled,
 		$networkEthereumEnabled,
 		$networkEvmMainnetEnabled,
-		$networkSolanaMainnetEnabled(async () => await validateAddresses())();
+		$networkSolanaMainnetEnabled,
+		(async () => await validateAddresses())();
 </script>
 
 <svelte:window on:oisyValidateAddresses={loadSignerAllowanceAndValidateAddresses} />
