@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Backdrop, BottomSheet } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
