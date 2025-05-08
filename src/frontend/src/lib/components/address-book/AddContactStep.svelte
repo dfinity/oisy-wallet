@@ -13,7 +13,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Contact } from '$lib/types/contact';
 
-	let contact: Partial<Contact> = $state({});
+	let contact: Partial<Contact> = $state({ addresses: [] });
 	let form: ContactForm | undefined = $state();
 
 	let { addContact, close }: { addContact: (contact: Contact) => void; close: () => void } =
