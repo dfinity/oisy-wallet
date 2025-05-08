@@ -14,12 +14,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import {
-		SEND_DESTINATION_WIZARD_STEP_BTC,
-		SEND_DESTINATION_WIZARD_STEP_ETH,
-		SEND_DESTINATION_WIZARD_STEP_IC,
-		SEND_DESTINATION_WIZARD_STEP_SOL
-	} from '$lib/constants/test-ids.constants';
+	import { SEND_DESTINATION_WIZARD_STEP } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -39,7 +34,7 @@
 	}
 	let { destination = $bindable(), formCancelAction = 'back' }: Props = $props();
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
@@ -50,11 +45,13 @@
 	let invalidDestination = $state(false);
 
 	let disabled = $derived(invalidDestination || isNullishOrEmpty(destination));
+
+	let testId = $derived(`${SEND_DESTINATION_WIZARD_STEP}-${$sendToken.network.name}`);
 </script>
 
 <ContentWithToolbar>
-	{#if isNetworkIdEthereum($sendToken?.network.id) || isNetworkIdEvm($sendToken.network.id)}
-		<div data-tid={SEND_DESTINATION_WIZARD_STEP_ETH}>
+	{#if isNetworkIdEthereum($sendTokenNetworkId) || isNetworkIdEvm($sendTokenNetworkId)}
+		<div data-tid={testId}>
 			<CkEthLoader nativeTokenId={$ethereumTokenId} isSendFlow={true}>
 				<EthSendDestination
 					token={$sendToken}
@@ -70,8 +67,8 @@
 				/>
 			</CkEthLoader>
 		</div>
-	{:else if isNetworkIdICP($sendToken?.network.id)}
-		<div data-tid={SEND_DESTINATION_WIZARD_STEP_IC}>
+	{:else if isNetworkIdICP($sendTokenNetworkId)}
+		<div data-tid={testId}>
 			<IcSendDestination
 				tokenStandard={$sendToken.standard}
 				knownDestinations={$icKnownDestinations}
@@ -85,8 +82,8 @@
 				on:icNext={next}
 			/>
 		</div>
-	{:else if isNetworkIdBitcoin($sendToken?.network.id)}
-		<div data-tid={SEND_DESTINATION_WIZARD_STEP_BTC}>
+	{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
+		<div data-tid={testId}>
 			<BtcSendDestination
 				bind:destination
 				bind:invalidDestination
@@ -99,8 +96,8 @@
 				on:icNext={next}
 			/>
 		</div>
-	{:else if isNetworkIdSolana($sendToken?.network.id)}
-		<div data-tid={SEND_DESTINATION_WIZARD_STEP_SOL}>
+	{:else if isNetworkIdSolana($sendTokenNetworkId)}
+		<div data-tid={testId}>
 			<SolSendDestination
 				bind:destination
 				bind:invalidDestination

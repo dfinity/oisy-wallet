@@ -1,20 +1,13 @@
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_DEVNET_TOKEN } from '$env/tokens/tokens.sol.env';
 import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
-import {
-	SEND_DESTINATION_WIZARD_STEP_BTC,
-	SEND_DESTINATION_WIZARD_STEP_ETH,
-	SEND_DESTINATION_WIZARD_STEP_IC,
-	SEND_DESTINATION_WIZARD_STEP_SOL
-} from '$lib/constants/test-ids.constants';
+import { SEND_DESTINATION_WIZARD_STEP } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
-import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 
 describe('SendDestinationWizardStep', () => {
@@ -34,8 +27,6 @@ describe('SendDestinationWizardStep', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-
-		mockPage.reset();
 	});
 
 	it('should display BTC send destination components if sendToken network is BTC', () => {
@@ -44,18 +35,20 @@ describe('SendDestinationWizardStep', () => {
 			context: mockContext(BTC_MAINNET_TOKEN)
 		});
 
-		expect(getByTestId(SEND_DESTINATION_WIZARD_STEP_BTC)).toBeInTheDocument();
+		expect(
+			getByTestId(`${SEND_DESTINATION_WIZARD_STEP}-${BTC_MAINNET_TOKEN.network.name}`)
+		).toBeInTheDocument();
 	});
 
 	it('should display ETH send destination components if sendToken network is ETH', () => {
-		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
-
 		const { getByTestId } = render(SendDestinationWizardStep, {
 			props,
 			context: mockContext(SEPOLIA_TOKEN)
 		});
 
-		expect(getByTestId(SEND_DESTINATION_WIZARD_STEP_ETH)).toBeInTheDocument();
+		expect(
+			getByTestId(`${SEND_DESTINATION_WIZARD_STEP}-${SEPOLIA_TOKEN.network.name}`)
+		).toBeInTheDocument();
 	});
 
 	it('should display IC send destination components if sendToken network is IC', () => {
@@ -64,7 +57,9 @@ describe('SendDestinationWizardStep', () => {
 			context: mockContext(mockValidIcCkToken)
 		});
 
-		expect(getByTestId(SEND_DESTINATION_WIZARD_STEP_IC)).toBeInTheDocument();
+		expect(
+			getByTestId(`${SEND_DESTINATION_WIZARD_STEP}-${mockValidIcCkToken.network.name}`)
+		).toBeInTheDocument();
 	});
 
 	it('should display SOL send destination components if sendToken network is SOL', () => {
@@ -73,7 +68,9 @@ describe('SendDestinationWizardStep', () => {
 			context: mockContext(SOLANA_DEVNET_TOKEN)
 		});
 
-		expect(getByTestId(SEND_DESTINATION_WIZARD_STEP_SOL)).toBeInTheDocument();
+		expect(
+			getByTestId(`${SEND_DESTINATION_WIZARD_STEP}-${SOLANA_DEVNET_TOKEN.network.name}`)
+		).toBeInTheDocument();
 	});
 
 	it('should display ETH send destination components if sendToken network is EVM', () => {
@@ -82,6 +79,8 @@ describe('SendDestinationWizardStep', () => {
 			context: mockContext(BASE_ETH_TOKEN)
 		});
 
-		expect(getByTestId(SEND_DESTINATION_WIZARD_STEP_ETH)).toBeInTheDocument();
+		expect(
+			getByTestId(`${SEND_DESTINATION_WIZARD_STEP}-${BASE_ETH_TOKEN.network.name}`)
+		).toBeInTheDocument();
 	});
 });
