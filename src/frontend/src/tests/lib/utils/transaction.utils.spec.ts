@@ -19,7 +19,6 @@ import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createTransactionsUiWithCmp } from '$tests/mocks/transactions.mock';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('transaction.utils', () => {
 	describe('mapIcon', () => {
@@ -212,9 +211,9 @@ describe('transaction.utils', () => {
 
 			const groupedList = groupTransactionsByDate(transactions);
 
-			expect(groupedList[get(i18n).transactions.text.pending]).toEqual(expectedPendingTransactions);
+			expect(groupedList[get(i18n).transaction.label.pending]).toEqual(expectedPendingTransactions);
 
-			expect(Object.keys(groupedList).indexOf(get(i18n).transactions.text.pending)).toEqual(0);
+			expect(Object.keys(groupedList).indexOf(get(i18n).transaction.label.pending)).toEqual(0);
 		});
 	});
 
