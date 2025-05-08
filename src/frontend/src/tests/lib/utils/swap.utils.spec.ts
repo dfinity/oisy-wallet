@@ -1,13 +1,25 @@
-import type { SwapAmountsTxReply } from '$declarations/kong_backend/kong_backend.did';
+import type {
+	SwapAmountsReply,
+	SwapAmountsTxReply
+} from '$declarations/kong_backend/kong_backend.did';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	ICP_SWAP_PROVIDER,
+	KONG_SWAP_PROVIDER,
+	SWAP_DEFAULT_SLIPPAGE_VALUE
+} from '$lib/constants/swap.constants';
+import type { ICPSwapResult } from '$lib/types/swap';
+import {
+	calculateSlippage,
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
 	getNetworkFee,
-	getSwapRoute
+	getSwapRoute,
+	mapIcpSwapResult,
+	mapKongSwapResult
 } from '$lib/utils/swap.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
@@ -125,6 +137,114 @@ describe('swap utils', () => {
 
 		it('returns empty string for non-IC token', () => {
 			expect(getKongIcTokenIdentifier(BTC_MAINNET_TOKEN)).toBe('');
+		});
+	});
+
+	describe('mapIcpSwapResult', () => {
+		const baseSwap: ICPSwapResult = {
+			receiveAmount: 1000n
+		};
+
+		it('should return mapped result with valid numeric slippage as string', () => {
+			const result = mapIcpSwapResult({ swap: baseSwap, slippage: '0.5' });
+
+			expect(result.provider).toBe(ICP_SWAP_PROVIDER);
+
+			assert(result.provider === ICP_SWAP_PROVIDER);
+
+			expect(result.receiveAmount).toBe(1000n);
+			expect(result.receiveOutMinimum).toBe(
+				calculateSlippage({ quoteAmount: 1000n, slippagePercentage: 0.5 })
+			);
+			expect(result.swapDetails).toBe(baseSwap);
+		});
+
+		it('should return mapped result with numeric slippage', () => {
+			const result = mapIcpSwapResult({ swap: baseSwap, slippage: 0.3 });
+
+			assert(result.provider === ICP_SWAP_PROVIDER);
+
+			expect(result.receiveOutMinimum).toBe(
+				calculateSlippage({ quoteAmount: 1000n, slippagePercentage: 0.3 })
+			);
+		});
+
+		it('should fallback to default slippage if value is NaN', () => {
+			const result = mapIcpSwapResult({ swap: baseSwap, slippage: 'string' });
+
+			assert(result.provider === ICP_SWAP_PROVIDER);
+
+			expect(result.receiveOutMinimum).toBe(
+				calculateSlippage({
+					quoteAmount: 1000n,
+					slippagePercentage: SWAP_DEFAULT_SLIPPAGE_VALUE
+				})
+			);
+		});
+
+		it('should fallback to default slippage if empty string is passed', () => {
+			const result = mapIcpSwapResult({ swap: baseSwap, slippage: '' });
+
+			assert(result.provider === ICP_SWAP_PROVIDER);
+
+			expect(result.receiveOutMinimum).toBe(
+				calculateSlippage({
+					quoteAmount: 1000n,
+					slippagePercentage: SWAP_DEFAULT_SLIPPAGE_VALUE
+				})
+			);
+		});
+	});
+
+	describe('mapKongSwapResult', () => {
+		const tokens = mockTokens;
+		const swap: SwapAmountsReply = {
+			slippage: 0.3,
+			receive_amount: 2000n,
+			txs: [],
+			receive_chain: 'icp',
+			mid_price: 1.0,
+			pay_amount: 1000n,
+			receive_symbol: 'BBB',
+			pay_symbol: 'AAA',
+			receive_address: 'address1',
+			pay_address: 'address2',
+			price: 1.0,
+			pay_chain: 'icp'
+		};
+
+		it('should return mapped kong swap result', () => {
+			const result = mapKongSwapResult({ swap, tokens });
+
+			expect(result.provider).toBe(KONG_SWAP_PROVIDER);
+
+			assert(result.provider === KONG_SWAP_PROVIDER);
+
+			expect(result.slippage).toBe(0.3);
+			expect(result.receiveAmount).toBe(2000n);
+			expect(result.swapDetails).toBe(swap);
+		});
+	});
+
+	describe('calculateSlippage', () => {
+		it('returns exact same amount for 0% slippage', () => {
+			expect(calculateSlippage({ quoteAmount: 1000n, slippagePercentage: 0 })).toBe(1000n);
+		});
+
+		it('reduces amount correctly for 0.5% slippage', () => {
+			expect(calculateSlippage({ quoteAmount: 10000n, slippagePercentage: 0.5 })).toBe(9950n);
+		});
+
+		it('reduces amount correctly for 1.23% slippage (rounded down)', () => {
+			expect(calculateSlippage({ quoteAmount: 10000n, slippagePercentage: 1.23 })).toBe(9877n);
+		});
+
+		it('handles high precision decimals by rounding down the factor', () => {
+			expect(calculateSlippage({ quoteAmount: 10000n, slippagePercentage: 0.001 })).toBe(9999n);
+		});
+
+		it('returns 0 for full slippage (100%)', () => {
+			expect(calculateSlippage({ quoteAmount: 12345n, slippagePercentage: 100 })).toBe(0n);
 		});
 	});
 });
