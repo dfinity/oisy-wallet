@@ -36,7 +36,7 @@
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionEthAddress }) => {
-		if (isNullish(token) || isNullish(token.id)) {
+		if (isNullish(token)) {
 			return;
 		}
 
