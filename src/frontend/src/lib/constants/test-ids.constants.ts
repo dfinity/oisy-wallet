@@ -51,6 +51,7 @@ export const RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON =
 export const SEND_TOKENS_MODAL_OPEN_BUTTON = 'send-tokens-modal-open-button';
 export const SEND_TOKENS_MODAL = 'send-tokens-modal';
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
+export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
 
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
