@@ -10,3 +10,5 @@ export const SWAP_VALUE_DIFFERENCE_ERROR_VALUE = -5;
 
 export const KONG_SWAP_PROVIDER = 'kongSwap';
 export const ICP_SWAP_PROVIDER = 'icpSwap';
+
+export const ICP_SWAP_POOL_FEE = 3000n;

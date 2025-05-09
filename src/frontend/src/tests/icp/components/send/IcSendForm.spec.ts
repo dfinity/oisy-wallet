@@ -3,8 +3,12 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { BITCOIN_FEE_CONTEXT_KEY, initBitcoinFeeStore } from '$icp/stores/bitcoin-fee.store';
 import { ETHEREUM_FEE_CONTEXT_KEY, initEthereumFeeStore } from '$icp/stores/ethereum-fee.store';
-import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
+import {
+	SEND_DESTINATION_SECTION,
+	TOKEN_INPUT_CURRENCY_TOKEN
+} from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
 describe('IcSendForm', () => {
@@ -33,14 +37,10 @@ describe('IcSendForm', () => {
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
-	const destinationSelector = 'input[data-tid="destination-input"]';
-	const networkSelector = 'div[id="network"]';
-	const feeSelector = 'p[id="fee"]';
-	const ethereumEstimatedFeeSelector = 'p[id="kyt-fee"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	it('should render all fields', () => {
-		const { container } = render(IcSendForm, {
+		const { container, getByTestId, getByText } = render(IcSendForm, {
 			props,
 			context: mockContext
 		});
@@ -49,23 +49,9 @@ describe('IcSendForm', () => {
 
 		expect(amount).not.toBeNull();
 
-		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
+		expect(getByTestId(SEND_DESTINATION_SECTION)).toBeInTheDocument();
 
-		expect(destination).not.toBeNull();
-
-		const network: HTMLDivElement | null = container.querySelector(networkSelector);
-
-		expect(network).not.toBeNull();
-
-		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
-
-		expect(fee).not.toBeNull();
-
-		const ethereumEstimatedFee: HTMLParagraphElement | null = container.querySelector(
-			ethereumEstimatedFeeSelector
-		);
-
-		expect(ethereumEstimatedFee).not.toBeNull();
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 

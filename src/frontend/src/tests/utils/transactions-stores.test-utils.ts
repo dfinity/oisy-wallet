@@ -2,7 +2,7 @@ import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import type { CertifiedData } from '$lib/types/store';
 
-const createIcTransactionUiMock = (id: string): IcTransactionUi => ({
+export const createIcTransactionUiMock = (id: string): IcTransactionUi => ({
 	id,
 	timestamp: nowInBigIntNanoSeconds(),
 	type: 'send',
