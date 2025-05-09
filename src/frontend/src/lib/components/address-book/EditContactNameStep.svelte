@@ -57,11 +57,7 @@
 	<ContactForm bind:contact bind:this={form}></ContactForm>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel
-			onclick={() => onClose!()}
-			disabled={isNullish(onClose)}
-			testId={ADDRESS_BOOK_CANCEL_BUTTON}
-		></ButtonCancel>
+		<ButtonCancel onclick={() => close()} testId={ADDRESS_EDIT_CANCEL_BUTTON}></ButtonCancel>
 		<Button
 			colorStyle="primary"
 			on:click={() => handleSave()}

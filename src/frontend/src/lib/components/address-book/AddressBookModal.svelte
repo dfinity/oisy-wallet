@@ -14,6 +14,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Address, Contact } from '$lib/types/contact';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
 
 	const steps: WizardSteps = [
 		{
@@ -141,11 +142,25 @@
 	testId={ADDRESS_BOOK_MODAL}
 	on:nnsClose={close}
 >
-	<svelte:fragment slot="title">
-		{currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)
-			? editContactNameStep.title
-			: currentStep?.title ?? ''}
-	</svelte:fragment>
+<svelte:fragment slot="title">
+	{#if currentStepName === AddressBookSteps.SHOW_QR_CODE && currentContact}
+		<div class="flex flex-wrap gap-2 items-center">
+			<Avatar
+				name={currentContact.name}
+				variant="lg"
+				styleClass="bg-accent text-white text-lg font-bold w-12 h-12 rounded-full flex items-center justify-center mb-2"
+			/>
+			<div class="text-lg font-semibold text-primary text-center">
+				{currentContact.name}
+			</div>
+		</div>
+	{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
+		{editContactNameStep.title}
+	{:else}
+		{currentStep?.title ?? ''}
+	{/if}
+</svelte:fragment>
+
 
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep

@@ -1,28 +1,37 @@
 <script lang="ts">
-	import AdressBookAction from '$lib/components/address-book/AdressBookAction.svelte';
-	import AdressBookQrCode from '$lib/components/address-book/AdressBookQrCode.svelte';
+	import AddressBookQrCode from '$lib/components/address-book/AddressBookQrCode.svelte';
+	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/address';
 	import type { Token } from '$lib/types/token';
-
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import {
+		ADDRESS_EDIT_CANCEL_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	export let address: Address;
 	export let addressToken: Token | undefined = undefined;
 	export let addressLabel: string | undefined = undefined;
 	export let copyAriaLabel: string = $i18n.wallet.copy_to_clipboard;
-
-	console.log('ShowQrCodeStep address:', address);
 </script>
 
-<div class="flex flex-col gap-4">
-	<AdressBookQrCode address={address.address} {addressToken} />
+{#if address}
+	<div class="flex flex-col gap-4">
+		<AddressBookQrCode
+			address={address.address}
+			addressType={address.address_type} 
+			{addressToken}
+		/>
 
-	<AdressBookAction
-		labelRef="address"
-		address={address}
-		{copyAriaLabel}
-	>
-		<svelte:fragment slot="title">
-			{addressLabel ?? $i18n.wallet.text.address}
-		</svelte:fragment>
-	</AdressBookAction>
-</div>
+		<AddressListItem
+			{address}
+			showFullAddress={true}
+			showInfoButton={false}
+			styleClass="shadow-sm border border-divider"
+			onclick={() => {}}
+		/>
+		<div class="pt-10" />
+		<ButtonCancel onclick={() => close()} testId={ADDRESS_EDIT_CANCEL_BUTTON}></ButtonCancel>
+	</div>
+{:else}
+	<p class="text-red-600">No address available</p>
+{/if}

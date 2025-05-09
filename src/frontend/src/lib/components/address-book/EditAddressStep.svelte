@@ -45,19 +45,6 @@
 	</div>
 
 	<AddressForm bind:this={form} {address}></AddressForm>
-
-	<!-- <Button
-		styleClass="p-3 self-start"
-		ariaLabel={$i18n.address_book.edit_contact.delete_contact}
-		colorStyle="tertiary-main-card"
-		disabled={true}
-	>
-		<span class="flex items-center">
-			<IconTrash />
-		</span>
-		{$i18n.address_book.edit_contact.delete_contact}
-	</Button> -->
-
 	<ButtonGroup slot="toolbar">
 		<ButtonCancel onclick={() => close()} testId={ADDRESS_EDIT_CANCEL_BUTTON}></ButtonCancel>
 		<Button
