@@ -28,6 +28,7 @@ interface I18nCore {
 		new: string;
 		edit: string;
 		no_results: string;
+		paste: string;
 		to: string;
 		more_items: string;
 	};
@@ -942,6 +943,7 @@ interface I18nAddress {
 		valid_for_networks: string;
 	};
 	fields: { alias: string; address: string };
+	types: { Icrc2: string; Btc: string; Eth: string; Sol: string };
 }
 
 interface I18nSigner {

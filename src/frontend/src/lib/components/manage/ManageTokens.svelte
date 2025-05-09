@@ -5,7 +5,7 @@
 	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+	import { isTokenErc20UserToken, isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -112,10 +112,7 @@
 		}>(
 			({ icrc, erc20, spl }, token) => ({
 				icrc: [...icrc, ...(isTokenIcrc(token) ? [token as IcrcCustomToken] : [])],
-				erc20: [
-					...erc20,
-					...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
-				],
+				erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 				spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
 			}),
 			{ icrc: [], erc20: [], spl: [] }
@@ -155,7 +152,7 @@
 				<svelte:fragment slot="action">
 					{#if icTokenIcrcCustomToken(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
-					{:else if icTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
+					{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
 						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
 					{:else if isBitcoinToken(token)}
 						<BtcManageTokenToggle />

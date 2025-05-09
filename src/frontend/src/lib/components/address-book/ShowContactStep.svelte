@@ -14,16 +14,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address, Contact } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-
 	interface Props {
 		contact: Contact;
 		close: () => void;
 		addAddress?: () => void;
-		showAddress?: (address: Address) => void;
+		showQrCode?: (address: Address) => void;
 		edit: (contact: Contact) => void;
 	}
 
-	let { contact, close, edit, addAddress, showAddress }: Props = $props();
+	let { contact, close, edit, showQrCode }: Props = $props();
 
 	let hasAddresses = $derived(contact?.addresses && contact.addresses.length > 0);
 </script>
@@ -40,8 +39,9 @@
 			{#each contact.addresses as address (address.id)}
 				<div class="flex items-center">
 					<div class="grow">ADDRESS: {address.address_type} {address.address} {address.alias}</div>
-					{#if nonNullish(showAddress)}
-						<Button styleClass="flex-none" on:click={() => showAddress(address)}>Show</Button>
+
+					{#if nonNullish(showQrCode)}
+						<Button styleClass="flex-none" on:click={() => showQrCode(address)}>Show</Button>
 					{/if}
 				</div>
 			{/each}
