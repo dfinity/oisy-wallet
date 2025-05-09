@@ -7,6 +7,7 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import Button from './Button.svelte';
 	import IconInfo from '../icons/lucide/IconInfo.svelte';
+	import { fade } from 'svelte/transition';
 
 	let {
 		content,
@@ -30,7 +31,7 @@
 			on:click={() => (expanded = true)}
 			ariaLabel="expand"
 			colorStyle="muted"
-			styleClass="mb-2"
+			styleClass="text-disabled mb-2"
 		>
 			<IconInfo slot="icon" />
 		</ButtonIcon>
@@ -39,7 +40,7 @@
 	{#if expanded}
 		<div class="z-14 fixed inset-0">
 			<BottomSheet on:nnsClose={() => (expanded = false)} transition>
-				<div slot="header" class="w-full">
+				<div slot="header" class="w-full p-4">
 					<ButtonIcon
 						on:click={() => (expanded = false)}
 						styleClass="text-disabled float-right"
@@ -69,13 +70,15 @@
 </Responsive>
 
 <Responsive up="md">
-	<Collapsible bind:expanded initiallyExpanded={expanded}>
-		<div class="flex w-[calc(100%-2rem)] items-center" slot="header">
-			{@render contentHeader()}
-		</div>
+	<div in:fade class="modal-expandable-values">
+		<Collapsible bind:expanded initiallyExpanded={expanded}>
+			<div class="flex w-[calc(100%-2rem)] items-center" slot="header">
+				{@render contentHeader()}
+			</div>
 
-		{@render content()}
-	</Collapsible>
+			{@render content()}
+		</Collapsible>
+	</div>
 </Responsive>
 
 <style lang="scss">
