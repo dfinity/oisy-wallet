@@ -175,7 +175,7 @@ export const sendDip20 = ({
 
 	return transferDip20({
 		identity,
-		to: Principal.from(to),
+		to: Principal.fromText(to),
 		amount
 	});
 };
