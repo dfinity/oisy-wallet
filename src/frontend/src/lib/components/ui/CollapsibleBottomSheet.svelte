@@ -24,8 +24,8 @@
 <Responsive down="sm">
 	<div class="flex w-full items-center justify-between">
 		{@render contentHeader()}
-		<ButtonIcon on:click={() => (expanded = true)} styleClass="text-primary" ariaLabel="expand">
-			<IconInfo />
+		<ButtonIcon on:click={() => (expanded = true)} ariaLabel="expand">
+			<IconInfo slot="icon" />
 		</ButtonIcon>
 	</div>
 
@@ -58,10 +58,12 @@
 	{/if}
 </Responsive>
 
-<Collapsible bind:expanded initiallyExpanded={expanded}>
-	<div class="flex w-[calc(100%-2rem)] items-center" slot="header">
-		{@render contentHeader()}
-	</div>
+<Responsive up="md">
+	<Collapsible bind:expanded initiallyExpanded={expanded}>
+		<div class="flex w-[calc(100%-2rem)] items-center" slot="header">
+			{@render contentHeader()}
+		</div>
 
-	{@render content()}
-</Collapsible>
+		{@render content()}
+	</Collapsible>
+</Responsive>
