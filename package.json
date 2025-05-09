@@ -19,7 +19,7 @@
 		"build:ii-alternative-origins": "node scripts/build.ii-alternative-origins.mjs",
 		"build:post-process": "npm run build:style && npm run build:metadata && npm run build:ic-domains && npm run build:ii-alternative-origins && npm run build:csp && npm run build:compress",
 		"build:tokens-sns": "vite-node scripts/build.tokens.sns.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.sns.json",
-		"build:tokens-ckerc20": "vite-node scripts/build.tokens.ckerc20.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.ckerc20.json ",
+		"build:tokens-ckerc20": "vite-node scripts/build.tokens.ckerc20.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.ckerc20.json",
 		"build:tokens-icrc": "vite-node scripts/build.tokens.icrc.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.icrc.json",
 		"dev": "vite dev",
 		"build": "tsc --noEmit && vite build && npm run build:post-process",
