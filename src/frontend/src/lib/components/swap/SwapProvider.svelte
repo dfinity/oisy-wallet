@@ -2,32 +2,33 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
-	import SwapLiquidityFees from '$lib/components/swap/SwapLiquidityFees.svelte';
-	import SwapNetworkFee from '$lib/components/swap/SwapNetworkFee.svelte';
-	import SwapRoute from '$lib/components/swap/SwapRoute.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
-	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import type { OptionString } from '$lib/types/string';
-	import { SwapProvider, type ProviderFee } from '$lib/types/swap';
+	import { SwapProvider } from '$lib/types/swap';
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 	import { safeParse } from '$lib/validation/utils.validation';
 	import SwapDetailsKong from './SwapDetailsKong.svelte';
 	import SwapDetailsIcp from './SwapDetailsIcp.svelte';
+	import CollapsibleBottomSheet from '../ui/CollapsibleBottomSheet.svelte';
+	import type { OisyDappDescription } from '$lib/types/dapp-description';
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	let swapDApp: OisyDappDescription | undefined;
 
 	$: swapDApp = dAppDescriptions.find(
 		({ id }) => id === $swapAmountsStore?.selectedProvider?.provider.toLowerCase()
 	);
+
+	$: provider = $swapAmountsStore?.selectedProvider;
 
 	console.log(swapDApp, $swapAmountsStore?.selectedProvider?.provider.toLowerCase());
 
@@ -53,12 +54,10 @@
 	}
 </script>
 
-{#if nonNullish(swapDApp)}
-	<ModalExpandableValues>
-		<ModalValue slot="list-header">
-			<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
-
-			<svelte:fragment slot="main-value">
+{#if nonNullish(swapDApp) && nonNullish(provider)}
+	<CollapsibleBottomSheet>
+		{#snippet contentHeader()}
+			<ModalValue label={$i18n.swap.text.swap_provider}>
 				<div class="flex gap-2">
 					<div class="mt-1">
 						<Logo
@@ -68,20 +67,20 @@
 					</div>
 					<div class="mr-auto">
 						<div class="text-lg font-bold">{swapDApp.name}</div>
-						{#if nonNullish(displayURL)}
+						{#if displayURL}
 							<div class="text-sm text-tertiary">{displayURL}</div>
 						{/if}
 					</div>
 				</div>
-			</svelte:fragment>
-		</ModalValue>
+			</ModalValue>
+		{/snippet}
 
-		<svelte:fragment slot="list-items">
-			{#if $swapAmountsStore?.selectedProvider?.provider === SwapProvider.KONG_SWAP}
-				<SwapDetailsKong provider={$swapAmountsStore.selectedProvider} />
-			{:else if $swapAmountsStore?.selectedProvider?.provider === SwapProvider.ICP_SWAP}
-				<SwapDetailsIcp provider={$swapAmountsStore.selectedProvider} />
+		{#snippet content()}
+			{#if provider.provider === SwapProvider.KONG_SWAP}
+				<SwapDetailsKong {provider} />
+			{:else if provider.provider === SwapProvider.ICP_SWAP}
+				<SwapDetailsIcp {provider} />
 			{/if}
-		</svelte:fragment>
-	</ModalExpandableValues>
+		{/snippet}
+	</CollapsibleBottomSheet>
 {/if}
