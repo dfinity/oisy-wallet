@@ -114,7 +114,7 @@
 				icrc: [...icrc, ...(isTokenIcrc(token) ? [token as IcrcCustomToken] : [])],
 				erc20: [
 					...erc20,
-					...(token.standard === 'erc20' && isTokenErc20UserToken(token) ? [token] : [])
+					...(isTokenErc20UserToken(token) ? [token] : [])
 				],
 				spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
 			}),
