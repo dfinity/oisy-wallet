@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import IconExpandMore from '$lib/components/icons/lucide/IconExpandMore.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 
@@ -19,11 +20,22 @@
 	let expanded = $state(false);
 </script>
 
+<!-- 🔽 MOBILE (BottomSheet) -->
 <Responsive down="sm">
+	<!-- Хедер + іконка -->
+	<div class="flex w-full items-center justify-between">
+		{@render contentHeader()}
+		<ButtonIcon on:click={() => (expanded = true)} styleClass="text-primary" ariaLabel="expand">
+			<span>fds</span>
+		</ButtonIcon>
+	</div>
+
+	<!-- BottomSheet, якщо expanded -->
 	{#if expanded}
-		<div class="z-14 fixed bottom-0 left-0 right-0 top-0">
+		<div class="z-14 fixed inset-0">
 			<BottomSheet on:nnsClose={() => (expanded = false)} transition>
-				<div slot="header" class="w-full p-4">
+				<!-- Header -->
+				<div slot="header" class="w-full">
 					<ButtonIcon
 						on:click={() => (expanded = false)}
 						styleClass="text-disabled float-right"
@@ -32,7 +44,9 @@
 						<IconClose slot="icon" size="24" />
 					</ButtonIcon>
 				</div>
-				<div class="min-h-[35vh] w-full pb-4 pl-4 pr-4">
+
+				<!-- Content -->
+				<div class="min-h-[35vh] w-full px-4 pb-4">
 					{@render content()}
 				</div>
 				<div slot="footer" class="w-full p-4">
@@ -48,13 +62,15 @@
 	{/if}
 </Responsive>
 
-<Collapsible bind:expanded initiallyExpanded={expanded}>
-	<!-- The width of the item below should be 100% - collapsible expand button width (1.5rem) -->
-	<div class="flex w-[calc(100%-2rem)] items-center" slot="header">
-		{@render contentHeader()}
-	</div>
+<!-- 💻 DESKTOP (Collapsible) -->
+<Responsive up="md">
+	<Collapsible bind:expanded initiallyExpanded={expanded} externalToggle expandButton={false}>
+		<!-- Хедер -->
+		<div class="flex w-[calc(100%-2rem)] items-center" slot="header">
+			{@render contentHeader()}
+		</div>
 
-	<Responsive up="md">
+		<!-- Контент -->
 		{@render content()}
-	</Responsive>
-</Collapsible>
+	</Collapsible>
+</Responsive>

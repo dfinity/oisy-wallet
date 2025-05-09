@@ -62,8 +62,8 @@
 				<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
 
 				<svelte:fragment slot="main-value">
-					<div class="flex gap-2">
-						<div class="mt-1">
+					<div>
+						<div>
 							<Logo
 								src={swapDApp.logo}
 								alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: swapDApp.name })}
@@ -81,7 +81,7 @@
 				<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
 
 				<svelte:fragment slot="main-value">
-					<div class="flex gap-2">
+					<div class="flex items-center gap-2">
 						<div class="mt-1">
 							<Logo
 								src={swapDApp.logo}
