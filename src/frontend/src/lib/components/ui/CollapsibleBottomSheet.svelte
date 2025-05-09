@@ -5,7 +5,6 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import Button from './Button.svelte';
 	import IconInfo from '../icons/lucide/IconInfo.svelte';
 	import { fade } from 'svelte/transition';
 
@@ -25,7 +24,7 @@
 </script>
 
 <Responsive down="sm">
-	<div class="flex w-full justify-between">
+	<div class="flex w-full items-center justify-between">
 		{@render contentHeader()}
 		<ButtonIcon
 			on:click={() => (expanded = true)}
