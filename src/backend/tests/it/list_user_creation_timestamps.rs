@@ -102,11 +102,14 @@ fn test_list_user_creation_timestamps_returns_filtered_timestamps_by_updated() {
             .expect("VC Holder principal is invalid"),
     };
 
-    let _ = pic_setup.update::<Result<(), AddUserCredentialError>>(
-        vc_holder,
-        "add_user_credential",
-        add_user_cred_arg.clone(),
-    );
+    pic_setup
+        .update::<Result<(), AddUserCredentialError>>(
+            vc_holder,
+            "add_user_credential",
+            add_user_cred_arg.clone(),
+        )
+        .expect("Failed to call add_user_credential")
+        .expect("Call to add_user_credential returned an error");
 
     let caller = Principal::from_text(CALLER).unwrap();
 
