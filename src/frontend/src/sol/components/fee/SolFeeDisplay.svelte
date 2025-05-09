@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { slide } from 'svelte/transition';
-	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
-	import Value from '$lib/components/ui/Value.svelte';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
@@ -21,37 +18,24 @@
 
 {#if nonNullish($symbol) && nonNullish($sendTokenId) && nonNullish($decimals)}
 	{#if nonNullish($fee)}
-		<Value ref="fee">
-			{#snippet label()}
-				{$i18n.fee.text.fee}
-			{/snippet}
-
-			{#snippet content()}
-				<ExchangeAmountDisplay
-					amount={$fee}
-					decimals={$decimals}
-					symbol={$symbol}
-					exchangeRate={$sendTokenExchangeRate}
-				/>
-			{/snippet}
-		</Value>
+		<FeeDisplay
+			feeAmount={$fee}
+			decimals={$decimals}
+			symbol={$symbol}
+			exchangeRate={$sendTokenExchangeRate}
+		>
+			<span slot="label">{$i18n.fee.text.fee}</span>
+		</FeeDisplay>
 	{/if}
-	{#if nonNullish($ataFee)}
-		<div transition:slide={SLIDE_DURATION}>
-			<Value ref="ataFee">
-				{#snippet label()}
-					{$i18n.fee.text.ata_fee}
-				{/snippet}
 
-				{#snippet content()}
-					<ExchangeAmountDisplay
-						amount={$ataFee}
-						decimals={$decimals}
-						symbol={$symbol}
-						exchangeRate={$sendTokenExchangeRate}
-					/>
-				{/snippet}
-			</Value>
-		</div>
+	{#if nonNullish($ataFee)}
+		<FeeDisplay
+			feeAmount={$ataFee}
+			decimals={$decimals}
+			symbol={$symbol}
+			exchangeRate={$sendTokenExchangeRate}
+		>
+			<span slot="label">{$i18n.fee.text.ata_fee}</span>
+		</FeeDisplay>
 	{/if}
 {/if}
