@@ -2,18 +2,19 @@ import { getTransactions as getTransactionsIcp } from '$icp/api/icp-index.api';
 import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCanistersStrict, IcToken } from '$icp/types/ic-token';
-import type { IcTransaction } from '$icp/types/ic-transaction';
+import type { IcTransaction, IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
+import { isNotIcToken, isNotIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { TokenId } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import type { Principal } from '@dfinity/principal';
-import { queryAndUpdate } from '@dfinity/utils';
+import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const getTransactions = async ({
@@ -40,7 +41,7 @@ const getTransactions = async ({
 	return transactions.flatMap(mapTransactionIcpToSelf);
 };
 
-export const loadNextIcTransactions = ({
+const loadNextIcTransactionsRequest = ({
 	token,
 	identity,
 	signalEnd,
@@ -119,5 +120,47 @@ export const onTransactionsCleanUp = (data: { tokenId: TokenId; transactionIds: 
 		msg: {
 			text: get(i18n).transactions.error.uncertified_transactions_removed
 		}
+	});
+};
+
+export const loadNextIcTransactions = async ({
+	lastId,
+	token,
+	...rest
+}: {
+	lastId: IcTransactionUi['id'] | undefined;
+	owner: Principal;
+	identity: OptionIdentity;
+	maxResults?: bigint;
+	token: Token;
+	signalEnd: () => void;
+}): Promise<void> => {
+	const lastIdCleaned = lastId?.replace('-self', '');
+
+	try {
+		if (nonNullish(lastIdCleaned)) {
+			BigInt(lastIdCleaned);
+		}
+	} catch {
+		// Pseudo transactions are displayed at the end of the list. There is not such use case in Oisy.
+		// Additionally, if it would be the case, that would mean that we display pseudo transactions at the end of the list and therefore we could assume all valid transactions have been fetched
+		return;
+	}
+
+	if (isNullish(token)) {
+		// Prevent unlikely events. UI wise if we are about to load the next transactions, it's probably because transactions for a loaded token have been fetched.
+		return;
+	}
+
+	if (isNotIcToken(token) || isNotIcTokenCanistersStrict(token)) {
+		// On one hand, we assume that the parent component does not mount this component if no transactions can be fetched; on the other hand, we want to avoid displaying an error toast that could potentially appear multiple times.
+		// Therefore, we do not particularly display a visual error. In any case, we cannot load transactions without an Index canister.
+		return;
+	}
+
+	await loadNextIcTransactionsRequest({
+		start: nonNullish(lastIdCleaned) ? BigInt(lastIdCleaned) : undefined,
+		token,
+		...rest
 	});
 };
