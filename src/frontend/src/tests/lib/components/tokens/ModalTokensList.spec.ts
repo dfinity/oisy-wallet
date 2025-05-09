@@ -47,7 +47,7 @@ describe('ModalTokensList', () => {
 			}
 		});
 
-		expect(await findByTestId(MODAL_TOKEN_LIST_TOOLBAR)).toBeInTheDocument();
+		await expect(findByTestId(MODAL_TOKEN_LIST_TOOLBAR)).resolves.toBeInTheDocument();
 	});
 
 	it('shows default no-results message when snippet is not provided', () => {
@@ -92,7 +92,7 @@ describe('ModalTokensList', () => {
 
 		await fireEvent.input(searchInput, { target: { value: 'BTC' } });
 
-		expect(await findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}BTC`)).toBeInTheDocument();
+		await expect(findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}BTC`)).resolves.toBeInTheDocument();
 		expect(queryByTestId('list-item-ETH')).not.toBeInTheDocument();
 	});
 
