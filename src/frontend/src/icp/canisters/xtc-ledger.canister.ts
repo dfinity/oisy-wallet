@@ -35,7 +35,7 @@ export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 	 * @throws {Error} If the transfer fails.
 	 */
 	transfer = async ({ to, amount }: XtcLedgerTransferParams): Promise<bigint> => {
-		const { transfer } = this.caller({ certified: false });
+		const { transfer } = this.caller({ certified: true });
 		const response = await transfer(to, amount);
 
 		if ('Ok' in response) {
