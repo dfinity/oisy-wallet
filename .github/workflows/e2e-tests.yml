@@ -89,7 +89,7 @@ jobs:
           MATRIX='["ubuntu-24.04"]'
           if [[ "${{ github.event_name }}" == "workflow_dispatch" || \
                 "${{ github.event_name }}" == "schedule" || \
-                "${{ contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}" == "false" ]]; then
+                "${{ contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}" == "true" ]]; then
             MATRIX='["ubuntu-24.04", "macos-14"]'
           fi
           echo "os-matrix=$MATRIX" >> $GITHUB_OUTPUT
