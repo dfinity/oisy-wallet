@@ -7,6 +7,8 @@ on:
   pull_request:
     types: [opened, synchronize, labeled]
   merge_group:
+  schedule:
+    - cron: '30 3 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -90,6 +92,12 @@ jobs:
       macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
 
     steps:
+      - name: Run macOS only on dispatch, schedule or label
+        if: runner.os == 'macOS' && github.event_name != 'workflow_dispatch' && github.event_name != 'schedule' && !contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots')
+        run: |
+          echo "Skipping macOS: not a dispatch/schedule and PR not labeled accordingly."
+          exit 0
+
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
         id: app-token
