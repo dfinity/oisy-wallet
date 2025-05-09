@@ -56,27 +56,8 @@
 </script>
 
 {#if nonNullish(swapDApp) && nonNullish(provider)}
-	<CollapsibleBottomSheet>
+	<CollapsibleBottomSheet showContentHeader>
 		{#snippet contentHeader()}
-			<ModalValue>
-				<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
-
-				<svelte:fragment slot="main-value">
-					<div class="flex gap-2">
-						<div class="mt-1">
-							<Logo
-								src={swapDApp.logo}
-								alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: swapDApp.name })}
-							/>
-						</div>
-						<div class="mr-auto">
-							<div class="text-lg font-bold">{swapDApp.name}</div>
-						</div>
-					</div>
-				</svelte:fragment>
-			</ModalValue>
-		{/snippet}
-		{#snippet content()}
 			<ModalValue>
 				<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
 
@@ -97,6 +78,8 @@
 					</div>
 				</svelte:fragment>
 			</ModalValue>
+		{/snippet}
+		{#snippet content()}
 			{#if provider.provider === SwapProvider.KONG_SWAP}
 				<SwapDetailsKong {provider} />
 			{:else if provider.provider === SwapProvider.ICP_SWAP}

@@ -11,20 +11,27 @@
 	let {
 		content,
 		contentHeader,
-		contentFooter
+		contentFooter,
+		showContentHeader = false
 	}: {
 		content: Snippet;
 		contentHeader: Snippet;
 		contentFooter?: Snippet<[closeFn: () => void]>;
+		showContentHeader?: boolean;
 	} = $props();
 
 	let expanded = $state(false);
 </script>
 
 <Responsive down="sm">
-	<div class="flex w-full items-center justify-between">
+	<div class="flex w-full justify-between">
 		{@render contentHeader()}
-		<ButtonIcon on:click={() => (expanded = true)} ariaLabel="expand">
+		<ButtonIcon
+			on:click={() => (expanded = true)}
+			ariaLabel="expand"
+			colorStyle="muted"
+			styleClass="mb-2"
+		>
 			<IconInfo slot="icon" />
 		</ButtonIcon>
 	</div>
@@ -43,6 +50,9 @@
 				</div>
 
 				<div class="min-h-[35vh] w-full px-4 pb-4">
+					{#if showContentHeader}
+						{@render contentHeader()}
+					{/if}
 					{@render content()}
 				</div>
 				<div slot="footer" class="w-full p-4">
@@ -67,3 +77,9 @@
 		{@render content()}
 	</Collapsible>
 </Responsive>
+
+<style lang="scss">
+	:global(.modal-expandable-values > div.contents > div.header > button.collapsible-expand-icon) {
+		justify-content: flex-end;
+	}
+</style>
