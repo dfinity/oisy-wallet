@@ -13,7 +13,6 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
-import type { TokenId } from '$lib/types/token';
 import type { Token, TokenId } from '$lib/types/token';
 import type { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
