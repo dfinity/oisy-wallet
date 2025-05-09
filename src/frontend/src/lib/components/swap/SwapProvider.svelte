@@ -25,9 +25,11 @@
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	const swapDApp: OisyDappDescription | undefined = dAppDescriptions.find(
+	$: swapDApp = dAppDescriptions.find(
 		({ id }) => id === $swapAmountsStore?.selectedProvider?.provider.toLowerCase()
 	);
+
+	console.log(swapDApp, $swapAmountsStore?.selectedProvider?.provider.toLowerCase());
 
 	// TODO: this state - websiteURL - isn't one and should become a local variable
 	let websiteURL: Option<URL>;
@@ -77,8 +79,8 @@
 		<svelte:fragment slot="list-items">
 			{#if $swapAmountsStore?.selectedProvider?.provider === SwapProvider.KONG_SWAP}
 				<SwapDetailsKong provider={$swapAmountsStore.selectedProvider} />
-			<!-- {:else if $swapAmountsStore?.selectedProvider?.provider === SwapProvider.ICP_SWAP}
-				<SwapDetailsIcp provider={$swapAmountsStore.selectedProvider} /> -->
+			{:else if $swapAmountsStore?.selectedProvider?.provider === SwapProvider.ICP_SWAP}
+				<SwapDetailsIcp provider={$swapAmountsStore.selectedProvider} />
 			{/if}
 		</svelte:fragment>
 	</ModalExpandableValues>
