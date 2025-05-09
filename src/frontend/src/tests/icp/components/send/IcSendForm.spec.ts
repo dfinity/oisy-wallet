@@ -8,6 +8,7 @@ import {
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
 describe('IcSendForm', () => {
@@ -36,12 +37,10 @@ describe('IcSendForm', () => {
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
-	const feeSelector = 'p[id="fee"]';
-	const ethereumEstimatedFeeSelector = 'p[id="kyt-fee"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	it('should render all fields', () => {
-		const { container, getByTestId } = render(IcSendForm, {
+		const { container, getByTestId, getByText } = render(IcSendForm, {
 			props,
 			context: mockContext
 		});
@@ -52,15 +51,7 @@ describe('IcSendForm', () => {
 
 		expect(getByTestId(SEND_DESTINATION_SECTION)).toBeInTheDocument();
 
-		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
-
-		expect(fee).not.toBeNull();
-
-		const ethereumEstimatedFee: HTMLParagraphElement | null = container.querySelector(
-			ethereumEstimatedFeeSelector
-		);
-
-		expect(ethereumEstimatedFee).not.toBeNull();
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 
