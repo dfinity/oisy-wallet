@@ -1,4 +1,3 @@
- 
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 
 type LogType = 'log' | 'debug' | 'warn' | 'error';
