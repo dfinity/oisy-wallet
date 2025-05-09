@@ -59,7 +59,6 @@
 				return;
 			}
 
-			// To be type-safe we need to check for valid interfaces too
 			if (isNetworkIdICP(networkId)) {
 				const icTransactions = ($icTransactionsStore?.[tokenId] ?? []).map(({ data }) => data);
 
