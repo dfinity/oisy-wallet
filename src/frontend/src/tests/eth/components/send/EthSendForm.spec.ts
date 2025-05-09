@@ -22,7 +22,7 @@ describe('EthSendForm', () => {
 		FEE_CONTEXT_KEY,
 		initFeeContext({
 			feeStore: initFeeStore(),
-			feeSymbolStore: writable(undefined),
+			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
 		})
@@ -36,11 +36,10 @@ describe('EthSendForm', () => {
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
-	const maxFeeEthSelector = 'div[id="max-fee-eth"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	it('should render all fields', () => {
-		const { container, getByTestId } = render(EthSendForm, {
+		const { container, getByTestId, getByText } = render(EthSendForm, {
 			props,
 			context: mockContext
 		});
@@ -51,9 +50,8 @@ describe('EthSendForm', () => {
 
 		expect(getByTestId(SEND_DESTINATION_SECTION)).toBeInTheDocument();
 
-		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
-
-		expect(maxFeeEth).not.toBeNull();
+		// en.fee.text.max_fee_eth contains HTML, so for simplicity we just search for a hardcoded string
+		expect(getByText('Max fee')).toBeInTheDocument();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 
