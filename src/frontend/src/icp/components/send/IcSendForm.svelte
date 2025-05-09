@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
+	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
@@ -46,7 +46,7 @@
 >
 	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} on:icTokensList />
 
-	<IcFeeDisplay slot="fee" {networkId} />
+	<IcTokenFee slot="fee" />
 
 	<slot name="cancel" slot="cancel" />
 </SendForm>
