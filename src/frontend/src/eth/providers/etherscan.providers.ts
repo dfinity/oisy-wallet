@@ -187,15 +187,15 @@ export class EtherscanProvider {
 	};
 }
 
-const ETHERSCAN_PLUGIN = new EtherscanPlugin('https://api.etherscan.io/v2');
-
 const providers: Record<NetworkId, EtherscanProvider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, EtherscanProvider>>((acc, { id, name, chainId }) => {
 	const network = new Network(name, chainId);
 
-	network.attachPlugin(ETHERSCAN_PLUGIN);
+	const plugin = new EtherscanPlugin('https://api.etherscan.io/v2');
+
+	network.attachPlugin(plugin);
 
 	return { ...acc, [id]: new EtherscanProvider(network, chainId) };
 }, {});
