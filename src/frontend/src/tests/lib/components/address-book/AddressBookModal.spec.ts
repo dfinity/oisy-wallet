@@ -5,6 +5,9 @@ import {
 	ADDRESS_BOOK_CONTACT_NAME_INPUT,
 	ADDRESS_BOOK_MODAL,
 	ADDRESS_BOOK_SAVE_BUTTON,
+	CONTACT_HEADER_EDIT_BUTTON,
+	CONTACT_HEADER_EDITING_EDIT_BUTTON,
+	CONTACT_SHOW_CLOSE_BUTTON,
 	MODAL_TITLE
 } from '$lib/constants/test-ids.constants';
 import en from '$tests/mocks/i18n.mock';
@@ -106,5 +109,72 @@ describe('AddressBookModal', () => {
 		// Both contacts should be displayed
 		expect(getByText('Contact 1', { exact: false })).toBeInTheDocument();
 		expect(getByText('Contact 2', { exact: false })).toBeInTheDocument();
+	});
+
+	it('should navigate to show contact step when a contact is clicked and back to address book when close button is clicked', async () => {
+		const { getByTestId, getByText } = render(AddressBookModal);
+
+		// Add a contact
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
+		await fireEvent.input(getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT), {
+			target: { value: 'Test Contact' }
+		});
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		// Click on the contact to navigate to show contact step
+		await fireEvent.click(getByText('Show contact Test Contact'));
+
+		// Should now be on show contact step with the contact name in the title
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
+		expect(getByText('Test Contact')).toBeInTheDocument();
+
+		// Click close button
+		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
+
+		// Should be back on address book step
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.text.title);
+	});
+
+	it('should allow editing a contact name', async () => {
+		const { getByTestId, getByText, queryByText } = render(AddressBookModal);
+
+		// Add a contact
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
+		await fireEvent.input(getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT), {
+			target: { value: 'Original Name' }
+		});
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		// Click on the contact to navigate to show contact step
+		await fireEvent.click(getByText('Show contact Original Name'));
+
+		// Should now be on show contact step
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
+		expect(getByText('Original Name')).toBeInTheDocument();
+
+		// Click edit button
+		await fireEvent.click(getByTestId(CONTACT_HEADER_EDIT_BUTTON));
+		// Should now be in edit mode
+		await fireEvent.click(getByTestId(CONTACT_HEADER_EDITING_EDIT_BUTTON));
+
+		// Should now be in edit name form
+		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
+
+		expect(nameInput).toHaveValue('Original Name');
+
+		// Change the contact name
+		await fireEvent.input(nameInput, { target: { value: 'Updated Name' } });
+
+		// Save the changes
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		// Should be back on address book step
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.text.title);
+
+		// Verify the updated contact is displayed and the original name is not
+
+		expect(getByText('Updated Name', { exact: false })).toBeInTheDocument();
+
+		expect(queryByText('Original Name', { exact: false })).not.toBeInTheDocument();
 	});
 });

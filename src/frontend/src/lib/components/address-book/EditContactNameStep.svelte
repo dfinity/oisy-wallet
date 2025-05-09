@@ -13,34 +13,54 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Contact } from '$lib/types/contact';
 
-	let contact: Partial<Contact> = $state({});
 	let form: ContactForm | undefined = $state();
 
-	let { addContact, close }: { addContact: (contact: Contact) => void; close: () => void } =
-		$props();
+	interface EditContactNameStepProps {
+		contact?: Partial<Contact>;
+		saveContact: (contact: Contact) => void;
+		addContact: (contact: Contact) => void;
+		close: () => void;
+	}
 
-	const handleAdd = () => {
-		if (form?.isValid) {
+	let {
+		contact = $bindable({ addresses: [] }),
+		addContact,
+		saveContact,
+		close
+	}: EditContactNameStepProps = $props();
+
+	const handleSave = () => {
+		if (!form?.isValid) {
+			return;
+		}
+
+		if (contact.id) {
+			saveContact(contact as Contact);
+		} else {
 			addContact(contact as Contact);
 		}
 	};
 
 	let title = $derived(
-		notEmptyString(contact?.name) ? contact?.name : $i18n.contact.form.add_new_contact
+		notEmptyString(contact?.id)
+			? $i18n.contact.form.edit_contact
+			: notEmptyString(contact?.name)
+				? contact?.name
+				: $i18n.contact.form.add_new_contact
 	);
 
 	export { title };
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-6 items-center">
-	<Avatar name={contact?.name} variant="xl"></Avatar>
+	<Avatar name={contact.name} variant="xl"></Avatar>
 	<ContactForm bind:contact bind:this={form}></ContactForm>
 
 	<ButtonGroup slot="toolbar">
 		<ButtonCancel onclick={() => close()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
 		<Button
 			colorStyle="primary"
-			on:click={handleAdd}
+			on:click={() => handleSave()}
 			disabled={!form?.isValid}
 			testId={ADDRESS_BOOK_SAVE_BUTTON}
 		>

@@ -916,12 +916,32 @@ interface I18nAddress_book {
 		empty_text: string;
 		add_new_contact: string;
 		add_contact: string;
+		search_contact: string;
+	};
+	edit_contact: { add_address: string; delete_contact: string };
+	show_contact: {
+		title: string;
+		add_address: string;
+		show_address_text: string;
+		add_first_address: string;
 	};
 }
 
 interface I18nContact {
-	form: { add_new_contact: string };
+	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
+}
+
+interface I18nAddress {
+	form: {
+		edit_address: string;
+		new_address: string;
+		address_placeholder: string;
+		alias_placeholder: string;
+		invalid_address: string;
+		valid_for_networks: string;
+	};
+	fields: { alias: string; address: string };
 }
 
 interface I18nSigner {
@@ -1019,6 +1039,7 @@ interface I18n {
 	referral: I18nReferral;
 	address_book: I18nAddress_book;
 	contact: I18nContact;
+	address: I18nAddress;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
