@@ -52,7 +52,7 @@ const initDip20WalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTra
 		getBalanceAndTransactions,
 		mapTransactionDip20ToSelf,
 		mapTransaction,
-		'syncIcpWallet'
+		'syncDip20Wallet'
 	);
 
 // Exposed for test purposes
