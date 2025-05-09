@@ -112,10 +112,7 @@
 		}>(
 			({ icrc, erc20, spl }, token) => ({
 				icrc: [...icrc, ...(isTokenIcrc(token) ? [token as IcrcCustomToken] : [])],
-				erc20: [
-					...erc20,
-					...(isTokenErc20UserToken(token) ? [token] : [])
-				],
+				erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 				spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
 			}),
 			{ icrc: [], erc20: [], spl: [] }
