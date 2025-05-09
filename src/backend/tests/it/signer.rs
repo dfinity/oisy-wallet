@@ -52,7 +52,7 @@ fn test_topup_fails_for_percentage_out_of_bounds() {
                     min: MIN_PERCENTAGE,
                     max: MAX_PERCENTAGE
                 }
-            ))
+            ).into())
         );
     }
 }
