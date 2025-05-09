@@ -68,18 +68,18 @@ export const onDip20WalletMessage = async ({
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
-		case 'startIcpWalletTimer':
-		case 'stopIcpWalletTimer':
+		case 'startDip20WalletTimer':
+		case 'stopDip20WalletTimer':
 			scheduler?.stop();
 	}
 
 	switch (msg) {
-		case 'startIcpWalletTimer': {
+		case 'startDip20WalletTimer': {
 			scheduler = initDip20WalletScheduler(data);
 			await scheduler.start(data);
 			break;
 		}
-		case 'triggerIcpWalletTimer': {
+		case 'triggerDip20WalletTimer': {
 			if (isNullish(scheduler)) {
 				scheduler = initDip20WalletScheduler(data);
 			}
