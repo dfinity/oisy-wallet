@@ -5,29 +5,25 @@
 	import { formatTokenBigintToNumber, formatUSD } from '$lib/utils/format.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { symbol } from 'zod';
 
 	export let provider: Extract<SwapMappedResult, { provider: SwapProvider.ICP_SWAP }>;
 
 	const { destinationToken, destinationTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-    console.log($destinationToken);
-
-	const getUsdBalance = (amount: bigint, token: any): number =>
-		nonNullish(amount) && nonNullish($destinationTokenExchangeRate)
-			? formatTokenBigintToNumber({
-					value: amount,
-					unitName: token.decimals,
-					displayDecimals: token.decimals
-				})
-			: 0;
+	console.log($destinationToken);
 </script>
 
-{#if nonNullish(provider.receiveOutMinimum)}
+{#if nonNullish(provider.receiveOutMinimum) && nonNullish($destinationToken)}
 	<ModalValue>
 		<svelte:fragment slot="label">Receive Minimum</svelte:fragment>
 
-		<svelte:fragment slot="main-value">{getUsdBalance(provider.receiveOutMinimum, destinationToken)}</svelte:fragment>
+		<svelte:fragment slot="main-value"
+			>{formatTokenBigintToNumber({
+				value: provider.receiveOutMinimum,
+				unitName: $destinationToken.decimals,
+				displayDecimals: $destinationToken.decimals
+			})} $destinationToken.symbol</svelte:fragment
+		>
 	</ModalValue>
 {/if}
