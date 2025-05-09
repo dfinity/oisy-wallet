@@ -141,7 +141,18 @@ export const themeVariables = {
 		'warning-alt': 'var(--color-foreground-warning-alt)',
 		'error-primary': 'var(--color-foreground-error-primary)',
 		'error-alt': 'var(--color-foreground-error-alt)',
-		'error-secondary': 'var(--color-foreground-error-secondary)'
+		'error-secondary': 'var(--color-foreground-error-secondary)',
+		contact: {
+			'1': 'var(--color-foreground-contact-1)',
+			'2': 'var(--color-foreground-contact-2)',
+			'3': 'var(--color-foreground-contact-3)',
+			'4': 'var(--color-foreground-contact-4)',
+			'5': 'var(--color-foreground-contact-5)',
+			'6': 'var(--color-foreground-contact-6)',
+			'7': 'var(--color-foreground-contact-7)',
+			'8': 'var(--color-foreground-contact-8)',
+			'9': 'var(--color-foreground-contact-9)'
+		}
 	},
 
 	// custom hard coded gradient colors
