@@ -42,7 +42,7 @@ export const mapIcrcToken = ({
 	return {
 		id: parseTokenId(symbol),
 		network: ICP_NETWORK,
-		standard: 'icrc',
+		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? 'icrc',
 		symbol,
 		...(notEmptyString(icon) && { icon }),
 		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
