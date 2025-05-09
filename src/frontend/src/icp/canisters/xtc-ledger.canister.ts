@@ -42,8 +42,6 @@ export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 			return response.Ok;
 		}
 
-		console.log('XTC Ledger transfer error:', response.Err);
-
 		throw mapXtcLedgerCanisterError(response.Err);
 	};
 
