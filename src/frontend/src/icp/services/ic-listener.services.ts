@@ -1,15 +1,18 @@
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { NetworkId } from '$lib/types/network';
 import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import { isNullish, jsonReviver } from '@dfinity/utils';
 
 export const syncWallet = ({
 	data,
-	tokenId
+	tokenId,
+	networkId
 }: {
 	data: PostMessageDataResponseWallet;
 	tokenId: TokenId;
+	networkId: NetworkId;
 }) => {
 	const {
 		wallet: {
@@ -33,6 +36,7 @@ export const syncWallet = ({
 
 	icTransactionsStore.prepend({
 		tokenId,
+		networkId,
 		transactions: JSON.parse(newTransactions, jsonReviver)
 	});
 };

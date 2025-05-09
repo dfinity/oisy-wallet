@@ -16,7 +16,7 @@ export const initIcrcWalletWorker = async ({
 	indexCanisterId,
 	ledgerCanisterId,
 	id: tokenId,
-	network: { env }
+	network: { env, id: networkId }
 }: IcToken): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
@@ -45,6 +45,7 @@ export const initIcrcWalletWorker = async ({
 			case 'syncIcrcWallet':
 				syncWallet({
 					tokenId,
+					networkId,
 					data: data.data as PostMessageDataResponseWallet
 				});
 				return;
@@ -63,6 +64,7 @@ export const initIcrcWalletWorker = async ({
 			case 'syncIcrcWalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId,
+					networkId,
 					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
