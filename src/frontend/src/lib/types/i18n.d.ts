@@ -171,7 +171,6 @@ interface I18nRewards {
 		share: string;
 		learn_more: string;
 		check_status: string;
-		requirements_title: string;
 		modal_button_text: string;
 		activity_button_text: string;
 		activity_button_text_short: string;
@@ -187,6 +186,12 @@ interface I18nRewards {
 		youre_eligible: string;
 		ongoing: string;
 		ended: string;
+	};
+	requirements: {
+		requirements_title: string;
+		min_logins: string;
+		min_transactions: string;
+		min_total_assets_usd: string;
 	};
 	alt: { upcoming_campaigns: string; reward_logo: string };
 }
@@ -872,7 +877,12 @@ interface I18nVip {
 			reward_received_description: string;
 			reward_failed_description: string;
 		};
-		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
+		error: {
+			loading_reward: string;
+			loading_user_data: string;
+			claiming_reward: string;
+			loading_eligibility: string;
+		};
 	};
 	invitation: {
 		text: {

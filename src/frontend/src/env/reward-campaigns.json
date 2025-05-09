@@ -5,11 +5,6 @@
 		"cardTitle": "OISY Sprinkles: Episode 3 is Live \uD83C\uDF89",
 		"oneLiner": "Earn BTC for being active—and now, for <strong>inviting friends</strong>.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer a friend, and earn 10% of the value of their rewards for the entire campaign.",
 		"description": "Meet simple weekly requirements. Log in, make two transactions, and hold at least $20 in tokens to stay eligible for one of 50 BTC drops every day.<br/><strong>Now with referral rewards:</strong> invite a friend to deploy a wallet and earn 10% of their Sprinkles for 30 days. They keep 100% - you earn extra.",
-		"requirements": [
-			"Login 1x in last 7 days",
-			"Complete 2 transactions in last 7 days",
-			"Hold $20 worth of tokens at the time of issuance"
-		],
 		"logo": "/images/rewards/oisy-episode-three-campaign.svg",
 		"campaignHref": "https://x.com/intent/post?text=Haven%E2%80%99t%20joined%20%40OISY%20Sprinkles%20yet%3F%0AThey%E2%80%99re%20dropping%20free%20%24BTC%20-%20all%20day%2C%20every%20day.%0AHead%20to%20OISY.com%20and%20try%20it%20for%20yourself.%20%F0%9F%9A%80%0A",
 		"jackpotHref": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin.",

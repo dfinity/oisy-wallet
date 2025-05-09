@@ -1,4 +1,6 @@
 import type {
+	CampaignEligibility,
+	EligibilityResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	RewardInfo,
@@ -14,6 +16,7 @@ import {
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import {
 	claimVipReward,
+	getEligibilityReport,
 	getNewReward,
 	getReferrerInfo,
 	getRewardRequirementsFulfilled,
@@ -38,6 +41,52 @@ const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 describe('reward-code', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+	});
+
+	describe('getEligibilityReport', () => {
+		const campaignId = 'deuteronomy';
+		const campaign: CampaignEligibility = { eligible: true, available: true, criteria: [] };
+		const mockEligibilityResponse: EligibilityResponse = {
+			Ok: { campaigns: [[campaignId, campaign]] }
+		};
+
+		it('should return eligibility report', async () => {
+			const getEligibilityReportSpy = vi
+				.spyOn(rewardApi, 'isEligible')
+				.mockResolvedValueOnce(mockEligibilityResponse);
+
+			const eligibilityReport = await getEligibilityReport({ identity: mockIdentity });
+
+			expect(getEligibilityReportSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				certified: false,
+				nullishIdentityErrorMessage
+			});
+			expect(eligibilityReport.campaigns).toHaveLength(1);
+
+			const [_, campaignEligibility] =
+				eligibilityReport.campaigns.find(([id, _]) => id === campaignId) ?? [];
+
+			expect(campaignEligibility).toEqual(campaign);
+		});
+
+		it('should display an error message', async () => {
+			const err = new Error('test');
+			const getEligibilityReportSpy = vi.spyOn(rewardApi, 'isEligible').mockRejectedValue(err);
+			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+			await getEligibilityReport({ identity: mockIdentity });
+
+			expect(getEligibilityReportSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				certified: false,
+				nullishIdentityErrorMessage
+			});
+			expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+				msg: { text: get(i18n).vip.reward.error.loading_eligibility },
+				err
+			});
+		});
 	});
 
 	describe('getUserRoles', () => {

@@ -1,6 +1,7 @@
 import type {
 	ClaimVipRewardResponse,
 	ClaimedVipReward,
+	EligibilityResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
@@ -30,6 +31,37 @@ describe('reward.canister', () => {
 	const queryParams = {
 		certified: false
 	};
+
+	describe('isEligible', () => {
+		it('should return new eligibility response', async () => {
+			const mockEligibilityResponse: EligibilityResponse = { Ok: { campaigns: [] } };
+			service.eligible.mockResolvedValue(mockEligibilityResponse);
+
+			const { isEligible } = await createRewardCanister({
+				serviceOverride: service
+			});
+
+			const eligibilityResponse = await isEligible(queryParams);
+
+			expect(service.eligible).toHaveBeenCalledWith([]);
+			expect(eligibilityResponse).toEqual(mockEligibilityResponse);
+		});
+
+		it('should throw an error if eligible throws', async () => {
+			service.eligible.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { isEligible } = await createRewardCanister({
+				serviceOverride: service
+			});
+
+			const result = isEligible(queryParams);
+
+			await expect(result).rejects.toThrow(mockResponseError);
+		});
+	});
 
 	describe('getUserInfo', () => {
 		describe('VIP', () => {
