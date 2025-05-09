@@ -46,13 +46,12 @@ fn test_topup_fails_for_percentage_out_of_bounds() {
 
         assert_eq!(
             response,
-            Ok(Err(
-                TopUpCyclesLedgerError::InvalidArgPercentageOutOfRange {
-                    percentage,
-                    min: MIN_PERCENTAGE,
-                    max: MAX_PERCENTAGE
-                }
-            ).into())
+            Ok(Err(TopUpCyclesLedgerError::InvalidArgPercentageOutOfRange {
+                percentage,
+                min: MIN_PERCENTAGE,
+                max: MAX_PERCENTAGE
+            })
+            .into())
         );
     }
 }
