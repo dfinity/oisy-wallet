@@ -1,16 +1,13 @@
-import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { BASE_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens-base/tokens.erc20.env';
+import { BSC_BEP20_TOKENS } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bep20.env';
+import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
+import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
+import { ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
+import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import {
-	SOLANA_DEVNET_TOKEN,
-	SOLANA_LOCAL_TOKEN,
-	SOLANA_TESTNET_TOKEN,
-	SOLANA_TOKEN
-} from '$env/tokens/tokens.sol.env';
+import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { isTokenSpl } from '$sol/utils/spl.utils';
+import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
 
 describe('spl.utils', () => {
 	describe('isTokenSpl', () => {
@@ -18,18 +15,67 @@ describe('spl.utils', () => {
 			expect(isTokenSpl(token)).toBeTruthy();
 		});
 
-		it.each([SOLANA_TOKEN, SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN])(
-			'should return false for SOLANA token $id',
-			(token) => {
-				expect(isTokenSpl(token)).toBeFalsy();
-			}
-		);
+		it.each([
+			ICP_TOKEN,
+			...SUPPORTED_BITCOIN_TOKENS,
+			...SUPPORTED_ETHEREUM_TOKENS,
+			...SUPPORTED_EVM_TOKENS,
+			...SUPPORTED_SOLANA_TOKENS,
+			...ERC20_TWIN_TOKENS,
+			...BASE_ERC20_TOKENS,
+			...BSC_BEP20_TOKENS
+		])('should return false for token $id', (token) => {
+			expect(isTokenSpl(token)).toBeFalsy();
+		});
+	});
 
-		it.each([ETHEREUM_TOKEN, SEPOLIA_TOKEN, ICP_TOKEN, BTC_MAINNET_TOKEN, USDC_TOKEN, PEPE_TOKEN])(
-			'should return false for non-SPL token $id',
-			(token) => {
-				expect(isTokenSpl(token)).toBeFalsy();
-			}
-		);
+	describe('isTokenSplToggleable', () => {
+		describe('without enabled field', () => {
+			it.each(SPL_TOKENS)('should return false for SPL token $id', (token) => {
+				expect(isTokenSplToggleable(token)).toBeFalsy();
+			});
+
+			it.each([
+				ICP_TOKEN,
+				...SUPPORTED_BITCOIN_TOKENS,
+				...SUPPORTED_ETHEREUM_TOKENS,
+				...SUPPORTED_EVM_TOKENS,
+				...SUPPORTED_SOLANA_TOKENS,
+				...ERC20_TWIN_TOKENS,
+				...BASE_ERC20_TOKENS,
+				...BSC_BEP20_TOKENS
+			])('should return false for token $id', (token) => {
+				expect(isTokenSplToggleable(token)).toBeFalsy();
+			});
+		});
+
+		describe('with enabled field', () => {
+			it.each(
+				SPL_TOKENS.map((token) => ({
+					...token,
+					enabled: Math.random() < 0.5
+				}))
+			)('should return true for SPL token $id', (token) => {
+				expect(isTokenSplToggleable(token)).toBeTruthy();
+			});
+
+			it.each(
+				[
+					ICP_TOKEN,
+					...SUPPORTED_BITCOIN_TOKENS,
+					...SUPPORTED_ETHEREUM_TOKENS,
+					...SUPPORTED_EVM_TOKENS,
+					...SUPPORTED_SOLANA_TOKENS,
+					...ERC20_TWIN_TOKENS,
+					...BASE_ERC20_TOKENS,
+					...BSC_BEP20_TOKENS
+				].map((token) => ({
+					...token,
+					enabled: Math.random() < 0.5
+				}))
+			)('should return false for token $id', (token) => {
+				expect(isTokenSplToggleable(token)).toBeFalsy();
+			});
+		});
 	});
 });
