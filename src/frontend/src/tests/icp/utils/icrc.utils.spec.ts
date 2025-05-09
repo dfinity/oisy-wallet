@@ -102,6 +102,39 @@ describe('icrc.utils', () => {
 			expect(token?.icon).toBe(mockToken.icon);
 			expect(token?.icon).not.toBe(metadataIcon);
 		});
+
+		it('should prioritize the standard from icrcCustomTokens', () => {
+			const token = mapIcrcToken({
+				...mockParams,
+				icrcCustomTokens: {
+					[mockToken.ledgerCanisterId]: { ...mockToken, standard: 'bitcoin' }
+				}
+			});
+
+			expect(token).toStrictEqual({
+				...mockToken,
+				id: token?.id,
+				standard: 'bitcoin'
+			});
+		});
+
+		it('should default the standard to icrc if not provided', () => {
+			const token = mapIcrcToken({
+				...mockParams,
+				icrcCustomTokens: {
+					[mockToken.ledgerCanisterId]: {
+						...mockToken,
+						standard: undefined as unknown as TokenStandard
+					}
+				}
+			});
+
+			expect(token).toStrictEqual({
+				...mockToken,
+				id: token?.id,
+				standard: 'icrc'
+			});
+		});
 	});
 
 	describe('sortIcTokens', () => {
