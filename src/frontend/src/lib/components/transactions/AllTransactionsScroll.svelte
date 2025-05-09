@@ -2,15 +2,15 @@
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import { isIcToken, isIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { TokenId } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
+	import { loadNextIcTransactions } from '$icp/services/ic-transactions.services';
+	import { isNetworkIdICP } from '$lib/utils/network.utils';
 
 	interface Props {
 		children?: Snippet;
@@ -28,33 +28,30 @@
 
 		await Promise.allSettled(
 			$enabledNetworkTokens.map(async (token) => {
-				if (isIcToken(token) && isIcTokenCanistersStrict(token)) {
-					if (disableInfiniteScroll[token.id]) {
-						return;
-					}
+				const {
+					id: tokenId,
+					network: { id: networkId }
+				} = token;
 
-					const lastId = last($icTransactionsStore?.[token.id] ?? [])?.data.id;
+				if (disableInfiniteScroll[tokenId]) {
+					return;
+				}
+
+				if (isNetworkIdICP(networkId)) {
+					const lastId = last($icTransactionsStore?.[tokenId] ?? [])?.data.id;
 
 					if (isNullish(lastId)) {
 						// No transactions, we do nothing here and wait for the worker to post the first transactions
 						return;
 					}
 
-					try {
-						BigInt(lastId.replace('-self', ''));
-					} catch {
-						// Pseudo transactions are displayed at the end of the list. There is not such use case in Oisy.
-						// Additionally, if it would be the case, that would mean that we display pseudo transactions at the end of the list and therefore we could assume all valid transactions have been fetched
-						return;
-					}
-
-					await loadNextTransactions({
+					await loadNextIcTransactions({
+						lastId,
 						owner: $authIdentity.getPrincipal(),
 						identity: $authIdentity,
 						maxResults: WALLET_PAGINATION,
-						start: BigInt(lastId.replace('-self', '')),
 						token,
-						signalEnd: () => (disableInfiniteScroll[token.id] = true)
+						signalEnd: () => (disableInfiniteScroll[tokenId] = true)
 					});
 				}
 			})
