@@ -13,7 +13,7 @@
 
 <ContentWithToolbar styleClass="mx-2 flex flex-col justify-center">
 	{#if contacts.length === 0}
-		<EmptyAddressBook {addContact}></EmptyAddressBook>
+		<EmptyAddressBook onAddContact={addContact}></EmptyAddressBook>
 	{:else}
 		<div class="flex">
 			<Button

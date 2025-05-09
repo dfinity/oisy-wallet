@@ -66,8 +66,8 @@
 	{:else if currentStep?.name === AddressBookSteps.ADD_CONTACT}
 		<AddContactStep
 			bind:this={addContactStep}
-			{addContact}
-			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			onAddContact={addContact}
+			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		></AddContactStep>
 	{/if}
 </WizardModal>
