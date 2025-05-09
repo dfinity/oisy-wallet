@@ -65,7 +65,6 @@ const mapDip20Token = ({
 	standard: 'icrc',
 	category: 'custom',
 	fee,
-	alternativeName
-	// TODO: add icon from result of `dfx canister call --ic xtc_ledger getMetadata`
-	// icon: `/icons/dip20/${ledgerCanisterId}.png`
+	alternativeName,
+	icon: `/icons/dip20/${ledgerCanisterId}.png`
 });
