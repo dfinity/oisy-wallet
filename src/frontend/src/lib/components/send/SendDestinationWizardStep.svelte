@@ -14,7 +14,10 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { SEND_DESTINATION_WIZARD_STEP, SEND_FORM_DESTINATION_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
+	import {
+		SEND_DESTINATION_WIZARD_STEP,
+		SEND_FORM_DESTINATION_NEXT_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
