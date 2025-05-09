@@ -10,10 +10,8 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
-	import { IcToken } from '$icp/types/ic-token';
+	import type { IcToken } from '$icp/types/ic-token';
 	import { fetchSwapAmounts } from '$lib/services/swap.services';
 
 	export let amount: OptionAmount = undefined;
@@ -43,7 +41,7 @@
 		}
 
 		try {
-			const swapAmounts = await kongSwapAmounts({
+			const swapsAmounts = await kongSwapAmounts({
 				identity: $authIdentity,
 				sourceToken,
 				destinationToken,
@@ -53,7 +51,7 @@
 				})
 			});
 
-			const swapsAmounts = await fetchSwapAmounts({
+			const swapAmounts = await fetchSwapAmounts({
 				identity: $authIdentity,
 				sourceToken,
 				destinationToken,
@@ -62,28 +60,23 @@
 				slippage: 1.5
 			});
 
-			console.log({ swapsAmounts });
+			console.log({ swapAmounts });
 
-			if (isNullish(swapAmounts)) {
+			if (swapAmounts.length === 0) {
 				store.reset();
 				return;
 			}
 
-			store.setSwapAmounts({
-				swapAmounts: {
-					slippage: swapAmounts.slippage,
-					receiveAmount: swapAmounts.receive_amount,
-					route: getSwapRoute(swapAmounts.txs ?? []),
-					liquidityFees: getLiquidityFees({ transactions: swapAmounts.txs ?? [], tokens: $tokens }),
-					networkFee: getNetworkFee({ transactions: swapAmounts.txs ?? [], tokens: $tokens })
-				},
-				amountForSwap: parsedAmount
+			store.setSwaps({
+				swaps: swapAmounts,
+				amountForSwap: parsedAmount,
+				selectedProvider: swapAmounts[0]
 			});
 		} catch (_err: unknown) {
-			// if kongSwapAmounts fails, it means no pool is currently available for the provided tokens
-			store.setSwapAmounts({
-				swapAmounts: null,
-				amountForSwap: parsedAmount
+			store.setSwaps({
+				swaps: [],
+				amountForSwap: parsedAmount,
+				selectedProvider: undefined
 			});
 		}
 	};

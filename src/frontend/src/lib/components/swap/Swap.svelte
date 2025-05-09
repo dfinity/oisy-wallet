@@ -22,16 +22,14 @@
 	import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
-		initSwapAmountsStore,
 		SWAP_AMOUNTS_CONTEXT_KEY,
+		swapAmountsContext,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { waitReady } from '$lib/utils/timeout.utils';
 
-	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
-		store: initSwapAmountsStore()
-	});
+	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, swapAmountsContext);
 
 	setContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY, {
 		store: icTokenFeeStore

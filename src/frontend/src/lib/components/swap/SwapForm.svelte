@@ -59,9 +59,9 @@
 	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 
 	$: receiveAmount =
-		nonNullish($destinationToken) && $swapAmountsStore?.swapAmounts?.receiveAmount
+		nonNullish($destinationToken) && nonNullish($swapAmountsStore?.selectedProvider)
 			? formatTokenBigintToNumber({
-					value: $swapAmountsStore?.swapAmounts.receiveAmount,
+					value: $swapAmountsStore?.selectedProvider.receiveAmount,
 					unitName: $destinationToken.decimals,
 					displayDecimals: $destinationToken.decimals
 				})
