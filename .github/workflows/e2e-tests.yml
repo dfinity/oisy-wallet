@@ -81,18 +81,18 @@ jobs:
     permissions:
       contents: read
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      os-matrix: ${{ steps.set-matrix.outputs.os-matrix }}
     steps:
       - name: Set OS Matrix
         id: set-matrix
         run: |
-          MATRIX='{"os": ["ubuntu-24.04"]}'
+          MATRIX='["ubuntu-24.04"]'
           if [[ "${{ github.event_name }}" == "schedule" || \
                 "${{ github.event_name }}" == "schedule" || \
                 "${{ contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}" == "true" ]]; then
-            MATRIX='{"os": ["ubuntu-24.04", "macos-14"]}'
+            MATRIX='["ubuntu-24.04", "macos-14"]'
           fi
-          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "os-matrix=$MATRIX" >> $GITHUB_OUTPUT
 
   e2e:
     runs-on: ${{ matrix.os }}
@@ -100,7 +100,8 @@ jobs:
       contents: read
     needs: ['oisy-backend-wasm', 'check-e2e-changes', 'define-matrix']
     strategy:
-      matrix: ${{ fromJson(needs.define-matrix.outputs.matrix) }}
+      matrix:
+        os: ${{ fromJson(needs.define-matrix.outputs.os-matrix) }}
     env:
       MATRIX_OS: ${{ matrix.os }}
     if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
