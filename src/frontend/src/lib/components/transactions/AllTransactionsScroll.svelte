@@ -2,6 +2,7 @@
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { loadNextIcTransactions } from '$icp/services/ic-transactions.services';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -9,7 +10,6 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { TokenId } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
-	import { loadNextIcTransactions } from '$icp/services/ic-transactions.services';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
 
 	interface Props {
@@ -37,6 +37,8 @@
 					return;
 				}
 
+				disableInfiniteScroll[tokenId] = false;
+
 				if (isNetworkIdICP(networkId)) {
 					const lastId = last($icTransactionsStore?.[tokenId] ?? [])?.data.id;
 
@@ -58,13 +60,19 @@
 		);
 	};
 
-	let allDisabledInfiniteScroll = $derived(
-		Object.getOwnPropertySymbols(disableInfiniteScroll).every(
-			(tokenId) => disableInfiniteScroll?.[tokenId as TokenId]
-		)
-	);
+	let allDisabledInfiniteScroll = $derived.by(() => {
+		const tokenIds = Object.getOwnPropertySymbols(disableInfiniteScroll) as TokenId[];
+
+		return (
+			tokenIds.length > 0 && tokenIds.every((tokenId) => disableInfiniteScroll?.[tokenId] === true)
+		);
+	});
 </script>
 
-<InfiniteScroll on:nnsIntersect={onIntersect} disabled={allDisabledInfiniteScroll}>
+<InfiniteScroll
+	on:nnsIntersect={onIntersect}
+	disabled={allDisabledInfiniteScroll}
+	testId="your-sentinel"
+>
 	{@render children?.()}
 </InfiniteScroll>
