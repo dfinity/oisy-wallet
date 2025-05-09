@@ -12,7 +12,7 @@ import {
 	IntersectionObserverActive,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
-import { createIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
+import { createIcTransactionUiMockList } from '$tests/utils/transactions-stores.test-utils';
 import { render } from '@testing-library/svelte';
 
 vi.mock('$lib/services/auth.services', () => ({
@@ -26,10 +26,7 @@ vi.mock('$icp/services/ic-transactions.services', () => ({
 describe('IcTransactionsScroll', () => {
 	const mockToken = ICP_TOKEN;
 
-	const mockTransactions: IcTransactionUi[] = [
-		createIcTransactionUiMock('tx1'),
-		createIcTransactionUiMock('tx2')
-	];
+	const mockTransactions: IcTransactionUi[] = createIcTransactionUiMockList(2);
 
 	const mockLastId = mockTransactions[mockTransactions.length - 1].id;
 
