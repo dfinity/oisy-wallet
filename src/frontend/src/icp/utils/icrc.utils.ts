@@ -111,7 +111,7 @@ export const isTokenDip20 = (token: Partial<IcToken>): token is IcToken =>
 	token.standard === 'dip20';
 
 export const isTokenIc = (token: Partial<IcToken>): token is IcToken =>
-	isTokenIcp(token) || isTokenIcrc(token);
+	isTokenIcp(token) || isTokenIcrc(token) || isTokenDip20(token);
 
 export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
 	isTokenIc(token) && 'enabled' in token;
