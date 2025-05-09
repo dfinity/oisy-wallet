@@ -52,6 +52,7 @@ jobs:
           fs.writeFileSync(file, updated);
           "
 
+      # To avoid a high frequency of PRs, we remove the decimals from the coverage thresholds
       - name: Floor coverage thresholds (remove decimals)
         run: |
           sed -i -E 's/(lines|functions|branches|statements):[[:space:]]*([0-9]+)\.[0-9]+/\1: \2/g' vitest.config.ts
