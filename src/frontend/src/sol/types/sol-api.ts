@@ -10,3 +10,7 @@ export interface GetSolTransactionsParams {
 	before?: string;
 	limit?: number;
 }
+
+export type LoadNextSolTransactionsParams = GetSolTransactionsParams & {
+	signalEnd: () => void;
+};
