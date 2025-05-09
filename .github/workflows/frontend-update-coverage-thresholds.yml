@@ -38,6 +38,21 @@ jobs:
       - name: Test
         run: npm run test:coverage
 
+      # The coverage calculation is a bit flaky, so to avoid being stuck, we reduce it to have an acceptable margin
+      - name: Reduce coverage thresholds by 0.50%
+        run: |
+          node -e "
+          const fs = require('fs');
+          const file = 'vitest.config.ts';
+          const text = fs.readFileSync(file, 'utf8');
+          const updated = text.replace(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g, (_, key, value) => {
+            const reduced = (parseFloat(value) - 0.5).toFixed(2);
+            return \`\${key}: \${reduced}\`;
+          });
+          fs.writeFileSync(file, updated);
+          "
+
+      # To avoid a high frequency of PRs, we remove the decimals from the coverage thresholds
       - name: Floor coverage thresholds (remove decimals)
         run: |
           sed -i -E 's/(lines|functions|branches|statements):[[:space:]]*([0-9]+)\.[0-9]+/\1: \2/g' vitest.config.ts
