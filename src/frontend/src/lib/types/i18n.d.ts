@@ -28,6 +28,7 @@ interface I18nCore {
 		new: string;
 		edit: string;
 		no_results: string;
+		paste: string;
 		to: string;
 		more_items: string;
 	};
@@ -810,6 +811,7 @@ interface I18nTransaction {
 		converting_ck_token: string;
 		twin_network: string;
 		no_date_available: string;
+		pending: string;
 	};
 	alt: {
 		open_block_explorer: string;

@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 
 use candid::{CandidType, Deserialize, Principal};
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
+use serde::Serialize;
 
 use super::{verifiable_credential::CredentialType, Timestamp};
 use crate::types::{settings::Settings, Version};
@@ -41,7 +42,7 @@ pub struct AddUserCredentialRequest {
     pub current_user_version: Option<Version>,
 }
 
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum AddUserCredentialError {
     InvalidCredential,
     ConfigurationError,
