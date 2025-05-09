@@ -19,22 +19,16 @@
 	let signerAllowanceLoaded = false;
 
 	const loadSignerAllowanceAndValidateAddresses = async () => {
-		let initSignerAllowanceSuccess = false;
+		if (!POW_FEATURE_ENABLED) {
+			const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
-		if (POW_FEATURE_ENABLED) {
-			// The new feature checks whether the user has sufficient cycles to continue
-			initSignerAllowanceSuccess = (await hasRequiredCycles());
-		} else {
-			// Until we remove the feature flag, we must preserve the previous behavior
-			initSignerAllowanceSuccess = (await initSignerAllowance()).success;
+			if (!initSignerAllowanceSuccess) {
+				// Sign-out is handled within the service.
+				return;
+			}
 		}
-
-		if (!initSignerAllowanceSuccess) {
-			// Sign-out is handled within the service.
-			return;
-		}
-
 		signerAllowanceLoaded = true;
+
 		await validateAddresses();
 	};
 

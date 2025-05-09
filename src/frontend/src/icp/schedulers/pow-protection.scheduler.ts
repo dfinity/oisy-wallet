@@ -48,7 +48,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 				identity
 			});
 		} catch (error) {
-			// Exit only if this is a "Challenge already in progress" error
+			// We can skipp the "Challenge already in progress" since we are already in the middle of a challenge.
 			if (this.isChallengeInProgressError(error)) {
 				return;
 			}

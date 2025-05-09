@@ -45,6 +45,7 @@ export const hasRequiredCycles = async (): Promise<boolean> => {
 		}
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, since do not know whether the user has enough cycles to continue.
+		console.error('Error -> hasRequiredCycles: ', _err);
 		await errorSignOut(get(i18n).init.error.insufficient_cycles_error);
 	}
 	return false;

@@ -23,25 +23,32 @@
 	let checkAttempts = $state(0);
 	let powWorker: PowProtectorWorkerInitResult | undefined;
 
-	const MAX_CHECK_ATTEMPTS = 5; // 18 attempts * 5 seconds = 90 seconds total wait time
+	const MAX_CHECK_ATTEMPTS = 30; // 30 attempts * 5 seconds = 150 seconds total wait time
 	const CHECK_INTERVAL_MS = 5000; // 5 seconds
+
+	// Create an effect to track when hasCycles changes
+	$effect(() => {
+		console.warn('hasCycles changed to:', hasCycles);
+	});
 
 	const checkCycles = async (): Promise<void> => {
 		console.warn('checkCycles ', checkAttempts);
 		hasCycles = await hasRequiredCycles();
-
 		checkAttempts++;
 
 		if (hasCycles) {
+			console.warn('hasCycles');
 			if (checkInterval) {
 				console.warn('clearInterval');
 				clearInterval(checkInterval);
+				checkInterval = undefined;
 			}
 		} else if (checkAttempts >= MAX_CHECK_ATTEMPTS) {
 			// Too many failed attempts, sign out
 			if (checkInterval) {
 				console.warn('clearInterval');
 				clearInterval(checkInterval);
+				checkInterval = undefined;
 			}
 			await errorSignOut(get(i18n).init.error.insufficient_cycles_error);
 		}
@@ -52,15 +59,19 @@
 
 		// Initial check
 		if (POW_FEATURE_ENABLED) {
-			const hasSufficentCycles = await hasRequiredCycles();
-			if (!hasSufficentCycles) {
+			hasCycles = await hasRequiredCycles();
+
+			// Always initialize the worker regardless of cycles status
+			powWorker = await initPowProtectorWorker();
+			powWorker.start();
+
+			if (!hasCycles) {
 				// If initial check fails, start polling
 				checkInterval = setInterval(checkCycles, CHECK_INTERVAL_MS);
-
-				// Initialize the worker if we have cycles
-				powWorker = await initPowProtectorWorker();
-				powWorker.start();
 			}
+		} else {
+			// If POW isn't enabled, we still need to render children
+			hasCycles = true;
 		}
 	});
 
@@ -71,6 +82,7 @@
 		if (checkInterval) {
 			console.warn('clearInterval');
 			clearInterval(checkInterval);
+			checkInterval = undefined;
 		}
 
 		// Stop the worker if it was started
@@ -100,8 +112,8 @@
 
 				<h3 class="my-3">{$i18n.pow_protector.text.title}</h3>
 
-				<div class="spinner-container">
-					<Spinner />
+				<div>
+					<Spinner inline />
 				</div>
 
 				<p class="mt-3">{$i18n.pow_protector.text.description}</p>
