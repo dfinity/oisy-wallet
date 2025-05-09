@@ -1,4 +1,5 @@
-import { shortenAddress } from '$lib/utils/address.utils';
+import { AddressTypeSchema } from '$lib/schema/address.schema';
+import { getNetworksForAddressType, shortenAddress } from '$lib/utils/address.utils';
 
 describe('address.utils', () => {
 	describe('shortenAddress', () => {
@@ -34,6 +35,18 @@ describe('address.utils', () => {
 			const address = '1234567890123';
 
 			expect(shortenAddress(address)).toBe('123456...890123');
+		});
+	});
+
+	describe('getNetworksForAddressType', () => {
+		it('should return networks for all types', () => {
+			AddressTypeSchema.options.forEach((type) => {
+				const networks = getNetworksForAddressType(type);
+
+				expect(networks).toBeDefined();
+				expect(Array.isArray(networks)).toBeTruthy();
+				expect(networks.length).toBeGreaterThan(0);
+			});
 		});
 	});
 });
