@@ -22,6 +22,21 @@ export const transfer = async ({
 	return await transfer(rest);
 };
 
+export const balance = async ({
+	identity,
+	canisterId,
+	nullishIdentityErrorMessage,
+	owner
+}: CanisterApiFunctionParams<{ owner: Principal }>): Promise<bigint> => {
+	const { balance } = await xtcLedgerCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return await balance(owner);
+};
+
 const xtcLedgerCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
