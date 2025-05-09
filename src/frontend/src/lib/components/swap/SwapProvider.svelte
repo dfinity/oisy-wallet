@@ -57,6 +57,24 @@
 
 {#if nonNullish(swapDApp) && nonNullish(provider)}
 	<CollapsibleBottomSheet>
+		{#snippet contentHeader()}
+			<ModalValue label={$i18n.swap.text.swap_provider}>
+				<div class="flex gap-2">
+					<div class="mt-1">
+						<Logo
+							src={swapDApp.logo}
+							alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: swapDApp.name })}
+						/>
+					</div>
+					<div class="mr-auto">
+						<div class="text-lg font-bold">{swapDApp.name}</div>
+						{#if displayURL}
+							<div class="text-sm text-tertiary">{displayURL}</div>
+						{/if}
+					</div>
+				</div>
+			</ModalValue>
+		{/snippet}
 		{#snippet content()}
 			<ModalValue label={$i18n.swap.text.swap_provider}>
 				<div class="flex gap-2">
@@ -81,7 +99,7 @@
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}
-			<Button on:click={closeFn}>Done</Button>
+			<Button fullWidth on:click={closeFn}>Done</Button>
 		{/snippet}
 	</CollapsibleBottomSheet>
 {/if}
