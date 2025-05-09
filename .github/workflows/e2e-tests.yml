@@ -100,7 +100,7 @@ jobs:
       contents: read
     needs: ['oisy-backend-wasm', 'check-e2e-changes', 'define-matrix']
     strategy:
-      matrix: ${{ fromJson(needs.define-e2e-matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.define-matrix.outputs.matrix) }}
     env:
       MATRIX_OS: ${{ matrix.os }}
     if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
