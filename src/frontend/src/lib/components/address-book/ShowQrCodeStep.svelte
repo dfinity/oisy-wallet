@@ -10,8 +10,7 @@
 	} from '$lib/constants/test-ids.constants';
 	export let address: Address;
 	export let addressToken: Token | undefined = undefined;
-	export let addressLabel: string | undefined = undefined;
-	export let copyAriaLabel: string = $i18n.wallet.copy_to_clipboard;
+	export let close: () => void;
 </script>
 
 {#if address}
@@ -30,7 +29,7 @@
 			onclick={() => {}}
 		/>
 		<div class="pt-10" />
-		<ButtonCancel onclick={() => close()} testId={ADDRESS_EDIT_CANCEL_BUTTON}></ButtonCancel>
+		<ButtonCancel onclick={() => close()} colorStyle="primary" testId={ADDRESS_EDIT_CANCEL_BUTTON}></ButtonCancel>
 	</div>
 {:else}
 	<p class="text-red-600">No address available</p>

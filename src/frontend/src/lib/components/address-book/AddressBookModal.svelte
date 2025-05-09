@@ -196,6 +196,7 @@
 			<ShowQrCodeStep
 				address={currentAddress}
 				addressLabel={currentAddress.alias}
+				close={() => modalStore.close()}
 			/>
 		{:else}
 			<p class="text-red-600">No address selected</p>
