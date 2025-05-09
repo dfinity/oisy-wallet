@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
@@ -54,7 +55,9 @@
 		{/if}
 	</svelte:fragment>
 
-	<EthFeeDisplay slot="fee" />
+	<EthFeeDisplay slot="fee">
+		<Html slot="label" text={$i18n.fee.text.convert_fee} />
+	</EthFeeDisplay>
 
 	<slot name="cancel" slot="cancel" />
 </ConvertForm>
