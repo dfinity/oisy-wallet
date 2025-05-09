@@ -5,6 +5,7 @@ import { mapXtcLedgerCanisterError } from '$icp/canisters/xtc-ledger.errors';
 import type { XtcLedgerTransferParams } from '$icp/types/xtc-ledger';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import type { Principal } from '@dfinity/principal';
 import { Canister, createServices } from '@dfinity/utils';
 
 export class XtcLedgerCanister extends Canister<XtcLedgerService> {
@@ -42,4 +43,14 @@ export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 
 		throw mapXtcLedgerCanisterError(response.Err);
 	};
+
+	/**
+	 * Balance of the given principal.
+	 *
+	 * @param {Principal} account The Principal to check the balance of.
+	 *
+	 * @throws {Error} If the request fails.
+	 */
+	balance = (account: Principal): Promise<bigint> =>
+		this.caller({ certified: true }).balanceOf(account);
 }
