@@ -19,6 +19,7 @@
 	import SwapDetailsIcp from './SwapDetailsIcp.svelte';
 	import CollapsibleBottomSheet from '../ui/CollapsibleBottomSheet.svelte';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
+	import Button from '../ui/Button.svelte';
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -56,7 +57,7 @@
 
 {#if nonNullish(swapDApp) && nonNullish(provider)}
 	<CollapsibleBottomSheet>
-		{#snippet contentHeader()}
+		{#snippet content()}
 			<ModalValue label={$i18n.swap.text.swap_provider}>
 				<div class="flex gap-2">
 					<div class="mt-1">
@@ -73,14 +74,14 @@
 					</div>
 				</div>
 			</ModalValue>
-		{/snippet}
-
-		{#snippet content()}
 			{#if provider.provider === SwapProvider.KONG_SWAP}
 				<SwapDetailsKong {provider} />
 			{:else if provider.provider === SwapProvider.ICP_SWAP}
 				<SwapDetailsIcp {provider} />
 			{/if}
+		{/snippet}
+		{#snippet contentFooter(closeFn)}
+			<Button on:click={closeFn}>Done</Button>
 		{/snippet}
 	</CollapsibleBottomSheet>
 {/if}
