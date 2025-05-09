@@ -6,6 +6,7 @@
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
+	import ShowQrCodeStep from '$lib/components/address-book/ShowQrCodeStep.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
@@ -38,25 +39,30 @@
 		{
 			name: AddressBookSteps.EDIT_ADDRESS,
 			title: 'Edit address'
+		},
+		{
+			name: AddressBookSteps.SHOW_QR_CODE,
+			title: 'Scan QR Code'
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
-	let currentStep: WizardStep | undefined = $state();
-	let modal: WizardModal | undefined = $state();
+	let currentStep: WizardStep | undefined;
+	let modal: WizardModal | undefined;
 	const close = () => modalStore.close();
 
-	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
-	let editContactNameStep = $state<EditContactNameStep>();
+	let currentContact: Contact | undefined;
+	let currentAddress: Address | undefined;
+	let editContactNameStep: EditContactNameStep;
 
-	let contacts: Contact[] = $state([
+	$: currentStepName = currentStep?.name as AddressBookSteps | undefined;
+
+	let contacts: Contact[] = [
 		{
 			id: 'pf',
 			name: 'Peter Fox',
 			addresses: [{ id: 'f1', address_type: 'ETH', address: 'xxxxxxx', alias: 'Private' }]
 		}
-	]);
-	let currentContact: Contact | undefined = $state();
-	let currentAddress: Address | undefined = $state();
+	];
 
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
@@ -79,7 +85,9 @@
 
 	const saveContact = (contact: Contact) => {
 		const index = contacts.findIndex((c) => contact.id === c.id);
-		contacts[index] = contact;
+		if (index !== -1) {
+			contacts[index] = contact;
+		}
 		gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
 
@@ -106,7 +114,9 @@
 	const saveAddress = (address: Address) => {
 		const { addresses } = currentContact!;
 		const index = addresses.findIndex((a) => address.id === a.id);
-		addresses[index] = { ...address };
+		if (index !== -1) {
+			addresses[index] = { ...address };
+		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
@@ -131,11 +141,11 @@
 	testId={ADDRESS_BOOK_MODAL}
 	on:nnsClose={close}
 >
-	<svelte:fragment slot="title"
-		>{currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)
+	<svelte:fragment slot="title">
+		{currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)
 			? editContactNameStep.title
-			: (currentStep?.title ?? '')}</svelte:fragment
-	>
+			: currentStep?.title ?? ''}
+	</svelte:fragment>
 
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
@@ -148,8 +158,8 @@
 				currentContact = undefined;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
-		></AddressBookStep>
-	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
+		/>
+	{:else if currentStepName === AddressBookSteps.SHOW_CONTACT}
 		<ShowContactStep
 			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 			contact={currentContact!}
@@ -161,12 +171,21 @@
 				currentAddress = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
-			showAddress={(address) => {
+			showQrCode={(address) => {
 				currentAddress = address;
-				gotoStep(AddressBookSteps.SHOW_ADDRESS);
+				gotoStep(AddressBookSteps.SHOW_QR_CODE);
 			}}
-		></ShowContactStep>
-	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT}
+		/>
+	{:else if currentStepName === AddressBookSteps.SHOW_QR_CODE}
+		{#if currentAddress}
+			<ShowQrCodeStep
+				address={currentAddress}
+				addressLabel={currentAddress.alias}
+			/>
+		{:else}
+			<p class="text-red-600">No address selected</p>
+		{/if}
+	{:else if currentStepName === AddressBookSteps.EDIT_CONTACT}
 		<EditContactStep
 			contact={currentContact!}
 			close={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
@@ -185,28 +204,24 @@
 			{deleteContact}
 			{deleteAddress}
 		/>
-	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
+	{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME}
 		<EditContactNameStep
 			bind:this={editContactNameStep}
 			contact={currentContact}
 			{addContact}
 			{saveContact}
 			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
-		></EditContactNameStep>
-	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
+		/>
+	{:else if currentStepName === AddressBookSteps.SHOW_ADDRESS}
 		{JSON.stringify(currentAddress)}
-		<Button
-			on:click={() => {
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
-			}}>back</Button
-		>
-	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS}
+		<Button on:click={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}>back</Button>
+	{:else if currentStepName === AddressBookSteps.EDIT_ADDRESS}
 		<EditAddressStep
 			contact={currentContact!}
 			address={currentAddress}
 			{saveAddress}
 			{addAddress}
 			close={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
-		></EditAddressStep>
+		/>
 	{/if}
 </WizardModal>
