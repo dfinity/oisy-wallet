@@ -1,4 +1,4 @@
-/* eslint-disable vitest/require-top-level-describe */
+ 
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 
 type LogType = 'log' | 'debug' | 'warn' | 'error';
