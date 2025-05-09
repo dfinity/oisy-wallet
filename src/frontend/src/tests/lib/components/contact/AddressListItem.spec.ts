@@ -51,6 +51,9 @@ describe('AddressListItem', () => {
 		// Check address type name is displayed
 		expect(container).toHaveTextContent(en.address.types.Icrc2);
 
+		// Check network name is displayed
+		expect(container).toHaveTextContent('Internet Computer');
+
 		// Check shortened address is displayed
 		expect(container).toHaveTextContent(shortenAddress(icrcAddress.address));
 
@@ -66,6 +69,9 @@ describe('AddressListItem', () => {
 
 		// Check address type name is displayed
 		expect(container).toHaveTextContent(en.address.types.Btc);
+
+		// Check network name is displayed
+		expect(container).toHaveTextContent('Bitcoin');
 
 		// Check shortened address is displayed
 		expect(container).toHaveTextContent(shortenAddress(btcAddress.address));
