@@ -23,7 +23,7 @@
 
 		if (POW_FEATURE_ENABLED) {
 			// The new feature checks whether the user has sufficient cycles to continue
-			initSignerAllowanceSuccess = (await hasRequiredCycles()).success;
+			initSignerAllowanceSuccess = (await hasRequiredCycles());
 		} else {
 			// Until we remove the feature flag, we must preserve the previous behavior
 			initSignerAllowanceSuccess = (await initSignerAllowance()).success;

@@ -33,7 +33,7 @@ import { get } from 'svelte/store';
  * @returns {Promise<boolean>} A promise resolving to `true` if the required cycles are met or exceeded,
  * otherwise `false` if insufficient cycles are detected or an error occurs during processing.
  */
-export const hasRequiredCycles = async (): Promise<ResultSuccess> => {
+export const hasRequiredCycles = async (): Promise<boolean> => {
 	try {
 		const { identity } = get(authStore);
 
@@ -41,13 +41,13 @@ export const hasRequiredCycles = async (): Promise<ResultSuccess> => {
 
 		if (allowed_cycles >= POW_MIN_CYCLES_THRESHOLD) {
 			// The user has enough cycles to continue
-			return { success: true };
+			return true;
 		}
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, since do not know whether the user has enough cycles to continue.
 		await errorSignOut(get(i18n).init.error.insufficient_cycles_error);
 	}
-	return { success: false };
+	return false;
 };
 
 /**
@@ -79,7 +79,6 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 
 		return { success: false };
 	}
-
 	return { success: true };
 };
 

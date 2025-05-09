@@ -1018,6 +1018,12 @@
 			"name": "Name"
 		}
 	},
+	"pow_protector": {
+		"text": {
+			"title": "Allowing signer operations",
+			"description": "Please be patient..."
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
