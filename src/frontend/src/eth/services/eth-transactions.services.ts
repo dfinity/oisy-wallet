@@ -1,7 +1,6 @@
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
-import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -148,9 +147,9 @@ const loadErc20Transactions = async ({
 	}
 
 	try {
-		const { transactions: transactionsRest } = etherscanRests(networkId);
+		const { erc20Transactions } = etherscanProviders(networkId);
 		const transactions = await retry({
-			request: async () => await transactionsRest({ contract: token, address }),
+			request: async () => await erc20Transactions({ contract: token, address }),
 			onRetry: async () => await randomWait({})
 		});
 

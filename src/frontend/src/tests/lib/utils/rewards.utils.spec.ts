@@ -1,10 +1,8 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import { ZERO } from '$lib/constants/app.constants';
-import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
-	getRewardsBalance,
+	isEndedCampaign,
 	isOngoingCampaign,
 	isUpcomingCampaign,
 	loadRewardResult
@@ -23,7 +21,8 @@ describe('rewards.utils', () => {
 			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: ['airdrop'],
-			campaign_name: []
+			campaign_name: ['deuteronomy'], // Note: This is no longer optional and will be superceded by campaign_id.
+			campaign_id: 'deuteronomy'
 		};
 
 		it('should return falsy reward result if result was already loaded', async () => {
@@ -203,43 +202,21 @@ describe('rewards.utils', () => {
 		});
 	});
 
-	describe('getRewardsBalance', () => {
-		const lastTimestamp = BigInt(Date.now());
+	describe('isEndedCampaign', () => {
+		it('should return false if the current date is before the end date of the campaign', () => {
+			const endDate = new Date(Date.now() + 86400000);
 
-		const mockedReward: RewardResponseInfo = {
-			amount: 100n,
-			timestamp: lastTimestamp,
-			name: 'airdrop',
-			campaignName: 'exodus',
-			ledger: mockIdentity.getPrincipal()
-		};
+			const result = isEndedCampaign(endDate);
 
-		it('should return the correct rewards balance of multiple rewards', () => {
-			const mockedRewards: RewardResponseInfo[] = [
-				mockedReward,
-				{ ...mockedReward, amount: 200n },
-				{ ...mockedReward, amount: 300n }
-			];
-
-			const result = getRewardsBalance(mockedRewards);
-
-			expect(result).toEqual(600n);
+			expect(result).toBeFalsy();
 		});
 
-		it('should return the correct rewards balance of a single airdrop', () => {
-			const mockedRewards: RewardResponseInfo[] = [mockedReward];
+		it('should return true if the current date is after the end date of the campaign', () => {
+			const endDate = new Date(Date.now() - 86400000);
 
-			const result = getRewardsBalance(mockedRewards);
+			const result = isEndedCampaign(endDate);
 
-			expect(result).toEqual(100n);
-		});
-
-		it('should return zero for an empty list of rewards', () => {
-			const mockedRewards: RewardResponseInfo[] = [];
-
-			const result = getRewardsBalance(mockedRewards);
-
-			expect(result).toEqual(ZERO);
+			expect(result).toBeTruthy();
 		});
 	});
 });

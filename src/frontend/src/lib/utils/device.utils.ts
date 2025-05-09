@@ -6,7 +6,7 @@ interface UserAgentData {
 
 export const isMobile = (): boolean => {
 	if ('userAgentData' in navigator && nonNullish(navigator.userAgentData)) {
-		const userAgentData: UserAgentData = navigator.userAgentData;
+		const { userAgentData } = navigator as { userAgentData: UserAgentData };
 		return nonNullish(userAgentData.mobile) && userAgentData.mobile;
 	}
 	const isTouchScreen = window.matchMedia('(any-pointer:coarse)').matches;
