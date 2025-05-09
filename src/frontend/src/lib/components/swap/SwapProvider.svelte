@@ -58,30 +58,28 @@
 {#if nonNullish(swapDApp) && nonNullish(provider)}
 	<CollapsibleBottomSheet showContentHeader>
 		{#snippet contentHeader()}
-			<div class="flex md:items-center">
-				<ModalValue>
-					<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
+			<ModalValue>
+				<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
 
-					<svelte:fragment slot="main-value">
-						<div class="flex gap-2">
-							<div class="mt-1">
-								<Logo
-									src={swapDApp.logo}
-									alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: swapDApp.name })}
-								/>
-							</div>
-							<div class="mr-auto">
-								<div class="text-lg font-bold">{swapDApp.name}</div>
-							</div>
+				<svelte:fragment slot="main-value">
+					<div class="flex gap-2">
+						<div class="mt-1">
+							<Logo
+								src={swapDApp.logo}
+								alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: swapDApp.name })}
+							/>
 						</div>
-					</svelte:fragment>
-				</ModalValue>
-			</div>
+						<div class="mr-auto">
+							<div class="text-lg font-bold">{swapDApp.name}</div>
+						</div>
+					</div>
+				</svelte:fragment>
+			</ModalValue>
 		{/snippet}
 		{#snippet content()}
 			{#if displayURL}
 				<ModalValue>
-					<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
+					<svelte:fragment slot="label">Website</svelte:fragment>
 
 					<svelte:fragment slot="main-value">
 						<div class="text-sm">{displayURL}</div>
