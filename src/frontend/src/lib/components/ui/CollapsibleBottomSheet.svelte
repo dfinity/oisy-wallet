@@ -6,6 +6,7 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import Button from './Button.svelte';
+	import IconInfo from '../icons/lucide/IconInfo.svelte';
 
 	let {
 		content,
@@ -23,9 +24,9 @@
 <Responsive down="sm">
 	<div class="flex w-full items-center justify-between">
 		{@render contentHeader()}
-		<Button on:click={() => (expanded = true)} styleClass="text-primary" ariaLabel="expand">
-			I
-		</Button>
+		<ButtonIcon on:click={() => (expanded = true)} styleClass="text-primary" ariaLabel="expand">
+			<IconInfo />
+		</ButtonIcon>
 	</div>
 
 	{#if expanded}
@@ -57,12 +58,10 @@
 	{/if}
 </Responsive>
 
-<Responsive up="sm">
-	<Collapsible bind:expanded initiallyExpanded={expanded}>
-		<div class="flex w-[calc(100%-2rem)] items-center" slot="header">
-			{@render contentHeader()}
-		</div>
+<Collapsible bind:expanded initiallyExpanded={expanded}>
+	<div class="flex w-[calc(100%-2rem)] items-center" slot="header">
+		{@render contentHeader()}
+	</div>
 
-		{@render content()}
-	</Collapsible>
-</Responsive>
+	{@render content()}
+</Collapsible>
