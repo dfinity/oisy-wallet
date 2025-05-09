@@ -39,7 +39,7 @@ export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 		const response = await transfer(to, amount);
 
 		if ('Ok' in response) {
-			return result.Ok;
+			return response.Ok;
 		}
 
 		throw mapXtcLedgerCanisterError(response.Err);
