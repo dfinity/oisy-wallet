@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
@@ -43,7 +45,9 @@
 		on:icTokensList
 	/>
 
-	<FeeDisplay slot="fee" />
+	<EthFeeDisplay slot="fee">
+		<Html slot="label" text={$i18n.fee.text.max_fee_eth} />
+	</EthFeeDisplay>
 
 	<slot name="cancel" slot="cancel" />
 </SendForm>
