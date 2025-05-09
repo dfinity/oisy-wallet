@@ -1041,6 +1041,13 @@
 		"fields": {
 			"alias": "Alias",
 			"address": "Address"
+		},
+		"types": {
+			"Icrc2": "Internet Computer",
+			"Btc": "Bitcoin",
+			"Eth": "Ethereum",
+			"Sol": "Solana"
+
 		}
 	},
 	"signer": {
