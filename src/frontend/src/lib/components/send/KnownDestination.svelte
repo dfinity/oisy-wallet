@@ -34,7 +34,9 @@
 <LogoButton styleClass="group" on:click>
 	<div class="mr-2" slot="logo"><RoundedIcon icon={IconConvertTo} /></div>
 
-	<svelte:fragment slot="title">{shortenWithMiddleEllipsis({ text: destination })}</svelte:fragment>
+	<svelte:fragment slot="title">
+		<span class="text-base">{shortenWithMiddleEllipsis({ text: destination })}</span>
+	</svelte:fragment>
 
 	<svelte:fragment slot="description">
 		{#each amountsToDisplay as amount, index (index)}
