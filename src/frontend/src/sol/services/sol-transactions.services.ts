@@ -20,6 +20,8 @@ import {
 } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { LoadNextSolTransactionsParams, LoadSolTransactionsParams } from '$sol/types/sol-api';
+import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
+import type { GetSolTransactionsParams, LoadNextSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	ParsedAccount,
 	SolMappedTransaction,

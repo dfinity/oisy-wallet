@@ -135,9 +135,11 @@ export const loadNextIcTransactions = async ({
 	token: Token;
 	signalEnd: () => void;
 }): Promise<void> => {
+	const lastIdCleaned = lastId?.replace('-self', '');
+
 	try {
-		if (nonNullish(lastId)) {
-			BigInt(lastId.replace('-self', ''));
+		if (nonNullish(lastIdCleaned)) {
+			BigInt(lastIdCleaned);
 		}
 	} catch {
 		// Pseudo transactions are displayed at the end of the list. There is not such use case in Oisy.
@@ -157,7 +159,7 @@ export const loadNextIcTransactions = async ({
 	}
 
 	await loadNextIcTransactionsRequest({
-		start: nonNullish(lastId) ? BigInt(lastId.replace('-self', '')) : undefined,
+		start: nonNullish(lastIdCleaned) ? BigInt(lastIdCleaned) : undefined,
 		token,
 		...rest
 	});

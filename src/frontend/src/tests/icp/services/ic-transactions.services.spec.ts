@@ -4,6 +4,7 @@ import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import * as icpIndexApi from '$icp/api/icp-index.api';
 import { getTransactions as getTransactionsIcp } from '$icp/api/icp-index.api';
 import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
+import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import {
 	loadNextIcTransactions,
 	onLoadTransactionsError,
