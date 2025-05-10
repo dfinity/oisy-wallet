@@ -1,8 +1,6 @@
 mod bitcoin;
 mod config;
 mod custom_token;
-mod list_user_creation_timestamps;
-mod list_users;
 mod pow;
 mod settings;
 mod signer;
