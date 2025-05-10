@@ -6,7 +6,7 @@ import {
 	isTokenCkErc20Ledger,
 	isTokenCkEthLedger
 } from '$icp/utils/ic-send.utils';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { TokenActionErrorType } from '$lib/types/token-action';
@@ -51,7 +51,7 @@ export const validateUserAmount = ({
 				}),
 				unitName: token.decimals
 			})
-		: ZERO_BI;
+		: ZERO;
 
 	// if the function called in the swap flow, we only need to check the basic assertAmount condition
 	// if convert or send - we identify token type and check some network-specific conditions
@@ -67,7 +67,7 @@ export const validateUserAmount = ({
 		return assertErc20Amount({
 			userAmount,
 			balance: parsedSendBalance,
-			balanceForFee: balanceForFee ?? ZERO_BI,
+			balanceForFee: balanceForFee ?? ZERO,
 			fee
 		});
 	}
@@ -94,7 +94,7 @@ export const validateUserAmount = ({
 		return assertCkErc20Amount({
 			userAmount,
 			balance: parsedSendBalance,
-			balanceForFee: balanceForFee ?? ZERO_BI,
+			balanceForFee: balanceForFee ?? ZERO,
 			ethereumEstimateFee,
 			fee
 		});

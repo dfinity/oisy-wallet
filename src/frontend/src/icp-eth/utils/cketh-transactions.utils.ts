@@ -46,7 +46,7 @@ const mapPendingTransaction = ({
 	token: IcToken;
 	value: bigint;
 } & IcCkLinkedAssets): IcTransactionUi => {
-	const explorerUrl = (twinToken.network as EthereumNetwork).explorerUrl;
+	const { explorerUrl } = twinToken.network as EthereumNetwork;
 
 	const { symbol: twinTokenSymbol } = twinToken;
 	const { symbol } = token;
@@ -59,7 +59,7 @@ const mapPendingTransaction = ({
 
 	return {
 		id: `${hash}`,
-		incoming: false,
+		incoming: true, // we mark this as incoming so we display a positive balance, as all pending mapped ckEth txs are incoming
 		type: 'burn',
 		status: 'pending',
 		from,

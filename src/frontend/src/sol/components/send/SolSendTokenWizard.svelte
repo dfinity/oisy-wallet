@@ -11,13 +11,12 @@
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -60,15 +59,14 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
-	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let network: Network | undefined = undefined;
-	$: network = $sendToken.network;
+	$: ({ network } = $sendToken);
 
 	let networkId: NetworkId | undefined = undefined;
-	$: networkId = $sendToken.network.id;
+	$: ({ id: networkId } = network);
 
 	let source: OptionSolAddress;
 	let solanaNativeToken: Token;
@@ -162,7 +160,7 @@
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
 				}),
-				prioritizationFee: $prioritizationFeeStore ?? ZERO_BI,
+				prioritizationFee: $prioritizationFeeStore ?? ZERO,
 				destination,
 				source
 			});
@@ -214,18 +212,12 @@
 			on:icNext
 			on:icClose
 			on:icTokensList
+			on:icBack
 			bind:destination
 			bind:amount
-			on:icQRCodeScan
 			source={source ?? ''}
 		>
-			<svelte:fragment slot="cancel">
-				{#if formCancelAction === 'back'}
-					<ButtonBack on:click={back} />
-				{:else}
-					<ButtonCancel on:click={close} />
-				{/if}
-			</svelte:fragment>
+			<ButtonBack onclick={back} slot="cancel" />
 		</SolSendForm>
 	{:else}
 		<slot />

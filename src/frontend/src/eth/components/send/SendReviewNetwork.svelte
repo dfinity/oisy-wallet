@@ -25,24 +25,30 @@
 </script>
 
 <Value ref="source-network" element="div">
-	<svelte:fragment slot="label"
-		>{#if nonNullish(targetNetwork)}{$i18n.send.text.source_network}{:else}{$i18n.send.text
-				.network}{/if}</svelte:fragment
-	>
-	<NetworkWithLogo network={sourceNetwork} />
+	{#snippet label()}
+		{#if nonNullish(targetNetwork)}{$i18n.send.text.source_network}{:else}{$i18n.send.text
+				.network}{/if}
+	{/snippet}
+	{#snippet content()}
+		<NetworkWithLogo network={sourceNetwork} />
+	{/snippet}
 </Value>
 
 {#if nonNullish(targetNetwork)}
 	<Value ref="target-network" element="div">
-		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
-		<span class="flex gap-1">
-			{#if nativeIcp}
-				{$i18n.send.text.convert_to_native_icp}
-				<NetworkLogo network={ICP_NETWORK} />
-			{:else}
-				{targetNetwork.name}
-				<NetworkLogo network={targetNetwork} />
-			{/if}
-		</span>
+		{#snippet label()}
+			{$i18n.send.text.destination_network}
+		{/snippet}
+		{#snippet content()}
+			<span class="flex gap-1">
+				{#if nativeIcp}
+					{$i18n.send.text.convert_to_native_icp}
+					<NetworkLogo network={ICP_NETWORK} />
+				{:else}
+					{targetNetwork.name}
+					<NetworkLogo network={targetNetwork} />
+				{/if}
+			</span>
+		{/snippet}
 	</Value>
 {/if}

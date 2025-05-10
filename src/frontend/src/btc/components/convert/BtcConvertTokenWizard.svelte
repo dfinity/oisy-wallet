@@ -156,15 +156,15 @@
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<ButtonBack on:click={back} />
+					<ButtonBack onclick={back} />
 				{:else}
-					<ButtonCancel on:click={close} />
+					<ButtonCancel onclick={close} />
 				{/if}
 			</svelte:fragment>
 		</BtcConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 		<BtcConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}
-			><ButtonBack slot="cancel" on:click={back} /></BtcConvertReview
+			><ButtonBack slot="cancel" onclick={back} /></BtcConvertReview
 		>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 		<BtcConvertProgress bind:convertProgressStep />

@@ -1,5 +1,5 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
-import { WALLET_PAGINATION, ZERO_BI } from '$lib/constants/app.constants';
+import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
 import {
 	checkIfAccountExists,
 	estimatePriorityFee,
@@ -27,7 +27,7 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { address, lamports } from '@solana/kit';
-import { type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers');
 
@@ -179,7 +179,7 @@ describe('solana.api', () => {
 
 		it('should handle zero balance', async () => {
 			mockGetTokenAccountBalance.mockReturnValueOnce({
-				send: () => Promise.resolve({ value: { amount: ZERO_BI } })
+				send: () => Promise.resolve({ value: { amount: ZERO } })
 			});
 
 			const balance = await loadTokenBalance({

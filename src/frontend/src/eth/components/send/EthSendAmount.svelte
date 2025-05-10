@@ -7,7 +7,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -50,11 +50,11 @@
 					}),
 					unitName: $sendTokenDecimals
 				})
-			: ZERO_BI;
+			: ZERO;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)) {
-			const total = userAmount + ($minGasFee ?? ZERO_BI);
+			const total = userAmount + ($minGasFee ?? ZERO);
 
 			if (total > parsedSendBalance) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
@@ -69,7 +69,7 @@
 		}
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
-		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO_BI;
+		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
 		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees

@@ -5,7 +5,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -28,11 +28,11 @@
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
-		if (invalidAmount(Number(userAmount)) || userAmount === ZERO_BI) {
+		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
 			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
-		if (userAmount > ($sendBalance ?? ZERO_BI)) {
+		if (userAmount > ($sendBalance ?? ZERO)) {
 			return new BtcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 		}
 	};

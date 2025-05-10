@@ -1,5 +1,8 @@
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { onLoadTransactionsError } from '$icp/services/ic-transactions.services';
+import {
+	onLoadTransactionsError,
+	onTransactionsCleanUp
+} from '$icp/services/ic-transactions.services';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -74,6 +77,43 @@ describe('ic-transactions.services', () => {
 				`${get(i18n).transactions.error.loading_transactions}:`,
 				undefined
 			);
+		});
+	});
+
+	describe('onTransactionsCleanUp', () => {
+		const tokenId = ICP_TOKEN_ID;
+		const mockTransactions = createMockIcTransactionsUi(5).map((transaction) => ({
+			data: transaction,
+			certified: false
+		}));
+		const n = 2;
+		const mockTransactionsIds = mockTransactions
+			.slice(0, n)
+			.map((transaction) => transaction.data.id);
+		const mockData = { tokenId, transactionIds: mockTransactionsIds };
+
+		let spyToastsError: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+			icTransactionsStore.append({ tokenId, transactions: mockTransactions });
+		});
+
+		it('should reset transactions store', () => {
+			onTransactionsCleanUp(mockData);
+
+			expect(get(icTransactionsStore)?.[tokenId]).toStrictEqual(mockTransactions.slice(n));
+		});
+
+		it('should call toastsError by default', () => {
+			onTransactionsCleanUp(mockData);
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: get(i18n).transactions.error.uncertified_transactions_removed }
+			});
 		});
 	});
 });

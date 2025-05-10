@@ -14,6 +14,7 @@ describe('mapHeaderData', () => {
 	// We mock the token group with a mix of data just to verify that the function works correctly
 	const tokenGroup: TokenUiGroup = {
 		id: mockGroup.id,
+		decimals: mockToken.decimals,
 		nativeToken: mockToken,
 		groupData: mockGroup,
 		tokens: [mockToken, ICP_TOKEN],
@@ -23,13 +24,13 @@ describe('mapHeaderData', () => {
 
 	it('should correctly map the token group to card data', () => {
 		const expected: CardData = {
-			name: mockToken.name,
-			symbol: mockToken.symbol,
+			name: mockGroup.name,
+			symbol: mockGroup.symbol,
 			decimals: mockToken.decimals,
-			icon: mockToken.icon,
+			icon: mockGroup.icon,
 			network: mockToken.network,
 			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
-			oisySymbol: { oisySymbol: mockToken.name },
+			oisySymbol: { oisySymbol: mockGroup.name },
 			balance: bn1Bi,
 			usdBalance: 300,
 			tokenCount: 2
@@ -42,13 +43,13 @@ describe('mapHeaderData', () => {
 		const { balance: _balance, usdBalance: _usdBalance, ...rest } = tokenGroup;
 
 		const expected: CardData = {
-			name: mockToken.name,
-			symbol: mockToken.symbol,
+			name: mockGroup.name,
+			symbol: mockGroup.symbol,
 			decimals: mockToken.decimals,
-			icon: mockToken.icon,
+			icon: mockGroup.icon,
 			network: mockToken.network,
 			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
-			oisySymbol: { oisySymbol: mockToken.name },
+			oisySymbol: { oisySymbol: mockGroup.name },
 			tokenCount: 2
 		};
 

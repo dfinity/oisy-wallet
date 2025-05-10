@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type WizardStep } from '@dfinity/gix-components';
+	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
@@ -26,7 +26,6 @@
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR,
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS,
@@ -60,7 +59,6 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
-	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const dispatch = createEventDispatcher();
 
@@ -198,20 +196,14 @@
 		{:else if currentStep?.name === WizardStepsSend.SEND}
 			<IcSendForm
 				on:icNext
+				on:icBack
 				on:icTokensList
 				bind:destination
 				bind:amount
 				bind:networkId
-				on:icQRCodeScan
 				{source}
 			>
-				<svelte:fragment slot="cancel">
-					{#if formCancelAction === 'back'}
-						<ButtonBack on:click={back} />
-					{:else}
-						<ButtonCancel on:click={close} />
-					{/if}
-				</svelte:fragment>
+				<ButtonBack onclick={back} slot="cancel" />
 			</IcSendForm>
 		{:else}
 			<slot />

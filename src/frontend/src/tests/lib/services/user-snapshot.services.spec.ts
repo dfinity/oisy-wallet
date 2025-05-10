@@ -8,7 +8,6 @@ import type {
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
-import * as airdropEnv from '$env/reward-campaigns.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
@@ -16,7 +15,7 @@ import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
-import { NANO_SECONDS_IN_MILLISECOND, ZERO_BI } from '$lib/constants/app.constants';
+import { NANO_SECONDS_IN_MILLISECOND, ZERO } from '$lib/constants/app.constants';
 import * as addressStore from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
@@ -92,8 +91,8 @@ describe('user-snapshot.services', () => {
 					last_transactions: mockIcTransactions.slice(0, 5).map(
 						({ value, timestamp }: IcTransactionUi): Transaction_Icrc => ({
 							transaction_type: { Send: null },
-							timestamp: timestamp ?? ZERO_BI,
-							amount: value ?? ZERO_BI,
+							timestamp: timestamp ?? ZERO,
+							amount: value ?? ZERO,
 							network: {},
 							counterparty: Principal.anonymous()
 						})
@@ -157,8 +156,8 @@ describe('user-snapshot.services', () => {
 					last_transactions: mockSolTransactions.slice(0, 5).map(
 						({ value, timestamp, to }: SolTransactionUi): Transaction_Spl => ({
 							transaction_type: { Send: null },
-							timestamp: (timestamp ?? ZERO_BI) * NANO_SECONDS_IN_MILLISECOND,
-							amount: value ?? ZERO_BI,
+							timestamp: (timestamp ?? ZERO) * NANO_SECONDS_IN_MILLISECOND,
+							amount: value ?? ZERO,
 							network: {},
 							counterparty: to ?? ''
 						})
@@ -189,8 +188,6 @@ describe('user-snapshot.services', () => {
 			vi.clearAllMocks();
 
 			vi.useFakeTimers().setSystemTime(now);
-
-			vi.spyOn(airdropEnv, 'USER_SNAPSHOT_ENABLED', 'get').mockImplementationOnce(() => true);
 
 			mockAuthStore();
 
@@ -324,11 +321,11 @@ describe('user-snapshot.services', () => {
 		it('should not include tokens with zero balance', async () => {
 			balancesStore.set({
 				id: mockValidIcToken.id,
-				data: { data: ZERO_BI, certified }
+				data: { data: ZERO, certified }
 			});
 			balancesStore.set({
 				id: ETHEREUM_TOKEN.id,
-				data: { data: ZERO_BI, certified }
+				data: { data: ZERO, certified }
 			});
 
 			await registerUserSnapshot();
