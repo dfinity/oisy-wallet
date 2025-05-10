@@ -89,6 +89,33 @@ export interface CheckPoolsReply {
 	symbol: string;
 }
 export type CheckPoolsResult = { Ok: Array<CheckPoolsReply> } | { Err: string };
+export interface ClaimReply {
+	ts: bigint;
+	fee: bigint;
+	status: string;
+	claim_id: bigint;
+	transfer_ids: Array<TransferIdReply>;
+	desc: string;
+	chain: string;
+	canister_id: [] | [string];
+	to_address: string;
+	amount: bigint;
+	symbol: string;
+}
+export type ClaimResult = { Ok: ClaimReply } | { Err: string };
+export interface ClaimsReply {
+	ts: bigint;
+	fee: bigint;
+	status: string;
+	claim_id: bigint;
+	desc: string;
+	chain: string;
+	canister_id: [] | [string];
+	to_address: string;
+	amount: bigint;
+	symbol: string;
+}
+export type ClaimsResult = { Ok: Array<ClaimsReply> } | { Err: string };
 export interface ExpectedBalance {
 	balance: bigint;
 	pool_balances: Array<PoolExpectedBalance>;
@@ -138,6 +165,7 @@ export interface LPBalancesReply {
 	chain_0: string;
 	chain_1: string;
 	symbol: string;
+	lp_token_id: bigint;
 }
 export interface LPTokenReply {
 	fee: bigint;
@@ -165,18 +193,14 @@ export interface PoolExpectedBalance {
 	lp_fee: bigint;
 }
 export interface PoolReply {
-	tvl: bigint;
 	lp_token_symbol: string;
 	name: string;
 	lp_fee_0: bigint;
 	lp_fee_1: bigint;
 	balance_0: bigint;
 	balance_1: bigint;
-	rolling_24h_volume: bigint;
-	rolling_24h_apy: number;
 	address_0: string;
 	address_1: string;
-	rolling_24h_num_swaps: bigint;
 	symbol_0: string;
 	symbol_1: string;
 	pool_id: number;
@@ -185,17 +209,9 @@ export interface PoolReply {
 	chain_1: string;
 	is_removed: boolean;
 	symbol: string;
-	rolling_24h_lp_fee: bigint;
 	lp_fee_bps: number;
 }
-export interface PoolsReply {
-	total_24h_lp_fee: bigint;
-	total_tvl: bigint;
-	total_24h_volume: bigint;
-	pools: Array<PoolReply>;
-	total_24h_num_swaps: bigint;
-}
-export type PoolsResult = { Ok: PoolsReply } | { Err: string };
+export type PoolsResult = { Ok: Array<PoolReply> } | { Err: string };
 export interface RemoveLiquidityAmountsReply {
 	lp_fee_0: bigint;
 	lp_fee_1: bigint;
@@ -438,6 +454,8 @@ export interface _SERVICE {
 	add_pool: ActorMethod<[AddPoolArgs], AddPoolResult>;
 	add_token: ActorMethod<[AddTokenArgs], AddTokenResult>;
 	check_pools: ActorMethod<[], CheckPoolsResult>;
+	claim: ActorMethod<[bigint], ClaimResult>;
+	claims: ActorMethod<[string], ClaimsResult>;
 	get_user: ActorMethod<[], UserResult>;
 	icrc10_supported_standards: ActorMethod<[], Array<Icrc10SupportedStandards>>;
 	icrc1_name: ActorMethod<[], string>;
@@ -456,7 +474,6 @@ export interface _SERVICE {
 	swap_amounts: ActorMethod<[string, bigint, string], SwapAmountsResult>;
 	swap_async: ActorMethod<[SwapArgs], SwapAsyncResult>;
 	tokens: ActorMethod<[[] | [string]], TokensResult>;
-	txs: ActorMethod<[[] | [string]], TxsResult>;
 	update_token: ActorMethod<[UpdateTokenArgs], UpdateTokenResult>;
 	user_balances: ActorMethod<[string], UserBalancesResult>;
 	validate_add_liquidity: ActorMethod<[], ValidateAddLiquidityResult>;

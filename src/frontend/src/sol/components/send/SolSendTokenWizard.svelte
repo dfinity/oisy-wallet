@@ -10,15 +10,13 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
-	import SendQrCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -45,7 +43,6 @@
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
@@ -62,15 +59,14 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
-	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let network: Network | undefined = undefined;
-	$: network = $sendToken.network;
+	$: ({ network } = $sendToken);
 
 	let networkId: NetworkId | undefined = undefined;
-	$: networkId = $sendToken.network.id;
+	$: ({ id: networkId } = network);
 
 	let source: OptionSolAddress;
 	let solanaNativeToken: Token;
@@ -164,12 +160,12 @@
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
 				}),
-				prioritizationFee: $prioritizationFeeStore ?? ZERO_BI,
+				prioritizationFee: $prioritizationFeeStore ?? ZERO,
 				destination,
 				source
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_SUCCESS,
 				metadata: {
 					token: $sendToken.symbol
@@ -178,7 +174,7 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_ERROR,
 				metadata: {
 					token: $sendToken.symbol
@@ -215,27 +211,14 @@
 		<SolSendForm
 			on:icNext
 			on:icClose
+			on:icTokensList
+			on:icBack
 			bind:destination
 			bind:amount
-			on:icQRCodeScan
 			source={source ?? ''}
 		>
-			<svelte:fragment slot="cancel">
-				{#if formCancelAction === 'back'}
-					<ButtonBack on:click={back} />
-				{:else}
-					<ButtonCancel on:click={close} />
-				{/if}
-			</svelte:fragment>
+			<ButtonBack onclick={back} slot="cancel" />
 		</SolSendForm>
-	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-		<SendQrCodeScan
-			expectedToken={$sendToken}
-			bind:destination
-			bind:amount
-			{decodeQrCode}
-			on:icQRCodeBack
-		/>
 	{:else}
 		<slot />
 	{/if}

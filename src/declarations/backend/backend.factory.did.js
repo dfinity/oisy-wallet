@@ -1,14 +1,5 @@
 // @ts-ignore
 export const idlFactory = ({ IDL }) => {
-	const ApiEnabled = IDL.Variant({
-		ReadOnly: IDL.Null,
-		Enabled: IDL.Null,
-		Disabled: IDL.Null
-	});
-	const Guards = IDL.Record({
-		user_data: ApiEnabled,
-		threshold_key: ApiEnabled
-	});
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
 		ii_canister_id: IDL.Principal,
@@ -18,7 +9,6 @@ export const idlFactory = ({ IDL }) => {
 		credential_type: CredentialType
 	});
 	const InitArg = IDL.Record({
-		api: IDL.Opt(Guards),
 		derivation_origin: IDL.Opt(IDL.Text),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
@@ -44,7 +34,7 @@ export const idlFactory = ({ IDL }) => {
 		ConfigurationError: IDL.Null,
 		UserNotFound: IDL.Null
 	});
-	const Result = IDL.Variant({
+	const AddUserCredentialResult = IDL.Variant({
 		Ok: IDL.Null,
 		Err: AddUserCredentialError
 	});
@@ -53,14 +43,12 @@ export const idlFactory = ({ IDL }) => {
 		dapp_id: IDL.Text
 	});
 	const AddDappSettingsError = IDL.Variant({
+		MaxHiddenDappIds: IDL.Null,
 		VersionMismatch: IDL.Null,
 		DappIdTooLong: IDL.Null,
 		UserNotFound: IDL.Null
 	});
-	const Result_1 = IDL.Variant({
-		Ok: IDL.Null,
-		Err: AddDappSettingsError
-	});
+	const Result = IDL.Variant({ Ok: IDL.Null, Err: AddDappSettingsError });
 	const AllowSigningRequest = IDL.Record({ nonce: IDL.Nat64 });
 	const AllowSigningStatus = IDL.Variant({
 		Skipped: IDL.Null,
@@ -105,7 +93,7 @@ export const idlFactory = ({ IDL }) => {
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
-	const Result_2 = IDL.Variant({
+	const Result_1 = IDL.Variant({
 		Ok: AllowSigningResponse,
 		Err: AllowSigningError
 	});
@@ -132,7 +120,7 @@ export const idlFactory = ({ IDL }) => {
 	const BtcAddPendingTransactionError = IDL.Variant({
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
-	const Result_3 = IDL.Variant({
+	const Result_2 = IDL.Variant({
 		Ok: IDL.Null,
 		Err: BtcAddPendingTransactionError
 	});
@@ -147,7 +135,7 @@ export const idlFactory = ({ IDL }) => {
 	const BtcGetPendingTransactionsReponse = IDL.Record({
 		transactions: IDL.Vec(PendingTransaction)
 	});
-	const Result_4 = IDL.Variant({
+	const Result_3 = IDL.Variant({
 		Ok: BtcGetPendingTransactionsReponse,
 		Err: BtcAddPendingTransactionError
 	});
@@ -164,12 +152,11 @@ export const idlFactory = ({ IDL }) => {
 		PendingTransactions: IDL.Null,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
-	const Result_5 = IDL.Variant({
+	const Result_4 = IDL.Variant({
 		Ok: SelectedUtxosFeeResponse,
 		Err: SelectedUtxosFeeError
 	});
 	const Config = IDL.Record({
-		api: IDL.Opt(Guards),
 		derivation_origin: IDL.Opt(IDL.Text),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
@@ -185,9 +172,10 @@ export const idlFactory = ({ IDL }) => {
 	const CreateChallengeError = IDL.Variant({
 		ChallengeInProgress: IDL.Null,
 		MissingUserProfile: IDL.Null,
-		RandomnessError: IDL.Text
+		RandomnessError: IDL.Text,
+		Other: IDL.Text
 	});
-	const Result_6 = IDL.Variant({
+	const Result_5 = IDL.Variant({
 		Ok: CreateChallengeResponse,
 		Err: CreateChallengeError
 	});
@@ -198,15 +186,19 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const NetworkSettingsFor = IDL.Variant({
 		InternetComputer: IDL.Null,
+		BaseSepolia: IDL.Null,
 		SolanaTestnet: IDL.Null,
 		BitcoinRegtest: IDL.Null,
 		SolanaDevnet: IDL.Null,
 		EthereumSepolia: IDL.Null,
 		BitcoinTestnet: IDL.Null,
+		BaseMainnet: IDL.Null,
+		BscMainnet: IDL.Null,
 		SolanaLocal: IDL.Null,
 		EthereumMainnet: IDL.Null,
 		SolanaMainnet: IDL.Null,
-		BitcoinMainnet: IDL.Null
+		BitcoinMainnet: IDL.Null,
+		BscTestnet: IDL.Null
 	});
 	const NetworkSettings = IDL.Record({
 		enabled: IDL.Bool,
@@ -231,6 +223,15 @@ export const idlFactory = ({ IDL }) => {
 		settings: IDL.Opt(Settings),
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
+	});
+	const GetAllowedCyclesResponse = IDL.Record({ allowed_cycles: IDL.Nat });
+	const GetAllowedCyclesError = IDL.Variant({
+		Other: IDL.Text,
+		FailedToContactCyclesLedger: IDL.Null
+	});
+	const Result_6 = IDL.Variant({
+		Ok: GetAllowedCyclesResponse,
+		Err: GetAllowedCyclesError
 	});
 	const CanisterStatusType = IDL.Variant({
 		stopped: IDL.Null,
@@ -433,43 +434,6 @@ export const idlFactory = ({ IDL }) => {
 		users: IDL.Vec(OisyUser),
 		matches_max_length: IDL.Nat64
 	});
-	const Stats = IDL.Record({
-		user_profile_count: IDL.Nat64,
-		custom_token_count: IDL.Nat64,
-		user_timestamps_count: IDL.Nat64,
-		user_token_count: IDL.Nat64
-	});
-	const MigrationError = IDL.Variant({
-		TargetLockFailed: IDL.Null,
-		TargetUnlockFailed: IDL.Null,
-		CouldNotGetTargetPostStats: IDL.Null,
-		CouldNotGetTargetPriorStats: IDL.Null,
-		DataMigrationFailed: IDL.Null,
-		TargetStatsMismatch: IDL.Tuple(Stats, Stats),
-		Unknown: IDL.Null,
-		TargetCanisterNotEmpty: Stats,
-		NoMigrationInProgress: IDL.Null
-	});
-	const MigrationProgress = IDL.Variant({
-		MigratedUserTokensUpTo: IDL.Opt(IDL.Principal),
-		Failed: MigrationError,
-		MigratedUserTimestampsUpTo: IDL.Opt(IDL.Principal),
-		MigratedCustomTokensUpTo: IDL.Opt(IDL.Principal),
-		CheckingDataMigration: IDL.Null,
-		MigratedUserProfilesUpTo: IDL.Opt(IDL.Tuple(IDL.Nat64, IDL.Principal)),
-		UnlockingTarget: IDL.Null,
-		Unlocking: IDL.Null,
-		Completed: IDL.Null,
-		Pending: IDL.Null,
-		LockingTarget: IDL.Null,
-		CheckingTarget: IDL.Null
-	});
-	const MigrationReport = IDL.Record({
-		to: IDL.Principal,
-		progress: MigrationProgress
-	});
-	const Result_8 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
-	const Result_9 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -482,9 +446,15 @@ export const idlFactory = ({ IDL }) => {
 		VersionMismatch: IDL.Null,
 		UserNotFound: IDL.Null
 	});
-	const Result_10 = IDL.Variant({
+	const Result_8 = IDL.Variant({
 		Ok: IDL.Null,
 		Err: SaveTestnetsSettingsError
+	});
+	const Stats = IDL.Record({
+		user_profile_count: IDL.Nat64,
+		custom_token_count: IDL.Nat64,
+		user_timestamps_count: IDL.Nat64,
+		user_token_count: IDL.Nat64
 	});
 	const TopUpCyclesLedgerRequest = IDL.Record({
 		threshold: IDL.Opt(IDL.Nat),
@@ -507,7 +477,7 @@ export const idlFactory = ({ IDL }) => {
 			available: IDL.Nat
 		})
 	});
-	const Result_11 = IDL.Variant({
+	const Result_9 = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
@@ -516,21 +486,21 @@ export const idlFactory = ({ IDL }) => {
 		current_user_version: IDL.Opt(IDL.Nat64)
 	});
 	return IDL.Service({
-		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
-		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result_1], []),
-		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [Result_2], []),
-		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_3], []),
-		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_4], []),
-		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_5], []),
-		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
+		add_user_credential: IDL.Func([AddUserCredentialRequest], [AddUserCredentialResult], []),
+		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result], []),
+		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [Result_1], []),
+		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_2], []),
+		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_3], []),
+		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_4], []),
 		config: IDL.Func([], [Config], ['query']),
-		create_pow_challenge: IDL.Func([], [Result_6], []),
+		create_pow_challenge: IDL.Func([], [Result_5], []),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		get_account_creation_timestamps: IDL.Func(
 			[],
 			[IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))],
 			['query']
 		),
+		get_allowed_cycles: IDL.Func([], [Result_6], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)], ['query']),
 		get_user_profile: IDL.Func([], [Result_7], ['query']),
@@ -544,34 +514,20 @@ export const idlFactory = ({ IDL }) => {
 		),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)], ['query']),
 		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse], ['query']),
-		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_8], []),
-		migration: IDL.Func([], [IDL.Opt(MigrationReport)], ['query']),
-		migration_stop_timer: IDL.Func([], [Result_9], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
-		set_guards: IDL.Func([Guards], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_snapshot: IDL.Func([UserSnapshot], [], []),
-		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_10], []),
+		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_8], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats], ['query']),
-		step_migration: IDL.Func([], [], []),
-		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_11], []),
-		update_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_10], [])
+		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_9], []),
+		update_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_8], [])
 	});
 };
 // @ts-ignore
 export const init = ({ IDL }) => {
-	const ApiEnabled = IDL.Variant({
-		ReadOnly: IDL.Null,
-		Enabled: IDL.Null,
-		Disabled: IDL.Null
-	});
-	const Guards = IDL.Record({
-		user_data: ApiEnabled,
-		threshold_key: ApiEnabled
-	});
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
 		ii_canister_id: IDL.Principal,
@@ -581,7 +537,6 @@ export const init = ({ IDL }) => {
 		credential_type: CredentialType
 	});
 	const InitArg = IDL.Record({
-		api: IDL.Opt(Guards),
 		derivation_origin: IDL.Opt(IDL.Text),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),

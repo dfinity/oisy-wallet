@@ -26,9 +26,10 @@ import {
 	SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE,
 	SIDEBAR_NAVIGATION_MENU,
 	TOKEN_BALANCE,
-	TOKEN_CARD
+	TOKEN_CARD,
+	TOKEN_GROUP
 } from '$lib/constants/test-ids.constants';
-import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
+import type { InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
@@ -167,7 +168,9 @@ abstract class Homepage {
 		await this.#page.locator(selector).innerHTML();
 
 		if (await this.isSelectorVisible({ selector })) {
-			await this.#page.locator(selector).evaluate((element) => (element.innerHTML = 'placeholder'));
+			const elementsLocator = this.#page.locator(selector);
+			await elementsLocator.evaluate((element) => (element.innerHTML = 'placeholder'));
+			await elementsLocator.locator('text=placeholder').first().waitFor();
 		}
 	}
 
@@ -178,6 +181,8 @@ abstract class Homepage {
 				(element as HTMLElement).innerHTML = 'placeholder';
 			}
 		});
+
+		await elementsLocator.locator('text=placeholder').first().waitFor();
 	}
 
 	private async goto(): Promise<void> {
@@ -250,10 +255,10 @@ abstract class Homepage {
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
 		await this.waitForByTestId({ testId: `${TOKEN_CARD}-ICP-ICP`, options });
-		await this.waitForByTestId({ testId: `${TOKEN_CARD}-ETH-ETH`, options });
+		await this.waitForByTestId({ testId: `${TOKEN_GROUP}-ETH-ETH`, options });
 
-		await this.waitForByTestId({ testId: `${TOKEN_BALANCE}-ICP`, options });
-		await this.waitForByTestId({ testId: `${TOKEN_BALANCE}-ETH`, options });
+		await this.waitForByTestId({ testId: `${TOKEN_BALANCE}-ICP-ICP`, options });
+		await this.waitForByTestId({ testId: `${TOKEN_BALANCE}-ETH-ETH`, options });
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
@@ -523,7 +528,9 @@ abstract class Homepage {
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
+
 				await expect(element).toHaveScreenshot({ fullPage: true });
+
 				await this.showMobileNavigationMenu();
 			}
 		}
@@ -560,8 +567,8 @@ export class HomepageLoggedOut extends Homepage {
 export class HomepageLoggedIn extends Homepage {
 	readonly #iiPage: InternetIdentityPage;
 
-	constructor({ page, iiPage, viewportSize }: HomepageLoggedInParams) {
-		super({ page, viewportSize });
+	constructor({ iiPage, ...rest }: HomepageLoggedInParams) {
+		super(rest);
 
 		this.#iiPage = iiPage;
 	}

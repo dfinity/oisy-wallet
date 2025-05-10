@@ -1,6 +1,14 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import {
+	BASE_ETH_TOKEN,
+	BASE_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import {
+	BNB_MAINNET_TOKEN,
+	BNB_TESTNET_TOKEN
+} from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
+import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
 	BTC_TESTNET_TOKEN
@@ -32,6 +40,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('all-tokens.derived', () => {
@@ -114,6 +123,8 @@ describe('all-tokens.derived', () => {
 				BTC_MAINNET_TOKEN.id.description,
 				ETHEREUM_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
+				BASE_ETH_TOKEN.id.description,
+				BNB_MAINNET_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockIcrcToken2.id.description,
 				mockIcrcToken.id.description,
@@ -152,7 +163,7 @@ describe('all-tokens.derived', () => {
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);
 
-			expect(tokenSymbols.filter((symbol) => symbol === mockIcrcToken.id.description).length).toBe(
+			expect(tokenSymbols.filter((symbol) => symbol === mockIcrcToken.id.description)).toHaveLength(
 				1
 			);
 		});
@@ -173,6 +184,7 @@ describe('all-tokens.derived', () => {
 
 		it('should include testnet tokens when testnets are enabled', () => {
 			setupTestnetsStore('enabled');
+			setupUserNetworksStore('allEnabled');
 
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);
@@ -185,12 +197,18 @@ describe('all-tokens.derived', () => {
 				SEPOLIA_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
 				SOLANA_TESTNET_TOKEN.id.description,
-				SOLANA_DEVNET_TOKEN.id.description
+				SOLANA_DEVNET_TOKEN.id.description,
+				BASE_ETH_TOKEN.id.description,
+				BASE_SEPOLIA_ETH_TOKEN.id.description,
+				BNB_MAINNET_TOKEN.id.description,
+				BNB_TESTNET_TOKEN.id.description
 			]);
 		});
 
 		it('should include local tokens when testnets are enabled and it is local env', () => {
 			setupTestnetsStore('enabled');
+			setupUserNetworksStore('allEnabled');
+
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			const tokens = get(allTokens);
@@ -206,7 +224,11 @@ describe('all-tokens.derived', () => {
 				SOLANA_TOKEN.id.description,
 				SOLANA_TESTNET_TOKEN.id.description,
 				SOLANA_DEVNET_TOKEN.id.description,
-				SOLANA_LOCAL_TOKEN.id.description
+				SOLANA_LOCAL_TOKEN.id.description,
+				BASE_ETH_TOKEN.id.description,
+				BASE_SEPOLIA_ETH_TOKEN.id.description,
+				BNB_MAINNET_TOKEN.id.description,
+				BNB_TESTNET_TOKEN.id.description
 			]);
 		});
 	});

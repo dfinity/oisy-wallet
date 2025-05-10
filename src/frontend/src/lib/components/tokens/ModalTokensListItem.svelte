@@ -9,7 +9,7 @@
 	import type { CardData } from '$lib/types/token-card';
 
 	export let data: CardData;
-	export let logoSize: LogoSize = 'md';
+	export let logoSize: LogoSize = 'lg';
 
 	const { oisyName, oisySymbol, symbol, name, network } = data;
 </script>
@@ -32,7 +32,7 @@
 	</svelte:fragment>
 
 	<div class="mr-2" slot="logo">
-		<TokenLogo {data} color="white" badge={{ type: 'network', blackAndWhite: true }} {logoSize} />
+		<TokenLogo {data} color="white" badge={{ type: 'network' }} {logoSize} />
 	</div>
 
 	<TokenBalance {data} slot="title-end" />

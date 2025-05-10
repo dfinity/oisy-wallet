@@ -7,18 +7,13 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkToken, IcInterface, IcToken } from '$icp/types/ic-token';
-import type { IcrcCustomTokenWithoutId } from '$icp/types/icrc-custom-token';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	mapIcrcToken,
 	mapTokenOisyName,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import {
-	queryAndUpdate,
-	type QueryAndUpdateRequestParams,
-	type QueryAndUpdateStrategy
-} from '$lib/actors/query.ic';
 import { listCustomTokens } from '$lib/api/backend.api';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -28,7 +23,14 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { AnonymousIdentity, type Identity } from '@dfinity/agent';
-import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import {
+	fromNullable,
+	isNullish,
+	nonNullish,
+	queryAndUpdate,
+	type QueryAndUpdateRequestParams,
+	type QueryAndUpdateStrategy
+} from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -42,10 +44,10 @@ const loadDefaultIcrcTokens = async () => {
 };
 
 export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
-	queryAndUpdate<IcrcCustomTokenWithoutId[]>({
+	queryAndUpdate<IcrcCustomToken[]>({
 		request: (params) => loadIcrcCustomTokens(params),
 		onLoad: loadIcrcCustomData,
-		onCertifiedError: ({ error: err }) => {
+		onUpdateError: ({ error: err }) => {
 			icrcCustomTokensStore.resetAll();
 
 			toastsError({
@@ -66,7 +68,7 @@ export const loadDefaultIcrc = ({
 	queryAndUpdate<IcrcLoadData>({
 		request: (params) => requestIcrcMetadata({ ...params, ...data, category: 'default' }),
 		onLoad: loadIcrcData,
-		onCertifiedError: ({ error: err }) => {
+		onUpdateError: ({ error: err }) => {
 			icrcDefaultTokensStore.reset(data.ledgerCanisterId);
 
 			toastsError({
@@ -108,7 +110,7 @@ const loadIcrcData = ({
 const loadIcrcCustomTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
-}): Promise<IcrcCustomTokenWithoutId[]> => {
+}): Promise<IcrcCustomToken[]> => {
 	const tokens = await listCustomTokens({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
@@ -131,14 +133,14 @@ const loadCustomIcrcTokensData = async ({
 	tokens: CustomToken[];
 	certified: boolean;
 	identity: OptionIdentity;
-}): Promise<IcrcCustomTokenWithoutId[]> => {
+}): Promise<IcrcCustomToken[]> => {
 	const indexedIcrcCustomTokens = buildIndexedIcrcCustomTokens();
 
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
 		custom_token: CustomToken,
 		index: number
-	): Promise<IcrcCustomTokenWithoutId | undefined> => {
+	): Promise<IcrcCustomToken | undefined> => {
 		const { enabled, version: v, token } = custom_token;
 
 		if (!('Icrc' in token)) {
@@ -183,7 +185,30 @@ const loadCustomIcrcTokensData = async ({
 				};
 	};
 
-	return (await Promise.all(tokens.map(requestIcrcCustomTokenMetadata))).filter(nonNullish);
+	const results = await Promise.allSettled(tokens.map(requestIcrcCustomTokenMetadata));
+
+	return results.reduce<IcrcCustomToken[]>((acc, result, index) => {
+		if (result.status !== 'fulfilled') {
+			// For development purposes, we want to see the error in the console.
+			console.error(result.reason);
+
+			const { token } = tokens[index];
+
+			if ('Icrc' in token) {
+				const {
+					Icrc: { ledger_id }
+				} = token;
+
+				icrcCustomTokensStore.reset(ledger_id.toString());
+			}
+
+			return acc;
+		}
+
+		const { value } = result;
+
+		return [...acc, ...(nonNullish(value) ? [value] : [])];
+	}, []);
 };
 
 const loadIcrcCustomData = ({
@@ -191,7 +216,7 @@ const loadIcrcCustomData = ({
 	certified
 }: {
 	certified: boolean;
-	response: IcrcCustomTokenWithoutId[];
+	response: IcrcCustomToken[];
 }) => {
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
@@ -212,7 +237,7 @@ export const loadDisabledIcrcTokensBalances = ({
 			});
 
 			balancesStore.set({
-				tokenId: id,
+				id,
 				data: {
 					data: icrcTokenBalance,
 					certified: true
@@ -227,8 +252,9 @@ export const loadDisabledIcrcTokensExchanges = async ({
 	disabledIcrcTokens: IcToken[];
 }): Promise<void> => {
 	const [currentErc20Prices, currentIcrcPrices] = await Promise.all([
-		exchangeRateERC20ToUsd(
-			disabledIcrcTokens.reduce<Erc20ContractAddress[]>((acc, token) => {
+		exchangeRateERC20ToUsd({
+			coingeckoPlatformId: 'ethereum',
+			contractAddresses: disabledIcrcTokens.reduce<Erc20ContractAddress[]>((acc, token) => {
 				const twinTokenAddress = ((token as Partial<IcCkToken>).twinToken as Erc20Token | undefined)
 					?.address;
 
@@ -241,7 +267,7 @@ export const loadDisabledIcrcTokensExchanges = async ({
 						]
 					: acc;
 			}, [])
-		),
+		}),
 		exchangeRateICRCToUsd(
 			disabledIcrcTokens.reduce<LedgerCanisterIdText[]>(
 				(acc, { ledgerCanisterId }) =>

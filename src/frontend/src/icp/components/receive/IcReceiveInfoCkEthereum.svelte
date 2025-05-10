@@ -25,26 +25,28 @@
 	<Hr spacing="lg" />
 
 	<Value ref="ethereum-helper-contract" element="div">
-		<svelte:fragment slot="label"
-			>{replacePlaceholders($i18n.receive.ethereum.text.from_network, {
+		{#snippet label()}
+			{replacePlaceholders($i18n.receive.ethereum.text.from_network, {
 				$network: $ckEthereumTwinTokenNetwork.name
-			})}</svelte:fragment
-		>
+			})}
+		{/snippet}
 
-		<p class="break-normal py-2 text-tertiary">
-			{replacePlaceholders(
-				replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
-				{
-					$token: $ckEthereumTwinToken.symbol,
-					$ckToken: $token.symbol,
-					$network: $ckEthereumTwinTokenNetwork.name
-				}
-			)}
-		</p>
+		{#snippet content()}
+			<p class="break-normal py-2 text-tertiary">
+				{replacePlaceholders(
+					replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
+					{
+						$token: $ckEthereumTwinToken.symbol,
+						$ckToken: $token.symbol,
+						$network: $ckEthereumTwinTokenNetwork.name
+					}
+				)}
+			</p>
+		{/snippet}
 	</Value>
 
 	<div class="flex w-full flex-col gap-3" slot="toolbar">
-		<Button paddingSmall colorStyle="secondary" on:click={() => dispatch('icConvert')}>
+		<Button paddingSmall colorStyle="secondary" on:click={() => dispatch('icHowToConvert')}>
 			<span class="text-dark-slate-blue font-bold"
 				>{replacePlaceholders(
 					replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
@@ -56,6 +58,6 @@
 			>
 		</Button>
 
-		<ButtonDone on:click={close} />
+		<ButtonDone onclick={close} />
 	</div>
 </ContentWithToolbar>

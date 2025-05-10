@@ -1,3 +1,4 @@
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
@@ -11,8 +12,8 @@ import {
 	type FeeStoreData
 } from '$eth/stores/fee.store';
 import * as ckEthDerived from '$icp-eth/derived/cketh.derived';
+import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import * as ckEthStores from '$icp-eth/stores/cketh.store';
-import { type CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
@@ -40,8 +41,9 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import type { MinterInfo } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
+import { InfuraProvider } from 'ethers/providers';
 import { get, readable, writable } from 'svelte/store';
-import { type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
@@ -50,17 +52,6 @@ vi.mock('$lib/services/auth.services', () => ({
 vi.mock('$eth/services/fee.services', () => ({
 	getErc20FeeData: vi.fn()
 }));
-
-vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
-	provider.prototype.getFeeData = vi.fn().mockResolvedValue({
-		lastBaseFeePerGas: null,
-		maxFeePerGas: null,
-		maxPriorityFeePerGas: null,
-		gasPrice: null
-	});
-	return { InfuraProvider: provider, JsonRpcProvider: provider, EtherscanProvider: provider };
-});
 
 describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
@@ -113,7 +104,7 @@ describe('EthConvertTokenWizard', () => {
 
 		if (nonNullish(minterInfo)) {
 			store.set({
-				tokenId: ETHEREUM_TOKEN.id,
+				id: ETHEREUM_TOKEN.id,
 				data: {
 					certified: true,
 					data: minterInfo
@@ -155,7 +146,15 @@ describe('EthConvertTokenWizard', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		InfuraProvider.prototype.getFeeData = vi.fn().mockResolvedValue({
+			lastBaseFeePerGas: null,
+			maxFeePerGas: null,
+			maxPriorityFeePerGas: null,
+			gasPrice: null
+		});
+
 		mockPage.reset();
+		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
 
 		ethAddressStore.reset();
 
@@ -178,7 +177,7 @@ describe('EthConvertTokenWizard', () => {
 
 		await clickConvertButton(container);
 
-		const args = sendSpy.mock.calls[0][0];
+		const [[args]] = sendSpy.mock.calls;
 
 		expect(sendSpy).toHaveBeenCalledOnce();
 		expect(stringifyJson({ value: args })).toBe(
@@ -280,7 +279,7 @@ describe('EthConvertTokenWizard', () => {
 		expect(sendSpy).not.toHaveBeenCalled();
 	});
 
-	it('should not call send if maxFeePerGas is null', async () => {
+	it('should not call send if maxPriorityFeePerGas is null', async () => {
 		const { container } = render(EthConvertTokenWizard, {
 			props,
 			context: mockContext({ ...mockFees, maxPriorityFeePerGas: null })

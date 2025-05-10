@@ -7,6 +7,8 @@ on:
   pull_request:
     types: [opened, synchronize, labeled]
   merge_group:
+  schedule:
+    - cron: '30 3 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -90,8 +92,14 @@ jobs:
       macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
 
     steps:
+      - name: Run macOS only on dispatch, schedule or label
+        if: runner.os == 'macOS' && github.event_name != 'workflow_dispatch' && github.event_name != 'schedule' && !contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots')
+        run: |
+          echo "Skipping macOS: not a dispatch/schedule and PR not labeled accordingly."
+          exit 0
+
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@3ff1caaa28b64c9cc276ce0a02e2ff584f3900c5 # v2.0.2
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
@@ -113,7 +121,7 @@ jobs:
           persist-credentials: false
 
       - name: Download WASM artifact
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: backend.wasm.gz
           path: out/
@@ -177,7 +185,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: snapshots-${{ matrix.os }}
-          path: e2e/**/*.spec.ts-snapshots/**/*-${{ steps.set_snapshot_output.outputs.os_suffix }}.png
+          path: e2e/snapshots/**/*.spec.ts-snapshots/**/*-${{ steps.set_snapshot_output.outputs.os_suffix }}.png
           retention-days: 3
 
   finalize-snapshots-update:
@@ -192,7 +200,7 @@ jobs:
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@3ff1caaa28b64c9cc276ce0a02e2ff584f3900c5 # v2.0.2
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
@@ -223,17 +231,17 @@ jobs:
 
       - name: Download Ubuntu Snapshots
         if: env.ubuntu_status == 'true'
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: snapshots-ubuntu-24.04
-          path: e2e
+          path: e2e/snapshots
 
       - name: Download macOS Snapshots
         if: env.macos_status == 'true'
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: snapshots-macos-14
-          path: e2e
+          path: e2e/snapshots
 
       - name: Check for Final Changes
         id: e2e-check-snapshots
@@ -280,15 +288,12 @@ jobs:
             ${{ env.MODIFIED_FILES }}
             ```
 
-  may-merge-e2e:
+  e2e-tests-pass:
     if: always()
     needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, macos-14]
     steps:
       - name: Cleared for merging
         run: |

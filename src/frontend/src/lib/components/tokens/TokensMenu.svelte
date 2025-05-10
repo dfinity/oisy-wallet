@@ -15,13 +15,15 @@
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
+	const manageTokensId = Symbol();
+
 	const toggleHideZeros = () => {
 		document.dispatchEvent(new CustomEvent('toggleHideZeros'));
 		emit({ message: 'oisyToggleZeroBalances' });
 	};
 
 	const openManageTokens = () => {
-		modalStore.openManageTokens();
+		modalStore.openManageTokens({ id: manageTokensId });
 		visible = false;
 	};
 </script>

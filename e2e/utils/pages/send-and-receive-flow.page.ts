@@ -8,6 +8,7 @@ import {
 	RECEIVE_TOKENS_MODAL_ICP_SECTION,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	REVIEW_FORM_SEND_BUTTON,
+	SEND_FORM_DESTINATION_NEXT_BUTTON,
 	SEND_FORM_NEXT_BUTTON,
 	SEND_TOKENS_MODAL,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
@@ -24,13 +25,14 @@ const commandRunner = createCommandRunner();
 export type FlowPageParams = HomepageLoggedInParams;
 
 export class FlowPage extends HomepageLoggedIn {
-	constructor({ page, iiPage }: FlowPageParams) {
-		super({ page, iiPage });
+	constructor(params: FlowPageParams) {
+		super(params);
 	}
 
 	async receiveTokens(): Promise<void> {
 		await this.clickByTestId({ testId: `${TOKEN_CARD}-ICP-ICP` });
 		await this.waitForByTestId({ testId: AMOUNT_DATA });
+
 		await expect(this.getBalanceLocator()).toHaveText('0.00');
 
 		await this.waitForModal({
@@ -38,12 +40,14 @@ export class FlowPage extends HomepageLoggedIn {
 			modalTestId: RECEIVE_TOKENS_MODAL
 		});
 		const accountId = await this.getAccountIdByTestId(RECEIVE_TOKENS_MODAL_ICP_SECTION);
+
 		expect(accountId).toBeTruthy();
 
 		await commandRunner.exec({
 			command: new LedgerTransferCommand({ amount: '10', recipient: accountId })
 		});
 		await this.clickByTestId({ testId: RECEIVE_TOKENS_MODAL_DONE_BUTTON });
+
 		await expect(this.getBalanceLocator()).toHaveText('10 ICP', { timeout: 30_000 });
 	}
 
@@ -53,11 +57,12 @@ export class FlowPage extends HomepageLoggedIn {
 			modalOpenButtonTestId: SEND_TOKENS_MODAL_OPEN_BUTTON,
 			modalTestId: SEND_TOKENS_MODAL
 		});
-		await this.clickByTestId({ testId: MAX_BUTTON });
 		await this.setInputValueByTestId({
 			testId: DESTINATION_INPUT,
 			value: 'tjgkf-baw6u-7lmw2-cbwoi-omgia-jk4kg-yvfcw-jni6g-k7spl-552th-jae'
 		});
+		await this.clickByTestId({ testId: SEND_FORM_DESTINATION_NEXT_BUTTON });
+		await this.clickByTestId({ testId: MAX_BUTTON });
 		await this.setInputValueByTestId({
 			testId: TOKEN_INPUT_CURRENCY_TOKEN,
 			value: '1'
@@ -65,6 +70,7 @@ export class FlowPage extends HomepageLoggedIn {
 		await this.clickByTestId({ testId: SEND_FORM_NEXT_BUTTON });
 		await this.clickByTestId({ testId: REVIEW_FORM_SEND_BUTTON });
 		const progressModalExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
+
 		expect(progressModalExists).toBeTruthy();
 
 		await this.waitForByTestId({
@@ -72,6 +78,7 @@ export class FlowPage extends HomepageLoggedIn {
 			options: { state: 'detached' }
 		});
 		const progressModalDoesNotExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
+
 		expect(progressModalDoesNotExists).toBeFalsy();
 
 		await this.mockSelectorAll({

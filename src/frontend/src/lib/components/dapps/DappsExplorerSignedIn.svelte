@@ -9,7 +9,7 @@
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { type FeaturedOisyDappDescription } from '$lib/types/dapp-description';
+	import type { FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	// For the moment only the first featured dapp is highlighted
@@ -28,6 +28,8 @@
 	$: filteredDapps = dAppDescriptions.filter(
 		({ tags }) => isNullish(selectedTag) || tags.includes(selectedTag)
 	);
+
+	const modalId = Symbol();
 </script>
 
 <PageTitle>{$i18n.dapps.text.title}</PageTitle>
@@ -35,7 +37,7 @@
 {#if nonNullish(featuredDapp) && nonNullish(featuredDapp.screenshots)}
 	<div class="mb-6 md:mb-10">
 		<DappPromoBanner
-			on:click={() => modalStore.openDappDetails(featuredDapp)}
+			on:click={() => modalStore.openDappDetails({ id: modalId, data: featuredDapp })}
 			dAppDescription={featuredDapp}
 		/>
 	</div>
@@ -67,7 +69,7 @@
 		<li class="flex" in:fade>
 			<DappCard
 				on:click={() => {
-					modalStore.openDappDetails(dApp);
+					modalStore.openDappDetails({ id: modalId, data: dApp });
 				}}
 				dAppDescription={dApp}
 			/>

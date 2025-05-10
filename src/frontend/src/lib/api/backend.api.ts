@@ -1,7 +1,9 @@
 import type {
-	AllowSigningRequest,
+	AddUserCredentialResult,
 	AllowSigningResponse,
+	CreateChallengeResponse,
 	CustomToken,
+	GetAllowedCyclesResponse,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -11,8 +13,8 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
 	AddUserCredentialParams,
-	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
@@ -106,7 +108,7 @@ export const getUserProfile = async ({
 export const addUserCredential = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResponse> => {
+}: CanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResult> => {
 	const { addUserCredential } = await backendCanister({ identity });
 
 	return addUserCredential(params);
@@ -139,16 +141,28 @@ export const selectUserUtxosFee = async ({
 	return btcSelectUserUtxosFee(params);
 };
 
-export const allowSigning = async ({
-	request,
+export const createPowChallenge = async ({
 	identity
-}: CanisterApiFunctionParams<{
-	request?: AllowSigningRequest;
-}>): Promise<AllowSigningResponse> => {
+}: CanisterApiFunctionParams): Promise<CreateChallengeResponse> => {
+	const { createPowChallenge } = await backendCanister({ identity });
+	return createPowChallenge();
+};
+
+export const getAllowedCycles = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<GetAllowedCyclesResponse> => {
+	const { getAllowedCycles } = await backendCanister({ identity });
+
+	return getAllowedCycles();
+};
+
+export const allowSigning = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningResponse> => {
 	const { allowSigning } = await backendCanister({ identity });
 
-	// Conditionally call allowSigning with request or empty
-	return allowSigning(request ? { request } : {});
+	return allowSigning(params);
 };
 
 export const addUserHiddenDappId = async ({

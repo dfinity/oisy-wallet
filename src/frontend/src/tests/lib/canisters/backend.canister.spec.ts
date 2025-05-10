@@ -2,21 +2,21 @@ import type {
 	_SERVICE as BackendService,
 	CustomToken,
 	IcrcToken,
-	Result_2,
+	Result_1,
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
 
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import type { ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
@@ -49,7 +49,7 @@ describe('backend.canister', () => {
 	const addUserCredentialParams = {
 		credentialJwt: 'test-credential-jwt',
 		issuerCanisterId: mockPrincipal,
-		currentUserVersion: ZERO_BI,
+		currentUserVersion: ZERO,
 		credentialSpec: {
 			arguments: [],
 			credential_type: ''
@@ -426,7 +426,7 @@ describe('backend.canister', () => {
 			expect(service.btc_add_pending_transaction).toHaveBeenCalledWith(
 				btcAddPendingTransactionEndpointParams
 			);
-			expect(res).toEqual(true);
+			expect(res).toBeTruthy();
 		});
 
 		it('should throw an error if btc_add_pending_transaction returns an internal error', async () => {
@@ -608,13 +608,86 @@ describe('backend.canister', () => {
 		});
 	});
 
+	describe('getAllowedCycles', () => {
+		it('should return allowed cycles when response is successful', async () => {
+			const mockAllowedCycles = 1000000n;
+
+			service.get_allowed_cycles.mockResolvedValue({
+				Ok: { allowed_cycles: mockAllowedCycles }
+			});
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const result = await getAllowedCycles();
+
+			expect(service.get_allowed_cycles).toHaveBeenCalledTimes(1);
+			expect(result).toEqual({ allowed_cycles: mockAllowedCycles });
+		});
+
+		it('should throw CanisterInternalError when FailedToContactCyclesLedger error is returned', async () => {
+			service.get_allowed_cycles.mockResolvedValue({
+				Err: { FailedToContactCyclesLedger: null }
+			});
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getAllowedCycles()).rejects.toThrow(
+				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
+			);
+		});
+
+		it('should throw CanisterInternalError with custom message when Other error is returned', async () => {
+			const errorMsg = 'Custom error message';
+			service.get_allowed_cycles.mockResolvedValue({
+				Err: { Other: errorMsg }
+			});
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getAllowedCycles()).rejects.toThrow(new CanisterInternalError(errorMsg));
+		});
+
+		it('should throw unknown GetAllowedCyclesError for unrecognized errors', async () => {
+			service.get_allowed_cycles.mockResolvedValue({
+				Err: { Other: 'Some unknown error' }
+			});
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getAllowedCycles()).rejects.toThrow(
+				new CanisterInternalError('Some unknown error')
+			);
+		});
+
+		it('should throw an error if get_allowed_cycles throws', async () => {
+			service.get_allowed_cycles.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getAllowedCycles()).rejects.toThrow(mockResponseError);
+		});
+	});
+
 	describe('allowSigning', () => {
 		it('should allow signing', async () => {
-			const result: Result_2 = {
+			const result: Result_1 = {
 				Ok: {
 					status: { Executed: null }, // or { Skipped: null } or { Failed: null }, depending on your scenario
 					challenge_completion: [], // Provide appropriately if challenge completion data exists
-					allowed_cycles: BigInt(0) // Replace with proper value
+					allowed_cycles: ZERO // Replace with proper value
 				}
 			};
 
@@ -691,7 +764,7 @@ describe('backend.canister', () => {
 		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
 			const response = { Err: { UnrecognizedError: 'Some unknown error' } };
 
-			service.allow_signing.mockResolvedValue(response as unknown as Result_2);
+			service.allow_signing.mockResolvedValue(response as unknown as Result_1);
 
 			const { allowSigning } = await createBackendCanister({
 				serviceOverride: service
@@ -700,6 +773,77 @@ describe('backend.canister', () => {
 			await expect(allowSigning()).rejects.toThrow(
 				new CanisterInternalError('Unknown AllowSigningError')
 			);
+		});
+	});
+
+	describe('createPowChallenge', () => {
+		const mockPowChallengeSuccess = {
+			start_timestamp_ms: 1_644_001_000_000n,
+			expiry_timestamp_ms: 1_644_001_001_200n,
+			difficulty: 1_000_000
+		};
+
+		let backendCanister: BackendCanister;
+
+		beforeEach(async () => {
+			backendCanister = await createBackendCanister({ serviceOverride: service });
+		});
+
+		it('should successfully create a PoW challenge (Ok case)', async () => {
+			service.create_pow_challenge.mockResolvedValue({ Ok: mockPowChallengeSuccess });
+
+			const result = await backendCanister.createPowChallenge();
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
+			expect(result).toEqual(mockPowChallengeSuccess);
+		});
+
+		it('should handle challenge already in progress error', async () => {
+			service.create_pow_challenge.mockResolvedValue({
+				Err: { ChallengeInProgress: null }
+			});
+
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+				'Challenge is already in progress.'
+			);
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
+		});
+
+		it('should handle randomness generation error', async () => {
+			service.create_pow_challenge.mockResolvedValue({
+				Err: { RandomnessError: 'Failed to generate randomness' }
+			});
+
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+				'Failed to generate randomness'
+			);
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
+		});
+
+		it('should handle missing user profile error', async () => {
+			service.create_pow_challenge.mockResolvedValue({
+				Err: { MissingUserProfile: null }
+			});
+
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+				'User profile is missing.'
+			);
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
+		});
+
+		it('should handle other unexpected errors', async () => {
+			service.create_pow_challenge.mockResolvedValue({
+				Err: { Other: 'Unexpected error occurred.' }
+			});
+
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+				'Unexpected error occurred.'
+			);
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
 		});
 	});
 

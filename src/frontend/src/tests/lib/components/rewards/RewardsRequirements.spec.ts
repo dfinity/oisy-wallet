@@ -59,6 +59,7 @@ describe('RewardsRequirements', () => {
 				const requirementStatus: HTMLSpanElement | null = container.querySelector(
 					requirementStatusSelector(index)
 				);
+
 				expect(requirementStatus).toBeInTheDocument();
 				expect(requirementStatus?.className).toContain('text-success-primary');
 			});
@@ -78,6 +79,7 @@ describe('RewardsRequirements', () => {
 				const requirementStatus: HTMLSpanElement | null = container.querySelector(
 					requirementStatusSelector(index)
 				);
+
 				expect(requirementStatus).toBeInTheDocument();
 				expect(requirementStatus?.className).toContain('text-disabled');
 			});
@@ -97,6 +99,7 @@ describe('RewardsRequirements', () => {
 				const requirementStatus: HTMLSpanElement | null = container.querySelector(
 					requirementStatusSelector(index)
 				);
+
 				expect(requirementStatus).toBeInTheDocument();
 				expect(requirementStatus?.className).toContain('text-disabled');
 			});
@@ -116,6 +119,7 @@ describe('RewardsRequirements', () => {
 				const requirementStatus: HTMLSpanElement | null = container.querySelector(
 					requirementStatusSelector(index)
 				);
+
 				expect(requirementStatus).toBeInTheDocument();
 				expect(requirementStatus?.className).toContain('text-disabled');
 			});

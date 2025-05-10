@@ -77,6 +77,8 @@ fi
 export POCKET_IC_BIN="../../${POCKET_IC_SERVER_PATH}"
 export POCKET_IC_MUTE_SERVER=""
 
+./scripts/download-canister-api --network ic --canister backend
+
 # Run tests
 
 echo "Running backend integration tests."

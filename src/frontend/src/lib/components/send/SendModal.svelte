@@ -1,13 +1,30 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { createEventDispatcher, setContext } from 'svelte';
+	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+	import { ethTransactionsNotInitialized } from '$eth/derived/eth-transactions.derived';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
+	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
+	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
+	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
-	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnetNotLoaded,
+		ethAddressNotLoaded,
+		btcAddressRegtestNotLoaded,
+		btcAddressTestnetNotLoaded,
+		solAddressTestnetNotLoaded,
+		solAddressLocalnetNotLoaded,
+		solAddressDevnetNotLoaded,
+		solAddressMainnetNotLoaded
+	} from '$lib/derived/address.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -20,9 +37,23 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import { token } from '$lib/stores/token.store';
 	import type { Network, NetworkId } from '$lib/types/network';
-	import type { Token } from '$lib/types/token';
+	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
+	import type { OptionToken, Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import {
+		isNetworkIdBTCMainnet,
+		isNetworkIdBTCTestnet,
+		isNetworkIdEthereum,
+		isNetworkIdEvm,
+		isNetworkIdBTCRegtest,
+		isNetworkIdSOLMainnet,
+		isNetworkIdSOLDevnet,
+		isNetworkIdSOLLocal,
+		isNetworkIdSOLTestnet
+	} from '$lib/utils/network.utils';
+	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	export let destination = '';
@@ -67,21 +98,52 @@
 			dispatch('nnsClose');
 		});
 
-	const isDisabled = (): boolean => $ethAddressNotLoaded;
+	const isDisabled = ({ network: { id } }: Token): boolean =>
+		isNetworkIdEthereum(id) || isNetworkIdEvm(id)
+			? $ethAddressNotLoaded
+			: isNetworkIdBTCMainnet(id)
+				? $btcAddressMainnetNotLoaded
+				: isNetworkIdBTCTestnet(id)
+					? $btcAddressTestnetNotLoaded
+					: isNetworkIdBTCRegtest(id)
+						? $btcAddressRegtestNotLoaded
+						: isNetworkIdSOLMainnet(id)
+							? $solAddressMainnetNotLoaded
+							: isNetworkIdSOLDevnet(id)
+								? $solAddressDevnetNotLoaded
+								: isNetworkIdSOLLocal(id)
+									? $solAddressLocalnetNotLoaded
+									: isNetworkIdSOLTestnet(id)
+										? $solAddressTestnetNotLoaded
+										: false;
 
-	const nextStep = async ({ detail: token }: CustomEvent<Token>) => {
-		if (isDisabled()) {
-			const status = await waitWalletReady(isDisabled);
+	const onIcSendToken = async ({ detail: token }: CustomEvent<Token>) => {
+		if (isDisabled(token)) {
+			const status = await waitWalletReady(() => isDisabled(token));
 
 			if (status === 'timeout') {
 				return;
 			}
 		}
 
-		// eslint-disable-next-line require-await
 		const callback = async () => {
-			goToStep(WizardStepsSend.SEND);
+			destination = '';
+
+			goToStep(WizardStepsSend.DESTINATION);
+
+			// if an ETH token, load transactions manually in case the data not available yet
+			if (
+				$ethTransactionsNotInitialized &&
+				(isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id))
+			) {
+				await loadEthereumTransactions({
+					tokenId: token.id,
+					networkId: token.network.id,
+					silent: true
+				});
+			}
 		};
+
 		await loadTokenAndRun({ token, callback });
 	};
 
@@ -92,55 +154,86 @@
 			stepName
 		});
 
+	const onDecodeQrCode = ({
+		status,
+		code,
+		expectedToken
+	}: {
+		status: QrStatus;
+		code?: string;
+		expectedToken: OptionToken;
+	}): QrResponse => {
+		const params = {
+			status,
+			code,
+			expectedToken
+		};
+
+		return isNetworkIdEthereum($token?.network.id)
+			? decodeQrCodeETH({
+					...params,
+					ethereumTokens: $enabledEthereumTokens,
+					erc20Tokens: $enabledErc20Tokens
+				})
+			: decodeQrCode(params);
+	};
+
 	// TODO: Use network id to get the address to support bitcoin.
 	let source: string;
 	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
-<WizardModal
-	{steps}
-	bind:currentStep
-	bind:this={modal}
-	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
-		currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
-	testId={SEND_TOKENS_MODAL}
->
-	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+<SendTokenContext token={$token}>
+	<WizardModal
+		{steps}
+		bind:currentStep
+		bind:this={modal}
+		on:nnsClose={close}
+		disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
+			currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
+		testId={SEND_TOKENS_MODAL}
+	>
+		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
-		<SendTokensList
-			on:icSendToken={nextStep}
-			on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
-		/>
-	{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
-		<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
-	{:else}
-		<SendWizard
-			{source}
-			{currentStep}
-			bind:destination
-			bind:networkId
-			bind:targetNetwork
-			bind:amount
-			bind:sendProgressStep
-			formCancelAction={isTransactionsPage ? 'close' : 'back'}
-			on:icBack={modal.back}
-			on:icSendBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-			on:icNext={modal.next}
-			on:icClose={close}
-			on:icQRCodeScan={() =>
-				goToWizardStep({
-					modal,
-					steps,
-					stepName: WizardStepsSend.QR_CODE_SCAN
-				})}
-			on:icQRCodeBack={() =>
-				goToWizardStep({
-					modal,
-					steps,
-					stepName: WizardStepsSend.SEND
-				})}
-		/>
-	{/if}
-</WizardModal>
+		{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
+			<SendTokensList
+				on:icSendToken={onIcSendToken}
+				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+			/>
+		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
+			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
+		{:else if currentStep?.name === WizardStepsSend.DESTINATION}
+			<SendDestinationWizardStep
+				bind:destination
+				formCancelAction={isTransactionsPage ? 'close' : 'back'}
+				on:icBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+				on:icNext={modal.next}
+				on:icClose={close}
+				on:icQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
+			/>
+		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+			<SendQrCodeScan
+				expectedToken={$token}
+				bind:destination
+				bind:amount
+				decodeQrCode={onDecodeQrCode}
+				on:icQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
+			/>
+		{:else}
+			<SendWizard
+				{source}
+				{currentStep}
+				{destination}
+				bind:networkId
+				bind:targetNetwork
+				bind:amount
+				bind:sendProgressStep
+				on:icBack={modal.back}
+				on:icSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				on:icTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+				on:icNext={modal.next}
+				on:icClose={close}
+			/>
+		{/if}
+	</WizardModal>
+</SendTokenContext>

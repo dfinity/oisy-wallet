@@ -24,6 +24,7 @@ export const themeVariables = {
 		'tertiary-inverted': 'var(--color-background-tertiary-inverted)',
 		disabled: 'var(--color-background-disabled)',
 		'disabled-alt': 'var(--color-background-disabled-alt)',
+		'disabled-alt2': 'var(--color-background-disabled-alt2)',
 		brand: {
 			'subtle-5': 'var(--color-background-brand-subtle-5)',
 			'subtle-10': 'var(--color-background-brand-subtle-10)',
@@ -61,6 +62,17 @@ export const themeVariables = {
 			secondary: 'var(--color-background-error-secondary)',
 			tertiary: 'var(--color-background-error-tertiary)',
 			light: 'var(--color-background-error-light)'
+		},
+		contact: {
+			'1': 'var(--color-background-contact-1)',
+			'2': 'var(--color-background-contact-2)',
+			'3': 'var(--color-background-contact-3)',
+			'4': 'var(--color-background-contact-4)',
+			'5': 'var(--color-background-contact-5)',
+			'6': 'var(--color-background-contact-6)',
+			'7': 'var(--color-background-contact-7)',
+			'8': 'var(--color-background-contact-8)',
+			'9': 'var(--color-background-contact-9)'
 		}
 	},
 	border: {
@@ -129,19 +141,34 @@ export const themeVariables = {
 		'warning-alt': 'var(--color-foreground-warning-alt)',
 		'error-primary': 'var(--color-foreground-error-primary)',
 		'error-alt': 'var(--color-foreground-error-alt)',
-		'error-secondary': 'var(--color-foreground-error-secondary)'
+		'error-secondary': 'var(--color-foreground-error-secondary)',
+		contact: {
+			'1': 'var(--color-foreground-contact-1)',
+			'2': 'var(--color-foreground-contact-2)',
+			'3': 'var(--color-foreground-contact-3)',
+			'4': 'var(--color-foreground-contact-4)',
+			'5': 'var(--color-foreground-contact-5)',
+			'6': 'var(--color-foreground-contact-6)',
+			'7': 'var(--color-foreground-contact-7)',
+			'8': 'var(--color-foreground-contact-8)',
+			'9': 'var(--color-foreground-contact-9)'
+		}
 	},
 
 	// custom hard coded gradient colors
 	gradient: {
 		'default-0': '#016DFC',
 		'default-100': '#004EB5',
-		'icp-0': '#3B00B9',
-		'icp-100': '#7014A4',
+		'icp-0': '#3607B1',
+		'icp-100': '#1E0071',
 		'btc-0': '#F7931A',
 		'btc-100': '#DE7900',
 		'eth-0': '#627EEA',
 		'eth-100': '#E18DFF',
+		'base-0': '#0066FF',
+		'base-100': '#0066FF',
+		'bsc-0': '#FB8202',
+		'bsc-100': '#FEBE38',
 		'sol-0': '#904EFA',
 		'sol-100': '#1DE59D',
 		'trump-0': '#232BCC',

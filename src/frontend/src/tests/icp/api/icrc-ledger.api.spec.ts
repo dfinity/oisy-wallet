@@ -35,9 +35,9 @@ describe('icrc-ledger.api', () => {
 			const tokens = await balance(params);
 
 			expect(tokens).toEqual(balanceE8s);
-			expect(ledgerCanisterMock.balance).toBeCalledTimes(1);
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.balance).toBeCalledWith({
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledWith({
 				certified: true,
 				...account
 			});
@@ -50,9 +50,9 @@ describe('icrc-ledger.api', () => {
 			});
 
 			expect(tokens).toEqual(balanceE8s);
-			expect(ledgerCanisterMock.balance).toBeCalledTimes(1);
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.balance).toBeCalledWith({
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledWith({
 				certified: false,
 				...account
 			});
@@ -87,9 +87,9 @@ describe('icrc-ledger.api', () => {
 			const result = await transactionFee(params);
 
 			expect(result).toEqual(fee);
-			expect(ledgerCanisterMock.transactionFee).toBeCalledTimes(1);
+			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.transactionFee).toBeCalledWith({
+			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledWith({
 				certified: true
 			});
 		});
@@ -101,9 +101,9 @@ describe('icrc-ledger.api', () => {
 			});
 
 			expect(result).toEqual(fee);
-			expect(ledgerCanisterMock.transactionFee).toBeCalledTimes(1);
+			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledTimes(1);
 
-			expect(ledgerCanisterMock.transactionFee).toBeCalledWith({
+			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledWith({
 				certified: false
 			});
 		});

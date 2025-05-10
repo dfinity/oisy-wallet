@@ -10,7 +10,7 @@
 	export let data: CardData;
 	export let color: 'off-white' | 'white' = 'off-white';
 	export let badge:
-		| { type: 'network'; blackAndWhite?: boolean }
+		| { type: 'network' }
 		| { type: 'tokenCount'; count: number }
 		| { type: 'icon'; icon: Component; ariaLabel: string }
 		| undefined = undefined;
@@ -37,20 +37,22 @@
 	/>
 	{#if badge?.type === 'tokenCount' && badge.count > 0}
 		<span
-			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
+			class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: name })}
 			data-tid={`token-count-${badgeTestId}`}
 		>
 			{badge.count}
 		</span>
 	{:else if badge?.type === 'network'}
-		<div class="absolute -bottom-1 -right-1">
-			<NetworkLogo
-				{network}
-				blackAndWhite={badge.blackAndWhite}
-				{color}
-				testId={`network-${badgeTestId}`}
-			/>
+		<div
+			class="absolute"
+			class:scale-60={logoSize === 'xs'}
+			class:-right-1={logoSize !== 'xs'}
+			class:-right-1.75={logoSize === 'xs'}
+			class:bottom-0={logoSize !== 'xs'}
+			class:-bottom-1={logoSize === 'xs'}
+		>
+			<NetworkLogo {network} {color} testId={`network-${badgeTestId}`} />
 		</div>
 	{:else if badge?.type === 'icon'}
 		<!-- TODO: use new mapping color when merged -->

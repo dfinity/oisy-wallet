@@ -4,35 +4,38 @@
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { EIGHT_DECIMALS, ZERO_BI } from '$lib/constants/app.constants';
-	import type { AmountString } from '$lib/types/amount';
+	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 
-	export let amount: bigint;
-	export let usdAmount: number;
-	export let token: IcToken | undefined;
-	export let loading = true;
+	interface Props {
+		amount: bigint;
+		usdAmount: number;
+		token: IcToken | undefined;
+		loading?: boolean;
+	}
 
-	let displayAmount: AmountString;
-	$: displayAmount = formatToken({
-		value: amount,
-		unitName: token?.decimals,
-		displayDecimals: EIGHT_DECIMALS
-	});
+	let { amount, usdAmount, token, loading = true }: Props = $props();
 
-	let displayUsdAmount: string;
-	$: displayUsdAmount = formatUSD({ value: usdAmount });
+	const displayAmount = $derived(
+		formatToken({
+			value: amount,
+			unitName: token?.decimals,
+			displayDecimals: EIGHT_DECIMALS
+		})
+	);
+
+	const displayUsdAmount = $derived(formatUSD({ value: usdAmount }));
 </script>
 
 {#if nonNullish(token)}
 	<div
-		class={`relative w-1/3 rounded-xl p-2 text-center text-sm text-primary-inverted md:text-base ${amount > ZERO_BI ? 'bg-success-primary' : 'bg-tertiary-inverted'}`}
+		class={`relative w-1/3 rounded-xl p-2 text-center text-sm text-primary-inverted md:text-base ${amount > ZERO ? 'bg-success-primary' : 'bg-tertiary-inverted'}`}
 		class:transition={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
 		class:animate-pulse={loading}
 	>
-		{#if amount > ZERO_BI}
+		{#if amount > ZERO}
 			<Sprinkles type="box" />
 		{/if}
 

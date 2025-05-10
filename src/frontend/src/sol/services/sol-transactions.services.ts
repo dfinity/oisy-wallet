@@ -5,7 +5,7 @@ import {
 	SOLANA_TESTNET_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
@@ -14,7 +14,7 @@ import {
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
-import type { GetSolTransactionsParams } from '$sol/types/sol-api';
+import type { GetSolTransactionsParams, LoadNextSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	ParsedAccount,
 	SolMappedTransaction,
@@ -27,10 +27,6 @@ import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { address as solAddress } from '@solana/kit';
-
-interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
-	signalEnd: () => void;
-}
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
@@ -145,8 +141,8 @@ export const fetchSolTransactionsForSignature = async ({
 				...accCumulativeBalances,
 				// We include WSOL in the calculation, because it is used to affect the SOL balance of the ATA.
 				...((isNullish(mappedTokenAddress) || mappedTokenAddress === WSOL_TOKEN.address) && {
-					[from]: (accCumulativeBalances[from] ?? ZERO_BI) - value,
-					[to]: (accCumulativeBalances[to] ?? ZERO_BI) + value
+					[from]: (accCumulativeBalances[from] ?? ZERO) - value,
+					[to]: (accCumulativeBalances[to] ?? ZERO) + value
 				})
 			};
 
@@ -164,7 +160,7 @@ export const fetchSolTransactionsForSignature = async ({
 			const newTransaction: SolTransactionUi = {
 				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
-				timestamp: blockTime ?? ZERO_BI,
+				timestamp: blockTime ?? ZERO,
 				value,
 				type: address === from || ataAddress === from ? 'send' : 'receive',
 				from,
@@ -173,8 +169,7 @@ export const fetchSolTransactionsForSignature = async ({
 				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
 				// Particularly, we are repeating the same fee for each instruction in the transaction.
 				// However, we should have it anyway saved in the transaction, so we can display it in the UI.
-				...(nonNullish(fee) &&
-					nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO_BI })
+				...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO })
 			};
 
 			return {
@@ -210,15 +205,12 @@ export const fetchSolTransactionsForSignature = async ({
 export const loadNextSolTransactions = async ({
 	signalEnd,
 	...rest
-}: LoadNextSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
+}: LoadNextSolTransactionsParams): Promise<void> => {
 	const transactions = await loadSolTransactions(rest);
 
 	if (transactions.length === 0) {
 		signalEnd();
-		return [];
 	}
-
-	return transactions;
 };
 
 const networkToSolTokenIdMap = {

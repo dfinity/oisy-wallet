@@ -41,7 +41,7 @@ describe('user-networks.utils', () => {
 					},
 					networkId: ICP_NETWORK_ID
 				})
-			).toBe(true);
+			).toBeTruthy();
 		});
 
 		it('should return false if network is disabled', () => {
@@ -53,7 +53,7 @@ describe('user-networks.utils', () => {
 					},
 					networkId: ICP_NETWORK_ID
 				})
-			).toBe(false);
+			).toBeFalsy();
 		});
 
 		it('should return false if network is not present', () => {
@@ -62,7 +62,7 @@ describe('user-networks.utils', () => {
 					userNetworks: mockUserNetworks,
 					networkId: parseNetworkId('unknownNetworkId')
 				})
-			).toBe(false);
+			).toBeFalsy();
 		});
 
 		it('should return false there are no user networks', () => {
@@ -71,7 +71,7 @@ describe('user-networks.utils', () => {
 					userNetworks: {},
 					networkId: ICP_NETWORK_ID
 				})
-			).toBe(false);
+			).toBeFalsy();
 		});
 	});
 });

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import Confetti from 'svelte-confetti';
 
-	export let type: 'box' | 'page' | 'page-jackpot' = 'page';
+	interface Props {
+		type?: 'box' | 'page' | 'page-jackpot';
+	}
+
+	let { type = 'page' }: Props = $props();
 
 	const colorArray = [
 		'url(/images/sprinkles/oisy-sprinkle-01.svg)',

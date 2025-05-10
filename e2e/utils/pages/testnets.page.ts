@@ -33,6 +33,14 @@ export const TestnetCases: TestnetConfig[] = [
 	{
 		networkSymbol: 'SOL (Local)',
 		tokenSymbol: 'SOL (Local)'
+	},
+	{
+		networkSymbol: 'SepoliaBASE',
+		tokenSymbol: 'SepoliaETH'
+	},
+	{
+		networkSymbol: 'BSC (Testnet)',
+		tokenSymbol: 'BNB (Testnet)'
 	}
 ];
 
@@ -50,12 +58,14 @@ export class TestnetsPage extends HomepageLoggedIn {
 	}): Promise<void> {
 		await this.activateTestnetSettings();
 		await this.toggleNetworkSelector({ networkSymbol });
+
 		await expect(
 			this.getTokenCardLocator({
 				tokenSymbol,
 				networkSymbol
 			})
 		).toBeVisible();
+
 		await this.waitForLoadState();
 
 		if (tokenSymbol !== 'BTC (Testnet)') {

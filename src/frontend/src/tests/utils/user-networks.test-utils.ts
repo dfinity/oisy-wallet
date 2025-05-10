@@ -1,10 +1,5 @@
-import {
-	SUPPORTED_MAINNET_NETWORKS_IDS,
-	SUPPORTED_NETWORKS_IDS,
-	SUPPORTED_TESTNET_NETWORKS_IDS
-} from '$env/networks/networks.env';
+import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 import { userProfileStore, type UserProfileStoreData } from '$lib/stores/user-profile.store';
-import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
@@ -21,17 +16,18 @@ export const setupUserNetworksStore = (
 
 	const settings = fromNullable(userProfile.profile.settings) ?? mockUserSettings;
 
-	const networkIds: NetworkId[] =
-		value === 'onlyMainnets'
-			? SUPPORTED_MAINNET_NETWORKS_IDS
-			: value === 'onlyTestnets'
-				? SUPPORTED_TESTNET_NETWORKS_IDS
-				: SUPPORTED_NETWORKS_IDS;
-
-	const userNetworks: UserNetworks = networkIds.reduce<UserNetworks>(
-		(acc, id) => ({
+	const userNetworks: UserNetworks = SUPPORTED_NETWORKS.reduce<UserNetworks>(
+		(acc, { id, env }) => ({
 			...acc,
-			[id]: { enabled: value !== 'allDisabled', isTestnet: false }
+			[id]: {
+				enabled:
+					value === 'onlyMainnets'
+						? env === 'mainnet'
+						: value === 'onlyTestnets'
+							? env === 'testnet'
+							: value === 'allEnabled',
+				isTestnet: env === 'testnet'
+			}
 		}),
 		{}
 	);

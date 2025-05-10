@@ -6,12 +6,6 @@ import * as networkUtils from '$lib/utils/network.utils';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-// We need to mock these nested dependencies too because otherwise there is an error raise in the importing of `WebSocket` from `ws` inside the `ethers/provider` package
-vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
-	return { EtherscanProvider: provider, InfuraProvider: provider, JsonRpcProvider: provider };
-});
-
 describe('Listener', () => {
 	const mockAuthStore = (value = true) =>
 		vi.spyOn(authStore, 'authNotSignedIn', 'get').mockImplementation(() => readable(value));
@@ -47,6 +41,7 @@ describe('Listener', () => {
 		vi.spyOn(networkUtils, 'isNetworkIdICP').mockReturnValueOnce(false);
 		vi.spyOn(networkUtils, 'isNetworkIdBitcoin').mockReturnValueOnce(false);
 		vi.spyOn(networkUtils, 'isNetworkIdEthereum').mockReturnValueOnce(false);
+		vi.spyOn(networkUtils, 'isNetworkIdEvm').mockReturnValueOnce(false);
 
 		const { container } = render(Listener, {
 			props: { token: ICP_TOKEN }

@@ -10,7 +10,10 @@
 </script>
 
 <TokenBalanceSkeleton {data}>
-	<output class="break-all" data-tid={`${TOKEN_BALANCE}-${data.symbol}`}>
+	<output
+		class="break-all"
+		data-tid={`${TOKEN_BALANCE}-${data.symbol}-${data.network.id.description}`}
+	>
 		{#if nonNullish(data.balance)}
 			{formatToken({
 				value: data.balance,

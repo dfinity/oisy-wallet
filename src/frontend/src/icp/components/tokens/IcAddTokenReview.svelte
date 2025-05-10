@@ -7,6 +7,7 @@
 		loadAndAssertAddCustomToken,
 		type ValidateTokenData
 	} from '$icp/services/ic-add-custom-tokens.service';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -15,7 +16,6 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
-	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -75,24 +75,36 @@
 	</div>
 
 	{#if nonNullish(token)}
+		{@const {
+			network: safeNetwork,
+			ledgerCanisterId: safeLedgerCanisterId,
+			indexCanisterId: safeIndexCanisterId
+		} = token.token}
 		<div in:fade>
 			<Value ref="network" element="div">
-				<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
-				<TextWithLogo name={token.token.network.name} icon={token.token.network.icon} />
+				{#snippet label()}
+					{$i18n.tokens.manage.text.network}
+				{/snippet}
+				{#snippet content()}
+					<NetworkWithLogo network={safeNetwork} />
+				{/snippet}
 			</Value>
 
 			<Value ref="ledgerId" element="div">
-				<svelte:fragment slot="label">{$i18n.tokens.import.text.ledger_canister_id}</svelte:fragment
-				>
-				{token.token.ledgerCanisterId}
+				{#snippet label()}{$i18n.tokens.import.text.ledger_canister_id}{/snippet}
+				{#snippet content()}
+					{safeLedgerCanisterId}
+				{/snippet}
 			</Value>
 
 			{#if nonNullish(indexCanisterId)}
 				<Value ref="indexId" element="div">
-					<svelte:fragment slot="label"
-						>{$i18n.tokens.import.text.index_canister_id}</svelte:fragment
-					>
-					{token.token.indexCanisterId}
+					{#snippet label()}
+						{$i18n.tokens.import.text.index_canister_id}
+					{/snippet}
+					{#snippet content()}
+						{safeIndexCanisterId}
+					{/snippet}
 				</Value>
 			{/if}
 
@@ -103,7 +115,7 @@
 	<div slot="toolbar" in:fade>
 		{#if nonNullish(token)}
 			<ButtonGroup>
-				<ButtonBack on:click={back} />
+				<ButtonBack onclick={back} />
 				<Button disabled={invalid} on:click={() => dispatch('icSave')}>
 					{$i18n.tokens.import.text.add_the_token}
 				</Button>

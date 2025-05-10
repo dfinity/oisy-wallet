@@ -25,7 +25,7 @@
 			</div>
 			<span>{$i18n.convert.text.default_destination}</span>
 		{:else}
-			<NetworkLogo network={token.network} blackAndWhite color="off-white" />
+			<NetworkLogo network={token.network} color="off-white" />
 			<span>{shortenWithMiddleEllipsis({ text: destination ?? '' })}</span>
 		{/if}
 

@@ -1,9 +1,5 @@
-import {
-	ETHEREUM_NETWORK_ID,
-	INFURA_NETWORK_HOMESTEAD,
-	INFURA_NETWORK_SEPOLIA,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
@@ -108,10 +104,13 @@ export class InfuraErc20Provider implements Erc20Provider {
 	};
 }
 
-const providers: Record<NetworkId, InfuraErc20Provider> = {
-	[ETHEREUM_NETWORK_ID]: new InfuraErc20Provider(INFURA_NETWORK_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new InfuraErc20Provider(INFURA_NETWORK_SEPOLIA)
-};
+const providers: Record<NetworkId, InfuraErc20Provider> = [
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_EVM_NETWORKS
+].reduce<Record<NetworkId, InfuraErc20Provider>>(
+	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraErc20Provider(infura) }),
+	{}
+);
 
 export const infuraErc20Providers = (networkId: NetworkId): InfuraErc20Provider => {
 	const provider = providers[networkId];

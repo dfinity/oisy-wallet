@@ -1,9 +1,5 @@
-import {
-	ETHEREUM_NETWORK_ID,
-	INFURA_NETWORK_HOMESTEAD,
-	INFURA_NETWORK_SEPOLIA,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
@@ -38,10 +34,13 @@ export class InfuraProvider {
 	getBlockNumber = (): Promise<number> => this.provider.getBlockNumber();
 }
 
-const providers: Record<NetworkId, InfuraProvider> = {
-	[ETHEREUM_NETWORK_ID]: new InfuraProvider(INFURA_NETWORK_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new InfuraProvider(INFURA_NETWORK_SEPOLIA)
-};
+const providers: Record<NetworkId, InfuraProvider> = [
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_EVM_NETWORKS
+].reduce<Record<NetworkId, InfuraProvider>>(
+	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraProvider(infura) }),
+	{}
+);
 
 export const infuraProviders = (networkId: NetworkId): InfuraProvider => {
 	const provider = providers[networkId];

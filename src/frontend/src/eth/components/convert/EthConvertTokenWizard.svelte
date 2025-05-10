@@ -7,10 +7,11 @@
 	import EthConvertProgress from '$eth/components/convert/EthConvertProgress.svelte';
 	import EthConvertReview from '$eth/components/convert/EthConvertReview.svelte';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import { selectedEthereumNetworkWithFallback } from '$eth/derived/network.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { send as executeSend } from '$eth/services/send.services';
 	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
+	import type { EthereumNetwork } from '$eth/types/network';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
@@ -26,6 +27,7 @@
 		TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR,
 		TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS
 	} from '$lib/constants/analytics.contants';
+	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -53,6 +55,9 @@
 	$: destination = isTokenErc20($sourceToken)
 		? ($ckErc20HelperContractAddress ?? '')
 		: ($ckEthHelperContractAddress ?? '');
+
+	let sourceNetwork: EthereumNetwork;
+	$: sourceNetwork = $selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK;
 
 	const dispatch = createEventDispatcher();
 
@@ -127,19 +132,19 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
-				sourceNetwork: $selectedEthereumNetworkWithFallback,
+				sourceNetwork,
 				targetNetwork: ICP_NETWORK,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[$ethereumToken.id]
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR
 			});
 
@@ -163,7 +168,7 @@
 	{destination}
 	observe={currentStep?.name !== WizardStepsConvert.CONVERTING &&
 		currentStep?.name !== WizardStepsConvert.REVIEW}
-	sourceNetwork={$selectedEthereumNetworkWithFallback}
+	{sourceNetwork}
 	targetNetwork={ICP_NETWORK}
 	nativeEthereumToken={$ethereumToken}
 >
@@ -171,15 +176,15 @@
 		<EthConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount {destination}>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<ButtonBack on:click={back} />
+					<ButtonBack onclick={back} />
 				{:else}
-					<ButtonCancel on:click={close} />
+					<ButtonCancel onclick={close} />
 				{/if}
 			</svelte:fragment>
 		</EthConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 		<EthConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}>
-			<ButtonBack slot="cancel" on:click={back} />
+			<ButtonBack slot="cancel" onclick={back} />
 		</EthConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 		<EthConvertProgress

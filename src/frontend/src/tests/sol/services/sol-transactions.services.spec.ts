@@ -1,5 +1,5 @@
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import * as solanaApi from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
@@ -9,6 +9,7 @@ import {
 } from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
+import type { LoadNextSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	SolMappedTransaction,
 	SolRpcTransaction,
@@ -108,7 +109,7 @@ describe('sol-transactions.services', () => {
 		const expected: SolTransactionUi = {
 			id: mockSignature.signature,
 			signature: mockSignature.signature,
-			timestamp: mockTransactionDetail.blockTime ?? ZERO_BI,
+			timestamp: mockTransactionDetail.blockTime ?? ZERO,
 			value: mockMappedTransaction.value,
 			from: mockSolAddress,
 			to: mockSolAddress2,
@@ -166,6 +167,7 @@ describe('sol-transactions.services', () => {
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(expectedResults);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(nInstructions);
+
 			mockAllInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
 					instruction: { ...instruction, programAddress: instruction.programId },
@@ -201,6 +203,7 @@ describe('sol-transactions.services', () => {
 			);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(innerInstructions.length);
+
 			innerInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
 					instruction: { ...instruction, programAddress: instruction.programId },
@@ -331,6 +334,7 @@ describe('sol-transactions.services', () => {
 			);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(nInstructions);
+
 			mockAllInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
 					instruction: { ...instruction, programAddress: instruction.programId },
@@ -357,37 +361,42 @@ describe('sol-transactions.services', () => {
 	});
 
 	describe('loadNextSolTransactions', () => {
-		it('should load and return transactions successfully', async () => {
+		const mockParams: LoadNextSolTransactionsParams = {
+			address: mockSolAddress,
+			network: SolanaNetworks.mainnet,
+			signalEnd
+		};
+
+		beforeEach(() => {
+			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+
 			spyGetTransactions.mockResolvedValue(mockTransactions);
+		});
 
-			const transactions = await loadNextSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet,
-				signalEnd
-			});
+		it('should load transactions successfully', async () => {
+			await loadNextSolTransactions(mockParams);
 
-			expect(transactions).toEqual(mockCertifiedTransactions);
 			expect(signalEnd).not.toHaveBeenCalled();
-			expect(spyGetTransactions).toHaveBeenCalledWith({
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
 		});
 
 		it('should handle pagination parameters', async () => {
-			spyGetTransactions.mockResolvedValue(mockTransactions);
 			const before = mockSolSignature();
 			const limit = 10;
 
 			await loadNextSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet,
+				...mockParams,
 				before,
-				limit,
-				signalEnd
+				limit
 			});
 
-			expect(spyGetTransactions).toHaveBeenCalledWith({
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				before,
@@ -396,56 +405,36 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should signal end when no transactions are returned', async () => {
-			spyGetTransactions.mockResolvedValue([]);
+			spyGetTransactions.mockResolvedValueOnce([]);
 
-			const transactions = await loadNextSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet,
-				signalEnd
-			});
+			await loadNextSolTransactions(mockParams);
 
-			expect(transactions).toEqual([]);
 			expect(signalEnd).toHaveBeenCalled();
 		});
 
 		it('should append transactions to the store', async () => {
-			spyGetTransactions.mockResolvedValue(mockTransactions);
+			await loadNextSolTransactions(mockParams);
 
-			await loadNextSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet,
-				signalEnd
-			});
-
-			const storeData = get(solTransactionsStore)?.[SOLANA_TOKEN_ID];
-			expect(storeData).toEqual(mockCertifiedTransactions);
+			expect(get(solTransactionsStore)?.[SOLANA_TOKEN_ID]).toEqual(mockCertifiedTransactions);
 		});
 
 		it('should handle errors and reset store', async () => {
 			const error = new Error('Failed to load transactions');
 			spyGetTransactions.mockRejectedValue(error);
 
-			const transactions = await loadNextSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet,
-				signalEnd
-			});
+			await loadNextSolTransactions(mockParams);
 
-			expect(transactions).toEqual([]);
-			const storeData = get(solTransactionsStore)?.[SOLANA_TOKEN_ID];
-			expect(storeData).toBeNull();
+			expect(get(solTransactionsStore)?.[SOLANA_TOKEN_ID]).toBeNull();
 		});
 
 		it('should work with different networks', async () => {
-			spyGetTransactions.mockResolvedValue(mockTransactions);
-
 			await loadNextSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.devnet,
-				signalEnd
+				...mockParams,
+				network: SolanaNetworks.devnet
 			});
 
-			expect(spyGetTransactions).toHaveBeenCalledWith({
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				address: mockSolAddress,
 				network: SolanaNetworks.devnet
 			});

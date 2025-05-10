@@ -6,6 +6,9 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { btcStatusesStore } from '$icp/stores/btc.store';
+	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
@@ -28,8 +31,7 @@
 	import { getRewardRequirementsFulfilled } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { AllTransactionUiWithCmp } from '$lib/types/transaction';
-	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
+	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 	import {
 		areTransactionsStoresLoading,
@@ -39,31 +41,37 @@
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
-	export let reward: RewardDescription;
+	interface Props {
+		reward: RewardDescription;
+	}
 
-	let totalUsdBalance: number;
-	$: totalUsdBalance = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
+	let { reward }: Props = $props();
 
-	let transactions: AllTransactionUiWithCmp[];
-	$: transactions = mapAllTransactionsUi({
-		tokens: $enabledNetworkTokens,
-		$btcTransactions: $btcTransactionsStore,
-		$ethTransactions: $ethTransactionsStore,
-		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress,
-		$icTransactions: $icTransactionsStore,
-		$btcStatuses: $btcStatusesStore,
-		$solTransactions: $solTransactionsStore
-	});
+	const totalUsdBalance = $derived(sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi));
 
-	let requirementsFulfilled: boolean[];
-	$: requirementsFulfilled = getRewardRequirementsFulfilled({ transactions, totalUsdBalance });
+	const transactions = $derived(
+		mapAllTransactionsUi({
+			tokens: $enabledNetworkTokens,
+			$btcTransactions: $btcTransactionsStore,
+			$ethTransactions: $ethTransactionsStore,
+			$ckEthMinterInfo: $ckEthMinterInfoStore,
+			$ethAddress,
+			$icTransactionsStore,
+			$btcStatuses: $btcStatusesStore,
+			$solTransactions: $solTransactionsStore,
+			$ckBtcMinterInfoStore,
+			$icPendingTransactionsStore,
+			$ckBtcPendingUtxosStore
+		})
+	);
 
-	let isEligible = false;
-	$: isEligible = requirementsFulfilled.reduce((p, c) => p && c);
+	const requirementsFulfilled = $derived(
+		getRewardRequirementsFulfilled({ transactions, totalUsdBalance })
+	);
 
-	let transactionsStores: TransactionsStoreCheckParams[];
-	$: transactionsStores = [
+	const isEligible = $derived(requirementsFulfilled.reduce((p, c) => p && c));
+
+	const transactionsStores = $derived([
 		// We explicitly do not include the Bitcoin transactions store locally, as it may cause lags in the UI.
 		// It could take longer time to be initialized and in case of no transactions (for example, a new user), it would be stuck to show the skeletons.
 		...(LOCAL
@@ -78,18 +86,20 @@
 			transactionsStoreData: $solTransactionsStore,
 			tokens: [...$enabledSolanaTokens, ...$enabledSplTokens]
 		}
-	];
-	let isRequirementsLoading = true;
-	$: isRequirementsLoading = areTransactionsStoresLoading(transactionsStores);
+	]);
 
-	let amountOfRewards = 0;
+	const isRequirementsLoading = $derived(areTransactionsStoresLoading(transactionsStores));
+
+	const hasEnded = $derived(isEndedCampaign(reward.endDate));
+
+	let amountOfRewards = $state(0);
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={REWARDS_MODAL}>
 	<span class="text-center text-xl" slot="title">{reward.title}</span>
 
 	<ContentWithToolbar>
-		<RewardBanner />
+		<RewardBanner {reward} />
 
 		<RewardEarnings bind:amountOfRewards />
 		{#if amountOfRewards > 0}
@@ -98,33 +108,35 @@
 
 		<div class="flex w-full justify-between text-lg font-semibold">
 			<span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
-			<span class="inline-flex">
+			<span>
 				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
 			</span>
 		</div>
 		<p class="my-3"><Html text={reward.description} /></p>
 
-		<ExternalLink
-			href={reward.learnMoreHref}
-			ariaLabel={$i18n.rewards.text.learn_more}
-			iconVisible={false}
-			asButton
-			styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
-		>
-			{$i18n.rewards.text.learn_more}
-		</ExternalLink>
+		{#if !hasEnded}
+			<ExternalLink
+				href={reward.learnMoreHref}
+				ariaLabel={$i18n.rewards.text.learn_more}
+				iconVisible={false}
+				asButton
+				styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
+			>
+				{$i18n.rewards.text.learn_more}
+			</ExternalLink>
 
-		<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2" />
+			<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2" />
 
-		{#if reward.requirements.length > 0}
-			<Hr spacing="md" />
+			{#if reward.requirements.length > 0}
+				<Hr spacing="md" />
 
-			<RewardsRequirements
-				loading={isRequirementsLoading}
-				{reward}
-				{isEligible}
-				{requirementsFulfilled}
-			/>
+				<RewardsRequirements
+					loading={isRequirementsLoading}
+					{reward}
+					{isEligible}
+					{requirementsFulfilled}
+				/>
+			{/if}
 		{/if}
 
 		<Button paddingSmall type="button" fullWidth on:click={modalStore.close} slot="toolbar">
