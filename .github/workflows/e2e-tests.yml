@@ -76,14 +76,32 @@ jobs:
         with:
           network: local
 
+  define-matrix:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      os-matrix: ${{ steps.set-matrix.outputs.os-matrix }}
+    steps:
+      - name: Set OS Matrix
+        id: set-matrix
+        run: |
+          MATRIX='["ubuntu-24.04"]'
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" || \
+                "${{ github.event_name }}" == "schedule" || \
+                "${{ contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}" == "true" ]]; then
+            MATRIX='["ubuntu-24.04", "macos-14"]'
+          fi
+          echo "os-matrix=$MATRIX" >> $GITHUB_OUTPUT
+
   e2e:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
-    needs: ['oisy-backend-wasm', 'check-e2e-changes']
+    needs: ['oisy-backend-wasm', 'check-e2e-changes', 'define-matrix']
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: ${{ fromJson(needs.define-matrix.outputs.os-matrix) }}
     env:
       MATRIX_OS: ${{ matrix.os }}
     if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
@@ -92,12 +110,6 @@ jobs:
       macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
 
     steps:
-      - name: Run macOS only on dispatch, schedule or label
-        if: runner.os == 'macOS' && github.event_name != 'workflow_dispatch' && github.event_name != 'schedule' && !contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots')
-        run: |
-          echo "Skipping macOS: not a dispatch/schedule and PR not labeled accordingly."
-          exit 0
-
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
         id: app-token
