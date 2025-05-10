@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import ReceiveAddressQRCodeContent from '$lib/components/receive/ReceiveAddressQRCodeContent.svelte';
+	import ReceiveAddressQrCodeContent from '$lib/components/receive/ReceiveAddressQrCodeContent.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT } from '$lib/constants/test-ids.constants';
@@ -22,7 +22,7 @@
 </script>
 
 <ContentWithToolbar styleClass="min-h-50vh" {testId}>
-	<ReceiveAddressQRCodeContent
+	<ReceiveAddressQrCodeContent
 		{address}
 		{addressLabel}
 		{addressToken}

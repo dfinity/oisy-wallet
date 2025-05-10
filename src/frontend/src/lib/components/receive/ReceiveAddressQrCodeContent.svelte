@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
-	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
+	import ReceiveQrCode from '$lib/components/receive/ReceiveQrCode.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address, OptionAddress } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
@@ -18,10 +18,10 @@
 	export let qrCodeAction: ReceiveQRCodeAction;
 	export let copyAriaLabel: string;
 
-	// TODO: replace properties (address, labels etc.) with a mandatory property of type ReceiveQRCode
+	// TODO: replace properties (address, labels etc.) with a mandatory property of type ReceiveQrCode
 </script>
 
-<ReceiveQRCode address={address ?? ''} {addressToken} />
+<ReceiveQrCode address={address ?? ''} {addressToken} />
 
 <ReceiveAddress
 	labelRef="address"

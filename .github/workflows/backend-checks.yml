@@ -52,7 +52,7 @@ jobs:
       - name: Dependencies are defined in the workspace
         run: ./scripts/lint.cargo-workspace-dependencies.sh
 
-  may-merge:
+  backend-checks-pass:
     needs: ['lint', 'workspace-dependencies']
     if: ${{ always() }}
     runs-on: ubuntu-24.04
