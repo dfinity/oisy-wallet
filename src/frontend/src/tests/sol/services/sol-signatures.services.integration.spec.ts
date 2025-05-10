@@ -17,7 +17,7 @@ describe('sol-signatures.services integration', () => {
 
 			// We use a real address to test the function. Ideally, the address is a very active one.
 			// https://solscan.io/account/7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1
-			const address = '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1';
+			const address = 'GZvi7ndzTYkTrbvfiwfz9ZequdCMacHCzCtadruT3e5f';
 
 			const loadTransactions = async (
 				lastSignature?: string | undefined
@@ -64,6 +64,9 @@ describe('sol-signatures.services integration', () => {
 				network: SolanaNetworks.mainnet
 			});
 
+			// FIXME: I already verified that transactionSolBalance matches the sum of the amounts in the Transfer page https://solscan.io/account/GZvi7ndzTYkTrbvfiwfz9ZequdCMacHCzCtadruT3e5f#transfers
+			// FIXME: The fetched balance matches too
+			// FIXME: The issue is that the total fee is not correctly calculated
 			expect(transactionSolBalance - totalFee).toBe(fetchedSolBalance);
 		}, 600000);
 	});
