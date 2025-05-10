@@ -559,7 +559,7 @@ mod user_profile {
                             .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
                         arguments: Some({
                             let mut args = HashMap::new();
-                            args.insert("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH), ArgumentValue::Int(0));
+                            args.insert("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH), ArgumentValue::String("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_VALUE_LENGTH + 1)));
                             args
                         }),
                     },

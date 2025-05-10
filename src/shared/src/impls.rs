@@ -435,7 +435,9 @@ impl Validate for UserToken {
         }
         if let Some(symbol) = &self.symbol {
             if symbol.len() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg("Symbol too long"));
+                return Err(candid::Error::msg(format!(
+                    "Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes",
+                )));
             }
         }
         Ok(())
