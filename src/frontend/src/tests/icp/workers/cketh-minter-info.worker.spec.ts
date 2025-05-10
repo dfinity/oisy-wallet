@@ -15,8 +15,8 @@ vi.mock(import('$icp/schedulers/ck-minter-info.scheduler'), async (importOrigina
 	};
 });
 
-describe('sol-wallet.worker', () => {
-	describe('onSolWalletMessage', () => {
+describe('ck-minter-info.worker', () => {
+	describe('onCkEthMinterInfoMessage', () => {
 		const invalidMessages = excludeValidMessageEvents([
 			'stopCkEthMinterInfoTimer',
 			'startCkEthMinterInfoTimer',
