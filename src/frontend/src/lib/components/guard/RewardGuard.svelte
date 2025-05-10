@@ -18,7 +18,8 @@
 
 	let { children }: Props = $props();
 
-	const modalId = Symbol();
+	const rewardModalId = Symbol();
+	const referralModalId = Symbol();
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
@@ -29,11 +30,11 @@
 			await loadRewardResult($authIdentity);
 		if (receivedReward) {
 			if (receivedJackpot) {
-				modalStore.openRewardState({ id: modalId, data: receivedJackpot });
+				modalStore.openRewardState({ id: rewardModalId, data: receivedJackpot });
 			} else if (receivedReferral) {
-				modalStore.openReferralState();
+				modalStore.openReferralState(referralModalId);
 			} else {
-				modalStore.openRewardState({ id: modalId, data: false });
+				modalStore.openRewardState({ id: rewardModalId, data: false });
 			}
 		}
 	});
