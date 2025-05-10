@@ -24,6 +24,7 @@ import {
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
+import * as dip20TokensServices from '$icp/services/dip20-tokens.services';
 import * as icrcCustomTokensServices from '$icp/services/icrc-custom-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
@@ -57,6 +58,15 @@ describe('all-tokens.derived', () => {
 		enabled: true
 	};
 
+	const mockDip20Token: IcrcCustomToken = {
+		...mockValidIcCkToken,
+		standard: 'dip20',
+		id: parseTokenId('XTC'),
+		ledgerCanisterId: 'mock-ledger-canister-id',
+		name: 'dummy-dip20-token',
+		enabled: true
+	};
+
 	const mockErc20Token: Erc20TokenToggleable = {
 		...mockValidErc20Token,
 		id: parseTokenId('DUM'),
@@ -84,6 +94,7 @@ describe('all-tokens.derived', () => {
 		});
 
 		vi.spyOn(icrcCustomTokensServices, 'buildIcrcCustomTokens').mockReturnValue([]);
+		vi.spyOn(dip20TokensServices, 'buildDip20Tokens').mockReturnValue([]);
 
 		vi.spyOn(icrcTokens, 'subscribe').mockImplementation((fn) => {
 			fn([]);
@@ -114,6 +125,7 @@ describe('all-tokens.derived', () => {
 			});
 
 			vi.spyOn(icrcCustomTokensServices, 'buildIcrcCustomTokens').mockReturnValue([mockIcrcToken2]);
+			vi.spyOn(dip20TokensServices, 'buildDip20Tokens').mockReturnValue([mockDip20Token]);
 
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);

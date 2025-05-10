@@ -1,3 +1,4 @@
+import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
 import type { icpTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType } from '$lib/types/transaction';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
@@ -17,6 +18,10 @@ export type IcpTransaction = { transaction: Transaction & IcTransactionAddOnsInf
 export type IcrcTransaction = {
 	transaction: IcrcTransactionCandid & IcTransactionAddOnsInfo;
 } & Pick<IcrcTransactionWithId, 'id'>;
+export type Dip20Transaction = { transaction: Event & IcTransactionAddOnsInfo } & Pick<
+	TransactionWithId,
+	'id'
+>;
 
 export type IcTransaction = IcpTransaction | IcrcTransaction;
 
