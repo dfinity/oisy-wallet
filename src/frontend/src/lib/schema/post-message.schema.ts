@@ -20,7 +20,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import * as z from 'zod';
 
-export const PostMessageRequestSchema = z.enum([
+export const POST_MESSAGE_REQUEST = [
 	'startIdleTimer',
 	'stopIdleTimer',
 	'startCodeTimer',
@@ -53,7 +53,9 @@ export const PostMessageRequestSchema = z.enum([
 	'stopCkBtcMinterInfoTimer',
 	'startCkBtcMinterInfoTimer',
 	'triggerCkBtcMinterInfoTimer'
-]);
+] as const;
+
+export const PostMessageRequestSchema = z.enum(POST_MESSAGE_REQUEST);
 
 export const PostMessageDataRequestSchema = z.never();
 export const PostMessageDataResponseSchema = z.object({}).strict();
