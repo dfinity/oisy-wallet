@@ -9,6 +9,7 @@
 	import SolSendAmount from '$sol/components/send/SolSendAmount.svelte';
 	import type { SolAmountAssertionError } from '$sol/types/sol-send';
 	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
+	import { parseSolAddress } from '$lib/validation/address.validation';
 
 	export let amount: OptionAmount = undefined;
 	export let destination = '';
@@ -19,7 +20,7 @@
 	let amountError: SolAmountAssertionError | undefined;
 
 	let invalidDestination = false;
-	$: invalidDestination = isNullishOrEmpty(destination) || invalidSolAddress(destination);
+	$: invalidDestination = isNullishOrEmpty(destination) || invalidSolAddress((destination));
 
 	let invalid = true;
 	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);

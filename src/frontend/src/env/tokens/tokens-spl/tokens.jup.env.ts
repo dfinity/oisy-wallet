@@ -1,5 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import jup from '$sol/assets/jup.svg';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -20,6 +21,6 @@ export const JUP_TOKEN: RequiredSplToken = {
 	symbol: JUP_SYMBOL,
 	decimals: JUP_DECIMALS,
 	icon: jup,
-	address: 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN',
+	address: parseSolAddress('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'),
 	owner: TOKEN_PROGRAM_ADDRESS
 };

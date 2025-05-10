@@ -7,6 +7,7 @@
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
+	import { parseSolAddress } from '$lib/validation/address.validation';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
@@ -20,7 +21,7 @@
 	$: disableSend = insufficientFundsForFee || invalid;
 
 	let invalid = true;
-	$: invalid = invalidSolAddress(destination) || invalidAmount(amount);
+	$: invalid = invalidSolAddress((destination)) || invalidAmount(amount);
 </script>
 
 <SendReview on:icBack on:icSend {source} {amount} {destination} disabled={disableSend}>

@@ -1,4 +1,6 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
+import { WALLET_PAGINATION, ZERO_BI } from '$lib/constants/app.constants';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
 import {
 	checkIfAccountExists,
@@ -159,7 +161,7 @@ describe('solana.api', () => {
 		it('should throw error when address is empty', async () => {
 			await expect(
 				loadSolLamportsBalance({
-					address: '',
+					address: parseSolAddress(''),
 					network: SolanaNetworks.mainnet
 				})
 			).rejects.toThrow();
@@ -230,7 +232,7 @@ describe('solana.api', () => {
 		it('should throw error when address is empty', async () => {
 			await expect(
 				loadTokenBalance({
-					ataAddress: '',
+					ataAddress: parseSolAddress(''),
 					network: SolanaNetworks.mainnet
 				})
 			).rejects.toThrow();
@@ -400,7 +402,7 @@ describe('solana.api', () => {
 		it('should throw an error when address is empty', async () => {
 			await expect(
 				loadTokenAccount({
-					address: '',
+					address: parseSolAddress(''),
 					network: SolanaNetworks.mainnet,
 					tokenAddress: DEVNET_EURC_TOKEN.address
 				})
@@ -412,7 +414,7 @@ describe('solana.api', () => {
 				loadTokenAccount({
 					address: mockSolAddress,
 					network: SolanaNetworks.mainnet,
-					tokenAddress: ''
+					tokenAddress: parseSolAddress('')
 				})
 			).rejects.toThrow();
 		});
