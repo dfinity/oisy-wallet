@@ -14,12 +14,12 @@ use crate::{
             SaveTestnetsSettingsError,
         },
         settings::Settings,
-        token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH, EVM_TOKEN_SYMBOL_MAX_LENGTH},
+        token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
         user_profile::{
             AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
         verifiable_credential::CredentialType,
-        Timestamp, TokenVersion, Version,
+        Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
     },
     validate::{validate_on_deserialize, Validate},
 };
@@ -434,7 +434,7 @@ impl Validate for UserToken {
             return Err(candid::Error::msg("Invalid EVM contract address length"));
         }
         if let Some(symbol) = &self.symbol {
-            if symbol.len() > EVM_TOKEN_SYMBOL_MAX_LENGTH {
+            if symbol.len() > MAX_SYMBOL_LENGTH {
                 return Err(candid::Error::msg("Symbol too long"));
             }
         }

@@ -358,7 +358,7 @@ mod token {
     use candid::{Decode, Encode};
 
     use crate::{
-        types::token::{UserToken, EVM_TOKEN_SYMBOL_MAX_LENGTH},
+        types::{token::UserToken, MAX_SYMBOL_LENGTH},
         validate::{test_validate_on_deserialize, TestVector, Validate},
     };
 
@@ -406,7 +406,7 @@ mod token {
                 input: UserToken {
                     contract_address: "0x1234567890123456789012345678901234567890".to_string(),
                     chain_id: 1,
-                    symbol: Some("B".repeat(EVM_TOKEN_SYMBOL_MAX_LENGTH + 1)),
+                    symbol: Some("B".repeat(MAX_SYMBOL_LENGTH + 1)),
                     decimals: Some(6),
                     version: None,
                     enabled: None,

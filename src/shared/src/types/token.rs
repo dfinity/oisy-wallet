@@ -12,11 +12,6 @@ use crate::types::Version;
 /// Note: This should be "0x" + 40 hex characters.
 pub const EVM_CONTRACT_ADDRESS_LENGTH: usize = 42;
 
-/// The maximum supported length for an EVM token symbol.
-///
-/// Note: Metamask limits symbols to 12 characters: <https://github.com/MetaMask/metamask-extension/blob/e0a8b911dc8e24c70e667573b925f2447283b220/ui/components/multichain/import-tokens-modal/import-tokens-modal.js#L336>
-pub const EVM_TOKEN_SYMBOL_MAX_LENGTH: usize = 16;
-
 /// EVM chain ID
 ///
 /// IDs may be found on: <https://chainlist.org/>
