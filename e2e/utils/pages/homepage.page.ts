@@ -364,7 +364,7 @@ abstract class Homepage {
 			throw new Error('Cannot reach navigation menu!');
 		}
 
-		const urlRegex = new RegExp(`/${expectedPath}(\\?.*|#.*|$)`);
+		const urlRegex = new RegExp(`${expectedPath}(\\?.*|#.*|$)`);
 		await this.#page.waitForURL(urlRegex);
 	}
 
