@@ -17,6 +17,7 @@ import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { TokenId } from '$lib/types/token';
+import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 
 // TODO: remember to remove the ERC20 from here once the ckERC20 is implemented. Following the normal flow, the ERC20 variables should be created on a separate file.
 
@@ -141,10 +142,11 @@ export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	XAUT_TOKEN
 ];
 
-export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
-	...(ETH_MAINNET_ENABLED ? ERC20_TWIN_TOKENS_MAINNET : []),
-	...ERC20_TWIN_TOKENS_SEPOLIA
-];
+export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = defineSupportedTokens({
+	mainnetFlag: ETH_MAINNET_ENABLED,
+	mainnetTokens: ERC20_TWIN_TOKENS_MAINNET,
+	testnetTokens: ERC20_TWIN_TOKENS_SEPOLIA
+});
 
 export const ERC20_TWIN_TOKENS_IDS: TokenId[] = ERC20_TWIN_TOKENS.map(({ id }) => id);
 
