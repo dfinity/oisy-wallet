@@ -1,6 +1,6 @@
 import { SOLANA_KEY_ID, SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
-import * as idbApi from '$lib/api/idb.api';
+import * as idbApi from '$lib/api/idb-addresses.api';
 import * as signerApi from '$lib/api/signer.api';
 import {
 	solAddressDevnetStore,

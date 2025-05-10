@@ -1,9 +1,4 @@
-import {
-	ETHEREUM_NETWORK_ID,
-	INFURA_NETWORK_HOMESTEAD,
-	INFURA_NETWORK_SEPOLIA,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
 import type { ContractAddress } from '$eth/types/address';
@@ -67,10 +62,9 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		});
 }
 
-const providers: Record<NetworkId, InfuraCkETHProvider> = {
-	[ETHEREUM_NETWORK_ID]: new InfuraCkETHProvider(INFURA_NETWORK_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new InfuraCkETHProvider(INFURA_NETWORK_SEPOLIA)
-};
+const providers: Record<NetworkId, InfuraCkETHProvider> = SUPPORTED_ETHEREUM_NETWORKS.reduce<
+	Record<NetworkId, InfuraCkETHProvider>
+>((acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraCkETHProvider(infura) }), {});
 
 export const infuraCkETHProviders = (networkId: NetworkId): InfuraCkETHProvider => {
 	const provider = providers[networkId];

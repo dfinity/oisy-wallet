@@ -7,6 +7,8 @@ on:
   pull_request:
     types: [opened, synchronize, labeled]
   merge_group:
+  schedule:
+    - cron: '30 3 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -90,8 +92,14 @@ jobs:
       macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
 
     steps:
+      - name: Run macOS only on dispatch, schedule or label
+        if: runner.os == 'macOS' && github.event_name != 'workflow_dispatch' && github.event_name != 'schedule' && !contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots')
+        run: |
+          echo "Skipping macOS: not a dispatch/schedule and PR not labeled accordingly."
+          exit 0
+
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@3ff1caaa28b64c9cc276ce0a02e2ff584f3900c5 # v2.0.2
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
@@ -192,7 +200,7 @@ jobs:
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@3ff1caaa28b64c9cc276ce0a02e2ff584f3900c5 # v2.0.2
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
@@ -280,7 +288,7 @@ jobs:
             ${{ env.MODIFIED_FILES }}
             ```
 
-  may-merge-e2e:
+  e2e-tests-pass:
     if: always()
     needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
     runs-on: ubuntu-24.04

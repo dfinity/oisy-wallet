@@ -76,6 +76,14 @@ export const KONG_BACKEND_CANISTER_ID = LOCAL
 			? import.meta.env.VITE_BETA_KONG_BACKEND_CANISTER_ID
 			: import.meta.env.VITE_IC_KONG_BACKEND_CANISTER_ID;
 
+export const ICP_SWAP_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_ICP_SWAP_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_ICP_SWAP_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_ICP_SWAP_CANISTER_ID
+			: import.meta.env.VITE_IC_ICP_SWAP_CANISTER_ID;
+
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
@@ -120,7 +128,7 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_SECOND * 60n;
 // Just a value that looks good visually.
 export const EIGHT_DECIMALS = 8;
 
-export const ZERO_BI = 0n;
+export const ZERO = 0n;
 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
@@ -148,3 +156,6 @@ export const FAILURE_THRESHOLD = 3;
 
 // Micro transaction
 export const MICRO_TRANSACTION_USD_THRESHOLD = 0.01;
+
+// Known destinations
+export const MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS = 3;

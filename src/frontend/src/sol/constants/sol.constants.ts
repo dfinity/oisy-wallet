@@ -14,8 +14,6 @@ export const ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS = parseSolAddress(
 	'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
 );
 
-export const SYSTEM_ACCOUNT_KEYS = [SYSTEM_PROGRAM_ADDRESS, COMPUTE_BUDGET_PROGRAM_ADDRESS];
-
 // Solana transaction fee
 // It can be hard-coded since it is not changed unsless under community proposal, with time in advance.
 // https://solana.com/docs/core/fees#transaction-fees
