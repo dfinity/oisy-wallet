@@ -14,7 +14,7 @@ use crate::{
             SaveTestnetsSettingsError,
         },
         settings::Settings,
-        token::UserToken,
+        token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH, EVM_TOKEN_SYMBOL_MAX_LENGTH},
         user_profile::{
             AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
@@ -428,8 +428,23 @@ impl Validate for IcrcToken {
     }
 }
 
+impl Validate for UserToken {
+    fn validate(&self) -> Result<(), candid::Error> {
+        if self.contract_address.len() != EVM_CONTRACT_ADDRESS_LENGTH {
+            return Err(candid::Error::msg("Invalid EVM contract address length"));
+        }
+        if let Some(symbol) = &self.symbol {
+            if symbol.len() > EVM_TOKEN_SYMBOL_MAX_LENGTH {
+                return Err(candid::Error::msg("Symbol too long"));
+            }
+        }
+        Ok(())
+    }
+}
+
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
+validate_on_deserialize!(UserToken);
