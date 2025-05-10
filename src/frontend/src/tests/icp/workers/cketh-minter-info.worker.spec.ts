@@ -15,7 +15,7 @@ vi.mock(import('$icp/schedulers/ck-minter-info.scheduler'), async (importOrigina
 	};
 });
 
-describe('ck-minter-info.worker', () => {
+describe('cketh-minter-info.worker', () => {
 	describe('onCkEthMinterInfoMessage', () => {
 		const invalidMessages = excludeValidMessageEvents([
 			'stopCkEthMinterInfoTimer',
