@@ -250,11 +250,6 @@ type NetworksSettings = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	testnets : TestnetsSettings
 };
-type OisyUser = record {
-	"principal" : principal;
-	pouh_verified : bool;
-	updated_timestamp : nat64
-};
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddDappSettingsError };
@@ -424,11 +419,7 @@ service : (Arg) -> {
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	http_request : (HttpRequest) -> (HttpResponse) query;
 	list_custom_tokens : () -> (vec CustomToken) query;
-	list_user_creation_timestamps : (ListUsersRequest) -> (
-		ListUserCreationTimestampsResponse
-	) query;
 	list_user_tokens : () -> (vec UserToken) query;
-	list_users : (ListUsersRequest) -> (ListUsersResponse) query;
 	remove_user_token : (UserTokenId) -> ();
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
