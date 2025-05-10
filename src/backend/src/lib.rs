@@ -63,7 +63,7 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 use crate::{
-    assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
+    assertions::assert_token_enabled_is_some,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     oisy_user::oisy_user_creation_timestamps,
     result_types::AddUserCredentialResult,
@@ -267,7 +267,6 @@ fn parse_eth_address(address: &str) -> [u8; 20] {
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_user_token(token: UserToken) {
-    assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
     assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
 
     let addr = parse_eth_address(&token.contract_address);
@@ -287,8 +286,6 @@ pub fn set_many_user_tokens(tokens: Vec<UserToken>) {
 
     mutate_state(|s| {
         for token in tokens {
-            assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
-            assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
             parse_eth_address(&token.contract_address);
 
             let find = |t: &UserToken| {
