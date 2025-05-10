@@ -97,7 +97,7 @@
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.address_book}
 				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
-				on:click={()=>modalStore.openAddressBook(addressModalId)}
+				on:click={() => modalStore.openAddressBook(addressModalId)}
 			>
 				<IconUserSquare size="20" />
 				{$i18n.navigation.text.address_book}
@@ -109,7 +109,7 @@
 		<ButtonMenu
 			ariaLabel={$i18n.navigation.alt.refer_a_friend}
 			testId={NAVIGATION_MENU_REFERRAL_BUTTON}
-			on:click={()=>modalStore.openReferralCode(referralModalId)}
+			on:click={() => modalStore.openReferralCode(referralModalId)}
 		>
 			<IconShare size="20" />
 			{$i18n.navigation.text.refer_a_friend}
