@@ -17,6 +17,7 @@
 	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
+	import { parseSolAddress } from '$lib/validation/address.validation';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -80,7 +81,7 @@
 		);
 
 		const tokenAccount = await loadTokenAccount({
-			address: destination,
+			address: parseSolAddress( destination),
 			network: solNetwork,
 			tokenAddress: $sendToken.address
 		});

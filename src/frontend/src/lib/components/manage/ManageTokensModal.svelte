@@ -39,6 +39,7 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+	import type { SolAddress } from '$lib/types/address';
 
 	let {
 		initialSearch,
@@ -207,7 +208,7 @@
 	let erc20ContractAddress: string | undefined = $state();
 	let erc20Metadata: Erc20Metadata | undefined = $state();
 
-	let splTokenAddress: string | undefined = $state();
+	let splTokenAddress: SolAddress | undefined = $state();
 	let splMetadata: TokenMetadata | undefined = $state();
 
 	let network: Network | undefined = $state($selectedNetwork);

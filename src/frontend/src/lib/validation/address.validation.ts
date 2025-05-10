@@ -6,5 +6,5 @@ const AddressStringSchema = z.string();
 
 export const parseSolAddress = (addressString: z.infer<typeof AddressStringSchema>): SolAddress => {
 	const validString = AddressStringSchema.parse(addressString);
-	return SolAddressSchema.parse(Symbol(validString));
+	return SolAddressSchema.parse(validString);
 };

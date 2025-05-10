@@ -54,6 +54,7 @@
 		initFeeContext,
 		initFeeStore
 	} from '$sol/stores/sol-fee.store';
+	import { parseSolAddress } from '$lib/validation/address.validation';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
@@ -161,7 +162,7 @@
 					unitName: $sendTokenDecimals
 				}),
 				prioritizationFee: $prioritizationFeeStore ?? ZERO,
-				destination,
+				destination : parseSolAddress(destination),
 				source
 			});
 
