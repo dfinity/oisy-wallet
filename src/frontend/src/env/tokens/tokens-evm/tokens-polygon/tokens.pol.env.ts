@@ -35,6 +35,7 @@ const POL_AMOY_SYMBOL = 'POL (Amoy Testnet)';
 export const POL_AMOY_TOKEN_ID: TokenId = parseTokenId(POL_AMOY_SYMBOL);
 
 // TODO: add instructions for faucets
+// https://faucet.polygon.technology/
 export const POL_AMOY_TOKEN: RequiredToken = {
 	id: POL_AMOY_TOKEN_ID,
 	network: POLYGON_AMOY_NETWORK,
