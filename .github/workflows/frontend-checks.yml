@@ -121,7 +121,7 @@ jobs:
           path: coverage/
           retention-days: 1
 
-  coverage-report:
+  test-coverage:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -169,7 +169,7 @@ jobs:
 
   frontend-checks-pass:
     if: always()
-    needs: ['format', 'lint', 'check', 'test', 'config']
+    needs: ['format', 'lint', 'check', 'test', 'test-coverage', 'config']
     runs-on: ubuntu-24.04
     permissions:
       contents: read
