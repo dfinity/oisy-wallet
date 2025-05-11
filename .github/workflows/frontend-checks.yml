@@ -138,7 +138,7 @@ jobs:
       - name: Download Blob Coverage Reports
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          path: .vitest-reports/
+          path: .vitest-reports
           pattern: vitest-coverage-report-*
           merge-multiple: true
       - name: Merge Coverage Reports
