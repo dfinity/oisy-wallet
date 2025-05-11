@@ -6,7 +6,6 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import IconInfo from '../icons/lucide/IconInfo.svelte';
-	import { fade } from 'svelte/transition';
 
 	let {
 		content,
@@ -30,7 +29,7 @@
 			on:click={() => (expanded = true)}
 			ariaLabel="expand"
 			colorStyle="muted"
-			styleClass="text-disabled mb-2"
+			styleClass="text-disabled mb-2 justify-end p-0 w-8"
 		>
 			<IconInfo slot="icon" />
 		</ButtonIcon>
@@ -69,9 +68,9 @@
 </Responsive>
 
 <Responsive up="md">
-	<div in:fade class="modal-expandable-values">
+	<div class="modal-expandable-values">
 		<Collapsible bind:expanded initiallyExpanded={expanded}>
-			<div class="flex w-[calc(100%-2rem)] items-center" slot="header">
+			<div class="flex w-[calc(100%-1.5rem)] items-center" slot="header">
 				{@render contentHeader()}
 			</div>
 
