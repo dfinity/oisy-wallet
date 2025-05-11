@@ -1,3 +1,4 @@
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { syncWallet } from '$icp/services/ic-listener.services';
 import {
@@ -31,6 +32,7 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 			case 'syncIcpWallet':
 				syncWallet({
 					tokenId: ICP_TOKEN_ID,
+					networkId: ICP_NETWORK_ID,
 					data: data.data as PostMessageDataResponseWallet
 				});
 				return;
@@ -43,6 +45,7 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 			case 'syncIcpWalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId: ICP_TOKEN_ID,
+					networkId: ICP_NETWORK_ID,
 					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
