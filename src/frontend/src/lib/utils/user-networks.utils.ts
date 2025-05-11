@@ -54,6 +54,7 @@ const networkIdToKey = (networkId: NetworkId): NetworkSettingsFor | undefined =>
 			return { BscMainnet: null };
 		case BSC_TESTNET_NETWORK_ID:
 			return { BscTestnet: null };
+		// TODO: add polygon networks
 		default:
 			// We just print the error to console and ignore the missing network, for the sake of the user's experience.
 			console.warn(`Unknown networkId: ${networkId.description}`);

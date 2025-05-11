@@ -96,6 +96,7 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			if ('BscTestnet' in key) {
 				return BSC_TESTNET_NETWORK_ID;
 			}
+			// TODO: add polygon networks
 
 			// Force compiler error on unhandled cases based on leftover types
 			const _: never = key;

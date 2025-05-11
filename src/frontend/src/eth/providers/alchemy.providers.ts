@@ -7,11 +7,17 @@ import {
 	BSC_TESTNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
+	POLYGON_AMOY_NETWORK_ID,
+	POLYGON_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.polygon.env';
+import {
 	ALCHEMY_NETWORK_BASE_MAINNET,
 	ALCHEMY_NETWORK_BASE_SEPOLIA,
 	ALCHEMY_NETWORK_BSC_MAINNET,
 	ALCHEMY_NETWORK_BSC_TESTNET,
 	ALCHEMY_NETWORK_MAINNET,
+	ALCHEMY_NETWORK_POLYGON_AMOY,
+	ALCHEMY_NETWORK_POLYGON_MAINNET,
 	ALCHEMY_NETWORK_SEPOLIA,
 	ETHEREUM_NETWORK_ID,
 	SEPOLIA_NETWORK_ID
@@ -54,6 +60,14 @@ const configs: Record<NetworkId, AlchemyConfig> = {
 	[BSC_TESTNET_NETWORK_ID]: {
 		apiKey: ALCHEMY_API_KEY,
 		network: ALCHEMY_NETWORK_BSC_TESTNET
+	},
+	[POLYGON_NETWORK_ID]: {
+		apiKey: ALCHEMY_API_KEY,
+		network: ALCHEMY_NETWORK_POLYGON_MAINNET
+	},
+	[POLYGON_AMOY_NETWORK_ID]: {
+		apiKey: ALCHEMY_API_KEY,
+		network: ALCHEMY_NETWORK_POLYGON_AMOY
 	}
 };
 
@@ -166,7 +180,9 @@ const providers: Record<NetworkId, AlchemyProvider> = {
 	[BASE_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BASE_MAINNET),
 	[BASE_SEPOLIA_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BASE_SEPOLIA),
 	[BSC_MAINNET_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BSC_MAINNET),
-	[BSC_TESTNET_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BSC_TESTNET)
+	[BSC_TESTNET_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BSC_TESTNET),
+	[POLYGON_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_POLYGON_MAINNET),
+	[POLYGON_AMOY_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_POLYGON_AMOY)
 };
 
 export const alchemyProviders = (networkId: NetworkId): AlchemyProvider => {
