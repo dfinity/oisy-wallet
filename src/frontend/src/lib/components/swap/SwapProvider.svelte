@@ -20,6 +20,7 @@
 	import CollapsibleBottomSheet from '../ui/CollapsibleBottomSheet.svelte';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import Button from '../ui/Button.svelte';
+	import SwapBestRateBadge from './SwapBestRateBadge.svelte';
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -30,6 +31,8 @@
 	);
 
 	$: provider = $swapAmountsStore?.selectedProvider;
+
+	$: bestRate = provider === $swapAmountsStore?.swaps[0]?.provider;
 
 	console.log(swapDApp, $swapAmountsStore?.selectedProvider?.provider.toLowerCase());
 
@@ -59,18 +62,28 @@
 	<CollapsibleBottomSheet showContentHeader>
 		{#snippet contentHeader()}
 			<ModalValue>
-				<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
+				<svelte:fragment slot="label"
+					>{$i18n.swap.text.swap_provider}
+					{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1}
+						<Button link on:click={() => {}}>Select ></Button>
+					{/if}
+				</svelte:fragment>
 
 				<svelte:fragment slot="main-value">
-					<div class="flex gap-2">
-						<div class="mt-1">
-							<Logo
-								src={swapDApp.logo}
-								alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: swapDApp.name })}
-							/>
-						</div>
-						<div class="mr-auto">
-							<div class="text-lg font-bold">{swapDApp.name}</div>
+					<div class="flex items-start gap-3">
+						{#if bestRate}
+							<SwapBestRateBadge />
+						{/if}
+						<div class="flex gap-2">
+							<div class="mt-1">
+								<Logo
+									src={swapDApp.logo}
+									alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: swapDApp.name })}
+								/>
+							</div>
+							<div class="mr-auto">
+								<div class="text-lg font-bold">{swapDApp.name}</div>
+							</div>
 						</div>
 					</div>
 				</svelte:fragment>
