@@ -8,7 +8,6 @@ import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 
-// TODO: check if this is the correct decimals
 const POL_DECIMALS = 18;
 
 const POL_MAINNET_SYMBOL = 'POL';
