@@ -14,7 +14,7 @@
 		showContentHeader = false
 	}: {
 		content: Snippet;
-		contentHeader: Snippet;
+		contentHeader: Snippet<[{ isInBottomSheet: boolean }]>;
 		contentFooter?: Snippet<[closeFn: () => void]>;
 		showContentHeader?: boolean;
 	} = $props();
@@ -24,7 +24,7 @@
 
 <Responsive down="sm">
 	<div class="flex w-full items-center justify-between">
-		{@render contentHeader()}
+		{@render contentHeader({ isInBottomSheet: false })}
 		<ButtonIcon
 			on:click={() => (expanded = true)}
 			ariaLabel="expand"
@@ -50,7 +50,7 @@
 
 				<div class="min-h-[35vh] w-full px-4 pb-4">
 					{#if showContentHeader}
-						{@render contentHeader()}
+						{@render contentHeader({ isInBottomSheet: true })}
 					{/if}
 					{@render content()}
 				</div>
@@ -71,7 +71,7 @@
 	<div class="modal-expandable-values">
 		<Collapsible bind:expanded initiallyExpanded={expanded}>
 			<div class="flex w-[calc(100%-1.5rem)] items-center" slot="header">
-				{@render contentHeader()}
+				{@render contentHeader({ isInBottomSheet: false })}
 			</div>
 
 			{@render content()}

@@ -60,13 +60,15 @@
 
 {#if nonNullish(swapDApp) && nonNullish(provider)}
 	<CollapsibleBottomSheet showContentHeader>
-		{#snippet contentHeader()}
+		{#snippet contentHeader({ isInBottomSheet })}
 			<ModalValue>
-				<svelte:fragment slot="label"
-					>{$i18n.swap.text.swap_provider}
-					{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1}
-						<Button link on:click={() => {}}>Select ></Button>
-					{/if}
+				<svelte:fragment slot="label">
+					<div class="flex justify-center gap-2">
+						{$i18n.swap.text.swap_provider}
+						{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1 && !isInBottomSheet}
+							<Button link on:click={() => {}}>Select ></Button>
+						{/if}
+					</div>
 				</svelte:fragment>
 
 				<svelte:fragment slot="main-value">
