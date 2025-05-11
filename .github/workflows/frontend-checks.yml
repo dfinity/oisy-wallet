@@ -118,7 +118,7 @@ jobs:
         if: always()
         with:
           name: vitest-coverage-report-${{ matrix.shardIndex }}
-          path: coverage/
+          path: .vitest-reports/*
           retention-days: 1
 
   test-coverage:
@@ -137,7 +137,7 @@ jobs:
       - name: Download blob reports from GitHub Actions Artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          path: coverage/
+          path: .vitest-reports
           pattern: vitest-coverage-report-*
           merge-multiple: true
       - name: Merge Coverage Reports
