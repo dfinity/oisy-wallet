@@ -13,10 +13,8 @@ export const isEthereumTokenToggleEnabled = (token: EthereumUserToken): boolean 
 
 // TODO: Like above - check why this functionality is used.
 export const isIcrcTokenToggleDisabled = (token: IcrcCustomToken): boolean =>
-	nonNullish(token)
-		? (token.category === 'default' && isTokenIcp(token)) ||
-			ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(token.ledgerCanisterId)
-		: false;
+	(token.category === 'default' && isTokenIcp(token)) ||
+	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(token.ledgerCanisterId);
 
 export const isIcrcTokenToggleEnabled = (token: IcrcCustomToken): boolean =>
 	!isIcrcTokenToggleDisabled(token);
