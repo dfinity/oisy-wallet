@@ -119,6 +119,7 @@ jobs:
         with:
           name: vitest-coverage-report-${{ matrix.shardIndex }}
           path: .vitest-reports/*
+          include-hidden-files: true
           retention-days: 1
 
   test-coverage:
