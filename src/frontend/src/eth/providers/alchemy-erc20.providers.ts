@@ -8,7 +8,7 @@ import {
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
 	POLYGON_AMOY_NETWORK_ID,
-	POLYGON_NETWORK_ID
+	POLYGON_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import {
 	ALCHEMY_JSON_RPC_URL_BASE_MAINNET,
@@ -86,7 +86,7 @@ const providers: Record<NetworkId, AlchemyErc20Provider> = {
 	[BASE_SEPOLIA_NETWORK_ID]: new AlchemyErc20Provider(ALCHEMY_JSON_RPC_URL_BASE_SEPOLIA),
 	[BSC_MAINNET_NETWORK_ID]: new AlchemyErc20Provider(ALCHEMY_JSON_RPC_URL_BSC_MAINNET),
 	[BSC_TESTNET_NETWORK_ID]: new AlchemyErc20Provider(ALCHEMY_JSON_RPC_URL_BSC_TESTNET),
-	[POLYGON_NETWORK_ID]: new AlchemyErc20Provider(ALCHEMY_JSON_RPC_URL_POLYGON_MAINNET),
+	[POLYGON_MAINNET_NETWORK_ID]: new AlchemyErc20Provider(ALCHEMY_JSON_RPC_URL_POLYGON_MAINNET),
 	[POLYGON_AMOY_NETWORK_ID]: new AlchemyErc20Provider(ALCHEMY_JSON_RPC_URL_POLYGON_AMOY)
 };
 

@@ -13,14 +13,14 @@ export const POLYGON_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_POLYGON_MAINNET_DISABLED
 );
 
-export const POLYGON_NETWORK_SYMBOL = 'POL';
+export const POLYGON_MAINNET_NETWORK_SYMBOL = 'POL';
 
-export const POLYGON_NETWORK_ID: NetworkId = parseNetworkId(POLYGON_NETWORK_SYMBOL);
+export const POLYGON_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(POLYGON_MAINNET_NETWORK_SYMBOL);
 
-export const POLYGON_NETWORK: EthereumNetwork = {
-	id: POLYGON_NETWORK_ID,
+export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
+	id: POLYGON_MAINNET_NETWORK_ID,
 	env: 'mainnet',
-	name: 'Polygon',
+	name: 'Polygon PoS',
 	chainId: 137n,
 	// TODO: add the correct icon
 	iconLight: baseMainnetIconLight,
@@ -49,7 +49,7 @@ export const POLYGON_AMOY_NETWORK: EthereumNetwork = {
 
 export const SUPPORTED_POLYGON_NETWORKS: EthereumNetwork[] = defineSupportedNetworks({
 	mainnetFlag: POLYGON_MAINNET_ENABLED,
-	mainnetNetworks: [POLYGON_NETWORK],
+	mainnetNetworks: [POLYGON_MAINNET_NETWORK],
 	testnetNetworks: [POLYGON_AMOY_NETWORK]
 });
 

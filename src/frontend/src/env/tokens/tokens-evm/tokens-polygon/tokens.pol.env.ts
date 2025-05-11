@@ -1,7 +1,7 @@
 import {
 	POLYGON_AMOY_NETWORK,
 	POLYGON_MAINNET_ENABLED,
-	POLYGON_NETWORK
+	POLYGON_MAINNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import bnb from '$evm/bsc/assets/bnb.svg';
 import type { RequiredToken, TokenId } from '$lib/types/token';
@@ -17,7 +17,7 @@ export const POL_MAINNET_TOKEN_ID: TokenId = parseTokenId(POL_MAINNET_SYMBOL);
 
 export const POL_MAINNET_TOKEN: RequiredToken = {
 	id: POL_MAINNET_TOKEN_ID,
-	network: POLYGON_NETWORK,
+	network: POLYGON_MAINNET_NETWORK,
 	standard: 'ethereum',
 	category: 'default',
 	name: 'POL (prev. MATIC)',

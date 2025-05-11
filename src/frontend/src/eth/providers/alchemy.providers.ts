@@ -8,7 +8,7 @@ import {
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
 	POLYGON_AMOY_NETWORK_ID,
-	POLYGON_NETWORK_ID
+	POLYGON_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import {
 	ALCHEMY_NETWORK_BASE_MAINNET,
@@ -61,7 +61,7 @@ const configs: Record<NetworkId, AlchemyConfig> = {
 		apiKey: ALCHEMY_API_KEY,
 		network: ALCHEMY_NETWORK_BSC_TESTNET
 	},
-	[POLYGON_NETWORK_ID]: {
+	[POLYGON_MAINNET_NETWORK_ID]: {
 		apiKey: ALCHEMY_API_KEY,
 		network: ALCHEMY_NETWORK_POLYGON_MAINNET
 	},
@@ -181,7 +181,7 @@ const providers: Record<NetworkId, AlchemyProvider> = {
 	[BASE_SEPOLIA_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BASE_SEPOLIA),
 	[BSC_MAINNET_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BSC_MAINNET),
 	[BSC_TESTNET_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_BSC_TESTNET),
-	[POLYGON_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_POLYGON_MAINNET),
+	[POLYGON_MAINNET_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_POLYGON_MAINNET),
 	[POLYGON_AMOY_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_POLYGON_AMOY)
 };
 
