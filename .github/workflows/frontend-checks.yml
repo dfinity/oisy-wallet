@@ -98,6 +98,10 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+    strategy:
+      matrix:
+        shardIndex: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        shardTotal: [10]
 
     steps:
       - name: Checkout
@@ -107,7 +111,9 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Test
-        run: npm run test:coverage
+        run: npm run test:coverage -- --reporter=blob --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+      - name: Merge Coverage Reports
+        run: npm run test:merge
       - name: Upload Coverage Report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
