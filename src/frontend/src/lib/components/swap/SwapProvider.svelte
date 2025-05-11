@@ -32,7 +32,7 @@
 
 	$: provider = $swapAmountsStore?.selectedProvider;
 
-	$: bestRate = provider === $swapAmountsStore?.swaps[0]?.provider;
+	$: bestRate = provider?.provider === $swapAmountsStore?.swaps[0]?.provider;
 
 	console.log(swapDApp, $swapAmountsStore?.selectedProvider?.provider.toLowerCase());
 
