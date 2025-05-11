@@ -4,7 +4,10 @@ import { solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
-import type { PostMessageDataRequest } from '$lib/types/post-message';
+import type {
+	PostMessageDataRequest,
+	PostMessageDataResponsePowProtector
+} from '$lib/types/post-message';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
@@ -44,6 +47,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 
 		try {
 			// Step 1: Request creation of the Proof-of-Work (PoW) challenge (throws when unsuccessful).
+			this.postMessagePow({ progress: 'REQUEST_CHALLENGE' });
 			createChallengeResponse = await createPowChallenge({
 				identity
 			});
@@ -60,12 +64,14 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		}
 
 		// Step 2: Solve the PoW challenge.
+		this.postMessagePow({ progress: 'SOLVE_CHALLENGE' });
 		const nonce = await solvePowChallenge({
 			timestamp: createChallengeResponse.start_timestamp_ms,
 			difficulty: createChallengeResponse.difficulty
 		});
 
 		// Step 3: Request allowance for signing operations with solved nonce.
+		this.postMessagePow({ progress: 'GRANT_CYCLES' });
 		await allowSigning({
 			identity,
 			request: { nonce }
@@ -75,4 +81,22 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	// Helper function to check for the specific error condition
 	private isChallengeInProgressError = (error: unknown): boolean =>
 		error instanceof CanisterInternalError && error.message === 'Challenge is already in progress';
+
+	private postMessagePow({
+		progress,
+		nextAllowanceMs
+	}: {
+		progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES';
+		nextAllowanceMs?: bigint;
+	}) {
+		const data: PostMessageDataResponsePowProtector = {
+			progress,
+			nextAllowanceMs
+		};
+
+		this.timer.postMsg<PostMessageDataResponsePowProtector>({
+			msg: 'syncPowProtection',
+			data
+		});
+	}
 }

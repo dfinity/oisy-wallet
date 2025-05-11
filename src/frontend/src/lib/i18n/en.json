@@ -1021,7 +1021,10 @@
 	"pow_protector": {
 		"text": {
 			"title": "Allowing signer operations",
-			"description": "Please be patient..."
+			"description": "Please be patient...",
+			"request_challenge": "Request Challenge",
+			"solve_challenge": "Solve challenge",
+			"grant_cycles": "Allow signing"
 		}
 	},
 	"signer": {

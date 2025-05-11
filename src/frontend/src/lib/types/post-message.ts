@@ -12,6 +12,8 @@ import type {
 	PostMessageDataResponseErrorSchema,
 	PostMessageDataResponseExchangeErrorSchema,
 	PostMessageDataResponseExchangeSchema,
+	PostMessageDataResponsePowProtectorProgressSchema,
+	PostMessageDataResponsePowProtectorSchema,
 	PostMessageDataResponseSchema,
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
@@ -73,6 +75,14 @@ export type PostMessageSyncState = z.infer<typeof PostMessageSyncStateSchema>;
 
 export type PostMessageDataResponseBTCAddress = z.infer<
 	typeof PostMessageDataResponseBTCAddressSchema
+>;
+
+export type PostMessageDataResponsePowProtectorProgress = z.infer<
+	typeof PostMessageDataResponsePowProtectorProgressSchema
+>;
+
+export type PostMessageDataResponsePowProtector = z.infer<
+	typeof PostMessageDataResponsePowProtectorSchema
 >;
 
 export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> = z.infer<

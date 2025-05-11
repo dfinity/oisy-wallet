@@ -921,10 +921,13 @@ interface I18nAddress_book {
 	};
 }
 
-interface I18nPowProtector_book {
+interface I18nPowProtector {
 	text: {
 		title: string;
 		description: string;
+		request_challenge: string;
+		solve_challenge: string;
+		grant_cycles: string;
 	};
 }
 
@@ -1027,7 +1030,7 @@ interface I18n {
 	vip: I18nVip;
 	referral: I18nReferral;
 	address_book: I18nAddress_book;
-	pow_protector: I18nPowProtector_book;
+	pow_protector: I18nPowProtector;
 	contact: I18nContact;
 	signer: I18nSigner;
 	carousel: I18nCarousel;

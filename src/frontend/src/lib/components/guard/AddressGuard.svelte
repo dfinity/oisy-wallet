@@ -8,7 +8,7 @@
 		networkEvmMainnetEnabled,
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
-	import { hasRequiredCycles, initSignerAllowance } from '$lib/services/loader.services';
+	import { initSignerAllowance } from '$lib/services/loader.services';
 	import {
 		btcAddressMainnetStore,
 		ethAddressStore,

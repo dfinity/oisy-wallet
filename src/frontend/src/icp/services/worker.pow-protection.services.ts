@@ -1,8 +1,13 @@
+import {
+	syncPowProtection,
+	type PowProtectorWorker,
+	type PowProtectorWorkerInitResult
+} from '$icp/services/pow-protector-listener';
 import type {
-	PowProtectorWorker,
-	PowProtectorWorkerInitResult
-} from '$icp/types/pow-protector-listener';
-import type { PostMessage, PostMessageDataResponse } from '$lib/types/post-message';
+	PostMessage,
+	PostMessageDataResponseError,
+	PostMessageDataResponsePowProtector
+} from '$lib/types/post-message';
 
 // TODO: add tests for POW worker/scheduler
 export const initPowProtectorWorker: PowProtectorWorker =
@@ -10,7 +15,25 @@ export const initPowProtectorWorker: PowProtectorWorker =
 		const PowWorker = await import('$lib/workers/workers?worker');
 		const worker: Worker = new PowWorker.default();
 
-		worker.onmessage = ({ data: _data }: MessageEvent<PostMessage<PostMessageDataResponse>>) => {};
+		worker.onmessage = ({
+			data
+		}: MessageEvent<
+			PostMessage<PostMessageDataResponsePowProtector | PostMessageDataResponseError>
+		>) => {
+			const { msg } = data;
+
+			switch (msg) {
+				case 'syncPowProtection': {
+					// Check if data.data exists and has proper structure
+					if (data.data && 'progress' in data.data) {
+						syncPowProtection({
+							data: data.data
+						});
+					}
+					return;
+				}
+			}
+		};
 
 		return {
 			start: () => {

@@ -1,14 +1,19 @@
 <script lang="ts">
-	import { Modal, Spinner, themeStore } from '@dfinity/gix-components';
+	import { Modal, themeStore, type ProgressStep } from '@dfinity/gix-components';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import { POW_FEATURE_ENABLED } from '$env/pow.env';
+	import type { PowProtectorWorkerInitResult } from '$icp/services/pow-protector-listener';
 	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
-	import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import InProgress from '$lib/components/ui/InProgress.svelte';
+	import { ProgressStepsPowProtectorLoader } from '$lib/enums/progress-steps';
 	import { errorSignOut } from '$lib/services/auth.services';
 	import { hasRequiredCycles } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { allowSigningPowStore } from '$lib/stores/pow-protection.store';
+	import type { StaticStep } from '$lib/types/steps';
+	import type { NonEmptyArray } from '$lib/types/utils';
 	import { replacePlaceholders, replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -26,10 +31,36 @@
 	const MAX_CHECK_ATTEMPTS = 30; // 30 attempts * 5 seconds = 150 seconds total wait time
 	const CHECK_INTERVAL_MS = 5000; // 5 seconds
 
-	// Create an effect to track when hasCycles changes
+	// Initialize with default value, but it will be reactively updated from the store
+	let progressStep = $state(ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE);
+
+	// Subscribe to the store and update progressStep reactively
 	$effect(() => {
-		console.warn('hasCycles changed to:', hasCycles);
+		const storeData = $allowSigningPowStore;
+		if (storeData?.progress) {
+			// Use type assertion to ensure the value is treated as a valid enum value
+			progressStep = storeData.progress as ProgressStepsPowProtectorLoader;
+		}
 	});
+
+	// Using $derived for reactive steps array
+	let steps = $derived([
+		{
+			step: ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE,
+			text: $i18n.pow_protector.text.request_challenge,
+			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: ProgressStepsPowProtectorLoader.SOLVE_CHALLENGE,
+			text: $i18n.pow_protector.text.solve_challenge,
+			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: ProgressStepsPowProtectorLoader.GRANT_CYCLES,
+			text: $i18n.pow_protector.text.grant_cycles,
+			state: 'in_progress'
+		} as ProgressStep
+	] as NonEmptyArray<ProgressStep | StaticStep>);
 
 	const checkCycles = async (): Promise<void> => {
 		console.warn('checkCycles ', checkAttempts);
@@ -54,6 +85,13 @@
 		}
 	};
 
+	const initWorker = async (): Promise<void> => {
+		if (POW_FEATURE_ENABLED && !powWorker) {
+			powWorker = await initPowProtectorWorker();
+			powWorker.start();
+		}
+	};
+
 	onMount(async () => {
 		console.warn('onMount');
 
@@ -62,11 +100,10 @@
 			hasCycles = await hasRequiredCycles();
 
 			// Always initialize the worker regardless of cycles status
-			powWorker = await initPowProtectorWorker();
-			powWorker.start();
+			await initWorker();
 
 			if (!hasCycles) {
-				// If initial check fails, start polling
+				// If the initial check fails, start polling
 				checkInterval = setInterval(checkCycles, CHECK_INTERVAL_MS);
 			}
 		} else {
@@ -92,6 +129,7 @@
 	});
 </script>
 
+```html
 {#if hasCycles}
 	{@render children?.()}
 {:else}
@@ -112,11 +150,9 @@
 
 				<h3 class="my-3">{$i18n.pow_protector.text.title}</h3>
 
-				<div>
-					<Spinner inline />
-				</div>
-
 				<p class="mt-3">{$i18n.pow_protector.text.description}</p>
+
+				<InProgress {progressStep} {steps} />
 			</div>
 		</Modal>
 	</div>
@@ -131,11 +167,5 @@
 
 	.banner-container {
 		width: 100%;
-	}
-
-	.spinner-container {
-		display: flex;
-		justify-content: center;
-		margin: 1rem 0;
 	}
 </style>
