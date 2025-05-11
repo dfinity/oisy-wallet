@@ -171,10 +171,12 @@ describe('ic-transactions.derived', () => {
 				transactions
 			});
 
+			const maxTimestamp = Math.max(...transactions.map(({ data }) => Number(data.timestamp)));
+
 			expect(get(icKnownDestinations)).toEqual({
 				[transactions[0].data.to as string]: {
 					amounts: transactions.map(({ data }) => data.value),
-					timestamp: Number(transactions[0].data.timestamp)
+					timestamp: maxTimestamp
 				}
 			});
 		});
