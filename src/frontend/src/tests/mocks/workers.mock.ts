@@ -8,4 +8,3 @@ export const createMockEvent = (msg: string) => ({
 
 export const excludeValidMessageEvents = (validMessages: string[]) =>
 	POST_MESSAGE_REQUESTS.filter((message) => !validMessages.includes(message));
-
