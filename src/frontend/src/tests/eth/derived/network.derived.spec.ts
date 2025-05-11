@@ -66,6 +66,14 @@ describe('network.derived', () => {
 	});
 
 	describe('explorerUrl', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+			vi.resetAllMocks();
+
+			setupTestnetsStore('enabled');
+			setupUserNetworksStore('allEnabled');
+		});
+
 		it('should return selected network explorer URL if it is an Ethereum network or and EVM network', () => {
 			const networks: EthereumNetwork[] = [
 				...SUPPORTED_ETHEREUM_NETWORKS,
