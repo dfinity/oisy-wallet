@@ -443,6 +443,21 @@ describe('backend.canister', () => {
 			);
 		});
 
+		it('should throw an error if btc_add_pending_transaction returns a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_add_pending_transaction.mockResolvedValue({ Err: { CanisterError: null } });
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError('Unknown BtcAddPendingTransactionError')
+			);
+		});
+
 		it('should throw an error if btc_add_pending_transaction throws', async () => {
 			service.btc_add_pending_transaction.mockImplementation(async () => {
 				await Promise.resolve();
@@ -579,6 +594,37 @@ describe('backend.canister', () => {
 			);
 		});
 
+		it('should throw an error if btc_select_user_utxos_fee returns a pending-transactions error', async () => {
+			service.btc_select_user_utxos_fee.mockResolvedValue({ Err: { PendingTransactions: null } });
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError(
+					'Selecting utxos fee is not possible - pending transactions found.'
+				)
+			);
+		});
+
+		it('should throw an error if btc_select_user_utxos_fee returns a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_select_user_utxos_fee.mockResolvedValue({ Err: { CanisterError: null } });
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
+			);
+		});
+
 		it('should throw an error if btc_select_user_utxos_fee throws', async () => {
 			service.btc_select_user_utxos_fee.mockImplementation(async () => {
 				await Promise.resolve();
@@ -651,6 +697,19 @@ describe('backend.canister', () => {
 			});
 
 			await expect(getAllowedCycles()).rejects.toThrow(new CanisterInternalError(errorMsg));
+		});
+
+		it('should throw CanisterInternalError with custom message when a generic canister error is returned', async () => {
+			// @ts-expect-error we test this in purposes
+			service.get_allowed_cycles.mockResolvedValue({ Err: { CanisterError: null } });
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getAllowedCycles()).rejects.toThrow(
+				new CanisterInternalError('Unknown GetAllowedCyclesError')
+			);
 		});
 
 		it('should throw unknown GetAllowedCyclesError for unrecognized errors', async () => {
@@ -748,6 +807,23 @@ describe('backend.canister', () => {
 			);
 		});
 
+		it.each([
+			['InvalidNonce', { InvalidNonce: null }],
+			['MissingChallenge', { MissingChallenge: null }],
+			['ExpiredChallenge', { ExpiredChallenge: null }],
+			['MissingUserProfile', { MissingUserProfile: null }],
+			['ChallengeAlreadySolved', { ChallengeAlreadySolved: null }]
+			// eslint-disable-next-line local-rules/prefer-object-params -- It is a simple list of cases
+		])(`should return the PoW challenge if PowChallenge error %s is returned`, async (_, error) => {
+			service.allow_signing.mockResolvedValue({ Err: { PowChallenge: error } });
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(allowSigning()).rejects.toEqual(error);
+		});
+
 		it('should throw a CanisterInternalError if Other error is returned', async () => {
 			const errorMsg = 'Test error';
 			const response = { Err: { Other: errorMsg } };
@@ -841,6 +917,17 @@ describe('backend.canister', () => {
 
 			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
 				'Unexpected error occurred.'
+			);
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
+		});
+
+		it('should handle a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.create_pow_challenge.mockResolvedValue({ Err: { CanisterError: null } });
+
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+				'Unknown CreateChallengeError'
 			);
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
