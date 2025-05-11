@@ -26,7 +26,7 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	iconLight: baseMainnetIconLight,
 	iconDark: baseMainnetIconDark,
 	explorerUrl: POLYGON_EXPLORER_URL,
-	providers: { infura: 'polygon-mainnet' },
+	providers: { infura: 'matic' },
 	exchange: { coingeckoId: 'polygon-pos' },
 	buy: { onramperId: 'polygon' }
 };
@@ -44,7 +44,7 @@ export const POLYGON_AMOY_NETWORK: EthereumNetwork = {
 	iconLight: baseSepoliaIconLight,
 	iconDark: baseSepoliaIconDark,
 	explorerUrl: POLYGON_AMOY_EXPLORER_URL,
-	providers: { infura: 'polygon-amoy' }
+	providers: { infura: 'matic-amoy' }
 };
 
 export const SUPPORTED_POLYGON_NETWORKS: EthereumNetwork[] = defineSupportedNetworks({
