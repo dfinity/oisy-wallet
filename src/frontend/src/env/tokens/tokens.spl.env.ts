@@ -9,6 +9,7 @@ import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { DEVNET_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import type { RequiredSplToken } from '$sol/types/spl';
 
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
@@ -26,7 +27,8 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 
 const SPL_TOKENS_DEVNET: RequiredSplToken[] = [DEVNET_USDC_TOKEN, DEVNET_EURC_TOKEN];
 
-export const SPL_TOKENS: RequiredSplToken[] = [
-	...(SOL_MAINNET_ENABLED ? SPL_TOKENS_MAINNET : []),
-	...SPL_TOKENS_DEVNET
-];
+export const SPL_TOKENS: RequiredSplToken[] = defineSupportedTokens({
+	mainnetFlag: SOL_MAINNET_ENABLED,
+	mainnetTokens: SPL_TOKENS_MAINNET,
+	testnetTokens: SPL_TOKENS_DEVNET
+});
