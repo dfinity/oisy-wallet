@@ -25,9 +25,7 @@ export const BASE_ETH_TOKEN: RequiredToken = {
 	decimals: BASE_ETH_DECIMALS,
 	icon: eth,
 	groupData: ETH_TOKEN_GROUP,
-	buy: {
-		onramperId: 'eth_base'
-	}
+	buy: { onramperId: 'eth_base' }
 };
 
 const BASE_SEPOLIA_ETH_SYMBOL = 'SepoliaETH';
