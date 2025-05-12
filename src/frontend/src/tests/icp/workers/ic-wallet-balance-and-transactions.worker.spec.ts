@@ -193,8 +193,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		const mockPostMessageCertified = mockPostMessage({ msg, transaction, certified: true });
 
 		return {
-			setup: () => {
-				scheduler = initScheduler(startData);
+			setup: async () => {
+				scheduler = await initScheduler(startData);
 			},
 
 			teardown: () => {
@@ -253,8 +253,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		const mockPostMessageCertified = mockPostMessage({ msg, transaction, certified: true });
 
 		return {
-			setup: () => {
-				scheduler = initScheduler(startData);
+			setup: async () => {
+				scheduler = await initScheduler(startData);
 			},
 
 			teardown: () => {
@@ -343,8 +343,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		};
 
 		return {
-			setup: () => {
-				scheduler = initScheduler(startData);
+			setup: async () => {
+				scheduler = await initScheduler(startData);
 			},
 
 			teardown: () => {
@@ -387,8 +387,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
 		return {
-			setup: () => {
-				scheduler = initScheduler(startData);
+			setup: async () => {
+				scheduler = await initScheduler(startData);
 			},
 
 			teardown: () => {
@@ -475,8 +475,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				transaction: mockMappedTransaction
 			});
 
-			beforeEach(() => {
-				setup();
+			beforeEach(async () => {
+				await setup();
 
 				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
 					balance: mockBalance,
@@ -496,8 +496,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				initScheduler: initIcpWalletScheduler
 			});
 
-			beforeEach(() => {
-				setup();
+			beforeEach(async () => {
+				await setup();
 
 				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
 					balance: mockBalance,
@@ -606,8 +606,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				startData
 			});
 
-			beforeEach(() => {
-				setup();
+			beforeEach(async () => {
+				await setup();
 
 				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
 					balance: mockBalanceFromTransactions(),
@@ -628,8 +628,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				startData
 			});
 
-			beforeEach(() => {
-				setup();
+			beforeEach(async () => {
+				await setup();
 
 				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
 					balance: mockBalanceFromTransactions(),
@@ -729,8 +729,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				transaction: mockMappedTransaction
 			});
 
-			beforeEach(() => {
-				setup();
+			beforeEach(async () => {
+				await setup();
 
 				// TODO: implement DIP-20 transactions tests when we implement the transactions history
 				spyGetTransactions = ledgerCanisterMock.transactions.mockResolvedValue({
@@ -750,8 +750,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				initScheduler: initDip20WalletScheduler
 			});
 
-			beforeEach(() => {
-				setup();
+			beforeEach(async () => {
+				await setup();
 
 				spyGetTransactions = ledgerCanisterMock.transactions.mockResolvedValue({
 					transactions: [],
