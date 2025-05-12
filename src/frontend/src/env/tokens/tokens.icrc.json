@@ -1,9 +1,9 @@
 {
 	"BURN": {
 		"ledgerCanisterId": "egjwt-lqaaa-aaaak-qi2aa-cai",
-		"name": "MSQ Cycle Burn",
 		"indexCanisterId": "nrant-tyaaa-aaaag-atsjq-cai",
 		"decimals": 8,
+		"name": "MSQ Cycle Burn",
 		"symbol": "BURN",
 		"fee": {
 			"__bigint__": "10000"
@@ -11,9 +11,9 @@
 	},
 	"POPEYE": {
 		"ledgerCanisterId": "6fvyi-faaaa-aaaam-qbiga-cai",
-		"name": "Popeye The Sailor",
 		"indexCanisterId": "gg3c3-6iaaa-aaaah-aq6dq-cai",
 		"decimals": 8,
+		"name": "Popeye The Sailor",
 		"symbol": "POPEYE",
 		"fee": {
 			"__bigint__": "1000000"
@@ -21,9 +21,9 @@
 	},
 	"CLOUD": {
 		"ledgerCanisterId": "pcj6u-uaaaa-aaaak-aewnq-cai",
-		"name": "Crypto Cloud",
 		"indexCanisterId": "72uqs-pqaaa-aaaak-aes7a-cai",
 		"decimals": 8,
+		"name": "Crypto Cloud",
 		"symbol": "CLOUD",
 		"fee": {
 			"__bigint__": "100000000"
@@ -31,9 +31,9 @@
 	},
 	"AAA": {
 		"ledgerCanisterId": "l67es-4iaaa-aaaag-atvda-cai",
-		"name": "aaaaa-aa ∞",
 		"indexCanisterId": "lz6cg-rqaaa-aaaag-atvdq-cai",
 		"decimals": 8,
+		"name": "aaaaa-aa ∞",
 		"symbol": "AAA",
 		"fee": {
 			"__bigint__": "10000"
@@ -41,9 +41,9 @@
 	},
 	"GLDT": {
 		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai",
-		"name": "Gold Token",
 		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai",
 		"decimals": 8,
+		"name": "Gold Token",
 		"symbol": "GLDT",
 		"fee": {
 			"__bigint__": "10000000"
@@ -51,34 +51,52 @@
 	},
 	"nICP": {
 		"ledgerCanisterId": "buwm7-7yaaa-aaaar-qagva-cai",
-		"name": "neuron ICP",
 		"indexCanisterId": "btxkl-saaaa-aaaar-qagvq-cai",
 		"decimals": 8,
+		"name": "neuron ICP",
 		"symbol": "nICP",
 		"fee": {
-			"__bigint__": "10000"
+			"__bigint__": "1000000"
 		}
 	},
 	"RUGGY": {
 		"ledgerCanisterId": "icaf7-3aaaa-aaaam-qcx3q-cai",
-		"name": "RUGGY",
 		"indexCanisterId": "qiu4p-taaaa-aaaal-qsi4a-cai",
 		"decimals": 8,
+		"name": "RUGGY",
 		"symbol": "RUGGY",
 		"fee": {
 			"__bigint__": "1000000"
 		}
 	},
 	"NAK": {
+		"ledgerCanisterId": "eig2s-waaaa-aaaam-qbg5a-cai",
 		"indexCanisterId": "hmav7-uaaaa-aaaam-qdhnq-cai",
-		"ledgerCanisterId": "eig2s-waaaa-aaaam-qbg5a-cai"
+		"decimals": 8,
+		"name": "NAK",
+		"symbol": "NAK",
+		"fee": {
+			"__bigint__": "1000000"
+		}
 	},
 	"VCHF": {
+		"ledgerCanisterId": "ly36x-wiaaa-aaaai-aqj7q-cai",
 		"indexCanisterId": "4cx56-naaaa-aaaai-aqkaa-cai",
-		"ledgerCanisterId": "ly36x-wiaaa-aaaai-aqj7q-cai"
+		"decimals": 8,
+		"name": "VNX Franc",
+		"symbol": "VCHF",
+		"fee": {
+			"__bigint__": "10000"
+		}
 	},
 	"VEUR": {
+		"ledgerCanisterId": "wu6g4-6qaaa-aaaan-qmrza-cai",
 		"indexCanisterId": "wi24n-jqaaa-aaaan-qmr3a-cai",
-		"ledgerCanisterId": "wu6g4-6qaaa-aaaan-qmrza-cai"
+		"decimals": 8,
+		"name": "VNX Euro",
+		"symbol": "VEUR",
+		"fee": {
+			"__bigint__": "10000"
+		}
 	}
 }
