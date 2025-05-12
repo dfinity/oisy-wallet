@@ -23,9 +23,10 @@ export const mapTransactionDip20ToSelf = (
 
 // TODO: implement this function
 export const mapDip20Transaction = ({
-	transaction: _,
+	transaction: { id },
 	identity: __
 }: {
 	transaction: Dip20Transaction;
 	identity: OptionIdentity;
-}): IcTransactionUi => ({}) as IcTransactionUi;
+}): IcTransactionUi =>
+	({ id: id.toString(), type: 'approve', status: 'executed' }) as IcTransactionUi;
