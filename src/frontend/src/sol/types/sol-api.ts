@@ -16,7 +16,9 @@ export type LoadSolTransactionsParams = GetSolTransactionsParams & {
 	token: Token;
 };
 
-export type LoadNextSolTransactionsParams = GetSolTransactionsParams & {
+export interface LoadNextSolTransactionsParams {
 	token: Token;
+	before?: string;
+	limit?: number;
 	signalEnd: () => void;
-};
+}
