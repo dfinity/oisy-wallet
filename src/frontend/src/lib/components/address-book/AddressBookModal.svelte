@@ -64,21 +64,18 @@
 	on:nnsClose={close}
 >
 	<svelte:fragment slot="title">
-			{#if currentStepName === AddressBookSteps.INFO_PAGE}
-				<div class="flex flex-wrap gap-2 items-center">
-					<Avatar
-						variant="xs"
-						styleClass="rounded-full flex items-center justify-center mb-2"
-					/>
-					<div class="text-lg font-semibold text-primary text-center">
-						{currentContact?.name}
-					</div>
+		{#if currentStepName === AddressBookSteps.INFO_PAGE}
+			<div class="flex flex-wrap items-center gap-2">
+				<Avatar variant="xs" styleClass="rounded-full flex items-center justify-center mb-2" />
+				<div class="text-center text-lg font-semibold text-primary">
+					{currentContact?.name}
 				</div>
-			{:else if currentStepName === AddressBookSteps.ADD_CONTACT && nonNullish(addContactStep)}
-				{addContactStep.title}
-			{:else}
-				{currentStep?.title ?? ''}
-			{/if}
+			</div>
+		{:else if currentStepName === AddressBookSteps.ADD_CONTACT && nonNullish(addContactStep)}
+			{addContactStep.title}
+		{:else}
+			{currentStep?.title ?? ''}
+		{/if}
 	</svelte:fragment>
 
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}

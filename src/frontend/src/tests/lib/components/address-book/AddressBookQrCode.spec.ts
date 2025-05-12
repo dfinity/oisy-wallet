@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/svelte';
 import AddressBookQrCode from '$lib/components/address-book/AddressBookQrCode.svelte';
 import type { Address } from '$lib/types/contact';
+import { render, screen } from '@testing-library/svelte';
 
 describe('AddressBookQrCode', () => {
 	const mockAddress: Address = {
@@ -13,5 +13,4 @@ describe('AddressBookQrCode', () => {
 		render(AddressBookQrCode, { props: { address: mockAddress } });
 		expect(screen.getByTestId('qr-code')).toBeInTheDocument();
 	});
-
 });

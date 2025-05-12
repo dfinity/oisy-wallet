@@ -11,16 +11,15 @@
 		colorStyle?: ButtonColorStyle;
 	}
 
-	let { onclick, disabled = false, fullWidth = false, testId, colorStyle = 'secondary-light' }: Props = $props();
+	let {
+		onclick,
+		disabled = false,
+		fullWidth = false,
+		testId,
+		colorStyle = 'secondary-light'
+	}: Props = $props();
 </script>
 
-<Button
-	{testId}
-	type="button"
-	{colorStyle}
-	{fullWidth}
-	{disabled}
-	on:click={onclick}
->
+<Button {testId} type="button" {colorStyle} {fullWidth} {disabled} on:click={onclick}>
 	{$i18n.core.text.cancel}
 </Button>

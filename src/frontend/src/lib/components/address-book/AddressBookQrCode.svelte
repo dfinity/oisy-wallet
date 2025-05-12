@@ -23,13 +23,11 @@
 		<QRCode value={address.address}>
 			<svelte:fragment slot="logo">
 				{#if nonNullish(address?.address_type)}
-				<div class="flex items-center justify-center rounded-lg bg-primary p-2">
-					<IconAddressType addressType={address.address_type} size="48" />
-				</div>
+					<div class="flex items-center justify-center rounded-lg bg-primary p-2">
+						<IconAddressType addressType={address.address_type} size="48" />
+					</div>
 				{/if}
 			</svelte:fragment>
 		</QRCode>
-
-{/if}
-
+	{/if}
 </div>
