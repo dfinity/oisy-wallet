@@ -44,7 +44,7 @@
 			transactions.length >= 0
 				? transactions.reduce<T>(
 						(min, transaction) =>
-							(transaction.timestamp ?? Infinity) < (min.timestamp ?? Infinity) ? transaction : min,
+							(Number(transaction.timestamp) ?? Infinity) < (Number(min.timestamp) ?? Infinity) ? transaction : min,
 						transactions[0]
 					)
 				: undefined;
