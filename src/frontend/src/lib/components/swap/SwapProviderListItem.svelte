@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { safeParse } from '$lib/validation/utils.validation';
 	import { UrlSchema } from '@dfinity/zod-schemas';
 	import type { LogoSize } from '$lib/types/components';
@@ -31,7 +31,7 @@
 	let displayURL: string | null = $state(null);
 
 	$effect(() => {
-		if (!nonNullish(dapp)) {
+		if (isNullish(dapp)) {
 			websiteURL = null;
 			displayURL = null;
 			return;
@@ -58,8 +58,8 @@
 	<span slot="title">{dapp.name}</span>
 
 	<span slot="description">
-		{#if $displayURL}
-			<span class="text-sm text-tertiary">{$displayURL}</span>
+		{#if displayURL}
+			<span class="text-sm text-tertiary">{displayURL}</span>
 		{/if}
 	</span>
 
@@ -72,10 +72,12 @@
 
 	<Amount {amount} decimals={token.decimals} symbol={token.symbol} slot="title-end" />
 
-	<output class="break-all" slot="description-end">
+	<div class="flex items-center justify-end gap-2" slot="description-end">
 		{#if isBest}
 			<SwapBestRateBadge />
 		{/if}
-		{usdBalance}
-	</output>
+		<span class="mt-1">
+			{usdBalance}
+		</span>
+	</div>
 </LogoButton>

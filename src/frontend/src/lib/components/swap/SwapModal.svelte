@@ -22,7 +22,7 @@
 	import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext, initSwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { SwapSelectTokenType } from '$lib/types/swap';
+	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import SwapProviderListModal from './SwapProviderListModal.svelte';
 
@@ -81,7 +81,10 @@
 	const closeSelectProviderModal = () => {
 		showSelectProviderModal = false;
 	};
-	const selectProvider = ({ detail }: CustomEvent<string>) => {
+	const selectProvider = ({ detail }: CustomEvent<SwapMappedResult>) => {
+
+		console.log(detail);
+		
 		swapAmountsStore.setSelectedProvider(detail);
 		closeSelectProviderModal();
 	};

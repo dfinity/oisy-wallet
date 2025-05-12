@@ -4,7 +4,7 @@
 	import Responsive from '../ui/Responsive.svelte';
 </script>
 
-<Badge variant="success" styleClass="mt-1">
+<Badge variant="success" styleClass="mt-1" width="w-fit">
 	<span class="flex items-center gap-1">
 		<IconStar />
 		<Responsive up="md">Best Rate</Responsive>

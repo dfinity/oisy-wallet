@@ -12,9 +12,10 @@
 	import ButtonGroup from '../ui/ButtonGroup.svelte';
 	import ButtonCancel from '../ui/ButtonCancel.svelte';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import type { SwapMappedResult } from '$lib/types/swap';
 
 	const dispatch = createEventDispatcher<{
-		icSelectProvider: string;
+		icSelectProvider: SwapMappedResult;
 		icCloseProviderList: void;
 	}>();
 
@@ -37,20 +38,20 @@
 
 <div class=" mb-4 overflow-y-auto overscroll-contain">
 	<div class="flex w-full flex-row justify-between border-b border-solid border-primary pb-2">
-		<div class="text-sm text-tertiary"> Swap Provider </div>
-		<div class="text-sm text-tertiary"> You receive </div>
+		<div class="text-sm text-tertiary">Swap Provider</div>
+		<div class="text-sm text-tertiary">You receive</div>
 	</div>
 	<ul class="list-none">
 		{#each $swapAmountsStore?.swaps ?? [] as swap (swap.provider)}
 			{#if nonNullish($destinationToken) && nonNullish($swapAmountsStore)}
 				<li class="logo-button-list-item">
 					<SwapProviderListItem
-						on:click={() => dispatch('icSelectProvider', swap.provider)}
+						on:click={() => dispatch('icSelectProvider', swap)}
 						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
 						amount={swap.receiveAmount}
 						token={$destinationToken}
 						usdBalance={getUsdBalance(swap.receiveAmount, $destinationToken)}
-						isBest={true}
+						isBest={swap.provider === $swapAmountsStore.swaps[0].provider}
 					/>
 				</li>
 			{/if}
