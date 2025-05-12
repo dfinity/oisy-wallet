@@ -62,5 +62,5 @@ export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 	): Promise<{
 		transactions: Dip20TransactionWithId[];
 		oldest_tx_id: [] | [bigint];
-	}> => Promise.resolve({ transactions: [], oldest_tx_id: toNullable() });
+	}> => Promise.resolve({ transactions: [], oldest_tx_id: toNullable(0n) });
 }
