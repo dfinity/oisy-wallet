@@ -50,7 +50,7 @@ const getTransactions = ({
 const getBalanceAndTransactions = async (
 	params: SchedulerJobParams<PostMessageDataRequestDip20>
 ): Promise<GetBalanceAndTransactions> => {
-	console.log('av1');
+	console.log('av1', params);
 	const foo = await getBalance(params);
 	console.log('av2', foo);
 
