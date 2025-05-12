@@ -61,7 +61,7 @@
 		{
 			id: 'pf',
 			name: 'Peter Fox',
-			addresses: [{ id: 'f1', address_type: 'ETH', address: 'xxxxxxx', alias: 'Private' }]
+			addresses: [{ id: 'f1', address_type: 'Eth', address: 'xxxxxxx', alias: 'Private' }]
 		}
 	];
 
@@ -147,8 +147,8 @@
 		<div class="flex flex-wrap gap-2 items-center">
 			<Avatar
 				name={currentContact.name}
-				variant="lg"
-				styleClass="bg-accent text-white text-lg font-bold w-12 h-12 rounded-full flex items-center justify-center mb-2"
+				variant="xs"
+				styleClass="rounded-full flex items-center justify-center mb-2"
 			/>
 			<div class="text-lg font-semibold text-primary text-center">
 				{currentContact.name}

@@ -2,19 +2,12 @@
 	import { QRCode } from '@dfinity/gix-components';
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import type { Token } from '$lib/types/token';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
+	import type { Address } from '$lib/types/contact';
 
-	export let address: string;
-	export let addressToken: Token | undefined = undefined;
-
-	let symbol: string | undefined;
-	$: symbol = addressToken?.symbol;
+	export let address: Address;
 
 	let render = true;
-
 	const rerender = debounce(() => {
 		render = false;
 		setTimeout(() => (render = true), 0);
@@ -29,20 +22,16 @@
 	class:opacity-0={!render}
 >
 	{#if render}
-		<article
-			aria-label={replacePlaceholders($i18n.wallet.alt.qrcode_address, {
-				$token: symbol ?? ''
-			})}
-		>
-			<QRCode value={address}>
-				<svelte:fragment slot="logo">
-					{#if nonNullish(addressToken)}
-						<div class="flex items-center justify-center rounded-lg bg-primary p-2">
-							<TokenLogo data={addressToken} />
-						</div>
-					{/if}
-				</svelte:fragment>
-			</QRCode>
-		</article>
-	{/if}
+		<QRCode value={address.address}>
+			<svelte:fragment slot="logo">
+				{#if nonNullish(address?.address_type)}
+				<div class="flex items-center justify-center rounded-lg bg-primary p-2">
+					<IconAddressType addressType={address.address_type} size="48" />
+				</div>
+				{/if}
+			</svelte:fragment>
+		</QRCode>
+
+{/if}
+
 </div>
