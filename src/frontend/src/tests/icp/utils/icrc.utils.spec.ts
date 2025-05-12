@@ -1,6 +1,7 @@
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	icTokenIcrcCustomToken,
+	isTokenDip20,
 	isTokenIc,
 	isTokenIcp,
 	isTokenIcrc,
@@ -263,7 +264,7 @@ describe('icrc.utils', () => {
 	describe('isTokenDip20', () => {
 		it.each(['dip20'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenIcrc({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+				isTokenDip20({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
 			).toBeTruthy();
 		});
 
@@ -271,7 +272,7 @@ describe('icrc.utils', () => {
 			'should return false for invalid token standards: %s',
 			(standard) => {
 				expect(
-					isTokenIcrc({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+					isTokenDip20({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
 				).toBeFalsy();
 			}
 		);
