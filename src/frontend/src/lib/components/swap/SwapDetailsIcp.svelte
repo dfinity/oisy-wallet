@@ -7,20 +7,20 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 
-	export let provider: Extract<SwapMappedResult, { provider: SwapProvider.ICP_SWAP }>;
-
+	const { provider } = $props<{
+		provider: Extract<SwapMappedResult, { provider: SwapProvider.ICP_SWAP }>;
+	}>();
 	const { destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	let formattedMinimum: string | null = null;
-
-	$: formattedMinimum =
-		nonNullish(provider.receiveOutMinimum) && nonNullish($destinationToken)
+	const formattedMinimum = $derived(() => {
+		return nonNullish(provider?.receiveOutMinimum) && nonNullish($destinationToken)
 			? `${formatTokenBigintToNumber({
 					value: provider.receiveOutMinimum,
 					unitName: $destinationToken.decimals,
 					displayDecimals: $destinationToken.decimals
 				})} ${$destinationToken.symbol}`
 			: null;
+	});
 </script>
 
 {#if formattedMinimum}
