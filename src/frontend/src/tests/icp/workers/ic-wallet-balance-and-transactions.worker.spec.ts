@@ -719,6 +719,10 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 			identity: mockIdentity
 		});
 
+		const startData = {
+			ledgerCanisterId: 'aanaa-xaaaa-aaaah-aaeiq-cai'
+		};
+
 		beforeEach(() => {
 			// @ts-expect-error for test purposes
 			vi.spyOn(XtcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
@@ -730,7 +734,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 			const { setup, teardown, tests } = initWithBalanceAndTransactions({
 				msg: 'syncDip20Wallet',
 				initScheduler: initDip20WalletScheduler,
-				transaction: mockMappedTransaction
+				transaction: mockMappedTransaction,
+				startData
 			});
 
 			beforeEach(() => {
