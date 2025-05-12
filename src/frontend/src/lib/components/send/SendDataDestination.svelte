@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
 		destination: string;
@@ -15,6 +16,6 @@
 	</svelte:fragment>
 
 	<svelte:fragment slot="main-value">
-		{destination}
+		{shortenWithMiddleEllipsis({ text: destination })}
 	</svelte:fragment>
 </ModalValue>
