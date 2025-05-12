@@ -474,4 +474,58 @@ describe('AllTransactionsLoader', () => {
 		// TODO: create test for the case when the transaction store is being populated b decremental timestamps at alternate tokens
 		it('should not go into a loop until there are no more transactions', () => {});
 	});
+
+	it('should handle all types of tokens', () => {
+		render(AllTransactionsLoader, { props });
+
+		expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
+		expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+
+		icTokens.forEach(([token, _, minTimestamp]) => {
+			const [
+				{
+					transaction: { id: lastId }
+				}
+			] = icTransactions.filter(
+				({ token: { id: tokenId }, transaction: { timestamp } }) =>
+					tokenId === token.id && timestamp === minTimestamp
+			);
+
+			expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
+				lastId,
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				token,
+				signalEnd: expect.any(Function)
+			});
+		});
+
+		solTokens.forEach(([token, _, minTimestamp]) => {
+			const [{ transaction }] = solTransactions.filter(
+				({ token: { id: tokenId }, transaction: { timestamp } }) =>
+					tokenId === token.id && timestamp === minTimestamp
+			);
+
+			const { signature: before } = transaction as SolTransactionUi;
+
+			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+				token,
+				before,
+				signalEnd: expect.any(Function)
+			});
+		});
+	});
+
+	it('should ignore errors during loading transactions', () => {
+		spyLoadNextIcTransactions.mockRejectedValueOnce(new Error('Error loading IC transactions'));
+		spyLoadNextSolTransactions.mockRejectedValueOnce(
+			new Error('Error loading Solana transactions')
+		);
+
+		render(AllTransactionsLoader, { props });
+
+		expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
+		expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+	});
 });
