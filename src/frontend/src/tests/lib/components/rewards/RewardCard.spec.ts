@@ -6,7 +6,7 @@ import {
 	initRewardEligibilityStore
 } from '$lib/stores/reward.store';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
-import { mockEligibilityReport } from '$tests/mocks/reward-eligibility-report.mock';
+import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
@@ -20,7 +20,7 @@ describe('RewardCard', () => {
 	const mockContext = new Map([]);
 	const store = initRewardEligibilityStore();
 	mockContext.set(REWARD_ELIGIBILITY_CONTEXT_KEY, { store });
-	store.setEligibilityReport(mockEligibilityReport);
+	store.setCampaignEligibilities(mockCampaignEligibilities);
 
 	it('should render active reward card content', () => {
 		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
