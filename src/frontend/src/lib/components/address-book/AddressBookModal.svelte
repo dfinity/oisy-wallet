@@ -9,8 +9,8 @@
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Contact ,Address } from '$lib/types/contact';
-		import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import type { Contact, Address } from '$lib/types/contact';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	const steps: WizardSteps = [
 		{
