@@ -22,6 +22,10 @@ import { arrayOfNumberToUint8Array, jsonReplacer } from '@dfinity/utils';
 import { describe, type MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
+vi.mock('$icp/canisters/xtc-ledger.canister', () => ({
+	XtcLedgerCanister: { create: vi.fn() }
+}));
+
 describe('ic-wallet-balance-and-transactions.worker', () => {
 	let spyGetBalance: MockInstance;
 	let spyGetTransactions: MockInstance;
