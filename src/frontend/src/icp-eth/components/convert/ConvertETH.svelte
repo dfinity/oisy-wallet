@@ -25,6 +25,9 @@
 	export let nativeTokenId: TokenId;
 	export let ariaLabel: string;
 
+	const ethModalId = Symbol();
+	const ckEthModalId = Symbol();
+
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
 	let isNetworkDisabled = false;
@@ -60,7 +63,7 @@
 				return;
 			}
 
-			modalStore.openConvertToTwinTokenEth();
+			modalStore.openConvertToTwinTokenEth(ethModalId);
 			return;
 		}
 
@@ -74,7 +77,7 @@
 			return;
 		}
 
-		modalStore.openConvertToTwinTokenCkEth();
+		modalStore.openConvertToTwinTokenCkEth(ckEthModalId);
 	};
 </script>
 
