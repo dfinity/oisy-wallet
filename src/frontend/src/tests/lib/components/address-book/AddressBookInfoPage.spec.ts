@@ -1,7 +1,5 @@
 import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
-import {
-	ADDRESS_EDIT_CANCEL_BUTTON,
-} from '$lib/constants/test-ids.constants';
+import { ADDRESS_EDIT_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 import type { Address } from '$lib/types/contact';
 import { fireEvent, render } from '@testing-library/svelte';
 import { vi } from 'vitest';
@@ -21,6 +19,7 @@ describe('AddressBookInfoPage', () => {
 				close
 			}
 		});
+
 		expect(getByText(/Main Wallet/i)).toBeInTheDocument();
 		expect(getByTestId('qr-code')).toBeInTheDocument();
 
@@ -37,6 +36,7 @@ describe('AddressBookInfoPage', () => {
 		});
 
 		await fireEvent.click(getByTestId(ADDRESS_EDIT_CANCEL_BUTTON));
+
 		expect(close).toHaveBeenCalled();
 	});
 });
