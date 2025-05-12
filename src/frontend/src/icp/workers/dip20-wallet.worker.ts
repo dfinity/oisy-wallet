@@ -1,9 +1,6 @@
 import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
-import { balance as getBalance } from '$icp/api/xtc-ledger.api';
-import {
-	IcWalletBalanceAndTransactionsScheduler,
-	type GetBalanceAndTransactions
-} from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
+import { balance, transactions } from '$icp/api/xtc-ledger.api';
+import { IcWalletBalanceAndTransactionsScheduler } from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
@@ -15,21 +12,43 @@ import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/sched
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import { isNullish } from '@dfinity/utils';
 
-const getBalanceAndTransactions = async ({
+// TODO: add query for transactions - for now we mock with empty transactions
+type GetTransactions = {
+	transactions: Dip20TransactionWithId[];
+	oldest_tx_id: [] | [bigint];
+};
+
+type GetBalance = bigint;
+
+type GetBalanceAndTransactions = GetTransactions & { balance: GetBalance };
+
+const getBalance = ({
 	identity
-}: SchedulerJobParams<PostMessageDataRequest>): Promise<
-	GetBalanceAndTransactions<Dip20TransactionWithId>
-> => {
-	const balance = await getBalance({
+}: SchedulerJobParams<PostMessageDataRequest>): Promise<GetBalance> =>
+	balance({
 		identity,
 		owner: identity.getPrincipal()
 	});
 
+const getTransactions = ({
+	identity,
+	certified
+}: SchedulerJobParams<PostMessageDataRequest>): Promise<GetTransactions> =>
+	transactions({ identity, certified });
+
+const getBalanceAndTransactions = async (
+	params: SchedulerJobParams<PostMessageDataRequest>
+): Promise<GetBalanceAndTransactions> => {
+	const [balance, transactions] = await Promise.all([
+		getBalance(params),
+		// TODO: add query for transactions - for now we mock with empty transactions
+		getTransactions(params)
+	]);
+
 	return {
 		balance,
-		// TODO: add query for transactions - for now we mock with empty transactions and oldest_tx_id
-		transactions: [],
-		oldest_tx_id: [4n]
+		// TODO: add query for transactions - for now we mock with empty transactions
+		...transactions
 	};
 };
 
