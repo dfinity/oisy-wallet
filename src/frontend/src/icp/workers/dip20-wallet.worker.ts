@@ -10,7 +10,11 @@ import {
 } from '$icp/utils/dip20-transactions.utils';
 import { KONG_BACKEND_CANISTER_ID, XTC_LEDGER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
-import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
+import type {
+	PostMessage,
+	PostMessageDataRequest,
+	PostMessageDataRequestDip20
+} from '$lib/types/post-message';
 import { isNullish } from '@dfinity/utils';
 
 // TODO: add query for transactions - for now we mock with empty transactions
@@ -24,24 +28,27 @@ type GetBalance = bigint;
 type GetBalanceAndTransactions = GetTransactions & { balance: GetBalance };
 
 const getBalance = async ({
-	identity
-}: SchedulerJobParams<PostMessageDataRequest>): Promise<GetBalance> => {
+	identity,
+	data
+}: SchedulerJobParams<PostMessageDataRequestDip20>): Promise<GetBalance> => {
 	console.log('ledger id', XTC_LEDGER_CANISTER_ID, KONG_BACKEND_CANISTER_ID);
 
 	return await balance({
 		identity,
-		owner: identity.getPrincipal()
+		owner: identity.getPrincipal(),
+		...data
 	});
 };
 
 const getTransactions = ({
 	identity,
-	certified
-}: SchedulerJobParams<PostMessageDataRequest>): Promise<GetTransactions> =>
-	transactions({ identity, certified });
+	certified,
+	data
+}: SchedulerJobParams<PostMessageDataRequestDip20>): Promise<GetTransactions> =>
+	transactions({ identity, certified, ...data });
 
 const getBalanceAndTransactions = async (
-	params: SchedulerJobParams<PostMessageDataRequest>
+	params: SchedulerJobParams<PostMessageDataRequestDip20>
 ): Promise<GetBalanceAndTransactions> => {
 	console.log('av1');
 	const foo = await getBalance(params);
