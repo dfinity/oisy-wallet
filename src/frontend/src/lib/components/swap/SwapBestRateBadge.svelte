@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
 	import IconStar from '$lib/components/icons/IconStar.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <Badge variant="success" styleClass="mt-1" width="w-fit">
