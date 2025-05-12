@@ -114,11 +114,7 @@
 				// If the user does not have the required cycles amount granted, we need to poll until he has
 				checkInterval = setInterval(checkCycles, CHECK_INTERVAL_MS);
 			}
-		} /* else {
-			// If POW isn't enabled, we still need to render children
-			hasCycles = true;
-		 loading = true;
-		}*/
+		}
 	});
 
 	onDestroy(() => {
