@@ -28,7 +28,7 @@
 		{@render contentHeader({ isInBottomSheet: false })}
 		<ButtonIcon
 			on:click={() => (expanded = true)}
-			ariaLabel={$i18n.swap.text.open_details}
+			ariaLabel={$i18n.core.alt.open_details}
 			colorStyle="muted"
 			styleClass="text-disabled mb-2 items-end"
 			width="w-8"
@@ -44,7 +44,7 @@
 					<ButtonIcon
 						on:click={() => (expanded = false)}
 						styleClass="text-disabled float-right"
-						ariaLabel={$i18n.swap.text.close_details}
+						ariaLabel={$i18n.core.alt.close_details}
 					>
 						<IconClose slot="icon" size="24" />
 					</ButtonIcon>

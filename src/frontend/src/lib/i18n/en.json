@@ -35,7 +35,9 @@
 		"alt": {
 			"logo": "$name logo",
 			"go_to_home": "Go to the $oisy_name home page",
-			"back": "Go back to the previous page"
+			"back": "Go back to the previous page",
+			"open_details": "Open details",
+			"close_details": "Close details"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
@@ -582,9 +584,7 @@
 			"swap_provider": "Swap provider",
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",
-			"included_liquidity_fees": "Included liquidity pool fees",
-			"open_details": "Open details",
-			"close_details": "Close details"
+			"included_liquidity_fees": "Included liquidity pool fees"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
