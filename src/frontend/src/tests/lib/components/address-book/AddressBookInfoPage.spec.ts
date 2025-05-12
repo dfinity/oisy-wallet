@@ -19,6 +19,7 @@ describe('AddressBookInfoPage', () => {
 				close
 			}
 		});
+
 		expect(getByText(/Main Wallet/i)).toBeInTheDocument();
 		expect(getByTestId('qr-code')).toBeInTheDocument();
 
@@ -35,6 +36,7 @@ describe('AddressBookInfoPage', () => {
 		});
 
 		await fireEvent.click(getByTestId(ADDRESS_EDIT_CANCEL_BUTTON));
+
 		expect(close).toHaveBeenCalled();
 	});
 });

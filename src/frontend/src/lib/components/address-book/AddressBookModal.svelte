@@ -2,15 +2,14 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import AddContactStep from '$lib/components/address-book/AddContactStep.svelte';
-	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
+	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
-	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Contact } from '$lib/types/contact';
-	import type { Address } from '$lib/types/contact';
+	import type { Contact, Address } from '$lib/types/contact';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	const steps: WizardSteps = [

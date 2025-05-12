@@ -11,6 +11,7 @@ describe('AddressBookQrCode', () => {
 
 	it('renders the QRCode with the correct value', () => {
 		render(AddressBookQrCode, { props: { address: mockAddress } });
+
 		expect(screen.getByTestId('qr-code')).toBeInTheDocument();
 	});
 });
