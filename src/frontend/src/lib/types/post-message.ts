@@ -1,25 +1,26 @@
-import type {
-	PostMessageDataRequestBtcSchema,
-	PostMessageDataRequestExchangeTimerSchema,
-	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
-	PostMessageDataRequestIcCkSchema,
-	PostMessageDataRequestIcrcSchema,
-	PostMessageDataRequestIcrcStrictSchema,
-	PostMessageDataRequestSchema,
-	PostMessageDataRequestSolSchema,
-	PostMessageDataResponseAuthSchema,
-	PostMessageDataResponseBTCAddressSchema,
-	PostMessageDataResponseErrorSchema,
-	PostMessageDataResponseExchangeErrorSchema,
-	PostMessageDataResponseExchangeSchema,
-	PostMessageDataResponseSchema,
-	PostMessageDataResponseWalletCleanUpSchema,
-	PostMessageDataResponseWalletSchema,
-	PostMessageJsonDataResponseSchema,
-	PostMessageResponseSchema,
-	PostMessageResponseStatusSchema,
-	PostMessageSyncStateSchema,
-	inferPostMessageSchema
+import {
+	PostMessageDataRequestDip20Schema,
+	type PostMessageDataRequestBtcSchema,
+	type PostMessageDataRequestExchangeTimerSchema,
+	type PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
+	type PostMessageDataRequestIcCkSchema,
+	type PostMessageDataRequestIcrcSchema,
+	type PostMessageDataRequestIcrcStrictSchema,
+	type PostMessageDataRequestSchema,
+	type PostMessageDataRequestSolSchema,
+	type PostMessageDataResponseAuthSchema,
+	type PostMessageDataResponseBTCAddressSchema,
+	type PostMessageDataResponseErrorSchema,
+	type PostMessageDataResponseExchangeErrorSchema,
+	type PostMessageDataResponseExchangeSchema,
+	type PostMessageDataResponseSchema,
+	type PostMessageDataResponseWalletCleanUpSchema,
+	type PostMessageDataResponseWalletSchema,
+	type PostMessageJsonDataResponseSchema,
+	type PostMessageResponseSchema,
+	type PostMessageResponseStatusSchema,
+	type PostMessageSyncStateSchema,
+	type inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 import type * as z from 'zod';
 import type { ZodType } from 'zod';
@@ -36,6 +37,8 @@ export type PostMessageDataRequestIcrc = z.infer<typeof PostMessageDataRequestIc
 export type PostMessageDataRequestIcrcStrict = z.infer<
 	typeof PostMessageDataRequestIcrcStrictSchema
 >;
+
+export type PostMessageDataRequestDip20 = z.infer<typeof PostMessageDataRequestDip20Schema>;
 
 export type PostMessageDataRequestIcCk = z.infer<typeof PostMessageDataRequestIcCkSchema>;
 

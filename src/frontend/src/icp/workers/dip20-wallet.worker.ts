@@ -100,8 +100,9 @@ const initDip20WalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTra
 
 // Exposed for test purposes
 export const initDip20WalletScheduler = (
-	_data: PostMessageDataRequest | undefined
-): IcWalletScheduler<PostMessageDataRequest> => initDip20WalletBalanceAndTransactionsScheduler();
+	_data: PostMessageDataRequestDip20 | undefined
+): IcWalletScheduler<PostMessageDataRequestDip20> =>
+	initDip20WalletBalanceAndTransactionsScheduler();
 
 let scheduler: IcWalletScheduler<PostMessageDataRequest> | undefined;
 

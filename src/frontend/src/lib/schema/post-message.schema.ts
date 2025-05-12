@@ -78,6 +78,8 @@ export const PostMessageDataRequestIcrcStrictSchema = IcCanistersStrictSchema.me
 	NetworkSchema.pick({ env: true })
 );
 
+export const PostMessageDataRequestDip20Schema = IcCanistersSchema.pick({ ledgerCanisterId: true });
+
 export const PostMessageDataRequestIcCkSchema = IcCkMetadataSchema.pick({
 	minterCanisterId: true
 }).partial();
