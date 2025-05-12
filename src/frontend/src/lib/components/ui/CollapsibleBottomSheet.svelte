@@ -6,6 +6,7 @@
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let {
 		content,
@@ -27,7 +28,7 @@
 		{@render contentHeader({ isInBottomSheet: false })}
 		<ButtonIcon
 			on:click={() => (expanded = true)}
-			ariaLabel="expand"
+			ariaLabel={$i18n.swap.text.open_details}
 			colorStyle="muted"
 			styleClass="text-disabled mb-2 items-end"
 			width="w-8"
@@ -43,7 +44,7 @@
 					<ButtonIcon
 						on:click={() => (expanded = false)}
 						styleClass="text-disabled float-right"
-						ariaLabel="close"
+						ariaLabel={$i18n.swap.text.close_details}
 					>
 						<IconClose slot="icon" size="24" />
 					</ButtonIcon>
