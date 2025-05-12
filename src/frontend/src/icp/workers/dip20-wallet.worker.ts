@@ -39,12 +39,12 @@ const getTransactions = ({
 const getBalanceAndTransactions = async (
 	params: SchedulerJobParams<PostMessageDataRequest>
 ): Promise<GetBalanceAndTransactions> => {
-	console.log(111111111111111111111111111);
+	console.log('av1');
 	const foo = await getBalance(params);
-	console.log(22222222222222222222222222, foo);
+	console.log('av2', foo);
 
 	const bar = await getTransactions(params);
-	console.log(33333333333333333333333333, bar);
+	console.log('av3', bar);
 
 	const [balance, transactions] = await Promise.all([
 		getBalance(params),
@@ -52,7 +52,7 @@ const getBalanceAndTransactions = async (
 		getTransactions(params)
 	]);
 
-	console.log(44444444444444444444444444, balance, transactions, {
+	console.log('av3', balance, transactions, {
 		balance,
 		// TODO: add query for transactions - for now we mock with empty transactions
 		...transactions
