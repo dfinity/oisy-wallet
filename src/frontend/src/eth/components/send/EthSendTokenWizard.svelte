@@ -176,7 +176,7 @@
 				}),
 				maxFeePerGas,
 				maxPriorityFeePerGas,
-				gas,
+				gas: gas *125n/100n,
 				sourceNetwork,
 				targetNetwork,
 				identity: $authIdentity,
