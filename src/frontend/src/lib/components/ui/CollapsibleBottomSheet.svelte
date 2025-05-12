@@ -24,9 +24,7 @@
 
 <Responsive down="sm">
 	<div class="flex w-full items-center justify-between">
-		<div class="flex items-center">
-			{@render contentHeader({ isInBottomSheet: false })}
-		</div>
+		{@render contentHeader({ isInBottomSheet: false })}
 		<ButtonIcon
 			on:click={() => (expanded = true)}
 			ariaLabel="expand"
