@@ -1,5 +1,6 @@
 import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
 import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
+import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { i18n } from '$lib/stores/i18n.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { render } from '@testing-library/svelte';
@@ -12,7 +13,9 @@ describe('RewardRequirement', () => {
 				props: {
 					criterion: {
 						satisfied: true,
-						criterion: { MinLogins: { duration: { Days: BigInt(6) }, count: 2 } }
+						type: RewardCriterionType.MIN_LOGINS,
+						days: 6n,
+						count: 2
 					}
 				}
 			});
@@ -32,7 +35,9 @@ describe('RewardRequirement', () => {
 				props: {
 					criterion: {
 						satisfied: false,
-						criterion: { MinTransactions: { duration: { Days: BigInt(6) }, count: 3 } }
+						type: RewardCriterionType.MIN_TRANSACTIONS,
+						days: 6n,
+						count: 3
 					}
 				}
 			});
@@ -50,7 +55,11 @@ describe('RewardRequirement', () => {
 		it('should not render min total assets usd requirement', () => {
 			const { getByText } = render(RewardRequirement, {
 				props: {
-					criterion: { satisfied: false, criterion: { MinTotalAssetsUsd: { usd: 21 } } }
+					criterion: {
+						satisfied: false,
+						type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+						usd: 21
+					}
 				}
 			});
 
@@ -72,7 +81,9 @@ describe('RewardRequirement', () => {
 				props: {
 					criterion: {
 						satisfied: true,
-						criterion: { MinLogins: { duration: { Days: BigInt(6) }, count: 2 } }
+						type: RewardCriterionType.MIN_LOGINS,
+						days: 6n,
+						count: 2
 					},
 					testId: REWARDS_REQUIREMENTS_STATUS
 				}
@@ -90,7 +101,9 @@ describe('RewardRequirement', () => {
 				props: {
 					criterion: {
 						satisfied: false,
-						criterion: { MinLogins: { duration: { Days: BigInt(6) }, count: 2 } }
+						type: RewardCriterionType.MIN_LOGINS,
+						days: 6n,
+						count: 2
 					},
 					testId: REWARDS_REQUIREMENTS_STATUS
 				}
