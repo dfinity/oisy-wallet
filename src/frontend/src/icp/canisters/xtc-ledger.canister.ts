@@ -2,11 +2,12 @@ import type { _SERVICE as XtcLedgerService } from '$declarations/xtc_ledger/xtc_
 import { idlFactory as idlCertifiedFactoryXtcLedger } from '$declarations/xtc_ledger/xtc_ledger.factory.certified.did';
 import { idlFactory as idlFactoryXtcLedger } from '$declarations/xtc_ledger/xtc_ledger.factory.did';
 import { mapXtcLedgerCanisterError } from '$icp/canisters/xtc-ledger.errors';
+import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { XtcLedgerTransferParams } from '$icp/types/xtc-ledger';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import type { Principal } from '@dfinity/principal';
-import { Canister, createServices } from '@dfinity/utils';
+import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
 export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 	static async create({
@@ -54,4 +55,12 @@ export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 	 */
 	balance = (account: Principal): Promise<bigint> =>
 		this.caller({ certified: true }).balanceOf(account);
+
+	// TODO: add query for transactions - for now we mock with empty transactions
+	transactions = (
+		_: QueryParams
+	): Promise<{
+		transactions: Dip20TransactionWithId[];
+		oldest_tx_id: [] | [bigint];
+	}> => Promise.resolve({ transactions: [], oldest_tx_id: toNullable(0n) });
 }

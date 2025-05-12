@@ -1,9 +1,10 @@
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
+import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { XtcLedgerTransferParams } from '$icp/types/xtc-ledger';
 import { XTC_LEDGER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 
 let canister: XtcLedgerCanister | undefined = undefined;
 
@@ -35,6 +36,25 @@ export const balance = async ({
 	});
 
 	return await balance(owner);
+};
+
+// TODO: add query for transactions - for now we mock with empty transactions
+export const transactions = async ({
+	identity,
+	certified,
+	canisterId,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams<QueryParams>): Promise<{
+	transactions: Dip20TransactionWithId[];
+	oldest_tx_id: [] | [bigint];
+}> => {
+	const { transactions } = await xtcLedgerCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return await transactions({ certified });
 };
 
 const xtcLedgerCanister = async ({

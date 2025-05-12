@@ -3,6 +3,7 @@ import { onBtcStatusesMessage } from '$icp/workers/btc-statuses.worker';
 import { onCkBtcMinterInfoMessage } from '$icp/workers/ckbtc-minter-info.worker';
 import { onCkBtcUpdateBalanceMessage } from '$icp/workers/ckbtc-update-balance.worker';
 import { onCkEthMinterInfoMessage } from '$icp/workers/cketh-minter-info.worker';
+import { onDip20WalletMessage } from '$icp/workers/dip20-wallet.worker';
 import { onIcpWalletMessage } from '$icp/workers/icp-wallet.worker';
 import { onIcrcWalletMessage } from '$icp/workers/icrc-wallet.worker';
 import { onPowProtectionMessage } from '$icp/workers/pow-protection.worker';
@@ -49,6 +50,10 @@ vi.mock('$icp/workers/icrc-wallet.worker', () => ({
 	onIcrcWalletMessage: vi.fn()
 }));
 
+vi.mock('$icp/workers/dip20-wallet.worker', () => ({
+	onDip20WalletMessage: vi.fn()
+}));
+
 vi.mock('$icp/workers/pow-protection.worker', () => ({
 	onPowProtectionMessage: vi.fn()
 }));
@@ -71,6 +76,7 @@ describe('workers', () => {
 			{ name: 'onCkEthMinterInfoMessage', onMessageFn: onCkEthMinterInfoMessage },
 			{ name: 'onIcpWalletMessage', onMessageFn: onIcpWalletMessage },
 			{ name: 'onIcrcWalletMessage', onMessageFn: onIcrcWalletMessage },
+			{ name: 'onDip20WalletMessage', onMessageFn: onDip20WalletMessage },
 			{ name: 'onSolWalletMessage', onMessageFn: onSolWalletMessage },
 			{ name: 'onPowProtectionMessage', onMessageFn: onPowProtectionMessage }
 		];

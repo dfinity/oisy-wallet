@@ -36,6 +36,9 @@ export const POST_MESSAGE_REQUESTS = [
 	'stopIcrcWalletTimer',
 	'startIcrcWalletTimer',
 	'triggerIcrcWalletTimer',
+	'stopDip20WalletTimer',
+	'startDip20WalletTimer',
+	'triggerDip20WalletTimer',
 	'stopBtcWalletTimer',
 	'stopSolWalletTimer',
 	'startBtcWalletTimer',
@@ -74,6 +77,10 @@ export const PostMessageDataRequestIcrcSchema = IcCanistersSchema.merge(
 export const PostMessageDataRequestIcrcStrictSchema = IcCanistersStrictSchema.merge(
 	NetworkSchema.pick({ env: true })
 );
+
+export const PostMessageDataRequestDip20Schema = z.object({
+	canisterId: CanisterIdTextSchema
+});
 
 export const PostMessageDataRequestIcCkSchema = IcCkMetadataSchema.pick({
 	minterCanisterId: true
