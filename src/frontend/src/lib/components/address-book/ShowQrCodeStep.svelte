@@ -25,8 +25,9 @@
 			styleClass="shadow-sm border border-divider"
 			onclick={() => {}}
 		/>
-		<div class="pt-10" /> </div>
-		<ButtonCancel onclick={() => close()} colorStyle="primary" testId={ADDRESS_EDIT_CANCEL_BUTTON}></ButtonCancel>
+		<div class="flex w-full justify-center pt-10">
+			<ButtonCancel onclick={() => close()} colorStyle="primary" testId={ADDRESS_EDIT_CANCEL_BUTTON}></ButtonCancel>
+		</div>
 	</div>
 {:else}
 	<p class="text-red-600">No address available</p>
