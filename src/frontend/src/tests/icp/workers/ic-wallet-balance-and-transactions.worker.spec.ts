@@ -720,7 +720,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		});
 
 		const startData = {
-			ledgerCanisterId: 'aanaa-xaaaa-aaaah-aaeiq-cai'
+			canisterId: 'aanaa-xaaaa-aaaah-aaeiq-cai'
 		};
 
 		beforeEach(() => {
