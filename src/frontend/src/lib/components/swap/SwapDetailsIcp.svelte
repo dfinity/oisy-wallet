@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
@@ -12,17 +13,23 @@
 	}>();
 	const { destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const formattedMinimum = $derived(() => {
-		if (nonNullish(provider?.receiveOutMinimum) && nonNullish($destinationToken)) {
+	const calculateMinimum = (
+		receiveOutMinimum: bigint,
+		destinationToken: IcTokenToggleable | undefined
+	) => {
+		if (nonNullish(receiveOutMinimum) && nonNullish(destinationToken)) {
 			return `${formatTokenBigintToNumber({
-				value: provider.receiveOutMinimum,
-				unitName: $destinationToken.decimals,
-				displayDecimals: $destinationToken.decimals
-			})} ${$destinationToken.symbol}`;
+				value: receiveOutMinimum,
+				unitName: destinationToken.decimals,
+				displayDecimals: destinationToken.decimals
+			})} ${destinationToken.symbol}`;
 		}
-
 		return null;
-	});
+	};
+
+	const formattedMinimum = $derived(
+		calculateMinimum(provider.receiveOutMinimum, $destinationToken)
+	);
 </script>
 
 {#if nonNullish(formattedMinimum)}
