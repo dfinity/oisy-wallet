@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { InfuraGasRest } from '$eth/rest/infura.rest';
@@ -61,7 +61,7 @@
 
 			const { getFeeData } = infuraProviders(sendToken.network.id);
 
-			const { maxFeePerGas, maxPriorityFeePerGas, gasPrice, ...feeDataRest } = await getFeeData();
+			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
 			const { getSuggestedFeeData } = new InfuraGasRest(
 				(sendToken.network as EthereumNetwork).chainId
@@ -69,16 +69,13 @@
 
 			const {
 				maxFeePerGas: suggestedMaxFeePerGas,
-				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas,
-				gasPrice: suggestedGasPrice
+				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
 			} = await getSuggestedFeeData();
-
-			console.log('suggestedGasPrice', suggestedGasPrice)
 
 			const feeData = {
 				...feeDataRest,
 				maxFeePerGas: maxFeePerGas ?? suggestedMaxFeePerGas,
-				maxPriorityFeePerGas: maxPriorityFeePerGas ?? suggestedMaxPriorityFeePerGas,
+				maxPriorityFeePerGas: maxPriorityFeePerGas ?? suggestedMaxPriorityFeePerGas
 			};
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
@@ -114,16 +111,7 @@
 				return;
 			}
 
-			const foo = await getErc20FeeData({
-				...erc20GasFeeParams,
-				targetNetwork,
-				to:
-				// When converting "ICP Erc20" to native ICP, the destination address is an "old" ICP hex account identifier.
-				// Therefore, it should not be prefixed with 0x.
-					isNetworkICP(targetNetwork) ? destination : erc20GasFeeParams.to
-			})
 
-			console.log('foo', foo, erc20GasFeeParams,targetNetwork)
 
 			feeStore.setFee({
 				...feeData,
