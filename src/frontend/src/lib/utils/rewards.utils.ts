@@ -1,9 +1,14 @@
-import {getRewards} from '$lib/services/reward.services';
-import type {CampaignEligibility, CampaignCriterion, RewardResponseInfo, RewardResult} from '$lib/types/reward';
-import type {Identity} from '@dfinity/agent';
-import {isNullish} from '@dfinity/utils';
-import type {CriterionEligibility, EligibilityReport} from "$declarations/rewards/rewards.did";
-import {RewardCriterionType} from "$lib/enums/reward-criterion-type";
+import type { CriterionEligibility, EligibilityReport } from '$declarations/rewards/rewards.did';
+import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
+import { getRewards } from '$lib/services/reward.services';
+import type {
+	CampaignCriterion,
+	CampaignEligibility,
+	RewardResponseInfo,
+	RewardResult
+} from '$lib/types/reward';
+import type { Identity } from '@dfinity/agent';
+import { isNullish } from '@dfinity/utils';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
 
@@ -54,43 +59,55 @@ export const isEndedCampaign = (endDate: Date) => {
 	return endDiff <= 0;
 };
 
-export const mapEligibilityReport = (eligibilityReport: EligibilityReport): CampaignEligibility[] => {
-	return eligibilityReport.campaigns.map(([campaignId, eligibility]) => {
-		const criteria = eligibility.criteria.map((criterion) => {
-			return mapCriterion(criterion);
-		})
+export const mapEligibilityReport = (
+	eligibilityReport: EligibilityReport
+): CampaignEligibility[] => eligibilityReport.campaigns.map(([campaignId, eligibility]) => {
+		const criteria = eligibility.criteria.map((criterion) => mapCriterion(criterion));
 
 		return {
 			campaignId,
 			available: eligibility.available,
 			eligible: eligibility.eligible,
-			criteria: criteria
-		}
+			criteria
+		};
 	});
-}
 
 const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 	if ('MinLogins' in criterion.criterion) {
 		const { duration, count } = criterion.criterion.MinLogins;
 		if ('Days' in duration) {
 			const days = duration.Days;
-			return {satisfied: criterion.satisfied, type: RewardCriterionType.MIN_LOGINS, days: days, count: count };
+			return {
+				satisfied: criterion.satisfied,
+				type: RewardCriterionType.MIN_LOGINS,
+				days,
+				count
+			};
 		}
-		return {satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
+		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
 	if ('MinTransactions' in criterion.criterion) {
 		const { duration, count } = criterion.criterion.MinTransactions;
 		if ('Days' in duration) {
 			const days = duration.Days;
-			return {satisfied: criterion.satisfied, type: RewardCriterionType.MIN_TRANSACTIONS, days: days, count: count };
+			return {
+				satisfied: criterion.satisfied,
+				type: RewardCriterionType.MIN_TRANSACTIONS,
+				days,
+				count
+			};
 		}
-		return {satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN}
+		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
 	if ('MinTotalAssetsUsd' in criterion.criterion) {
 		const { usd } = criterion.criterion.MinTotalAssetsUsd;
 
-		return {satisfied: criterion.satisfied, type: RewardCriterionType.MIN_TOTAL_ASSETS_USD, usd: usd}
+		return {
+			satisfied: criterion.satisfied,
+			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+			usd
+		};
 	}
 
-	return {satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN};
-}
+	return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
+};

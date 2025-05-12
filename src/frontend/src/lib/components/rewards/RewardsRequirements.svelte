@@ -3,7 +3,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type {CampaignCriterion} from "$lib/types/reward";
+	import type { CampaignCriterion } from '$lib/types/reward';
 
 	interface Props {
 		isEligible: boolean;

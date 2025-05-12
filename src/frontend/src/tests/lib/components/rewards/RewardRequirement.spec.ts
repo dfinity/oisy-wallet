@@ -1,10 +1,10 @@
 import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
 import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
+import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { i18n } from '$lib/stores/i18n.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import {RewardCriterionType} from "$lib/enums/reward-criterion-type";
 
 describe('RewardRequirement', () => {
 	describe('Requirements', () => {

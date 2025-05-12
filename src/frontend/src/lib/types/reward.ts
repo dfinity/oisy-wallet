@@ -1,7 +1,7 @@
 import type { ClaimedVipReward, ClaimVipRewardResponse } from '$declarations/rewards/rewards.did';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
+import type { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import type { Principal } from '@dfinity/principal';
-import type {RewardCriterionType} from "$lib/enums/reward-criterion-type";
 
 export interface RewardsResponse {
 	rewards: RewardResponseInfo[];

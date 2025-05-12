@@ -28,7 +28,9 @@ describe('AllRewardsList', () => {
 
 		mockAuthStore();
 
-		vi.spyOn(rewardService, 'getCampaignEligibilities').mockResolvedValue(mockCampaignEligibilities);
+		vi.spyOn(rewardService, 'getCampaignEligibilities').mockResolvedValue(
+			mockCampaignEligibilities
+		);
 	});
 
 	it('should render reward filter and ongoing campaigns', () => {

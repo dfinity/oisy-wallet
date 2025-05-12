@@ -1,8 +1,7 @@
-import type {CampaignEligibility} from "$lib/types/reward";
-import {RewardCriterionType} from "$lib/enums/reward-criterion-type";
+import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
+import type { CampaignEligibility } from '$lib/types/reward';
 
-export const mockCampaignEligibilities: CampaignEligibility[] =
-[
+export const mockCampaignEligibilities: CampaignEligibility[] = [
 	{
 		campaignId: 'OISY Airdrop #1',
 		available: true,

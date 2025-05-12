@@ -57,7 +57,9 @@ describe('reward-code', () => {
 			});
 			expect(campaignEligibilities).toHaveLength(1);
 
-			const campaignEligibility = campaignEligibilities.find((campaign) => campaign.campaignId === campaignId);
+			const campaignEligibility = campaignEligibilities.find(
+				(campaign) => campaign.campaignId === campaignId
+			);
 
 			expect(campaignEligibility?.campaignId).toEqual(campaignId);
 		});

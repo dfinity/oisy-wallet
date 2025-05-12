@@ -1,10 +1,10 @@
 <script lang="ts">
-	import {IconCheckCircleFill} from '@dfinity/gix-components';
-	import {nonNullish} from '@dfinity/utils';
-	import type {CampaignCriterion} from "$lib/types/reward";
-	import {RewardCriterionType} from "$lib/enums/reward-criterion-type";
-	import {replacePlaceholders} from "$lib/utils/i18n.utils";
-	import {i18n} from "$lib/stores/i18n.store";
+	import { IconCheckCircleFill } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { CampaignCriterion } from '$lib/types/reward';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		criterion: CampaignCriterion;

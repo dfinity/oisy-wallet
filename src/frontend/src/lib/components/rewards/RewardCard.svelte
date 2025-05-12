@@ -25,7 +25,9 @@
 
 	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
-	const campaignEligibility = $derived($store?.campaignEligibilities?.find((campaign) => campaign.campaignId === reward.id));
+	const campaignEligibility = $derived(
+		$store?.campaignEligibilities?.find((campaign) => campaign.campaignId === reward.id)
+	);
 	const isEligible = $derived(campaignEligibility?.eligible ?? false);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
