@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import SendData from '$lib/components/send/SendData.svelte';
+	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
+	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -13,34 +13,27 @@
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
-	export let source: string;
 	export let disabled: boolean | undefined = false;
+	// TODO: remove when all send review forms are updated
+	export let source: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance, sendTokenExchangeRate } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
-	{#if nonNullish($sendToken)}
-		<SendData
-			{amount}
-			{destination}
-			token={$sendToken}
-			balance={$sendBalance}
-			exchangeRate={$sendTokenExchangeRate}
-			{source}
-		>
-			<slot name="fee" slot="fee" />
+	<SendTokenReview sendAmount={amount} token={$sendToken} exchangeRate={$sendTokenExchangeRate} />
 
-			<slot name="network" slot="network" />
-		</SendData>
-	{/if}
+	<SendDataDestination {destination} />
+
+	<slot name="network" />
+
+	<slot name="fee" />
 
 	<slot name="info" />
 
-	<ButtonGroup slot="toolbar">
+	<ButtonGroup slot="toolbar" testId="toolbar">
 		<ButtonBack onclick={() => dispatch('icBack')} />
 		<Button {disabled} on:click={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
 			{$i18n.send.text.send}
