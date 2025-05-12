@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { safeParse } from '$lib/validation/utils.validation';
 	import { UrlSchema } from '@dfinity/zod-schemas';
-	import type { LogoSize } from '$lib/types/components';
-	import type { OptionAmount } from '$lib/types/send';
-	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapBestRateBadge from '$lib/components/swap/SwapBestRateBadge.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { LogoSize } from '$lib/types/components';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
-	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import type { OptionAmount } from '$lib/types/send';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { safeParse } from '$lib/validation/utils.validation';
 
 	const {
 		amount,
