@@ -401,11 +401,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 					initCleanupMock(mockRogueId);
 
-					console.log(111111);
-
 					await scheduler.start(startData);
-
-					console.log(22222);
 
 					// query + update = 2
 					// idle and in_progress

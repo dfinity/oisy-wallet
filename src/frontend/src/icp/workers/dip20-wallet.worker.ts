@@ -8,7 +8,6 @@ import {
 	mapDip20Transaction,
 	mapTransactionDip20ToSelf
 } from '$icp/utils/dip20-transactions.utils';
-import { KONG_BACKEND_CANISTER_ID, XTC_LEDGER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type {
 	PostMessage,
@@ -27,18 +26,15 @@ type GetBalance = bigint;
 
 type GetBalanceAndTransactions = GetTransactions & { balance: GetBalance };
 
-const getBalance = async ({
+const getBalance = ({
 	identity,
 	data
-}: SchedulerJobParams<PostMessageDataRequestDip20>): Promise<GetBalance> => {
-	console.log('ledger id', XTC_LEDGER_CANISTER_ID, KONG_BACKEND_CANISTER_ID);
-
-	return await balance({
+}: SchedulerJobParams<PostMessageDataRequestDip20>): Promise<GetBalance> =>
+	balance({
 		identity,
 		owner: identity.getPrincipal(),
 		...data
 	});
-};
 
 const getTransactions = ({
 	identity,
@@ -50,24 +46,11 @@ const getTransactions = ({
 const getBalanceAndTransactions = async (
 	params: SchedulerJobParams<PostMessageDataRequestDip20>
 ): Promise<GetBalanceAndTransactions> => {
-	console.log('av1', params);
-	const foo = await getBalance(params);
-	console.log('av2', foo);
-
-	const bar = await getTransactions(params);
-	console.log('av3', bar);
-
 	const [balance, transactions] = await Promise.all([
 		getBalance(params),
 		// TODO: add query for transactions - for now we mock with empty transactions
 		getTransactions(params)
 	]);
-
-	console.log('av3', balance, transactions, {
-		balance,
-		// TODO: add query for transactions - for now we mock with empty transactions
-		...transactions
-	});
 
 	return {
 		balance,

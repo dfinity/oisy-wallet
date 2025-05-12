@@ -35,8 +35,6 @@ export const balance = async ({
 		nullishIdentityErrorMessage
 	});
 
-	console.log('created canister', identity, canisterId, owner);
-
 	return await balance(owner);
 };
 
@@ -66,17 +64,12 @@ const xtcLedgerCanister = async ({
 }: CanisterApiFunctionParams): Promise<XtcLedgerCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
-	console.log('alilelila');
-
 	if (isNullish(canister)) {
-		console.log('creating canister weqewrqewrqwer', identity, canisterId);
 		canister = await XtcLedgerCanister.create({
 			identity,
 			canisterId: Principal.fromText(canisterId)
 		});
 	}
-
-	console.log('canister created', canister);
 
 	return canister;
 };
