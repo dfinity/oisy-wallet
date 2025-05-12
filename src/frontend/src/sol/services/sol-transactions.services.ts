@@ -1,10 +1,4 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
-import {
-	SOLANA_DEVNET_TOKEN_ID,
-	SOLANA_LOCAL_TOKEN_ID,
-	SOLANA_TESTNET_TOKEN_ID,
-	SOLANA_TOKEN_ID
-} from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
@@ -13,8 +7,8 @@ import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
-import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
-import type { GetSolTransactionsParams, LoadNextSolTransactionsParams } from '$sol/types/sol-api';
+import type { SolanaNetworkType } from '$sol/types/network';
+import type { LoadNextSolTransactionsParams, LoadSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	ParsedAccount,
 	SolMappedTransaction,
@@ -213,19 +207,11 @@ export const loadNextSolTransactions = async ({
 	}
 };
 
-const networkToSolTokenIdMap = {
-	[SolanaNetworks.mainnet]: SOLANA_TOKEN_ID,
-	[SolanaNetworks.testnet]: SOLANA_TESTNET_TOKEN_ID,
-	[SolanaNetworks.devnet]: SOLANA_DEVNET_TOKEN_ID,
-	[SolanaNetworks.local]: SOLANA_LOCAL_TOKEN_ID
-};
-
 const loadSolTransactions = async ({
+	token: { id: tokenId },
 	network,
 	...rest
-}: GetSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
-	const solTokenIdForNetwork = networkToSolTokenIdMap[network];
-
+}: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	try {
 		const transactions = await getSolTransactions({
 			network,
@@ -238,15 +224,15 @@ const loadSolTransactions = async ({
 		}));
 
 		solTransactionsStore.append({
-			tokenId: solTokenIdForNetwork,
+			tokenId,
 			transactions: certifiedTransactions
 		});
 
 		return certifiedTransactions;
 	} catch (error: unknown) {
-		solTransactionsStore.reset(solTokenIdForNetwork);
+		solTransactionsStore.reset(tokenId);
 
-		console.error(`Failed to load transactions for ${solTokenIdForNetwork.description}:`, error);
+		console.error(`Failed to load transactions for ${tokenId.description}:`, error);
 		return [];
 	}
 };
