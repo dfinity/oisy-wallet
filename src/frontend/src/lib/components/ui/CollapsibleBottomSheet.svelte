@@ -3,9 +3,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 
 	let {
 		content,
