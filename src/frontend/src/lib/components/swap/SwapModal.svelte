@@ -24,6 +24,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import SwapProviderListModal from './SwapProviderListModal.svelte';
 
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
 		SWAP_CONTEXT_KEY,
@@ -54,6 +55,7 @@
 	let swapProgressStep = ProgressStepsSwap.INITIALIZATION;
 	let currentStep: WizardStep | undefined;
 	let selectTokenType: SwapSelectTokenType | undefined;
+	let showSelectProviderModal = false;
 
 	const showTokensList = ({ detail: type }: CustomEvent<SwapSelectTokenType>) => {
 		swapAmountsStore.reset();
@@ -73,13 +75,26 @@
 		closeTokenList();
 	};
 
+	const openSelectProviderModal = () => {
+		showSelectProviderModal = true;
+	};
+	const closeSelectProviderModal = () => {
+		showSelectProviderModal = false;
+	};
+	const selectProvider = ({ detail }: CustomEvent<string>) => {
+		swapAmountsStore.setSelectedProvider(detail);
+		closeSelectProviderModal();
+	};
+
 	let title = '';
 	$: title =
 		selectTokenType === 'source'
 			? $i18n.swap.text.select_source_token
 			: selectTokenType === 'destination'
 				? $i18n.swap.text.select_destination_token
-				: (currentStep?.title ?? '');
+				: showSelectProviderModal
+					? 'Select swap provider'
+					: (currentStep?.title ?? '');
 
 	const dispatch = createEventDispatcher();
 
@@ -87,6 +102,7 @@
 		closeModal(() => {
 			currentStep = undefined;
 			selectTokenType = undefined;
+			showSelectProviderModal = false;
 			dispatch('nnsClose');
 		});
 </script>
@@ -97,12 +113,17 @@
 	bind:this={modal}
 	bind:currentStep
 	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING}
+	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING || showSelectProviderModal}
 >
 	<svelte:fragment slot="title">{title}</svelte:fragment>
 
 	{#if nonNullish(selectTokenType)}
 		<SwapTokensList on:icSelectToken={selectToken} on:icCloseTokensList={closeTokenList} />
+	{:else if showSelectProviderModal}
+		<SwapProviderListModal
+			on:icSelectProvider={selectProvider}
+			on:icCloseProviderList={closeSelectProviderModal}
+		/>
 	{:else}
 		<SwapWizard
 			{currentStep}
@@ -114,6 +135,7 @@
 			on:icNext={modal.next}
 			on:icClose={close}
 			on:icShowTokensList={showTokensList}
+			on:icShowProviderList={openSelectProviderModal}
 		/>
 	{/if}
 </WizardModal>

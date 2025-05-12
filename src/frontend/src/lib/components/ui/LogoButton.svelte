@@ -11,6 +11,7 @@
 	export let condensed = false;
 	export let styleClass: string | undefined = undefined;
 	export let testId: string | undefined = undefined;
+	export let dotDividers = true;
 
 	let hasTitleSlot: boolean;
 	$: hasTitleSlot = nonNullish($$slots['title']);
@@ -59,7 +60,7 @@
 						{#if hasTitleSlot}
 							<span class="text-lg font-bold text-primary"><slot name="title" /></span>
 						{/if}
-						{#if hasSubtitleSlot}
+						{#if hasSubtitleSlot && dotDividers}
 							{#if dividers}
 								<span class="text-lg text-tertiary">&nbsp;&middot;&nbsp;</span>
 							{/if}

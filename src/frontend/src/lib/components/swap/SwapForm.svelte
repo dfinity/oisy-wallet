@@ -183,7 +183,7 @@
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if $swapAmountsStore?.swapAmounts === null}
+						{#if $swapAmountsStore?.swaps.length === 0}
 							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
@@ -216,7 +216,7 @@
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider />
+				<SwapProvider on:icShowProviderList />
 				<SwapFees />
 			</div>
 		{/if}
