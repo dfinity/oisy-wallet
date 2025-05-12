@@ -204,7 +204,6 @@ export const loadNextSolTransactions = async ({
 
 	if (transactions.length === 0) {
 		signalEnd();
-		return;
 	}
 };
 
