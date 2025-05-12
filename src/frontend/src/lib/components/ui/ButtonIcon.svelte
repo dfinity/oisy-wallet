@@ -8,10 +8,11 @@
 	export let disabled = false;
 	export let link = true;
 	export let styleClass = '';
+	export let width: 'w-6' | 'w-8' | 'w-10' = 'w-10';
 </script>
 
 <button
-	class={`${colorStyle} icon flex h-10 w-10 flex-col text-center text-xs font-normal ${styleClass}`}
+	class={`${colorStyle} icon flex h-10 flex-col text-center text-xs font-normal ${styleClass} ${width}`}
 	class:link
 	bind:this={button}
 	on:click

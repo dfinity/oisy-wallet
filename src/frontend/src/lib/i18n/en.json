@@ -35,7 +35,9 @@
 		"alt": {
 			"logo": "$name logo",
 			"go_to_home": "Go to the $oisy_name home page",
-			"back": "Go back to the previous page"
+			"back": "Go back to the previous page",
+			"open_details": "Open details",
+			"close_details": "Close details"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
