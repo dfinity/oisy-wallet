@@ -1,34 +1,25 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { SwapMappedResult, SwapProvider } from '$lib/types/swap';
-	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	const { provider } = $props<{
 		provider: Extract<SwapMappedResult, { provider: SwapProvider.ICP_SWAP }>;
 	}>();
 	const { destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const calculateMinimum = (
-		receiveOutMinimum: bigint,
-		destinationToken: IcTokenToggleable | undefined
-	) => {
-		if (nonNullish(receiveOutMinimum) && nonNullish(destinationToken)) {
-			return `${formatTokenBigintToNumber({
-				value: receiveOutMinimum,
-				unitName: destinationToken.decimals,
-				displayDecimals: destinationToken.decimals
-			})} ${destinationToken.symbol}`;
-		}
-		return null;
-	};
-
 	const formattedMinimum = $derived(
-		calculateMinimum(provider.receiveOutMinimum, $destinationToken)
+		nonNullish(provider.receiveOutMinimum) && nonNullish($destinationToken)
+			? `${formatToken({
+					value: provider.receiveOutMinimum,
+					unitName: $destinationToken.decimals,
+					displayDecimals: $destinationToken.decimals
+				})} ${$destinationToken.symbol}`
+			: null
 	);
 </script>
 
