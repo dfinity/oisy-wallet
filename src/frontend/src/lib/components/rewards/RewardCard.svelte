@@ -84,7 +84,7 @@
 				<div
 					data-tid={REWARDS_STATUS_BUTTON}
 					class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
-					>{$i18n.rewards.text.check_status}
+					>{hasEnded ? $i18n.rewards.text.view_details : $i18n.rewards.text.check_status}
 				</div>
 			</section>
 		</article>
