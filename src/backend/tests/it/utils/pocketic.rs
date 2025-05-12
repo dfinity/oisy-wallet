@@ -485,21 +485,4 @@ impl PicBackend {
         }
         expected_users
     }
-
-    /// Creates toy user profiles with the given range of principals.
-    pub fn create_user_profiles<R>(&self, range: R) -> Vec<UserProfile>
-    where
-        R: RangeBounds<u8> + Iterator<Item = u8>,
-    {
-        let mut expected_user_profiles: Vec<UserProfile> = Vec::new();
-        for i in range {
-            self.pic.advance_time(Duration::new(10, 0));
-            let caller = Principal::self_authenticating(i.to_string());
-            let response = self.update::<UserProfile>(caller, "create_user_profile", ());
-            let expected_user_profile = response.clone().expect("Failed to create user profile");
-            expected_user_profiles.push(expected_user_profile);
-            assert!(response.is_ok());
-        }
-        expected_user_profiles
-    }
 }
