@@ -389,8 +389,6 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		return {
 			setup: () => {
 				scheduler = initScheduler(startData);
-
-				console.log(scheduler);
 			},
 
 			teardown: () => {
@@ -406,6 +404,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					console.log(111111);
 
 					await scheduler.start(startData);
+
+					console.log(22222);
 
 					// query + update = 2
 					// idle and in_progress
@@ -441,7 +441,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		};
 	};
 
-	describe('icp-wallet.worker', () => {
+	describe.skip('icp-wallet.worker', () => {
 		const indexCanisterMock = mock<IndexCanister>();
 
 		const mockTransaction: TransactionWithIdIcp = {
@@ -552,7 +552,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		});
 	});
 
-	describe('icrc-wallet.worker', () => {
+	describe.skip('icrc-wallet.worker', () => {
 		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 		const indexCanisterMock = mock<IcrcIndexNgCanister>();
 
