@@ -1,4 +1,5 @@
-import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { BONK_TOKEN, BONK_TOKEN_ID } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import * as solanaApi from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -361,14 +362,17 @@ describe('sol-transactions.services', () => {
 	});
 
 	describe('loadNextSolTransactions', () => {
+		const mockToken = SOLANA_TOKEN;
+
 		const mockParams: LoadNextSolTransactionsParams = {
 			address: mockSolAddress,
 			network: SolanaNetworks.mainnet,
+			token: mockToken,
 			signalEnd
 		};
 
 		beforeEach(() => {
-			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+			solTransactionsStore.reset(mockToken.id);
 
 			spyGetTransactions.mockResolvedValue(mockTransactions);
 		});
@@ -415,7 +419,11 @@ describe('sol-transactions.services', () => {
 		it('should append transactions to the store', async () => {
 			await loadNextSolTransactions(mockParams);
 
-			expect(get(solTransactionsStore)?.[SOLANA_TOKEN_ID]).toEqual(mockCertifiedTransactions);
+			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual(mockCertifiedTransactions);
+
+			await loadNextSolTransactions({ ...mockParams, token: BONK_TOKEN });
+
+			expect(get(solTransactionsStore)?.[BONK_TOKEN_ID]).toEqual(mockCertifiedTransactions);
 		});
 
 		it('should handle errors and reset store', async () => {
@@ -424,7 +432,7 @@ describe('sol-transactions.services', () => {
 
 			await loadNextSolTransactions(mockParams);
 
-			expect(get(solTransactionsStore)?.[SOLANA_TOKEN_ID]).toBeNull();
+			expect(get(solTransactionsStore)?.[mockToken.id]).toBeNull();
 		});
 
 		it('should work with different networks', async () => {
