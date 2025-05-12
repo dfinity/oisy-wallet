@@ -3,7 +3,7 @@ import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.sve
 import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
-import { mockEligibilityReport } from '$tests/mocks/reward-eligibility-report.mock';
+import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -14,16 +14,15 @@ describe('RewardsRequirements', () => {
 	);
 	assertNonNullish(mockRewardCampaign);
 
-	const [firstCampaign] = mockEligibilityReport.campaigns;
-	const [_, eligibility] = firstCampaign;
-	assertNonNullish(eligibility);
+	const [firstCampaign] = mockCampaignEligibilities;
+	assertNonNullish(firstCampaign);
 
 	describe('IsEligible', () => {
 		it('should not render badge if not eligible', () => {
 			const { queryByText } = render(RewardsRequirements, {
 				props: {
 					isEligible: false,
-					criteria: eligibility.criteria
+					criteria: firstCampaign.criteria
 				}
 			});
 
@@ -34,7 +33,7 @@ describe('RewardsRequirements', () => {
 			const { queryByText } = render(RewardsRequirements, {
 				props: {
 					isEligible: true,
-					criteria: eligibility.criteria
+					criteria: firstCampaign.criteria
 				}
 			});
 
@@ -50,11 +49,11 @@ describe('RewardsRequirements', () => {
 			const { container } = render(RewardsRequirements, {
 				props: {
 					isEligible: false,
-					criteria: eligibility.criteria
+					criteria: firstCampaign.criteria
 				}
 			});
 
-			eligibility.criteria.forEach((requirement, index) => {
+			firstCampaign.criteria.forEach((requirement, index) => {
 				const requirementStatus: HTMLSpanElement | null = container.querySelector(
 					requirementStatusSelector(index)
 				);
