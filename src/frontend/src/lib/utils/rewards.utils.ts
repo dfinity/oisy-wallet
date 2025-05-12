@@ -59,9 +59,8 @@ export const isEndedCampaign = (endDate: Date) => {
 	return endDiff <= 0;
 };
 
-export const mapEligibilityReport = (
-	eligibilityReport: EligibilityReport
-): CampaignEligibility[] => eligibilityReport.campaigns.map(([campaignId, eligibility]) => {
+export const mapEligibilityReport = (eligibilityReport: EligibilityReport): CampaignEligibility[] =>
+	eligibilityReport.campaigns.map(([campaignId, eligibility]) => {
 		const criteria = eligibility.criteria.map((criterion) => mapCriterion(criterion));
 
 		return {
