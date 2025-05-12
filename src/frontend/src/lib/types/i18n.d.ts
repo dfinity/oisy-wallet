@@ -194,11 +194,7 @@ interface I18nRewards {
 		ongoing: string;
 		ended: string;
 	};
-	requirements: {
-		min_logins: string;
-		min_transactions: string;
-		min_total_assets_usd: string;
-	};
+	requirements: { min_logins: string; min_transactions: string; min_total_assets_usd: string };
 	alt: { upcoming_campaigns: string; reward_logo: string };
 }
 
