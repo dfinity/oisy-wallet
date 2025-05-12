@@ -1,4 +1,4 @@
-export type AddressType = 'ICP' | 'BTC' | 'ETH' | 'SOL';
+// export type AddressType = 'ICP' | 'BTC' | 'ETH' | 'SOL';
 
 import type { AddressType } from './address';
 

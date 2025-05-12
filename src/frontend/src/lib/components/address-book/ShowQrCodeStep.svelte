@@ -9,7 +9,6 @@
 		ADDRESS_EDIT_CANCEL_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	export let address: Address;
-	export let addressToken: Address | undefined = undefined;
 	export let close: () => void;
 </script>
 
@@ -26,7 +25,7 @@
 			styleClass="shadow-sm border border-divider"
 			onclick={() => {}}
 		/>
-		<div class="pt-10" />
+		<div class="pt-10" /> </div>
 		<ButtonCancel onclick={() => close()} colorStyle="primary" testId={ADDRESS_EDIT_CANCEL_BUTTON}></ButtonCancel>
 	</div>
 {:else}
