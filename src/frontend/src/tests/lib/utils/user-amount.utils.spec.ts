@@ -6,6 +6,7 @@ import {
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { IcCkToken } from '$icp/types/ic-token';
+import { ZERO } from '$lib/constants/app.constants';
 import * as assertAmountUtils from '$lib/utils/assert-amount.utils';
 import { validateUserAmount } from '$lib/utils/user-amount.utils';
 import { mockCkBtcMinterInfo as mockCkBtcMinterInfoData } from '$tests/mocks/ckbtc.mock';
@@ -44,41 +45,66 @@ describe('validateUserAmount', () => {
 	});
 
 	it('should call assertErc20Amount if token is erc20', () => {
-		validateUserAmount({
+		const params = {
 			userAmount,
 			token: createMockErc20Tokens({ n: 1, networkEnv: 'testnet' })[0],
+			balance,
+			fee
+		};
+
+		validateUserAmount({
+			...params,
+			balanceForFee: balance
+		});
+
+		validateUserAmount(params);
+
+		expect(assertErc20AmountSpy).toHaveBeenCalledTimes(2);
+		expect(assertErc20AmountSpy).toHaveBeenNthCalledWith(1, {
+			userAmount,
 			balance,
 			balanceForFee: balance,
 			fee
 		});
-
-		expect(assertErc20AmountSpy).toHaveBeenCalledOnce();
-		expect(assertErc20AmountSpy).toHaveBeenCalledWith({
+		expect(assertErc20AmountSpy).toHaveBeenNthCalledWith(2, {
 			userAmount,
 			balance,
-			balanceForFee: balance,
+			balanceForFee: ZERO,
 			fee
 		});
 	});
 
 	it('should call mockedAssertCkErc20Amount if token is ckErc20', () => {
-		validateUserAmount({
+		const params = {
 			userAmount,
 			token: {
 				...mockValidToken,
 				ledgerCanisterId: LOCAL_CKUSDC_LEDGER_CANISTER_ID
 			} as IcCkToken,
 			balance,
+			fee,
+			ethereumEstimateFee: fee
+		};
+
+		validateUserAmount({
+			...params,
+			balanceForFee: balance
+		});
+
+		validateUserAmount(params);
+
+		expect(assertCkErc20AmountSpy).toHaveBeenCalledTimes(2);
+		expect(assertCkErc20AmountSpy).toHaveBeenNthCalledWith(1, {
+			userAmount,
+			balance,
 			balanceForFee: balance,
 			fee,
 			ethereumEstimateFee: fee
 		});
-
-		expect(assertCkErc20AmountSpy).toHaveBeenCalledOnce();
-		expect(assertCkErc20AmountSpy).toHaveBeenCalledWith({
+		expect(assertCkErc20AmountSpy).toHaveBeenNthCalledWith(2, {
 			userAmount,
 			balance,
-			balanceForFee: balance,
+			balanceForFee: ZERO,
 			fee,
 			ethereumEstimateFee: fee
 		});
