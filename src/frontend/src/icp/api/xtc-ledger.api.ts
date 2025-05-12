@@ -1,5 +1,6 @@
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { Dip20TransactionWithId } from '$icp/types/api';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { XtcLedgerTransferParams } from '$icp/types/xtc-ledger';
 import { XTC_LEDGER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -62,17 +63,19 @@ export const transactions = async ({
 const xtcLedgerCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
-	canisterId = XTC_LEDGER_CANISTER_ID
-}: CanisterApiFunctionParams): Promise<XtcLedgerCanister> => {
+	ledgerCanisterId = XTC_LEDGER_CANISTER_ID
+}: Omit<CanisterApiFunctionParams, 'canisterId'> & {
+	ledgerCanisterId?: LedgerCanisterIdText;
+}): Promise<XtcLedgerCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
 	console.log('alilelila');
 
 	if (isNullish(canister)) {
-		console.log('creating canister weqewrqewrqwer', identity, canisterId);
+		console.log('creating canister weqewrqewrqwer', identity, ledgerCanisterId);
 		canister = await XtcLedgerCanister.create({
 			identity,
-			canisterId: Principal.fromText(canisterId)
+			canisterId: Principal.fromText(ledgerCanisterId)
 		});
 	}
 
