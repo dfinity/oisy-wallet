@@ -11,7 +11,7 @@ import {
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
-import { mockEligibilityReport } from '$tests/mocks/reward-eligibility-report.mock';
+import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 import { beforeEach } from 'vitest';
@@ -22,7 +22,7 @@ describe('RewardModal', () => {
 	const mockContext = new Map([]);
 	const store = initRewardEligibilityStore();
 	mockContext.set(REWARD_ELIGIBILITY_CONTEXT_KEY, { store });
-	store.setEligibilityReport(mockEligibilityReport);
+	store.setCampaignEligibilities(mockCampaignEligibilities);
 
 	beforeEach(() => {
 		vi.clearAllMocks();
