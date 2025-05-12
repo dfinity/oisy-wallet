@@ -1,6 +1,17 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	solAddressDevnet,
+	solAddressLocal,
+	solAddressMainnet,
+	solAddressTestnet
+} from '$lib/derived/address.derived';
 import type { SolAddress } from '$lib/types/address';
+import {
+	isNetworkIdSOLDevnet,
+	isNetworkIdSOLLocal,
+	isNetworkIdSOLTestnet
+} from '$lib/utils/network.utils';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
@@ -17,10 +28,13 @@ import type {
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { address as solAddress } from '@solana/kit';
+import { get } from 'svelte/store';
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
@@ -197,10 +211,40 @@ export const fetchSolTransactionsForSignature = async ({
 };
 
 export const loadNextSolTransactions = async ({
+	token,
 	signalEnd,
 	...rest
 }: LoadNextSolTransactionsParams): Promise<void> => {
-	const transactions = await loadSolTransactions(rest);
+	const {
+		network: { id: networkId }
+	} = token;
+
+	const address = isNetworkIdSOLTestnet(networkId)
+		? get(solAddressTestnet)
+		: isNetworkIdSOLDevnet(networkId)
+			? get(solAddressDevnet)
+			: isNetworkIdSOLLocal(networkId)
+				? get(solAddressLocal)
+				: get(solAddressMainnet);
+
+	const network = mapNetworkIdToNetwork(token.network.id);
+
+	if (isNullish(network) || isNullish(address)) {
+		return;
+	}
+
+	const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
+		? token
+		: { address: undefined, owner: undefined };
+
+	const transactions = await loadSolTransactions({
+		token,
+		network,
+		address,
+		tokenAddress,
+		tokenOwnerAddress,
+		...rest
+	});
 
 	if (transactions.length === 0) {
 		signalEnd();
