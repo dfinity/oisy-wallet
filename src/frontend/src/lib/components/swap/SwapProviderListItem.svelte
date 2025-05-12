@@ -13,21 +13,16 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { safeParse } from '$lib/validation/utils.validation';
 
-	const {
-		amount,
-		token,
-		logoSize = 'md',
-		usdBalance,
-		dapp,
-		isBest
-	} = $props<{
+	interface Props {
 		amount: bigint;
 		token: IcTokenToggleable;
 		logoSize?: LogoSize;
 		usdBalance: OptionAmount;
 		dapp?: OisyDappDescription;
 		isBest: boolean;
-	}>();
+	}
+
+	const { amount, token, logoSize = 'md', usdBalance, dapp, isBest }: Props = $props();
 
 	let displayURL: string | null = $state(null);
 
