@@ -1,12 +1,14 @@
 import {
-	syncPowProtection,
+	syncPowNextAllowance,
+	syncPowProgress,
 	type PowProtectorWorker,
 	type PowProtectorWorkerInitResult
 } from '$icp/services/pow-protector-listener';
 import type {
 	PostMessage,
 	PostMessageDataResponseError,
-	PostMessageDataResponsePowProtector
+	PostMessageDataResponsePowProtectorNextAllowance,
+	PostMessageDataResponsePowProtectorProgress
 } from '$lib/types/post-message';
 
 // TODO: add tests for POW worker/scheduler
@@ -18,15 +20,28 @@ export const initPowProtectorWorker: PowProtectorWorker =
 		worker.onmessage = ({
 			data
 		}: MessageEvent<
-			PostMessage<PostMessageDataResponsePowProtector | PostMessageDataResponseError>
+			PostMessage<
+				| PostMessageDataResponsePowProtectorProgress
+				| PostMessageDataResponsePowProtectorNextAllowance
+				| PostMessageDataResponseError
+			>
 		>) => {
 			const { msg } = data;
 
 			switch (msg) {
-				case 'syncPowProtection': {
+				case 'syncPowProgress': {
 					// Check if data.data exists and has proper structure
 					if (data.data && 'progress' in data.data) {
-						syncPowProtection({
+						syncPowProgress({
+							data: data.data
+						});
+					}
+					return;
+				}
+				case 'syncPowNextAllowance': {
+					// Check if data.data exists and has proper structure
+					if (data.data && 'nextAllowanceMs' in data.data) {
+						syncPowNextAllowance({
 							data: data.data
 						});
 					}

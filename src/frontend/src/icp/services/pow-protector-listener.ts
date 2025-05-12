@@ -1,5 +1,13 @@
-import { allowSigningPowStore, type AllowSigningStoreData } from '$lib/stores/pow-protection.store';
-import type { PostMessageDataResponsePowProtector } from '$lib/types/post-message';
+import {
+	powProtectoreNextAllowanceStore,
+	powProtectoreProgressStore,
+	type PowProtectorNextAllowanceData,
+	type PowProtectorProgressData
+} from '$lib/stores/pow-protection.store';
+import type {
+	PostMessageDataResponsePowProtectorNextAllowance,
+	PostMessageDataResponsePowProtectorProgress
+} from '$lib/types/post-message';
 
 export type PowProtectorWorkerInitResult = {
 	start: () => void;
@@ -9,21 +17,24 @@ export type PowProtectorWorkerInitResult = {
 
 export type PowProtectorWorker = () => Promise<PowProtectorWorkerInitResult>;
 
-export const syncPowProtection = ({ data }: { data: PostMessageDataResponsePowProtector }) => {
-	// Map PostMessageDataResponsePowProtector to AllowSigningStoreData
-	const mappedData: AllowSigningStoreData = {
-		progress: data.progress,
+export const syncPowProgress = ({
+	data
+}: {
+	data: PostMessageDataResponsePowProtectorProgress;
+}) => {
+	const mappedData: PowProtectorProgressData = {
+		progress: data.progress
+	};
+	powProtectoreProgressStore.setPowProtectorProgressData(mappedData);
+};
+
+export const syncPowNextAllowance = ({
+	data
+}: {
+	data: PostMessageDataResponsePowProtectorNextAllowance;
+}) => {
+	const mappedData: PowProtectorNextAllowanceData = {
 		nextAllowanceMs: data.nextAllowanceMs
 	};
-
-	allowSigningPowStore.setAllowSigningStoreData(mappedData);
-};
-
-export type PowProtectionErrorParams = {
-	_error: unknown;
-	_hideToast?: boolean;
-};
-
-export const syncPowProtectionError = ({ _error: _err }: PowProtectionErrorParams) => {
-	// Implementation (removed unused parameter)
+	powProtectoreNextAllowanceStore.setPowProtectorNextAllowanceData(mappedData);
 };

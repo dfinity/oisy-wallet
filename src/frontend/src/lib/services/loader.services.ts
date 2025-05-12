@@ -1,8 +1,9 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-import { POW_FEATURE_ENABLED, POW_MIN_CYCLES_THRESHOLD } from '$env/pow.env';
+import { POW_FEATURE_ENABLED } from '$env/pow.env';
 import { allowSigning, getAllowedCycles } from '$lib/api/backend.api';
+import { POW_MIN_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
@@ -46,7 +47,7 @@ export const hasRequiredCycles = async (): Promise<boolean> => {
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, since do not know whether the user has enough cycles to continue.
 		console.error('Error -> hasRequiredCycles: ', _err);
-		await errorSignOut(get(i18n).init.error.insufficient_cycles_error);
+		await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
 	}
 	return false;
 };

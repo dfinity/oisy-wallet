@@ -279,7 +279,7 @@
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
-			"insufficient_cycles_error": "Your wallet ran out of ycles. Please try to login later",
+			"waiting_for_allowed_cycles_aborted": "Aborted cycles ledger preperation. Please try to login later",
 			"btc_wallet_error": "Error while loading BTC wallet information.",
 			"sol_wallet_error": "Error while loading SOL wallet information."
 		}
@@ -1019,11 +1019,11 @@
 	},
 	"pow_protector": {
 		"text": {
-			"title": "Allowing signer operations",
-			"description": "Please be patient...",
-			"request_challenge": "Request Challenge",
-			"solve_challenge": "Solve challenge",
-			"grant_cycles": "Allow signing"
+			"title": "Preparing Signer",
+			"description": "Verifying that you are not a robot",
+			"request_challenge": "Requesting Challenge",
+			"solve_challenge": "Solving challenge",
+			"grant_cycles": "Enabling Signing"
 		}
 	},
 	"signer": {

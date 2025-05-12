@@ -1,25 +1,41 @@
-import type { PostMessageDataResponsePowProtectorProgress } from '$lib/types/post-message';
 import { writable, type Readable } from 'svelte/store';
 
-export type AllowSigningStoreData = {
-	progress: PostMessageDataResponsePowProtectorProgress;
+export type PowProtectorProgressData = {
+	progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES';
+};
+
+export type PowProtectorNextAllowanceData = {
 	nextAllowanceMs?: bigint;
 };
 
-export interface AllowSigningStore extends Readable<AllowSigningStoreData> {
-	setAllowSigningStoreData: (data: AllowSigningStoreData) => void;
+export interface PowProtectorProgressStore extends Readable<PowProtectorProgressData> {
+	setPowProtectorProgressData: (data: PowProtectorProgressData) => void;
 }
 
-export const initAllowSigningStore = (): AllowSigningStore => {
-	const { subscribe, set } = writable<AllowSigningStoreData>(undefined);
+export interface PowProtectorNextAllowanceStore extends Readable<PowProtectorNextAllowanceData> {
+	setPowProtectorNextAllowanceData: (data: PowProtectorNextAllowanceData) => void;
+}
 
+export const initPowProtectorProgressStore = (): PowProtectorProgressStore => {
+	const { subscribe, set } = writable<PowProtectorProgressData>(undefined);
 	return {
 		subscribe,
-
-		setAllowSigningStoreData: (data: AllowSigningStoreData) => {
+		setPowProtectorProgressData: (data: PowProtectorProgressData) => {
 			set(data);
 		}
 	};
 };
 
-export const allowSigningPowStore = initAllowSigningStore();
+export const initPowProtectorNextAllowanceStore = (): PowProtectorNextAllowanceStore => {
+	const { subscribe, set } = writable<PowProtectorNextAllowanceData>(undefined);
+	return {
+		subscribe,
+		setPowProtectorNextAllowanceData: (data: PowProtectorNextAllowanceData) => {
+			set(data);
+		}
+	};
+};
+
+export const powProtectoreProgressStore = initPowProtectorProgressStore();
+
+export const powProtectoreNextAllowanceStore = initPowProtectorNextAllowanceStore();
