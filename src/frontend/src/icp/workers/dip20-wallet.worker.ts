@@ -27,7 +27,7 @@ const getBalanceAndTransactions = async ({
 
 	return {
 		balance,
-		// TODO: add query for transactions
+		// TODO: add query for transactions - for now we mock with empty transactions and oldest_tx_id
 		transactions: [],
 		oldest_tx_id: [4n]
 	};
