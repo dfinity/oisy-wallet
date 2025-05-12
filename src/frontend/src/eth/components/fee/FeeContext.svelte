@@ -61,7 +61,7 @@
 
 			const { getFeeData } = infuraProviders(sendToken.network.id);
 
-			const { maxFeePerGas, maxPriorityFeePerGas,gasPrice, ...feeDataRest } = await getFeeData();
+			const { maxFeePerGas, maxPriorityFeePerGas, gasPrice, ...feeDataRest } = await getFeeData();
 
 			const { getSuggestedFeeData } = new InfuraGasRest(
 				(sendToken.network as EthereumNetwork).chainId
@@ -77,7 +77,13 @@
 				...feeDataRest,
 				maxFeePerGas: maxFeePerGas ?? suggestedMaxFeePerGas,
 				maxPriorityFeePerGas: maxPriorityFeePerGas ?? suggestedMaxPriorityFeePerGas,
-				gasPrice: isNullish(gasPrice) ? suggestedGasPrice : isNullish(suggestedGasPrice) ? gasPrice : gasPrice > suggestedGasPrice ? gasPrice : suggestedGasPrice
+				gasPrice: isNullish(gasPrice)
+					? suggestedGasPrice
+					: isNullish(suggestedGasPrice)
+						? gasPrice
+						: gasPrice > suggestedGasPrice
+							? gasPrice
+							: suggestedGasPrice
 			};
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
