@@ -63,35 +63,12 @@ export const getCampaignEligibilities = async (params: {
 	identity: Identity;
 }): Promise<CampaignEligibility[]> => {
 	try {
-		const cham: EligibilityReport = {
-			campaigns: [
-				[
-					'OISY Airdrop #1',
-					{
-						available: true,
-						eligible: true,
-						criteria: [
-							{
-								satisfied: true,
-								criterion: { MinLogins: { duration: { Days: BigInt(6) }, count: 2 } }
-							},
-							{
-								satisfied: false,
-								criterion: { MinTransactions: { duration: { Days: BigInt(6) }, count: 3 } }
-							},
-							{ satisfied: false, criterion: { MinTotalAssetsUsd: { usd: 21 } } }
-						]
-					}
-				]
-			]
-		};
+		const eligibilityReport = await queryEligibilityReport({
+			...params,
+			certified: false
+		});
 
-		return mapEligibilityReport(cham)
-
-		// return await queryEligibilityReport({
-		// 	...params,
-		// 	certified: false
-		// });
+		return mapEligibilityReport(eligibilityReport);
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({

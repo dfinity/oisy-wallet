@@ -12,7 +12,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import {
 	claimVipReward,
-	getEligibilityReport,
+	getCampaignEligibilities,
 	getNewReward,
 	getReferrerInfo,
 	getRewards,
@@ -36,41 +36,40 @@ describe('reward-code', () => {
 		vi.clearAllMocks();
 	});
 
-	describe('getEligibilityReport', () => {
+	describe('getCampaignEligibilities', () => {
 		const campaignId = 'deuteronomy';
 		const campaign: CampaignEligibility = { eligible: true, available: true, criteria: [] };
 		const mockEligibilityResponse: EligibilityResponse = {
 			Ok: { campaigns: [[campaignId, campaign]] }
 		};
 
-		it('should return eligibility report', async () => {
-			const getEligibilityReportSpy = vi
+		it('should return campaign eligibilities', async () => {
+			const getCampaignEligibilitiesSpy = vi
 				.spyOn(rewardApi, 'isEligible')
 				.mockResolvedValueOnce(mockEligibilityResponse);
 
-			const eligibilityReport = await getEligibilityReport({ identity: mockIdentity });
+			const campaignEligibilities = await getCampaignEligibilities({ identity: mockIdentity });
 
-			expect(getEligibilityReportSpy).toHaveBeenCalledWith({
+			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
 			});
-			expect(eligibilityReport.campaigns).toHaveLength(1);
+			expect(campaignEligibilities).toHaveLength(1);
 
-			const [_, campaignEligibility] =
-				eligibilityReport.campaigns.find(([id, _]) => id === campaignId) ?? [];
+			const campaignEligibility = campaignEligibilities.find((campaign) => campaign.campaignId === campaignId);
 
-			expect(campaignEligibility).toEqual(campaign);
+			expect(campaignEligibility?.campaignId).toEqual(campaignId);
 		});
 
 		it('should display an error message', async () => {
 			const err = new Error('test');
-			const getEligibilityReportSpy = vi.spyOn(rewardApi, 'isEligible').mockRejectedValue(err);
+			const getCampaignEligibilitiesSpy = vi.spyOn(rewardApi, 'isEligible').mockRejectedValue(err);
 			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
-			await getEligibilityReport({ identity: mockIdentity });
+			await getCampaignEligibilities({ identity: mockIdentity });
 
-			expect(getEligibilityReportSpy).toHaveBeenCalledWith({
+			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage

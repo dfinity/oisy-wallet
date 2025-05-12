@@ -1,42 +1,54 @@
-import type { EligibilityReport } from '$declarations/rewards/rewards.did';
+import type {CampaignEligibility} from "$lib/types/reward";
+import {RewardCriterionType} from "$lib/enums/reward-criterion-type";
 
-export const mockEligibilityReport: EligibilityReport = {
-	campaigns: [
-		[
-			'OISY Airdrop #1',
+export const mockCampaignEligibilities: CampaignEligibility[] =
+[
+	{
+		campaignId: 'OISY Airdrop #1',
+		available: true,
+		eligible: true,
+		criteria: [
 			{
-				available: true,
-				eligible: true,
-				criteria: [
-					{
-						satisfied: true,
-						criterion: { MinLogins: { duration: { Days: BigInt(6) }, count: 2 } }
-					},
-					{
-						satisfied: false,
-						criterion: { MinTransactions: { duration: { Days: BigInt(6) }, count: 3 } }
-					},
-					{ satisfied: false, criterion: { MinTotalAssetsUsd: { usd: 21 } } }
-				]
-			}
-		],
-		[
-			'OISY Airdrop #3',
+				satisfied: true,
+				type: RewardCriterionType.MIN_LOGINS,
+				days: 6n,
+				count: 2
+			},
 			{
-				available: true,
-				eligible: false,
-				criteria: [
-					{
-						satisfied: true,
-						criterion: { MinLogins: { duration: { Days: BigInt(7) }, count: 1 } }
-					},
-					{
-						satisfied: false,
-						criterion: { MinTransactions: { duration: { Days: BigInt(7) }, count: 2 } }
-					},
-					{ satisfied: false, criterion: { MinTotalAssetsUsd: { usd: 18 } } }
-				]
+				satisfied: false,
+				type: RewardCriterionType.MIN_TRANSACTIONS,
+				days: 6n,
+				count: 3
+			},
+			{
+				satisfied: false,
+				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+				usd: 21
 			}
 		]
-	]
-};
+	},
+	{
+		campaignId: 'OISY Airdrop #3',
+		available: true,
+		eligible: false,
+		criteria: [
+			{
+				satisfied: true,
+				type: RewardCriterionType.MIN_LOGINS,
+				days: 7n,
+				count: 1
+			},
+			{
+				satisfied: false,
+				type: RewardCriterionType.MIN_TRANSACTIONS,
+				days: 7n,
+				count: 2
+			},
+			{
+				satisfied: false,
+				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+				usd: 18
+			}
+		]
+	}
+];
