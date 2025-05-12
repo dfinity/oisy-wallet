@@ -28,12 +28,11 @@
 		dapp?: OisyDappDescription;
 		isBest: boolean;
 	}>();
-	let websiteURL: URL | null = $state(null);
+
 	let displayURL: string | null = $state(null);
 
 	$effect(() => {
 		if (isNullish(dapp)) {
-			websiteURL = null;
 			displayURL = null;
 			return;
 		}
@@ -44,11 +43,9 @@
 			});
 			if (nonNullish(validated)) {
 				const url = new URL(validated);
-				websiteURL = url;
 				displayURL = url.hostname.startsWith('www.') ? url.hostname.slice(4) : url.hostname;
 			}
 		} catch {
-			websiteURL = null;
 			displayURL = null;
 		}
 	});
@@ -59,7 +56,7 @@
 	<span slot="title">{dapp.name}</span>
 
 	<span slot="description">
-		{#if displayURL}
+		{#if nonNullish(displayURL)}
 			<span class="text-sm text-tertiary">{displayURL}</span>
 		{/if}
 	</span>
