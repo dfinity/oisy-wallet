@@ -11,6 +11,10 @@ import {mockEligibilityReport} from "$tests/mocks/reward-eligibility-report.mock
 import {get} from "svelte/store";
 import {i18n} from "$lib/stores/i18n.store";
 import {replacePlaceholders} from "$lib/utils/i18n.utils";
+import {beforeEach} from "vitest";
+import * as rewardService from "$lib/services/reward.services";
+import {ZERO} from "$lib/constants/app.constants";
+import {mockAuthStore} from "$tests/mocks/auth.mock";
 
 describe('RewardModal', () => {
 	const imageBannerSelector = `img[data-tid="${REWARDS_MODAL_IMAGE_BANNER}"]`;
@@ -19,6 +23,14 @@ describe('RewardModal', () => {
 	const store = initRewardEligibilityStore();
 	mockContext.set(REWARD_ELIGIBILITY_CONTEXT_KEY, {store});
 	store.setEligibilityReport(mockEligibilityReport);
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		mockAuthStore();
+
+		vi.spyOn(rewardService, 'getUserRewardsTokenAmounts').mockResolvedValue({ckBtcReward: ZERO, ckUsdcReward: ZERO, icpReward: ZERO, amountOfRewards: 0})
+	});
 
 	it('should render active modal content', () => {
 		Object.defineProperty(window, 'navigator', {
