@@ -55,6 +55,8 @@ export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 	 */
 	balance = async (account: Principal): Promise<bigint> => {
 		const { balanceOf } = this.caller({ certified: true });
+
+		console.log('caller', account);
 		return await balanceOf(account);
 	};
 
