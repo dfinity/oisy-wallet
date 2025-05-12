@@ -16,19 +16,19 @@
 	const getCriterionText = (criterion: CampaignCriterion): string | undefined => {
 		if (RewardCriterionType.MIN_LOGINS === criterion.type) {
 			return replacePlaceholders($i18n.rewards.requirements.min_logins, {
-				$logins: criterion.count.toString(),
-				$days: criterion.days.toString()
+				$logins: criterion.count?.toString(),
+				$days: criterion.days?.toString()
 			});
 		}
 		if (RewardCriterionType.MIN_TRANSACTIONS === criterion.type) {
 			return replacePlaceholders($i18n.rewards.requirements.min_transactions, {
-				$transactions: criterion.count.toString(),
-				$days: criterion.days.toString()
+				$transactions: criterion.count?.toString(),
+				$days: criterion.days?.toString()
 			});
 		}
 		if (RewardCriterionType.MIN_TOTAL_ASSETS_USD === criterion.type) {
 			return replacePlaceholders($i18n.rewards.requirements.min_total_assets_usd, {
-				$usd: criterion.usd.toString()
+				$usd: criterion.usd?.toString()
 			});
 		}
 	};
