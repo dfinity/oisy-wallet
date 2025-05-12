@@ -14,8 +14,8 @@ describe('RewardsRequirements', () => {
 	);
 	assertNonNullish(mockRewardCampaign);
 
-	const cham = mockEligibilityReport.campaigns[0];
-	const [ , eligibility] = cham;
+	const [firstCampaign] = mockEligibilityReport.campaigns;
+	const [ _, eligibility] = firstCampaign;
 	assertNonNullish(eligibility);
 
 	describe('IsEligible', () => {
