@@ -585,6 +585,7 @@
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",
 			"included_liquidity_fees": "Included liquidity pool fees",
+			"best_rate": "Best Rate",
 			"expected_minimum": "Expected minimum"
 		},
 		"error": {
