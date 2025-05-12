@@ -10,7 +10,7 @@ export interface RewardEligibilityStore extends Readable<RewardEligibilityData> 
 }
 
 export const initRewardEligibilityStore = (): RewardEligibilityStore => {
-	const { subscribe, set } = writable<RewardEligibilityData>(undefined);
+	const { subscribe, set } = writable<RewardEligibilityData>({campaignEligibilities: undefined});
 
 	return {
 		subscribe,
