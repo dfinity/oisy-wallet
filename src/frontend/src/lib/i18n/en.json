@@ -25,6 +25,7 @@
 			"new": "New",
 			"edit": "Edit",
 			"no_results": "No results",
+			"paste": "Paste",
 			"to": "To",
 			"more_items": "+$items more"
 		},
@@ -34,7 +35,9 @@
 		"alt": {
 			"logo": "$name logo",
 			"go_to_home": "Go to the $oisy_name home page",
-			"back": "Go back to the previous page"
+			"back": "Go back to the previous page",
+			"open_details": "Open details",
+			"close_details": "Close details"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
@@ -247,7 +250,6 @@
 			"no_alchemy_provider": "No Alchemy provider for network $network",
 			"no_alchemy_erc20_provider": "No Alchemy ERC20 provider for network $network",
 			"no_etherscan_provider": "No Etherscan provider for network $network",
-			"no_etherscan_rest_api": "No Etherscan Rest API for network $network",
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
@@ -458,7 +460,8 @@
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
-			"no_available_utxos": "You won't have available utxos to perform this transaction."
+			"no_available_utxos": "You won't have available utxos to perform this transaction.",
+			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -876,7 +879,8 @@
 			"converting_twin_token": "Converting $twinToken to $ckToken",
 			"converting_ck_token": "Converting $ckToken to $twinToken",
 			"twin_network": "$twinNetwork network",
-			"no_date_available": "No Date Available"
+			"no_date_available": "No Date Available",
+			"pending": "Pending"
 		},
 		"alt": {
 			"open_block_explorer": "Open this transaction on a block explorer",

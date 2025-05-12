@@ -1,10 +1,4 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
-import {
-	SOLANA_DEVNET_TOKEN_ID,
-	SOLANA_LOCAL_TOKEN_ID,
-	SOLANA_TESTNET_TOKEN_ID,
-	SOLANA_TOKEN_ID
-} from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
@@ -13,8 +7,8 @@ import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
-import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
-import type { GetSolTransactionsParams } from '$sol/types/sol-api';
+import type { SolanaNetworkType } from '$sol/types/network';
+import type { LoadNextSolTransactionsParams, LoadSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	ParsedAccount,
 	SolMappedTransaction,
@@ -27,10 +21,6 @@ import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { address as solAddress } from '@solana/kit';
-
-interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
-	signalEnd: () => void;
-}
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
@@ -209,30 +199,19 @@ export const fetchSolTransactionsForSignature = async ({
 export const loadNextSolTransactions = async ({
 	signalEnd,
 	...rest
-}: LoadNextSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
+}: LoadNextSolTransactionsParams): Promise<void> => {
 	const transactions = await loadSolTransactions(rest);
 
 	if (transactions.length === 0) {
 		signalEnd();
-		return [];
 	}
-
-	return transactions;
-};
-
-const networkToSolTokenIdMap = {
-	[SolanaNetworks.mainnet]: SOLANA_TOKEN_ID,
-	[SolanaNetworks.testnet]: SOLANA_TESTNET_TOKEN_ID,
-	[SolanaNetworks.devnet]: SOLANA_DEVNET_TOKEN_ID,
-	[SolanaNetworks.local]: SOLANA_LOCAL_TOKEN_ID
 };
 
 const loadSolTransactions = async ({
+	token: { id: tokenId },
 	network,
 	...rest
-}: GetSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
-	const solTokenIdForNetwork = networkToSolTokenIdMap[network];
-
+}: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	try {
 		const transactions = await getSolTransactions({
 			network,
@@ -245,15 +224,15 @@ const loadSolTransactions = async ({
 		}));
 
 		solTransactionsStore.append({
-			tokenId: solTokenIdForNetwork,
+			tokenId,
 			transactions: certifiedTransactions
 		});
 
 		return certifiedTransactions;
 	} catch (error: unknown) {
-		solTransactionsStore.reset(solTokenIdForNetwork);
+		solTransactionsStore.reset(tokenId);
 
-		console.error(`Failed to load transactions for ${solTokenIdForNetwork.description}:`, error);
+		console.error(`Failed to load transactions for ${tokenId.description}:`, error);
 		return [];
 	}
 };

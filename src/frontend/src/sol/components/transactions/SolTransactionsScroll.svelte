@@ -62,6 +62,7 @@
 			address,
 			tokenAddress,
 			tokenOwnerAddress,
+			token,
 			before: lastSignature,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});

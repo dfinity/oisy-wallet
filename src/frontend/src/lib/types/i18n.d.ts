@@ -28,11 +28,18 @@ interface I18nCore {
 		new: string;
 		edit: string;
 		no_results: string;
+		paste: string;
 		to: string;
 		more_items: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string; go_to_home: string; back: string };
+	alt: {
+		logo: string;
+		go_to_home: string;
+		back: string;
+		open_details: string;
+		close_details: string;
+	};
 	warning: { do_not_close: string };
 }
 
@@ -223,7 +230,6 @@ interface I18nInit {
 		no_alchemy_provider: string;
 		no_alchemy_erc20_provider: string;
 		no_etherscan_provider: string;
-		no_etherscan_rest_api: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
@@ -427,6 +433,7 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
+		unknown_destination: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -810,6 +817,7 @@ interface I18nTransaction {
 		converting_ck_token: string;
 		twin_network: string;
 		no_date_available: string;
+		pending: string;
 	};
 	alt: {
 		open_block_explorer: string;
