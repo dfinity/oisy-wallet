@@ -53,10 +53,8 @@ export class XtcLedgerCanister extends Canister<XtcLedgerService> {
 	 *
 	 * @throws {Error} If the request fails.
 	 */
-	balance = async (account: Principal): Promise<bigint> => {
-		const { balanceOf } = this.caller({ certified: true });
-		return await balanceOf(account);
-	};
+	balance = (account: Principal): Promise<bigint> =>
+		this.caller({ certified: true }).balanceOf(account);
 
 	// TODO: add query for transactions - for now we mock with empty transactions
 	transactions = (
