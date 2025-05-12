@@ -29,7 +29,7 @@ const getBalanceAndTransactions = async ({
 		balance,
 		// TODO: add query for transactions
 		transactions: [],
-		oldest_tx_id: []
+		oldest_tx_id: [4n]
 	};
 };
 

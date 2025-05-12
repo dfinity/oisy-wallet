@@ -697,58 +697,23 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	describe('dip20-wallet.worker', () => {
 		const ledgerCanisterMock = mock<XtcLedgerCanister>();
 
-		// TODO: implement DIP-20 transactions tests when we implement the transactions history
-		const mockTransaction: IcrcIndexNgTransactionWithId = {
-			id: 123n,
-			transaction: {
-				burn: [],
-				kind: 'test',
-				mint: [],
-				approve: [],
-				transfer: [
-					{
-						to: {
-							owner: mockPrincipal,
-							subaccount: []
-						},
-						fee: [456n],
-						from: {
-							owner: mockPrincipal,
-							subaccount: [arrayOfNumberToUint8Array([1, 2, 3])]
-						},
-						amount: 789n,
-						spender: [],
-						memo: [],
-						created_at_time: []
-					}
-				],
-				timestamp: 1n
-			}
-		};
-
-		const mockMappedTransaction = mapIcrcTransaction({
-			transaction: mockTransaction,
-			identity: mockIdentity
-		});
-
 		beforeEach(() => {
 			vi.spyOn(XtcLedgerCanister, 'create').mockResolvedValue(ledgerCanisterMock);
 
 			spyGetBalance = ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
 		});
 
-		describe('with transactions', () => {
-			// TODO: implement DIP-20 transactions tests when we implement the transactions history
-			const { setup, teardown, tests } = initWithTransactions({
+		// TODO: implement DIP-20 transactions tests when we implement the transactions history
+
+		describe('without transactions', () => {
+			const { setup, teardown, tests } = initWithoutTransactions({
 				msg: 'syncDip20Wallet',
-				initScheduler: initDip20WalletScheduler,
-				transaction: mockMappedTransaction
+				initScheduler: initDip20WalletScheduler
 			});
 
 			beforeEach(() => {
 				setup();
 
-				// TODO: implement DIP-20 transactions tests when we implement the transactions history
 				spyGetTransactions = ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
 			});
 
