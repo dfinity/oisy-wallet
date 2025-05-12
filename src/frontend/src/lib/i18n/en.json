@@ -584,7 +584,8 @@
 			"swap_provider": "Swap provider",
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",
-			"included_liquidity_fees": "Included liquidity pool fees"
+			"included_liquidity_fees": "Included liquidity pool fees",
+			"expected_minimum": "Expected minimum"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
