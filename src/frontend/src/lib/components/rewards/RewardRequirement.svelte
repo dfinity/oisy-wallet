@@ -1,43 +1,34 @@
 <script lang="ts">
-	import { IconCheckCircleFill } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
-	import type { CriterionEligibility } from '$declarations/rewards/rewards.did';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import {IconCheckCircleFill} from '@dfinity/gix-components';
+	import {nonNullish} from '@dfinity/utils';
+	import type {CampaignCriterion} from "$lib/types/reward";
+	import {RewardCriterionType} from "$lib/enums/reward-criterion-type";
+	import {replacePlaceholders} from "$lib/utils/i18n.utils";
+	import {i18n} from "$lib/stores/i18n.store";
 
 	interface Props {
-		criterion: CriterionEligibility;
+		criterion: CampaignCriterion;
 		testId?: string;
 	}
 
 	let { criterion, testId }: Props = $props();
 
-	const getCriterionText = (criterion: CriterionEligibility): string | undefined => {
-		if ('MinLogins' in criterion.criterion) {
-			const { duration, count } = criterion.criterion.MinLogins;
-			if ('Days' in duration) {
-				const days = duration.Days;
-				return replacePlaceholders($i18n.rewards.requirements.min_logins, {
-					$logins: count.toString(),
-					$days: days.toString()
-				});
-			}
+	const getCriterionText = (criterion: CampaignCriterion): string | undefined => {
+		if (RewardCriterionType.MIN_LOGINS === criterion.type) {
+			return replacePlaceholders($i18n.rewards.requirements.min_logins, {
+				$logins: criterion.count.toString(),
+				$days: criterion.days.toString()
+			});
 		}
-		if ('MinTransactions' in criterion.criterion) {
-			const { duration, count } = criterion.criterion.MinTransactions;
-			if ('Days' in duration) {
-				const days = duration.Days;
-				return replacePlaceholders($i18n.rewards.requirements.min_transactions, {
-					$transactions: count.toString(),
-					$days: days.toString()
-				});
-			}
+		if (RewardCriterionType.MIN_TRANSACTIONS === criterion.type) {
+			return replacePlaceholders($i18n.rewards.requirements.min_transactions, {
+				$transactions: criterion.count.toString(),
+				$days: criterion.days.toString()
+			});
 		}
-		if ('MinTotalAssetsUsd' in criterion.criterion) {
-			const { usd } = criterion.criterion.MinTotalAssetsUsd;
-
+		if (RewardCriterionType.MIN_TOTAL_ASSETS_USD === criterion.type) {
 			return replacePlaceholders($i18n.rewards.requirements.min_total_assets_usd, {
-				$usd: usd.toString()
+				$usd: criterion.usd.toString()
 			});
 		}
 	};

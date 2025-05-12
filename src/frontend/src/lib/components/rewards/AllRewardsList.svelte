@@ -15,7 +15,7 @@
 	import { modalRewardDetails, modalRewardDetailsData } from '$lib/derived/modal.derived';
 	import { RewardStates } from '$lib/enums/reward-states';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { getEligibilityReport } from '$lib/services/reward.services';
+	import { getCampaignEligibilities } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initRewardEligibilityStore,
@@ -36,8 +36,8 @@
 				return;
 			}
 
-			const report = await getEligibilityReport({ identity: $authIdentity });
-			store.setEligibilityReport(report);
+			const campaignEligibilities = await getCampaignEligibilities({ identity: $authIdentity });
+			store.setCampaignEligibilities(campaignEligibilities);
 		};
 		loadEligibilityReport();
 	});

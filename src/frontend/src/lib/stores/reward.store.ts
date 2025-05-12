@@ -1,12 +1,12 @@
-import type { EligibilityReport } from '$declarations/rewards/rewards.did';
 import { writable, type Readable } from 'svelte/store';
+import type {CampaignEligibility} from "$lib/types/reward";
 
 export type RewardEligibilityData = {
-	eligibilityReport?: EligibilityReport | undefined;
+	campaignEligibilities?: CampaignEligibility[] | undefined;
 };
 
 export interface RewardEligibilityStore extends Readable<RewardEligibilityData> {
-	setEligibilityReport: (eligibilityReport: EligibilityReport) => void;
+	setCampaignEligibilities: (campaignEligibilities: CampaignEligibility[]) => void;
 }
 
 export const initRewardEligibilityStore = (): RewardEligibilityStore => {
@@ -15,8 +15,8 @@ export const initRewardEligibilityStore = (): RewardEligibilityStore => {
 	return {
 		subscribe,
 
-		setEligibilityReport: (eligibilityReport: EligibilityReport) => {
-			set({ eligibilityReport });
+		setCampaignEligibilities: (campaignEligibilities: CampaignEligibility[]) => {
+			set({ campaignEligibilities });
 		}
 	};
 };

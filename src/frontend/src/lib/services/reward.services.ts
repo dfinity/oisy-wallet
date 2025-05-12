@@ -28,6 +28,7 @@ import {
 	UserNotVipError
 } from '$lib/types/errors';
 import type {
+	CampaignEligibility,
 	RewardClaimApiResponse,
 	RewardClaimResponse,
 	RewardResponseInfo,
@@ -38,6 +39,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import {mapEligibilityReport} from "$lib/utils/rewards.utils";
 
 const queryEligibilityReport = async (params: {
 	identity: Identity;
@@ -57,21 +59,46 @@ const queryEligibilityReport = async (params: {
 	throw new Error('Unknown error');
 };
 
-export const getEligibilityReport = async (params: {
+export const getCampaignEligibilities = async (params: {
 	identity: Identity;
-}): Promise<EligibilityReport> => {
+}): Promise<CampaignEligibility[]> => {
 	try {
-		return await queryEligibilityReport({
-			...params,
-			certified: false
-		});
+		const cham: EligibilityReport = {
+			campaigns: [
+				[
+					'OISY Airdrop #1',
+					{
+						available: true,
+						eligible: true,
+						criteria: [
+							{
+								satisfied: true,
+								criterion: { MinLogins: { duration: { Days: BigInt(6) }, count: 2 } }
+							},
+							{
+								satisfied: false,
+								criterion: { MinTransactions: { duration: { Days: BigInt(6) }, count: 3 } }
+							},
+							{ satisfied: false, criterion: { MinTotalAssetsUsd: { usd: 21 } } }
+						]
+					}
+				]
+			]
+		};
+
+		return mapEligibilityReport(cham)
+
+		// return await queryEligibilityReport({
+		// 	...params,
+		// 	certified: false
+		// });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
 			msg: { text: vip.reward.error.loading_eligibility },
 			err
 		});
-		return { campaigns: [] };
+		return [];
 	}
 };
 
