@@ -389,6 +389,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		return {
 			setup: () => {
 				scheduler = initScheduler(startData);
+
+				console.log(scheduler);
 			},
 
 			teardown: () => {
@@ -400,6 +402,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					const mockRogueId = 666n;
 
 					initCleanupMock(mockRogueId);
+
+					console.log(111111);
 
 					await scheduler.start(startData);
 
