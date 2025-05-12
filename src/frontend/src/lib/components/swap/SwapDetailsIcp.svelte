@@ -13,7 +13,7 @@
 	const { destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const formattedMinimum = $derived(() => {
-		return nonNullish(provider?.receiveOutMinimum) && nonNullish($destinationToken)
+		nonNullish(provider?.receiveOutMinimum) && nonNullish($destinationToken)
 			? `${formatTokenBigintToNumber({
 					value: provider.receiveOutMinimum,
 					unitName: $destinationToken.decimals,
