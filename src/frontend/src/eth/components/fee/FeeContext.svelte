@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { InfuraGasRest } from '$eth/rest/infura.rest';
@@ -61,7 +61,7 @@
 
 			const { getFeeData } = infuraProviders(sendToken.network.id);
 
-			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
+			const { maxFeePerGas, maxPriorityFeePerGas,gasPrice, ...feeDataRest } = await getFeeData();
 
 			const { getSuggestedFeeData } = new InfuraGasRest(
 				(sendToken.network as EthereumNetwork).chainId
@@ -69,13 +69,15 @@
 
 			const {
 				maxFeePerGas: suggestedMaxFeePerGas,
-				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
+				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas,
+				gasPrice: suggestedGasPrice
 			} = await getSuggestedFeeData();
 
 			const feeData = {
 				...feeDataRest,
 				maxFeePerGas: maxFeePerGas ?? suggestedMaxFeePerGas,
-				maxPriorityFeePerGas: maxPriorityFeePerGas ?? suggestedMaxPriorityFeePerGas
+				maxPriorityFeePerGas: maxPriorityFeePerGas ?? suggestedMaxPriorityFeePerGas,
+				gasPrice: isNullish(gasPrice) ? suggestedGasPrice : isNullish(suggestedGasPrice) ? gasPrice : gasPrice > suggestedGasPrice ? gasPrice : suggestedGasPrice
 			};
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
