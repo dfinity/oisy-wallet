@@ -33,7 +33,7 @@ describe('modal.store', () => {
 		const id = Symbol('modalId');
 		modalStore.openConvertCkBTCToBTC(id);
 
-		expect(get(modalStore)).toEqual({ type: 'convert-ckbtc-btc' });
+		expect(get(modalStore)).toEqual({ id, type: 'convert-ckbtc-btc' });
 	});
 
 	it('should close the modal and reset the store', () => {
