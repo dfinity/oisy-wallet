@@ -162,7 +162,7 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 		return;
 	}
 
-	saveLogo({ logoData, file });
+	saveLogo({ logoData, file, name });
 };
 
 const findCkErc20 = async () => {
