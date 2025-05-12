@@ -61,7 +61,7 @@
 {#if nonNullish(swapDApp) && nonNullish(provider)}
 	<CollapsibleBottomSheet showContentHeader>
 		{#snippet contentHeader({ isInBottomSheet })}
-			<ModalValue>
+			<ModalValue labelStyleClass="allign-center">
 				<svelte:fragment slot="label">
 					<div class="flex justify-center gap-2">
 						{$i18n.swap.text.swap_provider}

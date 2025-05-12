@@ -29,7 +29,7 @@
 			on:click={() => (expanded = true)}
 			ariaLabel="expand"
 			colorStyle="muted"
-			styleClass="text-disabled mb-2 items-end"
+			styleClass="text-disabled mb-2 items-end w-8"
 		>
 			<IconInfo slot="icon" />
 		</ButtonIcon>
