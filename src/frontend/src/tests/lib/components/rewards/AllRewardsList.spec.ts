@@ -19,7 +19,6 @@ describe('AllRewardsList', () => {
 	const rewardsFilterContainerSelector = `div[data-tid="${REWARDS_FILTER}"]`;
 	const rewardsFilterEndedButtonSelector = `button[data-tid="${REWARDS_FILTER}-ended-button"]`;
 
-	let rewardServiceSpy: any;
 	beforeEach(() => {
 		vi.clearAllMocks();
 
@@ -29,7 +28,7 @@ describe('AllRewardsList', () => {
 
 		mockAuthStore();
 
-		rewardServiceSpy = vi.spyOn(rewardService, 'getEligibilityReport').mockResolvedValue(mockEligibilityReport);
+		vi.spyOn(rewardService, 'getEligibilityReport').mockResolvedValue(mockEligibilityReport);
 	});
 
 	it('should render reward filter and ongoing campaigns', () => {

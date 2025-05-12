@@ -14,7 +14,7 @@ describe('RewardsRequirements', () => {
 	);
 	assertNonNullish(mockRewardCampaign);
 
-	const [_, eligibility] = mockEligibilityReport.campaigns[0];
+	const [ ignored, eligibility] = mockEligibilityReport.campaigns[0];
 	assertNonNullish(eligibility);
 
 	describe('IsEligible', () => {
