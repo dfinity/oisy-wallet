@@ -1,5 +1,4 @@
 import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
-import type { TransactionWithId } from '$icp/types/api';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type {
 	Dip20Transaction,
