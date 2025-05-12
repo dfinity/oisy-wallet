@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { ProgressStep } from '@dfinity/gix-components';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ProgressSteps } from '$lib/types/progress-steps';
 
 	export let convertProgressStep: string = ProgressStepsConvert.INITIALIZATION;
 
-	let steps: [ProgressStep, ...ProgressStep[]];
+	let steps: ProgressSteps;
 	$: steps = [
 		{
 			step: ProgressStepsConvert.INITIALIZATION,
