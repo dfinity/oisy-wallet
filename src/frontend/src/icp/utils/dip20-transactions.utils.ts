@@ -1,5 +1,6 @@
 import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
 import type { TransactionWithId } from '$icp/types/api';
+import type { Dip20TransactionWithId } from '$icp/types/api';
 import type {
 	Dip20Transaction,
 	IcTransactionAddOnsInfo,
@@ -9,8 +10,8 @@ import type { OptionIdentity } from '$lib/types/identity';
 
 // TODO: implement this function
 export const mapTransactionDip20ToSelf = (
-	tx: TransactionWithId
-): ({ transaction: Event & IcTransactionAddOnsInfo } & Pick<TransactionWithId, 'id'>)[] => {
+	tx: Dip20TransactionWithId
+): ({ transaction: Event & IcTransactionAddOnsInfo } & Pick<Dip20TransactionWithId, 'id'>)[] => {
 	const { transaction, id } = tx;
 
 	return [
@@ -23,9 +24,10 @@ export const mapTransactionDip20ToSelf = (
 
 // TODO: implement this function
 export const mapDip20Transaction = ({
-	transaction: _,
+	transaction: { id },
 	identity: __
 }: {
 	transaction: Dip20Transaction;
 	identity: OptionIdentity;
-}): IcTransactionUi => ({}) as IcTransactionUi;
+}): IcTransactionUi =>
+	({ id: id.toString(), type: 'approve', status: 'executed' }) as IcTransactionUi;

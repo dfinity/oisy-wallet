@@ -78,6 +78,10 @@ export const PostMessageDataRequestIcrcStrictSchema = IcCanistersStrictSchema.me
 	NetworkSchema.pick({ env: true })
 );
 
+export const PostMessageDataRequestDip20Schema = z.object({
+	canisterId: CanisterIdTextSchema
+});
+
 export const PostMessageDataRequestIcCkSchema = IcCkMetadataSchema.pick({
 	minterCanisterId: true
 }).partial();

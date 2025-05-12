@@ -6,30 +6,63 @@ import {
 } from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { TransactionWithId } from '$icp/types/api';
+import { balance, transactions } from '$icp/api/xtc-ledger.api';
+import { IcWalletBalanceAndTransactionsScheduler } from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
+import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import {
 	mapDip20Transaction,
 	mapTransactionDip20ToSelf
 } from '$icp/utils/dip20-transactions.utils';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
-import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
+import type {
+	PostMessage,
+	PostMessageDataRequest,
+	PostMessageDataRequestDip20
+} from '$lib/types/post-message';
 import { isNullish } from '@dfinity/utils';
 
-const getBalanceAndTransactions = async ({
-	identity
-}: SchedulerJobParams<PostMessageDataRequest>): Promise<
-	GetBalanceAndTransactions<TransactionWithId>
-> => {
-	const balance = await getBalance({
+// TODO: add query for transactions - for now we mock with empty transactions
+type GetTransactions = {
+	transactions: Dip20TransactionWithId[];
+	oldest_tx_id: [] | [bigint];
+};
+
+type GetBalance = bigint;
+
+type GetBalanceAndTransactions = GetTransactions & { balance: GetBalance };
+
+const getBalance = ({
+	identity,
+	data
+}: SchedulerJobParams<PostMessageDataRequestDip20>): Promise<GetBalance> =>
+	balance({
 		identity,
-		owner: identity.getPrincipal()
+		owner: identity.getPrincipal(),
+		...data
 	});
+
+const getTransactions = ({
+	identity,
+	certified,
+	data
+}: SchedulerJobParams<PostMessageDataRequestDip20>): Promise<GetTransactions> =>
+	transactions({ identity, certified, ...data });
+
+const getBalanceAndTransactions = async (
+	params: SchedulerJobParams<PostMessageDataRequestDip20>
+): Promise<GetBalanceAndTransactions> => {
+	const [balance, transactions] = await Promise.all([
+		getBalance(params),
+		// TODO: add query for transactions - for now we mock with empty transactions
+		getTransactions(params)
+	]);
 
 	return {
 		balance,
-		// TODO: add query for transactions
-		transactions: [],
-		oldest_tx_id: []
+		// TODO: add query for transactions - for now we mock with empty transactions
+		...transactions
 	};
 };
 
@@ -37,7 +70,7 @@ const mapTransaction = ({
 	transaction,
 	jobData: { identity }
 }: {
-	transaction: Pick<TransactionWithId, 'id'> & {
+	transaction: Pick<Dip20TransactionWithId, 'id'> & {
 		transaction: Event & IcTransactionAddOnsInfo;
 	};
 	jobData: SchedulerJobData<PostMessageDataRequest>;
@@ -45,7 +78,7 @@ const mapTransaction = ({
 
 const initDip20WalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTransactionsScheduler<
 	Event,
-	TransactionWithId,
+	Dip20TransactionWithId,
 	PostMessageDataRequest
 > =>
 	new IcWalletBalanceAndTransactionsScheduler(
@@ -57,8 +90,9 @@ const initDip20WalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTra
 
 // Exposed for test purposes
 export const initDip20WalletScheduler = (
-	_data: PostMessageDataRequest | undefined
-): IcWalletScheduler<PostMessageDataRequest> => initDip20WalletBalanceAndTransactionsScheduler();
+	_data: PostMessageDataRequestDip20 | undefined
+): IcWalletScheduler<PostMessageDataRequestDip20> =>
+	initDip20WalletBalanceAndTransactionsScheduler();
 
 let scheduler: IcWalletScheduler<PostMessageDataRequest> | undefined;
 
