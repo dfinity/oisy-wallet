@@ -716,7 +716,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		});
 
 		beforeEach(() => {
-			vi.spyOn(XtcLedgerCanister, 'create').mockResolvedValue(ledgerCanisterMock);
+			// @ts-expect-error for test purposes
+			vi.spyOn(XtcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 
 			spyGetBalance = ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
 		});
