@@ -43,7 +43,7 @@ describe('ic-wallet-balance.worker', () => {
 		...rest
 	}: {
 		certified: boolean;
-		msg: 'syncIcpWallet' | 'syncIcrcWallet';
+		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 	}) => ({
 		msg,
 		data: mockPostMessageData(rest)
@@ -80,7 +80,7 @@ describe('ic-wallet-balance.worker', () => {
 		initScheduler: (
 			data: PostMessageDataRequest | undefined
 		) => IcWalletScheduler<PostMessageDataRequest>;
-		msg: 'syncIcpWallet' | 'syncIcrcWallet';
+		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 		startData?: PostMessageDataRequest | undefined;
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
@@ -188,7 +188,7 @@ describe('ic-wallet-balance.worker', () => {
 		) => IcWalletScheduler<PostMessageDataRequest>;
 		startData?: PostMessageDataRequest | undefined;
 		initErrorMock: (err: Error) => void;
-		msg: 'syncIcpWallet' | 'syncIcrcWallet';
+		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 

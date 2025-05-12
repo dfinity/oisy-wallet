@@ -5,7 +5,7 @@ import type {
 	PostMessageDataResponseWallet
 } from '$lib/types/post-message';
 
-export type IcWalletMsg = 'syncIcpWallet' | 'syncIcrcWallet';
+export type IcWalletMsg = 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 
 export abstract class IcWalletScheduler<PostMessageDataRequest>
 	implements Scheduler<PostMessageDataRequest>
