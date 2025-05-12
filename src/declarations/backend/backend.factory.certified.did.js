@@ -409,14 +409,6 @@ export const idlFactory = ({ IDL }) => {
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
 	});
-	const ListUsersRequest = IDL.Record({
-		updated_after_timestamp: IDL.Opt(IDL.Nat64),
-		matches_max_length: IDL.Opt(IDL.Nat64)
-	});
-	const ListUserCreationTimestampsResponse = IDL.Record({
-		creation_timestamps: IDL.Vec(IDL.Nat64),
-		matches_max_length: IDL.Nat64
-	});
 	const UserToken = IDL.Record({
 		decimals: IDL.Opt(IDL.Nat8),
 		version: IDL.Opt(IDL.Nat64),
@@ -424,15 +416,6 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text,
 		symbol: IDL.Opt(IDL.Text)
-	});
-	const OisyUser = IDL.Record({
-		principal: IDL.Principal,
-		pouh_verified: IDL.Bool,
-		updated_timestamp: IDL.Nat64
-	});
-	const ListUsersResponse = IDL.Record({
-		users: IDL.Vec(OisyUser),
-		matches_max_length: IDL.Nat64
 	});
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
@@ -503,12 +486,7 @@ export const idlFactory = ({ IDL }) => {
 		has_user_profile: IDL.Func([], [HasUserProfileResponse]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)]),
-		list_user_creation_timestamps: IDL.Func(
-			[ListUsersRequest],
-			[ListUserCreationTimestampsResponse]
-		),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)]),
-		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse]),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),

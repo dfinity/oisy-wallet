@@ -229,18 +229,6 @@ type InitArg = record {
 	supported_credentials : opt vec SupportedCredential;
 	ic_root_key_der : opt blob
 };
-type ListUserCreationTimestampsResponse = record {
-	creation_timestamps : vec nat64;
-	matches_max_length : nat64
-};
-type ListUsersRequest = record {
-	updated_after_timestamp : opt nat64;
-	matches_max_length : opt nat64
-};
-type ListUsersResponse = record {
-	users : vec OisyUser;
-	matches_max_length : nat64
-};
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
 type NetworkSettingsFor = variant {
 	InternetComputer;
@@ -261,11 +249,6 @@ type NetworkSettingsFor = variant {
 type NetworksSettings = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	testnets : TestnetsSettings
-};
-type OisyUser = record {
-	"principal" : principal;
-	pouh_verified : bool;
-	updated_timestamp : nat64
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
@@ -436,11 +419,7 @@ service : (Arg) -> {
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	http_request : (HttpRequest) -> (HttpResponse) query;
 	list_custom_tokens : () -> (vec CustomToken) query;
-	list_user_creation_timestamps : (ListUsersRequest) -> (
-		ListUserCreationTimestampsResponse
-	) query;
 	list_user_tokens : () -> (vec UserToken) query;
-	list_users : (ListUsersRequest) -> (ListUsersResponse) query;
 	remove_user_token : (UserTokenId) -> ();
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();

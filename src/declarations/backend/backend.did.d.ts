@@ -242,18 +242,6 @@ export interface InitArg {
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array | number[]];
 }
-export interface ListUserCreationTimestampsResponse {
-	creation_timestamps: BigUint64Array | bigint[];
-	matches_max_length: bigint;
-}
-export interface ListUsersRequest {
-	updated_after_timestamp: [] | [bigint];
-	matches_max_length: [] | [bigint];
-}
-export interface ListUsersResponse {
-	users: Array<OisyUser>;
-	matches_max_length: bigint;
-}
 export interface NetworkSettings {
 	enabled: boolean;
 	is_testnet: boolean;
@@ -276,11 +264,6 @@ export type NetworkSettingsFor =
 export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
-}
-export interface OisyUser {
-	principal: Principal;
-	pouh_verified: boolean;
-	updated_timestamp: bigint;
 }
 export interface Outpoint {
 	txid: Uint8Array | number[];
@@ -453,12 +436,7 @@ export interface _SERVICE {
 	has_user_profile: ActorMethod<[], HasUserProfileResponse>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
-	list_user_creation_timestamps: ActorMethod<
-		[ListUsersRequest],
-		ListUserCreationTimestampsResponse
-	>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
-	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;

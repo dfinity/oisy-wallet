@@ -15,7 +15,6 @@ use ic_stable_structures::{
     DefaultMemoryImpl,
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
-use oisy_user::oisy_users;
 use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
@@ -48,8 +47,7 @@ use shared::{
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
-            HasUserProfileResponse, ListUserCreationTimestampsResponse, ListUsersRequest,
-            ListUsersResponse, OisyUser, UserProfile,
+            HasUserProfileResponse, UserProfile,
         },
         Stats, Timestamp,
     },
@@ -65,7 +63,6 @@ use user_profile_model::UserProfileModel;
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
-    oisy_user::oisy_user_creation_timestamps,
     result_types::AddUserCredentialResult,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
@@ -79,7 +76,6 @@ mod config;
 mod guards;
 mod heap_state;
 mod impls;
-mod oisy_user;
 mod pow;
 pub mod signer;
 mod state;
@@ -793,37 +789,6 @@ pub async fn allow_signing(
         allowed_cycles,
         challenge_completion: Some(challenge_completion),
     })
-}
-
-#[query(guard = "caller_is_allowed")]
-#[allow(clippy::needless_pass_by_value)]
-#[must_use]
-pub fn list_users(request: ListUsersRequest) -> ListUsersResponse {
-    // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles
-    // consumption when reading BTreeMap.
-
-    let (users, matches_max_length): (Vec<OisyUser>, u64) =
-        read_state(|s| oisy_users(&request, &s.user_profile));
-
-    ListUsersResponse {
-        users,
-        matches_max_length,
-    }
-}
-
-#[query(guard = "caller_is_allowed")]
-#[allow(clippy::needless_pass_by_value)]
-#[must_use]
-pub fn list_user_creation_timestamps(
-    request: ListUsersRequest,
-) -> ListUserCreationTimestampsResponse {
-    let (creation_timestamps, matches_max_length): (Vec<Timestamp>, u64) =
-        read_state(|s| oisy_user_creation_timestamps(&request, &s.user_profile));
-
-    ListUserCreationTimestampsResponse {
-        creation_timestamps,
-        matches_max_length,
-    }
 }
 
 /// API method to get cycle balance and burn rate.
