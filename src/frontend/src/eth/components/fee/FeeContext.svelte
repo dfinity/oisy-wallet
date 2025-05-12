@@ -111,8 +111,6 @@
 				return;
 			}
 
-
-
 			feeStore.setFee({
 				...feeData,
 				gas: await getErc20FeeData({
