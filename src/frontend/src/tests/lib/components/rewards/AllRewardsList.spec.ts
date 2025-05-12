@@ -9,7 +9,7 @@ import {
 import * as rewardService from '$lib/services/reward.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
-import { mockEligibilityReport } from '$tests/mocks/reward-eligibility-report.mock';
+import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('AllRewardsList', () => {
@@ -28,7 +28,7 @@ describe('AllRewardsList', () => {
 
 		mockAuthStore();
 
-		vi.spyOn(rewardService, 'getEligibilityReport').mockResolvedValue(mockEligibilityReport);
+		vi.spyOn(rewardService, 'getCampaignEligibilities').mockResolvedValue(mockCampaignEligibilities);
 	});
 
 	it('should render reward filter and ongoing campaigns', () => {
