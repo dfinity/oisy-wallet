@@ -19,7 +19,9 @@
 
 	let { sourceToken, destinationToken }: Props = $props();
 
-	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth();
+	const modalId = Symbol();
+
+	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth(modalId);
 </script>
 
 <div class="pr-2">

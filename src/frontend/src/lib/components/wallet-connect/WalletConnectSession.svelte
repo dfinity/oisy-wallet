@@ -36,6 +36,8 @@
 
 	export let listener: OptionWalletConnectListener;
 
+	const modalId = Symbol();
+
 	const signModalId = Symbol();
 	const sendModalId = Symbol();
 
@@ -166,7 +168,7 @@
 		steps = [STEP_REVIEW];
 
 		// We open the WalletConnect auth modal on the review step
-		modalStore.openWalletConnectAuth();
+		modalStore.openWalletConnectAuth(modalId);
 
 		await connect($walletConnectUri);
 	};
@@ -358,7 +360,7 @@
 	onDestroy(() => walletConnectPaired.set(false));
 
 	const openWalletConnectAuth = () => {
-		modalStore.openWalletConnectAuth();
+		modalStore.openWalletConnectAuth(modalId);
 
 		trackEvent({
 			name: TRACK_COUNT_WALLET_CONNECT_MENU_OPEN
