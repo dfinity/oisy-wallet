@@ -25,6 +25,10 @@
 			return;
 		}
 
+		if (disableInfiniteScroll) {
+			return;
+		}
+
 		const lastId = last($icTransactions)?.data.id;
 
 		if (isNullish(lastId)) {
