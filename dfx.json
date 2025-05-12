@@ -496,7 +496,6 @@
 			"specified_id": "aanaa-xaaaa-aaaah-aaeiq-cai",
 			"remote": {
 				"id": {
-					"ic": "aanaa-xaaaa-aaaah-aaeiq-cai",
 					"test_be_1": "aanaa-xaaaa-aaaah-aaeiq-cai",
 					"test_fe_1": "aanaa-xaaaa-aaaah-aaeiq-cai",
 					"test_fe_2": "aanaa-xaaaa-aaaah-aaeiq-cai",
@@ -506,6 +505,8 @@
 					"test_fe_6": "aanaa-xaaaa-aaaah-aaeiq-cai",
 					"audit": "aanaa-xaaaa-aaaah-aaeiq-cai",
 					"staging": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"beta": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"ic": "aanaa-xaaaa-aaaah-aaeiq-cai",
 					"e2e": "aanaa-xaaaa-aaaah-aaeiq-cai"
 				}
 			}
