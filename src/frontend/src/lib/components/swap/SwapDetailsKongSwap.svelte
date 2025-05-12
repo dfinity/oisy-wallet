@@ -1,9 +1,9 @@
 <script lang="ts">
-	import SwapRoute from '$lib/components/swap/SwapRoute.svelte';
-	import SwapNetworkFee from '$lib/components/swap/SwapNetworkFee.svelte';
-	import SwapLiquidityFees from '$lib/components/swap/SwapLiquidityFees.svelte';
-	import type { SwapMappedResult, SwapProvider } from '$lib/types/swap';
 	import { nonNullish } from '@dfinity/utils';
+	import SwapLiquidityFees from '$lib/components/swap/SwapLiquidityFees.svelte';
+	import SwapNetworkFee from '$lib/components/swap/SwapNetworkFee.svelte';
+	import SwapRoute from '$lib/components/swap/SwapRoute.svelte';
+	import type { SwapMappedResult, SwapProvider } from '$lib/types/swap';
 	export let provider: Extract<SwapMappedResult, { provider: SwapProvider.KONG_SWAP }>;
 </script>
 
