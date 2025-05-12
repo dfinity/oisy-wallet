@@ -33,7 +33,13 @@ interface I18nCore {
 		more_items: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string; go_to_home: string; back: string };
+	alt: {
+		logo: string;
+		go_to_home: string;
+		back: string;
+		open_details: string;
+		close_details: string;
+	};
 	warning: { do_not_close: string };
 }
 
@@ -224,7 +230,6 @@ interface I18nInit {
 		no_alchemy_provider: string;
 		no_alchemy_erc20_provider: string;
 		no_etherscan_provider: string;
-		no_etherscan_rest_api: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
