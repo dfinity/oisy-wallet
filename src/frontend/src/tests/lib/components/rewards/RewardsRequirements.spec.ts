@@ -6,6 +6,7 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import {mockEligibilityReport} from "$tests/mocks/reward-eligibility-report.mock";
 
 describe('RewardsRequirements', () => {
 	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
@@ -13,14 +14,15 @@ describe('RewardsRequirements', () => {
 	);
 	assertNonNullish(mockRewardCampaign);
 
+	const [_, eligibility] = mockEligibilityReport.campaigns[0];
+	assertNonNullish(eligibility);
+
 	describe('IsEligible', () => {
 		it('should not render badge if not eligible', () => {
 			const { queryByText } = render(RewardsRequirements, {
 				props: {
-					loading: false,
-					reward: mockRewardCampaign,
 					isEligible: false,
-					requirementsFulfilled: [true, true, true]
+					criteria: eligibility.criteria
 				}
 			});
 
@@ -30,10 +32,8 @@ describe('RewardsRequirements', () => {
 		it('should render badge if eligible', () => {
 			const { queryByText } = render(RewardsRequirements, {
 				props: {
-					loading: false,
-					reward: mockRewardCampaign,
 					isEligible: true,
-					requirementsFulfilled: [true, true, true]
+					criteria: eligibility.criteria
 				}
 			});
 
@@ -41,88 +41,24 @@ describe('RewardsRequirements', () => {
 		});
 	});
 
-	describe('RequirementsFulfilled', () => {
+	describe('Requirements', () => {
 		const requirementStatusSelector = (index: number) =>
 			`span[data-tid="${REWARDS_REQUIREMENTS_STATUS}-${index}"]`;
 
-		it('should render all requirements as fulfilled', () => {
+		it('should render all requirements', () => {
 			const { container } = render(RewardsRequirements, {
 				props: {
-					loading: false,
-					reward: mockRewardCampaign,
 					isEligible: false,
-					requirementsFulfilled: [true, true, true]
+					criteria: eligibility.criteria
 				}
 			});
 
-			mockRewardCampaign.requirements.forEach((requirement, index) => {
+			eligibility.criteria.forEach((requirement, index) => {
 				const requirementStatus: HTMLSpanElement | null = container.querySelector(
 					requirementStatusSelector(index)
 				);
-
 				expect(requirementStatus).toBeInTheDocument();
-				expect(requirementStatus?.className).toContain('text-success-primary');
-			});
-		});
-
-		it('should render all requirements as not fulfilled', () => {
-			const { container } = render(RewardsRequirements, {
-				props: {
-					loading: false,
-					reward: mockRewardCampaign,
-					isEligible: false,
-					requirementsFulfilled: [false, false, false]
-				}
-			});
-
-			mockRewardCampaign.requirements.forEach((requirement, index) => {
-				const requirementStatus: HTMLSpanElement | null = container.querySelector(
-					requirementStatusSelector(index)
-				);
-
-				expect(requirementStatus).toBeInTheDocument();
-				expect(requirementStatus?.className).toContain('text-disabled');
-			});
-		});
-
-		it('should render all requirements as not fulfilled if incorrect amount of states are provided', () => {
-			const { container } = render(RewardsRequirements, {
-				props: {
-					loading: false,
-					reward: mockRewardCampaign,
-					isEligible: false,
-					requirementsFulfilled: [false, false]
-				}
-			});
-
-			mockRewardCampaign.requirements.forEach((requirement, index) => {
-				const requirementStatus: HTMLSpanElement | null = container.querySelector(
-					requirementStatusSelector(index)
-				);
-
-				expect(requirementStatus).toBeInTheDocument();
-				expect(requirementStatus?.className).toContain('text-disabled');
-			});
-		});
-
-		it('should render all requirements as not fulfilled if no states are provided', () => {
-			const { container } = render(RewardsRequirements, {
-				props: {
-					loading: false,
-					reward: mockRewardCampaign,
-					isEligible: false,
-					requirementsFulfilled: []
-				}
-			});
-
-			mockRewardCampaign.requirements.forEach((requirement, index) => {
-				const requirementStatus: HTMLSpanElement | null = container.querySelector(
-					requirementStatusSelector(index)
-				);
-
-				expect(requirementStatus).toBeInTheDocument();
-				expect(requirementStatus?.className).toContain('text-disabled');
-			});
+			})
 		});
 	});
 });
