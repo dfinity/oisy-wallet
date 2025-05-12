@@ -756,7 +756,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		describe('without transactions', () => {
 			const { setup, teardown, tests } = initWithoutTransactions({
 				msg: 'syncDip20Wallet',
-				initScheduler: initDip20WalletScheduler
+				initScheduler: initDip20WalletScheduler,
+				startData
 			});
 
 			beforeEach(() => {
@@ -794,6 +795,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 			describe('balance error', () => {
 				const { setup, teardown, tests } = initOtherScenarios({
 					initScheduler: initDip20WalletScheduler,
+					startData,
 					initCleanupMock,
 					initErrorMock: (err: Error) => ledgerCanisterMock.balance.mockRejectedValue(err),
 					msg: 'syncDip20Wallet'
@@ -809,6 +811,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 			describe('transactions error', () => {
 				const { setup, teardown, tests } = initOtherScenarios({
 					initScheduler: initDip20WalletScheduler,
+					startData,
 					initCleanupMock,
 					initErrorMock: (err: Error) => ledgerCanisterMock.transactions.mockRejectedValue(err),
 					msg: 'syncDip20Wallet'
