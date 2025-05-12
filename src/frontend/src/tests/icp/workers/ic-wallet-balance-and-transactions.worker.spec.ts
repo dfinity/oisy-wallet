@@ -749,7 +749,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				setup();
 
 				// TODO: implement DIP-20 transactions tests when we implement the transactions history
-				spyGetTransactions = spyGetBalance;
+				spyGetTransactions = ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
 			});
 
 			afterEach(teardown);
