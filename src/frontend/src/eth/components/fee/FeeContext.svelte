@@ -61,7 +61,7 @@
 
 			const { getFeeData } = infuraProviders(sendToken.network.id);
 
-			const { maxFeePerGas, maxPriorityFeePerGas, gasPrice, ...feeDataRest } = await getFeeData();
+			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
 			const { getSuggestedFeeData } = new InfuraGasRest(
 				(sendToken.network as EthereumNetwork).chainId
@@ -70,20 +70,12 @@
 			const {
 				maxFeePerGas: suggestedMaxFeePerGas,
 				maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas,
-				gasPrice: suggestedGasPrice
 			} = await getSuggestedFeeData();
 
 			const feeData = {
 				...feeDataRest,
 				maxFeePerGas: maxFeePerGas ?? suggestedMaxFeePerGas,
 				maxPriorityFeePerGas: maxPriorityFeePerGas ?? suggestedMaxPriorityFeePerGas,
-				gasPrice: isNullish(gasPrice)
-					? suggestedGasPrice
-					: isNullish(suggestedGasPrice)
-						? gasPrice
-						: gasPrice > suggestedGasPrice
-							? gasPrice
-							: suggestedGasPrice
 			};
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
@@ -118,6 +110,17 @@
 				});
 				return;
 			}
+
+			const foo = await getErc20FeeData({
+				...erc20GasFeeParams,
+				targetNetwork,
+				to:
+				// When converting "ICP Erc20" to native ICP, the destination address is an "old" ICP hex account identifier.
+				// Therefore, it should not be prefixed with 0x.
+					isNetworkICP(targetNetwork) ? destination : erc20GasFeeParams.to
+			})
+
+			console.log('foo', foo, erc20GasFeeParams,targetNetwork)
 
 			feeStore.setFee({
 				...feeData,

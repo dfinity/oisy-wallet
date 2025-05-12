@@ -11,7 +11,7 @@ export class InfuraGasRest {
 
 	// https://docs.metamask.io/services/reference/gas-api
 	getSuggestedFeeData = async (): Promise<
-		Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas' | 'gasPrice'>
+		Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'>
 	> => {
 		const url = new URL(
 			`${this.apiUrl}/${INFURA_API_KEY}/networks/${this.chainId.toString()}/suggestedGasFees`
@@ -24,14 +24,12 @@ export class InfuraGasRest {
 		}
 
 		const {
-			medium: { suggestedMaxPriorityFeePerGas, suggestedMaxFeePerGas },
-			estimatedBaseFee
+			medium: { suggestedMaxPriorityFeePerGas, suggestedMaxFeePerGas }
 		}: GasFeeEstimate = await response.json();
 
 		return {
 			maxFeePerGas: parseToken({ value: suggestedMaxFeePerGas, unitName: 'gwei' }),
-			maxPriorityFeePerGas: parseToken({ value: suggestedMaxPriorityFeePerGas, unitName: 'gwei' }),
-			gasPrice: parseToken({ value: estimatedBaseFee, unitName: 'gwei' })
+			maxPriorityFeePerGas: parseToken({ value: suggestedMaxPriorityFeePerGas, unitName: 'gwei' })
 		};
 	};
 }
