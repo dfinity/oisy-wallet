@@ -1,6 +1,7 @@
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	icTokenIcrcCustomToken,
+	isTokenDip20,
 	isTokenIc,
 	isTokenIcp,
 	isTokenIcrc,
@@ -260,12 +261,32 @@ describe('icrc.utils', () => {
 		);
 	});
 
-	describe('isTokenIc', () => {
-		it.each(['icp', 'icrc'])('should return true for valid token standards: %s', (standard) => {
+	describe('isTokenDip20', () => {
+		it.each(['dip20'])('should return true for valid token standards: %s', (standard) => {
 			expect(
-				isTokenIc({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+				isTokenDip20({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
 			).toBeTruthy();
 		});
+
+		it.each(['icp', 'icrc', 'ethereum', 'erc20', 'bitcoin', 'solana', 'spl'])(
+			'should return false for invalid token standards: %s',
+			(standard) => {
+				expect(
+					isTokenDip20({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+				).toBeFalsy();
+			}
+		);
+	});
+
+	describe('isTokenIc', () => {
+		it.each(['icp', 'icrc', 'dip20'])(
+			'should return true for valid token standards: %s',
+			(standard) => {
+				expect(
+					isTokenIc({ ...mockIcrcCustomToken, standard: standard as TokenStandard })
+				).toBeTruthy();
+			}
+		);
 
 		it.each(['ethereum', 'erc20', 'bitcoin', 'solana', 'spl'])(
 			'should return false for invalid token standards: %s',
