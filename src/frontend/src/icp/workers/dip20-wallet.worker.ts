@@ -8,6 +8,7 @@ import {
 	mapDip20Transaction,
 	mapTransactionDip20ToSelf
 } from '$icp/utils/dip20-transactions.utils';
+import { XTC_LEDGER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import { isNullish } from '@dfinity/utils';
@@ -22,13 +23,16 @@ type GetBalance = bigint;
 
 type GetBalanceAndTransactions = GetTransactions & { balance: GetBalance };
 
-const getBalance = ({
+const getBalance = async ({
 	identity
-}: SchedulerJobParams<PostMessageDataRequest>): Promise<GetBalance> =>
-	balance({
+}: SchedulerJobParams<PostMessageDataRequest>): Promise<GetBalance> => {
+	console.log(XTC_LEDGER_CANISTER_ID);
+
+	return await balance({
 		identity,
 		owner: identity.getPrincipal()
 	});
+};
 
 const getTransactions = ({
 	identity,
