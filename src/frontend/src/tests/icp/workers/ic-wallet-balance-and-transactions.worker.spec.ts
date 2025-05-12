@@ -437,7 +437,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		};
 	};
 
-	describe.skip('icp-wallet.worker', () => {
+	describe('icp-wallet.worker', () => {
 		const indexCanisterMock = mock<IndexCanister>();
 
 		const mockTransaction: TransactionWithIdIcp = {
@@ -548,7 +548,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		});
 	});
 
-	describe.skip('icrc-wallet.worker', () => {
+	describe('icrc-wallet.worker', () => {
 		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 		const indexCanisterMock = mock<IcrcIndexNgCanister>();
 
