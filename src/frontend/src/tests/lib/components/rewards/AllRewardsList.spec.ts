@@ -1,5 +1,4 @@
 import * as rewardCampaigns from '$env/reward-campaigns.env';
-import * as rewardService from '$lib/services/reward.services';
 import AllRewardsList from '$lib/components/rewards/AllRewardsList.svelte';
 import {
 	REWARDS_ACTIVE_CAMPAIGNS_CONTAINER,
@@ -7,10 +6,11 @@ import {
 	REWARDS_FILTER,
 	REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 } from '$lib/constants/test-ids.constants';
+import * as rewardService from '$lib/services/reward.services';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
+import { mockEligibilityReport } from '$tests/mocks/reward-eligibility-report.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import {mockEligibilityReport} from "$tests/mocks/reward-eligibility-report.mock";
-import {mockAuthStore} from "$tests/mocks/auth.mock";
 
 describe('AllRewardsList', () => {
 	const activeCampaignContainerSelector = `div[data-tid="${REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}"]`;

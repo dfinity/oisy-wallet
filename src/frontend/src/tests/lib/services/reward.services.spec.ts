@@ -8,9 +8,7 @@ import type {
 } from '$declarations/rewards/rewards.did';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as rewardApi from '$lib/api/reward.api';
-import {
-	ZERO
-} from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import {
 	claimVipReward,

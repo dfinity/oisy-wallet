@@ -3,10 +3,10 @@ import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.sve
 import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
+import { mockEligibilityReport } from '$tests/mocks/reward-eligibility-report.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import {mockEligibilityReport} from "$tests/mocks/reward-eligibility-report.mock";
 
 describe('RewardsRequirements', () => {
 	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
@@ -15,7 +15,7 @@ describe('RewardsRequirements', () => {
 	assertNonNullish(mockRewardCampaign);
 
 	const [firstCampaign] = mockEligibilityReport.campaigns;
-	const [ _, eligibility] = firstCampaign;
+	const [_, eligibility] = firstCampaign;
 	assertNonNullish(eligibility);
 
 	describe('IsEligible', () => {
@@ -58,8 +58,9 @@ describe('RewardsRequirements', () => {
 				const requirementStatus: HTMLSpanElement | null = container.querySelector(
 					requirementStatusSelector(index)
 				);
+
 				expect(requirementStatus).toBeInTheDocument();
-			})
+			});
 		});
 	});
 });
