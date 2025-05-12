@@ -4,7 +4,7 @@
 	import SwapNetworkFee from '$lib/components/swap/SwapNetworkFee.svelte';
 	import SwapRoute from '$lib/components/swap/SwapRoute.svelte';
 	import type { SwapMappedResult, SwapProvider } from '$lib/types/swap';
-    
+
 	const { provider } = $props<{
 		provider: Extract<SwapMappedResult, { provider: SwapProvider.KONG_SWAP }>;
 	}>();
