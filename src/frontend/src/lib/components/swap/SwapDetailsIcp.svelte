@@ -6,27 +6,28 @@
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { derived } from 'svelte/store';
 
 	const { provider } = $props<{
 		provider: Extract<SwapMappedResult, { provider: SwapProvider.ICP_SWAP }>;
 	}>();
 	const { destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const formattedMinimum = derived([destinationToken], ([$destinationToken]) => {
-		return nonNullish(provider?.receiveOutMinimum) && nonNullish($destinationToken)
-			? `${formatTokenBigintToNumber({
-					value: provider.receiveOutMinimum,
-					unitName: $destinationToken.decimals,
-					displayDecimals: $destinationToken.decimals
-				})} ${$destinationToken.symbol}`
-			: null;
+	const formattedMinimum = $derived(() => {
+		if (nonNullish(provider?.receiveOutMinimum) && nonNullish($destinationToken)) {
+			return `${formatTokenBigintToNumber({
+				value: provider.receiveOutMinimum,
+				unitName: $destinationToken.decimals,
+				displayDecimals: $destinationToken.decimals
+			})} ${$destinationToken.symbol}`;
+		}
+
+		return null;
 	});
 </script>
 
-{#if $formattedMinimum}
+{#if nonNullish(formattedMinimum)}
 	<ModalValue>
 		<svelte:fragment slot="label">{$i18n.swap.text.expected_minimum}</svelte:fragment>
-		<svelte:fragment slot="main-value">{$formattedMinimum}</svelte:fragment>
+		<svelte:fragment slot="main-value">{formattedMinimum}</svelte:fragment>
 	</ModalValue>
 {/if}
