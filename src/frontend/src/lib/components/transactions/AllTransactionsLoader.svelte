@@ -62,6 +62,7 @@
 			if (isNetworkIdICP(networkId)) {
 				const icTransactions = ($icTransactionsStore?.[tokenId] ?? []).map(({ data }) => data);
 
+				// If there are no transactions, we let the worker load the first ones
 				if (icTransactions.length === 0) {
 					return;
 				}
@@ -87,6 +88,11 @@
 				await loadNextTransactions(token);
 			} else if (isNetworkIdSolana(networkId)) {
 				const solTransactions = ($solTransactionsStore?.[tokenId] ?? []).map(({ data }) => data);
+
+				// If there are no transactions, we let the worker load the first ones
+				if (solTransactions.length === 0) {
+					return;
+				}
 
 				const lastSolTransaction = findLastTransaction(solTransactions);
 
