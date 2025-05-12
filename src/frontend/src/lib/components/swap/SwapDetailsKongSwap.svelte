@@ -4,7 +4,10 @@
 	import SwapLiquidityFees from '$lib/components/swap/SwapLiquidityFees.svelte';
 	import type { SwapMappedResult, SwapProvider } from '$lib/types/swap';
 	import { nonNullish } from '@dfinity/utils';
-	export let provider: Extract<SwapMappedResult, { provider: SwapProvider.KONG_SWAP }>;
+
+	const { provider } = $props<{
+		provider: Extract<SwapMappedResult, { provider: SwapProvider.KONG_SWAP }>;
+	}>();
 </script>
 
 {#if nonNullish(provider.route) && provider.route?.length > 0}
