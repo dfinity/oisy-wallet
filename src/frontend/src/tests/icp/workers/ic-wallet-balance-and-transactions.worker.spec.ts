@@ -1,7 +1,9 @@
+import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import { initDip20WalletScheduler } from '$icp/workers/dip20-wallet.worker';
 import { initIcpWalletScheduler } from '$icp/workers/icp-wallet.worker';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
 import { WALLET_TIMER_INTERVAL_MILLIS, ZERO } from '$lib/constants/app.constants';
@@ -690,5 +692,71 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				tests();
 			});
 		});
+	});
+
+	describe('dip20-wallet.worker', () => {
+		const ledgerCanisterMock = mock<XtcLedgerCanister>();
+
+		// TODO: implement DIP-20 transactions tests when we implement the transactions history
+		const mockTransaction: IcrcIndexNgTransactionWithId = {
+			id: 123n,
+			transaction: {
+				burn: [],
+				kind: 'test',
+				mint: [],
+				approve: [],
+				transfer: [
+					{
+						to: {
+							owner: mockPrincipal,
+							subaccount: []
+						},
+						fee: [456n],
+						from: {
+							owner: mockPrincipal,
+							subaccount: [arrayOfNumberToUint8Array([1, 2, 3])]
+						},
+						amount: 789n,
+						spender: [],
+						memo: [],
+						created_at_time: []
+					}
+				],
+				timestamp: 1n
+			}
+		};
+
+		const mockMappedTransaction = mapIcrcTransaction({
+			transaction: mockTransaction,
+			identity: mockIdentity
+		});
+
+		beforeEach(() => {
+			vi.spyOn(XtcLedgerCanister, 'create').mockResolvedValue(ledgerCanisterMock);
+
+			spyGetBalance = ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
+		});
+
+		describe('with transactions', () => {
+			// TODO: implement DIP-20 transactions tests when we implement the transactions history
+			const { setup, teardown, tests } = initWithTransactions({
+				msg: 'syncDip20Wallet',
+				initScheduler: initDip20WalletScheduler,
+				transaction: mockMappedTransaction
+			});
+
+			beforeEach(() => {
+				setup();
+
+				// TODO: implement DIP-20 transactions tests when we implement the transactions history
+				spyGetTransactions = spyGetBalance;
+			});
+
+			afterEach(teardown);
+
+			tests();
+		});
+
+		// TODO: implement DIP-20 transactions tests when we implement the transactions history - implement other scenarios, like the others workers
 	});
 });
