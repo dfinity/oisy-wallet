@@ -21,9 +21,12 @@
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
+	const hideModalId = Symbol();
+	const openModalId = Symbol();
+
 	const hideToken = () => {
 		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
-		fn();
+		fn(hideModalId);
 
 		visible = false;
 	};
@@ -38,7 +41,7 @@
 					: $networkSolana
 						? modalStore.openSolToken
 						: () => {};
-		fn();
+		fn(openModalId);
 
 		visible = false;
 	};
