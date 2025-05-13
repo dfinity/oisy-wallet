@@ -1,4 +1,5 @@
 import type {
+	EligibilityResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	RewardInfo,
@@ -13,7 +14,7 @@ import {
 } from '$lib/constants/app.constants';
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import {
-	claimVipReward,
+	claimVipReward, getCampaignEligibilities,
 	getNewReward,
 	getReferrerInfo,
 	getRewardRequirementsFulfilled,
@@ -25,7 +26,7 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCampaignError, InvalidCodeError } from '$lib/types/errors';
-import type { RewardClaimApiResponse, RewardResponseInfo } from '$lib/types/reward';
+import type {CampaignEligibility, RewardClaimApiResponse, RewardResponseInfo} from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -38,6 +39,53 @@ const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 describe('reward-code', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+	});
+
+	describe('getCampaignEligibilities', () => {
+		const campaignId = 'deuteronomy';
+		const campaign: CampaignEligibility = { eligible: true, available: true, criteria: [] };
+		const mockEligibilityResponse: EligibilityResponse = {
+			Ok: { campaigns: [[campaignId, campaign]] }
+		};
+
+		it('should return campaign eligibilities', async () => {
+			const getCampaignEligibilitiesSpy = vi
+				.spyOn(rewardApi, 'isEligible')
+				.mockResolvedValueOnce(mockEligibilityResponse);
+
+			const campaignEligibilities = await getCampaignEligibilities({ identity: mockIdentity });
+
+			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				certified: false,
+				nullishIdentityErrorMessage
+			});
+			expect(campaignEligibilities).toHaveLength(1);
+
+			const campaignEligibility = campaignEligibilities.find(
+				(campaign) => campaign.campaignId === campaignId
+			);
+
+			expect(campaignEligibility?.campaignId).toEqual(campaignId);
+		});
+
+		it('should display an error message', async () => {
+			const err = new Error('test');
+			const getCampaignEligibilitiesSpy = vi.spyOn(rewardApi, 'isEligible').mockRejectedValue(err);
+			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+			await getCampaignEligibilities({ identity: mockIdentity });
+
+			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				certified: false,
+				nullishIdentityErrorMessage
+			});
+			expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+				msg: { text: get(i18n).vip.reward.error.loading_eligibility },
+				err
+			});
+		});
 	});
 
 	describe('getUserRoles', () => {
