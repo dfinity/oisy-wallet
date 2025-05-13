@@ -3,7 +3,8 @@ import RewardCard from '$lib/components/rewards/RewardCard.svelte';
 import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 import {
 	REWARD_ELIGIBILITY_CONTEXT_KEY,
-	initRewardEligibilityStore, initRewardEligibilityContext
+	initRewardEligibilityContext,
+	initRewardEligibilityStore
 } from '$lib/stores/reward.store';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';

@@ -20,7 +20,7 @@
 	import {
 		initRewardEligibilityContext,
 		initRewardEligibilityStore,
-		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		REWARD_ELIGIBILITY_CONTEXT_KEY
 	} from '$lib/stores/reward.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
