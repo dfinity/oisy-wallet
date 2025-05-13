@@ -13,6 +13,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { RewardStates } from '$lib/enums/reward-states';
 	import { nullishSignOut } from '$lib/services/auth.services';
+	import { getCampaignEligibilities } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initRewardEligibilityStore,
@@ -32,8 +33,8 @@
 			return;
 		}
 
-		// TODO load campaign eligibilities from reward service
-		store.setCampaignEligibilities([]);
+		const campaignEligibilities = await getCampaignEligibilities({ identity: $authIdentity });
+		store.setCampaignEligibilities(campaignEligibilities);
 	};
 
 	onMount(loadEligibilityReport);
