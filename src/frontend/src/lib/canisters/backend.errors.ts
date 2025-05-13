@@ -1,7 +1,6 @@
 import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
-	ChallengeCompletionError,
 	CreateChallengeError,
 	GetAllowedCyclesError,
 	SelectedUtxosFeeError
@@ -49,7 +48,7 @@ export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterIn
 
 export const mapAllowSigningError = (
 	err: AllowSigningError
-): CanisterInternalError | ApproveError | ChallengeCompletionError => {
+): CanisterInternalError | ApproveError => {
 	if ('ApproveError' in err) {
 		return mapIcrc2ApproveError(err.ApproveError);
 	}
@@ -59,7 +58,33 @@ export const mapAllowSigningError = (
 	}
 
 	if ('PowChallenge' in err) {
-		return err.PowChallenge;
+		const powError = err.PowChallenge;
+
+		// Map specific PowChallenge errors to CanisterInternalError with descriptive messages
+		if ('InvalidNonce' in powError) {
+			return new CanisterInternalError(
+				'PowChallenge error: The proof of work solution is invalid.'
+			);
+		}
+		if ('MissingChallenge' in powError) {
+			return new CanisterInternalError('PowChallenge error: No active challenge found.');
+		}
+		if ('ExpiredChallenge' in powError) {
+			return new CanisterInternalError('PowChallenge error: The challenge has expired.');
+		}
+		if ('MissingUserProfile' in powError) {
+			return new CanisterInternalError(
+				'PowChallenge error: User profile not found. Please create a profile first.'
+			);
+		}
+		if ('ChallengeAlreadySolved' in powError) {
+			return new CanisterInternalError(
+				'PowChallenge error: This challenge has already been solved.'
+			);
+		}
+
+		// Fallback for any unknown PowChallenge error types
+		return new CanisterInternalError(`Unknown PoW challenge error: ${JSON.stringify(powError)}`);
 	}
 
 	if ('Other' in err) {
