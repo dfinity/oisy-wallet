@@ -29,11 +29,11 @@ export interface RewardEligibilityContext {
 export const initRewardEligibilityContext = (
 	store: RewardEligibilityStore
 ): RewardEligibilityContext => ({
-		store,
-		getCampaignEligibility: (rewardId: string) =>
-			derived(store, ($store) =>
-				$store?.campaignEligibilities?.find(({ campaignId }) => campaignId === rewardId)
-			)
-	});
+	store,
+	getCampaignEligibility: (rewardId: string) =>
+		derived(store, ($store) =>
+			$store?.campaignEligibilities?.find(({ campaignId }) => campaignId === rewardId)
+		)
+});
 
 export const REWARD_ELIGIBILITY_CONTEXT_KEY = Symbol('reward-eligibility');
