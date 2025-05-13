@@ -26,6 +26,7 @@ import {
 	UserNotVipError
 } from '$lib/types/errors';
 import type {
+	CampaignEligibility,
 	RewardClaimApiResponse,
 	RewardClaimResponse,
 	RewardResponseInfo,
