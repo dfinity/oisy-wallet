@@ -32,4 +32,12 @@ describe('ContactForm', () => {
 		// Check that validation failed
 		expect(component.isValid).toBeFalsy();
 	});
+
+	it('should fail validation when name is only spaces', () => {
+		const contact: Partial<Contact> = { name: '   ' };
+		const { component } = render(ContactForm, { props: { contact } });
+
+		// Check that validation failed
+		expect(component.isValid).toBeFalsy();
+	});
 });

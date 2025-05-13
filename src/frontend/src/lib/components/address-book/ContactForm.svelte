@@ -7,7 +7,7 @@
 
 	let { contact = $bindable() }: { contact: Partial<Contact> } = $props();
 
-	let isValid = $derived(notEmptyString(contact?.name));
+	let isValid = $derived(notEmptyString(contact?.name?.trim?.()));
 
 	export { isValid };
 </script>
