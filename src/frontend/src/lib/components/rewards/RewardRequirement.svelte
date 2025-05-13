@@ -3,7 +3,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { CampaignCriterion } from '$lib/types/reward';
+	import type {
+		CampaignCriterion,
+		MinLoginsCriterion,
+		MinTotalAssetsUsdCriterion,
+		MinTransactionsCriterion
+	} from '$lib/types/reward';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -15,20 +20,26 @@
 
 	const getCriterionText = (criterion: CampaignCriterion): string | undefined => {
 		if (RewardCriterionType.MIN_LOGINS === criterion.type) {
+			const minLoginCriterion = criterion as MinLoginsCriterion;
+
 			return replacePlaceholders($i18n.rewards.requirements.min_logins, {
-				$logins: criterion.count?.toString() ?? '',
-				$days: criterion.days?.toString() ?? ''
+				$logins: minLoginCriterion.count.toString(),
+				$days: minLoginCriterion.days.toString()
 			});
 		}
 		if (RewardCriterionType.MIN_TRANSACTIONS === criterion.type) {
+			const minTransactionsCriterion = criterion as MinTransactionsCriterion;
+
 			return replacePlaceholders($i18n.rewards.requirements.min_transactions, {
-				$transactions: criterion.count?.toString() ?? '',
-				$days: criterion.days?.toString() ?? ''
+				$transactions: minTransactionsCriterion.count.toString(),
+				$days: minTransactionsCriterion.days.toString()
 			});
 		}
 		if (RewardCriterionType.MIN_TOTAL_ASSETS_USD === criterion.type) {
+			const minTotalAssetsUsdCriterion = criterion as MinTotalAssetsUsdCriterion;
+
 			return replacePlaceholders($i18n.rewards.requirements.min_total_assets_usd, {
-				$usd: criterion.usd?.toString() ?? ''
+				$usd: minTotalAssetsUsdCriterion.usd
 			});
 		}
 	};
