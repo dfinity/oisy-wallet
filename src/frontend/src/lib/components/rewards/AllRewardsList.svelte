@@ -16,16 +16,15 @@
 	import { getCampaignEligibilities } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
+		initRewardEligibilityContext,
 		initRewardEligibilityStore,
-		REWARD_ELIGIBILITY_CONTEXT_KEY,
-		type RewardEligibilityContext
+		REWARD_ELIGIBILITY_CONTEXT_KEY
 	} from '$lib/stores/reward.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
 
-	const { store } = setContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY, {
-		store: initRewardEligibilityStore()
-	});
+	const store = initRewardEligibilityStore();
+	setContext(REWARD_ELIGIBILITY_CONTEXT_KEY, initRewardEligibilityContext(store));
 
 	const loadEligibilityReport = async () => {
 		if (isNullish($authIdentity)) {
