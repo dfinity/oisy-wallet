@@ -148,14 +148,14 @@ describe('AllTransactionsLoader', () => {
 		spyLoadNextIcTransactions.mockImplementation(
 			async ({ signalEnd }: { signalEnd: () => void }) => {
 				signalEnd();
-				return await Promise.resolve();
+				return await Promise.resolve({ success: true });
 			}
 		);
 
 		spyLoadNextSolTransactions.mockImplementation(
 			async ({ signalEnd }: { signalEnd: () => void }) => {
 				signalEnd();
-				return await Promise.resolve();
+				return await Promise.resolve({ success: true });
 			}
 		);
 
@@ -281,7 +281,49 @@ describe('AllTransactionsLoader', () => {
 			});
 		});
 
+		it('should not keep loading transactions if the service returns a falsy success', () => {
+			spyLoadNextIcTransactions.mockResolvedValue({ success: false });
+
+			render(AllTransactionsLoader, { props });
+
+			expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
+
+			icTokens.forEach(([token]) => {
+				const transactions = (get(icTransactionsStore)?.[token.id] ?? []).map(
+					({ data: transaction }) => transaction
+				);
+
+				expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
+					minTimestamp: mockMinTimestamp,
+					transactions,
+					owner: mockIdentity.getPrincipal(),
+					identity: mockIdentity,
+					maxResults: WALLET_PAGINATION,
+					token,
+					signalEnd: expect.any(Function)
+				});
+			});
+		});
+
 		it('should keep loading transactions if the timestamp is still not the minimum', async () => {
+			let counter = 0;
+
+			spyLoadNextIcTransactions.mockImplementation(async () => {
+				if (Math.random() > 0.3 || counter < 10) {
+					counter++;
+					return await Promise.resolve({ success: true });
+				}
+				return await Promise.resolve({ success: false });
+			});
+
+			render(AllTransactionsLoader, { props });
+
+			await waitFor(() => {
+				expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length + counter);
+			});
+		});
+
+		it('should keep loading transactions until there are not more transactions', async () => {
 			let counter = 0;
 
 			spyLoadNextIcTransactions.mockImplementation(
@@ -291,7 +333,7 @@ describe('AllTransactionsLoader', () => {
 					} else {
 						signalEnd();
 					}
-					return await Promise.resolve();
+					return await Promise.resolve({ success: true });
 				}
 			);
 
@@ -302,7 +344,7 @@ describe('AllTransactionsLoader', () => {
 			});
 		});
 
-		it('should not go into a loop that finishes only when there are no more transactions', async () => {
+		it('should not go into a recursive loop that finishes only when there are no more transactions', async () => {
 			let counter = 0;
 
 			const newTransaction: IcTransactionUi = {
@@ -323,7 +365,7 @@ describe('AllTransactionsLoader', () => {
 					} else {
 						signalEnd();
 					}
-					return await Promise.resolve();
+					return await Promise.resolve({ success: true });
 				}
 			);
 
@@ -355,7 +397,46 @@ describe('AllTransactionsLoader', () => {
 			});
 		});
 
+		it('should not keep loading transactions if the service returns a falsy success', () => {
+			spyLoadNextSolTransactions.mockResolvedValue({ success: false });
+
+			render(AllTransactionsLoader, { props });
+
+			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+
+			solTokens.forEach(([token]) => {
+				const transactions = (get(solTransactionsStore)?.[token.id] ?? []).map(
+					({ data: transaction }) => transaction
+				);
+
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+					minTimestamp: mockMinTimestamp,
+					transactions,
+					token,
+					signalEnd: expect.any(Function)
+				});
+			});
+		});
+
 		it('should keep loading transactions if the timestamp is still not the minimum', async () => {
+			let counter = 0;
+
+			spyLoadNextSolTransactions.mockImplementation(async () => {
+				if (Math.random() > 0.3 || counter < 10) {
+					counter++;
+					return await Promise.resolve({ success: true });
+				}
+				return await Promise.resolve({ success: false });
+			});
+
+			render(AllTransactionsLoader, { props });
+
+			await waitFor(() => {
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length + counter);
+			});
+		});
+
+		it('should keep loading transactions until there are not more transactions', async () => {
 			let counter = 0;
 
 			spyLoadNextSolTransactions.mockImplementation(
@@ -365,7 +446,7 @@ describe('AllTransactionsLoader', () => {
 					} else {
 						signalEnd();
 					}
-					return await Promise.resolve();
+					return await Promise.resolve({ success: true });
 				}
 			);
 
@@ -376,7 +457,7 @@ describe('AllTransactionsLoader', () => {
 			});
 		});
 
-		it('should not go into a loop that finishes only when there are no more transactions', async () => {
+		it('should not go into a recursive loop that finishes only when there are no more transactions', async () => {
 			let counter = 0;
 
 			const newTransaction: SolTransactionUi = {
@@ -397,7 +478,7 @@ describe('AllTransactionsLoader', () => {
 					} else {
 						signalEnd();
 					}
-					return await Promise.resolve();
+					return await Promise.resolve({ success: true });
 				}
 			);
 
