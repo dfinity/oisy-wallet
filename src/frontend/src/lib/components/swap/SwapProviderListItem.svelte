@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { UrlSchema } from '@dfinity/zod-schemas';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapBestRateBadge from '$lib/components/swap/SwapBestRateBadge.svelte';
@@ -11,49 +11,50 @@
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import type { OptionAmount } from '$lib/types/send';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { safeParse } from '$lib/validation/utils.validation';
 
 	interface Props {
 		amount: bigint;
-		token: IcTokenToggleable;
+		destinationToken: IcTokenToggleable;
 		logoSize?: LogoSize;
 		usdBalance: OptionAmount;
 		dapp?: OisyDappDescription;
-		isBest: boolean;
+		isBestRate: boolean;
 	}
 
-	const { amount, token, logoSize = 'md', usdBalance, dapp, isBest }: Props = $props();
+	const {
+		amount,
+		destinationToken,
+		logoSize = 'md',
+		usdBalance,
+		dapp,
+		isBestRate
+	}: Props = $props();
 
 	let displayURL: string | null = $state(null);
 
 	$effect(() => {
-		if (isNullish(dapp)) {
-			displayURL = null;
-			return;
-		}
-		try {
-			const validated = safeParse({
-				schema: UrlSchema,
-				value: dapp.website
-			});
-			if (nonNullish(validated)) {
-				const url = new URL(validated);
+		if (nonNullish(dapp)) {
+			const parsed = UrlSchema.safeParse(dapp.website);
+
+			if (parsed.success) {
+				const url = new URL(parsed.data);
 				displayURL = url.hostname.startsWith('www.') ? url.hostname.slice(4) : url.hostname;
+				return;
 			}
-		} catch {
+
 			displayURL = null;
 		}
 	});
+	// TODO: Migrate to Svelte 5, remove legacy slot usage and use render composition instead
 </script>
 
-// TODO: Migrate to Svelte 5, remove legacy slot usage and use render composition instead
 {#if nonNullish(dapp)}
 	<LogoButton on:click dividers>
 		<span slot="title">{dapp.name}</span>
 
 		<span slot="description">
 			{#if nonNullish(displayURL)}
-				<span class="text-sm text-tertiary">{displayURL}</span>
+				{displayURL}
 			{/if}
 		</span>
 
@@ -64,10 +65,15 @@
 			size={logoSize}
 		/>
 
-		<Amount {amount} decimals={token.decimals} symbol={token.symbol} slot="title-end" />
+		<Amount
+			{amount}
+			decimals={destinationToken.decimals}
+			symbol={destinationToken.symbol}
+			slot="title-end"
+		/>
 
 		<div class="flex items-center justify-end gap-2" slot="description-end">
-			{#if isBest}
+			{#if isBestRate}
 				<SwapBestRateBadge />
 			{/if}
 			<span class="mt-1">

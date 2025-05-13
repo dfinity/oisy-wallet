@@ -1,20 +1,16 @@
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import SwapProviderListItem from '$lib/components/swap/SwapProviderListItem.svelte';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
 describe('SwapProviderListItem', () => {
-	const tokenMock = {
-		symbol: 'ICP',
-		decimals: 8
-	} as IcTokenToggleable;
-
 	const baseProps = {
 		amount: 123_000_000n,
-		token: tokenMock,
+		destinationToken: mockValidIcToken as IcTokenToggleable,
 		usdBalance: '$5.00',
 		logoSize: 'md' as const,
-		isBest: false
+		isBestRate: false
 	};
 
 	const createDapp = (overrides = {}) => ({
