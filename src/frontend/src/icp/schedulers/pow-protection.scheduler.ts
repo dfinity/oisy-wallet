@@ -1,7 +1,7 @@
 import type { CreateChallengeResponse } from '$declarations/backend/backend.did';
-import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
+import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
 

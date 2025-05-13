@@ -58,3 +58,17 @@ export interface CampaignCriterion {
 	count?: number;
 	usd?: number;
 }
+
+export interface MinLoginsCriterion extends CampaignCriterion {
+	days: bigint;
+	count: number;
+}
+
+export interface MinTransactionsCriterion extends CampaignCriterion {
+	days: bigint;
+	count: number;
+}
+
+export interface MinTotalAssetsUsdCriterion extends CampaignCriterion {
+	usd: number;
+}

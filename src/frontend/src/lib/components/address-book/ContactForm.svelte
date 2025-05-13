@@ -21,6 +21,7 @@
 			bind:value={contact.name}
 			showResetButton
 			testId={ADDRESS_BOOK_CONTACT_NAME_INPUT}
+			autofocus={true}
 		/>
 	</div>
 </form>
