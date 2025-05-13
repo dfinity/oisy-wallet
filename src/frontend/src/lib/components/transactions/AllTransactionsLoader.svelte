@@ -53,31 +53,31 @@
 			}
 
 			if (isNetworkIdICP(networkId)) {
-				const {success: icSuccess} = await loadNextIcTransactionsByOldest({
+				const { success: icSuccess } = await loadNextIcTransactionsByOldest({
 					minTimestamp,
 					transactions: (icTransactionsStoreData[tokenId] ?? []).map(({ data }) => data),
 					owner: $authIdentity.getPrincipal(),
 					identity: $authIdentity,
 					maxResults: WALLET_PAGINATION,
 					token,
-					signalEnd: () => (disableLoader[tokenId] = true),
+					signalEnd: () => (disableLoader[tokenId] = true)
 				});
 
 				if (icSuccess) {
 					// We call the function again in case the last transaction is not the last one that we need
-					await loadNextTransactions(token)
+					await loadNextTransactions(token);
 				}
 			} else if (isNetworkIdSolana(networkId)) {
-				const {success: solSuccess} = await loadNextSolTransactionsByOldest({
+				const { success: solSuccess } = await loadNextSolTransactionsByOldest({
 					minTimestamp,
 					transactions: (solTransactionsStoreData[tokenId] ?? []).map(({ data }) => data),
 					token,
-					signalEnd: () => (disableLoader[tokenId] = true),
+					signalEnd: () => (disableLoader[tokenId] = true)
 				});
 
 				if (solSuccess) {
 					// We call the function again in case the last transaction is not the last one that we need
-					await loadNextTransactions(token)
+					await loadNextTransactions(token);
 				}
 			} else {
 				disableLoader[tokenId] = true;
