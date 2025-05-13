@@ -1,5 +1,6 @@
 import type {
-	CampaignEligibility, EligibilityReport,
+	CampaignEligibility,
+	EligibilityReport,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	RewardInfo,

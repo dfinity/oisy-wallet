@@ -45,10 +45,11 @@ import { get } from 'svelte/store';
 const queryEligibilityReport = async (params: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<EligibilityReport> => await isEligibleApi({
-	...params,
-	nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-});
+}): Promise<EligibilityReport> =>
+	await isEligibleApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
 
 export const getCampaignEligibilities = async (params: {
 	identity: Identity;

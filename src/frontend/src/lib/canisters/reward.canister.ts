@@ -1,17 +1,19 @@
 import type {
 	ClaimedVipReward,
+	EligibilityReport,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
 	SetReferrerResponse,
 	UserData,
 	UserSnapshot,
-	VipReward, EligibilityReport
+	VipReward
 } from '$declarations/rewards/rewards.did';
 import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/rewards.factory.certified.did';
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { EligibilityError } from '$lib/types/errors';
 import type { RewardClaimApiResponse } from '$lib/types/reward';
 import {
 	Canister,
@@ -20,7 +22,6 @@ import {
 	toNullable,
 	type QueryParams
 } from '@dfinity/utils';
-import {EligibilityError} from "$lib/types/errors";
 
 export class RewardCanister extends Canister<RewardService> {
 	static async create({
