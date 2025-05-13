@@ -3,7 +3,7 @@ import RewardCard from '$lib/components/rewards/RewardCard.svelte';
 import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 import {
 	REWARD_ELIGIBILITY_CONTEXT_KEY,
-	initRewardEligibilityStore
+	initRewardEligibilityStore, initRewardEligibilityContext
 } from '$lib/stores/reward.store';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
@@ -19,7 +19,7 @@ describe('RewardCard', () => {
 
 	const mockContext = new Map([]);
 	const store = initRewardEligibilityStore();
-	mockContext.set(REWARD_ELIGIBILITY_CONTEXT_KEY, { store });
+	mockContext.set(REWARD_ELIGIBILITY_CONTEXT_KEY, initRewardEligibilityContext(store));
 	store.setCampaignEligibilities(mockCampaignEligibilities);
 
 	it('should render active reward card content', () => {

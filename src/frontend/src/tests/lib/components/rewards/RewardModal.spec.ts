@@ -5,6 +5,7 @@ import { REWARDS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 import * as rewardService from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
 import {
+	initRewardEligibilityContext,
 	initRewardEligibilityStore,
 	REWARD_ELIGIBILITY_CONTEXT_KEY
 } from '$lib/stores/reward.store';
@@ -21,7 +22,7 @@ describe('RewardModal', () => {
 
 	const mockContext = new Map([]);
 	const store = initRewardEligibilityStore();
-	mockContext.set(REWARD_ELIGIBILITY_CONTEXT_KEY, { store });
+	mockContext.set(REWARD_ELIGIBILITY_CONTEXT_KEY, initRewardEligibilityContext(store));
 	store.setCampaignEligibilities(mockCampaignEligibilities);
 
 	beforeEach(() => {

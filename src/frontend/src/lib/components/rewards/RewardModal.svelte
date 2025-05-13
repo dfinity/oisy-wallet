@@ -26,14 +26,11 @@
 
 	let { reward }: Props = $props();
 
-	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
+	const context = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
-	const campaignEligibility = $derived(
-		$store?.campaignEligibilities?.find(({ campaignId }) => campaignId === reward.id)
-	);
-
-	const isEligible = $derived(campaignEligibility?.eligible ?? false);
-	const criteria = $derived(campaignEligibility?.criteria ?? []);
+	const campaignEligibility = context.getCampaignEligibility(reward.id);
+	const isEligible = $derived($campaignEligibility?.eligible ?? false);
+	const criteria = $derived($campaignEligibility?.criteria ?? []);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 
 	let amountOfRewards = $state(0);
