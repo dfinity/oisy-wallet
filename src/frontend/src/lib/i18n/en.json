@@ -198,6 +198,11 @@
 			"ongoing": "Ongoing",
 			"ended": "Ended ($amount)"
 		},
+		"requirements": {
+			"min_logins": "Login $loginsx in last $days days",
+			"min_transactions": "Complete $transactions transactions in last $days days",
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
+		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
 			"reward_logo": "Logo of the campaign $campaignName"
