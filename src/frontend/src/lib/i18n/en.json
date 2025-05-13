@@ -1017,6 +1017,12 @@
 			"empty_text": "All your contacts will be shown here",
 			"add_new_contact": "Add new contact",
 			"add_contact": "Add contact"
+		},
+		"show_contact": {
+			"title": "Contact",
+			"add_address": "Add address",
+			"show_address_text": "Associated addresses will appear here",
+			"add_first_address": "Add first address to contactName!"
 		}
 	},
 	"contact": {
