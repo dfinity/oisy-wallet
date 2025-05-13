@@ -146,7 +146,8 @@ export const REWARDS_STATUS_BUTTON = 'reward-status-button';
 export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
 export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
 
-export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
+export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
+
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
