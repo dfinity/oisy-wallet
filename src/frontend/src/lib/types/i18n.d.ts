@@ -936,6 +936,12 @@ interface I18nAddress_book {
 		add_new_contact: string;
 		add_contact: string;
 	};
+	show_contact: {
+		title: string;
+		add_address: string;
+		show_address_text: string;
+		add_first_address: string;
+	};
 }
 
 interface I18nContact {
