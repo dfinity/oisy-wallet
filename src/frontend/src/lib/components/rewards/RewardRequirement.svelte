@@ -39,7 +39,7 @@
 			const minTotalAssetsUsdCriterion = criterion as MinTotalAssetsUsdCriterion;
 
 			return replacePlaceholders($i18n.rewards.requirements.min_total_assets_usd, {
-				$usd: minTotalAssetsUsdCriterion.usd
+				$usd: minTotalAssetsUsdCriterion.usd.toString()
 			});
 		}
 	};
