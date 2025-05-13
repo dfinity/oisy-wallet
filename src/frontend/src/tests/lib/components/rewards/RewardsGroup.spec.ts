@@ -1,6 +1,7 @@
 import type { RewardDescription } from '$env/types/env-reward';
 import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
 import {
+	initRewardEligibilityContext,
 	initRewardEligibilityStore,
 	REWARD_ELIGIBILITY_CONTEXT_KEY
 } from '$lib/stores/reward.store';
@@ -21,7 +22,7 @@ describe('RewardsGroups', () => {
 
 	const mockContext = new Map([]);
 	const store = initRewardEligibilityStore();
-	mockContext.set(REWARD_ELIGIBILITY_CONTEXT_KEY, { store });
+	mockContext.set(REWARD_ELIGIBILITY_CONTEXT_KEY, initRewardEligibilityContext(store));
 	store.setCampaignEligibilities(mockCampaignEligibilities);
 
 	it('should render campaigns', () => {
