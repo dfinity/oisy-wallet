@@ -92,7 +92,7 @@ jobs:
           fi
           echo "os-matrix=$MATRIX" >> $GITHUB_OUTPUT
         env:
-          ALL_RUNNERS: ${{ contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots' }}
+          ALL_RUNNERS: ${{ contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
 
   e2e:
     runs-on: ${{ matrix.os }}
