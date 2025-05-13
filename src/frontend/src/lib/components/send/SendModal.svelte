@@ -2,9 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { createEventDispatcher, setContext } from 'svelte';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
-	import { ethTransactionsNotInitialized } from '$eth/derived/eth-transactions.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
@@ -130,22 +128,11 @@
 			}
 		}
 
+		// eslint-disable-next-line require-await
 		const callback = async () => {
 			reset();
 
 			goToStep(WizardStepsSend.DESTINATION);
-
-			// if an ETH token, load transactions manually in case the data not available yet
-			if (
-				$ethTransactionsNotInitialized &&
-				(isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id))
-			) {
-				await loadEthereumTransactions({
-					tokenId: token.id,
-					networkId: token.network.id,
-					silent: true
-				});
-			}
 		};
 
 		await loadTokenAndRun({ token, callback });
