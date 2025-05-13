@@ -26,7 +26,9 @@
 
 	let { reward }: Props = $props();
 
-	const {getCampaignEligibility} = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
+	const { getCampaignEligibility } = getContext<RewardEligibilityContext>(
+		REWARD_ELIGIBILITY_CONTEXT_KEY
+	);
 
 	const campaignEligibility = getCampaignEligibility(reward.id);
 	const isEligible = $derived($campaignEligibility?.eligible ?? false);
