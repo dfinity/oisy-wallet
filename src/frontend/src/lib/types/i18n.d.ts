@@ -33,7 +33,13 @@ interface I18nCore {
 		more_items: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string; go_to_home: string; back: string };
+	alt: {
+		logo: string;
+		go_to_home: string;
+		back: string;
+		open_details: string;
+		close_details: string;
+	};
 	warning: { do_not_close: string };
 }
 
@@ -547,6 +553,8 @@ interface I18nSwap {
 		swap_route: string;
 		included_network_fees: string;
 		included_liquidity_fees: string;
+		best_rate: string;
+		expected_minimum: string;
 	};
 	error: {
 		kong_not_available: string;
