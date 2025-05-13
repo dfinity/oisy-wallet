@@ -1,4 +1,5 @@
 import * as rewardCampaigns from '$env/reward-campaigns.env';
+import * as rewardStore from '$lib/stores/reward.store';
 import AllRewardsList from '$lib/components/rewards/AllRewardsList.svelte';
 import {
 	REWARDS_ACTIVE_CAMPAIGNS_CONTAINER,
@@ -25,6 +26,14 @@ describe('AllRewardsList', () => {
 		);
 
 		mockAuthStore();
+	});
+
+	it('should initialize reward store while rendering component', () => {
+		const initStoreSpy = vi.spyOn(rewardStore, 'initRewardEligibilityStore');
+
+		render(AllRewardsList);
+
+		expect(initStoreSpy).toHaveBeenCalledTimes(1);
 	});
 
 	it('should render reward filter and ongoing campaigns', () => {
