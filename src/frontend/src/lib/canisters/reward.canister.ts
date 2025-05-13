@@ -20,6 +20,7 @@ import {
 	toNullable,
 	type QueryParams
 } from '@dfinity/utils';
+import {EligibilityError} from "$lib/types/errors";
 
 export class RewardCanister extends Canister<RewardService> {
 	static async create({
