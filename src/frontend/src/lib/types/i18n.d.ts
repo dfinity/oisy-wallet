@@ -881,7 +881,12 @@ interface I18nVip {
 			reward_received_description: string;
 			reward_failed_description: string;
 		};
-		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
+		error: {
+			loading_reward: string;
+			loading_user_data: string;
+			claiming_reward: string;
+			loading_eligibility: string;
+		};
 	};
 	invitation: {
 		text: {
