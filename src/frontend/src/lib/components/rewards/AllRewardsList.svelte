@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, setContext } from 'svelte';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
+	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
 	import {
@@ -11,6 +12,7 @@
 		REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { modalRewardDetails, modalRewardDetailsData } from '$lib/derived/modal.derived';
 	import { RewardStates } from '$lib/enums/reward-states';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getCampaignEligibilities } from '$lib/services/reward.services';
@@ -69,4 +71,8 @@
 	/>
 {:else if selectedRewardState === RewardStates.ENDED}
 	<RewardsGroup rewards={endedCampaigns} testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER} />
+{/if}
+
+{#if $modalRewardDetails && nonNullish($modalRewardDetailsData)}
+	<RewardModal reward={$modalRewardDetailsData} />
 {/if}

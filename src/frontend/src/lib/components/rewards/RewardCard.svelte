@@ -12,7 +12,7 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
