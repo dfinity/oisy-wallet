@@ -5,7 +5,7 @@
 	import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 	import { convertWizardSteps } from '$lib/config/convert.config';
 	import { ProgressStepsConvert } from '$lib/enums/progress-steps';
-	import { WizardStepsConvert, WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { type WizardStepsSend , WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';

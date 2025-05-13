@@ -19,7 +19,7 @@
 			name: AddressBookSteps.ADD_CONTACT,
 			title: $i18n.contact.form.add_new_contact
 		}
-	] ;
+	];
 
 	let currentStep: WizardStep | undefined = $state();
 	let modal: WizardModal | undefined = $state();

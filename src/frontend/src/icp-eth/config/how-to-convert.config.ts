@@ -1,8 +1,9 @@
 import { convertWizardSteps, type ConvertWizardStepsParams } from '$lib/config/convert.config';
 import {
-	WizardStepsConvert,
-	WizardStepsHowToConvert,
-	WizardStepsSend
+	type WizardStepsConvert,
+	type WizardStepsSend
+,
+	WizardStepsHowToConvert
 } from '$lib/enums/wizard-steps';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { WizardSteps } from '@dfinity/gix-components';
