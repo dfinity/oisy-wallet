@@ -112,7 +112,7 @@ jobs:
         uses: ./.github/actions/prepare
       - name: Test
         # We disable the thresholds since we will check them in the next step, when all sharded reports are merged
-        run: npm run test:coverage -- --reporter=blob --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --coverage.thresholds.0 --coverage.thresholds.autoUpdate=false
+        run: npm run test:coverage -- --reporter=blob --reporter=default --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --coverage.thresholds.0 --coverage.thresholds.autoUpdate=false
       - name: Upload Blob Coverage Report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
