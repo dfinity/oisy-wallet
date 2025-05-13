@@ -1230,8 +1230,8 @@ describe('transactions.utils', () => {
 					timestamp: 1n + BigInt(index)
 				})
 			);
-			const transactionsWitUndefined: IcTransactionUi[] = createMockIcTransactionsUi(17).map(
-				(transaction, index) => ({
+			const transactionsWitUndefined: SolTransactionUi[] = createMockSolTransactionsUi(17).map(
+				(transaction) => ({
 					...transaction,
 					timestamp: undefined
 				})
