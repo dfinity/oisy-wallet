@@ -7,8 +7,8 @@ import {
 	REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 } from '$lib/constants/test-ids.constants';
 import * as rewardService from '$lib/services/reward.services';
-import { mockAuthStore } from '$tests/mocks/auth.mock';
 import * as rewardStore from '$lib/stores/reward.store';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { render, waitFor } from '@testing-library/svelte';
@@ -34,13 +34,13 @@ describe('AllRewardsList', () => {
 		);
 	});
 
-    it('should initialize reward store while rendering component', () => {
-        const initStoreSpy = vi.spyOn(rewardStore, 'initRewardEligibilityStore');
+	it('should initialize reward store while rendering component', () => {
+		const initStoreSpy = vi.spyOn(rewardStore, 'initRewardEligibilityStore');
 
-        render(AllRewardsList);
+		render(AllRewardsList);
 
-        expect(initStoreSpy).toHaveBeenCalledTimes(1);
-    });
+		expect(initStoreSpy).toHaveBeenCalledTimes(1);
+	});
 
 	it('should render reward filter and ongoing campaigns', () => {
 		const { container } = render(AllRewardsList);

@@ -35,7 +35,7 @@
 			return;
 		}
 
-        const campaignEligibilities = await getCampaignEligibilities({ identity: $authIdentity });
+		const campaignEligibilities = await getCampaignEligibilities({ identity: $authIdentity });
 		store.setCampaignEligibilities(campaignEligibilities);
 	};
 
