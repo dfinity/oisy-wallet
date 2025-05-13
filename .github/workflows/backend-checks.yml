@@ -37,6 +37,8 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
+      - name: Install rust
+        run: ./scripts/setup rust
       - name: Lint
         run: ./scripts/lint.rust.sh
 

@@ -25,6 +25,7 @@ RUSTUP_VERSION="$(jq -re .rustup.version dev-tools.json)"
 run curl --fail "https://raw.githubusercontent.com/rust-lang/rustup/refs/tags/${RUSTUP_VERSION}/rustup-init.sh" -sSf | run sh -s -- -y --no-modify-path
 rustup toolchain install            # Version from rust-toolchain.toml
 rustup toolchain install "$version" # Version from dev-tools.json
+rustup component add clippy
 rustup component add rustfmt --toolchain "$NIGHTLY_VERSION"
 rustup show
 

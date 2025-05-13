@@ -87,12 +87,12 @@ jobs:
         id: set-matrix
         run: |
           MATRIX='["ubuntu-24.04"]'
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" || \
-                "${{ github.event_name }}" == "schedule" || \
-                "${{ contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}" == "true" ]]; then
+          if [[ "$ALL_RUNNERS" == "true" ]]; then
             MATRIX='["ubuntu-24.04", "macos-14"]'
           fi
           echo "os-matrix=$MATRIX" >> $GITHUB_OUTPUT
+        env:
+          ALL_RUNNERS: ${{ contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
 
   e2e:
     runs-on: ${{ matrix.os }}
