@@ -3,7 +3,7 @@ import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { getRewards } from '$lib/services/reward.services';
 import type {
 	CampaignCriterion,
-	CampaignEligibility,
+	CampaignEligibility, MinLoginsCriterion, MinTotalAssetsUsdCriterion, MinTransactionsCriterion,
 	RewardResponseInfo,
 	RewardResult
 } from '$lib/types/reward';
@@ -81,7 +81,7 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 				type: RewardCriterionType.MIN_LOGINS,
 				days,
 				count
-			};
+			} as MinLoginsCriterion;
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
@@ -94,7 +94,7 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 				type: RewardCriterionType.MIN_TRANSACTIONS,
 				days,
 				count
-			};
+			} as MinTransactionsCriterion;
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
@@ -105,7 +105,7 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 			satisfied: criterion.satisfied,
 			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 			usd
-		};
+		} as MinTotalAssetsUsdCriterion;
 	}
 
 	return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
