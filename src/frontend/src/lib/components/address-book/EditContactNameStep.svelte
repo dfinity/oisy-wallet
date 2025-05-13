@@ -42,11 +42,7 @@
 	};
 
 	let title = $derived(
-		notEmptyString(contact?.id)
-			? $i18n.contact.form.edit_contact
-			: notEmptyString(contact?.name)
-				? contact?.name
-				: $i18n.contact.form.add_new_contact
+		notEmptyString(contact?.name?.trim?.()) ? contact?.name : $i18n.contact.form.add_new_contact
 	);
 
 	export { title };
@@ -57,7 +53,7 @@
 	<ContactForm bind:contact bind:this={form}></ContactForm>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => close()} testId={ADDRESS_EDIT_CANCEL_BUTTON}></ButtonCancel>
+		<ButtonCancel onclick={() => close()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
 		<Button
 			colorStyle="primary"
 			on:click={() => handleSave()}

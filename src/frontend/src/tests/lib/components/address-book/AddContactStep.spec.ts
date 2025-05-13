@@ -110,5 +110,10 @@ describe('AddContactStep', () => {
 
 		// Check that the title has been updated
 		expect(component.title).toBe('Test Contact');
+
+		// Empty name should reset to default title
+		await fireEvent.input(nameInput, { target: { value: '  ' } });
+
+		expect(component.title).toBe(en.contact.form.add_new_contact);
 	});
 });
