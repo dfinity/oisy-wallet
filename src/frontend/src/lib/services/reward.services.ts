@@ -22,7 +22,6 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import {
 	AlreadyClaimedError,
-	EligibilityError,
 	InvalidCampaignError,
 	InvalidCodeError,
 	UserNotVipError
@@ -45,18 +44,10 @@ const queryEligibilityReport = async (params: {
 	identity: Identity;
 	certified: boolean;
 }): Promise<EligibilityReport> => {
-	const response = await isEligibleApi({
+	return await isEligibleApi({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
-
-	if ('Ok' in response) {
-		return response.Ok;
-	}
-	if ('Err' in response) {
-		throw new EligibilityError();
-	}
-	throw new Error('Unknown error');
 };
 
 export const getCampaignEligibilities = async (params: {
