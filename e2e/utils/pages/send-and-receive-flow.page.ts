@@ -8,6 +8,7 @@ import {
 	RECEIVE_TOKENS_MODAL_ICP_SECTION,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	REVIEW_FORM_SEND_BUTTON,
+	SEND_FORM_DESTINATION_NEXT_BUTTON,
 	SEND_FORM_NEXT_BUTTON,
 	SEND_TOKENS_MODAL,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
@@ -56,11 +57,12 @@ export class FlowPage extends HomepageLoggedIn {
 			modalOpenButtonTestId: SEND_TOKENS_MODAL_OPEN_BUTTON,
 			modalTestId: SEND_TOKENS_MODAL
 		});
-		await this.clickByTestId({ testId: MAX_BUTTON });
 		await this.setInputValueByTestId({
 			testId: DESTINATION_INPUT,
 			value: 'tjgkf-baw6u-7lmw2-cbwoi-omgia-jk4kg-yvfcw-jni6g-k7spl-552th-jae'
 		});
+		await this.clickByTestId({ testId: SEND_FORM_DESTINATION_NEXT_BUTTON });
+		await this.clickByTestId({ testId: MAX_BUTTON });
 		await this.setInputValueByTestId({
 			testId: TOKEN_INPUT_CURRENCY_TOKEN,
 			value: '1'

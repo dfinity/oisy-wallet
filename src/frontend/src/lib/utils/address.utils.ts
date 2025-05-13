@@ -23,3 +23,14 @@ export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
 
 export const invalidBtcAddress = (address: BtcAddress | undefined): boolean =>
 	!isBtcAddress(address);
+
+export const shortenAddress = (address: string) => {
+	if (!address || address.length <= 12) {
+		return address;
+	}
+
+	const prefix = address.substring(0, 6);
+	const suffix = address.substring(address.length - 6);
+
+	return `${prefix}...${suffix}`;
+};

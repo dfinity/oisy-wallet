@@ -206,4 +206,59 @@ describe('sortBtcTransactions', () => {
 			)
 		).toStrictEqual(expectedResult);
 	});
+
+	it('sorts on top transactions without timestamp', () => {
+		const pendingTransaction1 = {
+			...mockBtcTransactionUi,
+			timestamp: undefined,
+			status: 'pending' as BtcTransactionStatus
+		};
+		const pendingTransaction2 = {
+			...mockBtcTransactionUi,
+			timestamp: undefined,
+			status: 'pending' as BtcTransactionStatus
+		};
+		const unconfirmedTransaction1 = {
+			...mockBtcTransactionUi,
+			timestamp: 3n,
+			status: 'unconfirmed' as BtcTransactionStatus
+		};
+		const unconfirmedTransaction2 = {
+			...mockBtcTransactionUi,
+			timestamp: 4n,
+			status: 'unconfirmed' as BtcTransactionStatus
+		};
+		const confirmedTransaction1 = {
+			...mockBtcTransactionUi,
+			timestamp: 5n,
+			status: 'confirmed' as BtcTransactionStatus
+		};
+		const confirmedTransaction2 = {
+			...mockBtcTransactionUi,
+			timestamp: 6n,
+			status: 'confirmed' as BtcTransactionStatus
+		};
+		const transactionsToSort = [
+			confirmedTransaction2,
+			pendingTransaction1,
+			unconfirmedTransaction2,
+			pendingTransaction2,
+			confirmedTransaction1,
+			unconfirmedTransaction1
+		];
+		const expectedResult = [
+			pendingTransaction1,
+			pendingTransaction2,
+			unconfirmedTransaction2,
+			unconfirmedTransaction1,
+			confirmedTransaction2,
+			confirmedTransaction1
+		];
+
+		expect(
+			transactionsToSort.sort((transactionA, transactionB) =>
+				sortBtcTransactions({ transactionA, transactionB })
+			)
+		).toStrictEqual(expectedResult);
+	});
 });

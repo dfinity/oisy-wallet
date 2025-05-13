@@ -3,7 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
-	import IconBackArrow from '$lib/components/icons/IconBackArrow.svelte';
+	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { back } from '$lib/utils/nav.utils';
 

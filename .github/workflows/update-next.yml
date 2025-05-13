@@ -18,7 +18,7 @@ on:
       next:
         required: false
         type: boolean
-        description: 'Update all dependencies to the next version'
+        description: 'Use the `@next` tag instead of the latest version'
         default: true
 
 permissions: {}

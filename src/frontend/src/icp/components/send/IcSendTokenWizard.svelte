@@ -26,7 +26,6 @@
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR,
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS,
@@ -60,7 +59,6 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
-	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const dispatch = createEventDispatcher();
 
@@ -192,26 +190,20 @@
 <EthereumFeeContext {networkId}>
 	<BitcoinFeeContext {amount} {networkId} token={$tokenWithFallbackAsIcToken}>
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
-			<IcSendReview on:icBack on:icSend={send} {destination} {amount} {networkId} {source} />
+			<IcSendReview on:icBack on:icSend={send} {destination} {amount} {networkId} />
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
 			<IcSendProgress bind:sendProgressStep {networkId} />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
 			<IcSendForm
 				on:icNext
+				on:icBack
 				on:icTokensList
 				bind:destination
 				bind:amount
 				bind:networkId
-				on:icQRCodeScan
 				{source}
 			>
-				<svelte:fragment slot="cancel">
-					{#if formCancelAction === 'back'}
-						<ButtonBack onclick={back} />
-					{:else}
-						<ButtonCancel onclick={close} />
-					{/if}
-				</svelte:fragment>
+				<ButtonBack onclick={back} slot="cancel" />
 			</IcSendForm>
 		{:else}
 			<slot />

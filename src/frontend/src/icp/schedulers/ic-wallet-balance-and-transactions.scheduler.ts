@@ -1,4 +1,6 @@
+import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
 import { IcWalletScheduler, type IcWalletMsg } from '$icp/schedulers/ic-wallet.scheduler';
+import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import type { GetTransactions } from '$icp/types/ic.post-message';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
@@ -18,12 +20,13 @@ interface IcWalletStore<T> {
 	transactions: IndexedTransactions<T>;
 }
 
-type GetBalanceAndTransactions<TWithId extends IcrcTransactionWithId | TransactionWithId> =
-	GetTransactions & { transactions: TWithId[] };
+export type GetBalanceAndTransactions<
+	TWithId extends IcrcTransactionWithId | TransactionWithId | Dip20TransactionWithId
+> = GetTransactions & { transactions: TWithId[] };
 
 export class IcWalletBalanceAndTransactionsScheduler<
-	T extends IcrcTransaction | Transaction,
-	TWithId extends IcrcTransactionWithId | TransactionWithId,
+	T extends IcrcTransaction | Transaction | Event,
+	TWithId extends IcrcTransactionWithId | TransactionWithId | Dip20TransactionWithId,
 	PostMessageDataRequest
 > extends IcWalletScheduler<PostMessageDataRequest> {
 	private store: IcWalletStore<T> = {

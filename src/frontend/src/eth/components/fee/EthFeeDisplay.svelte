@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 
 	const { maxGasFee, feeSymbolStore, feeDecimalsStore, feeExchangeRateStore }: FeeContext =
 		getContext<FeeContext>(FEE_CONTEXT_KEY);
@@ -49,6 +47,6 @@
 		symbol={$feeSymbolStore}
 		exchangeRate={$feeExchangeRateStore}
 	>
-		<Html slot="label" text={$i18n.fee.text.convert_fee} />
+		<slot slot="label" name="label" />
 	</FeeDisplay>
 {/if}

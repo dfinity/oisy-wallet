@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconHelp from '$lib/components/icons/IconHelp.svelte';
+	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';

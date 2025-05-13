@@ -22,7 +22,6 @@
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		TRACK_COUNT_ETH_SEND_ERROR,
@@ -44,7 +43,6 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let currentStep: WizardStep | undefined;
-	export let formCancelAction: 'back' | 'close' = 'close';
 
 	/**
 	 * Send context store
@@ -226,14 +224,7 @@
 	{nativeEthereumToken}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<EthSendReview
-			on:icBack
-			on:icSend={send}
-			{destination}
-			{amount}
-			{sourceNetwork}
-			{targetNetwork}
-		/>
+		<EthSendReview on:icBack on:icSend={send} {destination} {amount} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
 			progressStep={sendProgressStep}
@@ -243,20 +234,13 @@
 		<EthSendForm
 			on:icNext
 			on:icClose={close}
-			on:icQRCodeScan
+			on:icBack
 			on:icTokensList
 			bind:destination
 			bind:amount
-			bind:network={targetNetwork}
 			{nativeEthereumToken}
 		>
-			<svelte:fragment slot="cancel">
-				{#if formCancelAction === 'back'}
-					<ButtonBack onclick={back} />
-				{:else}
-					<ButtonCancel onclick={close} />
-				{/if}
-			</svelte:fragment>
+			<ButtonBack onclick={back} slot="cancel" />
 		</EthSendForm>
 	{:else}
 		<slot />

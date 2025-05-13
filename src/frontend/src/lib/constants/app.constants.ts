@@ -11,7 +11,8 @@ export const STAGING = MODE === 'staging' || TEST_FE || MODE === 'audit' || MODE
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
-export const TEST = parseBoolEnvVar(import.meta.env.TEST);
+export const TEST =
+	parseBoolEnvVar(import.meta.env.TEST) || parseBoolEnvVar(import.meta.env.STORYBOOK);
 
 const MAINNET_DOMAIN = 'icp0.io';
 
@@ -83,6 +84,14 @@ export const ICP_SWAP_CANISTER_ID = LOCAL
 		: BETA
 			? import.meta.env.VITE_BETA_ICP_SWAP_CANISTER_ID
 			: import.meta.env.VITE_IC_ICP_SWAP_CANISTER_ID;
+
+export const XTC_LEDGER_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_XTC_LEDGER_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_XTC_LEDGER_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_XTC_LEDGER_CANISTER_ID
+			: import.meta.env.VITE_IC_XTC_LEDGER_CANISTER_ID;
 
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds

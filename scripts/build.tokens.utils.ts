@@ -29,7 +29,29 @@ export const loadMetadata = async (
 	return mapTokenMetadata(metadata);
 };
 
-export const saveLogo = ({ logoData, file }: { logoData: string; file: string }) => {
+export const saveLogo = ({
+	logoData,
+	file,
+	name
+}: {
+	logoData: string;
+	file: string;
+	name: string;
+}) => {
+	if (!logoData.includes(';') || !logoData.includes(',')) {
+		console.error(`Invalid logoData format for ${name}: ${logoData}`);
+		return;
+	}
+
+	if (!logoData.startsWith('data:image/svg+xml;base64,')) {
+		const [logoDataPart1, logoDataPart2] = logoData.split(';');
+		console.warn(
+			`Invalid SVG logo format for ${name}:`,
+			`${logoDataPart1};${logoDataPart2.split(',')[0]},...`
+		);
+		return;
+	}
+
 	const [encoding, encodedStr] = logoData.split(';')[1].split(',');
 
 	const svgContent = Buffer.from(encodedStr, encoding as BufferEncoding).toString('utf-8');

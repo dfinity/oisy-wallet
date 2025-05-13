@@ -3,6 +3,7 @@ import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { NonEmptyArray } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -18,7 +19,7 @@ export interface ManageTokensSaveParams {
 export interface SaveTokensParams<T> {
 	progress: (step: ProgressStepsAddToken) => void;
 	identity: Identity;
-	tokens: [T, ...T[]];
+	tokens: NonEmptyArray<T>;
 }
 
 export const saveTokens = async <T>({
@@ -53,7 +54,7 @@ export const saveTokens = async <T>({
 		await save({
 			progress,
 			identity,
-			tokens: tokens as [T, ...T[]]
+			tokens: tokens as NonEmptyArray<T>
 		});
 
 		progress(ProgressStepsAddToken.DONE);

@@ -7,8 +7,8 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 	import SolSendAmount from '$sol/components/send/SolSendAmount.svelte';
-	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import type { SolAmountAssertionError } from '$sol/types/sol-send';
+	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let destination = '';
@@ -17,27 +17,26 @@
 	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: SolAmountAssertionError | undefined;
-	let invalidDestination: boolean;
+
+	let invalidDestination = false;
+	$: invalidDestination = isNullishOrEmpty(destination) || invalidSolAddress(destination);
 
 	let invalid = true;
-	$: invalid =
-		invalidDestination ||
-		nonNullish(amountError) ||
-		isNullishOrEmpty(destination) ||
-		isNullish(amount);
+	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
 </script>
 
 <SendForm
 	on:icNext
+	on:icBack
 	{source}
+	{destination}
+	{invalidDestination}
 	token={$sendToken}
 	balance={$sendBalance}
 	disabled={invalid}
 	hideSource
 >
 	<SolSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
-
-	<SolSendDestination slot="destination" bind:destination bind:invalidDestination on:icQRCodeScan />
 
 	<SolFeeDisplay slot="fee" />
 

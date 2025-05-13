@@ -7,14 +7,15 @@
 		disabled?: boolean;
 		fullWidth?: boolean;
 		testId?: string;
+		colorStyle?: string;
 	}
 
-	let { onclick, disabled = false, fullWidth = false, testId }: Props = $props();
+	let { onclick, disabled = false, fullWidth = false, testId, colorStyle = 'secondary-light' }: Props = $props();
 </script>
 
 <Button
 	{testId}
-	colorStyle="secondary-light"
+	{colorStyle}
 	type="button"
 	{fullWidth}
 	{disabled}

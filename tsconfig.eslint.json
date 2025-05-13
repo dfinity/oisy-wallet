@@ -21,7 +21,10 @@
 		"./scripts/*.mjs",
 		"./scripts/*.ts",
 		"./eslint.config.mjs",
-		"./eslint-local-rules.cjs"
+		"./eslint-local-rules.cjs",
+		"./.storybook/**/*.js",
+		"./.storybook/**/*.ts",
+		"./.storybook/**/*.mjs"
 	],
 	"exclude": [
 		"./node_modules/**",

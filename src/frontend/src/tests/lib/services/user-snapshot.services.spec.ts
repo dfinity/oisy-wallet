@@ -8,7 +8,6 @@ import type {
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
-import * as airdropEnv from '$env/reward-campaigns.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
@@ -189,8 +188,6 @@ describe('user-snapshot.services', () => {
 			vi.clearAllMocks();
 
 			vi.useFakeTimers().setSystemTime(now);
-
-			vi.spyOn(airdropEnv, 'USER_SNAPSHOT_ENABLED', 'get').mockImplementationOnce(() => true);
 
 			mockAuthStore();
 

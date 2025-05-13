@@ -1,3 +1,4 @@
+import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
@@ -8,6 +9,7 @@ import { setCustomToken } from '$lib/api/backend.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { swapProviders } from '$lib/providers/swap.providers';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	kongSwapTokensStore,
@@ -15,6 +17,12 @@ import {
 } from '$lib/stores/kong-swap-tokens.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Amount } from '$lib/types/send';
+import {
+	SwapProvider,
+	type FetchSwapAmountsParams,
+	type ICPSwapResult,
+	type SwapMappedResult
+} from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -117,4 +125,44 @@ export const loadKongSwapTokens = async ({ identity }: { identity: Identity }): 
 			{}
 		)
 	);
+};
+
+export const fetchSwapAmounts = async ({
+	identity,
+	sourceToken,
+	destinationToken,
+	amount,
+	tokens,
+	slippage
+}: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
+	const sourceAmount = parseToken({
+		value: `${amount}`,
+		unitName: sourceToken.decimals
+	});
+	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
+
+	const settledResults = await Promise.allSettled(
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({ identity, sourceToken, destinationToken, sourceAmount })
+		)
+	);
+
+	return enabledProviders.reduce<SwapMappedResult[]>((acc, provider, index) => {
+		const result = settledResults[index];
+		if (result.status !== 'fulfilled') {
+			return acc;
+		}
+
+		if (provider.key === SwapProvider.KONG_SWAP) {
+			const swap = result.value as SwapAmountsReply;
+			const mapped = provider.mapQuoteResult({ swap, tokens });
+			acc.push(mapped);
+		} else if (provider.key === SwapProvider.ICP_SWAP) {
+			const swap = result.value as ICPSwapResult;
+			const mapped = provider.mapQuoteResult({ swap, slippage });
+			acc.push(mapped);
+		}
+
+		return acc;
+	}, []);
 };

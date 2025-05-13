@@ -60,16 +60,16 @@
 		}) || invalidAmount(amount);
 </script>
 
-<SendReview on:icBack on:icSend {source} {amount} {destination} disabled={disableSend}>
+<SendReview on:icBack on:icSend {amount} {destination} disabled={disableSend}>
 	<BtcReviewNetwork {networkId} slot="network" />
 
 	<BtcUtxosFee slot="fee" bind:utxosFee {networkId} {amount} />
 
-	<svelte:fragment slot="info">
+	<div class="mt-8" slot="info">
 		{#if insufficientFundsForFee}
 			<InsufficientFundsForFee testId="btc-send-form-insufficient-funds-for-fee" />
 		{:else}
 			<BtcSendWarnings {utxosFee} pendingTransactionsStatus={$hasPendingTransactionsStore} />
 		{/if}
-	</svelte:fragment>
+	</div>
 </SendReview>

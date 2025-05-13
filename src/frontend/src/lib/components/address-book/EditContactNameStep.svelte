@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { notEmptyString } from '@dfinity/utils';
+	import { isNullish, notEmptyString } from '@dfinity/utils';
 	import ContactForm from '$lib/components/address-book/ContactForm.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -42,11 +42,7 @@
 	};
 
 	let title = $derived(
-		notEmptyString(contact?.id)
-			? $i18n.contact.form.edit_contact
-			: notEmptyString(contact?.name)
-				? contact?.name
-				: $i18n.contact.form.add_new_contact
+		notEmptyString(contact?.name?.trim?.()) ? contact?.name : $i18n.contact.form.add_new_contact
 	);
 
 	export { title };
