@@ -1,13 +1,20 @@
 import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 import type { ConvertWizardStepsParams } from '$lib/config/convert.config';
-import { WizardStepsReceive } from '$lib/enums/wizard-steps';
+import {
+	WizardStepsConvert,
+	WizardStepsHowToConvert,
+	WizardStepsReceive,
+	WizardStepsSend
+} from '$lib/enums/wizard-steps';
 import type { WizardSteps } from '@dfinity/gix-components';
 
 export const receiveWizardSteps = ({
 	i18n,
 	sourceToken,
 	destinationToken
-}: ConvertWizardStepsParams): WizardSteps => [
+}: ConvertWizardStepsParams): WizardSteps<
+	WizardStepsReceive | WizardStepsHowToConvert | WizardStepsConvert | WizardStepsSend
+> => [
 	{
 		name: WizardStepsReceive.RECEIVE,
 		title: i18n.receive.text.receive

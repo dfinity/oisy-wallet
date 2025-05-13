@@ -5,7 +5,7 @@
 	import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 	import { convertWizardSteps } from '$lib/config/convert.config';
 	import { ProgressStepsConvert } from '$lib/enums/progress-steps';
-	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
+	import { WizardStepsConvert, WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
@@ -22,7 +22,7 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	let steps: WizardSteps;
+	let steps: WizardSteps<WizardStepsConvert | WizardStepsSend>;
 	$: steps = convertWizardSteps({
 		i18n: $i18n,
 		sourceToken: sourceToken.symbol,

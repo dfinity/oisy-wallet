@@ -15,7 +15,7 @@
 	import {
 		WizardStepsConvert,
 		WizardStepsHowToConvert,
-		WizardStepsReceive
+		WizardStepsReceive, WizardStepsSend
 	} from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -36,7 +36,7 @@
 	let currentStep: WizardStep | undefined = $state();
 	let modal: WizardModal | undefined = $state();
 
-	let steps: WizardSteps = $derived(
+	let steps: WizardSteps<	WizardStepsReceive | WizardStepsHowToConvert | WizardStepsConvert | WizardStepsSend> = $derived(
 		receiveWizardSteps({
 			i18n: $i18n,
 			sourceToken: sourceToken.symbol,

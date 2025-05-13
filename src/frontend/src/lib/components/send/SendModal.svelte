@@ -66,7 +66,7 @@
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
-	let steps: WizardSteps;
+	let steps: WizardSteps<WizardStepsSend>;
 	$: steps = isTransactionsPage
 		? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
 		: allSendWizardSteps({ i18n: $i18n });

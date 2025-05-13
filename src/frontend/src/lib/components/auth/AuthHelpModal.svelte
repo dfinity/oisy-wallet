@@ -15,7 +15,7 @@
 
 	let modal: WizardModal;
 
-	let steps: WizardSteps;
+	let steps: WizardSteps<WizardStepsAuthHelp>;
 	$: steps = authHelpWizardSteps({ i18n: $i18n });
 
 	let currentStep: WizardStep | undefined;
