@@ -177,6 +177,7 @@ interface I18nRewards {
 		share: string;
 		learn_more: string;
 		check_status: string;
+		view_details: string;
 		requirements_title: string;
 		modal_button_text: string;
 		activity_button_text: string;
