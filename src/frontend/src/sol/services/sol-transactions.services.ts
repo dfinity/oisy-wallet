@@ -7,11 +7,14 @@ import {
 	solAddressTestnet
 } from '$lib/derived/address.derived';
 import type { SolAddress } from '$lib/types/address';
+import type { Token } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
 import {
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
 	isNetworkIdSOLTestnet
 } from '$lib/utils/network.utils';
+import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
@@ -279,4 +282,35 @@ const loadSolTransactions = async ({
 		console.error(`Failed to load transactions for ${tokenId.description}:`, error);
 		return [];
 	}
+};
+
+export const loadNextSolTransactionsByOldest = async ({
+	minTimestamp,
+	transactions,
+	...rest
+}: {
+	minTimestamp: bigint;
+	transactions: SolTransactionUi[];
+	token: Token;
+	signalEnd: () => void;
+}): Promise<ResultSuccess> => {
+	// If there are no transactions, we let the worker load the first ones
+	if (transactions.length === 0) {
+		return { success: false };
+	}
+
+	const lastTransaction = findOldestTransaction(transactions);
+
+	const { timestamp: minIcTimestamp, signature: lastSignature } = lastTransaction ?? {};
+
+	if (nonNullish(minIcTimestamp) && minIcTimestamp <= minTimestamp) {
+		return { success: false };
+	}
+
+	await loadNextSolTransactions({
+		...rest,
+		before: lastSignature
+	});
+
+	return { success: true };
 };
