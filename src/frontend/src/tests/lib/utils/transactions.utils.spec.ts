@@ -42,6 +42,7 @@ import type {
 import {
 	areTransactionsStoresLoading,
 	filterReceivedMicroTransactions,
+	findOldestTransaction,
 	getKnownDestinations,
 	getReceivedMicroTransactions,
 	isTransactionsStoreEmpty,
@@ -1179,6 +1180,72 @@ describe('transactions.utils', () => {
 			}));
 
 			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+		});
+	});
+
+	describe('findOldestTransaction', () => {
+		const icTransactions: IcTransactionUi[] = createMockIcTransactionsUi(17).map(
+			(transaction, index) => ({
+				...transaction,
+				timestamp: 100n + BigInt(index)
+			})
+		);
+		const solTransactions: SolTransactionUi[] = createMockSolTransactionsUi(19).map(
+			(transaction, index) => ({
+				...transaction,
+				timestamp: 200n + BigInt(index)
+			})
+		);
+
+		const mockTransactions: (IcTransactionUi | SolTransactionUi)[] = [
+			...icTransactions,
+			...solTransactions
+		].sort(() => Math.random() - 0.5);
+
+		const [expectedOldestTransaction] = icTransactions;
+
+		it('should return undefined if no transactions are provided', () => {
+			expect(findOldestTransaction([])).toBeUndefined();
+		});
+
+		it('should return the oldest transaction', () => {
+			expect(findOldestTransaction(mockTransactions)).toStrictEqual(expectedOldestTransaction);
+		});
+
+		it('should return the first transaction in the list if they have the same timestamp', () => {
+			const newTransactions: IcTransactionUi[] = icTransactions.map((transaction) => ({
+				...transaction,
+				id: `${transaction.id}-new`
+			}));
+
+			expect(findOldestTransaction([...mockTransactions, ...newTransactions])).toStrictEqual(
+				expectedOldestTransaction
+			);
+		});
+
+		it('should handle mixed timestamp between number, bigint and undefined', () => {
+			const transactionsWithNumber: IcTransactionUi[] = createMockIcTransactionsUi(17).map(
+				(transaction, index) => ({
+					...transaction,
+					timestamp: 1n + BigInt(index)
+				})
+			);
+			const transactionsWitUndefined: SolTransactionUi[] = createMockSolTransactionsUi(17).map(
+				(transaction) => ({
+					...transaction,
+					timestamp: undefined
+				})
+			);
+
+			const [expectedTransaction] = transactionsWithNumber;
+
+			expect(
+				findOldestTransaction([
+					...mockTransactions,
+					...transactionsWithNumber,
+					...transactionsWitUndefined
+				])
+			).toStrictEqual(expectedTransaction);
 		});
 	});
 });
