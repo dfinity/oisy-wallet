@@ -12,6 +12,32 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
+	import {onMount, setContext} from "svelte";
+	import {
+		initRewardEligibilityStore,
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from "$lib/stores/reward.store";
+	import {nullishSignOut} from "$lib/services/auth.services";
+	import {isNullish} from "@dfinity/utils";
+	import {authIdentity} from "$lib/derived/auth.derived";
+
+	const { store } = setContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY, {
+		store: initRewardEligibilityStore()
+	});
+
+	onMount(() => {
+		const loadEligibilityReport = async () => {
+			if (isNullish($authIdentity)) {
+				await nullishSignOut();
+				return;
+			}
+
+			// TODO load campaign eligibilities from reward service
+			store.setCampaignEligibilities([]);
+		};
+		loadEligibilityReport();
+	})
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 
