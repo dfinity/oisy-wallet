@@ -2,6 +2,7 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
+	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
@@ -56,18 +57,20 @@
 	{#if isNetworkIdEthereum($sendTokenNetworkId) || isNetworkIdEvm($sendTokenNetworkId)}
 		<div data-tid={testId}>
 			<CkEthLoader nativeTokenId={$ethereumTokenId} isSendFlow={true}>
-				<EthSendDestination
-					token={$sendToken}
-					knownDestinations={$ethKnownDestinations}
-					bind:destination
-					bind:invalidDestination
-					on:icQRCodeScan
-				/>
-				<KnownDestinationsComponent
-					knownDestinations={$ethKnownDestinations}
-					bind:destination
-					on:icNext={next}
-				/>
+				<LoaderMultipleEthTransactions>
+					<EthSendDestination
+						token={$sendToken}
+						knownDestinations={$ethKnownDestinations}
+						bind:destination
+						bind:invalidDestination
+						on:icQRCodeScan
+					/>
+					<KnownDestinationsComponent
+						knownDestinations={$ethKnownDestinations}
+						bind:destination
+						on:icNext={next}
+					/>
+				</LoaderMultipleEthTransactions>
 			</CkEthLoader>
 		</div>
 	{:else if isNetworkIdICP($sendTokenNetworkId)}
