@@ -1,20 +1,20 @@
 import type { RewardDescription } from '$env/types/env-reward';
 import RewardModal from '$lib/components/rewards/RewardModal.svelte';
+import { ZERO } from '$lib/constants/app.constants';
 import { REWARDS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
-import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
-import { render } from '@testing-library/svelte';
+import * as rewardService from '$lib/services/reward.services';
+import { i18n } from '$lib/stores/i18n.store';
 import {
 	initRewardEligibilityContext,
 	initRewardEligibilityStore,
 	REWARD_ELIGIBILITY_CONTEXT_KEY
-} from "$lib/stores/reward.store";
-import {mockCampaignEligibilities} from "$tests/mocks/reward-eligibility-report.mock";
-import {mockAuthStore} from "$tests/mocks/auth.mock";
-import {ZERO} from "$lib/constants/app.constants";
-import {replacePlaceholders} from "$lib/utils/i18n.utils";
-import {i18n} from "$lib/stores/i18n.store";
-import {get} from "svelte/store";
-import * as rewardService from '$lib/services/reward.services';
+} from '$lib/stores/reward.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
+import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
+import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('RewardModal', () => {
 	const imageBannerSelector = `img[data-tid="${REWARDS_MODAL_IMAGE_BANNER}"]`;

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
+	import { getContext } from 'svelte';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
@@ -13,9 +14,11 @@
 	import { REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import {
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from '$lib/stores/reward.store';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
-	import {getContext} from "svelte";
-	import {REWARD_ELIGIBILITY_CONTEXT_KEY, type RewardEligibilityContext} from "$lib/stores/reward.store";
 
 	interface Props {
 		reward: RewardDescription;
@@ -24,7 +27,7 @@
 	let { reward }: Props = $props();
 
 	const { getCampaignEligibility } = getContext<RewardEligibilityContext>(
-			REWARD_ELIGIBILITY_CONTEXT_KEY
+		REWARD_ELIGIBILITY_CONTEXT_KEY
 	);
 
 	const campaignEligibility = getCampaignEligibility(reward.id);

@@ -1,9 +1,9 @@
 <script lang="ts">
+	import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import RewardRequirement from "$lib/components/rewards/RewardRequirement.svelte";
-	import type {CampaignCriterion} from "$lib/types/reward";
+	import type { CampaignCriterion } from '$lib/types/reward';
 
 	interface Props {
 		isEligible: boolean;
