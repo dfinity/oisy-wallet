@@ -1,4 +1,6 @@
+import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
+import type { IcToken } from '$icp/types/ic-token';
 import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
@@ -12,20 +14,57 @@ import {
 	type SwapAmountsStoreData
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('SwapForm', () => {
 	const mockContext = new Map();
+
 	const mockSwapAmounts: SwapAmountsStoreData = {
 		amountForSwap: 1,
-		swapAmounts: {
-			slippage: 0,
+		swaps: [
+			{
+				provider: SwapProvider.ICP_SWAP,
+				receiveAmount: 1000000000n,
+				receiveOutMinimum: 990000000n,
+				swapDetails: {} as SwapMappedResult
+			},
+			{
+				provider: SwapProvider.KONG_SWAP,
+				receiveAmount: 2000000000n,
+				slippage: 0.5,
+				route: ['TokenA', 'TokenB'],
+				liquidityFees: [
+					{
+						fee: 3000n,
+						token: { symbol: 'ICP', decimals: 8 } as IcToken
+					}
+				],
+				networkFee: {
+					fee: 3000n,
+					token: { symbol: 'ICP', decimals: 8 } as IcToken
+				},
+				swapDetails: {} as SwapAmountsReply
+			}
+		],
+		selectedProvider: {
+			provider: SwapProvider.KONG_SWAP,
 			receiveAmount: 2000000n,
-			route: [],
-			liquidityFees: [],
-			networkFee: undefined
+			slippage: 0.5,
+			route: ['TokenA', 'TokenB'],
+			liquidityFees: [
+				{
+					fee: 3000n,
+					token: { symbol: 'ICP', decimals: 8 } as IcToken
+				}
+			],
+			networkFee: {
+				fee: 3000n,
+				token: { symbol: 'ICP', decimals: 8 } as IcToken
+			},
+			swapDetails: {} as SwapAmountsReply
 		}
 	};
 
@@ -49,11 +88,12 @@ describe('SwapForm', () => {
 	const setupSwapAmountsStore = (swapAmounts?: SwapAmountsStoreData) => {
 		const swapAmountsStore = initSwapAmountsStore();
 		if (swapAmounts) {
-			swapAmountsStore.setSwapAmounts(swapAmounts);
+			swapAmountsStore.setSwaps(swapAmounts);
 		}
 		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
 		return swapAmountsStore;
 	};
+
 	const setupIcTokenFeeStore = () => {
 		icTokenFeeStore.setIcTokenFee({
 			tokenSymbol: mockValidIcToken.symbol,
@@ -78,7 +118,7 @@ describe('SwapForm', () => {
 			},
 			{
 				description: 'swap amount exists but receive amount is null',
-				swapAmounts: { amountForSwap: 1, swapAmounts: undefined },
+				swapAmounts: { amountForSwap: 1, swaps: [], selectedProvider: undefined },
 				props: { swapAmount: '1', receiveAmount: undefined },
 				expected: true
 			},

@@ -2,22 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import type IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
-	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
-	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
-	import SwapFees from '$lib/components/swap/SwapFees.svelte';
-	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
-	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
-	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
-	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
-	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { SWAP_SLIPPAGE_INVALID_VALUE } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -27,11 +11,27 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import type { OptionAmount } from '$lib/types/send';
-	import type { DisplayUnit } from '$lib/types/swap';
-	import type { TokenActionErrorType } from '$lib/types/token-action';
-	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
+	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
+	import SwapFees from '$lib/components/swap/SwapFees.svelte';
+	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
+	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import type { OptionAmount } from '$lib/types/send';
+	import { icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
+	import type { DisplayUnit } from '$lib/types/swap';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -40,9 +40,9 @@
 	}
 
 	let {
-		swapAmount = $bindable(),
-		receiveAmount = $bindable(),
-		slippageValue = $bindable()
+		swapAmount = $bindable<OptionAmount>(),
+		receiveAmount = $bindable<number | undefined>(),
+		slippageValue = $bindable<OptionAmount>()
 	}: Props = $props();
 
 	const {
@@ -58,78 +58,46 @@
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
-
-	let errorType = $state<TokenActionErrorType>(undefined);
+	let errorType = $state<TokenActionErrorType | undefined>(undefined);
 	let amountSetToMax = $state(false);
-	let exchangeValueUnit = $state<DisplayUnit>('usd');
-	let inputUnit = $state<DisplayUnit>();
-	let sourceTokenFee = $state<bigint | undefined>(undefined);
-	let totalFee = $state<bigint | undefined>(undefined);
-	let swapAmountsLoading = $state(false);
-	let disableSwitchTokens = $state(false);
-	let invalid = $state(false);
+	let exchangeValueUnit = $state<'token' | 'usd'>('usd');
 
-	$effect(() => {
-		inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
-	});
+	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
-	$effect(() => {
-		const swapStore = $swapAmountsStore;
-		const token = $destinationToken;
-		const provider = swapStore?.selectedProvider;
+	let sourceTokenFee = $derived(
+		nonNullish($sourceToken) ? $icTokenFeeStore?.[$sourceToken.symbol] : undefined
+	);
 
-		if (nonNullish(token) && nonNullish(provider)) {
-			receiveAmount = formatTokenBigintToNumber({
-				value: provider.receiveAmount,
-				unitName: token.decimals,
-				displayDecimals: token.decimals
-			});
-		} else {
-			receiveAmount = undefined;
-		}
-	});
+	let totalFee = $derived(sourceTokenFee ?? ZERO * (isSourceTokenIcrc2 ? 2n : 1n));
 
-	$effect(() => {
-		sourceTokenFee = nonNullish($sourceToken) ? $icTokenFeeStore?.[$sourceToken.symbol] : undefined;
-	});
+	let swapAmountsLoading = $derived(
+		nonNullish(swapAmount) &&
+			nonNullish($swapAmountsStore) &&
+			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount) &&
+			Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
+	);
 
-	$effect(() => {
-		const fee = sourceTokenFee ?? ZERO;
-		const multiplier = $isSourceTokenIcrc2 ? 2n : 1n;
-		totalFee = fee * multiplier;
-	});
+	let disableSwitchTokens = $derived(
+		(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading
+	);
 
-	$effect(() => {
-		swapAmountsLoading =
-			nonNullish(swapAmount) &&
-			nonNullish($swapAmountsStore?.amountForSwap) &&
-			Number(swapAmount) !== Number($swapAmountsStore.amountForSwap);
-	});
-
-	$effect(() => {
-		disableSwitchTokens =
-			(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
-	});
-
-	$effect(() => {
-		invalid =
-			nonNullish(errorType) ||
+	let invalid = $derived(
+		nonNullish(errorType) ||
 			isNullish(swapAmount) ||
-			Number(swapAmount) <= 0 ||
+			Number(swapAmount!) <= 0 ||
 			isNullish(receiveAmount) ||
 			isNullish(sourceTokenFee) ||
 			swapAmountsLoading ||
-			Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE;
-	});
+			Number(slippageValue!) >= SWAP_SLIPPAGE_INVALID_VALUE
+	);
+
+	const dispatch = createEventDispatcher();
 
 	const onTokensSwitch = () => {
-		const tempAmount = receiveAmount;
-
+		const temp = receiveAmount;
 		swapAmountsStore.reset();
 		amountSetToMax = false;
-		swapAmount = tempAmount;
-
+		swapAmount = temp;
 		switchTokens();
 	};
 
@@ -144,7 +112,20 @@
 				})
 			: undefined;
 
-	const dispatch = createEventDispatcher();
+	$effect(() => {
+		if (
+			nonNullish($destinationToken) &&
+			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+		) {
+			receiveAmount = formatTokenBigintToNumber({
+				value: $swapAmountsStore.selectedProvider.receiveAmount,
+				unitName: $destinationToken.decimals,
+				displayDecimals: $destinationToken.decimals
+			});
+		} else {
+			receiveAmount = undefined;
+		}
+	});
 </script>
 
 <ContentWithToolbar>

@@ -75,7 +75,13 @@
 		}
 	};
 
-	$effect(debounce(loadSwapAmounts));
+	const debounceLoadSwapAmounts = debounce(loadSwapAmounts);
+
+	$effect(() => {
+		[amount, sourceToken, destinationToken, slippageValue];
+
+		debounceLoadSwapAmounts();
+	});
 </script>
 
 {@render children()}

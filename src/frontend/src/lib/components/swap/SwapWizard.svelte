@@ -40,10 +40,10 @@
 	}
 
 	let {
-		swapAmount = $bindable(),
-		receiveAmount = $bindable(),
-		slippageValue = $bindable(),
-		swapProgressStep = $bindable(),
+		swapAmount = $bindable<OptionAmount>(),
+		receiveAmount = $bindable<number | undefined>(),
+		slippageValue = $bindable<OptionAmount>(),
+		swapProgressStep = $bindable<string>(),
 		currentStep
 	}: Props = $props();
 

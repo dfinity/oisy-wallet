@@ -562,6 +562,7 @@ interface I18nSwap {
 		best_rate: string;
 		expected_minimum: string;
 		select: string;
+		you_receive: string;
 	};
 	error: {
 		kong_not_available: string;
