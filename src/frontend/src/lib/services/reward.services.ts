@@ -35,7 +35,6 @@ import type {
 	UserRoleResult
 } from '$lib/types/reward';
 import type { ResultSuccess } from '$lib/types/utils';
-import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
 import { mapEligibilityReport } from '$lib/utils/rewards.utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
