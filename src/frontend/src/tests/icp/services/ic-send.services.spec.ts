@@ -579,10 +579,10 @@ describe('ic-send.services', () => {
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 		});
 
-		it('should handle invalid destination addresses', async () => {
+		it('should handle invalid destination addresses', () => {
 			vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(true);
 
-			await expect(sendIcrc(mockParams)).rejects.toThrow(en.send.error.invalid_destination);
+			expect(() => sendIcrc(mockParams)).toThrow(en.send.error.invalid_destination);
 
 			expect(mockProgress).not.toHaveBeenCalled();
 		});
@@ -661,11 +661,11 @@ describe('ic-send.services', () => {
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 		});
 
-		it('should handle invalid destination addresses', async () => {
+		it('should handle invalid destination addresses', () => {
 			vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(true);
 			vi.spyOn(accountUtils, 'invalidIcpAddress').mockReturnValueOnce(true);
 
-			await expect(sendIcp(mockParams)).rejects.toThrow(en.send.error.invalid_destination);
+			expect(() => sendIcp(mockParams)).toThrow(en.send.error.invalid_destination);
 
 			expect(mockProgress).not.toHaveBeenCalled();
 		});
@@ -729,10 +729,10 @@ describe('ic-send.services', () => {
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 		});
 
-		it('should handle invalid destination addresses', async () => {
+		it('should handle invalid destination addresses', () => {
 			vi.spyOn(icrcAccountUtils, 'invalidIcrcAddress').mockReturnValueOnce(true);
 
-			await expect(sendDip20(mockParams)).resolves.toThrow();
+			expect(() => sendDip20(mockParams)).toThrow(en.send.error.invalid_destination);
 
 			expect(mockProgress).not.toHaveBeenCalled();
 		});
