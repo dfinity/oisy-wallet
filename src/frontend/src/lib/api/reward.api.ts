@@ -1,5 +1,6 @@
 import type {
-	ClaimedVipReward, EligibilityReport,
+	ClaimedVipReward,
+	EligibilityReport,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	SetReferrerResponse,
