@@ -129,7 +129,7 @@ concurrency:
 permissions: {}
 
 env:
-  DFX_WARNING=-mainnet_plaintext_identity
+  DFX_WARNING: '-mainnet_plaintext_identity'
 
 jobs:
   deployment:
