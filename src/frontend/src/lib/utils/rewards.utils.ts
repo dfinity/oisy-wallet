@@ -1,15 +1,17 @@
+import type { CriterionEligibility, EligibilityReport } from '$declarations/rewards/rewards.did';
+import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { getRewards } from '$lib/services/reward.services';
 import type {
 	CampaignCriterion,
 	CampaignEligibility,
-	MinLoginsCriterion, MinTotalAssetsUsdCriterion, MinTransactionsCriterion,
+	MinLoginsCriterion,
+	MinTotalAssetsUsdCriterion,
+	MinTransactionsCriterion,
 	RewardResponseInfo,
 	RewardResult
 } from '$lib/types/reward';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
-import {RewardCriterionType} from "$lib/enums/reward-criterion-type";
-import type {CriterionEligibility, EligibilityReport} from "$declarations/rewards/rewards.did";
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
 
