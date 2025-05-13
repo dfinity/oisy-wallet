@@ -62,6 +62,7 @@ describe('all-tokens.derived', () => {
 		...mockValidIcCkToken,
 		standard: 'dip20',
 		id: parseTokenId('XTC'),
+		symbol: 'XTC',
 		ledgerCanisterId: 'mock-ledger-canister-id',
 		name: 'dummy-dip20-token',
 		enabled: true
@@ -138,6 +139,7 @@ describe('all-tokens.derived', () => {
 				BASE_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
 				mockErc20Token.id.description,
+				mockDip20Token.id.description,
 				mockIcrcToken2.id.description,
 				mockIcrcToken.id.description,
 				mockSplToken.id.description
