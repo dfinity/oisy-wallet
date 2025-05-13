@@ -362,6 +362,7 @@ describe('ic-transactions.services', () => {
 
 	describe('loadNextIcTransactionsByOldest', () => {
 		const signalEnd = vi.fn();
+		const callback = vi.fn();
 
 		const mockToken = ICP_TOKEN;
 
@@ -381,7 +382,8 @@ describe('ic-transactions.services', () => {
 			identity: mockIdentity,
 			maxResults: WALLET_PAGINATION,
 			token: mockToken,
-			signalEnd
+			signalEnd,
+			callback
 		};
 
 		beforeEach(() => {
@@ -448,6 +450,12 @@ describe('ic-transactions.services', () => {
 				maxResults: WALLET_PAGINATION,
 				certified: true
 			});
+		});
+
+		it('should execute the callback if successful', async () => {
+			await loadNextIcTransactionsByOldest(mockParams);
+
+			expect(callback).toHaveBeenCalledOnce();
 		});
 	});
 });

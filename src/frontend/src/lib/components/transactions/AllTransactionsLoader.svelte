@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
-	import { loadNextIcTransactions } from '$icp/services/ic-transactions.services';
+	import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
@@ -11,9 +10,8 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction';
 	import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
-	import { loadNextSolTransactions } from '$sol/services/sol-transactions.services.js';
+	import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services.js';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 	interface Props {
 		transactions: AllTransactionUiWithCmp[];
@@ -34,22 +32,9 @@
 			return;
 		}
 
-		const minTimestamp = Math.min(
-			...transactions.map(({ transaction: { timestamp } }) => Number(timestamp))
+		const minTimestamp = BigInt(
+			Math.min(...transactions.map(({ transaction: { timestamp } }) => Number(timestamp)))
 		);
-
-		const findLastTransaction = <T extends IcTransactionUi | SolTransactionUi>(
-			transactions: T[]
-		): T | undefined =>
-			transactions.length >= 0
-				? transactions.reduce<T>(
-						(min, transaction) =>
-							(Number(transaction.timestamp) ?? Infinity) < (Number(min.timestamp) ?? Infinity)
-								? transaction
-								: min,
-						transactions[0]
-					)
-				: undefined;
 
 		// We fix the values to avoid a recursive loop: token A runs the first loop, while token B starts. However, token A updated the transactions store.
 		// So, if the timestamp that are newly included are lower that the one used as reference by token B, in the second loop of token B, there will be another request, and so on.
@@ -68,57 +53,26 @@
 			}
 
 			if (isNetworkIdICP(networkId)) {
-				const icTransactions = (icTransactionsStoreData[tokenId] ?? []).map(({ data }) => data);
-
-				// If there are no transactions, we let the worker load the first ones
-				if (icTransactions.length === 0) {
-					return;
-				}
-
-				const lastIcTransaction = findLastTransaction(icTransactions);
-
-				const { timestamp: minIcTimestamp, id: lastIcId } = lastIcTransaction ?? {};
-
-				if (nonNullish(minIcTimestamp) && Number(minIcTimestamp) <= minTimestamp) {
-					return;
-				}
-
-				await loadNextIcTransactions({
-					lastId: lastIcId,
+				await loadNextIcTransactionsByOldest({
+					minTimestamp,
+					transactions: (icTransactionsStoreData[tokenId] ?? []).map(({ data }) => data),
 					owner: $authIdentity.getPrincipal(),
 					identity: $authIdentity,
 					maxResults: WALLET_PAGINATION,
 					token,
-					signalEnd: () => (disableLoader[tokenId] = true)
+					signalEnd: () => (disableLoader[tokenId] = true),
+					// We call the function again in case the last transaction is not the last one that we need
+					callback: async () => await loadNextTransactions(token)
 				});
-
-				// We call the function again in case the last transaction is not the last one that we need
-				await loadNextTransactions(token);
 			} else if (isNetworkIdSolana(networkId)) {
-				const solTransactions = (solTransactionsStoreData[tokenId] ?? []).map(({ data }) => data);
-
-				// If there are no transactions, we let the worker load the first ones
-				if (solTransactions.length === 0) {
-					return;
-				}
-
-				const lastSolTransaction = findLastTransaction(solTransactions);
-
-				const { timestamp: minSolTimestamp, signature: lastSolSignature } =
-					lastSolTransaction ?? {};
-
-				if (nonNullish(minSolTimestamp) && Number(minSolTimestamp) <= minTimestamp) {
-					return;
-				}
-
-				await loadNextSolTransactions({
+				await loadNextSolTransactionsByOldest({
+					minTimestamp,
+					transactions: (solTransactionsStoreData[tokenId] ?? []).map(({ data }) => data),
 					token,
-					before: lastSolSignature,
-					signalEnd: () => (disableLoader[tokenId] = true)
+					signalEnd: () => (disableLoader[tokenId] = true),
+					// We call the function again in case the last transaction is not the last one that we need
+					callback: async () => await loadNextTransactions(token)
 				});
-
-				// We call the function again in case the last transaction is not the last one that we need
-				await loadNextTransactions(token);
 			}
 		};
 

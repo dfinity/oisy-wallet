@@ -286,12 +286,14 @@ const loadSolTransactions = async ({
 export const loadNextSolTransactionsByOldest = async ({
 	minTimestamp,
 	transactions,
+	callback,
 	...rest
 }: {
 	minTimestamp: bigint;
 	transactions: SolTransactionUi[];
 	token: Token;
 	signalEnd: () => void;
+	callback: () => Promise<void>;
 }): Promise<void> => {
 	// If there are no transactions, we let the worker load the first ones
 	if (transactions.length === 0) {
@@ -310,4 +312,6 @@ export const loadNextSolTransactionsByOldest = async ({
 		...rest,
 		before: lastSignature
 	});
+
+	await callback();
 };

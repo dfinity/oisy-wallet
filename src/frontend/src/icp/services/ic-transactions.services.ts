@@ -169,6 +169,7 @@ export const loadNextIcTransactions = async ({
 export const loadNextIcTransactionsByOldest = async ({
 	minTimestamp,
 	transactions,
+	callback,
 	...rest
 }: {
 	minTimestamp: bigint;
@@ -178,6 +179,7 @@ export const loadNextIcTransactionsByOldest = async ({
 	maxResults?: bigint;
 	token: Token;
 	signalEnd: () => void;
+	callback: () => Promise<void>;
 }): Promise<void> => {
 	// If there are no transactions, we let the worker load the first ones
 	if (transactions.length === 0) {
@@ -196,4 +198,6 @@ export const loadNextIcTransactionsByOldest = async ({
 		...rest,
 		lastId
 	});
+
+	await callback();
 };
