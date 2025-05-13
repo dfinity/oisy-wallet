@@ -7,11 +7,13 @@ import {
 	solAddressTestnet
 } from '$lib/derived/address.derived';
 import type { SolAddress } from '$lib/types/address';
+import type { Token } from '$lib/types/token';
 import {
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
 	isNetworkIdSOLTestnet
 } from '$lib/utils/network.utils';
+import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
@@ -279,4 +281,33 @@ const loadSolTransactions = async ({
 		console.error(`Failed to load transactions for ${tokenId.description}:`, error);
 		return [];
 	}
+};
+
+export const loadNextSolTransactionsByOldest = async ({
+	minTimestamp,
+	transactions,
+	...rest
+}: {
+	minTimestamp: bigint;
+	transactions: SolTransactionUi[];
+	token: Token;
+	signalEnd: () => void;
+}): Promise<void> => {
+	// If there are no transactions, we let the worker load the first ones
+	if (transactions.length === 0) {
+		return;
+	}
+
+	const lastTransaction = findOldestTransaction(transactions);
+
+	const { timestamp: minIcTimestamp, signature: lastSignature } = lastTransaction ?? {};
+
+	if (nonNullish(minIcTimestamp) && minIcTimestamp <= minTimestamp) {
+		return;
+	}
+
+	await loadNextSolTransactions({
+		...rest,
+		before: lastSignature
+	});
 };
