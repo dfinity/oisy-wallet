@@ -105,8 +105,6 @@
 	ariaLabel={$i18n.navigation.alt.airdrops}
 	selected={isRouteRewards(pageData)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
-	tag={$i18n.core.text.new}
-	tagVariant="emphasis"
 >
 	<IconGift />
 	{$i18n.navigation.text.airdrops}
