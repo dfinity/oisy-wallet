@@ -33,9 +33,17 @@
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
-	export let swapAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let slippageValue: OptionAmount;
+	interface Props {
+		swapAmount: OptionAmount;
+		receiveAmount: number | undefined;
+		slippageValue: OptionAmount;
+	}
+
+	let {
+		swapAmount = $bindable(),
+		receiveAmount = $bindable(),
+		slippageValue = $bindable()
+	}: Props = $props();
 
 	const {
 		sourceToken,
@@ -52,51 +60,68 @@
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
-	let errorType: TokenActionErrorType = undefined;
-	let amountSetToMax = false;
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let errorType = $state<TokenActionErrorType>(undefined);
+	let amountSetToMax = $state(false);
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
+	let inputUnit = $state<DisplayUnit>();
+	let sourceTokenFee = $state<bigint | undefined>(undefined);
+	let totalFee = $state<bigint | undefined>(undefined);
+	let swapAmountsLoading = $state(false);
+	let disableSwitchTokens = $state(false);
+	let invalid = $state(false);
 
-	$: receiveAmount =
-		nonNullish($destinationToken) && $swapAmountsStore?.swapAmounts?.receiveAmount
-			? formatTokenBigintToNumber({
-					value: $swapAmountsStore?.swapAmounts.receiveAmount,
-					unitName: $destinationToken.decimals,
-					displayDecimals: $destinationToken.decimals
-				})
-			: undefined;
+	$effect(() => {
+		inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	});
 
-	let sourceTokenFee: bigint | undefined;
-	$: sourceTokenFee = nonNullish($sourceToken)
-		? $icTokenFeeStore?.[$sourceToken.symbol]
-		: undefined;
+	$effect(() => {
+		const swapStore = $swapAmountsStore;
+		const token = $destinationToken;
+		const provider = swapStore?.selectedProvider;
 
-	let totalFee: bigint | undefined;
-	// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
-	$: totalFee = (sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n);
+		if (nonNullish(token) && nonNullish(provider)) {
+			receiveAmount = formatTokenBigintToNumber({
+				value: provider.receiveAmount,
+				unitName: token.decimals,
+				displayDecimals: token.decimals
+			});
+		} else {
+			receiveAmount = undefined;
+		}
+	});
 
-	let swapAmountsLoading = false;
-	$: swapAmountsLoading =
-		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
-			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
-			: false;
+	$effect(() => {
+		sourceTokenFee = nonNullish($sourceToken) ? $icTokenFeeStore?.[$sourceToken.symbol] : undefined;
+	});
 
-	let disableSwitchTokens = false;
-	$: disableSwitchTokens =
-		(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
+	$effect(() => {
+		const fee = sourceTokenFee ?? ZERO;
+		const multiplier = $isSourceTokenIcrc2 ? 2n : 1n;
+		totalFee = fee * multiplier;
+	});
 
-	const dispatch = createEventDispatcher();
+	$effect(() => {
+		swapAmountsLoading =
+			nonNullish(swapAmount) &&
+			nonNullish($swapAmountsStore?.amountForSwap) &&
+			Number(swapAmount) !== Number($swapAmountsStore.amountForSwap);
+	});
 
-	let invalid: boolean;
-	$: invalid =
-		nonNullish(errorType) ||
-		isNullish(swapAmount) ||
-		Number(swapAmount) <= 0 ||
-		isNullish(receiveAmount) ||
-		isNullish(sourceTokenFee) ||
-		swapAmountsLoading ||
-		Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE;
+	$effect(() => {
+		disableSwitchTokens =
+			(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
+	});
+
+	$effect(() => {
+		invalid =
+			nonNullish(errorType) ||
+			isNullish(swapAmount) ||
+			Number(swapAmount) <= 0 ||
+			isNullish(receiveAmount) ||
+			isNullish(sourceTokenFee) ||
+			swapAmountsLoading ||
+			Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE;
+	});
 
 	const onTokensSwitch = () => {
 		const tempAmount = receiveAmount;
@@ -118,6 +143,8 @@
 					isSwapFlow: true
 				})
 			: undefined;
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <ContentWithToolbar>
@@ -183,7 +210,7 @@
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if $swapAmountsStore?.swapAmounts === null}
+						{#if $swapAmountsStore?.swaps.length === 0}
 							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
@@ -216,7 +243,7 @@
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider />
+				<SwapProvider on:icShowProviderList />
 				<SwapFees />
 			</div>
 		{/if}

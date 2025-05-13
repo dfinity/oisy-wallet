@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { kongSwapAmounts } from '$lib/api/kong_backend.api';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
@@ -10,15 +10,21 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
-	import { parseToken } from '$lib/utils/parse.utils';
-	import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
+	import type { IcToken } from '$icp/types/ic-token';
+	import { fetchSwapAmounts } from '$lib/services/swap.services';
+	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 
-	export let amount: OptionAmount = undefined;
-	export let sourceToken: Token | undefined;
-	export let destinationToken: Token | undefined;
+	interface Props {
+		amount: OptionAmount;
+		sourceToken: IcToken | undefined;
+		destinationToken: IcToken | undefined;
+		slippageValue: OptionAmount;
+		children: Snippet;
+	}
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	let { amount, sourceToken, destinationToken, slippageValue, children }: Props = $props();
 
 	// TODO: add tests for this context
 	const loadSwapAmounts = async () => {
@@ -41,42 +47,35 @@
 		}
 
 		try {
-			const swapAmounts = await kongSwapAmounts({
+			const swapAmounts = await fetchSwapAmounts({
 				identity: $authIdentity,
 				sourceToken,
 				destinationToken,
-				sourceAmount: parseToken({
-					value: `${amount}`,
-					unitName: sourceToken.decimals
-				})
+				amount,
+				tokens: $tokens,
+				slippage: slippageValue || SWAP_DEFAULT_SLIPPAGE_VALUE
 			});
 
-			if (isNullish(swapAmounts)) {
+			if (swapAmounts.length === 0) {
 				store.reset();
 				return;
 			}
 
-			store.setSwapAmounts({
-				swapAmounts: {
-					slippage: swapAmounts.slippage,
-					receiveAmount: swapAmounts.receive_amount,
-					route: getSwapRoute(swapAmounts.txs ?? []),
-					liquidityFees: getLiquidityFees({ transactions: swapAmounts.txs ?? [], tokens: $tokens }),
-					networkFee: getNetworkFee({ transactions: swapAmounts.txs ?? [], tokens: $tokens })
-				},
-				amountForSwap: parsedAmount
+			store.setSwaps({
+				swaps: swapAmounts,
+				amountForSwap: parsedAmount,
+				selectedProvider: swapAmounts[0]
 			});
 		} catch (_err: unknown) {
-			// if kongSwapAmounts fails, it means no pool is currently available for the provided tokens
-			store.setSwapAmounts({
-				swapAmounts: null,
-				amountForSwap: parsedAmount
+			store.setSwaps({
+				swaps: [],
+				amountForSwap: parsedAmount,
+				selectedProvider: undefined
 			});
 		}
 	};
-	const debounceLoadSwapAmounts = debounce(loadSwapAmounts);
 
-	$: amount, sourceToken, destinationToken, debounceLoadSwapAmounts();
+	$effect(debounce(loadSwapAmounts));
 </script>
 
-<slot />
+{@render children()}
