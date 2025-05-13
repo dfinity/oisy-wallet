@@ -368,8 +368,37 @@ describe('AllTransactionsLoader', () => {
 			});
 		});
 
-		// TODO: create test for the case when the transaction store is being populated b decremental timestamps at alternate tokens
-		it('should not go into a loop until there are no more transactions', () => {});
+		it('should not go into a loop that finishes only when there are no more transactions', async () => {
+			let counter = 0;
+
+			const newTransaction: IcTransactionUi = {
+				...createMockIcTransactionsUi(1)[0],
+				timestamp: 1n
+			};
+
+			spyLoadNextIcTransactions.mockImplementation(
+				async ({ signalEnd }: { signalEnd: () => void }) => {
+					if (Math.random() > 0.3 || counter < 10) {
+						icTokens.forEach(([{ id: tokenId }]) => {
+							icTransactionsStore.append({
+								tokenId,
+								transactions: [{ data: newTransaction, certified: false }]
+							});
+						});
+						counter++;
+					} else {
+						signalEnd();
+					}
+					return await Promise.resolve();
+				}
+			);
+
+			render(AllTransactionsLoader, { props });
+
+			await waitFor(() => {
+				expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length + counter);
+			});
+		});
 	});
 
 	describe('with Solana tokens', () => {
@@ -471,8 +500,37 @@ describe('AllTransactionsLoader', () => {
 			});
 		});
 
-		// TODO: create test for the case when the transaction store is being populated b decremental timestamps at alternate tokens
-		it('should not go into a loop until there are no more transactions', () => {});
+		it('should not go into a loop that finishes only when there are no more transactions', async () => {
+			let counter = 0;
+
+			const newTransaction: SolTransactionUi = {
+				...createMockSolTransactionsUi(1)[0],
+				timestamp: 1n
+			};
+
+			spyLoadNextSolTransactions.mockImplementation(
+				async ({ signalEnd }: { signalEnd: () => void }) => {
+					if (Math.random() > 0.3 || counter < 10) {
+						solTokens.forEach(([{ id: tokenId }]) => {
+							solTransactionsStore.append({
+								tokenId,
+								transactions: [{ data: newTransaction, certified: false }]
+							});
+						});
+						counter++;
+					} else {
+						signalEnd();
+					}
+					return await Promise.resolve();
+				}
+			);
+
+			render(AllTransactionsLoader, { props });
+
+			await waitFor(() => {
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length + counter);
+			});
+		});
 	});
 
 	it('should handle all types of tokens', () => {
