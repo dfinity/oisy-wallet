@@ -182,7 +182,6 @@
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
 			"view_details": "View details",
-			"requirements_title": "Requirements",
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
@@ -200,6 +199,7 @@
 			"ended": "Ended ($amount)"
 		},
 		"requirements": {
+			"requirements_title": "Requirements",
 			"min_logins": "Login $loginsx in last $days days",
 			"min_transactions": "Complete $transactions transactions in last $days days",
 			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
