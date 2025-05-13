@@ -1,27 +1,3 @@
-import {
-	BASE_NETWORK_ID,
-	BASE_SEPOLIA_NETWORK_ID
-} from '$env/networks/networks-evm/networks.evm.base.env';
-import {
-	BSC_MAINNET_NETWORK_ID,
-	BSC_TESTNET_NETWORK_ID
-} from '$env/networks/networks-evm/networks.evm.bsc.env';
-import {
-	POLYGON_AMOY_NETWORK_ID,
-	POLYGON_MAINNET_NETWORK_ID
-} from '$env/networks/networks-evm/networks.evm.polygon.env';
-import {
-	ALCHEMY_NETWORK_BASE_MAINNET,
-	ALCHEMY_NETWORK_BASE_SEPOLIA,
-	ALCHEMY_NETWORK_BSC_MAINNET,
-	ALCHEMY_NETWORK_BSC_TESTNET,
-	ALCHEMY_NETWORK_MAINNET,
-	ALCHEMY_NETWORK_POLYGON_AMOY,
-	ALCHEMY_NETWORK_POLYGON_MAINNET,
-	ALCHEMY_NETWORK_SEPOLIA,
-	ETHEREUM_NETWORK_ID,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
