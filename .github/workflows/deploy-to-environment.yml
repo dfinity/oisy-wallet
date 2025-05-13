@@ -128,6 +128,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  DFX_WARNING: '-mainnet_plaintext_identity'
+
 jobs:
   deployment:
     runs-on: ubuntu-24.04
@@ -331,7 +334,7 @@ jobs:
         run: |
           key_pem=$(mktemp)
           printenv "DFX_DEPLOY_KEY" > "$key_pem"
-          dfx identity import --disable-encryption --force default "$key_pem"
+          dfx identity import --storage-mode=plaintext --force default "$key_pem"
           rm "$key_pem"
           dfx identity use default
           dfx identity get-principal
