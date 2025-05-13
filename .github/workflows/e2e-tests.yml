@@ -7,6 +7,8 @@ on:
   pull_request:
     types: [opened, synchronize, labeled]
   merge_group:
+  schedule:
+    - cron: '30 3 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -74,14 +76,32 @@ jobs:
         with:
           network: local
 
+  define-matrix:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      os-matrix: ${{ steps.set-matrix.outputs.os-matrix }}
+    steps:
+      - name: Set OS Matrix
+        id: set-matrix
+        run: |
+          MATRIX='["ubuntu-24.04"]'
+          if [[ "$ALL_RUNNERS" == "true" ]]; then
+            MATRIX='["ubuntu-24.04", "macos-14"]'
+          fi
+          echo "os-matrix=$MATRIX" >> $GITHUB_OUTPUT
+        env:
+          ALL_RUNNERS: ${{ contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+
   e2e:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
-    needs: ['oisy-backend-wasm', 'check-e2e-changes']
+    needs: ['oisy-backend-wasm', 'check-e2e-changes', 'define-matrix']
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: ${{ fromJson(needs.define-matrix.outputs.os-matrix) }}
     env:
       MATRIX_OS: ${{ matrix.os }}
     if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
@@ -123,7 +143,9 @@ jobs:
         uses: ./.github/actions/prepare-macos
 
       - name: Set Environment Variables
-        run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
+        run: |
+          echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
+          echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_E2E }}" >> $GITHUB_ENV
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
@@ -280,7 +302,7 @@ jobs:
             ${{ env.MODIFIED_FILES }}
             ```
 
-  may-merge-e2e:
+  e2e-tests-pass:
     if: always()
     needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
     runs-on: ubuntu-24.04

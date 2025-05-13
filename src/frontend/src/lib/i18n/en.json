@@ -25,6 +25,7 @@
 			"new": "New",
 			"edit": "Edit",
 			"no_results": "No results",
+			"paste": "Paste",
 			"to": "To",
 			"more_items": "+$items more"
 		},
@@ -34,7 +35,9 @@
 		"alt": {
 			"logo": "$name logo",
 			"go_to_home": "Go to the $oisy_name home page",
-			"back": "Go back to the previous page"
+			"back": "Go back to the previous page",
+			"open_details": "Open details",
+			"close_details": "Close details"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
@@ -178,7 +181,7 @@
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
-			"requirements_title": "Requirements",
+			"view_details": "View details",
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
@@ -194,6 +197,12 @@
 			"youre_eligible": "You're eligible!",
 			"ongoing": "Ongoing",
 			"ended": "Ended ($amount)"
+		},
+		"requirements": {
+			"requirements_title": "Requirements",
+			"min_logins": "Login $loginsx in last $days days",
+			"min_transactions": "Complete $transactions transactions in last $days days",
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
@@ -247,7 +256,6 @@
 			"no_alchemy_provider": "No Alchemy provider for network $network",
 			"no_alchemy_erc20_provider": "No Alchemy ERC20 provider for network $network",
 			"no_etherscan_provider": "No Etherscan provider for network $network",
-			"no_etherscan_rest_api": "No Etherscan Rest API for network $network",
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
@@ -582,7 +590,9 @@
 			"swap_provider": "Swap provider",
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",
-			"included_liquidity_fees": "Included liquidity pool fees"
+			"included_liquidity_fees": "Included liquidity pool fees",
+			"best_rate": "Best Rate",
+			"expected_minimum": "Expected minimum"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -877,7 +887,8 @@
 			"converting_twin_token": "Converting $twinToken to $ckToken",
 			"converting_ck_token": "Converting $ckToken to $twinToken",
 			"twin_network": "$twinNetwork network",
-			"no_date_available": "No Date Available"
+			"no_date_available": "No Date Available",
+			"pending": "Pending"
 		},
 		"alt": {
 			"open_block_explorer": "Open this transaction on a block explorer",
@@ -959,7 +970,8 @@
 			"error": {
 				"loading_reward": "Error while loading a new reward code.",
 				"loading_user_data": "Failed to load user data from reward canister.",
-				"claiming_reward": "Error while claiming reward."
+				"claiming_reward": "Error while claiming reward.",
+				"loading_eligibility": "Error while loading campaign eligibility."
 			}
 		},
 		"invitation": {

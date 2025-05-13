@@ -28,11 +28,18 @@ interface I18nCore {
 		new: string;
 		edit: string;
 		no_results: string;
+		paste: string;
 		to: string;
 		more_items: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string; go_to_home: string; back: string };
+	alt: {
+		logo: string;
+		go_to_home: string;
+		back: string;
+		open_details: string;
+		close_details: string;
+	};
 	warning: { do_not_close: string };
 }
 
@@ -170,7 +177,7 @@ interface I18nRewards {
 		share: string;
 		learn_more: string;
 		check_status: string;
-		requirements_title: string;
+		view_details: string;
 		modal_button_text: string;
 		activity_button_text: string;
 		activity_button_text_short: string;
@@ -186,6 +193,12 @@ interface I18nRewards {
 		youre_eligible: string;
 		ongoing: string;
 		ended: string;
+	};
+	requirements: {
+		requirements_title: string;
+		min_logins: string;
+		min_transactions: string;
+		min_total_assets_usd: string;
 	};
 	alt: { upcoming_campaigns: string; reward_logo: string };
 }
@@ -223,7 +236,6 @@ interface I18nInit {
 		no_alchemy_provider: string;
 		no_alchemy_erc20_provider: string;
 		no_etherscan_provider: string;
-		no_etherscan_rest_api: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
@@ -547,6 +559,8 @@ interface I18nSwap {
 		swap_route: string;
 		included_network_fees: string;
 		included_liquidity_fees: string;
+		best_rate: string;
+		expected_minimum: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -811,6 +825,7 @@ interface I18nTransaction {
 		converting_ck_token: string;
 		twin_network: string;
 		no_date_available: string;
+		pending: string;
 	};
 	alt: {
 		open_block_explorer: string;
@@ -871,7 +886,12 @@ interface I18nVip {
 			reward_received_description: string;
 			reward_failed_description: string;
 		};
-		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
+		error: {
+			loading_reward: string;
+			loading_user_data: string;
+			claiming_reward: string;
+			loading_eligibility: string;
+		};
 	};
 	invitation: {
 		text: {

@@ -8,7 +8,6 @@ import type {
 	Transaction_Icrc,
 	Transaction_Spl
 } from '$declarations/rewards/rewards.did';
-import { USER_SNAPSHOT_ENABLED } from '$env/reward-campaigns.env';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -338,10 +337,6 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 };
 
 export const registerUserSnapshot = async () => {
-	if (!USER_SNAPSHOT_ENABLED) {
-		return;
-	}
-
 	const timestamp = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
 
 	const accounts = takeAccountSnapshots(timestamp);

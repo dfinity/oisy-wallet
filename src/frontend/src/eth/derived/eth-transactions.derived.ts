@@ -57,6 +57,10 @@ export const ethKnownDestinations: Readable<KnownDestinations> = derived(
 			$ckEthMinterInfoStore?.[$ethereumTokenId]
 		);
 
+		if (ckMinterInfoAddresses.length === 0) {
+			return {};
+		}
+
 		const mappedTransactions = $sortedEthTransactions.map((transaction) =>
 			mapEthTransactionUi({
 				transaction,

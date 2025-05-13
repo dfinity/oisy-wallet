@@ -11,7 +11,6 @@
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		TRACK_COUNT_SOL_SEND_ERROR,
@@ -60,7 +59,6 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
-	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -199,14 +197,7 @@
 
 <SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING} {destination}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview
-			on:icBack
-			on:icSend={send}
-			{destination}
-			{amount}
-			{network}
-			source={source ?? ''}
-		/>
+		<SolSendReview on:icBack on:icSend={send} {destination} {amount} {network} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
@@ -214,18 +205,12 @@
 			on:icNext
 			on:icClose
 			on:icTokensList
+			on:icBack
 			bind:destination
 			bind:amount
-			on:icQRCodeScan
 			source={source ?? ''}
 		>
-			<svelte:fragment slot="cancel">
-				{#if formCancelAction === 'back'}
-					<ButtonBack onclick={back} />
-				{:else}
-					<ButtonCancel onclick={close} />
-				{/if}
-			</svelte:fragment>
+			<ButtonBack onclick={back} slot="cancel" />
 		</SolSendForm>
 	{:else}
 		<slot />
