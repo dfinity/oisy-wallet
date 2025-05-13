@@ -8,6 +8,7 @@ import {
 } from '$lib/derived/address.derived';
 import type { SolAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
 import {
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
@@ -292,10 +293,10 @@ export const loadNextSolTransactionsByOldest = async ({
 	transactions: SolTransactionUi[];
 	token: Token;
 	signalEnd: () => void;
-}): Promise<void> => {
+}): Promise<ResultSuccess> => {
 	// If there are no transactions, we let the worker load the first ones
 	if (transactions.length === 0) {
-		return;
+		return { success: false };
 	}
 
 	const lastTransaction = findOldestTransaction(transactions);
@@ -303,11 +304,13 @@ export const loadNextSolTransactionsByOldest = async ({
 	const { timestamp: minIcTimestamp, signature: lastSignature } = lastTransaction ?? {};
 
 	if (nonNullish(minIcTimestamp) && minIcTimestamp <= minTimestamp) {
-		return;
+		return { success: false };
 	}
 
 	await loadNextSolTransactions({
 		...rest,
 		before: lastSignature
 	});
+
+	return { success: true };
 };
