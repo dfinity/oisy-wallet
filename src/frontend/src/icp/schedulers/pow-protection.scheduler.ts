@@ -10,7 +10,7 @@ import {
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
 	private timer = new SchedulerTimer('syncPowProtectionStatus');
@@ -66,7 +66,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		}
 
 		// Make sure we have a valid response before continuing
-		if (!nonNullish(createChallengeResponse)) {
+		if (isNullish(createChallengeResponse)) {
 			return;
 		}
 
