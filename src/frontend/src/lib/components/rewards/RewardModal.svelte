@@ -29,7 +29,7 @@
 	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
 	const campaignEligibility = $derived(
-		$store?.campaignEligibilities?.find((campaign) => campaign.campaignId === reward.id)
+		$store?.campaignEligibilities?.find(({campaignId}) => campaignId === reward.id)
 	);
 
 	const isEligible = $derived(campaignEligibility?.eligible ?? false);
