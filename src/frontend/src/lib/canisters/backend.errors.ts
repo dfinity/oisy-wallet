@@ -62,7 +62,7 @@ export enum CreateChallengeEnum {
 }
 
 export class PowCreateChallengeError extends CanisterInternalError {
-	private code: CreateChallengeEnum;
+	public code: CreateChallengeEnum;
 
 	constructor(message: string, code: CreateChallengeEnum) {
 		super(message);
@@ -71,11 +71,11 @@ export class PowCreateChallengeError extends CanisterInternalError {
 }
 
 export class PowChallengeError extends CanisterInternalError {
-	private challengeCompletionError: ChallengeCompletionErrorEnum;
+	public code: ChallengeCompletionErrorEnum;
 
 	constructor(message: string, challengeCompletionError: ChallengeCompletionErrorEnum) {
 		super(message);
-		this.challengeCompletionError = challengeCompletionError;
+		this.code = challengeCompletionError;
 	}
 }
 

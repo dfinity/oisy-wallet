@@ -4,7 +4,8 @@ import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import {
 	ChallengeCompletionErrorEnum,
 	CreateChallengeEnum,
-	PowChallengeError
+	PowChallengeError,
+	PowCreateChallengeError
 } from '$lib/canisters/backend.errors';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
@@ -63,6 +64,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 			if (this.isChallengeInProgressError(err)) {
 				return;
 			}
+			throw err;
 		}
 
 		// Make sure we have a valid response before continuing
@@ -104,13 +106,11 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		}
 	};
 
-	private isChallengeInProgressError = (error: unknown): boolean =>
-		error instanceof PowChallengeError &&
-		error.message.includes(CreateChallengeEnum.ChallengeInProgress);
+	private isChallengeInProgressError = (err: unknown): boolean =>
+		err instanceof PowCreateChallengeError && err.code === CreateChallengeEnum.ChallengeInProgress;
 
-	private isExpiredChallengeError = (error: unknown): boolean =>
-		error instanceof PowChallengeError &&
-		error.message.includes(ChallengeCompletionErrorEnum.ExpiredChallenge);
+	private isExpiredChallengeError = (err: unknown): boolean =>
+		err instanceof PowChallengeError && err.code === ChallengeCompletionErrorEnum.ExpiredChallenge;
 
 	private postMessagePowProgress({
 		progress
