@@ -97,7 +97,7 @@ fn test_get_allowed_cycles_requires_authenticated_user() {
 
     assert_eq!(
         response,
-        Err("Anonymous caller not authorized.".to_string())
+        Err("Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized.".to_string())
     );
 }
 
