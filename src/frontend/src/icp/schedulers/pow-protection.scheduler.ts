@@ -65,7 +65,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		}
 
 		// Make sure we have a valid response before continuing
-		if (!createChallengeResponse) {
+		if (nonNullish(createChallengeResponse)) {
 			return;
 		}
 
