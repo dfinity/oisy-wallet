@@ -1,5 +1,6 @@
 import type {
-	ClaimedVipReward, EligibilityResponse,
+	ClaimedVipReward,
+	EligibilityResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	SetReferrerResponse,
@@ -17,9 +18,9 @@ import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 let canister: RewardCanister | undefined = undefined;
 
 export const isEligible = async ({
-	 identity,
-	 certified
- }: CanisterApiFunctionParams<QueryParams>): Promise<EligibilityResponse> => {
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<EligibilityResponse> => {
 	const { isEligible } = await rewardCanister({ identity });
 
 	return isEligible({ certified });
