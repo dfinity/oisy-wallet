@@ -483,7 +483,6 @@ describe('sol-transactions.services', () => {
 
 	describe('loadNextSolTransactionsByOldest', () => {
 		const signalEnd = vi.fn();
-		const callback = vi.fn();
 
 		const mockToken = SOLANA_TOKEN;
 
@@ -500,8 +499,7 @@ describe('sol-transactions.services', () => {
 			minTimestamp: 1n,
 			transactions: mockTransactions,
 			token: mockToken,
-			signalEnd,
-			callback
+			signalEnd
 		};
 
 		beforeEach(() => {
@@ -511,19 +509,28 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should not load transactions if the transactions list is empty', async () => {
-			await loadNextSolTransactionsByOldest({ ...mockParams, transactions: [] });
+			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions: [] });
+
+			expect(result).toEqual({ success: false });
 
 			expect(spyGetTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should not load transactions if the minStamp is newer than all the transactions', async () => {
-			await loadNextSolTransactionsByOldest({ ...mockParams, minTimestamp: 10_000n });
+			const result = await loadNextSolTransactionsByOldest({
+				...mockParams,
+				minTimestamp: 10_000n
+			});
+
+			expect(result).toEqual({ success: false });
 
 			expect(spyGetTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should load transactions with the correct parameters', async () => {
-			await loadNextSolTransactionsByOldest(mockParams);
+			const result = await loadNextSolTransactionsByOldest(mockParams);
+
+			expect(result).toEqual({ success: true });
 
 			expect(spyGetTransactions).toHaveBeenCalledOnce();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
@@ -542,7 +549,9 @@ describe('sol-transactions.services', () => {
 			);
 			const lastSignature = transactions[0].signature;
 
-			await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
+			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
+
+			expect(result).toEqual({ success: true });
 
 			expect(spyGetTransactions).toHaveBeenCalledOnce();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
@@ -550,21 +559,6 @@ describe('sol-transactions.services', () => {
 				network: SolanaNetworks.mainnet,
 				before: lastSignature
 			});
-		});
-
-		it('should not throw if the function to fetch transactions fails', async () => {
-			const error = new Error('Failed to load transactions');
-			spyGetTransactions.mockRejectedValue(error);
-
-			await expect(loadNextSolTransactionsByOldest(mockParams)).resolves.not.toThrow();
-
-			expect(callback).toHaveBeenCalled();
-		});
-
-		it('should execute the callback if successful', async () => {
-			await loadNextSolTransactionsByOldest(mockParams);
-
-			expect(callback).toHaveBeenCalledOnce();
 		});
 	});
 });
