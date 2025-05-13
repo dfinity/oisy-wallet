@@ -49,9 +49,9 @@
 						on:click={() => dispatch('icSelectProvider', swap)}
 						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
 						amount={swap.receiveAmount}
-						token={$destinationToken}
+						destinationToken={$destinationToken}
 						usdBalance={getUsdBalance(swap.receiveAmount, $destinationToken)}
-						isBest={swap.provider === $swapAmountsStore.swaps[0].provider}
+						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
 					/>
 				</li>
 			{/if}
