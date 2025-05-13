@@ -1,6 +1,6 @@
 use candid::{CandidType, Deserialize};
 
-use super::address_type::AddressType;
+use super::account::TokenAccountId; 
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Contact {
@@ -12,7 +12,7 @@ pub struct Contact {
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ContactAddressData {
-    pub network_type: AddressType,
+    pub network_type: TokenAccountId, 
     pub address: String,
     pub label: Option<String>,
 }
@@ -30,6 +30,8 @@ pub struct AddContactRequest {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct RemoveContactRequest {
     pub contact_id: String,
+    pub network_type: TokenAccountId, 
+    pub address: String,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -44,16 +46,9 @@ pub struct AddAddressRequest {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct RemoveAddressRequest {
-    pub contact_id: String,
-    pub network_type: AddressType,
-    pub address: String,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct UpdateAddressRequest {
     pub contact_id: String,
-    pub current_network_type: AddressType,
+    pub current_network_type: TokenAccountId, // Changed from TokenAccountId
     pub current_address: String,
     pub new_address: ContactAddressData,
 }
@@ -68,5 +63,5 @@ pub enum ContactError {
     AddressAlreadyExists,
     AddressNotFound,
     InvalidAddressFormat,
-    InvalidAddressType,
+    InvalidAddressType
 }
