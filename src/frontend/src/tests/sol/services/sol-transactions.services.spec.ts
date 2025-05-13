@@ -8,7 +8,8 @@ import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import {
 	fetchSolTransactionsForSignature,
-	loadNextSolTransactions
+	loadNextSolTransactions,
+	loadNextSolTransactionsByOldest
 } from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
@@ -476,6 +477,76 @@ describe('sol-transactions.services', () => {
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				address: mockSolAddress2,
 				network: SolanaNetworks.devnet
+			});
+		});
+	});
+
+	describe('loadNextSolTransactionsByOldest', () => {
+		const signalEnd = vi.fn();
+
+		const mockToken = SOLANA_TOKEN;
+
+		const mockTransactions: SolTransactionUi[] = createMockSolTransactionsUi(17).map(
+			(transaction, index) => ({
+				...transaction,
+				timestamp: 100n + BigInt(index)
+			})
+		);
+		const [expectedOldestTransaction] = mockTransactions;
+		const { signature: mockLastSignature } = expectedOldestTransaction;
+
+		const mockParams = {
+			minTimestamp: 1n,
+			transactions: mockTransactions,
+			token: mockToken,
+			signalEnd
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
+		});
+
+		it('should not load transactions if the transactions list is empty', async () => {
+			await loadNextSolTransactionsByOldest({ ...mockParams, transactions: [] });
+
+			expect(spyGetTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should not load transactions if the minStamp is newer than all the transactions', async () => {
+			await loadNextSolTransactionsByOldest({ ...mockParams, minTimestamp: 10_000n });
+
+			expect(spyGetTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should load transactions with the correct parameters', async () => {
+			await loadNextSolTransactionsByOldest(mockParams);
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: mockLastSignature
+			});
+		});
+
+		it('should load transactions if the transactions have undefined timestamp', async () => {
+			const transactions: SolTransactionUi[] = createMockSolTransactionsUi(17).map(
+				(transaction) => ({
+					...transaction,
+					timestamp: undefined
+				})
+			);
+			const lastSignature = transactions[0].signature;
+
+			await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: lastSignature
 			});
 		});
 	});
