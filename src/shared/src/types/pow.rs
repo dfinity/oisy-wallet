@@ -26,7 +26,7 @@ pub const TARGET_DURATION_MS: u64 = 30_000;
 // TARGET_DURATION_MS, ensuring that challenges have sufficient time to be solved before expiration.
 // By default, EXPIRY_DURATION_MS is set to twice the TARGET_DURATION_MS to provide a reasonable
 // time limit for solving challenges.
-pub const EXPIRY_DURATION_MS: u64 = 60_000;
+pub const EXPIRY_DURATION_MS: u64 = 120_000;
 
 // The default starting difficulty for the first PoW challenge.
 // Must lie between `MIN_DIFFICULTY` and `MAX_DIFFICULTY`.

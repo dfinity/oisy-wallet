@@ -1,6 +1,7 @@
 import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
+	ChallengeCompletionError,
 	CreateChallengeError,
 	GetAllowedCyclesError,
 	SelectedUtxosFeeError
@@ -46,9 +47,41 @@ export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterIn
 	return new CanisterInternalError('Unknown GetAllowedCyclesError');
 };
 
+export enum ChallengeCompletionErrorEnum {
+	InvalidNonce = 'InvalidNonce',
+	MissingChallenge = 'MissingChallenge',
+	ExpiredChallenge = 'ExpiredChallenge',
+	MissingUserProfile = 'MissingUserProfile',
+	ChallengeAlreadySolved = 'ChallengeAlreadySolved',
+	Unknown = 'Unknown'
+}
+
+export enum CreateChallengeEnum {
+	ChallengeInProgress = 'ChallengeInProgress',
+	Unknown = 'Unknown'
+}
+
+export class PowCreateChallengeError extends CanisterInternalError {
+	public code: CreateChallengeEnum;
+
+	constructor(message: string, code: CreateChallengeEnum) {
+		super(message);
+		this.code = code;
+	}
+}
+
+export class PowChallengeError extends CanisterInternalError {
+	public code: ChallengeCompletionErrorEnum;
+
+	constructor(message: string, challengeCompletionError: ChallengeCompletionErrorEnum) {
+		super(message);
+		this.code = challengeCompletionError;
+	}
+}
+
 export const mapAllowSigningError = (
 	err: AllowSigningError
-): CanisterInternalError | ApproveError => {
+): CanisterInternalError | ApproveError | ChallengeCompletionError => {
 	if ('ApproveError' in err) {
 		return mapIcrc2ApproveError(err.ApproveError);
 	}
@@ -60,43 +93,59 @@ export const mapAllowSigningError = (
 	if ('PowChallenge' in err) {
 		const powError = err.PowChallenge;
 
-		// Map specific PowChallenge errors to CanisterInternalError with descriptive messages
+		// Convert the backend Candid variant type to a strongly typed enum so we can easily handle it
+		// when thrown
 		if ('InvalidNonce' in powError) {
-			return new CanisterInternalError(
-				'PowChallenge error: The proof of work solution is invalid.'
+			return new PowChallengeError(
+				'The provided nonce is valid.',
+				ChallengeCompletionErrorEnum.InvalidNonce
 			);
 		}
 		if ('MissingChallenge' in powError) {
-			return new CanisterInternalError('PowChallenge error: No active challenge found.');
+			return new PowChallengeError(
+				'No active challenge found.',
+				ChallengeCompletionErrorEnum.MissingChallenge
+			);
 		}
 		if ('ExpiredChallenge' in powError) {
-			return new CanisterInternalError('PowChallenge error: The challenge has expired.');
+			return new PowChallengeError(
+				'The challenge has expired.',
+				ChallengeCompletionErrorEnum.ExpiredChallenge
+			);
 		}
 		if ('MissingUserProfile' in powError) {
-			return new CanisterInternalError(
-				'PowChallenge error: User profile not found. Please create a profile first.'
+			return new PowChallengeError(
+				'User profile not found. Please create a profile first.',
+				ChallengeCompletionErrorEnum.MissingUserProfile
 			);
 		}
 		if ('ChallengeAlreadySolved' in powError) {
-			return new CanisterInternalError(
-				'PowChallenge error: This challenge has already been solved.'
+			return new PowChallengeError(
+				'This challenge has already been solved.',
+				ChallengeCompletionErrorEnum.ChallengeAlreadySolved
 			);
 		}
 
 		// Fallback for any unknown PowChallenge error types
-		return new CanisterInternalError(`Unknown PoW challenge error: ${JSON.stringify(powError)}`);
+		return new PowChallengeError(
+			`Unknown error: ${JSON.stringify(powError)}`,
+			ChallengeCompletionErrorEnum.Unknown
+		);
 	}
 
 	if ('Other' in err) {
 		return new CanisterInternalError(err.Other);
 	}
 
-	return new CanisterInternalError('Unknown AllowSigningError');
+	return new CanisterInternalError('An uknown error occurred.');
 };
 
 export const mapCreateChallengeError = (err: CreateChallengeError): CanisterInternalError => {
 	if ('ChallengeInProgress' in err) {
-		return new CanisterInternalError('Challenge is already in progress.');
+		return new PowCreateChallengeError(
+			'Challenge is already in progress.',
+			CreateChallengeEnum.ChallengeInProgress
+		);
 	}
 
 	if ('MissingUserProfile' in err) {
@@ -104,12 +153,12 @@ export const mapCreateChallengeError = (err: CreateChallengeError): CanisterInte
 	}
 
 	if ('RandomnessError' in err) {
-		return new CanisterInternalError(err.RandomnessError);
+		return new CanisterInternalError('Could not generate randomness.');
 	}
 
 	if ('Other' in err) {
-		return new CanisterInternalError(err.Other);
+		return new CanisterInternalError('An other error occurred.');
 	}
 
-	return new CanisterInternalError('Unknown CreateChallengeError');
+	return new CanisterInternalError('An uknown error occurred.');
 };

@@ -1,7 +1,12 @@
 import type { CreateChallengeResponse } from '$declarations/backend/backend.did';
 import { solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
-import { CanisterInternalError } from '$lib/canisters/errors';
+import {
+	ChallengeCompletionErrorEnum,
+	CreateChallengeEnum,
+	PowChallengeError,
+	PowCreateChallengeError
+} from '$lib/canisters/backend.errors';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type {
@@ -59,6 +64,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 			if (this.isChallengeInProgressError(err)) {
 				return;
 			}
+			throw err;
 		}
 
 		// Make sure we have a valid response before continuing
@@ -89,7 +95,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 			if (this.isExpiredChallengeError(err)) {
 				console.error(
 					'ExpiredChallenge: The challange was not solved within the given timeframe. Reduce the ' +
-						'difficulty or increase the expiary duration to avoid this issue from heppening again'
+						'difficulty or increase the expiary duration to avoid this issue from happening again'
 				);
 			}
 		}
@@ -100,14 +106,11 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		}
 	};
 
-	// Helper function to check for the specific error condition
-	private isChallengeInProgressError = (error: unknown): boolean =>
-		error instanceof CanisterInternalError && error.message === 'Challenge is already in progress.';
+	private isChallengeInProgressError = (err: unknown): boolean =>
+		err instanceof PowCreateChallengeError && err.code === CreateChallengeEnum.ChallengeInProgress;
 
-	// Helper function to check for the specific error condition
-	private isExpiredChallengeError = (error: unknown): boolean =>
-		error instanceof CanisterInternalError &&
-		error.message === 'PowChallenge error: The challenge has expired.';
+	private isExpiredChallengeError = (err: unknown): boolean =>
+		err instanceof PowChallengeError && err.code === ChallengeCompletionErrorEnum.ExpiredChallenge;
 
 	private postMessagePowProgress({
 		progress
