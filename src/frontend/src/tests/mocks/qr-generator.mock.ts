@@ -1,4 +1,5 @@
 import type { EthereumNetwork } from '$eth/types/network';
+import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -26,7 +27,7 @@ export const generateUrn = ({
 	}
 
 	const prefix =
-		standard === 'erc20' ? 'ethereum' : standard === 'icrc' ? name.toLowerCase() : standard;
+		standard === 'erc20' ? 'ethereum' : isTokenIcrc(token) ? name.toLowerCase() : standard;
 
 	urn = `${prefix}:${destination}`;
 

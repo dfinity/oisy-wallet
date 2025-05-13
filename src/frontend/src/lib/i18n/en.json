@@ -25,7 +25,9 @@
 			"new": "New",
 			"edit": "Edit",
 			"no_results": "No results",
-			"to": "To"
+			"paste": "Paste",
+			"to": "To",
+			"more_items": "+$items more"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -33,7 +35,9 @@
 		"alt": {
 			"logo": "$name logo",
 			"go_to_home": "Go to the $oisy_name home page",
-			"back": "Go back to the previous page"
+			"back": "Go back to the previous page",
+			"open_details": "Open details",
+			"close_details": "Close details"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
@@ -194,6 +198,11 @@
 			"ongoing": "Ongoing",
 			"ended": "Ended ($amount)"
 		},
+		"requirements": {
+			"min_logins": "Login $loginsx in last $days days",
+			"min_transactions": "Complete $transactions transactions in last $days days",
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
+		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
 			"reward_logo": "Logo of the campaign $campaignName"
@@ -246,7 +255,6 @@
 			"no_alchemy_provider": "No Alchemy provider for network $network",
 			"no_alchemy_erc20_provider": "No Alchemy ERC20 provider for network $network",
 			"no_etherscan_provider": "No Etherscan provider for network $network",
-			"no_etherscan_rest_api": "No Etherscan Rest API for network $network",
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
@@ -443,7 +451,9 @@
 			"open_qr_modal": "Start QR Code scan for transaction details",
 			"scan_qr": "Scan QR Code",
 			"select_token": "Select token to send",
-			"select_network_filter": "Select network filter"
+			"select_network_filter": "Select network filter",
+			"send_again": "Send again",
+			"recently_used": "Recently used"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
@@ -455,7 +465,8 @@
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
-			"no_available_utxos": "You won't have available utxos to perform this transaction."
+			"no_available_utxos": "You won't have available utxos to perform this transaction.",
+			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -578,7 +589,9 @@
 			"swap_provider": "Swap provider",
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",
-			"included_liquidity_fees": "Included liquidity pool fees"
+			"included_liquidity_fees": "Included liquidity pool fees",
+			"best_rate": "Best Rate",
+			"expected_minimum": "Expected minimum"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -873,7 +886,8 @@
 			"converting_twin_token": "Converting $twinToken to $ckToken",
 			"converting_ck_token": "Converting $ckToken to $twinToken",
 			"twin_network": "$twinNetwork network",
-			"no_date_available": "No Date Available"
+			"no_date_available": "No Date Available",
+			"pending": "Pending"
 		},
 		"alt": {
 			"open_block_explorer": "Open this transaction on a block explorer",

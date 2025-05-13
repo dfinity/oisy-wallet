@@ -15,7 +15,6 @@ use ic_stable_structures::{
     DefaultMemoryImpl,
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
-use oisy_user::oisy_users;
 use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
@@ -48,8 +47,7 @@ use shared::{
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
-            HasUserProfileResponse, ListUserCreationTimestampsResponse, ListUsersRequest,
-            ListUsersResponse, OisyUser, UserProfile,
+            HasUserProfileResponse, UserProfile,
         },
         Stats, Timestamp,
     },
@@ -65,7 +63,7 @@ use user_profile_model::UserProfileModel;
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
-    oisy_user::oisy_user_creation_timestamps,
+    result_types::AddUserCredentialResult,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
@@ -78,7 +76,6 @@ mod config;
 mod guards;
 mod heap_state;
 mod impls;
-mod oisy_user;
 mod pow;
 pub mod signer;
 mod state;
@@ -87,6 +84,7 @@ mod types;
 mod user_profile;
 mod user_profile_model;
 
+mod result_types;
 #[cfg(test)]
 mod tests;
 
@@ -498,16 +496,17 @@ pub async fn btc_get_pending_transactions(
 /// Errors are enumerated by: `AddUserCredentialError`.
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
-pub fn add_user_credential(
-    request: AddUserCredentialRequest,
-) -> Result<(), AddUserCredentialError> {
+#[must_use]
+pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredentialResult {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
     let current_time_ns = u128::from(time());
 
-    let (vc_flow_signers, root_pk_raw, credential_type, derivation_origin) =
+    let Some((vc_flow_signers, root_pk_raw, credential_type, derivation_origin)) =
         read_config(|config| find_credential_config(&request, config))
-            .ok_or(AddUserCredentialError::ConfigurationError)?;
+    else {
+        return AddUserCredentialResult::Err(AddUserCredentialError::ConfigurationError);
+    };
 
     match validate_ii_presentation_and_claims(
         &request.credential_jwt,
@@ -531,6 +530,7 @@ pub fn add_user_credential(
         }),
         Err(_) => Err(AddUserCredentialError::InvalidCredential),
     }
+    .into()
 }
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
@@ -718,7 +718,7 @@ pub fn has_user_profile() -> HasUserProfileResponse {
     }
 }
 
-/// Retrieves the number of cycles that the signer canister is allowed to spend
+/// Retrieves the amount of cycles that the signer canister is allowed to spend
 /// on behalf of the current user
 /// # Returns
 /// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
@@ -728,12 +728,9 @@ pub fn has_user_profile() -> HasUserProfileResponse {
 /// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 /// - `Other`: If another error occurred during the operation
 #[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::unused_async)]
 pub async fn get_allowed_cycles() -> Result<GetAllowedCyclesResponse, GetAllowedCyclesError> {
-    // TODO call the get_allowed_cycles implementation
-    Ok(GetAllowedCyclesResponse {
-        allowed_cycles: { Nat::from(1u32) },
-    })
+    let allowed_cycles: Nat = signer::get_allowed_cycles().await?;
+    Ok(GetAllowedCyclesResponse { allowed_cycles })
 }
 
 /// This function authorizes the caller to spend a specific
@@ -792,37 +789,6 @@ pub async fn allow_signing(
         allowed_cycles,
         challenge_completion: Some(challenge_completion),
     })
-}
-
-#[query(guard = "caller_is_allowed")]
-#[allow(clippy::needless_pass_by_value)]
-#[must_use]
-pub fn list_users(request: ListUsersRequest) -> ListUsersResponse {
-    // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles
-    // consumption when reading BTreeMap.
-
-    let (users, matches_max_length): (Vec<OisyUser>, u64) =
-        read_state(|s| oisy_users(&request, &s.user_profile));
-
-    ListUsersResponse {
-        users,
-        matches_max_length,
-    }
-}
-
-#[query(guard = "caller_is_allowed")]
-#[allow(clippy::needless_pass_by_value)]
-#[must_use]
-pub fn list_user_creation_timestamps(
-    request: ListUsersRequest,
-) -> ListUserCreationTimestampsResponse {
-    let (creation_timestamps, matches_max_length): (Vec<Timestamp>, u64) =
-        read_state(|s| oisy_user_creation_timestamps(&request, &s.user_profile));
-
-    ListUserCreationTimestampsResponse {
-        creation_timestamps,
-        matches_max_length,
-    }
 }
 
 /// API method to get cycle balance and burn rate.

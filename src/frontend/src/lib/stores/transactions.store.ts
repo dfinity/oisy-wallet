@@ -6,32 +6,41 @@ import type { TokenId } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { nonNullish } from '@dfinity/utils';
 
-export type CertifiedTransaction<T> = CertifiedData<T>;
+type TransactionTypes = IcTransactionUi | BtcTransactionUi | SolTransactionUi;
+
+export type CertifiedTransaction<T extends TransactionTypes> = CertifiedData<T>;
+
+export type TransactionsStoreParams<T extends TransactionTypes> = {
+	tokenId: TokenId;
+	transactions: CertifiedTransaction<T>[];
+};
+
+export type TransactionsStoreIdParams<T extends TransactionTypes> = Omit<
+	TransactionsStoreParams<T>,
+	'transactions'
+> & {
+	transactionIds: T['id'][];
+};
 
 export type NullableCertifiedTransactions = null;
 
-export type TransactionsData<T> = CertifiedTransaction<T>[] | NullableCertifiedTransactions;
+export type TransactionsData<T extends TransactionTypes> =
+	| CertifiedTransaction<T>[]
+	| NullableCertifiedTransactions;
 
-export interface TransactionsStore<T> extends CertifiedStore<TransactionsData<T>> {
-	prepend: (params: { tokenId: TokenId; transactions: CertifiedTransaction<T>[] }) => void;
-	append: (params: { tokenId: TokenId; transactions: CertifiedTransaction<T>[] }) => void;
-	cleanUp: (params: { tokenId: TokenId; transactionIds: string[] }) => void;
+export interface TransactionsStore<T extends TransactionTypes>
+	extends CertifiedStore<TransactionsData<T>> {
+	prepend: (params: TransactionsStoreParams<T>) => void;
+	append: (params: TransactionsStoreParams<T>) => void;
+	cleanUp: (params: TransactionsStoreIdParams<T>) => void;
 	nullify: (tokenId: TokenId) => void;
 }
 
-export const initTransactionsStore = <
-	T extends IcTransactionUi | BtcTransactionUi | SolTransactionUi
->(): TransactionsStore<T> => {
+export const initTransactionsStore = <T extends TransactionTypes>(): TransactionsStore<T> => {
 	const { subscribe, update, reset } = initCertifiedStore<TransactionsData<T>>();
 
 	return {
-		prepend: ({
-			tokenId,
-			transactions
-		}: {
-			tokenId: TokenId;
-			transactions: CertifiedTransaction<T>[];
-		}) =>
+		prepend: ({ tokenId, transactions }: TransactionsStoreParams<T>) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: [
@@ -41,13 +50,7 @@ export const initTransactionsStore = <
 					)
 				]
 			})),
-		append: ({
-			tokenId,
-			transactions
-		}: {
-			tokenId: TokenId;
-			transactions: CertifiedTransaction<T>[];
-		}) =>
+		append: ({ tokenId, transactions }: TransactionsStoreParams<T>) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: [
@@ -58,7 +61,7 @@ export const initTransactionsStore = <
 					)
 				]
 			})),
-		cleanUp: ({ tokenId, transactionIds }: { tokenId: TokenId; transactionIds: string[] }) =>
+		cleanUp: ({ tokenId, transactionIds }: TransactionsStoreIdParams<T>) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: ((state ?? {})[tokenId] ?? []).filter(
