@@ -8,7 +8,11 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { CONTACT_SHOW_CLOSE_BUTTON } from '$lib/constants/test-ids.constants';
+	import {
+		CONTACT_EDIT_ADD_ADDRESS_BUTTON,
+		CONTACT_EDIT_DELETE_CONTACT_BUTTON,
+		CONTACT_SHOW_CLOSE_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address, Contact } from '$lib/types/contact';
 
@@ -37,7 +41,7 @@
 		-->
 	{#each contact.addresses as address (address.id)}
 		<div class="flex items-center">
-			<div class="grow">ADDRESS: {address.address_type} {address.address} {address.alias}</div>
+			<div class="grow">ADDRESS: {address.address} {address.alias}</div>
 			<div class="flex gap-2">
 				{#if nonNullish(editAddress)}
 					<Button styleClass="flex-none" on:click={() => editAddress(address)}>Edit</Button>
@@ -56,6 +60,7 @@
 		colorStyle="tertiary-main-card"
 		disabled={isNullish(addAddress)}
 		on:click={() => addAddress?.()}
+		testId={CONTACT_EDIT_ADD_ADDRESS_BUTTON}
 	>
 		<span class="flex items-center">
 			<IconPlus />
@@ -71,6 +76,7 @@
 		colorStyle="tertiary-main-card"
 		disabled={isNullish(deleteContact)}
 		on:click={() => deleteContact?.(contact.id)}
+		testId={CONTACT_EDIT_DELETE_CONTACT_BUTTON}
 	>
 		<span class="flex items-center">
 			<IconTrash />
