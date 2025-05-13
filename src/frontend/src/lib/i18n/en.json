@@ -35,7 +35,9 @@
 		"alt": {
 			"logo": "$name logo",
 			"go_to_home": "Go to the $oisy_name home page",
-			"back": "Go back to the previous page"
+			"back": "Go back to the previous page",
+			"open_details": "Open details",
+			"close_details": "Close details"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
@@ -195,6 +197,11 @@
 			"youre_eligible": "You're eligible!",
 			"ongoing": "Ongoing",
 			"ended": "Ended ($amount)"
+		},
+		"requirements": {
+			"min_logins": "Login $loginsx in last $days days",
+			"min_transactions": "Complete $transactions transactions in last $days days",
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
@@ -582,7 +589,9 @@
 			"swap_provider": "Swap provider",
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",
-			"included_liquidity_fees": "Included liquidity pool fees"
+			"included_liquidity_fees": "Included liquidity pool fees",
+			"best_rate": "Best Rate",
+			"expected_minimum": "Expected minimum"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -960,7 +969,8 @@
 			"error": {
 				"loading_reward": "Error while loading a new reward code.",
 				"loading_user_data": "Failed to load user data from reward canister.",
-				"claiming_reward": "Error while claiming reward."
+				"claiming_reward": "Error while claiming reward.",
+				"loading_eligibility": "Error while loading campaign eligibility."
 			}
 		},
 		"invitation": {

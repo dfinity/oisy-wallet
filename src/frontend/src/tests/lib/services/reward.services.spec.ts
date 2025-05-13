@@ -1,4 +1,6 @@
 import type {
+	CampaignEligibility,
+	EligibilityReport,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	RewardInfo,
@@ -14,6 +16,7 @@ import {
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import {
 	claimVipReward,
+	getCampaignEligibilities,
 	getNewReward,
 	getReferrerInfo,
 	getRewardRequirementsFulfilled,
@@ -38,6 +41,53 @@ const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 describe('reward-code', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+	});
+
+	describe('getCampaignEligibilities', () => {
+		const campaignId = 'deuteronomy';
+		const campaign: CampaignEligibility = { eligible: true, available: true, criteria: [] };
+		const mockEligibilityReport: EligibilityReport = {
+			campaigns: [[campaignId, campaign]]
+		};
+
+		it('should return campaign eligibilities', async () => {
+			const getCampaignEligibilitiesSpy = vi
+				.spyOn(rewardApi, 'isEligible')
+				.mockResolvedValueOnce(mockEligibilityReport);
+
+			const campaignEligibilities = await getCampaignEligibilities({ identity: mockIdentity });
+
+			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				certified: false,
+				nullishIdentityErrorMessage
+			});
+			expect(campaignEligibilities).toHaveLength(1);
+
+			const campaignEligibility = campaignEligibilities.find(
+				(campaign) => campaign.campaignId === campaignId
+			);
+
+			expect(campaignEligibility?.campaignId).toEqual(campaignId);
+		});
+
+		it('should display an error message', async () => {
+			const err = new Error('test');
+			const getCampaignEligibilitiesSpy = vi.spyOn(rewardApi, 'isEligible').mockRejectedValue(err);
+			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+			await getCampaignEligibilities({ identity: mockIdentity });
+
+			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				certified: false,
+				nullishIdentityErrorMessage
+			});
+			expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+				msg: { text: get(i18n).vip.reward.error.loading_eligibility },
+				err
+			});
+		});
 	});
 
 	describe('getUserRoles', () => {

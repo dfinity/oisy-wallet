@@ -33,7 +33,13 @@ interface I18nCore {
 		more_items: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string; go_to_home: string; back: string };
+	alt: {
+		logo: string;
+		go_to_home: string;
+		back: string;
+		open_details: string;
+		close_details: string;
+	};
 	warning: { do_not_close: string };
 }
 
@@ -188,6 +194,7 @@ interface I18nRewards {
 		ongoing: string;
 		ended: string;
 	};
+	requirements: { min_logins: string; min_transactions: string; min_total_assets_usd: string };
 	alt: { upcoming_campaigns: string; reward_logo: string };
 }
 
@@ -547,6 +554,8 @@ interface I18nSwap {
 		swap_route: string;
 		included_network_fees: string;
 		included_liquidity_fees: string;
+		best_rate: string;
+		expected_minimum: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -872,7 +881,12 @@ interface I18nVip {
 			reward_received_description: string;
 			reward_failed_description: string;
 		};
-		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
+		error: {
+			loading_reward: string;
+			loading_user_data: string;
+			claiming_reward: string;
+			loading_eligibility: string;
+		};
 	};
 	invitation: {
 		text: {
