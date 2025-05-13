@@ -26,18 +26,17 @@
 		store: initRewardEligibilityStore()
 	});
 
-	onMount(() => {
-		const loadEligibilityReport = async () => {
-			if (isNullish($authIdentity)) {
-				await nullishSignOut();
-				return;
-			}
+	const loadEligibilityReport = async () => {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
 
-			// TODO load campaign eligibilities from reward service
-			store.setCampaignEligibilities([]);
-		};
-		loadEligibilityReport();
-	});
+		// TODO load campaign eligibilities from reward service
+		store.setCampaignEligibilities([]);
+	};
+
+	onMount(loadEligibilityReport);
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 
