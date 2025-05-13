@@ -156,7 +156,7 @@ jobs:
       # So we first open an instance of the website to warm it up.
       - name: Warm up the website
         run: |
-          npm run preview -- --open
+          npm run preview -- --open &
           sleep 10
 
       - name: Test
