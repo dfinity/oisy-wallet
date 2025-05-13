@@ -94,7 +94,8 @@ const send = async ({
 
 	if (isTokenDip20(token)) {
 		await sendDip20({
-			...rest
+			...rest,
+			ledgerCanisterId
 		});
 		return;
 	}
@@ -162,8 +163,10 @@ export const sendDip20 = ({
 	to,
 	amount,
 	identity,
+	ledgerCanisterId,
 	progress
-}: PartialSpecific<IcTransferParams, 'progress'>): Promise<bigint> => {
+}: PartialSpecific<IcTransferParams, 'progress'> &
+	Pick<IcToken, 'ledgerCanisterId'>): Promise<bigint> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 
 	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.
@@ -175,6 +178,7 @@ export const sendDip20 = ({
 
 	return transferDip20({
 		identity,
+		canisterId: ledgerCanisterId,
 		to: Principal.fromText(to),
 		amount
 	});
