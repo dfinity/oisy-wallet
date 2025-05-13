@@ -1,5 +1,5 @@
 import type { CampaignEligibility } from '$lib/types/reward';
-import {writable, type Readable, derived} from 'svelte/store';
+import { derived, writable, type Readable } from 'svelte/store';
 
 export type RewardEligibilityData = {
 	campaignEligibilities?: CampaignEligibility[] | undefined;
