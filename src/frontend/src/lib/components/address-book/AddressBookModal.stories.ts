@@ -12,10 +12,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const addressModalId = Symbol();
+
 export const Default: Story = {
 	render: () => {
 		onMount(() => {
-			modalStore.openAddressBook();
+			modalStore.openAddressBook(addressModalId);
 		});
 		return {
 			Component: Button,
@@ -27,7 +29,7 @@ export const Default: Story = {
 				},
 				$$events: {
 					click: () => {
-						modalStore.openAddressBook();
+						modalStore.openAddressBook(addressModalId);
 					}
 				}
 			}

@@ -353,3 +353,158 @@ mod custom_token {
         );
     }
 }
+
+mod user_profile {
+    //! Tests for the `user_profile` types.
+    use std::collections::HashMap;
+
+    use candid::{Decode, Encode, Principal};
+    use ic_verifiable_credentials::issuer_api::{ArgumentValue, CredentialSpec};
+
+    use crate::{
+        types::{
+            user_profile::{
+                AddUserCredentialRequest, UserCredential, UserProfile, MAX_ISSUER_LENGTH,
+            },
+            verifiable_credential::CredentialType,
+        },
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    test_validate_on_deserialize!(
+        UserCredential,
+        vec![
+            TestVector {
+                description: "UserCredential with max length issuer",
+                input: UserCredential {
+                    credential_type: CredentialType::ProofOfUniqueness,
+                    issuer: "1".repeat(MAX_ISSUER_LENGTH),
+                    verified_date_timestamp: None,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "UserCredential with issuer too long",
+                input: UserCredential {
+                    credential_type: CredentialType::ProofOfUniqueness,
+                    issuer: "1".repeat(MAX_ISSUER_LENGTH + 1),
+                    verified_date_timestamp: None,
+                },
+                valid: false,
+            },
+        ]
+    );
+
+    fn sample_user_credential() -> UserCredential {
+        UserCredential {
+            credential_type: CredentialType::ProofOfUniqueness,
+            issuer: "1".repeat(MAX_ISSUER_LENGTH),
+            verified_date_timestamp: None,
+        }
+    }
+
+    test_validate_on_deserialize!(
+        UserProfile,
+        vec![
+            TestVector {
+                description: "UserProfile with max length credentials",
+                input: UserProfile {
+                    credentials: vec![sample_user_credential(); UserProfile::MAX_CREDENTIALS],
+                    created_timestamp: 0,
+                    updated_timestamp: 0,
+                    version: None,
+                    settings: None,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "UserProfile with too many credentials",
+                input: UserProfile {
+                    credentials: vec![sample_user_credential(); UserProfile::MAX_CREDENTIALS + 1],
+                    created_timestamp: 0,
+                    updated_timestamp: 0,
+                    version: None,
+                    settings: None,
+                },
+                valid: false,
+            },
+        ]
+    );
+
+    test_validate_on_deserialize!(
+        AddUserCredentialRequest,
+        vec![
+            TestVector {
+                description: "AddUserCredentialRequest with credential_type too long",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(10),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH + 1),
+                        arguments: None,
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "AddUserCredentialRequest with too many arguments",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(10),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
+                        arguments: Some({
+                            let mut args = HashMap::new();
+                            for i in 0..AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENTS + 1
+                            {
+                                args.insert(i.to_string(), ArgumentValue::Int(i as i32));
+                            }
+                            args
+                        }),
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "AddUserCredentialRequest with argument key too long",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(10),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
+                        arguments: Some({
+                            let mut args = HashMap::new();
+                            args.insert("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH + 1), ArgumentValue::Int(0));
+                            args
+                        }),
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "AddUserCredentialRequest with argument value too long",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(10),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
+                        arguments: Some({
+                            let mut args = HashMap::new();
+                            args.insert("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH), ArgumentValue::Int(0));
+                            args
+                        }),
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+        ]
+    );
+}

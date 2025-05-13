@@ -197,14 +197,7 @@
 
 <SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING} {destination}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview
-			on:icBack
-			on:icSend={send}
-			{destination}
-			{amount}
-			{network}
-			source={source ?? ''}
-		/>
+		<SolSendReview on:icBack on:icSend={send} {destination} {amount} {network} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
@@ -215,7 +208,6 @@
 			on:icBack
 			bind:destination
 			bind:amount
-			on:icQRCodeScan
 			source={source ?? ''}
 		>
 			<ButtonBack onclick={back} slot="cancel" />

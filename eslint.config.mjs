@@ -29,7 +29,8 @@ export default [
 			'src/frontend/src/env/tokens/tokens.sns.json',
 			'**/playwright-report',
 			'**/coverage',
-			'.storybook'
+			'.storybook',
+			'**/.vitest-reports'
 		]
 	}
 ];
