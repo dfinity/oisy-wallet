@@ -1,6 +1,16 @@
 import type {EligibilityReport} from '$declarations/rewards/rewards.did';
 import {mapEligibilityReport} from '$lib/utils/rewards.utils';
 import {RewardCriterionType} from "$lib/enums/reward-criterion-type";
+import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
+import * as rewardApi from '$lib/api/reward.api';
+import {
+	INITIAL_REWARD_RESULT,
+	isEndedCampaign,
+	isOngoingCampaign,
+	isUpcomingCampaign,
+	loadRewardResult
+} from '$lib/utils/rewards.utils';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 
 describe('rewards.utils', () => {
 	describe('loadRewardResult', () => {
