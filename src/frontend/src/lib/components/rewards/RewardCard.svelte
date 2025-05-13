@@ -12,7 +12,7 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
@@ -23,12 +23,12 @@
 
 	let { onclick, reward, testId }: Props = $props();
 
-	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
-
-	const campaignEligibility = $derived(
-		$store?.campaignEligibilities?.find(({ campaignId }) => campaignId === reward.id)
+	const { getCampaignEligibility } = getContext<RewardEligibilityContext>(
+		REWARD_ELIGIBILITY_CONTEXT_KEY
 	);
-	const isEligible = $derived(campaignEligibility?.eligible ?? false);
+
+	const campaignEligibility = getCampaignEligibility(reward.id);
+	const isEligible = $derived($campaignEligibility?.eligible ?? false);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
 
