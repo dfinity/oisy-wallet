@@ -54,9 +54,6 @@ export interface CampaignEligibility {
 export interface CampaignCriterion {
 	satisfied: boolean;
 	type: RewardCriterionType;
-	days?: bigint;
-	count?: number;
-	usd?: number;
 }
 
 export interface MinLoginsCriterion extends CampaignCriterion {
