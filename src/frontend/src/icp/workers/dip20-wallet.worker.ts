@@ -1,9 +1,6 @@
 import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
-import { balance, balance as getBalance, transactions } from '$icp/api/xtc-ledger.api';
-import {
-	IcWalletBalanceAndTransactionsScheduler,
-	type GetBalanceAndTransactions
-} from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
+import { balance, transactions } from '$icp/api/xtc-ledger.api';
+import { IcWalletBalanceAndTransactionsScheduler } from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
