@@ -1,10 +1,13 @@
 import type { RewardDescription } from '$env/types/env-reward';
 import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
+import {
+	initRewardEligibilityStore,
+	REWARD_ELIGIBILITY_CONTEXT_KEY
+} from '$lib/stores/reward.store';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
+import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import {initRewardEligibilityStore, REWARD_ELIGIBILITY_CONTEXT_KEY} from "$lib/stores/reward.store";
-import {mockCampaignEligibilities} from "$tests/mocks/reward-eligibility-report.mock";
 
 describe('RewardsGroups', () => {
 	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
