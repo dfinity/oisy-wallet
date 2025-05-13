@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import AddContactStep from '$lib/components/address-book/AddContactStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
@@ -23,6 +24,10 @@
 		{
 			name: AddressBookSteps.SHOW_CONTACT,
 			title: $i18n.address_book.show_contact.title
+		},
+		{
+			name: AddressBookSteps.EDIT_CONTACT,
+			title: $i18n.contact.form.edit_contact
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
@@ -78,7 +83,13 @@
 			}}
 		></AddressBookStep>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
-		<ShowContactStep close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)} contact={currentContact!}
+		<ShowContactStep
+			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			contact={currentContact!}
+			edit={(contact) => {
+				currentContact = contact;
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
+			}}
 		></ShowContactStep>
 	{:else if currentStep?.name === AddressBookSteps.ADD_CONTACT}
 		<AddContactStep
@@ -86,5 +97,10 @@
 			{addContact}
 			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		></AddContactStep>
+	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT}
+		<EditContactStep
+			contact={currentContact!}
+			close={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+		/>
 	{/if}
 </WizardModal>

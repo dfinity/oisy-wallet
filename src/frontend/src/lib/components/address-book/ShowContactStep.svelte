@@ -20,7 +20,7 @@
 		close: () => void;
 		addAddress?: () => void;
 		showAddress?: (address: Address) => void;
-		edit?: (contact: Contact) => void;
+		edit: (contact: Contact) => void;
 	}
 
 	let { contact, close, edit, addAddress, showAddress }: Props = $props();
@@ -29,7 +29,7 @@
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-stretch gap-5">
-	<ContactHeader name={contact.name} edit={() => edit?.(contact)}></ContactHeader>
+	<ContactHeader name={contact.name} edit={() => edit(contact)}></ContactHeader>
 
 	{#if hasAddresses}
 		<!--
