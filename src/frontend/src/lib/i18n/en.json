@@ -181,6 +181,7 @@
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
+			"view_details": "View details",
 			"requirements_title": "Requirements",
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
@@ -969,7 +970,8 @@
 			"error": {
 				"loading_reward": "Error while loading a new reward code.",
 				"loading_user_data": "Failed to load user data from reward canister.",
-				"claiming_reward": "Error while claiming reward."
+				"claiming_reward": "Error while claiming reward.",
+				"loading_eligibility": "Error while loading campaign eligibility."
 			}
 		},
 		"invitation": {

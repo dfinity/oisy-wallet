@@ -85,15 +85,19 @@
 		})
 	);
 
+	const reset = () => {
+		destination = '';
+		amount = undefined;
+		targetNetwork = undefined;
+
+		sendProgressStep = ProgressStepsSend.INITIALIZATION;
+
+		currentStep = undefined;
+	};
+
 	const close = () =>
 		closeModal(() => {
-			destination = '';
-			amount = undefined;
-			targetNetwork = undefined;
-
-			sendProgressStep = ProgressStepsSend.INITIALIZATION;
-
-			currentStep = undefined;
+			reset();
 
 			dispatch('nnsClose');
 		});
@@ -127,7 +131,7 @@
 		}
 
 		const callback = async () => {
-			destination = '';
+			reset();
 
 			goToStep(WizardStepsSend.DESTINATION);
 
