@@ -28,7 +28,7 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCampaignError, InvalidCodeError } from '$lib/types/errors';
-import type {RewardClaimApiResponse, RewardResponseInfo} from '$lib/types/reward';
+import type { RewardClaimApiResponse, RewardResponseInfo } from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
