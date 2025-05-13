@@ -29,18 +29,17 @@
 		store: initRewardEligibilityStore()
 	});
 
-	onMount(() => {
-		const loadEligibilityReport = async () => {
-			if (isNullish($authIdentity)) {
-				await nullishSignOut();
-				return;
-			}
+	const loadEligibilityReport = async () => {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
 
-			const campaignEligibilities = await getCampaignEligibilities({ identity: $authIdentity });
-			store.setCampaignEligibilities(campaignEligibilities);
-		};
-		loadEligibilityReport();
-	});
+        const campaignEligibilities = await getCampaignEligibilities({ identity: $authIdentity });
+		store.setCampaignEligibilities(campaignEligibilities);
+	};
+
+	onMount(loadEligibilityReport);
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 
