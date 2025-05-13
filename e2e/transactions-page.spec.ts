@@ -1,7 +1,7 @@
 import { testWithII } from '@dfinity/internet-identity-playwright';
 import { TransactionCases, TransactionsPage } from './utils/pages/transactions.page';
 
-TransactionCases.forEach(({ tokenSymbol, networkId }) => {
+TransactionCases.forEach(({ tokenSymbol, networkId, ...rest }) => {
 	testWithII(
 		`should display ${tokenSymbol} transactions page for network ${networkId}`,
 		async ({ page, iiPage }) => {
@@ -10,7 +10,7 @@ TransactionCases.forEach(({ tokenSymbol, networkId }) => {
 				iiPage
 			});
 			await transactionsPage.waitForReady();
-			await transactionsPage.showTransactions({ tokenSymbol, networkId });
+			await transactionsPage.showTransactions({ tokenSymbol, networkId, ...rest });
 		}
 	);
 });
