@@ -13,6 +13,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { RewardStates } from '$lib/enums/reward-states';
 	import { nullishSignOut } from '$lib/services/auth.services';
+	import { getCampaignEligibilities } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initRewardEligibilityStore,
@@ -21,7 +22,6 @@
 	} from '$lib/stores/reward.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
-	import {getCampaignEligibilities} from "$lib/services/reward.services";
 
 	const { store } = setContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY, {
 		store: initRewardEligibilityStore()
