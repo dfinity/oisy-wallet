@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { KnownDestinations } from '$lib/types/transactions';
 
 	interface Props {
@@ -14,8 +13,6 @@
 	let { knownDestinations, destination = $bindable() }: Props = $props();
 
 	const dispatch = createEventDispatcher();
-
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let destinations = $derived(nonNullish(knownDestinations) ? Object.keys(knownDestinations) : []);
 </script>
@@ -31,7 +28,6 @@
 				{#each destinations as recentDestination (recentDestination)}
 					<li>
 						<KnownDestination
-							token={$sendToken}
 							destination={recentDestination}
 							{...knownDestinations[recentDestination]}
 							on:click={() => {
