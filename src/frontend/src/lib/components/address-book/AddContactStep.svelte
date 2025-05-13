@@ -26,7 +26,7 @@
 	};
 
 	let title = $derived(
-		notEmptyString(contact?.name) ? contact?.name : $i18n.contact.form.add_new_contact
+		notEmptyString(contact?.name?.trim?.()) ? contact?.name : $i18n.contact.form.add_new_contact
 	);
 
 	export { title };

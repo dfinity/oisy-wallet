@@ -1,5 +1,6 @@
 import type {
 	ClaimedVipReward,
+	EligibilityReport,
 	ReferrerInfo,
 	RewardInfo,
 	SetReferrerResponse,
@@ -12,6 +13,7 @@ import {
 	getReferrerInfo as getReferrerInfoApi,
 	getUserInfo,
 	getUserInfo as getUserInfoApi,
+	isEligible as isEligibleApi,
 	setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
 import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
@@ -25,6 +27,7 @@ import {
 	UserNotVipError
 } from '$lib/types/errors';
 import type {
+	CampaignEligibility,
 	RewardClaimApiResponse,
 	RewardClaimResponse,
 	RewardResponseInfo,
@@ -34,9 +37,39 @@ import type {
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
+import { mapEligibilityReport } from '$lib/utils/rewards.utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+const queryEligibilityReport = async (params: {
+	identity: Identity;
+	certified: boolean;
+}): Promise<EligibilityReport> =>
+	await isEligibleApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+export const getCampaignEligibilities = async (params: {
+	identity: Identity;
+}): Promise<CampaignEligibility[]> => {
+	try {
+		const eligibilityReport = await queryEligibilityReport({
+			...params,
+			certified: false
+		});
+
+		return mapEligibilityReport(eligibilityReport);
+	} catch (err: unknown) {
+		const { vip } = get(i18n);
+		toastsError({
+			msg: { text: vip.reward.error.loading_eligibility },
+			err
+		});
+		return [];
+	}
+};
 
 const queryUserRoles = async (params: {
 	identity: Identity;

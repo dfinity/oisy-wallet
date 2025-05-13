@@ -1,0 +1,13 @@
+[
+	{
+		"ledgerCanisterId": "aanaa-xaaaa-aaaah-aaeiq-cai",
+		"metadata": {
+			"decimals": 12,
+			"name": "Cycles",
+			"symbol": "XTC",
+			"fee": {
+				"__bigint__": "2000000000"
+			}
+		}
+	}
+]
