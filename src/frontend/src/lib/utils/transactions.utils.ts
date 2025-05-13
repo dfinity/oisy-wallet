@@ -9,6 +9,7 @@ import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
 import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
@@ -311,3 +312,22 @@ export const getKnownDestinations = (transactions: AnyTransactionUi[]): KnownDes
 				: acc,
 		{}
 	);
+
+/**
+ * Finds the oldest transaction by timestamp in a list of transactions.
+ *
+ * @param transactions - The list of transactions to search through.
+ * @returns The last transaction or undefined if no transactions are provided.
+ */
+export const findOldestTransaction = <T extends IcTransactionUi | SolTransactionUi>(
+	transactions: T[]
+): T | undefined =>
+	transactions.length >= 0
+		? transactions.reduce<T>(
+				(min, transaction) =>
+					(Number(transaction.timestamp) ?? Infinity) < (Number(min.timestamp) ?? Infinity)
+						? transaction
+						: min,
+				transactions[0]
+			)
+		: undefined;
