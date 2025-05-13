@@ -21,6 +21,7 @@
 	} from '$lib/stores/reward.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
+	import {getCampaignEligibilities} from "$lib/services/reward.services";
 
 	const { store } = setContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY, {
 		store: initRewardEligibilityStore()
@@ -32,8 +33,8 @@
 			return;
 		}
 
-		// TODO load campaign eligibilities from reward service
-		store.setCampaignEligibilities([]);
+		const campaignEligibilities = await getCampaignEligibilities({ identity: $authIdentity });
+		store.setCampaignEligibilities(campaignEligibilities);
 	};
 
 	onMount(loadEligibilityReport);
