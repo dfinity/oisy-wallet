@@ -1,6 +1,5 @@
 import type {
-	ClaimedVipReward,
-	EligibilityResponse,
+	ClaimedVipReward, EligibilityReport,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	SetReferrerResponse,
@@ -20,7 +19,7 @@ let canister: RewardCanister | undefined = undefined;
 export const isEligible = async ({
 	identity,
 	certified
-}: CanisterApiFunctionParams<QueryParams>): Promise<EligibilityResponse> => {
+}: CanisterApiFunctionParams<QueryParams>): Promise<EligibilityReport> => {
 	const { isEligible } = await rewardCanister({ identity });
 
 	return isEligible({ certified });

@@ -1,13 +1,12 @@
 import type {
 	ClaimedVipReward,
-	EligibilityResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
 	SetReferrerResponse,
 	UserData,
 	UserSnapshot,
-	VipReward
+	VipReward, EligibilityReport
 } from '$declarations/rewards/rewards.did';
 import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/rewards.factory.certified.did';
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
@@ -41,10 +40,18 @@ export class RewardCanister extends Canister<RewardService> {
 		return new RewardCanister(canisterId, service, certifiedService);
 	}
 
-	isEligible = ({ certified = true }: QueryParams): Promise<EligibilityResponse> => {
+	isEligible = async ({ certified = true }: QueryParams): Promise<EligibilityReport> => {
 		const { eligible } = this.caller({ certified });
 
-		return eligible(toNullable());
+		const response = await eligible(toNullable());
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		if ('Err' in response) {
+			throw new EligibilityError();
+		}
+		throw new Error('Unknown error');
 	};
 
 	getUserInfo = ({ certified = true }: QueryParams): Promise<UserData> => {

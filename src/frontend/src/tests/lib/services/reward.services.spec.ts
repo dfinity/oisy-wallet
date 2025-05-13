@@ -1,6 +1,5 @@
 import type {
-	CampaignEligibility,
-	EligibilityResponse,
+	CampaignEligibility, EligibilityReport,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	RewardInfo,
@@ -46,14 +45,14 @@ describe('reward-code', () => {
 	describe('getCampaignEligibilities', () => {
 		const campaignId = 'deuteronomy';
 		const campaign: CampaignEligibility = { eligible: true, available: true, criteria: [] };
-		const mockEligibilityResponse: EligibilityResponse = {
-			Ok: { campaigns: [[campaignId, campaign]] }
+		const mockEligibilityReport: EligibilityReport = {
+			campaigns: [[campaignId, campaign]]
 		};
 
 		it('should return campaign eligibilities', async () => {
 			const getCampaignEligibilitiesSpy = vi
 				.spyOn(rewardApi, 'isEligible')
-				.mockResolvedValueOnce(mockEligibilityResponse);
+				.mockResolvedValueOnce(mockEligibilityReport);
 
 			const campaignEligibilities = await getCampaignEligibilities({ identity: mockIdentity });
 
