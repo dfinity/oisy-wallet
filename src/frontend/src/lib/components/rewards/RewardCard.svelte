@@ -1,16 +1,19 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from '$lib/stores/reward.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import {getContext} from "svelte";
-	import {REWARD_ELIGIBILITY_CONTEXT_KEY, type RewardEligibilityContext} from "$lib/stores/reward.store";
-	import Badge from "$lib/components/ui/Badge.svelte";
-	import {isEndedCampaign} from "$lib/utils/rewards.utils";
+	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		onclick: () => void;
@@ -23,7 +26,7 @@
 	const { store } = getContext<RewardEligibilityContext>(REWARD_ELIGIBILITY_CONTEXT_KEY);
 
 	const campaignEligibility = $derived(
-			$store?.campaignEligibilities?.find(({ campaignId }) => campaignId === reward.id)
+		$store?.campaignEligibilities?.find(({ campaignId }) => campaignId === reward.id)
 	);
 	const isEligible = $derived(campaignEligibility?.eligible ?? false);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
