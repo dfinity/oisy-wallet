@@ -7,6 +7,7 @@ export const RewardEventsSchema = z.object({
 	oneLiner: z.string(),
 	description: z.string(),
 	logo: z.string(),
+	cardBanner: z.string(),
 	campaignHref: z.string(),
 	jackpotHref: z.string(),
 	airdropHref: z.string(),
