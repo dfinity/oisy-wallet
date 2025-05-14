@@ -200,7 +200,7 @@ interface I18nRewards {
 		min_transactions: string;
 		min_total_assets_usd: string;
 	};
-	alt: { upcoming_campaigns: string; reward_logo: string };
+	alt: { upcoming_campaigns: string; coming_soon: string; reward_logo: string };
 }
 
 interface I18nFooter {
@@ -935,6 +935,12 @@ interface I18nAddress_book {
 		empty_text: string;
 		add_new_contact: string;
 		add_contact: string;
+	};
+	show_contact: {
+		title: string;
+		add_address: string;
+		show_address_text: string;
+		add_first_address: string;
 	};
 }
 
