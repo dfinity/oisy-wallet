@@ -8,4 +8,4 @@ export const rewardCampaigns: RewardDescription[] = parseResult.success ? parseR
 
 export const SPRINKLES_SEASON_1_EPISODE_3_ID = 'sprinkles_s1e3';
 
-export const FEATURED_REWARD_CAROUSEL_SLIDE_ID = SPRINKLES_SEASON_1_EPISODE_3_ID;
+export const FEATURED_REWARD_CAROUSEL_SLIDE_ID = 'OISY Airdrop #1 ';
