@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import type { IcToken } from '$icp/types/ic-token';
 	import { kongSwapAmounts } from '$lib/api/kong_backend.api';
+	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
+	import { fetchSwapAmounts } from '$lib/services/swap.services';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
-	import { fetchSwapAmounts } from '$lib/services/swap.services';
-	import type { IcToken } from '$icp/types/ic-token';
-	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 
 	interface Props {
 		amount: OptionAmount;
