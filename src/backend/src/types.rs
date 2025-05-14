@@ -4,8 +4,8 @@ use ic_stable_structures::{
 };
 use serde::Deserialize as SerdeDeserialize;
 use shared::types::{
-    backend_config::Config, contact::ContactSettings, custom_token::CustomToken, pow::StoredChallenge,
-    token::UserToken, user_profile::StoredUserProfile, Timestamp,
+    backend_config::Config, contact::ContactSettings, custom_token::CustomToken,
+    pow::StoredChallenge, token::UserToken, user_profile::StoredUserProfile, Timestamp,
 };
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
