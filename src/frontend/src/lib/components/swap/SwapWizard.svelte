@@ -58,14 +58,11 @@
 
 	const dispatch = createEventDispatcher();
 
-	let sourceTokenFee: bigint | undefined = $state();
-
-	$effect(() => {
-		sourceTokenFee =
-			nonNullish($sourceToken) && nonNullish($icTokenFeeStore)
-				? $icTokenFeeStore[$sourceToken.symbol]
-				: undefined;
-	});
+	let sourceTokenFee = $derived<bigint | undefined>(
+		nonNullish($sourceToken) && nonNullish($icTokenFeeStore)
+			? $icTokenFeeStore[$sourceToken.symbol]
+			: undefined
+	);
 
 	const swap = async () => {
 		if (isNullish($authIdentity)) {

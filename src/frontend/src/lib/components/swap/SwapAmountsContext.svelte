@@ -18,7 +18,7 @@
 		amount: OptionAmount;
 		sourceToken: Token | undefined;
 		destinationToken: Token | undefined;
-		children: Snippet;
+		children?: Snippet;
 	}
 
 	let { amount, sourceToken, destinationToken, children }: Props = $props();
@@ -87,4 +87,6 @@
 	});
 </script>
 
-{@render children()}
+{#if nonNullish(children)}
+	{@render children()}
+{/if}

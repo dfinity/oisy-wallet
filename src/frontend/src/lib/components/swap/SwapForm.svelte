@@ -61,7 +61,7 @@
 
 	let errorType: TokenActionErrorType = $state<TokenActionErrorType | undefined>(undefined);
 	let amountSetToMax = $state(false);
-	let exchangeValueUnit: DisplayUnit = $state<'token' | 'usd'>('usd');
+	let exchangeValueUnit: DisplayUnit = $state<DisplayUnit>('usd');
 
 	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
@@ -72,7 +72,7 @@
 	);
 
 	let totalFee: bigint | undefined = $derived(
-		sourceTokenFee ?? ZERO * ($isSourceTokenIcrc2 ? 2n : 1n)
+		(sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n)
 	);
 
 	let swapAmountsLoading = $derived(
