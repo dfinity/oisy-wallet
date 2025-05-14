@@ -1,10 +1,8 @@
 use candid::{CandidType, Deserialize};
 use serde::Serialize;
-use shared::types::{
-    user_profile::AddUserCredentialError,
-};
+use shared::types::user_profile::AddUserCredentialError;
 
-#[derive(CandidType, Serialize, Deserialize)]
+#[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum AddUserCredentialResult {
     /// The user's credential was added successfully.
     Ok(()),
