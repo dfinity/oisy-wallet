@@ -24,6 +24,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
+	import {onMount} from "svelte";
 
 	interface Props {
 		reward: RewardDescription;
@@ -97,7 +98,7 @@
 		loading = false;
 	};
 
-	$effect(() => {
+	onMount(() => {
 		loadRewards({ ckBtcToken, ckUsdcToken, icpToken: ICP_TOKEN });
 	});
 
