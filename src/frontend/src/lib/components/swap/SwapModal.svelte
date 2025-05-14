@@ -45,17 +45,16 @@
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let modal: WizardModal;
+	let modal = $state<WizardModal>();
 
-	let steps: WizardSteps;
-	$: steps = swapWizardSteps({ i18n: $i18n });
+	let steps = $derived<WizardSteps>(swapWizardSteps({ i18n: $i18n }));
 
-	let swapAmount: OptionAmount;
-	let receiveAmount: number | undefined;
-	let slippageValue: OptionAmount = SWAP_DEFAULT_SLIPPAGE_VALUE;
-	let swapProgressStep = ProgressStepsSwap.INITIALIZATION;
-	let currentStep: WizardStep | undefined;
-	let selectTokenType: SwapSelectTokenType | undefined;
+	let swapAmount = $state<OptionAmount>();
+	let receiveAmount = $state<number | undefined>();
+	let slippageValue = $state<OptionAmount>(SWAP_DEFAULT_SLIPPAGE_VALUE);
+	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
+	let currentStep = $state<WizardStep | undefined>();
+	let selectTokenType = $state<SwapSelectTokenType | undefined>();
 
 	const showTokensList = ({ detail: type }: CustomEvent<SwapSelectTokenType>) => {
 		swapAmountsStore.reset();
@@ -75,13 +74,13 @@
 		closeTokenList();
 	};
 
-	let title = '';
-	$: title =
+	let title = $derived(
 		selectTokenType === 'source'
 			? $i18n.swap.text.select_source_token
 			: selectTokenType === 'destination'
 				? $i18n.swap.text.select_destination_token
-				: (currentStep?.title ?? '');
+				: (currentStep?.title ?? '')
+	);
 
 	const dispatch = createEventDispatcher();
 
@@ -91,6 +90,8 @@
 			selectTokenType = undefined;
 			dispatch('nnsClose');
 		});
+
+	// TODO: Migrate to Svelte 5, remove legacy slot usage and use render composition instead
 </script>
 
 <WizardModal
