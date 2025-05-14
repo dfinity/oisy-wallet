@@ -174,7 +174,7 @@
 		"text": {
 			"title": "Rewards",
 			"active_campaigns": "Active Opportunities",
-			"upcoming_campaigns": "Upcoming Opportunities",
+			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 is coming soon!<br> Stay tuned for updates",
 			"active_date": "Ends on",
 			"ended_date": "Ended on",
 			"participate_title": "Earn BTC by staying active - and now by inviting others.",
@@ -199,14 +199,15 @@
 			"ended": "Ended ($amount)"
 		},
 		"requirements": {
-			"requirements_title": "Requirements",
+			"requirements_title": "Eligibility criteria",
 			"min_logins": "Login $loginsx in last $days days",
 			"min_transactions": "Complete $transactions transactions in last $days days",
 			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
-			"reward_logo": "Logo of the campaign $campaignName"
+			"coming_soon": "$oisy_short episode 4 is coming soon",
+			"reward_banner": "Banner of the campaign $campaignName"
 		}
 	},
 	"footer": {
@@ -1017,6 +1018,12 @@
 			"empty_text": "All your contacts will be shown here",
 			"add_new_contact": "Add new contact",
 			"add_contact": "Add contact"
+		},
+		"show_contact": {
+			"title": "Contact",
+			"add_address": "Add address",
+			"show_address_text": "Associated addresses will appear here",
+			"add_first_address": "Add first address to contactName!"
 		}
 	},
 	"contact": {
