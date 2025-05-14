@@ -95,7 +95,7 @@
 				sourceToken: $sourceToken,
 				destinationToken: $destinationToken,
 				swapAmount,
-				receiveAmount: $swapAmountsStore?.selectedProvider?.receiveAmount,
+				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
 				isSourceTokenIcrc2: $isSourceTokenIcrc2

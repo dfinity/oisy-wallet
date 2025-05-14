@@ -56,7 +56,7 @@
 
 				<svelte:fragment slot="main-value">
 					<div class="flex items-start gap-3">
-						{#if isBestRate && $swapAmountsStore?.swaps.length > 1}
+						{#if isBestRate && $swapAmountsStore.swaps.length > 1}
 							<SwapBestRateBadge />
 						{/if}
 						<div class="flex gap-2">

@@ -1,6 +1,7 @@
 import type { OptionAmount } from '$lib/types/send';
 import type { SwapMappedResult } from '$lib/types/swap';
 import type { Option } from '$lib/types/utils';
+import { isNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export interface SwapAmountsStoreData {
@@ -39,7 +40,7 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 
 		setSelectedProvider: (provider) => {
 			update((data) => {
-				if (!data) {
+				if (isNullish(data)) {
 					return data;
 				}
 				return { ...data, selectedProvider: provider };

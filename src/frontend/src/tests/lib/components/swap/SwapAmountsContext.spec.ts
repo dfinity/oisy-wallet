@@ -10,7 +10,7 @@ import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { OptionAmount } from '$lib/types/send';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { MOCK_SWAP_PROVIDERS } from '$tests/mocks/swap.mocks';
+import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { act, render } from '@testing-library/svelte';
 import { tick, type Snippet } from 'svelte';
 import { get, readable, writable } from 'svelte/store';
@@ -121,7 +121,7 @@ describe('SwapAmountsContext.svelte', () => {
 	it('sets swaps when fetchSwapAmounts succeeds', async () => {
 		const fetchMock = vi
 			.spyOn(swapService, 'fetchSwapAmounts')
-			.mockResolvedValue(MOCK_SWAP_PROVIDERS);
+			.mockResolvedValue(mockSwapProviders);
 
 		await renderWithContext({
 			amount: '10',
@@ -134,8 +134,8 @@ describe('SwapAmountsContext.svelte', () => {
 
 		const value = get(store);
 
-		expect(value?.swaps).toEqual(MOCK_SWAP_PROVIDERS);
-		expect(value?.selectedProvider).toEqual(MOCK_SWAP_PROVIDERS[0]);
+		expect(value?.swaps).toEqual(mockSwapProviders);
+		expect(value?.selectedProvider).toEqual(mockSwapProviders[0]);
 		expect(value?.amountForSwap).toBe(10);
 	});
 

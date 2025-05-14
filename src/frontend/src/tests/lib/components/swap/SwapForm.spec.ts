@@ -13,7 +13,7 @@ import {
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { MOCK_SWAP_PROVIDERS } from '$tests/mocks/swap.mocks';
+import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -22,8 +22,8 @@ describe('SwapForm', () => {
 
 	const mockSwapAmounts: SwapAmountsStoreData = {
 		amountForSwap: 1,
-		swaps: MOCK_SWAP_PROVIDERS,
-		selectedProvider: MOCK_SWAP_PROVIDERS[0]
+		swaps: mockSwapProviders,
+		selectedProvider: mockSwapProviders[0]
 	};
 
 	beforeEach(() => {

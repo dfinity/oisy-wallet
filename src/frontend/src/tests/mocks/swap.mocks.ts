@@ -2,7 +2,7 @@ import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.d
 import type { IcToken } from '$icp/types/ic-token';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 
-export const MOCK_SWAP_PROVIDERS: SwapMappedResult[] = [
+export const mockSwapProviders: SwapMappedResult[] = [
 	{
 		provider: SwapProvider.ICP_SWAP,
 		receiveAmount: 1000000000n,
