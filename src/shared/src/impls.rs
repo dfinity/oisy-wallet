@@ -1,15 +1,16 @@
+use std::{collections::BTreeMap, fmt};
+
 use candid::{Deserialize, Error, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use serde::{de, Deserializer};
-use std::{collections::BTreeMap, fmt};
 
-use crate::types::contact::{
-    AddAddressRequest, AddContactRequest, Contact, ContactAddressData, ContactSettings,
-    RemoveContactRequest, UpdateAddressRequest, UpdateContactRequest,
-};
 use crate::{
     types::{
         backend_config::{Config, InitArg},
+        contact::{
+            AddAddressRequest, AddContactRequest, Contact, ContactAddressData, ContactSettings,
+            RemoveContactRequest, UpdateAddressRequest, UpdateContactRequest,
+        },
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
