@@ -76,7 +76,7 @@
 			isNullish(slippageValue) ||
 			isNullish(swapAmount) ||
 			isNullish(sourceTokenFee) ||
-			isNullish($swapAmountsStore?.swapAmounts?.receiveAmount)
+			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -95,7 +95,7 @@
 				sourceToken: $sourceToken,
 				destinationToken: $destinationToken,
 				swapAmount,
-				receiveAmount: $swapAmountsStore.swapAmounts.receiveAmount,
+				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
 				isSourceTokenIcrc2: $isSourceTokenIcrc2
@@ -153,6 +153,7 @@
 		amount={swapAmount}
 		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
+		{slippageValue}
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapForm

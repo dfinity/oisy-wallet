@@ -2,8 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import type IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
-	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
+	import { IC_TOKEN_FEE_CONTEXT_KEY, type IcTokenFeeContext } from '$icp/stores/ic-token-fee.store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
@@ -38,6 +37,7 @@
 		receiveAmount: number | undefined;
 		slippageValue: OptionAmount;
 	}
+
 	let {
 		swapAmount = $bindable<OptionAmount>(),
 		receiveAmount = $bindable<number | undefined>(),
@@ -98,10 +98,10 @@
 	$effect(() => {
 		if (
 			nonNullish($destinationToken) &&
-			nonNullish($swapAmountsStore?.swapAmounts?.receiveAmount)
+			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
 		) {
 			receiveAmount = formatTokenBigintToNumber({
-				value: $swapAmountsStore?.swapAmounts.receiveAmount,
+				value: $swapAmountsStore?.selectedProvider?.receiveAmount,
 				unitName: $destinationToken.decimals,
 				displayDecimals: $destinationToken.decimals
 			});
@@ -197,7 +197,7 @@
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if $swapAmountsStore?.swapAmounts === null}
+						{#if $swapAmountsStore?.swaps.length === 0}
 							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
