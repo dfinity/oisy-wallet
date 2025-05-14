@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import SwapProviderListItem from './SwapProviderListItem.svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
