@@ -41,8 +41,7 @@ const MAX_CONTACTS: usize = 100;
 fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> Result<(), Error> {
     if value.len() > max_length {
         return Err(Error::msg(format!(
-            "{} too long, max allowed is {} characters",
-            field_name, max_length
+            "{field_name} too long, max allowed is {max_length} characters"
         )));
     }
     Ok(())
@@ -55,8 +54,7 @@ fn validate_collection_size<T>(
 ) -> Result<(), Error> {
     if collection.len() > max_size {
         return Err(Error::msg(format!(
-            "Too many {}, max allowed is {}",
-            collection_name, max_size
+            "Too many {collection_name}, max allowed is {max_size}"
         )));
     }
     Ok(())
