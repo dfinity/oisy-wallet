@@ -40,7 +40,7 @@ const MAX_CONTACTS: usize = 100;
 
 // Helper functions for validation
 fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> Result<(), Error> {
-    if value.len() > max_length {
+    if value.chars().count() > max_length {
         return Err(Error::msg(format!(
             "{field_name} too long, max allowed is {max_length} characters"
         )));
