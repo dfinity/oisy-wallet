@@ -128,9 +128,9 @@ describe('SwapForm', () => {
 			const [sourceInput, destinationInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 			expect(sourceTokenExchangeValue).toHaveTextContent('$10.00');
-			expect(destinationTokenExchangeValue).toHaveTextContent('$0.04');
+			expect(destinationTokenExchangeValue).toHaveTextContent('$20.00');
 			expect(sourceInput).toHaveValue('1');
-			expect(destinationInput).toHaveValue('0.02');
+			expect(destinationInput).toHaveValue('10');
 		});
 
 		it.each([
@@ -151,16 +151,16 @@ describe('SwapForm', () => {
 				await fireEvent.click(button);
 
 				expect(sourceTokenExchangeValue).toHaveTextContent(`1 ${mockValidIcToken.symbol}`);
-				expect(destinationTokenExchangeValue).toHaveTextContent(`2 ${mockValidIcCkToken.symbol}`);
+				expect(destinationTokenExchangeValue).toHaveTextContent(`10 ${mockValidIcCkToken.symbol}`);
 				expect(sourceInput).toHaveValue('1');
-				expect(destinationInput).toHaveValue('0.02');
+				expect(destinationInput).toHaveValue('10');
 
 				await fireEvent.click(button);
 
 				expect(sourceTokenExchangeValue).toHaveTextContent('$10.00');
-				expect(destinationTokenExchangeValue).toHaveTextContent('$0.04');
+				expect(destinationTokenExchangeValue).toHaveTextContent('$20.00');
 				expect(sourceInput).toHaveValue('1');
-				expect(destinationInput).toHaveValue('0.02');
+				expect(destinationInput).toHaveValue('10');
 			}
 		);
 	});
