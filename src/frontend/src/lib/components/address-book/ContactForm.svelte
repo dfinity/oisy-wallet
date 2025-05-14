@@ -7,7 +7,7 @@
 
 	let { contact = $bindable() }: { contact: Partial<Contact> } = $props();
 
-	let isValid = $derived(notEmptyString(contact?.name));
+	let isValid = $derived(notEmptyString(contact?.name?.trim?.()));
 
 	export { isValid };
 </script>
@@ -21,6 +21,7 @@
 			bind:value={contact.name}
 			showResetButton
 			testId={ADDRESS_BOOK_CONTACT_NAME_INPUT}
+			autofocus={true}
 		/>
 	</div>
 </form>

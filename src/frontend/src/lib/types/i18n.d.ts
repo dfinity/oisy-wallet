@@ -177,7 +177,7 @@ interface I18nRewards {
 		share: string;
 		learn_more: string;
 		check_status: string;
-		requirements_title: string;
+		view_details: string;
 		modal_button_text: string;
 		activity_button_text: string;
 		activity_button_text_short: string;
@@ -194,8 +194,13 @@ interface I18nRewards {
 		ongoing: string;
 		ended: string;
 	};
-	requirements: { min_logins: string; min_transactions: string; min_total_assets_usd: string };
-	alt: { upcoming_campaigns: string; reward_logo: string };
+	requirements: {
+		requirements_title: string;
+		min_logins: string;
+		min_transactions: string;
+		min_total_assets_usd: string;
+	};
+	alt: { upcoming_campaigns: string; coming_soon: string; reward_banner: string };
 }
 
 interface I18nFooter {
@@ -930,6 +935,12 @@ interface I18nAddress_book {
 		empty_text: string;
 		add_new_contact: string;
 		add_contact: string;
+	};
+	show_contact: {
+		title: string;
+		add_address: string;
+		show_address_text: string;
+		add_first_address: string;
 	};
 }
 
