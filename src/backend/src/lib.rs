@@ -527,9 +527,8 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
                 &mut user_profile_model,
             )
         }),
-        Err(_) => Err(AddUserCredentialError::InvalidCredential),
+        Err(_) => AddUserCredentialResult::Err(AddUserCredentialError::InvalidCredential),
     }
-    .into()
 }
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any

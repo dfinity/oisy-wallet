@@ -8,7 +8,7 @@ use shared::types::{
     verifiable_credential::CredentialType,
     Version,
 };
-
+use shared::types::result_types::AddUserCredentialResult;
 use crate::{read_state, user_profile_model::UserProfileModel, State, StoredPrincipal};
 
 pub fn find_profile(
@@ -59,7 +59,7 @@ pub fn add_credential(
         }
     } else {
         Err(AddUserCredentialError::UserNotFound)
-    }
+    }.into()
 }
 
 /// Updates the user's network settings, merging with any existing settings.
