@@ -5,6 +5,7 @@
 	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import type { RewardDescription } from '$env/types/env-reward';
 	import type { IcToken } from '$icp/types/ic-token';
 	import RewardEarningsCard from '$lib/components/rewards/RewardEarningsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -23,7 +24,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
-	import type {RewardDescription} from "$env/types/env-reward";
 
 	interface Props {
 		reward: RewardDescription;

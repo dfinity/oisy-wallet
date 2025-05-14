@@ -380,7 +380,7 @@ export const getUserRewardsTokenAmounts = async ({
 	ckUsdcToken,
 	icpToken,
 	identity,
-	 campaignId
+	campaignId
 }: {
 	ckBtcToken: IcToken;
 	ckUsdcToken: IcToken;

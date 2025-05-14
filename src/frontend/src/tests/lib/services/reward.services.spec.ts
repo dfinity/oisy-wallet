@@ -447,7 +447,7 @@ describe('reward-code', () => {
 		const getMockReward = ({
 			ledgerCanisterId,
 			amount,
-								   campaignId
+			campaignId
 		}: {
 			ledgerCanisterId: unknown;
 			amount: bigint;
@@ -575,7 +575,6 @@ describe('reward-code', () => {
 			expect(result.icpReward.toString()).toEqual('0');
 			expect(result.amountOfRewards.toString()).toEqual('3');
 		});
-
 
 		it('should only load balances of a specific campaign', async () => {
 			const result = await getUserRewardsTokenAmounts({
