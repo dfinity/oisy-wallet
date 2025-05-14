@@ -25,7 +25,7 @@ describe('RewardCard', () => {
 
 	it('should render active reward card content', () => {
 		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
-			(campaign) => campaign.id === 'OISY Airdrop #1'
+			(campaign) => campaign.id === 'sprinkles_s1e3'
 		);
 		assertNonNullish(mockedReward);
 
@@ -60,7 +60,7 @@ describe('RewardCard', () => {
 
 	it('should render inactive reward card content', () => {
 		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
-			(campaign) => campaign.id === 'OISY Airdrop #3'
+			(campaign) => campaign.id === 'sprinkles_s1e5'
 		);
 		assertNonNullish(mockedReward);
 

@@ -12,7 +12,7 @@ import { render } from '@testing-library/svelte';
 
 describe('RewardsGroups', () => {
 	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
-		({ id }) => id === 'OISY Airdrop #1'
+		({ id }) => id === 'sprinkles_s1e3'
 	);
 	assertNonNullish(mockRewardCampaign);
 
