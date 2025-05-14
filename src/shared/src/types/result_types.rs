@@ -21,10 +21,12 @@ impl AddUserCredentialResult {
     /// # Panics
     /// - If the result is `Ok`.
     #[must_use]
-     pub fn unwrap_err(self) -> AddUserCredentialError {
+    pub fn unwrap_err(self) -> AddUserCredentialError {
         match self {
             Self::Err(err) => err,
-            Self::Ok(()) => panic!("Called `AddUserCredentialResult.unwrap_err()` on an `Ok` value"),
+            Self::Ok(()) => {
+                panic!("Called `AddUserCredentialResult.unwrap_err()` on an `Ok` value")
+            }
         }
     }
 }
