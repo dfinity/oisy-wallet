@@ -431,7 +431,7 @@ describe('reward-code', () => {
 	});
 
 	describe('getUserRewardsTokenAmounts', () => {
-		const campaignId = 'test';
+		const defaultCampaignId = 'test';
 		const mockCkBtcToken = {
 			...ICP_TOKEN,
 			symbol: 'ckBTC',
@@ -446,15 +446,17 @@ describe('reward-code', () => {
 
 		const getMockReward = ({
 			ledgerCanisterId,
-			amount
+			amount,
+			campaignId,
 		}: {
 			ledgerCanisterId: unknown;
 			amount: bigint;
+			campaignId?: string;
 		}): RewardInfo =>
 			({
 				ledger: { toText: () => ledgerCanisterId },
 				amount,
-				campaign_id: campaignId
+				campaign_id: campaignId ?? defaultCampaignId
 			}) as unknown as RewardInfo;
 
 		const baseMockUserData = {
@@ -510,7 +512,7 @@ describe('reward-code', () => {
 				ckUsdcToken: mockCkUsdcToken,
 				icpToken: mockIcpToken,
 				identity: mockIdentity,
-				campaignId
+				campaignId: defaultCampaignId
 			});
 
 			expect(result.ckBtcReward.toString()).toEqual('3000');
@@ -525,7 +527,7 @@ describe('reward-code', () => {
 				ckUsdcToken: mockCkUsdcToken,
 				icpToken: mockIcpToken,
 				identity: mockIdentity,
-				campaignId
+				campaignId: defaultCampaignId
 			});
 
 			expect(result.ckBtcReward.toString()).toEqual('1000');
@@ -540,7 +542,7 @@ describe('reward-code', () => {
 				ckUsdcToken: mockCkUsdcToken,
 				icpToken: mockIcpToken,
 				identity: mockIdentity,
-				campaignId
+				campaignId: defaultCampaignId
 			});
 
 			expect(result.ckBtcReward.toString()).toEqual('0');
