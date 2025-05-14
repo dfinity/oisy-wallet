@@ -29,8 +29,8 @@ use shared::{
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
         contact::{
-            AddAddressRequest, AddContactRequest, Contact, ContactError, ContactSettings, RemoveContactRequest,
-            UpdateAddressRequest, UpdateContactRequest,
+            AddAddressRequest, AddContactRequest, Contact, ContactError, ContactSettings, 
+            RemoveContactRequest, UpdateAddressRequest, UpdateContactRequest,
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
@@ -67,7 +67,7 @@ use user_profile_model::UserProfileModel;
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
-    result_types::{AddUserCredentialResult, ContactOperationResult},
+    result_types::{AddUserCredentialResult, CreateContactResult},
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
@@ -850,10 +850,10 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 /// # Errors
 /// Errors are enumerated by: `ContactError`
 #[update(guard = "caller_is_not_anonymous")]
-pub fn create_contact(request: AddContactRequest) -> ContactOperationResult {
+pub fn create_contact(request: AddContactRequest) -> CreateContactResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
-        crate::contacts::add_contact(stored_principal, &mut s.contacts, &request)
+        contacts::add_contact(stored_principal, &mut s.contacts, &request).into()
     })
 }
 
@@ -862,10 +862,10 @@ pub fn create_contact(request: AddContactRequest) -> ContactOperationResult {
 /// # Errors
 /// Errors are enumerated by: `ContactError`
 #[update(guard = "caller_is_not_anonymous")]
-pub fn update_existing_contact(request: UpdateContactRequest) -> ContactOperationResult {
+pub fn update_existing_contact(request: UpdateContactRequest) -> CreateContactResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
-        crate::contacts::update_contact(stored_principal, &mut s.contacts, &request)
+        contacts::update_contact(stored_principal, &mut s.contacts, &request).into()
     })
 }
 
@@ -874,10 +874,10 @@ pub fn update_existing_contact(request: UpdateContactRequest) -> ContactOperatio
 /// # Errors
 /// Errors are enumerated by: `ContactError`
 #[update(guard = "caller_is_not_anonymous")]
-pub fn delete_contact(request: RemoveContactRequest) -> ContactOperationResult {
+pub fn delete_contact(request: RemoveContactRequest) -> CreateContactResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
-        crate::contacts::remove_contact(stored_principal, &mut s.contacts, &request)
+        contacts::remove_contact(stored_principal, &mut s.contacts, &request).into()
     })
 }
 
@@ -909,9 +909,9 @@ pub fn get_contact_settings() -> ContactSettings {
 
 /// Search contacts by name or address
 #[query(guard = "caller_is_not_anonymous")]
-pub fn search_contacts_by_query(query: String) -> ContactOperationResult {
+pub fn search_contacts_by_query(query: String) -> Vec<Contact> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| crate::contacts::search_contacts(stored_principal, &s.contacts, &query))
+    read_state(|s| contacts::search_contacts(stored_principal, &s.contacts, &query))
 }
 
 /// Filter contacts by token type
@@ -926,10 +926,10 @@ pub fn filter_contacts_by_token_type(token_type: String) -> Vec<Contact> {
 /// # Errors
 /// Errors are enumerated by: `ContactError`
 #[update(guard = "caller_is_not_anonymous")]
-pub fn add_address_to_contact(request: AddAddressRequest) -> Result<(), ContactError> {
+pub fn add_address_to_contact(request: AddAddressRequest) -> CreateContactResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
-        crate::contacts::add_address(stored_principal, &mut s.contacts, &request)
+        contacts::add_address(stored_principal, &mut s.contacts, &request).into()
     })
 }
 
@@ -938,10 +938,10 @@ pub fn add_address_to_contact(request: AddAddressRequest) -> Result<(), ContactE
 /// # Errors
 /// Errors are enumerated by: `ContactError`
 #[update(guard = "caller_is_not_anonymous")]
-pub fn update_contact_address(request: UpdateAddressRequest) -> Result<(), ContactError> {
+pub fn update_contact_address(request: UpdateAddressRequest) -> CreateContactResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
-        crate::contacts::update_address(stored_principal, &mut s.contacts, &request)
+        contacts::update_address(stored_principal, &mut s.contacts, &request).into()
     })
 }
 

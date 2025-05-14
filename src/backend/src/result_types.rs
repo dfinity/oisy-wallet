@@ -1,8 +1,11 @@
 use candid::{CandidType, Deserialize};
 use serde::Serialize;
-use shared::types::user_profile::AddUserCredentialError;
+use shared::types::{
+    contact::ContactError,
+    user_profile::AddUserCredentialError,
+};
 
-#[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[derive(CandidType, Serialize, Deserialize)]
 pub enum AddUserCredentialResult {
     /// The user's credential was added successfully.
     Ok(()),
@@ -17,3 +20,21 @@ impl From<Result<(), AddUserCredentialError>> for AddUserCredentialResult {
         }
     }
 }
+
+#[derive(CandidType, Serialize, Deserialize)]
+pub enum CreateContactResult {
+    /// The contact operation was successful.
+    Ok(()),
+    /// The contact operation failed due to an error.
+    Err(ContactError),
+}
+
+impl From<Result<(), ContactError>> for CreateContactResult {
+    fn from(result: Result<(), ContactError>) -> Self {
+        match result {
+            Ok(()) => CreateContactResult::Ok(()),
+            Err(err) => CreateContactResult::Err(err),
+        }
+    }
+}
+pub type ContactOperationResult = Result<(), ContactError>; // Existing type
