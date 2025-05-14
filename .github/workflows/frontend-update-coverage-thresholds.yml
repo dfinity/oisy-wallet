@@ -79,9 +79,9 @@ jobs:
             const oldValue = originalThresholds[key];
             const newValue = updatedThresholds[key];
             if (newValue > oldValue) {
-             return \`\${key}: \${newValue.toFixed(2)}\`;
+             return \`\${key}: \${newValue}\`;
             } else {
-             return \`\${key}: \${oldValue.toFixed(2)}\`;
+             return \`\${key}: \${oldValue}\`;
             }
           });
 
