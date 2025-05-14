@@ -10,6 +10,18 @@ pub enum AddUserCredentialResult {
     /// The user's credential was not added due to an error.
     Err(AddUserCredentialError),
 }
+impl AddUserCredentialResult {
+    pub fn is_err(&self) -> bool {
+        matches!(self, Self::Err(_))
+    }
+
+    pub fn unwrap_err(self) -> AddUserCredentialError {
+        match self {
+            Self::Err(e) => e,
+            Self::Ok(_) => panic!("called `unwrap_err()` on an `Ok` value"),
+        }
+    }
+}
 impl From<Result<(), AddUserCredentialError>> for AddUserCredentialResult {
     fn from(result: Result<(), AddUserCredentialError>) -> Self {
         match result {
