@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import { IC_TOKEN_FEE_CONTEXT_KEY, type IcTokenFeeContext } from '$icp/stores/ic-token-fee.store';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
@@ -30,7 +31,6 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
-	import { IC_TOKEN_FEE_CONTEXT_KEY, type IcTokenFeeContext } from '$icp/stores/ic-token-fee.store';
 
 	interface Props {
 		swapAmount: OptionAmount;
