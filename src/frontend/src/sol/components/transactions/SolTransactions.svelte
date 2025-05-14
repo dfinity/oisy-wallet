@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
@@ -26,6 +26,19 @@
 			$modalOpen: $modalSolTransaction,
 			$modalStore
 		}));
+
+
+	let solTransactionsData: SolTransactionUi[];
+
+	const debounceIcTransactions = debounce(() => {
+		solTransactionsData = $solTransactions;
+	}, 1);
+
+	$: {
+		if ($solTransactions.length > 0) {
+			debounceIcTransactions();
+		}
+	}
 </script>
 
 <Header>
@@ -35,7 +48,7 @@
 <SolTransactionsSkeletons>
 	{#if $solTransactions.length > 0}
 		<SolTransactionsScroll token={$token ?? DEFAULT_SOLANA_TOKEN}>
-			{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
+			{#each (solTransactionsData ?? []) as transaction, index (`${transaction.id}-${index}`)}
 				<li in:slide={SLIDE_DURATION}>
 					<SolTransaction {transaction} token={$token ?? DEFAULT_SOLANA_TOKEN} />
 				</li>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import Info from '$icp/components/info/Info.svelte';
@@ -31,6 +31,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
+	import type { CertifiedTransaction } from '$lib/stores/transactions.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
@@ -57,6 +58,18 @@
 
 	let noTransactions = false;
 	$: noTransactions = nonNullish($token) && $icTransactionsStore?.[$token.id] === null;
+
+	let icTransactionsData: CertifiedTransaction<IcTransactionUi>[];
+
+	const debounceIcTransactions = debounce(() => {
+		icTransactionsData = $icTransactions;
+	}, 1);
+
+	$: {
+		if ($icTransactions.length > 0) {
+			debounceIcTransactions();
+		}
+	}
 </script>
 
 <Info />
@@ -81,7 +94,7 @@
 	>
 		{#if $icTransactions.length > 0}
 			<IcTransactionsScroll token={$token ?? ICP_TOKEN}>
-				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
+				{#each icTransactionsData ?? [] as transaction, index (`${transaction.data.id}-${index}`)}
 					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
 						<IcTransaction transaction={transaction.data} token={$token ?? ICP_TOKEN} />
 					</li>
