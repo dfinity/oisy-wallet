@@ -28,6 +28,10 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
+        contact::{
+            AddAddressRequest, AddContactRequest, ContactError, ContactSettings,
+            RemoveContactRequest, UpdateAddressRequest, UpdateContactRequest,
+        },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{
@@ -73,6 +77,7 @@ mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
+mod contact;
 mod guards;
 mod heap_state;
 mod impls;
@@ -349,6 +354,42 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+pub fn add_contact(request: AddContactRequest) -> Result<(), ContactError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    contact::add_contact(stored_principal, request)
+}
+
+#[query(guard = "caller_is_not_anonymous")]
+pub fn get_contacts() -> Result<ContactSettings, ContactError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    contact::get_contacts(stored_principal)
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+pub fn update_contact(request: UpdateContactRequest) -> Result<(), ContactError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    contact::update_contact(stored_principal, request)
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+pub fn remove_contact_address(request: RemoveContactRequest) -> Result<(), ContactError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    contact::remove_contact_address(stored_principal, request)
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+pub fn add_contact_address(request: AddAddressRequest) -> Result<(), ContactError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    contact::add_contact_address(stored_principal, request)
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+pub fn update_contact_address(request: UpdateAddressRequest) -> Result<(), ContactError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    contact::update_contact_address(stored_principal, request)
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
