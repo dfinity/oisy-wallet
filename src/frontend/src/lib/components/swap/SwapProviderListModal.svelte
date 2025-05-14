@@ -1,0 +1,65 @@
+<script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher, getContext } from 'svelte';
+	import ButtonCancel from '../ui/ButtonCancel.svelte';
+	import ButtonGroup from '../ui/ButtonGroup.svelte';
+	import SwapProviderListItem from './SwapProviderListItem.svelte';
+	import { dAppDescriptions } from '$env/dapp-descriptions.env';
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
+	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+	import type { SwapMappedResult } from '$lib/types/swap';
+	import { formatTokenBigintToNumber, formatUSD } from '$lib/utils/format.utils';
+
+	const dispatch = createEventDispatcher<{
+		icSelectProvider: SwapMappedResult;
+		icCloseProviderList: void;
+	}>();
+
+	const { destinationToken, destinationTokenExchangeRate } =
+		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	const getUsdBalance = (amount: bigint, token: IcTokenToggleable | undefined): string =>
+		formatUSD({
+			value:
+				nonNullish(amount) && nonNullish(token) && nonNullish($destinationTokenExchangeRate)
+					? formatTokenBigintToNumber({
+							value: amount,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						}) * $destinationTokenExchangeRate
+					: 0
+		});
+</script>
+
+<div class=" mb-4 overflow-y-auto overscroll-contain">
+	<div class="flex w-full flex-row justify-between border-b border-solid border-primary pb-2">
+		<span class="text-sm text-tertiary">{$i18n.swap.text.swap_provider}</span>
+		<span class="text-sm text-tertiary">{$i18n.swap.text.you_receive}</span>
+	</div>
+	<ul class="list-none">
+		{#each $swapAmountsStore?.swaps ?? [] as swap (swap.provider)}
+			{#if nonNullish($destinationToken) && nonNullish($swapAmountsStore)}
+				<li class="logo-button-list-item">
+					<SwapProviderListItem
+						on:click={() => dispatch('icSelectProvider', swap)}
+						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
+						amount={swap.receiveAmount}
+						destinationToken={$destinationToken}
+						usdBalance={getUsdBalance(swap.receiveAmount, $destinationToken)}
+						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
+					/>
+				</li>
+			{/if}
+		{/each}
+	</ul>
+</div>
+
+<ButtonGroup>
+	<ButtonCancel fullWidth={true} onclick={() => dispatch('icCloseProviderList')} />
+</ButtonGroup>
