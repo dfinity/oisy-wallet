@@ -16,46 +16,31 @@
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import type { OptionString } from '$lib/types/string';
 	import type { ProviderFee } from '$lib/types/swap';
-	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
-	import { safeParse } from '$lib/validation/utils.validation';
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let route: string[] | undefined;
-	$: route = $swapAmountsStore?.swapAmounts?.route;
-
-	let networkFee: ProviderFee | undefined;
-	$: networkFee = $swapAmountsStore?.swapAmounts?.networkFee;
-
-	let liquidityFees: ProviderFee[] | undefined;
-	$: liquidityFees = $swapAmountsStore?.swapAmounts?.liquidityFees;
-
-	const kongSwapDApp: OisyDappDescription | undefined = dAppDescriptions.find(
-		({ id }) => id === 'kongswap'
+	let route = $derived<string[] | undefined>($swapAmountsStore?.swapAmounts?.route);
+	let networkFee = $derived<ProviderFee | undefined>($swapAmountsStore?.swapAmounts?.networkFee);
+	let liquidityFees = $derived<ProviderFee[] | undefined>(
+		$swapAmountsStore?.swapAmounts?.liquidityFees
+	);
+	let displayURL = $state<OptionString>(null);
+	let kongSwapDApp = $derived<OisyDappDescription | undefined>(
+		dAppDescriptions.find(({ id }) => id === 'kongswap')
 	);
 
-	// TODO: this state - websiteURL - isn't one and should become a local variable
-	let websiteURL: Option<URL>;
-	let displayURL: OptionString;
-	$: if (nonNullish(kongSwapDApp)) {
-		try {
-			const validatedWebsiteUrl = safeParse({
-				schema: UrlSchema,
-				value: kongSwapDApp?.website
-			});
-			if (nonNullish(validatedWebsiteUrl)) {
-				websiteURL = new URL(validatedWebsiteUrl);
-				displayURL = websiteURL.hostname.startsWith('www.')
-					? websiteURL.hostname.substring(4)
-					: websiteURL.hostname;
+	$effect(() => {
+		if (nonNullish(kongSwapDApp)) {
+			const parsed = UrlSchema.safeParse(kongSwapDApp.website);
+			if (parsed.success) {
+				const url = new URL(parsed.data);
+				displayURL = url.hostname.startsWith('www.') ? url.hostname.slice(4) : url.hostname;
+				return;
 			}
-		} catch (_err: unknown) {
-			websiteURL = null;
-			displayURL = null;
 		}
-	}
+	});
 </script>
 
 {#if nonNullish(kongSwapDApp)}
