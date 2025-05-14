@@ -504,6 +504,19 @@ describe('reward-code', () => {
 						getMockReward({ ledgerCanisterId: mockIcpToken.ledgerCanisterId, amount: ZERO })
 					]
 				]
+			})
+			.mockResolvedValueOnce({
+				...baseMockUserData,
+				usage_awards: [
+					[
+						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 1000n, campaignId: 'season1' }),
+						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 1000n, campaignId: 'season1' }),
+						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 1000n }),
+						getMockReward({ ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId, amount: 2000n, campaignId: 'season1' }),
+						getMockReward({ ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId, amount: 2000n }),
+						getMockReward({ ledgerCanisterId: mockIcpToken.ledgerCanisterId, amount: 3000n })
+					]
+				]
 			});
 
 		it('should calculate correct sums for all rewards', async () => {
@@ -547,6 +560,21 @@ describe('reward-code', () => {
 
 			expect(result.ckBtcReward.toString()).toEqual('0');
 			expect(result.ckUsdcReward.toString()).toEqual('0');
+			expect(result.icpReward.toString()).toEqual('0');
+			expect(result.amountOfRewards.toString()).toEqual('3');
+		});
+
+		it('should only load balances of a specific campaign', async () => {
+			const result = await getUserRewardsTokenAmounts({
+				ckBtcToken: mockCkBtcToken,
+				ckUsdcToken: mockCkUsdcToken,
+				icpToken: mockIcpToken,
+				identity: mockIdentity,
+				campaignId: 'season1'
+			});
+
+			expect(result.ckBtcReward.toString()).toEqual('2000');
+			expect(result.ckUsdcReward.toString()).toEqual('2000');
 			expect(result.icpReward.toString()).toEqual('0');
 			expect(result.amountOfRewards.toString()).toEqual('3');
 		});
