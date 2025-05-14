@@ -10,9 +10,12 @@ import { expect } from 'vitest';
 
 describe('KnownDestination', () => {
 	const props = {
-		token: BTC_MAINNET_TOKEN,
 		destination: mockBtcAddress,
-		amounts: [10000000n, 20000000n, 30000000n]
+		amounts: [
+			{ value: 10000000n, token: BTC_MAINNET_TOKEN },
+			{ value: 20000000n, token: BTC_MAINNET_TOKEN },
+			{ value: 30000000n, token: BTC_MAINNET_TOKEN }
+		]
 	};
 
 	it('renders all amounts if the array length is smaller than the max amount', () => {
@@ -20,13 +23,13 @@ describe('KnownDestination', () => {
 			props
 		});
 
-		props.amounts.forEach((amount) => {
+		props.amounts.forEach(({ value, token }) => {
 			expect(container).toHaveTextContent(
 				`${formatToken({
-					value: amount,
+					value,
 					unitName: BTC_MAINNET_TOKEN.decimals,
 					displayDecimals: BTC_MAINNET_TOKEN.decimals
-				})} ${props.token.symbol}`
+				})} ${token.symbol}`
 			);
 		});
 	});
@@ -40,13 +43,13 @@ describe('KnownDestination', () => {
 			props: newProps
 		});
 
-		props.amounts.forEach((amount) => {
+		props.amounts.forEach(({ value, token }) => {
 			expect(container).toHaveTextContent(
 				`${formatToken({
-					value: amount,
+					value,
 					unitName: BTC_MAINNET_TOKEN.decimals,
 					displayDecimals: BTC_MAINNET_TOKEN.decimals
-				})} ${props.token.symbol}`
+				})} ${token.symbol}`
 			);
 		});
 
