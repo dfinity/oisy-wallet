@@ -1,7 +1,11 @@
+import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { mapDip20Transaction } from '$icp/utils/dip20-transactions.utils';
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import { initDip20WalletScheduler } from '$icp/workers/dip20-wallet.worker';
 import { initIcpWalletScheduler } from '$icp/workers/icp-wallet.worker';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
 import { WALLET_TIMER_INTERVAL_MILLIS, ZERO } from '$lib/constants/app.constants';
@@ -73,7 +77,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	}: {
 		transaction: IcTransactionUi;
 		certified: boolean;
-		msg: 'syncIcpWallet' | 'syncIcrcWallet';
+		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 	}) => ({
 		msg,
 		data: mockPostMessageData(rest)
@@ -180,7 +184,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 			data: PostMessageDataRequest | undefined
 		) => IcWalletScheduler<PostMessageDataRequest>;
 		transaction: IcTransactionUi;
-		msg: 'syncIcpWallet' | 'syncIcrcWallet';
+		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 		startData?: PostMessageDataRequest | undefined;
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
@@ -240,7 +244,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 			data: PostMessageDataRequest | undefined
 		) => IcWalletScheduler<PostMessageDataRequest>;
 		transaction: IcTransactionUi;
-		msg: 'syncIcpWallet' | 'syncIcrcWallet';
+		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 		startData?: PostMessageDataRequest | undefined;
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
@@ -316,7 +320,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		initScheduler,
 		startData = undefined
 	}: {
-		msg: 'syncIcpWallet' | 'syncIcrcWallet';
+		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 		initScheduler: (
 			data: PostMessageDataRequest | undefined
 		) => IcWalletScheduler<PostMessageDataRequest>;
@@ -378,7 +382,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		startData?: PostMessageDataRequest | undefined;
 		initCleanupMock: (mockRogueId: bigint) => void;
 		initErrorMock: (err: Error) => void;
-		msg: 'syncIcpWallet' | 'syncIcrcWallet';
+		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
@@ -658,7 +662,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				);
 			};
 
-			describe('ledger canister error', () => {
+			describe('balance error', () => {
 				const { setup, teardown, tests } = initOtherScenarios({
 					initScheduler: initIcrcWalletScheduler,
 					startData,
@@ -674,13 +678,139 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				tests();
 			});
 
-			describe('index canister error', () => {
+			describe('transactions error', () => {
 				const { setup, teardown, tests } = initOtherScenarios({
 					initScheduler: initIcrcWalletScheduler,
 					startData,
 					initCleanupMock,
 					initErrorMock: (err: Error) => indexCanisterMock.getTransactions.mockRejectedValue(err),
 					msg: 'syncIcrcWallet'
+				});
+
+				beforeEach(setup);
+
+				afterEach(teardown);
+
+				tests();
+			});
+		});
+	});
+
+	describe('dip20-wallet.worker', () => {
+		const ledgerCanisterMock = mock<XtcLedgerCanister>();
+
+		const mockTransaction: Dip20TransactionWithId = {
+			id: 123n,
+			transaction: {
+				kind: { Transfer: { to: mockPrincipal, from: mockPrincipal } },
+				timestamp: 1n,
+				fee: 456n,
+				status: { SUCCEEDED: null },
+				cycles: 1_000_000_000_000n
+			}
+		};
+
+		const mockMappedTransaction = mapDip20Transaction({
+			transaction: mockTransaction,
+			identity: mockIdentity
+		});
+
+		const startData = {
+			canisterId: 'aanaa-xaaaa-aaaah-aaeiq-cai'
+		};
+
+		beforeEach(() => {
+			// @ts-expect-error for test purposes
+			vi.spyOn(XtcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
+
+			spyGetBalance = ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
+		});
+
+		describe('with transactions', () => {
+			const { setup, teardown, tests } = initWithBalanceAndTransactions({
+				msg: 'syncDip20Wallet',
+				initScheduler: initDip20WalletScheduler,
+				transaction: mockMappedTransaction,
+				startData
+			});
+
+			beforeEach(() => {
+				setup();
+
+				// TODO: implement DIP-20 transactions tests when we implement the transactions history
+				spyGetTransactions = ledgerCanisterMock.transactions.mockResolvedValue({
+					transactions: [mockTransaction],
+					oldest_tx_id: [mockOldestTxId]
+				});
+			});
+
+			afterEach(teardown);
+
+			tests();
+		});
+
+		describe('without transactions', () => {
+			const { setup, teardown, tests } = initWithoutTransactions({
+				msg: 'syncDip20Wallet',
+				initScheduler: initDip20WalletScheduler,
+				startData
+			});
+
+			beforeEach(() => {
+				setup();
+
+				spyGetTransactions = ledgerCanisterMock.transactions.mockResolvedValue({
+					transactions: [],
+					oldest_tx_id: [mockOldestTxId]
+				});
+			});
+
+			afterEach(teardown);
+
+			tests();
+		});
+
+		describe('other scenarios', () => {
+			const initCleanupMock = (mockRogueId: bigint) => {
+				ledgerCanisterMock.transactions.mockImplementation(({ certified }) =>
+					Promise.resolve({
+						transactions: !certified
+							? [
+									mockTransaction,
+									{
+										...mockTransaction,
+										id: mockRogueId
+									}
+								]
+							: [mockTransaction],
+						oldest_tx_id: [mockOldestTxId]
+					})
+				);
+			};
+
+			describe('balance error', () => {
+				const { setup, teardown, tests } = initOtherScenarios({
+					initScheduler: initDip20WalletScheduler,
+					startData,
+					initCleanupMock,
+					initErrorMock: (err: Error) => ledgerCanisterMock.balance.mockRejectedValue(err),
+					msg: 'syncDip20Wallet'
+				});
+
+				beforeEach(setup);
+
+				afterEach(teardown);
+
+				tests();
+			});
+
+			describe('transactions error', () => {
+				const { setup, teardown, tests } = initOtherScenarios({
+					initScheduler: initDip20WalletScheduler,
+					startData,
+					initCleanupMock,
+					initErrorMock: (err: Error) => ledgerCanisterMock.transactions.mockRejectedValue(err),
+					msg: 'syncDip20Wallet'
 				});
 
 				beforeEach(setup);

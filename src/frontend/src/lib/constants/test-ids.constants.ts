@@ -51,6 +51,7 @@ export const RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON =
 export const SEND_TOKENS_MODAL_OPEN_BUTTON = 'send-tokens-modal-open-button';
 export const SEND_TOKENS_MODAL = 'send-tokens-modal';
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
+export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
 
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
@@ -145,7 +146,8 @@ export const REWARDS_STATUS_BUTTON = 'reward-status-button';
 export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
 export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
 
-export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
+export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
+
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
@@ -183,6 +185,11 @@ export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
 export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
+
+export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button';
+export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';
+export const CONTACT_HEADER_EDIT_BUTTON = 'contact-header-edit-button';
+export const CONTACT_HEADER_EDITING_EDIT_BUTTON = 'contact-header-editing-edit-button';
 
 export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
 
