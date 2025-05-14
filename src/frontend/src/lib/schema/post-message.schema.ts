@@ -106,6 +106,7 @@ export const PostMessageDataRequestSolSchema = z.object({
 	// TODO: generate zod schema for CertifiedData
 	address: z.custom<CertifiedData<SolAddress>>(),
 	solanaNetwork: z.custom<SolanaNetworkType>(),
+	beforeSignature: z.string().optional(),
 	tokenAddress: z.custom<SplTokenAddress>().optional(),
 	tokenOwnerAddress: z.custom<SolAddress>().optional()
 });
