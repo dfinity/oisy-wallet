@@ -38,6 +38,7 @@ use shared::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
+        result_types::AddUserCredentialResult,
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
@@ -52,7 +53,6 @@ use shared::{
         Stats, Timestamp,
     },
 };
-use shared::types::result_types::AddUserCredentialResult;
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,

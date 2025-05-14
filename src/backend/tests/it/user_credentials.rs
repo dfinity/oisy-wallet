@@ -2,11 +2,12 @@ use std::time::Duration;
 
 use candid::Principal;
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
-use shared::types::result_types::AddUserCredentialResult;
-use shared::types::user_profile::{
-    AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, UserProfile,
+use shared::types::{
+    result_types::AddUserCredentialResult,
+    user_profile::{
+        AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, UserProfile,
+    },
 };
-
 
 use crate::utils::{
     mock::{ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},

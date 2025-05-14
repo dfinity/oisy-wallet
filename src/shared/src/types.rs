@@ -13,6 +13,7 @@ pub mod dapp;
 pub mod network;
 pub mod number;
 pub mod pow;
+pub mod result_types;
 pub mod settings;
 pub mod signer;
 pub mod snapshot;
@@ -22,7 +23,6 @@ pub mod token_standard;
 pub mod transaction;
 pub mod user_profile;
 pub mod verifiable_credential;
-pub mod result_types;
 
 #[cfg(test)]
 mod tests;

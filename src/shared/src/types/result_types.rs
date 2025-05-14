@@ -1,5 +1,6 @@
 use candid::{CandidType, Deserialize};
 use serde::Serialize;
+
 use crate::types::user_profile::AddUserCredentialError;
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
