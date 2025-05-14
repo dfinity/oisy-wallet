@@ -31,7 +31,7 @@ pub enum NetworkSettingsFor {
     BscMainnet,
     BscTestnet,
     PolygonMainnet,
-    PolygonAmoy
+    PolygonAmoy,
 }
 
 /// A list of logical networks grouped by type.
