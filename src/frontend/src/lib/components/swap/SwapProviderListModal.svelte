@@ -24,7 +24,13 @@
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	const getUsdBalance = (amount: bigint, token: IcTokenToggleable | undefined): string =>
+	const getUsdBalance = ({
+		amount,
+		token
+	}: {
+		amount: bigint;
+		token: IcTokenToggleable | undefined;
+	}): string =>
 		formatUSD({
 			value:
 				nonNullish(amount) && nonNullish(token) && nonNullish($destinationTokenExchangeRate)
@@ -51,7 +57,7 @@
 						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
 						amount={swap.receiveAmount}
 						destinationToken={$destinationToken}
-						usdBalance={getUsdBalance(swap.receiveAmount, $destinationToken)}
+						usdBalance={getUsdBalance({ amount: swap.receiveAmount, token: $destinationToken })}
 						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
 					/>
 				</li>
