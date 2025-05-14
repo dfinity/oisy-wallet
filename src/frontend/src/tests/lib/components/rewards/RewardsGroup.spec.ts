@@ -1,3 +1,4 @@
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import type { RewardDescription } from '$env/types/env-reward';
 import oisyEpisodeFour from '$lib/assets/oisy-episode-four-coming.svg';
 import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
@@ -13,7 +14,7 @@ import { render } from '@testing-library/svelte';
 
 describe('RewardsGroups', () => {
 	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
-		({ id }) => id === 'OISY Airdrop #1'
+		({ id }) => id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
 	assertNonNullish(mockRewardCampaign);
 
