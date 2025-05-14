@@ -1,12 +1,7 @@
 import type { CreateChallengeResponse } from '$declarations/backend/backend.did';
 import { solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
-import {
-	ChallengeCompletionErrorEnum,
-	CreateChallengeEnum,
-	PowChallengeError,
-	PowCreateChallengeError
-} from '$lib/canisters/backend.errors';
+import { CreateChallengeEnum, PowCreateChallengeError } from '$lib/canisters/backend.errors';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
@@ -82,26 +77,13 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 		// TODO provide functionality to post and receive the a post message to indicate the progress
 		// this.postMessagePowProgress({ progress: 'GRANT_CYCLES'});
 
-		try {
-			await allowSigning({
-				identity,
-				request: { nonce }
-			});
-		} catch (err: unknown) {
-			// Handle expired challenge specifically
-			if (this.isExpiredChallengeError(err)) {
-				console.error(
-					'ExpiredChallenge: The challange was not solved within the given timeframe. Reduce the ' +
-						'difficulty or increase the expiary duration to avoid this issue from happening again'
-				);
-			}
-		}
+		await allowSigning({
+			identity,
+			request: { nonce }
+		});
 		// TODO provide functionality to post and receive the a post message to indicate when the next challenge starts
 		// if (_allowSigningResponse?.challenge_completion[0]?.next_allowance_ms !== undefined) {this.postMessagePowNextAllowance({ nextAllowanceMs: allowSigningResponse.challenge_completion[0].next_allowance_ms });
 	};
 	private isChallengeInProgressError = (err: unknown): boolean =>
 		err instanceof PowCreateChallengeError && err.code === CreateChallengeEnum.ChallengeInProgress;
-
-	private isExpiredChallengeError = (err: unknown): boolean =>
-		err instanceof PowChallengeError && err.code === ChallengeCompletionErrorEnum.ExpiredChallenge;
 }
