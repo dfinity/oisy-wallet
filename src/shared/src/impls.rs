@@ -29,14 +29,14 @@ use crate::{
 };
 
 // Constants for validation limits
-const MAX_ID_LENGTH: usize = 100;
-const MAX_NAME_LENGTH: usize = 100;
-const MAX_AVATAR_LENGTH: usize = 100;
-const MAX_ADDRESSES: usize = 40;
-const MAX_LABEL_LENGTH: usize = 50;
+const CONTACT_MAX_ID_LENGTH: usize = 100;
+const CONTACT_MAX_NAME_LENGTH: usize = 100;
+const CONTACT_MAX_AVATAR_LENGTH: usize = 100;
+const CONTACT_MAX_ADDRESSES: usize = 40;
+const CONTACT_MAX_LABEL_LENGTH: usize = 50;
 
 // TODO what is a reasanoble value here?
-const MAX_CONTACTS: usize = 100;
+const CONTACT_MAX_ENTRIES: usize = 100;
 
 // Helper functions for validation
 fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> Result<(), Error> {
@@ -468,18 +468,18 @@ impl Validate for IcrcToken {
 impl Validate for Contact {
     fn validate(&self) -> Result<(), Error> {
         // Validate id length
-        validate_string_length(&self.id, MAX_ID_LENGTH, "Contact.id")?;
+        validate_string_length(&self.id, CONTACT_MAX_ID_LENGTH, "Contact.id")?;
 
         // Validate name length
-        validate_string_length(&self.name, MAX_NAME_LENGTH, "Contact.name")?;
+        validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
 
         // Check if avatar exists
         if let Some(avatar) = &self.avatar {
-            validate_string_length(avatar, MAX_AVATAR_LENGTH, "Contact.avatar")?;
+            validate_string_length(avatar, CONTACT_MAX_AVATAR_LENGTH, "Contact.avatar")?;
         }
 
         // Validate number of addresses
-        validate_collection_size(&self.addresses, MAX_ADDRESSES, "Contact.addresses")?;
+        validate_collection_size(&self.addresses, CONTACT_MAX_ADDRESSES, "Contact.addresses")?;
 
         Ok(())
     }
@@ -491,7 +491,7 @@ impl Validate for ContactAddressData {
 
         // Check if the label exists
         if let Some(label) = &self.label {
-            validate_string_length(label, MAX_LABEL_LENGTH, "ContactAddressData.label")?;
+            validate_string_length(label, CONTACT_MAX_LABEL_LENGTH, "ContactAddressData.label")?;
         }
 
         Ok(())
@@ -501,7 +501,11 @@ impl Validate for ContactAddressData {
 impl Validate for ContactSettings {
     fn validate(&self) -> Result<(), Error> {
         // Limit the number of contacts a user can have
-        validate_collection_size(&self.contacts, MAX_CONTACTS, "ContactSettings.contacts")?;
+        validate_collection_size(
+            &self.contacts,
+            CONTACT_MAX_ENTRIES,
+            "ContactSettings.contacts",
+        )?;
         Ok(())
     }
 }
@@ -518,7 +522,11 @@ impl Validate for RemoveContactRequest {
         // Note: We don't need to validate TokenAccountId since it has its own validation
 
         // Validate contact_id length
-        validate_string_length(&self.contact_id, MAX_ID_LENGTH, "RemoveContactRequest.id")?;
+        validate_string_length(
+            &self.contact_id,
+            CONTACT_MAX_ID_LENGTH,
+            "RemoveContactRequest.id",
+        )?;
 
         Ok(())
     }
@@ -536,7 +544,7 @@ impl Validate for AddAddressRequest {
         // Validate contact_id length
         validate_string_length(
             &self.contact_id,
-            MAX_ID_LENGTH,
+            CONTACT_MAX_ID_LENGTH,
             "AddAddressRequest.contact_id",
         )?;
 
@@ -551,7 +559,7 @@ impl Validate for UpdateAddressRequest {
         // Validate contact_id length
         validate_string_length(
             &self.contact_id,
-            MAX_ID_LENGTH,
+            CONTACT_MAX_ID_LENGTH,
             "UpdateAddressRequest.contact_id",
         )?;
 
