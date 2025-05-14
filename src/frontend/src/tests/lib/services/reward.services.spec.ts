@@ -509,10 +509,22 @@ describe('reward-code', () => {
 				...baseMockUserData,
 				usage_awards: [
 					[
-						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 1000n, campaignId: 'season1' }),
-						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 1000n, campaignId: 'season1' }),
+						getMockReward({
+							ledgerCanisterId: mockCkBtcToken.ledgerCanisterId,
+							amount: 1000n,
+							campaignId: 'season1'
+						}),
+						getMockReward({
+							ledgerCanisterId: mockCkBtcToken.ledgerCanisterId,
+							amount: 1000n,
+							campaignId: 'season1'
+						}),
 						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 1000n }),
-						getMockReward({ ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId, amount: 2000n, campaignId: 'season1' }),
+						getMockReward({
+							ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId,
+							amount: 2000n,
+							campaignId: 'season1'
+						}),
 						getMockReward({ ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId, amount: 2000n }),
 						getMockReward({ ledgerCanisterId: mockIcpToken.ledgerCanisterId, amount: 3000n })
 					]
