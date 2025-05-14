@@ -9,6 +9,7 @@ This document lists a couple of useful information for development and deploymen
 - [Faucets](#faucets)
 - [Testing](#testing)
 - [Integrate ckERC20 Tokens](#integrate-ckerc20-tokens)
+- [Bitcoin](#bitcoin)
 - [Routes Styles](#routes-styles)
 
 ## Deployment
@@ -285,3 +286,56 @@ Furthermore, given that parsing happens at build time, the developer might want 
 	});
 </script>
 ```
+
+
+## Add EVM Networks
+
+Below a summary of how to add a new EVM network (sidechains or layer-2).
+
+### Pre-Requisites
+
+- Chain ID is required for mainnet and testnet(s), if any.
+- The third-party providers must support the new network: [Alchemy](https://www.alchemy.com/), [Infura](https://www.infura.io/), and [Etherscan](https://docs.etherscan.io/etherscan-v2).
+- Verify that the network is already integrated by the [`ethers` library](https://github.com/ethers-io/ethers.js) in the previous providers, or open a request for it.
+
+### Create Networks Objects
+
+Under the `src/frontend/src/env/networks/networks-evm` folder, create a new file named `networks.<network>.env.ts` and copy the content of `networks.<network>.env.ts` from another EVM network.
+
+For example, this is the mainnet object of `networks.bsc.env.ts`:
+
+```typescript
+export const BSC_MAINNET_NETWORK_SYMBOL = 'BSC';
+
+export const BSC_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(BSC_MAINNET_NETWORK_SYMBOL);
+
+export const BSC_MAINNET_NETWORK: EthereumNetwork = {
+	id: BSC_MAINNET_NETWORK_ID,
+	env: 'mainnet',
+	name: 'BNB Smart Chain',
+	chainId: 56n,
+	iconLight: bscMainnetIconLight,
+	iconDark: bscMainnetIconDark,
+	explorerUrl: BSC_EXPLORER_URL,
+	providers: {
+		infura: 'bnb',
+		alchemy: Network.BNB_MAINNET,
+		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2'
+	},
+	exchange: { coingeckoId: 'binance-smart-chain' },
+	buy: { onramperId: 'bsc' }
+};
+```
+
+Then, update the content accordingly:
+
+- Symbol
+- Name
+- Chain ID
+- Icons for all themes. They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
+- Explorer URL. TO have these values, the `src/frontend/src/env/explorers.env.ts` file should be updated.
+- Providers. The correct values for all the providers should be set here.
+- Exchange. Remember to update type the appropriate types (for example, if a Coingecko ID is provided, type `CoingeckoPlatformId` should be updated).
+- Buy. Remember to update type the appropriate types (for example, if an Onramper ID is provided, type `OnramperNetworkId` should be updated).
+
+If there are testnets, create a similar object for each one.
