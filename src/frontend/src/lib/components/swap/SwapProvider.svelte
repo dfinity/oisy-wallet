@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import SwapBestRateBadge from './SwapBestRateBadge.svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
