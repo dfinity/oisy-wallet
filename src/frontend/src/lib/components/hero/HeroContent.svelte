@@ -7,7 +7,8 @@
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
 		isGLDTToken as isGLDTTokenUtil,
-		isVCHFToken as isVCHFTokenUtil
+		isVCHFToken as isVCHFTokenUtil,
+		isVEURToken as isVEURTokenUtil
 	} from '$icp-eth/utils/token.utils';
 	import Back from '$lib/components/core/Back.svelte';
 	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
@@ -77,6 +78,9 @@
 	let isVchfToken = false;
 	$: isVchfToken = nonNullish($pageToken) && isVCHFTokenUtil($pageToken);
 
+	let isVeurToken = false;
+	$: isVeurToken = nonNullish($pageToken) && isVEURTokenUtil($pageToken);
+
 	let isGradientToRight = false;
 	$: isGradientToRight = $networkSolana && !isTrumpToken;
 
@@ -89,7 +93,7 @@
 	class:from-default-0={$pseudoNetworkChainFusion}
 	class:to-default-100={$pseudoNetworkChainFusion}
 	class:bg-pos-100={!$pseudoNetworkChainFusion}
-	class:bg-cover={isTrumpToken || isVchfToken}
+	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken}
 	class:from-trump-0={isTrumpToken}
 	class:to-trump-100={isTrumpToken}
 	class:bg-size-200={!isTrumpToken}
@@ -110,6 +114,8 @@
 	class:bg-trump-token-hero-image={isTrumpToken}
 	class:bg-vchf-token-hero-image={isVchfToken}
 	class:bg-top-right={isVchfToken}
+	class:bg-veur-token-hero-image={isVeurToken}
+	class:bg-center={isVeurToken}
 	class:bg-linear-to-b={!isGradientToRight && !isGradientToBottomRight}
 	class:bg-gradient-to-r={isGradientToRight}
 	class:bg-linear-105={isGradientToBottomRight}

@@ -36,7 +36,9 @@ export default {
 				'trump-token-hero-image':
 					'url(/images/trump-token-hero-image.webp), linear-gradient(to bottom, #232bcc, #000797)',
 				'vchf-token-hero-image':
-					'url(/images/vchf-token-hero-image.webp), radial-gradient(#DA291C, #AD1207)'
+					'url(/images/vchf-token-hero-image.webp), radial-gradient(#DA291C, #AD1207)',
+				'veur-token-hero-image':
+					'url(/images/veur-token-hero-image.webp), linear-gradient(180deg, #00319E, #00319E)'
 			},
 			backgroundSize: {
 				'size-200': '200% 200%'
