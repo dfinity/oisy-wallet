@@ -87,6 +87,4 @@
 	});
 </script>
 
-{#if nonNullish(children)}
-	{@render children()}
-{/if}
+{@render children?.()}
