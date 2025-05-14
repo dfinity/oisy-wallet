@@ -21,7 +21,7 @@
 
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
 	{#if nonNullish(title)}
-		<span class="text-lg font-bold first-letter:capitalize">{title}</span>
+		<span class="text-lg font-bold first-letter:capitalize"><Html text={title} /></span>
 	{/if}
 
 	{#each rewards as reward (reward.id)}
@@ -35,6 +35,6 @@
 	{/each}
 
 	{#if nonNullish(altText) && rewards.length === 0}
-		<span><Html text={altText} /></span>
+		<span class="text-tertiary"><Html text={altText} /></span>
 	{/if}
 </div>
