@@ -79,7 +79,7 @@ describe('RewardEarnings', () => {
             expect(rewardEarningsActivityButton).toBeInTheDocument();
         });
 
-        expect(getByText(get(i18n).rewards.text.activity_button_text));
+        expect(getByText(get(i18n).rewards.text.activity_button_text)).toBeInTheDocument();
     });
 
     it('should not render reward earnings content without rewards', async () => {
@@ -114,7 +114,7 @@ describe('RewardEarnings', () => {
         expect(queryByText(get(i18n).rewards.text.activity_button_text)).not.toBeInTheDocument();
     });
 
-    it('should render different activity button text on mobile', async () => {
+    it('should render different activity button text on mobile', () => {
         Object.defineProperty(window, 'navigator', {
             writable: true,
             value: {
@@ -131,10 +131,10 @@ describe('RewardEarnings', () => {
             }
         });
 
-        expect(getByText(get(i18n).rewards.text.activity_button_text_short));
+        expect(getByText(get(i18n).rewards.text.activity_button_text_short)).toBeInTheDocument();
     });
 
-    it('should only load received tokens once', async () => {
+    it('should only load received tokens once', () => {
         const rewardServiceSpy = vi.spyOn(rewardService, 'getUserRewardsTokenAmounts').mockResolvedValue({
             ckBtcReward: ZERO,
             ckUsdcReward: ZERO,
