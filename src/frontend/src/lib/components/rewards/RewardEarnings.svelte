@@ -92,7 +92,7 @@
 			ckUsdcToken,
 			icpToken,
 			identity: $authIdentity,
-			episodeId: reward.id
+			campaignId: reward.id
 		}));
 		loading = false;
 	};

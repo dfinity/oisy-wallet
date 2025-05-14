@@ -380,13 +380,13 @@ export const getUserRewardsTokenAmounts = async ({
 	ckUsdcToken,
 	icpToken,
 	identity,
-	episodeId
+	campaignId
 }: {
 	ckBtcToken: IcToken;
 	ckUsdcToken: IcToken;
 	icpToken: IcToken;
 	identity: Identity;
-	episodeId: string;
+	campaignId: string;
 }): Promise<{
 	ckBtcReward: bigint;
 	ckUsdcReward: bigint;
@@ -407,7 +407,7 @@ export const getUserRewardsTokenAmounts = async ({
 		return initialRewards;
 	}
 
-	const filteredUsageAwards = usageAwards.filter(({ campaign_id }) => campaign_id === episodeId);
+	const filteredUsageAwards = usageAwards.filter(({ campaign_id }) => campaign_id === campaignId);
 
 	return filteredUsageAwards.reduce((acc, { ledger, amount }) => {
 		const canisterId = ledger.toText();
