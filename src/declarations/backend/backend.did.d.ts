@@ -249,9 +249,11 @@ export interface NetworkSettings {
 export type NetworkSettingsFor =
 	| { InternetComputer: null }
 	| { BaseSepolia: null }
+	| { PolygonMainnet: null }
 	| { SolanaTestnet: null }
 	| { BitcoinRegtest: null }
 	| { SolanaDevnet: null }
+	| { PolygonAmoy: null }
 	| { EthereumSepolia: null }
 	| { BitcoinTestnet: null }
 	| { BaseMainnet: null }

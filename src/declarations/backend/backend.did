@@ -233,9 +233,11 @@ type NetworkSettings = record { enabled : bool; is_testnet : bool };
 type NetworkSettingsFor = variant {
 	InternetComputer;
 	BaseSepolia;
+	PolygonMainnet;
 	SolanaTestnet;
 	BitcoinRegtest;
 	SolanaDevnet;
+	PolygonAmoy;
 	EthereumSepolia;
 	BitcoinTestnet;
 	BaseMainnet;
