@@ -25,6 +25,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
+	import {REWARDS_EARNINGS_ACTIVITY_BUTTON, REWARDS_EARNINGS_CARD} from "$lib/constants/test-ids.constants";
 
 	interface Props {
 		reward: RewardDescription;
@@ -134,14 +135,16 @@
 				token={ckBtcToken}
 				amount={ckBtcReward}
 				usdAmount={ckBtcRewardUsd}
+				testId={`${REWARDS_EARNINGS_CARD}-ck-btc`}
 			/>
 			<RewardEarningsCard
 				{loading}
 				token={ckUsdcToken}
 				amount={ckUsdcReward}
 				usdAmount={ckUsdcRewardUsd}
+				testId={`${REWARDS_EARNINGS_CARD}-ck-usdc`}
 			/>
-			<RewardEarningsCard {loading} token={ICP_TOKEN} amount={icpReward} usdAmount={icpRewardUsd} />
+			<RewardEarningsCard {loading} token={ICP_TOKEN} amount={icpReward} usdAmount={icpRewardUsd} testId={`${REWARDS_EARNINGS_CARD}-icp`} />
 		</div>
 
 		<div class="my-5 w-full justify-items-center text-center">
@@ -149,6 +152,7 @@
 				paddingSmall
 				on:click={gotoActivity}
 				styleClass="font-semibold bg-transparent text-brand-primary-alt"
+				testId={REWARDS_EARNINGS_ACTIVITY_BUTTON}
 			>
 				{isMobile()
 					? $i18n.rewards.text.activity_button_text_short
