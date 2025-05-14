@@ -19,7 +19,7 @@ describe('RewardStateModal', () => {
 
 	it('should render modal content', () => {
 		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
-			(campaign) => campaign.id === 'OISY Airdrop #1'
+			(campaign) => campaign.id === 'sprinkles_s1e3'
 		);
 		assertNonNullish(mockedReward);
 
@@ -47,7 +47,7 @@ describe('RewardStateModal', () => {
 
 	it('should render modal content for jackpot', () => {
 		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
-			(campaign) => campaign.id === 'OISY Airdrop #1'
+			(campaign) => campaign.id === 'sprinkles_s1e3'
 		);
 		assertNonNullish(mockedReward);
 

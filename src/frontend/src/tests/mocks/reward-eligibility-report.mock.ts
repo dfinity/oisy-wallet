@@ -8,7 +8,7 @@ import type {
 
 export const mockCampaignEligibilities: CampaignEligibility[] = [
 	{
-		campaignId: 'OISY Airdrop #1',
+		campaignId: 'sprinkles_s1e3',
 		available: true,
 		eligible: true,
 		criteria: [
@@ -32,7 +32,7 @@ export const mockCampaignEligibilities: CampaignEligibility[] = [
 		]
 	},
 	{
-		campaignId: 'OISY Airdrop #3',
+		campaignId: 'sprinkles_s1e5',
 		available: true,
 		eligible: false,
 		criteria: [

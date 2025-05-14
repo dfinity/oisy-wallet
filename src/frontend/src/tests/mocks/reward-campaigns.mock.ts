@@ -2,7 +2,7 @@ import type { RewardDescription } from '$env/types/env-reward';
 
 export const mockRewardCampaigns: RewardDescription[] = [
 	{
-		id: 'OISY Airdrop #1',
+		id: 'sprinkles_s1e3',
 		title: 'OISY Airdrop',
 		cardTitle: 'OISY Rewards Season is Now Active!',
 		oneLiner: 'The one stop token shop - Trade tokens across all chains with ease using KongSwap.',
@@ -19,7 +19,7 @@ export const mockRewardCampaigns: RewardDescription[] = [
 		endDate: new Date('2030-03-04T00:00:00.000Z')
 	},
 	{
-		id: 'OISY Airdrop #2',
+		id: 'sprinkles_s1e4',
 		title: 'OISY Airdrop',
 		cardTitle: 'OISY Rewards Season is Now Active!',
 		oneLiner: 'The one stop token shop - Trade tokens across all chains with ease using KongSwap.',
@@ -36,7 +36,7 @@ export const mockRewardCampaigns: RewardDescription[] = [
 		endDate: new Date('2029-03-04T00:00:00.000Z')
 	},
 	{
-		id: 'OISY Airdrop #3',
+		id: 'sprinkles_s1e5',
 		title: 'OISY Airdrop',
 		cardTitle: 'OISY Rewards Season is Now Active!',
 		oneLiner: 'The one stop token shop - Trade tokens across all chains with ease using KongSwap.',

@@ -27,7 +27,7 @@
 
 	// TODO At the moment the selected campaign is hardcoded. In the future this should be configurable from the outside.
 	const reward: RewardDescription | undefined = rewardCampaigns.find(
-		(campaign) => campaign.id === 'OISY Airdrop #1'
+		(campaign) => campaign.id === 'sprinkles_s1e3'
 	);
 </script>
 
