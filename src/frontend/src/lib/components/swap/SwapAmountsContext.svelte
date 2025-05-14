@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { kongSwapAmounts } from '$lib/api/kong_backend.api';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
@@ -14,9 +14,14 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
 
-	export let amount: OptionAmount = undefined;
-	export let sourceToken: Token | undefined;
-	export let destinationToken: Token | undefined;
+	interface Props {
+		amount: OptionAmount;
+		sourceToken: Token | undefined;
+		destinationToken: Token | undefined;
+		children?: Snippet;
+	}
+
+	let { amount, sourceToken, destinationToken, children }: Props = $props();
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -76,7 +81,10 @@
 	};
 	const debounceLoadSwapAmounts = debounce(loadSwapAmounts);
 
-	$: amount, sourceToken, destinationToken, debounceLoadSwapAmounts();
+	$effect(() => {
+		[amount, sourceToken, destinationToken];
+		debounceLoadSwapAmounts();
+	});
 </script>
 
-<slot />
+{@render children?.()}

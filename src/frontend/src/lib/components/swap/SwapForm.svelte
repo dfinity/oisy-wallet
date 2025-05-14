@@ -33,9 +33,16 @@
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
-	export let swapAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let slippageValue: OptionAmount;
+	interface Props {
+		swapAmount: OptionAmount;
+		receiveAmount: number | undefined;
+		slippageValue: OptionAmount;
+	}
+	let {
+		swapAmount = $bindable<OptionAmount>(),
+		receiveAmount = $bindable<number | undefined>(),
+		slippageValue = $bindable<OptionAmount>()
+	}: Props = $props();
 
 	const {
 		sourceToken,
@@ -52,51 +59,58 @@
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
-	let errorType: TokenActionErrorType = undefined;
-	let amountSetToMax = false;
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let errorType: TokenActionErrorType = $state<TokenActionErrorType | undefined>(undefined);
+	let amountSetToMax = $state(false);
+	let exchangeValueUnit: DisplayUnit = $state<DisplayUnit>('usd');
 
-	$: receiveAmount =
-		nonNullish($destinationToken) && $swapAmountsStore?.swapAmounts?.receiveAmount
-			? formatTokenBigintToNumber({
-					value: $swapAmountsStore?.swapAmounts.receiveAmount,
-					unitName: $destinationToken.decimals,
-					displayDecimals: $destinationToken.decimals
-				})
-			: undefined;
+	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
-	let sourceTokenFee: bigint | undefined;
-	$: sourceTokenFee = nonNullish($sourceToken)
-		? $icTokenFeeStore?.[$sourceToken.symbol]
-		: undefined;
+	let sourceTokenFee: bigint | undefined = $derived(
+		nonNullish($sourceToken) && nonNullish($icTokenFeeStore)
+			? $icTokenFeeStore[$sourceToken.symbol]
+			: undefined
+	);
 
-	let totalFee: bigint | undefined;
-	// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
-	$: totalFee = (sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n);
+	let totalFee: bigint | undefined = $derived(
+		(sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n)
+	);
 
-	let swapAmountsLoading = false;
-	$: swapAmountsLoading =
+	let swapAmountsLoading = $derived(
 		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
 			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
-			: false;
+			: false
+	);
 
-	let disableSwitchTokens = false;
-	$: disableSwitchTokens =
-		(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
+	let disableSwitchTokens = $derived(
+		(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading
+	);
+
+	let invalid: boolean = $derived(
+		nonNullish(errorType) ||
+			isNullish(swapAmount) ||
+			Number(swapAmount) <= 0 ||
+			isNullish(receiveAmount) ||
+			isNullish(sourceTokenFee) ||
+			swapAmountsLoading ||
+			Number(slippageValue!) >= SWAP_SLIPPAGE_INVALID_VALUE
+	);
+
+	$effect(() => {
+		if (
+			nonNullish($destinationToken) &&
+			nonNullish($swapAmountsStore?.swapAmounts?.receiveAmount)
+		) {
+			receiveAmount = formatTokenBigintToNumber({
+				value: $swapAmountsStore?.swapAmounts.receiveAmount,
+				unitName: $destinationToken.decimals,
+				displayDecimals: $destinationToken.decimals
+			});
+		} else {
+			receiveAmount = undefined;
+		}
+	});
 
 	const dispatch = createEventDispatcher();
-
-	let invalid: boolean;
-	$: invalid =
-		nonNullish(errorType) ||
-		isNullish(swapAmount) ||
-		Number(swapAmount) <= 0 ||
-		isNullish(receiveAmount) ||
-		isNullish(sourceTokenFee) ||
-		swapAmountsLoading ||
-		Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE;
 
 	const onTokensSwitch = () => {
 		const tempAmount = receiveAmount;
