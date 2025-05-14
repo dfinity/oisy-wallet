@@ -1,11 +1,11 @@
 use candid::{CandidType, Deserialize, Principal};
-use serde::Deserialize as SerdeDeserialize;
 use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
+use serde::Deserialize as SerdeDeserialize;
 use shared::types::{
-    backend_config::Config, custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
-    user_profile::StoredUserProfile, Timestamp, contact::Contact,
+    backend_config::Config, contact::Contact, custom_token::CustomToken, pow::StoredChallenge,
+    token::UserToken, user_profile::StoredUserProfile, Timestamp,
 };
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
@@ -24,6 +24,5 @@ pub struct Candid<T>(pub T)
 where
     T: CandidType + for<'de> Deserialize<'de>;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, CandidType)]
-#[derive(SerdeDeserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, CandidType, SerdeDeserialize)]
 pub struct StoredPrincipal(pub Principal);
