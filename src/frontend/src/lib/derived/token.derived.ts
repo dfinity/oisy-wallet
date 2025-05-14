@@ -10,8 +10,8 @@ import {
 import {
 	networkBase,
 	networkBitcoin,
+	networkBsc,
 	networkEthereum,
-	networkEvm,
 	networkSolana
 } from '$lib/derived/network.derived';
 import { token } from '$lib/stores/token.store';
@@ -24,8 +24,8 @@ import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const defaultFallbackToken: Readable<Token> = derived(
-	[networkBitcoin, networkEthereum, networkBase, networkEvm, networkSolana],
-	([$networkBitcoin, $networkEthereum, $networkBase, $networkEvm, $networkSolana]) => {
+	[networkBitcoin, networkEthereum, networkBase, networkBsc, networkSolana],
+	([$networkBitcoin, $networkEthereum, $networkBase, $networkBsc, $networkSolana]) => {
 		if ($networkBitcoin) {
 			return DEFAULT_BITCOIN_TOKEN;
 		}
@@ -38,7 +38,7 @@ export const defaultFallbackToken: Readable<Token> = derived(
 		if ($networkBase) {
 			return DEFAULT_BASE_TOKEN;
 		}
-		if ($networkEvm) {
+		if ($networkBsc) {
 			return DEFAULT_BSC_TOKEN;
 		}
 

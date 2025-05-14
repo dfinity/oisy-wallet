@@ -391,21 +391,27 @@ describe('ic-transactions.services', () => {
 		});
 
 		it('should not load transactions if the transactions list is empty', async () => {
-			await loadNextIcTransactionsByOldest({ ...mockParams, transactions: [] });
+			const result = await loadNextIcTransactionsByOldest({ ...mockParams, transactions: [] });
+
+			expect(result).toEqual({ success: false });
 
 			expect(getTransactionsIcp).not.toHaveBeenCalled();
 			expect(getTransactionsIcrc).not.toHaveBeenCalled();
 		});
 
 		it('should not load transactions if the minStamp is newer than all the transactions', async () => {
-			await loadNextIcTransactionsByOldest({ ...mockParams, minTimestamp: 10_000n });
+			const result = await loadNextIcTransactionsByOldest({ ...mockParams, minTimestamp: 10_000n });
+
+			expect(result).toEqual({ success: false });
 
 			expect(getTransactionsIcp).not.toHaveBeenCalled();
 			expect(getTransactionsIcrc).not.toHaveBeenCalled();
 		});
 
 		it('should load transactions with the correct parameters', async () => {
-			await loadNextIcTransactionsByOldest(mockParams);
+			const result = await loadNextIcTransactionsByOldest(mockParams);
+
+			expect(result).toEqual({ success: true });
 
 			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
@@ -431,7 +437,9 @@ describe('ic-transactions.services', () => {
 			}));
 			const lastId = transactions[0].id;
 
-			await loadNextIcTransactionsByOldest({ ...mockParams, transactions });
+			const result = await loadNextIcTransactionsByOldest({ ...mockParams, transactions });
+
+			expect(result).toEqual({ success: true });
 
 			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {

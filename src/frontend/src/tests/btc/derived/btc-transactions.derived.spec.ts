@@ -84,7 +84,7 @@ describe('btc-transactions.derived', () => {
 		});
 	});
 
-	describe('solKnownDestinations', () => {
+	describe('btcKnownDestinations', () => {
 		const transactions = [
 			{
 				certified: true,
@@ -109,7 +109,10 @@ describe('btc-transactions.derived', () => {
 
 			expect(get(btcKnownDestinations)).toEqual({
 				[transactions[0].data.to?.[0] ?? '']: {
-					amounts: transactions.map(({ data }) => data.value),
+					amounts: transactions.map(({ data }) => ({
+						value: data.value,
+						token: BTC_MAINNET_TOKEN
+					})),
 					timestamp: Number(transactions[0].data.timestamp)
 				}
 			});

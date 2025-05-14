@@ -14,6 +14,7 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import AllTransactionsLoader from '$lib/components/transactions/AllTransactionsLoader.svelte';
 	import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
@@ -94,19 +95,21 @@
 </script>
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
-	{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
-		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-			<TransactionsDateGroup
-				{formattedDate}
-				{transactions}
-				testId={`all-transactions-date-group-${index}`}
-			/>
-		{/each}
-	{/if}
+	<AllTransactionsLoader {transactions}>
+		{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
+			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+				<TransactionsDateGroup
+					{formattedDate}
+					{transactions}
+					testId={`all-transactions-date-group-${index}`}
+				/>
+			{/each}
+		{/if}
 
-	{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
-		<TransactionsPlaceholder />
-	{/if}
+		{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
+			<TransactionsPlaceholder />
+		{/if}
+	</AllTransactionsLoader>
 </AllTransactionsSkeletons>
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}

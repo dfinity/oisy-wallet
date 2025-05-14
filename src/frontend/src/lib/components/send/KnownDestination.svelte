@@ -8,7 +8,7 @@
 	import { MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/address';
-	import type { Token } from '$lib/types/token';
+	import type { KnownDestination } from '$lib/types/transactions';
 	import {
 		formatSecondsToNormalizedDate,
 		shortenWithMiddleEllipsis
@@ -16,12 +16,11 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		token: Token;
 		destination: Address;
-		amounts: bigint[];
+		amounts: KnownDestination['amounts'];
 		timestamp?: number;
 	}
-	let { token, destination, amounts, timestamp }: Props = $props();
+	let { destination, amounts, timestamp }: Props = $props();
 
 	// we only display the first 3 amounts, and the rest is displayed as "+N more"
 	let amountsToDisplay = $derived(amounts.slice(0, MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS));
@@ -39,8 +38,8 @@
 	</svelte:fragment>
 
 	<svelte:fragment slot="description">
-		{#each amountsToDisplay as amount, index (index)}
-			<Amount {amount} decimals={token.decimals} symbol={token.symbol} />
+		{#each amountsToDisplay as { token, value }, index (index)}
+			<Amount amount={value} decimals={token.decimals} symbol={token.symbol} />
 			{#if index < amounts.length - 1}
 				&nbsp;&middot;&nbsp;
 			{/if}

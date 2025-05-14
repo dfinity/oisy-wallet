@@ -38,10 +38,9 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SplToken } from '$sol/types/spl';
-import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
@@ -79,15 +78,6 @@ describe('tokens.derived', () => {
 		...mockValidSplToken,
 		id: parseTokenId('SplDefaultTokenId1'),
 		symbol: 'SplDefaultTokenId1'
-	};
-
-	const mockSplCustomToken: SplCustomToken = {
-		...mockValidSplToken,
-		id: parseTokenId('SplCustomTokenId2'),
-		symbol: 'SplCustomTokenId2',
-		address: `${mockValidSplToken.address}2`,
-		version: undefined,
-		enabled: true
 	};
 
 	describe('tokens', () => {

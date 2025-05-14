@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -39,7 +39,7 @@ describe('eth-transactions.derived', () => {
 
 			expect(get(ethKnownDestinations)).toEqual({
 				[transactions[0].to as string]: {
-					amounts: transactions.map(({ value }) => value),
+					amounts: transactions.map(({ value }) => ({ value, token: ETHEREUM_TOKEN })),
 					timestamp: Number(transactions[0].timestamp)
 				}
 			});
