@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardCard from '$lib/components/rewards/RewardCard.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalStore } from '$lib/stores/modal.store';
 
@@ -11,10 +12,11 @@
 		title?: string;
 		rewards: RewardDescription[];
 		altText?: string;
+		altImg?: string;
 		testId?: string;
 	}
 
-	let { title, rewards, altText, testId }: Props = $props();
+	let { title, rewards, altText, altImg, testId }: Props = $props();
 
 	const modalId = Symbol();
 </script>
@@ -34,7 +36,17 @@
 		</div>
 	{/each}
 
-	{#if nonNullish(altText) && rewards.length === 0}
+	{#if nonNullish(altText) && isNullish(altImg) && rewards.length === 0}
 		<span class="text-tertiary"><Html text={altText} /></span>
+	{/if}
+
+	{#if nonNullish(altImg) && rewards.length === 0}
+		<div class="max-h-66 overflow-hidden rounded-2xl">
+			<Img
+				src={altImg}
+				alt={altText}
+				testId={nonNullish(testId) ? `${testId}-alt-img` : undefined}
+			/>
+		</div>
 	{/if}
 </div>
