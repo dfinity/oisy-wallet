@@ -3,6 +3,7 @@
 	import { onMount, setContext } from 'svelte';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
+	import oisyEpisodeFour from '$lib/assets/oisy-episode-four-coming.svg';
 	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
@@ -61,7 +62,12 @@
 />
 
 {#if selectedRewardState === RewardStates.ONGOING}
-	<RewardsGroup rewards={ongoingCampaigns} testId={REWARDS_ACTIVE_CAMPAIGNS_CONTAINER} />
+	<RewardsGroup
+		rewards={ongoingCampaigns}
+		testId={REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}
+		altImg={oisyEpisodeFour}
+		altText={replaceOisyPlaceholders($i18n.rewards.alt.coming_soon)}
+	/>
 
 	<RewardsGroup
 		title={replaceOisyPlaceholders($i18n.rewards.text.upcoming_campaigns)}
