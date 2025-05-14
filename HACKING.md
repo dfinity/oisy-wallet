@@ -287,7 +287,6 @@ Furthermore, given that parsing happens at build time, the developer might want 
 </script>
 ```
 
-
 ## Add EVM Networks
 
 Below a summary of how to add a new EVM network (sidechains or layer-2).
