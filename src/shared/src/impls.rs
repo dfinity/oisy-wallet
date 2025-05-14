@@ -34,8 +34,6 @@ const CONTACT_MAX_NAME_LENGTH: usize = 100;
 const CONTACT_MAX_AVATAR_LENGTH: usize = 100;
 const CONTACT_MAX_ADDRESSES: usize = 40;
 const CONTACT_MAX_LABEL_LENGTH: usize = 50;
-
-// TODO what is a reasanoble value here?
 const CONTACT_MAX_ENTRIES: usize = 100;
 
 // Helper functions for validation
