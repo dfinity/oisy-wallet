@@ -20,7 +20,7 @@ import type { BRAND } from 'zod';
 
 export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 	Array.from({ length: n }, () => ({
-		id: crypto.randomUUID(),
+		id: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(),
 		type: 'send',
 		status: 'executed',
 		value: bn1Bi,

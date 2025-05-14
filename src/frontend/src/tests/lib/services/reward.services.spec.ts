@@ -1,4 +1,6 @@
 import type {
+	CampaignEligibility,
+	EligibilityReport,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	RewardInfo,
@@ -6,17 +8,13 @@ import type {
 } from '$declarations/rewards/rewards.did';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as rewardApi from '$lib/api/reward.api';
-import {
-	MILLISECONDS_IN_DAY,
-	NANO_SECONDS_IN_MILLISECOND,
-	ZERO
-} from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import {
 	claimVipReward,
+	getCampaignEligibilities,
 	getNewReward,
 	getReferrerInfo,
-	getRewardRequirementsFulfilled,
 	getRewards,
 	getUserRewardsTokenAmounts,
 	getUserRoles,
@@ -26,8 +24,6 @@ import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCampaignError, InvalidCodeError } from '$lib/types/errors';
 import type { RewardClaimApiResponse, RewardResponseInfo } from '$lib/types/reward';
-import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
-import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
@@ -38,6 +34,53 @@ const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 describe('reward-code', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+	});
+
+	describe('getCampaignEligibilities', () => {
+		const campaignId = 'deuteronomy';
+		const campaign: CampaignEligibility = { eligible: true, available: true, criteria: [] };
+		const mockEligibilityReport: EligibilityReport = {
+			campaigns: [[campaignId, campaign]]
+		};
+
+		it('should return campaign eligibilities', async () => {
+			const getCampaignEligibilitiesSpy = vi
+				.spyOn(rewardApi, 'isEligible')
+				.mockResolvedValueOnce(mockEligibilityReport);
+
+			const campaignEligibilities = await getCampaignEligibilities({ identity: mockIdentity });
+
+			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				certified: false,
+				nullishIdentityErrorMessage
+			});
+			expect(campaignEligibilities).toHaveLength(1);
+
+			const campaignEligibility = campaignEligibilities.find(
+				(campaign) => campaign.campaignId === campaignId
+			);
+
+			expect(campaignEligibility?.campaignId).toEqual(campaignId);
+		});
+
+		it('should display an error message', async () => {
+			const err = new Error('test');
+			const getCampaignEligibilitiesSpy = vi.spyOn(rewardApi, 'isEligible').mockRejectedValue(err);
+			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+			await getCampaignEligibilities({ identity: mockIdentity });
+
+			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				certified: false,
+				nullishIdentityErrorMessage
+			});
+			expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+				msg: { text: get(i18n).vip.reward.error.loading_eligibility },
+				err
+			});
+		});
 	});
 
 	describe('getUserRoles', () => {
@@ -384,78 +427,6 @@ describe('reward-code', () => {
 				msg: { text: get(i18n).referral.invitation.error.setting_referrer },
 				err
 			});
-		});
-	});
-
-	describe('getRewardRequirementsFulfilled', () => {
-		const buildMockTransaction: (timestamp: bigint) => AnyTransactionUiWithCmp = (timestamp) => ({
-			transaction: { ...mockBtcTransactionUi, timestamp },
-			component: 'bitcoin'
-		});
-
-		it('should be fulfilled for 1 of 3 criterias', () => {
-			const [req1, req2, req3] = getRewardRequirementsFulfilled({
-				transactions: [],
-				totalUsdBalance: 9
-			});
-
-			expect(req1).toBeTruthy();
-			expect(req2).toBeFalsy();
-			expect(req3).toBeFalsy();
-		});
-
-		it('should be fulfilled for 2 of 3 criterias', () => {
-			const [req1, req2, req3] = getRewardRequirementsFulfilled({
-				transactions: [
-					buildMockTransaction(
-						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 2) * NANO_SECONDS_IN_MILLISECOND // trx 2 days ago
-					),
-					buildMockTransaction(
-						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 3) * NANO_SECONDS_IN_MILLISECOND // trx 3 days ago
-					)
-				],
-				totalUsdBalance: 9
-			});
-
-			expect(req1).toBeTruthy();
-			expect(req2).toBeTruthy();
-			expect(req3).toBeFalsy();
-		});
-
-		it('should be fulfilled for 2 of 3 criterias because transactions older than 7 days', () => {
-			const [req1, req2, req3] = getRewardRequirementsFulfilled({
-				transactions: [
-					buildMockTransaction(
-						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 7) * NANO_SECONDS_IN_MILLISECOND // trx 7 days ago
-					),
-					buildMockTransaction(
-						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 7) * NANO_SECONDS_IN_MILLISECOND // trx 7 days ago
-					)
-				],
-				totalUsdBalance: 22
-			});
-
-			expect(req1).toBeTruthy();
-			expect(req2).toBeFalsy();
-			expect(req3).toBeTruthy();
-		});
-
-		it('should be fulfilled for 3 of 3 criterias', () => {
-			const [req1, req2, req3] = getRewardRequirementsFulfilled({
-				transactions: [
-					buildMockTransaction(
-						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 2) * NANO_SECONDS_IN_MILLISECOND // trx 2 days ago
-					),
-					buildMockTransaction(
-						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 3) * NANO_SECONDS_IN_MILLISECOND // trx 3 days ago
-					)
-				],
-				totalUsdBalance: 22
-			});
-
-			expect(req1).toBeTruthy();
-			expect(req2).toBeTruthy();
-			expect(req3).toBeTruthy();
 		});
 	});
 
