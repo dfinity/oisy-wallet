@@ -291,6 +291,13 @@ export const areTransactionsStoresLoading = (
 	return (someNullish || someNotInitialized) && allEmpty;
 };
 
+export const areTransactionsStoresLoaded = (
+	transactionsStores: TransactionsStoreCheckParams[]
+): boolean =>
+	transactionsStores.every((transactionsStore) =>
+		isTransactionsStoreInitialized(transactionsStore)
+	);
+
 export const getKnownDestinations = (
 	transactions: AnyTransactionUiWithToken[]
 ): KnownDestinations =>
