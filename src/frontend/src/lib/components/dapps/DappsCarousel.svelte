@@ -36,9 +36,9 @@
 		...temporaryHiddenDappsIds
 	];
 
-	const featuredAirdrop: RewardDescription | undefined = nonNullish(FEATURED_REWARD_CAROUSEL_SLIDE_ID) ? rewardCampaigns.find(
+	const featuredAirdrop: RewardDescription | undefined = rewardCampaigns.find(
 		({ id }) => id === FEATURED_REWARD_CAROUSEL_SLIDE_ID
-	) : undefined;
+	);
 
 	let featureAirdropSlide: CarouselSlideOisyDappDescription | undefined;
 	$: featureAirdropSlide = nonNullish(featuredAirdrop)
