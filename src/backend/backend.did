@@ -431,3 +431,14 @@ service : (Arg) -> {
 	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_9);
 	update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_8)
 }
+// ===== Contacts CRUD API =====
+	create_contact : (AddContactRequest) -> (variant { Ok : null; Err : ContactError });
+	update_existing_contact : (UpdateContactRequest) -> (variant { Ok : null; Err : ContactError });
+	delete_contact : (RemoveContactRequest) -> (variant { Ok : null; Err : ContactError });
+	get_contact_by_id : (text) -> (variant { Ok : Contact; Err : ContactError }) query;
+	list_contacts : () -> (vec Contact) query;
+	search_contacts_by_query : (text) -> (vec Contact) query;
+	filter_contacts_by_token_type : (text) -> (vec Contact) query;
+	add_address_to_contact : (AddAddressRequest) -> (variant { Ok : null; Err : ContactError });
+	update_contact_address : (UpdateAddressRequest) -> (variant { Ok : null; Err : ContactError });
+}
