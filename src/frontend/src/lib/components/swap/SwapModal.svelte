@@ -90,6 +90,8 @@
 			selectTokenType = undefined;
 			dispatch('nnsClose');
 		});
+
+	// TODO: Migrate to Svelte 5, remove legacy slot usage and use render composition instead
 </script>
 
 <WizardModal
