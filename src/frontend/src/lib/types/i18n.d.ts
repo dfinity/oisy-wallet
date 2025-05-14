@@ -200,7 +200,7 @@ interface I18nRewards {
 		min_transactions: string;
 		min_total_assets_usd: string;
 	};
-	alt: { upcoming_campaigns: string; coming_soon: string; reward_logo: string };
+	alt: { upcoming_campaigns: string; coming_soon: string; reward_banner: string };
 }
 
 interface I18nFooter {
