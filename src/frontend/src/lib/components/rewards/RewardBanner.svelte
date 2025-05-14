@@ -17,10 +17,10 @@
 
 <div class="mb-5 max-h-60 overflow-hidden rounded-2xl">
 	<Img
-		src={reward.logo}
+		src={reward.cardBanner}
 		testId={REWARDS_MODAL_IMAGE_BANNER}
 		grayscale={hasEnded}
-		alt={replacePlaceholders($i18n.rewards.alt.reward_logo, {
+		alt={replacePlaceholders($i18n.rewards.alt.reward_banner, {
 			$campaignName: reward.cardTitle
 		})}
 	/>

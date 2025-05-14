@@ -509,19 +509,28 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should not load transactions if the transactions list is empty', async () => {
-			await loadNextSolTransactionsByOldest({ ...mockParams, transactions: [] });
+			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions: [] });
+
+			expect(result).toEqual({ success: false });
 
 			expect(spyGetTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should not load transactions if the minStamp is newer than all the transactions', async () => {
-			await loadNextSolTransactionsByOldest({ ...mockParams, minTimestamp: 10_000n });
+			const result = await loadNextSolTransactionsByOldest({
+				...mockParams,
+				minTimestamp: 10_000n
+			});
+
+			expect(result).toEqual({ success: false });
 
 			expect(spyGetTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should load transactions with the correct parameters', async () => {
-			await loadNextSolTransactionsByOldest(mockParams);
+			const result = await loadNextSolTransactionsByOldest(mockParams);
+
+			expect(result).toEqual({ success: true });
 
 			expect(spyGetTransactions).toHaveBeenCalledOnce();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
@@ -540,7 +549,9 @@ describe('sol-transactions.services', () => {
 			);
 			const lastSignature = transactions[0].signature;
 
-			await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
+			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
+
+			expect(result).toEqual({ success: true });
 
 			expect(spyGetTransactions).toHaveBeenCalledOnce();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
