@@ -6,4 +6,4 @@ import * as z from 'zod';
 const parseResult = z.array(RewardEventsSchema).safeParse(rewardCampaignsJson);
 export const rewardCampaigns: RewardDescription[] = parseResult.success ? parseResult.data : [];
 
-export const FEATURED_REWARD_CAROUSEL_SLIDE_ID = 'sprinkles_s1e3';
+export const FEATURED_REWARD_CAROUSEL_SLIDE_ID = '';
