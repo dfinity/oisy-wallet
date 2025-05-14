@@ -7,10 +7,11 @@ import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-repor
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import {SPRINKLES_SEASON_1_EPISODE_3_ID} from "$env/reward-campaigns.env";
 
 describe('RewardsRequirements', () => {
 	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
-		({ id }) => id === 'sprinkles_s1e3'
+		({ id }) => id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
 	assertNonNullish(mockRewardCampaign);
 

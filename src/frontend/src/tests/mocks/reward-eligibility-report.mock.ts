@@ -5,10 +5,11 @@ import type {
 	MinTotalAssetsUsdCriterion,
 	MinTransactionsCriterion
 } from '$lib/types/reward';
+import {SPRINKLES_SEASON_1_EPISODE_3_ID} from "$env/reward-campaigns.env";
 
 export const mockCampaignEligibilities: CampaignEligibility[] = [
 	{
-		campaignId: 'sprinkles_s1e3',
+		campaignId: SPRINKLES_SEASON_1_EPISODE_3_ID,
 		available: true,
 		eligible: true,
 		criteria: [
