@@ -7,6 +7,7 @@ pub type Timestamp = u64;
 pub mod account;
 pub mod backend_config;
 pub mod bitcoin;
+pub mod contact;
 pub mod custom_token;
 pub mod dapp;
 pub mod network;
