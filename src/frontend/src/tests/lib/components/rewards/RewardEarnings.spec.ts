@@ -93,7 +93,7 @@ describe('RewardEarnings', () => {
         const {container, queryByText} = render(RewardEarnings, {
             props: {
                 reward: mockedReward,
-                amountOfRewards: 1
+                amountOfRewards: 0
             }
         });
 
