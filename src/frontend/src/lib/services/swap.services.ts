@@ -163,6 +163,8 @@ export const fetchSwapAmounts = async ({
 			acc.push(mapped);
 		}
 
-		return acc;
+		return acc
+			.filter((swap) => Number(swap.receiveAmount) > 0)
+			.sort((a, b) => Number(b.receiveAmount) - Number(a.receiveAmount));
 	}, []);
 };
