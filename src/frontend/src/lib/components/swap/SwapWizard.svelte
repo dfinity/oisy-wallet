@@ -2,6 +2,8 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
+	import SwapAmountsContext from './SwapAmountsContext.svelte';
+	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import {
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext as IcTokenFeeContextType
@@ -29,8 +31,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import SwapAmountsContext from './SwapAmountsContext.svelte';
-	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	interface Props {
 		swapAmount: OptionAmount;
 		receiveAmount: number | undefined;
@@ -155,21 +155,19 @@
 		destinationToken={$destinationToken}
 		{slippageValue}
 	>
-		{#snippet children()}
-			{#if currentStep?.name === WizardStepsSwap.SWAP}
-				<SwapForm
-					on:icClose
-					on:icNext
-					on:icShowTokensList
-					bind:swapAmount
-					bind:receiveAmount
-					bind:slippageValue
-				/>
-			{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-				<SwapReview on:icSwap={swap} on:icBack {slippageValue} {swapAmount} {receiveAmount} />
-			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-				<SwapProgress bind:swapProgressStep />
-			{/if}
-		{/snippet}
+		{#if currentStep?.name === WizardStepsSwap.SWAP}
+			<SwapForm
+				on:icClose
+				on:icNext
+				on:icShowTokensList
+				bind:swapAmount
+				bind:receiveAmount
+				bind:slippageValue
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
+			<SwapReview on:icSwap={swap} on:icBack {slippageValue} {swapAmount} {receiveAmount} />
+		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
+			<SwapProgress bind:swapProgressStep />
+		{/if}
 	</SwapAmountsContext>
 </IcTokenFeeContext>

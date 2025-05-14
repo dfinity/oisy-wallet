@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
+	import SwapBestRateBadge from './SwapBestRateBadge.svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
+	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
+	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,11 +17,6 @@
 	import { SwapProvider } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
-	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
-	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
-	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import SwapBestRateBadge from './SwapBestRateBadge.svelte';
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -40,21 +40,15 @@
 			displayURL = null;
 		}
 	});
-	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish(swapDApp) && nonNullish(selectedProvider) && nonNullish($swapAmountsStore)}
 	<CollapsibleBottomSheet showContentHeader>
-		{#snippet contentHeader({ isInBottomSheet })}
+		{#snippet contentHeader()}
 			<ModalValue wrapperStyleClass="items-center">
 				<svelte:fragment slot="label">
 					<div class="flex justify-center gap-2">
 						{$i18n.swap.text.swap_provider}
-						{#if $swapAmountsStore?.swaps.length > 1 && !isInBottomSheet}
-							<Button link on:click={() => dispatch('icShowProviderList')}
-								>{$i18n.swap.text.select}</Button
-							>
-						{/if}
 					</div>
 				</svelte:fragment>
 

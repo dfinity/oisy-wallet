@@ -1,14 +1,14 @@
-import { render } from '@testing-library/svelte';
-import { readable, writable } from 'svelte/store';
-import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
-import { initSwapAmountsStore, SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
-import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { IcToken } from '$icp/types/ic-token';
+import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
+import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { MOCK_SWAP_PROVIDERS } from '$tests/mocks/swap.mocks';
+import { render } from '@testing-library/svelte';
+import { readable, writable } from 'svelte/store';
 
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
 const mockDestToken = { ...mockValidIcCkToken, enabled: true } as IcToken;
@@ -38,9 +38,12 @@ describe('SwapWizard', () => {
 			selectedProvider: MOCK_SWAP_PROVIDERS[1]
 		});
 
-		const feeStore = readable({
-			[mockToken.symbol]: 1000n
-		});
+		const feeStore = {
+			reset: vi.fn(),
+			subscribe: readable({
+				[mockToken.symbol]: 1000n
+			}).subscribe
+		};
 
 		return new Map<symbol, unknown>([
 			[SWAP_CONTEXT_KEY, swapContext],

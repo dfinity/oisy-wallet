@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import type { IcToken } from '$icp/types/ic-token';
+	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
+	import { fetchSwapAmounts } from '$lib/services/swap.services';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { IcToken } from '$icp/types/ic-token';
-	import { fetchSwapAmounts } from '$lib/services/swap.services';
-	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 
 	interface Props {
 		amount: OptionAmount;
@@ -51,7 +51,7 @@
 				destinationToken,
 				amount,
 				tokens: $tokens,
-				slippage: slippageValue || SWAP_DEFAULT_SLIPPAGE_VALUE
+				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE
 			});
 
 			if (swapAmounts.length === 0) {

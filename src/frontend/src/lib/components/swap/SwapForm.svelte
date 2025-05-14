@@ -2,6 +2,16 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import { icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import SwapFees from '$lib/components/swap/SwapFees.svelte';
+	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
+	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
+	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
+	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { SWAP_SLIPPAGE_INVALID_VALUE } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -14,23 +24,13 @@
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
-	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
-	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
-	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
-	import SwapFees from '$lib/components/swap/SwapFees.svelte';
-	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import type { OptionAmount } from '$lib/types/send';
-	import { icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 	import type { DisplayUnit } from '$lib/types/swap';
 
 	interface Props {
@@ -68,7 +68,7 @@
 		nonNullish($sourceToken) ? $icTokenFeeStore?.[$sourceToken.symbol] : undefined
 	);
 
-	let totalFee = $derived(sourceTokenFee ?? ZERO * (isSourceTokenIcrc2 ? 2n : 1n));
+	let totalFee = $derived(sourceTokenFee ?? ZERO * ($isSourceTokenIcrc2 ? 2n : 1n));
 
 	let swapAmountsLoading = $derived(
 		nonNullish(swapAmount) &&
@@ -84,7 +84,7 @@
 	let invalid = $derived(
 		nonNullish(errorType) ||
 			isNullish(swapAmount) ||
-			Number(swapAmount!) <= 0 ||
+			Number(swapAmount) <= 0 ||
 			isNullish(receiveAmount) ||
 			isNullish(sourceTokenFee) ||
 			swapAmountsLoading ||
