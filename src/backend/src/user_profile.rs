@@ -46,7 +46,7 @@ pub fn add_credential(
     credential_type: &CredentialType,
     issuer: String,
     user_profile_model: &mut UserProfileModel,
-) -> Result<(), AddUserCredentialError> {
+) -> AddUserCredentialResult {
     if let Ok(user_profile) = find_profile(principal, user_profile_model) {
         let now = time();
         if let Ok(new_profile) =

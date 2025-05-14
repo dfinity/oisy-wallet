@@ -52,6 +52,7 @@ use shared::{
         Stats, Timestamp,
     },
 };
+use shared::types::result_types::AddUserCredentialResult;
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
@@ -63,7 +64,6 @@ use user_profile_model::UserProfileModel;
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
-    result_types::AddUserCredentialResult,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
@@ -84,7 +84,6 @@ mod types;
 mod user_profile;
 mod user_profile_model;
 
-mod result_types;
 #[cfg(test)]
 mod tests;
 
