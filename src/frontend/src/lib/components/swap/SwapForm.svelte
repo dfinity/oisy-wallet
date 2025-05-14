@@ -10,8 +10,13 @@
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { SWAP_SLIPPAGE_INVALID_VALUE } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -21,17 +26,11 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import { validateUserAmount } from '$lib/utils/user-amount.utils';
-	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
-
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
-	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
