@@ -8,6 +8,7 @@
 	import { ADDRESS_BOOK_ADD_CONTACT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Contact } from '$lib/types/contact';
+	import SearchContact from '$lib/components/address-book/SearchContact.svelte';
 
 	interface AddressBookStepProps {
 		contacts: Contact[];
@@ -15,6 +16,13 @@
 		showContact: (contact: Contact) => void;
 	}
 	let { contacts, addContact, showContact }: AddressBookStepProps = $props();
+	let filteredContacts = $state(contacts);
+	const handleSearch = (term: string) => {
+	  const lower = term.toLowerCase();
+	  filteredContacts = contacts.filter((contact) =>
+		contact.name.toLowerCase().includes(lower)
+	  );
+	};
 </script>
 
 <ContentWithToolbar styleClass="mx-2 flex flex-col items-stretch">
@@ -37,15 +45,17 @@
 			TODO: Add contact cards here
 			https://github.com/dfinity/oisy-wallet/pull/6243
 			-->
-			{#each contacts as contact, index (index)}
-				{#if index > 0}
-					<Hr />
-				{/if}
-				<div class="flex items-center">
+			<SearchContact onSearchChange={handleSearch} />
+			{#if filteredContacts.length > 0}
+			  {#each filteredContacts as contact, index (index)}
+				<div class="flex items-center border-b">
 					<div class="grow">CONTACT: {contact.name} #addresses {contact.addresses.length}</div>
 					<Button styleClass="flex-none" on:click={() => showContact(contact)}>Show</Button>
 				</div>
-			{/each}
+			  {/each}
+			{:else}
+			  <div class="text-gray-500">No contacts found</div>
+			{/if}
 		</div>
 	{/if}
 
