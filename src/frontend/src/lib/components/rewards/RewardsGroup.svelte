@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import {isNullish, nonNullish} from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardCard from '$lib/components/rewards/RewardCard.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalStore } from '$lib/stores/modal.store';
-	import Img from "$lib/components/ui/Img.svelte";
 
 	interface Props {
 		title?: string;
@@ -42,7 +42,11 @@
 
 	{#if nonNullish(altImg) && rewards.length === 0}
 		<div class="max-h-66 overflow-hidden rounded-2xl">
-			<Img src={altImg} alt={altText} testId={nonNullish(testId) ? `${testId}-alt-img` : undefined} />
+			<Img
+				src={altImg}
+				alt={altText}
+				testId={nonNullish(testId) ? `${testId}-alt-img` : undefined}
+			/>
 		</div>
 	{/if}
 </div>
