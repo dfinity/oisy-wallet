@@ -183,6 +183,7 @@ export const ADDRESS_BOOK_MODAL = 'address-book-modal';
 export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
 export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
 export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
+export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-input';
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
 

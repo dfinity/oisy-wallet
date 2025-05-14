@@ -1,20 +1,27 @@
 <script lang="ts">
-    let { onSearchChange }: { onSearchChange: (value: string) => void } = $props();
-    let search = '';
-  
-    const onInput = (e: Event) => {
-      search = (e.target as HTMLInputElement).value;
-      onSearchChange(search);
-    };
-  </script>
-  
-  <div class="w-full my-4">
-    <input
-      type="text"
-      placeholder="Search contact"
-      class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      oninput={onInput}
-      bind:value={search}
-    />
+  import { Input } from '@dfinity/gix-components';
+  import IconSearch from '$lib/components/icons/IconSearch.svelte';
+  import { ADDRESS_BOOK_SEARCH_CONTACT_INPUT } from '$lib/constants/test-ids.constants';
+
+  export let onSearchChange: (value: string) => void;
+  let search = '';
+
+  $: onSearchChange(search);
+</script>
+
+<div class="relative w-full my-4">
+  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+    <IconSearch class="text-gray-500" />
   </div>
-  
+
+  <Input
+    name="search"
+    inputType="text"
+    placeholder="Search contact"
+    bind:value={search}
+    testId={ADDRESS_BOOK_SEARCH_CONTACT_INPUT}
+    spellcheck={false}
+    autocomplete="off"
+    class="pl-10 w-full"
+  />
+</div>
