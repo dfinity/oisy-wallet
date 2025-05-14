@@ -12,6 +12,10 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import {
+		REWARDS_EARNINGS_ACTIVITY_BUTTON,
+		REWARDS_EARNINGS_CARD
+	} from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -25,7 +29,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
-	import {REWARDS_EARNINGS_ACTIVITY_BUTTON, REWARDS_EARNINGS_CARD} from "$lib/constants/test-ids.constants";
 
 	interface Props {
 		reward: RewardDescription;
@@ -144,7 +147,13 @@
 				usdAmount={ckUsdcRewardUsd}
 				testId={`${REWARDS_EARNINGS_CARD}-ck-usdc`}
 			/>
-			<RewardEarningsCard {loading} token={ICP_TOKEN} amount={icpReward} usdAmount={icpRewardUsd} testId={`${REWARDS_EARNINGS_CARD}-icp`} />
+			<RewardEarningsCard
+				{loading}
+				token={ICP_TOKEN}
+				amount={icpReward}
+				usdAmount={icpRewardUsd}
+				testId={`${REWARDS_EARNINGS_CARD}-icp`}
+			/>
 		</div>
 
 		<div class="my-5 w-full justify-items-center text-center">
