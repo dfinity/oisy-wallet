@@ -447,7 +447,7 @@ describe('reward-code', () => {
 		const getMockReward = ({
 			ledgerCanisterId,
 			amount,
-			campaignId,
+			campaignId
 		}: {
 			ledgerCanisterId: unknown;
 			amount: bigint;
