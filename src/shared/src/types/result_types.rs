@@ -11,14 +11,20 @@ pub enum AddUserCredentialResult {
     Err(AddUserCredentialError),
 }
 impl AddUserCredentialResult {
+    #[must_use]
     pub fn is_err(&self) -> bool {
         matches!(self, Self::Err(_))
     }
 
-    pub fn unwrap_err(self) -> AddUserCredentialError {
+    /// Returns the contained `AddUserCredentialError` if the result is an `Err`.
+    ///
+    /// # Panics
+    /// - If the result is `Ok`.
+    #[must_use]
+     pub fn unwrap_err(self) -> AddUserCredentialError {
         match self {
-            Self::Err(e) => e,
-            Self::Ok(_) => panic!("called `unwrap_err()` on an `Ok` value"),
+            Self::Err(err) => err,
+            Self::Ok(()) => panic!("Called `AddUserCredentialResult.unwrap_err()` on an `Ok` value"),
         }
     }
 }
