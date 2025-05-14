@@ -1,3 +1,4 @@
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import type { RewardDescription } from '$env/types/env-reward';
 import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
 import rewardReceived from '$lib/assets/reward-received.svg';
@@ -12,7 +13,6 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import {SPRINKLES_SEASON_1_EPISODE_3_ID} from "$env/reward-campaigns.env";
 
 describe('RewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid="${REWARDS_STATE_MODAL_IMAGE_BANNER}"]`;

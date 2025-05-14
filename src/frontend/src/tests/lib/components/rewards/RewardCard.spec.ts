@@ -1,3 +1,4 @@
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import type { RewardDescription } from '$env/types/env-reward';
 import RewardCard from '$lib/components/rewards/RewardCard.svelte';
 import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
@@ -10,7 +11,6 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import {SPRINKLES_SEASON_1_EPISODE_3_ID} from "$env/reward-campaigns.env";
 
 describe('RewardCard', () => {
 	const testId = 'testId';

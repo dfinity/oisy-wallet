@@ -1,3 +1,4 @@
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import type { RewardDescription } from '$env/types/env-reward';
 import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.svelte';
 import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
@@ -7,7 +8,6 @@ import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-repor
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import {SPRINKLES_SEASON_1_EPISODE_3_ID} from "$env/reward-campaigns.env";
 
 describe('RewardsRequirements', () => {
 	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(

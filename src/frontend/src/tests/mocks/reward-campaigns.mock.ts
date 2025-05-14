@@ -1,5 +1,5 @@
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import type { RewardDescription } from '$env/types/env-reward';
-import {SPRINKLES_SEASON_1_EPISODE_3_ID} from "$env/reward-campaigns.env";
 
 export const mockRewardCampaigns: RewardDescription[] = [
 	{
