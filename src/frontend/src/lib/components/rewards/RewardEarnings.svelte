@@ -23,12 +23,14 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
+	import type {RewardDescription} from "$env/types/env-reward";
 
 	interface Props {
+		reward: RewardDescription;
 		amountOfRewards?: number;
 	}
 
-	let { amountOfRewards = $bindable(0) }: Props = $props();
+	let { reward, amountOfRewards = $bindable(0) }: Props = $props();
 
 	let ckBtcReward = $state(ZERO);
 	const ckBtcToken = $derived(findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens }));
@@ -89,7 +91,8 @@
 			ckBtcToken,
 			ckUsdcToken,
 			icpToken,
-			identity: $authIdentity
+			identity: $authIdentity,
+			campaignId: reward.id
 		}));
 		loading = false;
 	};
