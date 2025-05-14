@@ -29,8 +29,8 @@ use shared::{
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
         contact::{
-            AddAddressRequest, AddContactRequest, Contact, ContactError, ContactSettings, RemoveContactRequest,
-            UpdateAddressRequest, UpdateContactRequest,
+            AddAddressRequest, AddContactRequest, Contact, ContactError, ContactSettings,
+            RemoveContactRequest, UpdateAddressRequest, UpdateContactRequest,
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
@@ -58,8 +58,8 @@ use shared::{
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
-    Candid, ConfigCell, ContactMap, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
-    UserTokenMap,
+    Candid, ConfigCell, ContactMap, CustomTokenMap, StoredPrincipal, UserProfileMap,
+    UserProfileUpdatedMap, UserTokenMap,
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
@@ -853,17 +853,17 @@ pub fn create_contact(request: AddContactRequest) -> Result<(), ContactError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
         let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        
+
         // Check if contact with same ID already exists
         if user_contacts.iter().any(|c| c.id == request.contact.id) {
             return Err(ContactError::ContactIdAlreadyExists);
         }
-        
+
         // Check if contact with same name already exists
         if user_contacts.iter().any(|c| c.name == request.contact.name) {
             return Err(ContactError::ContactNameAlreadyExists);
         }
-        
+
         user_contacts.push(request.contact.clone());
         s.contacts.insert(stored_principal, Candid(user_contacts));
         Ok(())
@@ -871,7 +871,7 @@ pub fn create_contact(request: AddContactRequest) -> Result<(), ContactError> {
 }
 
 /// Updates an existing contact
-/// 
+///
 /// # Errors
 /// Errors are enumerated by: `ContactError`
 #[update(guard = "caller_is_not_anonymous")]
@@ -879,17 +879,20 @@ pub fn update_existing_contact(request: UpdateContactRequest) -> Result<(), Cont
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
         let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        
+
         let contact_index = user_contacts
             .iter()
             .position(|c| c.id == request.contact.id)
             .ok_or(ContactError::ContactNotFound)?;
-        
+
         // Check if new name conflicts with another contact
-        if user_contacts.iter().any(|c| c.id != request.contact.id && c.name == request.contact.name) {
+        if user_contacts
+            .iter()
+            .any(|c| c.id != request.contact.id && c.name == request.contact.name)
+        {
             return Err(ContactError::ContactNameAlreadyExists);
         }
-        
+
         user_contacts[contact_index] = request.contact.clone();
         s.contacts.insert(stored_principal, Candid(user_contacts));
         Ok(())
@@ -905,28 +908,29 @@ pub fn delete_contact(request: RemoveContactRequest) -> Result<(), ContactError>
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
         let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        
+
         let contact_index = user_contacts
             .iter()
             .position(|c| c.id == request.contact_id)
             .ok_or(ContactError::ContactNotFound)?;
-        
+
         let contact = &mut user_contacts[contact_index];
-        
+
         // Find the address to remove
-        let address_index = contact.addresses
+        let address_index = contact
+            .addresses
             .iter()
             .position(|addr| addr.token_account_id == request.address_to_remove)
             .ok_or(ContactError::AddressNotFound)?;
-        
+
         // Remove the address
         contact.addresses.remove(address_index);
-        
+
         // If no addresses left, remove the entire contact
         if contact.addresses.is_empty() {
             user_contacts.remove(contact_index);
         }
-        
+
         s.contacts.insert(stored_principal, Candid(user_contacts));
         Ok(())
     })
@@ -963,7 +967,7 @@ pub fn get_contact_settings() -> ContactSettings {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     read_state(|s| ContactSettings {
-        contacts: s.contacts.get(&stored_principal).unwrap_or_default().0
+        contacts: s.contacts.get(&stored_principal).unwrap_or_default().0,
     })
 }
 
@@ -975,15 +979,17 @@ pub fn search_contacts_by_query(query: String) -> Vec<Contact> {
     read_state(|s| {
         let user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
         let query_lower = query.to_lowercase();
-        
+
         user_contacts
             .iter()
             .filter(|c| {
-                c.name.to_lowercase().contains(&query_lower) ||
-                c.addresses.iter().any(|addr| {
-                    // Convert address to string for comparison
-                    format!("{:?}", addr.token_account_id).to_lowercase().contains(&query_lower)
-                })
+                c.name.to_lowercase().contains(&query_lower)
+                    || c.addresses.iter().any(|addr| {
+                        // Convert address to string for comparison
+                        format!("{:?}", addr.token_account_id)
+                            .to_lowercase()
+                            .contains(&query_lower)
+                    })
             })
             .cloned()
             .collect()
@@ -997,7 +1003,7 @@ pub fn filter_contacts_by_token_type(token_type: String) -> Vec<Contact> {
 
     read_state(|s| {
         let user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        
+
         user_contacts
             .iter()
             .filter(|c| {
@@ -1021,19 +1027,23 @@ pub fn add_address_to_contact(request: AddAddressRequest) -> Result<(), ContactE
 
     mutate_state(|s| {
         let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        
+
         let contact_index = user_contacts
             .iter()
             .position(|c| c.id == request.contact_id)
             .ok_or(ContactError::ContactNotFound)?;
-        
+
         let contact = &mut user_contacts[contact_index];
-        
+
         // Check if address already exists
-        if contact.addresses.iter().any(|addr| addr.token_account_id == request.contact_address_data.token_account_id) {
+        if contact
+            .addresses
+            .iter()
+            .any(|addr| addr.token_account_id == request.contact_address_data.token_account_id)
+        {
             return Err(ContactError::AddressAlreadyExists);
         }
-        
+
         contact.addresses.push(request.contact_address_data.clone());
         s.contacts.insert(stored_principal, Candid(user_contacts));
         Ok(())
@@ -1050,26 +1060,31 @@ pub fn update_contact_address(request: UpdateAddressRequest) -> Result<(), Conta
 
     mutate_state(|s| {
         let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        
+
         let contact_index = user_contacts
             .iter()
             .position(|c| c.id == request.contact_id)
             .ok_or(ContactError::ContactNotFound)?;
-        
+
         let contact = &mut user_contacts[contact_index];
-        
+
         // Find the address to update
-        let address_index = contact.addresses
+        let address_index = contact
+            .addresses
             .iter()
             .position(|addr| addr.token_account_id == request.current_token_account_id)
             .ok_or(ContactError::AddressNotFound)?;
-        
+
         // Check if new address already exists in another entry
-        if request.current_token_account_id != request.new_address_data.token_account_id && 
-           contact.addresses.iter().any(|addr| addr.token_account_id == request.new_address_data.token_account_id) {
+        if request.current_token_account_id != request.new_address_data.token_account_id
+            && contact
+                .addresses
+                .iter()
+                .any(|addr| addr.token_account_id == request.new_address_data.token_account_id)
+        {
             return Err(ContactError::AddressAlreadyExists);
         }
-        
+
         contact.addresses[address_index] = request.new_address_data.clone();
         s.contacts.insert(stored_principal, Candid(user_contacts));
         Ok(())
