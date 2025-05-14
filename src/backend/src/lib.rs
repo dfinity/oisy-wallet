@@ -29,8 +29,8 @@ use shared::{
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
         contact::{
-            AddAddressRequest, AddContactRequest, Contact, ContactError, ContactSettings,
-            RemoveContactRequest, UpdateAddressRequest, UpdateContactRequest,
+            AddAddressRequest, AddContactRequest, Contact, ContactError, ContactSettings, RemoveContactRequest,
+            UpdateAddressRequest, UpdateContactRequest,
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
@@ -58,8 +58,8 @@ use shared::{
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
-    Candid, ConfigCell, ContactMap, CustomTokenMap, StoredPrincipal, UserProfileMap,
-    UserProfileUpdatedMap, UserTokenMap,
+    Candid, ConfigCell, ContactMap, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
+    UserTokenMap,
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
@@ -67,7 +67,7 @@ use user_profile_model::UserProfileModel;
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
-    result_types::AddUserCredentialResult,
+    result_types::{AddUserCredentialResult, ContactOperationResult},
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
@@ -77,6 +77,7 @@ mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
+mod contacts; // Ensure this module is declared
 mod guards;
 mod heap_state;
 mod impls;
@@ -382,8 +383,8 @@ pub async fn btc_select_user_utxos_fee(
                 .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
         ),
     )
-    .await
-    .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+        .await
+        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
     let now_ns = time();
 
     let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
@@ -442,8 +443,8 @@ pub async fn btc_add_pending_transaction(
         params.address.clone(),
         Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
     )
-    .await
-    .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+        .await
+        .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
     let now_ns = time();
 
     with_btc_pending_transactions(|pending_transactions| {
@@ -475,8 +476,8 @@ pub async fn btc_get_pending_transactions(
         params.address.clone(),
         Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
     )
-    .await
-    .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
+        .await
+        .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
 
     let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
         pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
@@ -538,7 +539,7 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
         }),
         Err(_) => Err(AddUserCredentialError::InvalidCredential),
     }
-    .into()
+        .into()
 }
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
@@ -849,14 +850,10 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 /// # Errors
 /// Errors are enumerated by: `ContactError`
 #[update(guard = "caller_is_not_anonymous")]
-pub fn create_contact(request: AddContactRequest) -> Result<(), ContactError> {
+pub fn create_contact(request: AddContactRequest) -> ContactOperationResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
-        // Dummy implementation - just store the contact
-        let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        user_contacts.push(request.contact.clone());
-        s.contacts.insert(stored_principal, Candid(user_contacts));
-        Ok(())
+        crate::contacts::add_contact(stored_principal, &mut s.contacts, &request)
     })
 }
 
@@ -865,44 +862,22 @@ pub fn create_contact(request: AddContactRequest) -> Result<(), ContactError> {
 /// # Errors
 /// Errors are enumerated by: `ContactError`
 #[update(guard = "caller_is_not_anonymous")]
-pub fn update_existing_contact(request: UpdateContactRequest) -> Result<(), ContactError> {
+pub fn update_existing_contact(request: UpdateContactRequest) -> ContactOperationResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
-        // Dummy implementation - find and update the contact
-        let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-
-        let contact_index = user_contacts
-            .iter()
-            .position(|c| c.id == request.contact.id)
-            .ok_or(ContactError::ContactNotFound)?;
-
-        user_contacts[contact_index] = request.contact.clone();
-        s.contacts.insert(stored_principal, Candid(user_contacts));
-        Ok(())
+        crate::contacts::update_contact(stored_principal, &mut s.contacts, &request)
     })
 }
 
-/// Deletes a contact by ID
+/// Deletes a contact by ID or a specific address from a contact.
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`
 #[update(guard = "caller_is_not_anonymous")]
-pub fn delete_contact(request: RemoveContactRequest) -> Result<(), ContactError> {
+pub fn delete_contact(request: RemoveContactRequest) -> ContactOperationResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
-        // Dummy implementation - find and remove the contact or address
-        let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-
-        let contact_index = user_contacts
-            .iter()
-            .position(|c| c.id == request.contact_id)
-            .ok_or(ContactError::ContactNotFound)?;
-
-        // Simple implementation - just remove the contact
-        user_contacts.remove(contact_index);
-
-        s.contacts.insert(stored_principal, Candid(user_contacts));
-        Ok(())
+        crate::contacts::remove_contact(stored_principal, &mut s.contacts, &request)
     })
 }
 
@@ -914,13 +889,7 @@ pub fn delete_contact(request: RemoveContactRequest) -> Result<(), ContactError>
 pub fn get_contact_by_id(contact_id: String) -> Result<Contact, ContactError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| {
-        // Dummy implementation - just find the contact by ID
-        let user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        user_contacts
-            .iter()
-            .find(|c| c.id == contact_id)
-            .cloned()
-            .ok_or(ContactError::ContactNotFound)
+        crate::contacts::get_contact_by_id(stored_principal, &s.contacts, &contact_id)
     })
 }
 
@@ -928,38 +897,28 @@ pub fn get_contact_by_id(contact_id: String) -> Result<Contact, ContactError> {
 #[query(guard = "caller_is_not_anonymous")]
 pub fn list_contacts() -> Vec<Contact> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    // Dummy implementation - just return all contacts
-    read_state(|s| s.contacts.get(&stored_principal).unwrap_or_default().0)
+    read_state(|s| crate::contacts::get_contacts(stored_principal, &s.contacts))
 }
 
 /// Gets the contact settings for the user
 #[query(guard = "caller_is_not_anonymous")]
 pub fn get_contact_settings() -> ContactSettings {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    // Dummy implementation - just return contacts as settings
-    read_state(|s| ContactSettings {
-        contacts: s.contacts.get(&stored_principal).unwrap_or_default().0,
-    })
+    read_state(|s| crate::contacts::get_contact_settings(stored_principal, &s.contacts))
 }
 
 /// Search contacts by name or address
 #[query(guard = "caller_is_not_anonymous")]
-pub fn search_contacts_by_query(query: String) -> Vec<Contact> {
+pub fn search_contacts_by_query(query: String) -> ContactOperationResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    // Dummy implementation - just return all contacts (no filtering)
-    read_state(|s| s.contacts.get(&stored_principal).unwrap_or_default().0)
+    read_state(|s| crate::contacts::search_contacts(stored_principal, &s.contacts, &query))
 }
 
 /// Filter contacts by token type
 #[query(guard = "caller_is_not_anonymous")]
 pub fn filter_contacts_by_token_type(token_type: String) -> Vec<Contact> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    // Dummy implementation - just return all contacts (no filtering)
-    read_state(|s| s.contacts.get(&stored_principal).unwrap_or_default().0)
+    read_state(|s| crate::contacts::filter_contacts_by_token(stored_principal, &s.contacts, &token_type))
 }
 
 /// Add an address to an existing contact
@@ -969,21 +928,8 @@ pub fn filter_contacts_by_token_type(token_type: String) -> Vec<Contact> {
 #[update(guard = "caller_is_not_anonymous")]
 pub fn add_address_to_contact(request: AddAddressRequest) -> Result<(), ContactError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    // Dummy implementation - just add the address to the contact
     mutate_state(|s| {
-        let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-
-        let contact_index = user_contacts
-            .iter()
-            .position(|c| c.id == request.contact_id)
-            .ok_or(ContactError::ContactNotFound)?;
-
-        let contact = &mut user_contacts[contact_index];
-        contact.addresses.push(request.contact_address_data.clone());
-
-        s.contacts.insert(stored_principal, Candid(user_contacts));
-        Ok(())
+        crate::contacts::add_address(stored_principal, &mut s.contacts, &request)
     })
 }
 
@@ -994,28 +940,8 @@ pub fn add_address_to_contact(request: AddAddressRequest) -> Result<(), ContactE
 #[update(guard = "caller_is_not_anonymous")]
 pub fn update_contact_address(request: UpdateAddressRequest) -> Result<(), ContactError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-
-    // Dummy implementation - just update the address
     mutate_state(|s| {
-        let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-
-        let contact_index = user_contacts
-            .iter()
-            .position(|c| c.id == request.contact_id)
-            .ok_or(ContactError::ContactNotFound)?;
-
-        let contact = &mut user_contacts[contact_index];
-
-        // Find the address to update
-        let address_index = contact
-            .addresses
-            .iter()
-            .position(|addr| addr.token_account_id == request.current_token_account_id)
-            .ok_or(ContactError::AddressNotFound)?;
-
-        contact.addresses[address_index] = request.new_address_data.clone();
-        s.contacts.insert(stored_principal, Candid(user_contacts));
-        Ok(())
+        crate::contacts::update_address(stored_principal, &mut s.contacts, &request)
     })
 }
 
