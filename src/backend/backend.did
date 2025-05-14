@@ -278,10 +278,6 @@ type NetworksSettings = record {
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
-type RemoveContactRequest = record {
-	contact_id : text;
-	address_to_remove : TokenAccountId
-};
 type Result = variant { Ok; Err : ContactError };
 type Result_1 = variant { Ok; Err : AddDappSettingsError };
 type Result_10 = variant { Ok; Err : SaveTestnetsSettingsError };
@@ -454,7 +450,8 @@ service : (Arg) -> {
 	create_contact : (AddContactRequest) -> (Result);
 	create_pow_challenge : () -> (Result_6);
 	create_user_profile : () -> (UserProfile);
-	delete_contact : (RemoveContactRequest) -> (Result);
+	delete_address_from_contact : (text, text) -> (Result);
+	delete_contact : (text) -> (Result);
 	filter_contacts_by_token_type : (text) -> (vec Contact) query;
 	get_account_creation_timestamps : () -> (
 		vec record { principal; nat64 }

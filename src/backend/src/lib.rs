@@ -29,8 +29,8 @@ use shared::{
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
         contact::{
-            AddAddressRequest, AddContactRequest, Contact, ContactError, ContactSettings, 
-            RemoveContactRequest, UpdateAddressRequest, UpdateContactRequest,
+            AddAddressRequest, AddContactRequest, Contact, ContactError, ContactSettings,
+            UpdateAddressRequest, UpdateContactRequest,
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
@@ -58,8 +58,8 @@ use shared::{
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
-    Candid, ConfigCell, ContactMap, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
-    UserTokenMap,
+    Candid, ConfigCell, ContactMap, CustomTokenMap, StoredPrincipal, UserProfileMap,
+    UserProfileUpdatedMap, UserTokenMap,
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
@@ -67,7 +67,7 @@ use user_profile_model::UserProfileModel;
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
-    result_types::{AddUserCredentialResult, CreateContactResult},
+    result_types::AddUserCredentialResult,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
@@ -77,7 +77,6 @@ mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
-mod contacts; // Ensure this module is declared
 mod guards;
 mod heap_state;
 mod impls;
@@ -99,7 +98,7 @@ const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
-const CONTACTS_MEMORY_ID: MemoryId = MemoryId::new(6);
+const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -115,7 +114,7 @@ thread_local! {
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
-            contacts: ContactMap::init(mm.borrow().get(CONTACTS_MEMORY_ID)),
+            contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
         })
     );
 }
@@ -153,8 +152,8 @@ pub struct State {
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
     pow_challenge: PowChallengeMap,
-    /// Stores user contacts (address book)
-    contacts: ContactMap,
+    #[allow(dead_code)]
+    contact: ContactMap,
 }
 
 fn set_config(arg: InitArg) {
@@ -383,8 +382,8 @@ pub async fn btc_select_user_utxos_fee(
                 .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
         ),
     )
-        .await
-        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+    .await
+    .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
     let now_ns = time();
 
     let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
@@ -443,8 +442,8 @@ pub async fn btc_add_pending_transaction(
         params.address.clone(),
         Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
     )
-        .await
-        .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+    .await
+    .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
     let now_ns = time();
 
     with_btc_pending_transactions(|pending_transactions| {
@@ -476,8 +475,8 @@ pub async fn btc_get_pending_transactions(
         params.address.clone(),
         Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
     )
-        .await
-        .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
+    .await
+    .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
 
     let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
         pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
@@ -539,7 +538,7 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
         }),
         Err(_) => Err(AddUserCredentialError::InvalidCredential),
     }
-        .into()
+    .into()
 }
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
@@ -843,106 +842,111 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
     todo!()
 }
 
-// ===== Contacts CRUD API =====
-
-/// Creates a new contact for the user
+/// Creates a new contact for the caller.
 ///
 /// # Errors
-/// Errors are enumerated by: `ContactError`
+/// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn create_contact(request: AddContactRequest) -> CreateContactResult {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-    mutate_state(|s| {
-        contacts::add_contact(stored_principal, &mut s.contacts, &request).into()
-    })
+pub fn create_contact(_request: AddContactRequest) -> Result<(), ContactError> {
+    // Placeholder implementation
+    Err(ContactError::ContactIdAlreadyExists)
 }
 
-/// Updates an existing contact
+/// Updates an existing contact for the caller.
 ///
 /// # Errors
-/// Errors are enumerated by: `ContactError`
+/// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn update_existing_contact(request: UpdateContactRequest) -> CreateContactResult {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-    mutate_state(|s| {
-        contacts::update_contact(stored_principal, &mut s.contacts, &request).into()
-    })
+pub fn update_existing_contact(_request: UpdateContactRequest) -> Result<(), ContactError> {
+    // Placeholder implementation
+    Err(ContactError::ContactNotFound)
 }
 
-/// Deletes a contact by ID or a specific address from a contact.
+/// Deletes a contact for the caller.
 ///
 /// # Errors
-/// Errors are enumerated by: `ContactError`
+/// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn delete_contact(request: RemoveContactRequest) -> CreateContactResult {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-    mutate_state(|s| {
-        contacts::remove_contact(stored_principal, &mut s.contacts, &request).into()
-    })
+pub fn delete_contact(_contact_id: String) -> Result<(), ContactError> {
+    // Placeholder implementation
+    Err(ContactError::ContactNotFound)
 }
 
-/// Gets a contact by ID
+/// Gets a contact by ID for the caller.
 ///
 /// # Errors
-/// Errors are enumerated by: `ContactError`
+/// Errors are enumerated by: `ContactError`.
 #[query(guard = "caller_is_not_anonymous")]
-pub fn get_contact_by_id(contact_id: String) -> Result<Contact, ContactError> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| {
-        crate::contacts::get_contact_by_id(stored_principal, &s.contacts, &contact_id)
-    })
+pub fn get_contact_by_id(_contact_id: String) -> Result<Contact, ContactError> {
+    // Placeholder implementation
+    Err(ContactError::ContactNotFound)
 }
 
-/// Lists all contacts for the user
+/// Lists all contacts for the caller.
 #[query(guard = "caller_is_not_anonymous")]
+#[must_use]
 pub fn list_contacts() -> Vec<Contact> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| crate::contacts::get_contacts(stored_principal, &s.contacts))
+    // Placeholder implementation
+    Vec::new()
 }
 
-/// Gets the contact settings for the user
+/// Gets contact settings for the caller.
 #[query(guard = "caller_is_not_anonymous")]
+#[must_use]
 pub fn get_contact_settings() -> ContactSettings {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| crate::contacts::get_contact_settings(stored_principal, &s.contacts))
+    // Placeholder implementation
+    ContactSettings {
+        contacts: Vec::new(),
+    }
 }
 
-/// Search contacts by name or address
+/// Searches contacts by query for the caller.
 #[query(guard = "caller_is_not_anonymous")]
-pub fn search_contacts_by_query(query: String) -> Vec<Contact> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| contacts::search_contacts(stored_principal, &s.contacts, &query))
+#[must_use]
+pub fn search_contacts_by_query(_query: String) -> Vec<Contact> {
+    // Placeholder implementation
+    Vec::new()
 }
 
-/// Filter contacts by token type
+/// Filters contacts by token type for the caller.
 #[query(guard = "caller_is_not_anonymous")]
-pub fn filter_contacts_by_token_type(token_type: String) -> Vec<Contact> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| crate::contacts::filter_contacts_by_token(stored_principal, &s.contacts, &token_type))
+#[must_use]
+pub fn filter_contacts_by_token_type(_token_type: String) -> Vec<Contact> {
+    // Placeholder implementation
+    Vec::new()
 }
 
-/// Add an address to an existing contact
+/// Adds an address to an existing contact.
 ///
 /// # Errors
-/// Errors are enumerated by: `ContactError`
+/// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn add_address_to_contact(request: AddAddressRequest) -> CreateContactResult {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-    mutate_state(|s| {
-        contacts::add_address(stored_principal, &mut s.contacts, &request).into()
-    })
+pub fn add_address_to_contact(_request: AddAddressRequest) -> Result<(), ContactError> {
+    // Placeholder implementation
+    Err(ContactError::ContactNotFound)
 }
 
-/// Update an address in a contact
+/// Updates a contact address.
 ///
 /// # Errors
-/// Errors are enumerated by: `ContactError`
+/// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn update_contact_address(request: UpdateAddressRequest) -> CreateContactResult {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-    mutate_state(|s| {
-        contacts::update_address(stored_principal, &mut s.contacts, &request).into()
-    })
+pub fn update_contact_address(_request: UpdateAddressRequest) -> Result<(), ContactError> {
+    // Placeholder implementation
+    Err(ContactError::ContactNotFound)
+}
+
+/// Deletes an address from a contact.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+#[update(guard = "caller_is_not_anonymous")]
+pub fn delete_address_from_contact(
+    _contact_id: String,
+    _address_id: String,
+) -> Result<(), ContactError> {
+    // Placeholder implementation
+    Err(ContactError::ContactNotFound)
 }
 
 export_candid!();
