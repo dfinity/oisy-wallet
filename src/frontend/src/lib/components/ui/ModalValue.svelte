@@ -3,9 +3,13 @@
 
 	export let ref: undefined | string = undefined;
 	export let labelStyleClass: string | undefined = undefined;
+	export let wrapperStyleClass: string | undefined = undefined;
 </script>
 
-<div in:fade class="mb-2 flex w-full justify-between last:mb-0 md:items-center">
+<div
+	in:fade
+	class={`mb-2 flex w-full justify-between last:mb-0 md:items-center ${wrapperStyleClass}`}
+>
 	<label for={ref} class={`mr-1 text-sm text-tertiary sm:mr-2 ${labelStyleClass}`}
 		><slot name="label" /></label
 	>

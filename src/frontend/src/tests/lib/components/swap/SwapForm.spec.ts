@@ -13,20 +13,17 @@ import {
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { MOCK_SWAP_PROVIDERS } from '$tests/mocks/swap.mocks';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('SwapForm', () => {
 	const mockContext = new Map();
+
 	const mockSwapAmounts: SwapAmountsStoreData = {
 		amountForSwap: 1,
-		swapAmounts: {
-			slippage: 0,
-			receiveAmount: 2000000n,
-			route: [],
-			liquidityFees: [],
-			networkFee: undefined
-		}
+		swaps: MOCK_SWAP_PROVIDERS,
+		selectedProvider: MOCK_SWAP_PROVIDERS[0]
 	};
 
 	beforeEach(() => {
@@ -49,11 +46,12 @@ describe('SwapForm', () => {
 	const setupSwapAmountsStore = (swapAmounts?: SwapAmountsStoreData) => {
 		const swapAmountsStore = initSwapAmountsStore();
 		if (swapAmounts) {
-			swapAmountsStore.setSwapAmounts(swapAmounts);
+			swapAmountsStore.setSwaps(swapAmounts);
 		}
 		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
 		return swapAmountsStore;
 	};
+
 	const setupIcTokenFeeStore = () => {
 		icTokenFeeStore.setIcTokenFee({
 			tokenSymbol: mockValidIcToken.symbol,
@@ -78,7 +76,7 @@ describe('SwapForm', () => {
 			},
 			{
 				description: 'swap amount exists but receive amount is null',
-				swapAmounts: { amountForSwap: 1, swapAmounts: undefined },
+				swapAmounts: { amountForSwap: 1, swaps: [], selectedProvider: undefined },
 				props: { swapAmount: '1', receiveAmount: undefined },
 				expected: true
 			},
