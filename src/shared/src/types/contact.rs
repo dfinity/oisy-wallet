@@ -12,8 +12,7 @@ pub struct Contact {
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ContactAddressData {
-    pub network_type: TokenAccountId,
-    pub address: String,
+    pub token_account_id: TokenAccountId,
     pub label: Option<String>,
 }
 
@@ -30,8 +29,7 @@ pub struct AddContactRequest {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct RemoveContactRequest {
     pub contact_id: String,
-    pub network_type: TokenAccountId,
-    pub address: String,
+    pub address_to_remove: TokenAccountId,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -42,15 +40,14 @@ pub struct UpdateContactRequest {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct AddAddressRequest {
     pub contact_id: String,
-    pub address: ContactAddressData,
+    pub contact_address_data: ContactAddressData,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct UpdateAddressRequest {
     pub contact_id: String,
-    pub current_network_type: TokenAccountId, // Changed from TokenAccountId
-    pub current_address: String,
-    pub new_address: ContactAddressData,
+    pub current_token_account_id: TokenAccountId,
+    pub new_address_data: ContactAddressData,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -63,5 +60,4 @@ pub enum ContactError {
     AddressAlreadyExists,
     AddressNotFound,
     InvalidAddressFormat,
-    InvalidAddressType,
 }

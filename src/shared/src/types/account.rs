@@ -199,25 +199,3 @@ impl AccountId<EthereumMainnet> for EthAddress {}
 impl AccountId<EthereumSepolia> for EthAddress {}
 impl TokenId<EthereumMainnet> for EthAddress {}
 impl TokenId<EthereumSepolia> for EthAddress {}
-
-impl std::fmt::Display for TokenAccountId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            TokenAccountId::Icrcv2(_) => write!(f, "ICP"),
-            TokenAccountId::Sol(_) => write!(f, "SOL"),
-            TokenAccountId::Btc(_) => write!(f, "BTC"),
-            TokenAccountId::Eth(_) => write!(f, "ETH"),
-        }
-    }
-}
-
-impl From<&str> for TokenAccountId {
-    fn from(s: &str) -> Self {
-        match s {
-            "BTC" => TokenAccountId::Btc(BtcAddress::P2WPKH(String::new())),
-            "ETH" => TokenAccountId::Eth(EthAddress::Public(String::new())),
-            "SOL" => TokenAccountId::Sol(SolPrincipal(String::new())),
-            _ => TokenAccountId::Icrcv2(Icrcv2AccountId::Account(IcrcSubaccountId([0; 32]))),
-        }
-    }
-}
