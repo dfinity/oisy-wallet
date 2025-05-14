@@ -64,7 +64,7 @@
 	<RewardsGroup rewards={ongoingCampaigns} testId={REWARDS_ACTIVE_CAMPAIGNS_CONTAINER} />
 
 	<RewardsGroup
-		title={$i18n.rewards.text.upcoming_campaigns}
+		title={replaceOisyPlaceholders($i18n.rewards.text.upcoming_campaigns)}
 		rewards={upcomingCampaigns}
 		altText={replaceOisyPlaceholders($i18n.rewards.alt.upcoming_campaigns)}
 		testId={REWARDS_UPCOMING_CAMPAIGNS_CONTAINER}
