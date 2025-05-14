@@ -29,8 +29,8 @@ use shared::{
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
         contact::{
-            AddAddressRequest, AddContactRequest, Contact, ContactError, ContactSettings, RemoveContactRequest,
-            UpdateAddressRequest, UpdateContactRequest,
+            AddAddressRequest, AddContactRequest, Contact, ContactError, ContactSettings,
+            RemoveContactRequest, UpdateAddressRequest, UpdateContactRequest,
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
@@ -58,8 +58,8 @@ use shared::{
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
-    Candid, ConfigCell, ContactMap, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
-    UserTokenMap,
+    Candid, ConfigCell, ContactMap, CustomTokenMap, StoredPrincipal, UserProfileMap,
+    UserProfileUpdatedMap, UserTokenMap,
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
@@ -861,7 +861,7 @@ pub fn create_contact(request: AddContactRequest) -> Result<(), ContactError> {
 }
 
 /// Updates an existing contact
-/// 
+///
 /// # Errors
 /// Errors are enumerated by: `ContactError`
 #[update(guard = "caller_is_not_anonymous")]
@@ -870,12 +870,12 @@ pub fn update_existing_contact(request: UpdateContactRequest) -> Result<(), Cont
     mutate_state(|s| {
         // Dummy implementation - find and update the contact
         let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        
+
         let contact_index = user_contacts
             .iter()
             .position(|c| c.id == request.contact.id)
             .ok_or(ContactError::ContactNotFound)?;
-        
+
         user_contacts[contact_index] = request.contact.clone();
         s.contacts.insert(stored_principal, Candid(user_contacts));
         Ok(())
@@ -892,15 +892,15 @@ pub fn delete_contact(request: RemoveContactRequest) -> Result<(), ContactError>
     mutate_state(|s| {
         // Dummy implementation - find and remove the contact or address
         let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        
+
         let contact_index = user_contacts
             .iter()
             .position(|c| c.id == request.contact_id)
             .ok_or(ContactError::ContactNotFound)?;
-        
+
         // Simple implementation - just remove the contact
         user_contacts.remove(contact_index);
-        
+
         s.contacts.insert(stored_principal, Candid(user_contacts));
         Ok(())
     })
@@ -940,7 +940,7 @@ pub fn get_contact_settings() -> ContactSettings {
 
     // Dummy implementation - just return contacts as settings
     read_state(|s| ContactSettings {
-        contacts: s.contacts.get(&stored_principal).unwrap_or_default().0
+        contacts: s.contacts.get(&stored_principal).unwrap_or_default().0,
     })
 }
 
@@ -973,15 +973,15 @@ pub fn add_address_to_contact(request: AddAddressRequest) -> Result<(), ContactE
     // Dummy implementation - just add the address to the contact
     mutate_state(|s| {
         let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        
+
         let contact_index = user_contacts
             .iter()
             .position(|c| c.id == request.contact_id)
             .ok_or(ContactError::ContactNotFound)?;
-        
+
         let contact = &mut user_contacts[contact_index];
         contact.addresses.push(request.contact_address_data.clone());
-        
+
         s.contacts.insert(stored_principal, Candid(user_contacts));
         Ok(())
     })
@@ -998,20 +998,21 @@ pub fn update_contact_address(request: UpdateAddressRequest) -> Result<(), Conta
     // Dummy implementation - just update the address
     mutate_state(|s| {
         let mut user_contacts = s.contacts.get(&stored_principal).unwrap_or_default().0;
-        
+
         let contact_index = user_contacts
             .iter()
             .position(|c| c.id == request.contact_id)
             .ok_or(ContactError::ContactNotFound)?;
-        
+
         let contact = &mut user_contacts[contact_index];
-        
+
         // Find the address to update
-        let address_index = contact.addresses
+        let address_index = contact
+            .addresses
             .iter()
             .position(|addr| addr.token_account_id == request.current_token_account_id)
             .ok_or(ContactError::AddressNotFound)?;
-        
+
         contact.addresses[address_index] = request.new_address_data.clone();
         s.contacts.insert(stored_principal, Candid(user_contacts));
         Ok(())
