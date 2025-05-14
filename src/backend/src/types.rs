@@ -1,10 +1,11 @@
 use candid::{CandidType, Deserialize, Principal};
+use serde::Deserialize as SerdeDeserialize;
 use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
     backend_config::Config, custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
-    user_profile::StoredUserProfile, Timestamp,
+    user_profile::StoredUserProfile, Timestamp, contact::Contact,
 };
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
@@ -17,10 +18,12 @@ pub type UserProfileMap =
 /// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
 pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
 pub type PowChallengeMap = StableBTreeMap<StoredPrincipal, Candid<StoredChallenge>, VMem>;
+pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<Vec<Contact>>, VMem>;
 #[derive(Default)]
 pub struct Candid<T>(pub T)
 where
     T: CandidType + for<'de> Deserialize<'de>;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, CandidType)]
+#[derive(SerdeDeserialize)]
 pub struct StoredPrincipal(pub Principal);
