@@ -9,6 +9,7 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
+import oisyEpisodeFour from '$lib/assets/oisy-episode-four-coming.svg';
 
 describe('RewardsGroups', () => {
 	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
@@ -19,6 +20,7 @@ describe('RewardsGroups', () => {
 	const title = 'Active campaigns';
 	const groupTitle = 'campaign';
 	const activeGroupSelector = `button[data-tid="${groupTitle}-${mockRewardCampaign.id}"]`;
+	const altImageSelector = `img[data-tid="${groupTitle}-alt-img"]`;
 
 	const mockContext = new Map([]);
 	const store = initRewardEligibilityStore();
@@ -61,6 +63,24 @@ describe('RewardsGroups', () => {
 		const activeGroup: HTMLButtonElement | null = container.querySelector(activeGroupSelector);
 
 		expect(activeGroup).not.toBeInTheDocument();
+	});
+
+	it('should render alternative image', () => {
+		const { container, getByText } = render(RewardsGroup, {
+			props: {
+				title,
+				rewards: [],
+				testId: groupTitle,
+				altImg: oisyEpisodeFour
+			},
+			context: mockContext
+		});
+
+		expect(getByText(title)).toBeInTheDocument();
+
+		const altImage: HTMLImageElement | null = container.querySelector(altImageSelector);
+
+		expect(altImage).toBeInTheDocument();
 	});
 
 	it('should render campaigns even if alternative text is defined', () => {
