@@ -1,9 +1,12 @@
-use std::{collections::BTreeMap, fmt};
-
-use candid::{Deserialize, Principal};
+use candid::{Deserialize, Error, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use serde::{de, Deserializer};
+use std::{collections::BTreeMap, fmt};
 
+use crate::types::contact::{
+    AddAddressRequest, AddContactRequest, Contact, ContactAddressData, ContactSettings,
+    RemoveContactRequest, UpdateAddressRequest, UpdateContactRequest,
+};
 use crate::{
     types::{
         backend_config::{Config, InitArg},
@@ -23,6 +26,41 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
+
+// Constants for validation limits
+const MAX_ID_LENGTH: usize = 100;
+const MAX_NAME_LENGTH: usize = 100;
+const MAX_AVATAR_LENGTH: usize = 100;
+const MAX_ADDRESSES: usize = 40;
+const MAX_LABEL_LENGTH: usize = 50;
+
+// TODO what is a reasanoble value here?
+const MAX_CONTACTS: usize = 100;
+
+// Helper functions for validation
+fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> Result<(), Error> {
+    if value.len() > max_length {
+        return Err(Error::msg(format!(
+            "{} too long, max allowed is {} characters",
+            field_name, max_length
+        )));
+    }
+    Ok(())
+}
+
+fn validate_collection_size<T>(
+    collection: &[T],
+    max_size: usize,
+    collection_name: &str,
+) -> Result<(), Error> {
+    if collection.len() > max_size {
+        return Err(Error::msg(format!(
+            "Too many {}, max allowed is {}",
+            collection_name, max_size
+        )));
+    }
+    Ok(())
+}
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -428,6 +466,109 @@ impl Validate for IcrcToken {
     }
 }
 
+impl Validate for Contact {
+    fn validate(&self) -> Result<(), Error> {
+        // Validate id length
+        validate_string_length(&self.id, MAX_ID_LENGTH, "Contact.id")?;
+
+        // Validate name length
+        validate_string_length(&self.name, MAX_NAME_LENGTH, "Contact.name")?;
+
+        // Check if avatar exists
+        if let Some(avatar) = &self.avatar {
+            validate_string_length(avatar, MAX_AVATAR_LENGTH, "Contact.avatar")?;
+        }
+
+        // Validate number of addresses
+        validate_collection_size(&self.addresses, MAX_ADDRESSES, "Contact.addresses")?;
+
+        Ok(())
+    }
+}
+
+impl Validate for ContactAddressData {
+    fn validate(&self) -> Result<(), Error> {
+        // Note: We don't need to validate TokenAccountId since it has its own validation
+
+        // Check if the label exists
+        if let Some(label) = &self.label {
+            validate_string_length(label, MAX_LABEL_LENGTH, "ContactAddressData.label")?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Validate for ContactSettings {
+    fn validate(&self) -> Result<(), Error> {
+        // Limit the number of contacts a user can have
+        validate_collection_size(&self.contacts, MAX_CONTACTS, "ContactSettings.contacts")?;
+        Ok(())
+    }
+}
+
+impl Validate for AddContactRequest {
+    fn validate(&self) -> Result<(), Error> {
+        // Nothing to validate here
+        Ok(())
+    }
+}
+
+impl Validate for RemoveContactRequest {
+    fn validate(&self) -> Result<(), Error> {
+        // Note: We don't need to validate TokenAccountId since it has its own validation
+
+        // Validate contact_id length
+        validate_string_length(&self.contact_id, MAX_ID_LENGTH, "RemoveContactRequest.id")?;
+
+        Ok(())
+    }
+}
+
+impl Validate for UpdateContactRequest {
+    fn validate(&self) -> Result<(), Error> {
+        // Nothing to validate here
+        Ok(())
+    }
+}
+
+impl Validate for AddAddressRequest {
+    fn validate(&self) -> Result<(), Error> {
+        // Validate contact_id length
+        validate_string_length(
+            &self.contact_id,
+            MAX_ID_LENGTH,
+            "AddAddressRequest.contact_id",
+        )?;
+
+        Ok(())
+    }
+}
+
+impl Validate for UpdateAddressRequest {
+    fn validate(&self) -> Result<(), Error> {
+        // Note: We don't need to validate TokenAccountId since it has its own validation
+
+        // Validate contact_id length
+        validate_string_length(
+            &self.contact_id,
+            MAX_ID_LENGTH,
+            "UpdateAddressRequest.contact_id",
+        )?;
+
+        Ok(())
+    }
+}
+
+// Apply the validation during deserialization for all types
+validate_on_deserialize!(ContactAddressData);
+validate_on_deserialize!(Contact);
+validate_on_deserialize!(ContactSettings);
+validate_on_deserialize!(AddContactRequest);
+validate_on_deserialize!(RemoveContactRequest);
+validate_on_deserialize!(UpdateContactRequest);
+validate_on_deserialize!(AddAddressRequest);
+validate_on_deserialize!(UpdateAddressRequest);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
