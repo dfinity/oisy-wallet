@@ -91,7 +91,8 @@ describe('RewardsGroups', () => {
 				title,
 				rewards: mockRewardCampaigns,
 				testId: groupTitle,
-				altText
+				altText,
+				altImg: oisyEpisodeFour
 			},
 			context: mockContext
 		});
@@ -102,5 +103,9 @@ describe('RewardsGroups', () => {
 		const activeGroup: HTMLButtonElement | null = container.querySelector(activeGroupSelector);
 
 		expect(activeGroup).toBeInTheDocument();
+
+		const altImage: HTMLImageElement | null = container.querySelector(altImageSelector);
+
+		expect(altImage).not.toBeInTheDocument();
 	});
 });
