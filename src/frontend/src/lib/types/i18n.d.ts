@@ -561,6 +561,9 @@ interface I18nSwap {
 		included_liquidity_fees: string;
 		best_rate: string;
 		expected_minimum: string;
+		you_receive: string;
+		select: string;
+		select_swap_provider: string;
 	};
 	error: {
 		kong_not_available: string;
