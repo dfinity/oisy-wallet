@@ -194,3 +194,8 @@ export const CONTACT_HEADER_EDITING_EDIT_BUTTON = 'contact-header-editing-edit-b
 export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
 
 export const SEND_DESTINATION_SECTION = 'send-destination-section';
+
+export const CONVERT_AMOUNT_DISPLAY_VALUE = 'convert-amount-display-value';
+export const CONVERT_AMOUNT_DISPLAY_SKELETON = 'convert-amount-display-skeleton';
+export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
+export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';

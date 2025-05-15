@@ -4,6 +4,10 @@
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import {
+		CONVERT_AMOUNT_DISPLAY_SKELETON,
+		CONVERT_AMOUNT_DISPLAY_VALUE
+	} from '$lib/constants/test-ids.constants';
 	import type { OptionAmount } from '$lib/types/send';
 
 	export let amount: OptionAmount = undefined;
@@ -18,13 +22,13 @@
 
 	<svelte:fragment slot="main-value">
 		{#if nonNullish(amount)}
-			<div in:fade data-tid="convert-amount-display-value">
+			<div in:fade data-tid={CONVERT_AMOUNT_DISPLAY_VALUE}>
 				{nonNullish(amount) && Number(amount) === 0 && nonNullish(zeroAmountLabel)
 					? zeroAmountLabel
 					: `${amount} ${symbol}`}
 			</div>
 		{:else}
-			<div class="w-14 sm:w-24" data-tid="convert-amount-display-skeleton">
+			<div class="w-14 sm:w-24" data-tid={CONVERT_AMOUNT_DISPLAY_SKELETON}>
 				<SkeletonText />
 			</div>
 		{/if}
