@@ -65,11 +65,10 @@
 		icTransactionsData = $icTransactions;
 	}, 1);
 
-	$: {
-		if ($icTransactions.length > 0) {
+	$: if ($icTransactions.length > 0) {
 			debounceIcTransactions();
 		}
-	}
+
 </script>
 
 <Info />

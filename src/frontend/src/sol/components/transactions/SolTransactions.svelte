@@ -34,11 +34,9 @@
 		solTransactionsData = $solTransactions;
 	}, 1);
 
-	$: {
-		if ($solTransactions.length > 0) {
+	$: if ($solTransactions.length > 0) {
 			debounceIcTransactions();
 		}
-	}
 </script>
 
 <Header>
