@@ -51,7 +51,7 @@
 	<ul class="list-none">
 		{#each $swapAmountsStore?.swaps ?? [] as swap (swap.provider)}
 			{#if nonNullish($destinationToken) && nonNullish($swapAmountsStore)}
-				<li class="logo-button-list-item">
+				<li class="logo-button-list-item" data-testid="provider-item">
 					<SwapProviderListItem
 						on:click={() => dispatch('icSelectProvider', swap)}
 						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
