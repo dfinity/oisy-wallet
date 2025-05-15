@@ -38,6 +38,7 @@ use shared::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
+        result_types::AddUserCredentialResult,
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
@@ -63,7 +64,6 @@ use user_profile_model::UserProfileModel;
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
-    result_types::AddUserCredentialResult,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
@@ -84,7 +84,6 @@ mod types;
 mod user_profile;
 mod user_profile_model;
 
-mod result_types;
 #[cfg(test)]
 mod tests;
 
@@ -527,10 +526,10 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
                 vc_flow_signers.issuer_origin,
                 &mut user_profile_model,
             )
+            .into()
         }),
-        Err(_) => Err(AddUserCredentialError::InvalidCredential),
+        Err(_) => AddUserCredentialResult::Err(AddUserCredentialError::InvalidCredential),
     }
-    .into()
 }
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
