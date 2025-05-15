@@ -17,46 +17,6 @@ export const idlFactory = ({ IDL }) => {
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
-	const BtcAddress = IDL.Variant({
-		P2WPKH: IDL.Text,
-		P2PKH: IDL.Text,
-		P2WSH: IDL.Text,
-		P2SH: IDL.Text,
-		P2TR: IDL.Text
-	});
-	const EthAddress = IDL.Variant({ Public: IDL.Text });
-	const Icrcv2AccountId = IDL.Variant({
-		Account: IDL.Vec(IDL.Nat8),
-		WithPrincipal: IDL.Record({
-			owner: IDL.Principal,
-			subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
-		})
-	});
-	const TokenAccountId = IDL.Variant({
-		Btc: BtcAddress,
-		Eth: EthAddress,
-		Sol: IDL.Text,
-		Icrcv2: Icrcv2AccountId
-	});
-	const ContactAddressData = IDL.Record({
-		label: IDL.Opt(IDL.Text),
-		token_account_id: TokenAccountId
-	});
-	const AddAddressRequest = IDL.Record({
-		contact_id: IDL.Text,
-		contact_address_data: ContactAddressData
-	});
-	const ContactError = IDL.Variant({
-		AddressAlreadyExists: IDL.Null,
-		InvalidContactData: IDL.Null,
-		ContactNotFound: IDL.Null,
-		ContactIdAlreadyExists: IDL.Null,
-		ContactNameAlreadyExists: IDL.Null,
-		InvalidAddressFormat: IDL.Null,
-		AddressNotFound: IDL.Null,
-		UserNotFound: IDL.Null
-	});
-	const Result = IDL.Variant({ Ok: IDL.Null, Err: ContactError });
 	const ArgumentValue = IDL.Variant({ Int: IDL.Int32, String: IDL.Text });
 	const CredentialSpec = IDL.Record({
 		arguments: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, ArgumentValue))),
@@ -88,10 +48,7 @@ export const idlFactory = ({ IDL }) => {
 		DappIdTooLong: IDL.Null,
 		UserNotFound: IDL.Null
 	});
-	const Result_1 = IDL.Variant({
-		Ok: IDL.Null,
-		Err: AddDappSettingsError
-	});
+	const Result = IDL.Variant({ Ok: IDL.Null, Err: AddDappSettingsError });
 	const AllowSigningRequest = IDL.Record({ nonce: IDL.Nat64 });
 	const AllowSigningStatus = IDL.Variant({
 		Skipped: IDL.Null,
@@ -136,7 +93,7 @@ export const idlFactory = ({ IDL }) => {
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
-	const Result_2 = IDL.Variant({
+	const Result_1 = IDL.Variant({
 		Ok: AllowSigningResponse,
 		Err: AllowSigningError
 	});
@@ -163,7 +120,7 @@ export const idlFactory = ({ IDL }) => {
 	const BtcAddPendingTransactionError = IDL.Variant({
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
-	const Result_3 = IDL.Variant({
+	const Result_2 = IDL.Variant({
 		Ok: IDL.Null,
 		Err: BtcAddPendingTransactionError
 	});
@@ -178,7 +135,7 @@ export const idlFactory = ({ IDL }) => {
 	const BtcGetPendingTransactionsReponse = IDL.Record({
 		transactions: IDL.Vec(PendingTransaction)
 	});
-	const Result_4 = IDL.Variant({
+	const Result_3 = IDL.Variant({
 		Ok: BtcGetPendingTransactionsReponse,
 		Err: BtcAddPendingTransactionError
 	});
@@ -195,7 +152,7 @@ export const idlFactory = ({ IDL }) => {
 		PendingTransactions: IDL.Null,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
-	const Result_5 = IDL.Variant({
+	const Result_4 = IDL.Variant({
 		Ok: SelectedUtxosFeeResponse,
 		Err: SelectedUtxosFeeError
 	});
@@ -207,13 +164,44 @@ export const idlFactory = ({ IDL }) => {
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
+	const BtcAddress = IDL.Variant({
+		P2WPKH: IDL.Text,
+		P2PKH: IDL.Text,
+		P2WSH: IDL.Text,
+		P2SH: IDL.Text,
+		P2TR: IDL.Text
+	});
+	const EthAddress = IDL.Variant({ Public: IDL.Text });
+	const Icrcv2AccountId = IDL.Variant({
+		Account: IDL.Vec(IDL.Nat8),
+		WithPrincipal: IDL.Record({
+			owner: IDL.Principal,
+			subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
+		})
+	});
+	const TokenAccountId = IDL.Variant({
+		Btc: BtcAddress,
+		Eth: EthAddress,
+		Sol: IDL.Text,
+		Icrcv2: Icrcv2AccountId
+	});
+	const ContactAddressData = IDL.Record({
+		label: IDL.Opt(IDL.Text),
+		token_account_id: TokenAccountId
+	});
 	const Contact = IDL.Record({
 		id: IDL.Text,
 		name: IDL.Text,
-		addresses: IDL.Vec(ContactAddressData),
-		avatar: IDL.Opt(IDL.Text)
+		addresses: IDL.Vec(ContactAddressData)
 	});
 	const AddContactRequest = IDL.Record({ contact: Contact });
+	const ContactError = IDL.Variant({
+		InvalidContactData: IDL.Null,
+		ContactNotFound: IDL.Null,
+		ContactIdAlreadyExists: IDL.Null,
+		ContactNameAlreadyExists: IDL.Null
+	});
+	const Result_5 = IDL.Variant({ Ok: IDL.Null, Err: ContactError });
 	const CreateChallengeResponse = IDL.Record({
 		difficulty: IDL.Nat32,
 		start_timestamp_ms: IDL.Nat64,
@@ -307,7 +295,6 @@ export const idlFactory = ({ IDL }) => {
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Result_8 = IDL.Variant({ Ok: Contact, Err: ContactError });
-	const ContactSettings = IDL.Record({ contacts: IDL.Vec(Contact) });
 	const TransactionType = IDL.Variant({
 		Send: IDL.Null,
 		Receive: IDL.Null
@@ -501,35 +488,26 @@ export const idlFactory = ({ IDL }) => {
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
-	const UpdateAddressRequest = IDL.Record({
-		current_token_account_id: TokenAccountId,
-		new_address_data: ContactAddressData,
-		contact_id: IDL.Text
-	});
 	const SaveNetworksSettingsRequest = IDL.Record({
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		current_user_version: IDL.Opt(IDL.Nat64)
 	});
 	return IDL.Service({
-		add_address_to_contact: IDL.Func([AddAddressRequest], [Result], []),
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [AddUserCredentialResult], []),
-		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result_1], []),
-		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [Result_2], []),
-		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_3], []),
-		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_4], []),
-		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_5], []),
+		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result], []),
+		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [Result_1], []),
+		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_2], []),
+		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_3], []),
+		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_4], []),
 		config: IDL.Func([], [Config]),
-		create_contact: IDL.Func([AddContactRequest], [Result], []),
+		create_contact: IDL.Func([AddContactRequest], [Result_5], []),
 		create_pow_challenge: IDL.Func([], [Result_6], []),
 		create_user_profile: IDL.Func([], [UserProfile], []),
-		delete_address_from_contact: IDL.Func([IDL.Text, IDL.Text], [Result], []),
-		delete_contact: IDL.Func([IDL.Text], [Result], []),
-		filter_contacts_by_token_type: IDL.Func([IDL.Text], [IDL.Vec(Contact)]),
+		delete_contact: IDL.Func([IDL.Text], [Result_5], []),
 		get_account_creation_timestamps: IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))]),
 		get_allowed_cycles: IDL.Func([], [Result_7], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact_by_id: IDL.Func([IDL.Text], [Result_8]),
-		get_contact_settings: IDL.Func([], [ContactSettings]),
 		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)]),
 		get_user_profile: IDL.Func([], [Result_9]),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse]),
@@ -538,7 +516,6 @@ export const idlFactory = ({ IDL }) => {
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)]),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)]),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
-		search_contacts_by_query: IDL.Func([IDL.Text], [IDL.Vec(Contact)]),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
@@ -547,8 +524,7 @@ export const idlFactory = ({ IDL }) => {
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats]),
 		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_11], []),
-		update_contact_address: IDL.Func([UpdateAddressRequest], [Result], []),
-		update_existing_contact: IDL.Func([AddContactRequest], [Result], []),
+		update_existing_contact: IDL.Func([AddContactRequest], [Result_5], []),
 		update_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_10], [])
 	});
 };

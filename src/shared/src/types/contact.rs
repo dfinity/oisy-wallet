@@ -7,7 +7,6 @@ pub struct Contact {
     pub id: String,
     pub name: String,
     pub addresses: Vec<ContactAddressData>,
-    pub avatar: Option<String>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -52,12 +51,8 @@ pub struct UpdateAddressRequest {
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum ContactError {
-    UserNotFound,
     ContactNotFound,
     ContactIdAlreadyExists,
     ContactNameAlreadyExists,
     InvalidContactData,
-    AddressAlreadyExists,
-    AddressNotFound,
-    InvalidAddressFormat,
 }

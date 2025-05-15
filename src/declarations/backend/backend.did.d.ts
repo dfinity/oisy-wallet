@@ -59,10 +59,6 @@ export interface AccountSnapshot_3 {
 	timestamp: bigint;
 	amount: bigint;
 }
-export interface AddAddressRequest {
-	contact_id: string;
-	contact_address_data: ContactAddressData;
-}
 export interface AddContactRequest {
 	contact: Contact;
 }
@@ -175,24 +171,16 @@ export interface Contact {
 	id: string;
 	name: string;
 	addresses: Array<ContactAddressData>;
-	avatar: [] | [string];
 }
 export interface ContactAddressData {
 	label: [] | [string];
 	token_account_id: TokenAccountId;
 }
 export type ContactError =
-	| { AddressAlreadyExists: null }
 	| { InvalidContactData: null }
 	| { ContactNotFound: null }
 	| { ContactIdAlreadyExists: null }
-	| { ContactNameAlreadyExists: null }
-	| { InvalidAddressFormat: null }
-	| { AddressNotFound: null }
-	| { UserNotFound: null };
-export interface ContactSettings {
-	contacts: Array<Contact>;
-}
+	| { ContactNameAlreadyExists: null };
 export type CreateChallengeError =
 	| { ChallengeInProgress: null }
 	| { MissingUserProfile: null }
@@ -302,16 +290,16 @@ export interface PendingTransaction {
 	txid: Uint8Array | number[];
 	utxos: Array<Utxo>;
 }
-export type Result = { Ok: null } | { Err: ContactError };
-export type Result_1 = { Ok: null } | { Err: AddDappSettingsError };
+export type Result = { Ok: null } | { Err: AddDappSettingsError };
+export type Result_1 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type Result_10 = { Ok: null } | { Err: SaveTestnetsSettingsError };
 export type Result_11 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
-export type Result_2 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
-export type Result_3 = { Ok: null } | { Err: BtcAddPendingTransactionError };
-export type Result_4 =
+export type Result_2 = { Ok: null } | { Err: BtcAddPendingTransactionError };
+export type Result_3 =
 	| { Ok: BtcGetPendingTransactionsReponse }
 	| { Err: BtcAddPendingTransactionError };
-export type Result_5 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
+export type Result_4 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
+export type Result_5 = { Ok: null } | { Err: ContactError };
 export type Result_6 = { Ok: CreateChallengeResponse } | { Err: CreateChallengeError };
 export type Result_7 = { Ok: GetAllowedCyclesResponse } | { Err: GetAllowedCyclesError };
 export type Result_8 = { Ok: Contact } | { Err: ContactError };
@@ -421,11 +409,6 @@ export interface Transaction_3 {
 	timestamp: bigint;
 	amount: bigint;
 }
-export interface UpdateAddressRequest {
-	current_token_account_id: TokenAccountId;
-	new_address_data: ContactAddressData;
-	contact_id: string;
-}
 export interface UserCredential {
 	issuer: string;
 	verified_date_timestamp: [] | [bigint];
@@ -460,25 +443,21 @@ export interface Utxo {
 	outpoint: Outpoint;
 }
 export interface _SERVICE {
-	add_address_to_contact: ActorMethod<[AddAddressRequest], Result>;
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], AddUserCredentialResult>;
-	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result_1>;
-	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], Result_2>;
-	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_3>;
-	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_4>;
-	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_5>;
+	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result>;
+	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], Result_1>;
+	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_2>;
+	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_3>;
+	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_4>;
 	config: ActorMethod<[], Config>;
-	create_contact: ActorMethod<[AddContactRequest], Result>;
+	create_contact: ActorMethod<[AddContactRequest], Result_5>;
 	create_pow_challenge: ActorMethod<[], Result_6>;
 	create_user_profile: ActorMethod<[], UserProfile>;
-	delete_address_from_contact: ActorMethod<[string, string], Result>;
-	delete_contact: ActorMethod<[string], Result>;
-	filter_contacts_by_token_type: ActorMethod<[string], Array<Contact>>;
+	delete_contact: ActorMethod<[string], Result_5>;
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
 	get_allowed_cycles: ActorMethod<[], Result_7>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_contact_by_id: ActorMethod<[string], Result_8>;
-	get_contact_settings: ActorMethod<[], ContactSettings>;
 	get_snapshot: ActorMethod<[], [] | [UserSnapshot]>;
 	get_user_profile: ActorMethod<[], Result_9>;
 	has_user_profile: ActorMethod<[], HasUserProfileResponse>;
@@ -487,7 +466,6 @@ export interface _SERVICE {
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
-	search_contacts_by_query: ActorMethod<[string], Array<Contact>>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
@@ -496,8 +474,7 @@ export interface _SERVICE {
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_11>;
-	update_contact_address: ActorMethod<[UpdateAddressRequest], Result>;
-	update_existing_contact: ActorMethod<[AddContactRequest], Result>;
+	update_existing_contact: ActorMethod<[AddContactRequest], Result_5>;
 	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_10>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;

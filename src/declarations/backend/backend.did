@@ -56,10 +56,6 @@ type AccountSnapshot_3 = record {
 	timestamp : nat64;
 	amount : nat64
 };
-type AddAddressRequest = record {
-	contact_id : text;
-	contact_address_data : ContactAddressData
-};
 type AddContactRequest = record { contact : Contact };
 type AddDappSettingsError = variant {
 	MaxHiddenDappIds;
@@ -171,24 +167,18 @@ type Config = record {
 type Contact = record {
 	id : text;
 	name : text;
-	addresses : vec ContactAddressData;
-	avatar : opt text
+	addresses : vec ContactAddressData
 };
 type ContactAddressData = record {
 	label : opt text;
 	token_account_id : TokenAccountId
 };
 type ContactError = variant {
-	AddressAlreadyExists;
 	InvalidContactData;
 	ContactNotFound;
 	ContactIdAlreadyExists;
-	ContactNameAlreadyExists;
-	InvalidAddressFormat;
-	AddressNotFound;
-	UserNotFound
+	ContactNameAlreadyExists
 };
-type ContactSettings = record { contacts : vec Contact };
 type CreateChallengeError = variant {
 	ChallengeInProgress;
 	MissingUserProfile;
@@ -278,23 +268,23 @@ type NetworksSettings = record {
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
-type Result = variant { Ok; Err : ContactError };
-type Result_1 = variant { Ok; Err : AddDappSettingsError };
+type Result = variant { Ok; Err : AddDappSettingsError };
+type Result_1 = variant { Ok : AllowSigningResponse; Err : AllowSigningError };
 type Result_10 = variant { Ok; Err : SaveTestnetsSettingsError };
 type Result_11 = variant {
 	Ok : TopUpCyclesLedgerResponse;
 	Err : TopUpCyclesLedgerError
 };
-type Result_2 = variant { Ok : AllowSigningResponse; Err : AllowSigningError };
-type Result_3 = variant { Ok; Err : BtcAddPendingTransactionError };
-type Result_4 = variant {
+type Result_2 = variant { Ok; Err : BtcAddPendingTransactionError };
+type Result_3 = variant {
 	Ok : BtcGetPendingTransactionsReponse;
 	Err : BtcAddPendingTransactionError
 };
-type Result_5 = variant {
+type Result_4 = variant {
 	Ok : SelectedUtxosFeeResponse;
 	Err : SelectedUtxosFeeError
 };
+type Result_5 = variant { Ok; Err : ContactError };
 type Result_6 = variant {
 	Ok : CreateChallengeResponse;
 	Err : CreateChallengeError
@@ -405,11 +395,6 @@ type Transaction_3 = record {
 	timestamp : nat64;
 	amount : nat64
 };
-type UpdateAddressRequest = record {
-	current_token_account_id : TokenAccountId;
-	new_address_data : ContactAddressData;
-	contact_id : text
-};
 type UserCredential = record {
 	issuer : text;
 	verified_date_timestamp : opt nat64;
@@ -437,29 +422,25 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
-	add_address_to_contact : (AddAddressRequest) -> (Result);
 	add_user_credential : (AddUserCredentialRequest) -> (AddUserCredentialResult);
-	add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (Result_1);
-	allow_signing : (opt AllowSigningRequest) -> (Result_2);
-	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (Result_3);
+	add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (Result);
+	allow_signing : (opt AllowSigningRequest) -> (Result_1);
+	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (Result_2);
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
-		Result_4
+		Result_3
 	);
-	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_5);
+	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_4);
 	config : () -> (Config) query;
-	create_contact : (AddContactRequest) -> (Result);
+	create_contact : (AddContactRequest) -> (Result_5);
 	create_pow_challenge : () -> (Result_6);
 	create_user_profile : () -> (UserProfile);
-	delete_address_from_contact : (text, text) -> (Result);
-	delete_contact : (text) -> (Result);
-	filter_contacts_by_token_type : (text) -> (vec Contact) query;
+	delete_contact : (text) -> (Result_5);
 	get_account_creation_timestamps : () -> (
 		vec record { principal; nat64 }
 	) query;
 	get_allowed_cycles : () -> (Result_7);
 	get_canister_status : () -> (CanisterStatusResultV2);
 	get_contact_by_id : (text) -> (Result_8) query;
-	get_contact_settings : () -> (ContactSettings) query;
 	get_snapshot : () -> (opt UserSnapshot) query;
 	get_user_profile : () -> (Result_9) query;
 	has_user_profile : () -> (HasUserProfileResponse) query;
@@ -468,7 +449,6 @@ service : (Arg) -> {
 	list_custom_tokens : () -> (vec CustomToken) query;
 	list_user_tokens : () -> (vec UserToken) query;
 	remove_user_token : (UserTokenId) -> ();
-	search_contacts_by_query : (text) -> (vec Contact) query;
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
 	set_many_user_tokens : (vec UserToken) -> ();
@@ -477,7 +457,6 @@ service : (Arg) -> {
 	set_user_token : (UserToken) -> ();
 	stats : () -> (Stats) query;
 	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_11);
-	update_contact_address : (UpdateAddressRequest) -> (Result);
-	update_existing_contact : (AddContactRequest) -> (Result);
+	update_existing_contact : (AddContactRequest) -> (Result_5);
 	update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_10)
 }
