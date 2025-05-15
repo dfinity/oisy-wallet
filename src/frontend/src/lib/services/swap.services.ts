@@ -147,24 +147,29 @@ export const fetchSwapAmounts = async ({
 		)
 	);
 
-	return enabledProviders.reduce<SwapMappedResult[]>((acc, provider, index) => {
-		const result = settledResults[index];
-		if (result.status !== 'fulfilled') {
+	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
+		(acc, provider, index) => {
+			const result = settledResults[index];
+			if (result.status !== 'fulfilled') {
+				return acc;
+			}
+
+			if (provider.key === SwapProvider.KONG_SWAP) {
+				const swap = result.value as SwapAmountsReply;
+				const mapped = provider.mapQuoteResult({ swap, tokens });
+				acc.push(mapped);
+			} else if (provider.key === SwapProvider.ICP_SWAP) {
+				const swap = result.value as ICPSwapResult;
+				const mapped = provider.mapQuoteResult({ swap, slippage });
+				acc.push(mapped);
+			}
+
 			return acc;
-		}
+		},
+		[]
+	);
 
-		if (provider.key === SwapProvider.KONG_SWAP) {
-			const swap = result.value as SwapAmountsReply;
-			const mapped = provider.mapQuoteResult({ swap, tokens });
-			acc.push(mapped);
-		} else if (provider.key === SwapProvider.ICP_SWAP) {
-			const swap = result.value as ICPSwapResult;
-			const mapped = provider.mapQuoteResult({ swap, slippage });
-			acc.push(mapped);
-		}
-
-		return acc
-			.filter((swap) => Number(swap.receiveAmount) > 0)
-			.sort((a, b) => Number(b.receiveAmount) - Number(a.receiveAmount));
-	}, []);
+	return mappedProvidersResults
+		.filter((swap) => Number(swap.receiveAmount) > 0)
+		.sort((a, b) => Number(b.receiveAmount) - Number(a.receiveAmount));
 };
