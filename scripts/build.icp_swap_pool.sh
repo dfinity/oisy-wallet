@@ -46,7 +46,7 @@ download wasm
 
 # Compress Wasm
 echo "Compressing Wasm: $WASM_FILE_GZ"
-gzip < "$WASM_FILE" >"$WASM_FILE_GZ"
+gzip <"$WASM_FILE" >"$WASM_FILE_GZ"
 
 # Set token config
 TOKEN0='record { address = "ryjl3-tyaaa-aaaaa-aaaba-cai"; standard = "icrc-1" }'
