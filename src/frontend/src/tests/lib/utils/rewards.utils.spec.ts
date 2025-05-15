@@ -10,6 +10,7 @@ import {
 	mapEligibilityReport
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 
 describe('rewards.utils', () => {
 	describe('loadRewardResult', () => {
@@ -248,7 +249,8 @@ describe('rewards.utils', () => {
 										criterion: {
 											MinLogins: {
 												duration: { Days: 7n },
-												count: 5
+												count: 5,
+												session_duration: toNullable()
 											}
 										}
 									}
@@ -418,7 +420,8 @@ describe('rewards.utils', () => {
 									criterion: {
 										MinLogins: {
 											duration: { Days: 7n },
-											count: 5
+											count: 5,
+											session_duration: toNullable()
 										}
 									}
 								},

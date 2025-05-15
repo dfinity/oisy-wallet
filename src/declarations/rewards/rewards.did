@@ -3,10 +3,23 @@ type Account = record {
 	subaccount : opt blob
 };
 
+type AccountId_Any = text;
+
 type AccountSnapshotFor = variant {
+	Any : AccountSnapshot_Any;
 	Icrc : AccountSnapshot_Icrc;
 	SplDevnet : AccountSnapshot_Spl;
 	SplMainnet : AccountSnapshot_Spl
+};
+type AccountSnapshot_Any = record {
+	decimals : nat8;
+	token_address : AnyToken;
+	network : AnyNetwork;
+	approx_usd_per_token : float64;
+	last_transactions : vec Transaction_Any;
+	account : AccountId_Any;
+	timestamp : nat64;
+	amount : nat64
 };
 type AccountSnapshot_Icrc = record {
 	decimals : nat8;
@@ -29,14 +42,18 @@ type AccountSnapshot_Spl = record {
 	amount : nat64
 };
 
-type AirDropConfig = record {
-	/// Max number of participants
-	number_of_participants : nat64;
-	/// When to start the timestamp
-	start_timestamp_ns : nat64;
-	/// The tokens to distribute during the airdrop
-	token_configs : vec TokenConfig
+/// A network on which a token can be found.
+type AnyNetwork = record {
+	network_id : text;
+	testnet_for : opt text
 };
+
+/// A token on a specified network.
+type AnyToken = record {
+	token_symbol : text;
+	wraps : opt text
+};
+
 ///
 type CampaignEligibility = record {
 	///
@@ -71,7 +88,6 @@ type ClaimVipRewardResponse = variant {
 
 type Config = record {
 	usage_awards_config : opt UsageAwardConfig;
-	airdrop_config : opt AirDropConfig;
 	/// The VIP configuration
 	vip_config : opt VipConfig;
 	/// VIP Campaigns
@@ -97,7 +113,9 @@ type Criterion = variant {
 		/// "recent" is defined by this duration.
 		duration : CandidDuration;
 		/// The user must have logged in at least this many times recently.
-		count : nat32
+		count : nat32;
+		/// The assumed session length.
+		session_duration : opt CandidDuration
 	};
 	/// The minimum total assets at the last valuation.
 	MinTotalAssetsUsd : record { usd : nat32 };
@@ -311,6 +329,13 @@ type TokenConfig = record {
 	/// The ledger canister that manages the token.
 	ledger_canister : principal
 };
+type Transaction_Any = record {
+	transaction_type : TransactionType;
+	network : AnyNetwork;
+	counterparty : AccountId_Any;
+	timestamp : nat64;
+	amount : nat64
+};
 type Transaction_Icrc = record {
 	transaction_type : TransactionType;
 	network : record {};
@@ -329,6 +354,7 @@ type Transaction_Spl = record {
 	timestamp : nat64;
 	amount : nat64
 };
+
 type UsageAndHolding = record {
 	// Account valuation at the time of the last snapshot.
 	approx_usd_valuation : float64;
@@ -373,9 +399,7 @@ type UsageAwardStats = record {
 	eligible_snapshots : nat64
 };
 type UsageCriteria = record {
-	criteria : vec Criterion;
-	measurement_duration : CandidDuration;
-	min_valuation_usd : nat64
+	criteria : vec Criterion
 };
 ///
 type UsageVsHoldingStats = record {
@@ -468,8 +492,6 @@ service : (opt Config) -> {
 	/// Runs the provided award event.  This is normally done automatically.  It can be useful
 	/// to trigger an event directly when testing.
 	trigger_usage_award_event : (UsageAwardEvent) -> ();
-	/// Usage Awards: User is eligible.
-	usage_eligible : (principal) -> (bool, bool) query;
 	/// Aggregate usage stats.
 	usage_stats : () -> (UsageAwardStats) query;
 	/// Finds winners
