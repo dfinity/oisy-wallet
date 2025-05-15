@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapBestRateBadge from './SwapBestRateBadge.svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
@@ -42,15 +42,22 @@
 			displayURL = null;
 		}
 	});
+
+	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish(swapDApp) && nonNullish(selectedProvider) && nonNullish($swapAmountsStore)}
 	<CollapsibleBottomSheet showContentHeader>
-		{#snippet contentHeader()}
+		{#snippet contentHeader({ isInBottomSheet })}
 			<ModalValue>
 				<svelte:fragment slot="label">
 					<div class="flex justify-center gap-2">
 						{$i18n.swap.text.swap_provider}
+						{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1 && !isInBottomSheet}
+							<Button link on:click={() => dispatch('icShowProviderList')}
+								>{$i18n.swap.text.select}</Button
+							>
+						{/if}
 					</div>
 				</svelte:fragment>
 
