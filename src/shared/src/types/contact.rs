@@ -8,6 +8,7 @@ pub struct Contact {
     pub id: String,
     pub name: String,
     pub addresses: Vec<ContactAddressData>,
+    pub update_timestamp: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -17,16 +18,17 @@ pub struct ContactAddressData {
     pub label: Option<String>,
 }
 
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
-#[serde(remote = "Self")]
-pub struct ContactSettings {
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct StoredContacts {
     pub contacts: Vec<Contact>,
+    pub last_updated: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(remote = "Self")]
-pub struct AddContactRequest {
+pub struct CreateContactRequest {
     pub contact: Contact,
+    pub update_timestamp: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -40,27 +42,11 @@ pub struct RemoveContactRequest {
 #[serde(remote = "Self")]
 pub struct UpdateContactRequest {
     pub contact: Contact,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(remote = "Self")]
-pub struct AddAddressRequest {
-    pub contact_id: String,
-    pub contact_address_data: ContactAddressData,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(remote = "Self")]
-pub struct UpdateAddressRequest {
-    pub contact_id: String,
-    pub current_token_account_id: TokenAccountId,
-    pub new_address_data: ContactAddressData,
+    pub update_timestamp: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum ContactError {
     ContactNotFound,
-    ContactIdAlreadyExists,
-    ContactNameAlreadyExists,
     InvalidContactData,
 }
