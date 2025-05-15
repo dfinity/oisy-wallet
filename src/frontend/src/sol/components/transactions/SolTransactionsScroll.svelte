@@ -9,7 +9,7 @@
 
 	interface Props {
 		token: Token;
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { token, children }: Props = $props();
@@ -33,5 +33,5 @@
 </script>
 
 <InfiniteScroll {onIntersect} disabled={disableInfiniteScroll}>
-	{@render children?.()}
+	{@render children()}
 </InfiniteScroll>
