@@ -5,7 +5,7 @@
 	import { ADDRESS_BOOK_SEARCH_CONTACT_INPUT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let value: string = '';
+	export let value = '';
 </script>
 
 <InputTextWithAction

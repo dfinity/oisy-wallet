@@ -1,6 +1,6 @@
 <script lang="ts">
 	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
-	import SearchContact from '$lib/components/address-book/SearchContact.svelte';
+	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -30,7 +30,12 @@
 	{:else}
 		<div class="flex w-full gap-2">
 			<div class="w-3/5">
-				<SearchContact bind:value={searchTerm} />
+				<InputSearch
+					bind:filter={searchTerm}
+					showResetButton={true}
+					placeholder={$i18n.address_book.text.search_contact}
+					autofocus={true}
+				/>
 			</div>
 			<div class="flex w-2/5 justify-end pt-1">
 				<Button
