@@ -31,7 +31,7 @@ WASM_FILE="$(jq -r .canisters.kong_backend.wasm dfx.json)"
 download() {
   : 'Downloads a URL to a given file.'
   # shellcheck disable=SC2016 # The $ in the comment is not meant to be expanded.
-  local asset asset_url asset_file response
+  local asset asset_url asset_file
   asset="$1"
   asset_url="${asset^^}_URL"
   asset_file="${asset^^}_FILE"

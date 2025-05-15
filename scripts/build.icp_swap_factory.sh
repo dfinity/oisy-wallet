@@ -31,7 +31,7 @@ WASM_FILE="${WASM_FILE_GZ%.gz}"
 ARG_FILE="$(jq -r .canisters.icp_swap_factory.init_arg_file dfx.json)"
 
 download() {
-  local asset asset_url asset_file response
+  local asset asset_url asset_file
   asset="$1"
   asset_url="${asset^^}_URL"
   asset_file="${asset^^}_FILE"
