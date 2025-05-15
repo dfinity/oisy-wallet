@@ -230,7 +230,7 @@
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider />
+				<SwapProvider on:icShowProviderList />
 				<SwapFees />
 			</div>
 		{/if}

@@ -4,6 +4,7 @@
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
@@ -24,7 +25,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext, initSwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { SwapSelectTokenType } from '$lib/types/swap';
+	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
 
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
@@ -55,6 +56,7 @@
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
 	let currentStep = $state<WizardStep | undefined>();
 	let selectTokenType = $state<SwapSelectTokenType | undefined>();
+	let showSelectProviderModal = $state<boolean>(false);
 
 	const showTokensList = ({ detail: type }: CustomEvent<SwapSelectTokenType>) => {
 		swapAmountsStore.reset();
@@ -79,7 +81,9 @@
 			? $i18n.swap.text.select_source_token
 			: selectTokenType === 'destination'
 				? $i18n.swap.text.select_destination_token
-				: (currentStep?.title ?? '')
+				: showSelectProviderModal
+					? $i18n.swap.text.select_swap_provider
+					: (currentStep?.title ?? '')
 	);
 
 	const dispatch = createEventDispatcher();
@@ -88,8 +92,20 @@
 		closeModal(() => {
 			currentStep = undefined;
 			selectTokenType = undefined;
+			showSelectProviderModal = false;
 			dispatch('nnsClose');
 		});
+
+	const openSelectProviderModal = () => {
+		showSelectProviderModal = true;
+	};
+	const closeSelectProviderModal = () => {
+		showSelectProviderModal = false;
+	};
+	const selectProvider = ({ detail }: CustomEvent<SwapMappedResult>) => {
+		swapAmountsStore.setSelectedProvider(detail);
+		closeSelectProviderModal();
+	};
 
 	// TODO: Migrate to Svelte 5, remove legacy slot usage and use render composition instead
 </script>
@@ -100,12 +116,17 @@
 	bind:this={modal}
 	bind:currentStep
 	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING}
+	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING || showSelectProviderModal}
 >
 	<svelte:fragment slot="title">{title}</svelte:fragment>
 
 	{#if nonNullish(selectTokenType)}
 		<SwapTokensList on:icSelectToken={selectToken} on:icCloseTokensList={closeTokenList} />
+	{:else if showSelectProviderModal}
+		<SwapProviderListModal
+			on:icSelectProvider={selectProvider}
+			on:icCloseProviderList={closeSelectProviderModal}
+		/>
 	{:else}
 		<SwapWizard
 			{currentStep}
@@ -117,6 +138,7 @@
 			on:icNext={modal.next}
 			on:icClose={close}
 			on:icShowTokensList={showTokensList}
+			on:icShowProviderList={openSelectProviderModal}
 		/>
 	{/if}
 </WizardModal>

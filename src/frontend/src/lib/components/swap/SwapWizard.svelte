@@ -160,6 +160,7 @@
 				on:icClose
 				on:icNext
 				on:icShowTokensList
+				on:icShowProviderList
 				bind:swapAmount
 				bind:receiveAmount
 				bind:slippageValue
