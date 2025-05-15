@@ -14,35 +14,23 @@
 		addContact: () => void;
 		showContact: (contact: Contact) => void;
 	}
+
 	let { contacts, addContact, showContact }: AddressBookStepProps = $props();
+
 	let searchTerm = $state('');
 
 	let filteredContacts = $derived(
 		contacts.filter((contact) => contact.name.toLowerCase().includes(searchTerm.toLowerCase()))
 	);
-
-	const handleSearch = (term: string) => {
-		searchTerm = term;
-	};
 </script>
 
 <ContentWithToolbar styleClass="mx-2 flex flex-col items-stretch">
 	{#if contacts.length === 0}
-		<EmptyAddressBook onAddContact={addContact}></EmptyAddressBook>
+		<EmptyAddressBook onAddContact={addContact} />
 	{:else}
-		<!-- <div class="flex">
-			<Button
-				colorStyle="secondary-light"
-				on:click={() => addContact()}
-				testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
-			>
-				<IconPlus></IconPlus>
-				{$i18n.address_book.text.add_contact}
-			</Button>
-		</div> -->
 		<div class="flex w-full gap-2">
 			<div class="w-3/5">
-				<SearchContact onSearchChange={handleSearch} />
+				<SearchContact bind:value={searchTerm} />
 			</div>
 			<div class="flex w-2/5 justify-end pt-1">
 				<Button
@@ -58,14 +46,12 @@
 		</div>
 
 		<div class="flex flex-col gap-2 py-6">
-			<!-- 
-			TODO: Add contact cards here
-			https://github.com/dfinity/oisy-wallet/pull/6243
-			-->
 			{#if filteredContacts.length > 0}
 				{#each filteredContacts as contact, index (index)}
 					<div class="flex items-center">
-						<div class="grow">CONTACT: {contact.name} #addresses {contact.addresses.length}</div>
+						<div class="grow">
+							CONTACT: {contact.name} #addresses {contact.addresses.length}
+						</div>
 						<Button styleClass="flex-none" on:click={() => showContact(contact)}>Show</Button>
 					</div>
 				{/each}
