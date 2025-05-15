@@ -292,7 +292,6 @@ export type Result = { Ok: null } | { Err: AddDappSettingsError };
 export type Result_1 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type Result_10 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_11 = { Ok: null } | { Err: SaveTestnetsSettingsError };
-export type Result_12 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
 export type Result_2 = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type Result_3 =
 	| { Ok: BtcGetPendingTransactionsReponse }
@@ -379,6 +378,9 @@ export interface TopUpCyclesLedgerResponse {
 	ledger_balance: bigint;
 	topped_up: bigint;
 }
+export type TopUpCyclesLedgerResult =
+	| { Ok: TopUpCyclesLedgerResponse }
+	| { Err: TopUpCyclesLedgerError };
 export interface Transaction {
 	transaction_type: TransactionType;
 	network: {};
@@ -472,7 +474,7 @@ export interface _SERVICE {
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_11>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
-	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_12>;
+	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
 	update_contact: ActorMethod<[CreateContactRequest], Result_7>;
 	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_11>;
 }

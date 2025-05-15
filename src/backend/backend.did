@@ -271,10 +271,6 @@ type Result = variant { Ok; Err : AddDappSettingsError };
 type Result_1 = variant { Ok : AllowSigningResponse; Err : AllowSigningError };
 type Result_10 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_11 = variant { Ok; Err : SaveTestnetsSettingsError };
-type Result_12 = variant {
-	Ok : TopUpCyclesLedgerResponse;
-	Err : TopUpCyclesLedgerError
-};
 type Result_2 = variant { Ok; Err : BtcAddPendingTransactionError };
 type Result_3 = variant {
 	Ok : BtcGetPendingTransactionsReponse;
@@ -366,6 +362,10 @@ type TopUpCyclesLedgerResponse = record {
 	ledger_balance : nat;
 	topped_up : nat
 };
+type TopUpCyclesLedgerResult = variant {
+	Ok : TopUpCyclesLedgerResponse;
+	Err : TopUpCyclesLedgerError
+};
 type Transaction = record {
 	transaction_type : TransactionType;
 	network : record {};
@@ -456,7 +456,9 @@ service : (Arg) -> {
 	set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_11);
 	set_user_token : (UserToken) -> ();
 	stats : () -> (Stats) query;
-	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_12);
+	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
+		TopUpCyclesLedgerResult
+	);
 	update_contact : (CreateContactRequest) -> (Result_7);
 	update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_11)
 }
