@@ -222,7 +222,10 @@ pub async fn btc_principal_to_p2wpkh_address(
 /// # Errors
 /// Errors are enumerated by: `TopUpCyclesLedgerError`
 pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyclesLedgerResult {
-    request.check()?;
+    match request.check() {
+        Ok(()) => {}
+        Err(err) => return TopUpCyclesLedgerResult::Err(err),
+    }
 
     // Cycles ledger account details:
     let cycles_ledger = CyclesLedgerService(*CYCLES_LEDGER);
@@ -232,10 +235,14 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
     };
 
     // Backend balance on the cycles ledger:
-    let (ledger_balance,): (Nat,) = cycles_ledger
+    let (ledger_balance,): (Nat,) = match cycles_ledger
         .icrc_1_balance_of(&account)
         .await
-        .map_err(|_| TopUpCyclesLedgerError::CouldNotGetBalanceFromCyclesLedger)?;
+        .map_err(|_| TopUpCyclesLedgerError::CouldNotGetBalanceFromCyclesLedger)
+    {
+        Ok(res) => res,
+        Err(err) => return TopUpCyclesLedgerResult::Err(err),
+    };
 
     // Cycles directly attached to the backend:
     let backend_cycles = Nat::from(ic_cdk::api::canister_balance128());
@@ -256,12 +263,15 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
                 unreachable!("Failed to convert cycle amount to u128: {}", err)
             });
         let (result,): (DepositResult,) =
-            call_with_payment128(*CYCLES_LEDGER, "deposit", (arg,), to_send_128)
+            match call_with_payment128(*CYCLES_LEDGER, "deposit", (arg,), to_send_128)
                 .await
                 .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
                     available: backend_cycles,
                     tried_to_send: to_send.clone(),
-                })?;
+                }) {
+                Ok(res) => res,
+                Err(err) => return TopUpCyclesLedgerResult::Err(err),
+            };
         let new_ledger_balance = result.balance;
 
         Ok(TopUpCyclesLedgerResponse {
@@ -269,11 +279,13 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
             backend_cycles: to_retain,
             topped_up: to_send,
         })
+        .into()
     } else {
         Ok(TopUpCyclesLedgerResponse {
             ledger_balance,
             backend_cycles,
             topped_up: Nat::from(0u32),
         })
+        .into()
     }
 }

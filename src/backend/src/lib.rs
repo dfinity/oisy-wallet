@@ -175,7 +175,7 @@ async fn hourly_housekeeping_tasks() {
     // Tops up the account on the cycles ledger
     {
         let result = top_up_cycles_ledger(None).await;
-        if let Err(err) = result {
+        if let TopUpCyclesLedgerResult::Err(err) = result {
             eprintln!("Failed to top up cycles ledger: {err:?}");
         }
         // TODO: Add monitoring for how many cycles have been topped up and whether topping up is
