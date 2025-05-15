@@ -938,6 +938,7 @@ interface I18nAddress_book {
 		empty_text: string;
 		add_new_contact: string;
 		add_contact: string;
+		search_contact: string;
 	};
 	show_contact: {
 		title: string;
