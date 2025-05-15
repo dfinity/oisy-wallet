@@ -525,7 +525,7 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
                 &credential_type,
                 vc_flow_signers.issuer_origin,
                 &mut user_profile_model,
-            )
+            ).into()
         }),
         Err(_) => AddUserCredentialResult::Err(AddUserCredentialError::InvalidCredential),
     }
