@@ -1,5 +1,8 @@
 import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
-import { ADDRESS_BOOK_ADD_CONTACT_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	ADDRESS_BOOK_ADD_CONTACT_BUTTON,
+	ADDRESS_BOOK_SEARCH_CONTACT_INPUT
+} from '$lib/constants/test-ids.constants';
 import type { Contact } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -129,5 +132,29 @@ describe('AddressBookStep', () => {
 
 		expect(mockShowContact).toHaveBeenCalledTimes(2);
 		expect(mockShowContact).toHaveBeenCalledWith(mockContacts[1]);
+	});
+
+	it('should filter contacts when typing in the search input', async () => {
+		const { getByTestId, queryByText } = render(AddressBookStep, {
+			props: {
+				contacts: mockContacts,
+				addContact: mockAddContact,
+				showContact: mockShowContact
+			}
+		});
+
+		const input = getByTestId(ADDRESS_BOOK_SEARCH_CONTACT_INPUT) as HTMLInputElement;
+
+		expect(input).toBeInTheDocument();
+
+		await fireEvent.input(input, { target: { value: 'Contact 1' } });
+
+		expect(queryByText('CONTACT: Test Contact 1 #addresses 1')).toBeInTheDocument();
+		expect(queryByText('CONTACT: Test Contact 2 #addresses 0')).not.toBeInTheDocument();
+
+		await fireEvent.input(input, { target: { value: '' } });
+
+		expect(queryByText('CONTACT: Test Contact 1 #addresses 1')).toBeInTheDocument();
+		expect(queryByText('CONTACT: Test Contact 2 #addresses 0')).toBeInTheDocument();
 	});
 });

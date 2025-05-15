@@ -1,11 +1,14 @@
 <script lang="ts">
 	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
-	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { ADDRESS_BOOK_ADD_CONTACT_BUTTON } from '$lib/constants/test-ids.constants';
+	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import {
+		ADDRESS_BOOK_ADD_CONTACT_BUTTON,
+		ADDRESS_BOOK_SEARCH_CONTACT_INPUT
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Contact } from '$lib/types/contact';
 
@@ -35,6 +38,7 @@
 					showResetButton={true}
 					placeholder={$i18n.address_book.text.search_contact}
 					autofocus={true}
+					testId={ADDRESS_BOOK_SEARCH_CONTACT_INPUT}
 				/>
 			</div>
 			<div class="flex w-2/5 justify-end pt-1">
