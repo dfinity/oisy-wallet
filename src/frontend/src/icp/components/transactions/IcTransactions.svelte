@@ -66,9 +66,8 @@
 	}, 1);
 
 	$: if ($icTransactions.length > 0) {
-			debounceIcTransactions();
-		}
-
+		debounceIcTransactions();
+	}
 </script>
 
 <Info />

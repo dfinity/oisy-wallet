@@ -27,7 +27,6 @@
 			$modalStore
 		}));
 
-
 	let solTransactionsData: SolTransactionUi[];
 
 	const debounceIcTransactions = debounce(() => {
@@ -35,8 +34,8 @@
 	}, 1);
 
 	$: if ($solTransactions.length > 0) {
-			debounceIcTransactions();
-		}
+		debounceIcTransactions();
+	}
 </script>
 
 <Header>
@@ -46,7 +45,7 @@
 <SolTransactionsSkeletons>
 	{#if $solTransactions.length > 0}
 		<SolTransactionsScroll token={$token ?? DEFAULT_SOLANA_TOKEN}>
-			{#each (solTransactionsData ?? []) as transaction, index (`${transaction.id}-${index}`)}
+			{#each solTransactionsData ?? [] as transaction, index (`${transaction.id}-${index}`)}
 				<li in:slide={SLIDE_DURATION}>
 					<SolTransaction {transaction} token={$token ?? DEFAULT_SOLANA_TOKEN} />
 				</li>
