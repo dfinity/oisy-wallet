@@ -37,7 +37,7 @@ download() {
   asset="$1"
   asset_url="${asset^^}_URL"
   asset_file="${asset^^}_FILE"
-  scripts/download-immutable.sh "$asset_url" "$asset_file"
+  scripts/download-immutable.sh "${!asset_url}" "${!asset_file}"
 }
 
 # Download candid and wasm
@@ -46,7 +46,7 @@ download wasm
 
 # Compress Wasm
 echo "Compressing Wasm: $WASM_FILE_GZ"
-gzip -c "$WASM_FILE" >"$WASM_FILE_GZ"
+gzip < "$WASM_FILE" >"$WASM_FILE_GZ"
 
 # Set token config
 TOKEN0='record { address = "ryjl3-tyaaa-aaaaa-aaaba-cai"; standard = "icrc-1" }'

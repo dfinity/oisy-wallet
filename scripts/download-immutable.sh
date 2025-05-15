@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -xeuo pipefail
 
 print_help() {
   cat <<-EOF
@@ -42,9 +42,10 @@ if test -e "$REAL_DOWNLOAD_DESTINATION"; then
   echo "Download already exists for: '$DOWNLOAD_DESTINATION'  Skipping..."
 else
   echo "Downloading ${URL} --> ${DOWNLOAD_DESTINATION}"
+  mkdir -p "$(dirname "$DOWNLOAD_DESTINATION")"
   TMP_DOWNLOAD_DESTINATION="$(mktemp "$REAL_DOWNLOAD_DESTINATION.XXXXX")"
   curl --fail -sSL "$URL" >"$TMP_DOWNLOAD_DESTINATION"
   mv "$TMP_DOWNLOAD_DESTINATION" "$REAL_DOWNLOAD_DESTINATION"
 fi
 
-ln --symbolic --force "$REAL_DOWNLOAD_DESTINATION" "$DOWNLOAD_DESTINATION"
+ln --symbolic --force "$(basename "$REAL_DOWNLOAD_DESTINATION")" "$DOWNLOAD_DESTINATION"
