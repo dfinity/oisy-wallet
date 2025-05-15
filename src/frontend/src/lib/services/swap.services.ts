@@ -147,22 +147,31 @@ export const fetchSwapAmounts = async ({
 		)
 	);
 
-	return enabledProviders.reduce<SwapMappedResult[]>((acc, provider, index) => {
-		const result = settledResults[index];
-		if (result.status !== 'fulfilled') {
+	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
+		(acc, provider, index) => {
+			const result = settledResults[index];
+			if (result.status !== 'fulfilled') {
+				return acc;
+			}
+
+			let mapped: SwapMappedResult | undefined;
+
+			if (provider.key === SwapProvider.KONG_SWAP) {
+				const swap = result.value as SwapAmountsReply;
+				mapped = provider.mapQuoteResult({ swap, tokens });
+			} else if (provider.key === SwapProvider.ICP_SWAP) {
+				const swap = result.value as ICPSwapResult;
+				mapped = provider.mapQuoteResult({ swap, slippage });
+			}
+
+			if (mapped && Number(mapped.receiveAmount) > 0) {
+				acc.push(mapped);
+			}
+
 			return acc;
-		}
+		},
+		[]
+	);
 
-		if (provider.key === SwapProvider.KONG_SWAP) {
-			const swap = result.value as SwapAmountsReply;
-			const mapped = provider.mapQuoteResult({ swap, tokens });
-			acc.push(mapped);
-		} else if (provider.key === SwapProvider.ICP_SWAP) {
-			const swap = result.value as ICPSwapResult;
-			const mapped = provider.mapQuoteResult({ swap, slippage });
-			acc.push(mapped);
-		}
-
-		return acc;
-	}, []);
+	return mappedProvidersResults.sort((a, b) => Number(b.receiveAmount) - Number(a.receiveAmount));
 };
