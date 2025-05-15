@@ -1,9 +1,9 @@
 import { POLYGON_AMOY_EXPLORER_URL, POLYGON_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import baseMainnetIconDark from '$lib/assets/networks/dark/base-mainnet.svg';
-import baseSepoliaIconDark from '$lib/assets/networks/dark/base-sepolia.svg';
-import baseMainnetIconLight from '$lib/assets/networks/light/base-mainnet.svg';
-import baseSepoliaIconLight from '$lib/assets/networks/light/base-sepolia.svg';
+import polygonAmoyIconDark from '$lib/assets/networks/dark/polygon-amoy.svg';
+import polygonMainnetIconDark from '$lib/assets/networks/dark/polygon-mainnet.svg';
+import polygonAmoyIconLight from '$lib/assets/networks/light/polygon-amoy.svg';
+import polygonMainnetIconLight from '$lib/assets/networks/light/polygon-mainnet.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -23,9 +23,8 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Polygon PoS',
 	chainId: 137n,
-	// TODO: add the correct icon
-	iconLight: baseMainnetIconLight,
-	iconDark: baseMainnetIconDark,
+	iconLight: polygonMainnetIconLight,
+	iconDark: polygonMainnetIconDark,
 	explorerUrl: POLYGON_EXPLORER_URL,
 	providers: {
 		infura: 'matic',
@@ -45,9 +44,8 @@ export const POLYGON_AMOY_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Polygon (Amoy Testnet)',
 	chainId: 80002n,
-	// TODO: add the correct icon
-	iconLight: baseSepoliaIconLight,
-	iconDark: baseSepoliaIconDark,
+	iconLight: polygonAmoyIconLight,
+	iconDark: polygonAmoyIconDark,
 	explorerUrl: POLYGON_AMOY_EXPLORER_URL,
 	providers: {
 		infura: 'matic-amoy',
