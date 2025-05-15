@@ -5,10 +5,16 @@
 	import { last } from '$lib/utils/array.utils';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
+	import type { Snippet } from 'svelte';
 
-	export let token: Token;
+	interface Props {
+		token: Token;
+		children?: Snippet;
+	}
 
-	let disableInfiniteScroll = false;
+	let { token, children }: Props = $props();
+
+	let disableInfiniteScroll = $state(false);
 
 	const onIntersect = async () => {
 		const lastSignature = last($solTransactions)?.signature;
@@ -26,6 +32,6 @@
 	};
 </script>
 
-<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
-	<slot />
+<InfiniteScroll {onIntersect} disabled={disableInfiniteScroll}>
+	{@render children?.()}
 </InfiniteScroll>

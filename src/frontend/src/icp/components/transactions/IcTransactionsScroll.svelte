@@ -47,6 +47,6 @@
 	};
 </script>
 
-<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
+<InfiniteScroll {onIntersect} disabled={disableInfiniteScroll}>
 	{@render children?.()}
 </InfiniteScroll>
