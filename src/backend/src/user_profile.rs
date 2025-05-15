@@ -47,7 +47,7 @@ pub fn add_credential(
     credential_type: &CredentialType,
     issuer: String,
     user_profile_model: &mut UserProfileModel,
-) -> AddUserCredentialResult {
+) -> Result<(), AddUserCredentialError>  {
     if let Ok(user_profile) = find_profile(principal, user_profile_model) {
         let now = time();
         if let Ok(new_profile) =
@@ -61,7 +61,6 @@ pub fn add_credential(
     } else {
         Err(AddUserCredentialError::UserNotFound)
     }
-    .into()
 }
 
 /// Updates the user's network settings, merging with any existing settings.
