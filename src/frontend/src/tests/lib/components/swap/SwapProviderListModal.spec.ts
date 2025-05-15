@@ -128,7 +128,7 @@ describe('SwapProviderListModal', () => {
 		const context = new Map();
 		context.set(SWAP_CONTEXT_KEY, {
 			destinationToken: readable(mockValidIcToken),
-			destinationTokenExchangeRate: derived(mockExchanges, ($ex) => $ex?.[tokenId]?.usd)
+			destinationTokenExchangeRate: derived(mockExchanges, ($exchange) => $exchange?.[tokenId]?.usd)
 		});
 		context.set(SWAP_AMOUNTS_CONTEXT_KEY, {
 			store: readable({
