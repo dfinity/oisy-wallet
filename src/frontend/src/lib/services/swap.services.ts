@@ -154,13 +154,17 @@ export const fetchSwapAmounts = async ({
 				return acc;
 			}
 
+			let mapped: SwapMappedResult | undefined;
+
 			if (provider.key === SwapProvider.KONG_SWAP) {
 				const swap = result.value as SwapAmountsReply;
-				const mapped = provider.mapQuoteResult({ swap, tokens });
-				acc.push(mapped);
+				mapped = provider.mapQuoteResult({ swap, tokens });
 			} else if (provider.key === SwapProvider.ICP_SWAP) {
 				const swap = result.value as ICPSwapResult;
-				const mapped = provider.mapQuoteResult({ swap, slippage });
+				mapped = provider.mapQuoteResult({ swap, slippage });
+			}
+
+			if (mapped && Number(mapped.receiveAmount) > 0) {
 				acc.push(mapped);
 			}
 
