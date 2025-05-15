@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
 	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
-	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import {
 		ADDRESS_BOOK_ADD_CONTACT_BUTTON,
 		ADDRESS_BOOK_SEARCH_CONTACT_INPUT
