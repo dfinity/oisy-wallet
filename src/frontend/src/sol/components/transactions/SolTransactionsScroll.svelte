@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		token: Token;
