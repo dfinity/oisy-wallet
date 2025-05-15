@@ -192,16 +192,18 @@ export const idlFactory = ({ IDL }) => {
 	const Contact = IDL.Record({
 		id: IDL.Text,
 		name: IDL.Text,
+		update_timestamp: IDL.Nat64,
 		addresses: IDL.Vec(ContactAddressData)
 	});
-	const AddContactRequest = IDL.Record({ contact: Contact });
+	const CreateContactRequest = IDL.Record({
+		contact: Contact,
+		update_timestamp: IDL.Nat64
+	});
 	const ContactError = IDL.Variant({
 		InvalidContactData: IDL.Null,
-		ContactNotFound: IDL.Null,
-		ContactIdAlreadyExists: IDL.Null,
-		ContactNameAlreadyExists: IDL.Null
+		ContactNotFound: IDL.Null
 	});
-	const Result_5 = IDL.Variant({ Ok: IDL.Null, Err: ContactError });
+	const Result_5 = IDL.Variant({ Ok: IDL.Text, Err: ContactError });
 	const CreateChallengeResponse = IDL.Record({
 		difficulty: IDL.Nat32,
 		start_timestamp_ms: IDL.Nat64,
@@ -262,12 +264,13 @@ export const idlFactory = ({ IDL }) => {
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
 	});
+	const Result_7 = IDL.Variant({ Ok: IDL.Null, Err: ContactError });
 	const GetAllowedCyclesResponse = IDL.Record({ allowed_cycles: IDL.Nat });
 	const GetAllowedCyclesError = IDL.Variant({
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
-	const Result_7 = IDL.Variant({
+	const Result_8 = IDL.Variant({
 		Ok: GetAllowedCyclesResponse,
 		Err: GetAllowedCyclesError
 	});
@@ -294,7 +297,7 @@ export const idlFactory = ({ IDL }) => {
 		idle_cycles_burned_per_day: IDL.Nat,
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
-	const Result_8 = IDL.Variant({ Ok: Contact, Err: ContactError });
+	const Result_9 = IDL.Variant({ Ok: Contact, Err: ContactError });
 	const TransactionType = IDL.Variant({
 		Send: IDL.Null,
 		Receive: IDL.Null
@@ -398,7 +401,7 @@ export const idlFactory = ({ IDL }) => {
 		timestamp: IDL.Opt(IDL.Nat64)
 	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
-	const Result_9 = IDL.Variant({
+	const Result_10 = IDL.Variant({
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
@@ -453,7 +456,7 @@ export const idlFactory = ({ IDL }) => {
 		VersionMismatch: IDL.Null,
 		UserNotFound: IDL.Null
 	});
-	const Result_10 = IDL.Variant({
+	const Result_11 = IDL.Variant({
 		Ok: IDL.Null,
 		Err: SaveTestnetsSettingsError
 	});
@@ -484,7 +487,7 @@ export const idlFactory = ({ IDL }) => {
 			available: IDL.Nat
 		})
 	});
-	const Result_11 = IDL.Variant({
+	const TopUpCyclesLedgerResult = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
@@ -500,20 +503,20 @@ export const idlFactory = ({ IDL }) => {
 		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_3], []),
 		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_4], []),
 		config: IDL.Func([], [Config], ['query']),
-		create_contact: IDL.Func([AddContactRequest], [Result_5], []),
+		create_contact: IDL.Func([CreateContactRequest], [Result_5], []),
 		create_pow_challenge: IDL.Func([], [Result_6], []),
 		create_user_profile: IDL.Func([], [UserProfile], []),
-		delete_contact: IDL.Func([IDL.Text], [Result_5], []),
+		delete_contact: IDL.Func([IDL.Text], [Result_7], []),
 		get_account_creation_timestamps: IDL.Func(
 			[],
 			[IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64))],
 			['query']
 		),
-		get_allowed_cycles: IDL.Func([], [Result_7], []),
+		get_allowed_cycles: IDL.Func([], [Result_8], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-		get_contact_by_id: IDL.Func([IDL.Text], [Result_8], ['query']),
+		get_contact_by_id: IDL.Func([IDL.Text], [Result_9], ['query']),
 		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)], ['query']),
-		get_user_profile: IDL.Func([], [Result_9], ['query']),
+		get_user_profile: IDL.Func([], [Result_10], ['query']),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_contacts: IDL.Func([], [IDL.Vec(Contact)], ['query']),
@@ -524,12 +527,16 @@ export const idlFactory = ({ IDL }) => {
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_snapshot: IDL.Func([UserSnapshot], [], []),
-		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_10], []),
+		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_11], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats], ['query']),
-		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_11], []),
-		update_existing_contact: IDL.Func([AddContactRequest], [Result_5], []),
-		update_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_10], [])
+		top_up_cycles_ledger: IDL.Func(
+			[IDL.Opt(TopUpCyclesLedgerRequest)],
+			[TopUpCyclesLedgerResult],
+			[]
+		),
+		update_contact: IDL.Func([CreateContactRequest], [Result_7], []),
+		update_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_11], [])
 	});
 };
 // @ts-ignore

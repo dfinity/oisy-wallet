@@ -28,7 +28,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{AddContactRequest, Contact, ContactError},
+        contact::{Contact, ContactError, CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{
@@ -56,8 +56,8 @@ use shared::{
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
-    Candid, ConfigCell, ContactMap, CustomTokenMap, StoredPrincipal, UserProfileMap,
-    UserProfileUpdatedMap, UserTokenMap,
+    Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
+    UserTokenMap,
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
@@ -94,7 +94,6 @@ const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
-const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -110,7 +109,6 @@ thread_local! {
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
-            contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
         })
     );
 }
@@ -148,8 +146,6 @@ pub struct State {
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
     pow_challenge: PowChallengeMap,
-    #[allow(dead_code)]
-    contact: ContactMap,
 }
 
 fn set_config(arg: InitArg) {
@@ -180,7 +176,7 @@ async fn hourly_housekeeping_tasks() {
     // Tops up the account on the cycles ledger
     {
         let result = top_up_cycles_ledger(None).await;
-        if let Err(err) = result {
+        if let TopUpCyclesLedgerResult::Err(err) = result {
             eprintln!("Failed to top up cycles ledger: {err:?}");
         }
         // TODO: Add monitoring for how many cycles have been topped up and whether topping up is
@@ -842,15 +838,16 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
+///
+/// # Returns
+/// The ID of the created contact on success.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn create_contact(request: AddContactRequest) -> Result<(), ContactError> {
-    // Check if contact ID is provided
-    if request.contact.id.trim().is_empty() {
-        return Err(ContactError::InvalidContactData);
-    }
-
-    // Return success
-    Ok(())
+pub fn create_contact(_request: CreateContactRequest) -> Result<String, ContactError> {
+    let principal = ic_cdk::caller();
+    let now_nanos = time();
+    // Create a unique ID by combining a prefix, the caller's principal and the timestamp
+    let contact_id = format!("contact_{}_{}", principal.to_string(), now_nanos);
+    Ok(contact_id)
 }
 
 /// Updates an existing contact for the caller.
@@ -858,12 +855,11 @@ pub fn create_contact(request: AddContactRequest) -> Result<(), ContactError> {
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn update_existing_contact(request: AddContactRequest) -> Result<(), ContactError> {
+pub fn update_contact(request: UpdateContactRequest) -> Result<(), ContactError> {
     // Check if contact ID is provided
     if request.contact.id.trim().is_empty() {
         return Err(ContactError::InvalidContactData);
     }
-
     // Return success
     Ok(())
 }
@@ -889,6 +885,7 @@ pub fn get_contact_by_id(contact_id: String) -> Result<Contact, ContactError> {
         id: contact_id,
         name: String::new(),
         addresses: Vec::new(),
+        update_timestamp: 0,
     })
 }
 
