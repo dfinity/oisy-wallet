@@ -31,17 +31,11 @@ WASM_FILE="${WASM_FILE_GZ%.gz}"
 ARG_FILE="$(jq -r .canisters.icp_swap_factory.init_arg_file dfx.json)"
 
 download() {
-  local asset asset_url asset_file response
+  local asset asset_url asset_file
   asset="$1"
   asset_url="${asset^^}_URL"
   asset_file="${asset^^}_FILE"
-  if test -e "${!asset_file}" && read -r -p "Overwrite existing ${!asset_file}? [y/N] " response && [[ "${response,,}" != y* ]]; then
-    echo "Using existing ICP Swap Factory $asset file."
-  else
-    echo "Downloading ${!asset_url} --> ${!asset_file}"
-    mkdir -p "$(dirname "${!asset_file}")"
-    curl -sSL "${!asset_url}" >"${!asset_file}"
-  fi
+  scripts/download-immutable.sh "${!asset_url}" "${!asset_file}"
 }
 
 # Download candid and wasm
