@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { Input } from '@dfinity/gix-components';
+  import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
   import IconSearch from '$lib/components/icons/IconSearch.svelte';
+  import { IconClose } from '@dfinity/gix-components';
   import { ADDRESS_BOOK_SEARCH_CONTACT_INPUT } from '$lib/constants/test-ids.constants';
+  import { i18n } from '$lib/stores/i18n.store';
 
   export let onSearchChange: (value: string) => void;
   let search = '';
@@ -9,19 +11,21 @@
   $: onSearchChange(search);
 </script>
 
-<div class="relative w-full my-4">
-  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-    <IconSearch class="text-gray-500" />
-  </div>
-
-  <Input
+  <InputTextWithAction
     name="search"
-    inputType="text"
-    placeholder="Search contact"
+    placeholder={$i18n.address_book.text.search_contact}
     bind:value={search}
     testId={ADDRESS_BOOK_SEARCH_CONTACT_INPUT}
-    spellcheck={false}
-    autocomplete="off"
-    class="pl-10 w-full"
-  />
-</div>
+    autofocus={true}
+  >
+    <svelte:fragment slot="inner-end">
+      {#if search}
+        <button on:click={() => (search = '')} aria-label={$i18n.core.text.clear_filter}>
+          <IconClose />
+        </button>
+      {:else}
+        <IconSearch />
+      {/if}
+    </svelte:fragment>
+  </InputTextWithAction>
+

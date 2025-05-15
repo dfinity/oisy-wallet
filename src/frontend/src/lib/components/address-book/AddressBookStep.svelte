@@ -29,7 +29,7 @@
 	{#if contacts.length === 0}
 		<EmptyAddressBook onAddContact={addContact}></EmptyAddressBook>
 	{:else}
-		<div class="flex">
+		<!-- <div class="flex">
 			<Button
 				colorStyle="secondary-light"
 				on:click={() => addContact()}
@@ -38,14 +38,30 @@
 				<IconPlus></IconPlus>
 				{$i18n.address_book.text.add_contact}
 			</Button>
+		</div> -->
+		<div class="flex gap-2 w-full">
+			<div class="w-3/5">
+				<SearchContact onSearchChange={handleSearch} />
+			</div>
+			<div class="w-2/5 flex justify-end pt-1">
+				<Button
+					colorStyle="secondary-light"
+					on:click={() => addContact()}
+					testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
+					styleClass="w-full h-full flex items-center justify-center gap-2 rounded-[12px]"
+					>
+					<IconPlus />
+					{$i18n.address_book.text.add_contact}
+				</Button>
+			</div>
 		</div>
+		
 
 		<div class="flex flex-col gap-2 py-6">
 			<!-- 
 			TODO: Add contact cards here
 			https://github.com/dfinity/oisy-wallet/pull/6243
 			-->
-			<SearchContact onSearchChange={handleSearch} />
 			{#if filteredContacts.length > 0}
 			  {#each filteredContacts as contact, index (index)}
 				<div class="flex items-center border-b">
