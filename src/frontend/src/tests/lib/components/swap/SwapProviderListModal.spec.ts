@@ -1,11 +1,13 @@
 import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
+import * as ExchangeDerived from '$lib/derived/exchange.derived';
 import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import type { ExchangesData } from '$lib/types/exchange';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { queryAllByTestId, render } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { readable, writable } from 'svelte/store';
+import { derived, readable, writable } from 'svelte/store';
 
 vi.mock('$env/dapp-descriptions.env', () => ({
 	dAppDescriptions: [
@@ -114,5 +116,39 @@ describe('SwapProviderListModal', () => {
 		await tick();
 
 		expect(queryAllByTestId(container, 'provider-item')).toHaveLength(0);
+	});
+
+	it('updates when exchanges store changes', async () => {
+		const tokenId = mockValidIcToken.id;
+		const mockExchanges = writable<ExchangesData>({
+			[tokenId]: { usd: 2 }
+		});
+		vi.spyOn(ExchangeDerived, 'exchanges', 'get').mockReturnValue(mockExchanges);
+
+		const context = new Map();
+		context.set(SWAP_CONTEXT_KEY, {
+			destinationToken: readable(mockValidIcToken),
+			destinationTokenExchangeRate: derived(mockExchanges, ($ex) => $ex?.[tokenId]?.usd)
+		});
+		context.set(SWAP_AMOUNTS_CONTEXT_KEY, {
+			store: readable({
+				swaps: mockSwapProviders,
+				amountForSwap: '1',
+				selectedProvider: mockSwapProviders[0]
+			})
+		});
+
+		const { getByText } = render(SwapProviderListModal, { context });
+
+		await tick();
+
+		expect(getByText('$20.00')).toBeInTheDocument();
+
+		mockExchanges.set({
+			[tokenId]: { usd: 3 }
+		});
+		await tick();
+
+		expect(getByText('$30.00')).toBeInTheDocument();
 	});
 });

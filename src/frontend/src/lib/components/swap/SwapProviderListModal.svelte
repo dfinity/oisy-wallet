@@ -26,19 +26,21 @@
 
 	const getUsdBalance = ({
 		amount,
-		token
+		token,
+		exchangeRate
 	}: {
 		amount: bigint;
 		token: IcTokenToggleable | undefined;
+		exchangeRate?: number;
 	}): string =>
 		formatUSD({
 			value:
-				nonNullish(amount) && nonNullish(token) && nonNullish($destinationTokenExchangeRate)
+				nonNullish(amount) && nonNullish(token) && nonNullish(exchangeRate)
 					? formatTokenBigintToNumber({
 							value: amount,
 							unitName: token.decimals,
 							displayDecimals: token.decimals
-						}) * $destinationTokenExchangeRate
+						}) * exchangeRate
 					: 0
 		});
 </script>
@@ -57,7 +59,11 @@
 						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
 						amount={swap.receiveAmount}
 						destinationToken={$destinationToken}
-						usdBalance={getUsdBalance({ amount: swap.receiveAmount, token: $destinationToken })}
+						usdBalance={getUsdBalance({
+							amount: swap.receiveAmount,
+							token: $destinationToken,
+							exchangeRate: $destinationTokenExchangeRate
+						})}
 						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
 					/>
 				</li>
