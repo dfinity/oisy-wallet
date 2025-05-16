@@ -848,6 +848,7 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 /// # Test
 /// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 #[update(guard = "caller_is_allowed")]
+#[must_use]
 pub fn create_contact(request: CreateContactRequest) -> CreateContactResult {
     // TODO replace mock data with contact service that returns Contact
     let contact = Contact {
