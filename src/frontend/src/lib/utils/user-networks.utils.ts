@@ -8,6 +8,10 @@ import {
 	BSC_TESTNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
+	POLYGON_AMOY_NETWORK_ID,
+	POLYGON_MAINNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.polygon.env';
+import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
@@ -54,6 +58,10 @@ const networkIdToKey = (networkId: NetworkId): NetworkSettingsFor | undefined =>
 			return { BscMainnet: null };
 		case BSC_TESTNET_NETWORK_ID:
 			return { BscTestnet: null };
+		case POLYGON_MAINNET_NETWORK_ID:
+			return { PolygonMainnet: null };
+		case POLYGON_AMOY_NETWORK_ID:
+			return { PolygonAmoy: null };
 		default:
 			// We just print the error to console and ignore the missing network, for the sake of the user's experience.
 			console.warn(`Unknown networkId: ${networkId.description}`);
