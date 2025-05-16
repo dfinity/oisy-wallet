@@ -199,3 +199,5 @@ export const CONVERT_AMOUNT_DISPLAY_VALUE = 'convert-amount-display-value';
 export const CONVERT_AMOUNT_DISPLAY_SKELETON = 'convert-amount-display-skeleton';
 export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
+
+export const SEND_FEE_INFO = 'send-fee-info';
