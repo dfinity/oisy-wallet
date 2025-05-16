@@ -33,7 +33,7 @@ import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const fetchKongSwap = async ({
+export const swap = async ({
 	identity,
 	progress,
 	sourceToken,
