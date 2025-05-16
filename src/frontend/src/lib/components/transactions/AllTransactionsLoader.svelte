@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { isNullish , nonNullish } from '@dfinity/utils';
-	import { type Snippet , onMount, type Snippet } from 'svelte';
-			import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { type Snippet, onMount, type Snippet } from 'svelte';
+	import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
