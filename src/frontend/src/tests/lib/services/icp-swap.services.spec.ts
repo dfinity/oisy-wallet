@@ -9,10 +9,8 @@ import { fetchIcpSwap } from '$lib/services/swap.services';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@dfinity/principal';
-
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcrc } from '$icp/services/ic-send.services';
-
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import { setCustomToken } from '$lib/api/backend.api';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';

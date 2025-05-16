@@ -189,8 +189,11 @@ export const fetchIcpSwap = async ({
 	});
 
 	const { ledgerCanisterId: sourceLedgerCanisterId, standard: sourceStandard } = sourceToken;
-	const { ledgerCanisterId: destinationLedgerCanisterId, standard: destinationStandard } =
-		destinationToken;
+	const {
+		ledgerCanisterId: destinationLedgerCanisterId,
+		standard: destinationStandard,
+		fee: destinationTokenFee
+	} = destinationToken;
 
 	const pool = await getPoolCanister({
 		identity,
@@ -204,6 +207,8 @@ export const fetchIcpSwap = async ({
 		throw new Error(get(i18n).swap.error.pool_not_found);
 	}
 
+	const poolCanisterId = pool.canisterId.toString();
+
 	const slippageMinimum = calculateSlippage({
 		quoteAmount: receiveAmount,
 		slippagePercentage: Number(slippageValue)
@@ -213,8 +218,8 @@ export const fetchIcpSwap = async ({
 		identity,
 		token: sourceToken,
 		amount: parsedSwapAmount,
-		to: pool.canisterId.toString(),
-		ledgerCanisterId: sourceToken.ledgerCanisterId
+		to: poolCanisterId,
+		ledgerCanisterId: sourceLedgerCanisterId
 	};
 
 	try {
@@ -222,15 +227,15 @@ export const fetchIcpSwap = async ({
 			await sendIcrc(transferParams);
 			await deposit({
 				identity,
-				canisterId: pool.canisterId.toString(),
-				token: sourceToken.ledgerCanisterId,
+				canisterId: poolCanisterId,
+				token: sourceLedgerCanisterId,
 				amount: parsedSwapAmount,
 				fee: sourceTokenFee
 			});
 		} else {
 			await approve({
 				identity,
-				ledgerCanisterId: sourceToken.ledgerCanisterId,
+				ledgerCanisterId: sourceLedgerCanisterId,
 				// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
 				amount: parsedSwapAmount + sourceTokenFee * 2n,
 				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
@@ -240,8 +245,8 @@ export const fetchIcpSwap = async ({
 
 			await depositFrom({
 				identity,
-				canisterId: pool.canisterId.toString(),
-				token: sourceToken.ledgerCanisterId,
+				canisterId: poolCanisterId,
+				token: sourceLedgerCanisterId,
 				amount: parsedSwapAmount,
 				fee: sourceTokenFee
 			});
@@ -255,9 +260,9 @@ export const fetchIcpSwap = async ({
 		// Perform the actual token swap after a successful deposit
 		await swapIcp({
 			identity,
-			canisterId: pool.canisterId.toString(),
+			canisterId: poolCanisterId,
 			amountIn: parsedSwapAmount.toString(),
-			zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId,
+			zeroForOne: pool.token0.address === sourceLedgerCanisterId,
 			amountOutMinimum: slippageMinimum.toString()
 		});
 	} catch (err: unknown) {
@@ -267,8 +272,8 @@ export const fetchIcpSwap = async ({
 			// If the swap fails, attempt to refund the user's original tokens
 			await withdraw({
 				identity,
-				canisterId: pool.canisterId.toString(),
-				token: sourceToken.ledgerCanisterId,
+				canisterId: poolCanisterId,
+				token: sourceLedgerCanisterId,
 				amount: parsedSwapAmount,
 				fee: sourceTokenFee
 			});
@@ -285,10 +290,10 @@ export const fetchIcpSwap = async ({
 		// Withdraw the swapped destination tokens from the pool
 		await withdraw({
 			identity,
-			canisterId: pool.canisterId.toString(),
-			token: destinationToken.ledgerCanisterId,
+			canisterId: poolCanisterId,
+			token: destinationLedgerCanisterId,
 			amount: receiveAmount,
-			fee: destinationToken.fee
+			fee: destinationTokenFee
 		});
 	} catch (err: unknown) {
 		console.error(err);
