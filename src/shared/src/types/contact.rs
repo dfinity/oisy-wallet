@@ -5,7 +5,7 @@ use super::account::TokenAccountId;
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(remote = "Self")]
 pub struct Contact {
-    pub id: String,
+    pub id: u64,
     pub name: String,
     pub addresses: Vec<ContactAddressData>,
     pub update_timestamp: u64,
@@ -21,27 +21,21 @@ pub struct ContactAddressData {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct StoredContacts {
     pub contacts: Vec<Contact>,
-    pub last_updated: u64,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(remote = "Self")]
-pub struct CreateContactRequest {
-    pub contact: Contact,
     pub update_timestamp: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(remote = "Self")]
-pub struct RemoveContactRequest {
-    pub contact_id: String,
-    pub address_to_remove: TokenAccountId,
+pub struct CreateContactRequest {
+    pub name: String,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(remote = "Self")]
 pub struct UpdateContactRequest {
-    pub contact: Contact,
+    pub id: u64,
+    pub name: String,
+    pub addresses: Vec<ContactAddressData>,
     pub update_timestamp: u64,
 }
 

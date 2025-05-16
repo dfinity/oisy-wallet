@@ -14,8 +14,11 @@ use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
 };
+use shared::types::account::{EthAddress, TokenAccountId};
+
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use serde_bytes::ByteBuf;
+use shared::types::contact::ContactAddressData;
 use shared::{
     http::{HttpRequest, HttpResponse},
     metrics::get_metrics,
@@ -842,12 +845,16 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 /// # Returns
 /// The ID of the created contact on success.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn create_contact(_request: CreateContactRequest) -> Result<String, ContactError> {
-    let principal = ic_cdk::caller();
-    let now_nanos = time();
-    // Create a unique ID by combining a prefix, the caller's principal and the timestamp
-    let contact_id = format!("contact_{}_{}", principal.to_string(), now_nanos);
-    Ok(contact_id)
+pub fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
+    // TODO replace mock data with contact service that returns Contact
+    let contact = Contact {
+        id: time(),
+        name: request.name,
+        addresses: vec![],
+        update_timestamp: time(),
+    };
+
+    Ok(contact)
 }
 
 /// Updates an existing contact for the caller.
@@ -855,13 +862,16 @@ pub fn create_contact(_request: CreateContactRequest) -> Result<String, ContactE
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn update_contact(request: UpdateContactRequest) -> Result<(), ContactError> {
-    // Check if contact ID is provided
-    if request.contact.id.trim().is_empty() {
-        return Err(ContactError::InvalidContactData);
-    }
-    // Return success
-    Ok(())
+pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactError> {
+    // TODO replace mock data with data from contact service
+    let contact = Contact {
+        id: request.id,
+        name: request.name,
+        addresses: request.addresses,
+        update_timestamp: time(),
+    };
+
+    Ok(contact)
 }
 
 /// Deletes a contact for the caller.
@@ -869,9 +879,9 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<(), ContactError>
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn delete_contact(_contact_id: String) -> Result<(), ContactError> {
-    // Always return OK
-    Ok(())
+pub fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
+    // TODO intergrate delete contact service
+    Ok(contact_id)
 }
 
 /// Gets a contact by ID for the caller.
@@ -879,22 +889,39 @@ pub fn delete_contact(_contact_id: String) -> Result<(), ContactError> {
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
 #[query(guard = "caller_is_not_anonymous")]
-pub fn get_contact_by_id(contact_id: String) -> Result<Contact, ContactError> {
-    // Return an empty Contact structure
+pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
+    // TODO replace mock data with the get contact service
     Ok(Contact {
         id: contact_id,
-        name: String::new(),
-        addresses: Vec::new(),
-        update_timestamp: 0,
+        name: "John Doe".to_string(),
+        addresses: vec![ContactAddressData {
+            token_account_id: TokenAccountId::Eth(EthAddress::Public(
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".to_string(),
+            )),
+            label: Some("ETH Wallet".to_string()),
+        }],
+        update_timestamp: time(),
     })
 }
 
 /// Lists all contacts for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
 #[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn list_contacts() -> Vec<Contact> {
-    // Empty structure: Return an empty vector
-    Vec::new()
+pub fn get_contacts() -> Result<Vec<Contact>, ContactError> {
+    // TODO replace mock data with the get contacts service
+    Ok(vec![Contact {
+        id: time(),
+        name: "John Doe".to_string(),
+        addresses: vec![ContactAddressData {
+            token_account_id: TokenAccountId::Eth(EthAddress::Public(
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".to_string(),
+            )),
+            label: Some("ETH Wallet".to_string()),
+        }],
+        update_timestamp: time(),
+    }])
 }
 
 export_candid!();
