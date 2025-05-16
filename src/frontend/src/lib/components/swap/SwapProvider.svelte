@@ -18,7 +18,7 @@
 	import { SwapProvider } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
-	
+
 	interface Props {
 		showSelectButton?: boolean;
 	}
