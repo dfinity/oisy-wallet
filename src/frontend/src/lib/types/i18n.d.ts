@@ -571,6 +571,10 @@ interface I18nSwap {
 		unexpected: string;
 		unexpected_missing_data: string;
 		slippage_exceeded: string;
+		pool_not_found: string;
+		deposit_error: string;
+		withdraw_failed: string;
+		swap_failed_withdraw_success: string;
 	};
 }
 
