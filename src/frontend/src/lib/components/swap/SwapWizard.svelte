@@ -20,7 +20,7 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { swap as swapService } from '$lib/services/swap.services';
+	import { swapService } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -76,7 +76,8 @@
 			isNullish(slippageValue) ||
 			isNullish(swapAmount) ||
 			isNullish(sourceTokenFee) ||
-			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount) ||
+			isNullish($swapAmountsStore?.selectedProvider?.provider)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -89,7 +90,7 @@
 		try {
 			failedSwapError.set(undefined);
 
-			await swapService({
+			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
 				progress,
 				sourceToken: $sourceToken,
@@ -108,7 +109,7 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: 'KONG'
+					dApp: $swapAmountsStore.selectedProvider.provider
 				}
 			});
 
@@ -154,7 +155,7 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: 'KONG'
+					dApp: $swapAmountsStore.selectedProvider.provider
 				}
 			});
 
