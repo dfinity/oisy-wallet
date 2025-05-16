@@ -42,7 +42,7 @@ use shared::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
-        result_types::AddUserCredentialResult,
+        result_types::{AddUserCredentialResult, CreateContactResult},
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
@@ -843,9 +843,12 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 /// Errors are enumerated by: `ContactError`.
 ///
 /// # Returns
-/// The ID of the created contact on success.
+/// The created contact on success.
+///
+/// # Test
+/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 #[update(guard = "caller_is_allowed")]
-pub fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
+pub fn create_contact(request: CreateContactRequest) -> CreateContactResult {
     // TODO replace mock data with contact service that returns Contact
     let contact = Contact {
         id: time(),
@@ -854,7 +857,7 @@ pub fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactE
         update_timestamp: time(),
     };
 
-    Ok(contact)
+    CreateContactResult::Ok(contact)
 }
 
 /// Updates an existing contact for the caller.
