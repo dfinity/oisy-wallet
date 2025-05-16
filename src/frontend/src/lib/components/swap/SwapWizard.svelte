@@ -117,11 +117,29 @@
 			const errorDetail = errorDetailToString(err);
 
 			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
-				failedSwapError.set(
-					replacePlaceholders(replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded), {
-						$maxSlippage: slippageValue.toString()
-					})
-				);
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
+						{
+							$maxSlippage: slippageValue.toString()
+						}
+					),
+					variant: 'info'
+				});
+			} else if (
+				nonNullish(errorDetail) &&
+				errorDetail.startsWith('Swap failed and withdraw also failed')
+			) {
+				failedSwapError.set({
+					message: errorDetail,
+					variant: 'error',
+					url: {
+						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+						text: 'icpswap.com'
+					}
+				});
+			} else if (errorDetail && errorDetail.startsWith('Swap failed.')) {
+				failedSwapError.set({ message: errorDetail, variant: 'error' });
 			} else {
 				failedSwapError.set(undefined);
 

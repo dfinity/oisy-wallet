@@ -14,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import ExternalLink from '../ui/ExternalLink.svelte';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -65,8 +66,13 @@
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
-			<MessageBox>
-				{$failedSwapError}
+			<MessageBox level={$failedSwapError.variant}>
+				{$failedSwapError.message}
+				{#if nonNullish($failedSwapError?.url)}
+					<ExternalLink href={$failedSwapError.url.url} ariaLabel={$i18n.swap.text.open_icp_swap}
+						>{$failedSwapError.url.text}</ExternalLink
+					>
+				{/if}
 			</MessageBox>
 		</div>
 	{/if}
