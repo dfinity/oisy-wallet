@@ -397,7 +397,7 @@ This process will generate new bindings. Once generated, the mapping of user net
 
 ### Include Networks to EVM List
 
-The list `SUPPORTED_<network>_NETWORKS` created in the first step needs to be included in the list of EVM networks that is `SUPPORTED_EVM_NETWORKS`, in file `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`. 
+The list `SUPPORTED_<network>_NETWORKS` created in the first step needs to be included in the list of EVM networks that is `SUPPORTED_EVM_NETWORKS`, in file `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`.
 
 ### Define Polygon Default token
 
@@ -455,8 +455,7 @@ export const enabledEvmNetworks: Readable<EthereumNetwork[]> = derived(
 		...$enabledPolygonNetworks
 	]
 );
-````
-
+```
 
 ### Create Derived Stores for Enabled Tokens
 
@@ -489,7 +488,7 @@ export const enabledEvmTokens: Readable<RequiredToken[]> = derived(
 		...$enabledPolygonTokens
 	]
 );
-````
+```
 
 ### Create Derived Stores for Enabled Networks
 
@@ -510,7 +509,6 @@ export const enabledPolygonNetworks: Readable<EthereumNetwork[]> = derived(
 		})
 );
 ```
-
 
 ### Set Custom Hero Color Palette
 
