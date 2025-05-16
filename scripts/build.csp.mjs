@@ -151,7 +151,11 @@ const updateCSP = (indexHtml) => {
 		'wss://bnb-mainnet.g.alchemy.com https://bnb-mainnet.g.alchemy.com https://bsc-mainnet.infura.io';
 	const bnbTestnetConnectSrc =
 		'wss://bnb-testnet.g.alchemy.com https://bnb-testnet.g.alchemy.com https://bsc-testnet.infura.io';
-	const evmConnectSrc = `${baseMainnetConnectSrc} ${baseSepoliaConnectSrc} ${bnbMainnetConnectSrc} ${bnbTestnetConnectSrc}`;
+	const polygonMainnetConnectSrc =
+		'wss://polygon-mainnet.g.alchemy.com https://polygon-mainnet.g.alchemy.com https://polygon-mainnet.infura.io';
+	const polygonAmoyConnectSrc =
+		'wss://polygon-amoy.g.alchemy.com https://polygon-amoy.g.alchemy.com https://polygon-amoy.infura.io';
+	const evmConnectSrc = `${baseMainnetConnectSrc} ${baseSepoliaConnectSrc} ${bnbMainnetConnectSrc} ${bnbTestnetConnectSrc} ${polygonMainnetConnectSrc} ${polygonAmoyConnectSrc}`;
 
 	const infuraConnectSrc = 'https://gas.api.infura.io';
 
