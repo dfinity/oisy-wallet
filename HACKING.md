@@ -297,7 +297,7 @@ Below a summary of how to add a new EVM network (sidechains or layer-2).
 - The third-party providers must support the new network: [Alchemy](https://www.alchemy.com/), [Infura](https://www.infura.io/), and [Etherscan](https://docs.etherscan.io/etherscan-v2).
 - Verify that the network is already integrated by the [`ethers` library](https://github.com/ethers-io/ethers.js) in the previous providers, or open a request for it.
 
-### Create Networks Objects
+### Create Network Object(s)
 
 Under the `src/frontend/src/env/networks/networks-evm` folder, create a new file named `networks.<network>.env.ts`.
 Copy the content of `networks.<network>.env.ts` from another EVM network.
@@ -342,7 +342,7 @@ If there are testnets, create a similar object for each one.
 
 Finally, make sure that the objects `SUPPORTED_<network>_NETWORKS` and `SUPPORTED_<network>_NETWORK_IDS` exist and are accordingly updated, at the end of the file.
 
-### Create Native Tokens Objects
+### Create Native Token Object(s)
 
 Under the `src/frontend/src/env/tokens/tokens-evm` folder, create a new folder named `tokens-<network>`.
 Inside it, create a new file named `tokens.<token>.env.ts` and copy the content of `tokens.<token>.env.ts` from another EVM network.
@@ -384,7 +384,7 @@ If there are testnet tokens, create a similar object for each one.
 
 Finally, make sure that the object `SUPPORTED_<network>_TOKENS` exists and is accordingly updated, at the end of the file.
 
-### Add the Network Variant to the Backend
+### Add Network Variant(s) to the Backend
 
 In file `src/shared/src/types/network.ts`, add the network(s) variant to the `NetworkSettingsFor` enum, similar to the existing ones.
 
@@ -396,6 +396,35 @@ This process will generate new bindings. Once generated, the mapping of user net
 2. Sub-function `networkIdToKey` of util `mapUserNetworks` needs to map the new network ID(s) to the respective network variant(s), similar to the existing ones.
 
 ### WIP
+
+### Define Polygon Default token
+
+Each network should have a default token as fallback. To define one for EVM networks the following is required:
+
+- Util function to check if a Network ID is a valid ID for the new network, in file `src/frontend/src/lib/utils/network.utils.ts`. For example:
+
+```typescript
+export const isNetworkIdBase: IsNetworkIdUtil = (id) =>
+  nonNullish(id) && SUPPORTED_BASE_NETWORK_IDS.includes(id);
+```
+
+- Derived store to verify that the current network is the new network, in file `src/frontend/src/lib/derived/network.derived.ts`. For example:
+
+```typescript
+export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdBase($networkId)
+);
+```
+
+- The default token definition for the new network, in file `src/frontend/src/lib/constants/tokens.constants.ts`. For example:
+
+```typescript
+export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
+```
+
+### Set Custom Hero Color Palette
+
+TODO
 
 ### Optional
 
