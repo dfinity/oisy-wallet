@@ -1,3 +1,4 @@
+import type { TokenId } from '$lib/types/token';
 import { writable, type Readable, type Writable } from 'svelte/store';
 
 export type FeeStoreData = bigint | undefined;
@@ -23,6 +24,7 @@ export interface FeeContext {
 	ataFeeStore: FeeStore;
 	feeSymbolStore: Writable<string | undefined>;
 	feeDecimalsStore: Writable<number | undefined>;
+	feeTokenIdStore: Writable<TokenId | undefined>;
 }
 
 export const initFeeContext = (params: FeeContext): FeeContext => params;
