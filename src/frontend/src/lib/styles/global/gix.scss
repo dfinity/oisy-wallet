@@ -88,6 +88,7 @@
 
 	--backdrop-contrast: var(--color-foreground-primary-inverted);
 	--backdrop-filter: blur(4px);
+	--frosted-glass-blur: 3.22px;
 
 	@media (width >= theme(--breakpoint-sm)) {
 		--dialog-width: 560px;
@@ -395,4 +396,11 @@ div.select {
 div.error .toast {
 	--overlay-background: var(--color-background-error-light);
 	--overlay-background-contrast: var(--color-foreground-error-secondary);
+}
+
+.frosted-glass {
+	backdrop-filter: blur(var(--frosted-glass-blur));
+	-webkit-backdrop-filter: blur(var(--frosted-glass-blur));
+	border-radius: 16px;
+	overflow: hidden;
 }
