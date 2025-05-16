@@ -25,7 +25,13 @@ fn test_topup_cannot_be_called_if_not_controller() {
 
     let response = pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
 
-    assert_eq!(response, Err("Caller is not a controller.".to_string()));
+    assert_eq!(
+        response,
+        Err(
+            "Update call error. RejectionCode: CanisterReject, Error: Caller is not a controller."
+                .to_string()
+        )
+    );
 }
 
 #[test]
@@ -46,13 +52,12 @@ fn test_topup_fails_for_percentage_out_of_bounds() {
 
         assert_eq!(
             response,
-            Ok(Err(
-                TopUpCyclesLedgerError::InvalidArgPercentageOutOfRange {
-                    percentage,
-                    min: MIN_PERCENTAGE,
-                    max: MAX_PERCENTAGE
-                }
-            ))
+            Ok(Err(TopUpCyclesLedgerError::InvalidArgPercentageOutOfRange {
+                percentage,
+                min: MIN_PERCENTAGE,
+                max: MAX_PERCENTAGE
+            })
+            .into())
         );
     }
 }
@@ -97,7 +102,7 @@ fn test_get_allowed_cycles_requires_authenticated_user() {
 
     assert_eq!(
         response,
-        Err("Anonymous caller not authorized.".to_string())
+        Err("Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized.".to_string())
     );
 }
 

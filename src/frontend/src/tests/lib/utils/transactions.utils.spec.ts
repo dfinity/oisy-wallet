@@ -42,6 +42,7 @@ import type {
 import {
 	areTransactionsStoresLoading,
 	filterReceivedMicroTransactions,
+	findOldestTransaction,
 	getKnownDestinations,
 	getReceivedMicroTransactions,
 	isTransactionsStoreEmpty,
@@ -1087,10 +1088,13 @@ describe('transactions.utils', () => {
 
 	describe('getKnownDestinations', () => {
 		it('should correctly return a single known destinations', () => {
-			const icTransactionsUi = createMockIcTransactionsUi(7);
+			const icTransactionsUi = createMockIcTransactionsUi(7).map((transaction) => ({
+				...transaction,
+				token: ICP_TOKEN
+			}));
 			const expectedIcKnownDestinations = {
 				[icTransactionsUi[0].to as string]: {
-					amounts: icTransactionsUi.map(({ value }) => value),
+					amounts: icTransactionsUi.map(({ value, token }) => ({ value, token })),
 					timestamp: Number(icTransactionsUi[0].timestamp)
 				}
 			};
@@ -1099,19 +1103,23 @@ describe('transactions.utils', () => {
 		});
 
 		it('should correctly return multiple known destinations', () => {
-			const [icTransactionsUi1] = createMockIcTransactionsUi(1);
+			const icTransactionsUi1 = {
+				...createMockIcTransactionsUi(1)[0],
+				token: ICP_TOKEN
+			};
 			const icTransactionsUi2 = {
 				...createMockIcTransactionsUi(1)[0],
+				token: ICP_TOKEN,
 				to: icTransactionsUi1.from
 			};
 
 			expect(getKnownDestinations([icTransactionsUi1, icTransactionsUi2])).toEqual({
 				[icTransactionsUi1.to as string]: {
-					amounts: [icTransactionsUi1.value],
+					amounts: [{ value: icTransactionsUi1.value, token: icTransactionsUi1.token }],
 					timestamp: Number(icTransactionsUi1.timestamp)
 				},
 				[icTransactionsUi2.to as string]: {
-					amounts: [icTransactionsUi2.value],
+					amounts: [{ value: icTransactionsUi2.value, token: icTransactionsUi2.token }],
 					timestamp: Number(icTransactionsUi2.timestamp)
 				}
 			});
@@ -1122,16 +1130,17 @@ describe('transactions.utils', () => {
 			const btcTransactionsUi = {
 				...mockTransaction,
 				type: 'send' as BtcTransactionType,
-				to: [mockTransaction.to, mockTransaction.from] as string[]
+				to: [mockTransaction.to, mockTransaction.from] as string[],
+				token: BTC_MAINNET_TOKEN
 			};
 
 			expect(getKnownDestinations([btcTransactionsUi])).toEqual({
 				[btcTransactionsUi.to[0] as string]: {
-					amounts: [btcTransactionsUi.value],
+					amounts: [{ value: btcTransactionsUi.value, token: btcTransactionsUi.token }],
 					timestamp: Number(btcTransactionsUi.timestamp)
 				},
 				[btcTransactionsUi.to[1] as string]: {
-					amounts: [btcTransactionsUi.value],
+					amounts: [{ value: btcTransactionsUi.value, token: btcTransactionsUi.token }],
 					timestamp: Number(btcTransactionsUi.timestamp)
 				}
 			});
@@ -1141,12 +1150,13 @@ describe('transactions.utils', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(
 				({ timestamp, ...rest }, index) => ({
 					...rest,
-					timestamp: (timestamp ?? ZERO) + BigInt(index)
+					timestamp: (timestamp ?? ZERO) + BigInt(index),
+					token: ICP_TOKEN
 				})
 			);
 			const expectedIcKnownDestinations = {
 				[icTransactionsUi[0].to as string]: {
-					amounts: icTransactionsUi.map(({ value }) => value),
+					amounts: icTransactionsUi.map(({ value, token }) => ({ value, token })),
 					timestamp: Number(icTransactionsUi[icTransactionsUi.length - 1].timestamp)
 				}
 			};
@@ -1157,6 +1167,7 @@ describe('transactions.utils', () => {
 		it('should correctly return an empty array if all txs do not have values', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ value: _, ...rest }) => ({
 				...rest,
+				token: ICP_TOKEN,
 				value: undefined
 			}));
 
@@ -1166,6 +1177,7 @@ describe('transactions.utils', () => {
 		it('should correctly return an empty array if all txs have zero values', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ value: _, ...rest }) => ({
 				...rest,
+				token: ICP_TOKEN,
 				value: ZERO
 			}));
 
@@ -1175,10 +1187,77 @@ describe('transactions.utils', () => {
 		it('should correctly return an empty array if all txs are receive', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ type: _, ...rest }) => ({
 				...rest,
+				token: ICP_TOKEN,
 				type: 'receive' as IcTransactionType
 			}));
 
 			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+		});
+	});
+
+	describe('findOldestTransaction', () => {
+		const icTransactions: IcTransactionUi[] = createMockIcTransactionsUi(17).map(
+			(transaction, index) => ({
+				...transaction,
+				timestamp: 100n + BigInt(index)
+			})
+		);
+		const solTransactions: SolTransactionUi[] = createMockSolTransactionsUi(19).map(
+			(transaction, index) => ({
+				...transaction,
+				timestamp: 200n + BigInt(index)
+			})
+		);
+
+		const mockTransactions: (IcTransactionUi | SolTransactionUi)[] = [
+			...icTransactions,
+			...solTransactions
+		].sort(() => Math.random() - 0.5);
+
+		const [expectedOldestTransaction] = icTransactions;
+
+		it('should return undefined if no transactions are provided', () => {
+			expect(findOldestTransaction([])).toBeUndefined();
+		});
+
+		it('should return the oldest transaction', () => {
+			expect(findOldestTransaction(mockTransactions)).toStrictEqual(expectedOldestTransaction);
+		});
+
+		it('should return the first transaction in the list if they have the same timestamp', () => {
+			const newTransactions: IcTransactionUi[] = icTransactions.map((transaction) => ({
+				...transaction,
+				id: `${transaction.id}-new`
+			}));
+
+			expect(findOldestTransaction([...mockTransactions, ...newTransactions])).toStrictEqual(
+				expectedOldestTransaction
+			);
+		});
+
+		it('should handle mixed timestamp between number, bigint and undefined', () => {
+			const transactionsWithNumber: IcTransactionUi[] = createMockIcTransactionsUi(17).map(
+				(transaction, index) => ({
+					...transaction,
+					timestamp: 1n + BigInt(index)
+				})
+			);
+			const transactionsWitUndefined: SolTransactionUi[] = createMockSolTransactionsUi(17).map(
+				(transaction) => ({
+					...transaction,
+					timestamp: undefined
+				})
+			);
+
+			const [expectedTransaction] = transactionsWithNumber;
+
+			expect(
+				findOldestTransaction([
+					...mockTransactions,
+					...transactionsWithNumber,
+					...transactionsWitUndefined
+				])
+			).toStrictEqual(expectedTransaction);
 		});
 	});
 });

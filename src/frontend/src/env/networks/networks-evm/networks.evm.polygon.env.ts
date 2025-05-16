@@ -4,10 +4,15 @@ import baseMainnetIconDark from '$lib/assets/networks/dark/base-mainnet.svg';
 import baseSepoliaIconDark from '$lib/assets/networks/dark/base-sepolia.svg';
 import baseMainnetIconLight from '$lib/assets/networks/light/base-mainnet.svg';
 import baseSepoliaIconLight from '$lib/assets/networks/light/base-sepolia.svg';
+import polygonAmoyIconDark from '$lib/assets/networks/dark/polygon-amoy.svg';
+import polygonMainnetIconDark from '$lib/assets/networks/dark/polygon-mainnet.svg';
+import polygonAmoyIconLight from '$lib/assets/networks/light/polygon-amoy.svg';
+import polygonMainnetIconLight from '$lib/assets/networks/light/polygon-mainnet.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
+import { Network } from 'alchemy-sdk';
 
 export const POLYGON_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_POLYGON_MAINNET_DISABLED
@@ -22,11 +27,14 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Polygon PoS',
 	chainId: 137n,
-	// TODO: add the correct icon
-	iconLight: baseMainnetIconLight,
-	iconDark: baseMainnetIconDark,
+	iconLight: polygonMainnetIconLight,
+	iconDark: polygonMainnetIconDark,
 	explorerUrl: POLYGON_EXPLORER_URL,
-	providers: { infura: 'matic' },
+	providers: {
+		infura: 'matic',
+		alchemy: Network.MATIC_MAINNET,
+		alchemyJsonRpcUrl: 'https://polygon-mainnet.g.alchemy.com/v2'
+	},
 	exchange: { coingeckoId: 'polygon-pos' },
 	buy: { onramperId: 'polygon' }
 };
@@ -40,11 +48,14 @@ export const POLYGON_AMOY_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Polygon (Amoy Testnet)',
 	chainId: 80002n,
-	// TODO: add the correct icon
-	iconLight: baseSepoliaIconLight,
-	iconDark: baseSepoliaIconDark,
+	iconLight: polygonAmoyIconLight,
+	iconDark: polygonAmoyIconDark,
 	explorerUrl: POLYGON_AMOY_EXPLORER_URL,
-	providers: { infura: 'matic-amoy' }
+	providers: {
+		infura: 'matic-amoy',
+		alchemy: Network.MATIC_AMOY,
+		alchemyJsonRpcUrl: 'https://polygon-amoy.g.alchemy.com/v2'
+	}
 };
 
 export const SUPPORTED_POLYGON_NETWORKS: EthereumNetwork[] = defineSupportedNetworks({
