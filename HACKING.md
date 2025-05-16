@@ -341,7 +341,6 @@ If there are testnets, create a similar object for each one.
 
 Finally, make sure that the objects `SUPPORTED_<network>_NETWORKS` and `SUPPORTED_<network>_NETWORK_IDS` exist and are accordingly updated, at the end of the file.
 
-
 ### Create Native Tokens Objects
 
 Under the `src/frontend/src/env/tokens/tokens-evm` folder, create a new file named `tokens.<token>.env.ts` and copy the content of `tokens.<token>.env.ts` from another EVM network.
@@ -383,7 +382,6 @@ If there are testnet tokens, create a similar object for each one.
 
 Finally, make sure that the object `SUPPORTED_<network>_TOKENS` exists and is accordingly updated, at the end of the file.
 
-
 ### Add the Network Variant to the Backend
 
 In file `src/shared/src/types/network.ts`, add the network(s) variant to the `NetworkSettingsFor` enum, similar to the existing ones.
@@ -394,7 +392,6 @@ This process will generate new bindings. Once generated, the mapping of user net
 
 1. Derived store `userNetworks` needs to map the new variant(s) to the respective network ID(s), similar to the existing ones.
 2. Sub-function `networkIdToKey` of util `mapUserNetworks` needs to map the new network ID(s) to the respective network variant(s), similar to the existing ones.
-
 
 ### WIP
 
