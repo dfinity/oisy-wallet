@@ -486,17 +486,20 @@ describe('sol-transactions.services', () => {
 
 		const mockToken = SOLANA_TOKEN;
 
+		const mockMinTimestamp = 1_000_000_000;
+		const timestampBuffer = BigInt(mockMinTimestamp) + 500_000_000n;
+
 		const mockTransactions: SolTransactionUi[] = createMockSolTransactionsUi(17).map(
 			(transaction, index) => ({
 				...transaction,
-				timestamp: 100n + BigInt(index)
+				timestamp: timestampBuffer + BigInt(index)
 			})
 		);
 		const [expectedOldestTransaction] = mockTransactions;
 		const { signature: mockLastSignature } = expectedOldestTransaction;
 
 		const mockParams = {
-			minTimestamp: 1n,
+			minTimestamp: mockMinTimestamp,
 			transactions: mockTransactions,
 			token: mockToken,
 			signalEnd
@@ -516,10 +519,10 @@ describe('sol-transactions.services', () => {
 			expect(spyGetTransactions).not.toHaveBeenCalled();
 		});
 
-		it('should not load transactions if the minStamp is newer than all the transactions', async () => {
+		it('should not load transactions if the minimum timestamp is newer than all the transactions', async () => {
 			const result = await loadNextSolTransactionsByOldest({
 				...mockParams,
-				minTimestamp: 10_000n
+				minTimestamp: Number(timestampBuffer) * 10
 			});
 
 			expect(result).toEqual({ success: false });
@@ -558,6 +561,38 @@ describe('sol-transactions.services', () => {
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				before: lastSignature
+			});
+		});
+
+		it('should handle minimum timestamp correctly in different units', async () => {
+			const resultWithNano = await loadNextSolTransactionsByOldest({
+				...mockParams,
+				minTimestamp: mockMinTimestamp * 1_000_000_000 + 1
+			});
+
+			expect(resultWithNano).toEqual({ success: true });
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: mockLastSignature
+			});
+
+			vi.clearAllMocks();
+
+			const resultWithMillis = await loadNextSolTransactionsByOldest({
+				...mockParams,
+				minTimestamp: mockMinTimestamp * 1_000 + 1
+			});
+
+			expect(resultWithMillis).toEqual({ success: true });
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: mockLastSignature
 			});
 		});
 	});

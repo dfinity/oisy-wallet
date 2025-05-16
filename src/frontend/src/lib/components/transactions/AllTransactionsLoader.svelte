@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
 	import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
@@ -32,8 +33,10 @@
 			return;
 		}
 
-		const minTimestamp = BigInt(
-			Math.min(...transactions.map(({ transaction: { timestamp } }) => Number(timestamp)))
+		const minTimestamp = Math.min(
+			...transactions.map(({ transaction: { timestamp } }) =>
+				nonNullish(timestamp) ? normalizeTimestampToSeconds(timestamp) : Infinity
+			)
 		);
 
 		const loadNextTransactions = async (token: Token) => {

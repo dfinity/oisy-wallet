@@ -1,4 +1,5 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	solAddressDevnet,
@@ -289,7 +290,7 @@ export const loadNextSolTransactionsByOldest = async ({
 	transactions,
 	...rest
 }: {
-	minTimestamp: bigint;
+	minTimestamp: number;
 	transactions: SolTransactionUi[];
 	token: Token;
 	signalEnd: () => void;
@@ -303,7 +304,10 @@ export const loadNextSolTransactionsByOldest = async ({
 
 	const { timestamp: minIcTimestamp, signature: lastSignature } = lastTransaction ?? {};
 
-	if (nonNullish(minIcTimestamp) && minIcTimestamp <= minTimestamp) {
+	if (
+		nonNullish(minIcTimestamp) &&
+		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
+	) {
 		return { success: false };
 	}
 
