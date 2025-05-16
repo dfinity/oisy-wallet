@@ -18,12 +18,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fakeSnippet: Snippet = (() => {}) as Snippet;
 
-type SwapAmountsContextProps = {
+interface SwapAmountsContextProps {
 	amount: OptionAmount;
 	sourceToken: IcToken | undefined;
 	destinationToken: IcToken | undefined;
 	slippageValue: OptionAmount;
-};
+}
 
 describe('SwapAmountsContext.svelte', () => {
 	const [sourceToken, destinationToken] = [mockValidIcToken, mockValidIcCkToken] as IcToken[];
