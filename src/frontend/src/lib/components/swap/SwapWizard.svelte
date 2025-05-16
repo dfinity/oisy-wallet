@@ -32,11 +32,20 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let swapAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let slippageValue: OptionAmount;
-	export let swapProgressStep: string;
-	export let currentStep: WizardStep | undefined;
+	interface Props {
+		swapAmount: OptionAmount;
+		receiveAmount: number | undefined;
+		slippageValue: OptionAmount;
+		swapProgressStep: string;
+		currentStep: WizardStep | undefined;
+	}
+	let {
+		swapAmount = $bindable<OptionAmount>(),
+		receiveAmount = $bindable<number | undefined>(),
+		slippageValue = $bindable<OptionAmount>(),
+		swapProgressStep = $bindable<string>(),
+		currentStep
+	}: Props = $props();
 
 	const { sourceToken, destinationToken, isSourceTokenIcrc2, failedSwapError } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -49,11 +58,11 @@
 
 	const dispatch = createEventDispatcher();
 
-	let sourceTokenFee: bigint | undefined;
-	$: sourceTokenFee =
+	let sourceTokenFee = $derived<bigint | undefined>(
 		nonNullish($sourceToken) && nonNullish($icTokenFeeStore)
 			? $icTokenFeeStore[$sourceToken.symbol]
-			: undefined;
+			: undefined
+	);
 
 	const swap = async () => {
 		if (isNullish($authIdentity)) {
@@ -67,7 +76,7 @@
 			isNullish(slippageValue) ||
 			isNullish(swapAmount) ||
 			isNullish(sourceTokenFee) ||
-			isNullish($swapAmountsStore?.swapAmounts?.receiveAmount)
+			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -86,7 +95,7 @@
 				sourceToken: $sourceToken,
 				destinationToken: $destinationToken,
 				swapAmount,
-				receiveAmount: $swapAmountsStore.swapAmounts.receiveAmount,
+				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
 				isSourceTokenIcrc2: $isSourceTokenIcrc2
@@ -144,12 +153,14 @@
 		amount={swapAmount}
 		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
+		{slippageValue}
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapForm
 				on:icClose
 				on:icNext
 				on:icShowTokensList
+				on:icShowProviderList
 				bind:swapAmount
 				bind:receiveAmount
 				bind:slippageValue
@@ -158,8 +169,6 @@
 			<SwapReview on:icSwap={swap} on:icBack {slippageValue} {swapAmount} {receiveAmount} />
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress bind:swapProgressStep />
-		{:else}
-			<slot />
 		{/if}
 	</SwapAmountsContext>
 </IcTokenFeeContext>
