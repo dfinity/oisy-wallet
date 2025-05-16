@@ -1,7 +1,7 @@
 import type { AddressType } from '$lib/types/address';
 
 export interface Address {
-	address_type: AddressType;
+	addressType: AddressType;
 	address: string;
 	alias?: string;
 }
