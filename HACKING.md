@@ -395,9 +395,10 @@ This process will generate new bindings. Once generated, the mapping of user net
 1. Derived store `userNetworks` needs to map the new variant(s) to the respective network ID(s), similar to the existing ones.
 2. Sub-function `networkIdToKey` of util `mapUserNetworks` needs to map the new network ID(s) to the respective network variant(s), similar to the existing ones.
 
-### Include Networks to EVM List
+### Include Networks and Tokens in EVM List
 
-The list `SUPPORTED_<network>_NETWORKS` created in the first step needs to be included in the list of EVM networks that is `SUPPORTED_EVM_NETWORKS`, in file `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`.
+- The list `SUPPORTED_<network>_NETWORKS` created in the first step needs to be included in the list of EVM networks that is `SUPPORTED_EVM_NETWORKS`, in file `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`.
+- The list `SUPPORTED_<network>_TOKENS` created in the second step needs to be included in the list of EVM tokens that is `SUPPORTED_EVM_TOKENS`, in file `src/frontend/src/env/tokens/tokens-evm/tokens.evm.env.ts`.
 
 ### Create Derived Stores for Enabled Networks
 
@@ -497,3 +498,6 @@ TODO
 ### Optional
 
 If provided, please add any additional information that might be useful for the new network. For example, a specific faucet to the list in this document.
+
+> [!NOTE]
+> Remember to adapt all the existing tests and create new ones where needed.
