@@ -187,9 +187,11 @@ export const idlFactory = ({ IDL }) => {
 	const NetworkSettingsFor = IDL.Variant({
 		InternetComputer: IDL.Null,
 		BaseSepolia: IDL.Null,
+		PolygonMainnet: IDL.Null,
 		SolanaTestnet: IDL.Null,
 		BitcoinRegtest: IDL.Null,
 		SolanaDevnet: IDL.Null,
+		PolygonAmoy: IDL.Null,
 		EthereumSepolia: IDL.Null,
 		BitcoinTestnet: IDL.Null,
 		BaseMainnet: IDL.Null,

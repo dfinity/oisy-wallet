@@ -8,6 +8,10 @@ import {
 	BSC_TESTNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
+	POLYGON_AMOY_NETWORK_ID,
+	POLYGON_MAINNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.polygon.env';
+import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
@@ -95,6 +99,12 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			}
 			if ('BscTestnet' in key) {
 				return BSC_TESTNET_NETWORK_ID;
+			}
+			if ('PolygonMainnet' in key) {
+				return POLYGON_MAINNET_NETWORK_ID;
+			}
+			if ('PolygonAmoy' in key) {
+				return POLYGON_AMOY_NETWORK_ID;
 			}
 
 			// Force compiler error on unhandled cases based on leftover types
