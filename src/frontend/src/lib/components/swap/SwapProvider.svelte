@@ -19,7 +19,13 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 
+	interface Props {
+		showSelectButton?: boolean;
+	}
+
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	let { showSelectButton = false }: Props = $props();
 
 	let displayURL = $state<OptionString>(null);
 
@@ -53,7 +59,7 @@
 				<svelte:fragment slot="label">
 					<div class="flex justify-center gap-2">
 						{$i18n.swap.text.swap_provider}
-						{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1 && !isInBottomSheet}
+						{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1 && !isInBottomSheet && showSelectButton}
 							<Button link on:click={() => dispatch('icShowProviderList')}
 								>{$i18n.swap.text.select}</Button
 							>
