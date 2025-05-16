@@ -440,6 +440,7 @@ interface I18nSend {
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
 		unknown_destination: string;
+		fee_info: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -561,6 +562,9 @@ interface I18nSwap {
 		included_liquidity_fees: string;
 		best_rate: string;
 		expected_minimum: string;
+		you_receive: string;
+		select: string;
+		select_swap_provider: string;
 	};
 	error: {
 		kong_not_available: string;

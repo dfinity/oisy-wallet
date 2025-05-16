@@ -468,7 +468,8 @@
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
-			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient."
+			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
+			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>"
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -593,7 +594,10 @@
 			"included_network_fees": "Included network fees",
 			"included_liquidity_fees": "Included liquidity pool fees",
 			"best_rate": "Best Rate",
-			"expected_minimum": "Expected minimum"
+			"expected_minimum": "Expected minimum",
+			"you_receive": "You receive",
+			"select": "Select >",
+			"select_swap_provider": "Select swap provider"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",

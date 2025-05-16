@@ -273,10 +273,6 @@ type Result_6 = variant {
 };
 type Result_7 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_8 = variant { Ok; Err : SaveTestnetsSettingsError };
-type Result_9 = variant {
-	Ok : TopUpCyclesLedgerResponse;
-	Err : TopUpCyclesLedgerError
-};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -341,6 +337,10 @@ type TopUpCyclesLedgerResponse = record {
 	backend_cycles : nat;
 	ledger_balance : nat;
 	topped_up : nat
+};
+type TopUpCyclesLedgerResult = variant {
+	Ok : TopUpCyclesLedgerResponse;
+	Err : TopUpCyclesLedgerError
 };
 type Transaction = record {
 	transaction_type : TransactionType;
@@ -428,6 +428,8 @@ service : (Arg) -> {
 	set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_8);
 	set_user_token : (UserToken) -> ();
 	stats : () -> (Stats) query;
-	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_9);
+	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
+		TopUpCyclesLedgerResult
+	);
 	update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_8)
 }

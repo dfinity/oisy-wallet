@@ -460,7 +460,7 @@ export const idlFactory = ({ IDL }) => {
 			available: IDL.Nat
 		})
 	});
-	const Result_9 = IDL.Variant({
+	const TopUpCyclesLedgerResult = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
@@ -495,7 +495,11 @@ export const idlFactory = ({ IDL }) => {
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_8], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats]),
-		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_9], []),
+		top_up_cycles_ledger: IDL.Func(
+			[IDL.Opt(TopUpCyclesLedgerRequest)],
+			[TopUpCyclesLedgerResult],
+			[]
+		),
 		update_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_8], [])
 	});
 };

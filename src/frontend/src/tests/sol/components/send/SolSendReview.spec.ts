@@ -41,7 +41,8 @@ describe('SolSendReview', () => {
 				prioritizationFeeStore: mockPrioritizationFeeStore,
 				ataFeeStore: mockAtaFeeStore,
 				feeSymbolStore: writable(SOLANA_TOKEN.symbol),
-				feeDecimalsStore: writable(SOLANA_TOKEN.decimals)
+				feeDecimalsStore: writable(SOLANA_TOKEN.decimals),
+				feeTokenIdStore: writable(SOLANA_TOKEN.id)
 			})
 		);
 	});
