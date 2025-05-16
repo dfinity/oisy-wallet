@@ -44,14 +44,6 @@ describe('LoaderMultipleEthTransactions', () => {
 		start: 2
 	});
 
-	const mockMainnetErc20UserTokens = mockMainnetErc20CertifiedUserTokens.map(
-		({ data: token }) => token
-	);
-
-	const mockSepoliaErc20UserTokens = mockSepoliaErc20CertifiedUserTokens.map(
-		({ data: token }) => token
-	);
-
 	const mockErc20UserTokens = mockErc20CertifiedUserTokens.map(({ data: token }) => token);
 
 	const mockAdditionalTokens = mockAdditionalCertifiedTokens.map(({ data: token }) => token);
