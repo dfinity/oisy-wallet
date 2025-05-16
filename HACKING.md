@@ -399,7 +399,6 @@ This process will generate new bindings. Once generated, the mapping of user net
 
 The list `SUPPORTED_<network>_NETWORKS` created in the first step needs to be included in the list of EVM networks that is `SUPPORTED_EVM_NETWORKS`, in file `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`.
 
-
 ### Create Derived Stores for Enabled Networks
 
 Create file `src/frontend/src/evm/<network>/derived/networks.derived.ts`, by copying an existing one from the other EVM networks.
@@ -466,7 +465,6 @@ export const enabledEvmTokens: Readable<RequiredToken[]> = derived(
 );
 ```
 
-
 ### Define Polygon Default token
 
 Each network should have a default token as fallback. To define one for EVM networks the following is required:
@@ -491,12 +489,6 @@ export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]
 ```typescript
 export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
 ```
-
-
-
-
-
-
 
 ### Set Custom Hero Color Palette
 
