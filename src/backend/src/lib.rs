@@ -28,6 +28,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
+        contact::{Contact, ContactError, CreateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{
@@ -38,7 +39,7 @@ use shared::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
-        result_types::AddUserCredentialResult,
+        result_types::{AddUserCredentialResult, CreateContactResult},
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
@@ -831,6 +832,29 @@ pub fn set_snapshot(snapshot: UserSnapshot) {
 #[must_use]
 pub fn get_snapshot() -> Option<UserSnapshot> {
     todo!()
+}
+
+/// Creates a new contact for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+///
+/// # Returns
+/// The created contact on success.
+///
+/// # Test
+/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
+#[update(guard = "caller_is_allowed")]
+pub fn create_contact(request: CreateContactRequest) -> CreateContactResult {
+    // TODO replace mock data with contact service that returns Contact
+    let contact = Contact {
+        id: time(),
+        name: request.name,
+        addresses: vec![],
+        update_timestamp: time(),
+    };
+
+    CreateContactResult::Ok(contact)
 }
 
 export_candid!();
