@@ -21,7 +21,7 @@ describe('clipboard.utils', () => {
 
 			spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
 
-			mockCopyText.mockResolvedValue(undefined);
+			mockCopyText.mockImplementation(() => Promise.resolve());
 		});
 
 		it('should copy text to clipboard', async () => {
