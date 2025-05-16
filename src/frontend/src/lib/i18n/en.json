@@ -468,7 +468,8 @@
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
-			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient."
+			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
+			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>"
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -602,7 +603,11 @@
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
-			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again."
+			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again.",
+			"pool_not_found": "Swap failed. Pool not found.",
+			"deposit_error": "Swap failed. We couldn’t deposit your tokens into the pool. Please try again.",
+			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: $url",
+			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance."
 		}
 	},
 	"buy": {
