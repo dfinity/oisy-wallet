@@ -326,15 +326,78 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 };
 ```
 
-Then, update the content accordingly:
+Then, update the content accordingly, renaming the objects appropriately.
 
-- Symbol
-- Name
-- Chain ID
-- Icons for all themes. They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
-- Explorer URL. TO have these values, the `src/frontend/src/env/explorers.env.ts` file should be updated.
-- Providers. The correct values for all the providers should be set here.
-- Exchange. Remember to update type the appropriate types (for example, if a Coingecko ID is provided, type `CoingeckoPlatformId` should be updated).
-- Buy. Remember to update type the appropriate types (for example, if an Onramper ID is provided, type `OnramperNetworkId` should be updated).
+- **Symbol**
+- **Name**
+- **Chain ID**
+- **Icons** for all themes. They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
+- **Explorer URL**. TO have these values, the `src/frontend/src/env/explorers.env.ts` file should be updated.
+- **Providers**. The correct values for all the providers should be set here.
+- **Exchange**. Remember to update type the appropriate types (for example, if a Coingecko ID is provided, type `CoingeckoPlatformId` should be updated).
+- **Buy**. Remember to update type the appropriate types (for example, if an Onramper ID is provided, type `OnramperNetworkId` should be updated).
 
 If there are testnets, create a similar object for each one.
+
+Finally, make sure that the objects `SUPPORTED_<network>_NETWORKS` and `SUPPORTED_<network>_NETWORK_IDS` exist and are accordingly updated, at the end of the file.
+
+
+### Create Native Tokens Objects
+
+Under the `src/frontend/src/env/tokens/tokens-evm` folder, create a new file named `tokens.<token>.env.ts` and copy the content of `tokens.<token>.env.ts` from another EVM network.
+
+For example, this is the mainnet object of `tokens.pol.env.ts`:
+
+```typescript
+const POL_DECIMALS = 18;
+
+const POL_MAINNET_SYMBOL = 'POL';
+
+export const POL_MAINNET_TOKEN_ID: TokenId = parseTokenId(POL_MAINNET_SYMBOL);
+
+export const POL_MAINNET_TOKEN: RequiredToken = {
+	id: POL_MAINNET_TOKEN_ID,
+	network: POLYGON_MAINNET_NETWORK,
+	standard: 'ethereum',
+	category: 'default',
+	name: 'POL (prev. MATIC)',
+	symbol: POL_MAINNET_SYMBOL,
+	decimals: POL_DECIMALS,
+	icon: pol,
+	buy: {
+		onramperId: 'pol_polygon'
+	}
+};
+```
+
+Then, update the content accordingly:
+
+- **Decimals**
+- **Symbol**
+- **Network**. This is the network object(s) created in the previous step.
+- **Name**
+- **Icons** for all themes. They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
+- **Buy**.
+
+If there are testnet tokens, create a similar object for each one.
+
+Finally, make sure that the object `SUPPORTED_<network>_TOKENS` exists and is accordingly updated, at the end of the file.
+
+
+### Add the Network Variant to the Backend
+
+In file `src/shared/src/types/network.ts`, add the network(s) variant to the `NetworkSettingsFor` enum, similar to the existing ones.
+
+Furthermore, in the same file, add the chain ID(s) to the `EthereumNetworkId` enum, similar to the existing ones.
+
+This process will generate new bindings. Once generated, the mapping of user networks must be updated manually:
+
+1. Derived store `userNetworks` needs to map the new variant(s) to the respective network ID(s), similar to the existing ones.
+2. Sub-function `networkIdToKey` of util `mapUserNetworks` needs to map the new network ID(s) to the respective network variant(s), similar to the existing ones.
+
+
+### WIP
+
+### Optional
+
+If provided, please add any additional information that might be useful for the new network. For example, a specific faucet to the list in this document.
