@@ -1,9 +1,5 @@
 import { POLYGON_AMOY_EXPLORER_URL, POLYGON_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import baseMainnetIconDark from '$lib/assets/networks/dark/base-mainnet.svg';
-import baseSepoliaIconDark from '$lib/assets/networks/dark/base-sepolia.svg';
-import baseMainnetIconLight from '$lib/assets/networks/light/base-mainnet.svg';
-import baseSepoliaIconLight from '$lib/assets/networks/light/base-sepolia.svg';
 import polygonAmoyIconDark from '$lib/assets/networks/dark/polygon-amoy.svg';
 import polygonMainnetIconDark from '$lib/assets/networks/dark/polygon-mainnet.svg';
 import polygonAmoyIconLight from '$lib/assets/networks/light/polygon-amoy.svg';
