@@ -6,6 +6,10 @@ import {
 	BSC_MAINNET_NETWORK_ID,
 	BSC_TESTNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
+	POLYGON_AMOY_NETWORK_ID,
+	POLYGON_MAINNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.polygon.env';
 import * as btcNetworkEnv from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK,
@@ -50,6 +54,7 @@ import {
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdICP,
+	isNetworkIdPolygon,
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
 	isNetworkIdSOLMainnet,
@@ -138,7 +143,7 @@ describe('network utils', () => {
 			expect(isNetworkIdBase(id as NetworkId)).toBeTruthy();
 		});
 
-		it('should return false for non-EVM network IDs', () => {
+		it('should return false for non-Base network IDs', () => {
 			expect(isNetworkIdBase(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 
 			expect(isNetworkIdBase(ETHEREUM_NETWORK_ID)).toBeFalsy();
@@ -150,16 +155,32 @@ describe('network utils', () => {
 	describe('isNetworkIdBsc', () => {
 		const allBscNetworkIds = [BSC_MAINNET_NETWORK_ID, BSC_TESTNET_NETWORK_ID];
 
-		it.each(allBscNetworkIds)('should return true for Base network ID %s', (id) => {
+		it.each(allBscNetworkIds)('should return true for BSC network ID %s', (id) => {
 			expect(isNetworkIdBsc(id as NetworkId)).toBeTruthy();
 		});
 
-		it('should return false for non-EVM network IDs', () => {
+		it('should return false for non-BSC network IDs', () => {
 			expect(isNetworkIdBsc(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 
 			expect(isNetworkIdBsc(ETHEREUM_NETWORK_ID)).toBeFalsy();
 
 			expect(isNetworkIdBsc(BASE_NETWORK_ID)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkIdPolygon', () => {
+		const allPolygonNetworkIds = [POLYGON_MAINNET_NETWORK_ID, POLYGON_AMOY_NETWORK_ID];
+
+		it.each(allPolygonNetworkIds)('should return true for Polygon network ID %s', (id) => {
+			expect(isNetworkIdPolygon(id as NetworkId)).toBeTruthy();
+		});
+
+		it('should return false for non-Polygon network IDs', () => {
+			expect(isNetworkIdPolygon(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdPolygon(ETHEREUM_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdPolygon(BASE_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
