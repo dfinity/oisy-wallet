@@ -405,7 +405,7 @@ Each network should have a default token as fallback. To define one for EVM netw
 
 ```typescript
 export const isNetworkIdBase: IsNetworkIdUtil = (id) =>
-  nonNullish(id) && SUPPORTED_BASE_NETWORK_IDS.includes(id);
+	nonNullish(id) && SUPPORTED_BASE_NETWORK_IDS.includes(id);
 ```
 
 - Derived store to verify that the current network is the new network, in file `src/frontend/src/lib/derived/network.derived.ts`. For example:
