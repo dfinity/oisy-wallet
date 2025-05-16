@@ -46,7 +46,6 @@ export const getIcpAccountIdString = (accountId: Icrcv2AccountId): string => {
 		const { owner, subaccount } = accountId.WithPrincipal;
 		const subaccountArray = subaccount.length > 0 ? subaccount[0] : undefined;
 
-		// Use the encodeIcrcAccount function to get the correct textual representation
 		return encodeIcrcAccount({
 			owner,
 			subaccount: subaccountArray
