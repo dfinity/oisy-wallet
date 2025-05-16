@@ -14,7 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import ExternalLink from '../ui/ExternalLink.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;

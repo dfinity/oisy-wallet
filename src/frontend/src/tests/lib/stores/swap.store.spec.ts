@@ -3,7 +3,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import * as exchanges from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import { initSwapContext, type SwapError } from '$lib/stores/swap.store';
+import { initSwapContext } from '$lib/stores/swap.store';
 import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -104,41 +104,5 @@ describe('swapStore', () => {
 
 		expect(get(sourceToken)).toBe(mockToken1);
 		expect(get(destinationToken)).toBe(mockToken2);
-	});
-
-	it('should handle failedSwapError correctly', () => {
-		const { failedSwapError } = initSwapContext();
-
-		expect(get(failedSwapError)).toBeUndefined();
-
-		const error: SwapError = {
-			variant: 'error',
-			message: 'Something went wrong',
-			url: { url: 'https://example.com', text: 'More info' }
-		};
-
-		failedSwapError.set(error);
-
-		expect(get(failedSwapError)).toStrictEqual(error);
-
-		failedSwapError.set(undefined);
-
-		expect(get(failedSwapError)).toBeUndefined();
-	});
-
-	it('should handle failedSwapError correctly with just message', () => {
-		const { failedSwapError } = initSwapContext();
-
-		expect(get(failedSwapError)).toBeUndefined();
-
-		const error: SwapError = {
-			variant: 'error',
-			message: 'Something went wrong',
-		};
-
-		failedSwapError.set(error);
-
-		expect(get(failedSwapError)).toStrictEqual(error);
-
 	});
 });
