@@ -332,11 +332,11 @@ Then, update the content accordingly, renaming the objects appropriately.
 - **Symbol**
 - **Name**
 - **Chain ID**
-- **Icons** for all themes. They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
-- **Explorer URL**. TO have these values, the `src/frontend/src/env/explorers.env.ts` file should be updated.
-- **Providers**. The correct values for all the providers should be set here.
-- **Exchange**. Remember to update type the appropriate types (for example, if a Coingecko ID is provided, type `CoingeckoPlatformId` should be updated).
-- **Buy**. Remember to update type the appropriate types (for example, if an Onramper ID is provided, type `OnramperNetworkId` should be updated).
+- **Icons** for all themes &rarr; They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
+- **Explorer URL** &rarr; To have these values, the `src/frontend/src/env/explorers.env.ts` file should be updated.
+- **Providers** &rarr; The correct values for all the providers should be set here.
+- **Exchange** &rarr; Remember to update type the appropriate types (for example, if a Coingecko ID is provided, type `CoingeckoPlatformId` should be updated).
+- **Buy** &rarr; Remember to update type the appropriate types (for example, if an Onramper ID is provided, type `OnramperNetworkId` should be updated).
 
 If there are testnets, create a similar object for each one.
 
@@ -375,10 +375,10 @@ Then, update the content accordingly:
 
 - **Decimals**
 - **Symbol**
-- **Network**. This is the network object(s) created in the previous step.
+- **Network** &rarr; This is the network object(s) created in the previous step.
 - **Name**
-- **Icons** for all themes. They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
-- **Buy**.
+- **Icons** &rarr; They should be in SVG format and placed in the `src/frontend/src/evm/<network>/assets` folder.
+- **Buy**
 
 If there are testnet tokens, create a similar object for each one.
 
