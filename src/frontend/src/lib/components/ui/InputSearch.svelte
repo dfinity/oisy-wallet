@@ -8,9 +8,17 @@
 	export let showResetButton = false;
 	export let placeholder: string;
 	export let autofocus = false;
+	export let testId: string | undefined = undefined;
 </script>
 
-<InputTextWithAction name="filter" required={false} bind:value={filter} {placeholder} {autofocus}>
+<InputTextWithAction
+	name="filter"
+	required={false}
+	bind:value={filter}
+	{placeholder}
+	{autofocus}
+	{testId}
+>
 	<svelte:fragment slot="inner-end">
 		{#if showResetButton}
 			<button on:click={() => (filter = '')} aria-label={$i18n.core.text.clear_filter}>
