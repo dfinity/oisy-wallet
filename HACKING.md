@@ -496,6 +496,11 @@ export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
 
 TODO
 
+### Add providers' URLs to Content Security Policy (CSP)
+
+The script that builds the CSP is `scripts/build.csp.mjs`.
+It must be updated to include the new network providers' URLs, similar to the existing ones.
+
 ### Optional
 
 If provided, please add any additional information that might be useful for the new network. For example, a specific faucet to the list in this document.
