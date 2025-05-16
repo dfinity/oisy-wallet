@@ -91,7 +91,7 @@ type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, Ic
 
 export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
 
-export type SwapParams = {
+export interface SwapParams {
 	identity: OptionIdentity;
 	progress: (step: ProgressStepsSwap) => void;
 	sourceToken: IcTokenToggleable;
@@ -101,4 +101,4 @@ export type SwapParams = {
 	slippageValue: Amount;
 	sourceTokenFee: bigint;
 	isSourceTokenIcrc2: boolean;
-};
+}
