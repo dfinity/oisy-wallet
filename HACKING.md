@@ -510,4 +510,4 @@ It must be updated to include the new network providers' URLs, similar to the ex
 If provided, please add any additional information that might be useful for the new network. For example, a specific faucet to the list in this document.
 
 > [!NOTE]
-> Remember to adapt all the existing tests and create new ones where needed.
+> Remember to adapt all the existing tests and create new ones where needed, including E2E tests.
