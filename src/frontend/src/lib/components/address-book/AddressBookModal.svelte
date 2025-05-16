@@ -46,7 +46,7 @@
 		}
 	};
 
-	const addContact = (contact: Contact) => {
+	const onAddContact = (contact: Contact) => {
 		contacts = [...contacts, contact];
 		gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
@@ -68,23 +68,25 @@
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
 			{contacts}
-			showContact={(contact) => {
+			onShowContact={(contact) => {
 				currentContact = contact;
 				gotoStep(AddressBookSteps.SHOW_CONTACT);
 			}}
-			addContact={() => {
+			onAddContact={() => {
 				currentContact = undefined;
 				gotoStep(AddressBookSteps.ADD_CONTACT);
 			}}
 		></AddressBookStep>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
-		<ShowContactStep close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)} contact={currentContact!}
+		<ShowContactStep
+			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			contact={currentContact!}
 		></ShowContactStep>
 	{:else if currentStep?.name === AddressBookSteps.ADD_CONTACT}
 		<AddContactStep
 			bind:this={addContactStep}
-			{addContact}
-			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			{onAddContact}
+			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		></AddContactStep>
 	{/if}
 </WizardModal>

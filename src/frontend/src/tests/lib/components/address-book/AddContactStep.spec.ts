@@ -10,11 +10,11 @@ import { vi } from 'vitest';
 
 describe('AddContactStep', () => {
 	it('should render the add contact step with form and buttons', () => {
-		const addContact = vi.fn();
-		const close = vi.fn();
+		const onAddContact = vi.fn();
+		const onClose = vi.fn();
 
 		const { getByTestId } = render(AddContactStep, {
-			props: { addContact, close }
+			props: { onAddContact, onClose }
 		});
 
 		// Check that the form is rendered
@@ -29,11 +29,11 @@ describe('AddContactStep', () => {
 	});
 
 	it('should disable save button when form is invalid', () => {
-		const addContact = vi.fn();
-		const close = vi.fn();
+		const onAddContact = vi.fn();
+		const onClose = vi.fn();
 
 		const { getByTestId } = render(AddContactStep, {
-			props: { addContact, close }
+			props: { onAddContact, onClose }
 		});
 
 		// Check that the save button is disabled initially
@@ -41,11 +41,11 @@ describe('AddContactStep', () => {
 	});
 
 	it('should enable save button when form is valid', async () => {
-		const addContact = vi.fn();
-		const close = vi.fn();
+		const onAddContact = vi.fn();
+		const onClose = vi.fn();
 
 		const { getByTestId } = render(AddContactStep, {
-			props: { addContact, close }
+			props: { onAddContact, onClose }
 		});
 
 		// Enter a name to make the form valid
@@ -57,11 +57,11 @@ describe('AddContactStep', () => {
 	});
 
 	it('should call addContact when save button is clicked', async () => {
-		const addContact = vi.fn();
-		const close = vi.fn();
+		const onAddContact = vi.fn();
+		const onClose = vi.fn();
 
 		const { getByTestId } = render(AddContactStep, {
-			props: { addContact, close }
+			props: { onAddContact, onClose }
 		});
 
 		// Enter a name to make the form valid
@@ -73,16 +73,16 @@ describe('AddContactStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that addContact was called with the correct contact
-		expect(addContact).toHaveBeenCalledTimes(1);
-		expect(addContact).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Contact' }));
+		expect(onAddContact).toHaveBeenCalledTimes(1);
+		expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Contact' }));
 	});
 
 	it('should call close when cancel button is clicked', async () => {
-		const addContact = vi.fn();
-		const close = vi.fn();
+		const onAddContact = vi.fn();
+		const onClose = vi.fn();
 
 		const { getByTestId } = render(AddContactStep, {
-			props: { addContact, close }
+			props: { onAddContact, onClose }
 		});
 
 		// Click the cancel button
@@ -90,15 +90,15 @@ describe('AddContactStep', () => {
 		await fireEvent.click(cancelButton);
 
 		// Check that close was called
-		expect(close).toHaveBeenCalledTimes(1);
+		expect(onClose).toHaveBeenCalledTimes(1);
 	});
 
 	it('should update title when contact name changes', async () => {
-		const addContact = vi.fn();
-		const close = vi.fn();
+		const onAddContact = vi.fn();
+		const onClose = vi.fn();
 
 		const { getByTestId, component } = render(AddContactStep, {
-			props: { addContact, close }
+			props: { onAddContact, onClose }
 		});
 
 		// Initially, the title should be the default

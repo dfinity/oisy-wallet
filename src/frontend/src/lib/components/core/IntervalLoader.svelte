@@ -3,12 +3,12 @@
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 
 	interface Props {
-		load: () => Promise<void>;
+		onLoad: () => Promise<void>;
 		interval: number;
 		children?: Snippet;
 	}
 
-	let { load, interval, children }: Props = $props();
+	let { onLoad, interval, children }: Props = $props();
 
 	let timer: NodeJS.Timeout | undefined = undefined;
 
@@ -17,9 +17,9 @@
 			return;
 		}
 
-		await load();
+		await onLoad();
 
-		timer = setInterval(load, interval);
+		timer = setInterval(onLoad, interval);
 	};
 
 	const stopTimer = () => {
