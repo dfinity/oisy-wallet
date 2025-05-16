@@ -299,7 +299,8 @@ Below a summary of how to add a new EVM network (sidechains or layer-2).
 
 ### Create Networks Objects
 
-Under the `src/frontend/src/env/networks/networks-evm` folder, create a new file named `networks.<network>.env.ts` and copy the content of `networks.<network>.env.ts` from another EVM network.
+Under the `src/frontend/src/env/networks/networks-evm` folder, create a new file named `networks.<network>.env.ts`.
+Copy the content of `networks.<network>.env.ts` from another EVM network.
 
 For example, this is the mainnet object of `networks.bsc.env.ts`:
 
@@ -343,7 +344,8 @@ Finally, make sure that the objects `SUPPORTED_<network>_NETWORKS` and `SUPPORTE
 
 ### Create Native Tokens Objects
 
-Under the `src/frontend/src/env/tokens/tokens-evm` folder, create a new file named `tokens.<token>.env.ts` and copy the content of `tokens.<token>.env.ts` from another EVM network.
+Under the `src/frontend/src/env/tokens/tokens-evm` folder, create a new folder named `tokens-<network>`.
+Inside it, create a new file named `tokens.<token>.env.ts` and copy the content of `tokens.<token>.env.ts` from another EVM network.
 
 For example, this is the mainnet object of `tokens.pol.env.ts`:
 
