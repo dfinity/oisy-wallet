@@ -11,6 +11,7 @@ This document lists a couple of useful information for development and deploymen
 - [Integrate ckERC20 Tokens](#integrate-ckerc20-tokens)
 - [Bitcoin](#bitcoin)
 - [Routes Styles](#routes-styles)
+- [Add EVM Networks](#add-evm-networks)
 
 ## Deployment
 
@@ -289,15 +290,15 @@ Furthermore, given that parsing happens at build time, the developer might want 
 
 ## Add EVM Networks
 
-Below a summary of how to add a new EVM network (sidechains or layer-2).
+Below a summary of how to add a new EVM network (side-chains or layer-2).
 
-### Pre-Requisites
+### Pre-requisites
 
 - Chain ID is required for mainnet and testnet(s), if any.
 - The third-party providers must support the new network: [Alchemy](https://www.alchemy.com/), [Infura](https://www.infura.io/), and [Etherscan](https://docs.etherscan.io/etherscan-v2).
 - Verify that the network is already integrated by the [`ethers` library](https://github.com/ethers-io/ethers.js) in the previous providers, or open a request for it.
 
-### Create Network Object(s)
+### Create network object(s)
 
 Under the `src/frontend/src/env/networks/networks-evm` folder, create a new file named `networks.<network>.env.ts`.
 Copy the content of `networks.<network>.env.ts` from another EVM network.
@@ -342,7 +343,7 @@ If there are testnets, create a similar object for each one.
 
 Finally, make sure that the objects `SUPPORTED_<network>_NETWORKS` and `SUPPORTED_<network>_NETWORK_IDS` exist and are accordingly updated, at the end of the file.
 
-### Create Native Token Object(s)
+### Create native token object(s)
 
 Under the `src/frontend/src/env/tokens/tokens-evm` folder, create a new folder named `tokens-<network>`.
 Inside it, create a new file named `tokens.<token>.env.ts` and copy the content of `tokens.<token>.env.ts` from another EVM network.
@@ -384,7 +385,7 @@ If there are testnet tokens, create a similar object for each one.
 
 Finally, make sure that the object `SUPPORTED_<network>_TOKENS` exists and is accordingly updated, at the end of the file.
 
-### Add Network Variant(s) to the Backend
+### Add network variant(s) to the Backend
 
 In file `src/shared/src/types/network.ts`, add the network(s) variant to the `NetworkSettingsFor` enum, similar to the existing ones.
 
@@ -395,12 +396,12 @@ This process will generate new bindings. Once generated, the mapping of user net
 1. Derived store `userNetworks` needs to map the new variant(s) to the respective network ID(s), similar to the existing ones.
 2. Sub-function `networkIdToKey` of util `mapUserNetworks` needs to map the new network ID(s) to the respective network variant(s), similar to the existing ones.
 
-### Include Networks and Tokens in EVM List
+### Include network(s) and token(s) in EVM List
 
 - The list `SUPPORTED_<network>_NETWORKS` created in the first step needs to be included in the list of EVM networks that is `SUPPORTED_EVM_NETWORKS`, in file `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`.
 - The list `SUPPORTED_<network>_TOKENS` created in the second step needs to be included in the list of EVM tokens that is `SUPPORTED_EVM_TOKENS`, in file `src/frontend/src/env/tokens/tokens-evm/tokens.evm.env.ts`.
 
-### Create Derived Stores for Enabled Networks
+### Create derived store for enabled network(s)
 
 Create file `src/frontend/src/evm/<network>/derived/networks.derived.ts`, by copying an existing one from the other EVM networks.
 
@@ -433,7 +434,7 @@ export const enabledEvmNetworks: Readable<EthereumNetwork[]> = derived(
 );
 ```
 
-### Create Derived Stores for Enabled Tokens
+### Create derived store for enabled token(s)
 
 Create file `src/frontend/src/evm/<network>/derived/tokens.derived.ts`, by copying an existing one from the other EVM networks.
 
@@ -466,7 +467,7 @@ export const enabledEvmTokens: Readable<RequiredToken[]> = derived(
 );
 ```
 
-### Define Polygon Default token
+### Define network default token
 
 Each network should have a default token as fallback. To define one for EVM networks the following is required:
 
