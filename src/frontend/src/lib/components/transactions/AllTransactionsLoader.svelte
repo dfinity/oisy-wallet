@@ -36,12 +36,6 @@
 			Math.min(...transactions.map(({ transaction: { timestamp } }) => Number(timestamp)))
 		);
 
-		// We fix the values to avoid a recursive loop: token A runs the first loop, while token B starts. However, token A updated the transactions store.
-		// So, if the timestamp that are newly included are lower that the one used as reference by token B, in the second loop of token B, there will be another request, and so on.
-		// In any case, at some point the transactions are finished and the loader is disabled
-		const icTransactionsStoreData = $icTransactionsStore ?? {};
-		const solTransactionsStoreData = $solTransactionsStore ?? {};
-
 		const loadNextTransactions = async (token: Token) => {
 			const {
 				id: tokenId,
@@ -55,7 +49,7 @@
 			if (isNetworkIdICP(networkId)) {
 				const { success: icSuccess } = await loadNextIcTransactionsByOldest({
 					minTimestamp,
-					transactions: (icTransactionsStoreData[tokenId] ?? []).map(({ data }) => data),
+					transactions: ($icTransactionsStore?.[tokenId] ?? []).map(({ data }) => data),
 					owner: $authIdentity.getPrincipal(),
 					identity: $authIdentity,
 					maxResults: WALLET_PAGINATION,
@@ -70,7 +64,7 @@
 			} else if (isNetworkIdSolana(networkId)) {
 				const { success: solSuccess } = await loadNextSolTransactionsByOldest({
 					minTimestamp,
-					transactions: (solTransactionsStoreData[tokenId] ?? []).map(({ data }) => data),
+					transactions: ($solTransactionsStore?.[tokenId] ?? []).map(({ data }) => data),
 					token,
 					signalEnd: () => (disableLoader[tokenId] = true)
 				});
