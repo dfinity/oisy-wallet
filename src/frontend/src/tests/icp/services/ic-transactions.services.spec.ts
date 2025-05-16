@@ -365,17 +365,20 @@ describe('ic-transactions.services', () => {
 
 		const mockToken = ICP_TOKEN;
 
+		const mockMinTimestamp = 1_000_000_000;
+		const timestampBuffer = BigInt(mockMinTimestamp) + 500_000_000n;
+
 		const mockTransactions: IcTransactionUi[] = createMockIcTransactionsUi(17).map(
 			(transaction, index) => ({
 				...transaction,
-				timestamp: 100n + BigInt(index)
+				timestamp: timestampBuffer + BigInt(index)
 			})
 		);
 		const [expectedOldestTransaction] = mockTransactions;
 		const { id: mockLastId } = expectedOldestTransaction;
 
 		const mockParams = {
-			minTimestamp: 1n,
+			minTimestamp: mockMinTimestamp,
 			transactions: mockTransactions,
 			owner: mockIdentity.getPrincipal(),
 			identity: mockIdentity,
@@ -400,7 +403,10 @@ describe('ic-transactions.services', () => {
 		});
 
 		it('should not load transactions if the minStamp is newer than all the transactions', async () => {
-			const result = await loadNextIcTransactionsByOldest({ ...mockParams, minTimestamp: 10_000n });
+			const result = await loadNextIcTransactionsByOldest({
+				...mockParams,
+				minTimestamp: Number(timestampBuffer) * 10
+			});
 
 			expect(result).toEqual({ success: false });
 
@@ -451,6 +457,50 @@ describe('ic-transactions.services', () => {
 			});
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
 				start: BigInt(lastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: true
+			});
+		});
+
+		it('should handle minimum timestamp correctly in different units', async () => {
+			const resultWithNano = await loadNextIcTransactionsByOldest(mockParams);
+
+			expect(resultWithNano).toEqual({ success: true });
+
+			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				start: BigInt(mockLastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: false
+			});
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				start: BigInt(mockLastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: true
+			});
+
+			vi.clearAllMocks();
+
+			const resultWithMillis = await loadNextIcTransactionsByOldest(mockParams);
+
+			expect(resultWithMillis).toEqual({ success: true });
+
+			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				start: BigInt(mockLastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: false
+			});
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
 				maxResults: WALLET_PAGINATION,
