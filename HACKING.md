@@ -395,6 +395,10 @@ This process will generate new bindings. Once generated, the mapping of user net
 1. Derived store `userNetworks` needs to map the new variant(s) to the respective network ID(s), similar to the existing ones.
 2. Sub-function `networkIdToKey` of util `mapUserNetworks` needs to map the new network ID(s) to the respective network variant(s), similar to the existing ones.
 
+### Include Networks to EVM List
+
+The list `SUPPORTED_<network>_NETWORKS` created in the first step needs to be included in the list of EVM networks that is `SUPPORTED_EVM_NETWORKS`, in file `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`. 
+
 ### Define Polygon Default token
 
 Each network should have a default token as fallback. To define one for EVM networks the following is required:
