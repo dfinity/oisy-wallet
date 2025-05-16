@@ -1,4 +1,5 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
@@ -32,6 +33,7 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { autoLoadSingleToken } from './token.services';
 
 export const swap = async ({
 	identity,
@@ -186,10 +188,14 @@ export const fetchIcpSwap = async ({
 		unitName: sourceToken.decimals
 	});
 
+	const { ledgerCanisterId: sourceLedgerCanisterId, standard: sourceStandard } = sourceToken;
+	const { ledgerCanisterId: destinationLedgerCanisterId, standard: destinationStandard } =
+		destinationToken;
+
 	const pool = await getPoolCanister({
 		identity,
-		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },
-		token1: { address: destinationToken.ledgerCanisterId, standard: destinationToken.standard },
+		token0: { address: sourceLedgerCanisterId, standard: sourceStandard },
+		token1: { address: destinationLedgerCanisterId, standard: destinationStandard },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity,
 		fee: ICP_SWAP_POOL_FEE
 	});
@@ -225,7 +231,9 @@ export const fetchIcpSwap = async ({
 			await approve({
 				identity,
 				ledgerCanisterId: sourceToken.ledgerCanisterId,
+				// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
 				amount: parsedSwapAmount + sourceTokenFee * 2n,
+				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
 				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
 				spender: { owner: pool.canisterId }
 			});
@@ -238,11 +246,13 @@ export const fetchIcpSwap = async ({
 				fee: sourceTokenFee
 			});
 		}
-	} catch (_: unknown) {
+	} catch (err: unknown) {
+		console.error(err);
 		throw new Error(get(i18n).swap.error.deposit_error);
 	}
 
 	try {
+		// Perform the actual token swap after a successful deposit
 		await swapIcp({
 			identity,
 			canisterId: pool.canisterId.toString(),
@@ -250,8 +260,11 @@ export const fetchIcpSwap = async ({
 			zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId,
 			amountOutMinimum: slippageMinimum.toString()
 		});
-	} catch (_: unknown) {
+	} catch (err: unknown) {
+		console.error(err);
+
 		try {
+			// If the swap fails, attempt to refund the user's original tokens
 			await withdraw({
 				identity,
 				canisterId: pool.canisterId.toString(),
@@ -259,14 +272,17 @@ export const fetchIcpSwap = async ({
 				amount: parsedSwapAmount,
 				fee: sourceTokenFee
 			});
-		} catch (_: unknown) {
+		} catch (err: unknown) {
+			console.error(err);
+			// If even the refund fails, show a critical error requiring manual user action
 			throw new Error(get(i18n).swap.error.withdraw_failed);
 		}
-
+		// Inform the user that the swap failed, but refund was successful
 		throw new Error(get(i18n).swap.error.swap_failed_withdraw_success);
 	}
 
 	try {
+		// Withdraw the swapped destination tokens from the pool
 		await withdraw({
 			identity,
 			canisterId: pool.canisterId.toString(),
@@ -274,19 +290,22 @@ export const fetchIcpSwap = async ({
 			amount: receiveAmount,
 			fee: destinationToken.fee
 		});
-	} catch (_: unknown) {
+	} catch (err: unknown) {
+		console.error(err);
+
 		throw new Error(get(i18n).swap.error.withdraw_failed);
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
 	if (!destinationToken.enabled) {
-		await setCustomToken({
-			token: toCustomToken({ ...destinationToken, enabled: true, networkKey: 'Icrc' }),
+		await autoLoadSingleToken({
 			identity,
-			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+			token: destinationToken,
+			setToken: setCustomIcrcToken,
+			loadTokens: loadCustomTokens,
+			errorMessage: get(i18n).init.error.icrc_custom_token
 		});
-		await loadCustomTokens({ identity });
 	}
 
 	await waitAndTriggerWallet();

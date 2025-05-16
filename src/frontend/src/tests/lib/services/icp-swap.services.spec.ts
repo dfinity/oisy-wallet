@@ -17,6 +17,7 @@ import { loadCustomTokens } from '$icp/services/icrc.services';
 import { setCustomToken } from '$lib/api/backend.api';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
+import en from '$tests/mocks/i18n.mock';
 
 const mockPool = {
 	canisterId: Principal.fromText('aaaaa-aa'),
@@ -149,10 +150,10 @@ describe('fetchIcpSwap', () => {
 	});
 
 	it('Swap failed. Pool not found', async () => {
-		vi.mocked(getPoolCanister).mockRejectedValue(new Error('pool_not_found'));
+		vi.mocked(getPoolCanister).mockRejectedValue(new Error('Swap failed. Pool not found.'));
 
 		await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).rejects.toThrow(
-			'pool_not_found'
+			en.swap.error.pool_not_found
 		);
 	});
 
@@ -163,7 +164,7 @@ describe('fetchIcpSwap', () => {
 		vi.mocked(deposit).mockRejectedValue(new Error('fail'));
 
 		await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).rejects.toThrow(
-			'Swap failed. We couldn’t deposit your tokens into the pool. Please try again.'
+			en.swap.error.deposit_error
 		);
 	});
 
@@ -176,7 +177,7 @@ describe('fetchIcpSwap', () => {
 		vi.mocked(withdraw).mockResolvedValue(1n);
 
 		await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).rejects.toThrow(
-			'Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance.'
+			en.swap.error.swap_failed_withdraw_success
 		);
 	});
 
@@ -189,7 +190,7 @@ describe('fetchIcpSwap', () => {
 		vi.mocked(withdraw).mockRejectedValue(new Error('withdraw fail'));
 
 		await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).rejects.toThrow(
-			'Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: $url%`'
+			en.swap.error.withdraw_failed
 		);
 	});
 });

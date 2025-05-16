@@ -605,7 +605,7 @@
 			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again.",
 			"pool_not_found": "Swap failed. Pool not found.",
 			"deposit_error": "Swap failed. We couldn’t deposit your tokens into the pool. Please try again.",
-			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: $url%`",
+			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: $url`",
 			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance."
 		}
 	},
