@@ -25,15 +25,14 @@ const baseContacts: Contact[] = [
 		addresses: []
 	}
 ];
-
 const mockAddContact = vi.fn();
 const mockShowContact = vi.fn();
 
-beforeEach(() => {
-	vi.clearAllMocks();
-});
-
 describe('AddressBookStep', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	it('should render empty state when there are no contacts', () => {
 		const { getByText } = render(AddressBookStep, {
 			props: {
@@ -76,8 +75,10 @@ describe('AddressBookStep', () => {
 				showContact: mockShowContact
 			}
 		});
+
 		// Should show the add contact button
 		expect(getByText(en.address_book.text.add_contact)).toBeInTheDocument();
+
 		// Should display each contact
 		baseContacts.forEach((contact) => {
 			expect(
@@ -87,6 +88,7 @@ describe('AddressBookStep', () => {
 
 		// Should have a Show button for each contact
 		const showButtons = getAllByText('Show');
+
 		expect(showButtons).toHaveLength(baseContacts.length);
 	});
 
@@ -118,10 +120,12 @@ describe('AddressBookStep', () => {
 
 		// Click the first contact's Show button
 		await fireEvent.click(showButtons[0]);
+
 		expect(mockShowContact).toHaveBeenCalledWith(baseContacts[0]);
 
 		// Click the second contact's Show button
 		await fireEvent.click(showButtons[1]);
+
 		expect(mockShowContact).toHaveBeenCalledWith(baseContacts[1]);
 	});
 

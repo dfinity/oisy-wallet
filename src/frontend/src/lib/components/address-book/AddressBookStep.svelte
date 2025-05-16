@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
 	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
-	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonAdd from '$lib/components/ui/ButtonAdd.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -71,7 +70,7 @@
 					</div>
 				{/each}
 			{:else}
-				<div class="text-gray-500">{$i18n.address_book.text.no_contact_found}</div>
+				<span class="text-gray-500">{$i18n.address_book.text.no_contact_found}</span>
 			{/if}
 		</div>
 	{/if}
