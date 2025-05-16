@@ -17,6 +17,7 @@ import AllTransactionsLoader from '$lib/components/transactions/AllTransactionsL
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp, Transaction } from '$lib/types/transaction';
+import * as transactionsUtils from '$lib/utils/transactions.utils';
 import * as solTransactionsServices from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
@@ -34,6 +35,7 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -149,6 +151,8 @@ describe('AllTransactionsLoader', () => {
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
 
+		vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(true);
+
 		spyLoadNextIcTransactions = vi.spyOn(icTransactionsServices, 'loadNextIcTransactionsByOldest');
 		spyLoadNextSolTransactions = vi.spyOn(
 			solTransactionsServices,
@@ -219,6 +223,15 @@ describe('AllTransactionsLoader', () => {
 				transactions: [{ data: transaction as SolTransactionUi, certified: false }]
 			});
 		});
+	});
+
+	it('should not load transactions if transactions store are not loaded', () => {
+		vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(false);
+
+		render(AllTransactionsLoader, { props: { transactions: [] } });
+
+		expect(spyLoadNextIcTransactions).not.toHaveBeenCalled();
+		expect(spyLoadNextSolTransactions).not.toHaveBeenCalled();
 	});
 
 	it('should not load transactions if identity is nullish', () => {
@@ -543,6 +556,39 @@ describe('AllTransactionsLoader', () => {
 		);
 
 		render(AllTransactionsLoader, { props });
+
+		expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
+		expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+	});
+
+	it('should not load transactions more than once after mounting', async () => {
+		vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(false);
+
+		render(AllTransactionsLoader, { props });
+
+		await tick();
+
+		expect(spyLoadNextIcTransactions).not.toHaveBeenCalled();
+		expect(spyLoadNextSolTransactions).not.toHaveBeenCalled();
+
+		vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(true);
+		splDefaultTokensStore.reset();
+		await tick();
+		splDefaultTokensStore.add(BONK_TOKEN);
+		await tick();
+
+		expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
+		expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+
+		vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(false);
+		splDefaultTokensStore.reset();
+		await tick();
+		splDefaultTokensStore.add(BONK_TOKEN);
+		await tick();
+		splDefaultTokensStore.reset();
+		await tick();
+		splDefaultTokensStore.add(BONK_TOKEN);
+		await tick();
 
 		expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
 		expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
