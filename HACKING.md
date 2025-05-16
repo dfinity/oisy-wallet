@@ -399,30 +399,6 @@ This process will generate new bindings. Once generated, the mapping of user net
 
 The list `SUPPORTED_<network>_NETWORKS` created in the first step needs to be included in the list of EVM networks that is `SUPPORTED_EVM_NETWORKS`, in file `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`.
 
-### Define Polygon Default token
-
-Each network should have a default token as fallback. To define one for EVM networks the following is required:
-
-- Util function to check if a Network ID is a valid ID for the new network, in file `src/frontend/src/lib/utils/network.utils.ts`. For example:
-
-```typescript
-export const isNetworkIdBase: IsNetworkIdUtil = (id) =>
-	nonNullish(id) && SUPPORTED_BASE_NETWORK_IDS.includes(id);
-```
-
-- Derived store to verify that the current network is the new network, in file `src/frontend/src/lib/derived/network.derived.ts`. For example:
-
-```typescript
-export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]) =>
-	isNetworkIdBase($networkId)
-);
-```
-
-- The default token definition for the new network, in file `src/frontend/src/lib/constants/tokens.constants.ts`. For example:
-
-```typescript
-export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
-```
 
 ### Create Derived Stores for Enabled Networks
 
@@ -490,25 +466,37 @@ export const enabledEvmTokens: Readable<RequiredToken[]> = derived(
 );
 ```
 
-### Create Derived Stores for Enabled Networks
 
-Create file `src/frontend/src/evm/<network>/derived/networks.derived.ts`, by copying an existing one from the other EVM networks.
+### Define Polygon Default token
 
-Then, update the content accordingly. For example:
+Each network should have a default token as fallback. To define one for EVM networks the following is required:
+
+- Util function to check if a Network ID is a valid ID for the new network, in file `src/frontend/src/lib/utils/network.utils.ts`. For example:
 
 ```typescript
-export const enabledPolygonNetworks: Readable<EthereumNetwork[]> = derived(
-	[testnetsEnabled, userNetworks],
-	([$testnetsEnabled, $userNetworks]) =>
-		defineEnabledNetworks({
-			$testnetsEnabled,
-			$userNetworks,
-			mainnetFlag: POLYGON_MAINNET_ENABLED,
-			mainnetNetworks: [POLYGON_MAINNET_NETWORK],
-			testnetNetworks: [POLYGON_AMOY_NETWORK]
-		})
+export const isNetworkIdBase: IsNetworkIdUtil = (id) =>
+	nonNullish(id) && SUPPORTED_BASE_NETWORK_IDS.includes(id);
+```
+
+- Derived store to verify that the current network is the new network, in file `src/frontend/src/lib/derived/network.derived.ts`. For example:
+
+```typescript
+export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdBase($networkId)
 );
 ```
+
+- The default token definition for the new network, in file `src/frontend/src/lib/constants/tokens.constants.ts`. For example:
+
+```typescript
+export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
+```
+
+
+
+
+
+
 
 ### Set Custom Hero Color Palette
 
