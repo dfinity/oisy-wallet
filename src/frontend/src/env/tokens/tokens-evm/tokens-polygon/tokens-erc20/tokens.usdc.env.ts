@@ -31,12 +31,12 @@ export const USDC_TOKEN: RequiredEvmErc20Token = {
 	}
 };
 
-export const SEPOLIA_USDC_SYMBOL = 'SepoliaUSDC';
+export const AMOY_USDC_SYMBOL = 'AmoyUSDC';
 
-export const SEPOLIA_USDC_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_USDC_SYMBOL);
+export const AMOY_USDC_TOKEN_ID: TokenId = parseTokenId(AMOY_USDC_SYMBOL);
 
-export const SEPOLIA_USDC_TOKEN: RequiredEvmErc20Token = {
-	id: SEPOLIA_USDC_TOKEN_ID,
+export const AMOY_USDC_TOKEN: RequiredEvmErc20Token = {
+	id: AMOY_USDC_TOKEN_ID,
 	network: POLYGON_AMOY_NETWORK,
 	standard: 'erc20',
 	category: 'default',
