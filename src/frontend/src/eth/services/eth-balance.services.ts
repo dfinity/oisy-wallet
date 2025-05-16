@@ -55,7 +55,12 @@ const loadEthBalance = async ({
 		balancesStore.reset(tokenId);
 
 		toastsError({
-			msg: { text: loading_balance },
+			msg: {
+				text: replacePlaceholders(loading_balance, {
+					$symbol: tokenId.description ?? 'ETH',
+					$network: networkId.description ?? 'ETH'
+				})
+			},
 			err
 		});
 
@@ -76,7 +81,7 @@ const loadErc20Balance = async ({
 
 	const {
 		init: {
-			error: { eth_address_unknown, loading_balance_symbol }
+			error: { eth_address_unknown, loading_balance }
 		}
 	} = get(i18n);
 
@@ -97,8 +102,9 @@ const loadErc20Balance = async ({
 
 		toastsError({
 			msg: {
-				text: replacePlaceholders(loading_balance_symbol, {
-					$symbol: contract.symbol
+				text: replacePlaceholders(loading_balance, {
+					$symbol: contract.symbol,
+					$network: contract.network.name
 				})
 			},
 			err
