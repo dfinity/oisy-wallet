@@ -35,7 +35,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import { autoLoadSingleToken } from './token.services';
 
-export const swap = async ({
+export const fetchKongSwap = async ({
 	identity,
 	progress,
 	sourceToken,
@@ -314,4 +314,9 @@ export const fetchIcpSwap = async ({
 	}
 
 	await waitAndTriggerWallet();
+};
+
+export const swapService = {
+	[SwapProvider.ICP_SWAP]: fetchIcpSwap,
+	[SwapProvider.KONG_SWAP]: fetchKongSwap
 };
