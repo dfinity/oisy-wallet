@@ -112,7 +112,12 @@ describe('eth-balance.services', () => {
 
 			expect(toastsError).toHaveBeenCalledOnce();
 			expect(toastsError).toHaveBeenNthCalledWith(1, {
-				msg: { text: en.init.error.loading_balance },
+				msg: {
+					text: replacePlaceholders(en.init.error.loading_balance, {
+						$symbol: ETHEREUM_TOKEN_ID.description!,
+						$network: ETHEREUM_NETWORK_ID.description!
+					})
+				},
 				err: mockError
 			});
 
@@ -132,9 +137,14 @@ describe('eth-balance.services', () => {
 
 			expect(toastsError).toHaveBeenCalledTimes(mockTokens.length);
 
-			mockTokens.forEach((_, index) => {
+			mockTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 				expect(toastsError).toHaveBeenNthCalledWith(index + 1, {
-					msg: { text: en.init.error.loading_balance },
+					msg: {
+						text: replacePlaceholders(en.init.error.loading_balance, {
+							$symbol: tokenId.description!,
+							$network: networkId.description!
+						})
+					},
 					err: mockError
 				});
 			});
@@ -234,8 +244,9 @@ describe('eth-balance.services', () => {
 			expect(toastsError).toHaveBeenCalledOnce();
 			expect(toastsError).toHaveBeenNthCalledWith(1, {
 				msg: {
-					text: replacePlaceholders(en.init.error.loading_balance_symbol, {
-						$symbol: mockErc20DefaultTokens[0].symbol
+					text: replacePlaceholders(en.init.error.loading_balance, {
+						$symbol: mockErc20DefaultTokens[0].symbol,
+						$network: mockErc20DefaultTokens[0].network.name
 					})
 				},
 				err: mockError
@@ -260,8 +271,9 @@ describe('eth-balance.services', () => {
 			mockErc20DefaultTokens.forEach((_, index) => {
 				expect(toastsError).toHaveBeenNthCalledWith(index + 1, {
 					msg: {
-						text: replacePlaceholders(en.init.error.loading_balance_symbol, {
-							$symbol: mockErc20DefaultTokens[index].symbol
+						text: replacePlaceholders(en.init.error.loading_balance, {
+							$symbol: mockErc20DefaultTokens[index].symbol,
+							$network: mockErc20DefaultTokens[index].network.name
 						})
 					},
 					err: mockError
