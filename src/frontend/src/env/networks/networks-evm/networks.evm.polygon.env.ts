@@ -35,7 +35,7 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	buy: { onramperId: 'polygon' }
 };
 
-export const POLYGON_AMOY_NETWORK_SYMBOL = 'BSC (Amoy Testnet)';
+export const POLYGON_AMOY_NETWORK_SYMBOL = 'POL (Amoy Testnet)';
 
 export const POLYGON_AMOY_NETWORK_ID: NetworkId = parseNetworkId(POLYGON_AMOY_NETWORK_SYMBOL);
 
