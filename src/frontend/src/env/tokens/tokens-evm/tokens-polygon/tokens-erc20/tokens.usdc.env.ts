@@ -44,6 +44,6 @@ export const SEPOLIA_USDC_TOKEN: RequiredEvmErc20Token = {
 	symbol: USDC_SYMBOL,
 	decimals: USDC_DECIMALS,
 	icon: usdc,
-	address: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
+	address: '0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582',
 	exchange: 'erc20'
 };
