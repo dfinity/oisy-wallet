@@ -844,7 +844,7 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 ///
 /// # Returns
 /// The ID of the created contact on success.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_allowed")]
 pub fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
     // TODO replace mock data with contact service that returns Contact
     let contact = Contact {
@@ -861,7 +861,7 @@ pub fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactE
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_allowed")]
 pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactError> {
     // TODO replace mock data with data from contact service
     let contact = Contact {
@@ -878,7 +878,7 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_allowed")]
 pub fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
     // TODO intergrate delete contact service
     Ok(contact_id)
