@@ -90,7 +90,7 @@ describe('AddContactStep', () => {
 		await fireEvent.click(cancelButton);
 
 		// Check that close was called
-		expect(close).toHaveBeenCalledTimes(1);
+		expect(onClose).toHaveBeenCalledTimes(1);
 	});
 
 	it('should update title when contact name changes', async () => {
