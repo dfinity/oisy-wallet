@@ -1,15 +1,13 @@
 import {
 	BASE_NETWORK_ID,
-	BASE_SEPOLIA_NETWORK_ID
+	SUPPORTED_BASE_NETWORK_IDS
 } from '$env/networks/networks-evm/networks.evm.base.env';
 import {
 	BSC_MAINNET_NETWORK_ID,
-	BSC_TESTNET_NETWORK_ID
+	SUPPORTED_BSC_NETWORK_IDS
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
-import {
-	POLYGON_AMOY_NETWORK_ID,
-	POLYGON_MAINNET_NETWORK_ID
-} from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { SUPPORTED_EVM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import * as btcNetworkEnv from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK,
@@ -17,12 +15,12 @@ import {
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
 } from '$env/networks/networks.btc.env';
-import * as ethEnv from '$env/networks/networks.eth.env';
 import {
 	ETHEREUM_NETWORK,
 	ETHEREUM_NETWORK_ID,
 	SEPOLIA_NETWORK,
-	SEPOLIA_NETWORK_ID
+	SEPOLIA_NETWORK_ID,
+	SUPPORTED_ETHEREUM_NETWORK_IDS
 } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
@@ -98,19 +96,12 @@ describe('network utils', () => {
 	});
 
 	describe('isNetworkIdEthereum', () => {
-		const allEthereumNetworkIds = [ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID];
-
-		beforeEach(() => {
-			vi.clearAllMocks();
-
-			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORK_IDS', 'get').mockImplementation(
-				() => allEthereumNetworkIds
-			);
-		});
-
-		it.each(allEthereumNetworkIds)('should return true for Ethereum network ID %s', (id) => {
-			expect(isNetworkIdEthereum(id as NetworkId)).toBeTruthy();
-		});
+		it.each(SUPPORTED_ETHEREUM_NETWORK_IDS)(
+			'should return true for Ethereum network ID %s',
+			(id) => {
+				expect(isNetworkIdEthereum(id as NetworkId)).toBeTruthy();
+			}
+		);
 
 		it('should return false for non-Ethereum network IDs', () => {
 			expect(isNetworkIdEthereum(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
@@ -118,14 +109,7 @@ describe('network utils', () => {
 	});
 
 	describe('isNetworkIdEvm', () => {
-		const allEvmNetworkIds = [
-			BASE_NETWORK_ID,
-			BASE_SEPOLIA_NETWORK_ID,
-			BSC_MAINNET_NETWORK_ID,
-			BSC_TESTNET_NETWORK_ID
-		];
-
-		it.each(allEvmNetworkIds)('should return true for EVM network ID %s', (id) => {
+		it.each(SUPPORTED_EVM_NETWORK_IDS)('should return true for EVM network ID %s', (id) => {
 			expect(isNetworkIdEvm(id as NetworkId)).toBeTruthy();
 		});
 
@@ -137,9 +121,7 @@ describe('network utils', () => {
 	});
 
 	describe('isNetworkIdBase', () => {
-		const allBaseNetworkIds = [BASE_NETWORK_ID, BASE_SEPOLIA_NETWORK_ID];
-
-		it.each(allBaseNetworkIds)('should return true for Base network ID %s', (id) => {
+		it.each(SUPPORTED_BASE_NETWORK_IDS)('should return true for Base network ID %s', (id) => {
 			expect(isNetworkIdBase(id as NetworkId)).toBeTruthy();
 		});
 
@@ -153,9 +135,7 @@ describe('network utils', () => {
 	});
 
 	describe('isNetworkIdBsc', () => {
-		const allBscNetworkIds = [BSC_MAINNET_NETWORK_ID, BSC_TESTNET_NETWORK_ID];
-
-		it.each(allBscNetworkIds)('should return true for BSC network ID %s', (id) => {
+		it.each(SUPPORTED_BSC_NETWORK_IDS)('should return true for BSC network ID %s', (id) => {
 			expect(isNetworkIdBsc(id as NetworkId)).toBeTruthy();
 		});
 
@@ -169,9 +149,7 @@ describe('network utils', () => {
 	});
 
 	describe('isNetworkIdPolygon', () => {
-		const allPolygonNetworkIds = [POLYGON_MAINNET_NETWORK_ID, POLYGON_AMOY_NETWORK_ID];
-
-		it.each(allPolygonNetworkIds)('should return true for Polygon network ID %s', (id) => {
+		it.each(SUPPORTED_POLYGON_NETWORK_IDS)('should return true for Polygon network ID %s', (id) => {
 			expect(isNetworkIdPolygon(id as NetworkId)).toBeTruthy();
 		});
 
