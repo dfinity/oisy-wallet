@@ -492,6 +492,10 @@ export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]
 export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
 ```
 
+### Adapt exchange rate workers
+
+TODO
+
 ### Set Custom Hero Color Palette
 
 TODO
