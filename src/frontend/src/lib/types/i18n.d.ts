@@ -565,6 +565,7 @@ interface I18nSwap {
 		you_receive: string;
 		select: string;
 		select_swap_provider: string;
+		open_icp_swap: string;
 	};
 	error: {
 		kong_not_available: string;
