@@ -294,6 +294,7 @@ export const areTransactionsStoresLoading = (
 export const areTransactionsStoresLoaded = (
 	transactionsStores: TransactionsStoreCheckParams[]
 ): boolean =>
+	transactionsStores.length > 0 &&
 	transactionsStores.every((transactionsStore) =>
 		isTransactionsStoreInitialized(transactionsStore)
 	);
