@@ -7,12 +7,12 @@
 	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
 
 	type GixInputProps = ComponentProps<GixInput>;
-	type InputProps = {
+	interface InputProps {
 		showResetButton?: boolean;
 		resetButtonAriaLabel?: string;
 		showPasteButton?: boolean;
 		innerEnd?: Snippet;
-	};
+	}
 
 	let endWidth: number = $state(0);
 

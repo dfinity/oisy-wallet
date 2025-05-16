@@ -52,32 +52,32 @@ export type SwapMappedResult =
 			swapDetails: SwapAmountsReply;
 	  };
 
-export type KongQuoteResult = {
+export interface KongQuoteResult {
 	swap: SwapAmountsReply;
 	tokens: IcToken[];
-};
+}
 
-export type IcpQuoteResult = {
+export interface IcpQuoteResult {
 	swap: ICPSwapResult;
 	slippage: Slippage;
-};
+}
 
-type KongQuoteParams = {
+interface KongQuoteParams {
 	swap: SwapAmountsReply;
 	tokens: Token[];
-};
+}
 
-type IcpQuoteParams = {
+interface IcpQuoteParams {
 	swap: ICPSwapResult;
 	slippage: Slippage;
-};
+}
 
-type SwapQuoteParams = {
+interface SwapQuoteParams {
 	identity: Identity;
 	sourceToken: IcToken;
 	destinationToken: IcToken;
 	sourceAmount: bigint;
-};
+}
 interface BaseSwapProvider<T extends SwapProvider, QuoteResult, QuoteMapParams> {
 	key: T;
 	getQuote: (params: SwapQuoteParams) => Promise<QuoteResult>;

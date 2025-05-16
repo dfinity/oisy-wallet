@@ -10,10 +10,10 @@ type TransactionTypes = IcTransactionUi | BtcTransactionUi | SolTransactionUi;
 
 export type CertifiedTransaction<T extends TransactionTypes> = CertifiedData<T>;
 
-export type TransactionsStoreParams<T extends TransactionTypes> = {
+export interface TransactionsStoreParams<T extends TransactionTypes> {
 	tokenId: TokenId;
 	transactions: CertifiedTransaction<T>[];
-};
+}
 
 export type TransactionsStoreIdParams<T extends TransactionTypes> = Omit<
 	TransactionsStoreParams<T>,

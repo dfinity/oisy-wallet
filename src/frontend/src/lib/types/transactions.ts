@@ -15,6 +15,9 @@ export interface TransactionsStoreCheckParams {
 	tokens: Token[];
 }
 
-export type KnownDestination = { amounts: { value: bigint; token: Token }[]; timestamp?: number };
+export interface KnownDestination {
+	amounts: { value: bigint; token: Token }[];
+	timestamp?: number;
+}
 
 export type KnownDestinations = Record<Address, KnownDestination>;

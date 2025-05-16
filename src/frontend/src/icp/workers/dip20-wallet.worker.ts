@@ -17,10 +17,10 @@ import type {
 import { isNullish } from '@dfinity/utils';
 
 // TODO: add query for transactions - for now we mock with empty transactions
-type GetTransactions = {
+interface GetTransactions {
 	transactions: Dip20TransactionWithId[];
 	oldest_tx_id: [] | [bigint];
-};
+}
 
 type GetBalance = bigint;
 
