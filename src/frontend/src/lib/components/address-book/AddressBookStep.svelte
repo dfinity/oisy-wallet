@@ -3,6 +3,7 @@
 	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonAdd from '$lib/components/ui/ButtonAdd.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
@@ -24,7 +25,11 @@
 	let searchTerm = $state('');
 
 	let filteredContacts = $derived(
-		contacts.filter((contact) => contact.name.toLowerCase().includes(searchTerm.toLowerCase()))
+		contacts.filter((contact) => {
+			const name = contact.name.toLowerCase();
+			const terms = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
+			return terms.every((term) => name.includes(term));
+		})
 	);
 </script>
 
@@ -43,15 +48,11 @@
 				/>
 			</div>
 			<div class="flex w-2/5 justify-end pt-1">
-				<Button
-					colorStyle="secondary-light"
-					on:click={() => addContact()}
+				<ButtonAdd
+					onclick={addContact}
 					testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
-					styleClass="w-full h-full flex items-center justify-center gap-2 rounded-[12px]"
-				>
-					<IconPlus />
-					{$i18n.address_book.text.add_contact}
-				</Button>
+					label={$i18n.address_book.text.add_contact}
+				/>
 			</div>
 		</div>
 
@@ -60,13 +61,17 @@
 				{#each filteredContacts as contact, index (index)}
 					<div class="flex items-center">
 						<div class="grow">
+							<!-- TODO: Should be updated with Pull request #6462
+								Address list item
+								https://github.com/dfinity/oisy-wallet/pull/6462
+							-->
 							CONTACT: {contact.name} #addresses {contact.addresses.length}
 						</div>
 						<Button styleClass="flex-none" on:click={() => showContact(contact)}>Show</Button>
 					</div>
 				{/each}
 			{:else}
-				<div class="text-gray-500">No contacts found</div>
+				<div class="text-gray-500">{$i18n.address_book.text.no_contact_found}</div>
 			{/if}
 		</div>
 	{/if}
