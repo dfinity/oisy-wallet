@@ -395,8 +395,6 @@ This process will generate new bindings. Once generated, the mapping of user net
 1. Derived store `userNetworks` needs to map the new variant(s) to the respective network ID(s), similar to the existing ones.
 2. Sub-function `networkIdToKey` of util `mapUserNetworks` needs to map the new network ID(s) to the respective network variant(s), similar to the existing ones.
 
-### WIP
-
 ### Define Polygon Default token
 
 Each network should have a default token as fallback. To define one for EVM networks the following is required:
@@ -421,6 +419,94 @@ export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]
 ```typescript
 export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
 ```
+
+### Create Derived Stores for Enabled Networks
+
+Create file `src/frontend/src/evm/<network>/derived/networks.derived.ts`, by copying an existing one from the other EVM networks.
+
+Then, update the content accordingly. For example:
+
+```typescript
+export const enabledPolygonNetworks: Readable<EthereumNetwork[]> = derived(
+	[testnetsEnabled, userNetworks],
+	([$testnetsEnabled, $userNetworks]) =>
+		defineEnabledNetworks({
+			$testnetsEnabled,
+			$userNetworks,
+			mainnetFlag: POLYGON_MAINNET_ENABLED,
+			mainnetNetworks: [POLYGON_MAINNET_NETWORK],
+			testnetNetworks: [POLYGON_AMOY_NETWORK]
+		})
+);
+```
+
+Finally, include it in derived store `enabledEvmNetworks`, in file `src/frontend/src/evm/derived/networks.derived.ts`:
+
+```typescript
+export const enabledEvmNetworks: Readable<EthereumNetwork[]> = derived(
+	[enabledBaseNetworks, enabledBscNetworks, enabledPolygonNetworks],
+	([$enabledBaseNetworks, $enabledBscNetworks, $enabledPolygonNetworks]) => [
+		...$enabledBaseNetworks,
+		...$enabledBscNetworks,
+		...$enabledPolygonNetworks
+	]
+);
+````
+
+
+### Create Derived Stores for Enabled Tokens
+
+Create file `src/frontend/src/evm/<network>/derived/tokens.derived.ts`, by copying an existing one from the other EVM networks.
+
+Then, update the content accordingly. For example:
+
+```typescript
+export const enabledPolygonTokens: Readable<RequiredToken[]> = derived(
+	[testnetsEnabled, userNetworks],
+	([$testnetsEnabled, $userNetworks]) =>
+		defineEnabledTokens({
+			$testnetsEnabled,
+			$userNetworks,
+			mainnetFlag: POLYGON_MAINNET_ENABLED,
+			mainnetTokens: [POL_MAINNET_TOKEN],
+			testnetTokens: [POL_AMOY_TOKEN]
+		})
+);
+```
+
+Finally, include it in derived store `enabledEvmTokens`, in file `src/frontend/src/evm/derived/tokens.derived.ts`:
+
+```typescript
+export const enabledEvmTokens: Readable<RequiredToken[]> = derived(
+	[enabledBaseTokens, enabledBscTokens, enabledPolygonTokens],
+	([$enabledBaseTokens, $enabledBscTokens, $enabledPolygonTokens]) => [
+		...$enabledBaseTokens,
+		...$enabledBscTokens,
+		...$enabledPolygonTokens
+	]
+);
+````
+
+### Create Derived Stores for Enabled Networks
+
+Create file `src/frontend/src/evm/<network>/derived/networks.derived.ts`, by copying an existing one from the other EVM networks.
+
+Then, update the content accordingly. For example:
+
+```typescript
+export const enabledPolygonNetworks: Readable<EthereumNetwork[]> = derived(
+	[testnetsEnabled, userNetworks],
+	([$testnetsEnabled, $userNetworks]) =>
+		defineEnabledNetworks({
+			$testnetsEnabled,
+			$userNetworks,
+			mainnetFlag: POLYGON_MAINNET_ENABLED,
+			mainnetNetworks: [POLYGON_MAINNET_NETWORK],
+			testnetNetworks: [POLYGON_AMOY_NETWORK]
+		})
+);
+```
+
 
 ### Set Custom Hero Color Palette
 
