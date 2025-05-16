@@ -9,6 +9,7 @@
 
 	export let level: 'plain' | 'info' | 'warning' | 'error' | 'success' = 'info';
 	export let closableKey: HideInfoKey | undefined = undefined;
+	export let styleClass: string | undefined = undefined;
 	export let testId: string | undefined = undefined;
 
 	let closable = false;
@@ -30,7 +31,7 @@
 
 {#if visible}
 	<div
-		class="mb-4 flex items-start gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base"
+		class={`mb-4 flex items-start gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base ${styleClass ?? ''}`}
 		class:bg-primary={level === 'plain'}
 		class:bg-brand-light={level === 'info'}
 		class:bg-warning-light={level === 'warning'}
