@@ -6,7 +6,11 @@ import {
 import type { Address } from '$lib/types/contact';
 import { shortenAddress } from '$lib/utils/address.utils';
 import * as clipboardUtils from '$lib/utils/clipboard.utils';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
+import { mockAccountIdentifierText } from '$tests/mocks/identity.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 import { vi } from 'vitest';
@@ -22,24 +26,24 @@ describe('AddressListItem', () => {
 	const mockContext = new Map([['i18n', mockI18n]]);
 
 	const icrcAddress: Address = {
-		address_type: 'Icrc2',
-		address: 'abcdef123456789abcdef123456789abcdef123456789'
+		addressType: 'Icrc2',
+		address: mockAccountIdentifierText
 	};
 
 	const btcAddress: Address = {
-		address_type: 'Btc',
-		address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+		addressType: 'Btc',
+		address: mockBtcAddress,
 		alias: 'My Bitcoin Address'
 	};
 
 	const ethAddress: Address = {
-		address_type: 'Eth',
-		address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+		addressType: 'Eth',
+		address: mockEthAddress
 	};
 
 	const solAddress: Address = {
-		address_type: 'Sol',
-		address: 'Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaC'
+		addressType: 'Sol',
+		address: mockSolAddress
 	};
 
 	it('should render ICRC address correctly', () => {
@@ -104,12 +108,12 @@ describe('AddressListItem', () => {
 	});
 
 	it('should call onclick when clicked', async () => {
-		const onclick = vi.fn();
+		const onClick = vi.fn();
 
 		const { container } = render(AddressListItem, {
 			props: {
 				address: icrcAddress,
-				onclick
+				onClick
 			},
 			context: mockContext
 		});
@@ -123,17 +127,16 @@ describe('AddressListItem', () => {
 		await fireEvent.click(button as HTMLElement);
 
 		// Check that onclick was called
-		expect(onclick).toHaveBeenCalled();
+		expect(onClick).toHaveBeenCalled();
 	});
 
 	it('should call oninfo when info button is clicked', async () => {
-		const oninfo = vi.fn();
+		const onInfo = vi.fn();
 
 		const { getByTestId } = render(AddressListItem, {
 			props: {
 				address: icrcAddress,
-				oninfo,
-				showInfoButton: true
+				onInfo
 			},
 			context: mockContext
 		});
@@ -145,17 +148,13 @@ describe('AddressListItem', () => {
 		await fireEvent.click(infoButton);
 
 		// Check that oninfo was called
-		expect(oninfo).toHaveBeenCalled();
+		expect(onInfo).toHaveBeenCalled();
 	});
 
-	it('should not show info button when showInfoButton is false', () => {
-		const oninfo = vi.fn();
-
+	it('should not show info button when no onInfo is provided', () => {
 		const { queryByTestId } = render(AddressListItem, {
 			props: {
-				address: icrcAddress,
-				oninfo,
-				showInfoButton: false
+				address: icrcAddress
 			},
 			context: mockContext
 		});

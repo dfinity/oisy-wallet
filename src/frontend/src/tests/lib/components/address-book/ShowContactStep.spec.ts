@@ -23,12 +23,12 @@ describe('ShowContactStep', () => {
 			{
 				address: '0x123456789abcdef',
 				alias: 'My ETH Address',
-				address_type: 'Eth'
+				addressType: 'Eth'
 			},
 			{
 				address: 'btc123456789abcdef',
 				alias: 'My BTC Address',
-				address_type: 'Btc'
+				addressType: 'Btc'
 			}
 		]
 	};

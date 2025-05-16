@@ -15,7 +15,7 @@ describe('AddressBookStep', () => {
 			addresses: [
 				{
 					address: '0x123456789abcdef',
-					address_type: 'Btc',
+					addressType: 'Btc',
 					alias: 'My ETH Address'
 				}
 			]
