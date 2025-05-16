@@ -3,6 +3,7 @@ import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.a
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCanistersStrict, IcToken } from '$icp/types/ic-token';
 import type { IcTransaction, IcTransactionUi } from '$icp/types/ic-transaction';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
@@ -172,7 +173,7 @@ export const loadNextIcTransactionsByOldest = async ({
 	transactions,
 	...rest
 }: {
-	minTimestamp: bigint;
+	minTimestamp: number;
 	transactions: IcTransactionUi[];
 	owner: Principal;
 	identity: OptionIdentity;
@@ -189,7 +190,10 @@ export const loadNextIcTransactionsByOldest = async ({
 
 	const { timestamp: minIcTimestamp, id: lastId } = lastTransaction ?? {};
 
-	if (nonNullish(minIcTimestamp) && minIcTimestamp <= minTimestamp) {
+	if (
+		nonNullish(minIcTimestamp) &&
+		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
+	) {
 		return { success: false };
 	}
 
