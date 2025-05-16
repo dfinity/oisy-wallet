@@ -62,3 +62,6 @@ coverage/
 tmp
 .qodo
 /cycles-ledger.wasm.gz
+
+# Storybook
+storybook-static/
