@@ -103,7 +103,7 @@ describe('token.derived', () => {
 		);
 
 		it.each(SUPPORTED_POLYGON_NETWORK_IDS)(
-			`should return default token for BSC network %s`,
+			`should return default token for Polygon network %s`,
 			(networkId) => {
 				mockPage.mock({ network: networkId.description });
 
