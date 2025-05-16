@@ -284,7 +284,6 @@ export type Result_5 = { Ok: CreateChallengeResponse } | { Err: CreateChallengeE
 export type Result_6 = { Ok: GetAllowedCyclesResponse } | { Err: GetAllowedCyclesError };
 export type Result_7 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_8 = { Ok: null } | { Err: SaveTestnetsSettingsError };
-export type Result_9 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -356,6 +355,9 @@ export interface TopUpCyclesLedgerResponse {
 	ledger_balance: bigint;
 	topped_up: bigint;
 }
+export type TopUpCyclesLedgerResult =
+	| { Ok: TopUpCyclesLedgerResponse }
+	| { Err: TopUpCyclesLedgerError };
 export interface Transaction {
 	transaction_type: TransactionType;
 	network: {};
@@ -445,7 +447,7 @@ export interface _SERVICE {
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_8>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
-	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_9>;
+	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
 	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_8>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
