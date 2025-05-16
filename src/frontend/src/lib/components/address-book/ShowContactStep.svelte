@@ -17,31 +17,31 @@
 
 	interface Props {
 		contact: Contact;
-		close: () => void;
-		addAddress?: () => void;
-		showAddress?: (address: Address) => void;
-		edit?: (contact: Contact) => void;
+		onClose: () => void;
+		onAddAddress?: () => void;
+		onShowAddress?: (address: Address) => void;
+		onEdit?: (contact: Contact) => void;
 	}
 
-	let { contact, close, edit, addAddress, showAddress }: Props = $props();
+	let { contact, onClose, onEdit, onAddAddress, onShowAddress }: Props = $props();
 
 	let hasAddresses = $derived(contact?.addresses && contact.addresses.length > 0);
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-stretch gap-5">
-	<ContactHeader name={contact.name} edit={() => edit?.(contact)}></ContactHeader>
+	<ContactHeader name={contact.name} onEdit={() => onEdit?.(contact)}></ContactHeader>
 
 	{#if hasAddresses}
 		<!--
 		TODO: Render AddressListItems here
-		https://github.com/dfinity/oisy-wallet/pull/6243 
+		https://github.com/dfinity/oisy-wallet/pull/6243
 		-->
 		<div>
 			{#each contact.addresses as address (address.id)}
 				<div class="flex items-center">
 					<div class="grow">ADDRESS: {address.address} {address.alias}</div>
-					{#if nonNullish(showAddress)}
-						<Button styleClass="flex-none" on:click={() => showAddress(address)}>Show</Button>
+					{#if nonNullish(onShowAddress)}
+						<Button styleClass="flex-none" on:click={() => onShowAddress(address)}>Show</Button>
 					{/if}
 				</div>
 			{/each}
@@ -68,8 +68,8 @@
 				ariaLabel={$i18n.address_book.show_contact.add_address}
 				colorStyle="tertiary-main-card"
 				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
-				disabled={isNullish(addAddress)}
-				on:click={() => addAddress?.()}
+				disabled={isNullish(onAddAddress)}
+				on:click={() => onAddAddress?.()}
 			>
 				<span class="flex items-center">
 					<IconPlus />
@@ -80,6 +80,6 @@
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => close()} testId={CONTACT_SHOW_CLOSE_BUTTON}></ButtonCancel>
+		<ButtonCancel onclick={() => onClose()} testId={CONTACT_SHOW_CLOSE_BUTTON}></ButtonCancel>
 	</ButtonGroup>
 </ContentWithToolbar>
