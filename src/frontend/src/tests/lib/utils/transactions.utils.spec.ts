@@ -40,6 +40,7 @@ import type {
 	Transaction
 } from '$lib/types/transaction';
 import {
+	areTransactionsStoresLoaded,
 	areTransactionsStoresLoading,
 	filterReceivedMicroTransactions,
 	findOldestTransaction,
@@ -1083,6 +1084,344 @@ describe('transactions.utils', () => {
 
 		it('should return false for an empty input array', () => {
 			expect(areTransactionsStoresLoading([])).toBeFalsy();
+		});
+	});
+
+	describe('areTransactionsStoresLoaded', () => {
+		beforeEach(() => {
+			vi.resetAllMocks();
+		});
+
+		const mockBtcTransactionStoreData: {
+			transactionsStoreData: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
+			tokens: Token[];
+		} = {
+			transactionsStoreData: {
+				[BTC_MAINNET_TOKEN_ID]: createMockBtcTransactionsUi(5).map((data) => ({
+					data,
+					certified: true
+				})),
+				[BTC_TESTNET_TOKEN_ID]: createMockBtcTransactionsUi(7).map((data) => ({
+					data,
+					certified: true
+				}))
+			},
+			tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]
+		};
+		const mockEthTransactionStoreData: {
+			transactionsStoreData: EthTransactionsData;
+			tokens: Token[];
+		} = {
+			transactionsStoreData: {
+				[ETHEREUM_TOKEN_ID]: createMockEthTransactions(9),
+				[SEPOLIA_TOKEN_ID]: createMockEthTransactions(7),
+				[PEPE_TOKEN_ID]: createMockEthTransactions(4)
+			},
+			tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
+		};
+		const mockIcTransactionStoreData: {
+			transactionsStoreData: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+			tokens: Token[];
+		} = {
+			transactionsStoreData: {
+				[ICP_TOKEN_ID]: createMockIcTransactionsUi(7).map((data) => ({
+					data,
+					certified: true
+				}))
+			},
+			tokens: [ICP_TOKEN]
+		};
+		const mockSolTransactionStoreData: {
+			transactionsStoreData: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
+			tokens: Token[];
+		} = {
+			transactionsStoreData: {
+				[SOLANA_TOKEN_ID]: createMockSolTransactionsUi(4).map((data) => ({
+					data,
+					certified: true
+				})),
+				[BONK_TOKEN_ID]: createMockSolTransactionsUi(2).map((data) => ({
+					data,
+					certified: true
+				}))
+			},
+			tokens: [SOLANA_TOKEN, BONK_TOKEN]
+		};
+
+		it('should return false if all transactionsStoreData is nullish', () => {
+			const result = areTransactionsStoresLoaded([
+				{
+					transactionsStoreData: undefined,
+					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
+				},
+				{
+					transactionsStoreData: undefined,
+					tokens: [SOLANA_TOKEN, BONK_TOKEN]
+				},
+				{ transactionsStoreData: undefined, tokens: [] }
+			]);
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return false if some transactionsStoreData is nullish and the rest is empty', () => {
+			const result = areTransactionsStoresLoaded([
+				{
+					transactionsStoreData: {
+						[ETHEREUM_TOKEN_ID]: [],
+						[SEPOLIA_TOKEN_ID]: []
+					},
+					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
+				},
+				{
+					transactionsStoreData: { [SOLANA_TOKEN_ID]: [], [BONK_TOKEN_ID]: [] },
+					tokens: [SOLANA_TOKEN, BONK_TOKEN]
+				},
+				{ transactionsStoreData: undefined, tokens: [ICP_TOKEN] }
+			]);
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return false if all transactions stores are not initialized', () => {
+			const result = areTransactionsStoresLoaded([
+				{
+					transactionsStoreData: {},
+					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
+				},
+				{
+					transactionsStoreData: {},
+					tokens: [SOLANA_TOKEN, BONK_TOKEN]
+				},
+				{ transactionsStoreData: {}, tokens: [ICP_TOKEN] }
+			]);
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return false if some transactions stores are not initialized and the rest is empty', () => {
+			const result = areTransactionsStoresLoaded([
+				{
+					transactionsStoreData: {
+						[ETHEREUM_TOKEN_ID]: [],
+						[SEPOLIA_TOKEN_ID]: [],
+						[PEPE_TOKEN_ID]: []
+					},
+					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
+				},
+				{
+					transactionsStoreData: {},
+					tokens: [SOLANA_TOKEN, BONK_TOKEN]
+				},
+				{ transactionsStoreData: {}, tokens: [ICP_TOKEN] }
+			]);
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return false if some transactions stores are nullish and the rest is empty', () => {
+			const result = areTransactionsStoresLoaded([
+				{
+					transactionsStoreData: {
+						[ETHEREUM_TOKEN_ID]: [],
+						[SEPOLIA_TOKEN_ID]: []
+					},
+					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
+				},
+				{
+					transactionsStoreData: undefined,
+					tokens: [SOLANA_TOKEN, BONK_TOKEN]
+				},
+				{ transactionsStoreData: undefined, tokens: [ICP_TOKEN] }
+			]);
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return false if some transactions stores are not initialized and the rest is empty or nullish', () => {
+			const result = areTransactionsStoresLoaded([
+				{
+					transactionsStoreData: {
+						[ETHEREUM_TOKEN_ID]: [],
+						[SEPOLIA_TOKEN_ID]: []
+					},
+					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
+				},
+				{
+					transactionsStoreData: {},
+					tokens: [SOLANA_TOKEN, BONK_TOKEN]
+				},
+				{ transactionsStoreData: undefined, tokens: [ICP_TOKEN] }
+			]);
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return false if some transactions stores are partially initialized', () => {
+			const result = areTransactionsStoresLoaded([
+				{
+					transactionsStoreData: {
+						[ETHEREUM_TOKEN_ID]: createMockEthTransactions(9),
+						[SEPOLIA_TOKEN_ID]: createMockEthTransactions(7)
+					},
+					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
+				},
+				{
+					transactionsStoreData: {
+						[SOLANA_TOKEN_ID]: null
+					},
+					tokens: [SOLANA_TOKEN, BONK_TOKEN]
+				},
+				{ transactionsStoreData: {}, tokens: [ICP_TOKEN] }
+			]);
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return false if some transactions stores are partially initialized but all of them are empty', () => {
+			const result = areTransactionsStoresLoaded([
+				{
+					transactionsStoreData: {
+						[ETHEREUM_TOKEN_ID]: [],
+						[SEPOLIA_TOKEN_ID]: []
+					},
+					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
+				},
+				{
+					transactionsStoreData: {
+						[SOLANA_TOKEN_ID]: [],
+						[BONK_TOKEN_ID]: []
+					},
+					tokens: [SOLANA_TOKEN, BONK_TOKEN]
+				},
+				{
+					transactionsStoreData: {
+						[ICP_TOKEN_ID]: []
+					},
+					tokens: [ICP_TOKEN]
+				}
+			]);
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return true if all transactions stores are empty but initialized and non-nullish', () => {
+			const result = areTransactionsStoresLoaded([
+				{
+					transactionsStoreData: {
+						[ETHEREUM_TOKEN_ID]: [],
+						[SEPOLIA_TOKEN_ID]: []
+					},
+					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN]
+				},
+				{
+					transactionsStoreData: {
+						[ICP_TOKEN_ID]: []
+					},
+					tokens: [ICP_TOKEN]
+				},
+				{
+					transactionsStoreData: {
+						[SOLANA_TOKEN_ID]: [],
+						[BONK_TOKEN_ID]: []
+					},
+					tokens: [SOLANA_TOKEN, BONK_TOKEN]
+				}
+			]);
+
+			expect(result).toBeTruthy();
+		});
+
+		it('should return false if at least one transactions store is initialized and non-empty', () => {
+			const result = areTransactionsStoresLoaded([
+				mockBtcTransactionStoreData,
+				{
+					transactionsStoreData: {
+						[ETHEREUM_TOKEN_ID]: [],
+						[SEPOLIA_TOKEN_ID]: []
+					},
+					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
+				},
+				{
+					transactionsStoreData: {},
+					tokens: [SOLANA_TOKEN, BONK_TOKEN]
+				},
+				{ transactionsStoreData: undefined, tokens: [ICP_TOKEN] }
+			]);
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return true if all transactions stores are initialized and non-empty', () => {
+			expect(
+				areTransactionsStoresLoaded([
+					mockBtcTransactionStoreData,
+					mockEthTransactionStoreData,
+					mockIcTransactionStoreData,
+					mockSolTransactionStoreData
+				])
+			).toBeTruthy();
+		});
+
+		it('should return true if there is at least one transactions store that is nullish', () => {
+			expect(
+				areTransactionsStoresLoaded([
+					mockBtcTransactionStoreData,
+					mockEthTransactionStoreData,
+					mockIcTransactionStoreData,
+					mockSolTransactionStoreData,
+					{
+						transactionsStoreData: undefined,
+						tokens: []
+					}
+				])
+			).toBeTruthy();
+		});
+
+		it('should return true if there is at least one transactions store that is not initialized', () => {
+			expect(
+				areTransactionsStoresLoaded([
+					mockBtcTransactionStoreData,
+					mockEthTransactionStoreData,
+					mockIcTransactionStoreData,
+					mockSolTransactionStoreData,
+					{
+						transactionsStoreData: {},
+						tokens: []
+					}
+				])
+			).toBeTruthy();
+		});
+
+		it('should return true if one of the tokens list is empty', () => {
+			expect(
+				areTransactionsStoresLoaded([
+					{
+						transactionsStoreData: {
+							[ETHEREUM_TOKEN_ID]: [],
+							[SEPOLIA_TOKEN_ID]: []
+						},
+						tokens: []
+					},
+					{
+						transactionsStoreData: {
+							[ICP_TOKEN_ID]: []
+						},
+						tokens: [ICP_TOKEN]
+					},
+					{
+						transactionsStoreData: {
+							[SOLANA_TOKEN_ID]: [],
+							[BONK_TOKEN_ID]: []
+						},
+						tokens: [SOLANA_TOKEN, BONK_TOKEN]
+					}
+				])
+			).toBeTruthy();
+		});
+
+		it('should return false for an empty input array', () => {
+			expect(areTransactionsStoresLoaded([])).toBeFalsy();
 		});
 	});
 
