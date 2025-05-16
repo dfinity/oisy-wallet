@@ -11,6 +11,7 @@ import type {
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
+import { nonNullish } from '@dfinity/utils';
 
 export const initIcrcWalletWorker = async ({
 	indexCanisterId,
@@ -21,7 +22,15 @@ export const initIcrcWalletWorker = async ({
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
-	const restartWorkerWithLedgerOnly = () =>
+	let restartedWithLedgerOnly = false;
+
+	const restartWorkerWithLedgerOnly = () => {
+		if (restartedWithLedgerOnly) {
+			return;
+		}
+
+		restartedWithLedgerOnly = true;
+
 		worker.postMessage({
 			msg: 'startIcrcWalletTimer',
 			data: {
@@ -29,6 +38,7 @@ export const initIcrcWalletWorker = async ({
 				env
 			}
 		});
+	};
 
 	worker.onmessage = ({
 		data
@@ -57,7 +67,9 @@ export const initIcrcWalletWorker = async ({
 
 				// In case of error, we start the listener again, but only with the ledgerCanisterId,
 				// to make it request only the balance and not the transactions
-				restartWorkerWithLedgerOnly();
+				if (nonNullish(indexCanisterId)) {
+					restartWorkerWithLedgerOnly();
+				}
 
 				return;
 			case 'syncIcrcWalletCleanUp':
