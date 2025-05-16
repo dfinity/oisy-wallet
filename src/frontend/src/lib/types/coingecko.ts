@@ -77,7 +77,7 @@ export type CoingeckoPriceResponse =
 	| CoingeckoSimplePriceResponse
 	| CoingeckoSimpleTokenPriceResponse;
 
-export type CoingeckoErc20PriceParams = {
+export interface CoingeckoErc20PriceParams {
 	coingeckoPlatformId: CoingeckoPlatformId;
 	contractAddresses: Erc20ContractAddress[];
-};
+}
