@@ -200,7 +200,7 @@ interface I18nRewards {
 		min_transactions: string;
 		min_total_assets_usd: string;
 	};
-	alt: { upcoming_campaigns: string; coming_soon: string; reward_logo: string };
+	alt: { upcoming_campaigns: string; coming_soon: string; reward_banner: string };
 }
 
 interface I18nFooter {
@@ -561,6 +561,9 @@ interface I18nSwap {
 		included_liquidity_fees: string;
 		best_rate: string;
 		expected_minimum: string;
+		you_receive: string;
+		select: string;
+		select_swap_provider: string;
 	};
 	error: {
 		kong_not_available: string;
