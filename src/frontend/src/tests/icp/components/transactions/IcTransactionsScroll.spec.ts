@@ -14,6 +14,7 @@ import {
 	IntersectionObserverActiveInterval,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { createIcTransactionUiMockList } from '$tests/utils/transactions-stores.test-utils';
 import { render } from '@testing-library/svelte';
 
@@ -31,6 +32,8 @@ describe('IcTransactionsScroll', () => {
 	const mockTransactions: IcTransactionUi[] = createIcTransactionUiMockList(2);
 
 	const mockLastId = mockTransactions[mockTransactions.length - 1].id;
+
+	const mockSnippet = createMockSnippet('Mock Snippet');
 
 	beforeAll(() => {
 		Object.defineProperty(window, 'IntersectionObserver', {
@@ -62,7 +65,7 @@ describe('IcTransactionsScroll', () => {
 
 	describe('when the infinite scroll is triggered', () => {
 		it('should load next transactions', () => {
-			render(IcTransactionsScroll, { token: mockToken });
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextIcTransactions).toHaveBeenCalledOnce();
 			expect(loadNextIcTransactions).toHaveBeenNthCalledWith(1, {
@@ -78,7 +81,7 @@ describe('IcTransactionsScroll', () => {
 		it('should not load next transactions if identity is nullish', () => {
 			mockAuthStore(null);
 
-			render(IcTransactionsScroll, { token: mockToken });
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextIcTransactions).not.toHaveBeenCalled();
 
@@ -88,7 +91,7 @@ describe('IcTransactionsScroll', () => {
 		it('should not load next transactions if the token is nullish', () => {
 			token.reset();
 
-			render(IcTransactionsScroll, { token: mockToken });
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextIcTransactions).not.toHaveBeenCalled();
 		});
@@ -96,7 +99,7 @@ describe('IcTransactionsScroll', () => {
 		it('should not load next transactions if the transactions store is nullish', () => {
 			icTransactionsStore.reset(mockToken.id);
 
-			render(IcTransactionsScroll, { token: mockToken });
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextIcTransactions).not.toHaveBeenCalled();
 		});
@@ -105,7 +108,7 @@ describe('IcTransactionsScroll', () => {
 			icTransactionsStore.reset(mockToken.id);
 			icTransactionsStore.prepend({ tokenId: mockToken.id, transactions: [] });
 
-			render(IcTransactionsScroll, { token: mockToken });
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextIcTransactions).not.toHaveBeenCalled();
 		});
@@ -128,7 +131,7 @@ describe('IcTransactionsScroll', () => {
 				}
 			);
 
-			render(IcTransactionsScroll, { token: mockToken });
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			await vi.advanceTimersByTimeAsync(interval + 1000);
 
