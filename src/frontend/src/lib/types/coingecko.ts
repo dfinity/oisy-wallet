@@ -17,7 +17,8 @@ export type CoingeckoPlatformId =
 	| 'internet-computer'
 	| 'solana'
 	| 'base'
-	| 'binance-smart-chain';
+	| 'binance-smart-chain'
+	| 'polygon-pos';
 
 // We only support conversion in USD for now, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/simple/supported_vs_currencies

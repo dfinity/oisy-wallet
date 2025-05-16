@@ -16,7 +16,9 @@ const EXPLORER_URLS = {
 	BASE: 'https://basescan.org',
 	BASE_SEPOLIA: 'https://sepolia.basescan.org',
 	BSC: 'https://bscscan.com',
-	BSC_TESTNET: 'https://testnet.bscscan.com'
+	BSC_TESTNET: 'https://testnet.bscscan.com',
+	POLYGON: 'https://polygonscan.com',
+	POLYGON_AMOY: 'https://amoy.polygonscan.com/'
 };
 
 export const {
@@ -37,5 +39,7 @@ export const {
 	BASE: BASE_EXPLORER_URL,
 	BASE_SEPOLIA: BASE_SEPOLIA_EXPLORER_URL,
 	BSC: BSC_EXPLORER_URL,
-	BSC_TESTNET: BSC_TESTNET_EXPLORER_URL
+	BSC_TESTNET: BSC_TESTNET_EXPLORER_URL,
+	POLYGON: POLYGON_EXPLORER_URL,
+	POLYGON_AMOY: POLYGON_AMOY_EXPLORER_URL
 } = EXPLORER_URLS;
