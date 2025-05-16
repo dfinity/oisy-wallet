@@ -34,7 +34,7 @@
 	import type { OptionSolAddress } from '$lib/types/address';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdSolana,
@@ -89,6 +89,9 @@
 	let feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(solanaNativeToken.symbol);
 
+	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	$: feeTokenIdStore.set(solanaNativeToken.id);
+
 	let feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set(solanaNativeToken.decimals);
 
@@ -99,7 +102,8 @@
 			prioritizationFeeStore,
 			ataFeeStore,
 			feeSymbolStore,
-			feeDecimalsStore
+			feeDecimalsStore,
+			feeTokenIdStore
 		})
 	);
 

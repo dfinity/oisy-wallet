@@ -3,7 +3,7 @@ import {
 	POLYGON_MAINNET_ENABLED,
 	POLYGON_MAINNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
-import bnb from '$evm/bsc/assets/bnb.svg';
+import pol from '$evm/polygon/assets/pol.svg';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -22,8 +22,7 @@ export const POL_MAINNET_TOKEN: RequiredToken = {
 	name: 'POL (prev. MATIC)',
 	symbol: POL_MAINNET_SYMBOL,
 	decimals: POL_DECIMALS,
-	// TODO: add the correct icon
-	icon: bnb,
+	icon: pol,
 	buy: {
 		onramperId: 'pol_polygon'
 	}
@@ -41,8 +40,7 @@ export const POL_AMOY_TOKEN: RequiredToken = {
 	name: 'POL (Amoy Testnet)',
 	symbol: POL_AMOY_SYMBOL,
 	decimals: POL_DECIMALS,
-	// TODO: add the correct icon
-	icon: bnb
+	icon: pol
 };
 
 export const SUPPORTED_POLYGON_TOKENS: RequiredToken[] = defineSupportedTokens({
