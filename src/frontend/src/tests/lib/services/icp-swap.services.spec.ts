@@ -1,21 +1,21 @@
+import { approve } from '$icp/api/icrc-ledger.api';
+import { sendIcrc } from '$icp/services/ic-send.services';
+import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+import { setCustomToken } from '$lib/api/backend.api';
 import * as factoryApi from '$lib/api/icp-swap-factory.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import * as poolApi from '$lib/api/icp-swap-pool.api';
 import { deposit, depositFrom, swap as swapIcp, withdraw } from '$lib/api/icp-swap-pool.api';
+import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { icpSwapAmounts } from '$lib/services/icp-swap.services';
 import { fetchIcpSwap } from '$lib/services/swap.services';
+import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@dfinity/principal';
-import { approve } from '$icp/api/icrc-ledger.api';
-import { sendIcrc } from '$icp/services/ic-send.services';
-import { loadCustomTokens } from '$icp/services/icrc.services';
-import { setCustomToken } from '$lib/api/backend.api';
-import { ProgressStepsSwap } from '$lib/enums/progress-steps';
-import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import en from '$tests/mocks/i18n.mock';
 
 const mockPool = {
 	canisterId: Principal.fromText('aaaaa-aa'),
