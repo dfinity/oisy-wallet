@@ -30,6 +30,8 @@ pub enum NetworkSettingsFor {
     BaseSepolia,
     BscMainnet,
     BscTestnet,
+    PolygonMainnet,
+    PolygonAmoy,
 }
 
 /// A list of logical networks grouped by type.
@@ -77,6 +79,8 @@ pub enum EthereumNetworkId {
     BaseSepolia = 84_532,
     BNBSmartChainMainnet = 56,
     BNBSmartChainTestnet = 97,
+    PolygonMainnet = 137,
+    PolygonAmoy = 80_002,
     Sepolia = 11_155_111,
 }
 impl Network for EthereumNetworkId {}
