@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { onDestroy, type Snippet } from 'svelte';
 	import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
@@ -25,6 +25,12 @@
 
 	let disableLoader: Record<TokenId, boolean> = $state({});
 
+	let destroyed = $state(false);
+
+	onDestroy(() => {
+		destroyed = true;
+	});
+
 	const loadMissingTransactions = async () => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
@@ -42,6 +48,10 @@
 		);
 
 		const loadNextTransactions = async (token: Token) => {
+			if (destroyed) {
+				return;
+			}
+
 			const {
 				id: tokenId,
 				network: { id: networkId }
