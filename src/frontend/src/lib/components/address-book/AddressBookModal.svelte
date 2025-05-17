@@ -11,7 +11,7 @@
 	import type { Contact } from '$lib/types/contact';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<AddressBookSteps> = [
 		{
 			name: AddressBookSteps.ADDRESS_BOOK,
 			title: $i18n.address_book.text.title
@@ -24,7 +24,7 @@
 			name: AddressBookSteps.SHOW_CONTACT,
 			title: $i18n.address_book.show_contact.title
 		}
-	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
+	];
 
 	let currentStep: WizardStep | undefined = $state();
 	let modal: WizardModal | undefined = $state();

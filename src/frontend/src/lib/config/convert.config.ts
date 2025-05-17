@@ -12,7 +12,7 @@ export const convertWizardSteps = ({
 	i18n,
 	sourceToken,
 	destinationToken
-}: ConvertWizardStepsParams): WizardSteps => [
+}: ConvertWizardStepsParams): WizardSteps<WizardStepsConvert | WizardStepsSend> => [
 	{
 		name: WizardStepsConvert.CONVERT,
 		title: replacePlaceholders(i18n.convert.text.swap_to_token, {
