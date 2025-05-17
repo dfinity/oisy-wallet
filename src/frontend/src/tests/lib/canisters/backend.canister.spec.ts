@@ -8,6 +8,12 @@ import type {
 } from '$declarations/backend/backend.did';
 
 import { BackendCanister } from '$lib/canisters/backend.canister';
+import {
+	ChallengeCompletionErrorEnum,
+	CreateChallengeEnum,
+	PowChallengeError,
+	PowCreateChallengeError
+} from '$lib/canisters/backend.errors';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
@@ -744,9 +750,9 @@ describe('backend.canister', () => {
 		it('should allow signing', async () => {
 			const result: Result_1 = {
 				Ok: {
-					status: { Executed: null }, // or { Skipped: null } or { Failed: null }, depending on your scenario
-					challenge_completion: [], // Provide appropriately if challenge completion data exists
-					allowed_cycles: ZERO // Replace with proper value
+					status: { Executed: null },
+					challenge_completion: [],
+					allowed_cycles: ZERO
 				}
 			};
 
@@ -808,21 +814,50 @@ describe('backend.canister', () => {
 		});
 
 		it.each([
-			['InvalidNonce', { InvalidNonce: null }],
-			['MissingChallenge', { MissingChallenge: null }],
-			['ExpiredChallenge', { ExpiredChallenge: null }],
-			['MissingUserProfile', { MissingUserProfile: null }],
-			['ChallengeAlreadySolved', { ChallengeAlreadySolved: null }]
-			// eslint-disable-next-line local-rules/prefer-object-params -- It is a simple list of cases
-		])(`should return the PoW challenge if PowChallenge error %s is returned`, async (_, error) => {
-			service.allow_signing.mockResolvedValue({ Err: { PowChallenge: error } });
+			{
+				errorName: 'InvalidNonce',
+				error: { InvalidNonce: null },
+				code: ChallengeCompletionErrorEnum.InvalidNonce
+			},
+			{
+				errorName: 'MissingChallenge',
+				error: { MissingChallenge: null },
+				code: ChallengeCompletionErrorEnum.MissingChallenge
+			},
+			{
+				errorName: 'ExpiredChallenge',
+				error: { ExpiredChallenge: null },
+				code: ChallengeCompletionErrorEnum.ExpiredChallenge
+			},
+			{
+				errorName: 'MissingUserProfile',
+				error: { MissingUserProfile: null },
+				code: ChallengeCompletionErrorEnum.MissingUserProfile
+			},
+			{
+				errorName: 'ChallengeAlreadySolved',
+				error: { ChallengeAlreadySolved: null },
+				code: ChallengeCompletionErrorEnum.ChallengeAlreadySolved
+			}
+		])(
+			'should throw PowChallengeError with appropriate code if PowChallenge error $errorName is returned',
+			async ({ error, code }) => {
+				service.allow_signing.mockResolvedValue({ Err: { PowChallenge: error } });
 
-			const { allowSigning } = await createBackendCanister({
-				serviceOverride: service
-			});
+				const { allowSigning } = await createBackendCanister({
+					serviceOverride: service
+				});
 
-			await expect(allowSigning()).rejects.toEqual(error);
-		});
+				const result = allowSigning();
+
+				await expect(result).rejects.toBeInstanceOf(PowChallengeError);
+
+				await result.catch((err) => {
+					expect(err).toBeInstanceOf(PowChallengeError);
+					expect((err as PowChallengeError).code).toEqual(code);
+				});
+			}
+		);
 
 		it('should throw a CanisterInternalError if Other error is returned', async () => {
 			const errorMsg = 'Test error';
@@ -837,7 +872,7 @@ describe('backend.canister', () => {
 			await expect(allowSigning()).rejects.toThrow(new CanisterInternalError(errorMsg));
 		});
 
-		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
+		it('should throw a CanisterInternalError with message if unrecognized error is returned', async () => {
 			const response = { Err: { UnrecognizedError: 'Some unknown error' } };
 
 			service.allow_signing.mockResolvedValue(response as unknown as Result_1);
@@ -847,7 +882,7 @@ describe('backend.canister', () => {
 			});
 
 			await expect(allowSigning()).rejects.toThrow(
-				new CanisterInternalError('Unknown AllowSigningError')
+				new CanisterInternalError('An uknown error occurred.')
 			);
 		});
 	});
@@ -880,7 +915,10 @@ describe('backend.canister', () => {
 			});
 
 			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
-				'Challenge is already in progress.'
+				new PowCreateChallengeError(
+					'Challenge is already in progress.',
+					CreateChallengeEnum.ChallengeInProgress
+				)
 			);
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
@@ -892,7 +930,7 @@ describe('backend.canister', () => {
 			});
 
 			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
-				'Failed to generate randomness'
+				new CanisterInternalError('Could not generate randomness.')
 			);
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
@@ -904,19 +942,20 @@ describe('backend.canister', () => {
 			});
 
 			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
-				'User profile is missing.'
+				new CanisterInternalError('User profile is missing.')
 			);
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
 		});
 
 		it('should handle other unexpected errors', async () => {
+			const errorMsg = 'Unexpected error occurred.';
 			service.create_pow_challenge.mockResolvedValue({
-				Err: { Other: 'Unexpected error occurred.' }
+				Err: { Other: errorMsg }
 			});
 
 			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
-				'Unexpected error occurred.'
+				new CanisterInternalError('An other error occurred.')
 			);
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
@@ -927,7 +966,7 @@ describe('backend.canister', () => {
 			service.create_pow_challenge.mockResolvedValue({ Err: { CanisterError: null } });
 
 			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
-				'Unknown CreateChallengeError'
+				new CanisterInternalError('An uknown error occurred.')
 			);
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
