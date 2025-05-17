@@ -162,7 +162,8 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
-	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>()
+	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>(),
+	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>()
 });
 
 export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataResponseSchema.extend({

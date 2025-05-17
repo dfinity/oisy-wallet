@@ -8,6 +8,7 @@ import {
 	exchangeRateETHToUsd,
 	exchangeRateICPToUsd,
 	exchangeRateICRCToUsd,
+	exchangeRatePOLToUsd,
 	exchangeRateSOLToUsd,
 	exchangeRateSPLToUsd
 } from '$lib/services/exchange.services';
@@ -116,7 +117,8 @@ const syncExchange = async ({
 			currentIcrcPrices,
 			currentSolPrice,
 			currentSplPrices,
-			currentBnbPrice
+			currentBnbPrice,
+			currentPolPrice
 		] = await Promise.all([
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
@@ -125,7 +127,8 @@ const syncExchange = async ({
 			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
 			exchangeRateSOLToUsd(),
 			exchangeRateSPLToUsd(splTokenAddresses),
-			exchangeRateBNBToUsd()
+			exchangeRateBNBToUsd(),
+			exchangeRatePOLToUsd()
 		]);
 
 		postMessage({
@@ -138,7 +141,8 @@ const syncExchange = async ({
 				currentIcrcPrices,
 				currentSolPrice,
 				currentSplPrices,
-				currentBnbPrice
+				currentBnbPrice,
+				currentPolPrice
 			}
 		});
 	} catch (err: unknown) {
