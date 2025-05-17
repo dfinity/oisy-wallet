@@ -14,7 +14,13 @@
 
 	const dispatch = createEventDispatcher();
 
-	let destinations = $derived(nonNullish(knownDestinations) ? Object.keys(knownDestinations) : []);
+	let destinations = $derived(
+		nonNullish(knownDestinations)
+			? Object.keys(knownDestinations).filter((address) =>
+					address.toLowerCase().includes(destination.toLowerCase())
+				)
+			: []
+	);
 </script>
 
 {#if nonNullish(knownDestinations) && destinations.length > 0}
