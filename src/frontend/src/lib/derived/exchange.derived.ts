@@ -8,6 +8,10 @@ import {
 	BNB_TESTNET_TOKEN_ID
 } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import {
+	POL_AMOY_TOKEN_ID,
+	POL_MAINNET_TOKEN_ID
+} from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import {
 	BTC_MAINNET_TOKEN_ID,
 	BTC_REGTEST_TOKEN_ID,
 	BTC_TESTNET_TOKEN_ID
@@ -49,6 +53,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 		const icpPrice = $exchangeStore?.['internet-computer'];
 		const solPrice = $exchangeStore?.solana;
 		const bnbPrice = $exchangeStore?.binancecoin;
+		const polPrice = $exchangeStore?.['polygon-ecosystem-token'];
 
 		return {
 			// TODO: improve feed price on testnets, for now we assume that 1 token mainnet = 1 token testnet
@@ -66,6 +71,8 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[BASE_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
 			[BNB_MAINNET_TOKEN_ID]: bnbPrice,
 			[BNB_TESTNET_TOKEN_ID]: bnbPrice,
+			[POL_MAINNET_TOKEN_ID]: polPrice,
+			[POL_AMOY_TOKEN_ID]: polPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
 				const token =
 					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??
