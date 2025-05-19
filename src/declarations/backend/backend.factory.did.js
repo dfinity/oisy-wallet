@@ -215,7 +215,7 @@ export const idlFactory = ({ IDL }) => {
 		RandomnessError: IDL.Text,
 		Other: IDL.Text
 	});
-	const Result_5 = IDL.Variant({
+	const CreatePowChallengeResult = IDL.Variant({
 		Ok: CreateChallengeResponse,
 		Err: CreateChallengeError
 	});
@@ -512,7 +512,7 @@ export const idlFactory = ({ IDL }) => {
 		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_4], []),
 		config: IDL.Func([], [Config], ['query']),
 		create_contact: IDL.Func([CreateContactRequest], [GetContactResult], []),
-		create_pow_challenge: IDL.Func([], [Result_5], []),
+		create_pow_challenge: IDL.Func([], [CreatePowChallengeResult], []),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
 		get_account_creation_timestamps: IDL.Func(

@@ -186,6 +186,10 @@ type CreateChallengeResponse = record {
 	expiry_timestamp_ms : nat64
 };
 type CreateContactRequest = record { name : text };
+type CreatePowChallengeResult = variant {
+	Ok : CreateChallengeResponse;
+	Err : CreateChallengeError
+};
 type CredentialSpec = record {
 	arguments : opt vec record { text; ArgumentValue };
 	credential_type : text
@@ -287,10 +291,6 @@ type Result_3 = variant {
 type Result_4 = variant {
 	Ok : SelectedUtxosFeeResponse;
 	Err : SelectedUtxosFeeError
-};
-type Result_5 = variant {
-	Ok : CreateChallengeResponse;
-	Err : CreateChallengeError
 };
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
@@ -437,7 +437,7 @@ service : (Arg) -> {
 	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_4);
 	config : () -> (Config) query;
 	create_contact : (CreateContactRequest) -> (GetContactResult);
-	create_pow_challenge : () -> (Result_5);
+	create_pow_challenge : () -> (CreatePowChallengeResult);
 	create_user_profile : () -> (UserProfile);
 	delete_contact : (nat64) -> (DeleteContactResult);
 	get_account_creation_timestamps : () -> (

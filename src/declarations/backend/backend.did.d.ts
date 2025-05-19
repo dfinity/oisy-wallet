@@ -188,6 +188,9 @@ export interface CreateChallengeResponse {
 export interface CreateContactRequest {
 	name: string;
 }
+export type CreatePowChallengeResult =
+	| { Ok: CreateChallengeResponse }
+	| { Err: CreateChallengeError };
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];
 	credential_type: string;
@@ -303,7 +306,6 @@ export type Result_3 =
 	| { Ok: BtcGetPendingTransactionsReponse }
 	| { Err: BtcAddPendingTransactionError };
 export type Result_4 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
-export type Result_5 = { Ok: CreateChallengeResponse } | { Err: CreateChallengeError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -455,7 +457,7 @@ export interface _SERVICE {
 	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_4>;
 	config: ActorMethod<[], Config>;
 	create_contact: ActorMethod<[CreateContactRequest], GetContactResult>;
-	create_pow_challenge: ActorMethod<[], Result_5>;
+	create_pow_challenge: ActorMethod<[], CreatePowChallengeResult>;
 	create_user_profile: ActorMethod<[], UserProfile>;
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
