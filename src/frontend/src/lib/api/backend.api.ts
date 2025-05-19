@@ -192,6 +192,13 @@ export const updateUserNetworkSettings = async ({
 	return updateUserNetworkSettings(params);
 };
 
+export const getContacts = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<string[]> => {
+	const { get } = await backendCanister({ identity });
+};
+
 const backendCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,

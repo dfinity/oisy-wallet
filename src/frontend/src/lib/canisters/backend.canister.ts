@@ -2,7 +2,9 @@ import type {
 	AddUserCredentialResult,
 	AllowSigningResponse,
 	_SERVICE as BackendService,
+	Contact,
 	CreateChallengeResponse,
+	CreateContactResult,
 	CustomToken,
 	GetAllowedCyclesResponse,
 	PendingTransaction,
@@ -251,5 +253,32 @@ export class BackendCanister extends Canister<BackendService> {
 			networks: mapUserNetworks(networks),
 			current_user_version: toNullable(currentUserVersion)
 		});
+	};
+
+	getContact = async (id: bigint) => {
+		const { get_contact } = this.caller({ certified: true });
+
+		return await get_contact(id);
+	};
+
+	getContacts = async () => {
+		const { get_contacts } = this.caller({ certified: true });
+
+		return await get_contacts();
+	};
+
+	createContact = async (name: string): Promise<CreateContactResult> => {
+		const { create_contact } = this.caller({ certified: true });
+		return await create_contact({ name });
+	};
+
+	deleteContact = async (id: bigint): Promise<void> => {
+		const { delete_contact } = this.caller({ certified: true });
+		await delete_contact(id);
+	};
+
+	updateContact = async (contact: Contact): Promise<void> => {
+		const { update_contact } = this.caller({ certified: true });
+		await update_contact(contact);
 	};
 }
