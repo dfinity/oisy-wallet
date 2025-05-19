@@ -21,12 +21,16 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
+        account::{EthAddress, TokenAccountId},
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
+        },
+        contact::{
+            Contact, ContactAddressData, ContactError, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
@@ -38,7 +42,9 @@ use shared::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
-        result_types::AddUserCredentialResult,
+        result_types::{
+            AddUserCredentialResult, DeleteContactResult, GetContactResult, GetContactsResult,
+        },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
@@ -829,6 +835,101 @@ pub fn set_snapshot(snapshot: UserSnapshot) {
 #[must_use]
 pub fn get_snapshot() -> Option<UserSnapshot> {
     todo!()
+}
+
+/// Creates a new contact for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+///
+/// # Returns
+/// The created contact on success.
+///
+/// # Test
+/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
+#[update(guard = "caller_is_allowed")]
+#[must_use]
+pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
+    // TODO replace mock data with contact service that returns Contact
+    let contact = Contact {
+        id: time(),
+        name: request.name,
+        addresses: vec![],
+        update_timestamp_ns: time(),
+    };
+
+    GetContactResult::Ok(contact)
+}
+
+/// Updates an existing contact for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+#[update(guard = "caller_is_allowed")]
+pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactError> {
+    // TODO replace mock data with data from contact service
+    let contact = Contact {
+        id: request.id,
+        name: request.name,
+        addresses: request.addresses,
+        update_timestamp_ns: time(),
+    };
+
+    Ok(contact)
+}
+
+/// Deletes a contact for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+#[update(guard = "caller_is_allowed")]
+#[must_use]
+pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
+    // TODO integrate delete contact service
+    let normal_result = Ok(contact_id);
+    normal_result.into()
+}
+
+/// Gets a contact by ID for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+#[query(guard = "caller_is_not_anonymous")]
+pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
+    // TODO replace mock data with the get contact service
+    Ok(Contact {
+        id: contact_id,
+        name: "John Doe".to_string(),
+        addresses: vec![ContactAddressData {
+            token_account_id: TokenAccountId::Eth(EthAddress::Public(
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".to_string(),
+            )),
+            label: Some("ETH Wallet".to_string()),
+        }],
+        update_timestamp_ns: time(),
+    })
+}
+
+/// Lists all contacts for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn get_contacts() -> GetContactsResult {
+    // TODO replace mock data with the get contacts service
+    let normal_result = Ok(vec![Contact {
+        id: time(),
+        name: "John Doe".to_string(),
+        addresses: vec![ContactAddressData {
+            token_account_id: TokenAccountId::Eth(EthAddress::Public(
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".to_string(),
+            )),
+            label: Some("ETH Wallet".to_string()),
+        }],
+        update_timestamp_ns: time(),
+    }]);
+    normal_result.into()
 }
 
 export_candid!();
