@@ -42,7 +42,7 @@ use shared::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
-        result_types::{AddUserCredentialResult, CreateContactResult},
+        result_types::{AddUserCredentialResult, CreateContactResult, DeleteContactResult},
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
@@ -883,9 +883,11 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_allowed")]
-pub fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
-    // TODO intergrate delete contact service
-    Ok(contact_id)
+#[must_use]
+pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
+    // TODO integrate delete contact service
+    let normal_result = Ok(contact_id);
+    normal_result.into()
 }
 
 /// Gets a contact by ID for the caller.

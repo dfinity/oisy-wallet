@@ -77,3 +77,18 @@ impl From<Result<Contact, ContactError>> for CreateContactResult {
         }
     }
 }
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum DeleteContactResult {
+    /// The contact was deleted successfully.
+    Ok(u64),
+    /// The contact was not deleted due to an error.
+    Err(ContactError),
+}
+impl From<Result<u64, ContactError>> for DeleteContactResult {
+    fn from(result: Result<u64, ContactError>) -> Self {
+        match result {
+            Ok(id) => DeleteContactResult::Ok(id),
+            Err(err) => DeleteContactResult::Err(err),
+        }
+    }
+}
