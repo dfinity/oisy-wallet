@@ -53,7 +53,7 @@
 					testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
 					styleClass="rounded-[12px]"
 				>
-					<IconPlus></IconPlus>
+					<IconPlus />
 					{$i18n.address_book.text.add_contact}
 				</Button>
 			</div>
