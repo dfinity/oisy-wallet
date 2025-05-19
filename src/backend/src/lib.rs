@@ -666,6 +666,7 @@ pub fn create_user_profile() -> UserProfile {
 /// # Panics
 /// - If the caller is anonymous.  See: `may_read_user_data`.
 #[query(guard = "caller_is_not_anonymous")]
+#[must_use]
 pub fn get_user_profile() -> GetUserProfileResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
