@@ -53,8 +53,22 @@ export const ethTransactionsNotInitialized: Readable<boolean> = derived(
 );
 
 export const ethKnownDestinations: Readable<KnownDestinations> = derived(
-	[ethTransactionsStore, ckEthMinterInfoStore, ethereumTokenId, ethAddress, tokens],
-	([$ethTransactionsStore, $ckEthMinterInfoStore, $ethereumTokenId, $ethAddress, $tokens]) => {
+	[
+		ethTransactionsStore,
+		ckEthMinterInfoStore,
+		ethereumTokenId,
+		ethAddress,
+		tokens,
+		tokenWithFallback
+	],
+	([
+		$ethTransactionsStore,
+		$ckEthMinterInfoStore,
+		$ethereumTokenId,
+		$ethAddress,
+		$tokens,
+		$tokenWithFallback
+	]) => {
 		const ckMinterInfoAddresses = toCkMinterInfoAddresses(
 			$ckEthMinterInfoStore?.[$ethereumTokenId]
 		);
@@ -67,7 +81,7 @@ export const ethKnownDestinations: Readable<KnownDestinations> = derived(
 		Object.getOwnPropertySymbols($ethTransactionsStore ?? {}).forEach((tokenId) => {
 			const token = $tokens.find(({ id }) => id === tokenId);
 
-			if (nonNullish(token)) {
+			if (nonNullish(token) && token.network.id === $tokenWithFallback.network.id) {
 				$ethTransactionsStore[tokenId as TokenId].forEach((transaction) => {
 					mappedTransactions.push({
 						...mapEthTransactionUi({
