@@ -1,7 +1,10 @@
 use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
-use super::user_profile::{GetUserProfileError, UserProfile};
+use super::{
+    signer::{GetAllowedCyclesError, GetAllowedCyclesResponse},
+    user_profile::{GetUserProfileError, UserProfile},
+};
 use crate::types::{
     contact::{Contact, ContactError},
     network::SaveTestnetsSettingsError,
@@ -140,6 +143,22 @@ impl From<Result<UserProfile, GetUserProfileError>> for GetUserProfileResult {
         match result {
             Ok(profile) => GetUserProfileResult::Ok(profile),
             Err(err) => GetUserProfileResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetAllowedCyclesResult {
+    /// The allowed cycles were retrieved successfully.
+    Ok(GetAllowedCyclesResponse),
+    /// The allowed cycles were not retrieved due to an error.
+    Err(GetAllowedCyclesError),
+}
+impl From<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>> for GetAllowedCyclesResult {
+    fn from(result: Result<GetAllowedCyclesResponse, GetAllowedCyclesError>) -> Self {
+        match result {
+            Ok(response) => GetAllowedCyclesResult::Ok(response),
+            Err(err) => GetAllowedCyclesResult::Err(err),
         }
     }
 }

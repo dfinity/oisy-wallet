@@ -1,7 +1,7 @@
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
-use candid::{candid_method, Nat, Principal};
+use candid::{candid_method, Principal};
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
@@ -40,13 +40,12 @@ use shared::{
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
-            AddUserCredentialResult, DeleteContactResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult,
+            AddUserCredentialResult, DeleteContactResult, GetAllowedCyclesResult, GetContactResult,
+            GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
-            GetAllowedCyclesResponse,
+            AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
         },
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
@@ -730,9 +729,12 @@ pub fn has_user_profile() -> HasUserProfileResponse {
 /// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 /// - `Other`: If another error occurred during the operation
 #[update(guard = "caller_is_not_anonymous")]
-pub async fn get_allowed_cycles() -> Result<GetAllowedCyclesResponse, GetAllowedCyclesError> {
-    let allowed_cycles: Nat = signer::get_allowed_cycles().await?;
-    Ok(GetAllowedCyclesResponse { allowed_cycles })
+pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
+    let allowed_cycles = signer::get_allowed_cycles().await;
+    match allowed_cycles {
+        Ok(allowed_cycles) => Ok(GetAllowedCyclesResponse { allowed_cycles }).into(),
+        Err(err) => GetAllowedCyclesResult::Err(err),
+    }
 }
 
 /// This function authorizes the caller to spend a specific
