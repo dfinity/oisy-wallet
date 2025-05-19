@@ -1,5 +1,6 @@
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_NETWORK_IDS, SUPPORTED_TESTNET_NETWORK_IDS } from '$env/networks/networks.env';
 import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
@@ -7,6 +8,7 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_NETWORK_IDS } from '$env/networks/networks.sol.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { BNB_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
+import { POL_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
@@ -97,6 +99,15 @@ describe('token.derived', () => {
 				mockPage.mock({ network: networkId.description });
 
 				expect(get(defaultFallbackToken)).toEqual(BNB_MAINNET_TOKEN);
+			}
+		);
+
+		it.each(SUPPORTED_POLYGON_NETWORK_IDS)(
+			`should return default token for Polygon network %s`,
+			(networkId) => {
+				mockPage.mock({ network: networkId.description });
+
+				expect(get(defaultFallbackToken)).toEqual(POL_MAINNET_TOKEN);
 			}
 		);
 

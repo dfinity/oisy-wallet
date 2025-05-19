@@ -164,6 +164,17 @@ export interface Config {
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_raw: [] | [Uint8Array | number[]];
 }
+export interface Contact {
+	id: bigint;
+	name: string;
+	update_timestamp_ns: bigint;
+	addresses: Array<ContactAddressData>;
+}
+export interface ContactAddressData {
+	label: [] | [string];
+	token_account_id: TokenAccountId;
+}
+export type ContactError = { InvalidContactData: null } | { ContactNotFound: null };
 export type CreateChallengeError =
 	| { ChallengeInProgress: null }
 	| { MissingUserProfile: null }
@@ -173,6 +184,9 @@ export interface CreateChallengeResponse {
 	difficulty: number;
 	start_timestamp_ms: bigint;
 	expiry_timestamp_ms: bigint;
+}
+export interface CreateContactRequest {
+	name: string;
 }
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];
@@ -197,11 +211,14 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
+export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
 	allowed_cycles: bigint;
 }
+export type GetContactResult = { Ok: Contact } | { Err: ContactError };
+export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
 export type GetUserProfileError = { NotFound: null };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
@@ -333,6 +350,11 @@ export interface TestnetsSettings {
 	show_testnets: boolean;
 }
 export type Token = { Icrc: IcrcToken } | { SplDevnet: SplToken } | { SplMainnet: SplToken };
+export type TokenAccountId =
+	| { Btc: BtcAddress }
+	| { Eth: EthAddress }
+	| { Sol: string }
+	| { Icrcv2: Icrcv2AccountId };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {
@@ -430,11 +452,15 @@ export interface _SERVICE {
 	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_3>;
 	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_4>;
 	config: ActorMethod<[], Config>;
+	create_contact: ActorMethod<[CreateContactRequest], GetContactResult>;
 	create_pow_challenge: ActorMethod<[], Result_5>;
 	create_user_profile: ActorMethod<[], UserProfile>;
+	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
 	get_allowed_cycles: ActorMethod<[], Result_6>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
+	get_contact: ActorMethod<[bigint], GetContactResult>;
+	get_contacts: ActorMethod<[], GetContactsResult>;
 	get_snapshot: ActorMethod<[], [] | [UserSnapshot]>;
 	get_user_profile: ActorMethod<[], Result_7>;
 	has_user_profile: ActorMethod<[], HasUserProfileResponse>;
@@ -450,6 +476,7 @@ export interface _SERVICE {
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
+	update_contact: ActorMethod<[Contact], GetContactResult>;
 	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_8>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;

@@ -1,16 +1,21 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import type { IcToken } from '$icp/types/ic-token';
 	import RewardEarningsCard from '$lib/components/rewards/RewardEarningsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import {
+		REWARDS_EARNINGS_ACTIVITY_BUTTON,
+		REWARDS_EARNINGS_CARD
+	} from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -97,7 +102,7 @@
 		loading = false;
 	};
 
-	$effect(() => {
+	onMount(() => {
 		loadRewards({ ckBtcToken, ckUsdcToken, icpToken: ICP_TOKEN });
 	});
 
@@ -133,14 +138,22 @@
 				token={ckBtcToken}
 				amount={ckBtcReward}
 				usdAmount={ckBtcRewardUsd}
+				testId={`${REWARDS_EARNINGS_CARD}-${BTC_MAINNET_TOKEN.twinTokenSymbol}`}
 			/>
 			<RewardEarningsCard
 				{loading}
 				token={ckUsdcToken}
 				amount={ckUsdcReward}
 				usdAmount={ckUsdcRewardUsd}
+				testId={`${REWARDS_EARNINGS_CARD}-${USDC_TOKEN.twinTokenSymbol}`}
 			/>
-			<RewardEarningsCard {loading} token={ICP_TOKEN} amount={icpReward} usdAmount={icpRewardUsd} />
+			<RewardEarningsCard
+				{loading}
+				token={ICP_TOKEN}
+				amount={icpReward}
+				usdAmount={icpRewardUsd}
+				testId={`${REWARDS_EARNINGS_CARD}-${ICP_SYMBOL}`}
+			/>
 		</div>
 
 		<div class="my-5 w-full justify-items-center text-center">
@@ -148,6 +161,7 @@
 				paddingSmall
 				on:click={gotoActivity}
 				styleClass="font-semibold bg-transparent text-brand-primary-alt"
+				testId={REWARDS_EARNINGS_ACTIVITY_BUTTON}
 			>
 				{isMobile()
 					? $i18n.rewards.text.activity_button_text_short

@@ -5,8 +5,10 @@ import type {
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
+import type { AmountString } from '$lib/types/amount';
 import {
 	SwapProvider,
+	type FormatSlippageParams,
 	type ICPSwapResult,
 	type ProviderFee,
 	type Slippage,
@@ -15,6 +17,8 @@ import {
 import type { Token } from '$lib/types/token';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { formatToken } from './format.utils';
+import { isNullishOrEmpty } from './input.utils';
 
 export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] =>
 	transactions.length === 0
@@ -119,4 +123,34 @@ export const calculateSlippage = ({
 }): bigint => {
 	const factor = 1 - slippagePercentage / 100;
 	return BigInt(Math.floor(Number(quoteAmount) * factor));
+};
+
+/**
+ * Formats the minimum expected receive amount after applying slippage.
+ *
+ * @param {OptionAmount} params.slippageValue - The slippage percentage (as string or number or undefined).
+ * @param {number} params.receiveAmount - The original quoted amount to receive.
+ * @param {number} params.decimals - The number of decimal places for the token.
+ * @returns {AmountString | null} A formatted string representing the minimum amount the user can expect to receive,
+ * formatted with the token's decimals, or `null` if any required value is missing.
+ *
+ */
+export const formatReceiveOutMinimum = ({
+	slippageValue,
+	receiveAmount,
+	decimals
+}: FormatSlippageParams): AmountString | undefined => {
+	if (isNullishOrEmpty(slippageValue?.toString())) {
+		return;
+	}
+	const receiveOutMinimum = calculateSlippage({
+		quoteAmount: receiveAmount,
+		slippagePercentage: Number(slippageValue)
+	});
+
+	return formatToken({
+		value: receiveOutMinimum,
+		unitName: decimals,
+		displayDecimals: decimals
+	});
 };

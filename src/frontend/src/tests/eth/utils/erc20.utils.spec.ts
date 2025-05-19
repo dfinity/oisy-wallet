@@ -1,5 +1,4 @@
-import { BASE_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens-base/tokens.erc20.env';
-import { BSC_BEP20_TOKENS } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bep20.env';
+import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
 import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
@@ -158,8 +157,7 @@ describe('erc20.utils', () => {
 			...SUPPORTED_ETHEREUM_TOKENS,
 			...SUPPORTED_EVM_TOKENS,
 			...ERC20_TWIN_TOKENS,
-			...BASE_ERC20_TOKENS,
-			...BSC_BEP20_TOKENS
+			...EVM_ERC20_TOKENS
 		];
 
 		it.each(
@@ -187,7 +185,7 @@ describe('erc20.utils', () => {
 	});
 
 	describe('isTokenErc20UserToken', () => {
-		const tokens = [...ERC20_TWIN_TOKENS, ...BASE_ERC20_TOKENS, ...BSC_BEP20_TOKENS];
+		const tokens = [...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS];
 
 		it.each(
 			tokens.map((token) => ({
@@ -236,7 +234,7 @@ describe('erc20.utils', () => {
 	});
 
 	describe('isTokenErc20', () => {
-		it.each([...ERC20_TWIN_TOKENS, ...BASE_ERC20_TOKENS, ...BSC_BEP20_TOKENS])(
+		it.each([...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS])(
 			'should return true for token $name',
 			(token) => {
 				expect(isTokenErc20(token)).toBeTruthy();

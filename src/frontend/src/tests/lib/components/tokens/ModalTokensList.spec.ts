@@ -10,17 +10,6 @@ export const MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS = 'modal-token-list-custom-no-re
 export const MODAL_TOKEN_LIST_ITEM_PREFIX = 'modal-token-list-item-';
 export const MODAL_TOKEN_LIST_TOOLBAR = 'modal-token-list-toolbar';
 
-window.matchMedia = vi.fn().mockImplementation((query) => ({
-	matches: false,
-	media: query,
-	onchange: null,
-	addListener: vi.fn(), // Deprecated
-	removeListener: vi.fn(), // Deprecated
-	addEventListener: vi.fn(),
-	removeEventListener: vi.fn(),
-	dispatchEvent: vi.fn()
-}));
-
 const mockTokens: Token[] = [BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
 
 describe('ModalTokensList', () => {
