@@ -274,11 +274,11 @@ export class BackendCanister extends Canister<BackendService> {
 
 	deleteContact = async (id: bigint): Promise<DeleteContactResult> => {
 		const { delete_contact } = this.caller({ certified: true });
-		await delete_contact(id);
+		return await delete_contact(id);
 	};
 
 	updateContact = async (contact: Contact): Promise<GetContactResult> => {
 		const { update_contact } = this.caller({ certified: true });
-		await update_contact(contact);
+		return await update_contact(contact);
 	};
 }
