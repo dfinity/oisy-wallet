@@ -7,28 +7,28 @@ import type { Contact } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
-const baseContacts: Contact[] = [
-	{
-		id: 'contact-1',
-		name: 'Test Contact 1',
-		addresses: [
-			{
-				id: 'address-1',
-				address: '0x123456789abcdef',
-				alias: 'My ETH Address'
-			}
-		]
-	},
-	{
-		id: 'contact-2',
-		name: 'Test Contact 2',
-		addresses: []
-	}
-];
-const mockAddContact = vi.fn();
-const mockShowContact = vi.fn();
-
 describe('AddressBookStep', () => {
+	const baseContacts: Contact[] = [
+		{
+			id: 'contact-1',
+			name: 'Test Contact 1',
+			addresses: [
+				{
+					id: 'address-1',
+					address: '0x123456789abcdef',
+					alias: 'My ETH Address'
+				}
+			]
+		},
+		{
+			id: 'contact-2',
+			name: 'Test Contact 2',
+			addresses: []
+		}
+	];
+	const mockAddContact = vi.fn();
+	const mockShowContact = vi.fn();
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});

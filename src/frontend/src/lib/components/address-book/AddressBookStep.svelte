@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
 	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
+	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonAdd from '$lib/components/ui/ButtonAdd.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
@@ -24,8 +24,8 @@
 	let searchTerm = $state('');
 
 	let filteredContacts = $derived(
-		contacts.filter((contact) => {
-			const name = contact.name.toLowerCase();
+		contacts.filter(({ name: contactName }) => {
+			const name = contactName.toLowerCase();
 			const terms = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
 			return terms.every((term) => name.includes(term));
 		})
@@ -46,12 +46,16 @@
 					testId={ADDRESS_BOOK_SEARCH_CONTACT_INPUT}
 				/>
 			</div>
-			<div class="flex w-2/5 justify-end pt-1">
-				<ButtonAdd
-					onclick={onAddContact}
+			<div class="flex w-2/5 justify-end pt-[var(--padding)]">
+				<Button
+					colorStyle="secondary-light"
+					on:click={() => onAddContact()}
 					testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
-					label={$i18n.address_book.text.add_contact}
-				/>
+					styleClass="rounded-[12px]"
+				>
+					<IconPlus></IconPlus>
+					{$i18n.address_book.text.add_contact}
+				</Button>
 			</div>
 		</div>
 
@@ -66,11 +70,12 @@
 							-->
 							CONTACT: {contact.name} #addresses {contact.addresses.length}
 						</div>
+						<!-- TODO: Should be changed with Pull request #6462 Address list item -->
 						<Button styleClass="flex-none" on:click={() => onShowContact(contact)}>Show</Button>
 					</div>
 				{/each}
 			{:else}
-				<span class="text-gray-500">{$i18n.address_book.text.no_contact_found}</span>
+				<span class="text-brand-secondary">{$i18n.address_book.text.no_contact_found}</span>
 			{/if}
 		</div>
 	{/if}
