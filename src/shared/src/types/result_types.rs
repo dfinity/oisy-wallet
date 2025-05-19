@@ -3,8 +3,8 @@ use serde::Serialize;
 
 use super::{
     bitcoin::{
-        BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse, SelectedUtxosFeeError,
-        SelectedUtxosFeeResponse,
+        BtcAddPendingTransactionError, BtcGetPendingTransactionsError,
+        BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
     pow::{CreateChallengeError, CreateChallengeResponse},
     signer::{GetAllowedCyclesError, GetAllowedCyclesResponse},
@@ -216,6 +216,22 @@ impl From<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsErro
         match result {
             Ok(response) => BtcGetPendingTransactionsResult::Ok(response),
             Err(err) => BtcGetPendingTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcAddPendingTransactionResult {
+    /// The pending transaction was added successfully.
+    Ok(()),
+    /// The pending transaction was not added due to an error.
+    Err(BtcAddPendingTransactionError),
+}
+impl From<Result<(), BtcAddPendingTransactionError>> for BtcAddPendingTransactionResult {
+    fn from(result: Result<(), BtcAddPendingTransactionError>) -> Self {
+        match result {
+            Ok(()) => BtcAddPendingTransactionResult::Ok(()),
+            Err(err) => BtcAddPendingTransactionResult::Err(err),
         }
     }
 }

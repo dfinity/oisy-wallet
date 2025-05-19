@@ -40,9 +40,10 @@ use shared::{
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
-            AddUserCredentialResult, BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult,
-            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
+            AddUserCredentialResult, BtcAddPendingTransactionResult,
+            BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreatePowChallengeResult,
+            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
+            GetUserProfileResult, SetUserShowTestnetsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -436,28 +437,33 @@ pub async fn btc_select_user_utxos_fee(
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn btc_add_pending_transaction(
     params: BtcAddPendingTransactionRequest,
-) -> Result<(), BtcAddPendingTransactionError> {
-    let principal = ic_cdk::caller();
-    let current_utxos = bitcoin_api::get_all_utxos(
-        params.network,
-        params.address.clone(),
-        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
-    )
-    .await
-    .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
-    let now_ns = time();
+) -> BtcAddPendingTransactionResult {
+    async fn inner(
+        params: BtcAddPendingTransactionRequest,
+    ) -> Result<(), BtcAddPendingTransactionError> {
+        let principal = ic_cdk::caller();
+        let current_utxos = bitcoin_api::get_all_utxos(
+            params.network,
+            params.address.clone(),
+            Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+        )
+        .await
+        .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+        let now_ns = time();
 
-    with_btc_pending_transactions(|pending_transactions| {
-        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
-        let current_pending_transaction = StoredPendingTransaction {
-            txid: params.txid,
-            utxos: params.utxos,
-            created_at_timestamp_ns: now_ns,
-        };
-        pending_transactions
-            .add_pending_transaction(principal, params.address, current_pending_transaction)
-            .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
-    })
+        with_btc_pending_transactions(|pending_transactions| {
+            pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+            let current_pending_transaction = StoredPendingTransaction {
+                txid: params.txid,
+                utxos: params.utxos,
+                created_at_timestamp_ns: now_ns,
+            };
+            pending_transactions
+                .add_pending_transaction(principal, params.address, current_pending_transaction)
+                .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
+        })
+    }
+    inner(params).await.into()
 }
 
 /// Returns the pending Bitcoin transactions for the caller.
