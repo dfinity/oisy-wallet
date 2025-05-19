@@ -15,7 +15,18 @@
 		autofocus?: boolean;
 	}
 
-	let {value, decimals, name = 'token-input-currency', disabled = false, placeholder = '0', error = false, loading = false, testId, styleClass = '', autofocus = false}: Props = $props();
+	let {
+		value,
+		decimals,
+		name = 'token-input-currency',
+		disabled = false,
+		placeholder = '0',
+		error = false,
+		loading = false,
+		testId,
+		styleClass = '',
+		autofocus = false
+	}: Props = $props();
 </script>
 
 <div
