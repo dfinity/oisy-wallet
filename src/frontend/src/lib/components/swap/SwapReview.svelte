@@ -65,7 +65,7 @@
 	</ModalValue>
 
 	<div class="flex flex-col gap-3">
-		<SwapProvider />
+		<SwapProvider {slippageValue} />
 		<SwapFees />
 	</div>
 

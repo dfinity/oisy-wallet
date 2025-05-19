@@ -1,9 +1,9 @@
 use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
-use super::network::SaveTestnetsSettingsError;
 use crate::types::{
     contact::{Contact, ContactError},
+    network::SaveTestnetsSettingsError,
     user_profile::AddUserCredentialError,
 };
 
