@@ -7,6 +7,7 @@
 		type WizardSteps
 	} from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
+	import { onDestroy } from 'svelte';
 	import HideTokenReview from '$lib/components/tokens/HideTokenReview.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -18,7 +19,6 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
-	import {onDestroy} from "svelte";
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
