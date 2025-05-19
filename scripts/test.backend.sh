@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euxo pipefail
 
 POCKET_IC_SERVER_VERSION=8.0.0
 OISY_UPGRADE_VERSIONS="v0.0.13,v0.0.19"
