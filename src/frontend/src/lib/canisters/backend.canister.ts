@@ -4,9 +4,11 @@ import type {
 	_SERVICE as BackendService,
 	Contact,
 	CreateChallengeResponse,
-	CreateContactResult,
 	CustomToken,
+	DeleteContactResult,
 	GetAllowedCyclesResponse,
+	GetContactResult,
+	GetContactsResult,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -255,29 +257,29 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 	};
 
-	getContact = async (id: bigint) => {
+	getContact = async (id: bigint): Promise<GetContactResult> => {
 		const { get_contact } = this.caller({ certified: true });
 
 		return await get_contact(id);
 	};
 
-	getContacts = async () => {
+	getContacts = async (): Promise<GetContactsResult> => {
 		const { get_contacts } = this.caller({ certified: true });
 
 		return await get_contacts();
 	};
 
-	createContact = async (name: string): Promise<CreateContactResult> => {
+	createContact = async (name: string): Promise<GetContactResult> => {
 		const { create_contact } = this.caller({ certified: true });
 		return await create_contact({ name });
 	};
 
-	deleteContact = async (id: bigint): Promise<void> => {
+	deleteContact = async (id: bigint): Promise<DeleteContactResult> => {
 		const { delete_contact } = this.caller({ certified: true });
 		await delete_contact(id);
 	};
 
-	updateContact = async (contact: Contact): Promise<void> => {
+	updateContact = async (contact: Contact): Promise<GetContactResult> => {
 		const { update_contact } = this.caller({ certified: true });
 		await update_contact(contact);
 	};
