@@ -586,17 +586,17 @@ impl Validate for UpdateAddressRequest {
 }
 
 // Apply the validation during deserialization for all types
-validate_on_deserialize!(ContactAddressData);
-validate_on_deserialize!(Contact);
-validate_on_deserialize!(ContactSettings);
-validate_on_deserialize!(AddContactRequest);
-validate_on_deserialize!(RemoveContactRequest);
-validate_on_deserialize!(UpdateContactRequest);
 validate_on_deserialize!(AddAddressRequest);
-validate_on_deserialize!(UpdateAddressRequest);
+validate_on_deserialize!(AddContactRequest);
+validate_on_deserialize!(Contact);
+validate_on_deserialize!(ContactAddressData);
+validate_on_deserialize!(ContactSettings);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
+validate_on_deserialize!(RemoveContactRequest);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
+validate_on_deserialize!(UpdateAddressRequest);
+validate_on_deserialize!(UpdateContactRequest);
 validate_on_deserialize!(UserToken);
