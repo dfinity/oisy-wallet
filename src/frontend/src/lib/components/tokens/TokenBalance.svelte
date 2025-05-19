@@ -5,8 +5,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CardData } from '$lib/types/token-card';
 	import { formatToken } from '$lib/utils/format.utils';
+	import IconDots from "$lib/components/icons/IconDots.svelte";
 
-	export let data: CardData;
+	interface Props {
+		data: CardData;
+		hideBalance?: boolean;
+	}
+
+	let {data, hideBalance = false}: Props = $props();
 </script>
 
 <TokenBalanceSkeleton {data}>

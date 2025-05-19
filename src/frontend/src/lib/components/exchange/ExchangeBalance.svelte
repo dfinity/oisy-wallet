@@ -6,6 +6,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
+	import IconDots from "$lib/components/icons/IconDots.svelte";
 
 	interface Props {
 		hideBalance?: boolean;
@@ -21,11 +22,19 @@
 <span class="flex flex-col items-center gap-2">
 	<output class="mt-8 inline-block break-all text-5xl font-bold">
 		{#if $loaded}
-			{hideBalance ? $i18n.privacy.text.private_balance : formatUSD({ value: totalUsd })}
+			{#if hideBalance}
+				<IconDots times={6} styleClass="h-12" />
+			{:else}
+				{formatUSD({ value: totalUsd })}
+			{/if}
 		{:else}
-			<span class="animate-pulse"
-				>{hideBalance ? $i18n.privacy.text.private_balance : formatUSD({ value: 0 })}</span
-			>
+			<span class="animate-pulse">
+				{#if hideBalance}
+					<IconDots times={6} styleClass="h-12" />
+				{:else}
+					{formatUSD({ value: 0 })}
+				{/if}
+			</span>
 		{/if}
 	</output>
 	<span class="max-w-48 text-xl font-medium text-brand-secondary-alt sm:max-w-none">

@@ -284,10 +284,6 @@ interface I18nHero {
 	};
 }
 
-interface I18nPrivacy {
-	text: { private_balance: string };
-}
-
 interface I18nSettings {
 	text: {
 		title: string;
@@ -1042,7 +1038,6 @@ interface I18n {
 	wallet: I18nWallet;
 	init: I18nInit;
 	hero: I18nHero;
-	privacy: I18nPrivacy;
 	settings: I18nSettings;
 	networks: I18nNetworks;
 	receive: I18nReceive;
