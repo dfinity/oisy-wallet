@@ -41,7 +41,7 @@ use shared::{
         },
         result_types::{
             AddUserCredentialResult, DeleteContactResult, GetContactResult, GetContactsResult,
-            SetUserShowTestnetsResult,
+            GetUserProfileResult, SetUserShowTestnetsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -51,8 +51,7 @@ use shared::{
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
-            AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
-            HasUserProfileResponse, UserProfile,
+            AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
         },
         Stats, Timestamp,
     },
@@ -667,7 +666,7 @@ pub fn create_user_profile() -> UserProfile {
 /// # Panics
 /// - If the caller is anonymous.  See: `may_read_user_data`.
 #[query(guard = "caller_is_not_anonymous")]
-pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
+pub fn get_user_profile() -> GetUserProfileResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -678,6 +677,7 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
             Err(err) => Err(err),
         }
     })
+    .into()
 }
 
 /// Creates a new proof-of-work challenge for the caller.

@@ -1,6 +1,7 @@
 use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
+use super::user_profile::{GetUserProfileError, UserProfile};
 use crate::types::{
     contact::{Contact, ContactError},
     network::SaveTestnetsSettingsError,
@@ -123,6 +124,22 @@ impl From<Result<(), SaveTestnetsSettingsError>> for SetUserShowTestnetsResult {
         match result {
             Ok(()) => SetUserShowTestnetsResult::Ok(()),
             Err(err) => SetUserShowTestnetsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetUserProfileResult {
+    /// The user's profile was retrieved successfully.
+    Ok(UserProfile),
+    /// The user's profile was not retrieved due to an error.
+    Err(GetUserProfileError),
+}
+impl From<Result<UserProfile, GetUserProfileError>> for GetUserProfileResult {
+    fn from(result: Result<UserProfile, GetUserProfileError>) -> Self {
+        match result {
+            Ok(profile) => GetUserProfileResult::Ok(profile),
+            Err(err) => GetUserProfileResult::Err(err),
         }
     }
 }
