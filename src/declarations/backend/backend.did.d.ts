@@ -220,6 +220,7 @@ export interface GetAllowedCyclesResponse {
 export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
 export type GetUserProfileError = { NotFound: null };
+export type GetUserProfileResult = { Ok: UserProfile } | { Err: GetUserProfileError };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
@@ -301,7 +302,6 @@ export type Result_3 =
 export type Result_4 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
 export type Result_5 = { Ok: CreateChallengeResponse } | { Err: CreateChallengeError };
 export type Result_6 = { Ok: GetAllowedCyclesResponse } | { Err: GetAllowedCyclesError };
-export type Result_7 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -462,7 +462,7 @@ export interface _SERVICE {
 	get_contact: ActorMethod<[bigint], GetContactResult>;
 	get_contacts: ActorMethod<[], GetContactsResult>;
 	get_snapshot: ActorMethod<[], [] | [UserSnapshot]>;
-	get_user_profile: ActorMethod<[], Result_7>;
+	get_user_profile: ActorMethod<[], GetUserProfileResult>;
 	has_user_profile: ActorMethod<[], HasUserProfileResponse>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;

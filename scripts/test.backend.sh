@@ -78,6 +78,7 @@ export POCKET_IC_BIN="../../${POCKET_IC_SERVER_PATH}"
 export POCKET_IC_MUTE_SERVER=""
 
 ./scripts/download-canister-api --network ic --canister backend
+ls -l target/ic/candid/backend.ic.did
 
 # Run tests
 

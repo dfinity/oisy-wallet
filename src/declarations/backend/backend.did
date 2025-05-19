@@ -215,6 +215,10 @@ type GetAllowedCyclesResponse = record { allowed_cycles : nat };
 type GetContactResult = variant { Ok : Contact; Err : ContactError };
 type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
 type GetUserProfileError = variant { NotFound };
+type GetUserProfileResult = variant {
+	Ok : UserProfile;
+	Err : GetUserProfileError
+};
 type HasUserProfileResponse = record { has_user_profile : bool };
 type HttpRequest = record {
 	url : text;
@@ -288,7 +292,6 @@ type Result_6 = variant {
 	Ok : GetAllowedCyclesResponse;
 	Err : GetAllowedCyclesError
 };
-type Result_7 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -445,7 +448,7 @@ service : (Arg) -> {
 	get_contact : (nat64) -> (GetContactResult) query;
 	get_contacts : () -> (GetContactsResult) query;
 	get_snapshot : () -> (opt UserSnapshot) query;
-	get_user_profile : () -> (Result_7) query;
+	get_user_profile : () -> (GetUserProfileResult) query;
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	http_request : (HttpRequest) -> (HttpResponse) query;
 	list_custom_tokens : () -> (vec CustomToken) query;

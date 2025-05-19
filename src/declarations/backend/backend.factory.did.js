@@ -409,7 +409,7 @@ export const idlFactory = ({ IDL }) => {
 		timestamp: IDL.Opt(IDL.Nat64)
 	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
-	const Result_7 = IDL.Variant({
+	const GetUserProfileResult = IDL.Variant({
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
@@ -525,7 +525,7 @@ export const idlFactory = ({ IDL }) => {
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult], ['query']),
 		get_contacts: IDL.Func([], [GetContactsResult], ['query']),
 		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)], ['query']),
-		get_user_profile: IDL.Func([], [Result_7], ['query']),
+		get_user_profile: IDL.Func([], [GetUserProfileResult], ['query']),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
