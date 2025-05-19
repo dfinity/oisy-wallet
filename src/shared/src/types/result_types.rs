@@ -92,3 +92,19 @@ impl From<Result<u64, ContactError>> for DeleteContactResult {
         }
     }
 }
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetContactsResult {
+    /// The contacts were retrieved successfully.
+    Ok(Vec<Contact>),
+    /// The contacts were not retrieved due to an error.
+    Err(ContactError),
+}
+impl From<Result<Vec<Contact>, ContactError>> for GetContactsResult {
+    fn from(result: Result<Vec<Contact>, ContactError>) -> Self {
+        match result {
+            Ok(contacts) => GetContactsResult::Ok(contacts),
+            Err(err) => GetContactsResult::Err(err),
+        }
+    }
+}

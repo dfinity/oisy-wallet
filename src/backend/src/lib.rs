@@ -42,7 +42,9 @@ use shared::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
-        result_types::{AddUserCredentialResult, CreateContactResult, DeleteContactResult},
+        result_types::{
+            AddUserCredentialResult, CreateContactResult, DeleteContactResult, GetContactsResult,
+        },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
@@ -915,9 +917,10 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
 #[query(guard = "caller_is_not_anonymous")]
-pub fn get_contacts() -> Result<Vec<Contact>, ContactError> {
+#[must_use]
+pub fn get_contacts() -> GetContactsResult {
     // TODO replace mock data with the get contacts service
-    Ok(vec![Contact {
+    let normal_result = Ok(vec![Contact {
         id: time(),
         name: "John Doe".to_string(),
         addresses: vec![ContactAddressData {
@@ -927,7 +930,8 @@ pub fn get_contacts() -> Result<Vec<Contact>, ContactError> {
             label: Some("ETH Wallet".to_string()),
         }],
         update_timestamp_ns: time(),
-    }])
+    }]);
+    normal_result.into()
 }
 
 export_candid!();
