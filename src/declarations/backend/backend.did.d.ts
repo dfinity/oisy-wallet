@@ -131,6 +131,9 @@ export interface BtcGetPendingTransactionsRequest {
 	network: BitcoinNetwork;
 	address: string;
 }
+export type BtcSelectUserUtxosFeeResult =
+	| { Ok: SelectedUtxosFeeResponse }
+	| { Err: SelectedUtxosFeeError };
 export type BtcTokenId = { Native: null };
 export interface CanisterStatusResultV2 {
 	controller: Principal;
@@ -305,7 +308,6 @@ export type Result_2 = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type Result_3 =
 	| { Ok: BtcGetPendingTransactionsReponse }
 	| { Err: BtcAddPendingTransactionError };
-export type Result_4 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -454,7 +456,7 @@ export interface _SERVICE {
 	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], Result_1>;
 	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_2>;
 	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_3>;
-	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_4>;
+	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], BtcSelectUserUtxosFeeResult>;
 	config: ActorMethod<[], Config>;
 	create_contact: ActorMethod<[CreateContactRequest], GetContactResult>;
 	create_pow_challenge: ActorMethod<[], CreatePowChallengeResult>;

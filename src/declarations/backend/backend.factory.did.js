@@ -152,7 +152,7 @@ export const idlFactory = ({ IDL }) => {
 		PendingTransactions: IDL.Null,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
-	const Result_4 = IDL.Variant({
+	const BtcSelectUserUtxosFeeResult = IDL.Variant({
 		Ok: SelectedUtxosFeeResponse,
 		Err: SelectedUtxosFeeError
 	});
@@ -509,7 +509,11 @@ export const idlFactory = ({ IDL }) => {
 		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [Result_1], []),
 		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_2], []),
 		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_3], []),
-		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_4], []),
+		btc_select_user_utxos_fee: IDL.Func(
+			[SelectedUtxosFeeRequest],
+			[BtcSelectUserUtxosFeeResult],
+			[]
+		),
 		config: IDL.Func([], [Config], ['query']),
 		create_contact: IDL.Func([CreateContactRequest], [GetContactResult], []),
 		create_pow_challenge: IDL.Func([], [CreatePowChallengeResult], []),

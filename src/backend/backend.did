@@ -129,6 +129,10 @@ type BtcGetPendingTransactionsRequest = record {
 	network : BitcoinNetwork;
 	address : text
 };
+type BtcSelectUserUtxosFeeResult = variant {
+	Ok : SelectedUtxosFeeResponse;
+	Err : SelectedUtxosFeeError
+};
 type BtcTokenId = variant { Native };
 type CanisterStatusResultV2 = record {
 	controller : principal;
@@ -288,10 +292,6 @@ type Result_3 = variant {
 	Ok : BtcGetPendingTransactionsReponse;
 	Err : BtcAddPendingTransactionError
 };
-type Result_4 = variant {
-	Ok : SelectedUtxosFeeResponse;
-	Err : SelectedUtxosFeeError
-};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -434,7 +434,9 @@ service : (Arg) -> {
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		Result_3
 	);
-	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_4);
+	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (
+		BtcSelectUserUtxosFeeResult
+	);
 	config : () -> (Config) query;
 	create_contact : (CreateContactRequest) -> (GetContactResult);
 	create_pow_challenge : () -> (CreatePowChallengeResult);
