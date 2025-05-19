@@ -82,17 +82,17 @@
 	 * Fee context store
 	 */
 
-	let feeStore = initFeeStore();
-	let prioritizationFeeStore = initFeeStore();
-	let ataFeeStore = initFeeStore();
+	const feeStore = initFeeStore();
+	const prioritizationFeeStore = initFeeStore();
+	const ataFeeStore = initFeeStore();
 
-	let feeSymbolStore = writable<string | undefined>(undefined);
+	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(solanaNativeToken.symbol);
 
-	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
 	$: feeTokenIdStore.set(solanaNativeToken.id);
 
-	let feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set(solanaNativeToken.decimals);
 
 	setContext<FeeContextType>(
