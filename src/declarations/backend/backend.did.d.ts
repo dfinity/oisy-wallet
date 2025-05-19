@@ -118,6 +118,7 @@ export interface BtcAddPendingTransactionRequest {
 	address: string;
 	utxos: Array<Utxo>;
 }
+export type BtcAddPendingTransactionResult = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type BtcAddress =
 	| { P2WPKH: string }
 	| { P2PKH: string }
@@ -309,7 +310,6 @@ export interface PendingTransaction {
 }
 export type Result = { Ok: null } | { Err: AddDappSettingsError };
 export type Result_1 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
-export type Result_2 = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -456,7 +456,10 @@ export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], AddUserCredentialResult>;
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result>;
 	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], Result_1>;
-	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_2>;
+	btc_add_pending_transaction: ActorMethod<
+		[BtcAddPendingTransactionRequest],
+		BtcAddPendingTransactionResult
+	>;
 	btc_get_pending_transactions: ActorMethod<
 		[BtcGetPendingTransactionsRequest],
 		BtcGetPendingTransactionsResult

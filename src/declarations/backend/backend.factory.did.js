@@ -120,7 +120,7 @@ export const idlFactory = ({ IDL }) => {
 	const BtcAddPendingTransactionError = IDL.Variant({
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
-	const Result_2 = IDL.Variant({
+	const BtcAddPendingTransactionResult = IDL.Variant({
 		Ok: IDL.Null,
 		Err: BtcAddPendingTransactionError
 	});
@@ -507,7 +507,11 @@ export const idlFactory = ({ IDL }) => {
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [AddUserCredentialResult], []),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result], []),
 		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [Result_1], []),
-		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_2], []),
+		btc_add_pending_transaction: IDL.Func(
+			[BtcAddPendingTransactionRequest],
+			[BtcAddPendingTransactionResult],
+			[]
+		),
 		btc_get_pending_transactions: IDL.Func(
 			[BtcGetPendingTransactionsRequest],
 			[BtcGetPendingTransactionsResult],
