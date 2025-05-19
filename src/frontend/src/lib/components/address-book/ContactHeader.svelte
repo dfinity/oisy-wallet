@@ -21,7 +21,7 @@
 
 <div class={`relative flex w-full flex-col items-center ${styleClass}`}>
 	<Button
-		styleClass="absolute z-[var(--modal-z-index)] top-2.5 right-2.5 bg-black/16 dark:bg-black/10 px-3 py-2 font-xs"
+		styleClass="absolute z-[var(--overlay-z-index)] top-2.5 right-2.5 bg-black/16 dark:bg-black/10 px-3 py-2 font-xs"
 		ariaLabel={$i18n.core.text.edit}
 		colorStyle="secondary"
 		testId={CONTACT_HEADER_EDIT_BUTTON}

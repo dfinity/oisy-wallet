@@ -1,9 +1,19 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
-	export let width = '100%';
+	const { width = '100%', backdrop = 'blur(1px)' } = $props<{
+		width?: string;
+		backdrop?: string;
+	}>();
+
+	const headerStyles = $derived(`
+	backdrop-filter: ${backdrop};
+	-webkit-backdrop-filter: ${backdrop};
+	overflow: hidden;
+	width: ${width};
+`);
 </script>
 
-<div class="frosted-glass" style="width: {width};">
+<div style={headerStyles}>
 	<svg {width} viewBox="0 0 464 104" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<path
 			d="M0 16C0 7.16344 7.16344 0 16 0H448C456.837 0 464 7.16344 464 16V88C464 96.8366 456.837 104 448 104H16C7.16345 104 0 96.8366 0 88V16Z"
