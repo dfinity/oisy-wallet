@@ -497,10 +497,6 @@ export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
 
 TODO
 
-### Set Custom Hero Color Palette
-
-TODO
-
 ### Add providers' URLs to Content Security Policy (CSP)
 
 The script that builds the CSP is `scripts/build.csp.mjs`.
@@ -508,7 +504,8 @@ It must be updated to include the new network providers' URLs (and any other req
 
 ### Optional
 
-If provided, please add any additional information that might be useful for the new network. For example, a specific faucet to the list in this document.
+- Define a custom Hero color palette for the new network in `src/frontend/src/lib/components/hero/HeroContent.svelte`, similar to the existing ones.
+- If provided, please add any additional information that might be useful for the new network. For example, a specific faucet to the list in this same document.
 
 > [!NOTE]
 > Remember to adapt all the existing tests and create new ones where needed, including E2E tests.
