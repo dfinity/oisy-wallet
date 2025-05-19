@@ -242,18 +242,6 @@ export interface InitArg {
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array | number[]];
 }
-export interface ListUserCreationTimestampsResponse {
-	creation_timestamps: BigUint64Array | bigint[];
-	matches_max_length: bigint;
-}
-export interface ListUsersRequest {
-	updated_after_timestamp: [] | [bigint];
-	matches_max_length: [] | [bigint];
-}
-export interface ListUsersResponse {
-	users: Array<OisyUser>;
-	matches_max_length: bigint;
-}
 export interface NetworkSettings {
 	enabled: boolean;
 	is_testnet: boolean;
@@ -261,9 +249,11 @@ export interface NetworkSettings {
 export type NetworkSettingsFor =
 	| { InternetComputer: null }
 	| { BaseSepolia: null }
+	| { PolygonMainnet: null }
 	| { SolanaTestnet: null }
 	| { BitcoinRegtest: null }
 	| { SolanaDevnet: null }
+	| { PolygonAmoy: null }
 	| { EthereumSepolia: null }
 	| { BitcoinTestnet: null }
 	| { BaseMainnet: null }
@@ -276,11 +266,6 @@ export type NetworkSettingsFor =
 export interface NetworksSettings {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
-}
-export interface OisyUser {
-	principal: Principal;
-	pouh_verified: boolean;
-	updated_timestamp: bigint;
 }
 export interface Outpoint {
 	txid: Uint8Array | number[];
@@ -301,7 +286,6 @@ export type Result_5 = { Ok: CreateChallengeResponse } | { Err: CreateChallengeE
 export type Result_6 = { Ok: GetAllowedCyclesResponse } | { Err: GetAllowedCyclesError };
 export type Result_7 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_8 = { Ok: null } | { Err: SaveTestnetsSettingsError };
-export type Result_9 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -373,6 +357,9 @@ export interface TopUpCyclesLedgerResponse {
 	ledger_balance: bigint;
 	topped_up: bigint;
 }
+export type TopUpCyclesLedgerResult =
+	| { Ok: TopUpCyclesLedgerResponse }
+	| { Err: TopUpCyclesLedgerError };
 export interface Transaction {
 	transaction_type: TransactionType;
 	network: {};
@@ -453,12 +440,7 @@ export interface _SERVICE {
 	has_user_profile: ActorMethod<[], HasUserProfileResponse>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
-	list_user_creation_timestamps: ActorMethod<
-		[ListUsersRequest],
-		ListUserCreationTimestampsResponse
-	>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
-	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
@@ -467,7 +449,7 @@ export interface _SERVICE {
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_8>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
-	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_9>;
+	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
 	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_8>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;

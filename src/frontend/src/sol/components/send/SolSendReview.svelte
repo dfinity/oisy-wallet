@@ -11,7 +11,6 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let network: Network | undefined = undefined;
-	export let source: string;
 
 	// TODO: add checks for insufficient funds for fee, when we calculate the fee
 	const insufficientFundsForFee = false;
@@ -23,7 +22,7 @@
 	$: invalid = invalidSolAddress(destination) || invalidAmount(amount);
 </script>
 
-<SendReview on:icBack on:icSend {source} {amount} {destination} disabled={disableSend}>
+<SendReview on:icBack on:icSend {amount} {destination} disabled={disableSend}>
 	<ReviewNetwork sourceNetwork={network} slot="network" />
 
 	<SolFeeDisplay slot="fee" />

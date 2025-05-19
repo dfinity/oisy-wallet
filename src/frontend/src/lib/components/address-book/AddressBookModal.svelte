@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import AddContactStep from '$lib/components/address-book/AddContactStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -18,6 +19,10 @@
 		{
 			name: AddressBookSteps.ADD_CONTACT,
 			title: $i18n.contact.form.add_new_contact
+		},
+		{
+			name: AddressBookSteps.SHOW_CONTACT,
+			title: $i18n.address_book.show_contact.title
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
@@ -29,6 +34,7 @@
 	let addContactStep = $state<AddContactStep>();
 
 	let contacts: Contact[] = $state([]);
+	let currentContact: Contact | undefined = $state();
 
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
@@ -40,7 +46,7 @@
 		}
 	};
 
-	const addContact = (contact: Contact) => {
+	const onAddContact = (contact: Contact) => {
 		contacts = [...contacts, contact];
 		gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
@@ -59,15 +65,28 @@
 			? addContactStep.title
 			: (currentStep?.title ?? '')}</svelte:fragment
 	>
-
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
-		<AddressBookStep {contacts} addContact={() => gotoStep(AddressBookSteps.ADD_CONTACT)}
+		<AddressBookStep
+			{contacts}
+			onShowContact={(contact) => {
+				currentContact = contact;
+				gotoStep(AddressBookSteps.SHOW_CONTACT);
+			}}
+			onAddContact={() => {
+				currentContact = undefined;
+				gotoStep(AddressBookSteps.ADD_CONTACT);
+			}}
 		></AddressBookStep>
+	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
+		<ShowContactStep
+			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			contact={currentContact!}
+		></ShowContactStep>
 	{:else if currentStep?.name === AddressBookSteps.ADD_CONTACT}
 		<AddContactStep
 			bind:this={addContactStep}
-			{addContact}
-			close={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			{onAddContact}
+			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		></AddContactStep>
 	{/if}
 </WizardModal>

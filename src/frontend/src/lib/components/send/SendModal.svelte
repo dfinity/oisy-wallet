@@ -5,6 +5,7 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
 	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
@@ -82,15 +83,19 @@
 		})
 	);
 
+	const reset = () => {
+		destination = '';
+		amount = undefined;
+		targetNetwork = undefined;
+
+		sendProgressStep = ProgressStepsSend.INITIALIZATION;
+
+		currentStep = undefined;
+	};
+
 	const close = () =>
 		closeModal(() => {
-			destination = '';
-			amount = undefined;
-			targetNetwork = undefined;
-
-			sendProgressStep = ProgressStepsSend.INITIALIZATION;
-
-			currentStep = undefined;
+			reset();
 
 			dispatch('nnsClose');
 		});
@@ -114,7 +119,7 @@
 										? $solAddressTestnetNotLoaded
 										: false;
 
-	const nextStep = async ({ detail: token }: CustomEvent<Token>) => {
+	const onIcSendToken = async ({ detail: token }: CustomEvent<Token>) => {
 		if (isDisabled(token)) {
 			const status = await waitWalletReady(() => isDisabled(token));
 
@@ -125,8 +130,11 @@
 
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			goToStep(WizardStepsSend.SEND);
+			reset();
+
+			goToStep(WizardStepsSend.DESTINATION);
 		};
+
 		await loadTokenAndRun({ token, callback });
 	};
 
@@ -151,6 +159,7 @@
 			code,
 			expectedToken
 		};
+
 		return isNetworkIdEthereum($token?.network.id)
 			? decodeQrCodeETH({
 					...params,
@@ -179,45 +188,42 @@
 
 		{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 			<SendTokensList
-				on:icSendToken={nextStep}
+				on:icSendToken={onIcSendToken}
 				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
+		{:else if currentStep?.name === WizardStepsSend.DESTINATION}
+			<SendDestinationWizardStep
+				bind:destination
+				formCancelAction={isTransactionsPage ? 'close' : 'back'}
+				on:icBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+				on:icNext={modal.next}
+				on:icClose={close}
+				on:icQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
+			/>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 			<SendQrCodeScan
 				expectedToken={$token}
 				bind:destination
 				bind:amount
 				decodeQrCode={onDecodeQrCode}
-				on:icQRCodeBack={() =>
-					goToWizardStep({
-						modal,
-						steps,
-						stepName: WizardStepsSend.SEND
-					})}
+				on:icQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
 			/>
 		{:else}
 			<SendWizard
 				{source}
 				{currentStep}
-				bind:destination
+				{destination}
 				bind:networkId
 				bind:targetNetwork
 				bind:amount
 				bind:sendProgressStep
-				formCancelAction={isTransactionsPage ? 'close' : 'back'}
 				on:icBack={modal.back}
-				on:icSendBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+				on:icSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				on:icTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				on:icNext={modal.next}
 				on:icClose={close}
-				on:icTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-				on:icQRCodeScan={() =>
-					goToWizardStep({
-						modal,
-						steps,
-						stepName: WizardStepsSend.QR_CODE_SCAN
-					})}
 			/>
 		{/if}
 	</WizardModal>

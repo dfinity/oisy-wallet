@@ -2,6 +2,7 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
+	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
@@ -14,7 +15,10 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { SEND_DESTINATION_WIZARD_STEP } from '$lib/constants/test-ids.constants';
+	import {
+		SEND_DESTINATION_WIZARD_STEP,
+		SEND_FORM_DESTINATION_NEXT_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -53,18 +57,20 @@
 	{#if isNetworkIdEthereum($sendTokenNetworkId) || isNetworkIdEvm($sendTokenNetworkId)}
 		<div data-tid={testId}>
 			<CkEthLoader nativeTokenId={$ethereumTokenId} isSendFlow={true}>
-				<EthSendDestination
-					token={$sendToken}
-					knownDestinations={$ethKnownDestinations}
-					bind:destination
-					bind:invalidDestination
-					on:icQRCodeScan
-				/>
-				<KnownDestinationsComponent
-					knownDestinations={$ethKnownDestinations}
-					bind:destination
-					on:icNext={next}
-				/>
+				<LoaderMultipleEthTransactions>
+					<EthSendDestination
+						token={$sendToken}
+						knownDestinations={$ethKnownDestinations}
+						bind:destination
+						bind:invalidDestination
+						on:icQRCodeScan
+					/>
+					<KnownDestinationsComponent
+						knownDestinations={$ethKnownDestinations}
+						bind:destination
+						on:icNext={next}
+					/>
+				</LoaderMultipleEthTransactions>
 			</CkEthLoader>
 		</div>
 	{:else if isNetworkIdICP($sendTokenNetworkId)}
@@ -119,7 +125,7 @@
 			<ButtonCancel onclick={close} />
 		{/if}
 
-		<Button on:click={next} {disabled}>
+		<Button on:click={next} {disabled} testId={SEND_FORM_DESTINATION_NEXT_BUTTON}>
 			{$i18n.core.text.next}
 		</Button>
 	</ButtonGroup>

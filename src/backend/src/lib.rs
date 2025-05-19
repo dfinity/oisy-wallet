@@ -15,7 +15,6 @@ use ic_stable_structures::{
     DefaultMemoryImpl,
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
-use oisy_user::oisy_users;
 use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
@@ -39,6 +38,7 @@ use shared::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
+        result_types::AddUserCredentialResult,
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
@@ -48,8 +48,7 @@ use shared::{
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
-            HasUserProfileResponse, ListUserCreationTimestampsResponse, ListUsersRequest,
-            ListUsersResponse, OisyUser, UserProfile,
+            HasUserProfileResponse, UserProfile,
         },
         Stats, Timestamp,
     },
@@ -65,8 +64,6 @@ use user_profile_model::UserProfileModel;
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
-    oisy_user::oisy_user_creation_timestamps,
-    result_types::AddUserCredentialResult,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
@@ -79,7 +76,6 @@ mod config;
 mod guards;
 mod heap_state;
 mod impls;
-mod oisy_user;
 mod pow;
 pub mod signer;
 mod state;
@@ -88,7 +84,6 @@ mod types;
 mod user_profile;
 mod user_profile_model;
 
-mod result_types;
 #[cfg(test)]
 mod tests;
 
@@ -180,7 +175,7 @@ async fn hourly_housekeeping_tasks() {
     // Tops up the account on the cycles ledger
     {
         let result = top_up_cycles_ledger(None).await;
-        if let Err(err) = result {
+        if let TopUpCyclesLedgerResult::Err(err) = result {
             eprintln!("Failed to top up cycles ledger: {err:?}");
         }
         // TODO: Add monitoring for how many cycles have been topped up and whether topping up is
@@ -531,10 +526,10 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
                 vc_flow_signers.issuer_origin,
                 &mut user_profile_model,
             )
+            .into()
         }),
-        Err(_) => Err(AddUserCredentialError::InvalidCredential),
+        Err(_) => AddUserCredentialResult::Err(AddUserCredentialError::InvalidCredential),
     }
-    .into()
 }
 
 /// Updates the user's preference to enable (or disable) networks in the interface, merging with any
@@ -793,37 +788,6 @@ pub async fn allow_signing(
         allowed_cycles,
         challenge_completion: Some(challenge_completion),
     })
-}
-
-#[query(guard = "caller_is_allowed")]
-#[allow(clippy::needless_pass_by_value)]
-#[must_use]
-pub fn list_users(request: ListUsersRequest) -> ListUsersResponse {
-    // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles
-    // consumption when reading BTreeMap.
-
-    let (users, matches_max_length): (Vec<OisyUser>, u64) =
-        read_state(|s| oisy_users(&request, &s.user_profile));
-
-    ListUsersResponse {
-        users,
-        matches_max_length,
-    }
-}
-
-#[query(guard = "caller_is_allowed")]
-#[allow(clippy::needless_pass_by_value)]
-#[must_use]
-pub fn list_user_creation_timestamps(
-    request: ListUsersRequest,
-) -> ListUserCreationTimestampsResponse {
-    let (creation_timestamps, matches_max_length): (Vec<Timestamp>, u64) =
-        read_state(|s| oisy_user_creation_timestamps(&request, &s.user_profile));
-
-    ListUserCreationTimestampsResponse {
-        creation_timestamps,
-        matches_max_length,
-    }
 }
 
 /// API method to get cycle balance and burn rate.

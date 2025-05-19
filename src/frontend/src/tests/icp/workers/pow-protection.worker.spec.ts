@@ -2,10 +2,10 @@ import type {
 	AllowSigningResponse,
 	CreateChallengeResponse
 } from '$declarations/backend/backend.did';
-import { POW_CHALLENGE_INTERVAL_MILLIS } from '$env/pow.env';
 import { PowProtectionScheduler } from '$icp/schedulers/pow-protection.scheduler';
 import * as powProtectorServices from '$icp/services/pow-protector.services';
 import * as backendApi from '$lib/api/backend.api';
+import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';

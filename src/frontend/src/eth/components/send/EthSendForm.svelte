@@ -1,9 +1,13 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
+	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
+	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
@@ -23,6 +27,9 @@
 	$: invalid = invalidDestination || insufficientFunds || isNullish(amount);
 
 	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	const { feeSymbolStore, feeDecimalsStore, feeTokenIdStore }: FeeContext =
+		getContext<FeeContext>(FEE_CONTEXT_KEY);
 </script>
 
 <SendForm
@@ -43,7 +50,16 @@
 		on:icTokensList
 	/>
 
-	<FeeDisplay slot="fee" />
+	<EthFeeDisplay slot="fee">
+		<Html slot="label" text={$i18n.fee.text.max_fee_eth} />
+	</EthFeeDisplay>
+
+	<SendFeeInfo
+		slot="info"
+		feeSymbol={$feeSymbolStore}
+		decimals={$feeDecimalsStore}
+		feeTokenId={$feeTokenIdStore}
+	/>
 
 	<slot name="cancel" slot="cancel" />
 </SendForm>
