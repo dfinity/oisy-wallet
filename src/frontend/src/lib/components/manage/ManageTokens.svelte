@@ -77,7 +77,7 @@
 		setTokens(allTokensSorted);
 	});
 
-	const loading = $erc20UserTokensNotInitialized;
+	let loading =$derived( $erc20UserTokensNotInitialized);
 
 	let showNetworks = $state(false);
 
