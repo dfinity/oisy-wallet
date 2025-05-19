@@ -21,12 +21,16 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
+        account::{EthAddress, TokenAccountId},
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
+        },
+        contact::{
+            Contact, ContactAddressData, ContactError, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
@@ -38,7 +42,9 @@ use shared::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
-        result_types::AddUserCredentialResult,
+        result_types::{
+            AddUserCredentialResult, DeleteContactResult, GetContactResult, GetContactsResult,
+        },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
@@ -62,7 +68,7 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 use crate::{
-    assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
+    assertions::assert_token_enabled_is_some,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
@@ -262,7 +268,6 @@ fn parse_eth_address(address: &str) -> [u8; 20] {
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_user_token(token: UserToken) {
-    assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
     assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
 
     let addr = parse_eth_address(&token.contract_address);
@@ -282,7 +287,6 @@ pub fn set_many_user_tokens(tokens: Vec<UserToken>) {
 
     mutate_state(|s| {
         for token in tokens {
-            assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
             assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
             parse_eth_address(&token.contract_address);
 
@@ -831,6 +835,101 @@ pub fn set_snapshot(snapshot: UserSnapshot) {
 #[must_use]
 pub fn get_snapshot() -> Option<UserSnapshot> {
     todo!()
+}
+
+/// Creates a new contact for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+///
+/// # Returns
+/// The created contact on success.
+///
+/// # Test
+/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
+#[update(guard = "caller_is_allowed")]
+#[must_use]
+pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
+    // TODO replace mock data with contact service that returns Contact
+    let contact = Contact {
+        id: time(),
+        name: request.name,
+        addresses: vec![],
+        update_timestamp_ns: time(),
+    };
+
+    GetContactResult::Ok(contact)
+}
+
+/// Updates an existing contact for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+#[update(guard = "caller_is_allowed")]
+pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactError> {
+    // TODO replace mock data with data from contact service
+    let contact = Contact {
+        id: request.id,
+        name: request.name,
+        addresses: request.addresses,
+        update_timestamp_ns: time(),
+    };
+
+    Ok(contact)
+}
+
+/// Deletes a contact for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+#[update(guard = "caller_is_allowed")]
+#[must_use]
+pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
+    // TODO integrate delete contact service
+    let normal_result = Ok(contact_id);
+    normal_result.into()
+}
+
+/// Gets a contact by ID for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+#[query(guard = "caller_is_not_anonymous")]
+pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
+    // TODO replace mock data with the get contact service
+    Ok(Contact {
+        id: contact_id,
+        name: "John Doe".to_string(),
+        addresses: vec![ContactAddressData {
+            token_account_id: TokenAccountId::Eth(EthAddress::Public(
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".to_string(),
+            )),
+            label: Some("ETH Wallet".to_string()),
+        }],
+        update_timestamp_ns: time(),
+    })
+}
+
+/// Lists all contacts for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn get_contacts() -> GetContactsResult {
+    // TODO replace mock data with the get contacts service
+    let normal_result = Ok(vec![Contact {
+        id: time(),
+        name: "John Doe".to_string(),
+        addresses: vec![ContactAddressData {
+            token_account_id: TokenAccountId::Eth(EthAddress::Public(
+                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".to_string(),
+            )),
+            label: Some("ETH Wallet".to_string()),
+        }],
+        update_timestamp_ns: time(),
+    }]);
+    normal_result.into()
 }
 
 export_candid!();
