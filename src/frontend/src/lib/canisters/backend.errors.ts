@@ -109,7 +109,8 @@ export const mapAllowSigningError = (
 		}
 		if ('ExpiredChallenge' in powError) {
 			return new PowChallengeError(
-				'The challenge has expired.',
+				'The challange was not solved within the given timeframe. Reduce the difficulty or increase the expiary ' +
+					'duration to avoid this issue from happening again',
 				ChallengeCompletionErrorEnum.ExpiredChallenge
 			);
 		}
