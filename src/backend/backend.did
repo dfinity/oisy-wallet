@@ -129,6 +129,14 @@ type BtcGetPendingTransactionsRequest = record {
 	network : BitcoinNetwork;
 	address : text
 };
+type BtcGetPendingTransactionsResult = variant {
+	Ok : BtcGetPendingTransactionsReponse;
+	Err : BtcAddPendingTransactionError
+};
+type BtcSelectUserUtxosFeeResult = variant {
+	Ok : SelectedUtxosFeeResponse;
+	Err : SelectedUtxosFeeError
+};
 type BtcTokenId = variant { Native };
 type CanisterStatusResultV2 = record {
 	controller : principal;
@@ -186,6 +194,10 @@ type CreateChallengeResponse = record {
 	expiry_timestamp_ms : nat64
 };
 type CreateContactRequest = record { name : text };
+type CreatePowChallengeResult = variant {
+	Ok : CreateChallengeResponse;
+	Err : CreateChallengeError
+};
 type CredentialSpec = record {
 	arguments : opt vec record { text; ArgumentValue };
 	credential_type : text
@@ -212,9 +224,17 @@ type GetAllowedCyclesError = variant {
 	FailedToContactCyclesLedger
 };
 type GetAllowedCyclesResponse = record { allowed_cycles : nat };
+type GetAllowedCyclesResult = variant {
+	Ok : GetAllowedCyclesResponse;
+	Err : GetAllowedCyclesError
+};
 type GetContactResult = variant { Ok : Contact; Err : ContactError };
 type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
 type GetUserProfileError = variant { NotFound };
+type GetUserProfileResult = variant {
+	Ok : UserProfile;
+	Err : GetUserProfileError
+};
 type HasUserProfileResponse = record { has_user_profile : bool };
 type HttpRequest = record {
 	url : text;
@@ -272,24 +292,6 @@ type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddDappSettingsError };
 type Result_1 = variant { Ok : AllowSigningResponse; Err : AllowSigningError };
 type Result_2 = variant { Ok; Err : BtcAddPendingTransactionError };
-type Result_3 = variant {
-	Ok : BtcGetPendingTransactionsReponse;
-	Err : BtcAddPendingTransactionError
-};
-type Result_4 = variant {
-	Ok : SelectedUtxosFeeResponse;
-	Err : SelectedUtxosFeeError
-};
-type Result_5 = variant {
-	Ok : CreateChallengeResponse;
-	Err : CreateChallengeError
-};
-type Result_6 = variant {
-	Ok : GetAllowedCyclesResponse;
-	Err : GetAllowedCyclesError
-};
-type Result_7 = variant { Ok : UserProfile; Err : GetUserProfileError };
-type Result_8 = variant { Ok; Err : SaveTestnetsSettingsError };
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -311,6 +313,10 @@ type SelectedUtxosFeeResponse = record {
 type SetShowTestnetsRequest = record {
 	current_user_version : opt nat64;
 	show_testnets : bool
+};
+type SetUserShowTestnetsResult = variant {
+	Ok;
+	Err : SaveTestnetsSettingsError
 };
 type Settings = record { networks : NetworksSettings; dapp : DappSettings };
 type SplToken = record {
@@ -426,23 +432,25 @@ service : (Arg) -> {
 	allow_signing : (opt AllowSigningRequest) -> (Result_1);
 	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (Result_2);
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
-		Result_3
+		BtcGetPendingTransactionsResult
 	);
-	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_4);
+	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (
+		BtcSelectUserUtxosFeeResult
+	);
 	config : () -> (Config) query;
 	create_contact : (CreateContactRequest) -> (GetContactResult);
-	create_pow_challenge : () -> (Result_5);
+	create_pow_challenge : () -> (CreatePowChallengeResult);
 	create_user_profile : () -> (UserProfile);
 	delete_contact : (nat64) -> (DeleteContactResult);
 	get_account_creation_timestamps : () -> (
 		vec record { principal; nat64 }
 	) query;
-	get_allowed_cycles : () -> (Result_6);
+	get_allowed_cycles : () -> (GetAllowedCyclesResult);
 	get_canister_status : () -> (CanisterStatusResultV2);
 	get_contact : (nat64) -> (GetContactResult) query;
 	get_contacts : () -> (GetContactsResult) query;
 	get_snapshot : () -> (opt UserSnapshot) query;
-	get_user_profile : () -> (Result_7) query;
+	get_user_profile : () -> (GetUserProfileResult) query;
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	http_request : (HttpRequest) -> (HttpResponse) query;
 	list_custom_tokens : () -> (vec CustomToken) query;
@@ -452,12 +460,16 @@ service : (Arg) -> {
 	set_many_custom_tokens : (vec CustomToken) -> ();
 	set_many_user_tokens : (vec UserToken) -> ();
 	set_snapshot : (UserSnapshot) -> ();
-	set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_8);
+	set_user_show_testnets : (SetShowTestnetsRequest) -> (
+		SetUserShowTestnetsResult
+	);
 	set_user_token : (UserToken) -> ();
 	stats : () -> (Stats) query;
 	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
 		TopUpCyclesLedgerResult
 	);
 	update_contact : (Contact) -> (GetContactResult);
-	update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_8)
+	update_user_network_settings : (SaveNetworksSettingsRequest) -> (
+		SetUserShowTestnetsResult
+	)
 }
