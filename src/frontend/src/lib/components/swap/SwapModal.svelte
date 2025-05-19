@@ -36,7 +36,7 @@
 		})
 	);
 
-	const {setFilterQuery} = setContext<ModalTokensListContext>(
+	const { setFilterQuery } = setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
 			tokens: [],
