@@ -141,7 +141,7 @@ export const formatReceiveOutMinimum = ({
 	decimals
 }: FormatSlippageParams): AmountString | undefined => {
 	if (isNullishOrEmpty(slippageValue?.toString())) {
-		return undefined;
+		return;
 	}
 	const receiveOutMinimum = calculateSlippage({
 		quoteAmount: receiveAmount,
