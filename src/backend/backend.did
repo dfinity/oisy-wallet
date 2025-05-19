@@ -163,6 +163,17 @@ type Config = record {
 	supported_credentials : opt vec SupportedCredential;
 	ic_root_key_raw : opt blob
 };
+type Contact = record {
+	id : nat64;
+	name : text;
+	update_timestamp_ns : nat64;
+	addresses : vec ContactAddressData
+};
+type ContactAddressData = record {
+	label : opt text;
+	token_account_id : TokenAccountId
+};
+type ContactError = variant { InvalidContactData; ContactNotFound };
 type CreateChallengeError = variant {
 	ChallengeInProgress;
 	MissingUserProfile;
@@ -174,6 +185,7 @@ type CreateChallengeResponse = record {
 	start_timestamp_ms : nat64;
 	expiry_timestamp_ms : nat64
 };
+type CreateContactRequest = record { name : text };
 type CredentialSpec = record {
 	arguments : opt vec record { text; ArgumentValue };
 	credential_type : text
@@ -193,12 +205,15 @@ type DefiniteCanisterSettingsArgs = record {
 	memory_allocation : nat;
 	compute_allocation : nat
 };
+type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;
 	FailedToContactCyclesLedger
 };
 type GetAllowedCyclesResponse = record { allowed_cycles : nat };
+type GetContactResult = variant { Ok : Contact; Err : ContactError };
+type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
 type GetUserProfileError = variant { NotFound };
 type HasUserProfileResponse = record { has_user_profile : bool };
 type HttpRequest = record {
@@ -322,6 +337,12 @@ type Token = variant {
 	SplDevnet : SplToken;
 	SplMainnet : SplToken
 };
+type TokenAccountId = variant {
+	Btc : BtcAddress;
+	Eth : EthAddress;
+	Sol : text;
+	Icrcv2 : Icrcv2AccountId
+};
 type TopUpCyclesLedgerError = variant {
 	InvalidArgPercentageOutOfRange : record {
 		max : nat8;
@@ -409,13 +430,17 @@ service : (Arg) -> {
 	);
 	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_4);
 	config : () -> (Config) query;
+	create_contact : (CreateContactRequest) -> (GetContactResult);
 	create_pow_challenge : () -> (Result_5);
 	create_user_profile : () -> (UserProfile);
+	delete_contact : (nat64) -> (DeleteContactResult);
 	get_account_creation_timestamps : () -> (
 		vec record { principal; nat64 }
 	) query;
 	get_allowed_cycles : () -> (Result_6);
 	get_canister_status : () -> (CanisterStatusResultV2);
+	get_contact : (nat64) -> (GetContactResult) query;
+	get_contacts : () -> (GetContactsResult) query;
 	get_snapshot : () -> (opt UserSnapshot) query;
 	get_user_profile : () -> (Result_7) query;
 	has_user_profile : () -> (HasUserProfileResponse) query;
@@ -433,5 +458,6 @@ service : (Arg) -> {
 	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
 		TopUpCyclesLedgerResult
 	);
+	update_contact : (Contact) -> (GetContactResult);
 	update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_8)
 }
