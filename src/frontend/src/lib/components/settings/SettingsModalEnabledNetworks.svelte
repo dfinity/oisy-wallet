@@ -35,7 +35,8 @@
 	import type { UserNetworks } from '$lib/types/user-networks';
 	import { emit } from '$lib/utils/events.utils';
 
-	let enabledNetworks = { ...$userNetworks };
+	let enabledNetworks: UserNetworks;
+	$: enabledNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...enabledNetworks };
 
 	let enabledTestnet = $testnetsEnabled;
