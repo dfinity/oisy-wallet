@@ -26,7 +26,7 @@
 		NAVIGATION_MENU_VIP_BUTTON,
 		NAVIGATION_MENU_REFERRAL_BUTTON,
 		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
-		NAVIGATION_MENU_GOLD_BUTTON
+		NAVIGATION_MENU_GOLD_BUTTON, NAVIGATION_MENU_PRIVACY_MODE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
@@ -39,6 +39,10 @@
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
+	import IconEyeOff from "$lib/components/icons/lucide/IconEyeOff.svelte";
+	import IconEye from "$lib/components/icons/lucide/IconEye.svelte";
+	import {isPrivacyMode} from "$lib/derived/settings.derived";
+	import {privacyModeStore} from "$lib/stores/settings.store";
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -88,6 +92,22 @@
 
 <Popover bind:visible anchor={button} direction="rtl" on:click={hidePopover}>
 	<div class="max-w-68 flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
+		<ButtonMenu
+			ariaLabel={$isPrivacyMode ? $i18n.navigation.alt.show_balances : $i18n.navigation.alt.hide_balances}
+			testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
+			on:click={() => privacyModeStore.set({key: 'privacy-mode', value: {enabled: !$isPrivacyMode}})}
+		>
+			{#if $isPrivacyMode}
+				<IconEye size="20" />
+				{$i18n.navigation.text.show_balances}
+			{:else}
+				<IconEyeOff size="20" />
+				{$i18n.navigation.text.hide_balances}
+			{/if}
+		</ButtonMenu>
+
+		<Hr />
+
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
 			<Hr />
