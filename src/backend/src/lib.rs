@@ -36,7 +36,7 @@ use shared::{
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         pow::{
-            AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
+            AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
