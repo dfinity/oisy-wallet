@@ -80,6 +80,7 @@ export interface AddUserCredentialRequest {
 	credential_spec: CredentialSpec;
 }
 export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
+export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
 	| { PowChallenge: ChallengeCompletionError }
@@ -309,7 +310,6 @@ export interface PendingTransaction {
 	txid: Uint8Array | number[];
 	utxos: Array<Utxo>;
 }
-export type Result = { Ok: null } | { Err: AddDappSettingsError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -454,7 +454,7 @@ export interface Utxo {
 }
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], AddUserCredentialResult>;
-	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result>;
+	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], AddUserHiddenDappIdResult>;
 	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
 	btc_add_pending_transaction: ActorMethod<
 		[BtcAddPendingTransactionRequest],
