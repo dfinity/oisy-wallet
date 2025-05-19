@@ -26,7 +26,7 @@
 	let bgColor = $derived(selectColorForName({ name, colors: CONTACT_BACKGROUND_COLORS }));
 
 	let commonClasses = $derived(
-		`${font} ${size} ${bgColor} relative z-[var(--overlay-z-index)] rounded-full`
+		`${font} ${size} ${bgColor} relative z-1 rounded-full`
 	);
 
 	const initials = $derived(
