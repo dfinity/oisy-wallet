@@ -504,7 +504,7 @@ TODO
 ### Add providers' URLs to Content Security Policy (CSP)
 
 The script that builds the CSP is `scripts/build.csp.mjs`.
-It must be updated to include the new network providers' URLs, similar to the existing ones.
+It must be updated to include the new network providers' URLs (and any other required URL), similar to the existing ones.
 
 ### Optional
 
