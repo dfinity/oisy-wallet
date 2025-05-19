@@ -1,4 +1,4 @@
-import type { Contact as BackendContact } from '$declarations/backend/backend.did';
+import type { Contact } from '$declarations/backend/backend.did';
 import type { TokenAccountIdTypes } from './token-account-id';
 
 export interface ContactAddress {
@@ -7,6 +7,6 @@ export interface ContactAddress {
 	addressType: TokenAccountIdTypes;
 }
 
-export interface ContactUi extends Omit<BackendContact, 'addresses'> {
+export interface ContactUi extends Omit<Contact, 'addresses'> {
 	addresses: ContactAddress[];
 }
