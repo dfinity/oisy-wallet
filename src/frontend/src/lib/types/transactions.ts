@@ -17,6 +17,7 @@ export interface TransactionsStoreCheckParams {
 
 export interface KnownDestination {
 	amounts: { value: bigint; token: Token }[];
+	address: Address;
 	timestamp?: number;
 }
 
