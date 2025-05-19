@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import {onMount} from 'svelte';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		value?: string | number;
@@ -14,7 +14,16 @@
 		autofocus?: boolean;
 	}
 
-	let {value, disabled, name, placeholder, required = true, decimals, testId, autofocus = false}: Props = $props();
+	let {
+		value,
+		disabled,
+		name,
+		placeholder,
+		required = true,
+		decimals,
+		testId,
+		autofocus = false
+	}: Props = $props();
 
 	let inputElement: HTMLInputElement | undefined = $state();
 
