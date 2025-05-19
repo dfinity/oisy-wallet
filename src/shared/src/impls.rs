@@ -7,10 +7,7 @@ use serde::{de, Deserializer};
 use crate::{
     types::{
         backend_config::{Config, InitArg},
-        contact::{
-            AddAddressRequest, AddContactRequest, Contact, ContactAddressData, ContactSettings,
-            RemoveContactRequest, UpdateAddressRequest, UpdateContactRequest,
-        },
+        contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
@@ -29,12 +26,9 @@ use crate::{
 };
 
 // Constants for validation limits
-const CONTACT_MAX_ID_LENGTH: usize = 100;
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
-const CONTACT_MAX_AVATAR_LENGTH: usize = 100;
 const CONTACT_MAX_ADDRESSES: usize = 40;
 const CONTACT_MAX_LABEL_LENGTH: usize = 50;
-const CONTACT_MAX_ENTRIES: usize = 100;
 
 // Helper functions for validation
 fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> Result<(), Error> {
@@ -485,16 +479,8 @@ impl Validate for UserToken {
 
 impl Validate for Contact {
     fn validate(&self) -> Result<(), Error> {
-        // Validate id length
-        validate_string_length(&self.id, CONTACT_MAX_ID_LENGTH, "Contact.id")?;
-
         // Validate name length
         validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
-
-        // Check if avatar exists
-        if let Some(avatar) = &self.avatar {
-            validate_string_length(avatar, CONTACT_MAX_AVATAR_LENGTH, "Contact.avatar")?;
-        }
 
         // Validate number of addresses
         validate_collection_size(&self.addresses, CONTACT_MAX_ADDRESSES, "Contact.addresses")?;
@@ -516,36 +502,9 @@ impl Validate for ContactAddressData {
     }
 }
 
-impl Validate for ContactSettings {
-    fn validate(&self) -> Result<(), Error> {
-        // Limit the number of contacts a user can have
-        validate_collection_size(
-            &self.contacts,
-            CONTACT_MAX_ENTRIES,
-            "ContactSettings.contacts",
-        )?;
-        Ok(())
-    }
-}
-
-impl Validate for AddContactRequest {
+impl Validate for CreateContactRequest {
     fn validate(&self) -> Result<(), Error> {
         // Nothing to validate here
-        Ok(())
-    }
-}
-
-impl Validate for RemoveContactRequest {
-    fn validate(&self) -> Result<(), Error> {
-        // Note: We don't need to validate TokenAccountId since it has its own validation
-
-        // Validate contact_id length
-        validate_string_length(
-            &self.contact_id,
-            CONTACT_MAX_ID_LENGTH,
-            "RemoveContactRequest.id",
-        )?;
-
         Ok(())
     }
 }
@@ -557,46 +516,14 @@ impl Validate for UpdateContactRequest {
     }
 }
 
-impl Validate for AddAddressRequest {
-    fn validate(&self) -> Result<(), Error> {
-        // Validate contact_id length
-        validate_string_length(
-            &self.contact_id,
-            CONTACT_MAX_ID_LENGTH,
-            "AddAddressRequest.contact_id",
-        )?;
-
-        Ok(())
-    }
-}
-
-impl Validate for UpdateAddressRequest {
-    fn validate(&self) -> Result<(), Error> {
-        // Note: We don't need to validate TokenAccountId since it has its own validation
-
-        // Validate contact_id length
-        validate_string_length(
-            &self.contact_id,
-            CONTACT_MAX_ID_LENGTH,
-            "UpdateAddressRequest.contact_id",
-        )?;
-
-        Ok(())
-    }
-}
-
 // Apply the validation during deserialization for all types
-validate_on_deserialize!(AddAddressRequest);
-validate_on_deserialize!(AddContactRequest);
 validate_on_deserialize!(Contact);
 validate_on_deserialize!(ContactAddressData);
-validate_on_deserialize!(ContactSettings);
+validate_on_deserialize!(CreateContactRequest);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
-validate_on_deserialize!(RemoveContactRequest);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
-validate_on_deserialize!(UpdateAddressRequest);
 validate_on_deserialize!(UpdateContactRequest);
 validate_on_deserialize!(UserToken);
