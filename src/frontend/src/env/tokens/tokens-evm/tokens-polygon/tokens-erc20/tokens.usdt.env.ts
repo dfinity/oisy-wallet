@@ -1,4 +1,4 @@
-import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import usdt from '$eth/assets/usdt.svg';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
@@ -13,7 +13,7 @@ export const USDT_TOKEN_ID: TokenId = parseTokenId(USDT_SYMBOL);
 
 export const USDT_TOKEN: RequiredEvmBep20Token = {
 	id: USDT_TOKEN_ID,
-	network: BSC_MAINNET_NETWORK,
+	network: POLYGON_MAINNET_NETWORK,
 	standard: 'erc20',
 	category: 'default',
 	name: 'Tether USD',
