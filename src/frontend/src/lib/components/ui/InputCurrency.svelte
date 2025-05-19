@@ -15,7 +15,7 @@
 	}
 
 	let {
-		value,
+		value = $bindable(),
 		disabled,
 		name,
 		placeholder,
