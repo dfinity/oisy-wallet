@@ -285,9 +285,7 @@ interface I18nHero {
 }
 
 interface I18nPrivacy {
-	text: {
-		private_balance: string;
-	}
+	text: { private_balance: string };
 }
 
 interface I18nSettings {
