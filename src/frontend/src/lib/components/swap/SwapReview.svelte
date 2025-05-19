@@ -78,7 +78,12 @@
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={() => dispatch('icBack')} />
+		<ButtonBack
+			onclick={() => {
+				failedSwapError.set(undefined);
+				dispatch('icBack');
+			}}
+		/>
 
 		<Button on:click={() => dispatch('icSwap')}>
 			{$i18n.swap.text.swap_button}
