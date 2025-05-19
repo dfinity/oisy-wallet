@@ -18,6 +18,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
+	import {onDestroy} from "svelte";
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
@@ -52,9 +53,6 @@
 			});
 
 			hideProgressStep = ProgressStepsHideToken.UPDATE_UI;
-
-			// We must navigate first otherwise we might land on the default token Ethereum selected while being on network ICP.
-			await gotoReplaceRoot();
 
 			await updateUi({
 				identity: $authIdentity
@@ -112,6 +110,8 @@
 
 		hideProgressStep = ProgressStepsHideToken.INITIALIZATION;
 	};
+
+	onDestroy(async () => await gotoReplaceRoot());
 </script>
 
 <WizardModal
