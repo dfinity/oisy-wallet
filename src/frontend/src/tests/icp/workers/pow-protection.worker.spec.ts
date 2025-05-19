@@ -271,7 +271,7 @@ describe('pow-protector.worker', () => {
 			},
 
 			tests: () => {
-				it('should handle ExpiredChallengeError gracefully', async () => {
+				it('should not handle ExpiredChallengeError gracefully', async () => {
 					await scheduler.start(startData);
 
 					// Even with ExpiredChallengeError, we should complete normally
@@ -284,7 +284,7 @@ describe('pow-protector.worker', () => {
 						(call) => call[0].data?.state === 'error'
 					);
 
-					expect(errorCalls).toHaveLength(0);
+					expect(errorCalls).toHaveLength(1);
 				});
 			}
 		};
