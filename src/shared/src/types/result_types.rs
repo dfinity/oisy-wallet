@@ -2,6 +2,7 @@ use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
 use super::{
+    pow::{CreateChallengeError, CreateChallengeResponse},
     signer::{GetAllowedCyclesError, GetAllowedCyclesResponse},
     user_profile::{GetUserProfileError, UserProfile},
 };
@@ -159,6 +160,22 @@ impl From<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>> for GetAllowe
         match result {
             Ok(response) => GetAllowedCyclesResult::Ok(response),
             Err(err) => GetAllowedCyclesResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreatePowChallengeResult {
+    /// The pow challenge was created successfully.
+    Ok(CreateChallengeResponse),
+    /// The pow challenge was not created due to an error.
+    Err(CreateChallengeError),
+}
+impl From<Result<CreateChallengeResponse, CreateChallengeError>> for CreatePowChallengeResult {
+    fn from(result: Result<CreateChallengeResponse, CreateChallengeError>) -> Self {
+        match result {
+            Ok(response) => CreatePowChallengeResult::Ok(response),
+            Err(err) => CreatePowChallengeResult::Err(err),
         }
     }
 }

@@ -40,8 +40,9 @@ use shared::{
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
-            AddUserCredentialResult, DeleteContactResult, GetAllowedCyclesResult, GetContactResult,
-            GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
+            AddUserCredentialResult, CreatePowChallengeResult, DeleteContactResult,
+            GetAllowedCyclesResult, GetContactResult, GetContactsResult, GetUserProfileResult,
+            SetUserShowTestnetsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -692,14 +693,17 @@ pub fn get_user_profile() -> GetUserProfileResult {
 ///   internal errors.
 #[update(guard = "caller_is_not_anonymous")]
 #[candid_method(update)]
-pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
-    let challenge = pow::create_pow_challenge().await?;
+pub async fn create_pow_challenge() -> CreatePowChallengeResult {
+    let challenge = pow::create_pow_challenge().await;
 
-    Ok(CreateChallengeResponse {
-        difficulty: challenge.difficulty,
-        start_timestamp_ms: challenge.start_timestamp_ms,
-        expiry_timestamp_ms: challenge.expiry_timestamp_ms,
-    })
+    match challenge {
+        Ok(challenge) => CreatePowChallengeResult::Ok(CreateChallengeResponse {
+            difficulty: challenge.difficulty,
+            start_timestamp_ms: challenge.start_timestamp_ms,
+            expiry_timestamp_ms: challenge.expiry_timestamp_ms,
+        }),
+        Err(err) => CreatePowChallengeResult::Err(err),
+    }
 }
 /// Checks if the caller has an associated user profile.
 ///
