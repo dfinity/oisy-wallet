@@ -40,9 +40,9 @@ use shared::{
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
-            AddUserCredentialResult, BtcSelectUserUtxosFeeResult, CreatePowChallengeResult,
-            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult,
+            AddUserCredentialResult, BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult,
+            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
+            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -467,36 +467,41 @@ pub async fn btc_add_pending_transaction(
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn btc_get_pending_transactions(
     params: BtcGetPendingTransactionsRequest,
-) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
-    let principal = ic_cdk::caller();
-    let now_ns = time();
+) -> BtcGetPendingTransactionsResult {
+    async fn inner(
+        params: BtcGetPendingTransactionsRequest,
+    ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
+        let principal = ic_cdk::caller();
+        let now_ns = time();
 
-    let current_utxos = bitcoin_api::get_all_utxos(
-        params.network,
-        params.address.clone(),
-        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
-    )
-    .await
-    .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
+        let current_utxos = bitcoin_api::get_all_utxos(
+            params.network,
+            params.address.clone(),
+            Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+        )
+        .await
+        .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
 
-    let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
-        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
-        pending_transactions
-            .get_pending_transactions(&principal, &params.address)
-            .clone()
-    });
+        let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
+            pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+            pending_transactions
+                .get_pending_transactions(&principal, &params.address)
+                .clone()
+        });
 
-    let pending_transactions = stored_transactions
-        .iter()
-        .map(|tx| PendingTransaction {
-            txid: tx.txid.clone(),
-            utxos: tx.utxos.clone(),
+        let pending_transactions = stored_transactions
+            .iter()
+            .map(|tx| PendingTransaction {
+                txid: tx.txid.clone(),
+                utxos: tx.utxos.clone(),
+            })
+            .collect();
+
+        Ok(BtcGetPendingTransactionsReponse {
+            transactions: pending_transactions,
         })
-        .collect();
-
-    Ok(BtcGetPendingTransactionsReponse {
-        transactions: pending_transactions,
-    })
+    }
+    inner(params).await.into()
 }
 
 /// Adds a verifiable credential to the user profile.

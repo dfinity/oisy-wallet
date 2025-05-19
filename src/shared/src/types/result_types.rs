@@ -2,7 +2,10 @@ use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
 use super::{
-    bitcoin::{SelectedUtxosFeeError, SelectedUtxosFeeResponse},
+    bitcoin::{
+        BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse, SelectedUtxosFeeError,
+        SelectedUtxosFeeResponse,
+    },
     pow::{CreateChallengeError, CreateChallengeResponse},
     signer::{GetAllowedCyclesError, GetAllowedCyclesResponse},
     user_profile::{GetUserProfileError, UserProfile},
@@ -193,6 +196,26 @@ impl From<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>> for BtcSelect
         match result {
             Ok(response) => BtcSelectUserUtxosFeeResult::Ok(response),
             Err(err) => BtcSelectUserUtxosFeeResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcGetPendingTransactionsResult {
+    /// The pending transactions were retrieved successfully.
+    Ok(BtcGetPendingTransactionsReponse),
+    /// The pending transactions were not retrieved due to an error.
+    Err(BtcGetPendingTransactionsError),
+}
+impl From<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError>>
+    for BtcGetPendingTransactionsResult
+{
+    fn from(
+        result: Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError>,
+    ) -> Self {
+        match result {
+            Ok(response) => BtcGetPendingTransactionsResult::Ok(response),
+            Err(err) => BtcGetPendingTransactionsResult::Err(err),
         }
     }
 }
