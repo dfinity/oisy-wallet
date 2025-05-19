@@ -49,7 +49,7 @@
 			<div class="flex w-2/5 justify-end pt-[var(--padding)]">
 				<Button
 					colorStyle="secondary-light"
-					on:click={() => onAddContact()}
+					on:click={onAddContact}
 					testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
 					styleClass="rounded-[12px]"
 				>
