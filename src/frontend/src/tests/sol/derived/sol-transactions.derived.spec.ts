@@ -141,7 +141,8 @@ describe('sol-transactions.derived', () => {
 			expect(get(solKnownDestinations)).toEqual({
 				[transactions[0].data.to as string]: {
 					amounts: transactions.map(({ data }) => ({ value: data.value, token: SOLANA_TOKEN })),
-					timestamp: maxTimestamp
+					timestamp: maxTimestamp,
+					address: transactions[0].data.to
 				}
 			});
 		});

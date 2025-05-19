@@ -1434,7 +1434,8 @@ describe('transactions.utils', () => {
 			const expectedIcKnownDestinations = {
 				[icTransactionsUi[0].to as string]: {
 					amounts: icTransactionsUi.map(({ value, token }) => ({ value, token })),
-					timestamp: Number(icTransactionsUi[0].timestamp)
+					timestamp: Number(icTransactionsUi[0].timestamp),
+					address: icTransactionsUi[0].to
 				}
 			};
 
@@ -1455,11 +1456,13 @@ describe('transactions.utils', () => {
 			expect(getKnownDestinations([icTransactionsUi1, icTransactionsUi2])).toEqual({
 				[icTransactionsUi1.to as string]: {
 					amounts: [{ value: icTransactionsUi1.value, token: icTransactionsUi1.token }],
-					timestamp: Number(icTransactionsUi1.timestamp)
+					timestamp: Number(icTransactionsUi1.timestamp),
+					address: icTransactionsUi1.to
 				},
 				[icTransactionsUi2.to as string]: {
 					amounts: [{ value: icTransactionsUi2.value, token: icTransactionsUi2.token }],
-					timestamp: Number(icTransactionsUi2.timestamp)
+					timestamp: Number(icTransactionsUi2.timestamp),
+					address: icTransactionsUi2.to
 				}
 			});
 		});
@@ -1476,11 +1479,13 @@ describe('transactions.utils', () => {
 			expect(getKnownDestinations([btcTransactionsUi])).toEqual({
 				[btcTransactionsUi.to[0] as string]: {
 					amounts: [{ value: btcTransactionsUi.value, token: btcTransactionsUi.token }],
-					timestamp: Number(btcTransactionsUi.timestamp)
+					timestamp: Number(btcTransactionsUi.timestamp),
+					address: btcTransactionsUi.to[0]
 				},
 				[btcTransactionsUi.to[1] as string]: {
 					amounts: [{ value: btcTransactionsUi.value, token: btcTransactionsUi.token }],
-					timestamp: Number(btcTransactionsUi.timestamp)
+					timestamp: Number(btcTransactionsUi.timestamp),
+					address: btcTransactionsUi.to[1]
 				}
 			});
 		});
@@ -1496,7 +1501,8 @@ describe('transactions.utils', () => {
 			const expectedIcKnownDestinations = {
 				[icTransactionsUi[0].to as string]: {
 					amounts: icTransactionsUi.map(({ value, token }) => ({ value, token })),
-					timestamp: Number(icTransactionsUi[icTransactionsUi.length - 1].timestamp)
+					timestamp: Number(icTransactionsUi[icTransactionsUi.length - 1].timestamp),
+					address: icTransactionsUi[0].to
 				}
 			};
 

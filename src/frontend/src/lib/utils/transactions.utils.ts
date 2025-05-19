@@ -320,7 +320,8 @@ export const getKnownDestinations = (
 											? Math.max(Number(acc[address].timestamp), Number(timestamp))
 											: nonNullish(timestamp)
 												? Number(timestamp)
-												: acc[address].timestamp
+												: acc[address].timestamp,
+									address
 								}
 							}),
 							{}
