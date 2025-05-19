@@ -40,10 +40,11 @@ use shared::{
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
-            AddUserCredentialResult, AllowSigningResult, BtcAddPendingTransactionResult,
-            BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreatePowChallengeResult,
-            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult,
+            AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
+            BtcAddPendingTransactionResult, BtcGetPendingTransactionsResult,
+            BtcSelectUserUtxosFeeResult, CreatePowChallengeResult, DeleteContactResult,
+            GetAllowedCyclesResult, GetContactResult, GetContactsResult, GetUserProfileResult,
+            SetUserShowTestnetsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -620,23 +621,25 @@ pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTes
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn add_user_hidden_dapp_id(
-    request: AddHiddenDappIdRequest,
-) -> Result<(), AddDappSettingsError> {
-    request.check()?;
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
+#[must_use]
+pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHiddenDappIdResult {
+    fn inner(request: AddHiddenDappIdRequest) -> Result<(), AddDappSettingsError> {
+        request.check()?;
+        let user_principal = ic_cdk::caller();
+        let stored_principal = StoredPrincipal(user_principal);
 
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        add_hidden_dapp_id(
-            stored_principal,
-            request.current_user_version,
-            request.dapp_id,
-            &mut user_profile_model,
-        )
-    })
+        mutate_state(|s| {
+            let mut user_profile_model =
+                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+            add_hidden_dapp_id(
+                stored_principal,
+                request.current_user_version,
+                request.dapp_id,
+                &mut user_profile_model,
+            )
+        })
+    }
+    inner(request).into()
 }
 
 /// It create a new user profile for the caller.

@@ -6,6 +6,7 @@ use super::{
         BtcAddPendingTransactionError, BtcGetPendingTransactionsError,
         BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
+    dapp::AddDappSettingsError,
     pow::{CreateChallengeError, CreateChallengeResponse},
     signer::{
         AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
@@ -250,6 +251,22 @@ impl From<Result<AllowSigningResponse, AllowSigningError>> for AllowSigningResul
         match result {
             Ok(response) => AllowSigningResult::Ok(response),
             Err(err) => AllowSigningResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum AddUserHiddenDappIdResult {
+    /// The user's hidden dapp id was added successfully.
+    Ok(()),
+    /// The user's hidden dapp id was not added due to an error.
+    Err(AddDappSettingsError),
+}
+impl From<Result<(), AddDappSettingsError>> for AddUserHiddenDappIdResult {
+    fn from(result: Result<(), AddDappSettingsError>) -> Self {
+        match result {
+            Ok(()) => AddUserHiddenDappIdResult::Ok(()),
+            Err(err) => AddUserHiddenDappIdResult::Err(err),
         }
     }
 }
