@@ -1,12 +1,11 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
-
 	interface Props {
 		size?: string;
 		text: string;
 	}
 
-	let {size = '46', text}: Props = $props();
+	let { size = '46', text }: Props = $props();
 
 	const generateColor = (text: string): string => {
 		let hash = 0;
