@@ -1,5 +1,6 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_SYMBOL } from '$env/tokens/tokens.icp.env';
 import type { RewardDescription } from '$env/types/env-reward';
 import type { IcCkToken } from '$icp/types/ic-token';
 import RewardEarnings from '$lib/components/rewards/RewardEarnings.svelte';
@@ -17,7 +18,6 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 import { beforeEach } from 'vitest';
-import {ICP_SYMBOL} from "$env/tokens/tokens.icp.env";
 
 describe('RewardEarnings', () => {
 	const ckBtcRewardEarningsCardSelector = `div[data-tid="${REWARDS_EARNINGS_CARD}-${BTC_MAINNET_TOKEN.twinTokenSymbol}"]`;
