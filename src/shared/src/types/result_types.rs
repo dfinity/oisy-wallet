@@ -2,6 +2,7 @@ use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
 use super::{
+    bitcoin::{SelectedUtxosFeeError, SelectedUtxosFeeResponse},
     pow::{CreateChallengeError, CreateChallengeResponse},
     signer::{GetAllowedCyclesError, GetAllowedCyclesResponse},
     user_profile::{GetUserProfileError, UserProfile},
@@ -176,6 +177,22 @@ impl From<Result<CreateChallengeResponse, CreateChallengeError>> for CreatePowCh
         match result {
             Ok(response) => CreatePowChallengeResult::Ok(response),
             Err(err) => CreatePowChallengeResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcSelectUserUtxosFeeResult {
+    /// The fee was selected successfully.
+    Ok(SelectedUtxosFeeResponse),
+    /// The fee was not selected due to an error.
+    Err(SelectedUtxosFeeError),
+}
+impl From<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>> for BtcSelectUserUtxosFeeResult {
+    fn from(result: Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>) -> Self {
+        match result {
+            Ok(response) => BtcSelectUserUtxosFeeResult::Ok(response),
+            Err(err) => BtcSelectUserUtxosFeeResult::Err(err),
         }
     }
 }

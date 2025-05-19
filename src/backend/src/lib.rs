@@ -40,9 +40,9 @@ use shared::{
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
-            AddUserCredentialResult, CreatePowChallengeResult, DeleteContactResult,
-            GetAllowedCyclesResult, GetContactResult, GetContactsResult, GetUserProfileResult,
-            SetUserShowTestnetsResult,
+            AddUserCredentialResult, BtcSelectUserUtxosFeeResult, CreatePowChallengeResult,
+            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
+            GetUserProfileResult, SetUserShowTestnetsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -360,64 +360,73 @@ const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
-) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
-    let principal = ic_cdk::caller();
-    let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+) -> BtcSelectUserUtxosFeeResult {
+    async fn inner(
+        params: SelectedUtxosFeeRequest,
+    ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
+        let principal = ic_cdk::caller();
+        let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+            .await
+            .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+        let all_utxos = bitcoin_api::get_all_utxos(
+            params.network,
+            source_address.clone(),
+            Some(
+                params
+                    .min_confirmations
+                    .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+            ),
+        )
         .await
         .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
-    let all_utxos = bitcoin_api::get_all_utxos(
-        params.network,
-        source_address.clone(),
-        Some(
-            params
-                .min_confirmations
-                .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
-        ),
-    )
-    .await
-    .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
-    let now_ns = time();
+        let now_ns = time();
 
-    let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
-        pending_transactions.prune_pending_transactions(principal, &all_utxos, now_ns);
-        !pending_transactions
-            .get_pending_transactions(&principal, &source_address)
-            .is_empty()
-    });
-
-    if has_pending_transactions {
-        return Err(SelectedUtxosFeeError::PendingTransactions);
-    }
-
-    let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
-        .await
-        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
-    // We support sending to one destination only.
-    // Therefore, the outputs are the destination and the source address for the change.
-    let output_count = 2;
-    let mut available_utxos = all_utxos.clone();
-    let selected_utxos =
-        bitcoin_utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
-
-    // Fee calculation might still take into account default tx size and expected output.
-    // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be present.
-    if selected_utxos.is_empty() {
-        return Ok(SelectedUtxosFeeResponse {
-            utxos: selected_utxos,
-            fee_satoshis: 0,
+        let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
+            pending_transactions.prune_pending_transactions(principal, &all_utxos, now_ns);
+            !pending_transactions
+                .get_pending_transactions(&principal, &source_address)
+                .is_empty()
         });
+
+        if has_pending_transactions {
+            return Err(SelectedUtxosFeeError::PendingTransactions);
+        }
+
+        let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
+            .await
+            .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+        // We support sending to one destination only.
+        // Therefore, the outputs are the destination and the source address for the change.
+        let output_count = 2;
+        let mut available_utxos = all_utxos.clone();
+        let selected_utxos = bitcoin_utils::utxos_selection(
+            params.amount_satoshis,
+            &mut available_utxos,
+            output_count,
+        );
+
+        // Fee calculation might still take into account default tx size and expected output.
+        // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be
+        // present.
+        if selected_utxos.is_empty() {
+            return Ok(SelectedUtxosFeeResponse {
+                utxos: selected_utxos,
+                fee_satoshis: 0,
+            });
+        }
+
+        let fee_satoshis = estimate_fee(
+            selected_utxos.len() as u64,
+            median_fee_millisatoshi_per_vbyte,
+            output_count as u64,
+        );
+
+        Ok(SelectedUtxosFeeResponse {
+            utxos: selected_utxos,
+            fee_satoshis,
+        })
     }
-
-    let fee_satoshis = estimate_fee(
-        selected_utxos.len() as u64,
-        median_fee_millisatoshi_per_vbyte,
-        output_count as u64,
-    );
-
-    Ok(SelectedUtxosFeeResponse {
-        utxos: selected_utxos,
-        fee_satoshis,
-    })
+    inner(params).await.into()
 }
 
 /// Adds a pending Bitcoin transaction for the caller.
