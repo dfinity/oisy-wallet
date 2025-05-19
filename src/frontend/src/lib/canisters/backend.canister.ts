@@ -258,12 +258,12 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	getContact = async (id: bigint): Promise<GetContactResult> => {
-		const { get_contact } = this.caller({ certified: true });
+		const { get_contact } = this.caller({ certified: false });
 		return await get_contact(id);
 	};
 
 	getContacts = async (): Promise<GetContactsResult> => {
-		const { get_contacts } = this.caller({ certified: true });
+		const { get_contacts } = this.caller({ certified: false });
 		return await get_contacts();
 	};
 
