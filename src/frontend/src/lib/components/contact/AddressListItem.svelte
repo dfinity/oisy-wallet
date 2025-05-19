@@ -23,7 +23,7 @@
 	let { address, onClick, onInfo, styleClass = '', showFullAddress = false }: Props = $props();
 
 	let displayAddress = $derived(
-		showFullAddress ? address.address : shortenWithMiddleEllipsis(address.address)
+		showFullAddress ? address.address : shortenWithMiddleEllipsis({ text: address.address })
 	);
 </script>
 
