@@ -29,6 +29,11 @@
 		destinationTokenExchangeRate,
 		failedSwapError
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	const onClick = () => {
+		failedSwapError.set(undefined);
+		dispatch('icBack');
+	};
 </script>
 
 <ContentWithToolbar>
@@ -78,12 +83,7 @@
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack
-			onclick={() => {
-				failedSwapError.set(undefined);
-				dispatch('icBack');
-			}}
-		/>
+		<ButtonBack onclick={onClick} />
 
 		<Button on:click={() => dispatch('icSwap')}>
 			{$i18n.swap.text.swap_button}
