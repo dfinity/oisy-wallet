@@ -92,5 +92,6 @@ export enum ProgressStepsUpdateBalanceCkBtc {
 
 export enum AddressBookSteps {
 	ADDRESS_BOOK = 'address_book',
-	ADD_CONTACT = 'add_contact'
+	ADD_CONTACT = 'add_contact',
+	SHOW_CONTACT = 'show_contact'
 }

@@ -84,7 +84,7 @@ describe('btc-transactions.derived', () => {
 		});
 	});
 
-	describe('solKnownDestinations', () => {
+	describe('btcKnownDestinations', () => {
 		const transactions = [
 			{
 				certified: true,
@@ -107,10 +107,16 @@ describe('btc-transactions.derived', () => {
 				transactions
 			});
 
+			const maxTimestamp = Math.max(...transactions.map(({ data }) => Number(data.timestamp)));
+
 			expect(get(btcKnownDestinations)).toEqual({
 				[transactions[0].data.to?.[0] ?? '']: {
-					amounts: transactions.map(({ data }) => data.value),
-					timestamp: Number(transactions[0].data.timestamp)
+					amounts: transactions.map(({ data }) => ({
+						value: data.value,
+						token: BTC_MAINNET_TOKEN
+					})),
+					timestamp: maxTimestamp,
+					address: transactions[0].data.to?.[0]
 				}
 			});
 		});

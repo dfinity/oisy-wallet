@@ -13,20 +13,24 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Contact } from '$lib/types/contact';
 
-	let contact: Partial<Contact> = $state({});
-	let form: ContactForm | undefined = $state();
+	interface Props {
+		onAddContact: (contact: Contact) => void;
+		onClose: () => void;
+	}
 
-	let { addContact, close }: { addContact: (contact: Contact) => void; close: () => void } =
-		$props();
+	let { onAddContact, onClose }: Props = $props();
+
+	let contact: Partial<Contact> = $state({ addresses: [] });
+	let form: ContactForm | undefined = $state();
 
 	const handleAdd = () => {
 		if (form?.isValid) {
-			addContact(contact as Contact);
+			onAddContact(contact as Contact);
 		}
 	};
 
 	let title = $derived(
-		notEmptyString(contact?.name) ? contact?.name : $i18n.contact.form.add_new_contact
+		notEmptyString(contact?.name?.trim?.()) ? contact?.name : $i18n.contact.form.add_new_contact
 	);
 
 	export { title };
@@ -37,7 +41,7 @@
 	<ContactForm bind:contact bind:this={form}></ContactForm>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => close()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
+		<ButtonCancel onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
 		<Button
 			colorStyle="primary"
 			on:click={handleAdd}

@@ -1,5 +1,5 @@
 {
-	"dfx": "0.23.0",
+	"dfx": "0.26.1",
 	"canisters": {
 		"signer": {
 			"type": "custom",
@@ -119,7 +119,6 @@
 			},
 			"source": ["build/"],
 			"type": "assets",
-			"gzip": true,
 			"remote": {
 				"id": {
 					"test_be_1": "tewsx-xaaaa-aaaad-aadia-cai"
@@ -513,8 +512,8 @@
 		},
 		"rewards": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.2-api.1/rewards.did",
-			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.2-api.1/rewards.wasm.gz",
+			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.3-api.1/rewards.did",
+			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.3-api.1/rewards.wasm.gz",
 			"remote": {
 				"id": {
 					"ic": "nynz6-haaaa-aaaan-qzqda-cai",

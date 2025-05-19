@@ -64,10 +64,19 @@ export interface Modal<T> {
 
 export type ModalData<T> = Option<Modal<T>>;
 
-type SetWithDataParams<D> = { id: symbol; data: D };
-type SetWithOptionalDataParams<D> = { id: symbol; data?: D };
+interface SetWithDataParams<D> {
+	id: symbol;
+	data: D;
+}
+interface SetWithOptionalDataParams<D> {
+	id: symbol;
+	data?: D;
+}
 
-type OpenTransactionParams<T extends AnyTransactionUi> = { transaction: T; token: Token };
+interface OpenTransactionParams<T extends AnyTransactionUi> {
+	transaction: T;
+	token: Token;
+}
 
 export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openEthReceive: (id: symbol) => void;
