@@ -7,6 +7,11 @@ use serde::Serialize;
 
 use crate::types::Version;
 
+/// The length of an EVM contract address.
+///
+/// Note: This should be "0x" + 40 hex characters.
+pub const EVM_CONTRACT_ADDRESS_LENGTH: usize = 42;
+
 /// EVM chain ID
 ///
 /// IDs may be found on: <https://chainlist.org/>
@@ -17,6 +22,7 @@ pub type ChainId = u64;
 /// Note: This is a legacy type and is likely to be phased out or adapted to fit into a consistent
 /// cross-chain approach.
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
 pub struct UserToken {
     pub contract_address: String,
     pub chain_id: ChainId,

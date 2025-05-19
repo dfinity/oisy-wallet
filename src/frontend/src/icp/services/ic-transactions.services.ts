@@ -3,6 +3,7 @@ import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.a
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCanistersStrict, IcToken } from '$icp/types/ic-token';
 import type { IcTransaction, IcTransactionUi } from '$icp/types/ic-transaction';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
@@ -13,6 +14,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import type { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
@@ -171,29 +173,34 @@ export const loadNextIcTransactionsByOldest = async ({
 	transactions,
 	...rest
 }: {
-	minTimestamp: bigint;
+	minTimestamp: number;
 	transactions: IcTransactionUi[];
 	owner: Principal;
 	identity: OptionIdentity;
 	maxResults?: bigint;
 	token: Token;
 	signalEnd: () => void;
-}): Promise<void> => {
+}): Promise<ResultSuccess> => {
 	// If there are no transactions, we let the worker load the first ones
 	if (transactions.length === 0) {
-		return;
+		return { success: false };
 	}
 
 	const lastTransaction = findOldestTransaction(transactions);
 
 	const { timestamp: minIcTimestamp, id: lastId } = lastTransaction ?? {};
 
-	if (nonNullish(minIcTimestamp) && minIcTimestamp <= minTimestamp) {
-		return;
+	if (
+		nonNullish(minIcTimestamp) &&
+		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
+	) {
+		return { success: false };
 	}
 
 	await loadNextIcTransactions({
 		...rest,
 		lastId
 	});
+
+	return { success: true };
 };

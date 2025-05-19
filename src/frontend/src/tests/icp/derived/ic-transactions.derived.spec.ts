@@ -164,7 +164,7 @@ describe('ic-transactions.derived', () => {
 			icTransactionsStore.reset(ICP_TOKEN_ID);
 		});
 
-		it('should return known destinations if transactions store has some data', () => {
+		it('should return known destinations for ICP if transactions store has some data', () => {
 			token.set(ICP_TOKEN);
 			icTransactionsStore.append({
 				tokenId: ICP_TOKEN_ID,
@@ -175,8 +175,9 @@ describe('ic-transactions.derived', () => {
 
 			expect(get(icKnownDestinations)).toEqual({
 				[transactions[0].data.to as string]: {
-					amounts: transactions.map(({ data }) => data.value),
-					timestamp: maxTimestamp
+					amounts: transactions.map(({ data }) => ({ value: data.value, token: ICP_TOKEN })),
+					timestamp: maxTimestamp,
+					address: transactions[0].data.to
 				}
 			});
 		});

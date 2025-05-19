@@ -9,6 +9,7 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -28,6 +29,11 @@
 		destinationTokenExchangeRate,
 		failedSwapError
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	const onClick = () => {
+		failedSwapError.set(undefined);
+		dispatch('icBack');
+	};
 </script>
 
 <ContentWithToolbar>
@@ -59,20 +65,25 @@
 	</ModalValue>
 
 	<div class="flex flex-col gap-3">
-		<SwapProvider />
+		<SwapProvider {slippageValue} />
 		<SwapFees />
 	</div>
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
-			<MessageBox>
-				{$failedSwapError}
+			<MessageBox level={$failedSwapError.variant}>
+				{$failedSwapError.message}
+				{#if nonNullish($failedSwapError?.url)}
+					<ExternalLink href={$failedSwapError.url.url} ariaLabel={$i18n.swap.text.open_icp_swap}
+						>{$failedSwapError.url.text}</ExternalLink
+					>
+				{/if}
 			</MessageBox>
 		</div>
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={() => dispatch('icBack')} />
+		<ButtonBack onclick={onClick} />
 
 		<Button on:click={() => dispatch('icSwap')}>
 			{$i18n.swap.text.swap_button}
