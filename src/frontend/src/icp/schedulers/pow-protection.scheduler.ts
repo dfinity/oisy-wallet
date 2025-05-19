@@ -49,6 +49,30 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 			createChallengeResponse = await createPowChallenge({
 				identity
 			});
+
+			// Make sure we have a valid response before continuing
+			if (isNullish(createChallengeResponse)) {
+				return;
+			}
+
+			// Step 2: Solve the PoW challenge.
+			// TODO provide functionality to post and receive the a post message to indicate the progress
+			// this.postMessagePowProgress({ progress: 'SOLVE_CHALLENGE' });
+			const nonce = await solvePowChallenge({
+				timestamp: createChallengeResponse.start_timestamp_ms,
+				difficulty: createChallengeResponse.difficulty
+			});
+
+			// Step 3: Request allowance for signing operations with solved nonce.
+			// TODO provide functionality to post and receive the a post message to indicate the progress
+			// this.postMessagePowProgress({ progress: 'GRANT_CYCLES'});
+
+			await allowSigning({
+				identity,
+				request: { nonce }
+			});
+			// TODO provide functionality to post and receive the a post message to indicate when the next challenge starts
+			// if (_allowSigningResponse?.challenge_completion[0]?.next_allowance_ms !== undefined) {this.postMessagePowNextAllowance({ nextAllowanceMs: allowSigningResponse.challenge_completion[0].next_allowance_ms });
 		} catch (err: unknown) {
 			// We can skip the "Challenge already in progress" since we are already in the middle of a challenge. This
 			// usually happens when:
@@ -59,30 +83,6 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 			}
 			throw err;
 		}
-
-		// Make sure we have a valid response before continuing
-		if (isNullish(createChallengeResponse)) {
-			return;
-		}
-
-		// Step 2: Solve the PoW challenge.
-		// TODO provide functionality to post and receive the a post message to indicate the progress
-		// this.postMessagePowProgress({ progress: 'SOLVE_CHALLENGE' });
-		const nonce = await solvePowChallenge({
-			timestamp: createChallengeResponse.start_timestamp_ms,
-			difficulty: createChallengeResponse.difficulty
-		});
-
-		// Step 3: Request allowance for signing operations with solved nonce.
-		// TODO provide functionality to post and receive the a post message to indicate the progress
-		// this.postMessagePowProgress({ progress: 'GRANT_CYCLES'});
-
-		await allowSigning({
-			identity,
-			request: { nonce }
-		});
-		// TODO provide functionality to post and receive the a post message to indicate when the next challenge starts
-		// if (_allowSigningResponse?.challenge_completion[0]?.next_allowance_ms !== undefined) {this.postMessagePowNextAllowance({ nextAllowanceMs: allowSigningResponse.challenge_completion[0].next_allowance_ms });
 	};
 	private isChallengeInProgressError = (err: unknown): boolean =>
 		err instanceof PowCreateChallengeError && err.code === CreateChallengeEnum.ChallengeInProgress;
