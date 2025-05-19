@@ -4,8 +4,8 @@ import {
 	ADDRESS_LIST_ITEM_INFO_BUTTON
 } from '$lib/constants/test-ids.constants';
 import type { Address } from '$lib/types/contact';
-import { shortenAddress } from '$lib/utils/address.utils';
 import * as clipboardUtils from '$lib/utils/clipboard.utils';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
@@ -20,7 +20,7 @@ describe('AddressListItem', () => {
 	const mockI18n = readable(en);
 
 	// Mock the clipboard utils
-	vi.spyOn(clipboardUtils, 'copyToClipboard').mockImplementation(() => Promise.resolve());
+	vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(undefined);
 
 	// Setup the context with the mocked i18n store
 	const mockContext = new Map([['i18n', mockI18n]]);
@@ -56,7 +56,7 @@ describe('AddressListItem', () => {
 		expect(container).toHaveTextContent(en.address.types.Icrc2);
 
 		// Check shortened address is displayed
-		expect(container).toHaveTextContent(shortenAddress(icrcAddress.address));
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis(icrcAddress.address));
 
 		// Check that alias is not displayed (since it's not provided)
 		expect(container).not.toHaveTextContent('•');
@@ -72,7 +72,7 @@ describe('AddressListItem', () => {
 		expect(container).toHaveTextContent(en.address.types.Btc);
 
 		// Check shortened address is displayed
-		expect(container).toHaveTextContent(shortenAddress(btcAddress.address));
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis(btcAddress.address));
 
 		// Check that alias is displayed
 		expect(container).toHaveTextContent(btcAddress.alias as string);
@@ -91,7 +91,7 @@ describe('AddressListItem', () => {
 		expect(container).toHaveTextContent(en.address.types.Eth);
 
 		// Check shortened address is displayed
-		expect(container).toHaveTextContent(shortenAddress(ethAddress.address));
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis(ethAddress.address));
 	});
 
 	it('should render SOL address correctly', () => {
@@ -104,7 +104,7 @@ describe('AddressListItem', () => {
 		expect(container).toHaveTextContent(en.address.types.Sol);
 
 		// Check shortened address is displayed
-		expect(container).toHaveTextContent(shortenAddress(solAddress.address));
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis(solAddress.address));
 	});
 
 	it('should call onclick when clicked', async () => {
@@ -208,7 +208,7 @@ describe('AddressListItem', () => {
 		});
 
 		// Check shortened address is displayed
-		expect(container).toHaveTextContent(shortenAddress(icrcAddress.address));
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis(icrcAddress.address));
 		// Check full address is not displayed
 		expect(container).not.toHaveTextContent(icrcAddress.address);
 	});
