@@ -25,7 +25,7 @@
 		autofocus = false
 	}: Props = $props();
 
-	let inputElement: HTMLInputElement | undefined = $state();
+	let inputElement = $state<HTMLInputElement | undefined>();
 
 	onMount(() => {
 		if (autofocus && nonNullish(inputElement)) {
