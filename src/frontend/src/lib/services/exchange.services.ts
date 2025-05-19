@@ -63,6 +63,12 @@ export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | n
 		vs_currencies: 'usd'
 	});
 
+export const exchangeRatePOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'polygon-ecosystem-token',
+		vs_currencies: 'usd'
+	});
+
 export const exchangeRateERC20ToUsd = ({
 	coingeckoPlatformId: id,
 	contractAddresses
@@ -114,6 +120,7 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 		...(nonNullish(data) ? [data.currentIcpPrice] : []),
 		...(nonNullish(data) ? [data.currentSolPrice] : []),
 		...(nonNullish(data) ? [data.currentBnbPrice] : []),
+		...(nonNullish(data) ? [data.currentPolPrice] : []),
 		...(nonNullish(data) ? [data.currentErc20Prices] : []),
 		...(nonNullish(data) ? [data.currentIcrcPrices] : []),
 		...(nonNullish(data) ? [data.currentSplPrices] : [])

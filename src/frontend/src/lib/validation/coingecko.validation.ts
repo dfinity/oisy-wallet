@@ -5,5 +5,6 @@ export const CoingeckoCoinsIdSchema = z.enum([
 	'bitcoin',
 	'internet-computer',
 	'solana',
-	'binancecoin'
+	'binancecoin',
+	'polygon-ecosystem-token'
 ]);

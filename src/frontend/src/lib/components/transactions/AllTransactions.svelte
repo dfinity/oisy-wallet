@@ -18,7 +18,7 @@
 	let tokenListWithoutCanister: string;
 	let tokenListWithUnavailableCanister: string;
 	$: {
-		let result = enabledTokensWithoutTransaction.reduce(
+		const result = enabledTokensWithoutTransaction.reduce(
 			(
 				acc: {
 					enabledTokensWithoutCanister: string[];

@@ -13,13 +13,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Contact } from '$lib/types/contact';
 
-	interface AddressBookStepProps {
+	interface Props {
 		contacts: Contact[];
-		addContact: () => void;
-		showContact: (contact: Contact) => void;
+		onAddContact: () => void;
+		onShowContact: (contact: Contact) => void;
 	}
 
-	let { contacts, addContact, showContact }: AddressBookStepProps = $props();
+	let { contacts, onAddContact, onShowContact }: Props = $props();
 
 	let searchTerm = $state('');
 
@@ -34,7 +34,7 @@
 
 <ContentWithToolbar styleClass="mx-2 flex flex-col items-stretch">
 	{#if contacts.length === 0}
-		<EmptyAddressBook {addContact}></EmptyAddressBook>
+		<EmptyAddressBook {onAddContact}></EmptyAddressBook>
 	{:else}
 		<div class="flex w-full gap-2">
 			<div class="w-3/5">
@@ -48,7 +48,7 @@
 			</div>
 			<div class="flex w-2/5 justify-end pt-1">
 				<ButtonAdd
-					onclick={addContact}
+					onclick={onAddContact}
 					testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
 					label={$i18n.address_book.text.add_contact}
 				/>
@@ -66,7 +66,7 @@
 							-->
 							CONTACT: {contact.name} #addresses {contact.addresses.length}
 						</div>
-						<Button styleClass="flex-none" on:click={() => showContact(contact)}>Show</Button>
+						<Button styleClass="flex-none" on:click={() => onShowContact(contact)}>Show</Button>
 					</div>
 				{/each}
 			{:else}

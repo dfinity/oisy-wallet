@@ -37,8 +37,8 @@ describe('AddressBookStep', () => {
 		const { getByText } = render(AddressBookStep, {
 			props: {
 				contacts: [],
-				addContact: mockAddContact,
-				showContact: mockShowContact
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact
 			}
 		});
 
@@ -56,8 +56,8 @@ describe('AddressBookStep', () => {
 		const { getByText } = render(AddressBookStep, {
 			props: {
 				contacts: [],
-				addContact: mockAddContact,
-				showContact: mockShowContact
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact
 			}
 		});
 
@@ -71,8 +71,8 @@ describe('AddressBookStep', () => {
 		const { getByText, getAllByText } = render(AddressBookStep, {
 			props: {
 				contacts: baseContacts,
-				addContact: mockAddContact,
-				showContact: mockShowContact
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact
 			}
 		});
 
@@ -96,8 +96,8 @@ describe('AddressBookStep', () => {
 		const { getByTestId } = render(AddressBookStep, {
 			props: {
 				contacts: baseContacts,
-				addContact: mockAddContact,
-				showContact: mockShowContact
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact
 			}
 		});
 
@@ -111,8 +111,8 @@ describe('AddressBookStep', () => {
 		const { getAllByText } = render(AddressBookStep, {
 			props: {
 				contacts: baseContacts,
-				addContact: mockAddContact,
-				showContact: mockShowContact
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact
 			}
 		});
 
@@ -133,8 +133,8 @@ describe('AddressBookStep', () => {
 		const { getByTestId, queryByText } = render(AddressBookStep, {
 			props: {
 				contacts: baseContacts,
-				addContact: mockAddContact,
-				showContact: mockShowContact
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact
 			}
 		});
 
@@ -159,8 +159,8 @@ describe('AddressBookStep', () => {
 		const { getByTestId, queryByText } = render(AddressBookStep, {
 			props: {
 				contacts,
-				addContact: mockAddContact,
-				showContact: mockShowContact
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact
 			}
 		});
 
@@ -177,8 +177,8 @@ describe('AddressBookStep', () => {
 		const { getByTestId, queryByText } = render(AddressBookStep, {
 			props: {
 				contacts,
-				addContact: mockAddContact,
-				showContact: mockShowContact
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact
 			}
 		});
 
@@ -194,8 +194,8 @@ describe('AddressBookStep', () => {
 		const { getByTestId, queryByText } = render(AddressBookStep, {
 			props: {
 				contacts,
-				addContact: mockAddContact,
-				showContact: mockShowContact
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact
 			}
 		});
 
@@ -209,8 +209,8 @@ describe('AddressBookStep', () => {
 		const { getByTestId, getByText } = render(AddressBookStep, {
 			props: {
 				contacts: baseContacts,
-				addContact: mockAddContact,
-				showContact: mockShowContact
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact
 			}
 		});
 

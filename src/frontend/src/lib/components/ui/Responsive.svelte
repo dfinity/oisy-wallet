@@ -22,7 +22,7 @@
 	export let down: ScreensKeyType = MAX_SCREEN;
 
 	let innerWidth = 0;
-	let debouncedWidth = writable(0);
+	const debouncedWidth = writable(0);
 	let timeoutHandle: NodeJS.Timeout | undefined;
 
 	$: {
