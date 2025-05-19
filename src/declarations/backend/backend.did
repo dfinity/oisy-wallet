@@ -212,6 +212,10 @@ type GetAllowedCyclesError = variant {
 	FailedToContactCyclesLedger
 };
 type GetAllowedCyclesResponse = record { allowed_cycles : nat };
+type GetAllowedCyclesResult = variant {
+	Ok : GetAllowedCyclesResponse;
+	Err : GetAllowedCyclesError
+};
 type GetContactResult = variant { Ok : Contact; Err : ContactError };
 type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
 type GetUserProfileError = variant { NotFound };
@@ -287,10 +291,6 @@ type Result_4 = variant {
 type Result_5 = variant {
 	Ok : CreateChallengeResponse;
 	Err : CreateChallengeError
-};
-type Result_6 = variant {
-	Ok : GetAllowedCyclesResponse;
-	Err : GetAllowedCyclesError
 };
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
@@ -443,7 +443,7 @@ service : (Arg) -> {
 	get_account_creation_timestamps : () -> (
 		vec record { principal; nat64 }
 	) query;
-	get_allowed_cycles : () -> (Result_6);
+	get_allowed_cycles : () -> (GetAllowedCyclesResult);
 	get_canister_status : () -> (CanisterStatusResultV2);
 	get_contact : (nat64) -> (GetContactResult) query;
 	get_contacts : () -> (GetContactsResult) query;

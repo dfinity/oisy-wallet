@@ -217,6 +217,9 @@ export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesL
 export interface GetAllowedCyclesResponse {
 	allowed_cycles: bigint;
 }
+export type GetAllowedCyclesResult =
+	| { Ok: GetAllowedCyclesResponse }
+	| { Err: GetAllowedCyclesError };
 export type GetContactResult = { Ok: Contact } | { Err: ContactError };
 export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
 export type GetUserProfileError = { NotFound: null };
@@ -301,7 +304,6 @@ export type Result_3 =
 	| { Err: BtcAddPendingTransactionError };
 export type Result_4 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
 export type Result_5 = { Ok: CreateChallengeResponse } | { Err: CreateChallengeError };
-export type Result_6 = { Ok: GetAllowedCyclesResponse } | { Err: GetAllowedCyclesError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -457,7 +459,7 @@ export interface _SERVICE {
 	create_user_profile: ActorMethod<[], UserProfile>;
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
-	get_allowed_cycles: ActorMethod<[], Result_6>;
+	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_contact: ActorMethod<[bigint], GetContactResult>;
 	get_contacts: ActorMethod<[], GetContactsResult>;
