@@ -245,7 +245,6 @@ interface I18nInit {
 		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
-		loading_balance_symbol: string;
 		erc20_contracts: string;
 		spl_tokens: string;
 		minter_ckbtc_btc: string;
@@ -565,6 +564,7 @@ interface I18nSwap {
 		you_receive: string;
 		select: string;
 		select_swap_provider: string;
+		open_icp_swap: string;
 	};
 	error: {
 		kong_not_available: string;

@@ -31,6 +31,14 @@ describe('ConvertAmountExchange', () => {
 		expect(getByTestId(divTestId)).toHaveTextContent('$0.00');
 	});
 
+	it('should display correct value if amount is less than placeholder value', () => {
+		const { getByTestId } = render(ConvertAmountExchange, {
+			props: { ...props, amount: 0.00001 }
+		});
+
+		expect(getByTestId(divTestId)).toHaveTextContent('< $0.01');
+	});
+
 	it('should display skeleton if amount is not provided', () => {
 		const { amount: _, ...newProps } = props;
 		const { getByTestId } = render(ConvertAmountExchange, { props: newProps });
