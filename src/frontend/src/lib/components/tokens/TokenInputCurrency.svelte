@@ -16,7 +16,7 @@
 	}
 
 	let {
-		value,
+		value = $bindable(),
 		decimals,
 		name = 'token-input-currency',
 		disabled = false,
