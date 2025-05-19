@@ -166,7 +166,7 @@ type Config = record {
 type Contact = record {
 	id : nat64;
 	name : text;
-	update_timestamp : nat64;
+	update_timestamp_ns : nat64;
 	addresses : vec ContactAddressData
 };
 type ContactAddressData = record {
@@ -186,7 +186,6 @@ type CreateChallengeResponse = record {
 	expiry_timestamp_ms : nat64
 };
 type CreateContactRequest = record { name : text };
-type CreateContactResult = variant { Ok : Contact; Err : ContactError };
 type CredentialSpec = record {
 	arguments : opt vec record { text; ArgumentValue };
 	credential_type : text
@@ -206,12 +205,15 @@ type DefiniteCanisterSettingsArgs = record {
 	memory_allocation : nat;
 	compute_allocation : nat
 };
+type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;
 	FailedToContactCyclesLedger
 };
 type GetAllowedCyclesResponse = record { allowed_cycles : nat };
+type GetContactResult = variant { Ok : Contact; Err : ContactError };
+type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
 type GetUserProfileError = variant { NotFound };
 type HasUserProfileResponse = record { has_user_profile : bool };
 type HttpRequest = record {
@@ -269,7 +271,6 @@ type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddDappSettingsError };
 type Result_1 = variant { Ok : AllowSigningResponse; Err : AllowSigningError };
-type Result_10 = variant { Ok; Err : SaveTestnetsSettingsError };
 type Result_2 = variant { Ok; Err : BtcAddPendingTransactionError };
 type Result_3 = variant {
 	Ok : BtcGetPendingTransactionsReponse;
@@ -283,13 +284,12 @@ type Result_5 = variant {
 	Ok : CreateChallengeResponse;
 	Err : CreateChallengeError
 };
-type Result_6 = variant { Ok : nat64; Err : ContactError };
-type Result_7 = variant {
+type Result_6 = variant {
 	Ok : GetAllowedCyclesResponse;
 	Err : GetAllowedCyclesError
 };
-type Result_8 = variant { Ok : vec Contact; Err : ContactError };
-type Result_9 = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result_7 = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result_8 = variant { Ok; Err : SaveTestnetsSettingsError };
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -430,19 +430,19 @@ service : (Arg) -> {
 	);
 	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_4);
 	config : () -> (Config) query;
-	create_contact : (CreateContactRequest) -> (CreateContactResult);
+	create_contact : (CreateContactRequest) -> (GetContactResult);
 	create_pow_challenge : () -> (Result_5);
 	create_user_profile : () -> (UserProfile);
-	delete_contact : (nat64) -> (Result_6);
+	delete_contact : (nat64) -> (DeleteContactResult);
 	get_account_creation_timestamps : () -> (
 		vec record { principal; nat64 }
 	) query;
-	get_allowed_cycles : () -> (Result_7);
+	get_allowed_cycles : () -> (Result_6);
 	get_canister_status : () -> (CanisterStatusResultV2);
-	get_contact : (nat64) -> (CreateContactResult) query;
-	get_contacts : () -> (Result_8) query;
+	get_contact : (nat64) -> (GetContactResult) query;
+	get_contacts : () -> (GetContactsResult) query;
 	get_snapshot : () -> (opt UserSnapshot) query;
-	get_user_profile : () -> (Result_9) query;
+	get_user_profile : () -> (Result_7) query;
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	http_request : (HttpRequest) -> (HttpResponse) query;
 	list_custom_tokens : () -> (vec CustomToken) query;
@@ -452,12 +452,12 @@ service : (Arg) -> {
 	set_many_custom_tokens : (vec CustomToken) -> ();
 	set_many_user_tokens : (vec UserToken) -> ();
 	set_snapshot : (UserSnapshot) -> ();
-	set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_10);
+	set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_8);
 	set_user_token : (UserToken) -> ();
 	stats : () -> (Stats) query;
 	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
 		TopUpCyclesLedgerResult
 	);
-	update_contact : (Contact) -> (CreateContactResult);
-	update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_10)
+	update_contact : (Contact) -> (GetContactResult);
+	update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_8)
 }
