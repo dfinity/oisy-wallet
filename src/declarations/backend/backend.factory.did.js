@@ -464,7 +464,7 @@ export const idlFactory = ({ IDL }) => {
 		VersionMismatch: IDL.Null,
 		UserNotFound: IDL.Null
 	});
-	const Result_8 = IDL.Variant({
+	const SetUserShowTestnetsResult = IDL.Variant({
 		Ok: IDL.Null,
 		Err: SaveTestnetsSettingsError
 	});
@@ -535,7 +535,7 @@ export const idlFactory = ({ IDL }) => {
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_snapshot: IDL.Func([UserSnapshot], [], []),
-		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_8], []),
+		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats], ['query']),
 		top_up_cycles_ledger: IDL.Func(
@@ -544,7 +544,11 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
-		update_user_network_settings: IDL.Func([SaveNetworksSettingsRequest], [Result_8], [])
+		update_user_network_settings: IDL.Func(
+			[SaveNetworksSettingsRequest],
+			[SetUserShowTestnetsResult],
+			[]
+		)
 	});
 };
 // @ts-ignore

@@ -289,7 +289,6 @@ type Result_6 = variant {
 	Err : GetAllowedCyclesError
 };
 type Result_7 = variant { Ok : UserProfile; Err : GetUserProfileError };
-type Result_8 = variant { Ok; Err : SaveTestnetsSettingsError };
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -311,6 +310,10 @@ type SelectedUtxosFeeResponse = record {
 type SetShowTestnetsRequest = record {
 	current_user_version : opt nat64;
 	show_testnets : bool
+};
+type SetUserShowTestnetsResult = variant {
+	Ok;
+	Err : SaveTestnetsSettingsError
 };
 type Settings = record { networks : NetworksSettings; dapp : DappSettings };
 type SplToken = record {
@@ -452,12 +455,16 @@ service : (Arg) -> {
 	set_many_custom_tokens : (vec CustomToken) -> ();
 	set_many_user_tokens : (vec UserToken) -> ();
 	set_snapshot : (UserSnapshot) -> ();
-	set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_8);
+	set_user_show_testnets : (SetShowTestnetsRequest) -> (
+		SetUserShowTestnetsResult
+	);
 	set_user_token : (UserToken) -> ();
 	stats : () -> (Stats) query;
 	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
 		TopUpCyclesLedgerResult
 	);
 	update_contact : (Contact) -> (GetContactResult);
-	update_user_network_settings : (SaveNetworksSettingsRequest) -> (Result_8)
+	update_user_network_settings : (SaveNetworksSettingsRequest) -> (
+		SetUserShowTestnetsResult
+	)
 }

@@ -302,7 +302,6 @@ export type Result_4 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFe
 export type Result_5 = { Ok: CreateChallengeResponse } | { Err: CreateChallengeError };
 export type Result_6 = { Ok: GetAllowedCyclesResponse } | { Err: GetAllowedCyclesError };
 export type Result_7 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_8 = { Ok: null } | { Err: SaveTestnetsSettingsError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -324,6 +323,7 @@ export interface SetShowTestnetsRequest {
 	current_user_version: [] | [bigint];
 	show_testnets: boolean;
 }
+export type SetUserShowTestnetsResult = { Ok: null } | { Err: SaveTestnetsSettingsError };
 export interface Settings {
 	networks: NetworksSettings;
 	dapp: DappSettings;
@@ -472,12 +472,15 @@ export interface _SERVICE {
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_snapshot: ActorMethod<[UserSnapshot], undefined>;
-	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_8>;
+	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], SetUserShowTestnetsResult>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
 	update_contact: ActorMethod<[Contact], GetContactResult>;
-	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_8>;
+	update_user_network_settings: ActorMethod<
+		[SaveNetworksSettingsRequest],
+		SetUserShowTestnetsResult
+	>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
