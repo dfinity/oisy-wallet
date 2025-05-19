@@ -855,7 +855,7 @@ pub fn create_contact(request: CreateContactRequest) -> CreateContactResult {
         id: time(),
         name: request.name,
         addresses: vec![],
-        update_timestamp: time(),
+        update_timestamp_ns: time(),
     };
 
     CreateContactResult::Ok(contact)
@@ -872,7 +872,7 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
         id: request.id,
         name: request.name,
         addresses: request.addresses,
-        update_timestamp: time(),
+        update_timestamp_ns: time(),
     };
 
     Ok(contact)
@@ -904,7 +904,7 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
             )),
             label: Some("ETH Wallet".to_string()),
         }],
-        update_timestamp: time(),
+        update_timestamp_ns: time(),
     })
 }
 
@@ -924,7 +924,7 @@ pub fn get_contacts() -> Result<Vec<Contact>, ContactError> {
             )),
             label: Some("ETH Wallet".to_string()),
         }],
-        update_timestamp: time(),
+        update_timestamp_ns: time(),
     }])
 }
 

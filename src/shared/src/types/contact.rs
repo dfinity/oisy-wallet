@@ -8,7 +8,7 @@ pub struct Contact {
     pub id: u64,
     pub name: String,
     pub addresses: Vec<ContactAddressData>,
-    pub update_timestamp: u64,
+    pub update_timestamp_ns: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -21,7 +21,7 @@ pub struct ContactAddressData {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct StoredContacts {
     pub contacts: Vec<Contact>,
-    pub update_timestamp: u64,
+    pub update_timestamp_ns: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -36,7 +36,7 @@ pub struct UpdateContactRequest {
     pub id: u64,
     pub name: String,
     pub addresses: Vec<ContactAddressData>,
-    pub update_timestamp: u64,
+    pub update_timestamp_ns: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
