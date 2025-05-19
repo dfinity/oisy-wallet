@@ -56,7 +56,7 @@ describe('AddressListItem', () => {
 		expect(container).toHaveTextContent(en.address.types.Icrc2);
 
 		// Check shortened address is displayed
-		expect(container).toHaveTextContent(shortenWithMiddleEllipsis(icrcAddress.address));
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: icrcAddress.address }));
 
 		// Check that alias is not displayed (since it's not provided)
 		expect(container).not.toHaveTextContent('•');
@@ -72,7 +72,7 @@ describe('AddressListItem', () => {
 		expect(container).toHaveTextContent(en.address.types.Btc);
 
 		// Check shortened address is displayed
-		expect(container).toHaveTextContent(shortenWithMiddleEllipsis(btcAddress.address));
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: btcAddress.address }));
 
 		// Check that alias is displayed
 		expect(container).toHaveTextContent(btcAddress.alias as string);
@@ -91,7 +91,7 @@ describe('AddressListItem', () => {
 		expect(container).toHaveTextContent(en.address.types.Eth);
 
 		// Check shortened address is displayed
-		expect(container).toHaveTextContent(shortenWithMiddleEllipsis(ethAddress.address));
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: ethAddress.address }));
 	});
 
 	it('should render SOL address correctly', () => {
@@ -104,7 +104,7 @@ describe('AddressListItem', () => {
 		expect(container).toHaveTextContent(en.address.types.Sol);
 
 		// Check shortened address is displayed
-		expect(container).toHaveTextContent(shortenWithMiddleEllipsis(solAddress.address));
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: solAddress.address }));
 	});
 
 	it('should call onclick when clicked', async () => {
@@ -208,7 +208,7 @@ describe('AddressListItem', () => {
 		});
 
 		// Check shortened address is displayed
-		expect(container).toHaveTextContent(shortenWithMiddleEllipsis(icrcAddress.address));
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: icrcAddress.address }));
 		// Check full address is not displayed
 		expect(container).not.toHaveTextContent(icrcAddress.address);
 	});
