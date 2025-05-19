@@ -7,7 +7,9 @@ use super::{
         BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
     pow::{CreateChallengeError, CreateChallengeResponse},
-    signer::{GetAllowedCyclesError, GetAllowedCyclesResponse},
+    signer::{
+        AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
+    },
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
@@ -232,6 +234,22 @@ impl From<Result<(), BtcAddPendingTransactionError>> for BtcAddPendingTransactio
         match result {
             Ok(()) => BtcAddPendingTransactionResult::Ok(()),
             Err(err) => BtcAddPendingTransactionResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum AllowSigningResult {
+    /// The signing was allowed successfully.
+    Ok(AllowSigningResponse),
+    /// The signing was not allowed due to an error.
+    Err(AllowSigningError),
+}
+impl From<Result<AllowSigningResponse, AllowSigningError>> for AllowSigningResult {
+    fn from(result: Result<AllowSigningResponse, AllowSigningError>) -> Self {
+        match result {
+            Ok(response) => AllowSigningResult::Ok(response),
+            Err(err) => AllowSigningResult::Err(err),
         }
     }
 }
