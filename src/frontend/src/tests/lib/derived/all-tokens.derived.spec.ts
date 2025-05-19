@@ -9,6 +9,10 @@ import {
 	BNB_TESTNET_TOKEN
 } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import {
+	POL_AMOY_TOKEN,
+	POL_MAINNET_TOKEN
+} from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
 	BTC_TESTNET_TOKEN
@@ -138,6 +142,7 @@ describe('all-tokens.derived', () => {
 				SOLANA_TOKEN.id.description,
 				BASE_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
+				POL_MAINNET_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockDip20Token.id.description,
 				mockIcrcToken2.id.description,
@@ -215,7 +220,9 @@ describe('all-tokens.derived', () => {
 				BASE_ETH_TOKEN.id.description,
 				BASE_SEPOLIA_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
-				BNB_TESTNET_TOKEN.id.description
+				BNB_TESTNET_TOKEN.id.description,
+				POL_MAINNET_TOKEN.id.description,
+				POL_AMOY_TOKEN.id.description
 			]);
 		});
 
@@ -242,7 +249,9 @@ describe('all-tokens.derived', () => {
 				BASE_ETH_TOKEN.id.description,
 				BASE_SEPOLIA_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
-				BNB_TESTNET_TOKEN.id.description
+				BNB_TESTNET_TOKEN.id.description,
+				POL_MAINNET_TOKEN.id.description,
+				POL_AMOY_TOKEN.id.description
 			]);
 		});
 	});

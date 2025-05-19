@@ -6,10 +6,22 @@ export interface Account {
 	owner: Principal;
 	subaccount: [] | [Uint8Array | number[]];
 }
+export type AccountId_Any = string;
 export type AccountSnapshotFor =
+	| { Any: AccountSnapshot_Any }
 	| { Icrc: AccountSnapshot_Icrc }
 	| { SplDevnet: AccountSnapshot_Spl }
 	| { SplMainnet: AccountSnapshot_Spl };
+export interface AccountSnapshot_Any {
+	decimals: number;
+	token_address: AnyToken;
+	network: AnyNetwork;
+	approx_usd_per_token: number;
+	last_transactions: Array<Transaction_Any>;
+	account: AccountId_Any;
+	timestamp: bigint;
+	amount: bigint;
+}
 export interface AccountSnapshot_Icrc {
 	decimals: number;
 	token_address: Principal;
@@ -30,10 +42,13 @@ export interface AccountSnapshot_Spl {
 	timestamp: bigint;
 	amount: bigint;
 }
-export interface AirDropConfig {
-	number_of_participants: bigint;
-	start_timestamp_ns: bigint;
-	token_configs: Array<TokenConfig>;
+export interface AnyNetwork {
+	testnet_for: [] | [string];
+	network_id: string;
+}
+export interface AnyToken {
+	token_symbol: string;
+	wraps: [] | [string];
 }
 export interface CampaignEligibility {
 	available: boolean;
@@ -56,7 +71,6 @@ export interface ClaimedVipReward {
 }
 export interface Config {
 	usage_awards_config: [] | [UsageAwardConfig];
-	airdrop_config: [] | [AirDropConfig];
 	vip_config: [] | [VipConfig];
 	vip_campaigns: [] | [Array<[string, VipConfig]>];
 	readonly_admins: Array<Principal>;
@@ -67,7 +81,13 @@ export type Criterion =
 			MinTransactions: { duration: CandidDuration; count: number };
 	  }
 	| { MinReferrals: { count: number } }
-	| { MinLogins: { duration: CandidDuration; count: number } }
+	| {
+			MinLogins: {
+				duration: CandidDuration;
+				count: number;
+				session_duration: [] | [CandidDuration];
+			};
+	  }
 	| { MinTotalAssetsUsd: { usd: number } }
 	| { MinTokens: { count: number } };
 export interface CriterionEligibility {
@@ -168,6 +188,13 @@ export interface TokenConfig {
 	ledger_canister: Principal;
 }
 export type TransactionType = { Send: null } | { Receive: null };
+export interface Transaction_Any {
+	transaction_type: TransactionType;
+	network: AnyNetwork;
+	counterparty: AccountId_Any;
+	timestamp: bigint;
+	amount: bigint;
+}
 export interface Transaction_Icrc {
 	transaction_type: TransactionType;
 	network: {};
@@ -217,9 +244,7 @@ export interface UsageAwardStats {
 	eligible_snapshots: bigint;
 }
 export interface UsageCriteria {
-	measurement_duration: CandidDuration;
 	criteria: Array<Criterion>;
-	min_valuation_usd: bigint;
 }
 export interface UsageVsHoldingStats {
 	holdings: Array<UsageAndHolding>;
@@ -284,7 +309,6 @@ export interface _SERVICE {
 	set_referrer: ActorMethod<[number], SetReferrerResponse>;
 	stats_usage_vs_holding: ActorMethod<[], UsageVsHoldingStats>;
 	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
-	usage_eligible: ActorMethod<[Principal], [boolean, boolean]>;
 	usage_stats: ActorMethod<[], UsageAwardStats>;
 	usage_winners: ActorMethod<[[] | [UsageWinnersRequest]], UsageWinnersResponse>;
 	user_info: ActorMethod<[], UserData>;

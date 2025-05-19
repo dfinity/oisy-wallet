@@ -353,7 +353,7 @@ const main = async () => {
 		`Found ${tokensToProcess.length} tokens to check: ${tokensToProcess.map(({ mainSymbol }) => mainSymbol).join(', ')}`
 	);
 
-	let newTokens = [];
+	const newTokens = [];
 
 	for (const token of tokensToProcess) {
 		const { mainSymbol } = token;
