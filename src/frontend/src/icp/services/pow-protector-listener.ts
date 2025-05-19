@@ -9,11 +9,11 @@ import type {
 	PostMessageDataResponsePowProtectorProgress
 } from '$lib/types/post-message';
 
-export type PowProtectorWorkerInitResult = {
+export interface PowProtectorWorkerInitResult {
 	start: () => void;
 	stop: () => void;
 	trigger: () => void;
-};
+}
 
 export type PowProtectorWorker = () => Promise<PowProtectorWorkerInitResult>;
 

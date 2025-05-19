@@ -1,12 +1,12 @@
 import { writable, type Readable } from 'svelte/store';
 
-export type PowProtectorProgressData = {
+export interface PowProtectorProgressData {
 	progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES';
-};
+}
 
-export type PowProtectorNextAllowanceData = {
+export interface PowProtectorNextAllowanceData {
 	nextAllowanceMs?: bigint;
-};
+}
 
 export interface PowProtectorProgressStore extends Readable<PowProtectorProgressData> {
 	setPowProtectorProgressData: (data: PowProtectorProgressData) => void;
