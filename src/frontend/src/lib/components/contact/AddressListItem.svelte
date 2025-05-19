@@ -10,8 +10,8 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/contact';
-	import { shortenAddress } from '$lib/utils/address.utils';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
 		address: Address;
@@ -20,10 +20,10 @@
 		styleClass?: string;
 		showFullAddress?: boolean;
 	}
-	const { address, onClick, onInfo, styleClass = '', showFullAddress = false }: Props = $props();
+	let { address, onClick, onInfo, styleClass = '', showFullAddress = false }: Props = $props();
 
 	let displayAddress = $derived(
-		showFullAddress ? address.address : shortenAddress(address.address)
+		showFullAddress ? address.address : shortenWithMiddleEllipsis(address.address)
 	);
 </script>
 
