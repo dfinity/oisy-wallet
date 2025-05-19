@@ -2,6 +2,7 @@ import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { balance, metadata } from '$icp/api/icrc-ledger.api';
+import { buildIndexedDip20Tokens } from '$icp/services/dip20-tokens.services';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
@@ -134,7 +135,10 @@ const loadCustomIcrcTokensData = async ({
 	certified: boolean;
 	identity: OptionIdentity;
 }): Promise<IcrcCustomToken[]> => {
-	const indexedIcrcCustomTokens = buildIndexedIcrcCustomTokens();
+	const indexedIcrcCustomTokens = {
+		...buildIndexedIcrcCustomTokens(),
+		...buildIndexedDip20Tokens()
+	};
 
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
