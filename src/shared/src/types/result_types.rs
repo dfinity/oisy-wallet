@@ -1,6 +1,7 @@
 use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
+use super::network::SaveTestnetsSettingsError;
 use crate::types::{
     contact::{Contact, ContactError},
     user_profile::AddUserCredentialError,
@@ -105,6 +106,23 @@ impl From<Result<Vec<Contact>, ContactError>> for GetContactsResult {
         match result {
             Ok(contacts) => GetContactsResult::Ok(contacts),
             Err(err) => GetContactsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SetUserShowTestnetsResult {
+    /// The user's show testnets was set successfully.
+    Ok(()),
+    /// The user's show testnets was not set due to an error.
+    Err(SaveTestnetsSettingsError),
+}
+
+impl From<Result<(), SaveTestnetsSettingsError>> for SetUserShowTestnetsResult {
+    fn from(result: Result<(), SaveTestnetsSettingsError>) -> Self {
+        match result {
+            Ok(()) => SetUserShowTestnetsResult::Ok(()),
+            Err(err) => SetUserShowTestnetsResult::Err(err),
         }
     }
 }

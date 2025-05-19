@@ -34,16 +34,14 @@ use shared::{
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        network::{
-            SaveNetworksSettingsError, SaveNetworksSettingsRequest, SaveTestnetsSettingsError,
-            SetShowTestnetsRequest,
-        },
+        network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         pow::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
             AddUserCredentialResult, DeleteContactResult, GetContactResult, GetContactsResult,
+            SetUserShowTestnetsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -574,9 +572,7 @@ pub fn update_user_network_settings(
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)] // canister methods are necessary
-pub fn set_user_show_testnets(
-    request: SetShowTestnetsRequest,
-) -> Result<(), SaveTestnetsSettingsError> {
+pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTestnetsResult {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
 
@@ -590,6 +586,7 @@ pub fn set_user_show_testnets(
             &mut user_profile_model,
         )
     })
+    .into()
 }
 
 /// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
