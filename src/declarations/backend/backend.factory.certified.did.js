@@ -93,7 +93,7 @@ export const idlFactory = ({ IDL }) => {
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
-	const Result_1 = IDL.Variant({
+	const AllowSigningResult = IDL.Variant({
 		Ok: AllowSigningResponse,
 		Err: AllowSigningError
 	});
@@ -506,7 +506,7 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [AddUserCredentialResult], []),
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result], []),
-		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [Result_1], []),
+		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [AllowSigningResult], []),
 		btc_add_pending_transaction: IDL.Func(
 			[BtcAddPendingTransactionRequest],
 			[BtcAddPendingTransactionResult],

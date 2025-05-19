@@ -93,6 +93,7 @@ export interface AllowSigningResponse {
 	challenge_completion: [] | [ChallengeCompletion];
 	allowed_cycles: bigint;
 }
+export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export type ApproveError =
 	| {
@@ -309,7 +310,6 @@ export interface PendingTransaction {
 	utxos: Array<Utxo>;
 }
 export type Result = { Ok: null } | { Err: AddDappSettingsError };
-export type Result_1 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -455,7 +455,7 @@ export interface Utxo {
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], AddUserCredentialResult>;
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result>;
-	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], Result_1>;
+	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
 	btc_add_pending_transaction: ActorMethod<
 		[BtcAddPendingTransactionRequest],
 		BtcAddPendingTransactionResult
