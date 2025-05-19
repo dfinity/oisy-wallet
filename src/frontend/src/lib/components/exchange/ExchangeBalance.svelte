@@ -7,18 +7,23 @@
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 
+	interface Props {
+		hideBalance?: boolean;
+	}
+
+	let {hideBalance = false}: Props = $props();
+
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
-	let totalUsd: number;
-	$: totalUsd = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
+	const totalUsd = $derived(sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi));
 </script>
 
 <span class="flex flex-col items-center gap-2">
 	<output class="mt-8 inline-block break-all text-5xl font-bold">
 		{#if $loaded}
-			{formatUSD({ value: totalUsd })}
+			{hideBalance ? $i18n.privacy.text.private_balance : formatUSD({ value: totalUsd })}
 		{:else}
-			<span class="animate-pulse">{formatUSD({ value: 0 })}</span>
+			<span class="animate-pulse">{hideBalance ? $i18n.privacy.text.private_balance : formatUSD({ value: 0 })}</span>
 		{/if}
 	</output>
 	<span class="max-w-48 text-xl font-medium text-brand-secondary-alt sm:max-w-none">

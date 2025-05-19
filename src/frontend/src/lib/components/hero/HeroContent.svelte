@@ -41,6 +41,7 @@
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
+	import {isPrivacyMode} from "$lib/derived/settings.derived";
 
 	let pageTokenUi: OptionTokenUi;
 	$: pageTokenUi = nonNullish($pageToken)
@@ -144,7 +145,7 @@
 		</div>
 	{:else}
 		<div in:slide={SLIDE_PARAMS}>
-			<ExchangeBalance />
+			<ExchangeBalance hideBalance={$isPrivacyMode} />
 		</div>
 	{/if}
 
