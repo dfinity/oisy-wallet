@@ -135,7 +135,7 @@ export const idlFactory = ({ IDL }) => {
 	const BtcGetPendingTransactionsReponse = IDL.Record({
 		transactions: IDL.Vec(PendingTransaction)
 	});
-	const Result_3 = IDL.Variant({
+	const BtcGetPendingTransactionsResult = IDL.Variant({
 		Ok: BtcGetPendingTransactionsReponse,
 		Err: BtcAddPendingTransactionError
 	});
@@ -508,7 +508,11 @@ export const idlFactory = ({ IDL }) => {
 		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result], []),
 		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [Result_1], []),
 		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_2], []),
-		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_3], []),
+		btc_get_pending_transactions: IDL.Func(
+			[BtcGetPendingTransactionsRequest],
+			[BtcGetPendingTransactionsResult],
+			[]
+		),
 		btc_select_user_utxos_fee: IDL.Func(
 			[SelectedUtxosFeeRequest],
 			[BtcSelectUserUtxosFeeResult],

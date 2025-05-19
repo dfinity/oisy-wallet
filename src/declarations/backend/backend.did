@@ -129,6 +129,10 @@ type BtcGetPendingTransactionsRequest = record {
 	network : BitcoinNetwork;
 	address : text
 };
+type BtcGetPendingTransactionsResult = variant {
+	Ok : BtcGetPendingTransactionsReponse;
+	Err : BtcAddPendingTransactionError
+};
 type BtcSelectUserUtxosFeeResult = variant {
 	Ok : SelectedUtxosFeeResponse;
 	Err : SelectedUtxosFeeError
@@ -288,10 +292,6 @@ type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddDappSettingsError };
 type Result_1 = variant { Ok : AllowSigningResponse; Err : AllowSigningError };
 type Result_2 = variant { Ok; Err : BtcAddPendingTransactionError };
-type Result_3 = variant {
-	Ok : BtcGetPendingTransactionsReponse;
-	Err : BtcAddPendingTransactionError
-};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -432,7 +432,7 @@ service : (Arg) -> {
 	allow_signing : (opt AllowSigningRequest) -> (Result_1);
 	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (Result_2);
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
-		Result_3
+		BtcGetPendingTransactionsResult
 	);
 	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (
 		BtcSelectUserUtxosFeeResult
