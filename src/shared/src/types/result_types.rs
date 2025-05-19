@@ -43,13 +43,13 @@ impl From<Result<(), AddUserCredentialError>> for AddUserCredentialResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum CreateContactResult {
+pub enum GetContactResult {
     /// The contact was created successfully.
     Ok(Contact),
     /// The contact was not created due to an error.
     Err(ContactError),
 }
-impl CreateContactResult {
+impl GetContactResult {
     #[must_use]
     pub fn is_err(&self) -> bool {
         matches!(self, Self::Err(_))
@@ -69,11 +69,11 @@ impl CreateContactResult {
         }
     }
 }
-impl From<Result<Contact, ContactError>> for CreateContactResult {
+impl From<Result<Contact, ContactError>> for GetContactResult {
     fn from(result: Result<Contact, ContactError>) -> Self {
         match result {
-            Ok(contact) => CreateContactResult::Ok(contact),
-            Err(err) => CreateContactResult::Err(err),
+            Ok(contact) => GetContactResult::Ok(contact),
+            Err(err) => GetContactResult::Err(err),
         }
     }
 }

@@ -43,7 +43,7 @@ use shared::{
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
-            AddUserCredentialResult, CreateContactResult, DeleteContactResult, GetContactsResult,
+            AddUserCredentialResult, DeleteContactResult, GetContactResult, GetContactsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -851,7 +851,7 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 /// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 #[update(guard = "caller_is_allowed")]
 #[must_use]
-pub fn create_contact(request: CreateContactRequest) -> CreateContactResult {
+pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
     // TODO replace mock data with contact service that returns Contact
     let contact = Contact {
         id: time(),
@@ -860,7 +860,7 @@ pub fn create_contact(request: CreateContactRequest) -> CreateContactResult {
         update_timestamp_ns: time(),
     };
 
-    CreateContactResult::Ok(contact)
+    GetContactResult::Ok(contact)
 }
 
 /// Updates an existing contact for the caller.
