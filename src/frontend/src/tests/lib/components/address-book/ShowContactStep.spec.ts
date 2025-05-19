@@ -4,20 +4,20 @@ import {
 	CONTACT_SHOW_ADD_ADDRESS_BUTTON,
 	CONTACT_SHOW_CLOSE_BUTTON
 } from '$lib/constants/test-ids.constants';
-import type { Contact } from '$lib/types/contact';
+import type { ContactUi } from '$lib/types/contact';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('ShowContactStep', () => {
-	const mockContact: Contact = {
+	const mockContact: ContactUi = {
 		id: BigInt(1),
 		name: 'Test Contact',
 		update_timestamp: BigInt(Date.now()),
 		addresses: []
 	};
 
-	const mockContactWithAddresses: Contact = {
+	const mockContactWithAddresses: ContactUi = {
 		id: BigInt(2),
 		name: 'Contact With Addresses',
 		update_timestamp: BigInt(Date.now()),

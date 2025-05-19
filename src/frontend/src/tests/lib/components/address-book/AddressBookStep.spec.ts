@@ -1,12 +1,12 @@
 import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 import { ADDRESS_BOOK_ADD_CONTACT_BUTTON } from '$lib/constants/test-ids.constants';
-import type { Contact } from '$lib/types/contact';
+import type { ContactUi } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { vi } from 'vitest';
 
 describe('AddressBookStep', () => {
-	const mockContacts: Contact[] = [
+	const mockContacts: ContactUi[] = [
 		{
 			id: BigInt(1),
 			name: 'Test Contact 1',

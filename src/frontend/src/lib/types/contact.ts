@@ -7,6 +7,6 @@ export interface ContactAddress {
 	addressType: TokenAccountIdTypes;
 }
 
-export interface Contact extends Omit<BackendContact, 'addresses'> {
+export interface ContactUi extends Omit<BackendContact, 'addresses'> {
 	addresses: ContactAddress[];
 }
