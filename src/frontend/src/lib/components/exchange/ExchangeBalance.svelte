@@ -11,7 +11,7 @@
 		hideBalance?: boolean;
 	}
 
-	let {hideBalance = false}: Props = $props();
+	let { hideBalance = false }: Props = $props();
 
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
@@ -23,7 +23,9 @@
 		{#if $loaded}
 			{hideBalance ? $i18n.privacy.text.private_balance : formatUSD({ value: totalUsd })}
 		{:else}
-			<span class="animate-pulse">{hideBalance ? $i18n.privacy.text.private_balance : formatUSD({ value: 0 })}</span>
+			<span class="animate-pulse"
+				>{hideBalance ? $i18n.privacy.text.private_balance : formatUSD({ value: 0 })}</span
+			>
 		{/if}
 	</output>
 	<span class="max-w-48 text-xl font-medium text-brand-secondary-alt sm:max-w-none">
