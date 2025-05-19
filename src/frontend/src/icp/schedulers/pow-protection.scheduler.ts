@@ -1,4 +1,3 @@
-import type { CreateChallengeResponse } from '$declarations/backend/backend.did';
 import { solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { CreateChallengeEnum, PowCreateChallengeError } from '$lib/canisters/backend.errors';
@@ -41,12 +40,11 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	 * @throws Errors if any step with no specific error handling in the sequence fails.
 	 */
 	private requestSignerCycles = async ({ identity }: SchedulerJobData<PostMessageDataRequest>) => {
-		let createChallengeResponse: CreateChallengeResponse | undefined;
 		// Step 1: Request creation of the Proof-of-Work (PoW) challenge (throws when unsuccessful).
 		// TODO provide functionality to post and receive the a post message to indicate the progress
 		// this.postMessagePowProgress({ progress: 'REQUEST_CHALLENGE' });
 		try {
-			createChallengeResponse = await createPowChallenge({
+			const createChallengeResponse = await createPowChallenge({
 				identity
 			});
 
