@@ -5,7 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import {ICP_SYMBOL, ICP_TOKEN} from '$env/tokens/tokens.icp.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import type { IcToken } from '$icp/types/ic-token';
 	import RewardEarningsCard from '$lib/components/rewards/RewardEarningsCard.svelte';
@@ -138,21 +138,21 @@
 				token={ckBtcToken}
 				amount={ckBtcReward}
 				usdAmount={ckBtcRewardUsd}
-				testId={`${REWARDS_EARNINGS_CARD}-ck-btc`}
+				testId={`${REWARDS_EARNINGS_CARD}-${BTC_MAINNET_TOKEN.twinTokenSymbol}`}
 			/>
 			<RewardEarningsCard
 				{loading}
 				token={ckUsdcToken}
 				amount={ckUsdcReward}
 				usdAmount={ckUsdcRewardUsd}
-				testId={`${REWARDS_EARNINGS_CARD}-ck-usdc`}
+				testId={`${REWARDS_EARNINGS_CARD}-${USDC_TOKEN.twinTokenSymbol}`}
 			/>
 			<RewardEarningsCard
 				{loading}
 				token={ICP_TOKEN}
 				amount={icpReward}
 				usdAmount={icpRewardUsd}
-				testId={`${REWARDS_EARNINGS_CARD}-icp`}
+				testId={`${REWARDS_EARNINGS_CARD}-${ICP_SYMBOL}`}
 			/>
 		</div>
 

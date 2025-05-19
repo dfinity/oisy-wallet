@@ -17,11 +17,12 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 import { beforeEach } from 'vitest';
+import {ICP_SYMBOL} from "$env/tokens/tokens.icp.env";
 
 describe('RewardEarnings', () => {
-	const ckBtcRewardEarningsCardSelector = `div[data-tid="${REWARDS_EARNINGS_CARD}-ck-btc"]`;
-	const ckUsdcRewardEarningsCardSelector = `div[data-tid="${REWARDS_EARNINGS_CARD}-ck-usdc"]`;
-	const icpRewardEarningsCardSelector = `div[data-tid="${REWARDS_EARNINGS_CARD}-icp"]`;
+	const ckBtcRewardEarningsCardSelector = `div[data-tid="${REWARDS_EARNINGS_CARD}-${BTC_MAINNET_TOKEN.twinTokenSymbol}"]`;
+	const ckUsdcRewardEarningsCardSelector = `div[data-tid="${REWARDS_EARNINGS_CARD}-${USDC_TOKEN.twinTokenSymbol}"]`;
+	const icpRewardEarningsCardSelector = `div[data-tid="${REWARDS_EARNINGS_CARD}-${ICP_SYMBOL}"]`;
 	const rewardEarningsActivityButtonSelector = `button[data-tid="${REWARDS_EARNINGS_ACTIVITY_BUTTON}"]`;
 
 	const mockedReward: RewardDescription = { ...mockRewardCampaigns[0] };
