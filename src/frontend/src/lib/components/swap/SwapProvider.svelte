@@ -14,18 +14,20 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionString } from '$lib/types/string';
 	import { SwapProvider } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 
 	interface Props {
+		slippageValue: OptionAmount;
 		showSelectButton?: boolean;
 	}
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let { showSelectButton = false }: Props = $props();
+	let { showSelectButton = false, slippageValue }: Props = $props();
 
 	let displayURL = $state<OptionString>(null);
 
@@ -100,7 +102,7 @@
 			{#if selectedProvider.provider === SwapProvider.KONG_SWAP}
 				<SwapDetailsKong provider={selectedProvider} />
 			{:else if selectedProvider.provider === SwapProvider.ICP_SWAP}
-				<SwapDetailsIcp provider={selectedProvider} />
+				<SwapDetailsIcp provider={selectedProvider} {slippageValue} />
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}
