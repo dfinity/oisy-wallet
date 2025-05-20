@@ -8,12 +8,14 @@
 	let { addressType, size }: { addressType: AddressType; size?: string } = $props();
 </script>
 
-{#if addressType === 'Icrc2'}
-	<IconAddressTypeIcrc2 {size} />
-{:else if addressType === 'Btc'}
-	<IconAddressTypeBtc {size} />
-{:else if addressType === 'Eth'}
-	<IconAddressTypeEth {size} />
-{:else if addressType === 'Sol'}
-	<IconAddressTypeSol {size} />
-{/if}
+<span class="border-1 rounded-full border-primary bg-primary">
+	{#if addressType === 'Icrc2'}
+		<IconAddressTypeIcrc2 {size} />
+	{:else if addressType === 'Btc'}
+		<IconAddressTypeBtc {size} />
+	{:else if addressType === 'Eth'}
+		<IconAddressTypeEth {size} />
+	{:else if addressType === 'Sol'}
+		<IconAddressTypeSol {size} />
+	{/if}
+</span>
