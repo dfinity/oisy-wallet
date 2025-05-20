@@ -3,7 +3,7 @@
 	import type { TagVariant } from '$lib/types/style';
 
 	interface Props {
-		children?: Snippet;
+		children: Snippet;
 		ariaHidden?: boolean;
 		variant?: TagVariant;
 		size?: 'xs' | 'sm' | 'md';
