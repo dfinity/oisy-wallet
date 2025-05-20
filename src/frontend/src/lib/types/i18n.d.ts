@@ -23,6 +23,7 @@ interface I18nCore {
 		approve: string;
 		view: string;
 		copy: string;
+		delete: string;
 		clear_filter: string;
 		not_available: string;
 		new: string;
