@@ -493,9 +493,31 @@ export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]
 export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
 ```
 
+
+### Add ERC20 tokens to the list of supported tokens
+
+If the new network supports ERC-20 tokens, they can be included among the supported tokens.
+
+> [!TIP]
+> Tokens standard that are an extension of the ERC-20 standard can be included too. For example BEP-20 of BNB Smart Chain can be treated the same as ERC-20 by OISY.
+
+To do this, the following steps are required:
+
+- Create a new folder in `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/` named `tokens-erc20`.
+- FOr each new token, create a new file named `tokens.<token>.env.ts` and copy the content of `tokens.<token>.env.ts` from another EVM network.
+- Adapt the content accordingly, renaming the objects appropriately, modifying the token name, symbol, decimals, network and icon.
+- If the token has similar bridged tokens on the other EVM networks or on IC, add the `groupData` property, similar to existing ones (for example USDC, USDT, etc.).
+
+Once all the new ERC20 tokens are created, they need to be added to the list of supported tokens:
+
+- Create a new list <network>_ERC20_TOKENS in `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/tokens.erc20.env.ts`, similar to the existing ones for other EVM networks.
+- Add the list to the `EVM_ERC20_TOKENS` list in `src/frontend/src/env/tokens/tokens-evm/tokens.erc20.env.ts`.
+
 ### Adapt exchange rate workers
 
 TODO
+- Add the native tokens to the custom price functions
+- Add the platform ID to syncExchange filter
 
 ### Add providers' URLs to Content Security Policy (CSP)
 
