@@ -1050,6 +1050,14 @@
 			"name": "Name"
 		}
 	},
+	"address": {
+		"types": {
+			"Icrc2": "Internet Computer",
+			"Btc": "Bitcoin",
+			"Eth": "Ethereum",
+			"Sol": "Solana"
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
