@@ -493,7 +493,6 @@ export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]
 export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
 ```
 
-
 ### Add ERC20 tokens to the list of supported tokens
 
 If the new network supports ERC-20 tokens, they can be included among the supported tokens.
@@ -510,12 +509,13 @@ To do this, the following steps are required:
 
 Once all the new ERC20 tokens are created, they need to be added to the list of supported tokens:
 
-- Create a new list <network>_ERC20_TOKENS in `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/tokens.erc20.env.ts`, similar to the existing ones for other EVM networks.
+- Create a new list <network>\_ERC20_TOKENS in `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/tokens.erc20.env.ts`, similar to the existing ones for other EVM networks.
 - Add the list to the `EVM_ERC20_TOKENS` list in `src/frontend/src/env/tokens/tokens-evm/tokens.erc20.env.ts`.
 
 ### Adapt exchange rate workers
 
 TODO
+
 - Add the native tokens to the custom price functions
 - Add the platform ID to syncExchange filter
 
