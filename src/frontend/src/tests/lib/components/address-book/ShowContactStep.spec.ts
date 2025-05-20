@@ -13,14 +13,14 @@ import { fireEvent, render } from '@testing-library/svelte';
 
 describe('ShowContactStep', () => {
 	const mockContact: ContactUi = {
-		id: BigInt(1),
+		id: 1n,
 		name: 'Test Contact',
 		addresses: [],
-		update_timestamp_ns: BigInt(Date.now())
+		updateTimestampNs: BigInt(Date.now())
 	};
 
 	const mockContactWithAddresses: ContactUi = {
-		id: BigInt(2),
+		id: 2n,
 		name: 'Contact With Addresses',
 		addresses: [
 			{
@@ -34,7 +34,7 @@ describe('ShowContactStep', () => {
 				addressType: 'Btc'
 			}
 		],
-		update_timestamp_ns: BigInt(Date.now())
+		updateTimestampNs: BigInt(Date.now())
 	};
 
 	const mockClose = vi.fn();

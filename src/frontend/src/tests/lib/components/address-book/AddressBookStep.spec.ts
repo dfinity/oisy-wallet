@@ -11,7 +11,7 @@ import { fireEvent, render } from '@testing-library/svelte';
 describe('AddressBookStep', () => {
 	const baseContacts: ContactUi[] = [
 		{
-			id: BigInt(1),
+			id: 1n,
 			name: 'Test Contact 1',
 			addresses: [
 				{
@@ -20,13 +20,13 @@ describe('AddressBookStep', () => {
 					addressType: 'Eth'
 				}
 			],
-			update_timestamp_ns: BigInt(Date.now())
+			updateTimestampNs: BigInt(Date.now())
 		},
 		{
-			id: BigInt(2),
+			id: 2n,
 			name: 'Test Contact 2',
 			addresses: [],
-			update_timestamp_ns: BigInt(Date.now())
+			updateTimestampNs: BigInt(Date.now())
 		}
 	];
 	const mockAddContact = vi.fn();

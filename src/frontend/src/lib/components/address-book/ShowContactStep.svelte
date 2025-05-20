@@ -34,7 +34,7 @@
 	{#if hasAddresses}
 		<!--
 		TODO: Render AddressListItems here
-		https://github.com/dfinity/oisy-wallet/pull/6243
+		https://github.com/dfinity/oisy-wallet/pull/6462
 		-->
 		<div>
 			{#each contact.addresses as address, index (index)}

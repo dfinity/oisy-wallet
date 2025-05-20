@@ -7,6 +7,7 @@ export interface ContactAddressUi {
 	addressType: TokenAccountIdTypes;
 }
 
-export interface ContactUi extends Omit<Contact, 'addresses'> {
+export interface ContactUi extends Omit<Contact, 'addresses' | 'update_timestamp_ns'> {
 	addresses: ContactAddressUi[];
+	updateTimestampNs: bigint;
 }
