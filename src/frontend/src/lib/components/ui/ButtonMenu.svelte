@@ -2,12 +2,18 @@
 	import { nonNullish } from '@dfinity/utils';
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import type { TagVariant } from '$lib/types/style';
+	import type {Snippet} from "svelte";
 
-	export let disabled = false;
-	export let ariaLabel: string;
-	export let testId: string | undefined = undefined;
-	export let tag: string | undefined = undefined;
-	export let tagVariant: TagVariant | undefined = undefined;
+	interface Props {
+		children: Snippet;
+		disabled?: boolean;
+		ariaLabel: string;
+		testId?: string;
+		tag?: string;
+		tagVariant?: TagVariant;
+	}
+
+	let {children, disabled = false, ariaLabel, testId, tag, tagVariant}: Props = $props();
 </script>
 
 <button
@@ -18,7 +24,7 @@
 	{disabled}
 	class:opacity-50={disabled}
 >
-	<slot />
+	{@render children?.()}
 	{#if nonNullish(tag)}
 		<span class="ml-auto">
 			<Tag variant={tagVariant}>{tag}</Tag>
