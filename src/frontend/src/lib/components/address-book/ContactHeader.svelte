@@ -17,6 +17,12 @@
 	let { name, onEdit, styleClass = '' }: Props = $props();
 
 	let color = $derived(selectColorForName({ name, colors: CONTACT_TEXT_COLORS }));
+
+	const headerStyles = $derived(`
+		backdrop-filter: blur(1px);
+		-webkit-backdrop-filter: blur(1px);
+		overflow: hidden;
+	`);
 </script>
 
 <div class={`relative flex w-full flex-col items-center ${styleClass}`}>
@@ -33,7 +39,7 @@
 		{$i18n.core.text.edit}
 	</Button>
 
-	<div class={`self-stretch ${color} transition-colors duration-1000`}>
+	<div class={`self-stretch ${color} transition-colors duration-1000`} style={headerStyles}>
 		<IconContactHeader />
 	</div>
 	<div>
