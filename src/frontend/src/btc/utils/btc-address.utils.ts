@@ -6,7 +6,7 @@ import {
 	type BtcAddressInfo
 } from '@dfinity/ckbtc';
 
-const createBtcAddressFromAddressInfo = (info: BtcAddressInfo): BtcAddress => {
+const createBtcAddressFromAddressInfo = ({ info }: { info: BtcAddressInfo }): BtcAddress => {
 	switch (info.type) {
 		case BtcAddressType.P2wpkhV0:
 			return { P2WPKH: info.address };
@@ -27,9 +27,9 @@ const createBtcAddressFromAddressInfo = (info: BtcAddressInfo): BtcAddress => {
 export const parseBtcAddress = (address: string): BtcAddress | undefined => {
 	try {
 		const info = parseBtcAddressCkbtc({ address });
-		return createBtcAddressFromAddressInfo(info);
+		return createBtcAddressFromAddressInfo({ info });
 	} catch (_: unknown) {
-		return undefined;
+		return;
 	}
 };
 
