@@ -9,11 +9,11 @@
 		ADDRESS_LIST_ITEM_INFO_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Address } from '$lib/types/contact';
+	import type { ContactAddressUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
-		address: Address;
+		address: ContactAddressUi;
 		onInfo?: () => void;
 		onClick?: () => void;
 		styleClass?: string;

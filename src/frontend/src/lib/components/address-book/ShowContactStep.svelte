@@ -12,15 +12,15 @@
 		CONTACT_SHOW_CLOSE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Address, Contact } from '$lib/types/contact';
+	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		contact: Contact;
+		contact: ContactUi;
 		onClose: () => void;
 		onAddAddress?: () => void;
-		onShowAddress?: (address: Address) => void;
-		onEdit?: (contact: Contact) => void;
+		onShowAddress?: (address: ContactAddressUi) => void;
+		onEdit?: (contact: ContactUi) => void;
 	}
 
 	let { contact, onClose, onEdit, onAddAddress, onShowAddress }: Props = $props();

@@ -1,13 +1,12 @@
-import type { AddressType } from '$lib/types/address';
+import type { Contact } from '$declarations/backend/backend.did';
+import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 
-export interface Address {
-	addressType: AddressType;
+export interface ContactAddressUi {
 	address: string;
 	alias?: string;
+	addressType: TokenAccountIdTypes;
 }
 
-export interface Contact {
-	id: string;
-	name: string;
-	addresses: Address[];
+export interface ContactUi extends Omit<Contact, 'addresses'> {
+	addresses: ContactAddressUi[];
 }

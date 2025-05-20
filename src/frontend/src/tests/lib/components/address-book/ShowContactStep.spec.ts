@@ -4,33 +4,37 @@ import {
 	CONTACT_SHOW_ADD_ADDRESS_BUTTON,
 	CONTACT_SHOW_CLOSE_BUTTON
 } from '$lib/constants/test-ids.constants';
-import type { Contact } from '$lib/types/contact';
+import type { ContactUi } from '$lib/types/contact';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('ShowContactStep', () => {
-	const mockContact: Contact = {
-		id: 'contact-1',
+	const mockContact: ContactUi = {
+		id: BigInt(1),
 		name: 'Test Contact',
-		addresses: []
+		addresses: [],
+		update_timestamp_ns: BigInt(Date.now())
 	};
 
-	const mockContactWithAddresses: Contact = {
-		id: 'contact-2',
+	const mockContactWithAddresses: ContactUi = {
+		id: BigInt(2),
 		name: 'Contact With Addresses',
 		addresses: [
 			{
-				address: '0x123456789abcdef',
+				address: mockEthAddress,
 				alias: 'My ETH Address',
 				addressType: 'Eth'
 			},
 			{
-				address: 'btc123456789abcdef',
+				address: mockBtcAddress,
 				alias: 'My BTC Address',
 				addressType: 'Btc'
 			}
-		]
+		],
+		update_timestamp_ns: BigInt(Date.now())
 	};
 
 	const mockClose = vi.fn();
