@@ -21,7 +21,7 @@ export const POLYGON_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(POLYGON_MAIN
 export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	id: POLYGON_MAINNET_NETWORK_ID,
 	env: 'mainnet',
-	name: 'Polygon PoS',
+	name: 'Polygon',
 	chainId: 137n,
 	iconLight: polygonMainnetIconLight,
 	iconDark: polygonMainnetIconDark,
