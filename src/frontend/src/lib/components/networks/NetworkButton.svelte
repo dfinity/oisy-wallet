@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import AllNetworksLogo from '$lib/components/networks/AllNetworksLogo.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
 	import type { Network, NetworkId } from '$lib/types/network';
@@ -60,7 +62,11 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 	<span slot="description-end">
 		<span class:text-sm={labelsSize === 'lg'} class:md:text-base={labelsSize === 'lg'}>
 			{#if nonNullish(usdBalance)}
-				{formatUSD({ value: usdBalance })}
+				{#if $isPrivacyMode}
+					<IconDots variant="xs" />
+				{:else}
+					{formatUSD({ value: usdBalance })}
+				{/if}
 			{/if}
 		</span>
 
