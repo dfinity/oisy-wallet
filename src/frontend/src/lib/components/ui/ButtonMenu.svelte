@@ -5,6 +5,7 @@
 	import type { TagVariant } from '$lib/types/style';
 
 	interface Props {
+		onclick: () => void;
 		children: Snippet;
 		disabled?: boolean;
 		ariaLabel: string;
@@ -13,14 +14,14 @@
 		tagVariant?: TagVariant;
 	}
 
-	let { children, disabled = false, ariaLabel, testId, tag, tagVariant }: Props = $props();
+	let { onclick, children, disabled = false, ariaLabel, testId, tag, tagVariant }: Props = $props();
 </script>
 
 <button
 	class="nav-item nav-item-condensed"
 	data-tid={testId}
 	aria-label={ariaLabel}
-	on:click
+	{onclick}
 	{disabled}
 	class:opacity-50={disabled}
 >
