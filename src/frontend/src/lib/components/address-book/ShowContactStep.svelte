@@ -37,7 +37,7 @@
 		https://github.com/dfinity/oisy-wallet/pull/6243
 		-->
 		<div>
-			{#each contact.addresses as address (address.id)}
+			{#each contact.addresses as address, index (index)}
 				<div class="flex items-center">
 					<div class="grow">ADDRESS: {address.address} {address.alias}</div>
 					{#if nonNullish(onShowAddress)}

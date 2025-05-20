@@ -14,8 +14,8 @@ describe('AddressBookStep', () => {
 			name: 'Test Contact 1',
 			addresses: [
 				{
-					id: 'address-1',
 					address: '0x123456789abcdef',
+					addressType: 'Btc',
 					alias: 'My ETH Address'
 				}
 			]

@@ -21,14 +21,14 @@ describe('ShowContactStep', () => {
 		name: 'Contact With Addresses',
 		addresses: [
 			{
-				id: 'address-1',
 				address: '0x123456789abcdef',
-				alias: 'My ETH Address'
+				alias: 'My ETH Address',
+				addressType: 'Eth'
 			},
 			{
-				id: 'address-2',
 				address: 'btc123456789abcdef',
-				alias: 'My BTC Address'
+				alias: 'My BTC Address',
+				addressType: 'Btc'
 			}
 		]
 	};
