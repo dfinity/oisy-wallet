@@ -62,7 +62,9 @@
 	const dAppExplorerRoute = $derived(isRouteDappExplorer($page));
 	const activityRoute = $derived(isRouteActivity($page));
 	const rewardsRoute = $derived(isRouteRewards($page));
-	const addressesOption = $derived(!settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute);
+	const addressesOption = $derived(
+		!settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute
+	);
 
 	const addressModalId = Symbol();
 	const referralModalId = Symbol();
