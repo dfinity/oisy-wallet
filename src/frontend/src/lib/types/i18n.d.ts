@@ -62,6 +62,8 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	alt: {
 		tokens: string;
@@ -79,6 +81,8 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	short: { documentation: string };
 }
@@ -604,6 +608,7 @@ interface I18nTokens {
 		hide_token: string;
 		select_token: string;
 		exchange_is_not_available: string;
+		exchange_is_not_available_short: string;
 		source_token_title: string;
 		destination_token_title: string;
 		chain_key: string;
