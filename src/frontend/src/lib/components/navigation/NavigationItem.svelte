@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import type { TagVariant } from '$lib/types/style';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		children?: Snippet;
@@ -14,7 +14,7 @@
 		tagVariant?: TagVariant;
 	}
 
-	let {children, href, selected = false, ariaLabel, testId, tag, tagVariant}: Props = $props();
+	let { children, href, selected = false, ariaLabel, testId, tag, tagVariant }: Props = $props();
 </script>
 
 <a {href} class="nav-item" class:selected aria-label={ariaLabel} data-tid={testId}>
