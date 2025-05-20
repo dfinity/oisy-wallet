@@ -29,7 +29,11 @@
 		networkUrl
 	} from '$lib/utils/nav.utils';
 
-	export let testIdPrefix: string | undefined = undefined;
+	interface Props {
+		testIdPrefix?: string;
+	}
+
+	let { testIdPrefix }: Props = $props();
 
 	const addTestIdPrefix = (testId: string): string =>
 		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
@@ -37,13 +41,11 @@
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
 	// cast it to `Page`.
-	let pageData: Page;
-	$: pageData = $page;
+	const pageData: Page = $derived($page);
 
-	let isTransactionsRoute = false;
-	$: isTransactionsRoute = isRouteTransactions($page);
+	const isTransactionsRoute = $derived(isRouteTransactions($page));
 
-	let fromRoute: NavigationTarget | null;
+	let fromRoute = $state<NavigationTarget | null>(null);
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
