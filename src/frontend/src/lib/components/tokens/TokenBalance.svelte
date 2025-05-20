@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import TokenBalanceSkeleton from '$lib/components/tokens/TokenBalanceSkeleton.svelte';
 	import { TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CardData } from '$lib/types/token-card';
 	import { formatToken } from '$lib/utils/format.utils';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		privacyPlaceholder?: Snippet;
@@ -13,7 +13,7 @@
 		hideBalance?: boolean;
 	}
 
-	let {privacyPlaceholder, data, hideBalance = false}: Props = $props();
+	let { privacyPlaceholder, data, hideBalance = false }: Props = $props();
 </script>
 
 <TokenBalanceSkeleton {data}>
