@@ -30,6 +30,7 @@ interface I18nCore {
 		no_results: string;
 		paste: string;
 		to: string;
+		add: string;
 		more_items: string;
 	};
 	info: { test_banner: string };
@@ -61,6 +62,8 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	alt: {
 		tokens: string;
@@ -78,6 +81,8 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	short: { documentation: string };
 }
@@ -604,6 +609,7 @@ interface I18nTokens {
 		hide_token: string;
 		select_token: string;
 		exchange_is_not_available: string;
+		exchange_is_not_available_short: string;
 		source_token_title: string;
 		destination_token_title: string;
 		chain_key: string;
@@ -944,6 +950,8 @@ interface I18nAddress_book {
 		empty_text: string;
 		add_new_contact: string;
 		add_contact: string;
+		search_contact: string;
+		no_contact_found: string;
 	};
 	show_contact: {
 		title: string;
