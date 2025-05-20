@@ -21,7 +21,6 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
-        account::{EthAddress, TokenAccountId},
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -30,7 +29,7 @@ use shared::{
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
         contact::{
-            Contact, ContactAddressData, ContactError, CreateContactRequest, UpdateContactRequest,
+            Contact, ContactError, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
@@ -56,6 +55,8 @@ use shared::{
         Stats, Timestamp,
     },
 };
+use shared::types::account::{EthAddress, TokenAccountId};
+use shared::types::contact::ContactAddressData;
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
@@ -76,6 +77,7 @@ mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
+mod contacts;
 mod guards;
 mod heap_state;
 mod impls;
@@ -96,6 +98,7 @@ const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
+const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -863,21 +866,15 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 ///
 /// # Returns
 /// The created contact on success.
-///
-/// # Test
-/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 #[update(guard = "caller_is_allowed")]
 #[must_use]
 pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
-    // TODO replace mock data with contact service that returns Contact
-    let contact = Contact {
-        id: time(),
-        name: request.name,
-        addresses: vec![],
-        update_timestamp_ns: time(),
-    };
+    let principal = ic_cdk::caller();
 
-    GetContactResult::Ok(contact)
+    let result =
+        mutate_state(|state| contacts::create_contact(principal, request, &mut state.contact));
+
+    result.into()
 }
 
 /// Updates an existing contact for the caller.
