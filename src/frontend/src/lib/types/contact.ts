@@ -1,11 +1,11 @@
-export interface Address {
-	id: string;
+export interface AddressUi {
 	address: string;
 	alias?: string;
 }
 
-export interface Contact {
+export interface ContactUi {
 	id: string;
 	name: string;
-	addresses: Address[];
+	addresses: AddressUi[];
+	updateTimestampNs: bigint;
 }
