@@ -36,6 +36,7 @@
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
 	import type { OptionTokenUi } from '$lib/types/token';
@@ -147,7 +148,7 @@
 		</div>
 	{:else}
 		<div in:slide={SLIDE_PARAMS}>
-			<ExchangeBalance />
+			<ExchangeBalance hideBalance={$isPrivacyMode} />
 		</div>
 	{/if}
 
