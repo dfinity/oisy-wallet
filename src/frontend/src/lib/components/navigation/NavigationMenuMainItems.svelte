@@ -45,7 +45,7 @@
 
 	const isTransactionsRoute = $derived(isRouteTransactions($page));
 
-	let fromRoute = $state<NavigationTarget | null>();
+	let fromRoute = $state<NavigationTarget | null>(null);
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
