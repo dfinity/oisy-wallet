@@ -30,6 +30,7 @@
 		networkBitcoin,
 		networkBsc,
 		networkEthereum,
+		networkPolygon,
 		networkICP,
 		networkSolana,
 		pseudoNetworkChainFusion
@@ -109,6 +110,8 @@
 	class:to-base-100={$networkBase}
 	class:from-bsc-0={$networkBsc}
 	class:to-bsc-100={$networkBsc}
+	class:from-polygon-0={$networkPolygon}
+	class:to-polygon-100={$networkPolygon}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
