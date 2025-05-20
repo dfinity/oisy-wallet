@@ -1,6 +1,6 @@
 import type { Contact } from '$declarations/backend/backend.did';
 
-export const getMockContacts = ({ n, name }: { n: number; name: string }): Contact[] =>
+export const getMockContacts = ({ n, name }: { n: number; name?: string }): Contact[] =>
 	Array(n)
 		.fill(null)
 		.map(
