@@ -4,33 +4,37 @@ import {
 	CONTACT_SHOW_ADD_ADDRESS_BUTTON,
 	CONTACT_SHOW_CLOSE_BUTTON
 } from '$lib/constants/test-ids.constants';
-import type { Contact } from '$lib/types/contact';
+import type { ContactUi } from '$lib/types/contact';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('ShowContactStep', () => {
-	const mockContact: Contact = {
-		id: 'contact-1',
+	const mockContact: ContactUi = {
+		id: 1n,
 		name: 'Test Contact',
-		addresses: []
+		addresses: [],
+		updateTimestampNs: BigInt(Date.now())
 	};
 
-	const mockContactWithAddresses: Contact = {
-		id: 'contact-2',
+	const mockContactWithAddresses: ContactUi = {
+		id: 2n,
 		name: 'Contact With Addresses',
 		addresses: [
 			{
-				address: '0x123456789abcdef',
-				alias: 'My ETH Address',
+				address: mockEthAddress,
+				label: 'My ETH Address',
 				addressType: 'Eth'
 			},
 			{
-				address: 'btc123456789abcdef',
-				alias: 'My BTC Address',
+				address: mockBtcAddress,
+				label: 'My BTC Address',
 				addressType: 'Btc'
 			}
-		]
+		],
+		updateTimestampNs: BigInt(Date.now())
 	};
 
 	const mockClose = vi.fn();
@@ -128,7 +132,7 @@ describe('ShowContactStep', () => {
 
 		// Check that each address is displayed
 		mockContactWithAddresses.addresses.forEach((address) => {
-			expect(getByText(`ADDRESS: ${address.address} ${address.alias}`)).toBeInTheDocument();
+			expect(getByText(`ADDRESS: ${address.address} ${address.label}`)).toBeInTheDocument();
 		});
 	});
 
