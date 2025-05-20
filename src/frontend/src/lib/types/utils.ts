@@ -17,3 +17,11 @@ export type AtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyo
 export type PartialSpecific<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 export type NonEmptyArray<T> = [T, ...T[]];
+
+/**
+ * Returns all keys of a union type. For example:
+ *   KeyOfUnion<{ a: number } | { b: string } | { d: { ... } }>
+ * will result in: 'a' | 'b' | 'd'
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type KeysOfUnion<T> = T extends any ? keyof T : never;
