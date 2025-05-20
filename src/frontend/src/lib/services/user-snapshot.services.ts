@@ -209,32 +209,34 @@ const getLastTransactionsByToken = ({
 
 	const isEthOrEvm = isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId);
 
-	const ckEthMinterInfoAddresses = toCkMinterInfoAddresses(
-		get(ckEthMinterInfoStore)?.[
-			isNetworkIdSepolia(networkId) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
-		]
-	);
-	// If there are no minter info addresses, we cannot map the transactions. We return undefined to skip this token.
-	// Since we are sending snapshots at several intervals and refreshes, it is not necessary to raise an error.
-	if (isEthOrEvm && isNullish(ckEthMinterInfoAddresses)) {
-		return [];
+	if (isEthOrEvm) {
+		const ckMinterInfoAddresses = toCkMinterInfoAddresses(
+			get(ckEthMinterInfoStore)?.[
+				isNetworkIdSepolia(networkId) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
+			]
+		);
+		// If there are no minter info addresses, we cannot map the transactions. We return undefined to skip this token.
+		// Since we are sending snapshots at several intervals and refreshes, it is not necessary to raise an error.
+		if (isNullish(ckMinterInfoAddresses)) {
+			return [];
+		}
+
+		return (get(ethTransactionsStore)?.[tokenId] ?? []).map((transaction) =>
+			mapEthTransactionUi({
+				transaction,
+				ckMinterInfoAddresses,
+				$ethAddress: account
+			})
+		);
 	}
 
-	return isEthOrEvm
-		? (get(ethTransactionsStore)?.[tokenId] ?? []).map((transaction) =>
-				mapEthTransactionUi({
-					transaction,
-					ckMinterInfoAddresses: ckEthMinterInfoAddresses,
-					$ethAddress: account
-				})
-			)
-		: isNetworkIdBitcoin(networkId)
-			? (get(btcTransactionsStore)?.[tokenId] ?? []).map(({ data: transaction }) => transaction)
-			: isNetworkIdSolana(networkId)
-				? (get(solTransactionsStore)?.[tokenId] ?? []).map(({ data: transaction }) => transaction)
-				: isNetworkIdICP(networkId)
-					? (get(icTransactionsStore)?.[tokenId] ?? []).map(({ data: transaction }) => transaction)
-					: [];
+	return isNetworkIdBitcoin(networkId)
+		? (get(btcTransactionsStore)?.[tokenId] ?? []).map(({ data: transaction }) => transaction)
+		: isNetworkIdSolana(networkId)
+			? (get(solTransactionsStore)?.[tokenId] ?? []).map(({ data: transaction }) => transaction)
+			: isNetworkIdICP(networkId)
+				? (get(icTransactionsStore)?.[tokenId] ?? []).map(({ data: transaction }) => transaction)
+				: [];
 };
 
 const toAnySnapshot = ({
