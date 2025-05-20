@@ -74,6 +74,7 @@ use crate::{
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
+use crate::types::ContactMap;
 
 mod assertions;
 mod bitcoin_api;
@@ -116,6 +117,7 @@ thread_local! {
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
+            contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
         })
     );
 }
@@ -153,6 +155,7 @@ pub struct State {
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
     pow_challenge: PowChallengeMap,
+    contact: ContactMap,
 }
 
 fn set_config(arg: InitArg) {
@@ -884,8 +887,29 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
     let principal = ic_cdk::caller();
 
-    let result =
-        mutate_state(|state| contacts::create_contact(principal, request, &mut state.contact));
+    // Initialize the contact state in the contacts module if needed
+    contacts::CONTACT_STATE.with(|cell| {
+        let mut state_ref = cell.borrow_mut();
+        if state_ref.is_none() {
+            mutate_state(|state| {
+                *state_ref = Some(state.contact.clone());
+            });
+        }
+    });
+
+    // Use the contacts module's mutate_state function
+    let result = contacts::mutate_state(|contact_map| {
+        contacts::create_contact(principal, request, contact_map)
+    });
+
+    // Sync back to the main state
+    mutate_state(|state| {
+        contacts::CONTACT_STATE.with(|cell| {
+            if let Some(contact_map) = &*cell.borrow() {
+                state.contact = contact_map.clone();
+            }
+        });
+    });
 
     result.into()
 }
