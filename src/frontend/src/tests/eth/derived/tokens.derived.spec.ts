@@ -3,6 +3,7 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import * as appContants from '$lib/constants/app.constants';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('tokens.derived', () => {
@@ -11,6 +12,7 @@ describe('tokens.derived', () => {
 			vi.resetAllMocks();
 
 			setupTestnetsStore('reset');
+			setupUserNetworksStore('allEnabled');
 
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 

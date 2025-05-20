@@ -26,7 +26,7 @@
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
 	import DestinationWizardStep from '$lib/components/address/DestinationWizardStep.svelte';
-	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
@@ -135,8 +135,8 @@
 				ckErc20ToErc20MaxCkEthFees
 			};
 
-			const trackAnalyticsOnSendComplete = async () => {
-				await trackEvent({
+			const trackAnalyticsOnSendComplete = () => {
+				trackEvent({
 					name: isNetworkIdBitcoin(networkId)
 						? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
 						: isConvertCkEthToEth({ token: $sourceToken, networkId })
@@ -159,7 +159,7 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
 					: isConvertCkEthToEth({ token: $sourceToken, networkId })
@@ -197,9 +197,9 @@
 			>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
-						<ButtonBack on:click={back} />
+						<ButtonBack onclick={back} />
 					{:else}
-						<ButtonCancel on:click={close} />
+						<ButtonCancel onclick={close} />
 					{/if}
 				</svelte:fragment>
 			</IcConvertForm>
@@ -212,7 +212,7 @@
 				destination={isDestinationCustom ? customDestination : defaultDestination}
 				{isDestinationCustom}
 			>
-				<ButtonBack slot="cancel" on:click={back} />
+				<ButtonBack slot="cancel" onclick={back} />
 			</IcConvertReview>
 		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 			<IcConvertProgress bind:convertProgressStep />
@@ -228,7 +228,7 @@
 				<svelte:fragment slot="title">{$i18n.convert.text.send_to}</svelte:fragment>
 			</DestinationWizardStep>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-			<SendQRCodeScan
+			<SendQrCodeScan
 				expectedToken={$destinationToken}
 				bind:destination={customDestination}
 				bind:amount={sendAmount}

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import icpDark from '$eth/assets/icp_dark.svg';
-	import bitcoin from '$icp/assets/bitcoin.svg';
+	import bitcoin from '$btc/assets/bitcoin.svg';
+	import icpDark from '$icp/assets/icp-dark.svg';
 	import eth from '$icp-eth/assets/eth.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';

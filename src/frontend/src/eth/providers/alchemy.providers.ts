@@ -1,9 +1,5 @@
-import {
-	ALCHEMY_NETWORK_MAINNET,
-	ALCHEMY_NETWORK_SEPOLIA,
-	ETHEREUM_NETWORK_ID,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
@@ -18,16 +14,19 @@ import { get } from 'svelte/store';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
-const configs: Record<NetworkId, AlchemyConfig> = {
-	[ETHEREUM_NETWORK_ID]: {
-		apiKey: ALCHEMY_API_KEY,
-		network: ALCHEMY_NETWORK_MAINNET
-	},
-	[SEPOLIA_NETWORK_ID]: {
-		apiKey: ALCHEMY_API_KEY,
-		network: ALCHEMY_NETWORK_SEPOLIA
-	}
-};
+const configs: Record<NetworkId, AlchemyConfig> = [
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_EVM_NETWORKS
+].reduce<Record<NetworkId, AlchemyConfig>>(
+	(acc, { id, providers: { alchemy } }) => ({
+		...acc,
+		[id]: {
+			apiKey: ALCHEMY_API_KEY,
+			network: alchemy
+		}
+	}),
+	{}
+);
 
 const alchemyConfig = (networkId: NetworkId): AlchemyConfig => {
 	const provider = configs[networkId];
@@ -132,10 +131,13 @@ export class AlchemyProvider {
 	};
 }
 
-const providers: Record<NetworkId, AlchemyProvider> = {
-	[ETHEREUM_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_MAINNET),
-	[SEPOLIA_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_SEPOLIA)
-};
+const providers: Record<NetworkId, AlchemyProvider> = [
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_EVM_NETWORKS
+].reduce<Record<NetworkId, AlchemyProvider>>(
+	(acc, { id, providers: { alchemy } }) => ({ ...acc, [id]: new AlchemyProvider(alchemy) }),
+	{}
+);
 
 export const alchemyProviders = (networkId: NetworkId): AlchemyProvider => {
 	const provider = providers[networkId];

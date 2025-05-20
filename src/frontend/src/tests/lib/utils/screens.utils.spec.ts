@@ -19,14 +19,17 @@ describe('screens.utils tests', () => {
 
 			// Test case when screenWidth is smaller than the first screen width
 			let screenWidth = remToPx('28rem') - 1; // Just below 'xs'
+
 			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual(MIN_SCREEN);
 
 			// Test case when screenWidth is in between 'md' and 'lg'
 			screenWidth = remToPx('56rem'); // Between 'md' (48rem) and 'lg' (64rem)
+
 			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual('lg');
 
 			// Test case when screenWidth is larger than the largest screen width
 			screenWidth = remToPx('160rem'); // Beyond '2.5xl'
+
 			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual(MAX_SCREEN);
 		});
 
@@ -35,9 +38,11 @@ describe('screens.utils tests', () => {
 
 			// Test invalid screenWidth (negative or extremely large value)
 			let screenWidth = -1; // Invalid, negative width
+
 			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual(MIN_SCREEN);
 
 			screenWidth = 10000; // Unrealistically large screen width
+
 			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual(MAX_SCREEN);
 		});
 
@@ -46,6 +51,7 @@ describe('screens.utils tests', () => {
 
 			// Test for a screenWidth smaller than any available screen (smaller than 'xs')
 			const screenWidth = remToPx('10rem'); // Smaller than smallest screen (xs)
+
 			expect(getActiveScreen({ screenWidth, availableScreensSortedByWidth })).toEqual(MIN_SCREEN);
 		});
 	});
@@ -60,6 +66,7 @@ describe('screens.utils tests', () => {
 				up: 'sm',
 				down: 'xl'
 			});
+
 			expect(filteredScreens).toEqual(['sm', 'md', '1.5md', 'lg', '1.5lg', 'xl']);
 
 			// Test when filtering from 'md' to '2xl'
@@ -68,6 +75,7 @@ describe('screens.utils tests', () => {
 				up: 'md',
 				down: '2xl'
 			});
+
 			expect(filteredScreens).toEqual(['md', '1.5md', 'lg', '1.5lg', 'xl', '1.5xl', '2xl']);
 
 			// Test when "up" and "down" are the same
@@ -76,6 +84,7 @@ describe('screens.utils tests', () => {
 				up: 'xs',
 				down: 'xs'
 			});
+
 			expect(filteredScreens).toEqual(['xs']);
 		});
 
@@ -88,6 +97,7 @@ describe('screens.utils tests', () => {
 				up: 'invalid' as ScreensKeyType,
 				down: 'xl'
 			});
+
 			expect(filteredScreens).toEqual([]);
 
 			// Test with invalid "down" value
@@ -96,6 +106,7 @@ describe('screens.utils tests', () => {
 				up: 'sm',
 				down: 'invalid' as ScreensKeyType
 			});
+
 			expect(invalidFilteredScreens).toEqual([]);
 		});
 
@@ -134,6 +145,7 @@ describe('screens.utils tests', () => {
 				up: undefined as unknown as ScreensKeyType,
 				down: 'xl'
 			});
+
 			expect(filteredScreens).toEqual([]);
 
 			filteredScreens = filterScreens({
@@ -141,6 +153,7 @@ describe('screens.utils tests', () => {
 				up: 'sm',
 				down: null as unknown as ScreensKeyType
 			});
+
 			expect(filteredScreens).toEqual([]);
 		});
 	});
@@ -159,14 +172,16 @@ describe('screens.utils tests', () => {
 				filteredScreens,
 				activeScreen: 'lg'
 			});
-			expect(result).toEqual(true);
+
+			expect(result).toBeTruthy();
 
 			// Test with an activeScreen that is NOT in the filtered list
 			const result2 = shouldDisplayForScreen({
 				filteredScreens,
 				activeScreen: '2.5xl'
 			});
-			expect(result2).toEqual(false);
+
+			expect(result2).toBeFalsy();
 		});
 
 		it('should return false if the activeScreen is not in the filtered screens list', () => {
@@ -182,7 +197,8 @@ describe('screens.utils tests', () => {
 				filteredScreens,
 				activeScreen: 'xs'
 			});
-			expect(result).toEqual(false);
+
+			expect(result).toBeFalsy();
 		});
 
 		it('should return false if the activeScreen is undefined or invalid', () => {
@@ -198,13 +214,15 @@ describe('screens.utils tests', () => {
 				filteredScreens,
 				activeScreen: undefined as unknown as ScreensKeyType
 			});
-			expect(result).toEqual(false);
+
+			expect(result).toBeFalsy();
 
 			const result2 = shouldDisplayForScreen({
 				filteredScreens,
 				activeScreen: 'nonExistentScreen' as ScreensKeyType
 			});
-			expect(result2).toEqual(false);
+
+			expect(result2).toBeFalsy();
 		});
 
 		it('should return false if filteredScreens is an empty array', () => {
@@ -215,7 +233,8 @@ describe('screens.utils tests', () => {
 				filteredScreens,
 				activeScreen: 'sm'
 			});
-			expect(result).toEqual(false);
+
+			expect(result).toBeFalsy();
 		});
 	});
 });

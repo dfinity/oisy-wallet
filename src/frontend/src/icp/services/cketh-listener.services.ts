@@ -15,7 +15,7 @@ export const syncCkEthMinterInfo = ({ data: postMsgData, tokenId }: SyncCkMinter
 	const data: CertifiedData<MinterInfo> = JSON.parse(json, jsonReviver);
 
 	ckEthMinterInfoStore.set({
-		tokenId,
+		id: tokenId,
 		data
 	});
 };

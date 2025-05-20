@@ -7,7 +7,8 @@
 	},
 	"rust": {
 		"method": "sh",
-		"version": "See rust-toolchain.toml"
+		"note": "See also: rust-toolchain.toml",
+		"version": "nightly-2025-04-01"
 	},
 	"didc": {
 		"method": "curl",
@@ -41,7 +42,7 @@
 	},
 	"cargo-audit": {
 		"method": "cargo-binstall",
-		"version": "0.13.1"
+		"version": "0.21.2"
 	},
 	"cargo-edit": {
 		"method": "cargo-binstall",

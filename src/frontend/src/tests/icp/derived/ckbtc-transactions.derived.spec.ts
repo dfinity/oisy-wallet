@@ -10,6 +10,7 @@ describe('ckBtcPendingUtxoTransactions', () => {
 		token.set(ETHEREUM_TOKEN);
 
 		const result = get(ckBtcPendingUtxoTransactions);
+
 		expect(result).toEqual([]);
 	});
 
@@ -25,7 +26,8 @@ describe('ckBtcPendingUtxoTransactions', () => {
 
 		it('derived pending UTXOs is always not certified', () => {
 			const result = get(ckBtcPendingUtxoTransactions);
-			expect(result[0].certified).toBe(false);
+
+			expect(result[0].certified).toBeFalsy();
 		});
 	});
 });

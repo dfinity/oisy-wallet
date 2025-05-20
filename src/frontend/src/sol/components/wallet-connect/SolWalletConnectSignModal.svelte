@@ -17,7 +17,7 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
+	import { type ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 	import { WizardStepsSign } from '$lib/enums/wizard-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';

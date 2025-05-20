@@ -18,6 +18,7 @@ describe('TokenInputCurrencyToken', () => {
 		const input = getByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 		await fireEvent.input(input, { target: { value: '100' } });
+
 		expect(input).toHaveValue('100');
 	});
 
@@ -26,6 +27,7 @@ describe('TokenInputCurrencyToken', () => {
 		const input = getByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 		await fireEvent.input(input, { target: { value: '' } });
+
 		expect(input).toHaveValue('');
 	});
 

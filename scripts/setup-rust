@@ -15,17 +15,21 @@ function run() {
   fi
 }
 
-rust_version=$(sed -n 's/^channel[[:space:]]*=[[:space:]]"\(.*\)"/\1/p' rust-toolchain.toml)
-echo "using rust version '$rust_version'"
+NIGHTLY_VERSION="${version:-nightly}"
+RUST_VERSION=$(sed -n 's/^channel[[:space:]]*=[[:space:]]"\(.*\)"/\1/p' rust-toolchain.toml)
+echo "Using rust version '$RUST_VERSION' and nightly '$NIGHTLY_VERSION'"
 
 RUSTUP_VERSION="$(jq -re .rustup.version dev-tools.json)"
 
 # here we set the toolchain to 'none' and rustup will pick up on ./rust-toolchain.toml
 run curl --fail "https://raw.githubusercontent.com/rust-lang/rustup/refs/tags/${RUSTUP_VERSION}/rustup-init.sh" -sSf | run sh -s -- -y --no-modify-path
-rustup toolchain install
+rustup toolchain install            # Version from rust-toolchain.toml
+rustup toolchain install "$version" # Version from dev-tools.json
+rustup component add clippy
+rustup component add rustfmt --toolchain "$NIGHTLY_VERSION"
 rustup show
 
 # make sure the packages are actually installed (rustup waits for the first invoke to lazyload)
 cargo --version
 cargo clippy --version
-cargo fmt --version
+cargo +"$NIGHTLY_VERSION" fmt --version

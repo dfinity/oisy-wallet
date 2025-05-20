@@ -1,5 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { EthereumNetwork } from '$eth/types/network';
+import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import { decodeQrCode, decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
@@ -21,6 +22,7 @@ describe('decodeUrn', () => {
 	it('should return undefined for an invalid URN', () => {
 		const urn = 'invalidURN';
 		const result = decodeQrCodeUrn(urn);
+
 		expect(result).toBeUndefined();
 	});
 
@@ -31,11 +33,11 @@ describe('decodeUrn', () => {
 
 			const result = decodeQrCodeUrn(urn);
 
-			const standard = token.standard;
+			const { standard } = token;
 			const expectedPrefix =
 				standard === 'erc20'
 					? 'ethereum'
-					: standard === 'icrc'
+					: isTokenIcrc(token)
 						? token.name.toLowerCase()
 						: standard;
 			const expectedResult: DecodedUrn = {
@@ -70,11 +72,13 @@ describe('decodeQrCode', () => {
 
 	it('should return { result } when result is not success', () => {
 		const response = decodeQrCode({ status: 'cancelled' });
+
 		expect(response).toEqual({ status: 'cancelled' });
 	});
 
 	it('should return { status: "cancelled" } when code is nullish', () => {
 		const response = decodeQrCode({ status: 'success', code: undefined });
+
 		expect(response).toEqual({ status: 'cancelled' });
 	});
 
@@ -82,6 +86,7 @@ describe('decodeQrCode', () => {
 		mockDecodePayment.mockReturnValue(undefined);
 
 		const response = decodeQrCode({ status: 'success', code });
+
 		expect(response).toEqual({ status: 'success', destination: code });
 
 		expect(mockDecodePayment).toHaveBeenCalledWith(code);
@@ -96,6 +101,7 @@ describe('decodeQrCode', () => {
 		mockDecodePayment.mockReturnValue(payment);
 
 		const response = decodeQrCode({ status: 'success', code, expectedToken: token });
+
 		expect(response).toEqual({ status: 'token_incompatible' });
 		expect(mockDecodePayment).toHaveBeenCalledWith(code);
 	});
@@ -109,6 +115,7 @@ describe('decodeQrCode', () => {
 		mockDecodePayment.mockReturnValue(payment);
 
 		const response = decodeQrCode({ status: 'success', code, expectedToken: token });
+
 		expect(response).toEqual({
 			status: 'success',
 			destination: address,

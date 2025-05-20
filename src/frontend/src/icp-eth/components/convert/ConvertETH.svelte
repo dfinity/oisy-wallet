@@ -25,11 +25,18 @@
 	export let nativeTokenId: TokenId;
 	export let ariaLabel: string;
 
+	const ethModalId = Symbol();
+	const ckEthModalId = Symbol();
+
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
-	const isDisabled = (): boolean =>
+	let isNetworkDisabled = false;
+	$: isNetworkDisabled =
 		(nativeTokenId === ETHEREUM_TOKEN_ID && $networkEthereumDisabled) ||
-		(nativeTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaDisabled) ||
+		(nativeTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaDisabled);
+
+	const isDisabled = (): boolean =>
+		isNetworkDisabled ||
 		$ethAddressNotLoaded ||
 		// We can convert to ETH - i.e. we can convert to Ethereum or Sepolia, not an ERC20 token
 		isNotSupportedEthTokenId(nativeTokenId) ||
@@ -56,7 +63,7 @@
 				return;
 			}
 
-			modalStore.openConvertToTwinTokenEth();
+			modalStore.openConvertToTwinTokenEth(ethModalId);
 			return;
 		}
 
@@ -70,17 +77,21 @@
 			return;
 		}
 
-		modalStore.openConvertToTwinTokenCkEth();
+		modalStore.openConvertToTwinTokenCkEth(ckEthModalId);
 	};
 </script>
 
 <CkEthLoader {nativeTokenId}>
 	<ButtonHero
-		on:click={async () => await openConvert()}
-		disabled={$isBusy || $outflowActionsDisabled}
+		onclick={async () => await openConvert()}
+		disabled={isNetworkDisabled || $isBusy || $outflowActionsDisabled}
 		{ariaLabel}
 	>
-		<slot name="icon" slot="icon" />
-		<slot />
+		{#snippet icon()}
+			<slot name="icon" />
+		{/snippet}
+		{#snippet label()}
+			<slot />
+		{/snippet}
 	</ButtonHero>
 </CkEthLoader>

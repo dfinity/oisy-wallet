@@ -164,7 +164,7 @@ export const send = ({
 
 				progress(lastProgressStep);
 
-				await trackEvent({
+				trackEvent({
 					name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
 					metadata: {
 						token: token.symbol
@@ -173,7 +173,7 @@ export const send = ({
 
 				return { success: true };
 			} catch (err: unknown) {
-				await trackEvent({
+				trackEvent({
 					name: TRACK_COUNT_WC_ETH_SEND_ERROR,
 					metadata: {
 						token: token.symbol

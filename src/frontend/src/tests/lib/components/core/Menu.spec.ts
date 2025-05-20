@@ -1,78 +1,120 @@
 import type { UserData } from '$declarations/rewards/rewards.did';
+import * as addressBookEnv from '$env/address-book.env';
 import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
+	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 	NAVIGATION_MENU_BUTTON,
+	NAVIGATION_MENU_GOLD_BUTTON,
+	NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
+	NAVIGATION_MENU_REFERRAL_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { beforeEach } from 'node:test';
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
+	const menuItemPrivacyModeButtonSelector = `button[data-tid="${NAVIGATION_MENU_PRIVACY_MODE_BUTTON}"]`;
 	const menuItemVipButtonSelector = `button[data-tid="${NAVIGATION_MENU_VIP_BUTTON}"]`;
+	const menuItemGoldButtonSelector = `button[data-tid="${NAVIGATION_MENU_GOLD_BUTTON}"]`;
+	const menuItemAddressBookSelector = `button[data-tid="${NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}"]`;
+	const menuItemReferralButtonSelector = `button[data-tid="${NAVIGATION_MENU_REFERRAL_BUTTON}"]`;
+
+	let container: HTMLElement;
 
 	beforeEach(() => {
 		userProfileStore.reset();
+		vi.resetAllMocks();
+		mockAuthStore();
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
+	});
+
+	const mockUserData = (powers: Array<string>): UserData => ({
+		is_vip: [],
+		superpowers: [powers],
+		airdrops: [],
+		usage_awards: [],
+		last_snapshot_timestamp: [BigInt(Date.now())],
+		sprinkles: []
+	});
+
+	const openMenu = () => {
+		({ container } = render(Menu));
+		const menuButton: HTMLButtonElement | null = container.querySelector(menuButtonSelector);
+
+		expect(menuButton).toBeInTheDocument();
+
+		menuButton?.click();
+	};
+
+	const waitForElement = async ({
+		selector,
+		shouldExist = true
+	}: {
+		selector: string;
+		shouldExist?: boolean;
+	}) =>
+		await waitFor(() => {
+			const element = container.querySelector(selector);
+			if (shouldExist) {
+				if (element == null) {
+					throw new Error(`Element with selector "${selector}" not yet loaded`);
+				}
+
+				expect(element).toBeInTheDocument();
+			} else {
+				expect(element).toBeNull();
+			}
+			return element;
+		});
+
+	it('renders the privacy mode menu item', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemPrivacyModeButtonSelector });
 	});
 
 	it('renders the vip menu item', async () => {
-		const mockedUserData: UserData = {
-			is_vip: [true],
-			airdrops: [],
-			usage_awards: [],
-			last_snapshot_timestamp: [BigInt(Date.now())],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-		mockAuthStore();
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(['vip']));
 
-		const { container } = render(Menu);
-		const menuButton: HTMLButtonElement | null = container.querySelector(menuButtonSelector);
-
-		expect(menuButton).toBeInTheDocument();
-
-		menuButton?.click();
-
-		await waitFor(() => {
-			const menuItemVipButton: HTMLButtonElement | null =
-				container.querySelector(menuItemVipButtonSelector);
-			if (menuItemVipButton == null) {
-				throw new Error('menu item not yet loaded');
-			}
-
-			expect(menuItemVipButton).toBeInTheDocument();
-		});
+		await openMenu();
+		await waitForElement({ selector: menuItemVipButtonSelector });
 	});
 
 	it('does not render the vip menu item', async () => {
-		const mockedUserData: UserData = {
-			is_vip: [false],
-			airdrops: [],
-			usage_awards: [],
-			last_snapshot_timestamp: [BigInt(Date.now())],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-		mockAuthStore();
+		await openMenu();
+		await waitForElement({ selector: menuItemVipButtonSelector, shouldExist: false });
+	});
 
-		const { container } = render(Menu);
-		const menuButton: HTMLButtonElement | null = container.querySelector(menuButtonSelector);
+	it('renders the gold menu item', async () => {
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(['gold']));
 
-		expect(menuButton).toBeInTheDocument();
+		await openMenu();
+		await waitForElement({ selector: menuItemGoldButtonSelector });
+	});
 
-		menuButton?.click();
+	it('does not render the gold menu item', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemGoldButtonSelector, shouldExist: false });
+	});
 
-		await waitFor(() => {
-			const menuItemVipButton: HTMLButtonElement | null =
-				container.querySelector(menuItemVipButtonSelector);
-			if (menuItemVipButton == null) {
-				expect(menuItemVipButton).toBeNull();
-			} else {
-				throw new Error('menu item loaded');
-			}
-		});
+	it('renders the address book button when ADDRESS_BOOK_ENABLED is true', async () => {
+		vi.spyOn(addressBookEnv, 'ADDRESS_BOOK_ENABLED', 'get').mockReturnValue(true);
+
+		await openMenu();
+		await waitForElement({ selector: menuItemAddressBookSelector });
+	});
+
+	it('does not render the address book button when ADDRESS_BOOK_ENABLED is false', async () => {
+		vi.spyOn(addressBookEnv, 'ADDRESS_BOOK_ENABLED', 'get').mockReturnValue(false);
+
+		await openMenu();
+		await waitForElement({ selector: menuItemAddressBookSelector, shouldExist: false });
+	});
+
+	it('always renders the referral button', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemReferralButtonSelector });
 	});
 });

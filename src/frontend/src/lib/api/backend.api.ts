@@ -1,5 +1,12 @@
 import type {
+	AddUserCredentialResult,
+	AllowSigningResponse,
+	CreateChallengeResponse,
 	CustomToken,
+	DeleteContactResult,
+	GetAllowedCyclesResponse,
+	GetContactResult,
+	GetContactsResult,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -9,14 +16,18 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
 	AddUserCredentialParams,
-	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateContactParams,
+	DeleteContactParams,
+	GetContactParams,
 	GetUserProfileResponse,
 	SaveUserNetworksSettings,
-	SetUserShowTestnetsParams
+	SetUserShowTestnetsParams,
+	UpdateContactParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
@@ -104,7 +115,7 @@ export const getUserProfile = async ({
 export const addUserCredential = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResponse> => {
+}: CanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResult> => {
 	const { addUserCredential } = await backendCanister({ identity });
 
 	return addUserCredential(params);
@@ -137,10 +148,28 @@ export const selectUserUtxosFee = async ({
 	return btcSelectUserUtxosFee(params);
 };
 
-export const allowSigning = async ({ identity }: CanisterApiFunctionParams): Promise<void> => {
+export const createPowChallenge = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<CreateChallengeResponse> => {
+	const { createPowChallenge } = await backendCanister({ identity });
+	return createPowChallenge();
+};
+
+export const getAllowedCycles = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<GetAllowedCyclesResponse> => {
+	const { getAllowedCycles } = await backendCanister({ identity });
+
+	return getAllowedCycles();
+};
+
+export const allowSigning = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningResponse> => {
 	const { allowSigning } = await backendCanister({ identity });
 
-	return allowSigning();
+	return allowSigning(params);
 };
 
 export const addUserHiddenDappId = async ({
@@ -168,6 +197,45 @@ export const updateUserNetworkSettings = async ({
 	const { updateUserNetworkSettings } = await backendCanister({ identity });
 
 	return updateUserNetworkSettings(params);
+};
+
+export const getContact = async ({
+	contactId,
+	identity
+}: CanisterApiFunctionParams<GetContactParams>): Promise<GetContactResult> => {
+	const { getContact } = await backendCanister({ identity });
+	return getContact(contactId);
+};
+
+export const getContacts = async ({
+	identity
+}: CanisterApiFunctionParams<QueryParams>): Promise<GetContactsResult> => {
+	const { getContacts } = await backendCanister({ identity });
+	return getContacts();
+};
+
+export const createContact = async ({
+	name,
+	identity
+}: CanisterApiFunctionParams<CreateContactParams>): Promise<GetContactResult> => {
+	const { createContact } = await backendCanister({ identity });
+	return createContact(name);
+};
+
+export const updateContact = async ({
+	contact,
+	identity
+}: CanisterApiFunctionParams<UpdateContactParams>): Promise<GetContactResult> => {
+	const { updateContact } = await backendCanister({ identity });
+	return updateContact(contact);
+};
+
+export const deleteContact = async ({
+	contactId,
+	identity
+}: CanisterApiFunctionParams<DeleteContactParams>): Promise<DeleteContactResult> => {
+	const { deleteContact } = await backendCanister({ identity });
+	return deleteContact(contactId);
 };
 
 const backendCanister = async ({

@@ -36,12 +36,17 @@
 
 	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 
+	--bottom-sheet-border-color: var(--color-border-primary);
+	--bottom-sheet-z-index: var(--modal-z-index);
+	--card-background: var(--color-background-primary);
+
 	// Input
 	--input-background: var(--color-background-primary);
 	--focus-background: var(--color-background-primary);
 	--focus-border-color: var(---color-border-brand-primary);
 	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
+	--input-width: 100%;
 	--animation-time-short: 0.2s;
 
 	// General GIX
@@ -122,6 +127,10 @@ div.input-field input[id] {
 	padding: var(--padding-1_5x);
 }
 
+.input-field.condensed input {
+	padding-block: var(--padding-1_5x) !important;
+}
+
 div.input-field input[id]::placeholder {
 	color: var(--color-foreground-tertiary) !important;
 }
@@ -187,6 +196,7 @@ div.modal {
 
 		& > div.container {
 			border-radius: 0;
+			max-width: 100% !important;
 		}
 	}
 
@@ -249,15 +259,21 @@ div.popover {
 }
 
 div.toggle {
-	zoom: 1.45;
+	scale: 1.45;
+	transform-origin: 50%;
+	margin-inline: var(--padding);
 
-	--card-background-contrast: var(--color-background-brand-subtle-20);
+	--card-background-contrast: var(--color-background-disabled-alt);
 	--card-background: var(--color-base-white);
+
+	&:hover {
+		--card-background-contrast: var(--color-background-disabled-alt2);
+	}
 
 	&:disabled,
 	&.disabled {
-		--card-background: var(--color-background-primary-alt);
-		--card-background-contrast: var(--color-background-disabled-alt);
+		--card-background: var(--color-background-disabled);
+		--card-background-contrast: var(--color-background-disabled);
 	}
 
 	&:has(input[type='checkbox']:checked) {
@@ -276,6 +292,16 @@ div.toggle {
 			--card-background: var(--color-background-primary-alt);
 			--card-background-contrast: var(--color-background-brand-subtle-20);
 		}
+	}
+
+	@media (width < theme(--breakpoint-lg)) {
+		scale: 1.6;
+		margin-inline: var(--padding);
+	}
+
+	@media (width < theme(--breakpoint-sm)) {
+		scale: 1.8;
+		margin-inline: var(--padding-2x);
 	}
 }
 

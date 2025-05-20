@@ -1,6 +1,6 @@
 #!/bin/bash
 
-POCKET_IC_SERVER_VERSION=6.0.0
+POCKET_IC_SERVER_VERSION=8.0.0
 OISY_UPGRADE_VERSIONS="v0.0.13,v0.0.19"
 BITCOIN_CANISTER_RELEASE="2024-08-30"
 BITCON_CANISTER_WASM="ic-btc-canister.wasm.gz"
@@ -76,6 +76,8 @@ fi
 
 export POCKET_IC_BIN="../../${POCKET_IC_SERVER_PATH}"
 export POCKET_IC_MUTE_SERVER=""
+
+./scripts/download-canister-api --network ic --canister backend
 
 # Run tests
 

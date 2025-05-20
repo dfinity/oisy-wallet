@@ -55,12 +55,14 @@ export class ManageTokensPage extends HomepageLoggedIn {
 			tokenSymbol,
 			networkSymbol
 		});
+
 		await expect(
 			this.getTokenCardLocator({
 				tokenSymbol,
 				networkSymbol
 			})
 		).toBeVisible();
+
 		await this.waitForLoadState();
 
 		const skeletons = this.getLocatorByTestId({ testId: TOKEN_SKELETON_TEXT });
@@ -87,6 +89,7 @@ export class ManageTokensPage extends HomepageLoggedIn {
 			tokenSymbol,
 			networkSymbol
 		});
+
 		await expect(
 			this.getTokenCardLocator({
 				tokenSymbol,

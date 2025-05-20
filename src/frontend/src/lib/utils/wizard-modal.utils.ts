@@ -1,14 +1,27 @@
-import { WizardStepsConvert, WizardStepsSend } from '$lib/enums/wizard-steps';
-import { WizardModal, type WizardSteps } from '@dfinity/gix-components';
+import type { AddressBookSteps } from '$lib/enums/progress-steps';
+import type {
+	WizardStepsAuthHelp,
+	WizardStepsConvert,
+	WizardStepsHowToConvert,
+	WizardStepsReceive,
+	WizardStepsSend
+} from '$lib/enums/wizard-steps';
+import type { WizardModal, WizardSteps } from '@dfinity/gix-components';
 
-export const goToWizardSendStep = ({
+export const goToWizardStep = ({
 	modal,
 	steps,
 	stepName
 }: {
 	modal: WizardModal;
 	steps: WizardSteps;
-	stepName: WizardStepsSend | WizardStepsConvert;
+	stepName:
+		| WizardStepsSend
+		| WizardStepsConvert
+		| WizardStepsAuthHelp
+		| WizardStepsHowToConvert
+		| WizardStepsReceive
+		| AddressBookSteps;
 }) => {
 	const stepNumber = steps.findIndex(({ name }) => name === stepName);
 	modal.set(Math.max(stepNumber, 0));

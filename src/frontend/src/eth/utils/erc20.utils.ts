@@ -2,7 +2,6 @@ import oneInch from '$eth/assets/1inch.svg';
 import dai from '$eth/assets/dai.svg';
 import dmail from '$eth/assets/dmail.svg';
 import floki from '$eth/assets/floki.svg';
-import icpDark from '$eth/assets/icp_dark.svg';
 import jasmy from '$eth/assets/jasmy.svg';
 import matic from '$eth/assets/matic.svg';
 import rndr from '$eth/assets/rndr.svg';
@@ -11,6 +10,7 @@ import weth from '$eth/assets/weth.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
+import icpDark from '$icp/assets/icp-dark.svg';
 import type { Token } from '$lib/types/token';
 import type { UserTokenState } from '$lib/types/token-toggleable';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -73,10 +73,10 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 	}
 };
 
-export const icTokenEthereumUserToken = (token: Token): token is EthereumUserToken =>
+export const isTokenEthereumUserToken = (token: Token): token is EthereumUserToken =>
 	(token.standard === 'ethereum' || token.standard === 'erc20') && 'enabled' in token;
 
-export const icTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
+export const isTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
 	token.standard === 'erc20' && 'enabled' in token && 'address' in token && 'exchange' in token;
 
 export const isTokenErc20 = (token: Token): token is Erc20Token => token.standard === 'erc20';

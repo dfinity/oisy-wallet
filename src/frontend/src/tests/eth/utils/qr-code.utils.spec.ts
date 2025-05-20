@@ -5,6 +5,7 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { decodeQrCode } from '$eth/utils/qr-code.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 import type { MockedFunction } from 'vitest';
 
@@ -19,6 +20,8 @@ describe('decodeQrCode', () => {
 	const urn = 'some-urn';
 
 	setupTestnetsStore('enabled');
+	setupUserNetworksStore('allEnabled');
+
 	const otherProps = {
 		expectedToken: token,
 		ethereumTokens: get(enabledEthereumTokens),
@@ -33,11 +36,13 @@ describe('decodeQrCode', () => {
 
 	it('should return { result } when result is not success', () => {
 		const response = decodeQrCode({ status: 'cancelled', ...otherProps });
+
 		expect(response).toEqual({ status: 'cancelled' });
 	});
 
 	it('should return { status: "cancelled" } when code is nullish', () => {
 		const response = decodeQrCode({ status: 'success', code: undefined, ...otherProps });
+
 		expect(response).toEqual({ status: 'cancelled' });
 	});
 
@@ -45,6 +50,7 @@ describe('decodeQrCode', () => {
 		mockDecodeQrCodeUrn.mockReturnValue(undefined);
 
 		const response = decodeQrCode({ status: 'success', code: urn, ...otherProps });
+
 		expect(response).toEqual({ status: 'success', destination: urn });
 
 		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
@@ -63,6 +69,7 @@ describe('decodeQrCode', () => {
 			code: urn,
 			...otherProps
 		});
+
 		expect(response).toEqual({ status: 'token_incompatible' });
 
 		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
@@ -82,6 +89,7 @@ describe('decodeQrCode', () => {
 			code: urn,
 			...otherProps
 		});
+
 		expect(response).toEqual({
 			status: 'success',
 			destination,

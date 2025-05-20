@@ -25,6 +25,7 @@ describe('SignerContext', () => {
 			const { accountsPrompt } = initSignerContext();
 
 			const payload = get(accountsPrompt.payload);
+
 			expect(payload).toBeUndefined();
 		});
 
@@ -36,6 +37,7 @@ describe('SignerContext', () => {
 			reset();
 
 			const payload = get(accountsPrompt.payload);
+
 			expect(payload).toBeNull();
 		});
 	});
@@ -45,6 +47,7 @@ describe('SignerContext', () => {
 			const { permissionsPrompt } = initSignerContext();
 
 			const payload = get(permissionsPrompt.payload);
+
 			expect(payload).toBeUndefined();
 		});
 
@@ -56,6 +59,7 @@ describe('SignerContext', () => {
 			reset();
 
 			const payload = get(permissionsPrompt.payload);
+
 			expect(payload).toBeNull();
 		});
 	});
@@ -65,6 +69,7 @@ describe('SignerContext', () => {
 			const { consentMessagePrompt } = initSignerContext();
 
 			const payload = get(consentMessagePrompt.payload);
+
 			expect(payload).toBeUndefined();
 		});
 
@@ -76,6 +81,7 @@ describe('SignerContext', () => {
 			reset();
 
 			const payload = get(consentMessagePrompt.payload);
+
 			expect(payload).toBeNull();
 		});
 	});
@@ -85,6 +91,7 @@ describe('SignerContext', () => {
 			const { callCanisterPrompt } = initSignerContext();
 
 			const payload = get(callCanisterPrompt.payload);
+
 			expect(payload).toBeUndefined();
 		});
 
@@ -96,6 +103,7 @@ describe('SignerContext', () => {
 			reset();
 
 			const payload = get(callCanisterPrompt.payload);
+
 			expect(payload).toBeNull();
 		});
 	});

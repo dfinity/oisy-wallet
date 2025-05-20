@@ -1,6 +1,14 @@
 import type {
+	AddUserCredentialResult,
+	AllowSigningResponse,
 	_SERVICE as BackendService,
+	Contact,
+	CreateChallengeResponse,
 	CustomToken,
+	DeleteContactResult,
+	GetAllowedCyclesResponse,
+	GetContactResult,
+	GetContactsResult,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -12,12 +20,14 @@ import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
 	mapBtcPendingTransactionError,
-	mapBtcSelectUserUtxosFeeError
+	mapBtcSelectUserUtxosFeeError,
+	mapCreateChallengeError,
+	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
-	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
+	AllowSigningParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
@@ -101,7 +111,7 @@ export class BackendCanister extends Canister<BackendService> {
 		issuerCanisterId,
 		currentUserVersion,
 		credentialSpec
-	}: AddUserCredentialParams): Promise<AddUserCredentialResponse> => {
+	}: AddUserCredentialParams): Promise<AddUserCredentialResult> => {
 		const { add_user_credential } = this.caller({ certified: true });
 
 		return add_user_credential({
@@ -173,14 +183,42 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	allowSigning = async (): Promise<void> => {
+	getAllowedCycles = async (): Promise<GetAllowedCyclesResponse> => {
+		const { get_allowed_cycles } = this.caller({ certified: true });
+
+		const response = await get_allowed_cycles();
+
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
+		}
+
+		throw mapGetAllowedCyclesError(response.Err);
+	};
+
+	allowSigning = async ({ request }: AllowSigningParams = {}): Promise<AllowSigningResponse> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		const response = await allow_signing();
+		const response = await allow_signing(toNullable(request));
 
-		if ('Err' in response) {
-			throw mapAllowSigningError(response.Err);
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
 		}
+
+		throw mapAllowSigningError(response.Err);
+	};
+
+	createPowChallenge = async (): Promise<CreateChallengeResponse> => {
+		const { create_pow_challenge } = this.caller({ certified: true });
+
+		const result = await create_pow_challenge();
+		if ('Ok' in result) {
+			const { Ok } = result;
+			return Ok;
+		}
+
+		throw mapCreateChallengeError(result.Err);
 	};
 
 	addUserHiddenDappId = async ({
@@ -217,5 +255,30 @@ export class BackendCanister extends Canister<BackendService> {
 			networks: mapUserNetworks(networks),
 			current_user_version: toNullable(currentUserVersion)
 		});
+	};
+
+	getContact = async (id: bigint): Promise<GetContactResult> => {
+		const { get_contact } = this.caller({ certified: false });
+		return await get_contact(id);
+	};
+
+	getContacts = async (): Promise<GetContactsResult> => {
+		const { get_contacts } = this.caller({ certified: false });
+		return await get_contacts();
+	};
+
+	createContact = async (name: string): Promise<GetContactResult> => {
+		const { create_contact } = this.caller({ certified: true });
+		return await create_contact({ name });
+	};
+
+	deleteContact = async (id: bigint): Promise<DeleteContactResult> => {
+		const { delete_contact } = this.caller({ certified: true });
+		return await delete_contact(id);
+	};
+
+	updateContact = async (contact: Contact): Promise<GetContactResult> => {
+		const { update_contact } = this.caller({ certified: true });
+		return await update_contact(contact);
 	};
 }

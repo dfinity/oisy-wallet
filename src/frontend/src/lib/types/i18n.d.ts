@@ -27,9 +27,20 @@ interface I18nCore {
 		not_available: string;
 		new: string;
 		edit: string;
+		no_results: string;
+		paste: string;
+		to: string;
+		add: string;
+		more_items: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string; go_to_home: string; back: string };
+	alt: {
+		logo: string;
+		go_to_home: string;
+		back: string;
+		open_details: string;
+		close_details: string;
+	};
 	warning: { do_not_close: string };
 }
 
@@ -48,7 +59,11 @@ interface I18nNavigation {
 		support: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
+		binance_qr_code: string;
 		refer_a_friend: string;
+		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	alt: {
 		tokens: string;
@@ -63,7 +78,11 @@ interface I18nNavigation {
 		support: string;
 		open_twitter: string;
 		vip_qr_code: string;
+		binance_qr_code: string;
 		refer_a_friend: string;
+		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	short: { documentation: string };
 }
@@ -90,6 +109,40 @@ interface I18nAuth {
 		no_pouh_credential: string;
 		error_while_signing_in: string;
 		unexpected_issue_with_syncing: string;
+	};
+	help: {
+		text: {
+			title: string;
+			description: string;
+			subtitle: string;
+			lost_identity: string;
+			security: string;
+			got_confused: string;
+			other: string;
+			feedback_text: string;
+			thanks_text: string;
+			identity_new_identity: string;
+			identity_legacy_description: string;
+			identity_legacy_sign_in: string;
+			identity_learn_more: string;
+			other_title: string;
+			other_description: string;
+			other_introduction: string;
+			other_docs: string;
+			other_private_key: string;
+			other_asset_control: string;
+			need_help: string;
+			sign_in: string;
+		};
+		alt: {
+			internet_identity: string;
+			identity_learn_more: string;
+			other_introduction: string;
+			other_docs: string;
+			other_private_key: string;
+			other_asset_control: string;
+			sign_in: string;
+		};
 	};
 }
 
@@ -124,11 +177,12 @@ interface I18nRewards {
 		active_campaigns: string;
 		upcoming_campaigns: string;
 		active_date: string;
+		ended_date: string;
 		participate_title: string;
 		share: string;
 		learn_more: string;
 		check_status: string;
-		requirements_title: string;
+		view_details: string;
 		modal_button_text: string;
 		activity_button_text: string;
 		activity_button_text_short: string;
@@ -142,8 +196,16 @@ interface I18nRewards {
 		carousel_slide_cta: string;
 		sprinkles_earned: string;
 		youre_eligible: string;
+		ongoing: string;
+		ended: string;
 	};
-	alt: { upcoming_campaigns: string };
+	requirements: {
+		requirements_title: string;
+		min_logins: string;
+		min_transactions: string;
+		min_total_assets_usd: string;
+	};
+	alt: { upcoming_campaigns: string; coming_soon: string; reward_banner: string };
 }
 
 interface I18nFooter {
@@ -179,7 +241,6 @@ interface I18nInit {
 		no_alchemy_provider: string;
 		no_alchemy_erc20_provider: string;
 		no_etherscan_provider: string;
-		no_etherscan_rest_api: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
@@ -189,7 +250,6 @@ interface I18nInit {
 		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
-		loading_balance_symbol: string;
 		erc20_contracts: string;
 		spl_tokens: string;
 		minter_ckbtc_btc: string;
@@ -369,6 +429,8 @@ interface I18nSend {
 		scan_qr: string;
 		select_token: string;
 		select_network_filter: string;
+		send_again: string;
+		recently_used: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -381,6 +443,8 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
+		unknown_destination: string;
+		fee_info: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -500,12 +564,22 @@ interface I18nSwap {
 		swap_route: string;
 		included_network_fees: string;
 		included_liquidity_fees: string;
+		best_rate: string;
+		expected_minimum: string;
+		you_receive: string;
+		select: string;
+		select_swap_provider: string;
+		open_icp_swap: string;
 	};
 	error: {
 		kong_not_available: string;
 		unexpected: string;
 		unexpected_missing_data: string;
 		slippage_exceeded: string;
+		pool_not_found: string;
+		deposit_error: string;
+		withdraw_failed: string;
+		swap_failed_withdraw_success: string;
 	};
 }
 
@@ -523,6 +597,10 @@ interface I18nTokens {
 		hide_zero_balances: string;
 		hide_zeros: string;
 		all_tokens_with_zero_hidden: string;
+		filter_nothing_found: string;
+		filter_nothing_found_description: string;
+		filter_placeholder: string;
+		filter_button: string;
 		buy_or_receive: string;
 		initializing: string;
 		updating_ui: string;
@@ -530,9 +608,13 @@ interface I18nTokens {
 		hide_token: string;
 		select_token: string;
 		exchange_is_not_available: string;
+		exchange_is_not_available_short: string;
 		source_token_title: string;
 		destination_token_title: string;
 		chain_key: string;
+		show_more_networks: string;
+		hide_more_networks: string;
+		on_network: string;
 	};
 	details: {
 		title: string;
@@ -580,8 +662,10 @@ interface I18nTokens {
 		text: {
 			title: string;
 			manage_list: string;
+			default_message: string;
 			list_settings: string;
 			do_not_see_import: string;
+			import_token: string;
 			manage_for_network: string;
 			network: string;
 			all_tokens_zero_balance: string;
@@ -599,6 +683,7 @@ interface I18nTokens {
 		open_contract_address_block_explorer: string;
 		open_token_address_block_explorer: string;
 		token_group_number: string;
+		filter_button: string;
 	};
 	placeholder: {
 		enter_contract_address: string;
@@ -754,6 +839,7 @@ interface I18nTransaction {
 		converting_ck_token: string;
 		twin_network: string;
 		no_date_available: string;
+		pending: string;
 	};
 	alt: {
 		open_block_explorer: string;
@@ -814,11 +900,17 @@ interface I18nVip {
 			reward_received_description: string;
 			reward_failed_description: string;
 		};
-		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
+		error: {
+			loading_reward: string;
+			loading_user_data: string;
+			claiming_reward: string;
+			loading_eligibility: string;
+		};
 	};
 	invitation: {
 		text: {
 			title: string;
+			binance_title: string;
 			invitation_link_copied: string;
 			generate_new_link: string;
 			generating_new_code: string;
@@ -848,6 +940,29 @@ interface I18nReferral {
 			open_wallet: string;
 		};
 	};
+}
+
+interface I18nAddress_book {
+	text: {
+		title: string;
+		empty_title: string;
+		empty_text: string;
+		add_new_contact: string;
+		add_contact: string;
+		search_contact: string;
+		no_contact_found: string;
+	};
+	show_contact: {
+		title: string;
+		add_address: string;
+		show_address_text: string;
+		add_first_address: string;
+	};
+}
+
+interface I18nContact {
+	form: { add_new_contact: string };
+	fields: { name: string };
 }
 
 interface I18nSigner {
@@ -943,6 +1058,8 @@ interface I18n {
 	about: I18nAbout;
 	vip: I18nVip;
 	referral: I18nReferral;
+	address_book: I18nAddress_book;
+	contact: I18nContact;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;

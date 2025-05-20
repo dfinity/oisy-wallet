@@ -1,10 +1,10 @@
-import * as networksEnv from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import {
 	ETHEREUM_TOKEN,
 	ETHEREUM_TOKEN_ID,
-	SEPOLIA_TOKEN,
-	SEPOLIA_TOKEN_ID
+	SEPOLIA_TOKEN_ID,
+	SUPPORTED_ETHEREUM_TOKENS
 } from '$env/tokens/tokens.eth.env';
 import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
@@ -44,25 +44,24 @@ describe('LoaderMultipleEthTransactions', () => {
 		start: 2
 	});
 
-	const mockMainnetErc20UserTokens = mockMainnetErc20CertifiedUserTokens.map(
-		({ data: token }) => token
-	);
-
-	const mockSepoliaErc20UserTokens = mockSepoliaErc20CertifiedUserTokens.map(
-		({ data: token }) => token
-	);
-
 	const mockErc20UserTokens = mockErc20CertifiedUserTokens.map(({ data: token }) => token);
 
 	const mockAdditionalTokens = mockAdditionalCertifiedTokens.map(({ data: token }) => token);
 
-	const expectedTokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN, ...mockErc20UserTokens];
+	const allExpectedTokens = [
+		...SUPPORTED_ETHEREUM_TOKENS,
+		...mockErc20UserTokens,
+		...SUPPORTED_EVM_TOKENS
+	];
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		vi.spyOn(networksEnv, 'USER_NETWORKS_FEATURE_ENABLED', 'get').mockImplementation(() => true);
+		vi.stubGlobal(
+			'setInterval',
+			vi.fn(() => 123456789)
+		);
 
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
@@ -74,6 +73,8 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	afterEach(() => {
+		vi.unstubAllGlobals();
+
 		vi.useRealTimers();
 	});
 
@@ -82,8 +83,9 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
+		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
+
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
 	});
@@ -95,16 +97,18 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
+		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
+
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
 		// same number of calls as before
-		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
+		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
+
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
 	});
@@ -116,8 +120,10 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		const expectedTokens = [ETHEREUM_TOKEN, ...mockMainnetErc20UserTokens];
+		const expectedTokens = allExpectedTokens.filter(({ network: { env } }) => env === 'mainnet');
+
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
+
 		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
@@ -136,8 +142,10 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		const expectedTokens = [SEPOLIA_TOKEN, ...mockSepoliaErc20UserTokens];
+		const expectedTokens = allExpectedTokens.filter(({ network: { env } }) => env === 'testnet');
+
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
+
 		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
@@ -164,8 +172,9 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
+		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
+
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
 
@@ -176,10 +185,12 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		// the number of calls as before + mockAdditionalTokens.length
 		const expectedNewTokens = [
-			...expectedTokens,
+			...allExpectedTokens,
 			...mockAdditionalTokens.map(({ data: token }) => token)
 		];
+
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
+
 		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
@@ -199,8 +210,9 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
+		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
+
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
 
@@ -213,8 +225,10 @@ describe('LoaderMultipleEthTransactions', () => {
 		await vi.advanceTimersByTimeAsync(timeout);
 
 		// the number of calls as before + mockAdditionalTokens.length
-		const expectedNewTokens = [...expectedTokens, ...mockAdditionalTokens];
+		const expectedNewTokens = [...allExpectedTokens, ...mockAdditionalTokens];
+
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
+
 		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
@@ -239,7 +253,9 @@ describe('LoaderMultipleEthTransactions', () => {
 			...expectedNewTokens,
 			...mockNewAdditionalTokens.map(({ data: token }) => token)
 		];
+
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokensWithSepolia.length);
+
 		expectedNewTokensWithSepolia.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
@@ -257,8 +273,9 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
-		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
+		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
+
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});
 
@@ -271,8 +288,10 @@ describe('LoaderMultipleEthTransactions', () => {
 		await vi.advanceTimersByTimeAsync(timeout);
 
 		// the number of calls as before + the failed call + mockAdditionalTokens.length
-		const expectedNewTokens = [...expectedTokens, ETHEREUM_TOKEN, ...mockAdditionalTokens];
+		const expectedNewTokens = [...allExpectedTokens, ETHEREUM_TOKEN, ...mockAdditionalTokens];
+
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
+
 		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
 			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
 		});

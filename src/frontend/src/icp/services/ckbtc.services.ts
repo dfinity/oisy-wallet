@@ -8,7 +8,6 @@ import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkMetadata, IcCkToken, IcToken } from '$icp/types/ic-token';
-import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
 import { waitWalletReady } from '$lib/services/actions.services';
 import { busy } from '$lib/stores/busy.store';
@@ -24,7 +23,13 @@ import {
 	type EstimateWithdrawalFee,
 	type PendingUtxo
 } from '@dfinity/ckbtc';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	isNullish,
+	nonNullish,
+	queryAndUpdate,
+	type QueryAndUpdateRequestParams
+} from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const updateBalance = async ({
@@ -82,7 +87,7 @@ const populatePendingUtxos = ({
 	};
 
 	ckBtcPendingUtxosStore.set({
-		tokenId,
+		id: tokenId,
 		data
 	});
 };
@@ -151,7 +156,7 @@ type LoadDataParams<T> = IcToken &
 	};
 
 const loadData: LoadData = async <T>({
-	id: tokenId,
+	id,
 	minterCanisterId,
 	store,
 	request,
@@ -166,9 +171,9 @@ const loadData: LoadData = async <T>({
 				identity,
 				certified
 			}),
-		onLoad: ({ response: data, certified }) => store.set({ tokenId, data: { data, certified } }),
-		onCertifiedError: ({ error: err }) => {
-			store.reset(tokenId);
+		onLoad: ({ response: data, certified }) => store.set({ id, data: { data, certified } }),
+		onUpdateError: ({ error: err }) => {
+			store.reset(id);
 
 			toastsError({
 				msg: { text: get(i18n).init.error.minter_ckbtc_loading_info },

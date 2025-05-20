@@ -1,14 +1,16 @@
-import { icTokenIcrcCustomToken, isDeprecatedSns } from '$icp/utils/icrc.utils';
+import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { UserNetworks } from '$lib/types/user-networks';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
+import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -46,11 +48,11 @@ export const sortTokens = <T extends Token>({
 		...pinnedTokens,
 		...otherTokens.sort((a, b) => {
 			// Deprecated SNSes such as CTS
-			if (isIcToken(a) && isDeprecatedSns(a)) {
+			if (isIcToken(a) && (a.deprecated ?? false)) {
 				return 1;
 			}
 
-			if (isIcToken(b) && isDeprecatedSns(b)) {
+			if (isIcToken(b) && (b.deprecated ?? false)) {
 				return -1;
 			}
 
@@ -100,7 +102,7 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 				$exchanges
 			});
 
-			return (tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO_BI) > 0
+			return (tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO) > 0
 				? [[...acc[0], tokenUI], acc[1]]
 				: [acc[0], [...acc[1], tokenUI]];
 		},
@@ -111,8 +113,8 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 		...positiveBalances.sort(
 			(a, b) =>
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+((b.balance ?? ZERO_BI) > (a.balance ?? ZERO_BI)) -
-					+((b.balance ?? ZERO_BI) < (a.balance ?? ZERO_BI)) ||
+				+((b.balance ?? ZERO) > (a.balance ?? ZERO)) -
+					+((b.balance ?? ZERO) < (a.balance ?? ZERO)) ||
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)
 		),
@@ -197,9 +199,7 @@ export const filterTokens = <T extends Token>({
 		token.name.toLowerCase().includes(filter.toLowerCase()) ||
 		token.symbol.toLowerCase().includes(filter.toLowerCase()) ||
 		(icTokenIcrcCustomToken(token) &&
-			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase())) ||
-		token.network.name.toLowerCase().includes(filter.toLowerCase()) ||
-		(token.network.id.description ?? '').toLowerCase().includes(filter.toLowerCase());
+			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase()));
 
 	return isNullishOrEmpty(filter)
 		? tokens
@@ -222,3 +222,25 @@ export const findToken = ({
 	tokens: Token[];
 	symbol: string;
 }): Token | undefined => tokens.find((token) => token.symbol === symbol);
+
+export const defineEnabledTokens = <T extends Token>({
+	$testnetsEnabled,
+	$userNetworks,
+	mainnetFlag,
+	mainnetTokens,
+	testnetTokens = [],
+	localTokens = []
+}: {
+	$testnetsEnabled: boolean;
+	$userNetworks: UserNetworks;
+	mainnetFlag: boolean;
+	mainnetTokens: T[];
+	testnetTokens?: T[];
+	localTokens?: T[];
+}): T[] =>
+	[
+		...(mainnetFlag ? mainnetTokens : []),
+		...($testnetsEnabled ? [...testnetTokens, ...(LOCAL ? localTokens : [])] : [])
+	].filter(({ network: { id: networkId } }) =>
+		isUserNetworkEnabled({ userNetworks: $userNetworks, networkId })
+	);

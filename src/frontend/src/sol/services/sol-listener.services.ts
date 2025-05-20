@@ -23,7 +23,7 @@ export const syncWallet = ({
 
 	if (nonNullish(balance)) {
 		balancesStore.set({
-			tokenId,
+			id: tokenId,
 			data: {
 				data: balance,
 				certified

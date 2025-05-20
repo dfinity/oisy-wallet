@@ -46,6 +46,7 @@ describe('page-token.derived', () => {
 		'should find $name token',
 		(token) => {
 			mockPage.mock({ token: token.name, network: token.network.id.description });
+
 			expect(get(pageToken)).toBe(token);
 		}
 	);
@@ -59,6 +60,7 @@ describe('page-token.derived', () => {
 			});
 
 			mockPage.mock({ token: token.name, network: token.network.id.description });
+
 			expect(get(pageToken)).toBe(token);
 		}
 	);
@@ -71,6 +73,7 @@ describe('page-token.derived', () => {
 		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
 		mockPage.mock({ token: token.name, network: token.network.id.description });
+
 		expect(get(pageToken)).toBe(token);
 	});
 
@@ -99,6 +102,7 @@ describe('page-token.derived', () => {
 
 	it('should return undefined when token is not found in any list', () => {
 		mockPage.mock({ token: 'non-existent-token' });
+
 		expect(get(pageToken)).toBeUndefined();
 	});
 

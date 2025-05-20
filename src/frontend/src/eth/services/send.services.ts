@@ -16,12 +16,13 @@ import type { ApproveParams, SendParams, SignAndApproveParams } from '$eth/types
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isDestinationContractAddress, shouldSendWithApproval } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
+import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import {
 	toCkErc20HelperContractAddress,
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/signer.api';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
@@ -89,7 +90,7 @@ const erc20PrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: ZERO_BI,
+		amount: ZERO,
 		...rest
 	});
 };
@@ -165,7 +166,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: ZERO_BI,
+		amount: ZERO,
 		...rest
 	});
 };
@@ -224,7 +225,7 @@ const erc20ContractPrepareApprove = async ({
 	return prepare({
 		data,
 		to,
-		amount: ZERO_BI,
+		amount: ZERO,
 		...rest
 	});
 };
@@ -335,9 +336,8 @@ const sendTransaction = async ({
 	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo);
 	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
-	const transferStandard: 'ethereum' | 'erc20' = isSupportedEthTokenId(token.id)
-		? 'ethereum'
-		: 'erc20';
+	const transferStandard: 'ethereum' | 'erc20' =
+		isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id) ? 'ethereum' : 'erc20';
 
 	const networkICP = isNetworkICP(targetNetwork);
 
@@ -467,7 +467,7 @@ const resetExistingApprovalToZero = async (
 > =>
 	await prepareAndSignApproval({
 		...params,
-		amount: ZERO_BI
+		amount: ZERO
 	});
 
 const checkExistingApproval = async ({
@@ -494,7 +494,7 @@ const checkExistingApproval = async ({
 	}
 
 	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first, before approving the new amount.
-	if (preApprovedAmount > ZERO_BI) {
+	if (preApprovedAmount > ZERO) {
 		await resetExistingApprovalToZero({
 			...rest,
 			token,

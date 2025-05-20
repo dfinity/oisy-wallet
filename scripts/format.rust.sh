@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-
-cargo +nightly fmt
+set -euo pipefail
+version="$(jq -re .rust.version dev-tools.json)"
+cargo +"$version" fmt

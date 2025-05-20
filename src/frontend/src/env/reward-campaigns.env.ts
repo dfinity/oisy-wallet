@@ -6,8 +6,6 @@ import * as z from 'zod';
 const parseResult = z.array(RewardEventsSchema).safeParse(rewardCampaignsJson);
 export const rewardCampaigns: RewardDescription[] = parseResult.success ? parseResult.data : [];
 
-// TODO: remove this feature flag when user snapshot live on production
-export const USER_SNAPSHOT_ENABLED =
-	JSON.parse(import.meta.env.VITE_USER_SNAPSHOT_ENABLED ?? false) === true;
+export const SPRINKLES_SEASON_1_EPISODE_3_ID = 'sprinkles_s1e3';
 
-export const FEATURED_REWARD_CAROUSEL_SLIDE_ID = 'OISY Airdrop #1';
+export const FEATURED_REWARD_CAROUSEL_SLIDE_ID = '';

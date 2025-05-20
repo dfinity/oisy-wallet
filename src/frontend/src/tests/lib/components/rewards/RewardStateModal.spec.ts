@@ -1,3 +1,4 @@
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import type { RewardDescription } from '$env/types/env-reward';
 import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
 import rewardReceived from '$lib/assets/reward-received.svg';
@@ -19,7 +20,7 @@ describe('RewardStateModal', () => {
 
 	it('should render modal content', () => {
 		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
-			(campaign) => campaign.id === 'OISY Airdrop #1'
+			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 		);
 		assertNonNullish(mockedReward);
 
@@ -35,17 +36,19 @@ describe('RewardStateModal', () => {
 		expect(getByText(get(i18n).rewards.text.state_modal_content_text)).toBeInTheDocument();
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 		expect(imageBanner?.src).toContain(rewardReceived);
 
 		const share: HTMLAnchorElement | null = container.querySelector(shareSelector);
+
 		expect(share).toBeInTheDocument();
 		expect(share?.href).toBe(mockedReward.airdropHref);
 	});
 
 	it('should render modal content for jackpot', () => {
 		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
-			(campaign) => campaign.id === 'OISY Airdrop #1'
+			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 		);
 		assertNonNullish(mockedReward);
 
@@ -61,10 +64,12 @@ describe('RewardStateModal', () => {
 		expect(getByText(get(i18n).rewards.text.state_modal_content_text)).toBeInTheDocument();
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
 		expect(imageBanner).toBeInTheDocument();
 		expect(imageBanner?.src).toContain(rewardJackpotReceived);
 
 		const share: HTMLAnchorElement | null = container.querySelector(shareSelector);
+
 		expect(share).toBeInTheDocument();
 		expect(share?.href).toBe(mockedReward.jackpotHref);
 	});

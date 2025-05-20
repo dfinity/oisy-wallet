@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
-	import IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
-	import IcReceiveInfoIcrc from '$icp/components/receive/IcReceiveInfoIcrc.svelte';
-	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
-	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
+	import type IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
+	import type IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
+	import type IcReceiveInfoIcrc from '$icp/components/receive/IcReceiveInfoIcrc.svelte';
+	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
+	import type ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
 	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -38,10 +38,7 @@
 	let copyAriaLabel: string | undefined;
 
 	const displayQRCode = ({ detail }: CustomEvent<ReceiveQRCode>) => {
-		address = detail.address;
-		addressLabel = detail.addressLabel;
-		addressToken = detail.addressToken;
-		copyAriaLabel = detail.copyAriaLabel;
+		({ address, addressLabel, addressToken, copyAriaLabel } = detail);
 		modal.next();
 	};
 
@@ -57,14 +54,14 @@
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose testId={RECEIVE_TOKENS_MODAL}>
 	<svelte:fragment slot="title">
 		{#if currentStep?.name === steps[1].name}
-			<ReceiveTitle {addressToken} />
+			<ReceiveTitle title={addressToken?.network.name} />
 		{:else}
 			{$i18n.receive.text.receive}
 		{/if}</svelte:fragment
 	>
 
 	{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
-		<ReceiveAddressQRCode
+		<ReceiveAddressQrCode
 			on:icBack={displayAddresses}
 			{address}
 			{addressLabel}

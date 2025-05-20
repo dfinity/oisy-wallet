@@ -1,6 +1,6 @@
 import type { EthereumNetwork } from '$eth/types/network';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
-import { ProgressStepsSend } from '$lib/enums/progress-steps';
+import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';

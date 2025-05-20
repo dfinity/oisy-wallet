@@ -20,9 +20,44 @@ import { mapAddress } from '$lib/utils/address.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
+export const btcAddressMainnetNotLoaded: Readable<boolean> = derived(
+	[btcAddressMainnetStore],
+	([$btcAddressMainnetStore]) => isNullish($btcAddressMainnetStore)
+);
+
+export const btcAddressTestnetNotLoaded: Readable<boolean> = derived(
+	[btcAddressTestnetStore],
+	([$btcAddressTestnetStore]) => isNullish($btcAddressTestnetStore)
+);
+
+export const btcAddressRegtestNotLoaded: Readable<boolean> = derived(
+	[btcAddressRegtestStore],
+	([$btcAddressRegtestStore]) => isNullish($btcAddressRegtestStore)
+);
+
 export const ethAddressNotLoaded: Readable<boolean> = derived(
 	[ethAddressStore],
 	([$ethAddressStore]) => isNullish($ethAddressStore)
+);
+
+export const solAddressMainnetNotLoaded: Readable<boolean> = derived(
+	[solAddressMainnetStore],
+	([$solAddressMainnetStore]) => isNullish($solAddressMainnetStore)
+);
+
+export const solAddressTestnetNotLoaded: Readable<boolean> = derived(
+	[solAddressTestnetStore],
+	([$solAddressTestnetStore]) => isNullish($solAddressTestnetStore)
+);
+
+export const solAddressDevnetNotLoaded: Readable<boolean> = derived(
+	[solAddressDevnetStore],
+	([$solAddressDevnetStore]) => isNullish($solAddressDevnetStore)
+);
+
+export const solAddressLocalnetNotLoaded: Readable<boolean> = derived(
+	[solAddressLocalnetStore],
+	([$solAddressLocalnetStore]) => isNullish($solAddressLocalnetStore)
 );
 
 export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(

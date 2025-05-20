@@ -1,4 +1,4 @@
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { token } from '$lib/stores/token.store';
@@ -20,7 +20,7 @@ export const balanceZero: Readable<boolean> = derived(
 		nonNullish($balanceStore) &&
 		nonNullish($token) &&
 		nonNullish($balanceStore?.[$token.id]) &&
-		$balanceStore[$token.id]?.data === ZERO_BI
+		$balanceStore[$token.id]?.data === ZERO
 );
 
 // TODO: Create tests for this store

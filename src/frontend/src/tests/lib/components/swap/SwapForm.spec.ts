@@ -13,20 +13,17 @@ import {
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('SwapForm', () => {
 	const mockContext = new Map();
+
 	const mockSwapAmounts: SwapAmountsStoreData = {
 		amountForSwap: 1,
-		swapAmounts: {
-			slippage: 0,
-			receiveAmount: 2000000n,
-			route: [],
-			liquidityFees: [],
-			networkFee: undefined
-		}
+		swaps: mockSwapProviders,
+		selectedProvider: mockSwapProviders[0]
 	};
 
 	beforeEach(() => {
@@ -49,11 +46,12 @@ describe('SwapForm', () => {
 	const setupSwapAmountsStore = (swapAmounts?: SwapAmountsStoreData) => {
 		const swapAmountsStore = initSwapAmountsStore();
 		if (swapAmounts) {
-			swapAmountsStore.setSwapAmounts(swapAmounts);
+			swapAmountsStore.setSwaps(swapAmounts);
 		}
 		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
 		return swapAmountsStore;
 	};
+
 	const setupIcTokenFeeStore = () => {
 		icTokenFeeStore.setIcTokenFee({
 			tokenSymbol: mockValidIcToken.symbol,
@@ -78,7 +76,7 @@ describe('SwapForm', () => {
 			},
 			{
 				description: 'swap amount exists but receive amount is null',
-				swapAmounts: { amountForSwap: 1, swapAmounts: undefined },
+				swapAmounts: { amountForSwap: 1, swaps: [], selectedProvider: undefined },
 				props: { swapAmount: '1', receiveAmount: undefined },
 				expected: true
 			},
@@ -130,9 +128,9 @@ describe('SwapForm', () => {
 			const [sourceInput, destinationInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 			expect(sourceTokenExchangeValue).toHaveTextContent('$10.00');
-			expect(destinationTokenExchangeValue).toHaveTextContent('$0.04');
+			expect(destinationTokenExchangeValue).toHaveTextContent('$20.00');
 			expect(sourceInput).toHaveValue('1');
-			expect(destinationInput).toHaveValue('0.02');
+			expect(destinationInput).toHaveValue('10');
 		});
 
 		it.each([
@@ -151,16 +149,18 @@ describe('SwapForm', () => {
 				const button = buttons[buttonIndex];
 
 				await fireEvent.click(button);
+
 				expect(sourceTokenExchangeValue).toHaveTextContent(`1 ${mockValidIcToken.symbol}`);
-				expect(destinationTokenExchangeValue).toHaveTextContent(`2 ${mockValidIcCkToken.symbol}`);
+				expect(destinationTokenExchangeValue).toHaveTextContent(`10 ${mockValidIcCkToken.symbol}`);
 				expect(sourceInput).toHaveValue('1');
-				expect(destinationInput).toHaveValue('0.02');
+				expect(destinationInput).toHaveValue('10');
 
 				await fireEvent.click(button);
+
 				expect(sourceTokenExchangeValue).toHaveTextContent('$10.00');
-				expect(destinationTokenExchangeValue).toHaveTextContent('$0.04');
+				expect(destinationTokenExchangeValue).toHaveTextContent('$20.00');
 				expect(sourceInput).toHaveValue('1');
-				expect(destinationInput).toHaveValue('0.02');
+				expect(destinationInput).toHaveValue('10');
 			}
 		);
 	});

@@ -10,15 +10,13 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
-	import SendQrCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -26,7 +24,7 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
+	import type { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -36,7 +34,7 @@
 	import type { OptionSolAddress } from '$lib/types/address';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdSolana,
@@ -45,7 +43,6 @@
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
@@ -62,15 +59,14 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
-	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let network: Network | undefined = undefined;
-	$: network = $sendToken.network;
+	$: ({ network } = $sendToken);
 
 	let networkId: NetworkId | undefined = undefined;
-	$: networkId = $sendToken.network.id;
+	$: ({ id: networkId } = network);
 
 	let source: OptionSolAddress;
 	let solanaNativeToken: Token;
@@ -86,14 +82,17 @@
 	 * Fee context store
 	 */
 
-	let feeStore = initFeeStore();
-	let prioritizationFeeStore = initFeeStore();
-	let ataFeeStore = initFeeStore();
+	const feeStore = initFeeStore();
+	const prioritizationFeeStore = initFeeStore();
+	const ataFeeStore = initFeeStore();
 
-	let feeSymbolStore = writable<string | undefined>(undefined);
+	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(solanaNativeToken.symbol);
 
-	let feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	$: feeTokenIdStore.set(solanaNativeToken.id);
+
+	const feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set(solanaNativeToken.decimals);
 
 	setContext<FeeContextType>(
@@ -103,7 +102,8 @@
 			prioritizationFeeStore,
 			ataFeeStore,
 			feeSymbolStore,
-			feeDecimalsStore
+			feeDecimalsStore,
+			feeTokenIdStore
 		})
 	);
 
@@ -164,12 +164,12 @@
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
 				}),
-				prioritizationFee: $prioritizationFeeStore ?? ZERO_BI,
+				prioritizationFee: $prioritizationFeeStore ?? ZERO,
 				destination,
 				source
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_SUCCESS,
 				metadata: {
 					token: $sendToken.symbol
@@ -178,7 +178,7 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_ERROR,
 				metadata: {
 					token: $sendToken.symbol
@@ -201,41 +201,21 @@
 
 <SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING} {destination}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview
-			on:icBack
-			on:icSend={send}
-			{destination}
-			{amount}
-			{network}
-			source={source ?? ''}
-		/>
+		<SolSendReview on:icBack on:icSend={send} {destination} {amount} {network} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
 		<SolSendForm
 			on:icNext
 			on:icClose
+			on:icTokensList
+			on:icBack
 			bind:destination
 			bind:amount
-			on:icQRCodeScan
 			source={source ?? ''}
 		>
-			<svelte:fragment slot="cancel">
-				{#if formCancelAction === 'back'}
-					<ButtonBack on:click={back} />
-				{:else}
-					<ButtonCancel on:click={close} />
-				{/if}
-			</svelte:fragment>
+			<ButtonBack onclick={back} slot="cancel" />
 		</SolSendForm>
-	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-		<SendQrCodeScan
-			expectedToken={$sendToken}
-			bind:destination
-			bind:amount
-			{decodeQrCode}
-			on:icQRCodeBack
-		/>
 	{:else}
 		<slot />
 	{/if}

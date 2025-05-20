@@ -6,7 +6,6 @@ export type SplTokenAddress = SolAddress;
 export type SplToken = Token & {
 	address: SplTokenAddress;
 	owner: SplTokenAddress;
-	twinToken?: Token;
 };
 
-export type RequiredSplToken = Omit<RequiredToken<SplToken>, 'twinToken'> & { twinToken?: Token };
+export type RequiredSplToken = RequiredToken<SplToken>;

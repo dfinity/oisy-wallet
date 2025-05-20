@@ -12,29 +12,34 @@ import {
 describe('isEthereumUserTokenDisabled', () => {
 	it('should check if default ethereum user token is disabled for token toggle', () => {
 		const token: EthereumUserToken = { ...ETHEREUM_TOKEN, enabled: false };
-		expect(isEthereumTokenToggleDisabled(token)).toBe(true);
+
+		expect(isEthereumTokenToggleDisabled(token)).toBeTruthy();
 	});
 
 	it('should check if custom ethereum user token is disabled for token toggle', () => {
 		const token: EthereumUserToken = { ...ETHEREUM_TOKEN, enabled: false, category: 'custom' };
-		expect(isEthereumTokenToggleDisabled(token)).toBe(false);
+
+		expect(isEthereumTokenToggleDisabled(token)).toBeFalsy();
 	});
 
 	it('should check if default erc20 token is disabled for token toggle', () => {
 		const token: EthereumUserToken = { ...EURC_TOKEN, enabled: false };
-		expect(isEthereumTokenToggleDisabled(token)).toBe(false);
+
+		expect(isEthereumTokenToggleDisabled(token)).toBeFalsy();
 	});
 
 	it('should check if custom erc20 token is disabled for token toggle', () => {
 		const token: EthereumUserToken = { ...WBTC_TOKEN, enabled: false, category: 'custom' };
-		expect(isEthereumTokenToggleDisabled(token)).toBe(false);
+
+		expect(isEthereumTokenToggleDisabled(token)).toBeFalsy();
 	});
 });
 
 describe('isIcrcCustomTokenDisabled', () => {
 	it('should check if icp default token is disabled for token toggle', () => {
 		const token: IcrcCustomToken = { ...ICP_TOKEN, enabled: false };
-		expect(isIcrcTokenToggleDisabled(token)).toBe(true);
+
+		expect(isIcrcTokenToggleDisabled(token)).toBeTruthy();
 	});
 
 	it('should check if custom icp custom token is disabled for token toggle', () => {
@@ -44,12 +49,14 @@ describe('isIcrcCustomTokenDisabled', () => {
 			category: 'custom',
 			ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaadu-cai'
 		};
-		expect(isIcrcTokenToggleDisabled(token)).toBe(false);
+
+		expect(isIcrcTokenToggleDisabled(token)).toBeFalsy();
 	});
 
 	it('should check if icrc default token is disabled for token toggle', () => {
 		const token: IcrcCustomToken = { ...ICP_TOKEN, standard: 'icrc', enabled: false };
-		expect(isIcrcTokenToggleDisabled(token)).toBe(false);
+
+		expect(isIcrcTokenToggleDisabled(token)).toBeFalsy();
 	});
 
 	it('should check if icrc custom token is disabled for token toggle', () => {
@@ -59,6 +66,7 @@ describe('isIcrcCustomTokenDisabled', () => {
 			category: 'custom',
 			enabled: false
 		};
-		expect(isIcrcTokenToggleDisabled(token)).toBe(false);
+
+		expect(isIcrcTokenToggleDisabled(token)).toBeFalsy();
 	});
 });

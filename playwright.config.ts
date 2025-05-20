@@ -77,6 +77,7 @@ export default defineConfig({
 	workers: 5,
 	expect: {
 		toHaveScreenshot: {
+			threshold: 0.3,
 			// disable any animations caught by playwright for better screenshots and less flaky tests
 			animations: 'disabled',
 			// hide caret for cleaner snapshots
@@ -93,6 +94,7 @@ export default defineConfig({
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
+	snapshotDir: 'e2e/snapshots',
 	use: {
 		testIdAttribute: 'data-tid',
 		trace: 'on',

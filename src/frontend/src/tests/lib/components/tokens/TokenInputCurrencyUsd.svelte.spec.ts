@@ -19,6 +19,7 @@ describe('TokenInputCurrencyUsd', () => {
 
 	it('renders in USD mode with $ sign', () => {
 		const { getByTestId } = render(TokenInputCurrencyUsd, defaultProps);
+
 		expect(getByTestId(TOKEN_INPUT_CURRENCY_USD_SYMBOL)).toHaveTextContent('$');
 	});
 
@@ -40,6 +41,7 @@ describe('TokenInputCurrencyUsd', () => {
 		const input = getByTestId(TOKEN_INPUT_CURRENCY_USD);
 
 		await fireEvent.input(input, { target: { value: '' } });
+
 		expect(input).toHaveValue('');
 	});
 
@@ -48,6 +50,7 @@ describe('TokenInputCurrencyUsd', () => {
 		const input = getByTestId(TOKEN_INPUT_CURRENCY_USD);
 
 		await fireEvent.input(input, { target: { value } });
+
 		expect(input).toHaveValue(value);
 	});
 
