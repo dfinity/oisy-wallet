@@ -10,6 +10,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/contact';
+	import { getNetworksForAddressType } from '$lib/utils/address.utils';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
@@ -25,6 +26,7 @@
 	let displayAddress = $derived(
 		showFullAddress ? address.address : shortenWithMiddleEllipsis({ text: address.address })
 	);
+	let networks = $derived(getNetworksForAddressType(address.address_type));
 </script>
 
 <button
@@ -38,6 +40,12 @@
 			<span class="pr-1 text-sm font-bold text-primary md:text-base">
 				{$i18n.address.types[address.addressType]}
 			</span>
+			{#each networks as network, i (network.id)}
+				{#if i > 0}
+					<span class="text-[0.5rem]">•</span>
+				{/if}
+				<span>{network.name}</span>
+			{/each}
 		</div>
 		<div class="flex items-center gap-1">
 			{#if notEmptyString(address.alias)}
