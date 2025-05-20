@@ -3,7 +3,10 @@ import type {
 	AllowSigningResponse,
 	CreateChallengeResponse,
 	CustomToken,
+	DeleteContactResult,
 	GetAllowedCyclesResponse,
+	GetContactResult,
+	GetContactsResult,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -18,9 +21,13 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateContactParams,
+	DeleteContactParams,
+	GetContactParams,
 	GetUserProfileResponse,
 	SaveUserNetworksSettings,
-	SetUserShowTestnetsParams
+	SetUserShowTestnetsParams,
+	UpdateContactParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
@@ -190,6 +197,45 @@ export const updateUserNetworkSettings = async ({
 	const { updateUserNetworkSettings } = await backendCanister({ identity });
 
 	return updateUserNetworkSettings(params);
+};
+
+export const getContact = async ({
+	contactId,
+	identity
+}: CanisterApiFunctionParams<GetContactParams>): Promise<GetContactResult> => {
+	const { getContact } = await backendCanister({ identity });
+	return getContact(contactId);
+};
+
+export const getContacts = async ({
+	identity
+}: CanisterApiFunctionParams<QueryParams>): Promise<GetContactsResult> => {
+	const { getContacts } = await backendCanister({ identity });
+	return getContacts();
+};
+
+export const createContact = async ({
+	name,
+	identity
+}: CanisterApiFunctionParams<CreateContactParams>): Promise<GetContactResult> => {
+	const { createContact } = await backendCanister({ identity });
+	return createContact(name);
+};
+
+export const updateContact = async ({
+	contact,
+	identity
+}: CanisterApiFunctionParams<UpdateContactParams>): Promise<GetContactResult> => {
+	const { updateContact } = await backendCanister({ identity });
+	return updateContact(contact);
+};
+
+export const deleteContact = async ({
+	contactId,
+	identity
+}: CanisterApiFunctionParams<DeleteContactParams>): Promise<DeleteContactResult> => {
+	const { deleteContact } = await backendCanister({ identity });
+	return deleteContact(contactId);
 };
 
 const backendCanister = async ({

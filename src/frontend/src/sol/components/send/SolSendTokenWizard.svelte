@@ -34,7 +34,7 @@
 	import type { OptionSolAddress } from '$lib/types/address';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdSolana,
@@ -82,14 +82,17 @@
 	 * Fee context store
 	 */
 
-	let feeStore = initFeeStore();
-	let prioritizationFeeStore = initFeeStore();
-	let ataFeeStore = initFeeStore();
+	const feeStore = initFeeStore();
+	const prioritizationFeeStore = initFeeStore();
+	const ataFeeStore = initFeeStore();
 
-	let feeSymbolStore = writable<string | undefined>(undefined);
+	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(solanaNativeToken.symbol);
 
-	let feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	$: feeTokenIdStore.set(solanaNativeToken.id);
+
+	const feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set(solanaNativeToken.decimals);
 
 	setContext<FeeContextType>(
@@ -99,7 +102,8 @@
 			prioritizationFeeStore,
 			ataFeeStore,
 			feeSymbolStore,
-			feeDecimalsStore
+			feeDecimalsStore,
+			feeTokenIdStore
 		})
 	);
 

@@ -115,7 +115,8 @@ describe('btc-transactions.derived', () => {
 						value: data.value,
 						token: BTC_MAINNET_TOKEN
 					})),
-					timestamp: maxTimestamp
+					timestamp: maxTimestamp,
+					address: transactions[0].data.to?.[0]
 				}
 			});
 		});

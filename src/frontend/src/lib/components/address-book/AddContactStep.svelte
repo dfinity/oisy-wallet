@@ -13,15 +13,19 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Contact } from '$lib/types/contact';
 
+	interface Props {
+		onAddContact: (contact: Contact) => void;
+		onClose: () => void;
+	}
+
+	let { onAddContact, onClose }: Props = $props();
+
 	let contact: Partial<Contact> = $state({ addresses: [] });
 	let form: ContactForm | undefined = $state();
 
-	let { addContact, close }: { addContact: (contact: Contact) => void; close: () => void } =
-		$props();
-
 	const handleAdd = () => {
 		if (form?.isValid) {
-			addContact(contact as Contact);
+			onAddContact(contact as Contact);
 		}
 	};
 
@@ -37,7 +41,7 @@
 	<ContactForm bind:contact bind:this={form}></ContactForm>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => close()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
+		<ButtonCancel onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
 		<Button
 			colorStyle="primary"
 			on:click={handleAdd}
