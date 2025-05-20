@@ -78,6 +78,7 @@ mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
+mod contact;
 mod guards;
 mod heap_state;
 mod impls;
@@ -898,16 +899,18 @@ pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_allowed")]
-pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactError> {
-    // TODO replace mock data with data from contact service
+#[must_use]
+pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
+    // Convert the request to a Contact
     let contact = Contact {
         id: request.id,
         name: request.name,
         addresses: request.addresses,
-        update_timestamp_ns: time(),
+        update_timestamp_ns: request.update_timestamp_ns,
     };
-
-    Ok(contact)
+    
+    // Use the contact module to update the contact
+    contact::update_contact(contact).into()
 }
 
 /// Deletes a contact for the caller.
