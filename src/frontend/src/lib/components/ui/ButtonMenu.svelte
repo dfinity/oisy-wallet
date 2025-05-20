@@ -25,6 +25,7 @@
 	class:opacity-50={disabled}
 >
 	{@render children?.()}
+
 	{#if nonNullish(tag)}
 		<span class="ml-auto">
 			<Tag variant={tagVariant}>{tag}</Tag>
