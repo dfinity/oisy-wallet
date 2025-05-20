@@ -21,6 +21,7 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
+        account::{EthAddress, TokenAccountId},
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -29,7 +30,7 @@ use shared::{
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
         contact::{
-            Contact, ContactError, CreateContactRequest, UpdateContactRequest,
+            Contact, ContactAddressData, ContactError, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
@@ -57,8 +58,6 @@ use shared::{
         Stats, Timestamp,
     },
 };
-use shared::types::account::{EthAddress, TokenAccountId};
-use shared::types::contact::ContactAddressData;
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
@@ -67,6 +66,7 @@ use types::{
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
+use crate::types::ContactMap;
 use crate::{
     assertions::assert_token_enabled_is_some,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
@@ -74,7 +74,6 @@ use crate::{
     types::PowChallengeMap,
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
-use crate::types::ContactMap;
 
 mod assertions;
 mod bitcoin_api;
@@ -882,36 +881,21 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 ///
 /// # Returns
 /// The created contact on success.
+///
+/// # Test
+/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 #[update(guard = "caller_is_allowed")]
 #[must_use]
 pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
-    let principal = ic_cdk::caller();
+    // TODO replace mock data with contact service that returns Contact
+    let contact = Contact {
+        id: time(),
+        name: request.name,
+        addresses: vec![],
+        update_timestamp_ns: time(),
+    };
 
-    // Initialize the contact state in the contacts module if needed
-    contacts::CONTACT_STATE.with(|cell| {
-        let mut state_ref = cell.borrow_mut();
-        if state_ref.is_none() {
-            mutate_state(|state| {
-                *state_ref = Some(state.contact.clone());
-            });
-        }
-    });
-
-    // Use the contacts module's mutate_state function
-    let result = contacts::mutate_state(|contact_map| {
-        contacts::create_contact(principal, request, contact_map)
-    });
-
-    // Sync back to the main state
-    mutate_state(|state| {
-        contacts::CONTACT_STATE.with(|cell| {
-            if let Some(contact_map) = &*cell.borrow() {
-                state.contact = contact_map.clone();
-            }
-        });
-    });
-
-    result.into()
+    GetContactResult::Ok(contact)
 }
 
 /// Updates an existing contact for the caller.

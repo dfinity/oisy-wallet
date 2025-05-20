@@ -1,19 +1,9 @@
 //! Tests for the rewards canister main entry point.
 use std::path::{Path, PathBuf};
 
-use candid::{Principal};
 use candid_parser::utils::{service_compatible, CandidSource};
-use ic_stable_structures::{
-    memory_manager::{MemoryId, MemoryManager},
-    DefaultMemoryImpl,
-};
-use shared::types::contact::{ContactError, CreateContactRequest};
 
-use crate::{
-    __export_service,
-    contacts::{self, ContactMap},
-    types::{StoredPrincipal},
-};
+use crate::__export_service;
 
 /// Checks candid interface type compatibility with production.
 #[test]
