@@ -103,10 +103,10 @@
 			tag="P"
 		>
 			{#if $isPrivacyMode}
-				<IconEye size="20" />
+				<IconEye />
 				{$i18n.navigation.text.show_balances}
 			{:else}
-				<IconEyeOff size="20" />
+				<IconEyeOff />
 				{$i18n.navigation.text.hide_balances}
 			{/if}
 		</ButtonMenu>
