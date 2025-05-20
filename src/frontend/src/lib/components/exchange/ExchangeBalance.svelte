@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
-	import IconDots from "$lib/components/icons/IconDots.svelte";
 
 	interface Props {
 		hideBalance?: boolean;
