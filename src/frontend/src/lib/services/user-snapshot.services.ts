@@ -122,6 +122,8 @@ const toAnyTransaction = ({
 		return;
 	}
 
+	// in case it's a BTC tx, "to" is an array
+	// TODO: If one day we implement sending BTC to multiple addresses, we'll need to revisit this logic.
 	const counterparty: AccountId_Any = account === from ? (Array.isArray(to) ? to[0] : to) : from;
 
 	return {
