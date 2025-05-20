@@ -3,11 +3,14 @@ use serde::Serialize;
 
 use super::{
     bitcoin::{
-        BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse, SelectedUtxosFeeError,
-        SelectedUtxosFeeResponse,
+        BtcAddPendingTransactionError, BtcGetPendingTransactionsError,
+        BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
+    dapp::AddDappSettingsError,
     pow::{CreateChallengeError, CreateChallengeResponse},
-    signer::{GetAllowedCyclesError, GetAllowedCyclesResponse},
+    signer::{
+        AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
+    },
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
@@ -216,6 +219,54 @@ impl From<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsErro
         match result {
             Ok(response) => BtcGetPendingTransactionsResult::Ok(response),
             Err(err) => BtcGetPendingTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcAddPendingTransactionResult {
+    /// The pending transaction was added successfully.
+    Ok(()),
+    /// The pending transaction was not added due to an error.
+    Err(BtcAddPendingTransactionError),
+}
+impl From<Result<(), BtcAddPendingTransactionError>> for BtcAddPendingTransactionResult {
+    fn from(result: Result<(), BtcAddPendingTransactionError>) -> Self {
+        match result {
+            Ok(()) => BtcAddPendingTransactionResult::Ok(()),
+            Err(err) => BtcAddPendingTransactionResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum AllowSigningResult {
+    /// The signing was allowed successfully.
+    Ok(AllowSigningResponse),
+    /// The signing was not allowed due to an error.
+    Err(AllowSigningError),
+}
+impl From<Result<AllowSigningResponse, AllowSigningError>> for AllowSigningResult {
+    fn from(result: Result<AllowSigningResponse, AllowSigningError>) -> Self {
+        match result {
+            Ok(response) => AllowSigningResult::Ok(response),
+            Err(err) => AllowSigningResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum AddUserHiddenDappIdResult {
+    /// The user's hidden dapp id was added successfully.
+    Ok(()),
+    /// The user's hidden dapp id was not added due to an error.
+    Err(AddDappSettingsError),
+}
+impl From<Result<(), AddDappSettingsError>> for AddUserHiddenDappIdResult {
+    fn from(result: Result<(), AddDappSettingsError>) -> Self {
+        match result {
+            Ok(()) => AddUserHiddenDappIdResult::Ok(()),
+            Err(err) => AddUserHiddenDappIdResult::Err(err),
         }
     }
 }
