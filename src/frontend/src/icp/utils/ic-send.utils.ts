@@ -46,7 +46,7 @@ export const isInvalidDestinationIc = ({
 }: {
 	destination: string;
 	tokenStandard: TokenStandard;
-	networkId?: NetworkId | undefined;
+	networkId?: NetworkId;
 }): boolean => {
 	if (isNullishOrEmpty(destination)) {
 		return false;
