@@ -35,7 +35,7 @@
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 	// TODO: re-set the reactivity (and remove the onMount) when we find out why it is too frequent to request (most probably because the balances store is frequently refreshed and the minter info store too).
-	// tslint-disable-next-line @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionEthAddress }) => {
 		if (isNullish(token)) {
 			return;
