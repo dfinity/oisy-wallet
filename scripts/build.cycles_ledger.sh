@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euox pipefail
 
 print_help() {
   cat <<-EOF
@@ -25,7 +25,7 @@ CANDID_URL="https://github.com/dfinity/cycles-ledger/releases/download/cycles-le
 WASM_URL="https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-${LEDGER_RELEASE}/cycles-ledger.wasm.gz"
 
 CANDID_FILE="$(jq -r .canisters.cycles_ledger.candid dfx.json)"
-WASM_FILE="$(jq -r .canisters.cycles_dledger.wasm dfx.json)"
+WASM_FILE="$(jq -r .canisters.cycles_ledger.wasm dfx.json)"
 ARG_FILE="$(jq -r .canisters.cycles_ledger.init_arg_file dfx.json)"
 
 ####
