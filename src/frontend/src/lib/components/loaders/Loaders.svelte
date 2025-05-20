@@ -10,12 +10,14 @@
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
+	import ShortcutGuard from "$lib/components/guard/ShortcutGuard.svelte";
 </script>
 
 <LoaderUserProfile>
 	<AddressGuard>
 		<Loader>
 			<UrlGuard>
+				<ShortcutGuard>
 				<RewardGuard>
 					<LoaderEthBalances>
 						<LoaderWallets>
@@ -29,6 +31,7 @@
 						</LoaderWallets>
 					</LoaderEthBalances>
 				</RewardGuard>
+				</ShortcutGuard>
 			</UrlGuard>
 		</Loader>
 	</AddressGuard>
