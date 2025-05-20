@@ -1,7 +1,20 @@
 use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
-use crate::types::user_profile::AddUserCredentialError;
+use super::{
+    bitcoin::{
+        BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse, SelectedUtxosFeeError,
+        SelectedUtxosFeeResponse,
+    },
+    pow::{CreateChallengeError, CreateChallengeResponse},
+    signer::{GetAllowedCyclesError, GetAllowedCyclesResponse},
+    user_profile::{GetUserProfileError, UserProfile},
+};
+use crate::types::{
+    contact::{Contact, ContactError},
+    network::SaveTestnetsSettingsError,
+    user_profile::AddUserCredentialError,
+};
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum AddUserCredentialResult {
@@ -35,6 +48,174 @@ impl From<Result<(), AddUserCredentialError>> for AddUserCredentialResult {
         match result {
             Ok(()) => AddUserCredentialResult::Ok(()),
             Err(err) => AddUserCredentialResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetContactResult {
+    /// The contact was created successfully.
+    Ok(Contact),
+    /// The contact was not created due to an error.
+    Err(ContactError),
+}
+impl GetContactResult {
+    #[must_use]
+    pub fn is_err(&self) -> bool {
+        matches!(self, Self::Err(_))
+    }
+
+    /// Returns the contained `ContactError` if the result is an `Err`.
+    ///
+    /// # Panics
+    /// - If the result is `Ok`.
+    #[must_use]
+    pub fn unwrap_err(self) -> ContactError {
+        match self {
+            Self::Err(err) => err,
+            Self::Ok(_) => {
+                panic!("Called `CreateContactResult.unwrap_err()` on an `Ok` value")
+            }
+        }
+    }
+}
+impl From<Result<Contact, ContactError>> for GetContactResult {
+    fn from(result: Result<Contact, ContactError>) -> Self {
+        match result {
+            Ok(contact) => GetContactResult::Ok(contact),
+            Err(err) => GetContactResult::Err(err),
+        }
+    }
+}
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum DeleteContactResult {
+    /// The contact was deleted successfully.
+    Ok(u64),
+    /// The contact was not deleted due to an error.
+    Err(ContactError),
+}
+impl From<Result<u64, ContactError>> for DeleteContactResult {
+    fn from(result: Result<u64, ContactError>) -> Self {
+        match result {
+            Ok(id) => DeleteContactResult::Ok(id),
+            Err(err) => DeleteContactResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetContactsResult {
+    /// The contacts were retrieved successfully.
+    Ok(Vec<Contact>),
+    /// The contacts were not retrieved due to an error.
+    Err(ContactError),
+}
+impl From<Result<Vec<Contact>, ContactError>> for GetContactsResult {
+    fn from(result: Result<Vec<Contact>, ContactError>) -> Self {
+        match result {
+            Ok(contacts) => GetContactsResult::Ok(contacts),
+            Err(err) => GetContactsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SetUserShowTestnetsResult {
+    /// The user's show testnets was set successfully.
+    Ok(()),
+    /// The user's show testnets was not set due to an error.
+    Err(SaveTestnetsSettingsError),
+}
+
+impl From<Result<(), SaveTestnetsSettingsError>> for SetUserShowTestnetsResult {
+    fn from(result: Result<(), SaveTestnetsSettingsError>) -> Self {
+        match result {
+            Ok(()) => SetUserShowTestnetsResult::Ok(()),
+            Err(err) => SetUserShowTestnetsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetUserProfileResult {
+    /// The user's profile was retrieved successfully.
+    Ok(UserProfile),
+    /// The user's profile was not retrieved due to an error.
+    Err(GetUserProfileError),
+}
+impl From<Result<UserProfile, GetUserProfileError>> for GetUserProfileResult {
+    fn from(result: Result<UserProfile, GetUserProfileError>) -> Self {
+        match result {
+            Ok(profile) => GetUserProfileResult::Ok(profile),
+            Err(err) => GetUserProfileResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetAllowedCyclesResult {
+    /// The allowed cycles were retrieved successfully.
+    Ok(GetAllowedCyclesResponse),
+    /// The allowed cycles were not retrieved due to an error.
+    Err(GetAllowedCyclesError),
+}
+impl From<Result<GetAllowedCyclesResponse, GetAllowedCyclesError>> for GetAllowedCyclesResult {
+    fn from(result: Result<GetAllowedCyclesResponse, GetAllowedCyclesError>) -> Self {
+        match result {
+            Ok(response) => GetAllowedCyclesResult::Ok(response),
+            Err(err) => GetAllowedCyclesResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreatePowChallengeResult {
+    /// The pow challenge was created successfully.
+    Ok(CreateChallengeResponse),
+    /// The pow challenge was not created due to an error.
+    Err(CreateChallengeError),
+}
+impl From<Result<CreateChallengeResponse, CreateChallengeError>> for CreatePowChallengeResult {
+    fn from(result: Result<CreateChallengeResponse, CreateChallengeError>) -> Self {
+        match result {
+            Ok(response) => CreatePowChallengeResult::Ok(response),
+            Err(err) => CreatePowChallengeResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcSelectUserUtxosFeeResult {
+    /// The fee was selected successfully.
+    Ok(SelectedUtxosFeeResponse),
+    /// The fee was not selected due to an error.
+    Err(SelectedUtxosFeeError),
+}
+impl From<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>> for BtcSelectUserUtxosFeeResult {
+    fn from(result: Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>) -> Self {
+        match result {
+            Ok(response) => BtcSelectUserUtxosFeeResult::Ok(response),
+            Err(err) => BtcSelectUserUtxosFeeResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcGetPendingTransactionsResult {
+    /// The pending transactions were retrieved successfully.
+    Ok(BtcGetPendingTransactionsReponse),
+    /// The pending transactions were not retrieved due to an error.
+    Err(BtcGetPendingTransactionsError),
+}
+impl From<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError>>
+    for BtcGetPendingTransactionsResult
+{
+    fn from(
+        result: Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError>,
+    ) -> Self {
+        match result {
+            Ok(response) => BtcGetPendingTransactionsResult::Ok(response),
+            Err(err) => BtcGetPendingTransactionsResult::Err(err),
         }
     }
 }
