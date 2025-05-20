@@ -1,21 +1,26 @@
 import type {
-	AccountSnapshot_Icrc,
-	AccountSnapshot_Spl,
-	Transaction_Icrc,
-	Transaction_Spl,
+	AccountSnapshot_Any,
+	Transaction_Any,
 	UserSnapshot
 } from '$declarations/rewards/rewards.did';
-import * as ethEnv from '$env/networks/networks.eth.env';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { ETH_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.eth.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
-import { NANO_SECONDS_IN_MILLISECOND, ZERO } from '$lib/constants/app.constants';
+import {
+	NANO_SECONDS_IN_MILLISECOND,
+	NANO_SECONDS_IN_SECOND,
+	ZERO
+} from '$lib/constants/app.constants';
 import * as addressStore from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
@@ -64,63 +69,83 @@ describe('user-snapshot.services', () => {
 		const tokens: Token[] = [
 			...mockTokens,
 			mockValidIcToken,
+			mockIcrcTestnetToken,
 			mockValidErc20Token,
 			SOLANA_TOKEN,
-			mockValidSplToken,
-			mockIcrcTestnetToken
+			mockValidSplToken
 		];
 
 		const mockIcAmount = 123456n;
-		const mockSplAmount = 987654n;
+		const mockSolAmount = 987654n;
+		const mockEthAmount = mockIcAmount + mockSolAmount;
 
 		const mockIcTransactions: IcTransactionUi[] = createMockIcTransactionsUi(7).map((tx) => ({
 			...tx,
 			from: mockPrincipalText
 		}));
 
-		const icrcAccounts: ({ Icrc: AccountSnapshot_Icrc } | { SplMainnet: AccountSnapshot_Spl })[] = [
+		const icpAccount: { Any: AccountSnapshot_Any }[] = [
 			{
-				Icrc: {
+				Any: {
 					decimals: ICP_TOKEN.decimals,
 					approx_usd_per_token: 1,
 					amount: mockIcAmount * 2n,
 					timestamp: nowNanoseconds,
-					network: {},
-					account: mockIdentity.getPrincipal(),
-					token_address: Principal.from(ICP_TOKEN.ledgerCanisterId),
+					network: {
+						testnet_for: toNullable(),
+						network_id: ICP_NETWORK_ID.description!
+					},
+					account: mockIdentity.getPrincipal().toString(),
+					token_address: { token_symbol: ICP_TOKEN_ID.description!, wraps: toNullable() },
 					last_transactions: mockIcTransactions.slice(0, 5).map(
-						({ value, timestamp }: IcTransactionUi): Transaction_Icrc => ({
+						({ value, timestamp, to }: IcTransactionUi): Transaction_Any => ({
 							transaction_type: { Send: null },
-							timestamp: timestamp ?? ZERO,
+							timestamp: BigInt(
+								normalizeTimestampToSeconds(timestamp ?? ZERO) * Number(NANO_SECONDS_IN_SECOND)
+							),
 							amount: value ?? ZERO,
-							network: {},
-							counterparty: Principal.anonymous()
+							network: {
+								testnet_for: toNullable(),
+								network_id: ICP_NETWORK_ID.description!
+							},
+							counterparty: to ?? Principal.anonymous().toString()
 						})
 					)
 				}
-			},
-			// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
+			}
+		];
+
+		const icrcAccounts: { Any: AccountSnapshot_Any }[] = [
 			{
-				SplMainnet: {
-					decimals: ETHEREUM_TOKEN.decimals,
-					approx_usd_per_token: mockTokens.length,
-					amount: mockIcAmount + mockSplAmount,
-					timestamp: nowNanoseconds,
-					network: {},
-					account: mockEthAddress,
-					token_address: ETHEREUM_TOKEN.symbol.padStart(43, '0'),
-					last_transactions: []
-				}
-			},
-			{
-				Icrc: {
+				Any: {
 					decimals: mockValidIcToken.decimals,
 					approx_usd_per_token: mockTokens.length + 1,
 					amount: mockIcAmount,
 					timestamp: nowNanoseconds,
-					network: {},
-					account: mockIdentity.getPrincipal(),
-					token_address: Principal.from(mockValidIcToken.ledgerCanisterId),
+					network: {
+						testnet_for: toNullable(),
+						network_id: ICP_NETWORK_ID.description!
+					},
+					account: mockIdentity.getPrincipal().toString(),
+					token_address: { token_symbol: mockValidIcToken.id.description!, wraps: toNullable() },
+					last_transactions: []
+				}
+			},
+			{
+				Any: {
+					decimals: mockIcrcTestnetToken.decimals,
+					approx_usd_per_token: mockTokens.length + 2,
+					amount: mockIcAmount * 10n,
+					timestamp: nowNanoseconds,
+					network: {
+						testnet_for: toNullable('true'),
+						network_id: ICP_NETWORK_ID.description!
+					},
+					account: mockIdentity.getPrincipal().toString(),
+					token_address: {
+						token_symbol: mockIcrcTestnetToken.id.description!,
+						wraps: toNullable()
+					},
 					last_transactions: []
 				}
 			}
@@ -131,34 +156,45 @@ describe('user-snapshot.services', () => {
 			from: mockSolAddress
 		}));
 
-		const splMainnetAccounts: { SplMainnet: AccountSnapshot_Spl }[] = [
+		const solMainnetAccounts: { Any: AccountSnapshot_Any }[] = [
 			{
-				SplMainnet: {
+				Any: {
 					decimals: SOLANA_TOKEN.decimals,
-					approx_usd_per_token: mockTokens.length + 3,
-					amount: mockSplAmount * 5n,
+					approx_usd_per_token: mockTokens.length + 4,
+					amount: mockSolAmount * 5n,
 					timestamp: nowNanoseconds,
-					network: {},
+					network: {
+						testnet_for: toNullable(),
+						network_id: SOLANA_MAINNET_NETWORK_ID.description!
+					},
 					account: mockSolAddress,
-					token_address: 'So11111111111111111111111111111111111111111',
+					token_address: { token_symbol: SOLANA_TOKEN_ID.description!, wraps: toNullable() },
 					last_transactions: []
 				}
 			},
 			{
-				SplMainnet: {
+				Any: {
 					decimals: mockValidSplToken.decimals,
-					approx_usd_per_token: mockTokens.length + 4,
-					amount: mockSplAmount,
+					approx_usd_per_token: mockTokens.length + 5,
+					amount: mockSolAmount,
 					timestamp: nowNanoseconds,
-					network: {},
+					network: {
+						testnet_for: toNullable(),
+						network_id: SOLANA_MAINNET_NETWORK_ID.description!
+					},
 					account: mockSolAddress,
-					token_address: mockValidSplToken.address,
+					token_address: { token_symbol: mockValidSplToken.id.description!, wraps: toNullable() },
 					last_transactions: mockSolTransactions.slice(0, 5).map(
-						({ value, timestamp, to }: SolTransactionUi): Transaction_Spl => ({
+						({ value, timestamp, to }: SolTransactionUi): Transaction_Any => ({
 							transaction_type: { Send: null },
-							timestamp: (timestamp ?? ZERO) * NANO_SECONDS_IN_MILLISECOND,
+							timestamp: BigInt(
+								normalizeTimestampToSeconds(timestamp ?? ZERO) * Number(NANO_SECONDS_IN_SECOND)
+							),
 							amount: value ?? ZERO,
-							network: {},
+							network: {
+								testnet_for: toNullable(),
+								network_id: SOLANA_MAINNET_NETWORK_ID.description!
+							},
 							counterparty: to ?? ''
 						})
 					)
@@ -166,8 +202,34 @@ describe('user-snapshot.services', () => {
 			}
 		];
 
+		const ethMainnetAccounts: { Any: AccountSnapshot_Any }[] = [
+			{
+				Any: {
+					decimals: ETHEREUM_TOKEN.decimals,
+					approx_usd_per_token: mockTokens.length,
+					amount: mockEthAmount,
+					timestamp: nowNanoseconds,
+					network: {
+						testnet_for: toNullable(),
+						network_id: ETHEREUM_NETWORK_ID.description!
+					},
+					account: mockEthAddress,
+					token_address: {
+						token_symbol: ETHEREUM_TOKEN_ID.description!,
+						wraps: toNullable(ETH_TOKEN_GROUP_ID.description)
+					},
+					last_transactions: []
+				}
+			}
+		];
+
 		const userSnapshot: UserSnapshot = {
-			accounts: [...icrcAccounts, ...splMainnetAccounts],
+			accounts: [
+				...icpAccount,
+				...ethMainnetAccounts,
+				...icrcAccounts.slice(0, 1),
+				...solMainnetAccounts
+			],
 			timestamp: toNullable(nowNanoseconds)
 		};
 
@@ -196,12 +258,6 @@ describe('user-snapshot.services', () => {
 			vi.spyOn(addressStore, 'solAddressMainnet', 'get').mockImplementation(() =>
 				readable(mockSolAddress)
 			);
-			// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
-			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORK_IDS', 'get').mockImplementation(() => [
-				ETHEREUM_NETWORK_ID,
-				SEPOLIA_NETWORK_ID
-			]);
 			vi.spyOn(addressStore, 'ethAddress', 'get').mockImplementation(() =>
 				readable(mockEthAddress)
 			);
@@ -218,11 +274,11 @@ describe('user-snapshot.services', () => {
 			});
 			balancesStore.set({
 				id: ETHEREUM_TOKEN.id,
-				data: { data: mockIcAmount + mockSplAmount, certified }
+				data: { data: mockEthAmount, certified }
 			});
 			balancesStore.set({
 				id: SOLANA_TOKEN.id,
-				data: { data: mockSplAmount * 5n, certified }
+				data: { data: mockSolAmount * 5n, certified }
 			});
 			balancesStore.set({
 				id: mockValidIcToken.id,
@@ -230,7 +286,7 @@ describe('user-snapshot.services', () => {
 			});
 			balancesStore.set({
 				id: mockValidSplToken.id,
-				data: { data: mockSplAmount, certified }
+				data: { data: mockSolAmount, certified }
 			});
 
 			icTransactionsStore.prepend({
@@ -304,11 +360,16 @@ describe('user-snapshot.services', () => {
 			});
 		});
 
-		it('should not include ICRC testnet tokens', async () => {
+		it('should include ICRC testnet tokens', async () => {
 			balancesStore.set({
 				id: mockIcrcTestnetToken.id,
-				data: { data: 987n, certified }
+				data: { data: mockIcAmount * 10n, certified }
 			});
+
+			const userSnapshot: UserSnapshot = {
+				accounts: [...icpAccount, ...ethMainnetAccounts, ...icrcAccounts, ...solMainnetAccounts],
+				timestamp: toNullable(nowNanoseconds)
+			};
 
 			await registerUserSnapshot();
 
@@ -320,7 +381,7 @@ describe('user-snapshot.services', () => {
 
 		it('should not include tokens with zero balance', async () => {
 			balancesStore.set({
-				id: mockValidIcToken.id,
+				id: mockIcrcTestnetToken.id,
 				data: { data: ZERO, certified }
 			});
 			balancesStore.set({
@@ -333,7 +394,7 @@ describe('user-snapshot.services', () => {
 			expect(registerAirdropRecipient).toHaveBeenCalledWith({
 				userSnapshot: {
 					...userSnapshot,
-					accounts: [...icrcAccounts.slice(0, 1), ...splMainnetAccounts]
+					accounts: [...icpAccount, ...icrcAccounts.slice(0, 1), ...solMainnetAccounts]
 				},
 				identity: mockIdentity
 			});
