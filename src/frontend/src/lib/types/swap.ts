@@ -5,7 +5,7 @@ import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
 import type { OptionIdentity } from './identity';
-import type { Amount } from './send';
+import type { Amount, OptionAmount } from './send';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
@@ -101,4 +101,10 @@ export interface SwapParams {
 	slippageValue: Amount;
 	sourceTokenFee: bigint;
 	isSourceTokenIcrc2: boolean;
+}
+
+export interface FormatSlippageParams {
+	slippageValue: OptionAmount;
+	receiveAmount: bigint;
+	decimals: number;
 }
