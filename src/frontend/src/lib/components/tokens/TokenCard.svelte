@@ -8,6 +8,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import {isPrivacyMode} from "$lib/derived/settings.derived";
+	import IconDots from "$lib/components/icons/IconDots.svelte";
 
 	let {
 		data,
@@ -58,7 +60,11 @@
 		</span>
 
 		<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap" slot="title-end">
-			<TokenBalance {data} />
+			<TokenBalance {data} hideBalance={$isPrivacyMode}>
+				{#snippet privacyBalance()}
+					<IconDots variant={asNetwork ? 'sm' : 'md'} styleClass={asNetwork ? 'my-4.25' : 'pb-4'} />
+				{/snippet}
+			</TokenBalance>
 		</span>
 
 		<span class:text-sm={asNetwork} slot="description">
@@ -75,7 +81,9 @@
 		</span>
 
 		<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap" slot="description-end">
-			<ExchangeTokenValue {data} />
+			{#if !$isPrivacyMode}
+				<ExchangeTokenValue {data} />
+			{/if}
 		</span>
 	</LogoButton>
 </div>
