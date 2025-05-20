@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish, isEmptyString, fromNullishNullable, debounce } from '@dfinity/utils';
 	import type { TransactionResponse } from 'ethers/providers';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
