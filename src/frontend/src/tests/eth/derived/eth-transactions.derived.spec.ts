@@ -48,7 +48,8 @@ describe('eth-transactions.derived', () => {
 			expect(get(ethKnownDestinations)).toEqual({
 				[transactions[0].to as string]: {
 					amounts: transactions.map(({ value }) => ({ value, token: ETHEREUM_TOKEN })),
-					timestamp: Number(transactions[0].timestamp)
+					timestamp: Number(transactions[0].timestamp),
+					address: transactions[0].to
 				}
 			});
 		});
