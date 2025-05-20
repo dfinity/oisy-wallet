@@ -2,7 +2,7 @@ import { getTransactions } from '$icp/api/icrc-index-ng.api';
 import { balance } from '$icp/api/icrc-ledger.api';
 import type { IndexCanisterIdText, LedgerCanisterIdText } from '$icp/types/canister';
 import type { Identity } from '@dfinity/agent';
-import { type QueryParams } from '@dfinity/utils';
+import type { QueryParams } from '@dfinity/utils';
 
 /**
  * This function checks whether the Index canister is not in a "sleepy" state (not syncing new blocks from the Ledger canister).

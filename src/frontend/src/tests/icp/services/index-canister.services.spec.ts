@@ -58,7 +58,7 @@ describe('index-canister.services', () => {
 
 			const result = await isIndexCanisterAwake(mockParams);
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 
 			expect(balance).not.toHaveBeenCalled();
 		});
@@ -71,7 +71,7 @@ describe('index-canister.services', () => {
 
 			const result = await isIndexCanisterAwake(mockParams);
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 
 			expect(balance).not.toHaveBeenCalled();
 		});
@@ -84,7 +84,7 @@ describe('index-canister.services', () => {
 
 			const result = await isIndexCanisterAwake(mockParams);
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 
 			expect(balance).not.toHaveBeenCalled();
 		});
@@ -118,7 +118,7 @@ describe('index-canister.services', () => {
 
 			const result = await isIndexCanisterAwake(mockParams);
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 		});
 
 		it('should return true if Index canister balance equals Ledger canister balance', async () => {
@@ -127,7 +127,7 @@ describe('index-canister.services', () => {
 
 			const result = await isIndexCanisterAwake(mockParams);
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 		});
 
 		it('should call `getTransactions` again if Index canister balance or transactions do not change after an interval of time', async () => {
@@ -175,7 +175,7 @@ describe('index-canister.services', () => {
 
 			const result = await promise;
 
-			expect(result).toBe(true);
+			expect(result).toBeTruthy();
 
 			vi.useRealTimers();
 		});
@@ -194,7 +194,7 @@ describe('index-canister.services', () => {
 
 			const result = await promise;
 
-			expect(result).toBe(false);
+			expect(result).toBeFalsy();
 
 			vi.useRealTimers();
 		});
