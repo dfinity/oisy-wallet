@@ -7,7 +7,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
-	let explorerUrl: string | undefined = notEmptyString($ethAddress)
+	let explorerUrl: string | undefined;
+	$: explorerUrl = notEmptyString($ethAddress)
 		? `${$explorerUrlStore}/address/${$ethAddress}`
 		: undefined;
 </script>

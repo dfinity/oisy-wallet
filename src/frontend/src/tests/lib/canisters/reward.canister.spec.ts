@@ -1,4 +1,7 @@
 import type {
+	ClaimVipRewardResponse,
+	ClaimedVipReward,
+	EligibilityResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
@@ -8,7 +11,7 @@ import type {
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import type { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
@@ -29,10 +32,132 @@ describe('reward.canister', () => {
 		certified: false
 	};
 
+	describe('isEligible', () => {
+		it('should return new eligibility report', async () => {
+			const mockEligibilityResponse: EligibilityResponse = { Ok: { campaigns: [] } };
+			service.eligible.mockResolvedValue(mockEligibilityResponse);
+
+			const { isEligible } = await createRewardCanister({
+				serviceOverride: service
+			});
+
+			const eligibilityReport = await isEligible(queryParams);
+
+			expect(service.eligible).toHaveBeenCalledWith([]);
+			expect(eligibilityReport).toEqual(mockEligibilityResponse.Ok);
+		});
+
+		it('should throw an error if eligible throws', async () => {
+			service.eligible.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { isEligible } = await createRewardCanister({
+				serviceOverride: service
+			});
+
+			const result = isEligible(queryParams);
+
+			await expect(result).rejects.toThrow(mockResponseError);
+		});
+	});
+
 	describe('getUserInfo', () => {
-		it('returns true if user is vip', async () => {
+		describe('VIP', () => {
+			it('returns true if user is vip', async () => {
+				const mockedUserData: UserData = {
+					is_vip: [true],
+					superpowers: toNullable(['vip']),
+					airdrops: [],
+					usage_awards: [],
+					last_snapshot_timestamp: [BigInt(Date.now())],
+					sprinkles: []
+				};
+				service.user_info.mockResolvedValue(mockedUserData);
+
+				const { getUserInfo } = await createRewardCanister({
+					serviceOverride: service
+				});
+
+				const userData = await getUserInfo(queryParams);
+
+				expect(service.user_info).toHaveBeenCalledWith();
+				expect(userData.superpowers[0]?.length).toBe(1);
+				expect(fromNullable(userData.superpowers)?.includes('vip') === true).toBeTruthy();
+			});
+
+			it('returns false if user is not vip', async () => {
+				const mockedUserData: UserData = {
+					is_vip: [false],
+					superpowers: [],
+					airdrops: [],
+					usage_awards: [],
+					last_snapshot_timestamp: [BigInt(Date.now())],
+					sprinkles: []
+				};
+				service.user_info.mockResolvedValue(mockedUserData);
+
+				const { getUserInfo } = await createRewardCanister({
+					serviceOverride: service
+				});
+
+				const userData = await getUserInfo(queryParams);
+
+				expect(userData.superpowers).toHaveLength(0);
+				expect(fromNullable(userData.superpowers)?.includes('vip') === true).toBeFalsy();
+			});
+		});
+
+		describe('Gold', () => {
+			it('returns true if user is gold user', async () => {
+				const mockedUserData: UserData = {
+					is_vip: [true],
+					superpowers: toNullable(['gold']),
+					airdrops: [],
+					usage_awards: [],
+					last_snapshot_timestamp: [BigInt(Date.now())],
+					sprinkles: []
+				};
+				service.user_info.mockResolvedValue(mockedUserData);
+
+				const { getUserInfo } = await createRewardCanister({
+					serviceOverride: service
+				});
+
+				const userData = await getUserInfo(queryParams);
+
+				expect(service.user_info).toHaveBeenCalledWith();
+				expect(userData.superpowers[0]?.length).toBe(1);
+				expect(fromNullable(userData.superpowers)?.includes('gold') === true).toBeTruthy();
+			});
+
+			it('returns false if user is not gold user', async () => {
+				const mockedUserData: UserData = {
+					is_vip: [false],
+					superpowers: [],
+					airdrops: [],
+					usage_awards: [],
+					last_snapshot_timestamp: [BigInt(Date.now())],
+					sprinkles: []
+				};
+				service.user_info.mockResolvedValue(mockedUserData);
+
+				const { getUserInfo } = await createRewardCanister({
+					serviceOverride: service
+				});
+
+				const userData = await getUserInfo(queryParams);
+
+				expect(userData.superpowers).toHaveLength(0);
+				expect(fromNullable(userData.superpowers)?.includes('gold') === true).toBeFalsy();
+			});
+		});
+
+		it('returns true if user is vip and gold user', async () => {
 			const mockedUserData: UserData = {
 				is_vip: [true],
+				superpowers: toNullable(['vip', 'gold']),
 				airdrops: [],
 				usage_awards: [],
 				last_snapshot_timestamp: [BigInt(Date.now())],
@@ -47,28 +172,9 @@ describe('reward.canister', () => {
 			const userData = await getUserInfo(queryParams);
 
 			expect(service.user_info).toHaveBeenCalledWith();
-			expect(userData.is_vip.length).toBe(1);
-			expect(fromNullable(userData.is_vip) === true).toBeTruthy();
-		});
-
-		it('returns false if user is not vip', async () => {
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				airdrops: [],
-				usage_awards: [],
-				last_snapshot_timestamp: [BigInt(Date.now())],
-				sprinkles: []
-			};
-			service.user_info.mockResolvedValue(mockedUserData);
-
-			const { getUserInfo } = await createRewardCanister({
-				serviceOverride: service
-			});
-
-			const userData = await getUserInfo(queryParams);
-
-			expect(userData.is_vip.length).toBe(1);
-			expect(fromNullable(userData.is_vip) === true).toBeFalsy();
+			expect(userData.superpowers[0]?.length).toBe(2);
+			expect(fromNullable(userData.superpowers)?.includes('vip') === true).toBeTruthy();
+			expect(fromNullable(userData.superpowers)?.includes('gold') === true).toBeTruthy();
 		});
 
 		it('should throw an error if user_info throws', async () => {
@@ -100,9 +206,10 @@ describe('reward.canister', () => {
 				serviceOverride: service
 			});
 
-			const vipRewardResponse = await getNewVipReward();
+			const rewardType: ClaimedVipReward = { campaign_id: 'vip' };
+			const vipRewardResponse = await getNewVipReward(rewardType);
 
-			expect(service.new_vip_reward).toHaveBeenCalledWith();
+			expect(service.new_vip_reward).toHaveBeenCalledWith(toNullable(rewardType));
 			expect(vipRewardResponse).toEqual(mockedRewardResponse);
 		});
 
@@ -116,7 +223,7 @@ describe('reward.canister', () => {
 				serviceOverride: service
 			});
 
-			const result = getNewVipReward();
+			const result = getNewVipReward({ campaign_id: 'vip' });
 
 			await expect(result).rejects.toThrow(mockResponseError);
 		});
@@ -124,7 +231,10 @@ describe('reward.canister', () => {
 
 	describe('claimVipReward', () => {
 		it('should be possible to claim a vip reward', async () => {
-			const mockedClaimResponse = { Success: null };
+			const mockedClaimResponse: [ClaimVipRewardResponse, [] | [ClaimedVipReward]] = [
+				{ Success: null },
+				[{ campaign_id: 'vip' }]
+			];
 			service.claim_vip_reward.mockResolvedValue(mockedClaimResponse);
 
 			const { claimVipReward } = await createRewardCanister({
@@ -135,7 +245,10 @@ describe('reward.canister', () => {
 			const claimResponse = await claimVipReward(vipReward);
 
 			expect(service.claim_vip_reward).toHaveBeenCalledWith(vipReward);
-			expect(claimResponse).toEqual(mockedClaimResponse);
+			expect(claimResponse).toEqual({
+				claimRewardResponse: { Success: null },
+				claimedVipReward: { campaign_id: 'vip' }
+			});
 		});
 
 		it('should throw an error if claim_vip_reward throws', async () => {

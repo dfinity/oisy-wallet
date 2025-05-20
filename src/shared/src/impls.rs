@@ -1,31 +1,57 @@
 use std::{collections::BTreeMap, fmt};
 
-use candid::{Deserialize, Principal};
+use candid::{Deserialize, Error, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use serde::{de, Deserializer};
-#[cfg(test)]
-use strum::IntoEnumIterator;
 
 use crate::{
     types::{
         backend_config::{Config, InitArg},
+        contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
-        dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
-        migration::{ApiEnabled, Migration, MigrationProgress, MigrationReport},
+        dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
             NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
             SaveTestnetsSettingsError,
         },
         settings::Settings,
-        token::UserToken,
+        token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
         user_profile::{
             AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
         verifiable_credential::CredentialType,
-        Timestamp, TokenVersion, Version,
+        Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
     },
     validate::{validate_on_deserialize, Validate},
 };
+
+// Constants for validation limits
+const CONTACT_MAX_NAME_LENGTH: usize = 100;
+const CONTACT_MAX_ADDRESSES: usize = 40;
+const CONTACT_MAX_LABEL_LENGTH: usize = 50;
+
+// Helper functions for validation
+fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> Result<(), Error> {
+    if value.chars().count() > max_length {
+        return Err(Error::msg(format!(
+            "{field_name} too long, max allowed is {max_length} characters"
+        )));
+    }
+    Ok(())
+}
+
+fn validate_collection_size<T>(
+    collection: &[T],
+    max_size: usize,
+    collection_name: &str,
+) -> Result<(), Error> {
+    if collection.len() > max_size {
+        return Err(Error::msg(format!(
+            "Too many {collection_name}, max allowed is {max_size}"
+        )));
+    }
+    Ok(())
+}
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -70,7 +96,6 @@ impl From<InitArg> for Config {
             allowed_callers,
             supported_credentials,
             ic_root_key_der,
-            api,
             cfs_canister_id,
             derivation_origin,
         } = arg;
@@ -86,7 +111,6 @@ impl From<InitArg> for Config {
             cfs_canister_id,
             supported_credentials,
             ic_root_key_raw: Some(ic_root_key_raw),
-            api,
             derivation_origin,
         }
     }
@@ -287,6 +311,10 @@ impl StoredUserProfile {
         let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
         let mut new_hidden_dapp_ids = new_dapp_carousel_settings.hidden_dapp_ids.clone();
 
+        if new_hidden_dapp_ids.len() == MAX_DAPP_ID_LIST_LENGTH {
+            return Err(AddDappSettingsError::MaxHiddenDappIds);
+        }
+
         new_hidden_dapp_ids.push(dapp_id);
         new_dapp_carousel_settings.hidden_dapp_ids = new_hidden_dapp_ids;
         new_dapp_settings.dapp_carousel = new_dapp_carousel_settings;
@@ -327,103 +355,6 @@ impl OisyUser {
             updated_timestamp: user.updated_timestamp,
         }
     }
-}
-
-impl From<&Migration> for MigrationReport {
-    fn from(migration: &Migration) -> Self {
-        MigrationReport {
-            to: migration.to,
-            progress: migration.progress,
-        }
-    }
-}
-
-impl Default for ApiEnabled {
-    fn default() -> Self {
-        Self::Enabled
-    }
-}
-impl ApiEnabled {
-    #[must_use]
-    pub fn readable(&self) -> bool {
-        matches!(self, Self::Enabled | Self::ReadOnly)
-    }
-
-    #[must_use]
-    pub fn writable(&self) -> bool {
-        matches!(self, Self::Enabled)
-    }
-}
-#[test]
-fn test_api_enabled() {
-    assert!(ApiEnabled::Enabled.readable());
-    assert!(ApiEnabled::Enabled.writable());
-    assert!(ApiEnabled::ReadOnly.readable());
-    assert!(!ApiEnabled::ReadOnly.writable());
-    assert!(!ApiEnabled::Disabled.readable());
-    assert!(!ApiEnabled::Disabled.writable());
-}
-
-impl MigrationProgress {
-    /// The next phase in the migration process.
-    ///
-    /// Note: A given phase, such as migrating a `BTreeMap`, may need multiple steps.
-    /// The code for that phase will have to keep track of those steps by means of the data in the
-    /// variant.
-    ///
-    /// Prior art:
-    /// - There is an `enum_iterator` crate, however it deals only with simple enums without variant
-    ///   fields.  In this implementation, `next()` always uses the default value for the new field,
-    ///   which is always None.  `next()` does NOT step through the values of the variant field.
-    /// - `strum` has the `EnumIter` derive macro, but that implements `.next()` on an iterator, not
-    ///   on the enum itself, so stepping from one variant to the next is not straightforward.
-    ///
-    /// Note: The next state after Completed is Completed, so the the iterator will run
-    /// indefinitely.  In our case returning an option and ending with None would be fine but needs
-    /// additional code that we don't need.
-    #[must_use]
-    pub fn next(&self) -> Self {
-        match self {
-            MigrationProgress::Pending => MigrationProgress::LockingTarget,
-            MigrationProgress::LockingTarget => MigrationProgress::CheckingTarget,
-            MigrationProgress::CheckingTarget => MigrationProgress::MigratedUserTokensUpTo(None),
-            MigrationProgress::MigratedUserTokensUpTo(_) => {
-                MigrationProgress::MigratedCustomTokensUpTo(None)
-            }
-            MigrationProgress::MigratedCustomTokensUpTo(_) => {
-                MigrationProgress::MigratedUserTimestampsUpTo(None)
-            }
-            MigrationProgress::MigratedUserTimestampsUpTo(_) => {
-                MigrationProgress::MigratedUserProfilesUpTo(None)
-            }
-            MigrationProgress::MigratedUserProfilesUpTo(_) => {
-                MigrationProgress::CheckingDataMigration
-            }
-            MigrationProgress::CheckingDataMigration => MigrationProgress::UnlockingTarget,
-            MigrationProgress::UnlockingTarget => MigrationProgress::Unlocking,
-            &MigrationProgress::Unlocking | MigrationProgress::Completed => {
-                MigrationProgress::Completed
-            }
-            MigrationProgress::Failed(e) => MigrationProgress::Failed(*e),
-        }
-    }
-}
-
-// `MigrationProgress::next(&self)` should list all the elements in the enum in order, but stop at
-// Completed.
-#[test]
-fn next_matches_strum_iter() {
-    let mut iter = MigrationProgress::iter();
-    let mut next = MigrationProgress::Pending;
-    while next != MigrationProgress::Completed {
-        assert_eq!(iter.next(), Some(next), "iter.next() != Some(next)");
-        next = next.next();
-    }
-    assert_eq!(
-        next,
-        next.next(),
-        "Once completed, it should stay completed"
-    );
 }
 
 impl SplTokenId {
@@ -492,8 +423,12 @@ impl Validate for SplToken {
     fn validate(&self) -> Result<(), candid::Error> {
         use crate::types::MAX_SYMBOL_LENGTH;
         if let Some(symbol) = &self.symbol {
-            if symbol.len() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg("Symbol too long"));
+            if symbol.chars().count() > MAX_SYMBOL_LENGTH {
+                return Err(candid::Error::msg(format!(
+                    "Symbol too long: {} > {}",
+                    symbol.len(),
+                    MAX_SYMBOL_LENGTH
+                )));
             }
         }
         self.token_address.validate()
@@ -526,8 +461,69 @@ impl Validate for IcrcToken {
     }
 }
 
+impl Validate for UserToken {
+    fn validate(&self) -> Result<(), candid::Error> {
+        if self.contract_address.len() != EVM_CONTRACT_ADDRESS_LENGTH {
+            return Err(candid::Error::msg("Invalid EVM contract address length"));
+        }
+        if let Some(symbol) = &self.symbol {
+            if symbol.len() > MAX_SYMBOL_LENGTH {
+                return Err(candid::Error::msg(format!(
+                    "Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes",
+                )));
+            }
+        }
+        Ok(())
+    }
+}
+
+impl Validate for Contact {
+    fn validate(&self) -> Result<(), Error> {
+        // Validate name length
+        validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
+
+        // Validate number of addresses
+        validate_collection_size(&self.addresses, CONTACT_MAX_ADDRESSES, "Contact.addresses")?;
+
+        Ok(())
+    }
+}
+
+impl Validate for ContactAddressData {
+    fn validate(&self) -> Result<(), Error> {
+        // Note: We don't need to validate TokenAccountId since it has its own validation
+
+        // Check if the label exists
+        if let Some(label) = &self.label {
+            validate_string_length(label, CONTACT_MAX_LABEL_LENGTH, "ContactAddressData.label")?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Validate for CreateContactRequest {
+    fn validate(&self) -> Result<(), Error> {
+        // Nothing to validate here
+        Ok(())
+    }
+}
+
+impl Validate for UpdateContactRequest {
+    fn validate(&self) -> Result<(), Error> {
+        // Nothing to validate here
+        Ok(())
+    }
+}
+
+// Apply the validation during deserialization for all types
+validate_on_deserialize!(Contact);
+validate_on_deserialize!(ContactAddressData);
+validate_on_deserialize!(CreateContactRequest);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
+validate_on_deserialize!(UpdateContactRequest);
+validate_on_deserialize!(UserToken);

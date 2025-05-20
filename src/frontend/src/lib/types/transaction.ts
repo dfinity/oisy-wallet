@@ -1,12 +1,13 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import {
-	type TransactionIdSchema,
-	type TransactionStatusSchema,
-	type TransactionTypeSchema
+import type {
+	TransactionIdSchema,
+	TransactionStatusSchema,
+	TransactionTypeSchema
 } from '$lib/schema/transaction.schema';
 import type { Token } from '$lib/types/token';
+import type { NonEmptyArray } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse as AlchemyTransactionResponse } from 'alchemy-sdk';
 import type { FeeData } from 'ethers/providers';
@@ -71,6 +72,10 @@ export type AnyTransactionUi =
 	| IcTransactionUi
 	| SolTransactionUi;
 
+export type AnyTransactionUiWithToken = AnyTransactionUi & {
+	token: Token;
+};
+
 export type AnyTransactionUiWithCmp =
 	| { component: 'bitcoin'; transaction: BtcTransactionUi }
 	| { component: 'ethereum'; transaction: EthTransactionUi }
@@ -81,12 +86,9 @@ export type AllTransactionUiWithCmp = AnyTransactionUiWithCmp & {
 	token: Token;
 };
 
-export type AllTransactionUiWithCmpNonEmptyList = [
-	AllTransactionUiWithCmp,
-	...AllTransactionUiWithCmp[]
-];
+export type AllTransactionUiWithCmpNonEmptyList = NonEmptyArray<AllTransactionUiWithCmp>;
 
 export type TransactionsUiDateGroup<T extends AnyTransactionUiWithCmp> = Record<
 	string,
-	[T, ...T[]]
+	NonEmptyArray<T>
 >;

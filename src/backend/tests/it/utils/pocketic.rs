@@ -12,7 +12,7 @@ use candid::{encode_one, CandidType, Principal};
 use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
-use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
+use pocket_ic::{PocketIc, PocketIcBuilder};
 use shared::types::{
     backend_config::{Arg, InitArg},
     user_profile::{OisyUser, UserProfile},
@@ -217,6 +217,7 @@ impl Default for BackendBuilder {
 // Customisation
 impl BackendBuilder {
     /// Sets custom controllers for the backend canister.
+    #[allow(dead_code)]
     pub fn with_controllers(mut self, controllers: Vec<Principal>) -> Self {
         self.controllers = controllers;
         self
@@ -411,14 +412,11 @@ impl PicBackend {
                 encode_one(&arg).unwrap(),
                 Some(controller()),
             )
-            .map_err(|e| match e {
-                CallError::Reject(e) => e,
-                CallError::UserError(e) => {
-                    format!(
-                        "Upgrade canister error. RejectionCode: {:?}, Error: {}",
-                        e.code, e.description
-                    )
-                }
+            .map_err(|e| {
+                format!(
+                    "Upgrade canister error code: {:?}, message: {}",
+                    e.reject_code, e.reject_message
+                )
             })
     }
 }
@@ -436,7 +434,6 @@ pub(crate) fn init_arg() -> Arg {
             issuer_origin: ISSUER_ORIGIN.to_string(),
             credential_type: CredentialType::ProofOfUniqueness,
         }]),
-        api: None,
         cfs_canister_id: Some(
             Principal::from_text(SIGNER_CANISTER_ID).expect("wrong cfs canister id"),
         ),
@@ -484,22 +481,5 @@ impl PicBackend {
             assert!(response.is_ok());
         }
         expected_users
-    }
-
-    /// Creates toy user profiles with the given range of principals.
-    pub fn create_user_profiles<R>(&self, range: R) -> Vec<UserProfile>
-    where
-        R: RangeBounds<u8> + Iterator<Item = u8>,
-    {
-        let mut expected_user_profiles: Vec<UserProfile> = Vec::new();
-        for i in range {
-            self.pic.advance_time(Duration::new(10, 0));
-            let caller = Principal::self_authenticating(i.to_string());
-            let response = self.update::<UserProfile>(caller, "create_user_profile", ());
-            let expected_user_profile = response.clone().expect("Failed to create user profile");
-            expected_user_profiles.push(expected_user_profile);
-            assert!(response.is_ok());
-        }
-        expected_user_profiles
     }
 }

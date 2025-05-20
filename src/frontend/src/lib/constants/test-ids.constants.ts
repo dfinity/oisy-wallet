@@ -1,6 +1,7 @@
 export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
+export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 
@@ -9,6 +10,9 @@ export const LOGIN_BUTTON = 'login-button';
 export const MAX_BUTTON = 'max-button';
 
 export const LOADER_MODAL = 'loader-modal';
+export const BUTTON_MODAL_CLOSE = 'close-modal';
+
+export const MODAL_TITLE = 'modal-title';
 
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
@@ -47,6 +51,7 @@ export const RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON =
 export const SEND_TOKENS_MODAL_OPEN_BUTTON = 'send-tokens-modal-open-button';
 export const SEND_TOKENS_MODAL = 'send-tokens-modal';
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
+export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
 
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
@@ -71,12 +76,9 @@ export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
 export const AMOUNT_DATA = 'amount-data';
-export const AMOUNT_INPUT = 'amount-input';
 export const DESTINATION_INPUT = 'destination-input';
 
 export const IN_PROGRESS_MODAL = 'in-progress-modal';
-
-export const TESTNET_TOGGLE = 'testnet-toggle';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
 export const CAROUSEL_SLIDE = 'carousel-slide';
@@ -94,6 +96,10 @@ export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
 
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
+export const VIP_QR_CODE_ICON = 'vip-qr-code-icon';
+export const VIP_QR_CODE_BINANCE_ICON = 'vip-qr-code-binance-icon';
+export const VIP_STATE_IMAGE_BANNER = 'vip-state-image-banner';
+export const VIP_STATE_BUTTON = 'vip-state-button';
 
 export const REFERRAL_CODE_COPY_BUTTON = 'referral-code-copy-button';
 export const REFERRAL_CODE_SHARE_BUTTON = 'referral-code-share-button';
@@ -117,7 +123,6 @@ export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
 export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
-export const MANAGE_TOKENS_MODAL_CLOSE = 'manage-tokens-modal-close';
 export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
@@ -127,6 +132,8 @@ export const THEME_SELECTOR_CARD = 'theme-selector-card';
 
 export const REWARDS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-reward-campaigns-container';
 export const REWARDS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-reward-campaigns-container';
+export const REWARDS_ENDED_CAMPAIGNS_CONTAINER = 'ended-reward-campaigns-container';
+export const REWARDS_FILTER = 'rewards-filter';
 export const REWARDS_MODAL = 'rewards-modal';
 export const REWARDS_MODAL_DATE_BADGE = 'rewards-modal-date-badge';
 export const REWARDS_MODAL_IMAGE_BANNER = 'rewards-modal-image-banner';
@@ -135,11 +142,14 @@ export const REWARDS_STATE_MODAL_SHARE_BUTTON = 'reward-state-modal-share-button
 export const REWARDS_BANNER = 'rewards-banner';
 export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 export const REWARDS_STATUS_BUTTON = 'reward-status-button';
+export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
+export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
 
 export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
 export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
 
-export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
+export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
+
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
@@ -165,3 +175,31 @@ export const AUTH_LICENSE_LINK = 'auth-license-link';
 export const AUTH_SIGNING_IN_HELP_LINK = 'auth-signing-in-help-link';
 
 export const TOKEN_LIST_FILTER = 'token-list-filter';
+
+export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
+export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
+
+export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+
+export const ADDRESS_BOOK_MODAL = 'address-book-modal';
+export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
+export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
+export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
+export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
+export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
+
+export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button';
+export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';
+export const CONTACT_HEADER_EDIT_BUTTON = 'contact-header-edit-button';
+export const CONTACT_HEADER_EDITING_EDIT_BUTTON = 'contact-header-editing-edit-button';
+
+export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
+
+export const SEND_DESTINATION_SECTION = 'send-destination-section';
+
+export const CONVERT_AMOUNT_DISPLAY_VALUE = 'convert-amount-display-value';
+export const CONVERT_AMOUNT_DISPLAY_SKELETON = 'convert-amount-display-skeleton';
+export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
+export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
+
+export const SEND_FEE_INFO = 'send-fee-info';

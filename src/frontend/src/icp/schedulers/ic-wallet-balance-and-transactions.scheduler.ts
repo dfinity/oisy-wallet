@@ -1,7 +1,9 @@
+import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
 import { IcWalletScheduler, type IcWalletMsg } from '$icp/schedulers/ic-wallet.scheduler';
+import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import type { GetTransactions } from '$icp/types/ic.post-message';
-import { type SchedulerJobData, type SchedulerJobParams } from '$lib/schedulers/scheduler';
+import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessageDataResponseWalletCleanUp } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
@@ -18,9 +20,13 @@ interface IcWalletStore<T> {
 	transactions: IndexedTransactions<T>;
 }
 
+export type GetBalanceAndTransactions<
+	TWithId extends IcrcTransactionWithId | TransactionWithId | Dip20TransactionWithId
+> = GetTransactions & { transactions: TWithId[] };
+
 export class IcWalletBalanceAndTransactionsScheduler<
-	T extends IcrcTransaction | Transaction,
-	TWithId extends IcrcTransactionWithId | TransactionWithId,
+	T extends IcrcTransaction | Transaction | Event,
+	TWithId extends IcrcTransactionWithId | TransactionWithId | Dip20TransactionWithId,
 	PostMessageDataRequest
 > extends IcWalletScheduler<PostMessageDataRequest> {
 	private store: IcWalletStore<T> = {
@@ -33,7 +39,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 	constructor(
 		private getBalanceAndTransactions: (
 			data: SchedulerJobParams<PostMessageDataRequest>
-		) => Promise<GetTransactions & { transactions: TWithId[] }>,
+		) => Promise<GetBalanceAndTransactions<TWithId>>,
 		private mapToSelfTransaction: (
 			transaction: TWithId
 		) => (Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> })[],
@@ -53,7 +59,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 		identity,
 		...data
 	}: SchedulerJobData<PostMessageDataRequest>) => {
-		await queryAndUpdate<GetTransactions & { transactions: TWithId[] }>({
+		await queryAndUpdate<GetBalanceAndTransactions<TWithId>>({
 			request: ({ identity: _, certified }) =>
 				this.getBalanceAndTransactions({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => {
@@ -71,7 +77,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 		certified,
 		jobData
 	}: {
-		response: GetTransactions & { transactions: TWithId[] };
+		response: GetBalanceAndTransactions<TWithId>;
 		certified: boolean;
 		jobData: SchedulerJobData<PostMessageDataRequest>;
 	}) => {

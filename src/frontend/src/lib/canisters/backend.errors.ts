@@ -2,6 +2,8 @@ import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
 	ChallengeCompletionError,
+	CreateChallengeError,
+	GetAllowedCyclesError,
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -33,6 +35,18 @@ export const mapBtcSelectUserUtxosFeeError = (
 	return new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError');
 };
 
+export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterInternalError => {
+	if ('FailedToContactCyclesLedger' in err) {
+		return new CanisterInternalError('The Cycles Ledger cannot be contacted.');
+	}
+
+	if ('Other' in err) {
+		return new CanisterInternalError(err.Other);
+	}
+
+	return new CanisterInternalError('Unknown GetAllowedCyclesError');
+};
+
 export const mapAllowSigningError = (
 	err: AllowSigningError
 ): CanisterInternalError | ApproveError | ChallengeCompletionError => {
@@ -53,4 +67,24 @@ export const mapAllowSigningError = (
 	}
 
 	return new CanisterInternalError('Unknown AllowSigningError');
+};
+
+export const mapCreateChallengeError = (err: CreateChallengeError): CanisterInternalError => {
+	if ('ChallengeInProgress' in err) {
+		return new CanisterInternalError('Challenge is already in progress.');
+	}
+
+	if ('MissingUserProfile' in err) {
+		return new CanisterInternalError('User profile is missing.');
+	}
+
+	if ('RandomnessError' in err) {
+		return new CanisterInternalError(err.RandomnessError);
+	}
+
+	if ('Other' in err) {
+		return new CanisterInternalError(err.Other);
+	}
+
+	return new CanisterInternalError('Unknown CreateChallengeError');
 };

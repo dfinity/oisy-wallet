@@ -17,6 +17,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
+	const modalId = Symbol();
+
 	const isDisabled = (): boolean =>
 		isNullish($tokenId) || isNullish($ckBtcMinterInfoStore?.[$tokenId]);
 
@@ -27,7 +29,7 @@
 			return;
 		}
 
-		modalStore.openConvertCkBTCToBTC();
+		modalStore.openConvertCkBTCToBTC(modalId);
 	};
 
 	let ckBtcToken: OptionIcCkToken;
@@ -38,11 +40,15 @@
 
 <ButtonHero
 	disabled={$networkBitcoinMainnetDisabled || $isBusy || $outflowActionsDisabled}
-	on:click={async () => await openConvert()}
+	onclick={async () => await openConvert()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >
-	<IconCkConvert size="28" slot="icon" />
-	{BTC_MAINNET_SYMBOL}
+	{#snippet icon()}
+		<IconCkConvert size="28" />
+	{/snippet}
+	{#snippet label()}
+		{BTC_MAINNET_SYMBOL}
+	{/snippet}
 </ButtonHero>
 
 {#if $modalConvertCkBTCToBTC && nonNullish(ckBtcToken) && nonNullish(ckBtcToken.twinToken)}

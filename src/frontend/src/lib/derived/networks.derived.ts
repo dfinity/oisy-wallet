@@ -1,5 +1,9 @@
 import { enabledBitcoinNetworks } from '$btc/derived/networks.derived';
 import {
+	SUPPORTED_EVM_MAINNET_NETWORK_IDS,
+	SUPPORTED_EVM_TESTNET_NETWORK_IDS
+} from '$env/networks/networks-evm/networks.evm.env';
+import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
@@ -13,17 +17,24 @@ import {
 	SOLANA_TESTNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
+import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 import type { Network } from '$lib/types/network';
 import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 import { derived, type Readable } from 'svelte/store';
 
 export const networks: Readable<Network[]> = derived(
-	[enabledBitcoinNetworks, enabledEthereumNetworks, enabledSolanaNetworks],
-	([$enabledBitcoinNetworks, $enabledEthereumNetworks, $enabledSolanaNetworks]) => [
+	[enabledBitcoinNetworks, enabledEthereumNetworks, enabledSolanaNetworks, enabledEvmNetworks],
+	([
+		$enabledBitcoinNetworks,
+		$enabledEthereumNetworks,
+		$enabledSolanaNetworks,
+		$enabledEvmNetworks
+	]) => [
 		...$enabledBitcoinNetworks,
 		...$enabledEthereumNetworks,
 		ICP_NETWORK,
-		...$enabledSolanaNetworks
+		...$enabledSolanaNetworks,
+		...$enabledEvmNetworks
 	]
 );
 
@@ -58,6 +69,14 @@ export const networkEthereumEnabled: Readable<boolean> = derived([networks], ([$
 
 export const networkSepoliaEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
 	$networks.some(({ id }) => id === SEPOLIA_NETWORK_ID)
+);
+
+export const networkEvmMainnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => SUPPORTED_EVM_MAINNET_NETWORK_IDS.includes(id))
+);
+
+export const networkEvmTestnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => SUPPORTED_EVM_TESTNET_NETWORK_IDS.includes(id))
 );
 
 export const networkEthereumDisabled: Readable<boolean> = derived(

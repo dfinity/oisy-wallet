@@ -64,10 +64,12 @@
 
 	let transactionDate: number | undefined;
 	$: transactionDate = timestamp ?? displayTimestamp;
+
+	const modalId = Symbol();
 </script>
 
 <Transaction
-	on:click={() => modalStore.openEthTransaction({ transaction, token })}
+	on:click={() => modalStore.openEthTransaction({ id: modalId, data: { transaction, token } })}
 	{amount}
 	{type}
 	timestamp={transactionDate}

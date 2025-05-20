@@ -1,7 +1,10 @@
 import type {
+	AddUserCredentialResult,
 	AllowSigningResponse,
 	_SERVICE as BackendService,
+	CreateChallengeResponse,
 	CustomToken,
+	GetAllowedCyclesResponse,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -13,18 +16,17 @@ import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
 	mapBtcPendingTransactionError,
-	mapBtcSelectUserUtxosFeeError
+	mapBtcSelectUserUtxosFeeError,
+	mapCreateChallengeError,
+	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
-	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
 	AllowSigningParams,
-	AllowSigningResult,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
-	CreateChallengeResult,
 	GetUserProfileResponse,
 	SaveUserNetworksSettings,
 	SetUserShowTestnetsParams
@@ -105,7 +107,7 @@ export class BackendCanister extends Canister<BackendService> {
 		issuerCanisterId,
 		currentUserVersion,
 		credentialSpec
-	}: AddUserCredentialParams): Promise<AddUserCredentialResponse> => {
+	}: AddUserCredentialParams): Promise<AddUserCredentialResult> => {
 		const { add_user_credential } = this.caller({ certified: true });
 
 		return add_user_credential({
@@ -177,15 +179,23 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
-	// directly returning result and not the response
-	// TODO: check if this one is really needed because it may cause duplication of code with `allowSigningResult`
-	allowSigningResult = async ({ request }: AllowSigningParams): Promise<AllowSigningResult> => {
-		const { allow_signing } = this.caller({ certified: true });
-		return await allow_signing(toNullable(request));
+	getAllowedCycles = async (): Promise<GetAllowedCyclesResponse> => {
+		const { get_allowed_cycles } = this.caller({ certified: true });
+
+		const response = await get_allowed_cycles();
+
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
+		}
+
+		throw mapGetAllowedCyclesError(response.Err);
 	};
 
-	allowSigning = async ({ request }: AllowSigningParams): Promise<AllowSigningResponse> => {
-		const response = await this.allowSigningResult({ request });
+	allowSigning = async ({ request }: AllowSigningParams = {}): Promise<AllowSigningResponse> => {
+		const { allow_signing } = this.caller({ certified: true });
+
+		const response = await allow_signing(toNullable(request));
 
 		if ('Ok' in response) {
 			const { Ok } = response;
@@ -195,9 +205,16 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapAllowSigningError(response.Err);
 	};
 
-	createPowChallengeResult = (): Promise<CreateChallengeResult> => {
+	createPowChallenge = async (): Promise<CreateChallengeResponse> => {
 		const { create_pow_challenge } = this.caller({ certified: true });
-		return create_pow_challenge();
+
+		const result = await create_pow_challenge();
+		if ('Ok' in result) {
+			const { Ok } = result;
+			return Ok;
+		}
+
+		throw mapCreateChallengeError(result.Err);
 	};
 
 	addUserHiddenDappId = async ({

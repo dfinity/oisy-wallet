@@ -5,9 +5,13 @@ import { networks } from '$lib/derived/networks.derived';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
 import {
+	isNetworkIdBase,
 	isNetworkIdBitcoin,
+	isNetworkIdBsc,
 	isNetworkIdEthereum,
+	isNetworkIdEvm,
 	isNetworkIdICP,
+	isNetworkIdPolygon,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -36,6 +40,22 @@ export const networkBitcoin: Readable<boolean> = derived([networkId], ([$network
 
 export const networkEthereum: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdEthereum($networkId)
+);
+
+export const networkEvm: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdEvm($networkId)
+);
+
+export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdBase($networkId)
+);
+
+export const networkBsc: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdBsc($networkId)
+);
+
+export const networkPolygon: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdPolygon($networkId)
 );
 
 export const networkSolana: Readable<boolean> = derived([networkId], ([$networkId]) =>

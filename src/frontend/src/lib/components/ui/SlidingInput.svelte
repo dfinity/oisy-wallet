@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Backdrop } from '@dfinity/gix-components';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { afterNavigate } from '$app/navigation';
@@ -79,7 +80,7 @@
 		</div>
 	{/if}
 
-	{#if overflowableContent}
+	{#if nonNullish(overflowableContent)}
 		<div class="flex pr-12">
 			{@render overflowableContent()}
 		</div>
@@ -90,13 +91,16 @@
 				in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
 				out:fade
 				class="input-field condensed absolute right-0 -mt-[11px] mr-px flex overflow-hidden"
-				class:w-full={overflowableContent}
-				class:md:w-[250px]={overflowableContent}
-				class:w-[250px]={!overflowableContent}
+				class:w-full={nonNullish(overflowableContent)}
+				class:md:w-[270px]={nonNullish(overflowableContent)}
+				class:w-[270px]={isNullish(overflowableContent)}
 			>
+				<!-- We add "search" in the inputs name to prevent browsers form displaying autofill, see: -->
+				<!-- https://stackoverflow.com/a/68260636/2244209 -->
+				<!-- Additionally, we have to avoid placeholders with word "name" as that can bring autofill as well -->
 				<InputTextWithAction
 					bind:inputElement
-					name="slidingInput"
+					name="search_slidingInput"
 					placeholder={inputPlaceholder ?? ''}
 					bind:value={inputValue}
 					testId={`${testIdPrefix}-input`}
@@ -128,7 +132,7 @@
 			testId={`${testIdPrefix}-open-btn`}
 		>
 			<span slot="icon">
-				{#if icon}
+				{#if nonNullish(icon)}
 					{@render icon()}
 				{/if}
 			</span>

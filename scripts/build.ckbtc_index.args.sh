@@ -20,7 +20,7 @@ mkdir -p "$(dirname "$ARGS_FILE")"
 cat <<EOF >"$ARGS_FILE"
 (opt variant {
   Init = record {
-    ledger_id = principal \"$CANISTER_ID_CKBTC_LEDGER\";
+    ledger_id = principal "$CANISTER_ID_CKBTC_LEDGER";
    }
 })
 EOF

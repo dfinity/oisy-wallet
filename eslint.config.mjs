@@ -1,7 +1,17 @@
-import { default as config } from '@dfinity/eslint-config-oisy-wallet/svelte';
+import { default as svelteConfig } from '@dfinity/eslint-config-oisy-wallet/svelte';
+import { default as vitestConfig } from '@dfinity/eslint-config-oisy-wallet/vitest';
 
 export default [
-	...config,
+	...vitestConfig,
+	...svelteConfig,
+
+	{
+		rules: {
+			// TODO: re-enable this rule when it includes `expect` statements nested in callable functions.
+			'vitest/expect-expect': ['off']
+		}
+	},
+
 	{
 		ignores: [
 			'**/.DS_Store',
@@ -18,7 +28,8 @@ export default [
 			'src/declarations/**/*',
 			'src/frontend/src/env/tokens/tokens.sns.json',
 			'**/playwright-report',
-			'**/coverage'
+			'**/coverage',
+			'**/.vitest-reports'
 		]
 	}
 ];

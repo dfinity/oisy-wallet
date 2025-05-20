@@ -1,6 +1,6 @@
 <script lang="ts">
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import type { Balance } from '$lib/types/balance';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -15,7 +15,7 @@
 
 	<div class="ml-1 font-semibold">
 		{formatToken({
-			value: balance ?? ZERO_BI,
+			value: balance ?? ZERO,
 			unitName: token.decimals
 		})}
 		{token.symbol}

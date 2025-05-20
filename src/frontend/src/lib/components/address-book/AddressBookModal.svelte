@@ -1,24 +1,92 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
-	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
-	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import AddContactStep from '$lib/components/address-book/AddContactStep.svelte';
+	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
+	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
+	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { Contact } from '$lib/types/contact';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	const contacts = [];
+	const steps: WizardSteps = [
+		{
+			name: AddressBookSteps.ADDRESS_BOOK,
+			title: $i18n.address_book.text.title
+		},
+		{
+			name: AddressBookSteps.ADD_CONTACT,
+			title: $i18n.contact.form.add_new_contact
+		},
+		{
+			name: AddressBookSteps.SHOW_CONTACT,
+			title: $i18n.address_book.show_contact.title
+		}
+	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
+
+	let currentStep: WizardStep | undefined = $state();
+	let modal: WizardModal | undefined = $state();
+	const close = () => modalStore.close();
+
+	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
+	let addContactStep = $state<AddContactStep>();
+
+	let contacts: Contact[] = $state([]);
+	let currentContact: Contact | undefined = $state();
+
+	const gotoStep = (stepName: AddressBookSteps) => {
+		if (nonNullish(modal)) {
+			goToWizardStep({
+				modal,
+				steps,
+				stepName
+			});
+		}
+	};
+
+	const onAddContact = (contact: Contact) => {
+		contacts = [...contacts, contact];
+		gotoStep(AddressBookSteps.ADDRESS_BOOK);
+	};
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<span class="text-xl" slot="title">{$i18n.address_book.text.title}</span>
-
-	<ContentWithToolbar styleClass="mx-2 flex flex-col justify-center items-center">
-		{#if contacts.length === 0}
-			<EmptyAddressBook></EmptyAddressBook>
-		{:else}
-			TODO Add contact list here
-		{/if}
-
-		<ButtonCloseModal slot="toolbar" />
-	</ContentWithToolbar>
-</Modal>
+<WizardModal
+	{steps}
+	bind:currentStep
+	bind:this={modal}
+	disablePointerEvents={true}
+	testId={ADDRESS_BOOK_MODAL}
+	on:nnsClose={close}
+>
+	<svelte:fragment slot="title"
+		>{currentStepName === AddressBookSteps.ADD_CONTACT && nonNullish(addContactStep)
+			? addContactStep.title
+			: (currentStep?.title ?? '')}</svelte:fragment
+	>
+	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
+		<AddressBookStep
+			{contacts}
+			onShowContact={(contact) => {
+				currentContact = contact;
+				gotoStep(AddressBookSteps.SHOW_CONTACT);
+			}}
+			onAddContact={() => {
+				currentContact = undefined;
+				gotoStep(AddressBookSteps.ADD_CONTACT);
+			}}
+		></AddressBookStep>
+	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
+		<ShowContactStep
+			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			contact={currentContact!}
+		></ShowContactStep>
+	{:else if currentStep?.name === AddressBookSteps.ADD_CONTACT}
+		<AddContactStep
+			bind:this={addContactStep}
+			{onAddContact}
+			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+		></AddContactStep>
+	{/if}
+</WizardModal>

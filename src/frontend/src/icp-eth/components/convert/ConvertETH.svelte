@@ -25,6 +25,9 @@
 	export let nativeTokenId: TokenId;
 	export let ariaLabel: string;
 
+	const ethModalId = Symbol();
+	const ckEthModalId = Symbol();
+
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
 	let isNetworkDisabled = false;
@@ -60,7 +63,7 @@
 				return;
 			}
 
-			modalStore.openConvertToTwinTokenEth();
+			modalStore.openConvertToTwinTokenEth(ethModalId);
 			return;
 		}
 
@@ -74,17 +77,21 @@
 			return;
 		}
 
-		modalStore.openConvertToTwinTokenCkEth();
+		modalStore.openConvertToTwinTokenCkEth(ckEthModalId);
 	};
 </script>
 
 <CkEthLoader {nativeTokenId}>
 	<ButtonHero
-		on:click={async () => await openConvert()}
+		onclick={async () => await openConvert()}
 		disabled={isNetworkDisabled || $isBusy || $outflowActionsDisabled}
 		{ariaLabel}
 	>
-		<slot name="icon" slot="icon" />
-		<slot />
+		{#snippet icon()}
+			<slot name="icon" />
+		{/snippet}
+		{#snippet label()}
+			<slot />
+		{/snippet}
 	</ButtonHero>
 </CkEthLoader>

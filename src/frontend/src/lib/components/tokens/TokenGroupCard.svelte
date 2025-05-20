@@ -6,7 +6,6 @@
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,62 +19,65 @@
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
 
-	export let tokenGroup: TokenUiGroup;
+	let { tokenGroup }: { tokenGroup: TokenUiGroup } = $props();
 
-	let isExpanded: boolean;
-	$: isExpanded = ($tokenGroupStore ?? {})[tokenGroup.id]?.isExpanded ?? false;
+	const isExpanded: boolean = $derived(
+		($tokenGroupStore ?? {})[tokenGroup.id]?.isExpanded ?? false
+	);
 
-	let hideZeros: boolean;
-	$: hideZeros = ($tokenGroupStore ?? {})[tokenGroup.id]?.hideZeros ?? true;
+	const hideZeros: boolean = $derived(($tokenGroupStore ?? {})[tokenGroup.id]?.hideZeros ?? true);
 
 	const toggleIsExpanded = (toggle: boolean) =>
-		tokenGroupStore.set({ tokenId: tokenGroup.id, data: { isExpanded: toggle, hideZeros } });
+		tokenGroupStore.set({ id: tokenGroup.id, data: { isExpanded: toggle, hideZeros } });
 
 	const toggleHideZeros = (toggle: boolean) =>
-		tokenGroupStore.set({ tokenId: tokenGroup.id, data: { isExpanded, hideZeros: toggle } });
+		tokenGroupStore.set({ id: tokenGroup.id, data: { isExpanded, hideZeros: toggle } });
 
-	let headerData: CardData;
-	$: headerData = mapHeaderData(tokenGroup);
+	const headerData: CardData = $derived(mapHeaderData(tokenGroup));
 
 	const isNativeToken = (token: TokenUi) => tokenGroup.nativeToken.id === token.id;
 	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix); // logic taken from old ck badge
 
 	// list of filtered tokens, filtered by string input
-	let filteredTokens: TokenUi[];
-	$: filteredTokens = getFilteredTokenGroup({
-		filter: $tokenListStore.filter,
-		list: tokenGroup.tokens
-	});
+	const filteredTokens: TokenUi[] = $derived(
+		getFilteredTokenGroup({
+			filter: $tokenListStore.filter,
+			list: tokenGroup.tokens
+		})
+	);
 
 	// list of tokens that should display with a "show more" button for not displayed ones
-	let truncatedTokens: TokenUi[];
-	$: truncatedTokens = filteredTokens.filter((token) => {
-		const totalBalance = filteredTokens.reduce((p, c) => p + BigInt(c.balance ?? 0n), ZERO_BI);
-		// Only include tokens with a balance
-		return (
-			(token.balance ?? 0n) > 0n ||
-			// If the total balance is 0, only include CK or Native tokens
-			(totalBalance === 0n && (isCkToken(token) || isNativeToken(token)))
-		);
-	});
+	const truncatedTokens: TokenUi[] = $derived(
+		filteredTokens.filter((token) => {
+			const totalBalance = filteredTokens.reduce((p, c) => p + (c.usdBalance ?? 0), 0);
+			// Only include tokens with a balance
+			return (
+				(token.usdBalance ?? 0) > 0 ||
+				// If the total balance is 0, only include CK or Native tokens
+				(totalBalance === 0 && (isCkToken(token) || isNativeToken(token)))
+			);
+		})
+	);
 
 	// Show all if hideZeros = false and sort
-	$: tokensToShow = (hideZeros ? filteredTokens : truncatedTokens).sort((a, b) => {
-		const balanceA = BigInt(a.balance ?? 0n);
-		const balanceB = BigInt(b.balance ?? 0n);
-		// higher balances show first
-		if (balanceA > balanceB) {
-			return -1;
-		}
-		if (balanceA < balanceB) {
-			return 1;
-		}
-		// if same balance order by Native > CK > others
-		return isNativeToken(a) ? -1 : isCkToken(a) && !isNativeToken(b) ? -1 : 1;
-	});
+	const tokensToShow: TokenUi[] = $derived(
+		(hideZeros ? truncatedTokens : filteredTokens).sort((a, b) => {
+			const balanceA = a.usdBalance ?? 0;
+			const balanceB = b.usdBalance ?? 0;
+			// higher balances show first
+			if (balanceA > balanceB) {
+				return -1;
+			}
+			if (balanceA < balanceB) {
+				return 1;
+			}
+			// if same balance order by Native > CK > others
+			return isNativeToken(a) ? -1 : isCkToken(a) && !isNativeToken(b) ? -1 : 1;
+		})
+	);
 
 	// Count tokens that are not displayed
-	$: notDisplayedCount = filteredTokens.length - tokensToShow.length;
+	const notDisplayedCount: number = $derived(filteredTokens.length - tokensToShow.length);
 </script>
 
 <div class="flex flex-col" class:bg-primary={isExpanded}>

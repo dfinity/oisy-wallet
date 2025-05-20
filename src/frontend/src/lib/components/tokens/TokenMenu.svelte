@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconMoreVertical from '$lib/components/icons/IconMoreVertical.svelte';
+	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import {
 		networkBitcoin,
 		networkEthereum,
+		networkEvm,
 		networkICP,
 		networkSolana
 	} from '$lib/derived/network.derived';
@@ -20,9 +21,12 @@
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
+	const hideModalId = Symbol();
+	const openModalId = Symbol();
+
 	const hideToken = () => {
 		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
-		fn();
+		fn(hideModalId);
 
 		visible = false;
 	};
@@ -30,14 +34,14 @@
 	const openToken = () => {
 		const fn = $networkICP
 			? modalStore.openIcToken
-			: $networkEthereum
+			: $networkEthereum || $networkEvm
 				? modalStore.openEthToken
 				: $networkBitcoin
 					? modalStore.openBtcToken
 					: $networkSolana
 						? modalStore.openSolToken
 						: () => {};
-		fn();
+		fn(openModalId);
 
 		visible = false;
 	};

@@ -1,6 +1,9 @@
 import type {
+	AddUserCredentialResult,
 	AllowSigningResponse,
+	CreateChallengeResponse,
 	CustomToken,
+	GetAllowedCyclesResponse,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -10,14 +13,11 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
 	AddUserCredentialParams,
-	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
 	AllowSigningParams,
-	AllowSigningResult,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
-	CreateChallengeResult,
 	GetUserProfileResponse,
 	SaveUserNetworksSettings,
 	SetUserShowTestnetsParams
@@ -108,7 +108,7 @@ export const getUserProfile = async ({
 export const addUserCredential = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResponse> => {
+}: CanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResult> => {
 	const { addUserCredential } = await backendCanister({ identity });
 
 	return addUserCredential(params);
@@ -143,9 +143,17 @@ export const selectUserUtxosFee = async ({
 
 export const createPowChallenge = async ({
 	identity
-}: CanisterApiFunctionParams): Promise<CreateChallengeResult> => {
-	const { createPowChallengeResult } = await backendCanister({ identity });
-	return createPowChallengeResult();
+}: CanisterApiFunctionParams): Promise<CreateChallengeResponse> => {
+	const { createPowChallenge } = await backendCanister({ identity });
+	return createPowChallenge();
+};
+
+export const getAllowedCycles = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<GetAllowedCyclesResponse> => {
+	const { getAllowedCycles } = await backendCanister({ identity });
+
+	return getAllowedCycles();
 };
 
 export const allowSigning = async ({
@@ -155,16 +163,6 @@ export const allowSigning = async ({
 	const { allowSigning } = await backendCanister({ identity });
 
 	return allowSigning(params);
-};
-
-export const allowSigningResult = async ({
-	identity,
-	...params
-}: CanisterApiFunctionParams<AllowSigningParams>): Promise<AllowSigningResult> => {
-	const { allowSigningResult } = await backendCanister({ identity });
-
-	// Conditionally call allowSigning with request or provide default logic
-	return allowSigningResult(params);
 };
 
 export const addUserHiddenDappId = async ({

@@ -1,3 +1,5 @@
+import { IcTokenDeprecatedSchema } from '$icp/schema/ic-token-deprecated.schema';
+import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
 import { TokenSchema } from '$lib/schema/token.schema';
 import { CanisterIdTextSchema } from '$lib/types/canister';
 import { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
@@ -34,10 +36,13 @@ export const IcCkMetadataSchema = IcCkLinkedAssetsSchema.partial().extend({
 
 export const IcInterfaceSchema = IcCanistersSchema.merge(IcAppMetadataSchema);
 
-export const IcTokenSchema = TokenSchema.merge(IcFeeSchema).merge(IcInterfaceSchema);
+export const IcTokenSchema = TokenSchema.merge(IcFeeSchema)
+	.merge(IcInterfaceSchema)
+	.merge(IcTokenDeprecatedSchema);
 
 export const IcTokenWithoutIdSchema = IcTokenSchema.omit({ id: true }).strict();
 
 export const IcCkTokenSchema = IcTokenSchema.merge(IcCkMetadataSchema.partial());
 
-export const IcCkInterfaceSchema = IcInterfaceSchema.merge(IcCkMetadataSchema);
+export const IcCkInterfaceSchema =
+	IcInterfaceSchema.merge(IcCkMetadataSchema).merge(TokenGroupPropSchema);

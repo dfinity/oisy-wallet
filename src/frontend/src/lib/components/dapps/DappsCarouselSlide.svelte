@@ -11,17 +11,21 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
+	import type { CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
 	export let airdrop: RewardDescription | undefined = undefined;
+
 	$: ({
 		id: dappId,
 		carousel: { text, callToAction },
 		logo,
 		name: dAppName
 	} = dappsCarouselSlide);
+
+	const rewardModalId = Symbol();
+	const dappModalId = Symbol();
 
 	const open = () => {
 		trackEvent({
@@ -32,9 +36,9 @@
 		});
 
 		if (nonNullish(airdrop)) {
-			modalStore.openRewardDetails(airdrop);
+			modalStore.openRewardDetails({ id: rewardModalId, data: airdrop });
 		} else {
-			modalStore.openDappDetails(dappsCarouselSlide);
+			modalStore.openDappDetails({ id: dappModalId, data: dappsCarouselSlide });
 		}
 	};
 

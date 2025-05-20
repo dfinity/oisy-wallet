@@ -1,7 +1,7 @@
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { isUserNetworkEnabled, mapUserNetworks } from '$lib/utils/user-networks.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
-import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
+import { mockUserNetworks, mockUserNetworksComplete } from '$tests/mocks/user-networks.mock';
 import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
 
 describe('user-networks.utils', () => {
@@ -29,6 +29,13 @@ describe('user-networks.utils', () => {
 		it('should handle empty UserNetworks', () => {
 			expect(mapUserNetworks({})).toEqual([]);
 		});
+
+		it('should be able to map all networks', () => {
+			expect(() => mapUserNetworks(mockUserNetworksComplete)).not.toThrow();
+
+			expect(console.warn).not.toHaveBeenCalled();
+			expect(console.error).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('isUserNetworkEnabled', () => {
@@ -41,7 +48,7 @@ describe('user-networks.utils', () => {
 					},
 					networkId: ICP_NETWORK_ID
 				})
-			).toBe(true);
+			).toBeTruthy();
 		});
 
 		it('should return false if network is disabled', () => {
@@ -53,7 +60,7 @@ describe('user-networks.utils', () => {
 					},
 					networkId: ICP_NETWORK_ID
 				})
-			).toBe(false);
+			).toBeFalsy();
 		});
 
 		it('should return false if network is not present', () => {
@@ -62,7 +69,7 @@ describe('user-networks.utils', () => {
 					userNetworks: mockUserNetworks,
 					networkId: parseNetworkId('unknownNetworkId')
 				})
-			).toBe(false);
+			).toBeFalsy();
 		});
 
 		it('should return false there are no user networks', () => {
@@ -71,7 +78,7 @@ describe('user-networks.utils', () => {
 					userNetworks: {},
 					networkId: ICP_NETWORK_ID
 				})
-			).toBe(false);
+			).toBeFalsy();
 		});
 	});
 });
