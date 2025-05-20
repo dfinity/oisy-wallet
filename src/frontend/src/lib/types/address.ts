@@ -1,5 +1,8 @@
-import type { AddressSchema, AddressTypeSchema } from '$lib/schema/address.schema';
-import type { AddressSchema, SolAddressSchema } from '$lib/schema/address.schema';
+import type {
+	AddressSchema,
+	AddressTypeSchema,
+	SolAddressSchema
+} from '$lib/schema/address.schema';
 import type { Option } from '$lib/types/utils';
 import type * as z from 'zod';
 

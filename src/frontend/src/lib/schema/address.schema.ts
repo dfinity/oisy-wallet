@@ -8,4 +8,3 @@ export const AddressTypeSchema = z.enum(['Icrc2', 'Btc', 'Eth', 'Sol']);
 export const AddressSchema = z.string().nonempty();
 
 export const SolAddressSchema = AddressSchema.refine((val) => isSolAddress(val));
-
