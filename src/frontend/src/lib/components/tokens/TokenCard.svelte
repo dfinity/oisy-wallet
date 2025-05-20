@@ -9,6 +9,7 @@
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import {isPrivacyMode} from "$lib/derived/settings.derived";
+	import IconDots from "$lib/components/icons/IconDots.svelte";
 
 	let {
 		data,
@@ -59,7 +60,11 @@
 		</span>
 
 		<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap" slot="title-end">
-			<TokenBalance {data} hideBalance={$isPrivacyMode} />
+			<TokenBalance {data} hideBalance={$isPrivacyMode}>
+				{#snippet privacyPlaceholder()}
+					<IconDots variant={asNetwork ? 'small' : 'medium'} />
+				{/snippet}
+			</TokenBalance>
 		</span>
 
 		<span class:text-sm={asNetwork} slot="description">

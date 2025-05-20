@@ -1,16 +1,23 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
+    export type DotVariant =
+        | 'big'
+        | 'medium'
+        | 'small';
 
     interface Props {
-        size?: string;
+        variant?: DotVariant;
         times?: number;
         styleClass?: string;
     }
 
-    let {size = '14', times = 5, styleClass = ''}: Props = $props();
+    let {variant = 'medium', times = 5, styleClass = ''}: Props = $props();
+
+    const size = $derived(variant === 'big' ? '14' : variant === 'medium' ? '8' : '6')
+    const gap = $derived(variant === 'big' ? 'gap-2' : 'gap-1');
 </script>
 
-<div class="flex gap-2 {styleClass}">
+<div class="flex {gap} {styleClass}">
     {#each Array(times) as _}
         <svg width={size} height={size} viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path

@@ -23,7 +23,7 @@
 	<output class="mt-8 inline-block break-all text-5xl font-bold">
 		{#if $loaded}
 			{#if hideBalance}
-				<IconDots times={6} styleClass="h-12" />
+				<IconDots variant="big" times={6} styleClass="h-12" />
 			{:else}
 				{formatUSD({ value: totalUsd })}
 			{/if}
