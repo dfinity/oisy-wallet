@@ -5,3 +5,5 @@ export interface SettingsData {
 }
 
 export const hideZeroBalancesStore = initStorageStore<SettingsData>({ key: 'hide-zero-balances' });
+
+export const privacyModeStore = initStorageStore<SettingsData>({ key: 'privacy-mode' });
