@@ -1,23 +1,23 @@
 <script lang="ts">
-    import type {Snippet} from "svelte";
-    import {privacyModeStore} from "$lib/stores/settings.store";
-    import {isPrivacyMode} from "$lib/derived/settings.derived";
+	import type { Snippet } from 'svelte';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { privacyModeStore } from '$lib/stores/settings.store';
 
-    interface Props {
-        children?: Snippet;
-    }
+	interface Props {
+		children?: Snippet;
+	}
 
-    let {children}: Props = $props();
+	let { children }: Props = $props();
 
-    const handleKeydown = (e: KeyboardEvent) => {
-        const isInputField = e?.target instanceof HTMLInputElement;
+	const handleKeydown = (e: KeyboardEvent) => {
+		const isInputField = e?.target instanceof HTMLInputElement;
 
-        if (!isInputField) {
-            if (e.key === 'p') {
-                privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } })
-            }
-        }
-    }
+		if (!isInputField) {
+			if (e.key === 'p') {
+				privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } });
+			}
+		}
+	};
 </script>
 
 {@render children?.()}
