@@ -29,6 +29,11 @@
 		destinationTokenExchangeRate,
 		failedSwapError
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	const onClick = () => {
+		failedSwapError.set(undefined);
+		dispatch('icBack');
+	};
 </script>
 
 <ContentWithToolbar>
@@ -60,7 +65,7 @@
 	</ModalValue>
 
 	<div class="flex flex-col gap-3">
-		<SwapProvider />
+		<SwapProvider {slippageValue} />
 		<SwapFees />
 	</div>
 
@@ -78,7 +83,7 @@
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={() => dispatch('icBack')} />
+		<ButtonBack onclick={onClick} />
 
 		<Button on:click={() => dispatch('icSwap')}>
 			{$i18n.swap.text.swap_button}
