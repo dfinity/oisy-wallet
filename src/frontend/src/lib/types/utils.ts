@@ -37,3 +37,11 @@ export const assertNever = ({
 }): never => {
 	throw new Error(`Unexpected ${typeName}: ${variable}`);
 };
+
+/**
+ * Returns all keys of a union type. For example:
+ *   KeyOfUnion<{ a: number } | { b: string } | { d: { ... } }>
+ * will result in: 'a' | 'b' | 'd'
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type KeysOfUnion<T> = T extends any ? keyof T : never;
