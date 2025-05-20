@@ -12,7 +12,7 @@ describe('ShortcutGuard', () => {
             privacyModeStore.set({ key: 'privacy-mode', value: { enabled: false } });
         });
 
-        it('should turn on and off privacy mode on keyboard click', async () => {
+        it('should turn on and off privacy mode on keyboard click', () => {
             render(ShortcutGuard);
 
             expect(get(isPrivacyMode)).toBe(false);
