@@ -61,7 +61,7 @@
 
 		<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap" slot="title-end">
 			<TokenBalance {data} hideBalance={$isPrivacyMode}>
-				{#snippet privacyPlaceholder()}
+				{#snippet privacyBalance()}
 					<IconDots variant={asNetwork ? 'sm' : 'md'} />
 				{/snippet}
 			</TokenBalance>

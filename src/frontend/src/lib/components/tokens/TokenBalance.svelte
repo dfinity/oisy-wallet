@@ -8,12 +8,12 @@
 	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
-		privacyPlaceholder?: Snippet;
+		privacyBalance?: Snippet;
 		data: CardData;
 		hideBalance?: boolean;
 	}
 
-	let { privacyPlaceholder, data, hideBalance = false }: Props = $props();
+	let { privacyBalance, data, hideBalance = false }: Props = $props();
 </script>
 
 <TokenBalanceSkeleton {data}>
@@ -23,7 +23,7 @@
 	>
 		{#if nonNullish(data.balance)}
 			{#if hideBalance}
-				{@render privacyPlaceholder?.()}
+				{@render privacyBalance?.()}
 			{:else}
 				{formatToken({
 					value: data.balance,
