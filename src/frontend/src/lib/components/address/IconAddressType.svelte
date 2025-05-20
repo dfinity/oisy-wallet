@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IconAddressTypeBtc from '$lib/components/icons/IconAddressTypeBtc.svelte';
 	import IconAddressTypeEth from '$lib/components/icons/IconAddressTypeEth.svelte';
-	import IconAddressTypeIcrc2 from '$lib/components/icons/IconAddressTypeIcrc2.svelte';
+	import IconAddressTypeIcrc2 from '$lib/components/icons/IconAddressTypeIcrcv2.svelte';
 	import IconAddressTypeSol from '$lib/components/icons/IconAddressTypeSol.svelte';
 	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 

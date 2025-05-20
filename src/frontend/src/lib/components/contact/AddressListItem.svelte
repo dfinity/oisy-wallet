@@ -40,8 +40,8 @@
 			</span>
 		</div>
 		<div class="flex items-center gap-1">
-			{#if notEmptyString(address.alias)}
-				<span class="font-bold">{address.alias}</span>
+			{#if notEmptyString(address.label)}
+				<span class="font-bold">{address.label}</span>
 				<span class="text-[0.5rem]">•</span>
 			{/if}
 			<span>{displayAddress}</span>

@@ -1052,7 +1052,7 @@
 	},
 	"address": {
 		"types": {
-			"Icrc2": "Internet Computer",
+			"Icrcv2": "Internet Computer",
 			"Btc": "Bitcoin",
 			"Eth": "Ethereum",
 			"Sol": "Solana"
