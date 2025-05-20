@@ -31,7 +31,7 @@
 	const close = () => modalStore.close();
 
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
-	let addContactStep = $state<AddContactStep>();
+	let editContactNameStep = $state<EditContactNameStep>();
 
 	let contacts: ContactUi[] = $state([]);
 	let currentContact: ContactUi | undefined = $state();

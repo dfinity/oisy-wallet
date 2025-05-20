@@ -1,4 +1,4 @@
-import AddContactStep from '$lib/components/address-book/AddContactStep.svelte';
+import AddContactStep from '$lib/components/address-book/EditContactNameStep.svelte';
 import {
 	ADDRESS_BOOK_CANCEL_BUTTON,
 	ADDRESS_BOOK_CONTACT_NAME_INPUT,
@@ -8,7 +8,7 @@ import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { vi } from 'vitest';
 
-describe('AddContactStep', () => {
+describe('EditContactNameStep', () => {
 	it('should render the add contact step with form and buttons', () => {
 		const onAddContact = vi.fn();
 		const onClose = vi.fn();
