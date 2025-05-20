@@ -30,6 +30,7 @@ interface I18nCore {
 		no_results: string;
 		paste: string;
 		to: string;
+		add: string;
 		more_items: string;
 	};
 	info: { test_banner: string };
@@ -245,7 +246,6 @@ interface I18nInit {
 		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
-		loading_balance_symbol: string;
 		erc20_contracts: string;
 		spl_tokens: string;
 		minter_ckbtc_btc: string;
@@ -440,6 +440,7 @@ interface I18nSend {
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
 		unknown_destination: string;
+		fee_info: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -564,12 +565,17 @@ interface I18nSwap {
 		you_receive: string;
 		select: string;
 		select_swap_provider: string;
+		open_icp_swap: string;
 	};
 	error: {
 		kong_not_available: string;
 		unexpected: string;
 		unexpected_missing_data: string;
 		slippage_exceeded: string;
+		pool_not_found: string;
+		deposit_error: string;
+		withdraw_failed: string;
+		swap_failed_withdraw_success: string;
 	};
 }
 
@@ -938,6 +944,8 @@ interface I18nAddress_book {
 		empty_text: string;
 		add_new_contact: string;
 		add_contact: string;
+		search_contact: string;
+		no_contact_found: string;
 	};
 	show_contact: {
 		title: string;

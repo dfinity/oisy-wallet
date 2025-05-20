@@ -15,12 +15,12 @@ use crate::{
             SaveTestnetsSettingsError,
         },
         settings::Settings,
-        token::UserToken,
+        token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
         user_profile::{
             AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
         verifiable_credential::CredentialType,
-        Timestamp, TokenVersion, Version,
+        Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
     },
     validate::{validate_on_deserialize, Validate},
 };
@@ -423,8 +423,12 @@ impl Validate for SplToken {
     fn validate(&self) -> Result<(), candid::Error> {
         use crate::types::MAX_SYMBOL_LENGTH;
         if let Some(symbol) = &self.symbol {
-            if symbol.len() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg("Symbol too long"));
+            if symbol.chars().count() > MAX_SYMBOL_LENGTH {
+                return Err(candid::Error::msg(format!(
+                    "Symbol too long: {} > {}",
+                    symbol.len(),
+                    MAX_SYMBOL_LENGTH
+                )));
             }
         }
         self.token_address.validate()
@@ -451,6 +455,22 @@ impl Validate for IcrcToken {
         if let Some(index_id) = index_id {
             if index_id.as_slice().last() != Some(&1) {
                 return Err(candid::Error::msg("Index ID is not a canister"));
+            }
+        }
+        Ok(())
+    }
+}
+
+impl Validate for UserToken {
+    fn validate(&self) -> Result<(), candid::Error> {
+        if self.contract_address.len() != EVM_CONTRACT_ADDRESS_LENGTH {
+            return Err(candid::Error::msg("Invalid EVM contract address length"));
+        }
+        if let Some(symbol) = &self.symbol {
+            if symbol.len() > MAX_SYMBOL_LENGTH {
+                return Err(candid::Error::msg(format!(
+                    "Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes",
+                )));
             }
         }
         Ok(())
@@ -497,12 +517,13 @@ impl Validate for UpdateContactRequest {
 }
 
 // Apply the validation during deserialization for all types
-validate_on_deserialize!(ContactAddressData);
 validate_on_deserialize!(Contact);
+validate_on_deserialize!(ContactAddressData);
 validate_on_deserialize!(CreateContactRequest);
-validate_on_deserialize!(UpdateContactRequest);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
+validate_on_deserialize!(UpdateContactRequest);
+validate_on_deserialize!(UserToken);

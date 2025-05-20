@@ -80,6 +80,7 @@ export interface AddUserCredentialRequest {
 	credential_spec: CredentialSpec;
 }
 export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
+export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
 	| { PowChallenge: ChallengeCompletionError }
@@ -93,6 +94,7 @@ export interface AllowSigningResponse {
 	challenge_completion: [] | [ChallengeCompletion];
 	allowed_cycles: bigint;
 }
+export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export type ApproveError =
 	| {
@@ -118,6 +120,7 @@ export interface BtcAddPendingTransactionRequest {
 	address: string;
 	utxos: Array<Utxo>;
 }
+export type BtcAddPendingTransactionResult = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type BtcAddress =
 	| { P2WPKH: string }
 	| { P2PKH: string }
@@ -131,6 +134,14 @@ export interface BtcGetPendingTransactionsRequest {
 	network: BitcoinNetwork;
 	address: string;
 }
+export type BtcGetPendingTransactionsResult =
+	| {
+			Ok: BtcGetPendingTransactionsReponse;
+	  }
+	| { Err: BtcAddPendingTransactionError };
+export type BtcSelectUserUtxosFeeResult =
+	| { Ok: SelectedUtxosFeeResponse }
+	| { Err: SelectedUtxosFeeError };
 export type BtcTokenId = { Native: null };
 export interface CanisterStatusResultV2 {
 	controller: Principal;
@@ -167,7 +178,7 @@ export interface Config {
 export interface Contact {
 	id: bigint;
 	name: string;
-	update_timestamp: bigint;
+	update_timestamp_ns: bigint;
 	addresses: Array<ContactAddressData>;
 }
 export interface ContactAddressData {
@@ -188,6 +199,9 @@ export interface CreateChallengeResponse {
 export interface CreateContactRequest {
 	name: string;
 }
+export type CreatePowChallengeResult =
+	| { Ok: CreateChallengeResponse }
+	| { Err: CreateChallengeError };
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];
 	credential_type: string;
@@ -211,12 +225,19 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
+export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
 	allowed_cycles: bigint;
 }
+export type GetAllowedCyclesResult =
+	| { Ok: GetAllowedCyclesResponse }
+	| { Err: GetAllowedCyclesError };
+export type GetContactResult = { Ok: Contact } | { Err: ContactError };
+export type GetContactsResult = { Ok: Array<Contact> } | { Err: ContactError };
 export type GetUserProfileError = { NotFound: null };
+export type GetUserProfileResult = { Ok: UserProfile } | { Err: GetUserProfileError };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
@@ -263,9 +284,11 @@ export interface NetworkSettings {
 export type NetworkSettingsFor =
 	| { InternetComputer: null }
 	| { BaseSepolia: null }
+	| { PolygonMainnet: null }
 	| { SolanaTestnet: null }
 	| { BitcoinRegtest: null }
 	| { SolanaDevnet: null }
+	| { PolygonAmoy: null }
 	| { EthereumSepolia: null }
 	| { BitcoinTestnet: null }
 	| { BaseMainnet: null }
@@ -287,20 +310,6 @@ export interface PendingTransaction {
 	txid: Uint8Array | number[];
 	utxos: Array<Utxo>;
 }
-export type Result = { Ok: null } | { Err: AddDappSettingsError };
-export type Result_1 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
-export type Result_10 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_11 = { Ok: null } | { Err: SaveTestnetsSettingsError };
-export type Result_2 = { Ok: null } | { Err: BtcAddPendingTransactionError };
-export type Result_3 =
-	| { Ok: BtcGetPendingTransactionsReponse }
-	| { Err: BtcAddPendingTransactionError };
-export type Result_4 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
-export type Result_5 = { Ok: Contact } | { Err: ContactError };
-export type Result_6 = { Ok: CreateChallengeResponse } | { Err: CreateChallengeError };
-export type Result_7 = { Ok: bigint } | { Err: ContactError };
-export type Result_8 = { Ok: GetAllowedCyclesResponse } | { Err: GetAllowedCyclesError };
-export type Result_9 = { Ok: Array<Contact> } | { Err: ContactError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -322,6 +331,7 @@ export interface SetShowTestnetsRequest {
 	current_user_version: [] | [bigint];
 	show_testnets: boolean;
 }
+export type SetUserShowTestnetsResult = { Ok: null } | { Err: SaveTestnetsSettingsError };
 export interface Settings {
 	networks: NetworksSettings;
 	dapp: DappSettings;
@@ -444,23 +454,29 @@ export interface Utxo {
 }
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], AddUserCredentialResult>;
-	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result>;
-	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], Result_1>;
-	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_2>;
-	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_3>;
-	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_4>;
+	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], AddUserHiddenDappIdResult>;
+	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
+	btc_add_pending_transaction: ActorMethod<
+		[BtcAddPendingTransactionRequest],
+		BtcAddPendingTransactionResult
+	>;
+	btc_get_pending_transactions: ActorMethod<
+		[BtcGetPendingTransactionsRequest],
+		BtcGetPendingTransactionsResult
+	>;
+	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], BtcSelectUserUtxosFeeResult>;
 	config: ActorMethod<[], Config>;
-	create_contact: ActorMethod<[CreateContactRequest], Result_5>;
-	create_pow_challenge: ActorMethod<[], Result_6>;
+	create_contact: ActorMethod<[CreateContactRequest], GetContactResult>;
+	create_pow_challenge: ActorMethod<[], CreatePowChallengeResult>;
 	create_user_profile: ActorMethod<[], UserProfile>;
-	delete_contact: ActorMethod<[bigint], Result_7>;
+	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
-	get_allowed_cycles: ActorMethod<[], Result_8>;
+	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
-	get_contact: ActorMethod<[bigint], Result_5>;
-	get_contacts: ActorMethod<[], Result_9>;
+	get_contact: ActorMethod<[bigint], GetContactResult>;
+	get_contacts: ActorMethod<[], GetContactsResult>;
 	get_snapshot: ActorMethod<[], [] | [UserSnapshot]>;
-	get_user_profile: ActorMethod<[], Result_10>;
+	get_user_profile: ActorMethod<[], GetUserProfileResult>;
 	has_user_profile: ActorMethod<[], HasUserProfileResponse>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
@@ -470,12 +486,15 @@ export interface _SERVICE {
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_snapshot: ActorMethod<[UserSnapshot], undefined>;
-	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_11>;
+	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], SetUserShowTestnetsResult>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
-	update_contact: ActorMethod<[Contact], Result_5>;
-	update_user_network_settings: ActorMethod<[SaveNetworksSettingsRequest], Result_11>;
+	update_contact: ActorMethod<[Contact], GetContactResult>;
+	update_user_network_settings: ActorMethod<
+		[SaveNetworksSettingsRequest],
+		SetUserShowTestnetsResult
+	>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

@@ -27,6 +27,7 @@
 			"no_results": "No results",
 			"paste": "Paste",
 			"to": "To",
+			"add": "Add",
 			"more_items": "+$items more"
 		},
 		"info": {
@@ -242,7 +243,7 @@
 		"text": {
 			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base and BNB",
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon and BNB",
 			"done": "Enjoy $oisy_short"
 		},
 		"alt": {
@@ -265,8 +266,7 @@
 			"no_solana_network": "No Solana network for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
 			"loading_address": "Error while loading the $symbol address.",
-			"loading_balance": "Error while loading the ETH balance.",
-			"loading_balance_symbol": "Error while loading $symbol balance.",
+			"loading_balance": "Error while loading $symbol balance for network $network.",
 			"erc20_contracts": "Error while loading the ERC20 contracts.",
 			"spl_tokens": "Error while loading the SPL tokens.",
 			"minter_ckbtc_btc": "A configured minter is required to convert ckBTC to BTC.",
@@ -468,7 +468,8 @@
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
-			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient."
+			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
+			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>"
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -596,13 +597,18 @@
 			"expected_minimum": "Expected minimum",
 			"you_receive": "You receive",
 			"select": "Select >",
-			"select_swap_provider": "Select swap provider"
+			"select_swap_provider": "Select swap provider",
+			"open_icp_swap": "Open ICP Swap website"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
-			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again."
+			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again.",
+			"pool_not_found": "Swap failed. Pool not found.",
+			"deposit_error": "Swap failed. We couldn’t deposit your tokens into the pool. Please try again.",
+			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: ",
+			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance."
 		}
 	},
 	"buy": {
@@ -1020,7 +1026,9 @@
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
 			"add_new_contact": "Add new contact",
-			"add_contact": "Add contact"
+			"add_contact": "Add contact",
+			"search_contact": "Search contact",
+			"no_contact_found": "No contacts found"
 		},
 		"show_contact": {
 			"title": "Contact",

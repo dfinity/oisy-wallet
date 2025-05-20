@@ -142,6 +142,8 @@ export const REWARDS_STATE_MODAL_SHARE_BUTTON = 'reward-state-modal-share-button
 export const REWARDS_BANNER = 'rewards-banner';
 export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 export const REWARDS_STATUS_BUTTON = 'reward-status-button';
+export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
+export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
 
 export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
 export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
@@ -185,6 +187,7 @@ export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
 export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
+export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-input';
 
 export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button';
 export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';
@@ -199,3 +202,5 @@ export const CONVERT_AMOUNT_DISPLAY_VALUE = 'convert-amount-display-value';
 export const CONVERT_AMOUNT_DISPLAY_SKELETON = 'convert-amount-display-skeleton';
 export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
+
+export const SEND_FEE_INFO = 'send-fee-info';

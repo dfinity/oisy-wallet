@@ -48,7 +48,7 @@ describe('ShowContactStep', () => {
 		const { getByText, getByTestId } = render(ShowContactStep, {
 			props: {
 				contact: mockContact,
-				close: mockClose
+				onClose: mockClose
 			}
 		});
 
@@ -76,8 +76,8 @@ describe('ShowContactStep', () => {
 		const { getByTestId } = render(ShowContactStep, {
 			props: {
 				contact: mockContact,
-				close: mockClose,
-				addAddress: mockAddAddress
+				onClose: mockClose,
+				onAddAddress: mockAddAddress
 			}
 		});
 
@@ -92,7 +92,7 @@ describe('ShowContactStep', () => {
 		const { getByTestId } = render(ShowContactStep, {
 			props: {
 				contact: mockContact,
-				close: mockClose
+				onClose: mockClose
 			}
 		});
 
@@ -106,8 +106,8 @@ describe('ShowContactStep', () => {
 		const { getByTestId } = render(ShowContactStep, {
 			props: {
 				contact: mockContact,
-				close: mockClose,
-				addAddress: mockAddAddress
+				onClose: mockClose,
+				onAddAddress: mockAddAddress
 			}
 		});
 
@@ -121,7 +121,7 @@ describe('ShowContactStep', () => {
 		const { getByText } = render(ShowContactStep, {
 			props: {
 				contact: mockContactWithAddresses,
-				close: mockClose
+				onClose: mockClose
 			}
 		});
 
@@ -138,8 +138,8 @@ describe('ShowContactStep', () => {
 		const { getAllByText } = render(ShowContactStep, {
 			props: {
 				contact: mockContactWithAddresses,
-				close: mockClose,
-				showAddress: mockShowAddress
+				onClose: mockClose,
+				onShowAddress: mockShowAddress
 			}
 		});
 
@@ -160,8 +160,8 @@ describe('ShowContactStep', () => {
 		const { getByTestId } = render(ShowContactStep, {
 			props: {
 				contact: mockContact,
-				close: mockClose,
-				edit: mockEdit
+				onClose: mockClose,
+				onEdit: mockEdit
 			}
 		});
 
