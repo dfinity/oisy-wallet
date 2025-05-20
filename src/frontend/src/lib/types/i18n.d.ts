@@ -966,7 +966,7 @@ interface I18nContact {
 }
 
 interface I18nAddress {
-	types: { Icrc2: string; Btc: string; Eth: string; Sol: string };
+	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
 }
 
 interface I18nSigner {

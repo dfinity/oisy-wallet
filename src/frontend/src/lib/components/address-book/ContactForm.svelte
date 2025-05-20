@@ -3,9 +3,9 @@
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { ADDRESS_BOOK_CONTACT_NAME_INPUT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Contact } from '$lib/types/contact';
+	import type { ContactUi } from '$lib/types/contact';
 
-	let { contact = $bindable() }: { contact: Partial<Contact> } = $props();
+	let { contact = $bindable() }: { contact: Partial<ContactUi> } = $props();
 
 	let isValid = $derived(notEmptyString(contact?.name?.trim?.()));
 

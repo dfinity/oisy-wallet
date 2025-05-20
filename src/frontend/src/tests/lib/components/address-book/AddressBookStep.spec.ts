@@ -3,27 +3,30 @@ import {
 	ADDRESS_BOOK_ADD_CONTACT_BUTTON,
 	ADDRESS_BOOK_SEARCH_CONTACT_INPUT
 } from '$lib/constants/test-ids.constants';
-import type { Contact } from '$lib/types/contact';
+import type { ContactUi } from '$lib/types/contact';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('AddressBookStep', () => {
-	const baseContacts: Contact[] = [
+	const baseContacts: ContactUi[] = [
 		{
-			id: 'contact-1',
+			id: 1n,
 			name: 'Test Contact 1',
 			addresses: [
 				{
-					address: '0x123456789abcdef',
-					addressType: 'Btc',
-					alias: 'My ETH Address'
+					address: mockEthAddress,
+					label: 'My ETH Address',
+					addressType: 'Eth'
 				}
-			]
+			],
+			updateTimestampNs: BigInt(Date.now())
 		},
 		{
-			id: 'contact-2',
+			id: 2n,
 			name: 'Test Contact 2',
-			addresses: []
+			addresses: [],
+			updateTimestampNs: BigInt(Date.now())
 		}
 	];
 	const mockAddContact = vi.fn();
@@ -154,7 +157,10 @@ describe('AddressBookStep', () => {
 	});
 
 	it('should support partial multi-word matching', async () => {
-		const contacts = [...baseContacts, { id: 'contact-3', name: 'Jane Smith', addresses: [] }];
+		const contacts = [
+			...baseContacts,
+			{ id: 3n, name: 'Jane Smith', addresses: [], update_timestamp_ns: BigInt(Date.now()) }
+		];
 
 		const { getByTestId, queryByText } = render(AddressBookStep, {
 			props: {
@@ -172,7 +178,10 @@ describe('AddressBookStep', () => {
 	});
 
 	it('should support case-insensitive and trimmed matching', async () => {
-		const contacts = [...baseContacts, { id: 'contact-4', name: 'Case Sensitive', addresses: [] }];
+		const contacts = [
+			...baseContacts,
+			{ id: 4n, name: 'Case Sensitive', addresses: [], update_timestamp_ns: BigInt(Date.now()) }
+		];
 
 		const { getByTestId, queryByText } = render(AddressBookStep, {
 			props: {
@@ -189,7 +198,10 @@ describe('AddressBookStep', () => {
 	});
 
 	it('should match contact by emoji', async () => {
-		const contacts = [...baseContacts, { id: 'contact-5', name: 'Test 😀 Contact', addresses: [] }];
+		const contacts = [
+			...baseContacts,
+			{ id: 5n, name: 'Test 😀 Contact', addresses: [], update_timestamp_ns: BigInt(Date.now()) }
+		];
 
 		const { getByTestId, queryByText } = render(AddressBookStep, {
 			props: {

@@ -1,6 +1,6 @@
 import ContactForm from '$lib/components/address-book/ContactForm.svelte';
 import { ADDRESS_BOOK_CONTACT_NAME_INPUT } from '$lib/constants/test-ids.constants';
-import type { Contact } from '$lib/types/contact';
+import type { ContactUi } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
@@ -14,7 +14,7 @@ describe('ContactForm', () => {
 	});
 
 	it('should validate successfully when name is provided', async () => {
-		const contact: Partial<Contact> = {};
+		const contact: Partial<ContactUi> = {};
 		const { component, getByTestId } = render(ContactForm, { props: { contact } });
 
 		// Enter a name
@@ -26,7 +26,7 @@ describe('ContactForm', () => {
 	});
 
 	it('should fail validation when name is empty', () => {
-		const contact: Partial<Contact> = {};
+		const contact: Partial<ContactUi> = {};
 		const { component } = render(ContactForm, { props: { contact } });
 
 		// Check that validation failed
@@ -34,7 +34,7 @@ describe('ContactForm', () => {
 	});
 
 	it('should fail validation when name is only spaces', () => {
-		const contact: Partial<Contact> = { name: '   ' };
+		const contact: Partial<ContactUi> = { name: '   ' };
 		const { component } = render(ContactForm, { props: { contact } });
 
 		// Check that validation failed

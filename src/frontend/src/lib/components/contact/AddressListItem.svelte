@@ -9,11 +9,11 @@
 		ADDRESS_LIST_ITEM_INFO_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Address } from '$lib/types/contact';
+	import type { ContactAddressUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
-		address: Address;
+		address: ContactAddressUi;
 		onInfo?: () => void;
 		onClick?: () => void;
 		styleClass?: string;
@@ -40,8 +40,8 @@
 			</span>
 		</div>
 		<div class="flex items-center gap-1">
-			{#if notEmptyString(address.alias)}
-				<span class="font-bold">{address.alias}</span>
+			{#if notEmptyString(address.label)}
+				<span class="font-bold">{address.label}</span>
 				<span class="text-[0.5rem]">•</span>
 			{/if}
 			<span>{displayAddress}</span>

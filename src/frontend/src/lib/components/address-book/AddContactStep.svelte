@@ -11,21 +11,21 @@
 		ADDRESS_BOOK_SAVE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Contact } from '$lib/types/contact';
+	import type { ContactUi } from '$lib/types/contact';
 
 	interface Props {
-		onAddContact: (contact: Contact) => void;
+		onAddContact: (contact: ContactUi) => void;
 		onClose: () => void;
 	}
 
 	let { onAddContact, onClose }: Props = $props();
 
-	let contact: Partial<Contact> = $state({ addresses: [] });
+	let contact: Partial<ContactUi> = $state({ addresses: [] });
 	let form: ContactForm | undefined = $state();
 
 	const handleAdd = () => {
 		if (form?.isValid) {
-			onAddContact(contact as Contact);
+			onAddContact(contact as ContactUi);
 		}
 	};
 
