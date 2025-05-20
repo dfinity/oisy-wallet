@@ -8,6 +8,8 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token';
+	import {isPrivacyMode} from "$lib/derived/settings.derived";
+	import IconDots from "$lib/components/icons/IconDots.svelte";
 
 	export let token: OptionTokenUi;
 
@@ -20,17 +22,29 @@
 		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol) && !(token.balance === ZERO)}
-			<Amount amount={token.balance} decimals={token.decimals} symbol={token.symbol} />
+			{#if $isPrivacyMode}
+				<IconDots variant="lg" times={6} styleClass="h-17 mt-4" />
+			{:else}
+				<Amount amount={token.balance} decimals={token.decimals} symbol={token.symbol} />
+			{/if}
 		{:else}
-			<span class:animate-pulse={$loading}>0.00</span>
+			<span class:animate-pulse={$loading}>
+				{#if $isPrivacyMode}
+					<IconDots variant="lg" times={6} styleClass="h-17 mt-4" />
+				{:else}
+					0.00
+				{/if}
+			</span>
 		{/if}
 	</output>
 
-	<span class="text-xl font-bold opacity-50">
-		<TokenExchangeBalance
-			balance={token?.balance}
-			usdBalance={token?.usdBalance}
-			nullishBalanceMessage={$i18n.hero.text.unavailable_balance}
-		/>
-	</span>
+	{#if !$isPrivacyMode}
+		<span class="text-xl font-bold opacity-50">
+			<TokenExchangeBalance
+				balance={token?.balance}
+				usdBalance={token?.usdBalance}
+				nullishBalanceMessage={$i18n.hero.text.unavailable_balance}
+			/>
+		</span>
+	{/if}
 </span>
