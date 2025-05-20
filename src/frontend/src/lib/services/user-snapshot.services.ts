@@ -209,20 +209,14 @@ const getLastTransactionsByToken = ({
 
 	const isEthOrEvm = isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId);
 
-	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses(
-		get(ckEthMinterInfoStore)?.[ETHEREUM_TOKEN_ID]
+	const ckEthMinterInfoAddresses = toCkMinterInfoAddresses(
+		get(ckEthMinterInfoStore)?.[
+			isNetworkIdSepolia(networkId) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
+		]
 	);
 	// If there are no minter info addresses, we cannot map the transactions. We return undefined to skip this token.
 	// Since we are sending snapshots at several intervals and refreshes, it is not necessary to raise an error.
-	if (isEthOrEvm && isNullish(ckEthMinterInfoAddressesMainnet)) {
-		return [];
-	}
-	const ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses(
-		get(ckEthMinterInfoStore)?.[SEPOLIA_TOKEN_ID]
-	);
-	// If there are no minter info addresses, we cannot map the transactions. We return undefined to skip this token.
-	// Since we are sending snapshots at several intervals and refreshes, it is not necessary to raise an error.
-	if (isEthOrEvm && isNullish(ckEthMinterInfoAddressesSepolia)) {
+	if (isEthOrEvm && isNullish(ckEthMinterInfoAddresses)) {
 		return [];
 	}
 
@@ -230,9 +224,7 @@ const getLastTransactionsByToken = ({
 		? (get(ethTransactionsStore)?.[tokenId] ?? []).map((transaction) =>
 				mapEthTransactionUi({
 					transaction,
-					ckMinterInfoAddresses: isNetworkIdSepolia(networkId)
-						? ckEthMinterInfoAddressesSepolia
-						: ckEthMinterInfoAddressesMainnet,
+					ckMinterInfoAddresses: ckEthMinterInfoAddresses,
 					$ethAddress: account
 				})
 			)
