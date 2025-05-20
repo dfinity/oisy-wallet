@@ -603,6 +603,7 @@ interface I18nTokens {
 		hide_token: string;
 		select_token: string;
 		exchange_is_not_available: string;
+		exchange_is_not_available_short: string;
 		source_token_title: string;
 		destination_token_title: string;
 		chain_key: string;
