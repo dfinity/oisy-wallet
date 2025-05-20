@@ -1,118 +1,279 @@
-import type { BitcoinNetwork, EthSignTransactionRequest, SendBtcResponse } from '$declarations/';
-import { SignerCanister } from '$lib/canisters/signer.canister';
-import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
-import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type {
-	GetSchnorrPublicKeyParams,
-	SendBtcParams,
-	SignWithSchnorrParams
-} from '$lib/types/api';
-import type { CanisterApiFunctionParams } from '$lib/types/canister';
+	Account,
+	Allowance,
+	AllowanceArgs,
+	BlockIndex,
+	CreateCanisterArgs,
+	CreateCanisterSuccess,
+	DataCertificate,
+	DepositArgs,
+	DepositResult,
+	GetArchivesArgs,
+	GetArchivesResult,
+	GetBlocksArgs,
+	GetBlocksResult,
+	HttpRequest,
+	HttpResponse,
+	MetadataValue,
+	SupportedBlockType,
+	SupportedStandard,
+	TransferArgs,
+	TransferError,
+	TransferFromArgs,
+	TransferFromError,
+	WithdrawArgs
+} from '$declarations/cycles_ledger/cycles_ledger.did';
+import { CyclesLedgerCanister } from '$lib/canisters/cycles-ledger.canister';
+import type { CanisterApiFunctionParams, LedgerCanisterIdText } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 
-let canister: SignerCanister | undefined = undefined;
+// Assuming we'll add this to constants
+const CYCLES_LEDGER_CANISTER_ID: LedgerCanisterIdText = 'rkp4c-7iaaa-aaaaa-aaaca-cai'; // This is a placeholder and should be replaced
 
-export const getBtcAddress = async ({
+let canister: CyclesLedgerCanister | undefined = undefined;
+
+export const icrc1BalanceOf = async ({
 	identity,
-	network
+	account,
+	certified
+}: CanisterApiFunctionParams<
+	{
+		account: Account;
+	} & QueryParams
+>): Promise<bigint> => {
+	const { icrc1BalanceOf } = await cyclesLedgerCanister({ identity });
+
+	return icrc1BalanceOf({ account, certified });
+};
+
+export const icrc1Decimals = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<number> => {
+	const { icrc1Decimals } = await cyclesLedgerCanister({ identity });
+
+	return icrc1Decimals({ certified });
+};
+
+export const icrc1Fee = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<bigint> => {
+	const { icrc1Fee } = await cyclesLedgerCanister({ identity });
+
+	return icrc1Fee({ certified });
+};
+
+export const icrc1Metadata = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<Array<[string, MetadataValue]>> => {
+	const { icrc1Metadata } = await cyclesLedgerCanister({ identity });
+
+	return icrc1Metadata({ certified });
+};
+
+export const icrc1MintingAccount = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<[] | [Account]> => {
+	const { icrc1MintingAccount } = await cyclesLedgerCanister({ identity });
+
+	return icrc1MintingAccount({ certified });
+};
+
+export const icrc1Name = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<string> => {
+	const { icrc1Name } = await cyclesLedgerCanister({ identity });
+
+	return icrc1Name({ certified });
+};
+
+export const icrc1Symbol = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<string> => {
+	const { icrc1Symbol } = await cyclesLedgerCanister({ identity });
+
+	return icrc1Symbol({ certified });
+};
+
+export const icrc1TotalSupply = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<bigint> => {
+	const { icrc1TotalSupply } = await cyclesLedgerCanister({ identity });
+
+	return icrc1TotalSupply({ certified });
+};
+
+export const icrc1Transfer = async ({
+	identity,
+	args
 }: CanisterApiFunctionParams<{
-	network: BitcoinNetwork;
-}>): Promise<BtcAddress> => {
-	const { getBtcAddress } = await signerCanister({ identity });
+	args: TransferArgs;
+}>): Promise<{ Ok: BlockIndex } | { Err: TransferError }> => {
+	const { icrc1Transfer } = await cyclesLedgerCanister({ identity });
 
-	return getBtcAddress({ network });
+	return icrc1Transfer(args);
 };
 
-export const getEthAddress = async ({
-	identity
-}: CanisterApiFunctionParams): Promise<EthAddress> => {
-	const { getEthAddress } = await signerCanister({ identity });
-
-	return getEthAddress();
-};
-
-export const getBtcBalance = async ({
+export const icrc2Allowance = async ({
 	identity,
-	network,
-	canisterId,
-	minConfirmations
+	args,
+	certified
+}: CanisterApiFunctionParams<
+	{
+		args: AllowanceArgs;
+	} & QueryParams
+>): Promise<Allowance> => {
+	const { icrc2Allowance } = await cyclesLedgerCanister({ identity });
+
+	return icrc2Allowance({ args, certified });
+};
+
+export const icrc2Approve = async ({
+	identity,
+	args
 }: CanisterApiFunctionParams<{
-	network: BitcoinNetwork;
-	minConfirmations?: number;
-}>): Promise<bigint> => {
-	const { getBtcBalance } = await signerCanister({ identity, canisterId });
+	args: {
+		fee: [] | [bigint];
+		memo: [] | [Uint8Array | number[]];
+		from_subaccount: [] | [Uint8Array | number[]];
+		created_at_time: [] | [bigint];
+		amount: bigint;
+		expected_allowance: [] | [bigint];
+		expires_at: [] | [bigint];
+		spender: Account;
+	};
+}>): Promise<{ Ok: bigint } | { Err: unknown }> => {
+	const { icrc2Approve } = await cyclesLedgerCanister({ identity });
 
-	return getBtcBalance({ network, minConfirmations });
+	return icrc2Approve(args);
 };
 
-export const signTransaction = async ({
-	transaction,
-	identity
+export const icrc2TransferFrom = async ({
+	identity,
+	args
 }: CanisterApiFunctionParams<{
-	transaction: EthSignTransactionRequest;
-}>): Promise<string> => {
-	const { signTransaction } = await signerCanister({ identity });
+	args: TransferFromArgs;
+}>): Promise<{ Ok: bigint } | { Err: TransferFromError }> => {
+	const { icrc2TransferFrom } = await cyclesLedgerCanister({ identity });
 
-	return signTransaction({ transaction });
+	return icrc2TransferFrom(args);
 };
 
-export const signMessage = async ({
-	message,
-	identity
-}: CanisterApiFunctionParams<{ message: string }>): Promise<string> => {
-	const { personalSign } = await signerCanister({ identity });
-
-	return personalSign({ message });
-};
-
-export const signPrehash = async ({
-	hash,
-	identity
+export const createCanister = async ({
+	identity,
+	args
 }: CanisterApiFunctionParams<{
-	hash: string;
-}>): Promise<string> => {
-	const { signPrehash } = await signerCanister({ identity });
+	args: CreateCanisterArgs;
+}>): Promise<{ Ok: CreateCanisterSuccess } | { Err: unknown }> => {
+	const { createCanister } = await cyclesLedgerCanister({ identity });
 
-	return signPrehash({ hash });
+	return createCanister(args);
 };
 
-export const sendBtc = async ({
+export const deposit = async ({
 	identity,
-	...params
-}: CanisterApiFunctionParams<SendBtcParams>): Promise<SendBtcResponse> => {
-	const { sendBtc } = await signerCanister({ identity });
+	args
+}: CanisterApiFunctionParams<{
+	args: DepositArgs;
+}>): Promise<DepositResult> => {
+	const { deposit } = await cyclesLedgerCanister({ identity });
 
-	return sendBtc(params);
+	return deposit(args);
 };
 
-export const getSchnorrPublicKey = async ({
+export const withdraw = async ({
 	identity,
-	...rest
-}: CanisterApiFunctionParams<GetSchnorrPublicKeyParams>): Promise<Uint8Array | number[]> => {
-	const { getSchnorrPublicKey } = await signerCanister({ identity });
+	args
+}: CanisterApiFunctionParams<{
+	args: WithdrawArgs;
+}>): Promise<{ Ok: BlockIndex } | { Err: unknown }> => {
+	const { withdraw } = await cyclesLedgerCanister({ identity });
 
-	return await getSchnorrPublicKey(rest);
+	return withdraw(args);
 };
 
-export const signWithSchnorr = async ({
+export const icrc3GetArchives = async ({
 	identity,
-	...rest
-}: CanisterApiFunctionParams<SignWithSchnorrParams>): Promise<Uint8Array | number[]> => {
-	const { signWithSchnorr } = await signerCanister({ identity });
+	args,
+	certified
+}: CanisterApiFunctionParams<
+	{
+		args: GetArchivesArgs;
+	} & QueryParams
+>): Promise<GetArchivesResult> => {
+	const { icrc3GetArchives } = await cyclesLedgerCanister({ identity });
 
-	return await signWithSchnorr(rest);
+	return icrc3GetArchives({ args, certified });
 };
 
-const signerCanister = async ({
+export const icrc3GetBlocks = async ({
+	identity,
+	args,
+	certified
+}: CanisterApiFunctionParams<
+	{
+		args: GetBlocksArgs;
+	} & QueryParams
+>): Promise<GetBlocksResult> => {
+	const { icrc3GetBlocks } = await cyclesLedgerCanister({ identity });
+
+	return icrc3GetBlocks({ args, certified });
+};
+
+export const icrc3GetTipCertificate = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<[] | [DataCertificate]> => {
+	const { icrc3GetTipCertificate } = await cyclesLedgerCanister({ identity });
+
+	return icrc3GetTipCertificate({ certified });
+};
+
+export const icrc3SupportedBlockTypes = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<Array<SupportedBlockType>> => {
+	const { icrc3SupportedBlockTypes } = await cyclesLedgerCanister({ identity });
+
+	return icrc3SupportedBlockTypes({ certified });
+};
+
+export const icrc1SupportedStandards = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<Array<SupportedStandard>> => {
+	const { icrc1SupportedStandards } = await cyclesLedgerCanister({ identity });
+
+	return icrc1SupportedStandards({ certified });
+};
+
+export const httpRequest = async ({
+	identity,
+	request
+}: CanisterApiFunctionParams<{
+	request: HttpRequest;
+}>): Promise<HttpResponse> => {
+	const { httpRequest } = await cyclesLedgerCanister({ identity });
+
+	return httpRequest(request);
+};
+
+const cyclesLedgerCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
-	canisterId = SIGNER_CANISTER_ID
-}: CanisterApiFunctionParams): Promise<SignerCanister> => {
+	canisterId = CYCLES_LEDGER_CANISTER_ID
+}: CanisterApiFunctionParams): Promise<CyclesLedgerCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
 	if (isNullish(canister)) {
-		canister = await SignerCanister.create({
+		canister = await CyclesLedgerCanister.create({
 			identity,
 			canisterId: Principal.fromText(canisterId)
 		});
