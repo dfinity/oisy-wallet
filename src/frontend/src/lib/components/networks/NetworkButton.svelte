@@ -9,6 +9,8 @@
 	import type { LabelSize } from '$lib/types/components';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { formatUSD } from '$lib/utils/format.utils';
+	import {isPrivacyMode} from "$lib/derived/settings.derived";
+	import IconDots from "$lib/components/icons/IconDots.svelte";
 
 	export let selectedNetworkId: NetworkId | undefined = undefined;
 	export let network: Network | undefined = undefined;
@@ -60,7 +62,11 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 	<span slot="description-end">
 		<span class:text-sm={labelsSize === 'lg'} class:md:text-base={labelsSize === 'lg'}>
 			{#if nonNullish(usdBalance)}
-				{formatUSD({ value: usdBalance })}
+				{#if $isPrivacyMode}
+					<IconDots variant="xs" />
+				{:else}
+					{formatUSD({ value: usdBalance })}
+				{/if}
 			{/if}
 		</span>
 
