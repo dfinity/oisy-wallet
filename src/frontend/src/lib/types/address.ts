@@ -1,10 +1,10 @@
-import type { AddressSchema, SolAddressSchema } from '$lib/schema/address.schema';
+import type { AddressSchema, BtcAddressSchema, SolAddressSchema } from '$lib/schema/address.schema';
 import type { Option } from '$lib/types/utils';
 import type * as z from 'zod';
 
 export type Address = z.infer<typeof AddressSchema>;
 
-export type BtcAddress = Address;
+export type BtcAddress = z.infer<typeof BtcAddressSchema>;
 
 export type EthAddress = Address;
 
