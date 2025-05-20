@@ -7,6 +7,32 @@ use shared::types::contact::{Contact, ContactError, CreateContactRequest, Stored
 
 use crate::types::{Candid, ContactMap, StoredPrincipal, VMem};
 
+thread_local! {
+    pub static CONTACT_STATE: RefCell<Option<ContactMap>> = RefCell::new(None);
+}
+
+pub fn mutate_state<R>(f: impl FnOnce(&mut ContactMap) -> R) -> R {
+    CONTACT_STATE.with(|cell| {
+        let mut state_ref = cell.borrow_mut();
+        if state_ref.is_none() {
+            // This should be initialized from the main state
+            ic_cdk::trap("Contact state not initialized");
+        }
+        f(state_ref.as_mut().unwrap())
+    })
+}
+
+pub fn read_state<R>(f: impl FnOnce(&ContactMap) -> R) -> R {
+    CONTACT_STATE.with(|cell| {
+        let state_ref = cell.borrow();
+        if state_ref.is_none() {
+            // This should be initialized from the main state
+            ic_cdk::trap("Contact state not initialized");
+        }
+        f(state_ref.as_ref().unwrap())
+    })
+}
+
 
 thread_local! {
     // In-memory cache for faster access
