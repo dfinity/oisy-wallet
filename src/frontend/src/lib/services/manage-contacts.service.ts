@@ -55,10 +55,10 @@ export const createContact = async ({ name, identity }: { name: string; identity
 	if ('Ok' in result) {
 		contactsStore.addContact(mapToFrontendContact(result.Ok));
 		return result.Ok;
-	} else {
+	} 
 		console.error(result.Err);
 		throw result.Err;
-	}
+	
 };
 
 export const updateContact = async ({
@@ -73,10 +73,10 @@ export const updateContact = async ({
 	if ('Ok' in result) {
 		contactsStore.updateContact(mapToFrontendContact(result.Ok));
 		return result.Ok;
-	} else {
+	} 
 		console.error(result.Err);
 		throw result.Err;
-	}
+	
 };
 
 export const deleteContact = async ({
@@ -91,8 +91,8 @@ export const deleteContact = async ({
 	if ('Ok' in result) {
 		contactsStore.removeContact(id);
 		return result.Ok;
-	} else {
+	} 
 		console.error(result.Err);
 		throw result.Err;
-	}
+	
 };

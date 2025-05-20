@@ -25,7 +25,7 @@
 
 	const handleAdd = () => {
 		if (form?.isValid) {
-			onAddContact(contact as Contact);
+			onAddContact(contact);
 		}
 	};
 
