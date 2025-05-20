@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Tag from "$lib/components/ui/Tag.svelte";
-	import type {TagVariant} from "$lib/types/style";
-	import {nonNullish} from "@dfinity/utils";
+	import { nonNullish } from '@dfinity/utils';
+	import Tag from '$lib/components/ui/Tag.svelte';
+	import type { TagVariant } from '$lib/types/style';
 
 	export let disabled = false;
 	export let ariaLabel: string;
