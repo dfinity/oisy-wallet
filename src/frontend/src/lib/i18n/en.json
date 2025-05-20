@@ -61,7 +61,9 @@
 			"vip_qr_code": "VIP QR codes",
 			"binance_qr_code": "Binance Clubhouse QR",
 			"refer_a_friend": "Refer your friends",
-			"address_book": "Address book"
+			"address_book": "Address book",
+			"hide_balances": "Hide balances",
+			"show_balances": "Show balances"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -78,7 +80,9 @@
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
-			"address_book": "Open address book"
+			"address_book": "Open address book",
+			"hide_balances": "Hide the displayed balances",
+			"show_balances": "Show the hidden balances"
 		},
 		"short": {
 			"documentation": "Docs"
