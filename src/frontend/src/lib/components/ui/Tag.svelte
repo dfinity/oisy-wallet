@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { TagVariant } from '$lib/types/style';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		children?: Snippet;
@@ -9,7 +9,7 @@
 		size?: 'xs' | 'sm' | 'md';
 	}
 
-	let {children, ariaHidden = false, variant = 'default', size = 'xs'}: Props = $props();
+	let { children, ariaHidden = false, variant = 'default', size = 'xs' }: Props = $props();
 
 	const variantClassNames = {
 		default: 'bg-primary text-primary border border-secondary',
