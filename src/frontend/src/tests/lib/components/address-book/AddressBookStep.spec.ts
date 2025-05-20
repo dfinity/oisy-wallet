@@ -16,7 +16,7 @@ describe('AddressBookStep', () => {
 			addresses: [
 				{
 					address: mockEthAddress,
-					alias: 'My ETH Address',
+					label: 'My ETH Address',
 					addressType: 'Eth'
 				}
 			],

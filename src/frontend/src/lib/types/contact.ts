@@ -3,7 +3,7 @@ import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 
 export interface ContactAddressUi {
 	address: string;
-	alias?: string;
+	label?: string;
 	addressType: TokenAccountIdTypes;
 }
 

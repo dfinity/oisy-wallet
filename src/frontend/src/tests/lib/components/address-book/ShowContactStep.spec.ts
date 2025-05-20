@@ -25,12 +25,12 @@ describe('ShowContactStep', () => {
 		addresses: [
 			{
 				address: mockEthAddress,
-				alias: 'My ETH Address',
+				label: 'My ETH Address',
 				addressType: 'Eth'
 			},
 			{
 				address: mockBtcAddress,
-				alias: 'My BTC Address',
+				label: 'My BTC Address',
 				addressType: 'Btc'
 			}
 		],
@@ -132,7 +132,7 @@ describe('ShowContactStep', () => {
 
 		// Check that each address is displayed
 		mockContactWithAddresses.addresses.forEach((address) => {
-			expect(getByText(`ADDRESS: ${address.address} ${address.alias}`)).toBeInTheDocument();
+			expect(getByText(`ADDRESS: ${address.address} ${address.label}`)).toBeInTheDocument();
 		});
 	});
 

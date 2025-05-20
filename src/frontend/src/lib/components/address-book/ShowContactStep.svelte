@@ -39,7 +39,7 @@
 		<div>
 			{#each contact.addresses as address, index (index)}
 				<div class="flex items-center">
-					<div class="grow">ADDRESS: {address.address} {address.alias}</div>
+					<div class="grow">ADDRESS: {address.address} {address.label}</div>
 					{#if nonNullish(onShowAddress)}
 						<Button styleClass="flex-none" on:click={() => onShowAddress(address)}>Show</Button>
 					{/if}
