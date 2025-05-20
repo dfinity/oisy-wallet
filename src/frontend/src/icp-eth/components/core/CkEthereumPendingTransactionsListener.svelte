@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { isNullish, nonNullish, isEmptyString, fromNullishNullable } from '@dfinity/utils';
+	import { isNullish, nonNullish, isEmptyString, fromNullishNullable, debounce } from '@dfinity/utils';
 	import type { TransactionResponse } from 'ethers/providers';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
@@ -124,14 +124,14 @@
 
 	$: (async () => await init({ toAddress: toContractAddress, twinToken }))();
 
+	const debounceLoadPendingTransactions = debounce(async () => await loadPendingTransactions({ toAddress: toContractAddress }), 2000);
+
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
-	$: $balance,
-		$ckEthMinterInfoStore,
-		twinToken,
-		toContractAddress,
-		(async () => await loadPendingTransactions({ toAddress: toContractAddress }))();
+	// TODO: re-set the reactivity (and remove the onMount) when we find out why it is too frequent to request (most probably because the balances store is frequently refreshed and the minter info store too).
+	// $:  $balance,toContractAddress, debounceLoadPendingTransactions();
+
 
 	onDestroy(async () => await listener?.disconnect());
 </script>
