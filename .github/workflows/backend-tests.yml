@@ -83,6 +83,9 @@ jobs:
           name: backend.wasm.gz
           path: .
 
+      - name: Install dfx
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
+
       - name: 'Run backend tests'
         working-directory: .
         run: ./scripts/test.backend.sh

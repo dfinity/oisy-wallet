@@ -14,15 +14,18 @@ describe('KnownDestinations', () => {
 	const knownDestinations = {
 		[mockBtcAddress]: {
 			amounts: [{ value: 10000000n, token: BTC_MAINNET_TOKEN }],
-			timestamp: 1671234567890
+			timestamp: 1671234567890,
+			address: mockBtcAddress
 		},
 		[mockEthAddress]: {
 			amounts: [{ value: 10000000n, token: ETHEREUM_TOKEN }],
-			timestamp: 1671234567890
+			timestamp: 1671234567890,
+			address: mockEthAddress
 		},
 		[mockSolAddress]: {
 			amounts: [{ value: 10000000n, token: SOLANA_TOKEN }],
-			timestamp: 1671234567890
+			timestamp: 1671234567890,
+			address: mockSolAddress
 		}
 	};
 

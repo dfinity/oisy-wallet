@@ -10,6 +10,8 @@
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
+	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
@@ -26,13 +28,16 @@
 		NAVIGATION_MENU_VIP_BUTTON,
 		NAVIGATION_MENU_REFERRAL_BUTTON,
 		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
-		NAVIGATION_MENU_GOLD_BUTTON
+		NAVIGATION_MENU_GOLD_BUTTON,
+		NAVIGATION_MENU_PRIVACY_MODE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { privacyModeStore } from '$lib/stores/settings.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -88,6 +93,25 @@
 
 <Popover bind:visible anchor={button} direction="rtl" on:click={hidePopover}>
 	<div class="max-w-68 flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
+		<ButtonMenu
+			ariaLabel={$isPrivacyMode
+				? $i18n.navigation.alt.show_balances
+				: $i18n.navigation.alt.hide_balances}
+			testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
+			on:click={() =>
+				privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } })}
+		>
+			{#if $isPrivacyMode}
+				<IconEye />
+				{$i18n.navigation.text.show_balances}
+			{:else}
+				<IconEyeOff />
+				{$i18n.navigation.text.hide_balances}
+			{/if}
+		</ButtonMenu>
+
+		<Hr />
+
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
 			<Hr />
