@@ -145,7 +145,9 @@ export const PostMessageResponseSchema = z.enum([
 	'syncBtcPendingUtxos',
 	'syncCkBTCUpdateOk',
 	'syncBtcAddress',
-	'syncPowProtection',
+	'syncPowProgress',
+	'syncPowNextAllowance',
+	'syncPowProtectionError',
 	...PostMessageResponseStatusSchema.options
 ]);
 
@@ -202,6 +204,16 @@ export const PostMessageDataResponseBTCAddressSchema = PostMessageDataResponseSc
 	// TODO: generate zod schema for BtcAddressData
 	address: z.custom<BtcAddressData>()
 }).strict();
+
+export const PostMessageDataResponsePowProtectorProgressSchema =
+	PostMessageDataResponseSchema.extend({
+		progress: z.enum(['REQUEST_CHALLENGE', 'SOLVE_CHALLENGE', 'GRANT_CYCLES'])
+	});
+
+export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
+	PostMessageDataResponseSchema.extend({
+		nextAllowanceMs: z.custom<bigint>().optional()
+	});
 
 export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 	z.object({

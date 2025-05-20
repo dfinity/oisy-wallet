@@ -1,7 +1,9 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-import { allowSigning } from '$lib/api/backend.api';
+import { POW_FEATURE_ENABLED } from '$env/pow.env';
+import { allowSigning, getAllowedCycles } from '$lib/api/backend.api';
+import { POW_MIN_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
@@ -19,6 +21,36 @@ import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+/**
+ * Retrieves and checks if the required number of cycles are available for the user.
+ *
+ * This asynchronous function verifies whether the user has sufficient cycles to proceed with further operations.
+ * It retrieves the user's identity and calculates the number of allowed cycles. If the number of allowed cycles
+ * meets or exceeds the defined threshold (`POW_MIN_CYCLES_THRESHOLD`), the function returns `true`. Otherwise,
+ * it performs necessary error handling and signs the user out in the event of insufficient cycles or any other
+ * encountered error.
+ *
+ * @returns {Promise<boolean>} A promise resolving to `true` if the required cycles are met or exceeded,
+ * otherwise `false` if insufficient cycles are detected or an error occurs during processing.
+ */
+export const hasRequiredCycles = async (): Promise<boolean> => {
+	try {
+		const { identity } = get(authStore);
+
+		const { allowed_cycles } = await getAllowedCycles({ identity });
+
+		if (allowed_cycles >= POW_MIN_CYCLES_THRESHOLD) {
+			// The user has enough cycles to continue
+			return true;
+		}
+	} catch (_err: unknown) {
+		// In the event of any error, we sign the user out, since do not know whether the user has enough cycles to continue.
+		console.error('Error -> hasRequiredCycles: ', _err);
+		await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
+	}
+	return false;
+};
 
 /**
  * Initializes the signer allowance by calling `allow_signing`.
@@ -40,14 +72,15 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
-		await allowSigning({ identity });
+		await allowSigning({
+			identity
+		});
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);
 
 		return { success: false };
 	}
-
 	return { success: true };
 };
 
@@ -110,12 +143,13 @@ export const initLoader = async ({
 
 	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 	setProgressModal(true);
+	if (!POW_FEATURE_ENABLED) {
+		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
-	const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
-
-	if (!initSignerAllowanceSuccess) {
-		// Sign-out is handled within the service.
-		return;
+		if (!initSignerAllowanceSuccess) {
+			// Sign-out is handled within the service.
+			return;
+		}
 	}
 
 	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
