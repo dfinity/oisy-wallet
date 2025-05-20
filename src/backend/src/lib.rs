@@ -1,7 +1,7 @@
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
-use candid::{candid_method, Nat, Principal};
+use candid::{candid_method, Principal};
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
@@ -34,27 +34,24 @@ use shared::{
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        network::{
-            SaveNetworksSettingsError, SaveNetworksSettingsRequest, SaveTestnetsSettingsError,
-            SetShowTestnetsRequest,
-        },
+        network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         pow::{
-            AllowSigningStatus, ChallengeCompletion, CreateChallengeError, CreateChallengeResponse,
+            AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
-            AddUserCredentialResult, DeleteContactResult, GetContactResult, GetContactsResult,
+            AddUserCredentialResult, BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult,
+            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
+            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
-            AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesError,
-            GetAllowedCyclesResponse,
+            AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
         },
         snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
-            AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
-            HasUserProfileResponse, UserProfile,
+            AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
         },
         Stats, Timestamp,
     },
@@ -363,64 +360,73 @@ const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
-) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
-    let principal = ic_cdk::caller();
-    let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+) -> BtcSelectUserUtxosFeeResult {
+    async fn inner(
+        params: SelectedUtxosFeeRequest,
+    ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
+        let principal = ic_cdk::caller();
+        let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+            .await
+            .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+        let all_utxos = bitcoin_api::get_all_utxos(
+            params.network,
+            source_address.clone(),
+            Some(
+                params
+                    .min_confirmations
+                    .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+            ),
+        )
         .await
         .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
-    let all_utxos = bitcoin_api::get_all_utxos(
-        params.network,
-        source_address.clone(),
-        Some(
-            params
-                .min_confirmations
-                .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
-        ),
-    )
-    .await
-    .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
-    let now_ns = time();
+        let now_ns = time();
 
-    let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
-        pending_transactions.prune_pending_transactions(principal, &all_utxos, now_ns);
-        !pending_transactions
-            .get_pending_transactions(&principal, &source_address)
-            .is_empty()
-    });
-
-    if has_pending_transactions {
-        return Err(SelectedUtxosFeeError::PendingTransactions);
-    }
-
-    let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
-        .await
-        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
-    // We support sending to one destination only.
-    // Therefore, the outputs are the destination and the source address for the change.
-    let output_count = 2;
-    let mut available_utxos = all_utxos.clone();
-    let selected_utxos =
-        bitcoin_utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
-
-    // Fee calculation might still take into account default tx size and expected output.
-    // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be present.
-    if selected_utxos.is_empty() {
-        return Ok(SelectedUtxosFeeResponse {
-            utxos: selected_utxos,
-            fee_satoshis: 0,
+        let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
+            pending_transactions.prune_pending_transactions(principal, &all_utxos, now_ns);
+            !pending_transactions
+                .get_pending_transactions(&principal, &source_address)
+                .is_empty()
         });
+
+        if has_pending_transactions {
+            return Err(SelectedUtxosFeeError::PendingTransactions);
+        }
+
+        let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
+            .await
+            .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+        // We support sending to one destination only.
+        // Therefore, the outputs are the destination and the source address for the change.
+        let output_count = 2;
+        let mut available_utxos = all_utxos.clone();
+        let selected_utxos = bitcoin_utils::utxos_selection(
+            params.amount_satoshis,
+            &mut available_utxos,
+            output_count,
+        );
+
+        // Fee calculation might still take into account default tx size and expected output.
+        // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be
+        // present.
+        if selected_utxos.is_empty() {
+            return Ok(SelectedUtxosFeeResponse {
+                utxos: selected_utxos,
+                fee_satoshis: 0,
+            });
+        }
+
+        let fee_satoshis = estimate_fee(
+            selected_utxos.len() as u64,
+            median_fee_millisatoshi_per_vbyte,
+            output_count as u64,
+        );
+
+        Ok(SelectedUtxosFeeResponse {
+            utxos: selected_utxos,
+            fee_satoshis,
+        })
     }
-
-    let fee_satoshis = estimate_fee(
-        selected_utxos.len() as u64,
-        median_fee_millisatoshi_per_vbyte,
-        output_count as u64,
-    );
-
-    Ok(SelectedUtxosFeeResponse {
-        utxos: selected_utxos,
-        fee_satoshis,
-    })
+    inner(params).await.into()
 }
 
 /// Adds a pending Bitcoin transaction for the caller.
@@ -461,36 +467,41 @@ pub async fn btc_add_pending_transaction(
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn btc_get_pending_transactions(
     params: BtcGetPendingTransactionsRequest,
-) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
-    let principal = ic_cdk::caller();
-    let now_ns = time();
+) -> BtcGetPendingTransactionsResult {
+    async fn inner(
+        params: BtcGetPendingTransactionsRequest,
+    ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
+        let principal = ic_cdk::caller();
+        let now_ns = time();
 
-    let current_utxos = bitcoin_api::get_all_utxos(
-        params.network,
-        params.address.clone(),
-        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
-    )
-    .await
-    .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
+        let current_utxos = bitcoin_api::get_all_utxos(
+            params.network,
+            params.address.clone(),
+            Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+        )
+        .await
+        .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
 
-    let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
-        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
-        pending_transactions
-            .get_pending_transactions(&principal, &params.address)
-            .clone()
-    });
+        let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
+            pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+            pending_transactions
+                .get_pending_transactions(&principal, &params.address)
+                .clone()
+        });
 
-    let pending_transactions = stored_transactions
-        .iter()
-        .map(|tx| PendingTransaction {
-            txid: tx.txid.clone(),
-            utxos: tx.utxos.clone(),
+        let pending_transactions = stored_transactions
+            .iter()
+            .map(|tx| PendingTransaction {
+                txid: tx.txid.clone(),
+                utxos: tx.utxos.clone(),
+            })
+            .collect();
+
+        Ok(BtcGetPendingTransactionsReponse {
+            transactions: pending_transactions,
         })
-        .collect();
-
-    Ok(BtcGetPendingTransactionsReponse {
-        transactions: pending_transactions,
-    })
+    }
+    inner(params).await.into()
 }
 
 /// Adds a verifiable credential to the user profile.
@@ -574,9 +585,8 @@ pub fn update_user_network_settings(
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)] // canister methods are necessary
-pub fn set_user_show_testnets(
-    request: SetShowTestnetsRequest,
-) -> Result<(), SaveTestnetsSettingsError> {
+#[must_use]
+pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTestnetsResult {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
 
@@ -590,6 +600,7 @@ pub fn set_user_show_testnets(
             &mut user_profile_model,
         )
     })
+    .into()
 }
 
 /// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
@@ -669,7 +680,8 @@ pub fn create_user_profile() -> UserProfile {
 /// # Panics
 /// - If the caller is anonymous.  See: `may_read_user_data`.
 #[query(guard = "caller_is_not_anonymous")]
-pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
+#[must_use]
+pub fn get_user_profile() -> GetUserProfileResult {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -680,6 +692,7 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
             Err(err) => Err(err),
         }
     })
+    .into()
 }
 
 /// Creates a new proof-of-work challenge for the caller.
@@ -694,14 +707,17 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 ///   internal errors.
 #[update(guard = "caller_is_not_anonymous")]
 #[candid_method(update)]
-pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
-    let challenge = pow::create_pow_challenge().await?;
+pub async fn create_pow_challenge() -> CreatePowChallengeResult {
+    let challenge = pow::create_pow_challenge().await;
 
-    Ok(CreateChallengeResponse {
-        difficulty: challenge.difficulty,
-        start_timestamp_ms: challenge.start_timestamp_ms,
-        expiry_timestamp_ms: challenge.expiry_timestamp_ms,
-    })
+    match challenge {
+        Ok(challenge) => CreatePowChallengeResult::Ok(CreateChallengeResponse {
+            difficulty: challenge.difficulty,
+            start_timestamp_ms: challenge.start_timestamp_ms,
+            expiry_timestamp_ms: challenge.expiry_timestamp_ms,
+        }),
+        Err(err) => CreatePowChallengeResult::Err(err),
+    }
 }
 /// Checks if the caller has an associated user profile.
 ///
@@ -731,9 +747,12 @@ pub fn has_user_profile() -> HasUserProfileResponse {
 /// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
 /// - `Other`: If another error occurred during the operation
 #[update(guard = "caller_is_not_anonymous")]
-pub async fn get_allowed_cycles() -> Result<GetAllowedCyclesResponse, GetAllowedCyclesError> {
-    let allowed_cycles: Nat = signer::get_allowed_cycles().await?;
-    Ok(GetAllowedCyclesResponse { allowed_cycles })
+pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
+    let allowed_cycles = signer::get_allowed_cycles().await;
+    match allowed_cycles {
+        Ok(allowed_cycles) => Ok(GetAllowedCyclesResponse { allowed_cycles }).into(),
+        Err(err) => GetAllowedCyclesResult::Err(err),
+    }
 }
 
 /// This function authorizes the caller to spend a specific
