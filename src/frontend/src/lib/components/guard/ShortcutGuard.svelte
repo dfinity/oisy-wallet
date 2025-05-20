@@ -1,5 +1,4 @@
 <script lang="ts">
-
     import type {Snippet} from "svelte";
     import {privacyModeStore} from "$lib/stores/settings.store";
     import {isPrivacyMode} from "$lib/derived/settings.derived";
