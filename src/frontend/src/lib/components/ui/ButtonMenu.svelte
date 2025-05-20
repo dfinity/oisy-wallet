@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import type { TagVariant } from '$lib/types/style';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		children: Snippet;
@@ -13,7 +13,7 @@
 		tagVariant?: TagVariant;
 	}
 
-	let {children, disabled = false, ariaLabel, testId, tag, tagVariant}: Props = $props();
+	let { children, disabled = false, ariaLabel, testId, tag, tagVariant }: Props = $props();
 </script>
 
 <button
