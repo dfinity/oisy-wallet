@@ -1,9 +1,10 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
     export type DotVariant =
-        | 'big'
-        | 'medium'
-        | 'small';
+        | 'lg'
+        | 'md'
+        | 'sm'
+        | 'xs';
 
     interface Props {
         variant?: DotVariant;
@@ -11,10 +12,13 @@
         styleClass?: string;
     }
 
-    let {variant = 'medium', times = 5, styleClass = ''}: Props = $props();
+    let {variant = 'md', times = 5, styleClass = ''}: Props = $props();
 
-    const size = $derived(variant === 'big' ? '14' : variant === 'medium' ? '8' : '6')
-    const gap = $derived(variant === 'big' ? 'gap-2' : 'gap-1');
+    const size = $derived(variant === 'lg' ? '14' : variant === 'md' ? '8' : variant === 'sm' ? '6' : '5')
+    const gap = $derived(variant === 'lg' ? 'gap-2' : 'gap-1');
+
+
+    $effect(() => console.log(variant) )
 </script>
 
 <div class="flex {gap} {styleClass}">
