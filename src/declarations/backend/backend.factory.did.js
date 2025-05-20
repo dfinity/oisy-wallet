@@ -48,7 +48,10 @@ export const idlFactory = ({ IDL }) => {
 		DappIdTooLong: IDL.Null,
 		UserNotFound: IDL.Null
 	});
-	const Result = IDL.Variant({ Ok: IDL.Null, Err: AddDappSettingsError });
+	const AddUserHiddenDappIdResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: AddDappSettingsError
+	});
 	const AllowSigningRequest = IDL.Record({ nonce: IDL.Nat64 });
 	const AllowSigningStatus = IDL.Variant({
 		Skipped: IDL.Null,
@@ -93,7 +96,7 @@ export const idlFactory = ({ IDL }) => {
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
-	const Result_1 = IDL.Variant({
+	const AllowSigningResult = IDL.Variant({
 		Ok: AllowSigningResponse,
 		Err: AllowSigningError
 	});
@@ -120,7 +123,7 @@ export const idlFactory = ({ IDL }) => {
 	const BtcAddPendingTransactionError = IDL.Variant({
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
-	const Result_2 = IDL.Variant({
+	const BtcAddPendingTransactionResult = IDL.Variant({
 		Ok: IDL.Null,
 		Err: BtcAddPendingTransactionError
 	});
@@ -505,9 +508,13 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [AddUserCredentialResult], []),
-		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result], []),
-		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [Result_1], []),
-		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_2], []),
+		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [AddUserHiddenDappIdResult], []),
+		allow_signing: IDL.Func([IDL.Opt(AllowSigningRequest)], [AllowSigningResult], []),
+		btc_add_pending_transaction: IDL.Func(
+			[BtcAddPendingTransactionRequest],
+			[BtcAddPendingTransactionResult],
+			[]
+		),
 		btc_get_pending_transactions: IDL.Func(
 			[BtcGetPendingTransactionsRequest],
 			[BtcGetPendingTransactionsResult],
