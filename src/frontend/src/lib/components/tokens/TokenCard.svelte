@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
+	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TOKEN_CARD, type TOKEN_GROUP } from '$lib/constants/test-ids.constants';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
@@ -58,7 +60,11 @@
 		</span>
 
 		<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap" slot="title-end">
-			<TokenBalance {data} />
+			<TokenBalance {data} hideBalance={$isPrivacyMode}>
+				{#snippet privacyBalance()}
+					<IconDots variant={asNetwork ? 'sm' : 'md'} styleClass={asNetwork ? 'my-4.25' : 'pb-4'} />
+				{/snippet}
+			</TokenBalance>
 		</span>
 
 		<span class:text-sm={asNetwork} slot="description">
@@ -75,7 +81,9 @@
 		</span>
 
 		<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap" slot="description-end">
-			<ExchangeTokenValue {data} />
+			{#if !$isPrivacyMode}
+				<ExchangeTokenValue {data} />
+			{/if}
 		</span>
 	</LogoButton>
 </div>
