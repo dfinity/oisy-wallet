@@ -27,6 +27,7 @@
 			"no_results": "No results",
 			"paste": "Paste",
 			"to": "To",
+			"add": "Add",
 			"more_items": "+$items more"
 		},
 		"info": {
@@ -246,7 +247,7 @@
 		"text": {
 			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base and BNB",
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon and BNB",
 			"done": "Enjoy $oisy_short"
 		},
 		"alt": {
@@ -1029,7 +1030,9 @@
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
 			"add_new_contact": "Add new contact",
-			"add_contact": "Add contact"
+			"add_contact": "Add contact",
+			"search_contact": "Search contact",
+			"no_contact_found": "No contacts found"
 		},
 		"show_contact": {
 			"title": "Contact",
