@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
-set -euox pipefail
+set -euo pipefail
 
 print_help() {
   cat <<-EOF
-		Creates the cycles_ledger installation files:
+	Creates the Kong Backend installation files:
 
-		- The Wasm and Candid files are downloaded.
-		- The installation args are computed based on the target network,
-		      determined by the DFX_NETWORK environment variable.
+	- The Wasm and Candid files are downloaded.
 
-		The files are installed at at the locations defined for 'cycles_ledger' in 'dfx.json'.
+	The files are installed at at the locations defined for 'cycles_ledger' in 'dfx.json'.
 	EOF
 }
 
@@ -18,42 +16,41 @@ print_help() {
   exit 0
 }
 
-DFX_NETWORK="${DFX_NETWORK:-local}"
-
+CYCLES_LEDGER_BUILDENV="$DFX_NETWORK"
+export CYCLES_LEDGER_BUILDENV
 LEDGER_RELEASE="v1.0.1"
-CANDID_URL="https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-${LEDGER_RELEASE}/cycles-ledger.did"
-WASM_URL="https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-${LEDGER_RELEASE}/cycles-ledger.wasm.gz"
+CYCLES_LEDGER_REPO_URL="https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-${LEDGER_RELEASE}"
+# shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
+CANDID_URL="${CYCLES_LEDGER_REPO_URL}/cycles-ledger.did"
+# shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
+WASM_URL="${CYCLES_LEDGER_REPO_URL}/cycles-ledger.wasm.gz"
 
 CANDID_FILE="$(jq -r .canisters.cycles_ledger.candid dfx.json)"
 WASM_FILE="$(jq -r .canisters.cycles_ledger.wasm dfx.json)"
-ARG_FILE="$(jq -r .canisters.cycles_ledger.init_arg_file dfx.json)"
+
+download() {
+  : 'Downloads a URL to a given file.'
+  # shellcheck disable=SC2016 # The $ in the comment is not meant to be expanded.
+  local asset asset_url asset_file
+  asset="$1"
+  asset_url="${asset^^}_URL"
+  asset_file="${asset^^}_FILE"
+  scripts/download-immutable.sh "${!asset_url}" "${!asset_file}"
+}
 
 ####
 # Downloads the candid file, if it does not exist already.
-if test -e "$CANDID_FILE"; then
-  echo "Using existing cycles_ledger candid file"
-else
-  mkdir -p "$(dirname "$CANDID_FILE")"
-  curl -sSL "$CANDID_URL" >"$CANDID_FILE"
-fi
+download candid
 
 ####
 # Downloads the Wasm file, if it does not exist already.
-if test -e "$WASM_FILE"; then
-  echo "Using existing cycles_ledger Wasm file"
-else
-  mkdir -p "$(dirname "$WASM_FILE")"
-  curl -sSL "$WASM_URL" >"$WASM_FILE"
-fi
+download wasm
 
 ####
-# Computes the install args, overwriting any existing args file.
-scripts/build.cycles_ledger.args.sh
-
 # Success
 cat <<EOF
 SUCCESS: The cycles_ledger installation files have been created:
 cycles_ledger candid:       $CANDID_FILE
 cycles_ledger Wasm:         $WASM_FILE
-cycles_ledger install args: $ARG_FILE
 EOF
+exit
