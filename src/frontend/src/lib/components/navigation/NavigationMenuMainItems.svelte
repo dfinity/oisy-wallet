@@ -33,7 +33,7 @@
 		testIdPrefix?: string;
 	}
 
-	let {testIdPrefix}: Props = $props();
+	let { testIdPrefix }: Props = $props();
 
 	const addTestIdPrefix = (testId: string): string =>
 		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
