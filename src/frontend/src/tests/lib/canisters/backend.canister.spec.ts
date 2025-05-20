@@ -13,6 +13,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
@@ -1042,6 +1043,171 @@ describe('backend.canister', () => {
 			const res = updateUserNetworkSettings({
 				networks: mockUserNetworks
 			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('getContact', () => {
+		it('should call get_contact service', async () => {
+			const [mockContact] = getMockContacts({ n: 1 });
+			const response = { Ok: mockContact };
+
+			service.get_contact.mockResolvedValue(response);
+
+			const { getContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getContact(1n);
+
+			expect(service.get_contact).toHaveBeenCalledWith(1n);
+			expect(res).toEqual(response);
+		});
+
+		it('should throw an error if get_contact throws', async () => {
+			service.get_contact.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = getContact(1n);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('getContacts', () => {
+		it('should call get_contacts service', async () => {
+			const mockContacts = getMockContacts({ n: 4 });
+			const response = { Ok: mockContacts };
+
+			service.get_contacts.mockResolvedValue(response);
+
+			const { getContacts } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getContacts();
+
+			expect(service.get_contacts).toHaveBeenCalledOnce();
+			expect(res).toEqual(response);
+		});
+
+		it('should throw an error if get_contact throws', async () => {
+			service.get_contacts.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getContacts } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = getContacts();
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('createContact', () => {
+		it('should call create_contact service', async () => {
+			const [mockContact] = getMockContacts({ n: 1, name: 'John' });
+			const response = { Ok: mockContact };
+
+			service.create_contact.mockResolvedValue(response);
+
+			const { createContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await createContact('John');
+
+			expect(service.create_contact).toHaveBeenCalledWith({ name: 'John' });
+			expect(res).toEqual(response);
+		});
+
+		it('should throw an error if create_contact throws', async () => {
+			service.create_contact.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { createContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = createContact('John');
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('delete_contact', () => {
+		it('should call delete_contact service', async () => {
+			const response = { Ok: 1n };
+
+			service.delete_contact.mockResolvedValue(response);
+
+			const { deleteContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await deleteContact(1n);
+
+			expect(service.delete_contact).toHaveBeenCalledWith(1n);
+			expect(res).toEqual(response);
+		});
+
+		it('should throw an error if delete_contact throws', async () => {
+			service.delete_contact.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { deleteContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = deleteContact(1n);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('update_contact', () => {
+		it('should call update_contact service', async () => {
+			const [mockContact] = getMockContacts({ n: 1, name: 'John' });
+			const response = { Ok: mockContact };
+
+			service.update_contact.mockResolvedValue(response);
+
+			const { updateContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateContact(mockContact);
+
+			expect(service.update_contact).toHaveBeenCalledWith(mockContact);
+			expect(res).toEqual(response);
+		});
+
+		it('should throw an error if update_contact throws', async () => {
+			const [mockContact] = getMockContacts({ n: 1, name: 'John' });
+			service.update_contact.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { updateContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = updateContact(mockContact);
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
