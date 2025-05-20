@@ -34,7 +34,6 @@
 	$: twinToken = nonNullish(token) && isIcCkToken(token) ? token.twinToken : undefined;
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
-	// TODO: re-set the reactivity (and remove the onMount) when we find out why it is too frequent to request (most probably because the balances store is frequently refreshed and the minter info store too).
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionEthAddress }) => {
 		if (isNullish(token)) {
@@ -128,7 +127,7 @@
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
-	// TODO: re-set the reactivity (and remove the onMount) when we find out why it is too frequent to request (most probably because the balances store is frequently refreshed and the minter info store too).
+	// TODO: re-set the reactivity when we find out why it is too frequent to request (most probably because the balances store is frequently refreshed and the minter info store too).
 	// $:  $balance,toContractAddress, (async () => await loadPendingTransactions({ toAddress: toContractAddress }))();
 
 	onDestroy(async () => await listener?.disconnect());
