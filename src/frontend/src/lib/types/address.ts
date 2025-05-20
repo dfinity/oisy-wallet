@@ -1,6 +1,8 @@
+import type { AddressSchema } from '$lib/schema/address.schema';
 import type { Option } from '$lib/types/utils';
+import type { z } from 'zod';
 
-export type Address = string;
+export type Address = z.infer<typeof AddressSchema>;
 
 export type BtcAddress = Address;
 
