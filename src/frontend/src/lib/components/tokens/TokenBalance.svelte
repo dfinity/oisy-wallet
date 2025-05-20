@@ -23,7 +23,7 @@
 	>
 		{#if nonNullish(data.balance)}
 			{#if hideBalance}
-				{@render privacyPlaceholder()}
+				{@render privacyPlaceholder?.()}
 			{:else}
 				{formatToken({
 					value: data.balance,
