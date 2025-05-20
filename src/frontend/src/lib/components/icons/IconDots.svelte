@@ -16,13 +16,10 @@
 
     const size = $derived(variant === 'lg' ? '14' : variant === 'md' ? '8' : variant === 'sm' ? '6' : '5')
     const gap = $derived(variant === 'lg' ? 'gap-2' : 'gap-1');
-
-
-    $effect(() => console.log(variant) )
 </script>
 
 <div class="flex {gap} {styleClass}">
-    {#each Array(times) as _}
+    {#each Array(times) as _, i (i)}
         <svg width={size} height={size} viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
