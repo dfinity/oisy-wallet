@@ -41,7 +41,7 @@
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
 	// cast it to `Page`.
-	const pageData = $derived($page);
+	const pageData: Page = $derived($page);
 
 	const isTransactionsRoute = $derived(isRouteTransactions($page));
 
