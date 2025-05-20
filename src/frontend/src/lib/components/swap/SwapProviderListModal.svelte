@@ -33,7 +33,7 @@
 		token: IcTokenToggleable | undefined;
 		exchangeRate?: number;
 	}): string | undefined => {
-		if (isNullish(amount) || isNullish(token?.decimals) || isNullish(exchangeRate)) {
+		if (isNullish(amount) || isNullish(token) || isNullish(exchangeRate)) {
 			return;
 		}
 
