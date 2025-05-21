@@ -44,7 +44,7 @@
 	disabled={invalid}
 	hideSource
 >
-	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} on:icTokensList />
+	<IcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 
 	<IcTokenFee slot="fee" />
 
