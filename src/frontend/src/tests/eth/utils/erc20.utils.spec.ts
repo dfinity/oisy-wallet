@@ -99,7 +99,7 @@ describe('erc20.utils', () => {
 		const mockParams = {
 			id: mockId,
 			name: 'TokenName',
-			symbol: 'DAI',
+			symbol: 'ckICP',
 			enabled: true,
 			address: mockValidErc20Token.address,
 			exchange: mockValidErc20Token.exchange,
@@ -114,9 +114,9 @@ describe('erc20.utils', () => {
 				id: mockId,
 				standard: 'erc20',
 				name: 'TokenName',
-				symbol: 'DAI',
+				symbol: 'ckICP',
 				enabled: true,
-				icon: dai
+				icon: icpDark
 			});
 		});
 
@@ -124,7 +124,7 @@ describe('erc20.utils', () => {
 			const { id: _, ...params } = mockParams;
 
 			expect(mapErc20UserToken(params).id.description).toBe(
-				`user-token#DAI#${params.network.chainId}`
+				`user-token#ckICP#${params.network.chainId}`
 			);
 		});
 
