@@ -1,5 +1,6 @@
-use crate::{read_state, types::StoredPrincipal};
 use shared::types::contact::{Contact, ContactError};
+
+use crate::{read_state, types::StoredPrincipal};
 
 pub fn get_contacts() -> Vec<Contact> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
