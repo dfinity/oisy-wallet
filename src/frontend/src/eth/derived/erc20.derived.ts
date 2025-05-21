@@ -49,7 +49,7 @@ const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
 			const userToken = $erc20UserTokens.find(
 				({ address: contractAddress, network: contractNetwork }) =>
 					contractAddress === address &&
-					(network as EthereumNetwork).chainId === (contractNetwork as EthereumNetwork).chainId
+					(network).chainId === (contractNetwork).chainId
 			);
 
 			return mapDefaultTokenToToggleable({
@@ -85,7 +85,7 @@ const erc20UserTokensToggleable: Readable<Erc20UserToken[]> = derived(
 					({ address: defaultAddress, network: defaultNetwork }) =>
 						mapAddressStartsWith0x(defaultAddress).toLowerCase() ===
 							mapAddressStartsWith0x(address).toLowerCase() &&
-						(defaultNetwork as EthereumNetwork).chainId === (network as EthereumNetwork).chainId
+						(defaultNetwork).chainId === (network).chainId
 				)
 			)
 		)

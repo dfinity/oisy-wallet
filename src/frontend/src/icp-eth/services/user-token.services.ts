@@ -76,7 +76,7 @@ export const toUserToken = ({
 	enabled
 }: SaveUserToken): UserToken => ({
 	contract_address,
-	chain_id: (network as EthereumNetwork).chainId,
+	chain_id: (network).chainId,
 	decimals: toNullable(decimals),
 	symbol: toNullable(symbol),
 	version: toNullable(version),
