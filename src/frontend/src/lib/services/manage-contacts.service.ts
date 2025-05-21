@@ -11,15 +11,8 @@ import type { Identity } from '@dfinity/agent';
 
 export const loadContacts = async (identity: Identity): Promise<void> => {
 	contactsStore.reset();
-
 	const result = await getContacts({ identity });
-
-	if ('Ok' in result) {
-		contactsStore.set(result.Ok.map(mapToFrontendContact));
-		return;
-	}
-	console.error(result.Err);
-	throw result.Err;
+	contactsStore.set(result.map(mapToFrontendContact));
 };
 
 export const createContact = async ({
@@ -30,14 +23,9 @@ export const createContact = async ({
 	identity: Identity;
 }): Promise<ContactUi> => {
 	const result = await createContactApi({ name, identity });
-
-	if ('Ok' in result) {
-		const contactUi = mapToFrontendContact(result.Ok);
-		contactsStore.addContact(contactUi);
-		return contactUi;
-	}
-	console.error(result.Err);
-	throw result.Err;
+	const contactUi = mapToFrontendContact(result);
+	contactsStore.addContact(contactUi);
+	return contactUi;
 };
 
 export const updateContact = async ({
@@ -48,14 +36,9 @@ export const updateContact = async ({
 	identity: Identity;
 }): Promise<ContactUi> => {
 	const result = await updateContactApi({ contact: mapToBackendContact(contact), identity });
-
-	if ('Ok' in result) {
-		const contactUi = mapToFrontendContact(result.Ok);
-		contactsStore.updateContact(contactUi);
-		return contactUi;
-	}
-	console.error(result.Err);
-	throw result.Err;
+	const contactUi = mapToFrontendContact(result);
+	contactsStore.updateContact(contactUi);
+	return contactUi;
 };
 
 export const deleteContact = async ({
@@ -65,12 +48,6 @@ export const deleteContact = async ({
 	id: ContactUi['id'];
 	identity: Identity;
 }): Promise<void> => {
-	const result = await deleteContactApi({ contactId: id, identity });
-
-	if ('Ok' in result) {
-		contactsStore.removeContact(id);
-		return;
-	}
-	console.error(result.Err);
-	throw result.Err;
+	await deleteContactApi({ contactId: id, identity });
+	contactsStore.removeContact(id);
 };
