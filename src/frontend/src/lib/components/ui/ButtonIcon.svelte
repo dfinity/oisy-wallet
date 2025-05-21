@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { ButtonColorStyle } from '$lib/types/style';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		icon: Snippet;
@@ -15,7 +15,18 @@
 		width?: 'w-6' | 'w-8' | 'w-10';
 	}
 
-	let {icon, children, button = $bindable(), colorStyle = 'tertiary', testId, ariaLabel, disabled = false, link = true, styleClass = '', width = 'w-10'}: Props = $props();
+	let {
+		icon,
+		children,
+		button = $bindable(),
+		colorStyle = 'tertiary',
+		testId,
+		ariaLabel,
+		disabled = false,
+		link = true,
+		styleClass = '',
+		width = 'w-10'
+	}: Props = $props();
 </script>
 
 <button
