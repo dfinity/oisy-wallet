@@ -947,26 +947,17 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
     })
 }
 
-/// Lists all contacts for the caller.
+/// Returns all contacts for the current authenticated user.
 ///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
+/// This query function returns a list of the user's contacts.
+/// The contacts are retrieved from the canister's stable storage.
+/// # Returns
+/// - `Ok(Vec<Contact>)` - A vector of the user's contacts.
+/// - `Err(ContactError)` - If an error occurs while retrieving the contacts.
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_contacts() -> GetContactsResult {
-    // TODO replace mock data with the get contacts service
-    let normal_result = Ok(vec![Contact {
-        id: time(),
-        name: "John Doe".to_string(),
-        addresses: vec![ContactAddressData {
-            token_account_id: TokenAccountId::Eth(EthAddress::Public(
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".to_string(),
-            )),
-            label: Some("ETH Wallet".to_string()),
-        }],
-        update_timestamp_ns: time(),
-    }]);
-    normal_result.into()
+    let result = Ok(contacts::get_contacts());
+    result.into()
 }
-
 export_candid!();
