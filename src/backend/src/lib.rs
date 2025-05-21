@@ -928,12 +928,13 @@ pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
 /// # Arguments
 /// * `contact_id` - The unique identifier of the contact to retrieve
 /// # Returns
-/// * `Ok(Contact)` - The requested contact if found
+/// * `Ok(GetContactResult)` - The requested contact if found
 /// # Errors
 /// * `ContactNotFound` - If no contact for the proivided contact_id could be found
 #[query(guard = "caller_is_not_anonymous")]
-pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
-    contacts::get_contact(contact_id)
+#[must_use]
+pub fn get_contact(contact_id: u64) -> GetContactResult {
+    contacts::get_contact(contact_id).into()
 }
 
 /// Returns all contacts for the caller
