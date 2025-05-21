@@ -36,7 +36,7 @@ function install_did_files() {
       destination=".dfx/local/canisters/${array[0]}/${filename}"
       mkdir -p "$(dirname "$destination")"
       case "$source" in
-      http*) curl -sSL "$source" >"$destination" ;;
+      http*) scripts/download-immutable.sh "$source" "$destination" ;;
       *) if test -e "$source"; then cp "$source" "$destination"; else echo "WARNING: $canister_name did file not found at $source"; fi ;;
       esac
     done
