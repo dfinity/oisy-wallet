@@ -6,6 +6,7 @@ import {
 import { ONEINCH_TOKEN } from '$env/tokens/tokens-erc20/tokens.1inch.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
+import { MATIC_TOKEN } from '$env/tokens/tokens-erc20/tokens.matic.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
@@ -29,12 +30,6 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 const ERC20_CONTRACT_ADDRESS_DMAIL: Erc20Contract = {
 	// Dmail Network
 	address: '0xcC6f1e1B87cfCbe9221808d2d85C501aab0B5192',
-	exchange: 'erc20'
-};
-
-const ERC20_CONTRACT_ADDRESS_MATIC: Erc20Contract = {
-	// Polygon
-	address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
 	exchange: 'erc20'
 };
 
@@ -97,7 +92,6 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
 	ERC20_CONTRACT_ADDRESS_DMAIL,
-	ERC20_CONTRACT_ADDRESS_MATIC,
 	ERC20_CONTRACT_ADDRESS_JASMY,
 	ERC20_CONTRACT_ADDRESS_DAI,
 	ERC20_CONTRACT_ADDRESS_FLOKI,
@@ -113,7 +107,7 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 	...ERC20_CONTRACTS_SEPOLIA.map((contract) => ({ ...contract, network: SEPOLIA_NETWORK }))
 ];
 
-export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [ONEINCH_TOKEN];
+export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [ONEINCH_TOKEN, MATIC_TOKEN];
 
 /**
  * ERC20 which have twin tokens counterparts.
