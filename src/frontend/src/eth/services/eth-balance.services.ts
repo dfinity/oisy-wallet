@@ -5,7 +5,9 @@ import { infuraProviders } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
+import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR } from '$lib/constants/analytics.contants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
+import { trackEvent } from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -56,15 +58,23 @@ const loadEthBalance = async ({
 	} catch (err: unknown) {
 		balancesStore.reset(tokenId);
 
-		toastsError({
-			msg: {
-				text: replacePlaceholders(loading_balance, {
-					$symbol: tokenId.description ?? ETHEREUM_TOKEN.symbol,
-					$network: networkId.description ?? ETHEREUM_NETWORK.name
-				})
-			},
-			err
+		trackEvent({
+			name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
+			metadata: {
+				tokenId: tokenId.description ?? '',
+				networkId: networkId.description ?? '',
+				error: `${err}`
+			}
 		});
+
+		// We print the error to console just for debugging purposes
+		console.warn(
+			replacePlaceholders(loading_balance, {
+				$symbol: tokenId.description ?? ETHEREUM_TOKEN.symbol,
+				$network: networkId.description ?? ETHEREUM_NETWORK.name
+			}),
+			err
+		);
 
 		return { success: false };
 	}
@@ -102,15 +112,23 @@ const loadErc20Balance = async ({
 	} catch (err: unknown) {
 		balancesStore.reset(contract.id);
 
-		toastsError({
-			msg: {
-				text: replacePlaceholders(loading_balance, {
-					$symbol: contract.symbol,
-					$network: contract.network.name
-				})
-			},
-			err
+		trackEvent({
+			name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
+			metadata: {
+				tokenId: contract.symbol,
+				networkId: contract.network.name,
+				error: `${err}`
+			}
 		});
+
+		// We print the error to console just for debugging purposes
+		console.warn(
+			replacePlaceholders(loading_balance, {
+				$symbol: contract.symbol,
+				$network: contract.network.name
+			}),
+			err
+		);
 
 		return { success: false };
 	}
