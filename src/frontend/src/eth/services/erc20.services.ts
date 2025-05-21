@@ -8,7 +8,11 @@ import {
 	SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS
 } from '$env/networks/networks.eth.env';
 import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
-import { ERC20_CONTRACTS, ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
+import {
+	ADDITIONAL_ERC20_TOKENS,
+	ERC20_CONTRACTS,
+	ERC20_TWIN_TOKENS
+} from '$env/tokens/tokens.erc20.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
@@ -54,6 +58,7 @@ const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 		erc20DefaultTokensStore.set([
 			...ERC20_TWIN_TOKENS,
 			...EVM_ERC20_TOKENS,
+			...ADDITIONAL_ERC20_TOKENS,
 			...contracts.map(mapErc20Token)
 		]);
 	} catch (err: unknown) {

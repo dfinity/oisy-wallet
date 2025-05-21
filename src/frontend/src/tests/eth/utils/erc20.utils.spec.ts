@@ -6,7 +6,6 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import oneInch from '$eth/assets/1inch.svg';
 import dai from '$eth/assets/dai.svg';
 import dmail from '$eth/assets/dmail.svg';
 import floki from '$eth/assets/floki.svg';
@@ -37,7 +36,6 @@ describe('erc20.utils', () => {
 		['rndr', rndr],
 		['weeth', weeth],
 		['weth', weth],
-		['1inch', oneInch],
 		['icp', icpDark],
 		['ckicp', icpDark],
 		['unknown', undefined],

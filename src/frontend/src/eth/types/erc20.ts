@@ -6,6 +6,7 @@ import type { Option } from '$lib/types/utils';
 export type Erc20Token = Erc20Contract & Token;
 
 export type RequiredErc20Token = RequiredToken<Erc20Token>;
+export type RequiredAdditionalErc20Token = Omit<RequiredErc20Token, keyof TokenLinkedData>;
 
 export type Erc20ContractAddress = ContractAddress;
 export type Erc20Contract = Erc20ContractAddress & { exchange: Exchange } & TokenLinkedData;
