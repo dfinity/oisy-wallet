@@ -16,7 +16,7 @@
 		ariaLabel,
 		testIdPrefix = 'sliding-input',
 		disabled = false,
-		slidingIcon,
+		icon: slidingIcon,
 		overflowableContent
 	}: {
 		inputValue: string;
@@ -24,7 +24,7 @@
 		ariaLabel: string;
 		testIdPrefix?: string;
 		disabled?: boolean;
-		slidingIcon: Snippet;
+		icon: Snippet;
 		overflowableContent?: Snippet;
 	} = $props();
 
@@ -135,9 +135,7 @@
 		>
 			{#snippet icon()}
 				<span>
-					{#if nonNullish(slidingIcon)}
-						{@render slidingIcon()}
-					{/if}
+					{@render slidingIcon()}
 				</span>
 			{/snippet}
 		</ButtonIcon>
