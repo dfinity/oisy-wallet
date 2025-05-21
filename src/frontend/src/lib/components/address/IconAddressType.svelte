@@ -8,7 +8,7 @@
 	let { addressType, size }: { addressType: TokenAccountIdTypes; size?: string } = $props();
 </script>
 
-<span class="border-1 rounded-full border-primary bg-primary">
+<div class="border-1 box-content rounded-full border-primary bg-primary">
 	{#if addressType === 'Icrcv2'}
 		<IconAddressTypeIcrc2 {size} />
 	{:else if addressType === 'Btc'}
@@ -18,4 +18,4 @@
 	{:else if addressType === 'Sol'}
 		<IconAddressTypeSol {size} />
 	{/if}
-</span>
+</div>
