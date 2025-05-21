@@ -5,10 +5,7 @@
 	import IconAddressTypeSol from '$lib/components/icons/IconAddressTypeSol.svelte';
 	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 
-	let {
-		addressType,
-		size,
-	}: { addressType: TokenAccountIdTypes; size?: string; } = $props();
+	let { addressType, size }: { addressType: TokenAccountIdTypes; size?: string } = $props();
 </script>
 
 <div class="border-1 box-content rounded-full border-primary bg-primary">
