@@ -12,7 +12,7 @@
 		hideBalance?: boolean;
 	}
 
-	let { hideBalance }: Props = $props();
+	let { hideBalance = false }: Props = $props();
 
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
