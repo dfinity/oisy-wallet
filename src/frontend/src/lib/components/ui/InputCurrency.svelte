@@ -53,8 +53,8 @@
 		on:focus
 		bind:inputElement
 	>
-		{#snippet innerEnd()}
-			<slot name="inner-end" />
-		{/snippet}
+		<svelte:fragment slot="inner-end">
+			{@render innerEnd()}
+		</svelte:fragment>
 	</Input>
 </div>
