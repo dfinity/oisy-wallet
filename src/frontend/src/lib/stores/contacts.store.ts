@@ -21,7 +21,7 @@ export const initContactsStore = (): ContactsStore => {
 	const addContact = (contact: ContactUi) => {
 		update((contacts) => {
 			if (isNullish(contacts)) {
-				throw new Error('Contacts store is not initialized');
+				throw new Error('Contacts store is not initialized - cannot add contact');
 			}
 			return [...contacts, contact];
 		});
@@ -30,7 +30,7 @@ export const initContactsStore = (): ContactsStore => {
 	const updateContact = (contact: ContactUi) => {
 		update((contacts) => {
 			if (isNullish(contacts)) {
-				throw new Error('Contacts store is not initialized');
+				throw new Error('Contacts store is not initialized - cannot update contact');
 			}
 			return contacts.map((c) => (c.id === contact.id ? contact : c));
 		});
@@ -39,7 +39,7 @@ export const initContactsStore = (): ContactsStore => {
 	const removeContact = (id: ContactUi['id']) => {
 		update((contacts) => {
 			if (isNullish(contacts)) {
-				throw new Error('Contacts store is not initialized');
+				throw new Error('Contacts store is not initialized - cannot remove contact');
 			}
 			return contacts.filter((c) => c.id !== id);
 		});

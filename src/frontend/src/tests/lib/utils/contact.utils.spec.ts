@@ -1,5 +1,21 @@
-import { selectColorForName } from '$lib/utils/contact.utils';
+import type { ContactUi } from '$lib/types/contact';
+import {
+	mapToBackendContact,
+	mapToFrontendContact,
+	selectColorForName
+} from '$lib/utils/contact.utils';
+import {
+	getMockContacts,
+	mockBackendAddressBtc,
+	mockBackendAddressEth,
+	mockBackendAddressSol,
+	mockBackendContactAddressBtc,
+	mockBackendContactAddressEth,
+	mockBackendContactAddressSol
+} from '$tests/mocks/contacts.mock';
+import { fromNullable } from '@dfinity/utils';
 import type { NonEmptyArray } from 'alchemy-sdk';
+import { describe } from 'vitest';
 
 describe('contact.utils', () => {
 	describe('selectColorForName', () => {
@@ -29,6 +45,56 @@ describe('contact.utils', () => {
 			expect(selectColorForName({ colors, name: '' })).toBeUndefined();
 			expect(selectColorForName({ colors, name: '   ' })).toBeUndefined();
 			expect(selectColorForName({ colors, name: undefined })).toBeUndefined();
+		});
+	});
+
+	describe('mapToFrontendContact', () => {
+		const [mockContact] = getMockContacts({
+			n: 1,
+			name: 'Johnny',
+			addresses: [
+				mockBackendContactAddressSol,
+				mockBackendContactAddressBtc,
+				mockBackendContactAddressEth
+			]
+		});
+		const expectedContactUi: ContactUi = {
+			name: mockContact.name,
+			id: mockContact.id,
+			updateTimestampNs: mockContact.update_timestamp_ns,
+			addresses: [
+				{
+					label: fromNullable(mockBackendContactAddressSol.label),
+					address: mockBackendAddressSol,
+					addressType: 'Sol'
+				},
+
+				{
+					label: fromNullable(mockBackendContactAddressBtc.label),
+					address: mockBackendAddressBtc,
+					addressType: 'Btc'
+				},
+
+				{
+					label: fromNullable(mockBackendContactAddressEth.label),
+					address: mockBackendAddressEth,
+					addressType: 'Eth'
+				}
+			]
+		};
+
+		it('should map backend contact to frontend contact', () => {
+			const result = mapToFrontendContact(mockContact);
+
+			expect(result).toEqual(expectedContactUi);
+		});
+
+		it('should map frontend contact to backend contact', () => {
+			const contactUi = mapToFrontendContact(mockContact);
+
+			const result = mapToBackendContact(contactUi);
+
+			expect(result).toEqual(mockContact);
 		});
 	});
 });
