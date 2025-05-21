@@ -12,6 +12,7 @@ import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.
 import { MATIC_TOKEN } from '$env/tokens/tokens-erc20/tokens.matic.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { RNDR_TOKEN } from '$env/tokens/tokens-erc20/tokens.rndr.env';
 import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
 import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
@@ -33,12 +34,6 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 const ERC20_CONTRACT_ADDRESS_FLOKI: Erc20Contract = {
 	// Floki Inu
 	address: '0xcf0c122c6b73ff809c693db761e7baebe62b6a2e',
-	exchange: 'erc20'
-};
-
-const ERC20_CONTRACT_ADDRESS_RNDR: Erc20Contract = {
-	// Render
-	address: '0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24',
 	exchange: 'erc20'
 };
 
@@ -77,7 +72,6 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
 	ERC20_CONTRACT_ADDRESS_FLOKI,
-	ERC20_CONTRACT_ADDRESS_RNDR,
 	ERC20_CONTRACT_ADDRESS_WEEETH,
 	ERC20_CONTRACT_ADDRESS_WETH
 ];
@@ -94,7 +88,8 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	DAI_TOKEN,
 	DMAIL_TOKEN,
 	JASMY_TOKEN,
-	MATIC_TOKEN
+	MATIC_TOKEN,
+	RNDR_TOKEN
 ];
 
 /**
