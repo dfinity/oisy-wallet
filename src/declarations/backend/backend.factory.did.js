@@ -203,7 +203,7 @@ export const idlFactory = ({ IDL }) => {
 		InvalidContactData: IDL.Null,
 		ContactNotFound: IDL.Null
 	});
-	const GetContactResult = IDL.Variant({
+	const CreateContactResult = IDL.Variant({
 		Ok: Contact,
 		Err: ContactError
 	});
@@ -304,6 +304,10 @@ export const idlFactory = ({ IDL }) => {
 		settings: DefiniteCanisterSettingsArgs,
 		idle_cycles_burned_per_day: IDL.Nat,
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
+	});
+	const GetContactResult = IDL.Variant({
+		Ok: Contact,
+		Err: ContactError
 	});
 	const GetContactsResult = IDL.Variant({
 		Ok: IDL.Vec(Contact),
@@ -526,7 +530,7 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		config: IDL.Func([], [Config], ['query']),
-		create_contact: IDL.Func([CreateContactRequest], [GetContactResult], []),
+		create_contact: IDL.Func([CreateContactRequest], [CreateContactResult], []),
 		create_pow_challenge: IDL.Func([], [CreatePowChallengeResult], []),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
