@@ -6,7 +6,6 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import dai from '$eth/assets/dai.svg';
 import dmail from '$eth/assets/dmail.svg';
 import floki from '$eth/assets/floki.svg';
 import jasmy from '$eth/assets/jasmy.svg';
@@ -47,7 +46,7 @@ describe('erc20.utils', () => {
 		const mockParams = {
 			id: mockId,
 			name: 'TokenName',
-			symbol: 'DAI',
+			symbol: 'ckICP',
 			address: mockValidErc20Token.address,
 			exchange: mockValidErc20Token.exchange,
 			decimals: mockValidErc20Token.decimals,
@@ -61,15 +60,15 @@ describe('erc20.utils', () => {
 				id: mockId,
 				standard: 'erc20',
 				name: 'TokenName',
-				symbol: 'DAI',
-				icon: dai
+				symbol: 'ckICP',
+				icon: icpDark
 			});
 		});
 
 		it('should map an ERC20 token correctly when the id is not provided', () => {
 			const { id: _, ...params } = mockParams;
 
-			expect(mapErc20Token(params).id.description).toBe('DAI');
+			expect(mapErc20Token(params).id.description).toBe('ckICP');
 		});
 
 		it.each(iconCases)(
