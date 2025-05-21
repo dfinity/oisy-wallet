@@ -11,7 +11,7 @@
 
 	const handleKeydown = (e: KeyboardEvent) => {
 		const isInputField = e?.target instanceof HTMLInputElement;
-        const hasModifier = e.ctrlKey || e.altKey || e.shiftKey || e.metaKey;
+		const hasModifier = e.ctrlKey || e.altKey || e.shiftKey || e.metaKey;
 
 		if (!isInputField) {
 			if (e.key === 'p' && !hasModifier) {
