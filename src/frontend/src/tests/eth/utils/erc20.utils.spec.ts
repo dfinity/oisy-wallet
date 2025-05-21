@@ -9,7 +9,6 @@ import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import floki from '$eth/assets/floki.svg';
 import rndr from '$eth/assets/rndr.svg';
 import weeth from '$eth/assets/weeth.svg';
-import weth from '$eth/assets/weth.svg';
 import type { EthereumNetwork } from '$eth/types/network';
 import {
 	isTokenErc20,
@@ -27,7 +26,6 @@ describe('erc20.utils', () => {
 		['floki', floki],
 		['rndr', rndr],
 		['weeth', weeth],
-		['weth', weth],
 		['icp', icpDark],
 		['ckicp', icpDark],
 		['unknown', undefined],
