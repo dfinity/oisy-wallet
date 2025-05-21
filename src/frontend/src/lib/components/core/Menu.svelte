@@ -2,7 +2,7 @@
 	import { IconUser, Popover } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { ADDRESS_BOOK_ENABLED } from '$env/address-book.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
@@ -58,10 +58,10 @@
 
 	const hidePopover = () => (visible = false);
 
-	const settingsRoute = $derived(isRouteSettings($page));
-	const dAppExplorerRoute = $derived(isRouteDappExplorer($page));
-	const activityRoute = $derived(isRouteActivity($page));
-	const rewardsRoute = $derived(isRouteRewards($page));
+	const settingsRoute = $derived(isRouteSettings(page));
+	const dAppExplorerRoute = $derived(isRouteDappExplorer(page));
+	const activityRoute = $derived(isRouteActivity(page));
+	const rewardsRoute = $derived(isRouteRewards(page));
 	const addressesOption = $derived(
 		!settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute
 	);
@@ -74,13 +74,15 @@
 
 <ButtonIcon
 	bind:button
-	on:click={() => (visible = true)}
+	onclick={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
 	colorStyle="tertiary-alt"
 	link={false}
 >
-	<IconUser size="24" slot="icon" />
+	{#snippet icon()}
+		<IconUser size="24" />
+	{/snippet}
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 
