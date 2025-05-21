@@ -931,9 +931,10 @@ pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
 #[query(guard = "caller_is_not_anonymous")]
-pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
+#[must_use]
+pub fn get_contact(contact_id: u64) -> GetContactResult {
     // TODO replace mock data with the get contact service
-    Ok(Contact {
+    let result = Ok(Contact {
         id: contact_id,
         name: "John Doe".to_string(),
         addresses: vec![ContactAddressData {
@@ -943,7 +944,8 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
             label: Some("ETH Wallet".to_string()),
         }],
         update_timestamp_ns: time(),
-    })
+    });
+    result.into()
 }
 
 /// Returns all contacts for the caller
