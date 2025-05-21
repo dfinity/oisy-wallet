@@ -346,6 +346,9 @@
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
 	},
+	"shortcuts": {
+		"privacy_mode": "P"
+	},
 	"networks": {
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
