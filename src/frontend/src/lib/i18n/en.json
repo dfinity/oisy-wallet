@@ -1036,7 +1036,9 @@
 			"add_new_contact": "Add new contact",
 			"add_contact": "Add contact",
 			"search_contact": "Search contact",
-			"no_contact_found": "No contacts found"
+			"no_contact_found": "No contacts found",
+			"show_addresses": "Show addresses",
+			"hide_addresses": "Hide addresses"
 		},
 		"show_contact": {
 			"title": "Contact",

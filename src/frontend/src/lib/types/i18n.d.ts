@@ -955,6 +955,8 @@ interface I18nAddress_book {
 		add_contact: string;
 		search_contact: string;
 		no_contact_found: string;
+		show_addresses: string;
+		hide_addresses: string;
 	};
 	show_contact: {
 		title: string;
