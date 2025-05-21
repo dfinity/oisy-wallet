@@ -11,7 +11,8 @@ import {
 	mockBackendContactAddressEth,
 	mockBackendContactAddressSol
 } from '$tests/mocks/contacts.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
 import type { NonEmptyArray } from 'alchemy-sdk';
 import { describe } from 'vitest';
@@ -64,7 +65,7 @@ describe('contact.utils', () => {
 			addresses: [
 				{
 					label: fromNullable(mockBackendContactAddressSol.label),
-					address: '7EcDhSYGxXyscszYEp35KHN8vvw3svAuLKTzXwCFLtV',
+					address: mockSolAddress,
 					addressType: 'Sol'
 				},
 
@@ -76,7 +77,7 @@ describe('contact.utils', () => {
 
 				{
 					label: fromNullable(mockBackendContactAddressEth.label),
-					address: mockEthAddress,
+					address: mockEthAddress3,
 					addressType: 'Eth'
 				}
 			]
