@@ -39,5 +39,20 @@ describe('ShortcutGuard', () => {
 
 			expect(get(isPrivacyMode)).toBeFalsy();
 		});
+
+		it('should not turn on privacy mode when ctrl + p is pressed', () => {
+			render(ShortcutGuard);
+
+			expect(get(isPrivacyMode)).toBeFalsy();
+
+			const ctrlPEvent = new KeyboardEvent('keydown', {
+				key: 'p',
+				ctrlKey: true
+			});
+
+			window.dispatchEvent(ctrlPEvent);
+
+			expect(get(isPrivacyMode)).toBeFalsy();
+		});
 	});
 });
