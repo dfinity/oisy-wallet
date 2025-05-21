@@ -13,7 +13,7 @@
 		const isInputField = e?.target instanceof HTMLInputElement;
 
 		if (!isInputField) {
-			if (e.key === 'p') {
+			if (e.key === 'p' && !e.ctrlKey) {
 				privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } });
 			}
 		}
