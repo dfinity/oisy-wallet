@@ -27,13 +27,15 @@
 	<div class="flex w-full items-center justify-between">
 		{@render contentHeader({ isInBottomSheet: false })}
 		<ButtonIcon
-			on:click={() => (expanded = true)}
+			onclick={() => (expanded = true)}
 			ariaLabel={$i18n.core.alt.open_details}
 			colorStyle="muted"
 			styleClass="text-disabled mb-2 items-end"
 			width="w-8"
 		>
-			<IconInfo slot="icon" />
+			{#snippet icon()}
+				<IconInfo />
+			{/snippet}
 		</ButtonIcon>
 	</div>
 
@@ -42,11 +44,13 @@
 			<BottomSheet on:nnsClose={() => (expanded = false)} transition>
 				<div slot="header" class="w-full p-4">
 					<ButtonIcon
-						on:click={() => (expanded = false)}
+						onclick={() => (expanded = false)}
 						styleClass="text-disabled float-right"
 						ariaLabel={$i18n.core.alt.close_details}
 					>
-						<IconClose slot="icon" size="24" />
+						{#snippet icon()}
+							<IconClose size="24" />
+						{/snippet}
 					</ButtonIcon>
 				</div>
 
