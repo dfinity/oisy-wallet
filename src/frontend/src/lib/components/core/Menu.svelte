@@ -74,13 +74,15 @@
 
 <ButtonIcon
 	bind:button
-	on:click={() => (visible = true)}
+	onclick={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
 	colorStyle="tertiary-alt"
 	link={false}
 >
-	<IconUser size="24" slot="icon" />
+	{#snippet icon()}
+		<IconUser size="24" />
+	{/snippet}
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 

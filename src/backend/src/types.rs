@@ -3,8 +3,8 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    backend_config::Config, custom_token::CustomToken, pow::StoredChallenge, token::UserToken,
-    user_profile::StoredUserProfile, Timestamp,
+    backend_config::Config, contact::StoredContacts, custom_token::CustomToken,
+    pow::StoredChallenge, token::UserToken, user_profile::StoredUserProfile, Timestamp,
 };
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
@@ -24,3 +24,5 @@ where
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct StoredPrincipal(pub Principal);
+// Define a new type for the contact storage
+pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VMem>;
