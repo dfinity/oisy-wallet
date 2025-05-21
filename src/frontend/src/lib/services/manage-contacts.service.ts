@@ -17,7 +17,6 @@ import { fromNullable, toNullable } from '@dfinity/utils';
 
 const mapToFrontendContact = (contact: Contact): ContactUi => ({
 	...contact,
-	id: contact.id.toString(),
 	updateTimestampNs: contact.update_timestamp_ns,
 	addresses: contact.addresses.map((address) => ({
 		address: getAddressString(address.token_account_id),
@@ -28,11 +27,10 @@ const mapToFrontendContact = (contact: Contact): ContactUi => ({
 
 const mapToBackendContact = (contact: ContactUi): Contact => ({
 	...contact,
-	id: BigInt(contact.id),
 	update_timestamp_ns: contact.updateTimestampNs,
 	addresses: contact.addresses.map((address) => ({
 		token_account_id: TokenAccountIdSchema.parse(address),
-		label: toNullable(address.alias)
+		label: toNullable(address.label)
 	}))
 });
 
