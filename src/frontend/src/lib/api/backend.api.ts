@@ -1,12 +1,10 @@
 import type {
 	AddUserCredentialResult,
 	AllowSigningResponse,
+	Contact,
 	CreateChallengeResponse,
 	CustomToken,
-	DeleteContactResult,
 	GetAllowedCyclesResponse,
-	GetContactResult,
-	GetContactsResult,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -202,14 +200,14 @@ export const updateUserNetworkSettings = async ({
 export const getContact = async ({
 	contactId,
 	identity
-}: CanisterApiFunctionParams<GetContactParams>): Promise<GetContactResult> => {
+}: CanisterApiFunctionParams<GetContactParams>): Promise<Contact> => {
 	const { getContact } = await backendCanister({ identity });
 	return getContact(contactId);
 };
 
 export const getContacts = async ({
 	identity
-}: CanisterApiFunctionParams<QueryParams>): Promise<GetContactsResult> => {
+}: CanisterApiFunctionParams<QueryParams>): Promise<Contact[]> => {
 	const { getContacts } = await backendCanister({ identity });
 	return getContacts();
 };
@@ -217,7 +215,7 @@ export const getContacts = async ({
 export const createContact = async ({
 	name,
 	identity
-}: CanisterApiFunctionParams<CreateContactParams>): Promise<GetContactResult> => {
+}: CanisterApiFunctionParams<CreateContactParams>): Promise<Contact> => {
 	const { createContact } = await backendCanister({ identity });
 	return createContact(name);
 };
@@ -225,7 +223,7 @@ export const createContact = async ({
 export const updateContact = async ({
 	contact,
 	identity
-}: CanisterApiFunctionParams<UpdateContactParams>): Promise<GetContactResult> => {
+}: CanisterApiFunctionParams<UpdateContactParams>): Promise<Contact> => {
 	const { updateContact } = await backendCanister({ identity });
 	return updateContact(contact);
 };
@@ -233,7 +231,7 @@ export const updateContact = async ({
 export const deleteContact = async ({
 	contactId,
 	identity
-}: CanisterApiFunctionParams<DeleteContactParams>): Promise<DeleteContactResult> => {
+}: CanisterApiFunctionParams<DeleteContactParams>): Promise<bigint> => {
 	const { deleteContact } = await backendCanister({ identity });
 	return deleteContact(contactId);
 };
