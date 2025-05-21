@@ -19,7 +19,10 @@ export class AlchemyErc20Provider {
 
 	// AlchemyProvider of ether.js does not support Sepolia
 	constructor(private readonly providerUrl: string) {
-		this.provider = new JsonRpcProvider(`${this.providerUrl}/${ALCHEMY_API_KEY}`);
+		this.provider = new JsonRpcProvider(`${this.providerUrl}/${ALCHEMY_API_KEY}`, undefined, {
+			// See: https://github.com/ethers-io/ethers.js/issues/4784#issuecomment-2820177791
+			polling: true
+		});
 	}
 
 	initMinedTransactionsListener = ({
