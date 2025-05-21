@@ -28,7 +28,6 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 
 describe('erc20.utils', () => {
 	const iconCases = [
-		['dai', dai],
 		['dmail', dmail],
 		['floki', floki],
 		['jasmy', jasmy],

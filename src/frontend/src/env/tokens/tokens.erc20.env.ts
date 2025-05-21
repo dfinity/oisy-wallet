@@ -4,6 +4,7 @@ import {
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
 import { ONEINCH_TOKEN } from '$env/tokens/tokens-erc20/tokens.1inch.env';
+import { DAI_TOKEN } from '$env/tokens/tokens-erc20/tokens.dai.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
@@ -41,12 +42,6 @@ const ERC20_CONTRACT_ADDRESS_MATIC: Erc20Contract = {
 const ERC20_CONTRACT_ADDRESS_JASMY: Erc20Contract = {
 	// Jasmy
 	address: '0x7420B4b9a0110cdC71fB720908340C03F9Bc03EC',
-	exchange: 'erc20'
-};
-
-const ERC20_CONTRACT_ADDRESS_DAI: Erc20Contract = {
-	// Multi-Collateral DAI
-	address: '0x6b175474e89094c44da98b954eedeac495271d0f',
 	exchange: 'erc20'
 };
 
@@ -99,7 +94,6 @@ export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ADDRESS_DMAIL,
 	ERC20_CONTRACT_ADDRESS_MATIC,
 	ERC20_CONTRACT_ADDRESS_JASMY,
-	ERC20_CONTRACT_ADDRESS_DAI,
 	ERC20_CONTRACT_ADDRESS_FLOKI,
 	ERC20_CONTRACT_ADDRESS_RNDR,
 	ERC20_CONTRACT_ADDRESS_WEEETH,
@@ -113,7 +107,7 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 	...ERC20_CONTRACTS_SEPOLIA.map((contract) => ({ ...contract, network: SEPOLIA_NETWORK }))
 ];
 
-export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [ONEINCH_TOKEN];
+export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [ONEINCH_TOKEN, DAI_TOKEN];
 
 /**
  * ERC20 which have twin tokens counterparts.
