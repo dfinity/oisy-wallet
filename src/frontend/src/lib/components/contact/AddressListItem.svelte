@@ -58,8 +58,12 @@
 				styleClass="-m-1 md:m-0 hover:text-inherit"
 				ariaLabel={$i18n.core.text.view}
 				testId={ADDRESS_LIST_ITEM_INFO_BUTTON}
-				on:click={onInfo}><IconInfo slot="icon" /></ButtonIcon
+				onclick={onInfo}
 			>
+				{#snippet icon()}
+					<IconInfo />
+				{/snippet}
+			</ButtonIcon>
 		{/if}
 	</div>
 </button>
