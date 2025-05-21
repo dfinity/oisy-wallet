@@ -326,6 +326,10 @@ interface I18nSettings {
 	error: { loading_profile: string };
 }
 
+interface I18nShortcuts {
+	privacy_mode: string;
+}
+
 interface I18nNetworks {
 	title: string;
 	test_networks: string;
@@ -1047,6 +1051,7 @@ interface I18n {
 	init: I18nInit;
 	hero: I18nHero;
 	settings: I18nSettings;
+	shortcuts: I18nShortcuts;
 	networks: I18nNetworks;
 	receive: I18nReceive;
 	send: I18nSend;
