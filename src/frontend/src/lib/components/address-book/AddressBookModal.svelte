@@ -8,7 +8,7 @@
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Contact } from '$lib/types/contact';
+	import type { ContactUi } from '$lib/types/contact';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	const steps: WizardSteps = [
@@ -33,8 +33,8 @@
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
 	let addContactStep = $state<AddContactStep>();
 
-	let contacts: Contact[] = $state([]);
-	let currentContact: Contact | undefined = $state();
+	let contacts: ContactUi[] = $state([]);
+	let currentContact: ContactUi | undefined = $state();
 
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
@@ -46,7 +46,7 @@
 		}
 	};
 
-	const onAddContact = (contact: Contact) => {
+	const onAddContact = (contact: ContactUi) => {
 		contacts = [...contacts, contact];
 		gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
