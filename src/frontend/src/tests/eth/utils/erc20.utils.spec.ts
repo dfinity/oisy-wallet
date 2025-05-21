@@ -7,9 +7,9 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import dai from '$eth/assets/dai.svg';
-import dmail from '$eth/assets/dmail.svg';
 import floki from '$eth/assets/floki.svg';
 import jasmy from '$eth/assets/jasmy.svg';
+import matic from '$eth/assets/matic.svg';
 import rndr from '$eth/assets/rndr.svg';
 import weeth from '$eth/assets/weeth.svg';
 import weth from '$eth/assets/weth.svg';
@@ -28,9 +28,7 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 describe('erc20.utils', () => {
 	const iconCases = [
 		['dai', dai],
-		['dmail', dmail],
 		['floki', floki],
-		['jasmy', jasmy],
 		['rndr', rndr],
 		['weeth', weeth],
 		['weth', weth],
