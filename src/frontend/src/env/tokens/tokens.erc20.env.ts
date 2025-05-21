@@ -99,7 +99,7 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	ONEINCH_TOKEN,
 	DMAIL_TOKEN,
 	JASMY_TOKEN,
-  MATIC_TOKEN
+	MATIC_TOKEN
 ];
 
 /**
