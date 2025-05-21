@@ -12,7 +12,12 @@
 		copyButtonTestId?: string;
 	}
 
-	let {address, qrCodeAction = {enabled: false}, copyAriaLabel, copyButtonTestId}: Props = $props();
+	let {
+		address,
+		qrCodeAction = { enabled: false },
+		copyAriaLabel,
+		copyButtonTestId
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 </script>

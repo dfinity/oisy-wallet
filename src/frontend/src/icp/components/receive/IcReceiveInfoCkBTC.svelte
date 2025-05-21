@@ -64,14 +64,14 @@
 			{/snippet}
 			{#snippet text()}
 				{$i18n.receive.bitcoin.text.from_network}&nbsp;{#if nonNullish(kytFee)}<span in:fade
-			>{replacePlaceholders($i18n.receive.bitcoin.text.fee_applied, {
-				$fee: formatToken({
-					value: kytFee,
-					unitName: BTC_DECIMALS,
-					displayDecimals: BTC_DECIMALS
-				})
-			})}</span
-			>{/if}
+						>{replacePlaceholders($i18n.receive.bitcoin.text.fee_applied, {
+							$fee: formatToken({
+								value: kytFee,
+								unitName: BTC_DECIMALS,
+								displayDecimals: BTC_DECIMALS
+							})
+						})}</span
+					>{/if}
 			{/snippet}
 		</ReceiveAddress>
 	{/if}

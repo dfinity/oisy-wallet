@@ -1,5 +1,6 @@
 <script lang="ts">
-	import {isNullish, nonNullish} from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
@@ -9,7 +10,6 @@
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { OptionString } from '$lib/types/string';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		text?: Snippet;
@@ -24,7 +24,18 @@
 		copyButtonTestId?: string;
 	}
 
-	let {text, title, children, labelRef, address, network, qrCodeAction, copyAriaLabel, testId, copyButtonTestId }: Props = $props()
+	let {
+		text,
+		title,
+		children,
+		labelRef,
+		address,
+		network,
+		qrCodeAction,
+		copyAriaLabel,
+		testId,
+		copyButtonTestId
+	}: Props = $props();
 </script>
 
 <div>
