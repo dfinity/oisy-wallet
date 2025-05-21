@@ -1,5 +1,4 @@
 use shared::types::contact::{Contact, ContactError};
-
 use crate::{read_state, types::StoredPrincipal};
 
 // The contact services provide the
