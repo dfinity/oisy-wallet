@@ -21,6 +21,7 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
+        account::{EthAddress, TokenAccountId},
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
