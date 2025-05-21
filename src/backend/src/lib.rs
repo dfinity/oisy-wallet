@@ -70,7 +70,7 @@ use crate::{
     assertions::assert_token_enabled_is_some,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
-    types::PowChallengeMap,
+    types::{ContactMap, PowChallengeMap},
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
 
@@ -78,6 +78,7 @@ mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
+mod contacts;
 mod guards;
 mod heap_state;
 mod impls;
@@ -98,6 +99,7 @@ const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
+const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -113,6 +115,7 @@ thread_local! {
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
+            contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
         })
     );
 }
@@ -150,6 +153,7 @@ pub struct State {
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
     pow_challenge: PowChallengeMap,
+    contact: ContactMap,
 }
 
 fn set_config(arg: InitArg) {
@@ -942,26 +946,15 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
     })
 }
 
-/// Lists all contacts for the caller.
+/// Returns all contacts for the caller
 ///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
+/// This query function returns a list of the user's contacts.
+/// # Returns
+/// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_contacts() -> GetContactsResult {
-    // TODO replace mock data with the get contacts service
-    let normal_result = Ok(vec![Contact {
-        id: time(),
-        name: "John Doe".to_string(),
-        addresses: vec![ContactAddressData {
-            token_account_id: TokenAccountId::Eth(EthAddress::Public(
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".to_string(),
-            )),
-            label: Some("ETH Wallet".to_string()),
-        }],
-        update_timestamp_ns: time(),
-    }]);
-    normal_result.into()
+    let result = Ok(contacts::get_contacts());
+    result.into()
 }
-
 export_candid!();
