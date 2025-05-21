@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { IconQRCodeScanner } from '@dfinity/gix-components';
+	import { createEventDispatcher } from 'svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
-	import {createEventDispatcher} from "svelte";
 
 	export let address: string;
 	export let qrCodeAction: ReceiveQRCodeAction = { enabled: false };
