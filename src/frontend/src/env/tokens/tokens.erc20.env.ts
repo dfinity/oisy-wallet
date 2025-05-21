@@ -4,6 +4,7 @@ import {
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
 import { ONEINCH_TOKEN } from '$env/tokens/tokens-erc20/tokens.1inch.env';
+import { DMAIL_TOKEN } from '$env/tokens/tokens-erc20/tokens.dmail.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { JASMY_TOKEN } from '$env/tokens/tokens-erc20/tokens.jasmy.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
@@ -26,12 +27,6 @@ import type { TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 
 // TODO: remember to remove the ERC20 from here once the ckERC20 is implemented. Following the normal flow, the ERC20 variables should be created on a separate file.
-
-const ERC20_CONTRACT_ADDRESS_DMAIL: Erc20Contract = {
-	// Dmail Network
-	address: '0xcC6f1e1B87cfCbe9221808d2d85C501aab0B5192',
-	exchange: 'erc20'
-};
 
 const ERC20_CONTRACT_ADDRESS_MATIC: Erc20Contract = {
 	// Polygon
@@ -91,7 +86,6 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 
 export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
-	ERC20_CONTRACT_ADDRESS_DMAIL,
 	ERC20_CONTRACT_ADDRESS_MATIC,
 	ERC20_CONTRACT_ADDRESS_DAI,
 	ERC20_CONTRACT_ADDRESS_FLOKI,
@@ -107,7 +101,11 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 	...ERC20_CONTRACTS_SEPOLIA.map((contract) => ({ ...contract, network: SEPOLIA_NETWORK }))
 ];
 
-export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [ONEINCH_TOKEN, JASMY_TOKEN];
+export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
+	ONEINCH_TOKEN,
+	DMAIL_TOKEN,
+	JASMY_TOKEN
+];
 
 /**
  * ERC20 which have twin tokens counterparts.
