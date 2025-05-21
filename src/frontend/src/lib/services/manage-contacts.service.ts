@@ -16,10 +16,10 @@ export const loadContacts = async (identity: Identity): Promise<void> => {
 
 	if ('Ok' in result) {
 		contactsStore.set(result.Ok.map(mapToFrontendContact));
-	} else {
-		console.error(result.Err);
-		throw result.Err;
+		return;
 	}
+	console.error(result.Err);
+	throw result.Err;
 };
 
 export const createContact = async ({
@@ -64,12 +64,12 @@ export const deleteContact = async ({
 }: {
 	id: ContactUi['id'];
 	identity: Identity;
-}): Promise<bigint> => {
-	const result = await deleteContactApi({ contactId: BigInt(id), identity });
+}): Promise<void> => {
+	const result = await deleteContactApi({ contactId: id, identity });
 
 	if ('Ok' in result) {
 		contactsStore.removeContact(id);
-		return result.Ok;
+		return;
 	}
 	console.error(result.Err);
 	throw result.Err;
