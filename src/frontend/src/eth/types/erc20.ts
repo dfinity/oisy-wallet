@@ -4,7 +4,7 @@ import type { Exchange } from '$lib/types/exchange';
 import type { RequiredToken, Token, TokenLinkedData, TokenMetadata } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
 
-export type Erc20Token = Erc20Contract & Token & { network: EthereumNetwork };
+export type Erc20Token = Erc20Contract & Omit<Token, 'network'> & { network: EthereumNetwork };
 
 export type RequiredErc20Token = RequiredToken<Erc20Token>;
 
