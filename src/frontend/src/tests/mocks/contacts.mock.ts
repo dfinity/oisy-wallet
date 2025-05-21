@@ -1,24 +1,21 @@
 import type { Contact, ContactAddressData } from '$declarations/backend/backend.did';
+import { mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
 
-export const mockBackendAddressSol = '7EcDhSYGxXyscszYEp35KHN8vvw3svAuLKTzXwCFLtV';
-
 export const mockBackendContactAddressSol: ContactAddressData = {
-	token_account_id: { Sol: mockBackendAddressSol },
+	token_account_id: { Sol: mockSolAddress },
 	label: ['Testwallet SOL']
 };
 
-export const mockBackendAddressBtc = '3AdD7ZaJQw9m1maN39CeJ1zVyXQLn2MEHR';
-
 export const mockBackendContactAddressBtc: ContactAddressData = {
-	token_account_id: { Btc: { P2SH: mockBackendAddressBtc } },
+	token_account_id: { Btc: { P2SH: mockBtcP2SHAddress } },
 	label: ['Testwallet BTC']
 };
 
-export const mockBackendAddressEth = '0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B';
-
 export const mockBackendContactAddressEth: ContactAddressData = {
-	token_account_id: { Eth: { Public: mockBackendAddressEth } },
+	token_account_id: { Eth: { Public: mockEthAddress } },
 	label: ['Testwallet Eth']
 };
 

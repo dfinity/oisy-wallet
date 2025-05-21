@@ -4,15 +4,15 @@ import {
 	mapToFrontendContact,
 	selectColorForName
 } from '$lib/utils/contact.utils';
+import { mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
 import {
 	getMockContacts,
-	mockBackendAddressBtc,
-	mockBackendAddressEth,
-	mockBackendAddressSol,
 	mockBackendContactAddressBtc,
 	mockBackendContactAddressEth,
 	mockBackendContactAddressSol
 } from '$tests/mocks/contacts.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
 import type { NonEmptyArray } from 'alchemy-sdk';
 import { describe } from 'vitest';
@@ -65,19 +65,19 @@ describe('contact.utils', () => {
 			addresses: [
 				{
 					label: fromNullable(mockBackendContactAddressSol.label),
-					address: mockBackendAddressSol,
+					address: mockSolAddress,
 					addressType: 'Sol'
 				},
 
 				{
 					label: fromNullable(mockBackendContactAddressBtc.label),
-					address: mockBackendAddressBtc,
+					address: mockBtcP2SHAddress,
 					addressType: 'Btc'
 				},
 
 				{
 					label: fromNullable(mockBackendContactAddressEth.label),
-					address: mockBackendAddressEth,
+					address: mockEthAddress,
 					addressType: 'Eth'
 				}
 			]
