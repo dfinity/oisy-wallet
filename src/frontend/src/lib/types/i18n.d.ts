@@ -62,6 +62,8 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	alt: {
 		tokens: string;
@@ -79,6 +81,8 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	short: { documentation: string };
 }
@@ -961,6 +965,10 @@ interface I18nContact {
 	fields: { name: string };
 }
 
+interface I18nAddress {
+	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -1056,6 +1064,7 @@ interface I18n {
 	referral: I18nReferral;
 	address_book: I18nAddress_book;
 	contact: I18nContact;
+	address: I18nAddress;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
