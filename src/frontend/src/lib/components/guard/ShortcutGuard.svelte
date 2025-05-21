@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { privacyModeStore } from '$lib/stores/settings.store';
-    import {i18n} from "$lib/stores/i18n.store";
 
 	interface Props {
 		children?: Snippet;
