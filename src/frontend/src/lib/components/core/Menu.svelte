@@ -45,11 +45,11 @@
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
 
-	let visible = false;
-	let button: HTMLButtonElement | undefined;
+	let visible = $state(false);
+	let button = $state<HTMLButtonElement | undefined>();
 
-	let isVip = false;
-	let isGold = false;
+	let isVip = $state(false);
+	let isGold = $state(false);
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
 			({ isVip, isGold } = await getUserRoles({ identity: $authIdentity }));
@@ -58,20 +58,13 @@
 
 	const hidePopover = () => (visible = false);
 
-	let settingsRoute = false;
-	$: settingsRoute = isRouteSettings($page);
-
-	let dAppExplorerRoute = false;
-	$: dAppExplorerRoute = isRouteDappExplorer($page);
-
-	let activityRoute = false;
-	$: activityRoute = isRouteActivity($page);
-
-	let rewardsRoute = false;
-	$: rewardsRoute = isRouteRewards($page);
-
-	let addressesOption = true;
-	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute;
+	const settingsRoute = $derived(isRouteSettings($page));
+	const dAppExplorerRoute = $derived(isRouteDappExplorer($page));
+	const activityRoute = $derived(isRouteActivity($page));
+	const rewardsRoute = $derived(isRouteRewards($page));
+	const addressesOption = $derived(
+		!settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute
+	);
 
 	const addressModalId = Symbol();
 	const referralModalId = Symbol();
@@ -98,7 +91,7 @@
 				? $i18n.navigation.alt.show_balances
 				: $i18n.navigation.alt.hide_balances}
 			testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
-			on:click={() =>
+			onclick={() =>
 				privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } })}
 		>
 			{#if $isPrivacyMode}
@@ -121,7 +114,7 @@
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.address_book}
 				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
-				on:click={() => modalStore.openAddressBook(addressModalId)}
+				onclick={() => modalStore.openAddressBook(addressModalId)}
 			>
 				<IconUserSquare size="20" />
 				{$i18n.navigation.text.address_book}
@@ -133,7 +126,7 @@
 		<ButtonMenu
 			ariaLabel={$i18n.navigation.alt.refer_a_friend}
 			testId={NAVIGATION_MENU_REFERRAL_BUTTON}
-			on:click={() => modalStore.openReferralCode(referralModalId)}
+			onclick={() => modalStore.openReferralCode(referralModalId)}
 		>
 			<IconShare size="20" />
 			{$i18n.navigation.text.refer_a_friend}
@@ -143,7 +136,7 @@
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.binance_qr_code}
 				testId={NAVIGATION_MENU_GOLD_BUTTON}
-				on:click={() => modalStore.openVipQrCode({ id: vipModalId, data: QrCodeType.GOLD })}
+				onclick={() => modalStore.openVipQrCode({ id: vipModalId, data: QrCodeType.GOLD })}
 			>
 				<IconBinance size="20" />
 				{$i18n.navigation.text.binance_qr_code}
@@ -154,7 +147,7 @@
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.vip_qr_code}
 				testId={NAVIGATION_MENU_VIP_BUTTON}
-				on:click={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
+				onclick={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
 			>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.vip_qr_code}
