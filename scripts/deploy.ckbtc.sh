@@ -43,13 +43,7 @@ dfx deploy ckbtc_ledger --specified-id mc6ru-gyaaa-aaaar-qaaaq-cai --network "$D
 })"
 
 echo "Step 4: deploy kyt canister..."
-dfx deploy ckbtc_kyt --specified-id pvm5g-xaaaa-aaaar-qaaia-cai --network "$DFX_NETWORK" --argument "(variant {
-  InitArg = record {
-    minter_id = principal \"$MINTERID\";
-    maintainers = vec {};
-    mode = variant { AcceptAll };
-   }
-})"
+dfx deploy ckbtc_kyt --network "$DFX_NETWORK"
 
 echo "Step 5: deploy index canister..."
 dfx deploy ckbtc_index --network "$DFX_NETWORK"
