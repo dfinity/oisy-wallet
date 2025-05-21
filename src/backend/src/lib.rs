@@ -931,7 +931,7 @@ pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
 /// # Arguments
 /// * `contact_id` - The unique identifier of the contact to retrieve
 /// # Returns
-///* `Ok(Contact)` - The requested contact if found
+/// * `Ok(Contact)` - The requested contact if found
 /// # Errors
 /// * `ContactNotFound` - If no contact for the proivided contact_id could be found
 #[query(guard = "caller_is_not_anonymous")]
