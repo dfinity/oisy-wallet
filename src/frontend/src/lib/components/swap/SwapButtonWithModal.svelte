@@ -4,17 +4,17 @@
 	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
-		open: (modalId: symbol) => void;
+		onOpen: (modalId: symbol) => void;
 		isOpen: boolean;
 		children: Snippet;
 	}
 
-	let { open, isOpen, children }: Props = $props();
+	let { onOpen, isOpen, children }: Props = $props();
 
 	const modalId = Symbol();
 </script>
 
-<SwapButton onclick={() => open(modalId)} />
+<SwapButton onclick={() => onOpen(modalId)} />
 
 {#if isOpen && $modalStore?.id === modalId}
 	{@render children()}
