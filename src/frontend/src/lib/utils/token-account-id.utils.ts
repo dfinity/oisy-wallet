@@ -1,6 +1,5 @@
 import { getBtcAddressString } from '$btc/utils/btc-address.utils';
 import type { TokenAccountId } from '$declarations/backend/backend.did';
-import { getIcpAccountIdString } from '$icp/utils/icp-account.utils';
 import type { Address } from '$lib/types/address';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 import { assertNever } from '$lib/types/utils';
@@ -13,7 +12,8 @@ export const tokenAccountIdToAddressString = (tokenAccountId: TokenAccountId): s
 		return tokenAccountId.Eth.Public;
 	}
 	if ('Icrcv2' in tokenAccountId) {
-		return getIcpAccountIdString(tokenAccountId.Icrcv2);
+		// TODO PR: https://github.com/dfinity/oisy-wallet/pull/6716
+		throw new Error("Not implemented yet")
 	}
 	if ('Sol' in tokenAccountId) {
 		return tokenAccountId.Sol;
@@ -49,7 +49,8 @@ export const getAddressString = (tokenAccountId: TokenAccountId): Address => {
 		return tokenAccountId.Eth.Public;
 	}
 	if ('Icrcv2' in tokenAccountId) {
-		return getIcpAccountIdString(tokenAccountId.Icrcv2);
+		// TODO PR: https://github.com/dfinity/oisy-wallet/pull/6716
+		throw new Error("Not implemented yet")
 	}
 	if ('Sol' in tokenAccountId) {
 		return tokenAccountId.Sol;

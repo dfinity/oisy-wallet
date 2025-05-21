@@ -3,23 +3,6 @@ import { Principal } from '@dfinity/principal';
 
 describe('token-account-id.schema', () => {
 	describe('TokenAccountIdSchema', () => {
-		it('should validate Icrcv2 account addresses', () => {
-			// Valid ICRC account address with principal and no subaccount
-			const principal = Principal.fromText('rrkah-fqaaa-aaaaa-aaaaq-cai');
-			const icrcAccount = `${principal.toText()}`;
-
-			const result = TokenAccountIdSchema.safeParse(icrcAccount);
-
-			expect(result.success).toBeTruthy();
-			expect(result.data).toEqual({
-				Icrcv2: {
-					WithPrincipal: {
-						owner: principal,
-						subaccount: []
-					}
-				}
-			});
-		});
 
 		it('should validate Btc P2PKH addresses', () => {
 			const p2pkhAddress = '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2';

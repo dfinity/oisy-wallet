@@ -2,12 +2,12 @@ import { z } from 'zod';
 import {
 	BtcAddressSchema,
 	EthAddressSchema,
-	Icrcv2AccountIdSchema,
 	SolAddressSchema
 } from './address.schema';
 
 export const TokenAccountIdSchema = z.union([
-	Icrcv2AccountIdSchema.transform((data) => ({ Icrcv2: data })),
+	// TODO: PR https://github.com/dfinity/oisy-wallet/pull/6716
+	// Icrcv2AccountIdObjectSchema.transform((data) => ({ Icrcv2: data })),
 	BtcAddressSchema.transform((data) => ({ Btc: data })),
 	EthAddressSchema.transform((data) => ({ Eth: data })),
 	SolAddressSchema.transform((data) => ({ Sol: data }))
