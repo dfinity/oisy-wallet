@@ -229,6 +229,7 @@ export interface UsageAwardEvent {
 }
 export interface UsageAwardState {
 	first_activity_ns: [] | [bigint];
+	snapshot_timestamps: BigUint64Array | bigint[];
 	snapshots: Array<UserSnapshot>;
 	referred_by: [] | [number];
 	last_activity_ns: [] | [bigint];
