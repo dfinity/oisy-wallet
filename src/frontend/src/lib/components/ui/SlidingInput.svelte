@@ -115,7 +115,9 @@
 							link={false}
 							testId={`${testIdPrefix}-clear-btn`}
 						>
-							<IconClose slot="icon" size="18" />
+							{#snippet icon()}
+								<IconClose size="18" />
+							{/snippet}
 						</ButtonIcon>
 					</div>
 				{/if}
@@ -131,11 +133,13 @@
 			{ariaLabel}
 			testId={`${testIdPrefix}-open-btn`}
 		>
-			<span slot="icon">
-				{#if nonNullish(icon)}
-					{@render icon()}
-				{/if}
-			</span>
+			{#snippet icon()}
+				<span>
+					{#if nonNullish(icon)}
+						{@render icon()}
+					{/if}
+				</span>
+			{/snippet}
 		</ButtonIcon>
 	</div>
 </div>

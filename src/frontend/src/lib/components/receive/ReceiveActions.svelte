@@ -18,7 +18,9 @@
 			testId={qrCodeAction?.testId}
 			link={false}
 		>
-			<IconQRCodeScanner size="24" slot="icon" />
+			{#snippet icon()}
+				<IconQRCodeScanner size="24" />
+			{/snippet}
 		</ButtonIcon>
 	{/if}
 

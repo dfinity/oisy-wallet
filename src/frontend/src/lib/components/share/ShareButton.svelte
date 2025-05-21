@@ -14,6 +14,8 @@
 		{testId}
 		link={false}
 	>
-		<IconShareArrow size="24" slot="icon" />
+		{#snippet icon()}
+			<IconShareArrow size="24" />
+		{/snippet}
 	</ButtonIcon>
 {/if}

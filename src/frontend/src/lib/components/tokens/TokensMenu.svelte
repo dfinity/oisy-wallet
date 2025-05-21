@@ -37,9 +37,11 @@
 	colorStyle="muted"
 	styleClass={visible ? 'active' : ''}
 >
-	<NotificationBlob slot="icon" display={$hideZeroBalances} position="top-right">
-		<IconManage />
-	</NotificationBlob>
+	{#snippet icon()}
+		<NotificationBlob display={$hideZeroBalances} position="top-right">
+			<IconManage />
+		</NotificationBlob>
+	{/snippet}
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">

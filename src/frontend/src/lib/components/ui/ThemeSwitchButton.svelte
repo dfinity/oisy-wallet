@@ -18,11 +18,13 @@
 	on:click={handleClick}
 	link={false}
 >
-	<span slot="icon">
-		{#if $themeStore === Theme.DARK}
-			<IconSun size="44" />
-		{:else}
-			<IconMoon size="18" />
-		{/if}</span
-	>
+	{#snippet icon()}
+		<span>
+			{#if $themeStore === Theme.DARK}
+				<IconSun size="44" />
+			{:else}
+				<IconMoon size="18" />
+			{/if}
+		</span>
+	{/snippet}
 </ButtonIcon>

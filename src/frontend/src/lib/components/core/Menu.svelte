@@ -80,7 +80,9 @@
 	colorStyle="tertiary-alt"
 	link={false}
 >
-	<IconUser size="24" slot="icon" />
+	{#snippet icon()}
+		<IconUser size="24" />
+	{/snippet}
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 

@@ -14,5 +14,7 @@
 	{testId}
 	link={false}
 >
-	<IconCopy size="24" slot="icon" />
+	{#snippet icon()}
+		<IconCopy size="24" />
+	{/snippet}
 </ButtonIcon>

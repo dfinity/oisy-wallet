@@ -1,14 +1,21 @@
 <script lang="ts">
 	import type { ButtonColorStyle } from '$lib/types/style';
+	import type {Snippet} from "svelte";
 
-	export let button: HTMLButtonElement | undefined = undefined;
-	export let colorStyle: ButtonColorStyle = 'tertiary';
-	export let testId: string | undefined = undefined;
-	export let ariaLabel: string;
-	export let disabled = false;
-	export let link = true;
-	export let styleClass = '';
-	export let width: 'w-6' | 'w-8' | 'w-10' = 'w-10';
+	interface Props {
+		icon: Snippet;
+		children?: Snippet;
+		button?: HTMLButtonElement;
+		colorStyle?: ButtonColorStyle;
+		testId?: string;
+		ariaLabel: string;
+		disabled?: boolean;
+		link?: boolean;
+		styleClass?: string;
+		width?: 'w-6' | 'w-8' | 'w-10';
+	}
+
+	let {icon, children, button = $bindable(), colorStyle = 'tertiary', testId, ariaLabel, disabled = false, link = true, styleClass = '', width = 'w-10'}: Props = $props();
 </script>
 
 <button
@@ -20,6 +27,6 @@
 	data-tid={testId}
 	{disabled}
 >
-	<slot name="icon" />
-	<span class="visually-hidden"><slot /></span>
+	{@render icon()}
+	<span class="visually-hidden">{@render children?.()}</span>
 </button>

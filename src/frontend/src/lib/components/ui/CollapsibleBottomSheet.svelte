@@ -33,7 +33,9 @@
 			styleClass="text-disabled mb-2 items-end"
 			width="w-8"
 		>
-			<IconInfo slot="icon" />
+			{#snippet icon()}
+				<IconInfo />
+			{/snippet}
 		</ButtonIcon>
 	</div>
 
@@ -46,7 +48,9 @@
 						styleClass="text-disabled float-right"
 						ariaLabel={$i18n.core.alt.close_details}
 					>
-						<IconClose slot="icon" size="24" />
+						{#snippet icon()}
+							<IconClose size="24" />
+						{/snippet}
 					</ButtonIcon>
 				</div>
 
