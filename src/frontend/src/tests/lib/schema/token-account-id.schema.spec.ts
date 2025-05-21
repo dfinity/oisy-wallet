@@ -5,7 +5,6 @@ describe('token-account-id.schema', () => {
 		it('should validate Btc P2PKH addresses', () => {
 			const p2pkhAddress = '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2';
 
-			// const result = TokenAccountIdSchema.safeParse({ Btc: p2pkhAddress });
 			const result = TokenAccountIdSchema.safeParse(p2pkhAddress);
 
 			expect(result.success).toBeTruthy();
