@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { loadContacts } from '$lib/services/manage-contacts.service';
 	import { contactsStore } from '$lib/stores/contacts.store';
 	import type { OptionIdentity } from '$lib/types/identity';
-	import type { Snippet } from 'svelte';
-	import { loadContacts } from '$lib/services/manage-contacts.service';
 
 	interface Props {
 		children?: Snippet;
