@@ -1,6 +1,6 @@
-use crate::read_state;
-use crate::types::StoredPrincipal;
 use shared::types::contact::Contact;
+
+use crate::{read_state, types::StoredPrincipal};
 
 // The contact services provide the
 // Make sure to stick to the following rules when implementing a contact service

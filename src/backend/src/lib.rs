@@ -66,12 +66,11 @@ use types::{
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
-use crate::types::ContactMap;
 use crate::{
     assertions::assert_token_enabled_is_some,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
-    types::PowChallengeMap,
+    types::{ContactMap, PowChallengeMap},
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
 
