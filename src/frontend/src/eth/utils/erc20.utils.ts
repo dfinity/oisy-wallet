@@ -1,4 +1,3 @@
-import dai from '$eth/assets/dai.svg';
 import floki from '$eth/assets/floki.svg';
 import rndr from '$eth/assets/rndr.svg';
 import weeth from '$eth/assets/weeth.svg';
@@ -42,8 +41,6 @@ export const mapErc20UserToken = ({
 
 const mapErc20Icon = (symbol: string): string | undefined => {
 	switch (symbol.toLowerCase()) {
-		case 'dai':
-			return dai;
 		case 'floki':
 			return floki;
 		case 'rndr':
