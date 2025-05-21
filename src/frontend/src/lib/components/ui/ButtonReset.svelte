@@ -9,8 +9,10 @@
 <ButtonIcon
 	colorStyle="muted"
 	link={false}
-	on:click={onclick}
+	{onclick}
 	ariaLabel={ariaLabel ?? $i18n.convert.text.input_reset_button}
 >
-	<IconClose slot="icon" size="24" />
+	{#snippet icon()}
+		<IconClose size="24" />
+	{/snippet}
 </ButtonIcon>
