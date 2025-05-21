@@ -3,16 +3,29 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 
-	export let value: string | number | undefined = undefined;
-	export let disabled: boolean | undefined = undefined;
-	export let name: string;
-	export let placeholder: string;
-	export let required = true;
-	export let decimals: number | undefined = undefined;
-	export let testId: string | undefined = undefined;
-	export let autofocus = false;
+	interface Props {
+		value?: string | number;
+		disabled?: boolean;
+		name: string;
+		placeholder: string;
+		required?: boolean;
+		decimals?: number;
+		testId?: string;
+		autofocus?: boolean;
+	}
 
-	let inputElement: HTMLInputElement | undefined;
+	let {
+		value = $bindable(),
+		disabled,
+		name,
+		placeholder,
+		required = true,
+		decimals,
+		testId,
+		autofocus = false
+	}: Props = $props();
+
+	let inputElement = $state<HTMLInputElement | undefined>();
 
 	onMount(() => {
 		if (autofocus && nonNullish(inputElement)) {
