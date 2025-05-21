@@ -23,14 +23,14 @@
 	<output class="mt-8 inline-block break-all text-5xl font-bold">
 		{#if $loaded}
 			{#if hideBalance}
-				<IconDots variant="lg" times={6} styleClass="h-12" />
+				<IconDots variant="lg" times={6} styleClass="my-4.25" />
 			{:else}
 				{formatUSD({ value: totalUsd })}
 			{/if}
 		{:else}
 			<span class="animate-pulse">
 				{#if hideBalance}
-					<IconDots variant="lg" times={6} styleClass="h-12" />
+					<IconDots variant="lg" times={6} styleClass="my-4.25" />
 				{:else}
 					{formatUSD({ value: 0 })}
 				{/if}
