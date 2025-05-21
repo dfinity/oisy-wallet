@@ -1,8 +1,10 @@
 use ic_cdk::api::time;
 use shared::types::contact::{Contact, ContactError, CreateContactRequest, StoredContacts};
 
-use crate::types::Candid;
-use crate::{mutate_state, read_state, types::StoredPrincipal};
+use crate::{
+    mutate_state, read_state,
+    types::{Candid, StoredPrincipal},
+};
 
 pub fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
     if request.name.trim().is_empty() {
