@@ -45,11 +45,11 @@
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
 
-	let visible = false;
-	let button: HTMLButtonElement | undefined;
+	let visible = $state(false);
+	let button = $state<HTMLButtonElement | undefined>();
 
-	let isVip = false;
-	let isGold = false;
+	let isVip = $state(false);
+	let isGold = $state(false);
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
 			({ isVip, isGold } = await getUserRoles({ identity: $authIdentity }));
@@ -58,20 +58,13 @@
 
 	const hidePopover = () => (visible = false);
 
-	let settingsRoute = false;
-	$: settingsRoute = isRouteSettings($page);
-
-	let dAppExplorerRoute = false;
-	$: dAppExplorerRoute = isRouteDappExplorer($page);
-
-	let activityRoute = false;
-	$: activityRoute = isRouteActivity($page);
-
-	let rewardsRoute = false;
-	$: rewardsRoute = isRouteRewards($page);
-
-	let addressesOption = true;
-	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute;
+	const settingsRoute = $derived(isRouteSettings($page));
+	const dAppExplorerRoute = $derived(isRouteDappExplorer($page));
+	const activityRoute = $derived(isRouteActivity($page));
+	const rewardsRoute = $derived(isRouteRewards($page));
+	const addressesOption = $derived(
+		!settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute
+	);
 
 	const addressModalId = Symbol();
 	const referralModalId = Symbol();
