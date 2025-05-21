@@ -1,7 +1,7 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import SwapButton from '$lib/components/swap/SwapButton.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		open: (modalId: symbol) => void;
