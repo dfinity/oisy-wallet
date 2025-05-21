@@ -21,6 +21,7 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
+        account::{EthAddress, TokenAccountId},
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -28,7 +29,9 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{Contact, ContactError, CreateContactRequest, UpdateContactRequest},
+        contact::{
+            Contact, ContactAddressData, ContactError, CreateContactRequest, UpdateContactRequest,
+        },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
@@ -872,20 +875,26 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 
 /// Creates a new contact for the caller.
 ///
-/// # Arguments
-/// * `request` - The request containing the contact information
+/// # Errors
+/// Errors are enumerated by: `ContactError`.
 ///
 /// # Returns
-/// * `Ok(Contact)` - The newly created contact with ID and timestamp
+/// The created contact on success.
 ///
-/// # Errors
-/// * `InvalidName` - If the contact name is empty or invalid
-/// * Other errors as defined in `ContactError`
+/// # Test
+/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 #[update(guard = "caller_is_allowed")]
 #[must_use]
 pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
-    let result = contacts::create_contact(request);
-    result.into()
+    // TODO replace mock data with contact service that returns Contact
+    let contact = Contact {
+        id: time(),
+        name: request.name,
+        addresses: vec![],
+        update_timestamp_ns: time(),
+    };
+
+    GetContactResult::Ok(contact)
 }
 
 /// Updates an existing contact for the caller.
@@ -926,8 +935,8 @@ pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
 /// # Errors
 /// * `ContactNotFound` - If no contact for the proivided contact_id could be found
 #[query(guard = "caller_is_not_anonymous")]
-pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
-    contacts::get_contact(contact_id)
+pub fn get_contact(contact_id: u64) -> GetContactResult {
+    contacts::get_contact(contact_id).into();
 }
 
 /// Returns all contacts for the caller
