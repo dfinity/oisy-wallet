@@ -26,7 +26,7 @@ import { toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { UserTokenState } from '$lib/types/token-toggleable';
 import type { ResultSuccess } from '$lib/types/utils';
-import { fromNullable, queryAndUpdate } from '@dfinity/utils';
+import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadErc20Tokens = async ({
@@ -36,6 +36,12 @@ export const loadErc20Tokens = async ({
 }): Promise<void> => {
 	await Promise.all([loadDefaultErc20Tokens(), loadErc20UserTokens({ identity })]);
 };
+
+const ALL_DEFAULT_ERC20_TOKENS = [
+	...ERC20_TWIN_TOKENS,
+	...EVM_ERC20_TOKENS,
+	...ADDITIONAL_ERC20_TOKENS
+];
 
 // TODO(GIX-2740): use environment static metadata
 const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
@@ -55,12 +61,7 @@ const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 			);
 
 		const contracts = await Promise.all(loadKnownContracts());
-		erc20DefaultTokensStore.set([
-			...ERC20_TWIN_TOKENS,
-			...EVM_ERC20_TOKENS,
-			...ADDITIONAL_ERC20_TOKENS,
-			...contracts.map(mapErc20Token)
-		]);
+		erc20DefaultTokensStore.set([...ALL_DEFAULT_ERC20_TOKENS, ...contracts.map(mapErc20Token)]);
 	} catch (err: unknown) {
 		erc20DefaultTokensStore.reset();
 
@@ -119,9 +120,31 @@ const loadUserTokens = async (params: {
 					version,
 					enabled
 				}: UserToken): Promise<ContractDataWithCustomToken> => {
+					// Check it the user token is actually a match in the environment static metadata
+					const existingToken = ALL_DEFAULT_ERC20_TOKENS.find(
+						({ address: tokenAddress, network }) =>
+							tokenAddress === address && (network as EthereumNetwork).chainId === chain_id
+					);
+
+					if (nonNullish(existingToken)) {
+						return {
+							...existingToken,
+							network: existingToken.network as EthereumNetwork,
+							category: 'custom' as const,
+							version: fromNullable(version),
+							enabled: fromNullable(enabled) ?? true
+						};
+					}
+
 					const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
 						({ chainId }) => chainId === chain_id
-					) as EthereumNetwork;
+					);
+
+					// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
+					assertNonNullish(
+						network,
+						`Inconsistency in network data: no network found for chainId ${chain_id} in user token, even though it is in the environment`
+					);
 
 					return {
 						...{
@@ -132,9 +155,7 @@ const loadUserTokens = async (params: {
 							version: fromNullable(version),
 							enabled: fromNullable(enabled) ?? true
 						},
-						// 1. TODO(GIX-2740): check uf user token is actually a match in the environment static metadata
-						// +
-						// 2. TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
+						// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
 						...(await infuraErc20Providers(network.id).metadata({ address }))
 					};
 				}
