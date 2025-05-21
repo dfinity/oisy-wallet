@@ -1,4 +1,3 @@
-import oneInch from '$eth/assets/1inch.svg';
 import dai from '$eth/assets/dai.svg';
 import dmail from '$eth/assets/dmail.svg';
 import floki from '$eth/assets/floki.svg';
@@ -62,8 +61,6 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 			return weeth;
 		case 'weth':
 			return weth;
-		case '1inch':
-			return oneInch;
 		// ICP in production. ckICP was used on staging because the definitive name and symbol had not been decided.
 		case 'icp':
 		case 'ckicp':
