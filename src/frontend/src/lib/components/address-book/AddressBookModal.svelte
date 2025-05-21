@@ -151,8 +151,9 @@
 				currentContact = undefined;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
-		></AddressBookStep>
+		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
+		<!-- TODO Remove ! from currentContact -->
 		<ShowContactStep
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 			contact={currentContact!}
@@ -168,7 +169,7 @@
 				currentAddressIndex = address;
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
-		></ShowContactStep>
+		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT}
 		<EditContactStep
 			contact={currentContact!}
@@ -196,7 +197,7 @@
 			onSaveContact={saveContact}
 			isNewContact={isNullish(currentContact)}
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
-		></EditContactNameStep>
+		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
 		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
 		{JSON.stringify(currentContact?.addresses[currentAddressIndex!])}
@@ -216,6 +217,6 @@
 			onAddAddress={addAddress}
 			isNewAddress={isNullish(currentAddressIndex)}
 			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
-		></EditAddressStep>
+		/>
 	{/if}
 </WizardModal>
