@@ -19,7 +19,7 @@
 	}
 
 	let {
-		innerEnd: _innerEnd,
+		innerEnd,
 		prefix,
 		value = $bindable(),
 		decimals,
@@ -51,11 +51,8 @@
 		on:focus
 		on:blur
 		on:nnsInput
-	>
-		{#snippet innerEnd()}
-			{@render _innerEnd()}
-		{/snippet}
-	</InputCurrency>
+		{innerEnd}
+	/>
 </div>
 
 <style lang="scss">
