@@ -23,7 +23,7 @@ export const initContactsStore = (): ContactsStore => {
 			if (isNullish(contacts)) {
 				throw new Error('Contacts store is not initialized - cannot add contact');
 			}
-			return [...contacts, contact];
+			return [...contacts, { ...contact }];
 		});
 	};
 
@@ -32,7 +32,7 @@ export const initContactsStore = (): ContactsStore => {
 			if (isNullish(contacts)) {
 				throw new Error('Contacts store is not initialized - cannot update contact');
 			}
-			return contacts.map((c) => (c.id === contact.id ? contact : c));
+			return contacts.map((c) => (c.id === contact.id ? { ...contact } : c));
 		});
 	};
 
