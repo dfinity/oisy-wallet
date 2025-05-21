@@ -1,6 +1,5 @@
 import dai from '$eth/assets/dai.svg';
 import floki from '$eth/assets/floki.svg';
-import jasmy from '$eth/assets/jasmy.svg';
 import matic from '$eth/assets/matic.svg';
 import rndr from '$eth/assets/rndr.svg';
 import weeth from '$eth/assets/weeth.svg';
@@ -48,8 +47,6 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 			return dai;
 		case 'floki':
 			return floki;
-		case 'jasmy':
-			return jasmy;
 		case 'matic':
 			return matic;
 		case 'rndr':
