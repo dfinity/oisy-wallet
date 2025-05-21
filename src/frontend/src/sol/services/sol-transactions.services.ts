@@ -1,4 +1,5 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	solAddressDevnet,
@@ -8,6 +9,7 @@ import {
 } from '$lib/derived/address.derived';
 import type { SolAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
 import {
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
@@ -288,26 +290,31 @@ export const loadNextSolTransactionsByOldest = async ({
 	transactions,
 	...rest
 }: {
-	minTimestamp: bigint;
+	minTimestamp: number;
 	transactions: SolTransactionUi[];
 	token: Token;
 	signalEnd: () => void;
-}): Promise<void> => {
+}): Promise<ResultSuccess> => {
 	// If there are no transactions, we let the worker load the first ones
 	if (transactions.length === 0) {
-		return;
+		return { success: false };
 	}
 
 	const lastTransaction = findOldestTransaction(transactions);
 
 	const { timestamp: minIcTimestamp, signature: lastSignature } = lastTransaction ?? {};
 
-	if (nonNullish(minIcTimestamp) && minIcTimestamp <= minTimestamp) {
-		return;
+	if (
+		nonNullish(minIcTimestamp) &&
+		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
+	) {
+		return { success: false };
 	}
 
 	await loadNextSolTransactions({
 		...rest,
 		before: lastSignature
 	});
+
+	return { success: true };
 };

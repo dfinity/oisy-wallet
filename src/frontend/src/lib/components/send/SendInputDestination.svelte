@@ -9,6 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { KnownDestinations } from '$lib/types/transactions';
+	import { isDesktop } from '$lib/utils/device.utils';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -35,6 +36,7 @@
 		bind:value={destination}
 		placeholder={inputPlaceholder}
 		testId={DESTINATION_INPUT}
+		autofocus={isDesktop()}
 		on:nnsInput
 	>
 		<svelte:fragment slot="inner-end">
@@ -49,7 +51,7 @@
 	<p transition:slide={SLIDE_DURATION} class="pb-3 text-error-primary">
 		{$i18n.send.assertion.invalid_destination_address}
 	</p>
-{:else if notEmptyString(destination) && nonNullish(knownDestinations) && isNullish(knownDestinations[destination])}
+{:else if notEmptyString(destination) && nonNullish(knownDestinations) && isNullish(knownDestinations[destination.toLowerCase()])}
 	<div transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning">
 			{$i18n.send.info.unknown_destination}

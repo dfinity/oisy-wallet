@@ -24,7 +24,11 @@ import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
-import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
+import type {
+	AllTransactionUiWithCmp,
+	AnyTransactionUi,
+	AnyTransactionUiWithToken
+} from '$lib/types/transaction';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
@@ -287,9 +291,19 @@ export const areTransactionsStoresLoading = (
 	return (someNullish || someNotInitialized) && allEmpty;
 };
 
-export const getKnownDestinations = (transactions: AnyTransactionUi[]): KnownDestinations =>
+export const areTransactionsStoresLoaded = (
+	transactionsStores: TransactionsStoreCheckParams[]
+): boolean =>
+	transactionsStores.length > 0 &&
+	transactionsStores.every((transactionsStore) =>
+		isTransactionsStoreInitialized(transactionsStore)
+	);
+
+export const getKnownDestinations = (
+	transactions: AnyTransactionUiWithToken[]
+): KnownDestinations =>
 	transactions.reduce<KnownDestinations>(
-		(acc, { timestamp, value, to, type }) =>
+		(acc, { timestamp, value, to, type, token }) =>
 			nonNullish(to) && type === 'send' && nonNullish(value) && value > ZERO
 				? {
 						...acc,
@@ -297,13 +311,17 @@ export const getKnownDestinations = (transactions: AnyTransactionUi[]): KnownDes
 							(innerAcc, address) => ({
 								...innerAcc,
 								[address]: {
-									amounts: [...(nonNullish(acc[address]) ? acc[address].amounts : []), value],
+									amounts: [
+										...(nonNullish(acc[address]) ? acc[address].amounts : []),
+										{ value, token }
+									],
 									timestamp:
 										nonNullish(acc[address]?.timestamp) && nonNullish(timestamp)
 											? Math.max(Number(acc[address].timestamp), Number(timestamp))
 											: nonNullish(timestamp)
 												? Number(timestamp)
-												: acc[address].timestamp
+												: acc[address].timestamp,
+									address
 								}
 							}),
 							{}

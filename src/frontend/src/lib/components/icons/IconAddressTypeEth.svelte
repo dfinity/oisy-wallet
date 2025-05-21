@@ -5,12 +5,10 @@
 
 <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 	<g clip-path="url(#clip0_11394_6686)">
-		<circle cx="10" cy="10" r="10" fill="white" />
-		<circle cx="10" cy="10" r="9.75" stroke="black" stroke-opacity="0.16" stroke-width="0.5" />
 		<g clip-path="url(#clip1_11394_6686)">
 			<path
 				d="M9.96831 3.3335L9.87793 3.64048V12.5476L9.96831 12.6378L14.1028 10.1938L9.96831 3.3335Z"
-				fill="black"
+				fill="currentColor"
 			/>
 			<path d="M9.96812 3.3335L5.8335 10.1938L9.96812 12.6378V8.31451V3.3335Z" fill="#ADB5BD" />
 			<path
@@ -23,11 +21,3 @@
 		</g>
 	</g>
 	<defs>
-		<clipPath id="clip0_11394_6686">
-			<rect width="20" height="20" fill="white" />
-		</clipPath>
-		<clipPath id="clip1_11394_6686">
-			<rect width="8.27167" height="13.4709" fill="white" transform="translate(5.8335 3.3335)" />
-		</clipPath>
-	</defs>
-</svg>

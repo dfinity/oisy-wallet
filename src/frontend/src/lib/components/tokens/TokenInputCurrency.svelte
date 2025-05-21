@@ -2,16 +2,31 @@
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 
-	export let value: OptionAmount;
-	export let decimals: number;
-	export let name = 'token-input-currency';
-	export let disabled = false;
-	export let placeholder = '0';
-	export let error = false;
-	export let loading = false;
-	export let testId: string | undefined = undefined;
-	export let styleClass = '';
-	export let autofocus = false;
+	interface Props {
+		value: OptionAmount;
+		decimals: number;
+		name?: string;
+		disabled?: boolean;
+		placeholder?: string;
+		error?: boolean;
+		loading?: boolean;
+		testId?: string;
+		styleClass?: string;
+		autofocus?: boolean;
+	}
+
+	let {
+		value = $bindable(),
+		decimals,
+		name = 'token-input-currency',
+		disabled = false,
+		placeholder = '0',
+		error = false,
+		loading = false,
+		testId,
+		styleClass = '',
+		autofocus = false
+	}: Props = $props();
 </script>
 
 <div
@@ -49,6 +64,6 @@
 		height: 100%;
 		border: none;
 		border-radius: 0;
-		padding: 0 4rem 0 0.75rem;
+		padding: 0 0.75rem 0 0.75rem;
 	}
 </style>
