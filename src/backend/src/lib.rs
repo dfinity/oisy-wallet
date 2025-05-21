@@ -16,13 +16,12 @@ use ic_stable_structures::{
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use serde_bytes::ByteBuf;
-use shared::types::account::{EthAddress, TokenAccountId};
-use shared::types::contact::ContactAddressData;
 use shared::{
     http::{HttpRequest, HttpResponse},
     metrics::get_metrics,
     std_canister_status,
     types::{
+        account::{EthAddress, TokenAccountId},
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -30,7 +29,9 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{Contact, ContactError, CreateContactRequest, UpdateContactRequest},
+        contact::{
+            Contact, ContactAddressData, ContactError, CreateContactRequest, UpdateContactRequest,
+        },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
