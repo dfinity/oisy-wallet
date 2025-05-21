@@ -1,5 +1,4 @@
 import type { ContactUi } from '$lib/types/contact';
-import { isNullish } from '@dfinity/utils';
 import { writable, type Writable } from 'svelte/store';
 
 export type ContactsStoreData = Array<ContactUi> | undefined;
@@ -19,30 +18,15 @@ export const initContactsStore = (): ContactsStore => {
 	};
 
 	const addContact = (contact: ContactUi) => {
-		update((contacts) => {
-			if (isNullish(contacts)) {
-				throw new Error('Contacts store is not initialized - cannot add contact');
-			}
-			return [...contacts, { ...contact }];
-		});
+		update((contacts) => [...(contacts ?? []), { ...contact }]);
 	};
 
 	const updateContact = (contact: ContactUi) => {
-		update((contacts) => {
-			if (isNullish(contacts)) {
-				throw new Error('Contacts store is not initialized - cannot update contact');
-			}
-			return contacts.map((c) => (c.id === contact.id ? { ...contact } : c));
-		});
+		update((contacts) => (contacts ?? []).map((c) => (c.id === contact.id ? { ...contact } : c)));
 	};
 
 	const removeContact = (id: ContactUi['id']) => {
-		update((contacts) => {
-			if (isNullish(contacts)) {
-				throw new Error('Contacts store is not initialized - cannot remove contact');
-			}
-			return contacts.filter((c) => c.id !== id);
-		});
+		update((contacts) => (contacts ?? []).filter((c) => c.id !== id));
 	};
 
 	return {
