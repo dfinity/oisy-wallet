@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget, Page } from '@sveltejs/kit';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
@@ -38,12 +38,7 @@
 	const addTestIdPrefix = (testId: string): string =>
 		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
 
-	// If we pass $page directly, we get a type error: for some reason (I cannot find any
-	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
-	// cast it to `Page`.
-	const pageData: Page = $derived($page);
-
-	const isTransactionsRoute = $derived(isRouteTransactions($page));
+	const isTransactionsRoute = $derived(isRouteTransactions(page));
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -60,7 +55,7 @@
 		fromRoute
 	})}
 	ariaLabel={$i18n.navigation.alt.tokens}
-	selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
+	selected={isRouteTokens(page) || isRouteTransactions(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
 	<IconWallet />
@@ -75,7 +70,7 @@
 		fromRoute
 	})}
 	ariaLabel={$i18n.navigation.alt.activity}
-	selected={isRouteActivity(pageData)}
+	selected={isRouteActivity(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_ACTIVITY)}
 >
 	<IconActivity />
@@ -90,7 +85,7 @@
 		fromRoute
 	})}
 	ariaLabel={$i18n.navigation.alt.dapp_explorer}
-	selected={isRouteDappExplorer(pageData)}
+	selected={isRouteDappExplorer(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
 >
 	<AnimatedIconUfo />
@@ -105,7 +100,7 @@
 		fromRoute
 	})}
 	ariaLabel={$i18n.navigation.alt.airdrops}
-	selected={isRouteRewards(pageData)}
+	selected={isRouteRewards(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
 >
 	<IconGift />
@@ -120,7 +115,7 @@
 		fromRoute
 	})}
 	ariaLabel={$i18n.navigation.alt.settings}
-	selected={isRouteSettings(pageData)}
+	selected={isRouteSettings(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_SETTINGS)}
 >
 	<IconlySettings />
