@@ -15,6 +15,8 @@ import {
 	reloadEthereumBalance
 } from '$eth/services/eth-balance.services';
 import type { Erc20Token } from '$eth/types/erc20';
+import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -39,6 +41,10 @@ vi.mock('ethers/contract', () => {
 	contract.prototype.balaceOf = vi.fn();
 	return { Contract: contract };
 });
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
 
 describe('eth-balance.services', () => {
 	describe('loadEthBalances', () => {
@@ -110,16 +116,25 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: false });
 
-			expect(toastsError).toHaveBeenCalledOnce();
-			expect(toastsError).toHaveBeenNthCalledWith(1, {
-				msg: {
-					text: replacePlaceholders(en.init.error.loading_balance, {
-						$symbol: ETHEREUM_TOKEN_ID.description!,
-						$network: ETHEREUM_NETWORK_ID.description!
-					})
-				},
-				err: mockError
+			expect(trackEvent).toHaveBeenCalledOnce();
+			expect(trackEvent).toHaveBeenNthCalledWith(1, {
+				name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
+				metadata: {
+					tokenId: ETHEREUM_TOKEN_ID.description!,
+					networkId: ETHEREUM_NETWORK_ID.description!,
+					error: mockError.toString()
+				}
 			});
+
+			expect(console.warn).toHaveBeenCalledOnce();
+			expect(console.warn).toHaveBeenNthCalledWith(
+				1,
+				replacePlaceholders(en.init.error.loading_balance, {
+					$symbol: ETHEREUM_TOKEN_ID.description!,
+					$network: ETHEREUM_NETWORK_ID.description!
+				}),
+				mockError
+			);
 
 			expect(get(balancesStore)?.[ETHEREUM_TOKEN_ID]).toEqual(null);
 			expect(get(balancesStore)?.[SEPOLIA_TOKEN_ID]).toEqual({
@@ -135,18 +150,30 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: false });
 
-			expect(toastsError).toHaveBeenCalledTimes(mockTokens.length);
+			expect(trackEvent).toHaveBeenCalledTimes(mockTokens.length);
 
 			mockTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-				expect(toastsError).toHaveBeenNthCalledWith(index + 1, {
-					msg: {
-						text: replacePlaceholders(en.init.error.loading_balance, {
-							$symbol: tokenId.description!,
-							$network: networkId.description!
-						})
-					},
-					err: mockError
+				expect(trackEvent).toHaveBeenNthCalledWith(index + 1, {
+					name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
+					metadata: {
+						tokenId: tokenId.description!,
+						networkId: networkId.description!,
+						error: mockError.toString()
+					}
 				});
+			});
+
+			expect(console.warn).toHaveBeenCalledTimes(mockTokens.length);
+
+			mockTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
+				expect(console.warn).toHaveBeenNthCalledWith(
+					index + 1,
+					replacePlaceholders(en.init.error.loading_balance, {
+						$symbol: tokenId.description!,
+						$network: networkId.description!
+					}),
+					mockError
+				);
 			});
 
 			mockTokens.forEach(({ id }) => {
@@ -241,16 +268,25 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: false });
 
-			expect(toastsError).toHaveBeenCalledOnce();
-			expect(toastsError).toHaveBeenNthCalledWith(1, {
-				msg: {
-					text: replacePlaceholders(en.init.error.loading_balance, {
-						$symbol: mockErc20DefaultTokens[0].symbol,
-						$network: mockErc20DefaultTokens[0].network.name
-					})
-				},
-				err: mockError
+			expect(trackEvent).toHaveBeenCalledOnce();
+			expect(trackEvent).toHaveBeenNthCalledWith(1, {
+				name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
+				metadata: {
+					tokenId: mockErc20DefaultTokens[0].symbol,
+					networkId: mockErc20DefaultTokens[0].network.name,
+					error: mockError.toString()
+				}
 			});
+
+			expect(console.warn).toHaveBeenCalledOnce();
+			expect(console.warn).toHaveBeenNthCalledWith(
+				1,
+				replacePlaceholders(en.init.error.loading_balance, {
+					$symbol: mockErc20DefaultTokens[0].symbol,
+					$network: mockErc20DefaultTokens[0].network.name
+				}),
+				mockError
+			);
 
 			expect(get(balancesStore)?.[mockErc20DefaultTokens[0].id]).toEqual(null);
 
@@ -266,19 +302,35 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: false });
 
-			expect(toastsError).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
+			expect(trackEvent).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
 
-			mockErc20DefaultTokens.forEach((_, index) => {
-				expect(toastsError).toHaveBeenNthCalledWith(index + 1, {
-					msg: {
-						text: replacePlaceholders(en.init.error.loading_balance, {
-							$symbol: mockErc20DefaultTokens[index].symbol,
-							$network: mockErc20DefaultTokens[index].network.name
-						})
-					},
-					err: mockError
-				});
-			});
+			mockErc20DefaultTokens.forEach(
+				({ symbol: tokenSymbol, network: { name: networkName } }, index) => {
+					expect(trackEvent).toHaveBeenNthCalledWith(index + 1, {
+						name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
+						metadata: {
+							tokenId: tokenSymbol,
+							networkId: networkName,
+							error: mockError.toString()
+						}
+					});
+				}
+			);
+
+			expect(console.warn).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
+
+			mockErc20DefaultTokens.forEach(
+				({ symbol: tokenSymbol, network: { name: networkName } }, index) => {
+					expect(console.warn).toHaveBeenNthCalledWith(
+						index + 1,
+						replacePlaceholders(en.init.error.loading_balance, {
+							$symbol: tokenSymbol,
+							$network: networkName
+						}),
+						mockError
+					);
+				}
+			);
 
 			mockErc20DefaultTokens.forEach(({ id }) => {
 				expect(get(balancesStore)?.[id]).toEqual(null);
