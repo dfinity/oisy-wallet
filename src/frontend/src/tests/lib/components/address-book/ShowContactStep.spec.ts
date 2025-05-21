@@ -50,7 +50,9 @@ describe('ShowContactStep', () => {
 		const { getByText, getByTestId } = render(ShowContactStep, {
 			props: {
 				contact: mockContact,
-				onClose: mockClose
+				onClose: mockClose,
+				onAddAddress: vi.fn(),
+				onShowAddress: vi.fn()
 			}
 		});
 
@@ -70,7 +72,6 @@ describe('ShowContactStep', () => {
 		const addAddressButton = getByTestId(CONTACT_SHOW_ADD_ADDRESS_BUTTON);
 
 		expect(addAddressButton).toBeInTheDocument();
-		expect(addAddressButton).toBeDisabled();
 		expect(addAddressButton).toHaveTextContent(en.address_book.show_contact.add_address);
 	});
 
@@ -79,7 +80,8 @@ describe('ShowContactStep', () => {
 			props: {
 				contact: mockContact,
 				onClose: mockClose,
-				onAddAddress: mockAddAddress
+				onAddAddress: mockAddAddress,
+				onShowAddress: vi.fn()
 			}
 		});
 
@@ -94,7 +96,9 @@ describe('ShowContactStep', () => {
 		const { getByTestId } = render(ShowContactStep, {
 			props: {
 				contact: mockContact,
-				onClose: mockClose
+				onClose: mockClose,
+				onAddAddress: vi.fn(),
+				onShowAddress: vi.fn()
 			}
 		});
 
@@ -109,7 +113,8 @@ describe('ShowContactStep', () => {
 			props: {
 				contact: mockContact,
 				onClose: mockClose,
-				onAddAddress: mockAddAddress
+				onAddAddress: mockAddAddress,
+				onShowAddress: vi.fn()
 			}
 		});
 
@@ -123,7 +128,9 @@ describe('ShowContactStep', () => {
 		const { getByText } = render(ShowContactStep, {
 			props: {
 				contact: mockContactWithAddresses,
-				onClose: mockClose
+				onClose: mockClose,
+				onAddAddress: vi.fn(),
+				onShowAddress: vi.fn()
 			}
 		});
 
@@ -141,21 +148,22 @@ describe('ShowContactStep', () => {
 			props: {
 				contact: mockContactWithAddresses,
 				onClose: mockClose,
+				onAddAddress: vi.fn(),
 				onShowAddress: mockShowAddress
 			}
 		});
 
 		// Check that show buttons are displayed for each address
-		const showButtons = getAllByText('Show');
+		const showButtons = getAllByText('SHOW');
 
 		expect(showButtons).toHaveLength(mockContactWithAddresses.addresses.length);
 
 		// Click the first show button
 		await fireEvent.click(showButtons[0]);
 
-		// Check that showAddress was called with the correct address
+		// Check that showAddress was called with the correct index
 		expect(mockShowAddress).toHaveBeenCalledTimes(1);
-		expect(mockShowAddress).toHaveBeenCalledWith(mockContactWithAddresses.addresses[0]);
+		expect(mockShowAddress).toHaveBeenCalledWith(0);
 	});
 
 	it('should call edit function when edit button is clicked', async () => {
@@ -163,6 +171,8 @@ describe('ShowContactStep', () => {
 			props: {
 				contact: mockContact,
 				onClose: mockClose,
+				onAddAddress: vi.fn(),
+				onShowAddress: vi.fn(),
 				onEdit: mockEdit
 			}
 		});
