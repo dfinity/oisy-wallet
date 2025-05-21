@@ -1101,7 +1101,7 @@ describe('backend.canister', () => {
 			const res = await getContact(1n);
 
 			expect(service.get_contact).toHaveBeenCalledWith(1n);
-			expect(res).toEqual(response);
+			expect(res).toEqual(mockContact);
 		});
 
 		it('should throw an error if get_contact throws', async () => {
@@ -1134,7 +1134,7 @@ describe('backend.canister', () => {
 			const res = await getContacts();
 
 			expect(service.get_contacts).toHaveBeenCalledOnce();
-			expect(res).toEqual(response);
+			expect(res).toEqual(mockContacts);
 		});
 
 		it('should throw an error if get_contact throws', async () => {
@@ -1167,7 +1167,7 @@ describe('backend.canister', () => {
 			const res = await createContact('John');
 
 			expect(service.create_contact).toHaveBeenCalledWith({ name: 'John' });
-			expect(res).toEqual(response);
+			expect(res).toEqual(mockContact);
 		});
 
 		it('should throw an error if create_contact throws', async () => {
@@ -1199,7 +1199,7 @@ describe('backend.canister', () => {
 			const res = await deleteContact(1n);
 
 			expect(service.delete_contact).toHaveBeenCalledWith(1n);
-			expect(res).toEqual(response);
+			expect(res).toEqual(1n);
 		});
 
 		it('should throw an error if delete_contact throws', async () => {
@@ -1232,7 +1232,7 @@ describe('backend.canister', () => {
 			const res = await updateContact(mockContact);
 
 			expect(service.update_contact).toHaveBeenCalledWith(mockContact);
-			expect(res).toEqual(response);
+			expect(res).toEqual(mockContact);
 		});
 
 		it('should throw an error if update_contact throws', async () => {
