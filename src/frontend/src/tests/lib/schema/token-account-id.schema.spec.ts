@@ -1,9 +1,7 @@
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
-import { Principal } from '@dfinity/principal';
 
 describe('token-account-id.schema', () => {
 	describe('TokenAccountIdSchema', () => {
-
 		it('should validate Btc P2PKH addresses', () => {
 			const p2pkhAddress = '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2';
 

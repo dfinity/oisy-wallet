@@ -13,7 +13,7 @@ export const tokenAccountIdToAddressString = (tokenAccountId: TokenAccountId): s
 	}
 	if ('Icrcv2' in tokenAccountId) {
 		// TODO PR: https://github.com/dfinity/oisy-wallet/pull/6716
-		throw new Error("Not implemented yet")
+		throw new Error('Not implemented yet');
 	}
 	if ('Sol' in tokenAccountId) {
 		return tokenAccountId.Sol;
@@ -50,7 +50,7 @@ export const getAddressString = (tokenAccountId: TokenAccountId): Address => {
 	}
 	if ('Icrcv2' in tokenAccountId) {
 		// TODO PR: https://github.com/dfinity/oisy-wallet/pull/6716
-		throw new Error("Not implemented yet")
+		throw new Error('Not implemented yet');
 	}
 	if ('Sol' in tokenAccountId) {
 		return tokenAccountId.Sol;

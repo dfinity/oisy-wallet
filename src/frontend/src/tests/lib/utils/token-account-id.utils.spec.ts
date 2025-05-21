@@ -1,11 +1,9 @@
 import type { TokenAccountId } from '$declarations/backend/backend.did';
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
 import { getAddressString } from '$lib/utils/token-account-id.utils';
-import { Principal } from '@dfinity/principal';
 
 describe('token-account-id.utils', () => {
 	describe('getAddressString', () => {
-
 		it('should extract address string from BTC token account ID', () => {
 			// Test for P2PKH BTC address
 			const btcAddressStr = '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2';
@@ -69,6 +67,5 @@ describe('token-account-id.utils', () => {
 
 			expect(result).toEqual(solAddressStr);
 		});
-
 	});
 });
