@@ -1,5 +1,3 @@
-import dmail from '$eth/assets/dmail.svg';
-import dai from '$eth/assets/dai.svg';
 import floki from '$eth/assets/floki.svg';
 import matic from '$eth/assets/matic.svg';
 import rndr from '$eth/assets/rndr.svg';

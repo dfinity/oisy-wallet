@@ -6,8 +6,6 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import dmail from '$eth/assets/dmail.svg';
-import dai from '$eth/assets/dai.svg';
 import floki from '$eth/assets/floki.svg';
 import matic from '$eth/assets/matic.svg';
 import rndr from '$eth/assets/rndr.svg';

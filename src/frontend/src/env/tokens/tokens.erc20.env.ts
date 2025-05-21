@@ -95,7 +95,7 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 
 export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	ONEINCH_TOKEN,
-  DAI_TOKEN,
+	DAI_TOKEN,
 	DMAIL_TOKEN,
 	JASMY_TOKEN
 ];
