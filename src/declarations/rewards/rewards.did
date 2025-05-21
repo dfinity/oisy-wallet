@@ -19,7 +19,7 @@ type AccountSnapshot_Any = record {
 	last_transactions : vec Transaction_Any;
 	account : AccountId_Any;
 	timestamp : nat64;
-	amount : nat64
+	amount : nat
 };
 type AccountSnapshot_Icrc = record {
 	decimals : nat8;
@@ -29,7 +29,7 @@ type AccountSnapshot_Icrc = record {
 	last_transactions : vec Transaction_Icrc;
 	account : principal;
 	timestamp : nat64;
-	amount : nat64
+	amount : nat
 };
 type AccountSnapshot_Spl = record {
 	decimals : nat8;
@@ -39,7 +39,7 @@ type AccountSnapshot_Spl = record {
 	last_transactions : vec Transaction_Spl;
 	account : text;
 	timestamp : nat64;
-	amount : nat64
+	amount : nat
 };
 
 /// A network on which a token can be found.
@@ -334,14 +334,14 @@ type Transaction_Any = record {
 	network : AnyNetwork;
 	counterparty : AccountId_Any;
 	timestamp : nat64;
-	amount : nat64
+	amount : nat
 };
 type Transaction_Icrc = record {
 	transaction_type : TransactionType;
 	network : record {};
 	counterparty : principal;
 	timestamp : nat64;
-	amount : nat64
+	amount : nat
 };
 type TransactionType = variant {
 	Send;
@@ -352,7 +352,7 @@ type Transaction_Spl = record {
 	network : record {};
 	counterparty : text;
 	timestamp : nat64;
-	amount : nat64
+	amount : nat
 };
 
 type UsageAndHolding = record {
@@ -379,7 +379,10 @@ type UsageAwardEvent = record {
 	campaign_name : opt text
 };
 type UsageAwardState = record {
+	/// The last few snapshots
 	snapshots : vec UserSnapshot;
+	/// Timestamps of recent snapshots
+	snapshot_timestamps : vec nat64;
 	/// Pseudonym for user who introduced the caller to Oisy.
 	referred_by : opt nat32;
 	/// User's code for inviting others to the platform, and referral stats.
