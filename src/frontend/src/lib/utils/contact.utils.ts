@@ -1,5 +1,12 @@
+import type { Contact } from '$declarations/backend/backend.did';
+import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
+import type { ContactUi } from '$lib/types/contact';
 import type { NonEmptyArray } from '$lib/types/utils';
-import { isEmptyString } from '@dfinity/utils';
+import {
+	getAddressString,
+	getDiscriminatorForTokenAccountId
+} from '$lib/utils/token-account-id.utils';
+import { fromNullable, isEmptyString, toNullable } from '@dfinity/utils';
 
 export const selectColorForName = <T>({
 	colors,
@@ -19,4 +26,29 @@ export const selectColorForName = <T>({
 	);
 
 	return colors[hash];
+};
+
+export const mapToFrontendContact = (contact: Contact): ContactUi => {
+	const { update_timestamp_ns, ...rest } = contact;
+	return {
+		...rest,
+		updateTimestampNs: update_timestamp_ns,
+		addresses: contact.addresses.map((address) => ({
+			address: getAddressString(address.token_account_id),
+			label: fromNullable(address.label),
+			addressType: getDiscriminatorForTokenAccountId(address.token_account_id)
+		}))
+	};
+};
+
+export const mapToBackendContact = (contact: ContactUi): Contact => {
+	const { updateTimestampNs, ...rest } = contact;
+	return {
+		...rest,
+		update_timestamp_ns: updateTimestampNs,
+		addresses: contact.addresses.map((address) => ({
+			token_account_id: TokenAccountIdSchema.parse(address.address),
+			label: toNullable(address.label)
+		}))
+	};
 };
