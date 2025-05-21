@@ -5,10 +5,7 @@ import type {
 	Contact,
 	CreateChallengeResponse,
 	CustomToken,
-	DeleteContactResult,
 	GetAllowedCyclesResponse,
-	GetContactResult,
-	GetContactsResult,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -257,28 +254,53 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 	};
 
-	getContact = async (id: bigint): Promise<GetContactResult> => {
+	getContact = async (id: bigint): Promise<Contact> => {
 		const { get_contact } = this.caller({ certified: false });
-		return await get_contact(id);
+		const response = await get_contact(id);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
 	};
 
-	getContacts = async (): Promise<GetContactsResult> => {
+	getContacts = async (): Promise<Contact[]> => {
 		const { get_contacts } = this.caller({ certified: false });
-		return await get_contacts();
+		const response = await get_contacts();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
 	};
 
-	createContact = async (name: string): Promise<GetContactResult> => {
+	createContact = async (name: string): Promise<Contact> => {
 		const { create_contact } = this.caller({ certified: true });
-		return await create_contact({ name });
+		const response = await create_contact({ name });
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
 	};
 
-	deleteContact = async (id: bigint): Promise<DeleteContactResult> => {
+	deleteContact = async (id: bigint): Promise<bigint> => {
 		const { delete_contact } = this.caller({ certified: true });
-		return await delete_contact(id);
+		const response = await delete_contact(id);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
 	};
 
-	updateContact = async (contact: Contact): Promise<GetContactResult> => {
+	updateContact = async (contact: Contact): Promise<Contact> => {
 		const { update_contact } = this.caller({ certified: true });
-		return await update_contact(contact);
+		const response = await update_contact(contact);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
 	};
 }
