@@ -9,6 +9,8 @@ import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { isNotIcToken, isNotIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
+import { TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -92,28 +94,27 @@ const loadNextIcTransactionsRequest = ({
 
 export const onLoadTransactionsError = ({
 	tokenId,
-	error: err,
-	silent = false
+	error: err
 }: {
 	tokenId: TokenId;
 	error: unknown;
-	silent?: boolean;
 }) => {
 	icTransactionsStore.reset(tokenId);
 
 	// We get transactions and balance for the same end point therefore if getting certified transactions fails, it also means the balance is incorrect.
 	balancesStore.reset(tokenId);
 
-	if (silent) {
-		// We print the error to console just for debugging purposes
-		console.warn(`${get(i18n).transactions.error.loading_transactions}:`, err);
-		return;
-	}
-
-	toastsError({
-		msg: { text: get(i18n).transactions.error.loading_transactions },
-		err
+	trackEvent({
+		name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
+		metadata: {
+			tokenId: tokenId.description ?? '',
+			error: `${err}`
+		}
 	});
+
+	// We print the error to console just for debugging purposes
+	console.warn(`${get(i18n).transactions.error.loading_transactions}:`, err);
+	return;
 };
 
 export const onTransactionsCleanUp = (data: { tokenId: TokenId; transactionIds: string[] }) => {

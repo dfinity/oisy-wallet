@@ -31,6 +31,7 @@ export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS = 'ic_ckerc20_to_erc20
 export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR = 'ic_ckerc20_to_erc20_error_count';
 export const TRACK_COUNT_IC_SEND_SUCCESS = 'ic_send_success_count';
 export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';
+export const TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR = 'ic_loading_transactions_error_count';
 
 // Solana
 export const TRACK_COUNT_SOL_SEND_SUCCESS = 'sol_send_success_count';
