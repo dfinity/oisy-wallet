@@ -33,7 +33,7 @@ IFS=',' read -r -a versions <<<"$OISY_UPGRADE_VERSIONS"
 for version in "${versions[@]}"; do
   OISY_UPGRADE_PATH="./backend-${version}.wasm.gz"
 
-  scripts/download-immutable.sh "https://github.com/dfinity/oisy-wallet/releases/download/${version}/backend.wasm.gz" $OISY_UPGRADE_PATH"
+  scripts/download-immutable.sh "https://github.com/dfinity/oisy-wallet/releases/download/${version}/backend.wasm.gz" "$OISY_UPGRADE_PATH"
 done
 
 # Download PocketIC server
