@@ -190,7 +190,7 @@
 <EthereumFeeContext {networkId}>
 	<BitcoinFeeContext {amount} {networkId} token={$tokenWithFallbackAsIcToken}>
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
-			<IcSendReview on:icBack on:icSend={send} {destination} {amount} {networkId} />
+			<IcSendReview on:icBack on:icSend={send} {destination} {amount} />
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
 			<IcSendProgress bind:sendProgressStep />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
