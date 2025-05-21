@@ -86,7 +86,9 @@
 						on:focus={onFocus}
 						on:blur={onBlur}
 					>
-						<span class="text-tertiary" slot="inner-end">%</span>
+						{#snippet innerEnd()}
+							<span class="text-tertiary">%</span>
+						{/snippet}
 					</TokenInputCurrency>
 				</TokenInputContainer>
 

@@ -1,8 +1,11 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 
 	interface Props {
+		innerEnd: Snippet;
+		prefix?: Snippet;
 		value: OptionAmount;
 		decimals: number;
 		name?: string;
@@ -16,6 +19,8 @@
 	}
 
 	let {
+		innerEnd,
+		prefix,
 		value = $bindable(),
 		decimals,
 		name = 'token-input-currency',
@@ -34,7 +39,7 @@
 	class:text-error-primary={error}
 	class:animate-pulse={loading}
 >
-	<slot name="prefix"></slot>
+	{@render prefix?.()}
 	<InputCurrency
 		{testId}
 		bind:value
@@ -46,9 +51,8 @@
 		on:focus
 		on:blur
 		on:nnsInput
-	>
-		<slot name="inner-end" slot="inner-end" />
-	</InputCurrency>
+		{innerEnd}
+	/>
 </div>
 
 <style lang="scss">
