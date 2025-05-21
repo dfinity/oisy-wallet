@@ -25,7 +25,7 @@
 
 	const handleAdd = () => {
 		if (form?.isValid) {
-			onAddContact(contact);
+			onAddContact(contact as ContactUi);
 		}
 	};
 
