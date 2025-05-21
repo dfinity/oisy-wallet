@@ -30,7 +30,7 @@
 
 <ButtonIcon
 	bind:button
-	on:click={() => (visible = true)}
+	onclick={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
 	disabled={$erc20UserTokensNotInitialized}
 	link={false}

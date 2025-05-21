@@ -35,7 +35,7 @@
 	bind:inputValue
 	{overflowableContent}
 >
-	{#snippet icon()}
+	{#snippet slidingIcon()}
 		<IconSearch />
 	{/snippet}
 </SlidingInput>

@@ -15,7 +15,7 @@
 	ariaLabel={$i18n.settings.alt[
 		`appearance_${$themeStore === Theme.LIGHT ? Theme.DARK : Theme.LIGHT}`
 	]}
-	on:click={handleClick}
+	onclick={handleClick}
 	link={false}
 >
 	{#snippet icon()}

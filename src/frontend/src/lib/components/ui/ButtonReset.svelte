@@ -9,7 +9,7 @@
 <ButtonIcon
 	colorStyle="muted"
 	link={false}
-	on:click={onclick}
+	onclick={onclick}
 	ariaLabel={ariaLabel ?? $i18n.convert.text.input_reset_button}
 >
 	{#snippet icon()}

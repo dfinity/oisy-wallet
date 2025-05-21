@@ -16,7 +16,7 @@
 		ariaLabel,
 		testIdPrefix = 'sliding-input',
 		disabled = false,
-		icon,
+		slidingIcon,
 		overflowableContent
 	}: {
 		inputValue: string;
@@ -24,7 +24,7 @@
 		ariaLabel: string;
 		testIdPrefix?: string;
 		disabled?: boolean;
-		icon: Snippet;
+		slidingIcon: Snippet;
 		overflowableContent?: Snippet;
 	} = $props();
 
@@ -111,7 +111,7 @@
 						<ButtonIcon
 							ariaLabel={$i18n.core.text.clear_filter}
 							colorStyle="muted"
-							on:click={handleClear}
+							onclick={handleClear}
 							link={false}
 							testId={`${testIdPrefix}-clear-btn`}
 						>
@@ -125,7 +125,7 @@
 		{/if}
 		<ButtonIcon
 			bind:button
-			on:click={handleToggle}
+			onclick={handleToggle}
 			{disabled}
 			link={false}
 			colorStyle="muted"
@@ -135,8 +135,8 @@
 		>
 			{#snippet icon()}
 				<span>
-					{#if nonNullish(icon)}
-						{@render icon()}
+					{#if nonNullish(slidingIcon)}
+						{@render slidingIcon()}
 					{/if}
 				</span>
 			{/snippet}

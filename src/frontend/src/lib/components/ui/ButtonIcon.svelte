@@ -3,6 +3,7 @@
 	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
+		onclick: () => void;
 		icon: Snippet;
 		children?: Snippet;
 		button?: HTMLButtonElement;
@@ -16,6 +17,7 @@
 	}
 
 	let {
+		onclick,
 		icon,
 		children,
 		button = $bindable(),
@@ -33,7 +35,7 @@
 	class={`${colorStyle} icon flex h-10 flex-col text-center text-xs font-normal ${styleClass} ${width}`}
 	class:link
 	bind:this={button}
-	on:click
+	{onclick}
 	aria-label={ariaLabel}
 	data-tid={testId}
 	{disabled}
