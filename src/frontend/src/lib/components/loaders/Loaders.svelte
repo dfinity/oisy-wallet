@@ -7,11 +7,11 @@
 	import ShortcutGuard from '$lib/components/guard/ShortcutGuard.svelte';
 	import UrlGuard from '$lib/components/guard/UrlGuard.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
+	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
-	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
 </script>
 
 <LoaderUserProfile>
