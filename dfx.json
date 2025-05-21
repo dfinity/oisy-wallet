@@ -349,8 +349,10 @@
 		},
 		"ckbtc_kyt": {
 			"type": "custom",
+			"build": "scripts/build.ckbtc_kyt.sh",
 			"candid": "target/ic/ckbtc_kyt.did",
 			"wasm": "target/ic/ckbtc_kyt.wasm",
+			"init_arg_file": "target/ic/ckbtc_kyt.args.did",
 			"specified_id": "pvm5g-xaaaa-aaaar-qaaia-cai",
 			"remote": {
 				"id": {
