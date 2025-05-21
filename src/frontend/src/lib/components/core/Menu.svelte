@@ -91,7 +91,7 @@
 				? $i18n.navigation.alt.show_balances
 				: $i18n.navigation.alt.hide_balances}
 			testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
-			on:click={() =>
+			onclick={() =>
 				privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } })}
 			tag="P"
 		>
@@ -115,7 +115,7 @@
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.address_book}
 				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
-				on:click={() => modalStore.openAddressBook(addressModalId)}
+				onclick={() => modalStore.openAddressBook(addressModalId)}
 			>
 				<IconUserSquare size="20" />
 				{$i18n.navigation.text.address_book}
@@ -127,7 +127,7 @@
 		<ButtonMenu
 			ariaLabel={$i18n.navigation.alt.refer_a_friend}
 			testId={NAVIGATION_MENU_REFERRAL_BUTTON}
-			on:click={() => modalStore.openReferralCode(referralModalId)}
+			onclick={() => modalStore.openReferralCode(referralModalId)}
 		>
 			<IconShare size="20" />
 			{$i18n.navigation.text.refer_a_friend}
@@ -137,7 +137,7 @@
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.binance_qr_code}
 				testId={NAVIGATION_MENU_GOLD_BUTTON}
-				on:click={() => modalStore.openVipQrCode({ id: vipModalId, data: QrCodeType.GOLD })}
+				onclick={() => modalStore.openVipQrCode({ id: vipModalId, data: QrCodeType.GOLD })}
 			>
 				<IconBinance size="20" />
 				{$i18n.navigation.text.binance_qr_code}
@@ -148,7 +148,7 @@
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.vip_qr_code}
 				testId={NAVIGATION_MENU_VIP_BUTTON}
-				on:click={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
+				onclick={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
 			>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.vip_qr_code}
