@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import {isNullish, nonNullish} from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
@@ -9,36 +9,40 @@
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { OptionString } from '$lib/types/string';
+	import type {Snippet} from "svelte";
 
-	export let labelRef: string;
-	export let address: OptionString;
-	export let network: Network;
-	export let qrCodeAction: ReceiveQRCodeAction;
-	export let copyAriaLabel: string;
+	interface Props {
+		text?: Snippet;
+		title: Snippet;
+		children?: Snippet;
+		labelRef: string;
+		address: OptionString;
+		network: Network;
+		qrCodeAction: ReceiveQRCodeAction;
+		copyAriaLabel: string;
+		testId?: string;
+		copyButtonTestId?: string;
+	}
 
-	export let testId: string | undefined = undefined;
-	export let copyButtonTestId: string | undefined = undefined;
-
-	let text = false;
-	$: text = nonNullish($$slots.text);
+	let {text, title, children, labelRef, address, network, qrCodeAction, copyAriaLabel, testId, copyButtonTestId }: Props = $props()
 </script>
 
 <div>
 	<Value ref={labelRef} element="div">
 		{#snippet label()}
-			<slot name="title" />
+			{@render title()}
 		{/snippet}
 
 		{#snippet content()}
-			{#if text}
+			{#if nonNullish(text)}
 				<p class="mb-1.5 break-normal py-2 text-tertiary">
-					<slot name="text" />
+					{@render text?.()}
 				</p>
 			{/if}
 
 			<div
 				class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
-				class:mt-3={!text}
+				class:mt-3={isNullish(text)}
 				data-tid={testId}
 			>
 				<div class="h-8 w-8">
@@ -65,7 +69,7 @@
 				{/if}
 			</div>
 
-			<slot />
+			{@render children?.()}
 		{/snippet}
 	</Value>
 </div>
