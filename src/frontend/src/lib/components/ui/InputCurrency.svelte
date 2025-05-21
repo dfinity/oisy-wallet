@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import {onMount, type Snippet} from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 
 	interface Props {
 		innerEnd: Snippet;

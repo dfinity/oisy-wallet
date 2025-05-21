@@ -1,7 +1,7 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import type { OptionAmount } from '$lib/types/send';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		innerEnd: Snippet;
