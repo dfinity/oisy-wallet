@@ -95,6 +95,7 @@
 			testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
 			onclick={() =>
 				privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } })}
+			tag={$i18n.shortcuts.privacy_mode}
 		>
 			{#if $isPrivacyMode}
 				<IconEye />
