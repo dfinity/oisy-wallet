@@ -58,8 +58,8 @@ const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 		erc20DefaultTokensStore.set([
 			...ERC20_TWIN_TOKENS,
 			...EVM_ERC20_TOKENS,
-			...contracts.map(mapErc20Token),
-			...ADDITIONAL_ERC20_TOKENS
+			...ADDITIONAL_ERC20_TOKENS,
+			...contracts.map(mapErc20Token)
 		]);
 	} catch (err: unknown) {
 		erc20DefaultTokensStore.reset();
