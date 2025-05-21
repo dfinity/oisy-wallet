@@ -192,7 +192,7 @@
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
 			<IcSendReview on:icBack on:icSend={send} {destination} {amount} {networkId} />
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
-			<IcSendProgress bind:sendProgressStep {networkId} />
+			<IcSendProgress bind:sendProgressStep />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
 			<IcSendForm
 				on:icNext

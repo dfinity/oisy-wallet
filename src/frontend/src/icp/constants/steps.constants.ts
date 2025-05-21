@@ -10,8 +10,8 @@ export const sendSteps = ({
 	tokenCkErc20Ledger
 }: {
 	i18n: I18n;
-	networkId: NetworkId | undefined;
-	tokenCkErc20Ledger: boolean;
+	networkId?: NetworkId;
+	tokenCkErc20Ledger?: boolean;
 }): ProgressSteps =>
 	[
 		{
