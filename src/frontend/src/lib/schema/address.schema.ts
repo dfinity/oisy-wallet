@@ -1,5 +1,6 @@
 import { parseBtcAddress } from '$btc/utils/btc-address.utils';
 import type { BtcAddress } from '$declarations/backend/backend.did';
+import { isEthAddress } from '$lib/utils/account.utils';
 import { isBtcAddress } from '$lib/utils/address.utils';
 import { isSolAddress } from '$sol/utils/sol-address.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -26,3 +27,7 @@ export const BtcAddressObjectSchema = BtcAddressSchema.transform<BtcAddress>((da
 
 	return z.NEVER;
 }).transform<BtcAddress>((v) => v);
+
+export const EthAddressSchema = AddressSchema.refine((val) => isEthAddress(val));
+
+export const EthAddressObjectSchema = EthAddressSchema.transform((v) => ({ Public: v }));
