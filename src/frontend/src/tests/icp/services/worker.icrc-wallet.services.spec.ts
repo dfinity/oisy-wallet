@@ -116,8 +116,7 @@ describe('worker.icrc-wallet.services', () => {
 					expect(onLoadTransactionsError).toHaveBeenCalledOnce();
 					expect(onLoadTransactionsError).toHaveBeenNthCalledWith(1, {
 						tokenId: mockToken.id,
-						error: payload.data.error,
-						silent: true
+						error: payload.data.error
 					});
 				});
 
@@ -248,8 +247,7 @@ describe('worker.icrc-wallet.services', () => {
 					expect(onLoadTransactionsError).toHaveBeenCalledOnce();
 					expect(onLoadTransactionsError).toHaveBeenNthCalledWith(1, {
 						tokenId: mockToken.id,
-						error: payload.data.error,
-						silent: true
+						error: payload.data.error
 					});
 				});
 
