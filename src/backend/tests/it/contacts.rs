@@ -16,8 +16,7 @@ pub fn call_create_contact(
     name: String,
 ) -> Result<Contact, ContactError> {
     let request = CreateContactRequest { name };
-    let wrapped_result =
-        pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
+    let wrapped_result = pic_setup.update::<CreateContactRes>(caller, "create_contact", request);
     wrapped_result.expect("that create_contact succeeds")
 }
 
