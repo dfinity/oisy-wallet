@@ -47,12 +47,19 @@ export const loadContacts = async (identity: Identity): Promise<void> => {
 	}
 };
 
-export const createContact = async ({ name, identity }: { name: string; identity: Identity }) => {
+export const createContact = async ({
+	name,
+	identity
+}: {
+	name: string;
+	identity: Identity;
+}): Promise<ContactUi> => {
 	const result = await createContactApi({ name, identity });
 
 	if ('Ok' in result) {
-		contactsStore.addContact(mapToFrontendContact(result.Ok));
-		return result.Ok;
+		const contactUi = mapToFrontendContact(result.Ok);
+		contactsStore.addContact(contactUi);
+		return contactUi;
 	}
 	console.error(result.Err);
 	throw result.Err;
@@ -64,12 +71,13 @@ export const updateContact = async ({
 }: {
 	contact: ContactUi;
 	identity: Identity;
-}) => {
+}): Promise<ContactUi> => {
 	const result = await updateContactApi({ contact: mapToBackendContact(contact), identity });
 
 	if ('Ok' in result) {
-		contactsStore.updateContact(mapToFrontendContact(result.Ok));
-		return result.Ok;
+		const contactUi = mapToFrontendContact(result.Ok);
+		contactsStore.updateContact(contactUi);
+		return contactUi;
 	}
 	console.error(result.Err);
 	throw result.Err;
@@ -81,7 +89,7 @@ export const deleteContact = async ({
 }: {
 	id: ContactUi['id'];
 	identity: Identity;
-}) => {
+}): Promise<bigint> => {
 	const result = await deleteContactApi({ contactId: BigInt(id), identity });
 
 	if ('Ok' in result) {

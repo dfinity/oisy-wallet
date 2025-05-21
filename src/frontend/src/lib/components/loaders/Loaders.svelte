@@ -11,6 +11,7 @@
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
+	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
 </script>
 
 <LoaderUserProfile>
@@ -24,7 +25,9 @@
 								<ExchangeWorker>
 									<LoaderMetamask>
 										<UserSnapshotWorker>
-											<slot />
+											<LoaderContacts>
+												<slot />
+											</LoaderContacts>
 										</UserSnapshotWorker>
 									</LoaderMetamask>
 								</ExchangeWorker>
