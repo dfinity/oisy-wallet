@@ -1,11 +1,10 @@
-use candid::Principal;
-use shared::types::contact::{Contact, ContactError, CreateContactRequest};
-
 use crate::utils::{
     mock::CALLER,
     pocketic::{setup, PicBackend, PicCanisterTrait},
 };
-
+use candid::Principal;
+use shared::types::contact::{Contact, ContactError, CreateContactRequest};
+use shared::types::user_profile::OisyUser;
 // -------------------------------------------------------------------------------------------------
 // - Helper methods for contact testing
 // -------------------------------------------------------------------------------------------------
@@ -16,13 +15,17 @@ pub fn call_create_contact(
     name: String,
 ) -> Result<Contact, ContactError> {
     let request = CreateContactRequest { name };
-    let wrapped_result = pic_setup.update::<CreateContactRes>(caller, "create_contact", request);
+    let wrapped_result =
+        pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
     wrapped_result.expect("that create_contact succeeds")
 }
 
 pub fn call_get_contacts(pic_setup: &PicBackend, caller: Principal) -> Vec<Contact> {
-    let wrapped_result = pic_setup.query::<Vec<Contact>>(caller, "get_contacts", ());
-    wrapped_result.expect("that get_contacts succeeds")
+    let wrapped_result =
+        pic_setup.query::<Result<Vec<Contact>, ContactError>>(caller, "get_contacts", ());
+    wrapped_result
+        .expect("that get_contacts succeeds")
+        .expect("affe")
 }
 
 /*
@@ -163,24 +166,76 @@ fn test_create_multiple_contacts() {
 #[test]
 fn test_contacts_are_isolated_between_users() {
     let pic_setup = setup();
-    let caller1: Principal = Principal::from_text(CALLER).unwrap();
-    let caller2: Principal = Principal::from_text("2vxsx-fae").unwrap(); // Different principal
 
-    // User 1 creates a contact
-    let result1 = call_create_contact(&pic_setup, caller1, "User 1's Contact".to_string());
-    assert!(result1.is_ok());
+    // Initialize multiple test users
+    let test_users: Vec<OisyUser> = pic_setup.create_users(1..=3);
 
-    // User 2 creates a contact
-    let result2 = call_create_contact(&pic_setup, caller2, "User 2's Contact".to_string());
-    assert!(result2.is_ok());
+    // Create a contact for each user with a dynamically generated name
+    for (index, test_user) in test_users.iter().enumerate() {
+        let user_number = index + 1;
+        let contact_name = format!("Contact of user {}", user_number);
 
-    // User 1 should only see their own contact
-    let contacts1 = call_get_contacts(&pic_setup, caller1);
-    assert_eq!(contacts1.len(), 1);
-    assert_eq!(contacts1[0].name, "User 1's Contact");
+        let result = call_create_contact(&pic_setup, test_user.principal, contact_name);
 
-    // User 2 should only see their own contact
-    let contacts2 = call_get_contacts(&pic_setup, caller2);
-    assert_eq!(contacts2.len(), 1);
-    assert_eq!(contacts2[0].name, "User 2's Contact");
+        assert!(
+            result.is_ok(),
+            "Failed to create contact for user {}",
+            user_number
+        );
+    }
+
+    // Each user should now only see their own contact
+    for (index, test_user) in test_users.iter().enumerate() {
+        let user_number = index + 1;
+        let expected_contact_name = format!("Contact of user {}", user_number);
+
+        let contacts = call_get_contacts(&pic_setup, test_user.principal);
+
+        // Verify contact count
+        assert_eq!(
+            contacts.len(),
+            1,
+            "User {} should have exactly 1 contact, but has {}",
+            user_number,
+            contacts.len()
+        );
+
+        // Verify contact name
+        assert_eq!(
+            contacts[0].name, expected_contact_name,
+            "User {} has a contact with incorrect name",
+            user_number
+        );
+    }
+
+    // Additional test: verify that a user cannot see another user's contacts
+    if test_users.len() >= 2 {
+        // Have the first user create an additional contact
+        let additional_contact_name = "Another contact for user 1";
+        let result = call_create_contact(
+            &pic_setup,
+            test_users[0].principal,
+            additional_contact_name.to_string(),
+        );
+        assert!(
+            result.is_ok(),
+            "Failed to create additional contact for user 1"
+        );
+
+        // First user should now have 2 contacts
+        let user1_contacts = call_get_contacts(&pic_setup, test_users[0].principal);
+        assert_eq!(
+            user1_contacts.len(),
+            2,
+            "User 1 should have 2 contacts after adding another one"
+        );
+
+        // Second user should still have only 1 contact
+        let user2_contacts = call_get_contacts(&pic_setup, test_users[1].principal);
+        assert_eq!(
+            user2_contacts.len(),
+            1,
+            "User 2 should still have only 1 contact"
+        );
+    }
 }
