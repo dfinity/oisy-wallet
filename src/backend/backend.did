@@ -202,8 +202,6 @@ type CreateChallengeResponse = record {
 	start_timestamp_ms : nat64;
 	expiry_timestamp_ms : nat64
 };
-type CreateContactRequest = record { name : text };
-type CreateContactResult = variant { Ok : Contact; Err : ContactError };
 type CreatePowChallengeResult = variant {
 	Ok : CreateChallengeResponse;
 	Err : CreateChallengeError
@@ -449,7 +447,6 @@ service : (Arg) -> {
 		BtcSelectUserUtxosFeeResult
 	);
 	config : () -> (Config) query;
-	create_contact : (CreateContactRequest) -> (CreateContactResult);
 	create_pow_challenge : () -> (CreatePowChallengeResult);
 	create_user_profile : () -> (UserProfile);
 	delete_contact : (nat64) -> (DeleteContactResult);
