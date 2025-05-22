@@ -54,7 +54,6 @@
 
 	const updateFeeData = async () => {
 		try {
-
 			if (isNullish($ethAddress)) {
 				return;
 			}
