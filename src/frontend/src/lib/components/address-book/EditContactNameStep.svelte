@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { notEmptyString } from '@dfinity/utils';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import ContactForm from '$lib/components/address-book/ContactForm.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -36,8 +36,8 @@
 			return;
 		}
 
-		if (isNewContact) {
-			onAddContact({ name: contact.name! });
+		if (isNewContact && nonNullish(contact.name)) {
+			onAddContact({ name: contact.name });
 		} else {
 			onSaveContact(contact as ContactUi);
 		}
