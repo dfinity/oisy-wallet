@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { debounce } from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
+	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { InfuraGasRest } from '$eth/rest/infura.rest';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
@@ -136,7 +137,19 @@
 
 	const debounceUpdateFeeData = debounce(updateFeeData);
 
+	let listenerCallbackTimer: NodeJS.Timeout | undefined;
 	const obverseFeeData = async (watch: boolean) => {
+		const throttledCallback = () => {
+			// to make sure we don't update UI too often, we listen to the WS updates max. once per 10 secs
+			if (isNullish(listenerCallbackTimer)) {
+				listenerCallbackTimer = setTimeout(() => {
+					debounceUpdateFeeData();
+
+					listenerCallbackTimer = undefined;
+				}, ETH_FEE_DATA_LISTENER_DELAY);
+			}
+		};
+
 		await listener?.disconnect();
 
 		if (!watch) {
@@ -146,7 +159,7 @@
 		debounceUpdateFeeData();
 		listener = initMinedTransactionsListener({
 			// eslint-disable-next-line require-await
-			callback: async () => debounceUpdateFeeData(),
+			callback: async () => throttledCallback(),
 			networkId: sourceNetwork.id
 		});
 	};
@@ -154,7 +167,10 @@
 	onMount(() => {
 		observe && debounceUpdateFeeData();
 	});
-	onDestroy(() => listener?.disconnect());
+	onDestroy(() => {
+		listener?.disconnect();
+		clearTimeout(listenerCallbackTimer);
+	});
 
 	/**
 	 * Observe input properties for erc20
