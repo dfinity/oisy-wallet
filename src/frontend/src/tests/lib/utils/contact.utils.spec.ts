@@ -157,5 +157,14 @@ describe('contact.utils', () => {
 			});
 			expect(result).toBeUndefined();
 		});
+
+		it('should match address regardless of case (case-insensitive match)', () => {
+			const upperCasedAddress = mockEthAddress3.toUpperCase();
+			const result = getContactForAddress({
+				addressString: upperCasedAddress,
+				contactList: mockContacts
+			});
+			expect(result?.addresses?.[0]?.address).toEqual(mockEthAddress3);
+		});
 	});
 });

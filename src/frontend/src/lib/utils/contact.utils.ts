@@ -59,4 +59,7 @@ export const getContactForAddress = ({
 }: {
 	addressString: string;
 	contactList: ContactUi[];
-}) => contactList.find((c) => c.addresses.find((address) => address.address === addressString));
+}): ContactUi | undefined =>
+	contactList.find((c) =>
+		c.addresses.find((address) => address.address.toLowerCase() === addressString.toLowerCase())
+	);
