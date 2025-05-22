@@ -46,7 +46,7 @@ import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { toNullable } from '@dfinity/utils';
+import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { readable } from 'svelte/store';
 
 vi.mock('$lib/api/reward.api', () => ({
@@ -75,6 +75,17 @@ describe('user-snapshot.services', () => {
 			mockValidSplToken
 		];
 
+		// Required for the type interpreter
+		assertNonNullish(ICP_NETWORK_ID.description);
+		assertNonNullish(ICP_TOKEN_ID.description);
+		assertNonNullish(mockValidIcToken.id.description);
+		assertNonNullish(mockIcrcTestnetToken.id.description);
+		assertNonNullish(SOLANA_MAINNET_NETWORK_ID.description);
+		assertNonNullish(SOLANA_TOKEN_ID.description);
+		assertNonNullish(mockValidSplToken.id.description);
+		assertNonNullish(ETHEREUM_NETWORK_ID.description);
+		assertNonNullish(ETHEREUM_TOKEN_ID.description);
+
 		const mockIcAmount = 123456n;
 		const mockSolAmount = 987654n;
 		const mockEthAmount = mockIcAmount + mockSolAmount;
@@ -93,24 +104,29 @@ describe('user-snapshot.services', () => {
 					timestamp: nowNanoseconds,
 					network: {
 						testnet_for: toNullable(),
-						network_id: ICP_NETWORK_ID.description!
+						network_id: ICP_NETWORK_ID.description
 					},
 					account: mockIdentity.getPrincipal().toString(),
-					token_address: { token_symbol: ICP_TOKEN_ID.description!, wraps: toNullable() },
-					last_transactions: mockIcTransactions.slice(0, 5).map(
-						({ value, timestamp, to }: IcTransactionUi): Transaction_Any => ({
-							transaction_type: { Send: null },
-							timestamp: BigInt(
-								normalizeTimestampToSeconds(timestamp ?? ZERO) * Number(NANO_SECONDS_IN_SECOND)
-							),
-							amount: value ?? ZERO,
-							network: {
-								testnet_for: toNullable(),
-								network_id: ICP_NETWORK_ID.description!
-							},
-							counterparty: to ?? Principal.anonymous().toString()
+					token_address: { token_symbol: ICP_TOKEN_ID.description, wraps: toNullable() },
+					last_transactions: mockIcTransactions
+						.slice(0, 5)
+						.map(({ value, timestamp, to }: IcTransactionUi): Transaction_Any => {
+							// Required for the type interpreter
+							assertNonNullish(ICP_NETWORK_ID.description);
+
+							return {
+								transaction_type: { Send: null },
+								timestamp: BigInt(
+									normalizeTimestampToSeconds(timestamp ?? ZERO) * Number(NANO_SECONDS_IN_SECOND)
+								),
+								amount: value ?? ZERO,
+								network: {
+									testnet_for: toNullable(),
+									network_id: ICP_NETWORK_ID.description
+								},
+								counterparty: to ?? Principal.anonymous().toString()
+							};
 						})
-					)
 				}
 			}
 		];
@@ -124,10 +140,10 @@ describe('user-snapshot.services', () => {
 					timestamp: nowNanoseconds,
 					network: {
 						testnet_for: toNullable(),
-						network_id: ICP_NETWORK_ID.description!
+						network_id: ICP_NETWORK_ID.description
 					},
 					account: mockIdentity.getPrincipal().toString(),
-					token_address: { token_symbol: mockValidIcToken.id.description!, wraps: toNullable() },
+					token_address: { token_symbol: mockValidIcToken.id.description, wraps: toNullable() },
 					last_transactions: []
 				}
 			},
@@ -139,11 +155,11 @@ describe('user-snapshot.services', () => {
 					timestamp: nowNanoseconds,
 					network: {
 						testnet_for: toNullable('true'),
-						network_id: ICP_NETWORK_ID.description!
+						network_id: ICP_NETWORK_ID.description
 					},
 					account: mockIdentity.getPrincipal().toString(),
 					token_address: {
-						token_symbol: mockIcrcTestnetToken.id.description!,
+						token_symbol: mockIcrcTestnetToken.id.description,
 						wraps: toNullable()
 					},
 					last_transactions: []
@@ -165,10 +181,10 @@ describe('user-snapshot.services', () => {
 					timestamp: nowNanoseconds,
 					network: {
 						testnet_for: toNullable(),
-						network_id: SOLANA_MAINNET_NETWORK_ID.description!
+						network_id: SOLANA_MAINNET_NETWORK_ID.description
 					},
 					account: mockSolAddress,
-					token_address: { token_symbol: SOLANA_TOKEN_ID.description!, wraps: toNullable() },
+					token_address: { token_symbol: SOLANA_TOKEN_ID.description, wraps: toNullable() },
 					last_transactions: []
 				}
 			},
@@ -180,24 +196,29 @@ describe('user-snapshot.services', () => {
 					timestamp: nowNanoseconds,
 					network: {
 						testnet_for: toNullable(),
-						network_id: SOLANA_MAINNET_NETWORK_ID.description!
+						network_id: SOLANA_MAINNET_NETWORK_ID.description
 					},
 					account: mockSolAddress,
-					token_address: { token_symbol: mockValidSplToken.id.description!, wraps: toNullable() },
-					last_transactions: mockSolTransactions.slice(0, 5).map(
-						({ value, timestamp, to }: SolTransactionUi): Transaction_Any => ({
-							transaction_type: { Send: null },
-							timestamp: BigInt(
-								normalizeTimestampToSeconds(timestamp ?? ZERO) * Number(NANO_SECONDS_IN_SECOND)
-							),
-							amount: value ?? ZERO,
-							network: {
-								testnet_for: toNullable(),
-								network_id: SOLANA_MAINNET_NETWORK_ID.description!
-							},
-							counterparty: to ?? ''
+					token_address: { token_symbol: mockValidSplToken.id.description, wraps: toNullable() },
+					last_transactions: mockSolTransactions
+						.slice(0, 5)
+						.map(({ value, timestamp, to }: SolTransactionUi): Transaction_Any => {
+							// Required for the type interpreter
+							assertNonNullish(SOLANA_MAINNET_NETWORK_ID.description);
+
+							return {
+								transaction_type: { Send: null },
+								timestamp: BigInt(
+									normalizeTimestampToSeconds(timestamp ?? ZERO) * Number(NANO_SECONDS_IN_SECOND)
+								),
+								amount: value ?? ZERO,
+								network: {
+									testnet_for: toNullable(),
+									network_id: SOLANA_MAINNET_NETWORK_ID.description
+								},
+								counterparty: to ?? ''
+							};
 						})
-					)
 				}
 			}
 		];
@@ -211,11 +232,11 @@ describe('user-snapshot.services', () => {
 					timestamp: nowNanoseconds,
 					network: {
 						testnet_for: toNullable(),
-						network_id: ETHEREUM_NETWORK_ID.description!
+						network_id: ETHEREUM_NETWORK_ID.description
 					},
 					account: mockEthAddress,
 					token_address: {
-						token_symbol: ETHEREUM_TOKEN_ID.description!,
+						token_symbol: ETHEREUM_TOKEN_ID.description,
 						wraps: toNullable(ETH_TOKEN_GROUP_ID.description)
 					},
 					last_transactions: []
