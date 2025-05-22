@@ -134,28 +134,11 @@
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}
-	<BtcSendReview
-		on:icBack
-		on:icSend={send}
-		bind:utxosFee
-		{destination}
-		{amount}
-		{networkId}
-		{source}
-	/>
+	<BtcSendReview on:icBack on:icSend={send} bind:utxosFee {destination} {amount} {source} />
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<BtcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
-	<BtcSendForm
-		on:icNext
-		on:icClose
-		on:icBack
-		on:icTokensList
-		bind:destination
-		bind:amount
-		{source}
-		{networkId}
-	>
+	<BtcSendForm {source} on:icNext on:icClose on:icBack on:icTokensList bind:destination bind:amount>
 		<ButtonBack onclick={back} slot="cancel" />
 	</BtcSendForm>
 {:else}
