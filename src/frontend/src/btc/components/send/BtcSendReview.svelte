@@ -13,7 +13,6 @@
 	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -21,11 +20,11 @@
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
-	export let networkId: NetworkId | undefined = undefined;
 	export let source: string;
 	export let utxosFee: UtxosFee | undefined = undefined;
 
-	const { sendBalance, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendBalance, sendTokenDecimals, sendTokenNetworkId } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
@@ -56,14 +55,14 @@
 	$: invalid =
 		isInvalidDestinationBtc({
 			destination,
-			networkId
+			networkId: $sendTokenNetworkId
 		}) || invalidAmount(amount);
 </script>
 
 <SendReview on:icBack on:icSend {amount} {destination} disabled={disableSend}>
-	<BtcReviewNetwork {networkId} slot="network" />
+	<BtcReviewNetwork networkId={$sendTokenNetworkId} slot="network" />
 
-	<BtcUtxosFee slot="fee" bind:utxosFee {networkId} {amount} />
+	<BtcUtxosFee slot="fee" bind:utxosFee networkId={$sendTokenNetworkId} {amount} />
 
 	<div class="mt-8" slot="info">
 		{#if insufficientFundsForFee}
