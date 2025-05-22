@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import type { ModalHeroVariant } from '$lib/types/style';
+
 	interface Props {
 		logo?: Snippet;
 		title?: Snippet;
@@ -9,6 +10,7 @@
 		description?: Snippet;
 		variant?: ModalHeroVariant;
 	}
+
 	const { logo, title, subtitle, description, variant = 'default' }: Props = $props();
 </script>
 
