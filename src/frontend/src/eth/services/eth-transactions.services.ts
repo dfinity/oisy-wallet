@@ -4,10 +4,12 @@ import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
+import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
+import { trackEvent } from '$lib/services/analytics.services';
 import { retry } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
+import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -88,14 +90,22 @@ const loadEthTransactions = async ({
 				}
 			} = get(i18n);
 
-			toastsErrorNoTrace({
-				msg: {
-					text: replacePlaceholders(loading_transactions_symbol, {
-						$symbol: ETHEREUM_NETWORK_SYMBOL
-					})
-				},
-				err
+			trackEvent({
+				name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
+				metadata: {
+					tokenId: `${tokenId.description}`,
+					networkId: `${networkId.description}`,
+					error: `${err}`
+				}
 			});
+
+			// We print the error to console just for debugging purposes
+			console.warn(
+				replacePlaceholders(loading_transactions_symbol, {
+					$symbol: ETHEREUM_NETWORK_SYMBOL
+				}),
+				err
+			);
 		}
 
 		return { success: false };
@@ -167,14 +177,23 @@ const loadErc20Transactions = async ({
 			}
 		} = get(i18n);
 
-		toastsErrorNoTrace({
-			msg: {
-				text: replacePlaceholders(loading_transactions_symbol, {
-					$symbol: token.symbol
-				})
-			},
-			err
+		trackEvent({
+			name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
+			metadata: {
+				tokenId: `${tokenId.description}`,
+				networkId: `${networkId.description}`,
+				error: `${err}`
+			}
 		});
+
+		// We print the error to console just for debugging purposes
+		console.warn(
+			replacePlaceholders(loading_transactions_symbol, {
+				$symbol: token.symbol
+			}),
+			err
+		);
+
 		return { success: false };
 	}
 
