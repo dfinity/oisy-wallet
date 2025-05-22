@@ -30,6 +30,7 @@ interface I18nCore {
 		no_results: string;
 		paste: string;
 		to: string;
+		add: string;
 		more_items: string;
 	};
 	info: { test_banner: string };
@@ -61,6 +62,8 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	alt: {
 		tokens: string;
@@ -78,6 +81,8 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	short: { documentation: string };
 }
@@ -319,6 +324,10 @@ interface I18nSettings {
 		appearance_system: string;
 	};
 	error: { loading_profile: string };
+}
+
+interface I18nShortcuts {
+	privacy_mode: string;
 }
 
 interface I18nNetworks {
@@ -603,6 +612,7 @@ interface I18nTokens {
 		hide_token: string;
 		select_token: string;
 		exchange_is_not_available: string;
+		exchange_is_not_available_short: string;
 		source_token_title: string;
 		destination_token_title: string;
 		chain_key: string;
@@ -943,6 +953,8 @@ interface I18nAddress_book {
 		empty_text: string;
 		add_new_contact: string;
 		add_contact: string;
+		search_contact: string;
+		no_contact_found: string;
 	};
 	show_contact: {
 		title: string;
@@ -955,6 +967,10 @@ interface I18nAddress_book {
 interface I18nContact {
 	form: { add_new_contact: string };
 	fields: { name: string };
+}
+
+interface I18nAddress {
+	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
 }
 
 interface I18nSigner {
@@ -1035,6 +1051,7 @@ interface I18n {
 	init: I18nInit;
 	hero: I18nHero;
 	settings: I18nSettings;
+	shortcuts: I18nShortcuts;
 	networks: I18nNetworks;
 	receive: I18nReceive;
 	send: I18nSend;
@@ -1052,6 +1069,7 @@ interface I18n {
 	referral: I18nReferral;
 	address_book: I18nAddress_book;
 	contact: I18nContact;
+	address: I18nAddress;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
