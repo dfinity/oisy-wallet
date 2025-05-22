@@ -39,7 +39,7 @@
 		loading = false;
 	};
 
-	const debounceLoad = debounce(onLoad, 500);
+	const debounceLoad = debounce(onLoad, 1000);
 
 	$effect(() => {
 		// To trigger the load function when any of the dependencies change.
