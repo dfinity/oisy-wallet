@@ -12,9 +12,8 @@
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
-	export let source: string;
 
-	const { sendToken, sendBalance, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
 
@@ -30,17 +29,7 @@
 	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
 </script>
 
-<SendForm
-	on:icNext
-	on:icBack
-	{source}
-	{destination}
-	{invalidDestination}
-	token={$sendToken}
-	balance={$sendBalance}
-	disabled={invalid}
-	hideSource
->
+<SendForm on:icNext on:icBack {destination} {invalidDestination} disabled={invalid}>
 	<IcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 
 	<IcTokenFee slot="fee" />
