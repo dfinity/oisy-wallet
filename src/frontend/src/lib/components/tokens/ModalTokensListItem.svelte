@@ -8,8 +8,12 @@
 	import type { LogoSize } from '$lib/types/components';
 	import type { CardData } from '$lib/types/token-card';
 
-	export let data: CardData;
-	export let logoSize: LogoSize = 'lg';
+	interface Props {
+		data: CardData;
+		logoSize?: LogoSize;
+	}
+
+	let { data, logoSize = 'lg' }: Props = $props();
 
 	const { oisyName, oisySymbol, symbol, name, network } = data;
 </script>
