@@ -1,5 +1,6 @@
 import { getBtcAddressString, parseBtcAddress } from '$btc/utils/btc-address.utils';
 import type { BtcAddress } from '$declarations/backend/backend.did';
+import { assertNonNullish } from '@dfinity/utils';
 
 describe('btc-address.utils', () => {
 	describe('parseBtcAddress', () => {
@@ -141,7 +142,8 @@ describe('btc-address.utils', () => {
 
 			validAddresses.forEach((address) => {
 				const parsedAddress = parseBtcAddress(address);
-				const recoveredAddress = getBtcAddressString(parsedAddress!);
+				assertNonNullish(parsedAddress);
+				const recoveredAddress = getBtcAddressString(parsedAddress);
 
 				expect(recoveredAddress).toEqual(address);
 			});
