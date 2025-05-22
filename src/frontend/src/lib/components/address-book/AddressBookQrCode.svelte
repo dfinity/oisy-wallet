@@ -3,12 +3,15 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
-	import type { Address } from '$lib/types/contact';
-	export let address: Address;
+	import type { ContactAddressUi } from '$lib/types/contact';
+
+	const { address }: { address: ContactAddressUi } = $props();
+
 	let render = true;
+
 	const rerender = debounce(() => {
 		render = false;
-		setTimeout(() => (render = true), 0);
+		queueMicrotask(() => (render = true));
 	});
 </script>
 
@@ -19,12 +22,12 @@
 	class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-[100%] rounded-xl bg-white p-4"
 	class:opacity-0={!render}
 >
-	{#if render}
+	{#if render && address?.address}
 		<QRCode value={address.address}>
 			<svelte:fragment slot="logo">
-				{#if nonNullish(address?.address_type)}
+				{#if nonNullish(address.addressType)}
 					<div class="flex items-center justify-center rounded-lg bg-primary p-2">
-						<IconAddressType addressType={address.address_type} size="48" />
+						<IconAddressType addressType={address.addressType} size="48" />
 					</div>
 				{/if}
 			</svelte:fragment>

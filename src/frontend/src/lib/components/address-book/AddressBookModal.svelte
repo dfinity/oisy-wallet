@@ -6,6 +6,8 @@
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
+	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
@@ -25,7 +27,7 @@
 		},
 		{
 			name: AddressBookSteps.EDIT_CONTACT,
-			// TODO: Add i18n
+// TODO: Add i18n
 			title: 'Edit Contact'
 		},
 		{
@@ -34,12 +36,12 @@
 		},
 		{
 			name: AddressBookSteps.SHOW_ADDRESS,
-			// TODO: Add i18n
+// TODO: Add i18n
 			title: 'Show address'
 		},
 		{
 			name: AddressBookSteps.EDIT_ADDRESS,
-			// TODO: Add i18n
+// TODO: Add i18n
 			title: 'Edit address'
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
@@ -51,11 +53,11 @@
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
 	let editContactNameStep = $state<EditContactNameStep>();
 
-	// TODO Use contact store and remove
+// TODO Use contact store and remove
 	let contacts: ContactUi[] = $state([]);
-	// TODO Use contact store and remove
+// TODO Use contact store and remove
 	let currentContact: ContactUi | undefined = $state();
-	// TODO Use contact store and remove
+// TODO Use contact store and remove
 	let currentAddressIndex: number | undefined = $state();
 
 	const gotoStep = (stepName: AddressBookSteps) => {
@@ -68,7 +70,7 @@
 		}
 	};
 
-	// TODO Use contact store and remove
+// TODO Use contact store and remove
 	const addContact = (contact: Pick<ContactUi, 'name'>) => {
 		currentContact = {
 			id: BigInt(Date.now()),
@@ -80,21 +82,21 @@
 		gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
 
-	// TODO Use contact store and remove
+// TODO Use contact store and remove
 	const saveContact = (contact: ContactUi) => {
 		const index = contacts.findIndex((c) => contact.id === c.id);
 		contacts[index] = contact;
 		gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
 
-	// TODO Use contact store and remove
+// TODO Use contact store and remove
 	const deleteContact = (id: bigint) => {
 		contacts = contacts.filter((contact) => contact.id !== id);
 		currentContact = undefined;
 		gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
 
-	// TODO Use contact store and remove
+// TODO Use contact store and remove
 	const addAddress = (address: ContactAddressUi) => {
 		const addresses = [...currentContact!.addresses, address];
 		currentAddressIndex = undefined;
@@ -106,14 +108,14 @@
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
-	// TODO Use contact store and remove
+// TODO Use contact store and remove
 	const saveAddress = (address: ContactAddressUi) => {
 		const { addresses } = currentContact!;
 		addresses[currentAddressIndex!] = { ...address };
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
-	// TODO Use contact store and remove
+// TODO Use contact store and remove
 	const deleteAddress = (index: number) => {
 		if (nonNullish(currentContact)) {
 			const addresses = currentContact.addresses.filter((a, i) => i !== index);
@@ -135,11 +137,21 @@
 	testId={ADDRESS_BOOK_MODAL}
 	on:nnsClose={close}
 >
-	<svelte:fragment slot="title"
-		>{currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)
-			? editContactNameStep.title
-			: (currentStep?.title ?? '')}</svelte:fragment
-	>
+	<svelte:fragment slot="title">
+		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS}
+			<div class="flex flex-wrap items-center gap-2">
+				<Avatar variant="xs" styleClass="rounded-full flex items-center justify-center mb-2" />
+				<div class="text-center text-lg font-semibold text-primary">
+					{currentContact?.name}
+				</div>
+			</div>
+		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
+			{editContactNameStep.title}
+		{:else}
+			{currentStep?.title ?? ''}
+		{/if}
+	</svelte:fragment>
+
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
 			{contacts}
@@ -151,9 +163,14 @@
 				currentContact = undefined;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
+			onShowAddress={(contact, addressIndex) => {
+				currentContact = contact;
+				currentAddressIndex = addressIndex;
+				gotoStep(AddressBookSteps.SHOW_ADDRESS);
+			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
-		<!-- TODO Remove ! from currentContact -->
+<!-- TODO Remove ! from currentContact -->
 		<ShowContactStep
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 			contact={currentContact!}
@@ -165,8 +182,8 @@
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
-			onShowAddress={(address) => {
-				currentAddressIndex = address;
+			onShowAddress={(addressIndex) => {
+				currentAddressIndex = addressIndex;
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
@@ -198,7 +215,7 @@
 			isNewContact={isNullish(currentContact)}
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		/>
-	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
+{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
 		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
 		{JSON.stringify(currentContact?.addresses[currentAddressIndex!])}
 		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
@@ -218,5 +235,11 @@
 			isNewAddress={isNullish(currentAddressIndex)}
 			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 		/>
+	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
+	<AddressBookInfoPage
+		address={currentContact?.addresses[currentAddressIndex!]!}
+		close={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+ 	 />
+  
 	{/if}
 </WizardModal>

@@ -3,6 +3,8 @@
 	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
@@ -17,9 +19,10 @@
 		contacts: ContactUi[];
 		onAddContact: () => void;
 		onShowContact: (contact: ContactUi) => void;
+		onShowAddress?: (contact: ContactUi, index: number) => void;
 	}
 
-	let { contacts, onAddContact, onShowContact }: Props = $props();
+	let { contacts, onAddContact, onShowContact, onShowAddress }: Props = $props();
 
 	let searchTerm = $state('');
 
@@ -64,14 +67,24 @@
 				{#each filteredContacts as contact, index (index)}
 					<div class="flex items-center">
 						<div class="grow">
-							<!-- TODO: Should be updated with Pull request #6462
+<!-- TODO: Should be updated with Pull request #6462
 								Address list item
 								https://github.com/dfinity/oisy-wallet/pull/6462
 							-->
 							CONTACT: {contact.name} #addresses {contact.addresses.length}
 						</div>
-						<!-- TODO: Should be changed with Pull request #6462 Address list item -->
+<!-- TODO: Should be changed with Pull request #6462 Address list item -->
 						<Button styleClass="flex-none" on:click={() => onShowContact(contact)}>Show</Button>
+
+						<ButtonIcon
+							ariaLabel={$i18n.core.text.view}
+							onclick={() => onShowAddress?.(contact, 0)}
+							testId="address-info-button"
+						>
+							{#snippet icon()}
+								<IconInfo />
+							{/snippet}
+						</ButtonIcon>
 					</div>
 				{/each}
 			{:else}
