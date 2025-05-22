@@ -1,4 +1,3 @@
-import floki from '$eth/assets/floki.svg';
 import rndr from '$eth/assets/rndr.svg';
 import weth from '$eth/assets/weth.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
@@ -40,8 +39,6 @@ export const mapErc20UserToken = ({
 
 const mapErc20Icon = (symbol: string): string | undefined => {
 	switch (symbol.toLowerCase()) {
-		case 'floki':
-			return floki;
 		case 'rndr':
 			return rndr;
 		case 'weth':
