@@ -17,8 +17,8 @@
 	let {
 		sendAmount,
 		receiveAmount,
-		sourceToken = undefined,
-		destinationToken = undefined,
+		sourceToken,
+		destinationToken,
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate
 	}: Props = $props();
@@ -26,7 +26,9 @@
 
 <div class="mb-6 rounded-lg border border-solid border-tertiary bg-primary p-4 shadow-sm">
 	<SwapToken token={sourceToken} amount={sendAmount} exchangeRate={sourceTokenExchangeRate}>
-		<span slot="title">{$i18n.tokens.text.source_token_title}</span>
+		{#snippet title()}
+			{$i18n.tokens.text.source_token_title}
+		{/snippet}
 	</SwapToken>
 
 	<div class="my-2 flex w-full items-center justify-between text-tertiary-inverted">
@@ -40,6 +42,8 @@
 		amount={receiveAmount}
 		exchangeRate={destinationTokenExchangeRate}
 	>
-		<span slot="title">{$i18n.tokens.text.destination_token_title}</span>
+		{#snippet title()}
+			{$i18n.tokens.text.destination_token_title}
+		{/snippet}
 	</SwapToken>
 </div>

@@ -4,13 +4,21 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import type { Snippet } from 'svelte';
 
-	export let token: Token | undefined = undefined;
-	export let amount: OptionAmount;
-	export let exchangeRate: number | undefined;
+	interface Props {
+		token?: Token;
+		amount: OptionAmount;
+		exchangeRate?: number;
+		title: Snippet;
+	}
+
+	let { token, amount, exchangeRate, title }: Props = $props();
 </script>
 
-<div class="mb-1 text-tertiary"><slot name="title" /></div>
+<div class="mb-1 text-tertiary">
+	{@render title()}
+</div>
 
 {#if nonNullish(token)}
 	<div class="flex items-center">
