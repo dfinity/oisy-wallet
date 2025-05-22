@@ -71,7 +71,7 @@ describe('ic-transactions.services', () => {
 			expect(spyAnalytics).toHaveBeenNthCalledWith(1, {
 				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 				metadata: {
-					tokenId: tokenId.description!,
+					tokenId: tokenId.description,
 					error: mockError.toString()
 				}
 			});
@@ -97,14 +97,14 @@ describe('ic-transactions.services', () => {
 			expect(spyAnalytics).toHaveBeenNthCalledWith(1, {
 				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 				metadata: {
-					tokenId: tokenId.description!,
+					tokenId: tokenId.description,
 					error: 'null'
 				}
 			});
 			expect(spyAnalytics).toHaveBeenNthCalledWith(2, {
 				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 				metadata: {
-					tokenId: tokenId.description!,
+					tokenId: tokenId.description,
 					error: 'undefined'
 				}
 			});

@@ -25,6 +25,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { createMockErc20Tokens, mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
 import { get } from 'svelte/store';
@@ -120,18 +121,22 @@ describe('eth-balance.services', () => {
 			expect(trackEvent).toHaveBeenNthCalledWith(1, {
 				name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
 				metadata: {
-					tokenId: ETHEREUM_TOKEN_ID.description!,
-					networkId: ETHEREUM_NETWORK_ID.description!,
+					tokenId: ETHEREUM_TOKEN_ID.description,
+					networkId: ETHEREUM_NETWORK_ID.description,
 					error: mockError.toString()
 				}
 			});
+
+			// Required for the type interpreter
+			assertNonNullish(ETHEREUM_TOKEN_ID.description);
+			assertNonNullish(ETHEREUM_NETWORK_ID.description);
 
 			expect(console.warn).toHaveBeenCalledOnce();
 			expect(console.warn).toHaveBeenNthCalledWith(
 				1,
 				replacePlaceholders(en.init.error.loading_balance, {
-					$symbol: ETHEREUM_TOKEN_ID.description!,
-					$network: ETHEREUM_NETWORK_ID.description!
+					$symbol: ETHEREUM_TOKEN_ID.description,
+					$network: ETHEREUM_NETWORK_ID.description
 				}),
 				mockError
 			);
@@ -156,8 +161,8 @@ describe('eth-balance.services', () => {
 				expect(trackEvent).toHaveBeenNthCalledWith(index + 1, {
 					name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
 					metadata: {
-						tokenId: tokenId.description!,
-						networkId: networkId.description!,
+						tokenId: tokenId.description,
+						networkId: networkId.description,
 						error: mockError.toString()
 					}
 				});
@@ -166,11 +171,15 @@ describe('eth-balance.services', () => {
 			expect(console.warn).toHaveBeenCalledTimes(mockTokens.length);
 
 			mockTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
+				// Required for the type interpreter
+				assertNonNullish(tokenId.description);
+				assertNonNullish(networkId.description);
+
 				expect(console.warn).toHaveBeenNthCalledWith(
 					index + 1,
 					replacePlaceholders(en.init.error.loading_balance, {
-						$symbol: tokenId.description!,
-						$network: networkId.description!
+						$symbol: tokenId.description,
+						$network: networkId.description
 					}),
 					mockError
 				);
