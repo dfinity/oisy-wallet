@@ -304,6 +304,8 @@
 			}
 		},
 		"ckbtc_ledger": {
+			"build": "scripts/build.ckbtc_ledger.sh",
+			"init_arg_file": "target/ic/ckbtc_ledger.args.did",
 			"type": "custom",
 			"candid": "target/ic/ckbtc_ledger.did",
 			"wasm": "target/ic/ckbtc_ledger.wasm",

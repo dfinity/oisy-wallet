@@ -21,26 +21,7 @@ echo "Step 2: deploy minter canister..."
 dfx deploy ckbtc_minter --network "$DFX_NETWORK"
 
 echo "Step 3: deploy ledger canister..."
-PRINCIPAL="$(dfx identity get-principal)"
-dfx deploy ckbtc_ledger --specified-id mc6ru-gyaaa-aaaar-qaaaq-cai --network "$DFX_NETWORK" --argument "(variant {
-  Init = record {
-     token_symbol = \"ckBTC\";
-     token_name = \"Chain key local Bitcoin\";
-     minting_account = record { owner = principal \"$MINTERID\" };
-     transfer_fee = 11_500;
-     metadata = vec {};
-     initial_balances = vec { record { record { owner = principal \"$PRINCIPAL\"; }; 100_000_000_000; }; };
-     archive_options = record {
-         num_blocks_to_archive = 10_000;
-         trigger_threshold = 20_000;
-         controller_id = principal \"$PRINCIPAL\";
-         cycles_for_archive_creation = opt 1_000_000_000_000;
-         max_message_size_bytes = null;
-         node_max_memory_size_bytes = opt 3_221_225_472;
-     };
-     feature_flags  = opt record { icrc2 = true };
- }
-})"
+dfx deploy ckbtc_ledger --network "$DFX_NETWORK"
 
 echo "Step 4: deploy kyt canister..."
 dfx deploy ckbtc_kyt --network "$DFX_NETWORK"
