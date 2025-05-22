@@ -16,6 +16,7 @@
 	import SettingsList from '$lib/components/settings/SettingsList.svelte';
 	import SettingsListItem from '$lib/components/settings/SettingsListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import ModalHero from '$lib/components/common/ModalHero.svelte';
 
 	export let transaction: IcTransactionUi;
 	export let token: OptionToken;
@@ -51,32 +52,33 @@
 	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
 
 	<ContentWithToolbar>
-		<div
-			class="border-1 mb-8 flex w-full flex-col items-center rounded-2xl border-success-subtle-20 bg-success-subtle-20 p-3"
-		>
-			{#if nonNullish(token)}
-				<div class="relative mb-1 block flex w-[54px]">
-					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
-				</div>
-			{/if}
-			<span class="text-base font-bold capitalize">{type}</span>
-			{#if nonNullish(token) && nonNullish(value)}
-				<output
-					class="mt-1.5 flex text-2xl font-bold"
-					class:text-success-primary={type === 'receive'}
-				>
-					{formatToken({
-						value,
-						unitName: token.decimals,
-						displayDecimals: token.decimals,
-						showPlusSign: type === 'receive'
-					})}
-					{token.symbol}
-				</output>
-			{:else}
-				&ZeroWidthSpace;
-			{/if}
-		</div>
+		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
+			{#snippet logo()}
+				{#if nonNullish(token)}
+					<div class="relative block flex w-[54px]">
+						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+					</div>
+				{/if}
+			{/snippet}
+			{#snippet subtitle()}
+				<span class="capitalize">{type}</span>
+			{/snippet}
+			{#snippet title()}
+				{#if nonNullish(token) && nonNullish(value)}
+					<output class:text-success-primary={type === 'receive'}>
+						{formatToken({
+							value,
+							unitName: token.decimals,
+							displayDecimals: token.decimals,
+							showPlusSign: type === 'receive'
+						})}
+						{token.symbol}
+					</output>
+				{:else}
+					&ZeroWidthSpace;
+				{/if}
+			{/snippet}
+		</ModalHero>
 
 		<ul>
 			{#if nonNullish(timestamp)}
