@@ -29,22 +29,12 @@ WASM_FILE="$(jq -r .canisters.cycles_depositor.wasm dfx.json)"
 ARG_FILE="$(jq -r .canisters.cycles_depositor.init_arg_file dfx.json)"
 
 ####
-# Downloads the candid file, if it does not exist already.
-if test -e "$CANDID_FILE"; then
-  echo "Using existing cycles_depositor candid file"
-else
-  mkdir -p "$(dirname "$CANDID_FILE")"
-  curl -sSL "$CANDID_URL" >"$CANDID_FILE"
-fi
+# Downloads the candid file
+scripts/download-immutable.sh "$CANDID_URL" "$CANDID_FILE"
 
 ####
-# Downloads the Wasm file, if it does not exist already.
-if test -e "$WASM_FILE"; then
-  echo "Using existing cycles_depositor Wasm file"
-else
-  mkdir -p "$(dirname "$WASM_FILE")"
-  curl -sSL "$WASM_URL" >"$WASM_FILE"
-fi
+# Downloads the Wasm file
+scripts/download-immutable.sh "$WASM_URL" "$WASM_FILE"
 
 ####
 # Computes the install args, overwriting any existing args file.
