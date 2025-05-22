@@ -16,6 +16,7 @@ import {
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
 import { listCustomTokens } from '$lib/api/backend.api';
+import { setIdbIcTokens } from '$lib/api/idb-tokens.api';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -119,6 +120,9 @@ const loadIcrcCustomTokens = async (params: {
 
 	// We filter the custom tokens that are Icrc (the backend "Custom Token" potentially supports other types).
 	const icrcTokens = tokens.filter(({ token }) => 'Icrc' in token);
+
+	// Caching the custom tokens in the IDB
+	await setIdbIcTokens({ identity: params.identity, tokens: icrcTokens });
 
 	return await loadCustomIcrcTokensData({
 		tokens: icrcTokens,

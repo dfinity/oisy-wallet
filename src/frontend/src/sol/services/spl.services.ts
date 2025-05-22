@@ -3,6 +3,7 @@ import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/net
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { listCustomTokens } from '$lib/api/backend.api';
+import { setIdbSolTokens } from '$lib/api/idb-tokens.api';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -76,7 +77,12 @@ const loadSplCustomTokens = async (params: {
 	});
 
 	// We filter the custom tokens that are Spl (the backend "Custom Token" potentially supports other types).
-	return tokens.filter(({ token }) => 'SplMainnet' in token || 'SplDevnet' in token);
+	const splTokens = tokens.filter(({ token }) => 'SplMainnet' in token || 'SplDevnet' in token);
+
+	// Caching the custom tokens in the IDB
+	await setIdbSolTokens({ identity: params.identity, tokens: splTokens });
+
+	return splTokens;
 };
 
 export const loadCustomTokensWithMetadata = async ({
@@ -192,6 +198,8 @@ const loadCustomTokenData = ({
 	response: SplCustomToken[];
 }) => {
 	splCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+
+	setIdbSolTokens;
 };
 
 export const getSplMetadata = async ({
