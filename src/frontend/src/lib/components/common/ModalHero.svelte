@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { ModalHeroVariant } from '$lib/types/style';
-	import type { Snippet } from 'svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
+	import type { ModalHeroVariant } from '$lib/types/style';
 
 	interface Props {
 		logo?: Snippet;
