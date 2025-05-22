@@ -46,7 +46,7 @@ describe('erc20.services', () => {
 			version: toNullable(2n),
 			enabled: toNullable(),
 			chain_id: BASE_NETWORK.chainId,
-			contract_address: mockEthAddress2,
+			contract_address: mockEthAddress2.toUpperCase(),
 			symbol: toNullable('TTK2')
 		},
 		{
@@ -98,7 +98,7 @@ describe('erc20.services', () => {
 				version: 2n,
 				enabled: true,
 				network: BASE_NETWORK,
-				address: mockEthAddress2,
+				address: mockEthAddress2.toUpperCase(),
 				decimals: mockMetadata2.decimals,
 				name: mockMetadata2.name,
 				symbol: mockMetadata2.symbol
