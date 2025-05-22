@@ -6,9 +6,6 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import floki from '$eth/assets/floki.svg';
-import weeth from '$eth/assets/weeth.svg';
-import rndr from '$eth/assets/rndr.svg';
 import weth from '$eth/assets/weth.svg';
 import type { EthereumNetwork } from '$eth/types/network';
 import {
