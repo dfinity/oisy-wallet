@@ -1,4 +1,3 @@
-import floki from '$eth/assets/floki.svg';
 import rndr from '$eth/assets/rndr.svg';
 import weeth from '$eth/assets/weeth.svg';
 import weth from '$eth/assets/weth.svg';
@@ -41,8 +40,6 @@ export const mapErc20UserToken = ({
 
 const mapErc20Icon = (symbol: string): string | undefined => {
 	switch (symbol.toLowerCase()) {
-		case 'floki':
-			return floki;
 		case 'rndr':
 			return rndr;
 		// ICP in production. ckICP was used on staging because the definitive name and symbol had not been decided.
