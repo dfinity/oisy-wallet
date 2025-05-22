@@ -76,7 +76,6 @@ describe('token-account-id.utils', () => {
 
 	describe('getNetworksForAddressType', () => {
 		it('should return networks for all types', () => {
-
 			const TOKEN_ACCOUNT_ID_TYPES = Object.keys(
 				TOKEN_ACCOUNT_ID_TO_NETWORKS
 			) as TokenAccountIdTypes[];
