@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import Divider, {type  Props as DividerProps } from '$lib/components/common/Divider.svelte';
-	
+	import Divider, { type Props as DividerProps } from '$lib/components/common/Divider.svelte';
+
 	interface Props {
 		[key: `item${number}`]: Snippet;
 		dividerProps?: DividerProps;
