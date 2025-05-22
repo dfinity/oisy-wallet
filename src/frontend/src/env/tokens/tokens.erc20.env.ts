@@ -46,9 +46,7 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 	exchange: 'icp'
 };
 
-export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
-	ERC20_CONTRACT_ICP,
-];
+export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [ERC20_CONTRACT_ICP];
 
 export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] = [
 	...(ETH_MAINNET_ENABLED
