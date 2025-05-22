@@ -152,11 +152,11 @@
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
 		/>
-	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
+	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
 		<!-- TODO Remove ! from currentContact -->
 		<ShowContactStep
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
-			contact={currentContact!}
+			contact={currentContact}
 			onEdit={(contact) => {
 				currentContact = contact;
 				gotoStep(AddressBookSteps.EDIT_CONTACT);
@@ -170,9 +170,9 @@
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
-	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT}
+	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact)}
 		<EditContactStep
-			contact={currentContact!}
+			contact={currentContact}
 			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 			onEdit={(contact) => {
 				currentContact = contact;
@@ -207,9 +207,9 @@
 				gotoStep(AddressBookSteps.SHOW_CONTACT);
 			}}>BACK</Button
 		>
-	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS}
+	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep
-			contact={currentContact!}
+			contact={currentContact}
 			address={nonNullish(currentAddressIndex)
 				? currentContact?.addresses[currentAddressIndex]
 				: undefined}
