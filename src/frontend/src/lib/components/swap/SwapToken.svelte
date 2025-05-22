@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		token?: Token;
