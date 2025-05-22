@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-	import { ERC20_CONTRACT_ICP, ERC20_CONTRACT_ICP_GOERLI } from '$env/tokens/tokens.erc20.env';
+	import { ERC20_CONTRACT_ICP } from '$env/tokens/tokens.erc20.env';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -18,10 +18,7 @@
 
 	let nativeIcp: boolean;
 	$: nativeIcp =
-		isNetworkICP(targetNetwork) &&
-		[ERC20_CONTRACT_ICP.address, ERC20_CONTRACT_ICP_GOERLI.address].includes(
-			(token as Erc20Token)?.address
-		);
+		isNetworkICP(targetNetwork) && ERC20_CONTRACT_ICP.address === (token as Erc20Token)?.address;
 </script>
 
 <Value ref="source-network" element="div">
