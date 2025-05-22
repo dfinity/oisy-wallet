@@ -18,6 +18,7 @@ import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
+import { WEETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.weeth.env';
 import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
 import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
 import type {
@@ -34,12 +35,6 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 const ERC20_CONTRACT_ADDRESS_FLOKI: Erc20Contract = {
 	// Floki Inu
 	address: '0xcf0c122c6b73ff809c693db761e7baebe62b6a2e',
-	exchange: 'erc20'
-};
-
-const ERC20_CONTRACT_ADDRESS_WEEETH: Erc20Contract = {
-	// Wrapped Ether (weETH)
-	address: '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee',
 	exchange: 'erc20'
 };
 
@@ -66,7 +61,6 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
 	ERC20_CONTRACT_ADDRESS_FLOKI,
-	ERC20_CONTRACT_ADDRESS_WEEETH,
 	ERC20_CONTRACT_ADDRESS_WETH
 ];
 
@@ -83,7 +77,8 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	DMAIL_TOKEN,
 	JASMY_TOKEN,
 	MATIC_TOKEN,
-	RNDR_TOKEN
+	RNDR_TOKEN,
+	WEETH_TOKEN
 ];
 
 /**
