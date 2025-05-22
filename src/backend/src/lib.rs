@@ -81,6 +81,7 @@ mod guards;
 mod heap_state;
 mod impls;
 mod pow;
+pub mod random;
 pub mod signer;
 mod state;
 mod token;
@@ -883,8 +884,8 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 /// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 #[update(guard = "caller_is_allowed")]
 #[must_use]
-pub fn create_contact(request: CreateContactRequest) -> CreateContactResult {
-    let result = contacts::create_contact(request);
+pub async fn create_contact(request: CreateContactRequest) -> CreateContactResult {
+    let result = contacts::create_contact(request).await;
     result.into()
 }
 

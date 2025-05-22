@@ -1,18 +1,24 @@
-use ic_cdk::api::time;
+use crate::random::random_random_u64;
+use crate::time;
 use shared::types::contact::{Contact, ContactError, CreateContactRequest, StoredContacts};
 
 use crate::{
     mutate_state, read_state,
     types::{Candid, StoredPrincipal},
 };
-
-pub fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
+pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
     if request.name.trim().is_empty() {
         return Err(ContactError::InvalidContactData);
     }
 
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     let current_time = time();
+
+    // Generate a random ID as an unique identifier for an contact entry
+    // Call the async function with await
+    let new_id = random_random_u64()
+        .await
+        .map_err(|_| ContactError::RandomnessError)?;
 
     mutate_state(|s| {
         // Get or create the user's contacts storage
@@ -23,10 +29,6 @@ pub fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactE
                 update_timestamp_ns: current_time,
             },
         };
-
-        // Generate a new unique ID for the contact
-        // Using the current timestamp as ID ensures uniqueness
-        let new_id = current_time;
 
         // Create the new contact - note that CreateContactRequest only has 'name'
         let new_contact = Contact {
