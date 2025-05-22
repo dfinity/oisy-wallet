@@ -54,10 +54,15 @@
 
 	const updateFeeData = async () => {
 		try {
-			const params: GetFeeData = {
-				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress!),
 
-				from: mapAddressStartsWith0x($ethAddress!)
+			if (isNullish($ethAddress)) {
+				return;
+			}
+
+			const params: GetFeeData = {
+				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress),
+
+				from: mapAddressStartsWith0x($ethAddress)
 			};
 
 			const { getFeeData } = infuraProviders(sendToken.network.id);
