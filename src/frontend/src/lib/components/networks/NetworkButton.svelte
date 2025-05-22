@@ -12,13 +12,25 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { formatUSD } from '$lib/utils/format.utils';
 
-	export let selectedNetworkId: NetworkId | undefined = undefined;
-	export let network: Network | undefined = undefined;
-	export let usdBalance: number | undefined = undefined;
-	export let isTestnet = false;
-	export let testId: string | undefined = undefined;
-	export let delayOnNetworkSelect = true;
-	export let labelsSize: LabelSize = 'md';
+	interface Props {
+		selectedNetworkId?: NetworkId;
+		network?: Network;
+		usdBalance?: number;
+		isTestnet?: boolean;
+		testId?: string;
+		delayOnNetworkSelect?: boolean;
+		labelsSize?: LabelSize;
+	}
+
+	let {
+		selectedNetworkId,
+		network,
+		usdBalance,
+		isTestnet = false,
+		testId,
+		delayOnNetworkSelect = true,
+		labelsSize = 'md'
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -40,40 +52,45 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 	selected={network?.id === selectedNetworkId}
 	dividers
 >
-	<div slot="logo">
-		{#if nonNullish(network)}
-			<NetworkLogo {network} />
-		{:else}
-			<AllNetworksLogo />
-		{/if}
-	</div>
+	<svelte:fragment slot="logo">
+		<div>
+			{#if nonNullish(network)}
+				<NetworkLogo {network} />
+			{:else}
+				<AllNetworksLogo />
+			{/if}
+		</div>
+	</svelte:fragment>
 
-	<span
-		slot="title"
-		class="mr-2 font-normal md:text-base"
-		class:text-sm={labelsSize === 'md'}
-		class:md:text-base={labelsSize === 'md'}
-		class:text-base={labelsSize === 'lg'}
-		class:md:text-lg={labelsSize === 'lg'}
-	>
-		{network?.name ?? $i18n.networks.chain_fusion}
-	</span>
+	<svelte:fragment slot="title">
+		<span
+			class="mr-2 font-normal md:text-base"
+			class:text-sm={labelsSize === 'md'}
+			class:md:text-base={labelsSize === 'md'}
+			class:text-base={labelsSize === 'lg'}
+			class:md:text-lg={labelsSize === 'lg'}
+		>
+			{network?.name ?? $i18n.networks.chain_fusion}
+		</span>
+	</svelte:fragment>
 
-	<span slot="description-end">
-		<span class:text-sm={labelsSize === 'lg'} class:md:text-base={labelsSize === 'lg'}>
-			{#if nonNullish(usdBalance)}
-				{#if $isPrivacyMode}
-					<IconDots variant="xs" />
-				{:else}
-					{formatUSD({ value: usdBalance })}
+	<svelte:fragment slot="description-end">
+		<span>
+			<span class:text-sm={labelsSize === 'lg'} class:md:text-base={labelsSize === 'lg'}>
+				{#if nonNullish(usdBalance)}
+					{#if $isPrivacyMode}
+						<IconDots variant="xs" />
+					{:else}
+						{formatUSD({ value: usdBalance })}
+					{/if}
 				{/if}
+			</span>
+
+			{#if isTestnet}
+				<span class="inline-flex">
+					<Badge styleClass="pt-0 pb-0">{$i18n.networks.testnet}</Badge>
+				</span>
 			{/if}
 		</span>
-
-		{#if isTestnet}
-			<span class="inline-flex">
-				<Badge styleClass="pt-0 pb-0">{$i18n.networks.testnet}</Badge>
-			</span>
-		{/if}
-	</span>
+	</svelte:fragment>
 </LogoButton>
