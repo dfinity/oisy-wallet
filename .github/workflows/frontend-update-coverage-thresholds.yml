@@ -35,6 +35,9 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
+      - name: Save current thresholds
+        run: cp vitest.config.ts vitest.config.before.ts
+
       - name: Test
         run: npm run test:coverage
 
@@ -51,6 +54,42 @@ jobs:
           });
           fs.writeFileSync(file, updated);
           "
+      # The coverage thresholds should never decrease
+      - name: Update thresholds only if increased
+        run: |
+          node -e "
+          const fs = require('fs');
+
+          const file = 'vitest.config.ts';
+          const current = fs.readFileSync(file, 'utf8');
+          const original = fs.readFileSync('vitest.config.before.ts', 'utf8');
+
+          const extractThresholds = (text) => {
+            const map = {};
+            for (const match of text.matchAll(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g)) {
+             map[match[1]] = parseFloat(match[2]);
+            }
+            return map;
+          };
+
+          const originalThresholds = extractThresholds(original);
+          const updatedThresholds = extractThresholds(current);
+
+          const updated = current.replace(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g, (_, key, value) => {
+            const oldValue = originalThresholds[key];
+            const newValue = updatedThresholds[key];
+            if (newValue > oldValue) {
+             return \`\${key}: \${newValue}\`;
+            } else {
+             return \`\${key}: \${oldValue}\`;
+            }
+          });
+
+          fs.writeFileSync(file, updated);
+          "
+
+      - name: Remove old thresholds file
+        run: rm vitest.config.before.ts
 
       # To avoid a high frequency of PRs, we remove the decimals from the coverage thresholds
       - name: Floor coverage thresholds (remove decimals)

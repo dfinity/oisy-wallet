@@ -349,7 +349,7 @@
 		"indexCanisterId": "ldv2p-dqaaa-aaaaq-aadga-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "SWAMPDAO",
+			"name": "Swampies",
 			"symbol": "SWAMP",
 			"fee": {
 				"__bigint__": "10000"

@@ -2,7 +2,7 @@
 use std::sync::Arc;
 
 use candid::{decode_one, encode_one, CandidType, Principal};
-use pocket_ic::{PocketIc, WasmResult};
+use pocket_ic::PocketIc;
 use serde::Deserialize;
 
 /// Common methods for interacting with a canister using `PocketIc`.
@@ -26,15 +26,10 @@ pub trait PicCanisterTrait {
             .map_err(|e| {
                 format!(
                     "Update call error. RejectionCode: {:?}, Error: {}",
-                    e.code, e.description
+                    e.reject_code, e.reject_message
                 )
             })
-            .and_then(|reply| match reply {
-                WasmResult::Reply(reply) => {
-                    decode_one(&reply).map_err(|e| format!("Decoding failed: {e}"))
-                }
-                WasmResult::Reject(error) => Err(error),
-            })
+            .and_then(|reply| decode_one(&reply).map_err(|e| format!("Decoding failed: {e}")))
     }
 
     /// Makes a query call to the canister.
@@ -47,14 +42,9 @@ pub trait PicCanisterTrait {
             .map_err(|e| {
                 format!(
                     "Query call error. RejectionCode: {:?}, Error: {}",
-                    e.code, e.description
+                    e.reject_code, e.reject_message
                 )
             })
-            .and_then(|reply| match reply {
-                WasmResult::Reply(reply) => {
-                    decode_one(&reply).map_err(|_| "Decoding failed".to_string())
-                }
-                WasmResult::Reject(error) => Err(error),
-            })
+            .and_then(|reply| decode_one(&reply).map_err(|_| "Decoding failed".to_string()))
     }
 }

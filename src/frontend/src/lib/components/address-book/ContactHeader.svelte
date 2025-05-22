@@ -8,11 +8,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { selectColorForName } from '$lib/utils/contact.utils';
 
-	let {
-		name,
-		edit,
-		styleClass = ''
-	}: { name: string; edit: () => void; styleClass?: string } = $props();
+	interface Props {
+		name: string;
+		onEdit: () => void;
+		styleClass?: string;
+	}
+
+	let { name, onEdit, styleClass = '' }: Props = $props();
 
 	let color = $derived(selectColorForName({ name, colors: CONTACT_TEXT_COLORS }));
 </script>
@@ -23,7 +25,7 @@
 		ariaLabel={$i18n.core.text.edit}
 		colorStyle="secondary"
 		testId={CONTACT_HEADER_EDIT_BUTTON}
-		on:click={edit}
+		on:click={onEdit}
 	>
 		<span class="flex items-center">
 			<IconPencil />

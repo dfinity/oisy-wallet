@@ -27,6 +27,7 @@
 			"no_results": "No results",
 			"paste": "Paste",
 			"to": "To",
+			"add": "Add",
 			"more_items": "+$items more"
 		},
 		"info": {
@@ -60,7 +61,9 @@
 			"vip_qr_code": "VIP QR codes",
 			"binance_qr_code": "Binance Clubhouse QR",
 			"refer_a_friend": "Refer your friends",
-			"address_book": "Address book"
+			"address_book": "Address book",
+			"hide_balances": "Hide balances",
+			"show_balances": "Show balances"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -77,7 +80,9 @@
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
-			"address_book": "Open address book"
+			"address_book": "Open address book",
+			"hide_balances": "Hide the displayed balances",
+			"show_balances": "Show the hidden balances"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -174,14 +179,14 @@
 		"text": {
 			"title": "Rewards",
 			"active_campaigns": "Active Opportunities",
-			"upcoming_campaigns": "Upcoming Opportunities",
+			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 is coming soon!<br> Stay tuned for updates",
 			"active_date": "Ends on",
 			"ended_date": "Ended on",
 			"participate_title": "Earn BTC by staying active - and now by inviting others.",
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
-			"requirements_title": "Requirements",
+			"view_details": "View details",
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
@@ -198,9 +203,16 @@
 			"ongoing": "Ongoing",
 			"ended": "Ended ($amount)"
 		},
+		"requirements": {
+			"requirements_title": "Eligibility criteria",
+			"min_logins": "Login $loginsx in last $days days",
+			"min_transactions": "Complete $transactions transactions in last $days days",
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
+		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
-			"reward_logo": "Logo of the campaign $campaignName"
+			"coming_soon": "$oisy_short episode 4 is coming soon",
+			"reward_banner": "Banner of the campaign $campaignName"
 		}
 	},
 	"footer": {
@@ -235,7 +247,7 @@
 		"text": {
 			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base and BNB",
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon and BNB",
 			"done": "Enjoy $oisy_short"
 		},
 		"alt": {
@@ -258,8 +270,7 @@
 			"no_solana_network": "No Solana network for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
 			"loading_address": "Error while loading the $symbol address.",
-			"loading_balance": "Error while loading the ETH balance.",
-			"loading_balance_symbol": "Error while loading $symbol balance.",
+			"loading_balance": "Error while loading $symbol balance for network $network.",
 			"erc20_contracts": "Error while loading the ERC20 contracts.",
 			"spl_tokens": "Error while loading the SPL tokens.",
 			"minter_ckbtc_btc": "A configured minter is required to convert ckBTC to BTC.",
@@ -334,6 +345,9 @@
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
+	},
+	"shortcuts": {
+		"privacy_mode": "P"
 	},
 	"networks": {
 		"title": "Current network. Access to selection.",
@@ -461,7 +475,8 @@
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
-			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient."
+			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
+			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>"
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -586,13 +601,21 @@
 			"included_network_fees": "Included network fees",
 			"included_liquidity_fees": "Included liquidity pool fees",
 			"best_rate": "Best Rate",
-			"expected_minimum": "Expected minimum"
+			"expected_minimum": "Expected minimum",
+			"you_receive": "You receive",
+			"select": "Select >",
+			"select_swap_provider": "Select swap provider",
+			"open_icp_swap": "Open ICP Swap website"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
-			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again."
+			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again.",
+			"pool_not_found": "Swap failed. Pool not found.",
+			"deposit_error": "Swap failed. We couldn’t deposit your tokens into the pool. Please try again.",
+			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: ",
+			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance."
 		}
 	},
 	"buy": {
@@ -624,6 +647,7 @@
 			"hide_token": "Hide token",
 			"select_token": "Select token",
 			"exchange_is_not_available": "USD value is currently not available.",
+			"exchange_is_not_available_short": "USD value not available",
 			"source_token_title": "You pay",
 			"destination_token_title": "You receive",
 			"chain_key": "Chain Key",
@@ -964,7 +988,8 @@
 			"error": {
 				"loading_reward": "Error while loading a new reward code.",
 				"loading_user_data": "Failed to load user data from reward canister.",
-				"claiming_reward": "Error while claiming reward."
+				"claiming_reward": "Error while claiming reward.",
+				"loading_eligibility": "Error while loading campaign eligibility."
 			}
 		},
 		"invitation": {
@@ -1009,7 +1034,15 @@
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
 			"add_new_contact": "Add new contact",
-			"add_contact": "Add contact"
+			"add_contact": "Add contact",
+			"search_contact": "Search contact",
+			"no_contact_found": "No contacts found"
+		},
+		"show_contact": {
+			"title": "Contact",
+			"add_address": "Add address",
+			"show_address_text": "Associated addresses will appear here",
+			"add_first_address": "Add first address to contactName!"
 		}
 	},
 	"contact": {
@@ -1018,6 +1051,14 @@
 		},
 		"fields": {
 			"name": "Name"
+		}
+	},
+	"address": {
+		"types": {
+			"Icrcv2": "Internet Computer",
+			"Btc": "Bitcoin",
+			"Eth": "Ethereum",
+			"Sol": "Solana"
 		}
 	},
 	"signer": {

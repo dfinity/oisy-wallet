@@ -56,8 +56,9 @@ macro_rules! test_validate_on_deserialize {
                 assert_eq!(
                     valid,
                     result.is_ok(),
-                    "Validation does not match for: {}",
-                    description
+                    "Validation does not match for: {} yielding: {:?}",
+                    description,
+                    result
                 );
                 let candid = Encode!(&input).unwrap();
                 let result: Result<$type, _> = Decode!(&candid, $type);

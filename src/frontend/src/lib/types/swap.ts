@@ -1,7 +1,11 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { IcToken } from '$icp/types/ic-token';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
+import type { OptionIdentity } from './identity';
+import type { Amount, OptionAmount } from './send';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
@@ -48,32 +52,32 @@ export type SwapMappedResult =
 			swapDetails: SwapAmountsReply;
 	  };
 
-export type KongQuoteResult = {
+export interface KongQuoteResult {
 	swap: SwapAmountsReply;
 	tokens: IcToken[];
-};
+}
 
-export type IcpQuoteResult = {
+export interface IcpQuoteResult {
 	swap: ICPSwapResult;
 	slippage: Slippage;
-};
+}
 
-type KongQuoteParams = {
+interface KongQuoteParams {
 	swap: SwapAmountsReply;
 	tokens: Token[];
-};
+}
 
-type IcpQuoteParams = {
+interface IcpQuoteParams {
 	swap: ICPSwapResult;
 	slippage: Slippage;
-};
+}
 
-type SwapQuoteParams = {
+interface SwapQuoteParams {
 	identity: Identity;
 	sourceToken: IcToken;
 	destinationToken: IcToken;
 	sourceAmount: bigint;
-};
+}
 interface BaseSwapProvider<T extends SwapProvider, QuoteResult, QuoteMapParams> {
 	key: T;
 	getQuote: (params: SwapQuoteParams) => Promise<QuoteResult>;
@@ -86,3 +90,21 @@ type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsRepl
 type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, IcpQuoteParams>;
 
 export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
+
+export interface SwapParams {
+	identity: OptionIdentity;
+	progress: (step: ProgressStepsSwap) => void;
+	sourceToken: IcTokenToggleable;
+	destinationToken: IcTokenToggleable;
+	swapAmount: Amount;
+	receiveAmount: bigint;
+	slippageValue: Amount;
+	sourceTokenFee: bigint;
+	isSourceTokenIcrc2: boolean;
+}
+
+export interface FormatSlippageParams {
+	slippageValue: OptionAmount;
+	receiveAmount: bigint;
+	decimals: number;
+}

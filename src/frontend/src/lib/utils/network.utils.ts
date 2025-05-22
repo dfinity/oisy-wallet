@@ -2,6 +2,7 @@ import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signe
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_EVM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -44,6 +45,9 @@ export const isNetworkIdBase: IsNetworkIdUtil = (id) =>
 
 export const isNetworkIdBsc: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_BSC_NETWORK_IDS.includes(id);
+
+export const isNetworkIdPolygon: IsNetworkIdUtil = (id) =>
+	nonNullish(id) && SUPPORTED_POLYGON_NETWORK_IDS.includes(id);
 
 export const isNetworkIdBitcoin: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_BITCOIN_NETWORK_IDS.includes(id);

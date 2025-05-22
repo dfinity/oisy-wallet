@@ -4,6 +4,7 @@ export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
+export const NAVIGATION_MENU_PRIVACY_MODE_BUTTON = 'navigation-menu-privacy-mode-button';
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
@@ -142,11 +143,14 @@ export const REWARDS_STATE_MODAL_SHARE_BUTTON = 'reward-state-modal-share-button
 export const REWARDS_BANNER = 'rewards-banner';
 export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 export const REWARDS_STATUS_BUTTON = 'reward-status-button';
+export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
+export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
 
 export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
 export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
 
-export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
+export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
+
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
@@ -184,9 +188,23 @@ export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
 export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
+export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-input';
 
+export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button';
+export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';
 export const CONTACT_HEADER_EDIT_BUTTON = 'contact-header-edit-button';
+export const CONTACT_HEADER_EDITING_EDIT_BUTTON = 'contact-header-editing-edit-button';
+
+export const ADDRESS_LIST_ITEM_COPY_BUTTON = 'address-list-item-copy-button';
+export const ADDRESS_LIST_ITEM_INFO_BUTTON = 'address-list-item-info-button';
 
 export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
 
 export const SEND_DESTINATION_SECTION = 'send-destination-section';
+
+export const CONVERT_AMOUNT_DISPLAY_VALUE = 'convert-amount-display-value';
+export const CONVERT_AMOUNT_DISPLAY_SKELETON = 'convert-amount-display-skeleton';
+export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
+export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
+
+export const SEND_FEE_INFO = 'send-fee-info';

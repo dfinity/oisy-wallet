@@ -12,7 +12,7 @@ use candid::{encode_one, CandidType, Principal};
 use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
-use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
+use pocket_ic::{PocketIc, PocketIcBuilder};
 use shared::types::{
     backend_config::{Arg, InitArg},
     user_profile::{OisyUser, UserProfile},
@@ -412,14 +412,11 @@ impl PicBackend {
                 encode_one(&arg).unwrap(),
                 Some(controller()),
             )
-            .map_err(|e| match e {
-                CallError::Reject(e) => e,
-                CallError::UserError(e) => {
-                    format!(
-                        "Upgrade canister error. RejectionCode: {:?}, Error: {}",
-                        e.code, e.description
-                    )
-                }
+            .map_err(|e| {
+                format!(
+                    "Upgrade canister error code: {:?}, message: {}",
+                    e.reject_code, e.reject_message
+                )
             })
     }
 }

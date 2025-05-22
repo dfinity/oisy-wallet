@@ -6,6 +6,8 @@ import {
 	REWARDS_FILTER,
 	REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 } from '$lib/constants/test-ids.constants';
+import * as rewardStore from '$lib/stores/reward.store';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
@@ -22,6 +24,16 @@ describe('AllRewardsList', () => {
 		vi.spyOn(rewardCampaigns, 'rewardCampaigns', 'get').mockImplementation(
 			() => mockRewardCampaigns
 		);
+
+		mockAuthStore();
+	});
+
+	it('should initialize reward store while rendering component', () => {
+		const initStoreSpy = vi.spyOn(rewardStore, 'initRewardEligibilityStore');
+
+		render(AllRewardsList);
+
+		expect(initStoreSpy).toHaveBeenCalledTimes(1);
 	});
 
 	it('should render reward filter and ongoing campaigns', () => {

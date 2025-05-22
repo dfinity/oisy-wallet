@@ -14,8 +14,6 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let disabled: boolean | undefined = false;
-	// TODO: remove when all send review forms are updated
-	export let source: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 

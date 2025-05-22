@@ -7,6 +7,7 @@ import {
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import {
 	JsonTransactionsTextSchema,
+	POST_MESSAGE_REQUESTS,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
@@ -39,34 +40,7 @@ import * as z from 'zod';
 
 describe('post-message.schema', () => {
 	describe('PostMessageRequestSchema', () => {
-		const validCases = [
-			'startIdleTimer',
-			'stopIdleTimer',
-			'startCodeTimer',
-			'stopCodeTimer',
-			'startExchangeTimer',
-			'stopExchangeTimer',
-			'stopIcpWalletTimer',
-			'startIcpWalletTimer',
-			'triggerIcpWalletTimer',
-			'stopIcrcWalletTimer',
-			'startIcrcWalletTimer',
-			'triggerIcrcWalletTimer',
-			'stopBtcWalletTimer',
-			'startBtcWalletTimer',
-			'triggerBtcWalletTimer',
-			'stopBtcStatusesTimer',
-			'startBtcStatusesTimer',
-			'triggerBtcStatusesTimer',
-			'stopCkBTCUpdateBalanceTimer',
-			'startCkBTCUpdateBalanceTimer',
-			'stopCkEthMinterInfoTimer',
-			'startCkEthMinterInfoTimer',
-			'triggerCkEthMinterInfoTimer',
-			'stopCkBtcMinterInfoTimer',
-			'startCkBtcMinterInfoTimer',
-			'triggerCkBtcMinterInfoTimer'
-		];
+		const validCases = POST_MESSAGE_REQUESTS;
 
 		const invalidCases = [
 			'invalidTimer',
