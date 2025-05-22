@@ -16,7 +16,7 @@
 		{#if index > 0}
 			<span class={dividerColor}><Divider {...dividerProps} /></span>
 		{/if}
-		<span class="mr-1.5 flex" class:ml-1.5={index > 0}>
+		<span class="mr-2 flex" class:ml-2={index > 0}>
 			{@render snippet()}
 		</span>
 	{/each}
