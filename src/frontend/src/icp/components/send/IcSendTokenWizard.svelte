@@ -194,15 +194,7 @@
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
 			<IcSendProgress bind:sendProgressStep />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
-			<IcSendForm
-				on:icNext
-				on:icBack
-				on:icTokensList
-				bind:destination
-				bind:amount
-				bind:networkId
-				{source}
-			>
+			<IcSendForm on:icNext on:icBack on:icTokensList bind:destination bind:amount {source}>
 				<ButtonBack onclick={back} slot="cancel" />
 			</IcSendForm>
 		{:else}

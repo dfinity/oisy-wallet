@@ -1,4 +1,4 @@
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
+import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import {
