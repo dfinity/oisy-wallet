@@ -1,9 +1,9 @@
-use crate::random::random_random_u64;
-use crate::time;
 use shared::types::contact::{Contact, ContactError, CreateContactRequest, StoredContacts};
 
 use crate::{
-    mutate_state, read_state,
+    mutate_state,
+    random::random_random_u64,
+    read_state, time,
     types::{Candid, StoredPrincipal},
 };
 pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
