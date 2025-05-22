@@ -39,8 +39,10 @@ jobs:
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
       - name: Install rust
         run: ./scripts/setup rust
-      - name: Lint
+      - name: Lint rust
         run: ./scripts/lint.rust.sh
+      - name: Lint candid
+        run: ./scripts/lint.did.sh
 
   workspace-dependencies:
     runs-on: ubuntu-24.04
