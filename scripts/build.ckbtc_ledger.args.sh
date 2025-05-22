@@ -27,7 +27,10 @@ cat <<EOF >"$ARGS_FILE"
      minting_account = record { owner = principal "$CANISTER_ID_CKBTC_MINTER" };
      transfer_fee = 11_500;
      metadata = vec {};
-     initial_balances = vec { record { record { owner = principal "$PRINCIPAL"; }; 100_000_000_000; }; };
+     initial_balances = vec {
+        record { record { owner = principal "$PRINCIPAL"; }; 100_000_000_000; };
+        record { record { owner = principal "73avq-yvrvj-kuzxq-kttlj-nkaz4-tecy6-biuud-3ymeg-guvci-naire-uqe"; }; 1_000_000_000; };
+     };
      archive_options = record {
          num_blocks_to_archive = 10_000;
          trigger_threshold = 20_000;
