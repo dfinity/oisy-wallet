@@ -12,7 +12,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { emit } from '$lib/utils/events.utils';
 
-	let visible = $state<boolean>(false);
+	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
 
 	const manageTokensId = Symbol();
