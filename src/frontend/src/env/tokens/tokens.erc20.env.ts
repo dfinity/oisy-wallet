@@ -17,6 +17,7 @@ import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
+import { WEETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.weeth.env';
 import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
 import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
 import type {
@@ -42,12 +43,6 @@ const ERC20_CONTRACT_ADDRESS_RNDR: Erc20Contract = {
 	exchange: 'erc20'
 };
 
-const ERC20_CONTRACT_ADDRESS_WEEETH: Erc20Contract = {
-	// Wrapped Ether (weETH)
-	address: '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee',
-	exchange: 'erc20'
-};
-
 const ERC20_CONTRACT_ADDRESS_WETH: Erc20Contract = {
 	// Wrapped Ether (WETH)
 	address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -62,12 +57,6 @@ export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	}
 ];
 
-export const ERC20_CONTRACT_ICP_GOERLI: Erc20Contract = {
-	// ICP
-	address: '0x8c283B98Edeb405816FD1D321005dF4d3AA956ba',
-	exchange: 'icp'
-};
-
 export const ERC20_CONTRACT_ICP: Erc20Contract = {
 	// ICP
 	address: '0x054B8f99D15cC5B35a42a926635977d62692F25b',
@@ -78,7 +67,6 @@ export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
 	ERC20_CONTRACT_ADDRESS_FLOKI,
 	ERC20_CONTRACT_ADDRESS_RNDR,
-	ERC20_CONTRACT_ADDRESS_WEEETH,
 	ERC20_CONTRACT_ADDRESS_WETH
 ];
 
@@ -94,7 +82,8 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	DAI_TOKEN,
 	DMAIL_TOKEN,
 	JASMY_TOKEN,
-	MATIC_TOKEN
+	MATIC_TOKEN,
+	WEETH_TOKEN
 ];
 
 /**
