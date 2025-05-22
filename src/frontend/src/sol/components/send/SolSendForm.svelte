@@ -3,7 +3,6 @@
 	import { getContext } from 'svelte';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
@@ -14,9 +13,6 @@
 
 	export let amount: OptionAmount = undefined;
 	export let destination = '';
-	export let source: string;
-
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeDecimalsStore, feeSymbolStore, feeTokenIdStore }: FeeContext =
 		getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
@@ -30,17 +26,7 @@
 	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
 </script>
 
-<SendForm
-	on:icNext
-	on:icBack
-	{source}
-	{destination}
-	{invalidDestination}
-	token={$sendToken}
-	balance={$sendBalance}
-	disabled={invalid}
-	hideSource
->
+<SendForm on:icNext on:icBack {destination} {invalidDestination} disabled={invalid}>
 	<SolSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 
 	<SolFeeDisplay slot="fee" />
