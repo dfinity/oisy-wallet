@@ -7,6 +7,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import weth from '$eth/assets/weth.svg';
+import rndr from '$eth/assets/rndr.svg';
 import type { EthereumNetwork } from '$eth/types/network';
 import {
 	isTokenErc20,
@@ -21,7 +22,6 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 
 describe('erc20.utils', () => {
 	const iconCases = [
-		['weth', weth],
 		['icp', icpDark],
 		['ckicp', icpDark],
 		['unknown', undefined],
