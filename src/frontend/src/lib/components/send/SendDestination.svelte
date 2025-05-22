@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
+	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import { SEND_DESTINATION_SECTION } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import AddressCard from '$lib/components/address/AddressCard.svelte';
 
 	interface Props {
 		destination: string;
