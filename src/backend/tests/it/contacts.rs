@@ -1,9 +1,10 @@
+use candid::Principal;
+use shared::types::contact::{Contact, ContactError, CreateContactRequest};
+
 use crate::utils::{
     mock::CALLER,
     pocketic::{setup, PicBackend, PicCanisterTrait},
 };
-use candid::Principal;
-use shared::types::contact::{Contact, ContactError, CreateContactRequest};
 // -------------------------------------------------------------------------------------------------
 // - Helper methods for contact testing
 // -------------------------------------------------------------------------------------------------
