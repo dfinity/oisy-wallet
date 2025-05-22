@@ -113,6 +113,7 @@ describe('contact.utils', () => {
 				contactList: mockContacts,
 				addressString: mockSolAddress
 			});
+
 			expect(result?.name).toBe('Johnny');
 		});
 
@@ -121,6 +122,7 @@ describe('contact.utils', () => {
 				contactList: mockContacts,
 				addressString: mockBtcP2SHAddress
 			});
+
 			expect(result?.name).toBe('Johnny');
 		});
 
@@ -129,6 +131,7 @@ describe('contact.utils', () => {
 				contactList: mockContacts,
 				addressString: mockEthAddress3
 			});
+
 			expect(result?.name).toBe('Bob');
 		});
 
@@ -137,11 +140,13 @@ describe('contact.utils', () => {
 				contactList: mockContacts,
 				addressString: '0xINEXISTENTADDRESS'
 			});
+
 			expect(result).toBeUndefined();
 		});
 
 		it('should handle empty contact list', () => {
 			const result = getContactForAddress({ contactList: [], addressString: mockEthAddress3 });
+
 			expect(result).toBeUndefined();
 		});
 
@@ -155,6 +160,7 @@ describe('contact.utils', () => {
 				contactList: contactsWithNoAddresses,
 				addressString: mockEthAddress3
 			});
+
 			expect(result).toBeUndefined();
 		});
 	});
