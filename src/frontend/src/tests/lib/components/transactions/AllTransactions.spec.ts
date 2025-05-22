@@ -45,7 +45,8 @@ describe('AllTransactions', () => {
 		icrcCustomTokensStore.set({ data: tokenWithoutIndexCanister, certified: true });
 
 		const store = get(icrcCustomTokensStore);
-		const tokenId = store!.at(0)!.data.id;
+		const tokenId = store?.at(0)?.data.id;
+		assertNonNullish(tokenId);
 		icTransactionsStore.nullify(tokenId);
 
 		const { getByText } = render(AllTransactions);
@@ -67,7 +68,8 @@ describe('AllTransactions', () => {
 		icrcCustomTokensStore.set({ data: tokenWithUnavailableIndexCanister, certified: true });
 
 		const store = get(icrcCustomTokensStore);
-		const tokenId = store!.at(0)!.data.id;
+		const tokenId = store?.at(0)?.data.id;
+		assertNonNullish(tokenId);
 		icTransactionsStore.nullify(tokenId);
 
 		const { getByText } = render(AllTransactions);
