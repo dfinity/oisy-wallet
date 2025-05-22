@@ -27,9 +27,6 @@ pub fn call_get_contacts(pic_setup: &PicBackend, caller: Principal) -> Vec<Conta
         .expect("that get_contacts succeeds")
         .expect("affe")
 }
-
-/*
-TODO: uncomment this helper function, once the get_contact PR has been merged
 pub fn call_get_contact(
     pic_setup: &PicBackend,
     caller: Principal,
@@ -39,7 +36,6 @@ pub fn call_get_contact(
         pic_setup.query::<Result<Contact, ContactError>>(caller, "get_contact", contact_id);
     wrapped_result.expect("that get_contact succeeds")
 }
-*/
 
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for the contact management functionality
@@ -96,8 +92,6 @@ fn test_create_contact_should_be_retrievable_by_get_contacts() {
     assert_eq!(contacts[0].id, created_contact.id);
 }
 
-/*
-TODO: uncomment this test, once the get_contact PR has been merged
 #[test]
 fn test_create_contact_should_be_retrievable_by_get_contact() {
     let pic_setup = setup();
@@ -116,10 +110,6 @@ fn test_create_contact_should_be_retrievable_by_get_contact() {
     assert_eq!(contact.name, contact_name);
     assert_eq!(contact.id, created_contact.id);
 }
-*/
-
-/*
-TODO: uncomment this test, once the get_contact PR has been merged
 
 #[test]
 fn test_get_contact_should_fail_with_nonexistent_id() {
@@ -132,7 +122,7 @@ fn test_get_contact_should_fail_with_nonexistent_id() {
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
 }
- */
+
 #[test]
 fn test_create_multiple_contacts() {
     let pic_setup = setup();
