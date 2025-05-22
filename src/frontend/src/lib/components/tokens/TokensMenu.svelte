@@ -12,12 +12,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { emit } from '$lib/utils/events.utils';
 
-	interface Props {
-		visible?: boolean;
-		button?: HTMLButtonElement;
-	}
-
-	let { visible = false, button = $bindable() }: Props = $props();
+	let visible = $state<boolean>(false);
+	let button = $state<HTMLButtonElement | undefined>();
 
 	const manageTokensId = Symbol();
 
