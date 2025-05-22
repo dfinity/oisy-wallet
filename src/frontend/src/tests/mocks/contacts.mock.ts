@@ -21,12 +21,12 @@ export const mockBackendContactAddressEth: ContactAddressData = {
 
 export const getMockContacts = ({
 	n,
-	name,
+	names,
 	addresses
 }: {
 	n: number;
-	name?: string;
-	addresses?: ContactAddressData[];
+	names?: string[];
+	addresses?: ContactAddressData[][];
 }): Contact[] =>
 	Array(n)
 		.fill(null)
@@ -34,8 +34,8 @@ export const getMockContacts = ({
 			(_, i) =>
 				({
 					id: BigInt(i),
-					name: name ?? 'Testname',
+					name: names?.[i] ?? 'Testname',
 					update_timestamp_ns: 12,
-					addresses: nonNullish(addresses) ? addresses : []
+					addresses: nonNullish(addresses?.[i]) ? addresses[i] : []
 				}) as unknown as Contact
 		);
