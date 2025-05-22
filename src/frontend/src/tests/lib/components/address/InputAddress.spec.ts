@@ -115,9 +115,7 @@ describe('InputAddress', () => {
 		await fireEvent.input(input, { target: { value: INVALID_BTC_ADDRESS } });
 
 		// Border color should be error color
-		expect(initialDiv).toHaveStyle(
-			'--input-custom-border-color: var(--color-background-error-primary)'
-		);
+		expect(initialDiv).toHaveStyle('--input-custom-border-color: var(--color-border-error-solid)');
 
 		// Enter a valid BTC address
 		await fireEvent.input(input, {
@@ -126,7 +124,7 @@ describe('InputAddress', () => {
 
 		// Border color should be success color
 		expect(initialDiv).toHaveStyle(
-			'--input-custom-border-color: var(--color-background-success-primary)'
+			'--input-custom-border-color: var(--color-border-success-solid)'
 		);
 	});
 

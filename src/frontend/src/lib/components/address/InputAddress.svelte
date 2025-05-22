@@ -1,20 +1,22 @@
 <script lang="ts">
-	import { isEmptyString, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import type { ComponentProps } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import QRButton from '$lib/components/common/QRButton.svelte';
+	import QrButton from '$lib/components/common/QrButton.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { AddressType } from '$lib/types/address';
-	import { getNetworksForAddressType, recognizeAddress } from '$lib/utils/address.utils';
+	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
+	import {
+		getDiscriminatorForTokenAccountId,
+		getNetworksForTokenAccountIdType
+	} from '$lib/utils/token-account-id.utils';
 
-	const SUCCESS_COLOR = 'var(--color-background-success-primary)';
-	const ERROR_COLOR = 'var(--color-background-error-primary)';
 	interface InputAddressProps {
 		onQRCodeScan?: () => void;
 		value?: string;
-		addressType?: AddressType;
+		addressType?: TokenAccountIdTypes;
 	}
 
 	let {
@@ -24,34 +26,37 @@
 		...props
 	}: InputAddressProps & ComponentProps<Input> = $props();
 
-	let { currentAddressType, error } = $derived.by(() => {
-		try {
-			if (isEmptyString(value)) {
-				return {};
-			}
+	let tokenAccountIdParseResult = $derived(TokenAccountIdSchema.safeParse(value));
 
-			const recognizedType = recognizeAddress(value);
-			if (recognizedType) {
-				return { currentAddressType: recognizedType };
-			}
-
-			return { error: $i18n.address.form.invalid_address };
-		} catch (e) {
-			return { error: `Error recognizing address type: ${e}` };
-		}
-	});
-	let isValid = $derived(notEmptyString(value) && !error);
-	let borderColor = $derived(isValid ? SUCCESS_COLOR : nonNullish(error) ? ERROR_COLOR : 'inherit');
-	let networks = $derived(nonNullish(addressType) ? getNetworksForAddressType(addressType) : []);
+	let isValid = $derived(tokenAccountIdParseResult.success);
+	let error = $derived(
+		nonNullish(value) && !isValid ? $i18n.address.form.invalid_address : undefined
+	);
+	let borderColor = $derived(
+		isValid
+			? 'var(--color-border-success-solid)'
+			: nonNullish(error)
+				? 'var(--color-border-error-solid)'
+				: 'inherit'
+	);
+	let currentAddressType = $derived(
+		tokenAccountIdParseResult?.success
+			? getDiscriminatorForTokenAccountId(tokenAccountIdParseResult.data)
+			: undefined
+	);
+	let networks = $derived(
+		nonNullish(addressType) ? getNetworksForTokenAccountIdType(addressType) : []
+	);
 
 	$effect(() => {
+		// Because bindable props may not be derrived, set it manually in an effect
 		addressType = currentAddressType;
 	});
 </script>
 
 {#snippet qrButton()}
 	{#if nonNullish(onQRCodeScan)}
-		<QRButton on:click={onQRCodeScan} />
+		<QrButton on:click={onQRCodeScan} />
 	{/if}
 {/snippet}
 
