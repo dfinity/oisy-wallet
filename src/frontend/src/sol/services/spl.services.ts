@@ -67,20 +67,26 @@ export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Pr
 		strategy: 'query'
 	});
 
-const loadSplCustomTokens = async (params: {
+const loadSplCustomTokens = async ({
+	identity,
+	certified
+}: {
 	identity: OptionIdentity;
 	certified: boolean;
 }): Promise<CustomToken[]> => {
 	const tokens = await listCustomTokens({
-		...params,
+		identity,
+		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
 	// We filter the custom tokens that are Spl (the backend "Custom Token" potentially supports other types).
 	const splTokens = tokens.filter(({ token }) => 'SplMainnet' in token || 'SplDevnet' in token);
 
-	// Caching the custom tokens in the IDB
-	await setIdbSolTokens({ identity: params.identity, tokens: splTokens });
+	// Caching the custom tokens in the IDB if update call
+	if (certified) {
+		await setIdbSolTokens({ identity, tokens: splTokens });
+	}
 
 	return splTokens;
 };
@@ -198,8 +204,6 @@ const loadCustomTokenData = ({
 	response: SplCustomToken[];
 }) => {
 	splCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
-
-	setIdbSolTokens;
 };
 
 export const getSplMetadata = async ({

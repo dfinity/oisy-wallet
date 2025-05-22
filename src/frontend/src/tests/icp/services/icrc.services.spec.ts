@@ -233,21 +233,14 @@ describe('icrc.services', () => {
 				});
 			});
 
-			it('should cache the custom tokens in IDB', async () => {
+			it('should cache the custom tokens in IDB on update call', async () => {
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				// query + update
-				expect(idbKeyval.set).toHaveBeenCalledTimes(2);
+				expect(idbKeyval.set).toHaveBeenCalledOnce();
 				expect(idbKeyval.set).toHaveBeenNthCalledWith(
 					1,
-					mockIdentity.getPrincipal().toText(),
-					[mockCustomToken],
-					expect.any(Object)
-				);
-				expect(idbKeyval.set).toHaveBeenNthCalledWith(
-					2,
 					mockIdentity.getPrincipal().toText(),
 					[mockCustomToken],
 					expect.any(Object)
