@@ -1,4 +1,4 @@
-use crate::random::random_random_u64;
+use crate::random::generate_random_u64;
 use crate::time;
 use shared::types::contact::{Contact, ContactError, CreateContactRequest, StoredContacts};
 
@@ -16,7 +16,7 @@ pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, Co
 
     // Generate a random ID as an unique identifier for an contact entry
     // Call the async function with await
-    let new_id = random_random_u64()
+    let new_id = generate_random_u64()
         .await
         .map_err(|_| ContactError::RandomnessError)?;
 
