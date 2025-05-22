@@ -16,6 +16,7 @@ use ic_stable_structures::{
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use serde_bytes::ByteBuf;
+use shared::types::result_types::{CreateContactResult, UpdateContactResult};
 use shared::{
     http::{HttpRequest, HttpResponse},
     metrics::get_metrics,
@@ -29,9 +30,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{
-            Contact, ContactAddressData, ContactError, CreateContactRequest, UpdateContactRequest,
-        },
+        contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
@@ -883,18 +882,10 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 ///
 /// # Test
 /// This endpoint is currently a placeholder and will be fully implemented in a future PR.
-#[update(guard = "caller_is_allowed")]
 #[must_use]
-pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
-    // TODO replace mock data with contact service that returns Contact
-    let contact = Contact {
-        id: time(),
-        name: request.name,
-        addresses: vec![],
-        update_timestamp_ns: time(),
-    };
-
-    GetContactResult::Ok(contact)
+pub fn create_contact(request: CreateContactRequest) -> CreateContactResult {
+    let result = contacts::create_contact(request);
+    result.into()
 }
 
 /// Updates an existing contact for the caller.
