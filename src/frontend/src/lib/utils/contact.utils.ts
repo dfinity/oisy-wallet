@@ -63,3 +63,4 @@ export const getContactForAddress = ({
 	contactList.find((c) =>
 		c.addresses.find((address) => address.address.toLowerCase() === addressString.toLowerCase())
 	);
+
