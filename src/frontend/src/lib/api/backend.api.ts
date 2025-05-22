@@ -1,6 +1,7 @@
 import type {
 	AddUserCredentialResult,
 	AllowSigningResponse,
+	Contact,
 	CreateChallengeResponse,
 	CustomToken,
 	GetAllowedCyclesResponse,
@@ -18,9 +19,13 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateContactParams,
+	DeleteContactParams,
+	GetContactParams,
 	GetUserProfileResponse,
 	SaveUserNetworksSettings,
-	SetUserShowTestnetsParams
+	SetUserShowTestnetsParams,
+	UpdateContactParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
@@ -190,6 +195,45 @@ export const updateUserNetworkSettings = async ({
 	const { updateUserNetworkSettings } = await backendCanister({ identity });
 
 	return updateUserNetworkSettings(params);
+};
+
+export const getContact = async ({
+	contactId,
+	identity
+}: CanisterApiFunctionParams<GetContactParams>): Promise<Contact> => {
+	const { getContact } = await backendCanister({ identity });
+	return getContact(contactId);
+};
+
+export const getContacts = async ({
+	identity
+}: CanisterApiFunctionParams<QueryParams>): Promise<Contact[]> => {
+	const { getContacts } = await backendCanister({ identity });
+	return getContacts();
+};
+
+export const createContact = async ({
+	name,
+	identity
+}: CanisterApiFunctionParams<CreateContactParams>): Promise<Contact> => {
+	const { createContact } = await backendCanister({ identity });
+	return createContact(name);
+};
+
+export const updateContact = async ({
+	contact,
+	identity
+}: CanisterApiFunctionParams<UpdateContactParams>): Promise<Contact> => {
+	const { updateContact } = await backendCanister({ identity });
+	return updateContact(contact);
+};
+
+export const deleteContact = async ({
+	contactId,
+	identity
+}: CanisterApiFunctionParams<DeleteContactParams>): Promise<bigint> => {
+	const { deleteContact } = await backendCanister({ identity });
+	return deleteContact(contactId);
 };
 
 const backendCanister = async ({
