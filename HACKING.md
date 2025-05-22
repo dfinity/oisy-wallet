@@ -517,18 +517,21 @@ Once all the new ERC20 tokens are created, they need to be added to the list of 
 In the first step, the exchange IDs and required fields should have been already be set. Now, the worker needs to be updated to include the new network.
 
 - In service `syncExchange` of the exchange worker in file `src/frontend/src/lib/workers/exchange.worker.ts`, add the new network in the filter for the ERC-20 price parameters. As example, when this document was written, the filter was:
+
 ```typescript
 if (
-    coingeckoId !== 'ethereum' &&
-    coingeckoId !== 'base' &&
-    coingeckoId !== 'binance-smart-chain' &&
-    coingeckoId !== 'polygon-pos'
+	coingeckoId !== 'ethereum' &&
+	coingeckoId !== 'base' &&
+	coingeckoId !== 'binance-smart-chain' &&
+	coingeckoId !== 'polygon-pos'
 ) {
-    return acc;
+	return acc;
 }
 ```
+
 - Set the price for the native token(s) that are not a fork of ETH token:
   - Create a price-fetching function similar to the existing ones in file `src/frontend/src/lib/services/exchange.services.ts`. For example:
+
 ```typescript
 export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
@@ -536,11 +539,11 @@ export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | n
 		vs_currencies: 'usd'
 	});
 ```
-  - Use the function created above in the worker to fetch the price of the new token(s) in service `syncExchange` of the exchange worker in file `src/frontend/src/lib/workers/exchange.worker.ts`. Adapt the types if necessary.
-  - Map the new token ID(s) to the correct price in the `exchanges` derived store in file `src/frontend/src/lib/derived/exchange.derived.ts`, similar to the existing ones.
+
+- Use the function created above in the worker to fetch the price of the new token(s) in service `syncExchange` of the exchange worker in file `src/frontend/src/lib/workers/exchange.worker.ts`. Adapt the types if necessary.
+- Map the new token ID(s) to the correct price in the `exchanges` derived store in file `src/frontend/src/lib/derived/exchange.derived.ts`, similar to the existing ones.
 - Set the price for the native token(s) that are a fork of ETH token:
   - Just map the new token ID(s) to the ETH price in the `exchanges` derived store in file `src/frontend/src/lib/derived/exchange.derived.ts`, similar to the existing ones.
-
 
 ### Add providers' URLs to Content Security Policy (CSP)
 
