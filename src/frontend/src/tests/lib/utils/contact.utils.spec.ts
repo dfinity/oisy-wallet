@@ -170,6 +170,7 @@ describe('contact.utils', () => {
 				addressString: upperCasedAddress,
 				contactList: mockContacts
 			});
+
 			expect(result?.addresses?.[0]?.address).toEqual(mockEthAddress3);
 		});
 	});
