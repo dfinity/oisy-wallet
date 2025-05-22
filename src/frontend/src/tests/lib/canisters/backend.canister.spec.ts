@@ -1155,7 +1155,7 @@ describe('backend.canister', () => {
 
 	describe('createContact', () => {
 		it('should call create_contact service', async () => {
-			const [mockContact] = getMockContacts({ n: 1, name: 'John' });
+			const [mockContact] = getMockContacts({ n: 1, names: ['John'] });
 			const response = { Ok: mockContact };
 
 			service.create_contact.mockResolvedValue(response);
@@ -1220,7 +1220,7 @@ describe('backend.canister', () => {
 
 	describe('update_contact', () => {
 		it('should call update_contact service', async () => {
-			const [mockContact] = getMockContacts({ n: 1, name: 'John' });
+			const [mockContact] = getMockContacts({ n: 1, names: ['John'] });
 			const response = { Ok: mockContact };
 
 			service.update_contact.mockResolvedValue(response);
@@ -1236,7 +1236,7 @@ describe('backend.canister', () => {
 		});
 
 		it('should throw an error if update_contact throws', async () => {
-			const [mockContact] = getMockContacts({ n: 1, name: 'John' });
+			const [mockContact] = getMockContacts({ n: 1, names: ['John'] });
 			service.update_contact.mockImplementation(async () => {
 				await Promise.resolve();
 				throw mockResponseError;
