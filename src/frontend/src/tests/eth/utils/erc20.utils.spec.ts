@@ -7,8 +7,6 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import rndr from '$eth/assets/rndr.svg';
-import weeth from '$eth/assets/weeth.svg';
-import weth from '$eth/assets/weth.svg';
 import type { EthereumNetwork } from '$eth/types/network';
 import {
 	isTokenErc20,

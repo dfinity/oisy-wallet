@@ -1,6 +1,4 @@
 import rndr from '$eth/assets/rndr.svg';
-import weeth from '$eth/assets/weeth.svg';
-import weth from '$eth/assets/weth.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
