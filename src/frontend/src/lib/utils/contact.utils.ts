@@ -52,3 +52,14 @@ export const mapToBackendContact = (contact: ContactUi): Contact => {
 		}))
 	};
 };
+
+export const getContactForAddress = ({
+	addressString,
+	contactList
+}: {
+	addressString: string;
+	contactList: ContactUi[];
+}): ContactUi | undefined =>
+	contactList.find((c) =>
+		c.addresses.find((address) => address.address.toLowerCase() === addressString.toLowerCase())
+	);
