@@ -13,12 +13,14 @@ import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.
 import { MATIC_TOKEN } from '$env/tokens/tokens-erc20/tokens.matic.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { RNDR_TOKEN } from '$env/tokens/tokens-erc20/tokens.rndr.env';
 import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
 import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
 import { WEETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.weeth.env';
+import { WETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.weth.env';
 import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
 import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
 import type {
@@ -29,20 +31,6 @@ import type {
 import type { EthereumNetwork } from '$eth/types/network';
 import type { TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
-
-// TODO: remember to remove the ERC20 from here once the ckERC20 is implemented. Following the normal flow, the ERC20 variables should be created on a separate file.
-
-const ERC20_CONTRACT_ADDRESS_RNDR: Erc20Contract = {
-	// Render
-	address: '0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24',
-	exchange: 'erc20'
-};
-
-const ERC20_CONTRACT_ADDRESS_WETH: Erc20Contract = {
-	// Wrapped Ether (WETH)
-	address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-	exchange: 'erc20'
-};
 
 export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	{
@@ -58,11 +46,7 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 	exchange: 'icp'
 };
 
-export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
-	ERC20_CONTRACT_ICP,
-	ERC20_CONTRACT_ADDRESS_RNDR,
-	ERC20_CONTRACT_ADDRESS_WETH
-];
+export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [ERC20_CONTRACT_ICP];
 
 export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] = [
 	...(ETH_MAINNET_ENABLED
@@ -78,7 +62,9 @@ export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	FLOKI_TOKEN,
 	JASMY_TOKEN,
 	MATIC_TOKEN,
-	WEETH_TOKEN
+	RNDR_TOKEN,
+	WEETH_TOKEN,
+	WETH_TOKEN
 ];
 
 /**
