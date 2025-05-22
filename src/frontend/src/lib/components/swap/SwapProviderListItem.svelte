@@ -50,35 +50,39 @@
 
 {#if nonNullish(dapp)}
 	<LogoButton on:click dividers>
-		<span slot="title">{dapp.name}</span>
+		<svelte:fragment slot="title">
+			<span>{dapp.name}</span>
+		</svelte:fragment>
 
-		<span slot="description">
-			{#if nonNullish(displayURL)}
-				{displayURL}
-			{/if}
-		</span>
-
-		<Logo
-			slot="logo"
-			src={dapp.logo}
-			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dapp.name })}
-			size={logoSize}
-		/>
-
-		<Amount
-			{amount}
-			decimals={destinationToken.decimals}
-			symbol={destinationToken.symbol}
-			slot="title-end"
-		/>
-
-		<div class="flex items-center justify-end gap-2" slot="description-end">
-			{#if isBestRate}
-				<SwapBestRateBadge />
-			{/if}
-			<span class="mt-1">
-				{usdBalance ?? $i18n.tokens.text.exchange_is_not_available_short}
+		<svelte:fragment slot="description">
+			<span>
+				{#if nonNullish(displayURL)}
+					{displayURL}
+				{/if}
 			</span>
-		</div>
+		</svelte:fragment>
+
+		<svelte:fragment slot="logo">
+			<Logo
+				src={dapp.logo}
+				alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dapp.name })}
+				size={logoSize}
+			/>
+		</svelte:fragment>
+
+		<svelte:fragment slot="title-end">
+			<Amount {amount} decimals={destinationToken.decimals} symbol={destinationToken.symbol} />
+		</svelte:fragment>
+
+		<svelte:fragment slot="description-end">
+			<div class="flex items-center justify-end gap-2">
+				{#if isBestRate}
+					<SwapBestRateBadge />
+				{/if}
+				<span class="mt-1">
+					{usdBalance ?? $i18n.tokens.text.exchange_is_not_available_short}
+				</span>
+			</div>
+		</svelte:fragment>
 	</LogoButton>
 {/if}
