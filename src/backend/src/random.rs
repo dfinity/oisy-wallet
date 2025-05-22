@@ -1,5 +1,4 @@
-use std::convert::TryInto;
-use std::mem::size_of;
+use std::{convert::TryInto, mem::size_of};
 
 /// Generates a cryptographically secure random `u64` number using the Internet Computer's
 /// Management Canister API `raw_rand()`.
