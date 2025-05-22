@@ -167,6 +167,46 @@ export const idlFactory = ({ IDL }) => {
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
+	const CreateContactRequest = IDL.Record({ name: IDL.Text });
+	const BtcAddress = IDL.Variant({
+		P2WPKH: IDL.Text,
+		P2PKH: IDL.Text,
+		P2WSH: IDL.Text,
+		P2SH: IDL.Text,
+		P2TR: IDL.Text
+	});
+	const EthAddress = IDL.Variant({ Public: IDL.Text });
+	const Icrcv2AccountId = IDL.Variant({
+		Account: IDL.Vec(IDL.Nat8),
+		WithPrincipal: IDL.Record({
+			owner: IDL.Principal,
+			subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
+		})
+	});
+	const TokenAccountId = IDL.Variant({
+		Btc: BtcAddress,
+		Eth: EthAddress,
+		Sol: IDL.Text,
+		Icrcv2: Icrcv2AccountId
+	});
+	const ContactAddressData = IDL.Record({
+		label: IDL.Opt(IDL.Text),
+		token_account_id: TokenAccountId
+	});
+	const Contact = IDL.Record({
+		id: IDL.Nat64,
+		name: IDL.Text,
+		update_timestamp_ns: IDL.Nat64,
+		addresses: IDL.Vec(ContactAddressData)
+	});
+	const ContactError = IDL.Variant({
+		InvalidContactData: IDL.Null,
+		ContactNotFound: IDL.Null
+	});
+	const CreateContactResult = IDL.Variant({
+		Ok: Contact,
+		Err: ContactError
+	});
 	const CreateChallengeResponse = IDL.Record({
 		difficulty: IDL.Nat32,
 		start_timestamp_ms: IDL.Nat64,
@@ -229,10 +269,6 @@ export const idlFactory = ({ IDL }) => {
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
 	});
-	const ContactError = IDL.Variant({
-		InvalidContactData: IDL.Null,
-		ContactNotFound: IDL.Null
-	});
 	const DeleteContactResult = IDL.Variant({
 		Ok: IDL.Nat64,
 		Err: ContactError
@@ -268,37 +304,6 @@ export const idlFactory = ({ IDL }) => {
 		settings: DefiniteCanisterSettingsArgs,
 		idle_cycles_burned_per_day: IDL.Nat,
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
-	});
-	const BtcAddress = IDL.Variant({
-		P2WPKH: IDL.Text,
-		P2PKH: IDL.Text,
-		P2WSH: IDL.Text,
-		P2SH: IDL.Text,
-		P2TR: IDL.Text
-	});
-	const EthAddress = IDL.Variant({ Public: IDL.Text });
-	const Icrcv2AccountId = IDL.Variant({
-		Account: IDL.Vec(IDL.Nat8),
-		WithPrincipal: IDL.Record({
-			owner: IDL.Principal,
-			subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
-		})
-	});
-	const TokenAccountId = IDL.Variant({
-		Btc: BtcAddress,
-		Eth: EthAddress,
-		Sol: IDL.Text,
-		Icrcv2: Icrcv2AccountId
-	});
-	const ContactAddressData = IDL.Record({
-		label: IDL.Opt(IDL.Text),
-		token_account_id: TokenAccountId
-	});
-	const Contact = IDL.Record({
-		id: IDL.Nat64,
-		name: IDL.Text,
-		update_timestamp_ns: IDL.Nat64,
-		addresses: IDL.Vec(ContactAddressData)
 	});
 	const GetContactResult = IDL.Variant({
 		Ok: Contact,
@@ -525,6 +530,7 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		config: IDL.Func([], [Config], ['query']),
+		create_contact: IDL.Func([CreateContactRequest], [CreateContactResult], []),
 		create_pow_challenge: IDL.Func([], [CreatePowChallengeResult], []),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
