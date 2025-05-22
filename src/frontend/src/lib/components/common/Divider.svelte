@@ -8,14 +8,10 @@
 
 {#if variant === 'dot'}
 	<svg
-		fill="currentColor"
-		width="8px"
-		height="8px"
+		width="4px"
+		height="4px"
 		viewBox="0 0 20 20"
 		xmlns="http://www.w3.org/2000/svg"
-		stroke="currentColor"
-		><g stroke-width="0"></g><g stroke-linecap="round" stroke-linejoin="round"></g><g
-			><path d="M7.8 10a2.2 2.2 0 0 0 4.4 0 2.2 2.2 0 0 0-4.4 0z"></path></g
-		></svg
+		stroke="currentColor"><circle r="8" cx="10" cy="10" fill="currentColor" /></svg
 	>
 {/if}
