@@ -199,6 +199,7 @@ export interface CreateChallengeResponse {
 export interface CreateContactRequest {
 	name: string;
 }
+export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
 export type CreatePowChallengeResult =
 	| { Ok: CreateChallengeResponse }
 	| { Err: CreateChallengeError };
@@ -466,7 +467,7 @@ export interface _SERVICE {
 	>;
 	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], BtcSelectUserUtxosFeeResult>;
 	config: ActorMethod<[], Config>;
-	create_contact: ActorMethod<[CreateContactRequest], GetContactResult>;
+	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
 	create_pow_challenge: ActorMethod<[], CreatePowChallengeResult>;
 	create_user_profile: ActorMethod<[], UserProfile>;
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
