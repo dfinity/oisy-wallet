@@ -14,8 +14,8 @@
 	export let destination = '';
 	export let invalidDestination = false;
 	export let disabled: boolean | undefined = false;
-	export let token: OptionToken;
-	export let balance: OptionBalance;
+	export let token: OptionToken = undefined;
+	export let balance: OptionBalance = undefined;
 	export let hideSource = false;
 
 	const dispatch = createEventDispatcher();
