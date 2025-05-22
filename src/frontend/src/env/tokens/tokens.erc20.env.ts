@@ -4,10 +4,12 @@ import {
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
 import { ONEINCH_TOKEN } from '$env/tokens/tokens-erc20/tokens.1inch.env';
+import { DAI_TOKEN } from '$env/tokens/tokens-erc20/tokens.dai.env';
 import { DMAIL_TOKEN } from '$env/tokens/tokens-erc20/tokens.dmail.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { JASMY_TOKEN } from '$env/tokens/tokens-erc20/tokens.jasmy.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
+import { MATIC_TOKEN } from '$env/tokens/tokens-erc20/tokens.matic.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
@@ -27,18 +29,6 @@ import type { TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 
 // TODO: remember to remove the ERC20 from here once the ckERC20 is implemented. Following the normal flow, the ERC20 variables should be created on a separate file.
-
-const ERC20_CONTRACT_ADDRESS_MATIC: Erc20Contract = {
-	// Polygon
-	address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
-	exchange: 'erc20'
-};
-
-const ERC20_CONTRACT_ADDRESS_DAI: Erc20Contract = {
-	// Multi-Collateral DAI
-	address: '0x6b175474e89094c44da98b954eedeac495271d0f',
-	exchange: 'erc20'
-};
 
 const ERC20_CONTRACT_ADDRESS_FLOKI: Erc20Contract = {
 	// Floki Inu
@@ -86,8 +76,6 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 
 export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
-	ERC20_CONTRACT_ADDRESS_MATIC,
-	ERC20_CONTRACT_ADDRESS_DAI,
 	ERC20_CONTRACT_ADDRESS_FLOKI,
 	ERC20_CONTRACT_ADDRESS_RNDR,
 	ERC20_CONTRACT_ADDRESS_WEEETH,
@@ -103,8 +91,10 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 
 export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	ONEINCH_TOKEN,
+	DAI_TOKEN,
 	DMAIL_TOKEN,
-	JASMY_TOKEN
+	JASMY_TOKEN,
+	MATIC_TOKEN
 ];
 
 /**

@@ -29,9 +29,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{
-            Contact, ContactAddressData, ContactError, CreateContactRequest, UpdateContactRequest,
-        },
+        contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
@@ -42,9 +40,9 @@ use shared::{
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetPendingTransactionsResult,
-            BtcSelectUserUtxosFeeResult, CreatePowChallengeResult, DeleteContactResult,
-            GetAllowedCyclesResult, GetContactResult, GetContactsResult, GetUserProfileResult,
-            SetUserShowTestnetsResult,
+            BtcSelectUserUtxosFeeResult, CreateContactResult, CreatePowChallengeResult,
+            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
+            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -885,7 +883,7 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 /// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 #[update(guard = "caller_is_allowed")]
 #[must_use]
-pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
+pub fn create_contact(request: CreateContactRequest) -> CreateContactResult {
     // TODO replace mock data with contact service that returns Contact
     let contact = Contact {
         id: time(),
@@ -894,7 +892,7 @@ pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
         update_timestamp_ns: time(),
     };
 
-    GetContactResult::Ok(contact)
+    Ok(contact).into()
 }
 
 /// Updates an existing contact for the caller.
@@ -902,7 +900,8 @@ pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_allowed")]
-pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactError> {
+#[must_use]
+pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
     // TODO replace mock data with data from contact service
     let contact = Contact {
         id: request.id,
@@ -911,7 +910,7 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
         update_timestamp_ns: time(),
     };
 
-    Ok(contact)
+    Ok(contact).into()
 }
 
 /// Deletes a contact for the caller.
