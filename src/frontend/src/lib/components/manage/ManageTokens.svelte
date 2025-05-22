@@ -141,16 +141,25 @@
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
-				<span slot="title">{token.symbol}</span>
-				<span slot="subtitle">{token.name}</span>
+				<svelte:fragment slot="title">
+					<span>{token.symbol}</span>
+				</svelte:fragment>
 
-				<span slot="logo" class="mr-2">
-					<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
-				</span>
+				<svelte:fragment slot="subtitle">
+					<span>{token.name}</span>
+				</svelte:fragment>
 
-				<span class="break-all" slot="description">
-					{token.network.name}
-				</span>
+				<svelte:fragment slot="logo">
+					<span class="mr-2">
+						<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
+					</span>
+				</svelte:fragment>
+
+				<svelte:fragment slot="description">
+					<span class="break-all">
+						{token.network.name}
+					</span>
+				</svelte:fragment>
 
 				<svelte:fragment slot="action">
 					{#if icTokenIcrcCustomToken(token)}
