@@ -16,7 +16,6 @@ use ic_stable_structures::{
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use serde_bytes::ByteBuf;
-use shared::types::result_types::{CreateContactResult, UpdateContactResult};
 use shared::{
     http::{HttpRequest, HttpResponse},
     metrics::get_metrics,
@@ -41,9 +40,9 @@ use shared::{
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
             BtcAddPendingTransactionResult, BtcGetPendingTransactionsResult,
-            BtcSelectUserUtxosFeeResult, CreatePowChallengeResult, DeleteContactResult,
-            GetAllowedCyclesResult, GetContactResult, GetContactsResult, GetUserProfileResult,
-            SetUserShowTestnetsResult,
+            BtcSelectUserUtxosFeeResult, CreateContactResult, CreatePowChallengeResult,
+            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
+            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
