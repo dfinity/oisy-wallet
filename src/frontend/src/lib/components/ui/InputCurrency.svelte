@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 
 	interface Props {
+		innerEnd: Snippet;
 		value?: string | number;
 		disabled?: boolean;
 		name: string;
@@ -15,6 +16,7 @@
 	}
 
 	let {
+		innerEnd,
 		value = $bindable(),
 		disabled,
 		name,
@@ -51,6 +53,8 @@
 		on:focus
 		bind:inputElement
 	>
-		<slot name="inner-end" slot="inner-end" />
+		<svelte:fragment slot="inner-end">
+			{@render innerEnd()}
+		</svelte:fragment>
 	</Input>
 </div>

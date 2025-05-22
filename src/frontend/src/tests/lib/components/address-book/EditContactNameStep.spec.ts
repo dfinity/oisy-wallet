@@ -1,20 +1,22 @@
-import AddContactStep from '$lib/components/address-book/AddContactStep.svelte';
+import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 import {
 	ADDRESS_BOOK_CANCEL_BUTTON,
 	ADDRESS_BOOK_CONTACT_NAME_INPUT,
 	ADDRESS_BOOK_SAVE_BUTTON
 } from '$lib/constants/test-ids.constants';
+import type { ContactUi } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { vi } from 'vitest';
 
-describe('AddContactStep', () => {
+describe('EditContactNameStep', () => {
 	it('should render the add contact step with form and buttons', () => {
 		const onAddContact = vi.fn();
+		const onSaveContact = vi.fn();
 		const onClose = vi.fn();
 
-		const { getByTestId } = render(AddContactStep, {
-			props: { onAddContact, onClose }
+		const { getByTestId } = render(EditContactNameStep, {
+			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
 		});
 
 		// Check that the form is rendered
@@ -30,10 +32,11 @@ describe('AddContactStep', () => {
 
 	it('should disable save button when form is invalid', () => {
 		const onAddContact = vi.fn();
+		const onSaveContact = vi.fn();
 		const onClose = vi.fn();
 
-		const { getByTestId } = render(AddContactStep, {
-			props: { onAddContact, onClose }
+		const { getByTestId } = render(EditContactNameStep, {
+			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
 		});
 
 		// Check that the save button is disabled initially
@@ -42,10 +45,11 @@ describe('AddContactStep', () => {
 
 	it('should enable save button when form is valid', async () => {
 		const onAddContact = vi.fn();
+		const onSaveContact = vi.fn();
 		const onClose = vi.fn();
 
-		const { getByTestId } = render(AddContactStep, {
-			props: { onAddContact, onClose }
+		const { getByTestId } = render(EditContactNameStep, {
+			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
 		});
 
 		// Enter a name to make the form valid
@@ -56,12 +60,13 @@ describe('AddContactStep', () => {
 		expect(getByTestId(ADDRESS_BOOK_SAVE_BUTTON)).not.toBeDisabled();
 	});
 
-	it('should call addContact when save button is clicked', async () => {
+	it('should call addContact when save button is clicked with isNewContact=true', async () => {
 		const onAddContact = vi.fn();
+		const onSaveContact = vi.fn();
 		const onClose = vi.fn();
 
-		const { getByTestId } = render(AddContactStep, {
-			props: { onAddContact, onClose }
+		const { getByTestId } = render(EditContactNameStep, {
+			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
 		});
 
 		// Enter a name to make the form valid
@@ -77,12 +82,32 @@ describe('AddContactStep', () => {
 		expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Contact' }));
 	});
 
+	it('should call addContact with full contact when save button is clicked with isNewContact=false', async () => {
+		const onAddContact = vi.fn();
+		const onSaveContact = vi.fn();
+		const onClose = vi.fn();
+		const contact: Partial<ContactUi> = { name: 'Test Contact' };
+
+		const { getByTestId } = render(EditContactNameStep, {
+			props: { onAddContact, onSaveContact, onClose, isNewContact: false, contact }
+		});
+
+		// Click the save button
+		const saveButton = getByTestId(ADDRESS_BOOK_SAVE_BUTTON);
+		await fireEvent.click(saveButton);
+
+		// Check that addContact was called with the full contact
+		expect(onSaveContact).toHaveBeenCalledTimes(1);
+		expect(onSaveContact).toHaveBeenCalledWith(contact);
+	});
+
 	it('should call close when cancel button is clicked', async () => {
 		const onAddContact = vi.fn();
+		const onSaveContact = vi.fn();
 		const onClose = vi.fn();
 
-		const { getByTestId } = render(AddContactStep, {
-			props: { onAddContact, onClose }
+		const { getByTestId } = render(EditContactNameStep, {
+			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
 		});
 
 		// Click the cancel button
@@ -95,10 +120,11 @@ describe('AddContactStep', () => {
 
 	it('should update title when contact name changes', async () => {
 		const onAddContact = vi.fn();
+		const onSaveContact = vi.fn();
 		const onClose = vi.fn();
 
-		const { getByTestId, component } = render(AddContactStep, {
-			props: { onAddContact, onClose }
+		const { getByTestId, component } = render(EditContactNameStep, {
+			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
 		});
 
 		// Initially, the title should be the default
