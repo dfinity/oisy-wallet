@@ -1,5 +1,6 @@
 import type { ContactUi } from '$lib/types/contact';
 import {
+	getContactForAddress,
 	mapToBackendContact,
 	mapToFrontendContact,
 	selectColorForName
@@ -51,11 +52,9 @@ describe('contact.utils', () => {
 	describe('mapToFrontendContact', () => {
 		const [mockContact] = getMockContacts({
 			n: 1,
-			name: 'Johnny',
+			names: ['Johnny'],
 			addresses: [
-				mockBackendContactAddressSol,
-				mockBackendContactAddressBtc,
-				mockBackendContactAddressEth
+				[mockBackendContactAddressSol, mockBackendContactAddressBtc, mockBackendContactAddressEth]
 			]
 		});
 		const expectedContactUi: ContactUi = {
@@ -95,6 +94,84 @@ describe('contact.utils', () => {
 			const result = mapToBackendContact(contactUi);
 
 			expect(result).toEqual(mockContact);
+		});
+	});
+
+	describe('getContactForAddress', () => {
+		const mockContacts = getMockContacts({
+			n: 3,
+			names: ['Johnny', 'Bob', 'Lisa'],
+			addresses: [
+				[mockBackendContactAddressSol, mockBackendContactAddressBtc],
+				[mockBackendContactAddressEth],
+				[mockBackendContactAddressBtc]
+			]
+		}).map((c) => mapToFrontendContact(c));
+
+		it('should return the correct contact for a SOL address', () => {
+			const result = getContactForAddress({
+				contactList: mockContacts,
+				addressString: mockSolAddress
+			});
+
+			expect(result?.name).toBe('Johnny');
+		});
+
+		it('should return the correct contact for address if multiple match - return only first match', () => {
+			const result = getContactForAddress({
+				contactList: mockContacts,
+				addressString: mockBtcP2SHAddress
+			});
+
+			expect(result?.name).toBe('Johnny');
+		});
+
+		it('should return the correct contact for an ETH address', () => {
+			const result = getContactForAddress({
+				contactList: mockContacts,
+				addressString: mockEthAddress3
+			});
+
+			expect(result?.name).toBe('Bob');
+		});
+
+		it('should return undefined if address is not found', () => {
+			const result = getContactForAddress({
+				contactList: mockContacts,
+				addressString: '0xINEXISTENTADDRESS'
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should handle empty contact list', () => {
+			const result = getContactForAddress({ contactList: [], addressString: mockEthAddress3 });
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should handle contacts with empty addresses array', () => {
+			const contactsWithNoAddresses = getMockContacts({
+				n: 2,
+				names: ['Empty1', 'Empty2'],
+				addresses: [[], []]
+			}).map((c) => mapToFrontendContact(c));
+			const result = getContactForAddress({
+				contactList: contactsWithNoAddresses,
+				addressString: mockEthAddress3
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should match address regardless of case (case-insensitive match)', () => {
+			const upperCasedAddress = mockEthAddress3.toUpperCase();
+			const result = getContactForAddress({
+				addressString: upperCasedAddress,
+				contactList: mockContacts
+			});
+
+			expect(result?.addresses?.[0]?.address).toEqual(mockEthAddress3);
 		});
 	});
 });
