@@ -25,7 +25,11 @@ describe('alchemy-erc20.providers', () => {
 		networks.forEach(({ providers: { alchemyJsonRpcUrl } }, index) => {
 			expect(JsonRpcProvider).toHaveBeenNthCalledWith(
 				index + 1,
-				`${alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`
+				`${alchemyJsonRpcUrl}/${ALCHEMY_API_KEY}`,
+				undefined,
+				{
+					polling: true
+				}
 			);
 		});
 	});
