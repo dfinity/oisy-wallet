@@ -15,8 +15,7 @@ describe('IcSendReview', () => {
 
 	const props = {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
-		amount: 22_000_000,
-		networkId: ICP_TOKEN
+		amount: 22_000_000
 	};
 
 	const toolbarSelector = 'div[data-tid="toolbar"]';
