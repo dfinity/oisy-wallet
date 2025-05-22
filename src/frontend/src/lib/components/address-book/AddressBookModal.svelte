@@ -96,10 +96,14 @@
 
 	// TODO Use contact store and remove
 	const addAddress = (address: ContactAddressUi) => {
-		const addresses = [...currentContact!.addresses, address];
+		if (isNullish(currentContact)) {
+			return;
+		}
+
+		const addresses = [...currentContact.addresses, address];
 		currentAddressIndex = undefined;
 		currentContact = {
-			...currentContact!,
+			...currentContact,
 			addresses
 		};
 		saveContact(currentContact);
@@ -108,8 +112,12 @@
 
 	// TODO Use contact store and remove
 	const saveAddress = (address: ContactAddressUi) => {
-		const { addresses } = currentContact!;
-		addresses[currentAddressIndex!] = { ...address };
+		if (isNullish(currentContact) || isNullish(currentAddressIndex)) {
+			return;
+		}
+
+		const { addresses } = currentContact;
+		addresses[currentAddressIndex] = { ...address };
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
@@ -198,9 +206,9 @@
 			isNewContact={isNullish(currentContact)}
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		/>
-	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
+	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentAddressIndex)}
 		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
-		{JSON.stringify(currentContact?.addresses[currentAddressIndex!])}
+		{JSON.stringify(currentContact?.addresses[currentAddressIndex])}
 		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
 		<Button
 			on:click={() => {
