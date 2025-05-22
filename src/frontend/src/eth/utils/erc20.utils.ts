@@ -41,8 +41,6 @@ export const mapErc20UserToken = ({
 
 const mapErc20Icon = (symbol: string): string | undefined => {
 	switch (symbol.toLowerCase()) {
-		case 'floki':
-			return floki;
 		case 'weth':
 			return weth;
 		// ICP in production. ckICP was used on staging because the definitive name and symbol had not been decided.
