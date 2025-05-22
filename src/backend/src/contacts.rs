@@ -1,11 +1,9 @@
-use crate::mutate_state;
-use crate::random::generate_random_u64;
-use crate::time;
-use crate::Candid;
-use crate::CreateContactRequest;
-use crate::{read_state, types::StoredPrincipal};
-use shared::types::contact::StoredContacts;
-use shared::types::contact::{Contact, ContactError};
+use shared::types::contact::{Contact, ContactError, StoredContacts};
+
+use crate::{
+    mutate_state, random::generate_random_u64, read_state, time, types::StoredPrincipal, Candid,
+    CreateContactRequest,
+};
 
 pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
     if request.name.trim().is_empty() {
