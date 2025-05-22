@@ -92,7 +92,7 @@
 			isNullish(receiveAmount) ||
 			isNullish(sourceTokenFee) ||
 			swapAmountsLoading ||
-			Number(slippageValue!) >= SWAP_SLIPPAGE_INVALID_VALUE
+			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE)
 	);
 
 	$effect(() => {
