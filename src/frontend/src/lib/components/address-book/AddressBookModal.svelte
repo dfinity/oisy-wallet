@@ -223,15 +223,6 @@
 			isNewContact={isNullish(currentContact)}
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		/>
-	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentAddressIndex)}
-		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
-		{JSON.stringify(currentContact?.addresses[currentAddressIndex])}
-		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
-		<Button
-			on:click={() => {
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
-			}}>BACK</Button
-		>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep
 			contact={currentContact}
