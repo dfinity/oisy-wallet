@@ -56,6 +56,40 @@ impl From<Result<(), AddUserCredentialError>> for AddUserCredentialResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreateContactResult {
+    /// The contact was retrieved successfully.
+    Ok(Contact),
+    /// The contact could not be created due to an error
+    Err(ContactError),
+}
+
+impl From<Result<Contact, ContactError>> for CreateContactResult {
+    fn from(result: Result<Contact, ContactError>) -> Self {
+        match result {
+            Ok(contact) => CreateContactResult::Ok(contact),
+            Err(err) => CreateContactResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateContactResult {
+    /// The contact was updated successfully.
+    Ok(Contact),
+    /// The contact could not be updated due to an error
+    Err(ContactError),
+}
+
+impl From<Result<Contact, ContactError>> for UpdateContactResult {
+    fn from(result: Result<Contact, ContactError>) -> Self {
+        match result {
+            Ok(contact) => UpdateContactResult::Ok(contact),
+            Err(err) => UpdateContactResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum GetContactResult {
     /// The contacts were retrieved successfully.
     Ok(Contact),
