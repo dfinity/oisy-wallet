@@ -11,12 +11,12 @@
 		ADDRESS_BOOK_SEARCH_CONTACT_INPUT
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Contact } from '$lib/types/contact';
+	import type { ContactUi } from '$lib/types/contact';
 
 	interface Props {
-		contacts: Contact[];
+		contacts: ContactUi[];
 		onAddContact: () => void;
-		onShowContact: (contact: Contact) => void;
+		onShowContact: (contact: ContactUi) => void;
 	}
 
 	let { contacts, onAddContact, onShowContact }: Props = $props();
