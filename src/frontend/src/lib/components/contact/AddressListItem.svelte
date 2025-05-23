@@ -1,19 +1,27 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import type { ComponentProps } from 'svelte';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
 	import AddressItemActions from '$lib/components/contact/AddressItemActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
-	interface Props {
+	interface AddressListItemProps {
 		address: ContactAddressUi;
-		onInfo?: () => void;
 		onClick?: () => void;
 		styleClass?: string;
 		showFullAddress?: boolean;
 	}
-	let { address, onClick, onInfo, styleClass = '', showFullAddress = false }: Props = $props();
+	type Props = AddressListItemProps & ComponentProps<typeof AddressItemActions>;
+
+	let {
+		address,
+		onClick,
+		styleClass = '',
+		showFullAddress = false,
+		...actionProps
+	}: Props = $props();
 
 	let displayAddress = $derived(
 		showFullAddress ? address.address : shortenWithMiddleEllipsis({ text: address.address })
@@ -41,5 +49,5 @@
 			<span>{displayAddress}</span>
 		</div>
 	</div>
-	<AddressItemActions {address} {onInfo} styleClass="ml-auto items-center" />
+	<AddressItemActions {address} styleClass="ml-auto items-center" {...actionProps} />
 </button>
