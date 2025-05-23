@@ -28,7 +28,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{Contact, CreateContactRequest, UpdateContactRequest},
+        contact::{Contact, CreateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
@@ -894,16 +894,9 @@ pub async fn create_contact(request: CreateContactRequest) -> CreateContactResul
 /// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_allowed")]
 #[must_use]
-pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    // TODO replace mock data with data from contact service
-    let contact = Contact {
-        id: request.id,
-        name: request.name,
-        addresses: request.addresses,
-        update_timestamp_ns: time(),
-    };
-
-    Ok(contact).into()
+pub fn update_contact(request: Contact) -> UpdateContactResult {
+    let result = contacts::update_contact(request);
+    result.into()
 }
 
 /// Deletes a contact for the caller.
