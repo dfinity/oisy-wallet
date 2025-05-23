@@ -21,7 +21,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<LogoButton onclick={() => dispatch('click')} dividers={true}>
+<LogoButton onClick={() => dispatch('click')} dividers={true}>
 	{#snippet title()}
 		{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
 	{/snippet}

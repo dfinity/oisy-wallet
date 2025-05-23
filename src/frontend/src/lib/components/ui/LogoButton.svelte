@@ -20,7 +20,7 @@
 		description?: Snippet;
 		descriptionEnd?: Snippet;
 		action?: Snippet;
-		onclick?: () => void;
+		onClick?: () => void;
 	}
 
 	let {
@@ -39,7 +39,7 @@
 		description,
 		descriptionEnd,
 		action,
-		onclick
+		onClick
 	}: Props = $props();
 </script>
 
@@ -49,7 +49,7 @@
 	class:hover:bg-brand-subtle-10={hover}
 	class:rounded-lg={rounded}
 >
-	<button {onclick} class="flex w-full border-0 px-2" data-tid={testId}>
+	<button onclick={onClick} class="flex w-full border-0 px-2" data-tid={testId}>
 		<span
 			class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0"
 			class:py-3={!condensed}

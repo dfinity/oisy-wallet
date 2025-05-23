@@ -29,33 +29,37 @@
 </script>
 
 {#snippet header()}
-	<LogoButton on:click={onClick} hover={false}>
-		<span class="flex" slot="logo">
-			<div class="relative">
-				<Avatar name={contact.name} variant="sm" styleClass="md:text-[19.2px]"></Avatar>
-				<AddressesBadge addresses={contact.addresses} />
-			</div>
-		</span>
+	<LogoButton {onClick} hover={false}>
+		{#snippet logo()}
+			<span class="flex">
+				<div class="relative">
+					<Avatar name={contact.name} variant="sm" styleClass="md:text-[19.2px]"></Avatar>
+					<AddressesBadge addresses={contact.addresses} />
+				</div>
+			</span>
+		{/snippet}
 
-		<span slot="title">
+		{#snippet title()}
 			{contact.name}
-		</span>
+		{/snippet}
 
-		<span slot="description" class="flex items-center">
-			{#each contact.addresses as address, index (index)}
-				{#if index !== 0}
-					&nbsp;<span class="text-[0.5rem]">•</span>&nbsp;
+		{#snippet description()}
+			<span class="flex items-center">
+				{#each contact.addresses as address, index (index)}
+					{#if index !== 0}
+						&nbsp;<span class="text-[0.5rem]">•</span>&nbsp;
+					{/if}
+					<span class:font-bold={singleAddress} class:text-primary={singleAddress}
+						>{$i18n.address.types[address.addressType]}</span
+					>
+				{/each}
+				{#if singleAddress}
+					&nbsp;{shortenWithMiddleEllipsis({ text: contact.addresses[0].address })}
 				{/if}
-				<span class:font-bold={singleAddress} class:text-primary={singleAddress}
-					>{$i18n.address.types[address.addressType]}</span
-				>
-			{/each}
-			{#if singleAddress}
-				&nbsp;{shortenWithMiddleEllipsis({ text: contact.addresses[0].address })}
-			{/if}
-		</span>
+			</span>
+		{/snippet}
 
-		<span slot="action">
+		{#snippet action()}
 			{#if singleAddress}
 				<AddressItemActions
 					styleClass="ml-auto"
@@ -77,7 +81,7 @@
 					{/snippet}
 				</ButtonIcon>
 			{/if}
-		</span>
+		{/snippet}
 	</LogoButton>
 {/snippet}
 

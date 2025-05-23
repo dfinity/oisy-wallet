@@ -32,7 +32,7 @@
 		dividers={false}
 		rounded={false}
 		testId={`${testIdPrefix}-${data.symbol}-${data.network.id.description}`}
-		onclick={() => dispatch('click')}
+		onClick={() => dispatch('click')}
 		condensed={asNetwork}
 		{hover}
 	>

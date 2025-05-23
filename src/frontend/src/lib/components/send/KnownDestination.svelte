@@ -33,7 +33,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<LogoButton styleClass="group" onclick={() => dispatch('click')}>
+<LogoButton styleClass="group" onClick={() => dispatch('click')}>
 	{#snippet logo()}
 		<div class="mr-2"><RoundedIcon icon={IconConvertTo} /></div>
 	{/snippet}

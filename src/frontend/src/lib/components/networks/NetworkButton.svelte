@@ -47,7 +47,7 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 -->
 <LogoButton
 	{testId}
-	onclick={onClick}
+	{onClick}
 	selectable
 	selected={network?.id === selectedNetworkId}
 	dividers

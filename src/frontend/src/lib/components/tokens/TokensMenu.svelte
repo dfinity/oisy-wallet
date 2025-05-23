@@ -48,7 +48,7 @@
 	<span class="mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
 	<ul class="flex flex-col">
 		<li class="logo-button-list-item">
-			<LogoButton dividers onclick={toggleHideZeros}>
+			<LogoButton dividers onClick={toggleHideZeros}>
 				{#snippet logo()}
 					<IconHide />
 				{/snippet}
@@ -61,7 +61,7 @@
 			</LogoButton>
 		</li>
 		<li class="logo-button-list-item">
-			<LogoButton dividers onclick={openManageTokens}>
+			<LogoButton dividers onClick={openManageTokens}>
 				{#snippet logo()}
 					<IconManage />
 				{/snippet}

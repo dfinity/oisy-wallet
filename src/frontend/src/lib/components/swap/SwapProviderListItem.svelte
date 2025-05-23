@@ -51,9 +51,9 @@
 </script>
 
 {#if nonNullish(dapp)}
-	<LogoButton onclick={() => dispatch('click')} dividers>
+	<LogoButton onClick={() => dispatch('click')} dividers>
 		{#snippet title()}
-			<span>{dapp.name}</span>
+			{dapp.name}
 		{/snippet}
 
 		{#snippet description()}
