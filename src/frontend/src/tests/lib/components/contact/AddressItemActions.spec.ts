@@ -1,6 +1,8 @@
 import AddressItemActions from '$lib/components/contact/AddressItemActions.svelte';
 import {
 	ADDRESS_LIST_ITEM_COPY_BUTTON,
+	ADDRESS_LIST_ITEM_DELETE_BUTTON,
+	ADDRESS_LIST_ITEM_EDIT_BUTTON,
 	ADDRESS_LIST_ITEM_INFO_BUTTON
 } from '$lib/constants/test-ids.constants';
 import type { ContactAddressUi } from '$lib/types/contact';
@@ -36,6 +38,19 @@ describe('AddressItemActions', () => {
 		expect(getByTestId(ADDRESS_LIST_ITEM_COPY_BUTTON)).toBeInTheDocument();
 	});
 
+	it('should not render copy button when hideCopyButton is true', () => {
+		const { queryByTestId } = render(AddressItemActions, {
+			props: {
+				address: mockAddress,
+				hideCopyButton: true
+			},
+			context: mockContext
+		});
+
+		// Check that the copy button is not rendered
+		expect(queryByTestId(ADDRESS_LIST_ITEM_COPY_BUTTON)).toBeNull();
+	});
+
 	it('should render info button when onInfo is provided', () => {
 		const onInfo = vi.fn();
 
@@ -59,6 +74,56 @@ describe('AddressItemActions', () => {
 
 		// Check that the info button is not rendered
 		expect(queryByTestId(ADDRESS_LIST_ITEM_INFO_BUTTON)).toBeNull();
+	});
+
+	it('should render edit button when onEdit is provided', () => {
+		const onEdit = vi.fn();
+
+		const { getByTestId } = render(AddressItemActions, {
+			props: {
+				address: mockAddress,
+				onEdit
+			},
+			context: mockContext
+		});
+
+		// Check that the edit button is rendered
+		expect(getByTestId(ADDRESS_LIST_ITEM_EDIT_BUTTON)).toBeInTheDocument();
+	});
+
+	it('should not render edit button when onEdit is not provided', () => {
+		const { queryByTestId } = render(AddressItemActions, {
+			props: { address: mockAddress },
+			context: mockContext
+		});
+
+		// Check that the edit button is not rendered
+		expect(queryByTestId(ADDRESS_LIST_ITEM_EDIT_BUTTON)).toBeNull();
+	});
+
+	it('should render delete button when onDelete is provided', () => {
+		const onDelete = vi.fn();
+
+		const { getByTestId } = render(AddressItemActions, {
+			props: {
+				address: mockAddress,
+				onDelete
+			},
+			context: mockContext
+		});
+
+		// Check that the delete button is rendered
+		expect(getByTestId(ADDRESS_LIST_ITEM_DELETE_BUTTON)).toBeInTheDocument();
+	});
+
+	it('should not render delete button when onDelete is not provided', () => {
+		const { queryByTestId } = render(AddressItemActions, {
+			props: { address: mockAddress },
+			context: mockContext
+		});
+
+		// Check that the delete button is not rendered
+		expect(queryByTestId(ADDRESS_LIST_ITEM_DELETE_BUTTON)).toBeNull();
 	});
 
 	it('should copy address to clipboard when copy button is clicked', async () => {
@@ -99,6 +164,48 @@ describe('AddressItemActions', () => {
 
 		// Check that onInfo was called
 		expect(onInfo).toHaveBeenCalled();
+	});
+
+	it('should call onEdit when edit button is clicked', async () => {
+		const onEdit = vi.fn();
+
+		const { getByTestId } = render(AddressItemActions, {
+			props: {
+				address: mockAddress,
+				onEdit
+			},
+			context: mockContext
+		});
+
+		// Find the edit button using test ID
+		const editButton = getByTestId(ADDRESS_LIST_ITEM_EDIT_BUTTON);
+
+		// Click the edit button
+		await fireEvent.click(editButton);
+
+		// Check that onEdit was called
+		expect(onEdit).toHaveBeenCalled();
+	});
+
+	it('should call onDelete when delete button is clicked', async () => {
+		const onDelete = vi.fn();
+
+		const { getByTestId } = render(AddressItemActions, {
+			props: {
+				address: mockAddress,
+				onDelete
+			},
+			context: mockContext
+		});
+
+		// Find the delete button using test ID
+		const deleteButton = getByTestId(ADDRESS_LIST_ITEM_DELETE_BUTTON);
+
+		// Click the delete button
+		await fireEvent.click(deleteButton);
+
+		// Check that onDelete was called
+		expect(onDelete).toHaveBeenCalled();
 	});
 
 	it('should apply custom style class', () => {
