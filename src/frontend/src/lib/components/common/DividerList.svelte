@@ -10,10 +10,8 @@
 	const { dividerProps, ...snippets }: Props = $props();
 </script>
 
-<span class="flex flex-row items-center">
-	{#each Object.entries(snippets) as [key, snippet], index (key)}
-		{#if index > 0}
-			<Divider {...dividerProps} />
-		{/if}{@render snippet()}
-	{/each}
-</span>
+{#each Object.entries(snippets) as [key, snippet], index (key)}
+	{#if index > 0}
+		<Divider {...dividerProps} />
+	{/if}{@render snippet()}
+{/each}
