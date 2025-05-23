@@ -2,6 +2,8 @@
 	import { IconCheck } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import DividerList from '$lib/components/common/DividerList.svelte';
+	import Divider from '$lib/components/common/Divider.svelte';
 
 	export let selectable = false;
 	export let selected = false;
@@ -61,7 +63,7 @@
 						{/if}
 						{#if hasSubtitleSlot}
 							{#if dividers}
-								<span class="text-lg text-tertiary">&nbsp;&middot;&nbsp;</span>
+								<span class="text-tertiary"><Divider /></span>
 							{/if}
 							<span class="text-base text-tertiary"><slot name="subtitle" /></span>
 						{/if}

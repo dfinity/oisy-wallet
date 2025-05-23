@@ -10,6 +10,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import DividerList from '$lib/components/common/DividerList.svelte';
+	import Divider from '$lib/components/common/Divider.svelte';
 
 	let {
 		data,
@@ -44,7 +46,7 @@
 			/>
 		</span>
 
-		<span class:text-sm={asNetwork} slot="title">
+		<span class="-mr-0.25" class:text-sm={asNetwork} slot="title">
 			{data.symbol}
 			{#if asNetwork}
 				<span class="font-normal">
@@ -55,7 +57,7 @@
 
 		<span class:text-sm={asNetwork} slot="subtitle">
 			{#if !asNetwork}
-				&nbsp;&middot;&nbsp;{data.name}
+				<Divider />{data.name}
 			{/if}
 		</span>
 
@@ -70,10 +72,9 @@
 		<span class:text-sm={asNetwork} slot="description">
 			{#if data?.networks}
 				{#each [...new Set(data.networks.map((n) => n.name))] as network, index (network)}
-					{#if index !== 0}
-						&nbsp;&middot;&nbsp;
-					{/if}
-					{network}
+					{#if index > 0}
+						<Divider size="sm" />
+					{/if}{network}
 				{/each}
 			{:else if !asNetwork}
 				{data.network.name}
