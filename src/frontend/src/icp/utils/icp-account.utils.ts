@@ -3,6 +3,7 @@ import { assertNever } from '$lib/types/utils';
 import { AccountIdentifier, isIcpAccountIdentifier } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, encodeIcrcAccount } from '@dfinity/ledger-icrc';
 import type { Principal } from '@dfinity/principal';
+import { fromNullable, toNullable } from '@dfinity/utils';
 
 export const getAccountIdentifier = (principal: Principal): AccountIdentifier =>
 	AccountIdentifier.fromPrincipal({ principal, subAccount: undefined });
@@ -24,7 +25,7 @@ export const parseIcpAccountId = (address: string): Icrcv2AccountId | undefined 
 		return {
 			WithPrincipal: {
 				owner: decoded.owner,
-				subaccount: decoded.subaccount ? [decoded.subaccount] : []
+				subaccount: toNullable(decoded.subaccount)
 			}
 		};
 	} catch (_: unknown) {
@@ -44,11 +45,10 @@ export const getIcpAccountIdString = (accountId: Icrcv2AccountId): string => {
 
 	if ('WithPrincipal' in accountId) {
 		const { owner, subaccount } = accountId.WithPrincipal;
-		const subaccountArray = subaccount.length > 0 ? subaccount[0] : undefined;
 
 		return encodeIcrcAccount({
 			owner,
-			subaccount: subaccountArray
+			subaccount: fromNullable(subaccount)
 		});
 	}
 

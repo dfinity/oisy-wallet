@@ -40,7 +40,7 @@ export const Icrcv2AccountIdObjectSchema = Icrcv2AccountIdSchema.transform<Icrcv
 	(data, context): Icrcv2AccountId => {
 		const accountId = parseIcpAccountId(data);
 
-		if (accountId) {
+		if (nonNullish(accountId)) {
 			return accountId;
 		}
 
