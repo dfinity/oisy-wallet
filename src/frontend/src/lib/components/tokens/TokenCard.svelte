@@ -10,7 +10,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import DividerList from '$lib/components/common/DividerList.svelte';
 	import Divider from '$lib/components/common/Divider.svelte';
 
 	let {
@@ -73,7 +72,7 @@
 			{#if data?.networks}
 				{#each [...new Set(data.networks.map((n) => n.name))] as network, index (network)}
 					{#if index > 0}
-						<Divider size="sm" />
+						<Divider />
 					{/if}{network}
 				{/each}
 			{:else if !asNetwork}
