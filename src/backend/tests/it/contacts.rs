@@ -1,6 +1,8 @@
 use candid::Principal;
-use shared::types::contact::{Contact, ContactError, CreateContactRequest};
-use shared::types::user_profile::OisyUser;
+use shared::types::{
+    contact::{Contact, ContactError, CreateContactRequest},
+    user_profile::OisyUser,
+};
 
 use crate::utils::{
     mock::CALLER,
