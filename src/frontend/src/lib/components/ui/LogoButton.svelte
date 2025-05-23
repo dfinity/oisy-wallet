@@ -4,7 +4,6 @@
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
-	import DividerList from '$lib/components/common/DividerList.svelte';
 
 	interface Props {
 		selectable?: boolean;
