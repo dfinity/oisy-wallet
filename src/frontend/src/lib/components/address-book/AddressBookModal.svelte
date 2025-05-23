@@ -187,7 +187,7 @@
 				currentContact = undefined;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
-			onShowAddress={(contact, addressIndex) => {
+			onShowAddress={({ contact, addressIndex }) => {
 				currentContact = contact;
 				currentAddressIndex = addressIndex;
 				previousStep = AddressBookSteps.ADDRESS_BOOK;

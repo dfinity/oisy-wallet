@@ -7,15 +7,11 @@
 	import { ADDRESS_EDIT_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import type { ContactAddressUi } from '$lib/types/contact';
-	const {
-		address,
-		onClose,
-		previousStep
-	}: {
-		address?: ContactAddressUi;
-		onClose: (step?: AddressBookSteps) => void;
-		previousStep?: AddressBookSteps;
-	} = $props();
+
+	// Define the props with appropriate types
+	export let address: ContactAddressUi;
+	export let onClose: (step?: AddressBookSteps) => void;
+	export let previousStep: AddressBookSteps;
 
 	const onClickHandler = () => {
 		onClose(previousStep ?? AddressBookSteps.SHOW_CONTACT);

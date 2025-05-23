@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
 	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
-	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import ContactCard from '$lib/components/contact/ContactCard.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
@@ -20,7 +18,7 @@
 	interface Props {
 		contacts: ContactUi[];
 		onAddContact: () => void;
-		onShowAddress: ({
+		onShowAddress?: ({
 			contact,
 			addressIndex
 		}: {
@@ -28,7 +26,6 @@
 			addressIndex: number;
 		}) => void;
 		onShowContact: (contact: ContactUi) => void;
-		onShowAddress?: (contact: ContactUi, index: number) => void;
 	}
 
 	let { contacts, onAddContact, onShowContact, onShowAddress }: Props = $props();
