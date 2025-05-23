@@ -84,3 +84,42 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
             .ok_or(ContactError::ContactNotFound)
     })
 }
+
+/// Deletes a contact by ID for the current user.
+///
+/// # Arguments
+/// * `contact_id` - The unique identifier of the contact to delete
+///
+/// # Returns
+/// * `Ok(u64)` - The ID of the deleted contact if successful
+/// * `Err(ContactError::ContactNotFound)` - If no contact with the given ID exists for the user
+pub fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let current_time = time();
+
+    mutate_state(|s| {
+        // Get the user's contacts storage
+        match s.contact.get(&stored_principal) {
+            Some(candid_stored_contacts) => {
+                let mut stored_contacts = candid_stored_contacts.clone();
+
+                // Find the index of the contact to delete
+                let contact_index = stored_contacts
+                    .contacts
+                    .iter()
+                    .position(|contact| contact.id == contact_id)
+                    .ok_or(ContactError::ContactNotFound)?;
+
+                // Remove the contact
+                stored_contacts.contacts.remove(contact_index);
+                stored_contacts.update_timestamp_ns = current_time;
+
+                // Update the storage
+                s.contact.insert(stored_principal, Candid(stored_contacts));
+
+                Ok(contact_id)
+            }
+            None => Err(ContactError::ContactNotFound),
+        }
+    })
+}
