@@ -2,11 +2,13 @@
 	import { notEmptyString } from '@dfinity/utils';
 	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
+	import ContactCard from '$lib/components/contact/ContactCard.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import {
 		ADDRESS_BOOK_ADD_CONTACT_BUTTON,
@@ -18,6 +20,13 @@
 	interface Props {
 		contacts: ContactUi[];
 		onAddContact: () => void;
+		onShowAddress: ({
+			contact,
+			addressIndex
+		}: {
+			contact: ContactUi;
+			addressIndex: number;
+		}) => void;
 		onShowContact: (contact: ContactUi) => void;
 		onShowAddress?: (contact: ContactUi, index: number) => void;
 	}
@@ -62,29 +71,17 @@
 			</div>
 		</div>
 
-		<div class="flex flex-col gap-2 py-6">
+		<div class="flex flex-col gap-0.5 py-6">
 			{#if filteredContacts.length > 0}
 				{#each filteredContacts as contact, index (index)}
-					<div class="flex items-center">
-						<div class="grow">
-							<!-- TODO: Should be updated with Pull request #6462
-								Address list item
-								https://github.com/dfinity/oisy-wallet/pull/6462
-							-->
-							CONTACT: {contact.name} #addresses {contact.addresses.length}
-						</div>
-						<!-- TODO: Should be changed with Pull request #6462 Address list item -->
-						<Button styleClass="flex-none" on:click={() => onShowContact(contact)}>Show</Button>
-						<ButtonIcon
-							ariaLabel={$i18n.core.text.view}
-							onclick={() => onShowAddress?.(contact, 0)}
-							testId="address-info-button"
-						>
-							{#snippet icon()}
-								<IconInfo />
-							{/snippet}
-						</ButtonIcon>
-					</div>
+					{#if index > 0}
+						<Hr />
+					{/if}
+					<ContactCard
+						{contact}
+						onClick={() => onShowContact(contact)}
+						onInfo={(addressIndex) => onShowAddress({ contact, addressIndex })}
+					/>
 				{/each}
 			{:else}
 				<span class="text-brand-secondary">{$i18n.address_book.text.no_contact_found}</span>

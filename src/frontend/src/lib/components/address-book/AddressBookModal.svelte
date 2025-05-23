@@ -51,6 +51,7 @@
 	const close = () => modalStore.close();
 
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
+	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
 
 	// TODO Use contact store and remove
@@ -60,8 +61,19 @@
 	// TODO Use contact store and remove
 	let currentAddressIndex: number | undefined = $state();
 
+	const handleClose = () => {
+		if (
+			currentStepName === AddressBookSteps.SHOW_ADDRESS &&
+			previousStepName === AddressBookSteps.SHOW_CONTACT
+		) {
+			return gotoStep(AddressBookSteps.SHOW_CONTACT);
+		}
+		return gotoStep(AddressBookSteps.ADDRESS_BOOK);
+	};
+
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
+			previousStepName = currentStepName;
 			goToWizardStep({
 				modal,
 				steps,
