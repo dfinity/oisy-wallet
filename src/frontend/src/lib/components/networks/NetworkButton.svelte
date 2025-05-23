@@ -12,13 +12,25 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { formatUSD } from '$lib/utils/format.utils';
 
-	export let selectedNetworkId: NetworkId | undefined = undefined;
-	export let network: Network | undefined = undefined;
-	export let usdBalance: number | undefined = undefined;
-	export let isTestnet = false;
-	export let testId: string | undefined = undefined;
-	export let delayOnNetworkSelect = true;
-	export let labelsSize: LabelSize = 'md';
+	interface Props {
+		selectedNetworkId?: NetworkId;
+		network?: Network;
+		usdBalance?: number;
+		isTestnet?: boolean;
+		testId?: string;
+		delayOnNetworkSelect?: boolean;
+		labelsSize?: LabelSize;
+	}
+
+	let {
+		selectedNetworkId,
+		network,
+		usdBalance,
+		isTestnet = false,
+		testId,
+		delayOnNetworkSelect = true,
+		labelsSize = 'md'
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 

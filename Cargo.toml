@@ -10,7 +10,7 @@ resolver = "2"
 
 [workspace.dependencies]
 bs58 = "0.5.1"
-ic-cdk = "0.16.0"
+ic-cdk = "0.16.1"
 ic-cdk-macros = "0.16.0"
 ic-cdk-timers = "0.9.0"
 ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }

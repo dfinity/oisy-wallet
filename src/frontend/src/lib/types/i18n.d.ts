@@ -23,6 +23,7 @@ interface I18nCore {
 		approve: string;
 		view: string;
 		copy: string;
+		delete: string;
 		clear_filter: string;
 		not_available: string;
 		new: string;
@@ -324,6 +325,10 @@ interface I18nSettings {
 		appearance_system: string;
 	};
 	error: { loading_profile: string };
+}
+
+interface I18nShortcuts {
+	privacy_mode: string;
 }
 
 interface I18nNetworks {
@@ -952,6 +957,7 @@ interface I18nAddress_book {
 		search_contact: string;
 		no_contact_found: string;
 	};
+	alt: { show_addresses_of_contact: string; hide_addresses: string };
 	show_contact: {
 		title: string;
 		add_address: string;
@@ -1047,6 +1053,7 @@ interface I18n {
 	init: I18nInit;
 	hero: I18nHero;
 	settings: I18nSettings;
+	shortcuts: I18nShortcuts;
 	networks: I18nNetworks;
 	receive: I18nReceive;
 	send: I18nSend;

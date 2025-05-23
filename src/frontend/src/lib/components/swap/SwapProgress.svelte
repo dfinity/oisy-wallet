@@ -4,10 +4,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 
-	export let swapProgressStep: string = ProgressStepsSwap.INITIALIZATION;
+	interface Props {
+		swapProgressStep?: string;
+	}
 
-	let steps: ProgressSteps;
-	$: steps = [
+	let { swapProgressStep = $bindable(ProgressStepsSwap.INITIALIZATION) }: Props = $props();
+
+	let steps = $state<ProgressSteps>([
 		{
 			step: ProgressStepsSwap.INITIALIZATION,
 			text: $i18n.swap.text.initializing,
@@ -23,7 +26,7 @@
 			text: $i18n.swap.text.refreshing_ui,
 			state: 'next'
 		}
-	];
+	]);
 </script>
 
 <InProgressWizard progressStep={swapProgressStep} {steps} />
