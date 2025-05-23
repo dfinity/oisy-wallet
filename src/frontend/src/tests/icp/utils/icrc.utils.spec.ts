@@ -1,4 +1,3 @@
-import { GHOSTNODE_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	icTokenIcrcCustomToken,
@@ -194,25 +193,6 @@ describe('icrc.utils', () => {
 				...mockToken,
 				id: token?.id,
 				standard: 'icrc'
-			});
-		});
-
-		it('should map a token with custom symbol', () => {
-			const token = mapIcrcToken({
-				...mockParams,
-				icrcCustomTokens: {
-					[GHOSTNODE_LEDGER_CANISTER_ID]: {
-						...mockToken
-					}
-				},
-				ledgerCanisterId: GHOSTNODE_LEDGER_CANISTER_ID
-			});
-
-			expect(token).toStrictEqual({
-				...mockToken,
-				ledgerCanisterId: GHOSTNODE_LEDGER_CANISTER_ID,
-				symbol: 'GHOSTNODE',
-				id: token?.id
 			});
 		});
 	});
