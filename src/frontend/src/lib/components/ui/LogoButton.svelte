@@ -1,34 +1,47 @@
 <script lang="ts">
 	import { IconCheck } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import Divider from '$lib/components/common/Divider.svelte';
 
-	export let selectable = false;
-	export let selected = false;
-	export let dividers = false;
-	export let hover = true;
-	export let rounded = true;
-	export let condensed = false;
-	export let styleClass: string | undefined = undefined;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		selectable?: boolean;
+		selected?: boolean;
+		dividers?: boolean;
+		hover?: boolean;
+		rounded?: boolean;
+		condensed?: boolean;
+		styleClass?: string;
+		testId?: string;
+		logo: Snippet;
+		title?: Snippet;
+		subtitle?: Snippet;
+		titleEnd?: Snippet;
+		description?: Snippet;
+		descriptionEnd?: Snippet;
+		action?: Snippet;
+		onClick?: () => void;
+	}
 
-	let hasTitleSlot: boolean;
-	$: hasTitleSlot = nonNullish($$slots['title']);
-
-	let hasSubtitleSlot: boolean;
-	$: hasSubtitleSlot = nonNullish($$slots['subtitle']);
-
-	let hasTitleEndSlot: boolean;
-	$: hasTitleEndSlot = nonNullish($$slots['title-end']);
-
-	let hasDescriptionSlot: boolean;
-	$: hasDescriptionSlot = nonNullish($$slots['description']);
-
-	let hasDescriptionEndSlot: boolean;
-	$: hasDescriptionEndSlot = nonNullish($$slots['description-end']);
-
-	let hasActionSlot: boolean;
-	$: hasActionSlot = nonNullish($$slots['action']);
+	let {
+		selectable = false,
+		selected = false,
+		dividers = false,
+		hover = true,
+		rounded = true,
+		condensed = false,
+		styleClass,
+		testId,
+		logo,
+		title,
+		subtitle,
+		titleEnd,
+		description,
+		descriptionEnd,
+		action,
+		onClick
+	}: Props = $props();
 </script>
 
 <div
@@ -37,7 +50,7 @@
 	class:hover:bg-brand-subtle-10={hover}
 	class:rounded-lg={rounded}
 >
-	<button on:click class="flex w-full border-0 px-2" data-tid={testId}>
+	<button onclick={onClick} class="flex w-full border-0 px-2" data-tid={testId}>
 		<span
 			class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0"
 			class:py-3={!condensed}
@@ -53,22 +66,22 @@
 						{/if}
 					</span>
 				{/if}
-				<span class="mr-2 flex"><slot name="logo" /></span>
+				<span class="mr-2 flex">{@render logo()}</span>
 				<span class="flex min-w-0 flex-col text-left">
 					<span class="truncate text-nowrap">
-						{#if hasTitleSlot}
-							<span class="text-lg font-bold text-primary"><slot name="title" /></span>
+						{#if nonNullish(title)}
+							<span class="text-lg font-bold text-primary">{@render title()}</span>
 						{/if}
-						{#if hasSubtitleSlot}
+						{#if nonNullish(subtitle)}
 							{#if dividers}
-								<span class="text-lg text-tertiary">&nbsp;&middot;&nbsp;</span>
+								<span class="text-tertiary"><Divider /></span>
 							{/if}
-							<span class="text-base text-tertiary"><slot name="subtitle" /></span>
+							<span class="text-base text-tertiary">{@render subtitle()}</span>
 						{/if}
 					</span>
-					{#if hasDescriptionSlot}
+					{#if nonNullish(description)}
 						<span class="truncate text-sm text-tertiary">
-							<slot name="description" />
+							{@render description()}
 						</span>
 					{/if}
 				</span>
@@ -76,20 +89,20 @@
 
 			<span class="flex items-center">
 				<span class="flex flex-col text-right">
-					{#if hasTitleEndSlot}
+					{#if nonNullish(titleEnd)}
 						<span class="text-lg font-bold">
-							<slot name="title-end" />
+							{@render titleEnd()}
 						</span>
 					{/if}
-					{#if hasDescriptionEndSlot}
+					{#if nonNullish(descriptionEnd)}
 						<span class="text-sm text-tertiary">
-							<slot name="description-end" />
+							{@render descriptionEnd()}
 						</span>
 					{/if}
 				</span>
 
-				{#if hasActionSlot}
-					<span in:fade class="ml-2 flex text-brand-primary"><slot name="action" /></span>
+				{#if nonNullish(action)}
+					<span in:fade class="ml-2 flex text-brand-primary">{@render action()}</span>
 				{/if}
 			</span>
 		</span>

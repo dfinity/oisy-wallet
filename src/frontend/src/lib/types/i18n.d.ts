@@ -973,6 +973,7 @@ interface I18nContact {
 
 interface I18nAddress {
 	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
+	form: { invalid_address: string; valid_for_networks: string };
 }
 
 interface I18nSigner {
