@@ -913,9 +913,7 @@ pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
 #[update(guard = "caller_is_allowed")]
 #[must_use]
 pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
-    // TODO integrate delete contact service
-    let normal_result = Ok(contact_id);
-    normal_result.into()
+    contacts::delete_contact(contact_id).into()
 }
 
 /// Gets a contact by ID for the caller.
