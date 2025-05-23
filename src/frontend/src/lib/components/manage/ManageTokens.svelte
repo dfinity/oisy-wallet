@@ -141,18 +141,27 @@
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
-				<span slot="title">{token.symbol}</span>
-				<span slot="subtitle">{token.name}</span>
+				{#snippet title()}
+					{token.symbol}
+				{/snippet}
 
-				<span slot="logo" class="mr-2">
-					<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
-				</span>
+				{#snippet subtitle()}
+					{token.name}
+				{/snippet}
 
-				<span class="break-all" slot="description">
-					{token.network.name}
-				</span>
+				{#snippet logo()}
+					<span class="mr-2">
+						<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
+					</span>
+				{/snippet}
 
-				<svelte:fragment slot="action">
+				{#snippet description()}
+					<span class="break-all">
+						{token.network.name}
+					</span>
+				{/snippet}
+
+				{#snippet action()}
 					{#if icTokenIcrcCustomToken(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
 					{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
@@ -162,7 +171,7 @@
 					{:else if isSolanaToken(token)}
 						<SolManageTokenToggle />
 					{/if}
-				</svelte:fragment>
+				{/snippet}
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}

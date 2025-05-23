@@ -23,6 +23,7 @@ interface I18nCore {
 		approve: string;
 		view: string;
 		copy: string;
+		delete: string;
 		clear_filter: string;
 		not_available: string;
 		new: string;
@@ -956,6 +957,7 @@ interface I18nAddress_book {
 		search_contact: string;
 		no_contact_found: string;
 	};
+	alt: { show_addresses_of_contact: string; hide_addresses: string };
 	show_contact: {
 		title: string;
 		add_address: string;
@@ -971,6 +973,7 @@ interface I18nContact {
 
 interface I18nAddress {
 	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
+	form: { invalid_address: string; valid_for_networks: string };
 }
 
 interface I18nSigner {
