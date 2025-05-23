@@ -190,7 +190,11 @@ type ContactAddressData = record {
 	label : opt text;
 	token_account_id : TokenAccountId
 };
-type ContactError = variant { InvalidContactData; ContactNotFound };
+type ContactError = variant {
+	InvalidContactData;
+	ContactNotFound;
+	RandomnessError
+};
 type CreateChallengeError = variant {
 	ChallengeInProgress;
 	MissingUserProfile;
