@@ -53,7 +53,7 @@
 
 		<span class:text-sm={asNetwork} slot="subtitle">
 			{#if !asNetwork}
-				<!-- TODO: add oisyName-->
+				<!-- TODO: add oisyName -->
 				&nbsp;&middot;&nbsp;{data.name}
 			{/if}
 		</span>
