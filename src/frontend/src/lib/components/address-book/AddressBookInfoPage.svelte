@@ -7,18 +7,15 @@
 	import { ADDRESS_EDIT_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import type { ContactAddressUi } from '$lib/types/contact';
-
-	interface Props {
-		address?: Partial<ContactAddressUi>;
-		onClose: (step?: AddressBookSteps) => void;
-		previousStep?: AddressBookSteps;
-	}
-
-	let {
-		address = $bindable({}),
+	const {
+		address,
 		onClose,
 		previousStep
-	}: Props = $props();
+	}: {
+		address?: ContactAddressUi;
+		onClose: (step?: AddressBookSteps) => void;
+		previousStep?: AddressBookSteps;
+	} = $props();
 
 	const onClickHandler = () => {
 		onClose(previousStep ?? AddressBookSteps.SHOW_CONTACT);
@@ -27,20 +24,17 @@
 
 <ContentWithToolbar styleClass="mb-10 flex flex-col items-stretch">
 	{#if address?.address}
-		<!-- Safe to cast now because address?.address is truthy -->
-		<AddressBookQrCode address={address as ContactAddressUi} />
+		<AddressBookQrCode {address} />
 
 		<AddressListItem
-			address={address as ContactAddressUi}
+			{address}
 			showFullAddress={true}
 			styleClass="shadow-sm border border-divider"
 			showTypeOnTop={true}
 		/>
 	{:else}
 		<div class="flex items-center justify-center py-4">
-			<p class="text-center text-sm font-medium text-brand-primary">
-				No address available.
-			</p>
+			<p class="text-center text-sm font-medium text-brand-primary"> No address available. </p>
 		</div>
 	{/if}
 

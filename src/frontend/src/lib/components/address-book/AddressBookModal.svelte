@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
-	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -48,6 +47,7 @@
 
 	let currentStep: WizardStep | undefined = $state();
 	let modal: WizardModal | undefined = $state();
+	let previousStep: AddressBookSteps | undefined = $state();
 	const close = () => modalStore.close();
 
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
@@ -178,6 +178,7 @@
 			onShowAddress={(contact, addressIndex) => {
 				currentContact = contact;
 				currentAddressIndex = addressIndex;
+				previousStep = AddressBookSteps.ADDRESS_BOOK;
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
@@ -196,6 +197,7 @@
 			}}
 			onShowAddress={(addressIndex) => {
 				currentAddressIndex = addressIndex;
+				previousStep = AddressBookSteps.SHOW_CONTACT;
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
@@ -240,8 +242,11 @@
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
 		<AddressBookInfoPage
-			address={currentContact?.addresses[currentAddressIndex!]!}
-			close={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+			address={nonNullish(currentAddressIndex)
+				? currentContact?.addresses[currentAddressIndex]
+				: undefined}
+			onClose={(step) => gotoStep(step ?? AddressBookSteps.SHOW_CONTACT)}
+			{previousStep}
 		/>
 	{/if}
 </WizardModal>
