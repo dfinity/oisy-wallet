@@ -1,4 +1,3 @@
-import rndr from '$eth/assets/rndr.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -38,8 +37,6 @@ export const mapErc20UserToken = ({
 
 const mapErc20Icon = (symbol: string): string | undefined => {
 	switch (symbol.toLowerCase()) {
-		case 'rndr':
-			return rndr;
 		// ICP in production. ckICP was used on staging because the definitive name and symbol had not been decided.
 		case 'icp':
 		case 'ckicp':

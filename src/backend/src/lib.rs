@@ -21,7 +21,6 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
-        account::{EthAddress, TokenAccountId},
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -29,7 +28,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
+        contact::{Contact, CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
@@ -81,6 +80,7 @@ mod guards;
 mod heap_state;
 mod impls;
 mod pow;
+pub mod random;
 pub mod signer;
 mod state;
 mod token;
@@ -883,16 +883,9 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 /// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 #[update(guard = "caller_is_allowed")]
 #[must_use]
-pub fn create_contact(request: CreateContactRequest) -> CreateContactResult {
-    // TODO replace mock data with contact service that returns Contact
-    let contact = Contact {
-        id: time(),
-        name: request.name,
-        addresses: vec![],
-        update_timestamp_ns: time(),
-    };
-
-    Ok(contact).into()
+pub async fn create_contact(request: CreateContactRequest) -> CreateContactResult {
+    let result = contacts::create_contact(request).await;
+    result.into()
 }
 
 /// Updates an existing contact for the caller.
@@ -927,24 +920,16 @@ pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
 
 /// Gets a contact by ID for the caller.
 ///
+/// # Arguments
+/// * `contact_id` - The unique identifier of the contact to retrieve
+/// # Returns
+/// * `Ok(GetContactResult)` - The requested contact if found
 /// # Errors
-/// Errors are enumerated by: `ContactError`.
+/// * `ContactNotFound` - If no contact for the proivided contact_id could be found
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_contact(contact_id: u64) -> GetContactResult {
-    // TODO replace mock data with the get contact service
-    let result = Ok(Contact {
-        id: contact_id,
-        name: "John Doe".to_string(),
-        addresses: vec![ContactAddressData {
-            token_account_id: TokenAccountId::Eth(EthAddress::Public(
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".to_string(),
-            )),
-            label: Some("ETH Wallet".to_string()),
-        }],
-        update_timestamp_ns: time(),
-    });
-    result.into()
+    contacts::get_contact(contact_id).into()
 }
 
 /// Returns all contacts for the caller
