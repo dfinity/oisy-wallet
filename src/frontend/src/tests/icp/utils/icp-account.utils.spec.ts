@@ -12,7 +12,7 @@ describe('icp-account.utils', () => {
 			const result = parseIcpAccountId(icpAccountId);
 
 			expect(result).toEqual({
-				Account: new TextEncoder().encode(icpAccountId)
+				Account: Buffer.from(icpAccountId, 'hex')
 			});
 		});
 
@@ -103,7 +103,7 @@ describe('icp-account.utils', () => {
 		it('should extract string from Account type', () => {
 			const accountIdStr = '6c04faf793b42b156206f805d13ba1b3b697ec18f519e6a11484eed091859d5a';
 			const accountIdObj: Icrcv2AccountId = {
-				Account: new TextEncoder().encode(accountIdStr)
+				Account: Buffer.from(accountIdStr, 'hex')
 			};
 
 			const result = getIcpAccountIdString(accountIdObj);

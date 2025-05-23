@@ -15,7 +15,7 @@ export const getAccountIdentifier = (principal: Principal): AccountIdentifier =>
 export const parseIcpAccountId = (address: string): Icrcv2AccountId | undefined => {
 	if (isIcpAccountIdentifier(address)) {
 		return {
-			Account: new TextEncoder().encode(address)
+			Account: Buffer.from(address, 'hex')
 		};
 	}
 
@@ -39,7 +39,7 @@ export const parseIcpAccountId = (address: string): Icrcv2AccountId | undefined 
  */
 export const getIcpAccountIdString = (accountId: Icrcv2AccountId): string => {
 	if ('Account' in accountId) {
-		return new TextDecoder().decode(new Uint8Array(accountId.Account));
+		return Buffer.from(accountId.Account).toString('hex');
 	}
 
 	if ('WithPrincipal' in accountId) {

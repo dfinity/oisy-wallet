@@ -61,7 +61,7 @@ describe('address.schema', () => {
 
 			expect(result.success).toBeTruthy();
 			expect(result.data).toEqual({
-				Account: new TextEncoder().encode(icpAccountId)
+				Account: Buffer.from(icpAccountId, 'hex')
 			});
 		});
 
