@@ -881,7 +881,7 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 ///
 /// # Test
 /// This endpoint is currently a placeholder and will be fully implemented in a future PR.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub async fn create_contact(request: CreateContactRequest) -> CreateContactResult {
     let result = contacts::create_contact(request).await;
@@ -892,7 +892,7 @@ pub async fn create_contact(request: CreateContactRequest) -> CreateContactResul
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
     // TODO replace mock data with data from contact service
@@ -910,7 +910,7 @@ pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
     // TODO integrate delete contact service
