@@ -100,7 +100,7 @@
 	 * Modal
 	 */
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.REVIEW,
 			title: $i18n.send.text.review

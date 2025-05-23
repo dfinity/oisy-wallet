@@ -20,7 +20,7 @@
 	 * Modal
 	 */
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsSign> = [
 		{
 			name: WizardStepsSign.REVIEW,
 			title: $i18n.send.text.review
@@ -31,7 +31,7 @@
 		}
 	];
 
-	let currentStep: WizardStep | undefined;
+	let currentStep: WizardStep<WizardStepsSign> | undefined;
 	let modal: WizardModal;
 
 	const close = () => modalStore.close();

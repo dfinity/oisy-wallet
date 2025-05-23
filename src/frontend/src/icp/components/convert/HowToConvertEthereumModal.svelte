@@ -6,7 +6,11 @@
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
-	import { WizardStepsHowToConvert, WizardStepsConvert } from '$lib/enums/wizard-steps';
+	import {
+		type WizardStepsSend,
+		WizardStepsHowToConvert,
+		WizardStepsConvert
+	} from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
@@ -26,13 +30,14 @@
 	let currentStep: WizardStep | undefined = $state();
 	let modal: WizardModal | undefined = $state();
 
-	const steps: WizardSteps = $derived(
-		howToConvertWizardSteps({
-			i18n: $i18n,
-			sourceToken: sourceToken.symbol,
-			destinationToken: destinationToken.symbol
-		})
-	);
+	const steps: WizardSteps<WizardStepsHowToConvert | WizardStepsConvert | WizardStepsSend> =
+		$derived(
+			howToConvertWizardSteps({
+				i18n: $i18n,
+				sourceToken: sourceToken.symbol,
+				destinationToken: destinationToken.symbol
+			})
+		);
 
 	const close = () =>
 		closeModal(() => {
