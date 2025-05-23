@@ -141,7 +141,9 @@
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
-				<span slot="title">{nonNullish(token.oisySymbol) ? token.oisySymbol.oisySymbol : token.symbol}</span>
+				<span slot="title"
+					>{nonNullish(token.oisySymbol) ? token.oisySymbol.oisySymbol : token.symbol}</span
+				>
 				<span slot="subtitle">{token.name}</span>
 
 				<span slot="logo" class="mr-2">
