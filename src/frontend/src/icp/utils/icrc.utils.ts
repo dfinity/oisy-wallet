@@ -9,6 +9,7 @@ import type {
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { UrlSchema } from '$lib/validation/url.validation';
 import {
 	IcrcMetadataResponseEntries,
 	mapTokenMetadata,
@@ -37,7 +38,14 @@ export const mapIcrcToken = ({
 
 	const { symbol, icon: tokenIcon, ...metadataToken } = token;
 
-	const icon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
+	const staticIcon = `/icons/icrc/${ledgerCanisterId}.png`;
+
+	const dynamicIcon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
+
+	const { success: dynamicIconIsUrl } = UrlSchema.safeParse(dynamicIcon);
+
+	// We do not allow external URLs anyway, so it is safe to use the static icon, even if it does not exist
+	const icon = nonNullish(dynamicIconIsUrl) && dynamicIconIsUrl ? staticIcon : dynamicIcon;
 
 	return {
 		id: parseTokenId(symbol),
