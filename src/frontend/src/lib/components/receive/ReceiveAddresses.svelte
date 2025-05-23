@@ -275,9 +275,9 @@
 
 <ContentWithToolbar>
 	<div class="flex flex-col gap-2">
-		{#each receiveAddressList as { title, text, condition, on, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
+		{#each receiveAddressList as { title: _title, text: _text, condition, on, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
 			{#if condition !== false}
-				{#if nonNullish(text)}
+				{#if nonNullish(_text)}
 					<ReceiveAddress
 						on:click={on.click}
 						{labelRef}
@@ -287,8 +287,12 @@
 						{copyAriaLabel}
 						{qrCodeAction}
 					>
-						<svelte:fragment slot="title">{title}</svelte:fragment>
-						<span slot="text" class="text-sm">{text}</span>
+						{#snippet title()}
+							{_title}
+						{/snippet}
+						{#snippet text()}
+							<span class="text-sm">{_text}</span>
+						{/snippet}
 					</ReceiveAddress>
 				{:else}
 					<ReceiveAddress
@@ -300,7 +304,9 @@
 						{copyAriaLabel}
 						{qrCodeAction}
 					>
-						<svelte:fragment slot="title">{title}</svelte:fragment>
+						{#snippet title()}
+							{_title}
+						{/snippet}
 					</ReceiveAddress>
 				{/if}
 			{/if}
