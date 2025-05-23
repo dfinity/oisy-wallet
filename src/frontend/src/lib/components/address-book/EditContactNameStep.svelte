@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { notEmptyString } from '@dfinity/utils';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import ContactForm from '$lib/components/address-book/ContactForm.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -11,21 +11,35 @@
 		ADDRESS_BOOK_SAVE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Contact } from '$lib/types/contact';
+	import type { ContactUi } from '$lib/types/contact';
 
 	interface Props {
-		onAddContact: (contact: Contact) => void;
+		contact?: Partial<ContactUi>;
+		onAddContact: (contact: Pick<ContactUi, 'name'>) => void;
+		onSaveContact: (contact: ContactUi) => void;
 		onClose: () => void;
+		isNewContact: boolean;
 	}
 
-	let { onAddContact, onClose }: Props = $props();
+	let {
+		onAddContact,
+		onSaveContact,
+		onClose,
+		isNewContact,
+		contact = $bindable({})
+	}: Props = $props();
 
-	let contact: Partial<Contact> = $state({ addresses: [] });
 	let form: ContactForm | undefined = $state();
 
-	const handleAdd = () => {
-		if (form?.isValid) {
-			onAddContact(contact as Contact);
+	const handleSave = () => {
+		if (!form?.isValid) {
+			return;
+		}
+
+		if (isNewContact && nonNullish(contact.name)) {
+			onAddContact({ name: contact.name });
+		} else {
+			onSaveContact(contact as ContactUi);
 		}
 	};
 
@@ -40,11 +54,13 @@
 	<Avatar name={contact?.name} variant="xl"></Avatar>
 	<ContactForm bind:contact bind:this={form}></ContactForm>
 
+	<!-- TODO Add address list here -->
+
 	<ButtonGroup slot="toolbar">
 		<ButtonCancel onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
 		<Button
 			colorStyle="primary"
-			on:click={handleAdd}
+			on:click={handleSave}
 			disabled={!form?.isValid}
 			testId={ADDRESS_BOOK_SAVE_BUTTON}
 		>

@@ -3,11 +3,14 @@ use serde::Serialize;
 
 use super::{
     bitcoin::{
-        BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse, SelectedUtxosFeeError,
-        SelectedUtxosFeeResponse,
+        BtcAddPendingTransactionError, BtcGetPendingTransactionsError,
+        BtcGetPendingTransactionsReponse, SelectedUtxosFeeError, SelectedUtxosFeeResponse,
     },
+    dapp::AddDappSettingsError,
     pow::{CreateChallengeError, CreateChallengeResponse},
-    signer::{GetAllowedCyclesError, GetAllowedCyclesResponse},
+    signer::{
+        AllowSigningError, AllowSigningResponse, GetAllowedCyclesError, GetAllowedCyclesResponse,
+    },
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
@@ -53,32 +56,47 @@ impl From<Result<(), AddUserCredentialError>> for AddUserCredentialResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum GetContactResult {
-    /// The contact was created successfully.
+pub enum CreateContactResult {
+    /// The contact was retrieved successfully.
     Ok(Contact),
-    /// The contact was not created due to an error.
+    /// The contact could not be created due to an error
     Err(ContactError),
 }
-impl GetContactResult {
-    #[must_use]
-    pub fn is_err(&self) -> bool {
-        matches!(self, Self::Err(_))
-    }
 
-    /// Returns the contained `ContactError` if the result is an `Err`.
-    ///
-    /// # Panics
-    /// - If the result is `Ok`.
-    #[must_use]
-    pub fn unwrap_err(self) -> ContactError {
-        match self {
-            Self::Err(err) => err,
-            Self::Ok(_) => {
-                panic!("Called `CreateContactResult.unwrap_err()` on an `Ok` value")
-            }
+impl From<Result<Contact, ContactError>> for CreateContactResult {
+    fn from(result: Result<Contact, ContactError>) -> Self {
+        match result {
+            Ok(contact) => CreateContactResult::Ok(contact),
+            Err(err) => CreateContactResult::Err(err),
         }
     }
 }
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateContactResult {
+    /// The contact was updated successfully.
+    Ok(Contact),
+    /// The contact could not be updated due to an error
+    Err(ContactError),
+}
+
+impl From<Result<Contact, ContactError>> for UpdateContactResult {
+    fn from(result: Result<Contact, ContactError>) -> Self {
+        match result {
+            Ok(contact) => UpdateContactResult::Ok(contact),
+            Err(err) => UpdateContactResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetContactResult {
+    /// The contacts were retrieved successfully.
+    Ok(Contact),
+    /// The contacts were not retrieved due to an error.
+    Err(ContactError),
+}
+
 impl From<Result<Contact, ContactError>> for GetContactResult {
     fn from(result: Result<Contact, ContactError>) -> Self {
         match result {
@@ -216,6 +234,54 @@ impl From<Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsErro
         match result {
             Ok(response) => BtcGetPendingTransactionsResult::Ok(response),
             Err(err) => BtcGetPendingTransactionsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcAddPendingTransactionResult {
+    /// The pending transaction was added successfully.
+    Ok(()),
+    /// The pending transaction was not added due to an error.
+    Err(BtcAddPendingTransactionError),
+}
+impl From<Result<(), BtcAddPendingTransactionError>> for BtcAddPendingTransactionResult {
+    fn from(result: Result<(), BtcAddPendingTransactionError>) -> Self {
+        match result {
+            Ok(()) => BtcAddPendingTransactionResult::Ok(()),
+            Err(err) => BtcAddPendingTransactionResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum AllowSigningResult {
+    /// The signing was allowed successfully.
+    Ok(AllowSigningResponse),
+    /// The signing was not allowed due to an error.
+    Err(AllowSigningError),
+}
+impl From<Result<AllowSigningResponse, AllowSigningError>> for AllowSigningResult {
+    fn from(result: Result<AllowSigningResponse, AllowSigningError>) -> Self {
+        match result {
+            Ok(response) => AllowSigningResult::Ok(response),
+            Err(err) => AllowSigningResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum AddUserHiddenDappIdResult {
+    /// The user's hidden dapp id was added successfully.
+    Ok(()),
+    /// The user's hidden dapp id was not added due to an error.
+    Err(AddDappSettingsError),
+}
+impl From<Result<(), AddDappSettingsError>> for AddUserHiddenDappIdResult {
+    fn from(result: Result<(), AddDappSettingsError>) -> Self {
+        match result {
+            Ok(()) => AddUserHiddenDappIdResult::Ok(()),
+            Err(err) => AddUserHiddenDappIdResult::Err(err),
         }
     }
 }

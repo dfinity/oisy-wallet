@@ -80,6 +80,7 @@ export interface AddUserCredentialRequest {
 	credential_spec: CredentialSpec;
 }
 export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
+export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
 	| { PowChallenge: ChallengeCompletionError }
@@ -93,6 +94,7 @@ export interface AllowSigningResponse {
 	challenge_completion: [] | [ChallengeCompletion];
 	allowed_cycles: bigint;
 }
+export type AllowSigningResult = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export type ApproveError =
 	| {
@@ -118,6 +120,7 @@ export interface BtcAddPendingTransactionRequest {
 	address: string;
 	utxos: Array<Utxo>;
 }
+export type BtcAddPendingTransactionResult = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type BtcAddress =
 	| { P2WPKH: string }
 	| { P2PKH: string }
@@ -182,7 +185,10 @@ export interface ContactAddressData {
 	label: [] | [string];
 	token_account_id: TokenAccountId;
 }
-export type ContactError = { InvalidContactData: null } | { ContactNotFound: null };
+export type ContactError =
+	| { InvalidContactData: null }
+	| { ContactNotFound: null }
+	| { RandomnessError: null };
 export type CreateChallengeError =
 	| { ChallengeInProgress: null }
 	| { MissingUserProfile: null }
@@ -196,6 +202,7 @@ export interface CreateChallengeResponse {
 export interface CreateContactRequest {
 	name: string;
 }
+export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
 export type CreatePowChallengeResult =
 	| { Ok: CreateChallengeResponse }
 	| { Err: CreateChallengeError };
@@ -307,9 +314,6 @@ export interface PendingTransaction {
 	txid: Uint8Array | number[];
 	utxos: Array<Utxo>;
 }
-export type Result = { Ok: null } | { Err: AddDappSettingsError };
-export type Result_1 = { Ok: AllowSigningResponse } | { Err: AllowSigningError };
-export type Result_2 = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -454,16 +458,19 @@ export interface Utxo {
 }
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], AddUserCredentialResult>;
-	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result>;
-	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], Result_1>;
-	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_2>;
+	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], AddUserHiddenDappIdResult>;
+	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
+	btc_add_pending_transaction: ActorMethod<
+		[BtcAddPendingTransactionRequest],
+		BtcAddPendingTransactionResult
+	>;
 	btc_get_pending_transactions: ActorMethod<
 		[BtcGetPendingTransactionsRequest],
 		BtcGetPendingTransactionsResult
 	>;
 	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], BtcSelectUserUtxosFeeResult>;
 	config: ActorMethod<[], Config>;
-	create_contact: ActorMethod<[CreateContactRequest], GetContactResult>;
+	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
 	create_pow_challenge: ActorMethod<[], CreatePowChallengeResult>;
 	create_user_profile: ActorMethod<[], UserProfile>;
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;

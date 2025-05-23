@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.4.5",
+	"version": "1.4.7",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -67,7 +67,7 @@
 		"@dfinity/candid": "^2.4.0",
 		"@dfinity/ckbtc": "^3.1.12",
 		"@dfinity/cketh": "^3.4.9",
-		"@dfinity/gix-components": "^6.0.0-next-2025-05-15",
+		"@dfinity/gix-components": "^6.0.0-next-2025-05-22",
 		"@dfinity/ledger-icp": "^2.6.13",
 		"@dfinity/ledger-icrc": "^2.8.1",
 		"@dfinity/oisy-wallet-signer": "^0.1.8",
@@ -91,7 +91,7 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@dfinity/eslint-config-oisy-wallet": "^0.1.12-next-2025-05-19",
+		"@dfinity/eslint-config-oisy-wallet": "^0.1.13",
 		"@dfinity/ic-management": "^6.1.1",
 		"@dfinity/identity-secp256k1": "^2.4.0",
 		"@dfinity/internet-identity-playwright": "^0.0.4",
@@ -118,7 +118,7 @@
 		"prettier-plugin-organize-imports": "^4.1.0",
 		"prettier-plugin-svelte": "^3.4.0",
 		"prettier-plugin-tailwindcss": "^0.6.11",
-		"sass": "^1.88.0",
+		"sass": "^1.89.0",
 		"svelte": "^5.28.2",
 		"svelte-check": "^4.2.1",
 		"tailwindcss": "4.1.6",

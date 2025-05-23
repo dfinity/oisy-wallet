@@ -2,6 +2,7 @@ import type {
 	AddUserCredentialResult,
 	AllowSigningResponse,
 	_SERVICE as BackendService,
+	Contact,
 	CreateChallengeResponse,
 	CustomToken,
 	GetAllowedCyclesResponse,
@@ -251,5 +252,55 @@ export class BackendCanister extends Canister<BackendService> {
 			networks: mapUserNetworks(networks),
 			current_user_version: toNullable(currentUserVersion)
 		});
+	};
+
+	getContact = async (id: bigint): Promise<Contact> => {
+		const { get_contact } = this.caller({ certified: false });
+		const response = await get_contact(id);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getContacts = async (): Promise<Contact[]> => {
+		const { get_contacts } = this.caller({ certified: false });
+		const response = await get_contacts();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	createContact = async (name: string): Promise<Contact> => {
+		const { create_contact } = this.caller({ certified: true });
+		const response = await create_contact({ name });
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	deleteContact = async (id: bigint): Promise<bigint> => {
+		const { delete_contact } = this.caller({ certified: true });
+		const response = await delete_contact(id);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	updateContact = async (contact: Contact): Promise<Contact> => {
+		const { update_contact } = this.caller({ certified: true });
+		const response = await update_contact(contact);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
 	};
 }

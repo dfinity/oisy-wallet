@@ -4,7 +4,6 @@
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
 	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
@@ -36,7 +35,6 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { token } from '$lib/stores/token.store';
-	import type { Network, NetworkId } from '$lib/types/network';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
@@ -54,12 +52,9 @@
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let destination = '';
-	export let targetNetwork: Network | undefined = undefined;
 	export let isTransactionsPage: boolean;
 
-	let networkId: NetworkId | undefined = undefined;
-	$: networkId = targetNetwork?.id;
+	let destination = '';
 
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
@@ -86,7 +81,6 @@
 	const reset = () => {
 		destination = '';
 		amount = undefined;
-		targetNetwork = undefined;
 
 		sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
@@ -168,10 +162,6 @@
 				})
 			: decodeQrCode(params);
 	};
-
-	// TODO: Use network id to get the address to support bitcoin.
-	let source: string;
-	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
 <SendTokenContext token={$token}>
@@ -212,11 +202,8 @@
 			/>
 		{:else}
 			<SendWizard
-				{source}
 				{currentStep}
 				{destination}
-				bind:networkId
-				bind:targetNetwork
 				bind:amount
 				bind:sendProgressStep
 				on:icBack={modal.back}

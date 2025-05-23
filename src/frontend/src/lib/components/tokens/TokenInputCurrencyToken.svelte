@@ -27,5 +27,7 @@
 	on:blur
 	on:nnsInput
 >
-	<slot name="inner-end" slot="inner-end" />
+	{#snippet innerEnd()}
+		<slot name="inner-end" />
+	{/snippet}
 </TokenInputCurrency>

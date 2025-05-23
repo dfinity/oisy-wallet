@@ -51,7 +51,7 @@
 	<p transition:slide={SLIDE_DURATION} class="pb-3 text-error-primary">
 		{$i18n.send.assertion.invalid_destination_address}
 	</p>
-{:else if notEmptyString(destination) && nonNullish(knownDestinations) && isNullish(knownDestinations[destination])}
+{:else if notEmptyString(destination) && nonNullish(knownDestinations) && isNullish(knownDestinations[destination.toLowerCase()])}
 	<div transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning">
 			{$i18n.send.info.unknown_destination}

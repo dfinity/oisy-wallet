@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { isNullish, nonNullish, isEmptyString, fromNullishNullable } from '@dfinity/utils';
+	import {
+		isNullish,
+		nonNullish,
+		isEmptyString,
+		fromNullishNullable,
+		debounce
+	} from '@dfinity/utils';
 	import type { TransactionResponse } from 'ethers/providers';
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
@@ -33,14 +39,19 @@
 	let twinToken: Token | undefined;
 	$: twinToken = nonNullish(token) && isIcCkToken(token) ? token.twinToken : undefined;
 
-	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
+	let toContractAddress = '';
+	$: toContractAddress =
+		nonNullish(twinToken) && twinToken.standard === 'erc20'
+			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '')
+			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '');
 
-	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionEthAddress }) => {
+	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
+	const loadPendingTransactions = async () => {
 		if (isNullish(token)) {
 			return;
 		}
 
-		if (isNullish(toAddress)) {
+		if (isNullish(toContractAddress)) {
 			icPendingTransactionsStore.reset(token.id);
 			return;
 		}
@@ -70,7 +81,7 @@
 			token: token as IcToken,
 			lastObservedBlockNumber,
 			identity: $authIdentity,
-			toAddress,
+			toAddress: toContractAddress,
 			twinToken
 		});
 	};
@@ -116,22 +127,14 @@
 		});
 	};
 
-	let toContractAddress = '';
-	$: toContractAddress =
-		nonNullish(twinToken) && twinToken.standard === 'erc20'
-			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '')
-			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '');
-
 	$: (async () => await init({ toAddress: toContractAddress, twinToken }))();
+
+	const debounceLoadPendingTransactions = debounce(loadPendingTransactions, 1000);
 
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
-	$: $balance,
-		$ckEthMinterInfoStore,
-		twinToken,
-		toContractAddress,
-		(async () => await loadPendingTransactions({ toAddress: toContractAddress }))();
+	$: $balance, toContractAddress, debounceLoadPendingTransactions();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>

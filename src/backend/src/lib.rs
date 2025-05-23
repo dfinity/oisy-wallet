@@ -21,7 +21,6 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
-        account::{EthAddress, TokenAccountId},
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -29,9 +28,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{
-            Contact, ContactAddressData, ContactError, CreateContactRequest, UpdateContactRequest,
-        },
+        contact::{Contact, CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
@@ -40,9 +37,11 @@ use shared::{
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
-            AddUserCredentialResult, BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult,
-            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
+            AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
+            BtcAddPendingTransactionResult, BtcGetPendingTransactionsResult,
+            BtcSelectUserUtxosFeeResult, CreateContactResult, CreatePowChallengeResult,
+            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
+            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -68,7 +67,7 @@ use crate::{
     assertions::assert_token_enabled_is_some,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
-    types::PowChallengeMap,
+    types::{ContactMap, PowChallengeMap},
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
 
@@ -76,10 +75,12 @@ mod assertions;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
+mod contacts;
 mod guards;
 mod heap_state;
 mod impls;
 mod pow;
+pub mod random;
 pub mod signer;
 mod state;
 mod token;
@@ -96,6 +97,7 @@ const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
+const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -111,6 +113,7 @@ thread_local! {
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
+            contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
         })
     );
 }
@@ -148,6 +151,7 @@ pub struct State {
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
     pow_challenge: PowChallengeMap,
+    contact: ContactMap,
 }
 
 fn set_config(arg: InitArg) {
@@ -436,28 +440,33 @@ pub async fn btc_select_user_utxos_fee(
 #[update(guard = "caller_is_not_anonymous")]
 pub async fn btc_add_pending_transaction(
     params: BtcAddPendingTransactionRequest,
-) -> Result<(), BtcAddPendingTransactionError> {
-    let principal = ic_cdk::caller();
-    let current_utxos = bitcoin_api::get_all_utxos(
-        params.network,
-        params.address.clone(),
-        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
-    )
-    .await
-    .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
-    let now_ns = time();
+) -> BtcAddPendingTransactionResult {
+    async fn inner(
+        params: BtcAddPendingTransactionRequest,
+    ) -> Result<(), BtcAddPendingTransactionError> {
+        let principal = ic_cdk::caller();
+        let current_utxos = bitcoin_api::get_all_utxos(
+            params.network,
+            params.address.clone(),
+            Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+        )
+        .await
+        .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+        let now_ns = time();
 
-    with_btc_pending_transactions(|pending_transactions| {
-        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
-        let current_pending_transaction = StoredPendingTransaction {
-            txid: params.txid,
-            utxos: params.utxos,
-            created_at_timestamp_ns: now_ns,
-        };
-        pending_transactions
-            .add_pending_transaction(principal, params.address, current_pending_transaction)
-            .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
-    })
+        with_btc_pending_transactions(|pending_transactions| {
+            pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+            let current_pending_transaction = StoredPendingTransaction {
+                txid: params.txid,
+                utxos: params.utxos,
+                created_at_timestamp_ns: now_ns,
+            };
+            pending_transactions
+                .add_pending_transaction(principal, params.address, current_pending_transaction)
+                .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
+        })
+    }
+    inner(params).await.into()
 }
 
 /// Returns the pending Bitcoin transactions for the caller.
@@ -614,23 +623,25 @@ pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTes
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "caller_is_not_anonymous")]
-pub fn add_user_hidden_dapp_id(
-    request: AddHiddenDappIdRequest,
-) -> Result<(), AddDappSettingsError> {
-    request.check()?;
-    let user_principal = ic_cdk::caller();
-    let stored_principal = StoredPrincipal(user_principal);
+#[must_use]
+pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHiddenDappIdResult {
+    fn inner(request: AddHiddenDappIdRequest) -> Result<(), AddDappSettingsError> {
+        request.check()?;
+        let user_principal = ic_cdk::caller();
+        let stored_principal = StoredPrincipal(user_principal);
 
-    mutate_state(|s| {
-        let mut user_profile_model =
-            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        add_hidden_dapp_id(
-            stored_principal,
-            request.current_user_version,
-            request.dapp_id,
-            &mut user_profile_model,
-        )
-    })
+        mutate_state(|s| {
+            let mut user_profile_model =
+                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+            add_hidden_dapp_id(
+                stored_principal,
+                request.current_user_version,
+                request.dapp_id,
+                &mut user_profile_model,
+            )
+        })
+    }
+    inner(request).into()
 }
 
 /// It create a new user profile for the caller.
@@ -767,50 +778,54 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub async fn allow_signing(
-    request: Option<AllowSigningRequest>,
-) -> Result<AllowSigningResponse, AllowSigningError> {
-    let principal = ic_cdk::caller();
+pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigningResult {
+    async fn inner(
+        request: Option<AllowSigningRequest>,
+    ) -> Result<AllowSigningResponse, AllowSigningError> {
+        let principal = ic_cdk::caller();
 
-    // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED is
-    // disabled
-    if !POW_ENABLED {
-        // Passing None to apply the old cycle calculation logic
-        signer::allow_signing(None).await?;
-        // Returning a placeholder response that can be ignored by the frontend.
-        return Ok(AllowSigningResponse {
-            status: AllowSigningStatus::Skipped,
-            allowed_cycles: 0u64,
-            challenge_completion: None,
-        });
+        // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED
+        // is disabled
+        if !POW_ENABLED {
+            // Passing None to apply the old cycle calculation logic
+            signer::allow_signing(None).await?;
+            // Returning a placeholder response that can be ignored by the frontend.
+            return Ok(AllowSigningResponse {
+                status: AllowSigningStatus::Skipped,
+                allowed_cycles: 0u64,
+                challenge_completion: None,
+            });
+        }
+
+        // we atill need to make a valid request has been sent request
+        let request = request.ok_or(AllowSigningError::Other("Invalid request".to_string()))?;
+
+        // The Proof-of-Work (PoW) protection is explicitly enforced at the HTTP entry-point level.
+        // This ensures internal calls to the business service remains unrestricted and does not
+        // require PoW protection.
+        let challenge_completion: ChallengeCompletion =
+            pow::complete_challenge(request.nonce).map_err(AllowSigningError::PowChallenge)?;
+
+        // Grant cycles proportional to difficulty
+        let allowed_cycles =
+            u64::from(challenge_completion.current_difficulty) * CYCLES_PER_DIFFICULTY;
+
+        ic_cdk::println!(
+            "Allowing principle {} to spend {} cycles on signer operations",
+            principal.to_string(),
+            allowed_cycles,
+        );
+
+        // Allow the caller to pay for cycles consumed by signer operations
+        signer::allow_signing(Some(allowed_cycles)).await?;
+
+        Ok(AllowSigningResponse {
+            status: AllowSigningStatus::Executed,
+            allowed_cycles,
+            challenge_completion: Some(challenge_completion),
+        })
     }
-
-    // we atill need to make a valid request has been sent request
-    let request = request.ok_or(AllowSigningError::Other("Invalid request".to_string()))?;
-
-    // The Proof-of-Work (PoW) protection is explicitly enforced at the HTTP entry-point level.
-    // This ensures internal calls to the business service remains unrestricted and does not require
-    // PoW protection.
-    let challenge_completion: ChallengeCompletion =
-        pow::complete_challenge(request.nonce).map_err(AllowSigningError::PowChallenge)?;
-
-    // Grant cycles proportional to difficulty
-    let allowed_cycles = u64::from(challenge_completion.current_difficulty) * CYCLES_PER_DIFFICULTY;
-
-    ic_cdk::println!(
-        "Allowing principle {} to spend {} cycles on signer operations",
-        principal.to_string(),
-        allowed_cycles,
-    );
-
-    // Allow the caller to pay for cycles consumed by signer operations
-    signer::allow_signing(Some(allowed_cycles)).await?;
-
-    Ok(AllowSigningResponse {
-        status: AllowSigningStatus::Executed,
-        allowed_cycles,
-        challenge_completion: Some(challenge_completion),
-    })
+    inner(request).await.into()
 }
 
 /// API method to get cycle balance and burn rate.
@@ -866,26 +881,20 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 ///
 /// # Test
 /// This endpoint is currently a placeholder and will be fully implemented in a future PR.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn create_contact(request: CreateContactRequest) -> GetContactResult {
-    // TODO replace mock data with contact service that returns Contact
-    let contact = Contact {
-        id: time(),
-        name: request.name,
-        addresses: vec![],
-        update_timestamp_ns: time(),
-    };
-
-    GetContactResult::Ok(contact)
+pub async fn create_contact(request: CreateContactRequest) -> CreateContactResult {
+    let result = contacts::create_contact(request).await;
+    result.into()
 }
 
 /// Updates an existing contact for the caller.
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_allowed")]
-pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactError> {
+#[update(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
     // TODO replace mock data with data from contact service
     let contact = Contact {
         id: request.id,
@@ -894,14 +903,14 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
         update_timestamp_ns: time(),
     };
 
-    Ok(contact)
+    Ok(contact).into()
 }
 
 /// Deletes a contact for the caller.
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
     // TODO integrate delete contact service
@@ -911,44 +920,27 @@ pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
 
 /// Gets a contact by ID for the caller.
 ///
+/// # Arguments
+/// * `contact_id` - The unique identifier of the contact to retrieve
+/// # Returns
+/// * `Ok(GetContactResult)` - The requested contact if found
 /// # Errors
-/// Errors are enumerated by: `ContactError`.
+/// * `ContactNotFound` - If no contact for the proivided contact_id could be found
 #[query(guard = "caller_is_not_anonymous")]
-pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
-    // TODO replace mock data with the get contact service
-    Ok(Contact {
-        id: contact_id,
-        name: "John Doe".to_string(),
-        addresses: vec![ContactAddressData {
-            token_account_id: TokenAccountId::Eth(EthAddress::Public(
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".to_string(),
-            )),
-            label: Some("ETH Wallet".to_string()),
-        }],
-        update_timestamp_ns: time(),
-    })
+#[must_use]
+pub fn get_contact(contact_id: u64) -> GetContactResult {
+    contacts::get_contact(contact_id).into()
 }
 
-/// Lists all contacts for the caller.
+/// Returns all contacts for the caller
 ///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
+/// This query function returns a list of the user's contacts.
+/// # Returns
+/// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_contacts() -> GetContactsResult {
-    // TODO replace mock data with the get contacts service
-    let normal_result = Ok(vec![Contact {
-        id: time(),
-        name: "John Doe".to_string(),
-        addresses: vec![ContactAddressData {
-            token_account_id: TokenAccountId::Eth(EthAddress::Public(
-                "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045".to_string(),
-            )),
-            label: Some("ETH Wallet".to_string()),
-        }],
-        update_timestamp_ns: time(),
-    }]);
-    normal_result.into()
+    let result = Ok(contacts::get_contacts());
+    result.into()
 }
-
 export_candid!();

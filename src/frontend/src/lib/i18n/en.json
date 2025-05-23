@@ -20,6 +20,7 @@
 			"approve": "Approve",
 			"view": "View",
 			"copy": "Copy",
+			"delete": "Delete",
 			"clear_filter": "Clear filter",
 			"not_available": "n/a",
 			"new": "New",
@@ -27,6 +28,7 @@
 			"no_results": "No results",
 			"paste": "Paste",
 			"to": "To",
+			"add": "Add",
 			"more_items": "+$items more"
 		},
 		"info": {
@@ -60,7 +62,9 @@
 			"vip_qr_code": "VIP QR codes",
 			"binance_qr_code": "Binance Clubhouse QR",
 			"refer_a_friend": "Refer your friends",
-			"address_book": "Address book"
+			"address_book": "Address book",
+			"hide_balances": "Hide balances",
+			"show_balances": "Show balances"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -77,7 +81,9 @@
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
-			"address_book": "Open address book"
+			"address_book": "Open address book",
+			"hide_balances": "Hide the displayed balances",
+			"show_balances": "Show the hidden balances"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -242,7 +248,7 @@
 		"text": {
 			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base and BNB",
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon and BNB",
 			"done": "Enjoy $oisy_short"
 		},
 		"alt": {
@@ -340,6 +346,9 @@
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
+	},
+	"shortcuts": {
+		"privacy_mode": "P"
 	},
 	"networks": {
 		"title": "Current network. Access to selection.",
@@ -639,6 +648,7 @@
 			"hide_token": "Hide token",
 			"select_token": "Select token",
 			"exchange_is_not_available": "USD value is currently not available.",
+			"exchange_is_not_available_short": "USD value not available",
 			"source_token_title": "You pay",
 			"destination_token_title": "You receive",
 			"chain_key": "Chain Key",
@@ -1025,7 +1035,13 @@
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
 			"add_new_contact": "Add new contact",
-			"add_contact": "Add contact"
+			"add_contact": "Add contact",
+			"search_contact": "Search contact",
+			"no_contact_found": "No contacts found"
+		},
+		"alt": {
+			"show_addresses_of_contact": "Show all addresses for contact",
+			"hide_addresses": "Hide addresses of contact"
 		},
 		"show_contact": {
 			"title": "Contact",
@@ -1040,6 +1056,14 @@
 		},
 		"fields": {
 			"name": "Name"
+		}
+	},
+	"address": {
+		"types": {
+			"Icrcv2": "Internet Computer",
+			"Btc": "Bitcoin",
+			"Eth": "Ethereum",
+			"Sol": "Solana"
 		}
 	},
 	"signer": {
