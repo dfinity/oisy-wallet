@@ -37,10 +37,10 @@
 	<LogoButton {onClick} hover={false} condensed testId={CONTACT_CARD_BUTTON}>
 		{#snippet logo()}
 			<span class="flex">
-  			<div class="relative">
-	  			<Avatar name={contact.name} variant="sm" styleClass="md:text-[19.2px]"></Avatar>
-	  			<AddressesBadge addresses={contact.addresses} />
-	  		</div>
+				<div class="relative">
+					<Avatar name={contact.name} variant="sm" styleClass="md:text-[19.2px]"></Avatar>
+					<AddressesBadge addresses={contact.addresses} />
+				</div>
 			</span>
 		{/snippet}
 
