@@ -13,8 +13,8 @@
 		onEdit: (contact: ContactUi) => void;
 		onEditAddress: (index: number) => void;
 		onAddAddress: () => void;
-		onDeleteContact: (id: bigint) => void;
-		onDeleteAddress: (index: number) => void;
+		onDeleteContact: (id: bigint) => Promise<void>;
+		onDeleteAddress: (index: number) => Promise<void>;
 	}
 
 	let {

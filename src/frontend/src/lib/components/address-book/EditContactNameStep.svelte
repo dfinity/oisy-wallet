@@ -15,15 +15,15 @@
 
 	interface Props {
 		contact?: Partial<ContactUi>;
-		onAddContact: (contact: Pick<ContactUi, 'name'>) => void;
-		onSaveContact: (contact: ContactUi) => void;
+		onCreateContact: (name: string) => Promise<void>;
+		onUpdateContact: (contact: ContactUi) => Promise<void>;
 		onClose: () => void;
 		isNewContact: boolean;
 	}
 
 	let {
-		onAddContact,
-		onSaveContact,
+		onCreateContact,
+		onUpdateContact,
 		onClose,
 		isNewContact,
 		contact = $bindable({})
@@ -31,15 +31,28 @@
 
 	let form: ContactForm | undefined = $state();
 
-	const handleSave = () => {
+	let loading = $state(false);
+
+	const handleSave = async () => {
 		if (!form?.isValid) {
 			return;
 		}
 
+		loading = true;
+
+		try {
+
 		if (isNewContact && nonNullish(contact.name)) {
-			onAddContact({ name: contact.name });
+			await onCreateContact(contact.name);
 		} else {
-			onSaveContact(contact as ContactUi);
+			await onUpdateContact(contact as ContactUi);
+		}
+	} catch(e) {
+		alert(e)
+		debugger
+		} finally {
+			loading = false;
+
 		}
 	};
 
@@ -61,7 +74,8 @@
 		<Button
 			colorStyle="primary"
 			on:click={handleSave}
-			disabled={!form?.isValid}
+			disabled={!form?.isValid || loading}
+			loading={loading}
 			testId={ADDRESS_BOOK_SAVE_BUTTON}
 		>
 			{$i18n.core.text.save}
