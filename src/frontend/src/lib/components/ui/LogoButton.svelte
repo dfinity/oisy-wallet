@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import Divider from '$lib/components/common/Divider.svelte';
 
 	interface Props {
 		selectable?: boolean;
@@ -73,7 +74,7 @@
 						{/if}
 						{#if nonNullish(subtitle)}
 							{#if dividers}
-								<span class="text-lg text-tertiary">&nbsp;&middot;&nbsp;</span>
+								<span class="text-tertiary"><Divider /></span>
 							{/if}
 							<span class="text-base text-tertiary">{@render subtitle()}</span>
 						{/if}
