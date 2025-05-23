@@ -16,9 +16,6 @@ type AccountSnapshotFor = variant {
 	SolDevnet : AccountSnapshot_1;
 	Erc20Mainnet : AccountSnapshot;
 	SolTestnet : AccountSnapshot_1;
-	Icrcv2 : AccountSnapshot_3;
-	BtcRegtest : AccountSnapshot_2;
-	SplDevnet : AccountSnapshot_1;
 	EthMainnet : AccountSnapshot;
 	SplMainnet : AccountSnapshot_1;
 	SolLocal : AccountSnapshot_1;
