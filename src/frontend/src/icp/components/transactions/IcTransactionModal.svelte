@@ -3,6 +3,11 @@
 	import { nonNullish } from '@dfinity/utils';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
+	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import SettingsList from '$lib/components/settings/SettingsList.svelte';
+	import SettingsListItem from '$lib/components/settings/SettingsListItem.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -47,46 +52,68 @@
 	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
 
 	<ContentWithToolbar>
-		<Value ref="id" element="div">
-			{#snippet label()}
-				{$i18n.transaction.text.id}
-			{/snippet}
-			{#snippet content()}
-				<output>{id}</output>
-				<Copy value={`${id}`} text={$i18n.transaction.text.id_copied} inline />
-				{#if nonNullish(txExplorerUrl)}
-					<ExternalLink
-						iconSize="18"
-						href={txExplorerUrl}
-						ariaLabel={$i18n.transaction.alt.open_block_explorer}
-						inline
-						color="blue"
-					/>
+		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
+			{#snippet logo()}
+				{#if nonNullish(token)}
+					<div class="relative block flex w-[54px]">
+						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+					</div>
 				{/if}
 			{/snippet}
-		</Value>
+			{#snippet subtitle()}
+				<span class="capitalize">{type}</span>
+			{/snippet}
+			{#snippet title()}
+				{#if nonNullish(token) && nonNullish(value)}
+					<output class:text-success-primary={type === 'receive'}>
+						{formatToken({
+							value,
+							unitName: token.decimals,
+							displayDecimals: token.decimals,
+							showPlusSign: type === 'receive'
+						})}
+						{token.symbol}
+					</output>
+				{:else}
+					&ZeroWidthSpace;
+				{/if}
+			{/snippet}
+		</ModalHero>
 
-		{#if nonNullish(timestamp)}
-			<Value ref="timestamp">
-				{#snippet label()}
-					{$i18n.transaction.text.timestamp}
-				{/snippet}
-				{#snippet content()}
+		<ul>
+			{#if nonNullish(timestamp)}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>{$i18n.transaction.text.timestamp}</span>
 					<output>{formatNanosecondsToDate(timestamp)}</output>
-				{/snippet}
-			</Value>
-		{/if}
+				</li>
+			{/if}
 
-		<Value ref="type" element="div">
-			{#snippet label()}
-				{$i18n.transaction.text.type}
-			{/snippet}
+			{#if nonNullish(token)}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>{$i18n.networks.network}</span>
+					<span><NetworkWithLogo network={token.network} logo="start" /></span>
+				</li>
+			{/if}
 
-			{#snippet content()}
-				<p class="first-letter:capitalize">{type}</p>
-			{/snippet}
-		</Value>
+			<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<span>{$i18n.transaction.text.id}</span>
+				<span>
+					<output>{id}</output>
+					<Copy value={`${id}`} text={$i18n.transaction.text.id_copied} inline />
+					{#if nonNullish(txExplorerUrl)}
+						<ExternalLink
+							iconSize="18"
+							href={txExplorerUrl}
+							ariaLabel={$i18n.transaction.alt.open_block_explorer}
+							inline
+							color="blue"
+						/>
+					{/if}
+				</span>
+			</li>
+		</ul>
 
+		<!--
 		{#if nonNullish(from) || nonNullish(fromLabel)}
 			<Value ref="from" element="div">
 				{#snippet label()}
@@ -150,29 +177,7 @@
 				{/snippet}
 			</Value>
 		{/if}
-
-		{#if nonNullish(value)}
-			<Value ref="amount">
-				{#snippet label()}
-					{$i18n.core.text.amount}
-				{/snippet}
-				{#snippet content()}
-					{#if nonNullish(token)}
-						<output>
-							{formatToken({
-								value,
-								unitName: token.decimals,
-								displayDecimals: token.decimals
-							})}
-							{token.symbol}
-						</output>
-					{:else}
-						&ZeroWidthSpace;
-					{/if}
-				{/snippet}
-			</Value>
-		{/if}
-
+-->
 		<ButtonCloseModal slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>
