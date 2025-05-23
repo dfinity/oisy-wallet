@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import Divider from '$lib/components/common/Divider.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
@@ -11,7 +12,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import Divider from '$lib/components/common/Divider.svelte';
 
 	let {
 		data,
