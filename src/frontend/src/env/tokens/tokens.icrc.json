@@ -98,5 +98,9 @@
 		"fee": {
 			"__bigint__": "10000"
 		}
+	},
+	"XP": {
+		"indexCanisterId": "7hwgv-uaaaa-aaaao-qjv7q-cai",
+		"ledgerCanisterId": "wqihv-qyaaa-aaaak-afjoa-cai"
 	}
 }
