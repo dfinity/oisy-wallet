@@ -36,7 +36,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -56,7 +55,6 @@
 
 	export let destination = '';
 	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
 	// Required for the fee and also to retrieve ck minter information.
@@ -134,8 +132,7 @@
 		}
 
 		const { valid } = assertCkEthMinterInfoLoaded({
-			minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
-			network: targetNetwork
+			minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 		});
 
 		if (!valid) {
@@ -178,7 +175,6 @@
 				maxPriorityFeePerGas,
 				gas,
 				sourceNetwork,
-				targetNetwork,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 			});
@@ -220,7 +216,6 @@
 	{destination}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}
 	{sourceNetwork}
-	{targetNetwork}
 	{nativeEthereumToken}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}

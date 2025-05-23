@@ -35,7 +35,6 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { token } from '$lib/stores/token.store';
-	import type { Network } from '$lib/types/network';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
@@ -53,9 +52,9 @@
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let destination = '';
-	export let targetNetwork: Network | undefined = undefined;
 	export let isTransactionsPage: boolean;
+
+	let destination = '';
 
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
@@ -82,7 +81,6 @@
 	const reset = () => {
 		destination = '';
 		amount = undefined;
-		targetNetwork = undefined;
 
 		sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
@@ -206,7 +204,6 @@
 			<SendWizard
 				{currentStep}
 				{destination}
-				bind:targetNetwork
 				bind:amount
 				bind:sendProgressStep
 				on:icBack={modal.back}

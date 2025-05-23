@@ -50,7 +50,7 @@ export const assertCkEthMinterInfoLoaded = ({
 	network
 }: {
 	minterInfo: OptionCertifiedMinterInfo;
-	network: Network | undefined;
+	network?: Network;
 }): { valid: boolean } => {
 	if (!isNetworkICP(network)) {
 		return { valid: true };
