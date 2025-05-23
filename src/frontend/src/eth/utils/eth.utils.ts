@@ -5,11 +5,11 @@ import {
 import type { OptionToken, TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
-export const isStandardEthereumToken = (token: OptionToken): boolean =>
+export const isDefaultEthereumToken = (token: OptionToken): boolean =>
 	nonNullish(token) && token.category === 'default' && token.standard === 'ethereum';
 
-export const isNotStandardEthereumToken = (token: OptionToken): boolean =>
-	!isStandardEthereumToken(token);
+export const isNotDefaultEthereumToken = (token: OptionToken): boolean =>
+	!isDefaultEthereumToken(token);
 
 export const isSupportedEthTokenId = (tokenId: TokenId): boolean =>
 	SUPPORTED_ETHEREUM_TOKEN_IDS.includes(tokenId);

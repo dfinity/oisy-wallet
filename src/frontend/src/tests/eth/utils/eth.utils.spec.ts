@@ -6,39 +6,39 @@ import { ADDITIONAL_ERC20_TOKENS, ERC20_TWIN_TOKENS } from '$env/tokens/tokens.e
 import { ETHEREUM_TOKEN, SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import {
-	isNotStandardEthereumToken,
+	isDefaultEthereumToken,
+	isNotDefaultEthereumToken,
 	isNotSupportedEthTokenId,
-	isStandardEthereumToken,
 	isSupportedEthToken,
 	isSupportedEthTokenId
 } from '$eth/utils/eth.utils';
 
 describe('eth.utils', () => {
-	describe('isStandardEthereumToken', () => {
+	describe('isDefaultEthereumToken', () => {
 		it.each([...SUPPORTED_ETHEREUM_TOKENS, ...SUPPORTED_EVM_TOKENS])(
 			'should return true for standard Ethereum token $symbol',
 			(token) => {
-				expect(isStandardEthereumToken(token)).toBeTruthy();
+				expect(isDefaultEthereumToken(token)).toBeTruthy();
 			}
 		);
 
 		it.each([...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS, ...ADDITIONAL_ERC20_TOKENS])(
 			'should return false for non-standard Ethereum token $symbol',
 			(token) => {
-				expect(isStandardEthereumToken(token)).toBeFalsy();
+				expect(isDefaultEthereumToken(token)).toBeFalsy();
 			}
 		);
 
 		it('should return false for a custom Ethereum user token', () => {
 			const token = { ...ETHEREUM_TOKEN, category: 'custom' as const };
 
-			expect(isStandardEthereumToken(token)).toBeFalsy();
+			expect(isDefaultEthereumToken(token)).toBeFalsy();
 		});
 
 		it('should return false for a non-standard Ethereum user token', () => {
 			const token = { ...ETHEREUM_TOKEN, standard: 'erc20' as const };
 
-			expect(isStandardEthereumToken(token)).toBeFalsy();
+			expect(isDefaultEthereumToken(token)).toBeFalsy();
 		});
 
 		it('should return true for a default standard Ethereum token', () => {
@@ -48,41 +48,41 @@ describe('eth.utils', () => {
 				category: 'default' as const
 			};
 
-			expect(isStandardEthereumToken(token)).toBeTruthy();
+			expect(isDefaultEthereumToken(token)).toBeTruthy();
 		});
 
 		it('should return false for a nullish token', () => {
-			expect(isStandardEthereumToken(null)).toBeFalsy();
+			expect(isDefaultEthereumToken(null)).toBeFalsy();
 
-			expect(isStandardEthereumToken(undefined)).toBeFalsy();
+			expect(isDefaultEthereumToken(undefined)).toBeFalsy();
 		});
 	});
 
-	describe('isNotStandardEthereumToken', () => {
+	describe('isNotDefaultEthereumToken', () => {
 		it.each([...SUPPORTED_ETHEREUM_TOKENS, ...SUPPORTED_EVM_TOKENS])(
 			'should return false for standard Ethereum token $symbol',
 			(token) => {
-				expect(isNotStandardEthereumToken(token)).toBeFalsy();
+				expect(isNotDefaultEthereumToken(token)).toBeFalsy();
 			}
 		);
 
 		it.each([...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS, ...ADDITIONAL_ERC20_TOKENS])(
 			'should return true for non-standard Ethereum token $symbol',
 			(token) => {
-				expect(isNotStandardEthereumToken(token)).toBeTruthy();
+				expect(isNotDefaultEthereumToken(token)).toBeTruthy();
 			}
 		);
 
 		it('should return true for a custom Ethereum user token', () => {
 			const token = { ...ETHEREUM_TOKEN, category: 'custom' as const };
 
-			expect(isNotStandardEthereumToken(token)).toBeTruthy();
+			expect(isNotDefaultEthereumToken(token)).toBeTruthy();
 		});
 
 		it('should return true for a non-standard Ethereum user token', () => {
 			const token = { ...ETHEREUM_TOKEN, standard: 'erc20' as const };
 
-			expect(isNotStandardEthereumToken(token)).toBeTruthy();
+			expect(isNotDefaultEthereumToken(token)).toBeTruthy();
 		});
 
 		it('should return false for a default standard Ethereum token', () => {
@@ -92,13 +92,13 @@ describe('eth.utils', () => {
 				category: 'default' as const
 			};
 
-			expect(isNotStandardEthereumToken(token)).toBeFalsy();
+			expect(isNotDefaultEthereumToken(token)).toBeFalsy();
 		});
 
 		it('should return true for a nullish token', () => {
-			expect(isNotStandardEthereumToken(null)).toBeTruthy();
+			expect(isNotDefaultEthereumToken(null)).toBeTruthy();
 
-			expect(isNotStandardEthereumToken(undefined)).toBeTruthy();
+			expect(isNotDefaultEthereumToken(undefined)).toBeTruthy();
 		});
 	});
 

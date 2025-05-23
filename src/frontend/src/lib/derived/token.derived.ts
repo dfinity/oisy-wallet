@@ -1,5 +1,5 @@
 import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
-import { isNotStandardEthereumToken } from '$eth/utils/eth.utils';
+import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import {
 	DEFAULT_BASE_TOKEN,
@@ -76,7 +76,7 @@ export const tokenToggleable: Readable<boolean> = derived([token], ([$token]) =>
 		return icTokenIcrcCustomToken($token)
 			? isIcrcTokenToggleEnabled($token)
 			: isTokenEthereumUserToken($token)
-				? isNotStandardEthereumToken($token)
+				? isNotDefaultEthereumToken($token)
 				: false;
 	}
 
