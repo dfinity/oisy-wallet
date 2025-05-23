@@ -148,9 +148,11 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 // TODO: create tests
 export const mapTokenOisySymbol = (token: IcInterface): IcInterface => ({
 	...token,
-	...{
-		oisySymbol: {
-			oisySymbol: CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId]
-		}
-	}
+	...(nonNullish(CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId])
+		? {
+				oisySymbol: {
+					oisySymbol: CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId]
+				}
+			}
+		: {})
 });
