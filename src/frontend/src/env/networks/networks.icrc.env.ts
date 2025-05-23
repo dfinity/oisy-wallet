@@ -504,6 +504,14 @@ const GHOSTNODE_IC_DATA: IcInterface | undefined = nonNullish(
 		}
 	: undefined;
 
+
+const XP_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.XP)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.XP,
+			position: 24
+		}
+	: undefined;
+
 const EXE_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.EXE)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.EXE,
@@ -588,6 +596,7 @@ const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(VCHF_IC_DATA) ? [VCHF_IC_DATA] : []),
 	...(nonNullish(VEUR_IC_DATA) ? [VEUR_IC_DATA] : []),
 	...(nonNullish(GHOSTNODE_IC_DATA) ? [GHOSTNODE_IC_DATA] : []),
+	...(nonNullish(XP_IC_DATA) ? [XP_IC_DATA] : []),
 	...(nonNullish(EXE_IC_DATA) ? [EXE_IC_DATA] : [])
 ];
 
