@@ -1038,6 +1038,10 @@
 			"search_contact": "Search contact",
 			"no_contact_found": "No contacts found"
 		},
+		"alt": {
+			"show_addresses_of_contact": "Show all addresses for contact",
+			"hide_addresses": "Hide addresses of contact"
+		},
 		"show_contact": {
 			"title": "Contact",
 			"add_address": "Add address",

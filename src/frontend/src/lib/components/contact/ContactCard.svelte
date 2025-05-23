@@ -1,0 +1,108 @@
+<script lang="ts">
+	import { Collapsible } from '@dfinity/gix-components';
+	import AddressItemActions from '$lib/components/contact/AddressItemActions.svelte';
+	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
+	import AddressesBadge from '$lib/components/contact/AddressesBadge.svelte';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
+	import IconExpand from '$lib/components/icons/IconExpand.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+
+	interface Props {
+		contact: ContactUi;
+		onClick: () => void;
+		onInfo: (address: ContactAddressUi) => void;
+		initiallyExpanded?: boolean;
+	}
+
+	let { contact, onInfo, onClick, initiallyExpanded = false }: Props = $props();
+
+	let toggleContent = $state<() => void | undefined>();
+
+	let singleAddress = $derived(contact.addresses.length === 1);
+	let multipleAddresses = $derived(contact.addresses.length > 1);
+
+	let expanded = $state(initiallyExpanded);
+</script>
+
+{#snippet header()}
+	<LogoButton on:click={onClick} hover={false}>
+		<span class="flex" slot="logo">
+			<div class="relative">
+				<Avatar name={contact.name} variant="sm" styleClass="md:text-[19.2px]"></Avatar>
+				<AddressesBadge addresses={contact.addresses} />
+			</div>
+		</span>
+
+		<span slot="title">
+			{contact.name}
+		</span>
+
+		<span slot="description" class="flex items-center">
+			{#each contact.addresses as address, index (index)}
+				{#if index !== 0}
+					&nbsp;<span class="text-[0.5rem]">•</span>&nbsp;
+				{/if}
+				<span class:font-bold={singleAddress} class:text-primary={singleAddress}
+					>{$i18n.address.types[address.addressType]}</span
+				>
+			{/each}
+			{#if singleAddress}
+				&nbsp;{shortenWithMiddleEllipsis({ text: contact.addresses[0].address })}
+			{/if}
+		</span>
+
+		<span slot="action">
+			{#if singleAddress}
+				<AddressItemActions
+					styleClass="ml-auto"
+					address={contact.addresses[0]}
+					onInfo={() => onInfo(contact.addresses[0])}
+				/>
+			{:else if multipleAddresses}
+				<ButtonIcon
+					onclick={() => {
+						toggleContent?.();
+						expanded = !expanded;
+					}}
+					ariaLabel={expanded
+						? $i18n.address_book.alt.hide_addresses
+						: $i18n.address_book.alt.show_addresses_of_contact}
+				>
+					{#snippet icon()}
+						<IconExpand {expanded} />
+					{/snippet}
+				</ButtonIcon>
+			{/if}
+		</span>
+	</LogoButton>
+{/snippet}
+
+<div
+	class="flex w-full flex-col rounded-xl bg-primary p-2 hover:bg-brand-subtle-20 dark:hover:bg-brand-tertiary"
+>
+	{#if multipleAddresses}
+		<Collapsible
+			iconSize="medium"
+			{expanded}
+			{initiallyExpanded}
+			externalToggle={true}
+			expandButton={false}
+			bind:toggleContent
+		>
+			<div slot="header" class="flex-grow">
+				{@render header()}
+			</div>
+			<div class="flex flex-col gap-1.5 md:pl-20">
+				{#each contact.addresses as address, index (index)}
+					<AddressListItem {address} onInfo={() => onInfo(address)}></AddressListItem>
+				{/each}
+			</div>
+		</Collapsible>
+	{:else}
+		{@render header()}
+	{/if}
+</div>
