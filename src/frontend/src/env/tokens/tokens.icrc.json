@@ -98,5 +98,8 @@
 		"fee": {
 			"__bigint__": "10000"
 		}
+	},
+	"EXE": {
+		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai"
 	}
 }
