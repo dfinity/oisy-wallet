@@ -44,7 +44,7 @@
 			{/each}
 		</div>
 	{:else}
-		<div class="my-5 flex flex-col items-center gap-5">
+		<div class="mb-5 flex flex-col items-center gap-5">
 			<div class="text-secondary-inverted">
 				<IconEmptyAddresses />
 			</div>
