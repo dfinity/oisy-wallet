@@ -9,7 +9,9 @@ This document lists a couple of useful information for development and deploymen
 - [Faucets](#faucets)
 - [Testing](#testing)
 - [Integrate ckERC20 Tokens](#integrate-ckerc20-tokens)
+- [Bitcoin](#bitcoin)
 - [Routes Styles](#routes-styles)
+- [Add EVM Networks](#add-evm-networks)
 
 ## Deployment
 
@@ -286,3 +288,272 @@ Furthermore, given that parsing happens at build time, the developer might want 
 	});
 </script>
 ```
+
+## Add EVM Networks
+
+Below a summary of how to add a new EVM network (side-chains or layer-2).
+
+### Pre-requisites
+
+- Chain ID is required for mainnet and testnet(s), if any.
+- The third-party providers must support the new network: [Alchemy](https://www.alchemy.com/), [Infura](https://www.infura.io/), and [Etherscan](https://docs.etherscan.io/etherscan-v2).
+- Verify that the network is already integrated by the [`ethers` library](https://github.com/ethers-io/ethers.js) in the previous providers, or open a request for it.
+
+### Create network object(s)
+
+Under the `src/frontend/src/env/networks/networks-evm` folder, create a new file named `networks.<network>.env.ts`.
+Copy the content of `networks.<network>.env.ts` from another EVM network.
+
+For example, this is the mainnet object of `networks.bsc.env.ts`:
+
+```typescript
+export const BSC_MAINNET_NETWORK_SYMBOL = 'BSC';
+
+export const BSC_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(BSC_MAINNET_NETWORK_SYMBOL);
+
+export const BSC_MAINNET_NETWORK: EthereumNetwork = {
+	id: BSC_MAINNET_NETWORK_ID,
+	env: 'mainnet',
+	name: 'BNB Smart Chain',
+	chainId: 56n,
+	iconLight: bscMainnetIconLight,
+	iconDark: bscMainnetIconDark,
+	explorerUrl: BSC_EXPLORER_URL,
+	providers: {
+		infura: 'bnb',
+		alchemy: Network.BNB_MAINNET,
+		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2'
+	},
+	exchange: { coingeckoId: 'binance-smart-chain' },
+	buy: { onramperId: 'bsc' }
+};
+```
+
+Then, update the content accordingly, renaming the objects appropriately.
+
+- **Symbol**
+- **Name**
+- **Chain ID**
+- **Icons** for all themes &rarr; They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
+- **Explorer URL** &rarr; To have these values, the `src/frontend/src/env/explorers.env.ts` file should be updated.
+- **Providers** &rarr; The correct values for all the providers should be set here.
+- **Exchange** &rarr; Remember to update type the appropriate types (for example, if a Coingecko ID is provided, type `CoingeckoPlatformId` should be updated).
+- **Buy** &rarr; Remember to update type the appropriate types (for example, if an Onramper ID is provided, type `OnramperNetworkId` should be updated).
+
+If there are testnets, create a similar object for each one.
+
+Finally, make sure that the objects `SUPPORTED_<network>_NETWORKS` and `SUPPORTED_<network>_NETWORK_IDS` exist and are accordingly updated, at the end of the file.
+
+### Create native token object(s)
+
+Under the `src/frontend/src/env/tokens/tokens-evm` folder, create a new folder named `tokens-<network>`.
+Inside it, create a new file named `tokens.<token>.env.ts` and copy the content of `tokens.<token>.env.ts` from another EVM network.
+
+For example, this is the mainnet object of `tokens.pol.env.ts`:
+
+```typescript
+const POL_DECIMALS = 18;
+
+const POL_MAINNET_SYMBOL = 'POL';
+
+export const POL_MAINNET_TOKEN_ID: TokenId = parseTokenId(POL_MAINNET_SYMBOL);
+
+export const POL_MAINNET_TOKEN: RequiredToken = {
+	id: POL_MAINNET_TOKEN_ID,
+	network: POLYGON_MAINNET_NETWORK,
+	standard: 'ethereum',
+	category: 'default',
+	name: 'POL (prev. MATIC)',
+	symbol: POL_MAINNET_SYMBOL,
+	decimals: POL_DECIMALS,
+	icon: pol,
+	buy: {
+		onramperId: 'pol_polygon'
+	}
+};
+```
+
+Then, update the content accordingly:
+
+- **Decimals**
+- **Symbol**
+- **Network** &rarr; This is the network object(s) created in the previous step.
+- **Name**
+- **Icons** &rarr; They should be in SVG format and placed in the `src/frontend/src/evm/<network>/assets` folder.
+- **Buy**
+
+If there are testnet tokens, create a similar object for each one.
+
+Finally, make sure that the object `SUPPORTED_<network>_TOKENS` exists and is accordingly updated, at the end of the file.
+
+### Add network variant(s) to the Backend
+
+In file `src/shared/src/types/network.ts`, add the network(s) variant to the `NetworkSettingsFor` enum, similar to the existing ones.
+
+Furthermore, in the same file, add the chain ID(s) to the `EthereumNetworkId` enum, similar to the existing ones.
+
+This process will generate new bindings. Once generated, the mapping of user networks must be updated manually:
+
+1. Derived store `userNetworks` needs to map the new variant(s) to the respective network ID(s), similar to the existing ones.
+2. Sub-function `networkIdToKey` of util `mapUserNetworks` needs to map the new network ID(s) to the respective network variant(s), similar to the existing ones.
+
+### Include network(s) and token(s) in EVM List
+
+- The list `SUPPORTED_<network>_NETWORKS` created in the first step needs to be included in the list of EVM networks that is `SUPPORTED_EVM_NETWORKS`, in file `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`.
+- The list `SUPPORTED_<network>_TOKENS` created in the second step needs to be included in the list of EVM tokens that is `SUPPORTED_EVM_TOKENS`, in file `src/frontend/src/env/tokens/tokens-evm/tokens.evm.env.ts`.
+
+### Create derived store for enabled network(s)
+
+Create file `src/frontend/src/evm/<network>/derived/networks.derived.ts`, by copying an existing one from the other EVM networks.
+
+Then, update the content accordingly. For example:
+
+```typescript
+export const enabledPolygonNetworks: Readable<EthereumNetwork[]> = derived(
+	[testnetsEnabled, userNetworks],
+	([$testnetsEnabled, $userNetworks]) =>
+		defineEnabledNetworks({
+			$testnetsEnabled,
+			$userNetworks,
+			mainnetFlag: POLYGON_MAINNET_ENABLED,
+			mainnetNetworks: [POLYGON_MAINNET_NETWORK],
+			testnetNetworks: [POLYGON_AMOY_NETWORK]
+		})
+);
+```
+
+Finally, include it in derived store `enabledEvmNetworks`, in file `src/frontend/src/evm/derived/networks.derived.ts`:
+
+```typescript
+export const enabledEvmNetworks: Readable<EthereumNetwork[]> = derived(
+	[enabledBaseNetworks, enabledBscNetworks, enabledPolygonNetworks],
+	([$enabledBaseNetworks, $enabledBscNetworks, $enabledPolygonNetworks]) => [
+		...$enabledBaseNetworks,
+		...$enabledBscNetworks,
+		...$enabledPolygonNetworks
+	]
+);
+```
+
+### Create derived store for enabled token(s)
+
+Create file `src/frontend/src/evm/<network>/derived/tokens.derived.ts`, by copying an existing one from the other EVM networks.
+
+Then, update the content accordingly. For example:
+
+```typescript
+export const enabledPolygonTokens: Readable<RequiredToken[]> = derived(
+	[testnetsEnabled, userNetworks],
+	([$testnetsEnabled, $userNetworks]) =>
+		defineEnabledTokens({
+			$testnetsEnabled,
+			$userNetworks,
+			mainnetFlag: POLYGON_MAINNET_ENABLED,
+			mainnetTokens: [POL_MAINNET_TOKEN],
+			testnetTokens: [POL_AMOY_TOKEN]
+		})
+);
+```
+
+Finally, include it in derived store `enabledEvmTokens`, in file `src/frontend/src/evm/derived/tokens.derived.ts`:
+
+```typescript
+export const enabledEvmTokens: Readable<RequiredToken[]> = derived(
+	[enabledBaseTokens, enabledBscTokens, enabledPolygonTokens],
+	([$enabledBaseTokens, $enabledBscTokens, $enabledPolygonTokens]) => [
+		...$enabledBaseTokens,
+		...$enabledBscTokens,
+		...$enabledPolygonTokens
+	]
+);
+```
+
+### Define network default token
+
+Each network should have a default token as fallback. To define one for EVM networks the following is required:
+
+- Util function to check if a Network ID is a valid ID for the new network, in file `src/frontend/src/lib/utils/network.utils.ts`. For example:
+
+```typescript
+export const isNetworkIdBase: IsNetworkIdUtil = (id) =>
+	nonNullish(id) && SUPPORTED_BASE_NETWORK_IDS.includes(id);
+```
+
+- Derived store to verify that the current network is the new network, in file `src/frontend/src/lib/derived/network.derived.ts`. For example:
+
+```typescript
+export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdBase($networkId)
+);
+```
+
+- The default token definition for the new network, in file `src/frontend/src/lib/constants/tokens.constants.ts`. For example:
+
+```typescript
+export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
+```
+
+### Add ERC20 tokens to the list of supported tokens
+
+If the new network supports ERC-20 tokens, they can be included among the supported tokens.
+
+> [!TIP]
+> Tokens standard that are an extension of the ERC-20 standard can be included too. For example BEP-20 of BNB Smart Chain can be treated the same as ERC-20 by OISY.
+
+To do this, the following steps are required:
+
+- Create a new folder in `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/` named `tokens-erc20`.
+- FOr each new token, create a new file named `tokens.<token>.env.ts` and copy the content of `tokens.<token>.env.ts` from another EVM network.
+- Adapt the content accordingly, renaming the objects appropriately, modifying the token name, symbol, decimals, network and icon.
+- If the token has similar bridged tokens on the other EVM networks or on IC, add the `groupData` property, similar to existing ones (for example USDC, USDT, etc.).
+
+Once all the new ERC20 tokens are created, they need to be added to the list of supported tokens:
+
+- Create a new list <network>\_ERC20_TOKENS in `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/tokens.erc20.env.ts`, similar to the existing ones for other EVM networks.
+- Add the list to the `EVM_ERC20_TOKENS` list in `src/frontend/src/env/tokens/tokens-evm/tokens.erc20.env.ts`.
+
+### Adapt exchange rate workers
+
+In the first step, the exchange IDs and required fields should have been already be set. Now, the worker needs to be updated to include the new network.
+
+- In service `syncExchange` of the exchange worker in file `src/frontend/src/lib/workers/exchange.worker.ts`, add the new network in the filter for the ERC-20 price parameters. As example, when this document was written, the filter was:
+
+```typescript
+if (
+	coingeckoId !== 'ethereum' &&
+	coingeckoId !== 'base' &&
+	coingeckoId !== 'binance-smart-chain' &&
+	coingeckoId !== 'polygon-pos'
+) {
+	return acc;
+}
+```
+
+- Set the price for the native token(s) that are not a fork of ETH token:
+  - Create a price-fetching function similar to the existing ones in file `src/frontend/src/lib/services/exchange.services.ts`. For example:
+
+```typescript
+export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'binancecoin',
+		vs_currencies: 'usd'
+	});
+```
+
+- Use the function created above in the worker to fetch the price of the new token(s) in service `syncExchange` of the exchange worker in file `src/frontend/src/lib/workers/exchange.worker.ts`. Adapt the types if necessary.
+- Map the new token ID(s) to the correct price in the `exchanges` derived store in file `src/frontend/src/lib/derived/exchange.derived.ts`, similar to the existing ones.
+- Set the price for the native token(s) that are a fork of ETH token:
+  - Just map the new token ID(s) to the ETH price in the `exchanges` derived store in file `src/frontend/src/lib/derived/exchange.derived.ts`, similar to the existing ones.
+
+### Add providers' URLs to Content Security Policy (CSP)
+
+The script that builds the CSP is `scripts/build.csp.mjs`.
+It must be updated to include the new network providers' URLs (and any other required URL), similar to the existing ones.
+
+### Optional
+
+- Define a custom Hero color palette for the new network in `src/frontend/src/lib/components/hero/HeroContent.svelte`, similar to the existing ones.
+- If provided, please add any additional information that might be useful for the new network. For example, a specific faucet to the list in this same document.
+
+> [!NOTE]
+> Remember to adapt all the existing tests and create new ones where needed, including E2E tests.
