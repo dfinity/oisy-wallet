@@ -14,6 +14,7 @@ describe('AddressBookQrCode', () => {
 
 		// Check that the outer QR container exists
 		const qrContainer = container.querySelector('div[class*="aspect-square"]');
+
 		expect(qrContainer).toBeInTheDocument();
 	});
 
@@ -21,6 +22,7 @@ describe('AddressBookQrCode', () => {
 		const { container } = render(AddressBookQrCode, { props: { address: mockAddress } });
 
 		const icon = container.querySelector('svg'); // IconAddressType renders an SVG
+
 		expect(icon).toBeInTheDocument();
 	});
 });
