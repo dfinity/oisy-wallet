@@ -2,8 +2,7 @@
 	import { Collapsible } from '@dfinity/gix-components';
 	import AddressItemActions from '$lib/components/contact/AddressItemActions.svelte';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
-	import AddressesBadge from '$lib/components/contact/AddressesBadge.svelte';
-	import Avatar from '$lib/components/contact/Avatar.svelte';
+	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -36,12 +35,7 @@
 {#snippet header()}
 	<LogoButton {onClick} hover={false} condensed testId={CONTACT_CARD_BUTTON}>
 		{#snippet logo()}
-			<span class="flex">
-				<div class="relative">
-					<Avatar name={contact.name} variant="sm" styleClass="md:text-[19.2px]"></Avatar>
-					<AddressesBadge addresses={contact.addresses} />
-				</div>
-			</span>
+			<AvatarWithBadge {contact} badge={{ type: 'addressTypeOrCount' }} variant="sm" />
 		{/snippet}
 
 		{#snippet title()}
