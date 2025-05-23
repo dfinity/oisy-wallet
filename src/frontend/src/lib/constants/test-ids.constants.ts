@@ -197,6 +197,8 @@ export const CONTACT_HEADER_EDITING_EDIT_BUTTON = 'contact-header-editing-edit-b
 
 export const ADDRESS_LIST_ITEM_COPY_BUTTON = 'address-list-item-copy-button';
 export const ADDRESS_LIST_ITEM_INFO_BUTTON = 'address-list-item-info-button';
+export const ADDRESS_LIST_ITEM_EDIT_BUTTON = 'address-list-item-edit-button';
+export const ADDRESS_LIST_ITEM_DELETE_BUTTON = 'address-list-item-delete-button';
 
 export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
 
