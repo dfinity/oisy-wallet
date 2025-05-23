@@ -23,6 +23,7 @@
 	let toggleContent = $state<() => void | undefined>();
 
 	let singleAddress = $derived(contact.addresses.length === 1);
+	let multipleAddresses = $derived(contact.addresses.length > 1);
 
 	let expanded = $state(initiallyExpanded);
 </script>
@@ -61,15 +62,15 @@
 					address={contact.addresses[0]}
 					onInfo={() => onInfo(contact.addresses[0])}
 				/>
-			{:else if contact.addresses.length > 1}
+			{:else if multipleAddresses}
 				<ButtonIcon
 					onclick={() => {
 						toggleContent?.();
 						expanded = !expanded;
 					}}
 					ariaLabel={expanded
-						? $i18n.address_book.text.hide_addresses
-						: $i18n.address_book.text.show_addresses}
+						? $i18n.address_book.alt.hide_addresses
+						: $i18n.address_book.alt.show_addresses_of_contact}
 				>
 					{#snippet icon()}
 						<IconExpand {expanded} />
@@ -83,7 +84,7 @@
 <div
 	class="flex w-full flex-col rounded-xl bg-primary p-2 hover:bg-brand-subtle-20 dark:hover:bg-brand-tertiary"
 >
-	{#if contact.addresses.length > 1}
+	{#if multipleAddresses}
 		<Collapsible
 			iconSize="medium"
 			{expanded}

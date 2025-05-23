@@ -8,16 +8,9 @@ import {
 } from '$tests/mocks/contacts.mock';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
 import { vi } from 'vitest';
 
 describe('ContactCard', () => {
-	// Mock the i18n store
-	const mockI18n = readable(en);
-
-	// Setup the context with the mocked i18n store
-	const mockContext = new Map([['i18n', mockI18n]]);
-
 	// Create mock contacts using getMockContacts
 	const [singleAddressContact] = getMockContactsUi({
 		n: 1,
@@ -45,8 +38,7 @@ describe('ContactCard', () => {
 				contact: singleAddressContact,
 				onClick,
 				onInfo
-			},
-			context: mockContext
+			}
 		});
 
 		// Check that the contact name is displayed
@@ -70,8 +62,7 @@ describe('ContactCard', () => {
 				contact: singleAddressContact,
 				onClick,
 				onInfo
-			},
-			context: mockContext
+			}
 		});
 
 		// Find the LogoButton
@@ -95,8 +86,7 @@ describe('ContactCard', () => {
 				contact: singleAddressContact,
 				onClick,
 				onInfo
-			},
-			context: mockContext
+			}
 		});
 
 		// Find the info button (it's inside AddressItemActions)
@@ -120,8 +110,7 @@ describe('ContactCard', () => {
 				contact: multipleAddressesContact,
 				onClick,
 				onInfo
-			},
-			context: mockContext
+			}
 		});
 
 		// Check that the contact name is displayed
@@ -132,7 +121,9 @@ describe('ContactCard', () => {
 		expect(getAllByText(en.address.types.Btc).length).toBeGreaterThan(0);
 
 		// Check that the expand button is displayed
-		const expandButton = container.querySelector('[aria-label="Show addresses"]');
+		const expandButton = container.querySelector(
+			`[aria-label="${en.address_book.alt.show_addresses_of_contact}"]`
+		);
 
 		expect(expandButton).not.toBeNull();
 
@@ -149,12 +140,13 @@ describe('ContactCard', () => {
 				contact: multipleAddressesContact,
 				onClick,
 				onInfo
-			},
-			context: mockContext
+			}
 		});
 
 		// Find the expand button
-		const expandButton = container.querySelector('[aria-label="Show addresses"]');
+		const expandButton = container.querySelector(
+			`[aria-label="${en.address_book.alt.show_addresses_of_contact}"]`
+		);
 
 		expect(expandButton).not.toBeNull();
 
@@ -168,10 +160,14 @@ describe('ContactCard', () => {
 		expect(queryByTestId('collapsible-content')?.style.maxHeight).not.toBe('0px');
 
 		// The button should now be for hiding addresses
-		expect(container.querySelector('[aria-label="Hide addresses"]')).not.toBeNull();
+		expect(
+			container.querySelector(`[aria-label="${en.address_book.alt.hide_addresses}"]`)
+		).not.toBeNull();
 
 		// Click the collapse button
-		await fireEvent.click(container.querySelector('[aria-label="Hide addresses"]') as HTMLElement);
+		await fireEvent.click(
+			container.querySelector(`[aria-label="${en.address_book.alt.hide_addresses}"]`) as HTMLElement
+		);
 
 		// The collapsible should be collapsed again
 		expect(queryByTestId('collapsible-content')?.style.maxHeight).toBe('0px');
@@ -187,8 +183,7 @@ describe('ContactCard', () => {
 				onClick,
 				onInfo,
 				initiallyExpanded: true // Start expanded
-			},
-			context: mockContext
+			}
 		});
 
 		// Collapsible should be expanded
@@ -216,8 +211,7 @@ describe('ContactCard', () => {
 				onClick,
 				onInfo,
 				initiallyExpanded: true
-			},
-			context: mockContext
+			}
 		});
 
 		// Collapsible should be expanded
