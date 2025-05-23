@@ -1,12 +1,16 @@
 import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 import {
 	ADDRESS_BOOK_ADD_CONTACT_BUTTON,
-	ADDRESS_BOOK_SEARCH_CONTACT_INPUT
+	ADDRESS_BOOK_SEARCH_CONTACT_INPUT,
+	ADDRESS_LIST_ITEM_INFO_BUTTON,
+	CONTACT_CARD,
+	CONTACT_CARD_BUTTON
 } from '$lib/constants/test-ids.constants';
 import type { ContactUi } from '$lib/types/contact';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
+import { vi } from 'vitest';
 
 describe('AddressBookStep', () => {
 	const baseContacts: ContactUi[] = [
@@ -31,6 +35,7 @@ describe('AddressBookStep', () => {
 	];
 	const mockAddContact = vi.fn();
 	const mockShowContact = vi.fn();
+	const mockShowAddress = vi.fn();
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -41,7 +46,8 @@ describe('AddressBookStep', () => {
 			props: {
 				contacts: [],
 				onAddContact: mockAddContact,
-				onShowContact: mockShowContact
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
 			}
 		});
 
@@ -60,7 +66,8 @@ describe('AddressBookStep', () => {
 			props: {
 				contacts: [],
 				onAddContact: mockAddContact,
-				onShowContact: mockShowContact
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
 			}
 		});
 
@@ -71,28 +78,27 @@ describe('AddressBookStep', () => {
 	});
 
 	it('should render contacts list when there are contacts', () => {
-		const { getByText, getAllByText } = render(AddressBookStep, {
+		const { getByText, getAllByTestId } = render(AddressBookStep, {
 			props: {
 				contacts: baseContacts,
 				onAddContact: mockAddContact,
-				onShowContact: mockShowContact
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
 			}
 		});
 
 		// Should show the add contact button
 		expect(getByText(en.address_book.text.add_contact)).toBeInTheDocument();
 
-		// Should display each contact
+		// Should display a ContactCard for each contact
+		const contactCards = getAllByTestId(CONTACT_CARD);
+
+		expect(contactCards).toHaveLength(baseContacts.length);
+
+		// Should display each contact name
 		baseContacts.forEach((contact) => {
-			expect(
-				getByText(`CONTACT: ${contact.name} #addresses ${contact.addresses.length}`)
-			).toBeInTheDocument();
+			expect(getByText(contact.name)).toBeInTheDocument();
 		});
-
-		// Should have a Show button for each contact
-		const showButtons = getAllByText('Show');
-
-		expect(showButtons).toHaveLength(baseContacts.length);
 	});
 
 	it('should call addContact when add contact button is clicked in contacts list', async () => {
@@ -100,7 +106,8 @@ describe('AddressBookStep', () => {
 			props: {
 				contacts: baseContacts,
 				onAddContact: mockAddContact,
-				onShowContact: mockShowContact
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
 			}
 		});
 
@@ -110,34 +117,64 @@ describe('AddressBookStep', () => {
 		expect(mockAddContact).toHaveBeenCalledTimes(1);
 	});
 
-	it('should call showContact with the correct contact when Show button is clicked', async () => {
-		const { getAllByText } = render(AddressBookStep, {
+	it('should call showContact with the correct contact when ContactCard is clicked', async () => {
+		const { getAllByTestId } = render(AddressBookStep, {
 			props: {
 				contacts: baseContacts,
 				onAddContact: mockAddContact,
-				onShowContact: mockShowContact
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
 			}
 		});
 
-		const showButtons = getAllByText('Show');
+		const contactButtons = getAllByTestId(CONTACT_CARD_BUTTON);
 
-		// Click the first contact's Show button
-		await fireEvent.click(showButtons[0]);
+		// Click the first contact's card
+		await fireEvent.click(contactButtons[0]);
 
 		expect(mockShowContact).toHaveBeenCalledWith(baseContacts[0]);
 
-		// Click the second contact's Show button
-		await fireEvent.click(showButtons[1]);
+		// Click the second contact's card
+		await fireEvent.click(contactButtons[1]);
 
 		expect(mockShowContact).toHaveBeenCalledWith(baseContacts[1]);
 	});
 
+	it('should call onShowAddress with the correct contact and address index', async () => {
+		// Use only the first contact which has an address
+		const [contactWithAddress] = baseContacts;
+
+		const { getAllByTestId } = render(AddressBookStep, {
+			props: {
+				contacts: [contactWithAddress],
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
+			}
+		});
+
+		// Find the info button for the address
+		const infoButtons = getAllByTestId(ADDRESS_LIST_ITEM_INFO_BUTTON);
+
+		expect(infoButtons).toHaveLength(1);
+
+		// Click the info button
+		await fireEvent.click(infoButtons[0]);
+
+		// Check that onShowAddress was called with the correct parameters
+		expect(mockShowAddress).toHaveBeenCalledWith({
+			contact: contactWithAddress,
+			addressIndex: 0
+		});
+	});
+
 	it('should filter contacts when typing in the search input', async () => {
-		const { getByTestId, queryByText } = render(AddressBookStep, {
+		const { getByTestId, queryByText, queryAllByTestId } = render(AddressBookStep, {
 			props: {
 				contacts: baseContacts,
 				onAddContact: mockAddContact,
-				onShowContact: mockShowContact
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
 			}
 		});
 
@@ -147,74 +184,98 @@ describe('AddressBookStep', () => {
 
 		await fireEvent.input(input, { target: { value: 'Contact 1' } });
 
-		expect(queryByText('CONTACT: Test Contact 1 #addresses 1')).toBeInTheDocument();
-		expect(queryByText('CONTACT: Test Contact 2 #addresses 0')).not.toBeInTheDocument();
+		// Should show only the first contact
+		const filteredCards = queryAllByTestId(CONTACT_CARD);
+
+		expect(filteredCards).toHaveLength(1);
+		expect(queryByText('Test Contact 1')).toBeInTheDocument();
+		expect(queryByText('Test Contact 2')).not.toBeInTheDocument();
 
 		await fireEvent.input(input, { target: { value: '' } });
 
-		expect(queryByText('CONTACT: Test Contact 1 #addresses 1')).toBeInTheDocument();
-		expect(queryByText('CONTACT: Test Contact 2 #addresses 0')).toBeInTheDocument();
+		// Should show all contacts again
+		expect(queryAllByTestId(CONTACT_CARD)).toHaveLength(2);
+		expect(queryByText('Test Contact 1')).toBeInTheDocument();
+		expect(queryByText('Test Contact 2')).toBeInTheDocument();
 	});
 
 	it('should support partial multi-word matching', async () => {
 		const contacts = [
 			...baseContacts,
-			{ id: 3n, name: 'Jane Smith', addresses: [], update_timestamp_ns: BigInt(Date.now()) }
+			{
+				id: 3n,
+				name: 'Jane Smith',
+				addresses: [],
+				updateTimestampNs: BigInt(Date.now())
+			}
 		];
 
 		const { getByTestId, queryByText } = render(AddressBookStep, {
 			props: {
 				contacts,
 				onAddContact: mockAddContact,
-				onShowContact: mockShowContact
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
 			}
 		});
 
 		const input = getByTestId(ADDRESS_BOOK_SEARCH_CONTACT_INPUT);
 		await fireEvent.input(input, { target: { value: 'jan smi' } });
 
-		expect(queryByText('CONTACT: Jane Smith #addresses 0')).toBeInTheDocument();
-		expect(queryByText('CONTACT: Test Contact 1 #addresses 1')).not.toBeInTheDocument();
+		expect(queryByText('Jane Smith')).toBeInTheDocument();
+		expect(queryByText('Test Contact 1')).not.toBeInTheDocument();
 	});
 
 	it('should support case-insensitive and trimmed matching', async () => {
 		const contacts = [
 			...baseContacts,
-			{ id: 4n, name: 'Case Sensitive', addresses: [], update_timestamp_ns: BigInt(Date.now()) }
+			{
+				id: 4n,
+				name: 'Case Sensitive',
+				addresses: [],
+				updateTimestampNs: BigInt(Date.now())
+			}
 		];
 
 		const { getByTestId, queryByText } = render(AddressBookStep, {
 			props: {
 				contacts,
 				onAddContact: mockAddContact,
-				onShowContact: mockShowContact
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
 			}
 		});
 
 		const input = getByTestId(ADDRESS_BOOK_SEARCH_CONTACT_INPUT);
 		await fireEvent.input(input, { target: { value: '   case   senSITive  ' } });
 
-		expect(queryByText('CONTACT: Case Sensitive #addresses 0')).toBeInTheDocument();
+		expect(queryByText('Case Sensitive')).toBeInTheDocument();
 	});
 
 	it('should match contact by emoji', async () => {
 		const contacts = [
 			...baseContacts,
-			{ id: 5n, name: 'Test 😀 Contact', addresses: [], update_timestamp_ns: BigInt(Date.now()) }
+			{
+				id: 5n,
+				name: 'Test 😀 Contact',
+				addresses: [],
+				updateTimestampNs: BigInt(Date.now())
+			}
 		];
 
 		const { getByTestId, queryByText } = render(AddressBookStep, {
 			props: {
 				contacts,
 				onAddContact: mockAddContact,
-				onShowContact: mockShowContact
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
 			}
 		});
 
 		const input = getByTestId(ADDRESS_BOOK_SEARCH_CONTACT_INPUT);
 		await fireEvent.input(input, { target: { value: '😀' } });
 
-		expect(queryByText('CONTACT: Test 😀 Contact #addresses 0')).toBeInTheDocument();
+		expect(queryByText('Test 😀 Contact')).toBeInTheDocument();
 	});
 
 	it('should display no results message for unmatched input', async () => {
@@ -222,7 +283,8 @@ describe('AddressBookStep', () => {
 			props: {
 				contacts: baseContacts,
 				onAddContact: mockAddContact,
-				onShowContact: mockShowContact
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
 			}
 		});
 

@@ -5,6 +5,8 @@ import {
 	ADDRESS_BOOK_CONTACT_NAME_INPUT,
 	ADDRESS_BOOK_MODAL,
 	ADDRESS_BOOK_SAVE_BUTTON,
+	CONTACT_CARD,
+	CONTACT_CARD_BUTTON,
 	MODAL_TITLE
 } from '$lib/constants/test-ids.constants';
 import en from '$tests/mocks/i18n.mock';
@@ -106,5 +108,40 @@ describe('AddressBookModal', () => {
 		// Both contacts should be displayed
 		expect(getByText('Contact 1', { exact: false })).toBeInTheDocument();
 		expect(getByText('Contact 2', { exact: false })).toBeInTheDocument();
+	});
+
+	it('should display contacts using ContactCard components', async () => {
+		const { getByTestId, getAllByTestId } = render(AddressBookModal);
+
+		// Add first contact
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
+		await fireEvent.input(getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT), {
+			target: { value: 'Contact 1' }
+		});
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		// Should display the contact using ContactCard
+		const contactCards = getAllByTestId(CONTACT_CARD);
+
+		expect(contactCards).toHaveLength(1);
+		expect(contactCards[0]).toBeInTheDocument();
+	});
+
+	it('should navigate to show contact step when ContactCard is clicked', async () => {
+		const { getByTestId, getAllByTestId } = render(AddressBookModal);
+
+		// Add a contact
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
+		await fireEvent.input(getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT), {
+			target: { value: 'Test Contact' }
+		});
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		// Click on the contact card
+		const contactButtons = getAllByTestId(CONTACT_CARD_BUTTON);
+		await fireEvent.click(contactButtons[0]);
+
+		// Should navigate to show contact step
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
 	});
 });

@@ -210,3 +210,8 @@ export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
 
 export const SEND_FEE_INFO = 'send-fee-info';
+
+// Contact Card test IDs
+export const CONTACT_CARD = 'contact-card';
+export const CONTACT_CARD_BUTTON = 'contact-card-button';
+export const CONTACT_CARD_EXPAND_BUTTON = 'contact-card-expand-button';

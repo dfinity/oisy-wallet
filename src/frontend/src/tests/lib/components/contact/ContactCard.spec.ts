@@ -97,8 +97,8 @@ describe('ContactCard', () => {
 		// Click the info button
 		await fireEvent.click(infoButton as HTMLElement);
 
-		// Check that onInfo was called with the correct address
-		expect(onInfo).toHaveBeenCalledWith(mockContactIcrcAddressUi);
+		// Check that onInfo was called with the correct address index
+		expect(onInfo).toHaveBeenCalledWith(0);
 	});
 
 	it('should render contact with multiple addresses in collapsed state by default', () => {
@@ -197,8 +197,8 @@ describe('ContactCard', () => {
 		// Click the second info button (BTC address)
 		await fireEvent.click(infoButtons[1] as HTMLElement);
 
-		// Check that onInfo was called with the BTC address
-		expect(onInfo).toHaveBeenCalledWith(mockContactBtcAddressUi);
+		// Check that onInfo was called with the BTC address index
+		expect(onInfo).toHaveBeenCalledWith(1);
 	});
 
 	it('should render with expanded prop set to true', () => {
