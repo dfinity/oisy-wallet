@@ -12,8 +12,8 @@
 	interface Props {
 		address?: Partial<ContactAddressUi>;
 		contact: ContactUi;
-		onSaveAddress: (address: ContactAddressUi) => void;
-		onAddAddress: (address: ContactAddressUi) => void;
+		onSaveAddress: (address: ContactAddressUi) => Promise<void>;
+		onAddAddress: (address: ContactAddressUi) => Proimse<void>;
 		onClose: () => void;
 		isNewAddress: boolean;
 	}
