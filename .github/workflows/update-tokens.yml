@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '30 3 * * MON'
     - cron: '30 3 * * THU'
+  pull_request:
+    paths:
+      - 'src/frontend/src/env/tokens/**/*.json'
   workflow_dispatch:
 
 permissions: {}
