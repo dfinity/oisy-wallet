@@ -18,11 +18,11 @@
 
 	let color = $derived(selectColorForName({ name, colors: CONTACT_TEXT_COLORS }));
 
-	const headerStyles = $derived(`
+	const headerStyles = `
 		backdrop-filter: blur(1px);
 		-webkit-backdrop-filter: blur(1px);
 		overflow: hidden;
-	`);
+		`;
 </script>
 
 <div class={`relative flex w-full flex-col items-center ${styleClass}`}>
