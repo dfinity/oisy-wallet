@@ -43,5 +43,4 @@ export const assertNever = ({
  *   KeyOfUnion<{ a: number } | { b: string } | { d: { ... } }>
  * will result in: 'a' | 'b' | 'd'
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type KeysOfUnion<T> = T extends any ? keyof T : never;
+export type KeysOfUnion<T> = T extends unknown ? keyof T : never;
