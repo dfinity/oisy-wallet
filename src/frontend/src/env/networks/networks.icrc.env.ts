@@ -495,6 +495,15 @@ const VEUR_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCT
 		}
 	: undefined;
 
+const GHOSTNODE_IC_DATA: IcInterface | undefined = nonNullish(
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.GHOSTNODE
+)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.GHOSTNODE,
+			position: 23
+		}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -570,7 +579,8 @@ const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(RUGGY_IC_DATA) ? [RUGGY_IC_DATA] : []),
 	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : []),
 	...(nonNullish(VCHF_IC_DATA) ? [VCHF_IC_DATA] : []),
-	...(nonNullish(VEUR_IC_DATA) ? [VEUR_IC_DATA] : [])
+	...(nonNullish(VEUR_IC_DATA) ? [VEUR_IC_DATA] : []),
+	...(nonNullish(GHOSTNODE_IC_DATA) ? [GHOSTNODE_IC_DATA] : [])
 ];
 
 export const ICRC_TOKENS: IcInterface[] = [
