@@ -21,9 +21,24 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, nonNullish } from '@dfinity/utils';
+import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+
+vi.mock('idb-keyval', () => ({
+	createStore: vi.fn(() => ({
+		/* mock store implementation */
+	})),
+	set: vi.fn(),
+	get: vi.fn(),
+	del: vi.fn(),
+	update: vi.fn()
+}));
+
+vi.mock('$app/environment', () => ({
+	browser: true
+}));
 
 describe('icrc.services', () => {
 	const mockLedgerCanisterId = 'bw4dl-smaaa-aaaaa-qaacq-cai';
@@ -216,6 +231,20 @@ describe('icrc.services', () => {
 				expect(spyListCustomTokens).toHaveBeenCalledWith({
 					certified: true
 				});
+			});
+
+			it('should cache the custom tokens in IDB on update call', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
+
+				expect(idbKeyval.set).toHaveBeenCalledOnce();
+				expect(idbKeyval.set).toHaveBeenNthCalledWith(
+					1,
+					mockIdentity.getPrincipal().toText(),
+					[mockCustomToken],
+					expect.any(Object)
+				);
 			});
 		});
 
