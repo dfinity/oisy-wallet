@@ -504,7 +504,6 @@ const GHOSTNODE_IC_DATA: IcInterface | undefined = nonNullish(
 		}
 	: undefined;
 
-
 const XP_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.XP)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.XP,
