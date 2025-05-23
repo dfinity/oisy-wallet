@@ -1,4 +1,5 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { GHOSTNODE_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
 import type {
@@ -22,6 +23,10 @@ export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	metadata: IcrcTokenMetadataResponse;
 	category: TokenCategory;
 	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
+};
+
+const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
+	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE'
 };
 
 export const mapIcrcToken = ({
@@ -51,7 +56,7 @@ export const mapIcrcToken = ({
 		id: parseTokenId(symbol),
 		network: ICP_NETWORK,
 		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? 'icrc',
-		symbol,
+		symbol: CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[ledgerCanisterId] ?? symbol,
 		...(notEmptyString(icon) && { icon }),
 		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
 			explorerUrl: icrcCustomTokens[ledgerCanisterId].explorerUrl
