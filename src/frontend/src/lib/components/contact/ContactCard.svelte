@@ -2,14 +2,13 @@
 	import { Collapsible } from '@dfinity/gix-components';
 	import AddressItemActions from '$lib/components/contact/AddressItemActions.svelte';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
-	import AddressesBadge from '$lib/components/contact/AddressesBadge.svelte';
-	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 
 	interface Props {
 		contact: ContactUi;
@@ -32,10 +31,7 @@
 	<LogoButton {onClick} hover={false}>
 		{#snippet logo()}
 			<span class="flex">
-				<div class="relative">
-					<Avatar name={contact.name} variant="sm" styleClass="md:text-[19.2px]"></Avatar>
-					<AddressesBadge addresses={contact.addresses} />
-				</div>
+				<AvatarWithBadge {contact} badge={{ type: 'addressTypeOrCount' }} variant="sm" />
 			</span>
 		{/snippet}
 
