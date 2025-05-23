@@ -201,7 +201,8 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const ContactError = IDL.Variant({
 		InvalidContactData: IDL.Null,
-		ContactNotFound: IDL.Null
+		ContactNotFound: IDL.Null,
+		RandomnessError: IDL.Null
 	});
 	const CreateContactResult = IDL.Variant({
 		Ok: Contact,
