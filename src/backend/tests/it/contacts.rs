@@ -1,5 +1,8 @@
 use candid::Principal;
-use shared::types::contact::{Contact, ContactError, CreateContactRequest};
+use shared::types::{
+    contact::{Contact, ContactError, CreateContactRequest},
+    user_profile::OisyUser,
+};
 
 use crate::utils::{
     mock::CALLER,
@@ -164,6 +167,52 @@ fn test_create_multiple_contacts() {
 }
 
 #[test]
+fn test_contacts_are_isolated_between_users() {
+    let pic_setup = setup();
+
+    // Initialize multiple test users
+    let test_users: Vec<OisyUser> = pic_setup.create_users(1..=3);
+
+    // Create a contact for each user with a dynamically generated name
+    for (index, test_user) in test_users.iter().enumerate() {
+        let user_number = index + 1;
+        let contact_name = format!("Contact of user {}", user_number);
+
+        let result = call_create_contact(&pic_setup, test_user.principal, contact_name);
+
+        assert!(
+            result.is_ok(),
+            "Failed to create contact for user {}",
+            user_number
+        );
+    }
+
+    // Each user should now only see their own contact
+    for (index, test_user) in test_users.iter().enumerate() {
+        let user_number = index + 1;
+        let expected_contact_name = format!("Contact of user {}", user_number);
+
+        let contacts = call_get_contacts(&pic_setup, test_user.principal);
+
+        // Verify contact count
+        assert_eq!(
+            contacts.len(),
+            1,
+            "User {} should have exactly 1 contact, but has {}",
+            user_number,
+            contacts.len()
+        );
+
+        // Verify contact name
+        assert_eq!(
+            contacts[0].name, expected_contact_name,
+            "User {} has a contact with incorrect name",
+            user_number
+        );
+    }
+}
+
+#[test]
 fn test_delete_contact_should_succeed_with_valid_id() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
@@ -283,85 +332,3 @@ fn test_delete_all_contacts() {
     let get_result = call_get_contact(&pic_setup, caller, new_contact.id);
     assert!(get_result.is_ok());
 }
-
-/*
-TODO Uncommment this test as soon as we can register a caller address dynamically
-#[test]
-fn test_contacts_are_isolated_between_users() {
-    let pic_setup = setup();
-
-    // Initialize multiple test users
-    let test_users: Vec<OisyUser> = pic_setup.create_users(1..=3);
-
-    // TODO add a function that allows the users to call the backewnd canister here
-    // Create a contact for each user with a dynamically generated name
-    for (index, test_user) in test_users.iter().enumerate() {
-        let user_number = index + 1;
-        let contact_name = format!("Contact of user {}", user_number);
-
-        let result = call_create_contact(&pic_setup, test_user.principal, contact_name);
-
-        assert!(
-            result.is_ok(),
-            "Failed to create contact for user {}",
-            user_number
-        );
-    }
-
-    // Each user should now only see their own contact
-    for (index, test_user) in test_users.iter().enumerate() {
-        let user_number = index + 1;
-        let expected_contact_name = format!("Contact of user {}", user_number);
-
-        let contacts = call_get_contacts(&pic_setup, test_user.principal);
-
-        // Verify contact count
-        assert_eq!(
-            contacts.len(),
-            1,
-            "User {} should have exactly 1 contact, but has {}",
-            user_number,
-            contacts.len()
-        );
-
-        // Verify contact name
-        assert_eq!(
-            contacts[0].name, expected_contact_name,
-            "User {} has a contact with incorrect name",
-            user_number
-        );
-    }
-}
-
-#[test]
-fn test_delete_contact_isolation_between_users() {
-    let pic_setup = setup();
-
-    // Initialize multiple test users
-    let test_users: Vec<OisyUser> = pic_setup.create_users(1..=3);
-
-    // Create a contact for each user
-    for (index, test_user) in test_users.iter().enumerate() {
-        let user_number = index + 1;
-        let contact_name = format!("Contact of user {}", user_number);
-
-        let result = call_create_contact(&pic_setup, test_user.principal, contact_name);
-        assert!(result.is_ok(), "Failed to create contact for user {}", user_number);
-    }
-
-    // Try to have user 2 delete user 1's contact
-    let user1_contacts = call_get_contacts(&pic_setup, test_users[0].principal);
-    let user1_contact_id = user1_contacts[0].id;
-
-    // User 2 tries to delete User 1's contact
-    let delete_result = call_delete_contact(&pic_setup, test_users[1].principal, user1_contact_id);
-
-    // This should fail with ContactNotFound since user 2 doesn't have access to user 1's contacts
-    assert!(delete_result.is_err());
-    assert_eq!(delete_result.unwrap_err(), ContactError::ContactNotFound);
-
-    // Verify user 1's contact still exists
-    let user1_contacts_after = call_get_contacts(&pic_setup, test_users[0].principal);
-    assert_eq!(user1_contacts_after.len(), 1);
-}
-*/
