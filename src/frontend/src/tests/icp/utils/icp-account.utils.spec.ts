@@ -201,9 +201,9 @@ describe('icp-account.utils', () => {
 
 			validAddresses.forEach((address) => {
 				const parsedAddress = parseIcpAccountId(address);
-			if (isNullish(parsedAddress)) {
-				throw new Error('Parsing failed');
-			}
+				if (isNullish(parsedAddress)) {
+					throw new Error('Parsing failed');
+				}
 				const recoveredAddress = getIcpAccountIdString(parsedAddress);
 
 				expect(recoveredAddress).toEqual(address);
