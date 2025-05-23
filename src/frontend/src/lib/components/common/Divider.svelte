@@ -2,7 +2,6 @@
 	export interface Props {
 		variant?: 'dot';
 	}
-
 	const { variant = 'dot' }: Props = $props();
 </script>
 

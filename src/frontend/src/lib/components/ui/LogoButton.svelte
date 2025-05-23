@@ -2,7 +2,6 @@
 	import { IconCheck } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import DividerList from '$lib/components/common/DividerList.svelte';
 	import Divider from '$lib/components/common/Divider.svelte';
 
 	export let selectable = false;
