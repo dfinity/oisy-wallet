@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher } from 'svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
@@ -22,6 +23,8 @@
 		asNetwork?: boolean;
 		hover?: boolean;
 	} = $props();
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <div class="flex w-full flex-col">
@@ -29,61 +32,76 @@
 		dividers={false}
 		rounded={false}
 		testId={`${testIdPrefix}-${data.symbol}-${data.network.id.description}`}
-		on:click
+		onClick={() => dispatch('click')}
 		condensed={asNetwork}
 		{hover}
 	>
-		<span class="flex" slot="logo" class:mr-2={!asNetwork}>
-			<TokenLogo
-				{data}
-				badge={nonNullish(data.tokenCount)
-					? { type: 'tokenCount', count: data.tokenCount }
-					: { type: 'network' }}
-				color="white"
-				logoSize={asNetwork ? 'xs' : 'lg'}
-			/>
-		</span>
+		{#snippet logo()}
+			<span class="flex" class:mr-2={!asNetwork}>
+				<TokenLogo
+					{data}
+					badge={nonNullish(data.tokenCount)
+						? { type: 'tokenCount', count: data.tokenCount }
+						: { type: 'network' }}
+					color="white"
+					logoSize={asNetwork ? 'xs' : 'lg'}
+				/>
+			</span>
+		{/snippet}
 
-		<span class:text-sm={asNetwork} slot="title">
-			{data.symbol}
-			{#if asNetwork}
-				<span class="font-normal">
-					{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
-				</span>
-			{/if}
-		</span>
+		{#snippet title()}
+			<span class:text-sm={asNetwork}>
+				{data.symbol}
+				{#if asNetwork}
+					<span class="font-normal">
+						{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
+					</span>
+				{/if}
+			</span>
+		{/snippet}
 
-		<span class:text-sm={asNetwork} slot="subtitle">
-			{#if !asNetwork}
-				&nbsp;&middot;&nbsp;{data.name}
-			{/if}
-		</span>
+		{#snippet subtitle()}
+			<span class:text-sm={asNetwork}>
+				{#if !asNetwork}
+					&nbsp;&middot;&nbsp;{data.name}
+				{/if}
+			</span>
+		{/snippet}
 
-		<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap" slot="title-end">
-			<TokenBalance {data} hideBalance={$isPrivacyMode}>
-				{#snippet privacyBalance()}
-					<IconDots variant={asNetwork ? 'sm' : 'md'} styleClass={asNetwork ? 'my-4.25' : 'pb-4'} />
-				{/snippet}
-			</TokenBalance>
-		</span>
+		{#snippet titleEnd()}
+			<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
+				<TokenBalance {data} hideBalance={$isPrivacyMode}>
+					{#snippet privacyBalance()}
+						<IconDots
+							variant={asNetwork ? 'sm' : 'md'}
+							styleClass={asNetwork ? 'my-4.25' : 'pb-4'}
+						/>
+					{/snippet}
+				</TokenBalance>
+			</span>
+		{/snippet}
 
-		<span class:text-sm={asNetwork} slot="description">
-			{#if data?.networks}
-				{#each [...new Set(data.networks.map((n) => n.name))] as network, index (network)}
-					{#if index !== 0}
-						&nbsp;&middot;&nbsp;
-					{/if}
-					{network}
-				{/each}
-			{:else if !asNetwork}
-				{data.network.name}
-			{/if}
-		</span>
+		{#snippet description()}
+			<span class:text-sm={asNetwork}>
+				{#if data?.networks}
+					{#each [...new Set(data.networks.map((n) => n.name))] as network, index (network)}
+						{#if index !== 0}
+							&nbsp;&middot;&nbsp;
+						{/if}
+						{network}
+					{/each}
+				{:else if !asNetwork}
+					{data.network.name}
+				{/if}
+			</span>
+		{/snippet}
 
-		<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap" slot="description-end">
-			{#if !$isPrivacyMode}
-				<ExchangeTokenValue {data} />
-			{/if}
-		</span>
+		{#snippet descriptionEnd()}
+			<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
+				{#if !$isPrivacyMode}
+					<ExchangeTokenValue {data} />
+				{/if}
+			</span>
+		{/snippet}
 	</LogoButton>
 </div>

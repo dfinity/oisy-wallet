@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher } from 'svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -16,30 +17,38 @@
 	let { data, logoSize = 'lg' }: Props = $props();
 
 	const { oisyName, oisySymbol, symbol, name, network } = data;
+
+	const dispatch = createEventDispatcher();
 </script>
 
-<LogoButton on:click dividers={true}>
-	<svelte:fragment slot="title">
+<LogoButton onClick={() => dispatch('click')} dividers={true}>
+	{#snippet title()}
 		{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
-	</svelte:fragment>
+	{/snippet}
 
-	<svelte:fragment slot="subtitle">
+	{#snippet subtitle()}
 		{#if nonNullish(oisyName?.prefix)}
 			{$i18n.tokens.text.chain_key}
 		{/if}
 
 		{oisyName?.oisyName ?? name}
-	</svelte:fragment>
+	{/snippet}
 
-	<svelte:fragment slot="description">
+	{#snippet description()}
 		{network.name}
-	</svelte:fragment>
+	{/snippet}
 
-	<div class="mr-2" slot="logo">
-		<TokenLogo {data} color="white" badge={{ type: 'network' }} {logoSize} />
-	</div>
+	{#snippet logo()}
+		<div class="mr-2">
+			<TokenLogo {data} color="white" badge={{ type: 'network' }} {logoSize} />
+		</div>
+	{/snippet}
 
-	<TokenBalance {data} slot="title-end" />
+	{#snippet titleEnd()}
+		<TokenBalance {data} />
+	{/snippet}
 
-	<ExchangeTokenValue {data} slot="description-end" />
+	{#snippet descriptionEnd()}
+		<ExchangeTokenValue {data} />
+	{/snippet}
 </LogoButton>
