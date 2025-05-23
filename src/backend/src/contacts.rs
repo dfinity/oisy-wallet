@@ -84,3 +84,56 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
             .ok_or(ContactError::ContactNotFound)
     })
 }
+
+/// Updates an existing contact for the current user.
+///
+/// # Arguments
+/// * `request` - The contact with updated data (id, name, addresses)
+///
+/// # Returns
+/// * `Ok(Contact)` - The updated contact if successful
+/// * `Err(ContactError::ContactNotFound)` - If no contact with the given ID exists for the user
+/// * `Err(ContactError::InvalidContactData)` - If the provided name is empty
+pub fn update_contact(request: Contact) -> Result<Contact, ContactError> {
+    if request.name.trim().is_empty() {
+        return Err(ContactError::InvalidContactData);
+    }
+
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let current_time = time();
+
+    mutate_state(|s| {
+        // Get the user's contacts storage
+        let mut stored_contacts = match s.contact.get(&stored_principal) {
+            Some(candid_stored_contacts) => candid_stored_contacts.clone(),
+            None => {
+                // No contacts found for this principle
+                return Err(ContactError::ContactNotFound);
+            }
+        };
+
+        // Find the index of the contact to update
+        let contact_index = stored_contacts
+            .contacts
+            .iter()
+            .position(|contact| contact.id == request.id)
+            .ok_or(ContactError::ContactNotFound)?;
+
+        // Create the updated contact with current timestamp
+        let updated_contact = Contact {
+            id: request.id,
+            name: request.name,
+            addresses: request.addresses,
+            update_timestamp_ns: current_time,
+        };
+
+        // Replace the old contact with the updated one
+        stored_contacts.contacts[contact_index] = updated_contact.clone();
+        stored_contacts.update_timestamp_ns = current_time;
+
+        // Update the storage
+        s.contact.insert(stored_principal, Candid(stored_contacts));
+
+        Ok(updated_contact)
+    })
+}
