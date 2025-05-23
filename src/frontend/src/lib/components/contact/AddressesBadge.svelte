@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
 	import type { ContactAddressUi } from '$lib/types/contact';
-	import { nonNullish } from '@dfinity/utils';
 	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 
 	interface Props {

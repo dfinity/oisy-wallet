@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import AddressesBadge from '$lib/components/contact/AddressesBadge.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { AvatarVariants } from '$lib/types/style';
-	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		contact: ContactUi;
