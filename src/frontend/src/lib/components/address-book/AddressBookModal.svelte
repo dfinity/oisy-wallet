@@ -148,7 +148,7 @@
 	<svelte:fragment slot="title">
 		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS}
 			<div class="flex flex-wrap items-center gap-2">
-				<Avatar variant="xs" styleClass="rounded-full flex items-center justify-center mb-2" />
+				<Avatar name={currentContact?.name} variant="xs" styleClass="rounded-full flex items-center justify-center"  />
 				<div class="text-center text-lg font-semibold text-primary">
 					{currentContact?.name}
 				</div>

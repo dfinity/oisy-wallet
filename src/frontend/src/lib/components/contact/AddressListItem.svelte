@@ -13,13 +13,18 @@
 		onClick?: () => void;
 		styleClass?: string;
 		showFullAddress?: boolean;
+		showLabelOutside?: boolean;
 	}
-	let { address, onClick, onInfo, styleClass = '', showFullAddress = false }: Props = $props();
+	let { address, onClick, onInfo, styleClass = '', showFullAddress = false, showLabelOutside = false }: Props = $props();
 
 	let displayAddress = $derived(
 		showFullAddress ? address.address : shortenWithMiddleEllipsis({ text: address.address })
 	);
 </script>
+
+{#if showLabelOutside && notEmptyString(address.label)}
+	<div class="text-sm font-bold text-primary">{address.label}</div>
+{/if}
 
 <button
 	onclick={() => onClick?.()}
@@ -35,10 +40,10 @@
 			</span>
 		</div>
 		<div class="flex items-center gap-1">
-			{#if notEmptyString(address.label)}
-				<span class="font-bold">{address.label}</span>
-				<span class="text-[0.5rem]">•</span>
-			{/if}
+			{#if !showLabelOutside && notEmptyString(address.label)}
+			<span class="font-bold">{address.label}</span>
+			<span class="text-[0.5rem]">•</span>
+		{/if}
 			<span>{displayAddress}</span>
 		</div>
 	</div>
