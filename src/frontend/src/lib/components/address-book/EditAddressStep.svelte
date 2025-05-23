@@ -29,7 +29,12 @@
 
 	const handleSave = () => {
 		if (isNewAddress) {
-			onAddAddress(address as ContactAddressUi);
+			onAddAddress({
+				...address,
+				// TODO: Remove when address input field with type detection has been merged
+				//  https://github.com/dfinity/oisy-wallet/pull/6284
+				addressType: 'Icrcv2'
+			} as ContactAddressUi);
 		} else {
 			onSaveAddress(address as ContactAddressUi);
 		}
