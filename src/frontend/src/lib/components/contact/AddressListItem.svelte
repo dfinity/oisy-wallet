@@ -14,7 +14,14 @@
 		showFullAddress?: boolean;
 		showTypeOnTop?: boolean;
 	}
-	let { address, onClick, onInfo, styleClass = '', showFullAddress = false, showTypeOnTop = false }: Props = $props();
+	let {
+		address,
+		onClick,
+		onInfo,
+		styleClass = '',
+		showFullAddress = false,
+		showTypeOnTop = false
+	}: Props = $props();
 
 	let displayAddress = $derived(
 		showFullAddress ? address.address : shortenWithMiddleEllipsis({ text: address.address })
@@ -22,7 +29,7 @@
 </script>
 
 {#if showTypeOnTop}
-	<label class="font-bold block" for="address">
+	<label class="block font-bold" for="address">
 		{$i18n.address.types[address.addressType]}
 	</label>
 {/if}
@@ -52,15 +59,14 @@
 						<span class="text-[0.5rem]">•</span>
 					{/if}
 				</div>
-			
 			{:else}
-			<div class="flex items-center gap-1 text-tertiary">
-				{#if notEmptyString(address.label)}
-					<span class="font-bold">{address.label}</span>
-				{/if}
-			</div>
+				<div class="flex items-center gap-1 text-tertiary">
+					{#if notEmptyString(address.label)}
+						<span class="font-bold">{address.label}</span>
+					{/if}
+				</div>
 			{/if}
-			<div class="flex break-all text-sm items-center gap-1">
+			<div class="flex items-center gap-1 break-all text-sm">
 				<span>{displayAddress}</span>
 			</div>
 		</div>

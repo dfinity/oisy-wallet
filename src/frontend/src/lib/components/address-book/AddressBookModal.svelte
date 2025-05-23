@@ -145,21 +145,24 @@
 	testId={ADDRESS_BOOK_MODAL}
 	on:nnsClose={close}
 >
-<svelte:fragment slot="title">
-	{#if currentStepName === AddressBookSteps.SHOW_ADDRESS}
-		<div class="flex flex-wrap items-center gap-2">
-			<Avatar name={currentContact?.name} variant="xs" styleClass="rounded-full flex items-center justify-center"  />
-			<div class="text-center text-lg font-semibold text-primary">
-				{currentContact?.name}
+	<svelte:fragment slot="title">
+		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS}
+			<div class="flex flex-wrap items-center gap-2">
+				<Avatar
+					name={currentContact?.name}
+					variant="xs"
+					styleClass="rounded-full flex items-center justify-center"
+				/>
+				<div class="text-center text-lg font-semibold text-primary">
+					{currentContact?.name}
+				</div>
 			</div>
-		</div>
-	{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
-		{editContactNameStep.title}
-	{:else}
-		{currentStep?.title ?? ''}
-	{/if}
-</svelte:fragment>
-
+		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
+			{editContactNameStep.title}
+		{:else}
+			{currentStep?.title ?? ''}
+		{/if}
+	</svelte:fragment>
 
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
@@ -236,10 +239,9 @@
 			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
-	<AddressBookInfoPage
-		address={currentContact?.addresses[currentAddressIndex!]!}
-		close={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
- 	 />
-
+		<AddressBookInfoPage
+			address={currentContact?.addresses[currentAddressIndex!]!}
+			close={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+		/>
 	{/if}
 </WizardModal>

@@ -1,6 +1,6 @@
 import AddressBookQrCode from '$lib/components/address-book/AddressBookQrCode.svelte';
 import type { ContactAddressUi } from '$lib/types/contact';
-import { render, screen } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 
 describe('AddressBookQrCode', () => {
 	const mockAddress: ContactAddressUi = {
@@ -23,5 +23,4 @@ describe('AddressBookQrCode', () => {
 		const icon = container.querySelector('svg'); // IconAddressType renders an SVG
 		expect(icon).toBeInTheDocument();
 	});
-
 });
