@@ -23,6 +23,7 @@ interface I18nCore {
 		approve: string;
 		view: string;
 		copy: string;
+		delete: string;
 		clear_filter: string;
 		not_available: string;
 		new: string;
@@ -956,6 +957,7 @@ interface I18nAddress_book {
 		search_contact: string;
 		no_contact_found: string;
 	};
+	alt: { show_addresses_of_contact: string; hide_addresses: string };
 	show_contact: {
 		title: string;
 		add_address: string;
