@@ -19,13 +19,15 @@
 	const { contact, badge, variant }: Props = $props();
 </script>
 
-<div class="relative">
-	<Avatar name={contact.name} {variant}></Avatar>
-	{#if nonNullish(badge)}
-		{#if badge.type === 'addressTypeOrCount'}
-			<AddressesBadge addresses={contact.addresses} />
-		{:else if badge.type === 'addressType'}
-			<AddressesBadge addresses={contact.addresses} selectedAddress={badge.address} />
+<div class="flex">
+	<div class="relative">
+		<Avatar name={contact.name} {variant} />
+		{#if nonNullish(badge)}
+			{#if badge.type === 'addressTypeOrCount'}
+				<AddressesBadge addresses={contact.addresses} />
+			{:else if badge.type === 'addressType'}
+				<AddressesBadge addresses={contact.addresses} selectedAddress={badge.address} />
+			{/if}
 		{/if}
-	{/if}
+	</div>
 </div>

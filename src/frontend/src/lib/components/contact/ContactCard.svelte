@@ -30,9 +30,7 @@
 {#snippet header()}
 	<LogoButton {onClick} hover={false}>
 		{#snippet logo()}
-			<span class="flex">
-				<AvatarWithBadge {contact} badge={{ type: 'addressTypeOrCount' }} variant="sm" />
-			</span>
+			<AvatarWithBadge {contact} badge={{ type: 'addressTypeOrCount' }} variant="sm" />
 		{/snippet}
 
 		{#snippet title()}
