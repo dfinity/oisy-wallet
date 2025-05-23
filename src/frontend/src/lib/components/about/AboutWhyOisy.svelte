@@ -12,9 +12,11 @@
 
 	const dispatch = createEventDispatcher();
 
+	const modalId = Symbol();
+
 	const openModal = () => {
 		dispatch('icOpenAboutModal');
-		modalStore.openAboutWhyOisy();
+		modalStore.openAboutWhyOisy(modalId);
 	};
 </script>
 

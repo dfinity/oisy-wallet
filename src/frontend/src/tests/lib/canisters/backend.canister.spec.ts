@@ -1,18 +1,25 @@
 import type {
+	AllowSigningResult,
 	_SERVICE as BackendService,
 	CustomToken,
 	IcrcToken,
-	Result_1,
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
 
 import { BackendCanister } from '$lib/canisters/backend.canister';
+import {
+	ChallengeCompletionErrorEnum,
+	CreateChallengeEnum,
+	PowChallengeError,
+	PowCreateChallengeError
+} from '$lib/canisters/backend.errors';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
@@ -443,6 +450,21 @@ describe('backend.canister', () => {
 			);
 		});
 
+		it('should throw an error if btc_add_pending_transaction returns a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_add_pending_transaction.mockResolvedValue({ Err: { CanisterError: null } });
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError('Unknown BtcAddPendingTransactionError')
+			);
+		});
+
 		it('should throw an error if btc_add_pending_transaction throws', async () => {
 			service.btc_add_pending_transaction.mockImplementation(async () => {
 				await Promise.resolve();
@@ -579,6 +601,37 @@ describe('backend.canister', () => {
 			);
 		});
 
+		it('should throw an error if btc_select_user_utxos_fee returns a pending-transactions error', async () => {
+			service.btc_select_user_utxos_fee.mockResolvedValue({ Err: { PendingTransactions: null } });
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError(
+					'Selecting utxos fee is not possible - pending transactions found.'
+				)
+			);
+		});
+
+		it('should throw an error if btc_select_user_utxos_fee returns a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_select_user_utxos_fee.mockResolvedValue({ Err: { CanisterError: null } });
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
+			);
+		});
+
 		it('should throw an error if btc_select_user_utxos_fee throws', async () => {
 			service.btc_select_user_utxos_fee.mockImplementation(async () => {
 				await Promise.resolve();
@@ -653,6 +706,19 @@ describe('backend.canister', () => {
 			await expect(getAllowedCycles()).rejects.toThrow(new CanisterInternalError(errorMsg));
 		});
 
+		it('should throw CanisterInternalError with custom message when a generic canister error is returned', async () => {
+			// @ts-expect-error we test this in purposes
+			service.get_allowed_cycles.mockResolvedValue({ Err: { CanisterError: null } });
+
+			const { getAllowedCycles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getAllowedCycles()).rejects.toThrow(
+				new CanisterInternalError('Unknown GetAllowedCyclesError')
+			);
+		});
+
 		it('should throw unknown GetAllowedCyclesError for unrecognized errors', async () => {
 			service.get_allowed_cycles.mockResolvedValue({
 				Err: { Other: 'Some unknown error' }
@@ -683,11 +749,11 @@ describe('backend.canister', () => {
 
 	describe('allowSigning', () => {
 		it('should allow signing', async () => {
-			const result: Result_1 = {
+			const result: AllowSigningResult = {
 				Ok: {
-					status: { Executed: null }, // or { Skipped: null } or { Failed: null }, depending on your scenario
-					challenge_completion: [], // Provide appropriately if challenge completion data exists
-					allowed_cycles: ZERO // Replace with proper value
+					status: { Executed: null },
+					challenge_completion: [],
+					allowed_cycles: ZERO
 				}
 			};
 
@@ -748,6 +814,52 @@ describe('backend.canister', () => {
 			);
 		});
 
+		it.each([
+			{
+				errorName: 'InvalidNonce',
+				error: { InvalidNonce: null },
+				code: ChallengeCompletionErrorEnum.InvalidNonce
+			},
+			{
+				errorName: 'MissingChallenge',
+				error: { MissingChallenge: null },
+				code: ChallengeCompletionErrorEnum.MissingChallenge
+			},
+			{
+				errorName: 'ExpiredChallenge',
+				error: { ExpiredChallenge: null },
+				code: ChallengeCompletionErrorEnum.ExpiredChallenge
+			},
+			{
+				errorName: 'MissingUserProfile',
+				error: { MissingUserProfile: null },
+				code: ChallengeCompletionErrorEnum.MissingUserProfile
+			},
+			{
+				errorName: 'ChallengeAlreadySolved',
+				error: { ChallengeAlreadySolved: null },
+				code: ChallengeCompletionErrorEnum.ChallengeAlreadySolved
+			}
+		])(
+			'should throw PowChallengeError with appropriate code if PowChallenge error $errorName is returned',
+			async ({ error, code }) => {
+				service.allow_signing.mockResolvedValue({ Err: { PowChallenge: error } });
+
+				const { allowSigning } = await createBackendCanister({
+					serviceOverride: service
+				});
+
+				const result = allowSigning();
+
+				await expect(result).rejects.toBeInstanceOf(PowChallengeError);
+
+				await result.catch((err) => {
+					expect(err).toBeInstanceOf(PowChallengeError);
+					expect((err as PowChallengeError).code).toEqual(code);
+				});
+			}
+		);
+
 		it('should throw a CanisterInternalError if Other error is returned', async () => {
 			const errorMsg = 'Test error';
 			const response = { Err: { Other: errorMsg } };
@@ -761,17 +873,17 @@ describe('backend.canister', () => {
 			await expect(allowSigning()).rejects.toThrow(new CanisterInternalError(errorMsg));
 		});
 
-		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
+		it('should throw a CanisterInternalError with message if unrecognized error is returned', async () => {
 			const response = { Err: { UnrecognizedError: 'Some unknown error' } };
 
-			service.allow_signing.mockResolvedValue(response as unknown as Result_1);
+			service.allow_signing.mockResolvedValue(response as unknown as AllowSigningResult);
 
 			const { allowSigning } = await createBackendCanister({
 				serviceOverride: service
 			});
 
 			await expect(allowSigning()).rejects.toThrow(
-				new CanisterInternalError('Unknown AllowSigningError')
+				new CanisterInternalError('An uknown error occurred.')
 			);
 		});
 	});
@@ -804,7 +916,10 @@ describe('backend.canister', () => {
 			});
 
 			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
-				'Challenge is already in progress.'
+				new PowCreateChallengeError(
+					'Challenge is already in progress.',
+					CreateChallengeEnum.ChallengeInProgress
+				)
 			);
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
@@ -816,7 +931,7 @@ describe('backend.canister', () => {
 			});
 
 			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
-				'Failed to generate randomness'
+				new CanisterInternalError('Could not generate randomness.')
 			);
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
@@ -828,19 +943,31 @@ describe('backend.canister', () => {
 			});
 
 			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
-				'User profile is missing.'
+				new CanisterInternalError('User profile is missing.')
 			);
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
 		});
 
 		it('should handle other unexpected errors', async () => {
+			const errorMsg = 'Unexpected error occurred.';
 			service.create_pow_challenge.mockResolvedValue({
-				Err: { Other: 'Unexpected error occurred.' }
+				Err: { Other: errorMsg }
 			});
 
 			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
-				'Unexpected error occurred.'
+				new CanisterInternalError('An other error occurred.')
+			);
+
+			expect(service.create_pow_challenge).toHaveBeenCalled();
+		});
+
+		it('should handle a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.create_pow_challenge.mockResolvedValue({ Err: { CanisterError: null } });
+
+			await expect(backendCanister.createPowChallenge()).rejects.toThrow(
+				new CanisterInternalError('An uknown error occurred.')
 			);
 
 			expect(service.create_pow_challenge).toHaveBeenCalled();
@@ -955,6 +1082,171 @@ describe('backend.canister', () => {
 			const res = updateUserNetworkSettings({
 				networks: mockUserNetworks
 			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('getContact', () => {
+		it('should call get_contact service', async () => {
+			const [mockContact] = getMockContacts({ n: 1 });
+			const response = { Ok: mockContact };
+
+			service.get_contact.mockResolvedValue(response);
+
+			const { getContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getContact(1n);
+
+			expect(service.get_contact).toHaveBeenCalledWith(1n);
+			expect(res).toEqual(mockContact);
+		});
+
+		it('should throw an error if get_contact throws', async () => {
+			service.get_contact.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = getContact(1n);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('getContacts', () => {
+		it('should call get_contacts service', async () => {
+			const mockContacts = getMockContacts({ n: 4 });
+			const response = { Ok: mockContacts };
+
+			service.get_contacts.mockResolvedValue(response);
+
+			const { getContacts } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getContacts();
+
+			expect(service.get_contacts).toHaveBeenCalledOnce();
+			expect(res).toEqual(mockContacts);
+		});
+
+		it('should throw an error if get_contact throws', async () => {
+			service.get_contacts.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getContacts } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = getContacts();
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('createContact', () => {
+		it('should call create_contact service', async () => {
+			const [mockContact] = getMockContacts({ n: 1, names: ['John'] });
+			const response = { Ok: mockContact };
+
+			service.create_contact.mockResolvedValue(response);
+
+			const { createContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await createContact('John');
+
+			expect(service.create_contact).toHaveBeenCalledWith({ name: 'John' });
+			expect(res).toEqual(mockContact);
+		});
+
+		it('should throw an error if create_contact throws', async () => {
+			service.create_contact.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { createContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = createContact('John');
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('delete_contact', () => {
+		it('should call delete_contact service', async () => {
+			const response = { Ok: 1n };
+
+			service.delete_contact.mockResolvedValue(response);
+
+			const { deleteContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await deleteContact(1n);
+
+			expect(service.delete_contact).toHaveBeenCalledWith(1n);
+			expect(res).toEqual(1n);
+		});
+
+		it('should throw an error if delete_contact throws', async () => {
+			service.delete_contact.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { deleteContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = deleteContact(1n);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('update_contact', () => {
+		it('should call update_contact service', async () => {
+			const [mockContact] = getMockContacts({ n: 1, names: ['John'] });
+			const response = { Ok: mockContact };
+
+			service.update_contact.mockResolvedValue(response);
+
+			const { updateContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateContact(mockContact);
+
+			expect(service.update_contact).toHaveBeenCalledWith(mockContact);
+			expect(res).toEqual(mockContact);
+		});
+
+		it('should throw an error if update_contact throws', async () => {
+			const [mockContact] = getMockContacts({ n: 1, names: ['John'] });
+			service.update_contact.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { updateContact } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = updateContact(mockContact);
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});

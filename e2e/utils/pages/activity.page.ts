@@ -1,9 +1,9 @@
 import { AppPath } from '$lib/constants/routes.constants';
 import {
 	ACTIVITY_TRANSACTION_SKELETON_PREFIX,
-	ACTIVITY_TRANSACTIONS_PLACEHOLDER,
 	CAROUSEL_SLIDE_NAVIGATION,
-	NAVIGATION_ITEM_ACTIVITY
+	NAVIGATION_ITEM_ACTIVITY,
+	NO_TRANSACTIONS_PLACEHOLDER
 } from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
@@ -33,7 +33,7 @@ export class ActivityPage extends HomepageLoggedIn {
 		);
 
 		await this.waitForByTestId({
-			testId: ACTIVITY_TRANSACTIONS_PLACEHOLDER,
+			testId: NO_TRANSACTIONS_PLACEHOLDER,
 			options: { state: 'visible', timeout: 60000 }
 		});
 	}

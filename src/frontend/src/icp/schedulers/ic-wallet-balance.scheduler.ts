@@ -17,7 +17,7 @@ export class IcWalletBalanceScheduler<
 
 	constructor(
 		private getBalance: (data: SchedulerJobParams<PostMessageDataRequest>) => Promise<bigint>,
-		private msg: 'syncIcpWallet' | 'syncIcrcWallet'
+		private msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet'
 	) {
 		super();
 	}

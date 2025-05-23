@@ -6,6 +6,12 @@ import type { Balance } from '$lib/types/balance';
 import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
+export interface SwapError {
+	variant: 'error' | 'warning' | 'info';
+	message: string;
+	url?: { url: string; text: string };
+}
+
 export interface SwapData {
 	sourceToken?: IcTokenToggleable;
 	destinationToken?: IcTokenToggleable;
@@ -55,7 +61,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
 		isSourceTokenIcrc2,
-		failedSwapError: writable<string | undefined>(undefined),
+		failedSwapError: writable<SwapError | undefined>(undefined),
 		setSourceToken: (token: IcTokenToggleable) =>
 			update((state) => ({
 				...state,
@@ -82,7 +88,7 @@ export interface SwapContext {
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	isSourceTokenIcrc2: Readable<boolean>;
-	failedSwapError: Writable<string | undefined>;
+	failedSwapError: Writable<SwapError | undefined>;
 	setSourceToken: (token: IcTokenToggleable) => void;
 	setDestinationToken: (token: IcTokenToggleable) => void;
 	switchTokens: () => void;

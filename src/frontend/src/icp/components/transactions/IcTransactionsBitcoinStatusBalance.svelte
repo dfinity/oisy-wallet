@@ -17,6 +17,8 @@
 
 	let receiveProgressStep: string | undefined = undefined;
 
+	const modalId = Symbol();
+
 	const receive = async () => {
 		if (isNullish($token)) {
 			toastsError({
@@ -27,7 +29,7 @@
 
 		receiveProgressStep = ProgressStepsUpdateBalanceCkBtc.INITIALIZATION;
 
-		modalStore.openReceiveBitcoin();
+		modalStore.openReceiveBitcoin(modalId);
 
 		try {
 			await updateBalance({

@@ -1,27 +1,11 @@
-import {
-	BASE_NETWORK,
-	BASE_SEPOLIA_NETWORK
-} from '$env/networks/networks-evm/networks.evm.base.env';
-import {
-	BSC_MAINNET_NETWORK,
-	BSC_TESTNET_NETWORK
-} from '$env/networks/networks-evm/networks.evm.bsc.env';
-import {
-	ALCHEMY_NETWORK_BASE_MAINNET,
-	ALCHEMY_NETWORK_BASE_SEPOLIA,
-	ALCHEMY_NETWORK_BSC_MAINNET,
-	ALCHEMY_NETWORK_BSC_TESTNET,
-	ALCHEMY_NETWORK_MAINNET,
-	ALCHEMY_NETWORK_SEPOLIA,
-	ETHEREUM_NETWORK,
-	SEPOLIA_NETWORK
-} from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
 import type { EthereumNetwork } from '$eth/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
-import { Alchemy, type Network } from 'alchemy-sdk';
+import { Alchemy } from 'alchemy-sdk';
 import { vi } from 'vitest';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
@@ -39,31 +23,15 @@ vi.mock('$env/rest/alchemy.env', () => ({
 describe('alchemy.providers', () => {
 	const ALCHEMY_API_KEY = 'test-api-key';
 
-	const networks: EthereumNetwork[] = [
-		ETHEREUM_NETWORK,
-		SEPOLIA_NETWORK,
-		BASE_NETWORK,
-		BASE_SEPOLIA_NETWORK,
-		BSC_MAINNET_NETWORK,
-		BSC_TESTNET_NETWORK
-	];
-
-	const alchemyNames: Network[] = [
-		ALCHEMY_NETWORK_MAINNET,
-		ALCHEMY_NETWORK_SEPOLIA,
-		ALCHEMY_NETWORK_BASE_MAINNET,
-		ALCHEMY_NETWORK_BASE_SEPOLIA,
-		ALCHEMY_NETWORK_BSC_MAINNET,
-		ALCHEMY_NETWORK_BSC_TESTNET
-	];
+	const networks: EthereumNetwork[] = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS];
 
 	it('should create the correct map of providers', () => {
 		expect(Alchemy).toHaveBeenCalledTimes(networks.length);
 
-		networks.forEach((_, index) => {
+		networks.forEach(({ providers: { alchemy } }, index) => {
 			expect(Alchemy).toHaveBeenNthCalledWith(index + 1, {
 				apiKey: ALCHEMY_API_KEY,
-				network: alchemyNames[index]
+				network: alchemy
 			});
 		});
 	});

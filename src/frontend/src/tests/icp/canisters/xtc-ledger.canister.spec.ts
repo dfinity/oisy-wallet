@@ -22,13 +22,17 @@ describe('xtc-ledger.canister', () => {
 			serviceOverride
 		});
 
-	const amount = 123n;
-
-	const params: XtcLedgerTransferParams = { to: mockPrincipal, amount };
-
 	const service = mock<ActorSubclass<XtcLedgerService>>();
 
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	describe('transfer', () => {
+		const amount = 123n;
+
+		const params: XtcLedgerTransferParams = { to: mockPrincipal, amount };
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 		});
@@ -218,6 +222,40 @@ describe('xtc-ledger.canister', () => {
 			await expect(res).rejects.toThrow(
 				new CanisterInternalError('Unknown XtcLedgerCanisterError')
 			);
+		});
+	});
+
+	describe('balance', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should correctly call the balance method', async () => {
+			const mockBalance = 12345n;
+			service.balanceOf.mockResolvedValue(mockBalance);
+
+			const { balance } = await createXtcLedgerCanister({
+				serviceOverride: service
+			});
+
+			const res = await balance(mockPrincipal);
+
+			expect(res).toEqual(mockBalance);
+			expect(service.balanceOf).toHaveBeenCalledOnce();
+			expect(service.balanceOf).toHaveBeenNthCalledWith(1, mockPrincipal);
+		});
+
+		it('should throw an error if balance throws', async () => {
+			const mockError = new Error('Test response error');
+			service.balanceOf.mockRejectedValue(mockError);
+
+			const { balance } = await createXtcLedgerCanister({
+				serviceOverride: service
+			});
+
+			const res = balance(mockPrincipal);
+
+			await expect(res).rejects.toThrow(mockError);
 		});
 	});
 });

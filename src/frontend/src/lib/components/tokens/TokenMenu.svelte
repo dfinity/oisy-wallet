@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconMoreVertical from '$lib/components/icons/IconMoreVertical.svelte';
+	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import {
 		networkBitcoin,
@@ -21,9 +21,12 @@
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
+	const hideModalId = Symbol();
+	const openModalId = Symbol();
+
 	const hideToken = () => {
 		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
-		fn();
+		fn(hideModalId);
 
 		visible = false;
 	};
@@ -38,7 +41,7 @@
 					: $networkSolana
 						? modalStore.openSolToken
 						: () => {};
-		fn();
+		fn(openModalId);
 
 		visible = false;
 	};
@@ -63,14 +66,14 @@
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
 	<div class="flex flex-col gap-1">
 		{#if $tokenToggleable}
-			<ButtonMenu ariaLabel={hideTokenLabel} on:click={hideToken}>
+			<ButtonMenu ariaLabel={hideTokenLabel} onclick={hideToken}>
 				{hideTokenLabel}
 			</ButtonMenu>
 		{/if}
 
 		<slot />
 
-		<ButtonMenu ariaLabel={$i18n.tokens.details.title} on:click={openToken}>
+		<ButtonMenu ariaLabel={$i18n.tokens.details.title} onclick={openToken}>
 			{$i18n.tokens.details.title}
 		</ButtonMenu>
 	</div>

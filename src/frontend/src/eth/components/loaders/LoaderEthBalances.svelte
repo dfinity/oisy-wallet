@@ -17,7 +17,7 @@
 
 	let loading = false;
 
-	const load = async () => {
+	const onLoad = async () => {
 		if (loading) {
 			return;
 		}
@@ -39,7 +39,7 @@
 		loading = false;
 	};
 
-	const debounceLoad = debounce(load, 500);
+	const debounceLoad = debounce(onLoad, 1000);
 
 	$effect(() => {
 		// To trigger the load function when any of the dependencies change.
@@ -48,6 +48,6 @@
 	});
 </script>
 
-<IntervalLoader {load} interval={WALLET_TIMER_INTERVAL_MILLIS}>
+<IntervalLoader {onLoad} interval={WALLET_TIMER_INTERVAL_MILLIS}>
 	{@render children?.()}
 </IntervalLoader>

@@ -1,11 +1,15 @@
-import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { BONK_TOKEN, BONK_TOKEN_ID } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { solAddressDevnetStore, solAddressMainnetStore } from '$lib/stores/address.store';
 import * as solanaApi from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import {
 	fetchSolTransactionsForSignature,
-	loadNextSolTransactions
+	loadNextSolTransactions,
+	loadNextSolTransactionsByOldest
 } from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
@@ -361,19 +365,37 @@ describe('sol-transactions.services', () => {
 	});
 
 	describe('loadNextSolTransactions', () => {
+		const mockToken = SOLANA_TOKEN;
+
 		const mockParams: LoadNextSolTransactionsParams = {
-			address: mockSolAddress,
-			network: SolanaNetworks.mainnet,
+			token: mockToken,
 			signalEnd
 		};
 
 		beforeEach(() => {
-			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+			solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
+			solAddressDevnetStore.set({ data: mockSolAddress2, certified: false });
+
+			solTransactionsStore.reset(mockToken.id);
 
 			spyGetTransactions.mockResolvedValue(mockTransactions);
 		});
 
-		it('should load transactions successfully', async () => {
+		it('should not load transactions if Solana address is nullish', async () => {
+			solAddressMainnetStore.reset();
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(spyGetTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should not load transactions for a non-Solana token', async () => {
+			await loadNextSolTransactions({ ...mockParams, token: ETHEREUM_TOKEN });
+
+			expect(spyGetTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should load transactions successfully for native Solana tokens', async () => {
 			await loadNextSolTransactions(mockParams);
 
 			expect(signalEnd).not.toHaveBeenCalled();
@@ -382,6 +404,20 @@ describe('sol-transactions.services', () => {
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
+			});
+		});
+
+		it('should load transactions successfully for SPL tokens', async () => {
+			await loadNextSolTransactions({ ...mockParams, token: BONK_TOKEN });
+
+			expect(signalEnd).not.toHaveBeenCalled();
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				tokenAddress: BONK_TOKEN.address,
+				tokenOwnerAddress: BONK_TOKEN.owner
 			});
 		});
 
@@ -409,13 +445,17 @@ describe('sol-transactions.services', () => {
 
 			await loadNextSolTransactions(mockParams);
 
-			expect(signalEnd).toHaveBeenCalled();
+			expect(signalEnd).toHaveBeenCalledOnce();
 		});
 
 		it('should append transactions to the store', async () => {
 			await loadNextSolTransactions(mockParams);
 
-			expect(get(solTransactionsStore)?.[SOLANA_TOKEN_ID]).toEqual(mockCertifiedTransactions);
+			expect(get(solTransactionsStore)?.[mockToken.id]).toEqual(mockCertifiedTransactions);
+
+			await loadNextSolTransactions({ ...mockParams, token: BONK_TOKEN });
+
+			expect(get(solTransactionsStore)?.[BONK_TOKEN_ID]).toEqual(mockCertifiedTransactions);
 		});
 
 		it('should handle errors and reset store', async () => {
@@ -424,19 +464,135 @@ describe('sol-transactions.services', () => {
 
 			await loadNextSolTransactions(mockParams);
 
-			expect(get(solTransactionsStore)?.[SOLANA_TOKEN_ID]).toBeNull();
+			expect(get(solTransactionsStore)?.[mockToken.id]).toBeNull();
 		});
 
 		it('should work with different networks', async () => {
 			await loadNextSolTransactions({
 				...mockParams,
-				network: SolanaNetworks.devnet
+				token: SOLANA_DEVNET_TOKEN
 			});
 
 			expect(spyGetTransactions).toHaveBeenCalledOnce();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
-				address: mockSolAddress,
+				address: mockSolAddress2,
 				network: SolanaNetworks.devnet
+			});
+		});
+	});
+
+	describe('loadNextSolTransactionsByOldest', () => {
+		const signalEnd = vi.fn();
+
+		const mockToken = SOLANA_TOKEN;
+
+		const mockMinTimestamp = 1_000_000_000;
+		const timestampBuffer = BigInt(mockMinTimestamp) + 500_000_000n;
+
+		const mockTransactions: SolTransactionUi[] = createMockSolTransactionsUi(17).map(
+			(transaction, index) => ({
+				...transaction,
+				timestamp: timestampBuffer + BigInt(index)
+			})
+		);
+		const [expectedOldestTransaction] = mockTransactions;
+		const { signature: mockLastSignature } = expectedOldestTransaction;
+
+		const mockParams = {
+			minTimestamp: mockMinTimestamp,
+			transactions: mockTransactions,
+			token: mockToken,
+			signalEnd
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
+		});
+
+		it('should not load transactions if the transactions list is empty', async () => {
+			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions: [] });
+
+			expect(result).toEqual({ success: false });
+
+			expect(spyGetTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should not load transactions if the minimum timestamp is newer than all the transactions', async () => {
+			const result = await loadNextSolTransactionsByOldest({
+				...mockParams,
+				minTimestamp: Number(timestampBuffer) * 10
+			});
+
+			expect(result).toEqual({ success: false });
+
+			expect(spyGetTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should load transactions with the correct parameters', async () => {
+			const result = await loadNextSolTransactionsByOldest(mockParams);
+
+			expect(result).toEqual({ success: true });
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: mockLastSignature
+			});
+		});
+
+		it('should load transactions if the transactions have undefined timestamp', async () => {
+			const transactions: SolTransactionUi[] = createMockSolTransactionsUi(17).map(
+				(transaction) => ({
+					...transaction,
+					timestamp: undefined
+				})
+			);
+			const lastSignature = transactions[0].signature;
+
+			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
+
+			expect(result).toEqual({ success: true });
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: lastSignature
+			});
+		});
+
+		it('should handle minimum timestamp correctly in different units', async () => {
+			const resultWithNano = await loadNextSolTransactionsByOldest({
+				...mockParams,
+				minTimestamp: mockMinTimestamp * 1_000_000_000 + 1
+			});
+
+			expect(resultWithNano).toEqual({ success: true });
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: mockLastSignature
+			});
+
+			vi.clearAllMocks();
+
+			const resultWithMillis = await loadNextSolTransactionsByOldest({
+				...mockParams,
+				minTimestamp: mockMinTimestamp * 1_000 + 1
+			});
+
+			expect(resultWithMillis).toEqual({ success: true });
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: mockLastSignature
 			});
 		});
 	});

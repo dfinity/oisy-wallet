@@ -268,26 +268,26 @@ describe('etherscan.providers', () => {
 				});
 			});
 		});
+	});
 
-		describe('etherscanProviders', () => {
-			networks.forEach(({ id, name }) => {
-				it(`should return the correct provider for ${name} network`, () => {
-					const provider = etherscanProviders(id);
+	describe('etherscanProviders', () => {
+		networks.forEach(({ id, name }) => {
+			it(`should return the correct provider for ${name} network`, () => {
+				const provider = etherscanProviders(id);
 
-					expect(provider).toBeInstanceOf(EtherscanProvider);
+				expect(provider).toBeInstanceOf(EtherscanProvider);
 
-					expect(provider).toHaveProperty('network');
-					expect(provider).toHaveProperty('chainId');
-				});
+				expect(provider).toHaveProperty('network');
+				expect(provider).toHaveProperty('chainId');
 			});
+		});
 
-			it('should throw an error for an unsupported network ID', () => {
-				expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
-					replacePlaceholders(en.init.error.no_etherscan_provider, {
-						$network: ICP_NETWORK_ID.toString()
-					})
-				);
-			});
+		it('should throw an error for an unsupported network ID', () => {
+			expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
+				replacePlaceholders(en.init.error.no_etherscan_provider, {
+					$network: ICP_NETWORK_ID.toString()
+				})
+			);
 		});
 	});
 });

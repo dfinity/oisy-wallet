@@ -11,6 +11,7 @@ import {
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdICP,
+	isNetworkIdPolygon,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -51,6 +52,10 @@ export const networkBase: Readable<boolean> = derived([networkId], ([$networkId]
 
 export const networkBsc: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdBsc($networkId)
+);
+
+export const networkPolygon: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdPolygon($networkId)
 );
 
 export const networkSolana: Readable<boolean> = derived([networkId], ([$networkId]) =>

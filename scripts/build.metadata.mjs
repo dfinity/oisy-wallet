@@ -63,7 +63,7 @@ const removeMetaRobots = (targetFile) => {
 		return;
 	}
 
-	let content = readFileSync(targetFile, 'utf8');
+	const content = readFileSync(targetFile, 'utf8');
 
 	const update = content.replace(/<meta\s+name="robots"\s+content="noindex"\s*\/>/, '');
 

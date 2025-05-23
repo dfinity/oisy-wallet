@@ -164,17 +164,20 @@ describe('ic-transactions.derived', () => {
 			icTransactionsStore.reset(ICP_TOKEN_ID);
 		});
 
-		it('should return known destinations if transactions store has some data', () => {
+		it('should return known destinations for ICP if transactions store has some data', () => {
 			token.set(ICP_TOKEN);
 			icTransactionsStore.append({
 				tokenId: ICP_TOKEN_ID,
 				transactions
 			});
 
+			const maxTimestamp = Math.max(...transactions.map(({ data }) => Number(data.timestamp)));
+
 			expect(get(icKnownDestinations)).toEqual({
 				[transactions[0].data.to as string]: {
-					amounts: transactions.map(({ data }) => data.value),
-					timestamp: Number(transactions[0].data.timestamp)
+					amounts: transactions.map(({ data }) => ({ value: data.value, token: ICP_TOKEN })),
+					timestamp: maxTimestamp,
+					address: transactions[0].data.to
 				}
 			});
 		});
