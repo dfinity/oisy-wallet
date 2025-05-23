@@ -56,7 +56,7 @@ export const mapIcrcToken = ({
 		id: parseTokenId(symbol),
 		network: ICP_NETWORK,
 		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? 'icrc',
-		symbol: CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[ledgerCanisterId] ?? symbol,
+		symbol,
 		...(notEmptyString(icon) && { icon }),
 		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
 			explorerUrl: icrcCustomTokens[ledgerCanisterId].explorerUrl
@@ -132,6 +132,7 @@ export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token i
 const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>
 	'minterCanisterId' in token && 'twinToken' in token;
 
+// TODO: create tests
 export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 	...token,
 	...(isIcCkInterface(token) && nonNullish(token.twinToken)
@@ -142,4 +143,14 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 				}
 			}
 		: {})
+});
+
+// TODO: create tests
+export const mapTokenOisySymbol = (token: IcInterface): IcInterface => ({
+	...token,
+	...{
+		oisySymbol: {
+			oisySymbol: CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId]
+		}
+	}
 });
