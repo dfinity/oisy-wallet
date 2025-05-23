@@ -1,4 +1,5 @@
 import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import {
 	DEFAULT_BASE_TOKEN,
@@ -18,10 +19,7 @@ import {
 } from '$lib/derived/network.derived';
 import { token } from '$lib/stores/token.store';
 import type { OptionTokenId, OptionTokenStandard, Token } from '$lib/types/token';
-import {
-	isEthereumTokenToggleEnabled,
-	isIcrcTokenToggleEnabled
-} from '$lib/utils/token-toggle.utils';
+import { isIcrcTokenToggleEnabled } from '$lib/utils/token-toggle.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -78,7 +76,7 @@ export const tokenToggleable: Readable<boolean> = derived([token], ([$token]) =>
 		return icTokenIcrcCustomToken($token)
 			? isIcrcTokenToggleEnabled($token)
 			: isTokenEthereumUserToken($token)
-				? isEthereumTokenToggleEnabled($token)
+				? isNotDefaultEthereumToken($token)
 				: false;
 	}
 
