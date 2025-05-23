@@ -1,5 +1,8 @@
 use candid::Principal;
-use shared::types::contact::{Contact, ContactError, CreateContactRequest};
+use shared::types::{
+    contact::{Contact, ContactError, CreateContactRequest},
+    user_profile::OisyUser,
+};
 
 use crate::utils::{
     mock::CALLER,
@@ -163,8 +166,6 @@ fn test_create_multiple_contacts() {
     assert_ne!(id2, id3);
 }
 
-/*
-TODO Uncommment this test as soon as we can register a caller address dynamically
 #[test]
 fn test_contacts_are_isolated_between_users() {
     let pic_setup = setup();
@@ -172,7 +173,6 @@ fn test_contacts_are_isolated_between_users() {
     // Initialize multiple test users
     let test_users: Vec<OisyUser> = pic_setup.create_users(1..=3);
 
-    // TODO add a function that allows the users to call the backewnd canister here
     // Create a contact for each user with a dynamically generated name
     for (index, test_user) in test_users.iter().enumerate() {
         let user_number = index + 1;
@@ -211,7 +211,6 @@ fn test_contacts_are_isolated_between_users() {
         );
     }
 }
-*/
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for the update contact functionality
 // -------------------------------------------------------------------------------------------------
