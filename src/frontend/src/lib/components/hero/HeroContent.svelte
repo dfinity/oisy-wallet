@@ -30,11 +30,13 @@
 		networkBitcoin,
 		networkBsc,
 		networkEthereum,
+		networkPolygon,
 		networkICP,
 		networkSolana,
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
 	import type { OptionTokenUi } from '$lib/types/token';
@@ -109,6 +111,8 @@
 	class:to-base-100={$networkBase}
 	class:from-bsc-0={$networkBsc}
 	class:to-bsc-100={$networkBsc}
+	class:from-polygon-0={$networkPolygon}
+	class:to-polygon-100={$networkPolygon}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
@@ -144,7 +148,7 @@
 		</div>
 	{:else}
 		<div in:slide={SLIDE_PARAMS}>
-			<ExchangeBalance />
+			<ExchangeBalance hideBalance={$isPrivacyMode} />
 		</div>
 	{/if}
 

@@ -363,7 +363,7 @@ jobs:
       - name: Deploy Frontend to Environment
         run: |
           if [ "$deploy_frontend" == "true" ] ; then
-            dfx deploy frontend --network $NETWORK
+            dfx deploy frontend --network "$NETWORK" --no-asset-upgrade
           fi
         env:
           VITE_ETHERSCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_ETHERSCAN_API_KEY }}

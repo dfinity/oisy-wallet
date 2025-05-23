@@ -77,7 +77,7 @@
 				<SwapBestRateBadge />
 			{/if}
 			<span class="mt-1">
-				{usdBalance}
+				{usdBalance ?? $i18n.tokens.text.exchange_is_not_available_short}
 			</span>
 		</div>
 	</LogoButton>

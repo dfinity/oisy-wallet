@@ -176,7 +176,8 @@ describe('ic-transactions.derived', () => {
 			expect(get(icKnownDestinations)).toEqual({
 				[transactions[0].data.to as string]: {
 					amounts: transactions.map(({ data }) => ({ value: data.value, token: ICP_TOKEN })),
-					timestamp: maxTimestamp
+					timestamp: maxTimestamp,
+					address: transactions[0].data.to
 				}
 			});
 		});

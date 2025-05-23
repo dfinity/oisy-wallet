@@ -12,18 +12,18 @@
 
 	export let token: Token;
 
-	let feeStore = initFeeStore();
+	const feeStore = initFeeStore();
 
-	let feeSymbolStore = writable<string | undefined>(undefined);
+	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(token.symbol);
 
-	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
 	$: feeTokenIdStore.set(token.id);
 
-	let feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set(token.decimals);
 
-	let feeExchangeRateStore = writable<number | undefined>(undefined);
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
 	$: feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
 
 	setContext<FeeContextType>(

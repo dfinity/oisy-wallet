@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ContactHeader from '$lib/components/address-book/ContactHeader.svelte';
 	import IconEmptyAddresses from '$lib/components/icons/IconEmptyAddresses.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
@@ -12,37 +11,35 @@
 		CONTACT_SHOW_CLOSE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Address, Contact } from '$lib/types/contact';
+	import type { ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		contact: Contact;
-		close: () => void;
-		addAddress?: () => void;
-		showAddress?: (address: Address) => void;
-		edit?: (contact: Contact) => void;
+		contact: ContactUi;
+		onClose: () => void;
+		onAddAddress: () => void;
+		onShowAddress: (index: number) => void;
+		onEdit?: (contact: ContactUi) => void;
 	}
 
-	let { contact, close, edit, addAddress, showAddress }: Props = $props();
+	let { contact, onClose, onEdit, onAddAddress, onShowAddress }: Props = $props();
 
 	let hasAddresses = $derived(contact?.addresses && contact.addresses.length > 0);
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-stretch gap-5">
-	<ContactHeader name={contact.name} edit={() => edit?.(contact)}></ContactHeader>
+	<ContactHeader name={contact.name} onEdit={() => onEdit?.(contact)}></ContactHeader>
 
 	{#if hasAddresses}
 		<!--
 		TODO: Render AddressListItems here
-		https://github.com/dfinity/oisy-wallet/pull/6243 
+		https://github.com/dfinity/oisy-wallet/pull/6462
 		-->
 		<div>
-			{#each contact.addresses as address (address.id)}
+			{#each contact.addresses as address, index (index)}
 				<div class="flex items-center">
-					<div class="grow">ADDRESS: {address.address} {address.alias}</div>
-					{#if nonNullish(showAddress)}
-						<Button styleClass="flex-none" on:click={() => showAddress(address)}>Show</Button>
-					{/if}
+					<div class="grow">ADDRESS: {address.address} {address.label}</div>
+					<Button styleClass="flex-none" on:click={() => onShowAddress(index)}>SHOW</Button>
 				</div>
 			{/each}
 		</div>
@@ -68,8 +65,7 @@
 				ariaLabel={$i18n.address_book.show_contact.add_address}
 				colorStyle="tertiary-main-card"
 				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
-				disabled={isNullish(addAddress)}
-				on:click={() => addAddress?.()}
+				on:click={onAddAddress}
 			>
 				<span class="flex items-center">
 					<IconPlus />
@@ -80,6 +76,6 @@
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => close()} testId={CONTACT_SHOW_CLOSE_BUTTON}></ButtonCancel>
+		<ButtonCancel onclick={() => onClose()} testId={CONTACT_SHOW_CLOSE_BUTTON}></ButtonCancel>
 	</ButtonGroup>
 </ContentWithToolbar>

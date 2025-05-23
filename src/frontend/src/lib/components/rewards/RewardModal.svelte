@@ -44,7 +44,7 @@
 	<ContentWithToolbar>
 		<RewardBanner {reward} />
 
-		<RewardEarnings bind:amountOfRewards />
+		<RewardEarnings {reward} bind:amountOfRewards />
 		{#if amountOfRewards > 0}
 			<Hr spacing="md" />
 		{/if}

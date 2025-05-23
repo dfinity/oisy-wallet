@@ -107,13 +107,16 @@ describe('btc-transactions.derived', () => {
 				transactions
 			});
 
+			const maxTimestamp = Math.max(...transactions.map(({ data }) => Number(data.timestamp)));
+
 			expect(get(btcKnownDestinations)).toEqual({
 				[transactions[0].data.to?.[0] ?? '']: {
 					amounts: transactions.map(({ data }) => ({
 						value: data.value,
 						token: BTC_MAINNET_TOKEN
 					})),
-					timestamp: Number(transactions[0].data.timestamp)
+					timestamp: maxTimestamp,
+					address: transactions[0].data.to?.[0]
 				}
 			});
 		});

@@ -12,8 +12,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { emit } from '$lib/utils/events.utils';
 
-	let visible = false;
-	let button: HTMLButtonElement | undefined;
+	let visible = $state(false);
+	let button = $state<HTMLButtonElement | undefined>();
 
 	const manageTokensId = Symbol();
 
@@ -30,16 +30,18 @@
 
 <ButtonIcon
 	bind:button
-	on:click={() => (visible = true)}
+	onclick={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
 	disabled={$erc20UserTokensNotInitialized}
 	link={false}
 	colorStyle="muted"
 	styleClass={visible ? 'active' : ''}
 >
-	<NotificationBlob slot="icon" display={$hideZeroBalances} position="top-right">
-		<IconManage />
-	</NotificationBlob>
+	{#snippet icon()}
+		<NotificationBlob display={$hideZeroBalances} position="top-right">
+			<IconManage />
+		</NotificationBlob>
+	{/snippet}
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">

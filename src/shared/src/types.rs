@@ -13,6 +13,7 @@ pub mod dapp;
 pub mod network;
 pub mod number;
 pub mod pow;
+pub mod result_types;
 pub mod settings;
 pub mod signer;
 pub mod snapshot;

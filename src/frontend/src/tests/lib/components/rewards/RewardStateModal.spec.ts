@@ -1,3 +1,4 @@
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import type { RewardDescription } from '$env/types/env-reward';
 import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
 import rewardReceived from '$lib/assets/reward-received.svg';
@@ -19,7 +20,7 @@ describe('RewardStateModal', () => {
 
 	it('should render modal content', () => {
 		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
-			(campaign) => campaign.id === 'OISY Airdrop #1'
+			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 		);
 		assertNonNullish(mockedReward);
 
@@ -47,7 +48,7 @@ describe('RewardStateModal', () => {
 
 	it('should render modal content for jackpot', () => {
 		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
-			(campaign) => campaign.id === 'OISY Airdrop #1'
+			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 		);
 		assertNonNullish(mockedReward);
 

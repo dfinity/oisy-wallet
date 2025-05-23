@@ -3,61 +3,44 @@ use candid::{CandidType, Deserialize};
 use super::account::TokenAccountId;
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
 pub struct Contact {
-    pub id: String,
+    pub id: u64,
     pub name: String,
     pub addresses: Vec<ContactAddressData>,
-    pub avatar: Option<String>,
+    pub update_timestamp_ns: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
 pub struct ContactAddressData {
     pub token_account_id: TokenAccountId,
     pub label: Option<String>,
 }
 
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
-pub struct ContactSettings {
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct StoredContacts {
     pub contacts: Vec<Contact>,
+    pub update_timestamp_ns: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AddContactRequest {
-    pub contact: Contact,
+#[serde(remote = "Self")]
+pub struct CreateContactRequest {
+    pub name: String,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct RemoveContactRequest {
-    pub contact_id: String,
-    pub address_to_remove: TokenAccountId,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
 pub struct UpdateContactRequest {
-    pub contact: Contact,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct AddAddressRequest {
-    pub contact_id: String,
-    pub contact_address_data: ContactAddressData,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct UpdateAddressRequest {
-    pub contact_id: String,
-    pub current_token_account_id: TokenAccountId,
-    pub new_address_data: ContactAddressData,
+    pub id: u64,
+    pub name: String,
+    pub addresses: Vec<ContactAddressData>,
+    pub update_timestamp_ns: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum ContactError {
-    UserNotFound,
     ContactNotFound,
-    ContactIdAlreadyExists,
-    ContactNameAlreadyExists,
     InvalidContactData,
-    AddressAlreadyExists,
-    AddressNotFound,
-    InvalidAddressFormat,
 }

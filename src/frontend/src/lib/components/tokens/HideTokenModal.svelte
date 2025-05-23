@@ -7,6 +7,7 @@
 		type WizardSteps
 	} from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
+	import { onDestroy } from 'svelte';
 	import HideTokenReview from '$lib/components/tokens/HideTokenReview.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -52,9 +53,6 @@
 			});
 
 			hideProgressStep = ProgressStepsHideToken.UPDATE_UI;
-
-			// We must navigate first otherwise we might land on the default token Ethereum selected while being on network ICP.
-			await gotoReplaceRoot();
 
 			await updateUi({
 				identity: $authIdentity
@@ -112,6 +110,8 @@
 
 		hideProgressStep = ProgressStepsHideToken.INITIALIZATION;
 	};
+
+	onDestroy(async () => await gotoReplaceRoot());
 </script>
 
 <WizardModal

@@ -1,3 +1,4 @@
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import type {
 	CampaignEligibility,
@@ -8,7 +9,7 @@ import type {
 
 export const mockCampaignEligibilities: CampaignEligibility[] = [
 	{
-		campaignId: 'OISY Airdrop #1',
+		campaignId: SPRINKLES_SEASON_1_EPISODE_3_ID,
 		available: true,
 		eligible: true,
 		criteria: [
@@ -32,7 +33,7 @@ export const mockCampaignEligibilities: CampaignEligibility[] = [
 		]
 	},
 	{
-		campaignId: 'OISY Airdrop #3',
+		campaignId: 'sprinkles_s1e5',
 		available: true,
 		eligible: false,
 		criteria: [

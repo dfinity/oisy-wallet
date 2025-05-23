@@ -1,12 +1,5 @@
-import {
-	BASE_ETH_TOKEN,
-	BASE_SEPOLIA_ETH_TOKEN
-} from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
-import {
-	BNB_MAINNET_TOKEN,
-	BNB_TESTNET_TOKEN
-} from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
+import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
 import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -32,16 +25,9 @@ describe('LoaderEthBalances', () => {
 		networkEnv: 'testnet'
 	});
 
-	const mainnetTokens: Token[] = [ETHEREUM_TOKEN, BASE_ETH_TOKEN, BNB_MAINNET_TOKEN];
+	const allTokens: Token[] = [...SUPPORTED_ETHEREUM_TOKENS, ...SUPPORTED_EVM_TOKENS];
 
-	const allTokens: Token[] = [
-		ETHEREUM_TOKEN,
-		SEPOLIA_TOKEN,
-		BASE_ETH_TOKEN,
-		BASE_SEPOLIA_ETH_TOKEN,
-		BNB_MAINNET_TOKEN,
-		BNB_TESTNET_TOKEN
-	];
+	const mainnetTokens: Token[] = allTokens.filter(({ network: { env } }) => env === 'mainnet');
 
 	beforeEach(() => {
 		vi.clearAllMocks();
