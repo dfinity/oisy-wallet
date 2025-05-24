@@ -18,7 +18,7 @@
 	interface Props {
 		contacts: ContactUi[];
 		onAddContact: () => void;
-		onShowAddress?: ({
+		onShowAddress: ({
 			contact,
 			addressIndex
 		}: {

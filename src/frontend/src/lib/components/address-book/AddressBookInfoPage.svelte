@@ -8,13 +8,12 @@
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
-	// Define the props with appropriate types
 	export let address: ContactAddressUi;
 	export let onClose: (step?: AddressBookSteps) => void;
-	export let previousStep: AddressBookSteps;
+	export let previousStepName: AddressBookSteps;
 
-	const onClickHandler = () => {
-		onClose(previousStep ?? AddressBookSteps.SHOW_CONTACT);
+	const onCloseHandler = () => {
+		onClose(previousStepName ?? AddressBookSteps.SHOW_CONTACT);
 	};
 </script>
 
@@ -22,19 +21,16 @@
 	{#if address?.address}
 		<AddressBookQrCode {address} />
 
-		<AddressInfoCard
-			{address}
-			showFullAddress={true}
-			styleClass="shadow-sm border border-divider"
-			showTypeOnTop={true}
-		/>
+		<AddressInfoCard {address} />
 	{:else}
+		<!-- Display a fallback message if no address is available. 
+			Styling is minimal and could be enhanced. -->
 		<div class="flex items-center justify-center py-4">
 			<p class="text-center text-sm font-medium text-brand-primary"> No address available. </p>
 		</div>
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={onClickHandler} testId={ADDRESS_EDIT_CANCEL_BUTTON} />
+		<ButtonBack onclick={onCloseHandler} testId={ADDRESS_EDIT_CANCEL_BUTTON} />
 	</ButtonGroup>
 </ContentWithToolbar>

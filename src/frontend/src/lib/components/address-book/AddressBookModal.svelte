@@ -47,7 +47,6 @@
 
 	let currentStep: WizardStep | undefined = $state();
 	let modal: WizardModal | undefined = $state();
-	let previousStep: AddressBookSteps | undefined = $state();
 	const close = () => modalStore.close();
 
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
@@ -60,16 +59,6 @@
 	let currentContact: ContactUi | undefined = $state();
 	// TODO Use contact store and remove
 	let currentAddressIndex: number | undefined = $state();
-
-	const handleClose = () => {
-		if (
-			currentStepName === AddressBookSteps.SHOW_ADDRESS &&
-			previousStepName === AddressBookSteps.SHOW_CONTACT
-		) {
-			return gotoStep(AddressBookSteps.SHOW_CONTACT);
-		}
-		return gotoStep(AddressBookSteps.ADDRESS_BOOK);
-	};
 
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
@@ -190,7 +179,7 @@
 			onShowAddress={({ contact, addressIndex }) => {
 				currentContact = contact;
 				currentAddressIndex = addressIndex;
-				previousStep = AddressBookSteps.ADDRESS_BOOK;
+				previousStepName = AddressBookSteps.ADDRESS_BOOK;
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
@@ -209,7 +198,7 @@
 			}}
 			onShowAddress={(addressIndex) => {
 				currentAddressIndex = addressIndex;
-				previousStep = AddressBookSteps.SHOW_CONTACT;
+				previousStepName = AddressBookSteps.SHOW_CONTACT;
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
@@ -253,12 +242,12 @@
 			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
-		<AddressBookInfoPage
-			address={nonNullish(currentAddressIndex)
-				? currentContact?.addresses[currentAddressIndex]
-				: undefined}
-			onClose={(step) => gotoStep(step ?? AddressBookSteps.SHOW_CONTACT)}
-			{previousStep}
-		/>
+		{#if nonNullish(currentAddressIndex) && currentContact?.addresses[currentAddressIndex]}
+			<AddressBookInfoPage
+				address={currentContact.addresses[currentAddressIndex]}
+				onClose={(step) => gotoStep(step ?? AddressBookSteps.SHOW_CONTACT)}
+				previousStepName={previousStepName ?? AddressBookSteps.SHOW_CONTACT}
+			/>
+		{/if}
 	{/if}
 </WizardModal>
