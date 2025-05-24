@@ -460,38 +460,31 @@ const nICP_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCT
 		}
 	: undefined;
 
-const vUSD_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.vUSD)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.vUSD,
-			position: 18
-		}
-	: undefined;
-
 const RUGGY_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.RUGGY)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.RUGGY,
-			position: 19
+			position: 18
 		}
 	: undefined;
 
 const NAK_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.NAK)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.NAK,
-			position: 20
+			position: 19
 		}
 	: undefined;
 
 const VCHF_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VCHF)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.VCHF,
-			position: 21
+			position: 20
 		}
 	: undefined;
 
 const VEUR_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VEUR)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.VEUR,
-			position: 22
+			position: 21
 		}
 	: undefined;
 
@@ -566,7 +559,6 @@ const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(AAA_IC_DATA) ? [AAA_IC_DATA] : []),
 	...(nonNullish(GLDT_IC_DATA) ? [GLDT_IC_DATA] : []),
 	...(nonNullish(nICP_IC_DATA) ? [nICP_IC_DATA] : []),
-	...(nonNullish(vUSD_IC_DATA) ? [vUSD_IC_DATA] : []),
 	...(nonNullish(RUGGY_IC_DATA) ? [RUGGY_IC_DATA] : []),
 	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : []),
 	...(nonNullish(VCHF_IC_DATA) ? [VCHF_IC_DATA] : []),
