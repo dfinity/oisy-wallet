@@ -39,6 +39,7 @@ describe('AddressBookInfoPage', () => {
 		});
 
 		await fireEvent.click(getByTestId(ADDRESS_EDIT_CANCEL_BUTTON));
+
 		expect(onClose).toHaveBeenCalledWith(AddressBookSteps.SHOW_CONTACT);
 	});
 
