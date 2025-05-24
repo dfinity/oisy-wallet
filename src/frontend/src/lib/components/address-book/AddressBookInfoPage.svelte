@@ -24,6 +24,8 @@
 		<AddressInfoCard {address} />
 	{:else}
 		<!-- Display a fallback message if no address is available. 
+			TODO:
+			Add i18n support for the message.
 			Styling is minimal and could be enhanced. -->
 		<div class="flex items-center justify-center py-4">
 			<p class="text-center text-sm font-medium text-brand-primary"> No address available. </p>
