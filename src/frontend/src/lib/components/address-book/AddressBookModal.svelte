@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -58,16 +59,6 @@
 	let currentContact: ContactUi | undefined = $state();
 	// TODO Use contact store and remove
 	let currentAddressIndex: number | undefined = $state();
-
-	const handleClose = () => {
-		if (
-			currentStepName === AddressBookSteps.SHOW_ADDRESS &&
-			previousStepName === AddressBookSteps.SHOW_CONTACT
-		) {
-			return gotoStep(AddressBookSteps.SHOW_CONTACT);
-		}
-		return gotoStep(AddressBookSteps.ADDRESS_BOOK);
-	};
 
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
@@ -155,11 +146,25 @@
 	testId={ADDRESS_BOOK_MODAL}
 	on:nnsClose={close}
 >
-	<svelte:fragment slot="title"
-		>{currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)
-			? editContactNameStep.title
-			: (currentStep?.title ?? '')}</svelte:fragment
-	>
+	<svelte:fragment slot="title">
+		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS}
+			<div class="flex flex-wrap items-center gap-2">
+				<Avatar
+					name={currentContact?.name}
+					variant="xs"
+					styleClass="rounded-full flex items-center justify-center"
+				/>
+				<div class="text-center text-lg font-semibold text-primary">
+					{currentContact?.name}
+				</div>
+			</div>
+		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
+			{editContactNameStep.title}
+		{:else}
+			{currentStep?.title ?? ''}
+		{/if}
+	</svelte:fragment>
+
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
 			{contacts}
@@ -174,6 +179,7 @@
 			onShowAddress={({ contact, addressIndex }) => {
 				currentContact = contact;
 				currentAddressIndex = addressIndex;
+				previousStepName = AddressBookSteps.ADDRESS_BOOK;
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
@@ -190,8 +196,9 @@
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
-			onShowAddress={(address) => {
-				currentAddressIndex = address;
+			onShowAddress={(addressIndex) => {
+				currentAddressIndex = addressIndex;
+				previousStepName = AddressBookSteps.SHOW_CONTACT;
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
@@ -223,11 +230,6 @@
 			isNewContact={isNullish(currentContact)}
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		/>
-	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentAddressIndex)}
-		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
-		{JSON.stringify(currentContact?.addresses[currentAddressIndex])}
-		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
-		<Button on:click={() => handleClose()}>BACK</Button>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep
 			contact={currentContact}
@@ -239,5 +241,13 @@
 			isNewAddress={isNullish(currentAddressIndex)}
 			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 		/>
+	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
+		{#if nonNullish(currentAddressIndex) && currentContact?.addresses[currentAddressIndex]}
+			<AddressBookInfoPage
+				address={currentContact.addresses[currentAddressIndex]}
+				onClose={(step) => gotoStep(step ?? AddressBookSteps.SHOW_CONTACT)}
+				previousStepName={previousStepName ?? AddressBookSteps.SHOW_CONTACT}
+			/>
+		{/if}
 	{/if}
 </WizardModal>
