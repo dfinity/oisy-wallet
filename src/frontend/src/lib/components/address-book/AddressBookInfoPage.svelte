@@ -1,6 +1,6 @@
 <script lang="ts">
 	import AddressBookQrCode from '$lib/components/address-book/AddressBookQrCode.svelte';
-	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
+	import AddressInfoCard from '$lib/components/address-book/AddressInfoCard.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -22,7 +22,7 @@
 	{#if address?.address}
 		<AddressBookQrCode {address} />
 
-		<AddressListItem
+		<AddressInfoCard
 			{address}
 			showFullAddress={true}
 			styleClass="shadow-sm border border-divider"
