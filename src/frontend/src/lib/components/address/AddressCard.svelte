@@ -1,24 +1,15 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 
 	interface Props {
 		logo?: Snippet;
 		content: Snippet;
-		description?: Snippet;
 		actions?: Snippet;
 		hasError?: boolean;
 		items?: 'start' | 'center' | 'end';
 	}
 
-	const {
-		logo,
-		content,
-		description,
-		actions,
-		hasError = false,
-		items = 'start'
-	}: Props = $props();
+	const { logo, content, actions, hasError = false, items = 'start' }: Props = $props();
 </script>
 
 <div
