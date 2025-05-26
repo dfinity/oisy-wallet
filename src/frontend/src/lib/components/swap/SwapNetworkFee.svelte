@@ -3,6 +3,7 @@
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProviderFee } from '$lib/types/swap';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let networkFee: ProviderFee;
 </script>
@@ -13,7 +14,7 @@
 	<div slot="main-value" class="flex flex-col">
 		<FeeDisplay
 			feeAmount={networkFee.fee}
-			symbol={networkFee.token.symbol}
+			symbol={getTokenDisplaySymbol(networkFee.token)}
 			decimals={networkFee.token.decimals}
 			displayExchangeRate={false}
 		/>
