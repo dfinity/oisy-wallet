@@ -29,10 +29,6 @@
 
 	<div class="flex w-full flex-col truncate pl-2 pr-4 text-sm sm:text-base">
 		{@render content()}
-
-		{#if nonNullish(description)}
-			<div class="w-full pl-2 pr-4 pt-1.5 text-sm sm:text-base">{@render description()}</div>
-		{/if}
 	</div>
 
 	{@render actions?.()}
