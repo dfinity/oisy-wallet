@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ContactHeader from '$lib/components/address-book/ContactHeader.svelte';
+	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import IconEmptyAddresses from '$lib/components/icons/IconEmptyAddresses.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -31,17 +32,26 @@
 	<ContactHeader name={contact.name} onEdit={() => onEdit?.(contact)}></ContactHeader>
 
 	{#if hasAddresses}
-		<!--
-		TODO: Render AddressListItems here
-		https://github.com/dfinity/oisy-wallet/pull/6462
-		-->
 		<div>
 			{#each contact.addresses as address, index (index)}
-				<div class="flex items-center">
-					<div class="grow">ADDRESS: {address.address} {address.label}</div>
-					<Button styleClass="flex-none" on:click={() => onShowAddress(index)}>SHOW</Button>
-				</div>
+				<AddressListItem
+					{address}
+					addressItemActionsProps={{
+						onInfo: () => onShowAddress(index)
+					}}
+				/>
 			{/each}
+		</div>
+		<div class="flex justify-start">
+			<Button
+				alignLeft
+				ariaLabel={$i18n.address_book.edit_contact.add_address}
+				colorStyle="tertiary-main-card"
+				on:click={onAddAddress}
+			>
+				<IconPlus />
+				{$i18n.address_book.edit_contact.add_address}
+			</Button>
 		</div>
 	{:else}
 		<div class="mb-5 flex flex-col items-center gap-5">
@@ -67,9 +77,7 @@
 				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
 				on:click={onAddAddress}
 			>
-				<span class="flex items-center">
-					<IconPlus />
-				</span>
+				<IconPlus />
 				{$i18n.address_book.show_contact.add_address}
 			</Button>
 		</div>
