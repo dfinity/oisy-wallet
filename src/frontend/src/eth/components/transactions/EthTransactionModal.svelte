@@ -125,7 +125,7 @@
 			{#if type === 'receive' && nonNullish(to)}
 				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
 					<span>{$i18n.transaction.text.to}</span>
-					<output class="flex max-w-[50%] flex-row">
+					<span class="flex max-w-[50%] flex-row">
 						<output class="truncate">{to}</output>
 						<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
 						{#if nonNullish(toExplorerUrl)}
@@ -137,7 +137,7 @@
 								color="blue"
 							/>
 						{/if}
-					</output>
+					</span>
 				</li>
 			{/if}
 			{#if type === 'send' && nonNullish(from)}
@@ -223,12 +223,13 @@
 				{/snippet}
 			</Value>
 
+			-->
+
 			{#if nonNullish(to) && nonNullish(toDisplay)}
-				<Value ref="to">
-					{#snippet label()}
-						{$i18n.transaction.text.interacted_with}
-					{/snippet}
-					{#snippet content()}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>{$i18n.transaction.text.interacted_with}</span>
+
+					<span class="flex max-w-[50%] flex-row">
 						<output>{toDisplay}</output>
 						<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
 						{#if nonNullish(toExplorerUrl)}
@@ -240,10 +241,9 @@
 								color="blue"
 							/>
 						{/if}
-					{/snippet}
-				</Value>
+					</span>
+				</li>
 			{/if}
-			-->
 
 			{#if nonNullish(token)}
 				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
