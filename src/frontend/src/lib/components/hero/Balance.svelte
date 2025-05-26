@@ -15,7 +15,7 @@
 		token: OptionTokenUi;
 	}
 
-	let {token}: Props = $props();
+	let { token }: Props = $props();
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
