@@ -17,6 +17,7 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;
@@ -125,7 +126,7 @@
 		<button class="flex h-full gap-1 px-3" on:click disabled={!isSelectable}>
 			{#if token}
 				<TokenLogo data={token} logoSize="xs" />
-				<div class="ml-2 text-sm font-semibold">{token.symbol}</div>
+				<div class="ml-2 text-sm font-semibold">{getTokenDisplaySymbol(token)}</div>
 			{:else}
 				<span
 					class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"
