@@ -1045,6 +1045,10 @@
 			"show_addresses_of_contact": "Show all addresses for contact",
 			"hide_addresses": "Hide addresses of contact"
 		},
+		"edit_contact": {
+			"add_address": "Add address",
+			"delete_contact": "Delete contact"
+		},
 		"show_contact": {
 			"title": "Contact",
 			"add_address": "Add address",
@@ -1054,6 +1058,7 @@
 	},
 	"contact": {
 		"form": {
+			"edit_contact": "Edit contact",
 			"add_new_contact": "Add new contact"
 		},
 		"fields": {

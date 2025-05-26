@@ -106,7 +106,8 @@
 			</div>
 			<div class="flex flex-col gap-1.5 md:pl-20">
 				{#each contact.addresses as address, index (index)}
-					<AddressListItem {address} onInfo={() => onInfo(index)}></AddressListItem>
+					<AddressListItem {address} addressItemActionsProps={{ onInfo: () => onInfo(index) }}
+					></AddressListItem>
 				{/each}
 			</div>
 		</Collapsible>
