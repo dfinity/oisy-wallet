@@ -26,7 +26,7 @@ import {
 	SIDEBAR_NAVIGATION_MENU,
 	TOKEN_BALANCE,
 	TOKEN_CARD,
-	TOKEN_GROUP
+	TOKEN_GROUP, NAVIGATION_MENU_PRIVACY_MODE_BUTTON
 } from '$lib/constants/test-ids.constants';
 import type { InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -175,13 +175,25 @@ abstract class Homepage {
 
 	protected async mockSelectorAll({ selector }: SelectorOperationParams): Promise<void> {
 		const elementsLocator = this.#page.locator(selector);
+
+		await elementsLocator.first().waitFor()
+
 		await elementsLocator.evaluateAll((elements) => {
 			for (const element of elements) {
 				(element as HTMLElement).innerHTML = 'placeholder';
 			}
 		});
 
-		await elementsLocator.locator('text=placeholder').first().waitFor();
+		await Promise.all([
+			elementsLocator.locator('text=placeholder').first().waitFor(),
+			elementsLocator.evaluate(elements => {
+				return Array.from(elements).every(el => el.innerHTML === 'placeholder');
+			}).then(allUpdated => {
+				if (!allUpdated) {
+					throw new Error('Not all elements were updated to placeholder');
+				}
+			})
+		])
 	}
 
 	private async goto(): Promise<void> {
@@ -586,6 +598,20 @@ export class HomepageLoggedIn extends Homepage {
 		await this.clickMenuItem({ menuItemTestId: LOGOUT_BUTTON });
 
 		await this.waitForLoggedOutIndicator();
+	}
+
+	async activatePrivacyMode(): Promise<void> {
+		await this.clickMenuItem({menuItemTestId: NAVIGATION_MENU_PRIVACY_MODE_BUTTON })
+	}
+
+    async clickTokenGroupCard({
+	  	tokenSymbol,
+	 	networkSymbol
+  	}: {
+		tokenSymbol: string;
+		networkSymbol: string;
+	}): Promise<void> {
+		await this.clickByTestId({testId: `token-group-${tokenSymbol}-${networkSymbol}`})
 	}
 
 	async testReceiveModalQrCode({
