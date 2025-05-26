@@ -12,6 +12,7 @@
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
+	import {getTokenDisplaySymbol} from "$lib/utils/token.utils";
 
 	export let amount: bigint | undefined;
 	export let type: TransactionType;
@@ -46,7 +47,7 @@
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
-						<Amount {amount} decimals={token.decimals} symbol={token.symbol} formatPositiveAmount />
+						<Amount {amount} decimals={token.decimals} symbol={getTokenDisplaySymbol(token)} formatPositiveAmount />
 					{/if}
 				{/if}
 			</svelte:fragment>
