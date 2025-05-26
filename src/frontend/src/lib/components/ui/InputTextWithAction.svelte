@@ -28,6 +28,8 @@
 	autocomplete="off"
 	{testId}
 	on:nnsInput
+	on:blur
+	on:focus
 	bind:inputElement
 >
 	<slot name="inner-end" slot="inner-end" />
