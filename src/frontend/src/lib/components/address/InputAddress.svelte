@@ -12,17 +12,20 @@
 		getDiscriminatorForTokenAccountId,
 		getNetworksForTokenAccountIdType
 	} from '$lib/utils/token-account-id.utils';
+	import type { ZodError } from 'zod';
 
 	interface InputAddressProps {
 		onQRCodeScan?: () => void;
 		value?: string;
 		addressType?: TokenAccountIdTypes;
+		parseError?: ZodError;
 	}
 
 	let {
 		onQRCodeScan,
 		value = $bindable(),
 		addressType = $bindable(),
+		parseError = $bindable(),
 		...props
 	}: InputAddressProps & ComponentProps<Input> = $props();
 
@@ -51,6 +54,7 @@
 	$effect(() => {
 		// Because bindable props may not be derrived, set it manually in an effect
 		addressType = currentAddressType;
+		parseError = tokenAccountIdParseResult?.error;
 	});
 </script>
 
