@@ -197,6 +197,8 @@ export const CONTACT_HEADER_EDITING_EDIT_BUTTON = 'contact-header-editing-edit-b
 
 export const ADDRESS_LIST_ITEM_COPY_BUTTON = 'address-list-item-copy-button';
 export const ADDRESS_LIST_ITEM_INFO_BUTTON = 'address-list-item-info-button';
+export const ADDRESS_LIST_ITEM_EDIT_BUTTON = 'address-list-item-edit-button';
+export const ADDRESS_LIST_ITEM_DELETE_BUTTON = 'address-list-item-delete-button';
 
 export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
 
@@ -208,3 +210,8 @@ export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
 
 export const SEND_FEE_INFO = 'send-fee-info';
+
+// Contact Card test IDs
+export const CONTACT_CARD = 'contact-card';
+export const CONTACT_CARD_BUTTON = 'contact-card-button';
+export const CONTACT_CARD_EXPAND_BUTTON = 'contact-card-expand-button';
