@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
+	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import { SEND_DESTINATION_SECTION } from '$lib/constants/test-ids.constants';
@@ -22,21 +23,23 @@
 <div class="mb-10 mt-6" data-tid={SEND_DESTINATION_SECTION}>
 	<div class="font-bold">{$i18n.core.text.to}</div>
 
-	<div
-		class="flex items-center rounded-lg border bg-secondary px-2 py-3"
-		class:border-tertiary={!invalidDestination}
-		class:border-error-solid={invalidDestination}
-	>
-		<NetworkLogo network={$sendToken.network} />
+	<AddressCard hasError={invalidDestination} items="center">
+		{#snippet logo()}
+			<NetworkLogo network={$sendToken.network} />
+		{/snippet}
 
-		<div class="w-full truncate pl-2 pr-4 text-sm sm:text-base">{destination}</div>
+		{#snippet content()}
+			{destination}
+		{/snippet}
 
-		<button
-			class="text-brand-primary"
-			onclick={onIcSendDestinationStep}
-			aria-label={$i18n.core.text.back}
-		>
-			<IconPenLine />
-		</button>
-	</div>
+		{#snippet actions()}
+			<button
+				class="text-brand-primary"
+				onclick={onIcSendDestinationStep}
+				aria-label={$i18n.core.text.back}
+			>
+				<IconPenLine />
+			</button>
+		{/snippet}
+	</AddressCard>
 </div>
