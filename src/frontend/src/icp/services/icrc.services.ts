@@ -13,6 +13,7 @@ import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	mapIcrcToken,
 	mapTokenOisyName,
+	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
 import { listCustomTokens } from '$lib/api/backend.api';
@@ -41,7 +42,9 @@ export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity })
 
 const loadDefaultIcrcTokens = async () => {
 	await Promise.all(
-		ICRC_TOKENS.map(mapTokenOisyName).map((token) => loadDefaultIcrc({ data: token }))
+		ICRC_TOKENS.map(mapTokenOisyName)
+			.map(mapTokenOisySymbol)
+			.map((token) => loadDefaultIcrc({ data: token }))
 	);
 };
 

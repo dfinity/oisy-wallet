@@ -142,7 +142,7 @@
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
 				{#snippet title()}
-					{token.symbol}
+					{nonNullish(token.oisySymbol) ? token.oisySymbol.oisySymbol : token.symbol}
 				{/snippet}
 
 				{#snippet subtitle()}

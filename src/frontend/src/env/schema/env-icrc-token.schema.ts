@@ -18,5 +18,5 @@ export const EnvIcrcTokenMetadataWithIconSchema =
 
 export const EnvIcTokenSchema = z.object({
 	ledgerCanisterId: z.string(),
-	indexCanisterId: z.string()
+	indexCanisterId: z.string().optional()
 });
