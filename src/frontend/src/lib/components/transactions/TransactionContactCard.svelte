@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
-	import type { ContactUi } from '$lib/types/contact';
-	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import Copy from '$lib/components/ui/Copy.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ContactUi } from '$lib/types/contact';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
 
 	interface Props {
 		type: 'send' | 'receive';
