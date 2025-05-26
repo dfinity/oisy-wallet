@@ -11,7 +11,11 @@
 	import type { OptionTokenUi } from '$lib/types/token';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let token: OptionTokenUi;
+	interface Props {
+		token: OptionTokenUi;
+	}
+
+	let { token }: Props = $props();
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
