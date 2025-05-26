@@ -22,7 +22,11 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionToken } from '$lib/types/token';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
-	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
+	import {
+		formatNanosecondsToDate,
+		formatToken,
+		shortenWithMiddleEllipsis
+	} from '$lib/utils/format.utils';
 
 	export let transaction: IcTransactionUi;
 	export let token: OptionToken;
@@ -101,7 +105,7 @@
 				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
 					<span>{$i18n.transaction.text.to}</span>
 					<output class="flex max-w-[50%] flex-row">
-						<output class="truncate">{to}</output>
+						<output>{shortenWithMiddleEllipsis({ text: to })}</output>
 						<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
 						{#if nonNullish(toExplorerUrl)}
 							<ExternalLink
@@ -119,7 +123,7 @@
 				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
 					<span>{$i18n.transaction.text.from}</span>
 					<output class="flex max-w-[50%] flex-row">
-						<output class="truncate">{from}</output>
+						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
 						<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
 						{#if nonNullish(fromExplorerUrl)}
 							<ExternalLink

@@ -75,7 +75,7 @@
 	})();
 </script>
 
-<label for="to">{$i18n.transaction.text.status}:</label>
+<label for="to">{$i18n.transaction.text.status}</label>
 
 <span id="to" class="break-all font-normal first-letter:capitalize">
 	{#if nonNullish(status)}

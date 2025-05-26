@@ -126,7 +126,7 @@
 				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
 					<span>{$i18n.transaction.text.to}</span>
 					<span class="flex max-w-[50%] flex-row">
-						<output class="truncate">{to}</output>
+						<output>{shortenWithMiddleEllipsis({ text: to })}</output>
 						<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
 						{#if nonNullish(toExplorerUrl)}
 							<ExternalLink
@@ -144,7 +144,7 @@
 				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
 					<span>{$i18n.transaction.text.from}</span>
 					<output class="flex max-w-[50%] flex-row">
-						<output class="truncate">{from}</output>
+						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
 						<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
 						{#if nonNullish(fromExplorerUrl)}
 							<ExternalLink
@@ -229,7 +229,7 @@
 				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
 					<span>{$i18n.transaction.text.interacted_with}</span>
 
-					<span class="flex max-w-[50%] flex-row">
+					<span class="flex max-w-[50%] flex-row break-all">
 						<output>{toDisplay}</output>
 						<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
 						{#if nonNullish(toExplorerUrl)}
