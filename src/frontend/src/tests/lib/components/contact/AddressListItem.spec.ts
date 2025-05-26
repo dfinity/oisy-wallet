@@ -3,7 +3,7 @@ import {
 	ADDRESS_LIST_ITEM_COPY_BUTTON,
 	ADDRESS_LIST_ITEM_INFO_BUTTON
 } from '$lib/constants/test-ids.constants';
-import type { Address } from '$lib/types/contact';
+import type { ContactAddressUi } from '$lib/types/contact';
 import * as clipboardUtils from '$lib/utils/clipboard.utils';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
@@ -25,23 +25,23 @@ describe('AddressListItem', () => {
 	// Setup the context with the mocked i18n store
 	const mockContext = new Map([['i18n', mockI18n]]);
 
-	const icrcAddress: Address = {
-		addressType: 'Icrc2',
+	const icrcAddress: ContactAddressUi = {
+		addressType: 'Icrcv2',
 		address: mockAccountIdentifierText
 	};
 
-	const btcAddress: Address = {
+	const btcAddress: ContactAddressUi = {
 		addressType: 'Btc',
 		address: mockBtcAddress,
-		alias: 'My Bitcoin Address'
+		label: 'My Bitcoin Address'
 	};
 
-	const ethAddress: Address = {
+	const ethAddress: ContactAddressUi = {
 		addressType: 'Eth',
 		address: mockEthAddress
 	};
 
-	const solAddress: Address = {
+	const solAddress: ContactAddressUi = {
 		addressType: 'Sol',
 		address: mockSolAddress
 	};
@@ -53,7 +53,7 @@ describe('AddressListItem', () => {
 		});
 
 		// Check address type name is displayed
-		expect(container).toHaveTextContent(en.address.types.Icrc2);
+		expect(container).toHaveTextContent(en.address.types.Icrcv2);
 
 		// Check shortened address is displayed
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: icrcAddress.address }));
@@ -75,7 +75,7 @@ describe('AddressListItem', () => {
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: btcAddress.address }));
 
 		// Check that alias is displayed
-		expect(container).toHaveTextContent(btcAddress.alias as string);
+		expect(container).toHaveTextContent(btcAddress.label as string);
 
 		// Check that the separator dot is displayed
 		expect(container).toHaveTextContent('•');

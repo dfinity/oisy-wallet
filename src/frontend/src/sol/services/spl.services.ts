@@ -3,6 +3,7 @@ import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/net
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { listCustomTokens } from '$lib/api/backend.api';
+import { setIdbSolTokens } from '$lib/api/idb-tokens.api';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -66,17 +67,28 @@ export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Pr
 		strategy: 'query'
 	});
 
-const loadSplCustomTokens = async (params: {
+const loadSplCustomTokens = async ({
+	identity,
+	certified
+}: {
 	identity: OptionIdentity;
 	certified: boolean;
 }): Promise<CustomToken[]> => {
 	const tokens = await listCustomTokens({
-		...params,
+		identity,
+		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
 	// We filter the custom tokens that are Spl (the backend "Custom Token" potentially supports other types).
-	return tokens.filter(({ token }) => 'SplMainnet' in token || 'SplDevnet' in token);
+	const splTokens = tokens.filter(({ token }) => 'SplMainnet' in token || 'SplDevnet' in token);
+
+	// Caching the custom tokens in the IDB if update call
+	if (certified) {
+		await setIdbSolTokens({ identity, tokens: splTokens });
+	}
+
+	return splTokens;
 };
 
 export const loadCustomTokensWithMetadata = async ({

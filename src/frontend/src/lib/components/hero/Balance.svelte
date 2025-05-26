@@ -10,6 +10,7 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let token: OptionTokenUi;
 
@@ -23,14 +24,18 @@
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol) && !(token.balance === ZERO)}
 			{#if $isPrivacyMode}
-				<IconDots variant="lg" times={6} styleClass="h-17 mt-4" />
+				<IconDots variant="lg" times={6} styleClass="h-12.5 my-4.25" />
 			{:else}
-				<Amount amount={token.balance} decimals={token.decimals} symbol={token.symbol} />
+				<Amount
+					amount={token.balance}
+					decimals={token.decimals}
+					symbol={getTokenDisplaySymbol(token)}
+				/>
 			{/if}
 		{:else}
 			<span class:animate-pulse={$loading}>
 				{#if $isPrivacyMode}
-					<IconDots variant="lg" times={6} styleClass="h-17 mt-4" />
+					<IconDots variant="lg" times={6} styleClass="h-12.5 my-4.25" />
 				{:else}
 					0.00
 				{/if}

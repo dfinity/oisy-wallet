@@ -8,7 +8,6 @@
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isEthAddress } from '$lib/utils/account.utils';
@@ -26,22 +25,11 @@
 	let invalid = true;
 	$: invalid = invalidDestination || insufficientFunds || isNullish(amount);
 
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
 	const { feeSymbolStore, feeDecimalsStore, feeTokenIdStore }: FeeContext =
 		getContext<FeeContext>(FEE_CONTEXT_KEY);
 </script>
 
-<SendForm
-	on:icNext
-	on:icBack
-	{destination}
-	{invalidDestination}
-	token={$sendToken}
-	balance={$sendBalance}
-	disabled={invalid}
-	hideSource
->
+<SendForm on:icNext on:icBack {destination} {invalidDestination} disabled={invalid}>
 	<EthSendAmount
 		slot="amount"
 		{nativeEthereumToken}

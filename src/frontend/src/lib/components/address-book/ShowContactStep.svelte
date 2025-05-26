@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ContactHeader from '$lib/components/address-book/ContactHeader.svelte';
 	import IconEmptyAddresses from '$lib/components/icons/IconEmptyAddresses.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
@@ -12,15 +11,15 @@
 		CONTACT_SHOW_CLOSE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Address, Contact } from '$lib/types/contact';
+	import type { ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		contact: Contact;
+		contact: ContactUi;
 		onClose: () => void;
-		onAddAddress?: () => void;
-		onShowAddress?: (address: Address) => void;
-		onEdit?: (contact: Contact) => void;
+		onAddAddress: () => void;
+		onShowAddress: (index: number) => void;
+		onEdit?: (contact: ContactUi) => void;
 	}
 
 	let { contact, onClose, onEdit, onAddAddress, onShowAddress }: Props = $props();
@@ -34,20 +33,18 @@
 	{#if hasAddresses}
 		<!--
 		TODO: Render AddressListItems here
-		https://github.com/dfinity/oisy-wallet/pull/6243
+		https://github.com/dfinity/oisy-wallet/pull/6462
 		-->
 		<div>
 			{#each contact.addresses as address, index (index)}
 				<div class="flex items-center">
-					<div class="grow">ADDRESS: {address.address} {address.alias}</div>
-					{#if nonNullish(onShowAddress)}
-						<Button styleClass="flex-none" on:click={() => onShowAddress(address)}>Show</Button>
-					{/if}
+					<div class="grow">ADDRESS: {address.address} {address.label}</div>
+					<Button styleClass="flex-none" on:click={() => onShowAddress(index)}>SHOW</Button>
 				</div>
 			{/each}
 		</div>
 	{:else}
-		<div class="my-5 flex flex-col items-center gap-5">
+		<div class="mb-5 flex flex-col items-center gap-5">
 			<div class="text-secondary-inverted">
 				<IconEmptyAddresses />
 			</div>
@@ -68,8 +65,7 @@
 				ariaLabel={$i18n.address_book.show_contact.add_address}
 				colorStyle="tertiary-main-card"
 				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
-				disabled={isNullish(onAddAddress)}
-				on:click={() => onAddAddress?.()}
+				on:click={onAddAddress}
 			>
 				<span class="flex items-center">
 					<IconPlus />
