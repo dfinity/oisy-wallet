@@ -223,21 +223,21 @@ describe('exchange.worker', () => {
 
 					expect(simpleTokenPrice).toHaveBeenCalledTimes(3);
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
+						id: 'ethereum',
+						vs_currencies: 'usd',
+						contract_addresses: ['0x123', '0xabc'],
+						include_market_cap: true
+					});
+					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
 						id: 'polygon-pos',
 						vs_currencies: 'usd',
 						contract_addresses: ['0x456'],
 						include_market_cap: true
 					});
-					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
+					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
 						id: 'binance-smart-chain',
 						vs_currencies: 'usd',
 						contract_addresses: ['0x789'],
-						include_market_cap: true
-					});
-					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
-						id: 'ethereum',
-						vs_currencies: 'usd',
-						contract_addresses: ['0x123', '0xabc'],
 						include_market_cap: true
 					});
 				});
@@ -301,21 +301,21 @@ describe('exchange.worker', () => {
 					expect(simpleTokenPrice).toHaveBeenCalledTimes(3 + 1 + 1);
 
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
+						id: 'ethereum',
+						vs_currencies: 'usd',
+						contract_addresses: ['0x123', '0xabc'],
+						include_market_cap: true
+					});
+					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
 						id: 'polygon-pos',
 						vs_currencies: 'usd',
 						contract_addresses: ['0x456'],
 						include_market_cap: true
 					});
-					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
+					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
 						id: 'binance-smart-chain',
 						vs_currencies: 'usd',
 						contract_addresses: ['0x789'],
-						include_market_cap: true
-					});
-					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
-						id: 'ethereum',
-						vs_currencies: 'usd',
-						contract_addresses: ['0x123', '0xabc'],
 						include_market_cap: true
 					});
 
