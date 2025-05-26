@@ -3,6 +3,11 @@
 	import { nonNullish } from '@dfinity/utils';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
+	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import SettingsList from '$lib/components/settings/SettingsList.svelte';
+	import SettingsListItem from '$lib/components/settings/SettingsListItem.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -12,11 +17,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import SettingsList from '$lib/components/settings/SettingsList.svelte';
-	import SettingsListItem from '$lib/components/settings/SettingsListItem.svelte';
-	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import ModalHero from '$lib/components/common/ModalHero.svelte';
 
 	export let transaction: IcTransactionUi;
 	export let token: OptionToken;
