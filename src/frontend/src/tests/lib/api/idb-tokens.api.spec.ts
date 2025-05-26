@@ -1,9 +1,9 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
-import { setIdbTokensStore } from '$lib/api/idb-tokens.api';
+import { deleteIdbIcTokens, deleteIdbSolTokens, setIdbTokensStore } from '$lib/api/idb-tokens.api';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
@@ -111,6 +111,24 @@ describe('idb-tokens.api', () => {
 				[],
 				mockIdbTokensStore
 			);
+		});
+	});
+
+	describe('deleteIdbIcTokens', () => {
+		it('should delete IC tokens', async () => {
+			await deleteIdbIcTokens(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledOnce();
+			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
+	describe('deleteIdbSolTokens', () => {
+		it('should delete SOL tokens', async () => {
+			await deleteIdbSolTokens(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledOnce();
+			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
 		});
 	});
 });
