@@ -53,3 +53,5 @@ SUCCESS: The cycles_ledger installation files have been created:
 cycles_ledger candid:       $CANDID_FILE
 cycles_ledger Wasm:         $WASM_FILE
 EOF
+
+./scripts/build.cycles_ledger.args.sh

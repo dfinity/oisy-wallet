@@ -26,7 +26,24 @@ CANISTER_ID_CYCLES_LEDGER="${CANISTER_ID_CYCLES_LEDGER:-$(dfx canister id cycles
 rm -f "$ARG_FILE"
 mkdir -p "$(dirname "$ARG_FILE")"
 cat <<EOF >"$ARG_FILE"
-(record { ledger_id = principal "$CANISTER_ID_CYCLES_LEDGER" })
+(variant {
+  Init = record {
+    ledger_id = principal "$CANISTER_ID_CYCLES_LEDGER";
+    max_blocks_per_request = 2000;
+    minting_account = record { owner = principal "$PRINCIPAL" };
+    metadata = vec {};
+    transfer_fee = 10_000;
+    initial_balances = vec {};
+    archive_options = record {
+        num_blocks_to_archive = 10_000;
+        trigger_threshold = 20_000;
+        controller_id = principal "$PRINCIPAL";
+        cycles_for_archive_creation = opt 1_000_000_000_000;
+        max_message_size_bytes = null;
+        node_max_memory_size_bytes = opt 3_221_225_472;
+    };
+  }
+})
 EOF
 
 ####

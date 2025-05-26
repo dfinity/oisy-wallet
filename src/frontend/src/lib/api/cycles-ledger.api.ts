@@ -23,8 +23,9 @@ import type {
 	TransferFromError,
 	WithdrawArgs
 } from '$declarations/cycles_ledger/cycles_ledger.did';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { CyclesLedgerCanister } from '$lib/canisters/cycles-ledger.canister';
-import type { CanisterApiFunctionParams, LedgerCanisterIdText } from '$lib/types/canister';
+import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 

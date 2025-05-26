@@ -67,6 +67,8 @@ for canister in "${canisters[@]}"; do
   echo "Generating bindings for $canister"
   dfx generate "$canister"
 done
+
+
 # Clean up..
 node scripts/did.update.types.mjs
 node scripts/did.delete.types.mjs
