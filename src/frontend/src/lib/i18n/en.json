@@ -463,7 +463,9 @@
 			"select_token": "Select token to send",
 			"select_network_filter": "Select network filter",
 			"send_again": "Send again",
-			"recently_used": "Recently used"
+			"recently_used": "Recently used",
+			"recently_used_empty_state_title": "Recently used addresses will appear here",
+			"recently_used_empty_state_description": "Make your first send now!"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",

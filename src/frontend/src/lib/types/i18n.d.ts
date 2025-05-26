@@ -436,6 +436,8 @@ interface I18nSend {
 		select_network_filter: string;
 		send_again: string;
 		recently_used: string;
+		recently_used_empty_state_title: string;
+		recently_used_empty_state_description: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
