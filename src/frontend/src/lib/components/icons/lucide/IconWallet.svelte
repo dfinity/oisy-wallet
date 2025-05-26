@@ -1,10 +1,10 @@
 <!-- source: ISC Lucide - please visit https://lucide.dev/license -->
 <script lang="ts">
 	interface Props {
-		size?: string
+		size?: string;
 	}
 
-	let {size = '24'}: Props = $props();
+	let { size = '24' }: Props = $props();
 </script>
 
 <svg
