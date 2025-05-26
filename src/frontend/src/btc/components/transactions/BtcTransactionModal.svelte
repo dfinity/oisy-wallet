@@ -6,14 +6,11 @@
 	import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TransactionAddress from '$lib/components/transactions/TransactionAddress.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
-	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
