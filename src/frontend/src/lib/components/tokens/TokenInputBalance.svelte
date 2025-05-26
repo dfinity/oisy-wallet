@@ -11,7 +11,7 @@
 		testId?: string;
 	}
 
-	let {token, balance, testId}: Props = $props();
+	let { token, balance, testId }: Props = $props();
 </script>
 
 <div class="flex items-center" data-tid={testId}>
