@@ -9,20 +9,24 @@
 		formatPositiveAmount?: boolean;
 	}
 
-	let {amount, decimals, symbol, formatPositiveAmount = false}: Props = $props();
+	let { amount, decimals, symbol, formatPositiveAmount = false }: Props = $props();
 
-	const detailedValue = $derived(formatToken({
-		value: amount,
-		unitName: decimals,
-		displayDecimals: decimals
-	}));
+	const detailedValue = $derived(
+		formatToken({
+			value: amount,
+			unitName: decimals,
+			displayDecimals: decimals
+		})
+	);
 
-	const displayValue = $derived(formatToken({
-		value: amount,
-		unitName: decimals,
-		displayDecimals: EIGHT_DECIMALS,
-		showPlusSign: formatPositiveAmount
-	}));
+	const displayValue = $derived(
+		formatToken({
+			value: amount,
+			unitName: decimals,
+			displayDecimals: EIGHT_DECIMALS,
+			showPlusSign: formatPositiveAmount
+		})
+	);
 </script>
 
 <span class:text-success-primary={formatPositiveAmount && amount > ZERO}>
