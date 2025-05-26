@@ -30,7 +30,7 @@ describe('mapHeaderData', () => {
 			icon: mockGroup.icon,
 			network: mockToken.network,
 			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
-			oisySymbol: { oisySymbol: mockGroup.name },
+			oisySymbol: { oisySymbol: mockGroup.symbol },
 			balance: bn1Bi,
 			usdBalance: 300,
 			tokenCount: 2
@@ -49,7 +49,7 @@ describe('mapHeaderData', () => {
 			icon: mockGroup.icon,
 			network: mockToken.network,
 			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
-			oisySymbol: { oisySymbol: mockGroup.name },
+			oisySymbol: { oisySymbol: mockGroup.symbol },
 			tokenCount: 2
 		};
 
