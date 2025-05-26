@@ -42,7 +42,7 @@
 	}: Props = $props();
 </script>
 
-<ContentWithToolbar styleClass="flex flex-col items-stretch gap-1">
+<ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
 	<LogoButton hover={false} condensed={true}>
 		{#snippet logo()}
 			<Avatar name={contact.name} variant="xs" styleClass="md:text-[19.2px]"></Avatar>
@@ -71,39 +71,45 @@
 	{#each contact.addresses as address, index (index)}
 		<AddressListItem
 			{address}
-			hideCopyButton={true}
-			onEdit={() => onEditAddress(index)}
-			onDelete={() => onDeleteAddress(index)}
+			addressItemActionsProps={{
+				hideCopyButton: true,
+				onEdit: () => onEditAddress(index),
+				onDelete: () => onDeleteAddress(index)
+			}}
 		/>
 	{/each}
 
-	<Button
-		fullWidth
-		alignLeft
-		ariaLabel={$i18n.address_book.edit_contact.add_address}
-		colorStyle="tertiary-main-card"
-		disabled={isNullish(onAddAddress)}
-		on:click={() => onAddAddress?.()}
-		testId={CONTACT_EDIT_ADD_ADDRESS_BUTTON}
-	>
-		<IconPlus />
-		{$i18n.address_book.edit_contact.add_address}
-	</Button>
+	<div class="flex justify-start">
+		<Button
+			alignLeft
+			ariaLabel={$i18n.address_book.edit_contact.add_address}
+			colorStyle="tertiary-main-card"
+			disabled={isNullish(onAddAddress)}
+			on:click={() => onAddAddress?.()}
+			testId={CONTACT_EDIT_ADD_ADDRESS_BUTTON}
+		>
+			<IconPlus />
+			{$i18n.address_book.edit_contact.add_address}
+		</Button>
+	</div>
 
 	<Hr />
 
-	<Button
-		fullWidth
-		alignLeft
-		styleClass="text-error-primary hover:bg-error-light"
-		ariaLabel={$i18n.address_book.edit_contact.delete_contact}
-		colorStyle="tertiary-main-card"
-		on:click={() => onDeleteContact?.(contact.id)}
-		testId={CONTACT_EDIT_DELETE_CONTACT_BUTTON}
-	>
-		<IconTrash />
-		{$i18n.address_book.edit_contact.delete_contact}
-	</Button>
+	<div class="flex justify-start">
+		<Button
+			alignLeft
+			styleClass="text-error-primary hover:bg-error-light"
+			ariaLabel={$i18n.address_book.edit_contact.delete_contact}
+			colorStyle="tertiary-main-card"
+			on:click={() => onDeleteContact?.(contact.id)}
+			testId={CONTACT_EDIT_DELETE_CONTACT_BUTTON}
+		>
+			<IconTrash />
+			{$i18n.address_book.edit_contact.delete_contact}
+		</Button>
+	</div>
+
+	<div class="flex-grow"></div>
 
 	<ButtonGroup slot="toolbar">
 		<ButtonCancel onclick={onClose} testId={CONTACT_SHOW_CLOSE_BUTTON}></ButtonCancel>
