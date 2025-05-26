@@ -23,7 +23,7 @@
 <div class="mb-10 mt-6" data-tid={SEND_DESTINATION_SECTION}>
 	<div class="font-bold">{$i18n.core.text.to}</div>
 
-	<AddressCard hasError={invalidDestination}>
+	<AddressCard hasError={invalidDestination} items="center">
 		{#snippet logo()}
 			<NetworkLogo network={$sendToken.network} />
 		{/snippet}

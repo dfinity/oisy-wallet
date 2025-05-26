@@ -8,13 +8,21 @@
 		description?: Snippet;
 		actions?: Snippet;
 		hasError?: boolean;
+		items?: 'start' | 'center' | 'end';
 	}
 
-	const { logo, content, description, actions, hasError = false }: Props = $props();
+	const {
+		logo,
+		content,
+		description,
+		actions,
+		hasError = false,
+		items = 'start'
+	}: Props = $props();
 </script>
 
 <div
-	class="flex items-center rounded-lg border border-disabled bg-secondary px-2 py-3"
+	class={`flex rounded-lg border border-disabled bg-secondary px-2 py-3 items-${items}`}
 	class:border-error-solid={hasError}
 >
 	{@render logo?.()}
