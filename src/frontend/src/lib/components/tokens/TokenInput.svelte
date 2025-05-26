@@ -17,7 +17,7 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import {getTokenDisplaySymbol} from "$lib/utils/token.utils";
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;
