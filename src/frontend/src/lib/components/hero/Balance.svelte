@@ -26,7 +26,11 @@
 			{#if $isPrivacyMode}
 				<IconDots variant="lg" times={6} styleClass="h-12.5 my-4.25" />
 			{:else}
-				<Amount amount={token.balance} decimals={token.decimals} symbol={getTokenDisplaySymbol(token)} />
+				<Amount
+					amount={token.balance}
+					decimals={token.decimals}
+					symbol={getTokenDisplaySymbol(token)}
+				/>
 			{/if}
 		{:else}
 			<span class:animate-pulse={$loading}>
