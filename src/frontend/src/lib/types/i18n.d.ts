@@ -436,6 +436,8 @@ interface I18nSend {
 		select_network_filter: string;
 		send_again: string;
 		recently_used: string;
+		recently_used_empty_state_title: string;
+		recently_used_empty_state_description: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -958,6 +960,7 @@ interface I18nAddress_book {
 		no_contact_found: string;
 	};
 	alt: { show_addresses_of_contact: string; hide_addresses: string };
+	edit_contact: { add_address: string; delete_contact: string };
 	show_contact: {
 		title: string;
 		add_address: string;
@@ -967,7 +970,7 @@ interface I18nAddress_book {
 }
 
 interface I18nContact {
-	form: { add_new_contact: string };
+	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
 }
 

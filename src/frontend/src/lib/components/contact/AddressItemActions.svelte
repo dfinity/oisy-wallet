@@ -45,7 +45,11 @@
 			styleClass="-m-1 md:m-0 hover:text-inherit"
 			ariaLabel={$i18n.core.text.view}
 			testId={ADDRESS_LIST_ITEM_INFO_BUTTON}
-			onclick={onInfo}
+			onclick={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				onInfo();
+			}}
 		>
 			{#snippet icon()}
 				<IconInfo />
