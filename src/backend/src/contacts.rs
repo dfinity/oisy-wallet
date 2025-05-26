@@ -1,10 +1,11 @@
+use std::collections::BTreeMap;
+
 use shared::types::contact::{Contact, ContactError, StoredContacts};
 
 use crate::{
     mutate_state, random::generate_random_u64, read_state, time, types::StoredPrincipal, Candid,
     CreateContactRequest,
 };
-use std::collections::BTreeMap;
 
 pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
     if request.name.trim().is_empty() {
@@ -96,8 +97,8 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
 /// * `stored_principal` - The stored principal identifier of the user
 ///
 /// # Returns
-/// * `StoredContacts` - The user's stored contacts if found and successfully deserialized
-///   or an empty contacts structure if not found or deserialization fails
+/// * `StoredContacts` - The user's stored contacts if found and successfully deserialized or an
+///   empty contacts structure if not found or deserialization fails
 fn get_stored_contacts_safely(stored_principal: &StoredPrincipal) -> StoredContacts {
     read_state(|state| {
         if let Some(stored_contacts) = state.contact.get(stored_principal) {
