@@ -20,6 +20,9 @@
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import { contacts } from '$lib/derived/contacts.derived';
+	import type { ContactUi } from '$lib/types/contact';
+	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 
 	export let transaction: IcTransactionUi;
 	export let token: OptionToken;
@@ -49,8 +52,6 @@
 		fromExplorerUrl,
 		toExplorerUrl
 	} = transaction);
-
-	getContactForAddress({})
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -85,30 +86,54 @@
 			{/snippet}
 		</ModalHero>
 
-		{#if nonNullish(to) && type === 'receive'}
-			<AddressCard>
-				{#snippet logo()}
-					<AvatarWithBadge contact={} />
-				{/snippet}
-				{#snippet content()}
-					{to}
-				{/snippet}
-				{#snippet actions()}
-					<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
-					{#if nonNullish(toExplorerUrl)}
-						<ExternalLink
-							iconSize="18"
-							href={toExplorerUrl}
-							ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
-							inline
-							color="blue"
-						/>
-					{/if}
-				{/snippet}
-			</AddressCard>
+		{#if nonNullish(to) && nonNullish(from)}
+			<TransactionContactCard
+				type={type === 'receive' ? 'receive' : 'send'}
+				{to}
+				{from}
+				{toExplorerUrl}
+				{fromExplorerUrl}
+			/>
 		{/if}
 
 		<ul>
+			{#if type === 'send' && nonNullish(to)}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>{$i18n.transaction.text.to}</span>
+					<output class="flex max-w-[50%] flex-row">
+						<output class="truncate">{to}</output>
+						<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
+						{#if nonNullish(toExplorerUrl)}
+							<ExternalLink
+								iconSize="18"
+								href={toExplorerUrl}
+								ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
+								inline
+								color="blue"
+							/>
+						{/if}
+					</output>
+				</li>
+			{/if}
+			{#if type === 'receive' && nonNullish(from)}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>{$i18n.transaction.text.from}</span>
+					<output class="flex max-w-[50%] flex-row">
+						<output class="truncate">{from}</output>
+						<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
+						{#if nonNullish(fromExplorerUrl)}
+							<ExternalLink
+								iconSize="18"
+								href={fromExplorerUrl}
+								ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
+								inline
+								color="blue"
+							/>
+						{/if}
+					</output>
+				</li>
+			{/if}
+
 			{#if nonNullish(timestamp)}
 				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
 					<span>{$i18n.transaction.text.timestamp}</span>
