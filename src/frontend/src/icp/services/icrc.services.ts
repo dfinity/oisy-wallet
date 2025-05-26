@@ -119,7 +119,7 @@ const loadIcrcCustomTokens = async ({
 	const tokens = await loadNetworkCustomTokens({
 		identity,
 		certified,
-		filterTokens: (token) => 'Icrc' in token,
+		filterTokens: ({ token }) => 'Icrc' in token,
 		setIdbTokens: setIdbIcTokens
 	});
 

@@ -77,7 +77,7 @@ const loadSplCustomTokens = async ({
 	await loadNetworkCustomTokens({
 		identity,
 		certified,
-		filterTokens: (token) => 'SplMainnet' in token || 'SplDevnet' in token,
+		filterTokens: ({ token }) => 'SplMainnet' in token || 'SplDevnet' in token,
 		setIdbTokens: setIdbSolTokens
 	});
 

@@ -80,7 +80,7 @@ describe('custom-tokens.services', () => {
 		it('should filter the custom tokens based on the provided filter function', async () => {
 			const result = await loadNetworkCustomTokens({
 				...mockParams,
-				filterTokens: (token) => 'Icrc' in token.token
+				filterTokens: ({ token }) => 'Icrc' in token
 			});
 
 			const expectedTokens = mockCustomTokens.splice(0, 2);
