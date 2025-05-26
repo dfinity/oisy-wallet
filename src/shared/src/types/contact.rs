@@ -1,5 +1,6 @@
-use candid::{CandidType, Deserialize};
 use std::collections::BTreeMap;
+
+use candid::{CandidType, Deserialize};
 
 use super::account::TokenAccountId;
 
