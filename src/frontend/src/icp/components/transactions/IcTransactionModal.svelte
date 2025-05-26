@@ -17,6 +17,9 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
+	import AddressCard from '$lib/components/address/AddressCard.svelte';
+	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
 
 	export let transaction: IcTransactionUi;
 	export let token: OptionToken;
@@ -46,6 +49,8 @@
 		fromExplorerUrl,
 		toExplorerUrl
 	} = transaction);
+
+	getContactForAddress({})
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -79,6 +84,29 @@
 				{/if}
 			{/snippet}
 		</ModalHero>
+
+		{#if nonNullish(to) && type === 'receive'}
+			<AddressCard>
+				{#snippet logo()}
+					<AvatarWithBadge contact={} />
+				{/snippet}
+				{#snippet content()}
+					{to}
+				{/snippet}
+				{#snippet actions()}
+					<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
+					{#if nonNullish(toExplorerUrl)}
+						<ExternalLink
+							iconSize="18"
+							href={toExplorerUrl}
+							ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
+							inline
+							color="blue"
+						/>
+					{/if}
+				{/snippet}
+			</AddressCard>
+		{/if}
 
 		<ul>
 			{#if nonNullish(timestamp)}
