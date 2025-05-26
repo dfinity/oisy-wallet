@@ -4,6 +4,7 @@ export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
+export const NAVIGATION_MENU_PRIVACY_MODE_BUTTON = 'navigation-menu-privacy-mode-button';
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
@@ -194,6 +195,11 @@ export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';
 export const CONTACT_HEADER_EDIT_BUTTON = 'contact-header-edit-button';
 export const CONTACT_HEADER_EDITING_EDIT_BUTTON = 'contact-header-editing-edit-button';
 
+export const ADDRESS_LIST_ITEM_COPY_BUTTON = 'address-list-item-copy-button';
+export const ADDRESS_LIST_ITEM_INFO_BUTTON = 'address-list-item-info-button';
+export const ADDRESS_LIST_ITEM_EDIT_BUTTON = 'address-list-item-edit-button';
+export const ADDRESS_LIST_ITEM_DELETE_BUTTON = 'address-list-item-delete-button';
+
 export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
 
 export const SEND_DESTINATION_SECTION = 'send-destination-section';
@@ -204,3 +210,8 @@ export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
 
 export const SEND_FEE_INFO = 'send-fee-info';
+
+// Contact Card test IDs
+export const CONTACT_CARD = 'contact-card';
+export const CONTACT_CARD_BUTTON = 'contact-card-button';
+export const CONTACT_CARD_EXPAND_BUTTON = 'contact-card-expand-button';

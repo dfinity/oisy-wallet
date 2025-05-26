@@ -43,4 +43,5 @@ pub struct UpdateContactRequest {
 pub enum ContactError {
     ContactNotFound,
     InvalidContactData,
+    RandomnessError,
 }

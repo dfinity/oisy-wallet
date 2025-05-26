@@ -18,6 +18,17 @@ describe('SendInputDestination', () => {
 		expect(getByText(en.core.text.to)).toBeInTheDocument();
 	});
 
+	it('renders provided destination if inputted address is uppercased', () => {
+		const { getByText } = render(SendInputDestination, {
+			props: {
+				...props,
+				destination: props.destination.toUpperCase()
+			}
+		});
+
+		expect(getByText(en.core.text.to)).toBeInTheDocument();
+	});
+
 	it('renders invalid destination error message', () => {
 		const { getByText } = render(SendInputDestination, {
 			props: {

@@ -60,7 +60,7 @@
 	testId={TOKEN_INPUT_CURRENCY_USD}
 	styleClass="no-padding"
 >
-	<svelte:fragment slot="prefix">
+	{#snippet prefix()}
 		<span
 			class="duration=[var(--animation-time-short)] pl-3 transition-colors"
 			class:text-tertiary={isNullish(displayValue)}
@@ -68,8 +68,10 @@
 		>
 			$
 		</span>
-	</svelte:fragment>
-	<slot name="inner-end" slot="inner-end" />
+	{/snippet}
+	{#snippet innerEnd()}
+		<slot name="inner-end" />
+	{/snippet}
 </TokenInputCurrency>
 
 <style lang="scss">

@@ -205,15 +205,7 @@
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<SolSendForm
-			on:icNext
-			on:icClose
-			on:icTokensList
-			on:icBack
-			bind:destination
-			bind:amount
-			source={source ?? ''}
-		>
+		<SolSendForm on:icNext on:icClose on:icTokensList on:icBack bind:destination bind:amount>
 			<ButtonBack onclick={back} slot="cancel" />
 		</SolSendForm>
 	{:else}

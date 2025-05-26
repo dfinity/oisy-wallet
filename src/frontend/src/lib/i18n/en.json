@@ -20,6 +20,7 @@
 			"approve": "Approve",
 			"view": "View",
 			"copy": "Copy",
+			"delete": "Delete",
 			"clear_filter": "Clear filter",
 			"not_available": "n/a",
 			"new": "New",
@@ -61,7 +62,9 @@
 			"vip_qr_code": "VIP QR codes",
 			"binance_qr_code": "Binance Clubhouse QR",
 			"refer_a_friend": "Refer your friends",
-			"address_book": "Address book"
+			"address_book": "Address book",
+			"hide_balances": "Hide balances",
+			"show_balances": "Show balances"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -78,7 +81,9 @@
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
-			"address_book": "Open address book"
+			"address_book": "Open address book",
+			"hide_balances": "Hide the displayed balances",
+			"show_balances": "Show the hidden balances"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -341,6 +346,9 @@
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
+	},
+	"shortcuts": {
+		"privacy_mode": "P"
 	},
 	"networks": {
 		"title": "Current network. Access to selection.",
@@ -1031,6 +1039,10 @@
 			"search_contact": "Search contact",
 			"no_contact_found": "No contacts found"
 		},
+		"alt": {
+			"show_addresses_of_contact": "Show all addresses for contact",
+			"hide_addresses": "Hide addresses of contact"
+		},
 		"show_contact": {
 			"title": "Contact",
 			"add_address": "Add address",
@@ -1044,6 +1056,18 @@
 		},
 		"fields": {
 			"name": "Name"
+		}
+	},
+	"address": {
+		"types": {
+			"Icrcv2": "Internet Computer",
+			"Btc": "Bitcoin",
+			"Eth": "Ethereum",
+			"Sol": "Solana"
+		},
+		"form": {
+			"invalid_address": "Invalid address",
+			"valid_for_networks": "Valid for networks:"
 		}
 	},
 	"signer": {
