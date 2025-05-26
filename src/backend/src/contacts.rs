@@ -19,6 +19,11 @@ pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, Co
         .await
         .map_err(|_| ContactError::RandomnessError)?;
 
+    // we need to ensure that the new contact ID is not already used
+    if has_contact(new_id) {
+        return Err(ContactError::RandomnessError);
+    }
+
     mutate_state(|s| {
         // Get or create the user's contacts storage
         let mut stored_contacts = match s.contact.get(&stored_principal) {
@@ -94,11 +99,7 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
 /// * `Ok(Contact)` - The updated contact if successful
 /// * `Err(ContactError::ContactNotFound)` - If no contact with the given ID exists for the user
 /// * `Err(ContactError::InvalidContactData)` - If the provided name is empty
-pub fn update_contact(request: Contact) -> Result<Contact, ContactError> {
-    if request.name.trim().is_empty() {
-        return Err(ContactError::InvalidContactData);
-    }
-
+pub fn update_contact(contact: Contact) -> Result<Contact, ContactError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     let current_time = time();
 
@@ -113,17 +114,18 @@ pub fn update_contact(request: Contact) -> Result<Contact, ContactError> {
         };
 
         // Find the index of the contact to update
+        // TODO remove once the stored_contacts is replaced through a BTreeMap
         let contact_index = stored_contacts
             .contacts
             .iter()
-            .position(|contact| contact.id == request.id)
+            .position(|stored_contact| stored_contact.id == contact.id)
             .ok_or(ContactError::ContactNotFound)?;
 
         // Create the updated contact with current timestamp
         let updated_contact = Contact {
-            id: request.id,
-            name: request.name,
-            addresses: request.addresses,
+            id: contact.id,
+            name: contact.name,
+            addresses: contact.addresses,
             update_timestamp_ns: current_time,
         };
 
@@ -135,5 +137,22 @@ pub fn update_contact(request: Contact) -> Result<Contact, ContactError> {
         s.contact.insert(stored_principal, Candid(stored_contacts));
 
         Ok(updated_contact)
+    })
+}
+pub fn has_contact(contact_id: u64) -> bool {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    read_state(|s| {
+        // Get the user's contacts storage if it exists
+        if let Some(stored_contacts) = s.contact.get(&stored_principal) {
+            // Check if any contact has the specified ID
+            stored_contacts
+                .contacts
+                .iter()
+                .any(|contact| contact.id == contact_id)
+        } else {
+            // No contacts found for this user
+            false
+        }
     })
 }

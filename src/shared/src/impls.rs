@@ -4,6 +4,7 @@ use candid::{Deserialize, Error, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use serde::{de, Deserializer};
 
+use crate::types::contact::ContactError;
 use crate::{
     types::{
         backend_config::{Config, InitArg},
@@ -36,6 +37,21 @@ fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> R
         return Err(Error::msg(format!(
             "{field_name} too long, max allowed is {max_length} characters"
         )));
+    }
+    Ok(())
+}
+
+fn validate_string_not_empty<E, F>(
+    value: &str,
+    error_constructor: F,
+    field_name: &str,
+) -> Result<(), candid::Error>
+where
+    F: FnOnce(String) -> E,
+    E: Into<candid::Error>,
+{
+    if value.is_empty() {
+        return Err(error_constructor(format!("{field_name} cannot be empty")).into());
     }
     Ok(())
 }
@@ -511,7 +527,18 @@ impl Validate for CreateContactRequest {
 
 impl Validate for UpdateContactRequest {
     fn validate(&self) -> Result<(), Error> {
-        // Nothing to validate here
+        // Validate name length
+        validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
+
+        validate_string_not_empty(
+            &self.name,
+            ContactError::InvalidContactData,
+            "UpdateContactRequest.name",
+        )?;
+
+        // Validate number of addresses
+        validate_collection_size(&self.addresses, CONTACT_MAX_ADDRESSES, "Contact.addresses")?;
+
         Ok(())
     }
 }

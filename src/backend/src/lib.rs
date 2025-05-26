@@ -1,3 +1,4 @@
+use shared::types::contact::Contact;
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
@@ -28,7 +29,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{Contact, CreateContactRequest},
+        contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
@@ -894,8 +895,15 @@ pub async fn create_contact(request: CreateContactRequest) -> CreateContactResul
 /// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn update_contact(request: Contact) -> UpdateContactResult {
-    let result = contacts::update_contact(request);
+pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
+    let contact = Contact {
+        id: request.id,
+        name: request.name,
+        addresses: request.addresses,
+        update_timestamp_ns: request.update_timestamp_ns,
+    };
+
+    let result = contacts::update_contact(contact);
     result.into()
 }
 
