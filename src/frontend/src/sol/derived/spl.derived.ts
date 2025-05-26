@@ -109,7 +109,7 @@ export const enabledSplTokenAddresses: Readable<SplTokenAddress[]> = derived(
 	[enabledSplTokens],
 	([$enabledSplTokens]) => [
 		...new Map(
-			$enabledSplTokens.map((item) => [`${item.address}|${item.owner}`, item.address])
+			$enabledSplTokens.map(({ address, owner }) => [`${address}|${owner}`, address])
 		).values()
 	]
 );
