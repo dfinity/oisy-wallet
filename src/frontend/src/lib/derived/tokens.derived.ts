@@ -21,6 +21,7 @@ import {
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { derived, type Readable } from 'svelte/store';
+import {isDefaultEthereumToken} from "$eth/utils/eth.utils";
 
 export const tokens: Readable<Token[]> = derived(
 	[
@@ -52,14 +53,19 @@ export const tokens: Readable<Token[]> = derived(
 	]
 );
 
+export const defaultEthereumTokens: Readable<Token[]> = derived(
+	[tokens], ([$tokens]) => $tokens.filter(token => isDefaultEthereumToken(token))
+);
+
 export const tokensToPin: Readable<TokenToPin[]> = derived(
-	[icrcChainFusionDefaultTokens],
-	([$icrcChainFusionDefaultTokens]) => [
+	[icrcChainFusionDefaultTokens, defaultEthereumTokens],
+	([$icrcChainFusionDefaultTokens, $defaultEthereumTokens]) => [
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
 		SOLANA_TOKEN,
-		...$icrcChainFusionDefaultTokens
+		...$icrcChainFusionDefaultTokens,
+		...$defaultEthereumTokens.filter(token => token !== ETHEREUM_TOKEN)
 	]
 );
 
