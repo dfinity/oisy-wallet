@@ -136,7 +136,7 @@ describe('AddressListItem', () => {
 		const { getByTestId } = render(AddressListItem, {
 			props: {
 				address: icrcAddress,
-				onInfo
+				addressItemActionsProps: { onInfo }
 			},
 			context: mockContext
 		});
