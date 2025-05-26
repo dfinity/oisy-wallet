@@ -29,7 +29,7 @@
 		{/snippet}
 
 		{#snippet content()}
-			<div class="w-full truncate pl-2 pr-4 text-sm sm:text-base">{destination}</div>
+			{destination}
 		{/snippet}
 
 		{#snippet actions()}
