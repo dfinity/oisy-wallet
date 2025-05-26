@@ -21,8 +21,23 @@ pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, Co
         .map_err(|_| ContactError::RandomnessError)?;
 
     mutate_state(|s| {
-        // Get or create the user's contacts storage even if deserialization fails
-        let mut stored_contacts = get_stored_contacts_safely(&stored_principal);
+        // Get the user's contacts directly from the state instead of using the helper function
+        // `get_stored_contacts_safely` to avoid a "BorrowError" caused by nested state borrowing
+        let mut stored_contacts = if let Some(stored_contacts) = s.contact.get(&stored_principal) {
+            // Try to access the contacts safely with catch_unwind
+            if let Ok(contacts) = std::panic::catch_unwind(|| stored_contacts.clone()) {
+                contacts
+            } else {
+                // Log deserialization failure and create empty contacts
+                ic_cdk::api::print(format!(
+                    "Failed to deserialize contacts for principal: {}. Creating empty contacts.",
+                    stored_principal.0
+                ));
+                create_empty_contacts()
+            }
+        } else {
+            create_empty_contacts()
+        };
 
         // Create the new contact - note that CreateContactRequest only has 'name'
         let new_contact = Contact {
