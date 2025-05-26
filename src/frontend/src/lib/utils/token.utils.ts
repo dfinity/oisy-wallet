@@ -220,4 +220,4 @@ export const findTwinToken = ({
 			) as IcCkToken | undefined)
 		: undefined;
 
-export const getDisplaySymbol = (token: Token): string => token.oisySymbol?.oisySymbol ?? token.symbol;
+export const getDisplaySymbol = (token: TokenUi): string => token.oisySymbol?.oisySymbol ?? token.symbol;
