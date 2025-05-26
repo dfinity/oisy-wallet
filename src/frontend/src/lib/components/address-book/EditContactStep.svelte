@@ -44,15 +44,15 @@
 
 <ContentWithToolbar styleClass="flex flex-col items-stretch gap-1">
 	<LogoButton hover={false} condensed={true}>
-		<span slot="logo">
+		{#snippet logo()}
 			<Avatar name={contact.name} variant="xs" styleClass="md:text-[19.2px]"></Avatar>
-		</span>
+		{/snippet}
 
-		<span slot="title">
+		{#snippet title()}
 			{contact.name}
-		</span>
+		{/snippet}
 
-		<span slot="action">
+		{#snippet action()}
 			<ButtonIcon
 				styleClass="-m-1 md:m-0 hover:text-primary"
 				ariaLabel={$i18n.core.text.edit}
@@ -63,7 +63,7 @@
 					<IconPencil />
 				{/snippet}
 			</ButtonIcon>
-		</span>
+		{/snippet}
 	</LogoButton>
 
 	<Hr />
@@ -78,31 +78,30 @@
 	{/each}
 
 	<Button
-		styleClass="self-start hover:bg-transparent flex-none px-1"
+		fullWidth
+		alignLeft
 		ariaLabel={$i18n.address_book.edit_contact.add_address}
 		colorStyle="tertiary-main-card"
 		disabled={isNullish(onAddAddress)}
 		on:click={() => onAddAddress?.()}
 		testId={CONTACT_EDIT_ADD_ADDRESS_BUTTON}
 	>
-		<span class="flex items-center">
-			<IconPlus />
-		</span>
+		<IconPlus />
 		{$i18n.address_book.edit_contact.add_address}
 	</Button>
 
 	<Hr />
 
 	<Button
-		styleClass="self-start text-error-primary hover:bg-transparent flex-none px-1"
+		fullWidth
+		alignLeft
+		styleClass="text-error-primary hover:bg-error-light"
 		ariaLabel={$i18n.address_book.edit_contact.delete_contact}
 		colorStyle="tertiary-main-card"
 		on:click={() => onDeleteContact?.(contact.id)}
 		testId={CONTACT_EDIT_DELETE_CONTACT_BUTTON}
 	>
-		<span class="flex items-center">
-			<IconTrash />
-		</span>
+		<IconTrash />
 		{$i18n.address_book.edit_contact.delete_contact}
 	</Button>
 
