@@ -83,8 +83,8 @@ describe('spl.derived', () => {
 		});
 
 		it('should handle empty token stores', () => {
-			splCustomTokensStore.resetAll();
 			splDefaultTokensStore.reset();
+			splCustomTokensStore.resetAll();
 
 			const tokens = get(splTokens);
 
@@ -124,8 +124,8 @@ describe('spl.derived', () => {
 		});
 
 		it('should handle empty token stores', () => {
-			splCustomTokensStore.resetAll();
 			splDefaultTokensStore.reset();
+			splCustomTokensStore.resetAll();
 
 			const tokens = get(enabledSplTokens);
 
@@ -167,8 +167,8 @@ describe('spl.derived', () => {
 		});
 
 		it('should handle empty token stores', () => {
-			splCustomTokensStore.resetAll();
 			splDefaultTokensStore.reset();
+			splCustomTokensStore.resetAll();
 
 			const tokens = get(enabledSplTokenAddresses);
 
