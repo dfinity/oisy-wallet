@@ -21,7 +21,7 @@ export const mapHeaderData = ({
 	icon,
 	network,
 	oisyName: { oisyName: tokens.map((token) => token.symbol).join(', ') },
-	oisySymbol: { oisySymbol: name },
+	oisySymbol: { oisySymbol: symbol },
 	balance,
 	usdBalance,
 	tokenCount: tokens.length
