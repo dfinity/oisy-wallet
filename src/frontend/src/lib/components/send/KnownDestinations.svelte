@@ -3,7 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
-	import KnownDestinationsEmptyState from '$lib/components/send/KnownDestinationsEmptyState.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { KnownDestinations } from '$lib/types/transactions';
 
@@ -55,7 +55,7 @@
 		</div>
 	</div>
 {:else}
-	<KnownDestinationsEmptyState
+	<EmptyState
 		title={$i18n.send.text.recently_used_empty_state_title}
 		description={$i18n.send.text.recently_used_empty_state_description}
 	/>
