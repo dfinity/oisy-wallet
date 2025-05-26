@@ -12,7 +12,7 @@
 		token: Token;
 	}
 
-	let {token}:Props = $props();
+	let { token }: Props = $props();
 </script>
 
 <Value ref="network">
