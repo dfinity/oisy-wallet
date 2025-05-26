@@ -12,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	let {
 		data,
@@ -52,7 +53,7 @@
 
 		{#snippet title()}
 			<span class:text-sm={asNetwork}>
-				{nonNullish(data.oisySymbol) ? data.oisySymbol.oisySymbol : data.symbol}
+				{getTokenDisplaySymbol(data)}
 				{#if asNetwork}
 					<span class="font-normal">
 						{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
