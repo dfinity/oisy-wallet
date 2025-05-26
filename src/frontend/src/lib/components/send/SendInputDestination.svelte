@@ -23,38 +23,63 @@
 
 	const debounceValidate = debounce(validate);
 
+	let focused: boolean;
+	const onFocus = () => (focused = true);
+	const onBlur = () => (focused = false);
+
 	$: destination, networkId, isInvalidDestination, debounceValidate();
 </script>
 
-<label for="destination" class="font-bold">
-	{$i18n.core.text.to}
-</label>
+<div
+	class="rounded-lg border border-solid p-5 text-left duration-300"
+	class:bg-brand-subtle-10={focused}
+	class:border-brand-subtle-20={focused}
+	class:bg-secondary={!focused}
+	class:border-secondary={!focused}
+>
+	<label for="destination" class="font-bold">
+		{$i18n.core.text.to}
+	</label>
 
-<div class="mb-4">
-	<InputTextWithAction
-		name="destination"
-		bind:value={destination}
-		placeholder={inputPlaceholder}
-		testId={DESTINATION_INPUT}
-		autofocus={isDesktop()}
-		on:nnsInput
-	>
-		<svelte:fragment slot="inner-end">
-			{#if nonNullish(onQRButtonClick)}
-				<QrButton on:click={onQRButtonClick} />
-			{/if}
-		</svelte:fragment>
-	</InputTextWithAction>
+	<div class="send-input-destination" class:error={invalidDestination}>
+		<InputTextWithAction
+			name="destination"
+			bind:value={destination}
+			placeholder={inputPlaceholder}
+			testId={DESTINATION_INPUT}
+			autofocus={isDesktop()}
+			on:focus={onFocus}
+			on:blur={onBlur}
+			on:nnsInput
+		>
+			<svelte:fragment slot="inner-end">
+				{#if nonNullish(onQRButtonClick)}
+					<QrButton on:click={onQRButtonClick} />
+				{/if}
+			</svelte:fragment>
+		</InputTextWithAction>
+
+		{#if invalidDestination}
+			<p transition:slide={SLIDE_DURATION} class="mb-0 mt-4 text-error-primary">
+				{$i18n.send.assertion.invalid_destination_address}
+			</p>
+		{/if}
+	</div>
 </div>
 
-{#if invalidDestination}
-	<p transition:slide={SLIDE_DURATION} class="pb-3 text-error-primary">
-		{$i18n.send.assertion.invalid_destination_address}
-	</p>
-{:else if notEmptyString(destination) && nonNullish(knownDestinations) && isNullish(knownDestinations[destination.toLowerCase()])}
+{#if !invalidDestination && notEmptyString(destination) && nonNullish(knownDestinations) && isNullish(knownDestinations[destination.toLowerCase()])}
 	<div transition:slide={SLIDE_DURATION}>
-		<MessageBox level="warning">
+		<MessageBox level="warning" styleClass="mt-4">
 			{$i18n.send.info.unknown_destination}
 		</MessageBox>
 	</div>
 {/if}
+
+<style lang="scss">
+	:global(.error.send-input-destination div.input-field input) {
+		--input-error-color: var(--color-border-error-solid);
+		--secondary: var(--color-border-error-solid);
+		--focus-background-contrast: var(--color-border-error-solid);
+		--input-background-contrast: var(--color-border-error-solid);
+	}
+</style>
