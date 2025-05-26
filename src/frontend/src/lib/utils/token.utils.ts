@@ -18,6 +18,7 @@ import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type {CardData} from "$lib/types/token-card";
 
 /**
  * Calculates the maximum amount for a transaction.
