@@ -219,3 +219,5 @@ export const findTwinToken = ({
 				(token) => token.symbol === tokenToPair.twinTokenSymbol && isIcCkToken(token)
 			) as IcCkToken | undefined)
 		: undefined;
+
+export const getDisplaySymbol = (token: Token): string => token.oisySymbol?.oisySymbol ?? token.symbol;
