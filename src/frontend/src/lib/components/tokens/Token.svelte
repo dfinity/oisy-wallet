@@ -7,12 +7,14 @@
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import type {Snippet} from "svelte";
 
 	interface Props {
+		children?: Snippet;
 		token: Token;
 	}
 
-	let { token }: Props = $props();
+	let { children, token }: Props = $props();
 </script>
 
 <Value ref="network">
@@ -45,7 +47,7 @@
 	{/snippet}
 </Value>
 
-<slot />
+{@render children?.()}
 
 {#if ['icrc', 'erc20'].includes(token.standard)}
 	<Value ref="symbol">
