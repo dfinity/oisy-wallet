@@ -6,9 +6,13 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let token: Token;
-	export let balance: Balance | undefined = undefined;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		token: Token;
+		balance?: Balance;
+		testId?: string;
+	}
+
+	let { token, balance, testId }: Props = $props();
 </script>
 
 <div class="flex items-center" data-tid={testId}>
