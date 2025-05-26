@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import AddressesBadge from '$lib/components/contact/AddressesBadge.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { AvatarVariants } from '$lib/types/style';
-	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
-	import Img from '$lib/components/ui/Img.svelte';
 
 	interface Props {
 		contact?: ContactUi;
