@@ -32,5 +32,7 @@
 	{copyAriaLabel}
 	{copyButtonTestId}
 >
-	<svelte:fragment slot="title">{addressLabel ?? $i18n.wallet.text.address}</svelte:fragment>
+	{#snippet title()}
+		{addressLabel ?? $i18n.wallet.text.address}
+	{/snippet}
 </ReceiveAddress>
