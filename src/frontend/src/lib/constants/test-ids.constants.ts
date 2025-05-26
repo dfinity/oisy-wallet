@@ -189,11 +189,15 @@ export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input'
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
 export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-input';
+export const ADDRESS_EDIT_CANCEL_BUTTON = 'address-edit-cancel-button';
+export const ADDRESS_EDIT_SAVE_BUTTON = 'address-edit-save-button';
 
 export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button';
 export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';
 export const CONTACT_HEADER_EDIT_BUTTON = 'contact-header-edit-button';
 export const CONTACT_HEADER_EDITING_EDIT_BUTTON = 'contact-header-editing-edit-button';
+export const CONTACT_EDIT_ADD_ADDRESS_BUTTON = 'contact-edit-add-address-button';
+export const CONTACT_EDIT_DELETE_CONTACT_BUTTON = 'contact-edit-delete-contact-button';
 
 export const ADDRESS_LIST_ITEM_COPY_BUTTON = 'address-list-item-copy-button';
 export const ADDRESS_LIST_ITEM_INFO_BUTTON = 'address-list-item-info-button';
