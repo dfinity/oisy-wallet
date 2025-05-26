@@ -1,6 +1,11 @@
 import type { TokenAccountId } from '$declarations/backend/backend.did';
+import { TOKEN_ACCOUNT_ID_TO_NETWORKS } from '$lib/constants/token-account-id.constants';
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
-import { getAddressString } from '$lib/utils/token-account-id.utils';
+import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
+import {
+	getAddressString,
+	getNetworksForTokenAccountIdType
+} from '$lib/utils/token-account-id.utils';
 
 describe('token-account-id.utils', () => {
 	describe('getAddressString', () => {
@@ -66,6 +71,22 @@ describe('token-account-id.utils', () => {
 			const result = getAddressString(tokenAccountId);
 
 			expect(result).toEqual(solAddressStr);
+		});
+	});
+
+	describe('getNetworksForAddressType', () => {
+		it('should return networks for all types', () => {
+			const TOKEN_ACCOUNT_ID_TYPES = Object.keys(
+				TOKEN_ACCOUNT_ID_TO_NETWORKS
+			) as TokenAccountIdTypes[];
+
+			TOKEN_ACCOUNT_ID_TYPES.forEach((type) => {
+				const networks = getNetworksForTokenAccountIdType(type);
+
+				expect(networks).toBeDefined();
+				expect(Array.isArray(networks)).toBeTruthy();
+				expect(networks.length).toBeGreaterThan(0);
+			});
 		});
 	});
 });
