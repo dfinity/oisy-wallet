@@ -1,16 +1,49 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import type { ZodError } from 'zod';
+	import InputAddress from '$lib/components/address/InputAddress.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
+	import {
+		ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT,
+		ADDRESS_BOOK_ADDRESS_ALIAS_INPUT
+	} from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
-	let { address = $bindable() }: { address: Partial<ContactAddressUi> } = $props();
+	interface Props {
+		address: Partial<ContactAddressUi>;
+		isNewAddress: boolean;
+		isInvalid: boolean;
+	}
+	let { address = $bindable(), isNewAddress, isInvalid = $bindable() }: Props = $props();
 
-	// TODO Implement form with proper validation
+	let addressParseError = $state<ZodError | undefined>();
+
+	$effect(() => {
+		isInvalid = nonNullish(addressParseError);
+	});
 </script>
 
 <form class="w-full">
-	<label for="address" class="">Address</label>
-	<InputText name="address" bind:value={address.address} placeholder=""></InputText>
+	<label for="address" class="font-bold">{$i18n.address.fields.address}</label>
 
-	<label for="label">Label</label>
-	<InputText name="label" bind:value={address.label} placeholder="" />
+	<InputAddress
+		bind:parseError={addressParseError}
+		bind:value={address.address}
+		bind:addressType={address.addressType}
+		name="address"
+		placeholder={$i18n.address.form.address_placeholder}
+		testId={ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT}
+		showPasteButton={isNewAddress}
+		showResetButton={isNewAddress}
+		disabled={!isNewAddress}
+	/>
+
+	<label for="label" class="font-bold">{$i18n.address.fields.label}</label>
+	<InputText
+		name="label"
+		placeholder={$i18n.address.form.label_placeholder}
+		bind:value={address.label}
+		testId={ADDRESS_BOOK_ADDRESS_ALIAS_INPUT}
+	/>
 </form>
