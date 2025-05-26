@@ -4,7 +4,7 @@
 	import type { Balance } from '$lib/types/balance';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
-	import {getTokenDisplaySymbol} from "$lib/utils/token.utils";
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let token: Token;
 	export let balance: Balance | undefined = undefined;

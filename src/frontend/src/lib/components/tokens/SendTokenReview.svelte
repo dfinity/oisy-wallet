@@ -4,7 +4,7 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
-	import {getTokenDisplaySymbol} from "$lib/utils/token.utils";
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		token: Token;
