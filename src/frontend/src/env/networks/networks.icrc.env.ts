@@ -488,6 +488,29 @@ const VEUR_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCT
 		}
 	: undefined;
 
+const GHOSTNODE_IC_DATA: IcInterface | undefined = nonNullish(
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.GHOSTNODE
+)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.GHOSTNODE,
+			position: 23
+		}
+	: undefined;
+
+const XP_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.XP)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.XP,
+			position: 24
+		}
+	: undefined;
+
+const EXE_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.EXE)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.EXE,
+			position: 25
+		}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -562,7 +585,10 @@ const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(RUGGY_IC_DATA) ? [RUGGY_IC_DATA] : []),
 	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : []),
 	...(nonNullish(VCHF_IC_DATA) ? [VCHF_IC_DATA] : []),
-	...(nonNullish(VEUR_IC_DATA) ? [VEUR_IC_DATA] : [])
+	...(nonNullish(VEUR_IC_DATA) ? [VEUR_IC_DATA] : []),
+	...(nonNullish(GHOSTNODE_IC_DATA) ? [GHOSTNODE_IC_DATA] : []),
+	...(nonNullish(XP_IC_DATA) ? [XP_IC_DATA] : []),
+	...(nonNullish(EXE_IC_DATA) ? [EXE_IC_DATA] : [])
 ];
 
 export const ICRC_TOKENS: IcInterface[] = [
@@ -605,3 +631,6 @@ export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> 
 		[IC_CKBTC_MINTER_CANISTER_ID]: 'ghsi2-tqaaa-aaaan-aaaca-cai'
 	})
 };
+
+export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	GHOSTNODE_IC_DATA?.ledgerCanisterId ?? 'sx3gz-hqaaa-aaaar-qaoca-cai';
