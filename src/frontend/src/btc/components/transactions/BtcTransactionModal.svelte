@@ -1,29 +1,29 @@
 <script lang="ts">
+	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { BtcTransactionStatus, BtcTransactionUi } from '$btc/types/btc';
 	import type { BtcTransactionType } from '$btc/types/btc-transaction';
 	import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
+	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionAddress from '$lib/components/transactions/TransactionAddress.svelte';
+	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Copy from '$lib/components/ui/Copy.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
 	import {
 		formatSecondsToDate,
 		formatToken,
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
-	import ModalHero from '$lib/components/common/ModalHero.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { Modal } from '@dfinity/gix-components';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
 
 	export let transaction: BtcTransactionUi;
 	export let token: OptionToken;
