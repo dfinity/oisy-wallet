@@ -892,7 +892,7 @@ pub async fn create_contact(request: CreateContactRequest) -> CreateContactResul
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_allowed")]
 #[must_use]
 pub fn update_contact(request: Contact) -> UpdateContactResult {
     let result = contacts::update_contact(request);
@@ -903,7 +903,7 @@ pub fn update_contact(request: Contact) -> UpdateContactResult {
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "caller_is_allowed")]
 #[must_use]
 pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
     // TODO integrate delete contact service
