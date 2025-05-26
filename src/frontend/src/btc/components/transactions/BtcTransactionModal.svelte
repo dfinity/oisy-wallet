@@ -9,6 +9,21 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
+	import {
+		formatSecondsToDate,
+		formatToken,
+		shortenWithMiddleEllipsis
+	} from '$lib/utils/format.utils';
+	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import Copy from '$lib/components/ui/Copy.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { Modal } from '@dfinity/gix-components';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let transaction: BtcTransactionUi;
 	export let token: OptionToken;
@@ -37,68 +52,177 @@
 
 	let fromExplorerUrl: string | undefined;
 	$: fromExplorerUrl =
-		nonNullish(explorerUrl) && nonNullish(to) ? `${explorerUrl}/address/${from}` : undefined;
+		nonNullish(explorerUrl) && nonNullish(from) ? `${explorerUrl}/address/${from}` : undefined;
 </script>
 
-<TransactionModal
-	commonData={{
-		from,
-		timestamp,
-		blockNumber,
-		txExplorerUrl,
-		fromExplorerUrl
-	}}
-	hash={id}
-	{value}
-	{token}
-	sendToLabel={$i18n.transaction.text.to}
-	typeLabel={type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}
->
-	<svelte:fragment slot="transaction-confirmations">
-		{#if nonNullish(confirmations)}
-			<Value ref="confirmations">
-				{#snippet label()}
-					{$i18n.transaction.text.confirmations}
-				{/snippet}
-				{#snippet content()}
-					{confirmations}
-				{/snippet}
-			</Value>
+<Modal on:nnsClose={modalStore.close}>
+	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
+
+	<ContentWithToolbar>
+		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
+			{#snippet logo()}
+				{#if nonNullish(token)}
+					<div class="relative block flex w-[54px]">
+						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+					</div>
+				{/if}
+			{/snippet}
+			{#snippet subtitle()}
+				<span class="capitalize">{type}</span>
+			{/snippet}
+			{#snippet title()}
+				{#if nonNullish(token) && nonNullish(value)}
+					<output class:text-success-primary={type === 'receive'}>
+						{formatToken({
+							value,
+							unitName: token.decimals,
+							displayDecimals: token.decimals,
+							showPlusSign: type === 'receive'
+						})}
+						{token.symbol}
+					</output>
+				{:else}
+					&ZeroWidthSpace;
+				{/if}
+			{/snippet}
+		</ModalHero>
+
+		{#if nonNullish(to) && nonNullish(from)}
+			{#each to as address, index (`${address}-${index}`)}
+				<TransactionContactCard
+					type={type === 'receive' ? 'receive' : 'send'}
+					to={address}
+					{from}
+					toExplorerUrl={nonNullish(explorerUrl) ? `${explorerUrl}/address/${address}` : undefined}
+					{fromExplorerUrl}
+				/>
+			{/each}
 		{/if}
-	</svelte:fragment>
 
-	<Value ref="status" slot="transaction-status">
-		{#snippet label()}
-			{$i18n.transaction.text.status}
-		{/snippet}
-		{#snippet content()}
-			{`${$i18n.transaction.status[status]}`}
-		{/snippet}
-	</Value>
-
-	<svelte:fragment slot="transaction-custom-to">
-		{#if nonNullish(to)}
-			<Value ref="recipients">
-				{#snippet label()}
-					{$i18n.transaction.text.to}
-				{/snippet}
-
-				{#snippet content()}
-					<ul class="list-none">
+		<ul class="mt-5">
+			{#if type === 'receive' && nonNullish(to)}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>{$i18n.transaction.text.to}</span>
+					<output class="flex max-w-[50%] flex-row">
 						{#each to as address, index (`${address}-${index}`)}
-							<li>
-								<TransactionAddress
-									{address}
-									explorerUrl={nonNullish(explorerUrl)
-										? `${explorerUrl}/address/${address}`
-										: undefined}
-									copiedText={$i18n.transaction.text.to_copied}
-								/>
-							</li>
+							<span>
+								<output>{shortenWithMiddleEllipsis({ text: address })}</output>
+								<Copy value={address} text={$i18n.transaction.text.to_copied} inline />
+								{#if nonNullish(explorerUrl)}
+									<ExternalLink
+										iconSize="18"
+										href={`${explorerUrl}/address/${address}`}
+										ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
+										inline
+										color="blue"
+									/>
+								{/if}
+							</span>
 						{/each}
-					</ul>
-				{/snippet}
-			</Value>
-		{/if}
-	</svelte:fragment>
-</TransactionModal>
+					</output>
+				</li>
+			{/if}
+			{#if type === 'send' && nonNullish(from)}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>{$i18n.transaction.text.from}</span>
+					<output class="flex max-w-[50%] flex-row">
+						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
+						<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
+						{#if nonNullish(fromExplorerUrl)}
+							<ExternalLink
+								iconSize="18"
+								href={fromExplorerUrl}
+								ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
+								inline
+								color="blue"
+							/>
+						{/if}
+					</output>
+				</li>
+			{/if}
+
+			{#if nonNullish(id)}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>
+						{$i18n.transaction.text.hash}
+					</span>
+
+					<span>
+						<output>{shortenWithMiddleEllipsis({ text: id })}</output>
+						<Copy
+							value={id}
+							text={replacePlaceholders($i18n.transaction.text.hash_copied, {
+								$hash: id
+							})}
+							inline
+						/>
+						{#if nonNullish(txExplorerUrl)}
+							<ExternalLink
+								iconSize="18"
+								href={txExplorerUrl}
+								ariaLabel={$i18n.transaction.alt.open_block_explorer}
+								inline
+								color="blue"
+							/>
+						{/if}
+					</span>
+				</li>
+			{/if}
+
+			{#if nonNullish(blockNumber)}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>
+						{$i18n.transaction.text.block}
+					</span>
+
+					<output>{blockNumber}</output>
+				</li>
+			{/if}
+
+			{#if nonNullish(confirmations)}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>
+						{$i18n.transaction.text.confirmations}
+					</span>
+					<span>{confirmations}</span>
+				</li>
+			{/if}
+
+			<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<span>
+					{$i18n.transaction.text.status}
+				</span>
+				<span>
+					{`${$i18n.transaction.status[status]}`}
+				</span>
+			</li>
+
+			{#if nonNullish(timestamp)}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>
+						{$i18n.transaction.text.timestamp}
+					</span>
+
+					<output>{formatSecondsToDate(Number(timestamp))}</output>
+				</li>
+			{/if}
+
+			{#if nonNullish(value) && nonNullish(token)}
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<span>{$i18n.core.text.amount}</span>
+
+					<output>
+						{formatToken({
+							value,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					</output>
+				</li>
+			{/if}
+		</ul>
+
+		<ButtonCloseModal slot="toolbar" />
+	</ContentWithToolbar>
+</Modal>
