@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import Divider from '$lib/components/common/Divider.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
@@ -51,7 +52,7 @@
 
 		{#snippet title()}
 			<span class:text-sm={asNetwork}>
-				{data.symbol}
+				{nonNullish(data.oisySymbol) ? data.oisySymbol.oisySymbol : data.symbol}
 				{#if asNetwork}
 					<span class="font-normal">
 						{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
@@ -63,7 +64,7 @@
 		{#snippet subtitle()}
 			<span class:text-sm={asNetwork}>
 				{#if !asNetwork}
-					&nbsp;&middot;&nbsp;{data.name}
+					<Divider />{data.name}
 				{/if}
 			</span>
 		{/snippet}
@@ -86,9 +87,8 @@
 				{#if data?.networks}
 					{#each [...new Set(data.networks.map((n) => n.name))] as network, index (network)}
 						{#if index !== 0}
-							&nbsp;&middot;&nbsp;
-						{/if}
-						{network}
+							<Divider />
+						{/if}{network}
 					{/each}
 				{:else if !asNetwork}
 					{data.network.name}
