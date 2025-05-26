@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
@@ -15,8 +16,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {getDisplaySymbol} from "$lib/utils/token.utils";
-	import {nonNullish} from "@dfinity/utils";
+	import { getDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let testId: string | undefined = undefined;
 

@@ -5,7 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {getDisplaySymbol} from "$lib/utils/token.utils";
+	import { getDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let token: Token;
 </script>
@@ -60,7 +60,9 @@
 	{/snippet}
 
 	{#snippet content()}
-		<output>{`${getDisplaySymbol(token)}${token.oisySymbol?.oisySymbol ? ` (${token.symbol})` : ''}`}</output>
+		<output
+			>{`${getDisplaySymbol(token)}${token.oisySymbol?.oisySymbol ? ` (${token.symbol})` : ''}`}</output
+		>
 	{/snippet}
 </Value>
 

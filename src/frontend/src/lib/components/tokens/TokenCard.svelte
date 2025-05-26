@@ -12,7 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import {getDisplaySymbol} from "$lib/utils/token.utils";
+	import { getDisplaySymbol } from '$lib/utils/token.utils';
 
 	let {
 		data,
