@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -6,7 +7,6 @@
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import {nonNullish} from "@dfinity/utils";
 
 	export let token: Token;
 </script>
