@@ -1,27 +1,27 @@
 <script lang="ts">
+	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Commitment } from '@solana/kit';
+	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Copy from '$lib/components/ui/Copy.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OptionToken } from '$lib/types/token';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNetworkSolana } from '$lib/utils/network.utils';
-	import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionToken } from '$lib/types/token';
 	import {
 		formatSecondsToDate,
 		formatToken,
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
-	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
-	import ModalHero from '$lib/components/common/ModalHero.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
-	import { Modal } from '@dfinity/gix-components';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNetworkSolana } from '$lib/utils/network.utils';
+	import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
 
 	export let transaction: SolTransactionUi;
 	export let token: OptionToken;
