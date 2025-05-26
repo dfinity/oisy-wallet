@@ -5,10 +5,19 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 
-	export let address: string;
-	export let qrCodeAction: ReceiveQRCodeAction = { enabled: false };
-	export let copyAriaLabel: string;
-	export let copyButtonTestId: string | undefined = undefined;
+	interface Props {
+		address: string;
+		qrCodeAction?: ReceiveQRCodeAction;
+		copyAriaLabel: string;
+		copyButtonTestId?: string;
+	}
+
+	let {
+		address,
+		qrCodeAction = { enabled: false },
+		copyAriaLabel,
+		copyButtonTestId
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 </script>

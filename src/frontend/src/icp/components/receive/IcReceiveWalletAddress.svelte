@@ -34,10 +34,12 @@
 	copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 	on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
 >
-	<svelte:fragment slot="title">{$i18n.wallet.text.wallet_address}</svelte:fragment>
-	<svelte:fragment slot="text"
-		>{replacePlaceholders($i18n.wallet.text.use_address_from_to, {
+	{#snippet title()}
+		{$i18n.wallet.text.wallet_address}
+	{/snippet}
+	{#snippet text()}
+		{replacePlaceholders($i18n.wallet.text.use_address_from_to, {
 			$token: $token.symbol
-		})}</svelte:fragment
-	>
+		})}
+	{/snippet}
 </ReceiveAddress>
