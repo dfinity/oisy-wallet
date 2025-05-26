@@ -49,6 +49,7 @@
 	const close = () => modalStore.close();
 
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
+	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
 
 	// TODO Use contact store and remove
@@ -58,8 +59,19 @@
 	// TODO Use contact store and remove
 	let currentAddressIndex: number | undefined = $state();
 
+	const handleClose = () => {
+		if (
+			currentStepName === AddressBookSteps.SHOW_ADDRESS &&
+			previousStepName === AddressBookSteps.SHOW_CONTACT
+		) {
+			return gotoStep(AddressBookSteps.SHOW_CONTACT);
+		}
+		return gotoStep(AddressBookSteps.ADDRESS_BOOK);
+	};
+
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
+			previousStepName = currentStepName;
 			goToWizardStep({
 				modal,
 				steps,
@@ -96,10 +108,14 @@
 
 	// TODO Use contact store and remove
 	const addAddress = (address: ContactAddressUi) => {
-		const addresses = [...currentContact!.addresses, address];
+		if (isNullish(currentContact)) {
+			return;
+		}
+
+		const addresses = [...currentContact.addresses, address];
 		currentAddressIndex = undefined;
 		currentContact = {
-			...currentContact!,
+			...currentContact,
 			addresses
 		};
 		saveContact(currentContact);
@@ -108,8 +124,12 @@
 
 	// TODO Use contact store and remove
 	const saveAddress = (address: ContactAddressUi) => {
-		const { addresses } = currentContact!;
-		addresses[currentAddressIndex!] = { ...address };
+		if (isNullish(currentContact) || isNullish(currentAddressIndex)) {
+			return;
+		}
+
+		const { addresses } = currentContact;
+		addresses[currentAddressIndex] = { ...address };
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
@@ -151,12 +171,17 @@
 				currentContact = undefined;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
+			onShowAddress={({ contact, addressIndex }) => {
+				currentContact = contact;
+				currentAddressIndex = addressIndex;
+				gotoStep(AddressBookSteps.SHOW_ADDRESS);
+			}}
 		/>
-	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT}
+	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
 		<!-- TODO Remove ! from currentContact -->
 		<ShowContactStep
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
-			contact={currentContact!}
+			contact={currentContact}
 			onEdit={(contact) => {
 				currentContact = contact;
 				gotoStep(AddressBookSteps.EDIT_CONTACT);
@@ -170,9 +195,9 @@
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
-	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT}
+	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact)}
 		<EditContactStep
-			contact={currentContact!}
+			contact={currentContact}
 			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 			onEdit={(contact) => {
 				currentContact = contact;
@@ -198,18 +223,14 @@
 			isNewContact={isNullish(currentContact)}
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		/>
-	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
+	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentAddressIndex)}
 		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
-		{JSON.stringify(currentContact?.addresses[currentAddressIndex!])}
+		{JSON.stringify(currentContact?.addresses[currentAddressIndex])}
 		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
-		<Button
-			on:click={() => {
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
-			}}>BACK</Button
-		>
-	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS}
+		<Button on:click={() => handleClose()}>BACK</Button>
+	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep
-			contact={currentContact!}
+			contact={currentContact}
 			address={nonNullish(currentAddressIndex)
 				? currentContact?.addresses[currentAddressIndex]
 				: undefined}
