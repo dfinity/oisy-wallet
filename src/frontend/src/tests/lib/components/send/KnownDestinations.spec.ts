@@ -59,7 +59,7 @@ describe('KnownDestinations', () => {
 		expect(() => getByText(shortenWithMiddleEllipsis({ text: mockSolAddress }))).toThrow();
 	});
 
-	it('does not render content if data is empty', () => {
+	it('renders empty state component if data is empty', () => {
 		const { getByText } = render(KnownDestinations, {
 			props: {
 				destination: mockBtcAddress
@@ -67,5 +67,7 @@ describe('KnownDestinations', () => {
 		});
 
 		expect(() => getByText(en.send.text.recently_used)).toThrow();
+		expect(getByText(en.send.text.recently_used_empty_state_title)).toBeInTheDocument();
+		expect(getByText(en.send.text.recently_used_empty_state_description)).toBeInTheDocument();
 	});
 });
