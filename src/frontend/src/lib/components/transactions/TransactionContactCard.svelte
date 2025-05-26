@@ -29,19 +29,21 @@
 
 <AddressCard>
 	{#snippet logo()}
-		{#if nonNullish(contact)}
-			<AvatarWithBadge
-				{contact}
-				badge={{ type: 'addressType', address: type === 'send' ? to : from }}
-			/>
-		{/if}
+		<AvatarWithBadge
+			{contact}
+			badge={{ type: 'addressType', address: type === 'send' ? to : from }}
+		/>
 	{/snippet}
 	{#snippet content()}
-		<span class="mx-1 flex flex-col">
+		<span class="mx-1 flex flex-col items-start text-left">
 			<span class="font-bold"
 				>{type === 'send' ? $i18n.transaction.text.to : $i18n.transaction.text.from}: {contact?.name}</span
 			>
-			<span class="w-full truncate">{to}</span>
+			<span class="w-full truncate">{type === 'send' ? to : from}</span>
+			<!--
+			Todo: add action to button to navigate to add contact modal
+			<Button link styleClass="mt-3 text-sm"><IconUserSquare size="20px" /> Save address</Button>
+			-->
 		</span>
 	{/snippet}
 	{#snippet actions()}

@@ -96,8 +96,8 @@
 			/>
 		{/if}
 
-		<ul>
-			{#if type === 'send' && nonNullish(to)}
+		<ul class="mt-5">
+			{#if type === 'receive' && nonNullish(to)}
 				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
 					<span>{$i18n.transaction.text.to}</span>
 					<output class="flex max-w-[50%] flex-row">
@@ -115,7 +115,7 @@
 					</output>
 				</li>
 			{/if}
-			{#if type === 'receive' && nonNullish(from)}
+			{#if type === 'send' && nonNullish(from)}
 				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
 					<span>{$i18n.transaction.text.from}</span>
 					<output class="flex max-w-[50%] flex-row">

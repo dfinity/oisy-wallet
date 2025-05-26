@@ -14,7 +14,7 @@
 </script>
 
 <div
-	class="flex items-center rounded-lg border border-disabled bg-secondary px-2 py-3"
+	class="flex items-start rounded-lg border border-disabled bg-secondary px-2 py-3"
 	class:border-error-solid={hasError}
 >
 	{@render logo?.()}
