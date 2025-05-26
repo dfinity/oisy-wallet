@@ -10,7 +10,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getDisplaySymbol } from '$lib/utils/token.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -26,7 +26,7 @@
 
 		<p class="text-center font-bold">
 			{#if nonNullish($token)}
-				{getDisplaySymbol($token)}
+				{getTokenDisplaySymbol($token)}
 			{:else}
 				&ZeroWidthSpace;
 			{/if}

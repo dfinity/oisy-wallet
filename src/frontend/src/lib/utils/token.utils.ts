@@ -221,5 +221,11 @@ export const findTwinToken = ({
 			) as IcCkToken | undefined)
 		: undefined;
 
-export const getDisplaySymbol = (token: Token | CardData): string =>
+/**
+ * Gets the symbol to display for the given token.
+ *
+ * @param token - for which the symbol to display should be found
+ * @returns the symbol to display for the token
+ */
+export const getTokenDisplaySymbol = (token: Token | CardData): string =>
 	token.oisySymbol?.oisySymbol ?? token.symbol;

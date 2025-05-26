@@ -9,7 +9,7 @@
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getDisplaySymbol } from '$lib/utils/token.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
@@ -40,7 +40,7 @@
 	{/snippet}
 	{#snippet text()}
 		{replacePlaceholders($i18n.wallet.text.use_address_from_to, {
-			$token: getDisplaySymbol($token)
+			$token: getTokenDisplaySymbol($token)
 		})}
 	{/snippet}
 </ReceiveAddress>

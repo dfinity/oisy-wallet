@@ -16,7 +16,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getDisplaySymbol } from '$lib/utils/token.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let testId: string | undefined = undefined;
 
@@ -50,7 +50,7 @@
 
 	let hideTokenLabel: string;
 	$: hideTokenLabel = replacePlaceholders($i18n.tokens.hide.token, {
-		$token: nonNullish($token) ? getDisplaySymbol($token) : ''
+		$token: nonNullish($token) ? getTokenDisplaySymbol($token) : ''
 	});
 </script>
 
