@@ -52,7 +52,7 @@
 
 		{#snippet title()}
 			<span class:text-sm={asNetwork}>
-				{data.symbol}
+				{nonNullish(data.oisySymbol) ? data.oisySymbol.oisySymbol : data.symbol}
 				{#if asNetwork}
 					<span class="font-normal">
 						{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}

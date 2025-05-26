@@ -98,5 +98,15 @@
 		"fee": {
 			"__bigint__": "10000"
 		}
+	},
+	"GHOSTNODE": {
+		"ledgerCanisterId": "sx3gz-hqaaa-aaaar-qaoca-cai"
+	},
+	"XP": {
+		"indexCanisterId": "7hwgv-uaaaa-aaaao-qjv7q-cai",
+		"ledgerCanisterId": "wqihv-qyaaa-aaaak-afjoa-cai"
+	},
+	"EXE": {
+		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai"
 	}
 }
