@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -8,7 +9,12 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let token: Token;
+	interface Props {
+		children?: Snippet;
+		token: Token;
+	}
+
+	let { children, token }: Props = $props();
 </script>
 
 <Value ref="network">
@@ -41,7 +47,7 @@
 	{/snippet}
 </Value>
 
-<slot />
+{@render children?.()}
 
 {#if ['icrc', 'erc20'].includes(token.standard)}
 	<Value ref="symbol">
