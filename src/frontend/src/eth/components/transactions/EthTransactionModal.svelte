@@ -189,9 +189,11 @@
 					<span>{$i18n.transaction.text.block}</span>
 					<span>
 						<output>{blockNumber}</output>
-
-						<EthTransactionStatus {blockNumber} />
 					</span>
+				</li>
+
+				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+					<EthTransactionStatus {blockNumber} />
 				</li>
 			{/if}
 
