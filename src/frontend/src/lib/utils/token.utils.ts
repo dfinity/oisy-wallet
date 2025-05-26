@@ -18,6 +18,7 @@ import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type {CardData} from "$lib/types/token-card";
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -219,3 +220,6 @@ export const findTwinToken = ({
 				(token) => token.symbol === tokenToPair.twinTokenSymbol && isIcCkToken(token)
 			) as IcCkToken | undefined)
 		: undefined;
+
+export const getTokenDisplaySymbol = (token: Token | CardData): string =>
+	token.oisySymbol?.oisySymbol ?? token.symbol;
