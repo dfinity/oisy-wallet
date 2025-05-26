@@ -1,15 +1,15 @@
 import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
-import { getIcpAccountIdString, parseIcpAccountId } from '$icp/utils/icp-account.utils';
+import { getIcrcv2AccountIdString, parseIcrcv2AccountId } from '$icp/utils/icp-account.utils';
 import { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 
 describe('icp-account.utils', () => {
-	describe('parseIcpAccountId', () => {
+	describe('parseIcrcv2AccountId', () => {
 		it('should parse ICP account identifiers', () => {
 			// Valid ICP account identifier (example)
 			const icpAccountId = '6c04faf793b42b156206f805d13ba1b3b697ec18f519e6a11484eed091859d5a';
 
-			const result = parseIcpAccountId(icpAccountId);
+			const result = parseIcrcv2AccountId(icpAccountId);
 
 			expect(result).toEqual({
 				Account: Buffer.from(icpAccountId, 'hex')
@@ -21,7 +21,7 @@ describe('icp-account.utils', () => {
 			const principal = Principal.fromText('rrkah-fqaaa-aaaaa-aaaaq-cai');
 			const icrcAccount = `${principal.toText()}`;
 
-			const result = parseIcpAccountId(icrcAccount);
+			const result = parseIcrcv2AccountId(icrcAccount);
 
 			expect(result).toEqual({
 				WithPrincipal: {
@@ -37,7 +37,7 @@ describe('icp-account.utils', () => {
 			const icrcAccount =
 				'k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae-6cc627i.1';
 
-			const result = parseIcpAccountId(icrcAccount);
+			const result = parseIcrcv2AccountId(icrcAccount);
 
 			expect(result).toBeDefined();
 
@@ -81,7 +81,7 @@ describe('icp-account.utils', () => {
 			];
 
 			invalidAddresses.forEach((address) => {
-				const result = parseIcpAccountId(address);
+				const result = parseIcrcv2AccountId(address);
 
 				expect(result).toBeUndefined();
 			});
@@ -89,24 +89,24 @@ describe('icp-account.utils', () => {
 
 		it('should return undefined for non-string inputs', () => {
 			// @ts-expect-error Testing invalid input types
-			expect(parseIcpAccountId(123)).toBeUndefined();
+			expect(parseIcrcv2AccountId(123)).toBeUndefined();
 			// @ts-expect-error Testing invalid input types
-			expect(parseIcpAccountId(null)).toBeUndefined();
+			expect(parseIcrcv2AccountId(null)).toBeUndefined();
 			// @ts-expect-error Testing invalid input types
-			expect(parseIcpAccountId(undefined)).toBeUndefined();
+			expect(parseIcrcv2AccountId(undefined)).toBeUndefined();
 			// @ts-expect-error Testing invalid input types
-			expect(parseIcpAccountId({})).toBeUndefined();
+			expect(parseIcrcv2AccountId({})).toBeUndefined();
 		});
 	});
 
-	describe('getIcpAccountIdString', () => {
+	describe('getIcrcv2AccountIdString', () => {
 		it('should extract string from Account type', () => {
 			const accountIdStr = '6c04faf793b42b156206f805d13ba1b3b697ec18f519e6a11484eed091859d5a';
 			const accountIdObj: Icrcv2AccountId = {
 				Account: Buffer.from(accountIdStr, 'hex')
 			};
 
-			const result = getIcpAccountIdString(accountIdObj);
+			const result = getIcrcv2AccountIdString(accountIdObj);
 
 			expect(result).toEqual(accountIdStr);
 		});
@@ -120,7 +120,7 @@ describe('icp-account.utils', () => {
 				}
 			};
 
-			const result = getIcpAccountIdString(accountIdObj);
+			const result = getIcrcv2AccountIdString(accountIdObj);
 
 			expect(result).toEqual(principal.toString());
 		});
@@ -139,16 +139,16 @@ describe('icp-account.utils', () => {
 				}
 			};
 
-			const result = getIcpAccountIdString(accountIdObj);
+			const result = getIcrcv2AccountIdString(accountIdObj);
 
 			expect(result).toEqual(`${principal.toString()}-6cc627i.1`);
 		});
 
 		it('should return undefined for invalid Icrcv2AccountId objects', () => {
 			// @ts-expect-error Testing invalid input
-			expect(() => getIcpAccountIdString({})).toThrow();
+			expect(() => getIcrcv2AccountIdString({})).toThrow();
 			// @ts-expect-error Testing invalid input
-			expect(() => getIcpAccountIdString({ InvalidType: 'address' })).toThrow();
+			expect(() => getIcrcv2AccountIdString({ InvalidType: 'address' })).toThrow();
 		});
 	});
 
@@ -156,12 +156,12 @@ describe('icp-account.utils', () => {
 		it('should preserve ICP account identifiers when parsing and then getting the string', () => {
 			const originalAddress = '6c04faf793b42b156206f805d13ba1b3b697ec18f519e6a11484eed091859d5a';
 
-			const parsedAddress = parseIcpAccountId(originalAddress);
+			const parsedAddress = parseIcrcv2AccountId(originalAddress);
 
 			if (isNullish(parsedAddress)) {
 				throw new Error('Parsing failed');
 			}
-			const recoveredAddress = getIcpAccountIdString(parsedAddress);
+			const recoveredAddress = getIcrcv2AccountIdString(parsedAddress);
 
 			expect(recoveredAddress).toEqual(originalAddress);
 		});
@@ -170,11 +170,11 @@ describe('icp-account.utils', () => {
 			const principal = Principal.fromText('rrkah-fqaaa-aaaaa-aaaaq-cai');
 			const originalAddress = principal.toString();
 
-			const parsedAddress = parseIcpAccountId(originalAddress);
+			const parsedAddress = parseIcrcv2AccountId(originalAddress);
 			if (isNullish(parsedAddress)) {
 				throw new Error('Parsing failed');
 			}
-			const recoveredAddress = getIcpAccountIdString(parsedAddress);
+			const recoveredAddress = getIcrcv2AccountIdString(parsedAddress);
 
 			expect(recoveredAddress).toEqual(originalAddress);
 		});
@@ -183,11 +183,11 @@ describe('icp-account.utils', () => {
 			const originalAddress =
 				'k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae-6cc627i.1';
 
-			const parsedAddress = parseIcpAccountId(originalAddress);
+			const parsedAddress = parseIcrcv2AccountId(originalAddress);
 			if (isNullish(parsedAddress)) {
 				throw new Error('Parsing failed');
 			}
-			const recoveredAddress = getIcpAccountIdString(parsedAddress);
+			const recoveredAddress = getIcrcv2AccountIdString(parsedAddress);
 
 			expect(recoveredAddress).toEqual(originalAddress);
 		});
@@ -200,11 +200,11 @@ describe('icp-account.utils', () => {
 			];
 
 			validAddresses.forEach((address) => {
-				const parsedAddress = parseIcpAccountId(address);
+				const parsedAddress = parseIcrcv2AccountId(address);
 				if (isNullish(parsedAddress)) {
 					throw new Error('Parsing failed');
 				}
-				const recoveredAddress = getIcpAccountIdString(parsedAddress);
+				const recoveredAddress = getIcrcv2AccountIdString(parsedAddress);
 
 				expect(recoveredAddress).toEqual(address);
 			});

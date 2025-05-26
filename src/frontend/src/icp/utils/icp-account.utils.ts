@@ -13,7 +13,7 @@ export const getAccountIdentifier = (principal: Principal): AccountIdentifier =>
  * @param address The address string to parse
  * @returns The parsed Icrcv2AccountId or undefined if parsing fails
  */
-export const parseIcpAccountId = (address: string): Icrcv2AccountId | undefined => {
+export const parseIcrcv2AccountId = (address: string): Icrcv2AccountId | undefined => {
 	if (isIcpAccountIdentifier(address)) {
 		return {
 			Account: Buffer.from(address, 'hex')
@@ -38,7 +38,7 @@ export const parseIcpAccountId = (address: string): Icrcv2AccountId | undefined 
  * @param accountId The Icrcv2AccountId object
  * @returns The address string or undefined if extraction fails
  */
-export const getIcpAccountIdString = (accountId: Icrcv2AccountId): string => {
+export const getIcrcv2AccountIdString = (accountId: Icrcv2AccountId): string => {
 	if ('Account' in accountId) {
 		return Buffer.from(accountId.Account).toString('hex');
 	}

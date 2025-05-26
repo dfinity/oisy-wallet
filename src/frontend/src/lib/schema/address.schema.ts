@@ -1,6 +1,6 @@
 import { parseBtcAddress } from '$btc/utils/btc-address.utils';
 import type { BtcAddress, Icrcv2AccountId } from '$declarations/backend/backend.did';
-import { parseIcpAccountId } from '$icp/utils/icp-account.utils';
+import { parseIcrcv2AccountId } from '$icp/utils/icp-account.utils';
 import { isEthAddress } from '$lib/utils/account.utils';
 import { isBtcAddress } from '$lib/utils/address.utils';
 import { isSolAddress } from '$sol/utils/sol-address.utils';
@@ -33,12 +33,12 @@ export const EthAddressSchema = AddressSchema.refine((val) => isEthAddress(val))
 
 export const EthAddressObjectSchema = EthAddressSchema.transform((v) => ({ Public: v }));
 
-export const Icrcv2AccountIdSchema = AddressSchema.refine((v) => !!parseIcpAccountId(v));
+export const Icrcv2AccountIdSchema = AddressSchema.refine((v) => !!parseIcrcv2AccountId(v));
 
 export const Icrcv2AccountIdObjectSchema = Icrcv2AccountIdSchema.transform<Icrcv2AccountId>(
 	// eslint-disable-next-line local-rules/prefer-object-params
 	(data, context): Icrcv2AccountId => {
-		const accountId = parseIcpAccountId(data);
+		const accountId = parseIcrcv2AccountId(data);
 
 		if (nonNullish(accountId)) {
 			return accountId;
