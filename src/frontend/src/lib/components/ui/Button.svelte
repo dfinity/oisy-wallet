@@ -7,7 +7,7 @@
 	export let loading = false;
 	export let loadingAsSkeleton = true;
 	export let fullWidth = false;
-	export let alignLeft = false
+	export let alignLeft = false;
 	export let link = false;
 	export let inlineLink = false;
 	export let paddingSmall = false;
