@@ -6,6 +6,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
 import type { IcToken } from '$icp/types/ic-token';
@@ -21,7 +22,6 @@ import {
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { derived, type Readable } from 'svelte/store';
-import {isDefaultEthereumToken} from "$eth/utils/eth.utils";
 
 export const tokens: Readable<Token[]> = derived(
 	[
@@ -53,8 +53,8 @@ export const tokens: Readable<Token[]> = derived(
 	]
 );
 
-export const defaultEthereumTokens: Readable<Token[]> = derived(
-	[tokens], ([$tokens]) => $tokens.filter(token => isDefaultEthereumToken(token))
+export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
+	$tokens.filter((token) => isDefaultEthereumToken(token))
 );
 
 export const tokensToPin: Readable<TokenToPin[]> = derived(
@@ -65,7 +65,7 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		ICP_TOKEN,
 		SOLANA_TOKEN,
 		...$icrcChainFusionDefaultTokens,
-		...$defaultEthereumTokens.filter(token => token !== ETHEREUM_TOKEN)
+		...$defaultEthereumTokens.filter((token) => token !== ETHEREUM_TOKEN)
 	]
 );
 
