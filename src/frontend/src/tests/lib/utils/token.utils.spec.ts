@@ -18,6 +18,7 @@ import {
 	calculateTokenUsdBalance,
 	findTwinToken,
 	getMaxTransactionAmount,
+	getTokenDisplaySymbol,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
 	sumUsdBalances
@@ -25,6 +26,7 @@ import {
 import { bn3Bi, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import type { MockedFunction } from 'vitest';
 
@@ -499,6 +501,22 @@ describe('token.utils', () => {
 
 				expect(result.enabled).toBeTruthy();
 			});
+		});
+	});
+
+	describe('getTokenDisplaySymbol', () => {
+		it('should return oisy symbol if exists', () => {
+			const oisySymbol = 'OISY';
+
+			const result = getTokenDisplaySymbol({ ...mockIcrcCustomToken, oisySymbol: { oisySymbol } });
+
+			expect(result).toBe(oisySymbol);
+		});
+
+		it('should return token symbol if oisy symbol does not exist', () => {
+			const result = getTokenDisplaySymbol(mockIcrcCustomToken);
+
+			expect(result).toBe(mockIcrcCustomToken.symbol);
 		});
 	});
 });
