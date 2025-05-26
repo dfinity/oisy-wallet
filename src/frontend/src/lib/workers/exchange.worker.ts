@@ -48,7 +48,7 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 			splTokenAddresses: data?.splAddresses ?? []
 		});
 
-	// We sync now but also schedule the update afterwards
+	// We sync now but also schedule the update afterward
 	await sync();
 
 	timer = setInterval(sync, SYNC_EXCHANGE_TIMER_INTERVAL);
@@ -96,7 +96,7 @@ const syncExchange = async ({
 		const existing = acc.find(({ coingeckoPlatformId }) => coingeckoPlatformId === coingeckoId);
 
 		return [
-			...acc,
+			...acc.filter(({ coingeckoPlatformId }) => coingeckoPlatformId !== coingeckoId),
 			{
 				...existing,
 				coingeckoPlatformId: coingeckoId,
