@@ -4,6 +4,7 @@ use crate::{
     mutate_state, random::generate_random_u64, read_state, time, types::StoredPrincipal, Candid,
     CreateContactRequest,
 };
+use std::collections::BTreeMap;
 
 pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
     if request.name.trim().is_empty() {
@@ -24,7 +25,7 @@ pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, Co
         let mut stored_contacts = match s.contact.get(&stored_principal) {
             Some(candid_stored_contacts) => candid_stored_contacts.clone(),
             None => StoredContacts {
-                contacts: Vec::new(),
+                contacts: BTreeMap::new(),
                 update_timestamp_ns: current_time,
             },
         };
@@ -37,7 +38,7 @@ pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, Co
         };
 
         // Add the contact to the stored contacts
-        stored_contacts.contacts.push(new_contact.clone());
+        stored_contacts.contacts.insert(new_id, new_contact.clone());
         stored_contacts.update_timestamp_ns = current_time;
 
         // Update the storage
@@ -52,7 +53,7 @@ pub fn get_contacts() -> Vec<Contact> {
     read_state(|s| {
         s.contact
             .get(&stored_principal)
-            .map(|stored_contacts| stored_contacts.contacts.clone())
+            .map(|stored_contacts| stored_contacts.contacts.values().cloned().collect())
             // a user is allowed to have no contacts (if no contact has yet been added)
             .unwrap_or_default()
     })
@@ -79,8 +80,8 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
 
         // Find the specific contact by ID
         contacts
-            .into_iter()
-            .find(|contact| contact.id == contact_id)
+            .get(&contact_id)
+            .cloned()
             .ok_or(ContactError::ContactNotFound)
     })
 }

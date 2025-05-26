@@ -1,4 +1,5 @@
 use candid::{CandidType, Deserialize};
+use std::collections::BTreeMap;
 
 use super::account::TokenAccountId;
 
@@ -20,7 +21,7 @@ pub struct ContactAddressData {
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct StoredContacts {
-    pub contacts: Vec<Contact>,
+    pub contacts: BTreeMap<u64, Contact>,
     pub update_timestamp_ns: u64,
 }
 
