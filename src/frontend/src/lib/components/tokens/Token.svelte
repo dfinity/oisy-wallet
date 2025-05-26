@@ -6,6 +6,7 @@
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import {nonNullish} from "@dfinity/utils";
 
 	export let token: Token;
 </script>
@@ -61,7 +62,7 @@
 
 	{#snippet content()}
 		<output
-			>{`${getTokenDisplaySymbol(token)}${token.oisySymbol?.oisySymbol ? ` (${token.symbol})` : ''}`}</output
+			>{`${getTokenDisplaySymbol(token)}${nonNullish(token.oisySymbol) ? ` (${token.symbol})` : ''}`}</output
 		>
 	{/snippet}
 </Value>
