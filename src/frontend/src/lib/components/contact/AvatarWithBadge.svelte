@@ -27,7 +27,7 @@
 		{#if nonNullish(badge)}
 			<AddressesBadge
 				addresses={contact.addresses}
-				selectedAddress={badge.type === 'addressTypeOrCount' ? badge.address : undefined}
+				selectedAddress={badge.type === 'addressType' ? badge.address : undefined}
 			/>
 		{/if}
 	{:else}
