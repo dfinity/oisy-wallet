@@ -4,6 +4,7 @@
 	import type { Balance } from '$lib/types/balance';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		token: Token;
@@ -22,6 +23,6 @@
 			value: balance ?? ZERO,
 			unitName: token.decimals
 		})}
-		{token.symbol}
+		{getTokenDisplaySymbol(token)}
 	</div>
 </div>
