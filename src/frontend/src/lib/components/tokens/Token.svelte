@@ -8,7 +8,11 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let token: Token;
+	interface Props {
+		token: Token;
+	}
+
+	let {token}:Props = $props();
 </script>
 
 <Value ref="network">
