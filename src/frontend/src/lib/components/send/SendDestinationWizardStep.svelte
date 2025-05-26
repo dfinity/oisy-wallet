@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
-	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
+	import { btcRecentlyUsedDestinations } from '$btc/derived/btc-transactions.derived';
 	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
-	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
+	import { ethRecentlyUsedDestinations } from '$eth/derived/eth-transactions.derived';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
-	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
+	import { icRecentlyUsedDestinations } from '$icp/derived/ic-transactions.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
-	import KnownDestinationsComponent from '$lib/components/send/KnownDestinations.svelte';
+	import RecentlyUsedDestinationsComponent from '$lib/components/send/RecentlyUsedDestinations.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -30,7 +30,7 @@
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
-	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
+	import { solRecentlyUsedDestinations } from '$sol/derived/sol-transactions.derived';
 
 	interface Props {
 		destination: string;
@@ -60,13 +60,13 @@
 				<LoaderMultipleEthTransactions>
 					<EthSendDestination
 						token={$sendToken}
-						knownDestinations={$ethKnownDestinations}
+						recentlyUsedDestinations={$ethRecentlyUsedDestinations}
 						bind:destination
 						bind:invalidDestination
 						on:icQRCodeScan
 					/>
-					<KnownDestinationsComponent
-						knownDestinations={$ethKnownDestinations}
+					<RecentlyUsedDestinationsComponent
+						recentlyUsedDestinations={$ethRecentlyUsedDestinations}
 						bind:destination
 						on:icNext={next}
 					/>
@@ -77,13 +77,13 @@
 		<div data-tid={testId}>
 			<IcSendDestination
 				tokenStandard={$sendToken.standard}
-				knownDestinations={$icKnownDestinations}
+				recentlyUsedDestinations={$icRecentlyUsedDestinations}
 				bind:destination
 				bind:invalidDestination
 				on:icQRCodeScan
 			/>
-			<KnownDestinationsComponent
-				knownDestinations={$icKnownDestinations}
+			<RecentlyUsedDestinationsComponent
+				recentlyUsedDestinations={$icRecentlyUsedDestinations}
 				bind:destination
 				on:icNext={next}
 			/>
@@ -94,10 +94,10 @@
 				bind:destination
 				bind:invalidDestination
 				on:icQRCodeScan
-				knownDestinations={$btcKnownDestinations}
+				recentlyUsedDestinations={$btcRecentlyUsedDestinations}
 			/>
-			<KnownDestinationsComponent
-				knownDestinations={$btcKnownDestinations}
+			<RecentlyUsedDestinationsComponent
+				recentlyUsedDestinations={$btcRecentlyUsedDestinations}
 				bind:destination
 				on:icNext={next}
 			/>
@@ -108,10 +108,10 @@
 				bind:destination
 				bind:invalidDestination
 				on:icQRCodeScan
-				knownDestinations={$solKnownDestinations}
+				recentlyUsedDestinations={$solRecentlyUsedDestinations}
 			/>
-			<KnownDestinationsComponent
-				knownDestinations={$solKnownDestinations}
+			<RecentlyUsedDestinationsComponent
+				recentlyUsedDestinations={$solRecentlyUsedDestinations}
 				bind:destination
 				on:icNext={next}
 			/>

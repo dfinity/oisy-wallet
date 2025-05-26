@@ -2,12 +2,12 @@
 	import { createEventDispatcher } from 'svelte';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { KnownDestinations } from '$lib/types/transactions';
+	import type { RecentlyUsedDestinations } from '$lib/types/transactions';
 	import { isInvalidDestinationSol } from '$sol/utils/sol-send.utils';
 
 	export let destination = '';
 	export let invalidDestination = false;
-	export let knownDestinations: KnownDestinations | undefined = undefined;
+	export let recentlyUsedDestinations: RecentlyUsedDestinations | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -17,7 +17,7 @@
 <SendInputDestination
 	bind:destination
 	bind:invalidDestination
-	{knownDestinations}
+	{recentlyUsedDestinations}
 	{isInvalidDestination}
 	inputPlaceholder={$i18n.send.placeholder.enter_recipient_address}
 	on:icQRCodeScan

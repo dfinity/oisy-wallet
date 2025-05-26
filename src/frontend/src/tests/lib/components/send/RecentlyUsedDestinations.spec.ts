@@ -1,7 +1,7 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import KnownDestinations from '$lib/components/send/KnownDestinations.svelte';
+import RecentlyUsedDestinations from '$lib/components/send/RecentlyUsedDestinations.svelte';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
@@ -10,8 +10,8 @@ import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 import { expect } from 'vitest';
 
-describe('KnownDestinations', () => {
-	const knownDestinations = {
+describe('RecentlyUsedDestinations', () => {
+	const recentlyUsedDestinations = {
 		[mockBtcAddress]: {
 			amounts: [{ value: 10000000n, token: BTC_MAINNET_TOKEN }],
 			timestamp: 1671234567890,
@@ -30,10 +30,10 @@ describe('KnownDestinations', () => {
 	};
 
 	it('renders content if data is provided', () => {
-		const { getByText } = render(KnownDestinations, {
+		const { getByText } = render(RecentlyUsedDestinations, {
 			props: {
 				destination: '',
-				knownDestinations
+				recentlyUsedDestinations
 			}
 		});
 
@@ -45,10 +45,10 @@ describe('KnownDestinations', () => {
 	});
 
 	it('renders filtered content if data is provided', () => {
-		const { getByText } = render(KnownDestinations, {
+		const { getByText } = render(RecentlyUsedDestinations, {
 			props: {
 				destination: mockBtcAddress,
-				knownDestinations
+				recentlyUsedDestinations
 			}
 		});
 
@@ -60,7 +60,7 @@ describe('KnownDestinations', () => {
 	});
 
 	it('renders empty state component if data is empty', () => {
-		const { getByText } = render(KnownDestinations, {
+		const { getByText } = render(RecentlyUsedDestinations, {
 			props: {
 				destination: mockBtcAddress
 			}

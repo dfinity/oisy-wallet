@@ -1,7 +1,7 @@
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { token } from '$lib/stores/token.store';
 import {
-	solKnownDestinations,
+	solRecentlyUsedDestinations,
 	solTransactions,
 	solTransactionsInitialized,
 	solTransactionsNotInitialized
@@ -125,12 +125,12 @@ describe('sol-transactions.derived', () => {
 		});
 	});
 
-	describe('solKnownDestinations', () => {
+	describe('solRecentlyUsedDestinations', () => {
 		beforeEach(() => {
 			solTransactionsStore.reset(SOLANA_TOKEN_ID);
 		});
 
-		it('should return known destinations if transactions store has some data', () => {
+		it('should return recently used destinations if transactions store has some data', () => {
 			solTransactionsStore.append({
 				tokenId: SOLANA_TOKEN_ID,
 				transactions
@@ -138,7 +138,7 @@ describe('sol-transactions.derived', () => {
 
 			const maxTimestamp = Math.max(...transactions.map(({ data }) => Number(data.timestamp)));
 
-			expect(get(solKnownDestinations)).toEqual({
+			expect(get(solRecentlyUsedDestinations)).toEqual({
 				[transactions[0].data.to as string]: {
 					amounts: transactions.map(({ data }) => ({ value: data.value, token: SOLANA_TOKEN })),
 					timestamp: maxTimestamp,
@@ -148,7 +148,7 @@ describe('sol-transactions.derived', () => {
 		});
 
 		it('should return empty object if transactions store does not have data', () => {
-			expect(get(solKnownDestinations)).toEqual({});
+			expect(get(solRecentlyUsedDestinations)).toEqual({});
 		});
 	});
 });

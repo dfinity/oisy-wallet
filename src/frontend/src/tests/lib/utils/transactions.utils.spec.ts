@@ -44,8 +44,8 @@ import {
 	areTransactionsStoresLoading,
 	filterReceivedMicroTransactions,
 	findOldestTransaction,
-	getKnownDestinations,
 	getReceivedMicroTransactions,
+	getRecentlyUsedDestinations,
 	isTransactionsStoreEmpty,
 	isTransactionsStoreInitialized,
 	isTransactionsStoreNotInitialized,
@@ -1425,13 +1425,13 @@ describe('transactions.utils', () => {
 		});
 	});
 
-	describe('getKnownDestinations', () => {
-		it('should correctly return a single known destinations', () => {
+	describe('getRecentlyUsedDestinations', () => {
+		it('should correctly return a single recently used destinations', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map((transaction) => ({
 				...transaction,
 				token: ICP_TOKEN
 			}));
-			const expectedIcKnownDestinations = {
+			const expectedIcRecentlyUsedDestinations = {
 				[icTransactionsUi[0].to as string]: {
 					amounts: icTransactionsUi.map(({ value, token }) => ({ value, token })),
 					timestamp: Number(icTransactionsUi[0].timestamp),
@@ -1439,10 +1439,12 @@ describe('transactions.utils', () => {
 				}
 			};
 
-			expect(getKnownDestinations(icTransactionsUi)).toEqual(expectedIcKnownDestinations);
+			expect(getRecentlyUsedDestinations(icTransactionsUi)).toEqual(
+				expectedIcRecentlyUsedDestinations
+			);
 		});
 
-		it('should correctly return multiple known destinations', () => {
+		it('should correctly return multiple recently used destinations', () => {
 			const icTransactionsUi1 = {
 				...createMockIcTransactionsUi(1)[0],
 				token: ICP_TOKEN
@@ -1453,7 +1455,7 @@ describe('transactions.utils', () => {
 				to: icTransactionsUi1.from
 			};
 
-			expect(getKnownDestinations([icTransactionsUi1, icTransactionsUi2])).toEqual({
+			expect(getRecentlyUsedDestinations([icTransactionsUi1, icTransactionsUi2])).toEqual({
 				[icTransactionsUi1.to as string]: {
 					amounts: [{ value: icTransactionsUi1.value, token: icTransactionsUi1.token }],
 					timestamp: Number(icTransactionsUi1.timestamp),
@@ -1467,7 +1469,7 @@ describe('transactions.utils', () => {
 			});
 		});
 
-		it('should correctly return multiple known destinations if a tx has "to" as an array', () => {
+		it('should correctly return multiple recently used destinations if a tx has "to" as an array', () => {
 			const [mockTransaction] = createMockBtcTransactionsUi(1);
 			const btcTransactionsUi = {
 				...mockTransaction,
@@ -1476,7 +1478,7 @@ describe('transactions.utils', () => {
 				token: BTC_MAINNET_TOKEN
 			};
 
-			expect(getKnownDestinations([btcTransactionsUi])).toEqual({
+			expect(getRecentlyUsedDestinations([btcTransactionsUi])).toEqual({
 				[btcTransactionsUi.to[0] as string]: {
 					amounts: [{ value: btcTransactionsUi.value, token: btcTransactionsUi.token }],
 					timestamp: Number(btcTransactionsUi.timestamp),
@@ -1498,7 +1500,7 @@ describe('transactions.utils', () => {
 					token: ICP_TOKEN
 				})
 			);
-			const expectedIcKnownDestinations = {
+			const expectedIcRecentlyUsedDestinations = {
 				[icTransactionsUi[0].to as string]: {
 					amounts: icTransactionsUi.map(({ value, token }) => ({ value, token })),
 					timestamp: Number(icTransactionsUi[icTransactionsUi.length - 1].timestamp),
@@ -1506,7 +1508,9 @@ describe('transactions.utils', () => {
 				}
 			};
 
-			expect(getKnownDestinations(icTransactionsUi)).toEqual(expectedIcKnownDestinations);
+			expect(getRecentlyUsedDestinations(icTransactionsUi)).toEqual(
+				expectedIcRecentlyUsedDestinations
+			);
 		});
 
 		it('should correctly return an empty array if all txs do not have values', () => {
@@ -1516,7 +1520,7 @@ describe('transactions.utils', () => {
 				value: undefined
 			}));
 
-			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+			expect(getRecentlyUsedDestinations(icTransactionsUi)).toEqual({});
 		});
 
 		it('should correctly return an empty array if all txs have zero values', () => {
@@ -1526,7 +1530,7 @@ describe('transactions.utils', () => {
 				value: ZERO
 			}));
 
-			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+			expect(getRecentlyUsedDestinations(icTransactionsUi)).toEqual({});
 		});
 
 		it('should correctly return an empty array if all txs are receive', () => {
@@ -1536,7 +1540,7 @@ describe('transactions.utils', () => {
 				type: 'receive' as IcTransactionType
 			}));
 
-			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+			expect(getRecentlyUsedDestinations(icTransactionsUi)).toEqual({});
 		});
 	});
 

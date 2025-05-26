@@ -6,7 +6,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import type { OptionToken } from '$lib/types/token';
-	import type { KnownDestinations } from '$lib/types/transactions';
+	import type { RecentlyUsedDestinations } from '$lib/types/transactions';
 	import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
@@ -15,7 +15,7 @@
 	export let network: Network | undefined = undefined;
 	export let destination = '';
 	export let invalidDestination = false;
-	export let knownDestinations: KnownDestinations | undefined = undefined;
+	export let recentlyUsedDestinations: RecentlyUsedDestinations | undefined = undefined;
 
 	let networkICP = false;
 	$: networkICP = isNetworkICP(network);
@@ -48,7 +48,7 @@
 <SendInputDestination
 	bind:destination
 	bind:invalidDestination
-	{knownDestinations}
+	{recentlyUsedDestinations}
 	{isInvalidDestination}
 	inputPlaceholder={$i18n.send.placeholder.enter_eth_address}
 	on:icQRCodeScan

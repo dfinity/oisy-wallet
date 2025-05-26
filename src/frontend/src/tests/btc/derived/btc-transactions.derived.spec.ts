@@ -1,4 +1,7 @@
-import { btcKnownDestinations, sortedBtcTransactions } from '$btc/derived/btc-transactions.derived';
+import {
+	btcRecentlyUsedDestinations,
+	sortedBtcTransactions
+} from '$btc/derived/btc-transactions.derived';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import { BTC_MAINNET_TOKEN, BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
@@ -84,7 +87,7 @@ describe('btc-transactions.derived', () => {
 		});
 	});
 
-	describe('btcKnownDestinations', () => {
+	describe('btcRecentlyUsedDestinations', () => {
 		const transactions = [
 			{
 				certified: true,
@@ -101,7 +104,7 @@ describe('btc-transactions.derived', () => {
 			btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
 		});
 
-		it('should return known destinations if transactions store has some data', () => {
+		it('should return recently used destinations if transactions store has some data', () => {
 			btcTransactionsStore.append({
 				tokenId: BTC_MAINNET_TOKEN_ID,
 				transactions
@@ -109,7 +112,7 @@ describe('btc-transactions.derived', () => {
 
 			const maxTimestamp = Math.max(...transactions.map(({ data }) => Number(data.timestamp)));
 
-			expect(get(btcKnownDestinations)).toEqual({
+			expect(get(btcRecentlyUsedDestinations)).toEqual({
 				[transactions[0].data.to?.[0] ?? '']: {
 					amounts: transactions.map(({ data }) => ({
 						value: data.value,
@@ -122,7 +125,7 @@ describe('btc-transactions.derived', () => {
 		});
 
 		it('should return empty object if transactions store does not have data', () => {
-			expect(get(btcKnownDestinations)).toEqual({});
+			expect(get(btcRecentlyUsedDestinations)).toEqual({});
 		});
 	});
 });

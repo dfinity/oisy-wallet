@@ -29,7 +29,10 @@ import type {
 	AnyTransactionUi,
 	AnyTransactionUiWithToken
 } from '$lib/types/transaction';
-import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
+import type {
+	RecentlyUsedDestinations,
+	TransactionsStoreCheckParams
+} from '$lib/types/transactions';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
@@ -299,10 +302,10 @@ export const areTransactionsStoresLoaded = (
 		isTransactionsStoreInitialized(transactionsStore)
 	);
 
-export const getKnownDestinations = (
+export const getRecentlyUsedDestinations = (
 	transactions: AnyTransactionUiWithToken[]
-): KnownDestinations =>
-	transactions.reduce<KnownDestinations>(
+): RecentlyUsedDestinations =>
+	transactions.reduce<RecentlyUsedDestinations>(
 		(acc, { timestamp, value, to, type, token }) =>
 			nonNullish(to) && type === 'send' && nonNullish(value) && value > ZERO
 				? {

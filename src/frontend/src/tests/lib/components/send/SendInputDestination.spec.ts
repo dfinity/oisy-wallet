@@ -45,7 +45,7 @@ describe('SendInputDestination', () => {
 			props: {
 				...props,
 				invalidDestination: false,
-				knownDestinations: {}
+				recentlyUsedDestinations: {}
 			}
 		});
 

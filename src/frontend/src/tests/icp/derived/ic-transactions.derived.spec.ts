@@ -4,7 +4,7 @@ import {
 	IC_CKETH_MINTER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { icKnownDestinations, icTransactions } from '$icp/derived/ic-transactions.derived';
+import { icRecentlyUsedDestinations, icTransactions } from '$icp/derived/ic-transactions.derived';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
@@ -159,12 +159,12 @@ describe('ic-transactions.derived', () => {
 		});
 	});
 
-	describe('icKnownDestinations', () => {
+	describe('icRecentlyUsedDestinations', () => {
 		beforeEach(() => {
 			icTransactionsStore.reset(ICP_TOKEN_ID);
 		});
 
-		it('should return known destinations for ICP if transactions store has some data', () => {
+		it('should return recently used destinations for ICP if transactions store has some data', () => {
 			token.set(ICP_TOKEN);
 			icTransactionsStore.append({
 				tokenId: ICP_TOKEN_ID,
@@ -173,7 +173,7 @@ describe('ic-transactions.derived', () => {
 
 			const maxTimestamp = Math.max(...transactions.map(({ data }) => Number(data.timestamp)));
 
-			expect(get(icKnownDestinations)).toEqual({
+			expect(get(icRecentlyUsedDestinations)).toEqual({
 				[transactions[0].data.to as string]: {
 					amounts: transactions.map(({ data }) => ({ value: data.value, token: ICP_TOKEN })),
 					timestamp: maxTimestamp,
@@ -183,7 +183,7 @@ describe('ic-transactions.derived', () => {
 		});
 
 		it('should return empty object if transactions store does not have data', () => {
-			expect(get(icKnownDestinations)).toEqual({});
+			expect(get(icRecentlyUsedDestinations)).toEqual({});
 		});
 	});
 });

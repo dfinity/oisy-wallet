@@ -1,6 +1,6 @@
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
+import { ethRecentlyUsedDestinations } from '$eth/derived/eth-transactions.derived';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { ethAddressStore } from '$lib/stores/address.store';
@@ -34,18 +34,18 @@ describe('eth-transactions.derived', () => {
 		});
 	};
 
-	describe('ethKnownDestinations', () => {
+	describe('ethRecentlyUsedDestinations', () => {
 		beforeEach(() => {
 			ethTransactionsStore.reset();
 			token.reset();
 			ethAddressStore.set({ certified: true, data: mockEthAddress });
 		});
 
-		it('should return known destinations if transactions store has some data and helper addresses available and network matches', () => {
+		it('should return recently used destinations if transactions store has some data and helper addresses available and network matches', () => {
 			token.set(ETHEREUM_TOKEN);
 			setupStores();
 
-			expect(get(ethKnownDestinations)).toEqual({
+			expect(get(ethRecentlyUsedDestinations)).toEqual({
 				[transactions[0].to as string]: {
 					amounts: transactions.map(({ value }) => ({ value, token: ETHEREUM_TOKEN })),
 					timestamp: Number(transactions[0].timestamp),
@@ -58,11 +58,11 @@ describe('eth-transactions.derived', () => {
 			token.set(BASE_ETH_TOKEN);
 			setupStores();
 
-			expect(get(ethKnownDestinations)).toEqual({});
+			expect(get(ethRecentlyUsedDestinations)).toEqual({});
 		});
 
 		it('should return empty object if transactions store does not have data at all', () => {
-			expect(get(ethKnownDestinations)).toEqual({});
+			expect(get(ethRecentlyUsedDestinations)).toEqual({});
 		});
 
 		it('should return empty object if helper addresses are not available', () => {
@@ -71,7 +71,7 @@ describe('eth-transactions.derived', () => {
 				data: mockCkEthMinterInfo
 			});
 
-			expect(get(ethKnownDestinations)).toEqual({});
+			expect(get(ethRecentlyUsedDestinations)).toEqual({});
 		});
 	});
 });

@@ -11,8 +11,8 @@ import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';
 import type { AnyTransactionUiWithToken } from '$lib/types/transaction';
-import type { KnownDestinations } from '$lib/types/transactions';
-import { getKnownDestinations } from '$lib/utils/transactions.utils';
+import type { RecentlyUsedDestinations } from '$lib/types/transactions';
+import { getRecentlyUsedDestinations } from '$lib/utils/transactions.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -62,7 +62,7 @@ export const icTransactions: Readable<NonNullable<IcTransactionsData>> = derived
 		})
 );
 
-export const icKnownDestinations: Readable<KnownDestinations> = derived(
+export const icRecentlyUsedDestinations: Readable<RecentlyUsedDestinations> = derived(
 	[icTransactionsStore, tokens, tokenWithFallback],
 	([$icTransactionsStore, $tokens, $tokenWithFallback]) => {
 		const isIcpToken = $tokenWithFallback.id === ICP_TOKEN_ID;
@@ -87,6 +87,6 @@ export const icKnownDestinations: Readable<KnownDestinations> = derived(
 			}
 		);
 
-		return getKnownDestinations(mappedTransactions);
+		return getRecentlyUsedDestinations(mappedTransactions);
 	}
 );

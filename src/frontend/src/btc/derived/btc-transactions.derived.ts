@@ -4,8 +4,8 @@ import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';
 import type { AnyTransactionUiWithToken } from '$lib/types/transaction';
-import type { KnownDestinations } from '$lib/types/transactions';
-import { getKnownDestinations } from '$lib/utils/transactions.utils';
+import type { RecentlyUsedDestinations } from '$lib/types/transactions';
+import { getRecentlyUsedDestinations } from '$lib/utils/transactions.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -27,7 +27,7 @@ export const btcTransactionsNotInitialized: Readable<boolean> = derived(
 	([$btcTransactionsInitialized]) => !$btcTransactionsInitialized
 );
 
-export const btcKnownDestinations: Readable<KnownDestinations | undefined> = derived(
+export const btcRecentlyUsedDestinations: Readable<RecentlyUsedDestinations | undefined> = derived(
 	[btcTransactionsStore, tokens],
 	([$btcTransactionsStore, $tokens]) => {
 		const mappedTransactions: AnyTransactionUiWithToken[] = [];
@@ -44,6 +44,6 @@ export const btcKnownDestinations: Readable<KnownDestinations | undefined> = der
 			}
 		});
 
-		return getKnownDestinations(mappedTransactions);
+		return getRecentlyUsedDestinations(mappedTransactions);
 	}
 );

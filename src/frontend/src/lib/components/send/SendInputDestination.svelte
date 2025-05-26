@@ -8,7 +8,7 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
-	import type { KnownDestinations } from '$lib/types/transactions';
+	import type { RecentlyUsedDestinations } from '$lib/types/transactions';
 	import { isDesktop } from '$lib/utils/device.utils';
 
 	export let destination = '';
@@ -17,7 +17,7 @@
 	export let inputPlaceholder: string;
 	export let isInvalidDestination: (() => boolean) | undefined;
 	export let onQRButtonClick: (() => void) | undefined = undefined;
-	export let knownDestinations: KnownDestinations | undefined = undefined;
+	export let recentlyUsedDestinations: RecentlyUsedDestinations | undefined = undefined;
 
 	const validate = () => (invalidDestination = isInvalidDestination?.() ?? false);
 
@@ -67,7 +67,7 @@
 	</div>
 </div>
 
-{#if !invalidDestination && notEmptyString(destination) && nonNullish(knownDestinations) && isNullish(knownDestinations[destination.toLowerCase()])}
+{#if !invalidDestination && notEmptyString(destination) && nonNullish(recentlyUsedDestinations) && isNullish(recentlyUsedDestinations[destination.toLowerCase()])}
 	<div transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning" styleClass="mt-4">
 			{$i18n.send.info.unknown_destination}

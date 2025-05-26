@@ -8,8 +8,8 @@ import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';
 import type { AnyTransactionUiWithToken, Transaction } from '$lib/types/transaction';
-import type { KnownDestinations } from '$lib/types/transactions';
-import { getKnownDestinations } from '$lib/utils/transactions.utils';
+import type { RecentlyUsedDestinations } from '$lib/types/transactions';
+import { getRecentlyUsedDestinations } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -52,7 +52,7 @@ export const ethTransactionsNotInitialized: Readable<boolean> = derived(
 	([$ethTransactionsInitialized]) => !$ethTransactionsInitialized
 );
 
-export const ethKnownDestinations: Readable<KnownDestinations> = derived(
+export const ethRecentlyUsedDestinations: Readable<RecentlyUsedDestinations> = derived(
 	[
 		ethTransactionsStore,
 		ckEthMinterInfoStore,
@@ -95,6 +95,6 @@ export const ethKnownDestinations: Readable<KnownDestinations> = derived(
 			}
 		});
 
-		return getKnownDestinations(mappedTransactions);
+		return getRecentlyUsedDestinations(mappedTransactions);
 	}
 );

@@ -9,7 +9,7 @@
 	import { MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/address';
-	import type { KnownDestination } from '$lib/types/transactions';
+	import type { RecentlyUsedDestination } from '$lib/types/transactions';
 	import {
 		formatSecondsToNormalizedDate,
 		shortenWithMiddleEllipsis
@@ -18,7 +18,7 @@
 
 	interface Props {
 		destination: Address;
-		amounts: KnownDestination['amounts'];
+		amounts: RecentlyUsedDestination['amounts'];
 		timestamp?: number;
 	}
 	let { destination, amounts, timestamp }: Props = $props();

@@ -2,8 +2,8 @@ import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';
 import type { AnyTransactionUiWithToken } from '$lib/types/transaction';
-import type { KnownDestinations } from '$lib/types/transactions';
-import { getKnownDestinations } from '$lib/utils/transactions.utils';
+import type { RecentlyUsedDestinations } from '$lib/types/transactions';
+import { getRecentlyUsedDestinations } from '$lib/utils/transactions.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { nonNullish } from '@dfinity/utils';
@@ -25,7 +25,7 @@ export const solTransactionsNotInitialized: Readable<boolean> = derived(
 	([$solTransactionsInitialized]) => !$solTransactionsInitialized
 );
 
-export const solKnownDestinations: Readable<KnownDestinations> = derived(
+export const solRecentlyUsedDestinations: Readable<RecentlyUsedDestinations> = derived(
 	[solTransactionsStore, tokens],
 	([$solTransactionsStore, $tokens]) => {
 		const mappedTransactions: AnyTransactionUiWithToken[] = [];
@@ -42,6 +42,6 @@ export const solKnownDestinations: Readable<KnownDestinations> = derived(
 			}
 		});
 
-		return getKnownDestinations(mappedTransactions);
+		return getRecentlyUsedDestinations(mappedTransactions);
 	}
 );

@@ -15,10 +15,10 @@ export interface TransactionsStoreCheckParams {
 	tokens: Token[];
 }
 
-export interface KnownDestination {
+export interface RecentlyUsedDestination {
 	amounts: { value: bigint; token: Token }[];
 	address: Address;
 	timestamp?: number;
 }
 
-export type KnownDestinations = Record<Address, KnownDestination>;
+export type RecentlyUsedDestinations = Record<Address, RecentlyUsedDestination>;

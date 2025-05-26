@@ -1,5 +1,5 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-import KnownDestination from '$lib/components/send/KnownDestination.svelte';
+import RecentlyUsedDestination from '$lib/components/send/RecentlyUsedDestination.svelte';
 import { MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS } from '$lib/constants/app.constants';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -8,7 +8,7 @@ import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 import { expect } from 'vitest';
 
-describe('KnownDestination', () => {
+describe('RecentlyUsedDestination', () => {
 	const props = {
 		destination: mockBtcAddress,
 		amounts: [
@@ -19,7 +19,7 @@ describe('KnownDestination', () => {
 	};
 
 	it('renders all amounts if the array length is smaller than the max amount', () => {
-		const { container } = render(KnownDestination, {
+		const { container } = render(RecentlyUsedDestination, {
 			props
 		});
 
@@ -39,7 +39,7 @@ describe('KnownDestination', () => {
 			...props,
 			amounts: [...props.amounts, ...props.amounts]
 		};
-		const { container } = render(KnownDestination, {
+		const { container } = render(RecentlyUsedDestination, {
 			props: newProps
 		});
 
