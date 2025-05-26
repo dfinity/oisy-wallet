@@ -9,6 +9,10 @@
 	import { mapAddressToName } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
+	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -26,10 +30,6 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
-	import ModalHero from '$lib/components/common/ModalHero.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
-	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	export let transaction: EthTransactionUi;
 	export let token: OptionToken;
