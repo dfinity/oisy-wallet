@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { ComponentProps } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import type { ZodError } from 'zod';
 	import QrButton from '$lib/components/common/QrButton.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -17,12 +18,14 @@
 		onQRCodeScan?: () => void;
 		value?: string;
 		addressType?: TokenAccountIdTypes;
+		parseError?: ZodError;
 	}
 
 	let {
 		onQRCodeScan,
 		value = $bindable(),
 		addressType = $bindable(),
+		parseError = $bindable(),
 		...props
 	}: InputAddressProps & ComponentProps<Input> = $props();
 
@@ -51,6 +54,7 @@
 	$effect(() => {
 		// Because bindable props may not be derrived, set it manually in an effect
 		addressType = currentAddressType;
+		parseError = tokenAccountIdParseResult?.error;
 	});
 </script>
 
