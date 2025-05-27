@@ -1046,6 +1046,7 @@
 			"hide_addresses": "Hide addresses of contact"
 		},
 		"edit_contact": {
+			"title": "Edit contact",
 			"add_address": "Add address",
 			"delete_contact": "Delete contact"
 		},
