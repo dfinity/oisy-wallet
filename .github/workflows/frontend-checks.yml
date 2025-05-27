@@ -172,6 +172,7 @@ jobs:
         run: |
           NETWORKS=$(scripts/dfx_networks.sh | jq -R . | jq -s .)
           echo "network-matrix=$NETWORKS" >> $GITHUB_OUTPUT
+          echo "Network matrix set to: $NETWORKS"
 
   config-build:
     runs-on: ubuntu-24.04
