@@ -30,25 +30,12 @@
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let type: IcTransactionType;
-	let toLabel: string | undefined;
-	let fromLabel: string | undefined;
 	let txExplorerUrl: string | undefined;
 	let fromExplorerUrl: string | undefined;
 	let toExplorerUrl: string | undefined;
 
-	$: ({
-		id,
-		from,
-		to,
-		value,
-		timestamp,
-		type,
-		toLabel,
-		fromLabel,
-		txExplorerUrl,
-		fromExplorerUrl,
-		toExplorerUrl
-	} = transaction);
+	$: ({ id, from, to, value, timestamp, type, txExplorerUrl, fromExplorerUrl, toExplorerUrl } =
+		transaction);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>

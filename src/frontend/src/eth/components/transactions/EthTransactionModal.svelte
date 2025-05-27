@@ -202,29 +202,27 @@
 					<output>{formatSecondsToDate(timestamp)}</output>
 				</ListItem>
 			{/if}
-			<!--
-			<Value ref="from">
-				{#snippet label()}
-					{$i18n.transaction.text.from}
-				{/snippet}
-				{#snippet content()}
-					<output>{fromDisplay}</output>
-					<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
-					{#if nonNullish(fromExplorerUrl)}
-						<ExternalLink
-							iconSize="18"
-							href={fromExplorerUrl}
-							ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
-							inline
-							color="blue"
-						/>
-					{/if}
-				{/snippet}
-			</Value>
 
-			-->
+			{#if nonNullish(from) && nonNullish(fromDisplay) && from !== fromDisplay}
+				<ListItem>
+					<span>{$i18n.transaction.text.from}</span>
+					<span class="flex max-w-[50%] flex-row break-all">
+						<output>{fromDisplay}</output>
+						<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
+						{#if nonNullish(fromExplorerUrl)}
+							<ExternalLink
+								iconSize="18"
+								href={fromExplorerUrl}
+								ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
+								inline
+								color="blue"
+							/>
+						{/if}
+					</span>
+				</ListItem>
+			{/if}
 
-			{#if nonNullish(to) && nonNullish(toDisplay)}
+			{#if nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
 				<ListItem>
 					<span>{$i18n.transaction.text.interacted_with}</span>
 
