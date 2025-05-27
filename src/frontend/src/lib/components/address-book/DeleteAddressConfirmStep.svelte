@@ -7,6 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import {shortenWithMiddleEllipsis} from "$lib/utils/format.utils";
 
 	interface Props {
 		onCancel: () => void;
@@ -16,20 +17,13 @@
 	}
 
 	let { onCancel, onDelete, address, contact }: Props = $props();
-
-	const truncateAddress = (address: string) => {
-		if (!address || address.length <= 10) {
-			return address;
-		}
-		return `${address.slice(0, 5)}...${address.slice(-5)}`;
-	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center pb-5">
 	<span class="mb-5 text-center">
 		<Html
 			text={replacePlaceholders($i18n.address.delete.content_text, {
-				$address: truncateAddress(address.address),
+				$address: shortenWithMiddleEllipsis({ text: address.address }),
 				$contact: contact.name
 			})}
 		/>
