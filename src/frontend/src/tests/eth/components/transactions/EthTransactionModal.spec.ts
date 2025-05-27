@@ -7,7 +7,7 @@ import { render } from '@testing-library/svelte';
 const [mockEthTransactionUi] = createMockEthTransactionsUi(1);
 
 describe('EthTransactionModal', () => {
-	it('should render the SOL transaction modal', () => {
+	it('should render the ETH transaction modal', () => {
 		const { getByText } = render(EthTransactionModal, {
 			transaction: mockEthTransactionUi,
 			token: ETHEREUM_TOKEN
