@@ -987,6 +987,7 @@ interface I18nAddress {
 		valid_for_networks: string;
 	};
 	fields: { label: string; address: string };
+	delete: { title: string; delete_address: string; content_text: string };
 }
 
 interface I18nSigner {
