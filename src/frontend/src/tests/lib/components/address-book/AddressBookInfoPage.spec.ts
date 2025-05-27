@@ -1,6 +1,5 @@
 import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 import { ADDRESS_EDIT_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
-import { AddressBookSteps } from '$lib/enums/progress-steps';
 import type { ContactAddressUi } from '$lib/types/contact';
 import { fireEvent, render } from '@testing-library/svelte';
 import { vi } from 'vitest';
@@ -17,30 +16,28 @@ describe('AddressBookInfoPage', () => {
 		const { getByText, getByTestId } = render(AddressBookInfoPage, {
 			props: {
 				address: mockAddress,
-				onClose,
-				previousStep: AddressBookSteps.SHOW_CONTACT
+				onClose
 			}
 		});
 
 		expect(getByText(/Main Wallet/i)).toBeInTheDocument();
 		expect(getByText(/0x1234/i)).toBeInTheDocument();
-		expect(getByText(/Eth/i)).toBeInTheDocument(); // Address type
+		expect(getByText(/Eth/i)).toBeInTheDocument();
 		expect(getByTestId(ADDRESS_EDIT_CANCEL_BUTTON)).toBeInTheDocument();
 	});
 
-	it('should call onClose with fallback when back button is clicked', async () => {
+	it('should call onClose when back button is clicked', async () => {
 		const onClose = vi.fn();
 		const { getByTestId } = render(AddressBookInfoPage, {
 			props: {
 				address: mockAddress,
-				onClose,
-				previousStep: AddressBookSteps.SHOW_CONTACT
+				onClose
 			}
 		});
 
 		await fireEvent.click(getByTestId(ADDRESS_EDIT_CANCEL_BUTTON));
 
-		expect(onClose).toHaveBeenCalledWith(AddressBookSteps.SHOW_CONTACT);
+		expect(onClose).toHaveBeenCalled();
 	});
 
 	it('should show fallback message when address is missing', () => {
@@ -48,8 +45,7 @@ describe('AddressBookInfoPage', () => {
 		const { getByText } = render(AddressBookInfoPage, {
 			props: {
 				address: { address: '', addressType: 'Eth' },
-				onClose,
-				previousStep: AddressBookSteps.SHOW_CONTACT
+				onClose
 			}
 		});
 
