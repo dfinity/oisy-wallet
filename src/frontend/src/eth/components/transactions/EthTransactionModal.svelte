@@ -65,7 +65,7 @@
 			: from
 	);
 
-	let toDisplay: OptionString = nonNullish(token)
+	const toDisplay: OptionString = nonNullish(token)
 		? (mapAddressToName({
 				address: to,
 				networkId: token.network.id,
