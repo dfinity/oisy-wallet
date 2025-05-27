@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { Commitment } from '@solana/kit';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -20,38 +19,45 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
-	import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
+	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
-	export let transaction: SolTransactionUi;
-	export let token: OptionToken;
+	interface Props {
+		transaction: SolTransactionUi;
+		token: OptionToken;
+	}
 
-	let from: string;
-	let to: string | undefined;
-	let type: SolTransactionType;
-	let value: bigint | undefined;
-	let timestamp: bigint | undefined;
-	let id: string;
-	let status: Commitment | null;
+	const { transaction, token }: Props = $props();
 
-	let explorerUrl: string | undefined;
-	$: explorerUrl = isNetworkSolana(token?.network) ? token.network.explorerUrl : undefined;
+	let {
+		from,
+		value,
+		timestamp,
+		signature: id,
+		blockNumber,
+		to,
+		type,
+		status
+	} = $derived(transaction);
 
-	$: ({ from, value, timestamp, signature: id, blockNumber, to, type, status } = transaction);
+	let explorerUrl: string | undefined = $derived(
+		isNetworkSolana(token?.network) ? token.network.explorerUrl : undefined
+	);
 
-	let txExplorerUrl: string | undefined;
-	$: txExplorerUrl = nonNullish(explorerUrl)
-		? replacePlaceholders(explorerUrl, { $args: `tx/${id}/` })
-		: undefined;
+	let txExplorerUrl: string | undefined = $derived(
+		nonNullish(explorerUrl) ? replacePlaceholders(explorerUrl, { $args: `tx/${id}/` }) : undefined
+	);
 
-	let toExplorerUrl: string | undefined;
-	$: toExplorerUrl = nonNullish(explorerUrl)
-		? replacePlaceholders(explorerUrl, { $args: `account/${to}/` })
-		: undefined;
+	let toExplorerUrl: string | undefined = $derived(
+		nonNullish(explorerUrl)
+			? replacePlaceholders(explorerUrl, { $args: `account/${to}/` })
+			: undefined
+	);
 
-	let fromExplorerUrl: string | undefined;
-	$: fromExplorerUrl = nonNullish(explorerUrl)
-		? replacePlaceholders(explorerUrl, { $args: `account/${from}/` })
-		: undefined;
+	let fromExplorerUrl: string | undefined = $derived(
+		nonNullish(explorerUrl)
+			? replacePlaceholders(explorerUrl, { $args: `account/${from}/` })
+			: undefined
+	);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -61,9 +67,7 @@
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
-					<div class="relative block flex">
-						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
-					</div>
+					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
