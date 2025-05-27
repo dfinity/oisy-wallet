@@ -170,7 +170,7 @@ jobs:
       - name: Set Network Matrix
         id: set-matrix
         run: |
-          NETWORKS=$(scripts/build.ic-domains.test.list | jq -R . | jq -s .)
+          NETWORKS=$(scripts/build.ic-domains.test.list | jq -R . | jq -s -c .)
           echo "network-matrix=$NETWORKS" >> $GITHUB_OUTPUT
 
   config-build:
