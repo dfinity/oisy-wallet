@@ -137,6 +137,12 @@ const enabledIcrcTokensNoCk: Readable<IcToken[]> = derived(
 
 export const enabledIcrcLedgerCanisterIdsNoCk: Readable<LedgerCanisterIdText[]> = derived(
 	[enabledIcrcTokensNoCk],
-	([$enabledIcrcTokensNoCk]) =>
-		$enabledIcrcTokensNoCk.map(({ ledgerCanisterId }) => ledgerCanisterId)
+	([$enabledIcrcTokensNoCk]) => [
+		...new Map(
+			$enabledIcrcTokensNoCk.map(({ ledgerCanisterId, indexCanisterId }) => [
+				`${ledgerCanisterId}|${indexCanisterId}`,
+				ledgerCanisterId
+			])
+		).values()
+	]
 );
