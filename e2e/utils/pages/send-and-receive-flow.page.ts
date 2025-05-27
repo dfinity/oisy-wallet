@@ -33,7 +33,7 @@ export class FlowPage extends HomepageLoggedIn {
 		await this.clickByTestId({ testId: `${TOKEN_CARD}-ICP-ICP` });
 		await this.waitForByTestId({ testId: AMOUNT_DATA });
 
-		await expect(this.getBalanceLocator()).toHaveText('0.00');
+		await expect(this.getBalanceLocator()).toHaveText('0 ICP');
 
 		await this.waitForModal({
 			modalOpenButtonTestId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
