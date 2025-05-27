@@ -165,8 +165,6 @@ jobs:
           persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
-      - name: Install dfx
-        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
       - name: Set Network Matrix
         id: set-matrix
         run: |
