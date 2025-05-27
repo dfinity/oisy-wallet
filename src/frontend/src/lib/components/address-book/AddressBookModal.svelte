@@ -205,6 +205,7 @@
 			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact)}
+		<!-- TODO find a better way to render EditContactStep with different onDeleteAddress functions -->
 		<Responsive down="sm">
 			<EditContactStep
 				contact={currentContact}
