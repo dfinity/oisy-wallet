@@ -8,7 +8,6 @@ import type {
 	PostMessageDataResponsePowProtectorNextAllowance,
 	PostMessageDataResponsePowProtectorProgress
 } from '$lib/types/post-message';
-import type { PostMessageDataRequest } from '$lib/types/post-message';
 import { isNullish } from '@dfinity/utils';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
