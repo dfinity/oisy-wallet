@@ -1,19 +1,19 @@
 <script lang="ts">
-	import {WizardModal, type WizardStep, type WizardSteps} from '@dfinity/gix-components';
-	import {isNullish, nonNullish} from '@dfinity/utils';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import DeleteAddressConfirmStep from '$lib/components/address-book/DeleteAddressConfirmStep.svelte';
 	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import {ADDRESS_BOOK_MODAL} from '$lib/constants/test-ids.constants';
-	import {AddressBookSteps} from '$lib/enums/progress-steps';
-	import {i18n} from '$lib/stores/i18n.store';
-	import {modalStore} from '$lib/stores/modal.store';
-	import type {ContactAddressUi, ContactUi} from '$lib/types/contact';
-	import {goToWizardStep} from '$lib/utils/wizard-modal.utils';
-	import DeleteAddressConfirmStep from "$lib/components/address-book/DeleteAddressConfirmStep.svelte";
+	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
+	import { AddressBookSteps } from '$lib/enums/progress-steps';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	const steps: WizardSteps = [
 		{
@@ -142,7 +142,7 @@
 			currentAddressIndex = index;
 			gotoStep(AddressBookSteps.DELETE_ADDRESS);
 		}
-	}
+	};
 
 	// TODO Use contact store and remove
 	const deleteAddress = (index: number) => {
