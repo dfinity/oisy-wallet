@@ -14,7 +14,6 @@ import type { Token } from '$lib/types/token';
 import {
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
-	isNetworkIdSOLMainnet,
 	isNetworkIdSOLTestnet
 } from '$lib/utils/network.utils';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
@@ -33,7 +32,6 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
-	const isMainnetNetwork = isNetworkIdSOLMainnet(networkId);
 	const isTestnetNetwork = isNetworkIdSOLTestnet(networkId);
 	const isDevnetNetwork = isNetworkIdSOLDevnet(networkId);
 	const isLocalNetwork = isNetworkIdSOLLocal(networkId);
@@ -53,8 +51,7 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 				syncWalletError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error,
-					// TODO: Remove "isMainnetNetwork" after the issue with SOL wallet is investigated and fixed
-					hideToast: isTestnetNetwork || isDevnetNetwork || isLocalNetwork || isMainnetNetwork
+					hideToast: true
 				});
 				return;
 		}
