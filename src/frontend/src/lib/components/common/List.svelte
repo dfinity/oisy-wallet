@@ -27,7 +27,7 @@
 </script>
 
 {#if element === 'ul'}
-	<ul class={styleClass}>{@render children?.()}</ul>
+	<ul class={`list-disc ${styleClass}`}>{@render children?.()}</ul>
 {:else if element === 'ol'}
 	<ol class={styleClass}>{@render children?.()}</ol>
 {/if}
