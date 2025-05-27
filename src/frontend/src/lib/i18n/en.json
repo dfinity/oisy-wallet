@@ -1046,6 +1046,7 @@
 			"hide_addresses": "Hide addresses of contact"
 		},
 		"edit_contact": {
+			"title": "Edit contact",
 			"add_address": "Add address",
 			"delete_contact": "Delete contact"
 		},
@@ -1073,8 +1074,15 @@
 			"Sol": "Solana"
 		},
 		"form": {
+			"new_address": "New address",
+			"address_placeholder": "Enter or paste address",
+			"label_placeholder": "E.g., “Mom’s wallet“",
 			"invalid_address": "Invalid address",
 			"valid_for_networks": "Valid for networks:"
+		},
+		"fields": {
+			"label": "Alias",
+			"address": "Address"
 		}
 	},
 	"signer": {
