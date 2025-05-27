@@ -102,22 +102,24 @@ pub fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
         if let Some(candid_stored_contacts) = s.contact.get(&stored_principal) {
             let mut stored_contacts = candid_stored_contacts.clone();
             let original_len = stored_contacts.contacts.len();
-            
+
             // Remove the contact with the specified ID
-            stored_contacts.contacts.retain(|contact| contact.id != contact_id);
-            
+            stored_contacts
+                .contacts
+                .retain(|contact| contact.id != contact_id);
+
             // If no contact was removed, the contact was already deleted or never existed
             // For idempotent behavior, we return Ok with the contact_id in both cases
             if stored_contacts.contacts.len() == original_len {
                 return Ok(contact_id);
             }
-            
+
             // Update the timestamp
             stored_contacts.update_timestamp_ns = current_time;
-            
+
             // Update the storage
             s.contact.insert(stored_principal, Candid(stored_contacts));
-            
+
             Ok(contact_id)
         } else {
             // No contacts exist for this user, so the specified contact doesn't exist either

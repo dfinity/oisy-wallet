@@ -339,28 +339,29 @@ fn test_delete_contact_is_idempotent() {
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
     // Create a contact
-    let contact = call_create_contact(&pic_setup, caller, "Contact to Delete Twice".to_string()).unwrap();
-    
+    let contact =
+        call_create_contact(&pic_setup, caller, "Contact to Delete Twice".to_string()).unwrap();
+
     // Verify the contact exists
     let contacts_before = call_get_contacts(&pic_setup, caller);
     assert_eq!(contacts_before.len(), 1);
-    
+
     // Delete the contact first time
     let first_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
     assert!(first_delete_result.is_ok());
     assert_eq!(first_delete_result.unwrap(), contact.id);
-    
+
     // Verify the contact is deleted
     let contacts_after_first_delete = call_get_contacts(&pic_setup, caller);
     assert_eq!(contacts_after_first_delete.len(), 0);
-    
+
     // Delete the same contact again
     let second_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
-    
+
     // Verify the second delete also succeeds (idempotent behavior)
     assert!(second_delete_result.is_ok());
     assert_eq!(second_delete_result.unwrap(), contact.id);
-    
+
     // Verify contacts are still empty
     let contacts_after_second_delete = call_get_contacts(&pic_setup, caller);
     assert_eq!(contacts_after_second_delete.len(), 0);
