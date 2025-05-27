@@ -11,6 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	const { destinationToken, sourceToken, sourceTokenExchangeRate, isSourceTokenIcrc2 } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -53,7 +54,7 @@
 						<SkeletonText />
 					</div>
 				{:else if isNullish($sourceTokenExchangeRate)}
-					{sourceTokenTransferFee + sourceTokenApproveFee} {$sourceToken.symbol}
+					{sourceTokenTransferFee + sourceTokenApproveFee} {getTokenDisplaySymbol($sourceToken)}
 				{:else if sourceTokenTotalFeeUSD < EXCHANGE_USD_AMOUNT_THRESHOLD}
 					{`< ${formatUSD({
 						value: EXCHANGE_USD_AMOUNT_THRESHOLD
@@ -70,14 +71,14 @@
 			{#if $isSourceTokenIcrc2 && sourceTokenApproveFee !== 0}
 				<SwapFee
 					fee={sourceTokenApproveFeeDisplay}
-					symbol={$sourceToken.symbol}
+					symbol={getTokenDisplaySymbol($sourceToken)}
 					label={$i18n.swap.text.approval_fee}
 				/>
 			{/if}
 
 			<SwapFee
 				fee={sourceTokenTransferFeeDisplay}
-				symbol={$sourceToken.symbol}
+				symbol={getTokenDisplaySymbol($sourceToken)}
 				label={$i18n.swap.text.network_fee}
 			/>
 		</svelte:fragment>
