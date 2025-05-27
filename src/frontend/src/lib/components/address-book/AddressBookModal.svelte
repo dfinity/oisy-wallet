@@ -14,8 +14,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import {isDesktop} from "$lib/utils/device.utils";
 	import DeleteAddressConfirmBottomSheet from "$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte";
+	import Responsive from "$lib/components/ui/Responsive.svelte";
 
 	const steps: WizardSteps = [
 		{
@@ -143,10 +143,7 @@
 	const confirmDeleteAddress = (index: number) => {
 		if (nonNullish(currentContact)) {
 			currentAddressIndex = index;
-
-			if (isDesktop()) {
-				gotoStep(AddressBookSteps.DELETE_ADDRESS);
-			}
+			gotoStep(AddressBookSteps.DELETE_ADDRESS);
 		}
 	};
 
@@ -214,24 +211,48 @@
 			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact)}
-		<EditContactStep
-			contact={currentContact}
-			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
-			onEdit={(contact) => {
-				currentContact = contact;
-				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
-			}}
-			onEditAddress={(index: number) => {
-				currentAddressIndex = index;
-				gotoStep(AddressBookSteps.EDIT_ADDRESS);
-			}}
-			onAddAddress={() => {
-				currentAddressIndex = undefined;
-				gotoStep(AddressBookSteps.EDIT_ADDRESS);
-			}}
-			onDeleteContact={deleteContact}
-			onDeleteAddress={confirmDeleteAddress}
-		/>
+		<Responsive down="sm">
+			<EditContactStep
+				contact={currentContact}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+				onEdit={(contact) => {
+					currentContact = contact;
+					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				}}
+				onEditAddress={(index: number) => {
+					currentAddressIndex = index;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onAddAddress={() => {
+					currentAddressIndex = undefined;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onDeleteContact={deleteContact}
+				onDeleteAddress={(index) => {
+					currentAddressIndex = index;
+				}}
+			/>
+		</Responsive>
+		<Responsive up="md">
+			<EditContactStep
+				contact={currentContact}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+				onEdit={(contact) => {
+					currentContact = contact;
+					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				}}
+				onEditAddress={(index: number) => {
+					currentAddressIndex = index;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onAddAddress={() => {
+					currentAddressIndex = undefined;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onDeleteContact={deleteContact}
+				onDeleteAddress={confirmDeleteAddress}
+			/>
+		</Responsive>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
 		<EditContactNameStep
 			bind:this={editContactNameStep}
@@ -262,7 +283,10 @@
 		/>
 	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
 		<DeleteAddressConfirmContent
-			onCancel={() => gotoStep(AddressBookSteps.EDIT_CONTACT)}
+			onCancel={() => {
+				currentAddressIndex = undefined;
+				gotoStep(AddressBookSteps.EDIT_CONTACT)
+			}}
 			onDelete={() => nonNullish(currentAddressIndex) && deleteAddress(currentAddressIndex)}
 			address={currentContact.addresses[currentAddressIndex]}
 			contact={currentContact}
