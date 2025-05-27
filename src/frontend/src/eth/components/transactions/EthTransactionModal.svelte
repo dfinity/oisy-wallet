@@ -29,45 +29,43 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
 
-	export let transaction: EthTransactionUi;
-	export let token: OptionToken;
+	interface Props {
+		transaction: EthTransactionUi;
+		token: OptionToken;
+	}
 
-	let from: string;
-	let to: string | undefined;
-	let value: bigint;
-	let timestamp: number | undefined;
-	let hash: string | undefined;
-	let blockNumber: number | undefined;
+	const { transaction, token }: Props = $props();
 
-	$: ({ from, value, timestamp, hash, blockNumber, to, type } = transaction);
+	let { from, value, timestamp, hash, blockNumber, to, type } = $derived(transaction);
 
-	let explorerUrl: string | undefined;
-	$: explorerUrl = notEmptyString(hash) ? `${$explorerUrlStore}/tx/${hash}` : undefined;
+	let explorerUrl: string | undefined = $derived(
+		notEmptyString(hash) ? `${$explorerUrlStore}/tx/${hash}` : undefined
+	);
 
-	let fromExplorerUrl: string;
-	$: fromExplorerUrl = `${$explorerUrlStore}/address/${from}`;
+	let fromExplorerUrl: string = $derived(`${$explorerUrlStore}/address/${from}`);
 
-	let toExplorerUrl: string | undefined;
-	$: toExplorerUrl = notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined;
+	let toExplorerUrl: string | undefined = $derived(
+		notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined
+	);
 
-	let ckMinterInfo: OptionCertifiedMinterInfo;
-	$: ckMinterInfo =
+	let ckMinterInfo: OptionCertifiedMinterInfo = $derived(
 		$ckEthMinterInfoStore?.[
 			isNetworkIdSepolia(token?.network.id) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
-		];
+		]
+	);
 
-	let fromDisplay: OptionString;
-	$: fromDisplay = nonNullish(token)
-		? (mapAddressToName({
-				address: from,
-				networkId: token.network.id,
-				erc20Tokens: $erc20Tokens,
-				ckMinterInfo
-			}) ?? from)
-		: from;
+	let fromDisplay: OptionString = $derived(
+		nonNullish(token)
+			? (mapAddressToName({
+					address: from,
+					networkId: token.network.id,
+					erc20Tokens: $erc20Tokens,
+					ckMinterInfo
+				}) ?? from)
+			: from
+	);
 
-	let toDisplay: OptionString;
-	$: toDisplay = nonNullish(token)
+	const toDisplay: OptionString = nonNullish(token)
 		? (mapAddressToName({
 				address: to,
 				networkId: token.network.id,
@@ -84,9 +82,7 @@
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
-					<div class="relative block flex">
-						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
-					</div>
+					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
