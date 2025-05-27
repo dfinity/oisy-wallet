@@ -242,7 +242,7 @@ fn test_delete_contact_should_succeed_with_valid_id() {
 }
 
 #[test]
-fn test_delete_contact_should_fail_with_nonexistent_id() {
+fn test_delete_contact_should_succeed_with_nonexistent_id() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -250,9 +250,9 @@ fn test_delete_contact_should_fail_with_nonexistent_id() {
     let nonexistent_id = 999999;
     let result = call_delete_contact(&pic_setup, caller, nonexistent_id);
 
-    // Verify the operation fails with the correct error
-    assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
+    // Verify the operation succeeds (idempotent behavior)
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap(), nonexistent_id);
 }
 
 #[test]
@@ -331,4 +331,37 @@ fn test_delete_all_contacts() {
     // Verify we can get the new contact by ID
     let get_result = call_get_contact(&pic_setup, caller, new_contact.id);
     assert!(get_result.is_ok());
+}
+
+#[test]
+fn test_delete_contact_is_idempotent() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact
+    let contact = call_create_contact(&pic_setup, caller, "Contact to Delete Twice".to_string()).unwrap();
+    
+    // Verify the contact exists
+    let contacts_before = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_before.len(), 1);
+    
+    // Delete the contact first time
+    let first_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
+    assert!(first_delete_result.is_ok());
+    assert_eq!(first_delete_result.unwrap(), contact.id);
+    
+    // Verify the contact is deleted
+    let contacts_after_first_delete = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after_first_delete.len(), 0);
+    
+    // Delete the same contact again
+    let second_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
+    
+    // Verify the second delete also succeeds (idempotent behavior)
+    assert!(second_delete_result.is_ok());
+    assert_eq!(second_delete_result.unwrap(), contact.id);
+    
+    // Verify contacts are still empty
+    let contacts_after_second_delete = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after_second_delete.len(), 0);
 }

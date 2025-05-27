@@ -910,6 +910,9 @@ pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
+///
+/// # Notes
+/// This operation is idempotent - it will return OK if the contact has already been deleted.
 #[update(guard = "caller_is_allowed")]
 #[must_use]
 pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
