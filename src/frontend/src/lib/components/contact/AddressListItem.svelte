@@ -30,7 +30,6 @@
 </script>
 
 <button
-	id="address"
 	onclick={() => onClick?.()}
 	disabled={nonNullish(onClick)}
 	class={`flex w-full items-center gap-3 rounded-xl bg-primary p-2 text-left hover:bg-brand-subtle-10 ${styleClass}`}
@@ -43,17 +42,12 @@
 				{$i18n.address.types[address.addressType]}
 			</span>
 		</div>
-
-		<div class="text-xs md:text-sm">
-			<div class="flex items-center gap-1 text-tertiary">
-				{#if notEmptyString(address.label)}
-					<span class="font-bold">{address.label}</span>
-					<span class="text-[0.5rem]">•</span>
-				{/if}
-			</div>
-			<div class="flex items-center gap-1 break-all text-sm">
-				<span>{displayAddress}</span>
-			</div>
+		<div class="flex items-center gap-1">
+			{#if notEmptyString(address.label)}
+				<span class="font-bold">{address.label}</span>
+				<span class="text-[0.5rem]">•</span>
+			{/if}
+			<span>{displayAddress}</span>
 		</div>
 	</div>
 	<AddressItemActions {address} styleClass="ml-auto items-center" {...addressItemActionsProps} />
