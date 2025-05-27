@@ -1,5 +1,4 @@
 use candid::Principal;
-use pretty_assertions::assert_eq;
 use shared::types::{
     contact::{Contact, ContactError, CreateContactRequest},
     user_profile::OisyUser,
@@ -9,7 +8,6 @@ use crate::utils::{
     mock::CALLER,
     pocketic::{setup, PicBackend, PicCanisterTrait},
 };
-
 // -------------------------------------------------------------------------------------------------
 // - Helper methods for contact testing
 // -------------------------------------------------------------------------------------------------
@@ -30,9 +28,8 @@ pub fn call_get_contacts(pic_setup: &PicBackend, caller: Principal) -> Vec<Conta
         pic_setup.query::<Result<Vec<Contact>, ContactError>>(caller, "get_contacts", ());
     wrapped_result
         .expect("that get_contacts succeeds")
-        .expect("failed to get contacts")
+        .expect("that the result is not empty")
 }
-
 pub fn call_get_contact(
     pic_setup: &PicBackend,
     caller: Principal,
@@ -76,33 +73,14 @@ fn test_create_contact_should_fail_with_empty_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
-    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
-        caller,
-        "create_contact",
-        CreateContactRequest {
-            name: String::new(),
-        },
-    );
-
-    assert!(wrapped_result.is_err());
-    assert_eq!(
-        wrapped_result.unwrap().unwrap_err(),
-        ContactError::InvalidContactData("ss".to_string())
-    );
+    let result = call_create_contact(&pic_setup, caller, "".to_string());
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), ContactError::InvalidContactData);
 
     // Also test with just whitespace
-    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
-        caller,
-        "create_contact",
-        CreateContactRequest {
-            name: "   ".to_string(),
-        },
-    );
-    assert!(wrapped_result.is_err());
-    assert_eq!(
-        wrapped_result.unwrap().unwrap_err(),
-        ContactError::InvalidContactData(String::new())
-    );
+    let result = call_create_contact(&pic_setup, caller, "   ".to_string());
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), ContactError::InvalidContactData);
 }
 
 #[test]
