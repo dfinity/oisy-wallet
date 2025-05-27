@@ -6,15 +6,24 @@
 	interface Props {
 		copyAddress?: string;
 		copyAddressText?: string;
+		copyAddressTestId?: string;
 		explorerUrl?: string;
 		explorerUrlAriaLabel?: string;
+		explorerUrlTestId?: string;
 	}
 
-	const { copyAddress, copyAddressText, explorerUrl, explorerUrlAriaLabel }: Props = $props();
+	const {
+		copyAddress,
+		copyAddressText,
+		copyAddressTestId,
+		explorerUrl,
+		explorerUrlAriaLabel,
+		explorerUrlTestId
+	}: Props = $props();
 </script>
 
 {#if nonNullish(copyAddress) && nonNullish(copyAddressText)}
-	<Copy value={copyAddress} text={copyAddressText} inline />
+	<Copy value={copyAddress} text={copyAddressText} inline testId={copyAddressTestId} />
 {/if}
 {#if nonNullish(explorerUrl) && nonNullish(explorerUrlAriaLabel)}
 	<ExternalLink
@@ -23,5 +32,6 @@
 		ariaLabel={explorerUrlAriaLabel}
 		inline
 		color="blue"
+		testId={explorerUrlTestId}
 	/>
 {/if}
