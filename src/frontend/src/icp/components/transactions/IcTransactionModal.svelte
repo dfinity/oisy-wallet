@@ -27,6 +27,8 @@
 		formatToken,
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
+	import ListItem from '$lib/components/common/ListItem.svelte';
+	import List from '$lib/components/common/List.svelte';
 
 	export let transaction: IcTransactionUi;
 	export let token: OptionToken;
@@ -100,9 +102,9 @@
 			/>
 		{/if}
 
-		<ul class="mt-5">
+		<List styleClass="mt-5">
 			{#if type === 'receive' && nonNullish(to)}
-				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<ListItem variant="styled">
 					<span>{$i18n.transaction.text.to}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: to })}</output>
@@ -117,10 +119,10 @@
 							/>
 						{/if}
 					</output>
-				</li>
+				</ListItem>
 			{/if}
 			{#if type === 'send' && nonNullish(from)}
-				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<ListItem variant="styled">
 					<span>{$i18n.transaction.text.from}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
@@ -135,24 +137,24 @@
 							/>
 						{/if}
 					</output>
-				</li>
+				</ListItem>
 			{/if}
 
 			{#if nonNullish(timestamp)}
-				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<ListItem variant="styled">
 					<span>{$i18n.transaction.text.timestamp}</span>
 					<output>{formatNanosecondsToDate(timestamp)}</output>
-				</li>
+				</ListItem>
 			{/if}
 
 			{#if nonNullish(token)}
-				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<ListItem variant="styled">
 					<span>{$i18n.networks.network}</span>
 					<span><NetworkWithLogo network={token.network} logo="start" /></span>
-				</li>
+				</ListItem>
 			{/if}
 
-			<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+			<ListItem variant="styled">
 				<span>{$i18n.transaction.text.id}</span>
 				<span>
 					<output>{id}</output>
@@ -167,8 +169,8 @@
 						/>
 					{/if}
 				</span>
-			</li>
-		</ul>
+			</ListItem>
+		</List>
 
 		<!--
 		{#if nonNullish(from) || nonNullish(fromLabel)}

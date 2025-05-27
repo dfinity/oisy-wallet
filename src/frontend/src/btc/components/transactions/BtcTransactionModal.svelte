@@ -21,6 +21,8 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
 
 	export let transaction: BtcTransactionUi;
 	export let token: OptionToken;
@@ -96,9 +98,9 @@
 			{/each}
 		{/if}
 
-		<ul class="mt-5">
+		<List styleClass="mt-5">
 			{#if type === 'receive' && nonNullish(to)}
-				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<ListItem variant="styled">
 					<span>{$i18n.transaction.text.to}</span>
 					<output class="flex max-w-[50%] flex-row">
 						{#each to as address, index (`${address}-${index}`)}
@@ -117,10 +119,10 @@
 							</span>
 						{/each}
 					</output>
-				</li>
+				</ListItem>
 			{/if}
 			{#if type === 'send' && nonNullish(from)}
-				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<ListItem variant="styled">
 					<span>{$i18n.transaction.text.from}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
@@ -135,11 +137,11 @@
 							/>
 						{/if}
 					</output>
-				</li>
+				</ListItem>
 			{/if}
 
 			{#if nonNullish(id)}
-				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<ListItem variant="styled">
 					<span>
 						{$i18n.transaction.text.hash}
 					</span>
@@ -163,49 +165,49 @@
 							/>
 						{/if}
 					</span>
-				</li>
+				</ListItem>
 			{/if}
 
 			{#if nonNullish(blockNumber)}
-				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<ListItem variant="styled">
 					<span>
 						{$i18n.transaction.text.block}
 					</span>
 
 					<output>{blockNumber}</output>
-				</li>
+				</ListItem>
 			{/if}
 
 			{#if nonNullish(confirmations)}
-				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<ListItem variant="styled">
 					<span>
 						{$i18n.transaction.text.confirmations}
 					</span>
 					<span>{confirmations}</span>
-				</li>
+				</ListItem>
 			{/if}
 
-			<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+			<ListItem variant="styled">
 				<span>
 					{$i18n.transaction.text.status}
 				</span>
 				<span>
 					{`${$i18n.transaction.status[status]}`}
 				</span>
-			</li>
+			</ListItem>
 
 			{#if nonNullish(timestamp)}
-				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<ListItem variant="styled">
 					<span>
 						{$i18n.transaction.text.timestamp}
 					</span>
 
 					<output>{formatSecondsToDate(Number(timestamp))}</output>
-				</li>
+				</ListItem>
 			{/if}
 
 			{#if nonNullish(value) && nonNullish(token)}
-				<li class="border-b-1 flex flex-row justify-between border-brand-subtle-10 py-1.5">
+				<ListItem variant="styled">
 					<span>{$i18n.core.text.amount}</span>
 
 					<output>
@@ -216,9 +218,9 @@
 						})}
 						{token.symbol}
 					</output>
-				</li>
+				</ListItem>
 			{/if}
-		</ul>
+		</List>
 
 		<ButtonCloseModal slot="toolbar" />
 	</ContentWithToolbar>
