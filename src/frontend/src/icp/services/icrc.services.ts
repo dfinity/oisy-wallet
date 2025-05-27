@@ -16,8 +16,8 @@ import {
 	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { listCustomTokens } from '$lib/api/backend.api';
 import { setIdbIcTokens } from '$lib/api/idb-tokens.api';
+import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -109,9 +109,6 @@ const loadIcrcData = ({
 	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
 };
 
-/**
- * @todo Add missing document and test for this function.
- */
 const loadIcrcCustomTokens = async ({
 	identity,
 	certified
@@ -119,22 +116,15 @@ const loadIcrcCustomTokens = async ({
 	identity: OptionIdentity;
 	certified: boolean;
 }): Promise<IcrcCustomToken[]> => {
-	const tokens = await listCustomTokens({
+	const tokens = await loadNetworkCustomTokens({
 		identity,
 		certified,
-		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		filterTokens: ({ token }) => 'Icrc' in token,
+		setIdbTokens: setIdbIcTokens
 	});
 
-	// We filter the custom tokens that are Icrc (the backend "Custom Token" potentially supports other types).
-	const icrcTokens = tokens.filter(({ token }) => 'Icrc' in token);
-
-	// Caching the custom tokens in the IDB if update call
-	if (certified) {
-		await setIdbIcTokens({ identity, tokens: icrcTokens });
-	}
-
 	return await loadCustomIcrcTokensData({
-		tokens: icrcTokens,
+		tokens,
 		identity,
 		certified
 	});
