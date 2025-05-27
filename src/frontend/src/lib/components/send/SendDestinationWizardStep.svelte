@@ -9,7 +9,7 @@
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
-	import KnownDestinationsComponent from '$lib/components/send/KnownDestinations.svelte';
+	import SendDestinationTabs from '$lib/components/send/SendDestinationTabs.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -65,7 +65,7 @@
 						bind:invalidDestination
 						on:icQRCodeScan
 					/>
-					<KnownDestinationsComponent
+					<SendDestinationTabs
 						knownDestinations={$ethKnownDestinations}
 						bind:destination
 						on:icNext={next}
@@ -82,7 +82,7 @@
 				bind:invalidDestination
 				on:icQRCodeScan
 			/>
-			<KnownDestinationsComponent
+			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
 				bind:destination
 				on:icNext={next}
@@ -96,7 +96,7 @@
 				on:icQRCodeScan
 				knownDestinations={$btcKnownDestinations}
 			/>
-			<KnownDestinationsComponent
+			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
 				bind:destination
 				on:icNext={next}
@@ -110,7 +110,7 @@
 				on:icQRCodeScan
 				knownDestinations={$solKnownDestinations}
 			/>
-			<KnownDestinationsComponent
+			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
 				bind:destination
 				on:icNext={next}

@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		copyAddress?: string;
