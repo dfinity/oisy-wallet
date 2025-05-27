@@ -1073,8 +1073,14 @@
 			"Sol": "Solana"
 		},
 		"form": {
+			"address_placeholder": "Enter or paste address",
+			"label_placeholder": "E.g., “Mom’s wallet“",
 			"invalid_address": "Invalid address",
 			"valid_for_networks": "Valid for networks:"
+		},
+		"fields": {
+			"label": "Alias",
+			"address": "Address"
 		}
 	},
 	"signer": {
