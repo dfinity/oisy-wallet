@@ -37,7 +37,7 @@
 	// TODO Use contact store and remove
 	let currentAddressIndex: number | undefined = $state();
 
-	const steps: WizardSteps = $derived([
+	const steps: WizardSteps = [
 		{
 			name: AddressBookSteps.ADDRESS_BOOK,
 			title: $i18n.address_book.text.title
@@ -73,7 +73,7 @@
 			name: AddressBookSteps.DELETE_ADDRESS,
 			title: $i18n.address.delete.title
 		}
-	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps);
+	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
 	const handleClose = () => {
 		if (nonNullish(previousStepName)) {
