@@ -72,7 +72,7 @@ export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi
 		: undefined;
 
 	if (isNullish(currentAddressType)) {
-		return undefined;
+		return;
 	}
 
 	return {
