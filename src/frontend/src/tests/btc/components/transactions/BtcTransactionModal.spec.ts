@@ -37,6 +37,7 @@ describe('BtcTransactionModal', () => {
 		});
 
 		expect(getByText(mockBtcTransactionUi.from)).toBeInTheDocument();
+
 		if (mockBtcTransactionUi.to?.length) {
 			expect(
 				getByText(shortenWithMiddleEllipsis({ text: mockBtcTransactionUi.to[0] }))
