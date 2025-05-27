@@ -1,11 +1,12 @@
 import type { ContactUi } from '$lib/types/contact';
 import {
 	getContactForAddress,
+	mapAddressToContactAddressUi,
 	mapToBackendContact,
 	mapToFrontendContact,
 	selectColorForName
 } from '$lib/utils/contact.utils';
-import { mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
+import { mockBtcAddress, mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
 import {
 	getMockContacts,
 	mockBackendContactAddressBtc,
@@ -13,10 +14,10 @@ import {
 	mockBackendContactAddressSol
 } from '$tests/mocks/contacts.mock';
 import { mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
 import type { NonEmptyArray } from 'alchemy-sdk';
-import { describe } from 'vitest';
 
 describe('contact.utils', () => {
 	describe('selectColorForName', () => {
@@ -172,6 +173,36 @@ describe('contact.utils', () => {
 			});
 
 			expect(result?.addresses?.[0]?.address).toEqual(mockEthAddress3);
+		});
+	});
+
+	describe('mapAddressToContactAddressUi', () => {
+		it('should map BTC address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockBtcAddress)).toStrictEqual({
+				address: mockBtcAddress,
+				addressType: 'Btc'
+			});
+		});
+
+		it('should map ETH address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockEthAddress3)).toStrictEqual({
+				address: mockEthAddress3,
+				addressType: 'Eth'
+			});
+		});
+
+		it('should map SOL address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockSolAddress)).toStrictEqual({
+				address: mockSolAddress,
+				addressType: 'Sol'
+			});
+		});
+
+		it('should map IC address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockPrincipalText)).toStrictEqual({
+				address: mockPrincipalText,
+				addressType: 'Icrcv2'
+			});
 		});
 	});
 });
