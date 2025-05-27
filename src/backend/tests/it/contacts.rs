@@ -1,10 +1,11 @@
+use std::time::Duration;
+
 use candid::Principal;
 use pretty_assertions::assert_eq;
 use shared::types::{
     contact::{Contact, ContactError, CreateContactRequest},
     user_profile::OisyUser,
 };
-use std::time::Duration;
 
 use crate::utils::{
     mock::CALLER,
