@@ -3,14 +3,11 @@ import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
 import type { Address } from '$lib/types/address';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import type { NonEmptyArray } from '$lib/types/utils';
-import { isEthAddress } from '$lib/utils/account.utils';
-import { isBtcAddress } from '$lib/utils/address.utils';
 import {
 	getAddressString,
 	getDiscriminatorForTokenAccountId
 } from '$lib/utils/token-account-id.utils';
-import { isSolAddress } from '$sol/utils/sol-address.utils';
-import { fromNullable, isEmptyString, toNullable } from '@dfinity/utils';
+import { fromNullable, isEmptyString, isNullish, toNullable } from '@dfinity/utils';
 
 export const selectColorForName = <T>({
 	colors,
@@ -68,13 +65,18 @@ export const getContactForAddress = ({
 		c.addresses.find((address) => address.address.toLowerCase() === addressString.toLowerCase())
 	);
 
-export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi => ({
-	address,
-	addressType: isBtcAddress({ address })
-		? 'Btc'
-		: isSolAddress(address)
-			? 'Sol'
-			: isEthAddress(address)
-				? 'Eth'
-				: 'Icrcv2'
-});
+export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi | undefined => {
+	const tokenAccountIdParseResult = TokenAccountIdSchema.safeParse(address);
+	const currentAddressType = tokenAccountIdParseResult?.success
+		? getDiscriminatorForTokenAccountId(tokenAccountIdParseResult.data)
+		: undefined;
+
+	if (isNullish(currentAddressType)) {
+		return undefined;
+	}
+
+	return {
+		address,
+		addressType: currentAddressType
+	};
+};

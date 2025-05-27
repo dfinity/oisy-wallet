@@ -18,7 +18,6 @@ import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
 import type { NonEmptyArray } from 'alchemy-sdk';
-import { describe, expect } from 'vitest';
 
 describe('contact.utils', () => {
 	describe('selectColorForName', () => {
