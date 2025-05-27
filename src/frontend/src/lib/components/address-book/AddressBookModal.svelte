@@ -60,6 +60,20 @@
 	// TODO Use contact store and remove
 	let currentAddressIndex: number | undefined = $state();
 
+	const handleClose = (step?: AddressBookSteps) => {
+		if (step) {
+			return gotoStep(step);
+		}
+
+		if (
+			currentStepName === AddressBookSteps.SHOW_ADDRESS &&
+			previousStepName === AddressBookSteps.SHOW_CONTACT
+		) {
+			return gotoStep(AddressBookSteps.SHOW_CONTACT);
+		}
+		return gotoStep(AddressBookSteps.ADDRESS_BOOK);
+	};
+
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
 			previousStepName = currentStepName;
@@ -245,8 +259,7 @@
 		{#if nonNullish(currentAddressIndex) && currentContact?.addresses[currentAddressIndex]}
 			<AddressBookInfoPage
 				address={currentContact.addresses[currentAddressIndex]}
-				onClose={(step) => gotoStep(step ?? AddressBookSteps.SHOW_CONTACT)}
-				previousStepName={previousStepName ?? AddressBookSteps.SHOW_CONTACT}
+				onClose={handleClose}
 			/>
 		{/if}
 	{/if}

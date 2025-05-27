@@ -5,16 +5,13 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ADDRESS_EDIT_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
-	import { AddressBookSteps } from '$lib/enums/progress-steps';
+	import type { AddressBookSteps } from '$lib/enums/progress-steps';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
 	export let address: ContactAddressUi;
 	export let onClose: (step?: AddressBookSteps) => void;
-	export let previousStepName: AddressBookSteps;
 
-	const onCloseHandler = () => {
-		onClose(previousStepName ?? AddressBookSteps.SHOW_CONTACT);
-	};
+	const onCloseHandler = () => onClose();
 </script>
 
 <ContentWithToolbar styleClass="mb-10 flex flex-col items-stretch">
