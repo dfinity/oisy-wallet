@@ -4,7 +4,7 @@ import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils'
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { render } from '@testing-library/svelte';
 
-const mockIcTransactionUi = createMockIcTransactionsUi(1)[0];
+const [mockIcTransactionUi] = createMockIcTransactionsUi(1);
 
 describe('IcTransactionModal', () => {
 	it('should render the IC transaction modal', () => {
