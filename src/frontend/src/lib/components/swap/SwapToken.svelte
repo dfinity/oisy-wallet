@@ -5,6 +5,7 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		token?: Token;
@@ -27,7 +28,7 @@
 		<div class="ml-2 flex flex-col">
 			<span class="text-2xl font-bold">
 				{amount}
-				{token.symbol}
+				{getTokenDisplaySymbol(token)}
 			</span>
 			<span class="text-sm text-tertiary">
 				<TokenInputAmountExchange disabled {amount} {exchangeRate} />
