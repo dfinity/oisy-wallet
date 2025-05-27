@@ -1,18 +1,20 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
+	import type { ListContext } from '$lib/components/common/List.svelte';
+	import type { ListVariant } from '$lib/types/style';
 
 	interface Props {
-		variant?: 'default' | 'styled';
 		children?: Snippet;
 	}
 
-	const { variant = 'default', children }: Props = $props();
+	const { children }: Props = $props();
 
-	const classes = {
-		default: 'flex flex-row',
-		styled:
-			'border-b-1 last-of-type:border-b-0 flex flex-row justify-between border-brand-subtle-10 py-1.5'
+	const { variant, condensed } = getContext<ListContext>('list-context');
+
+	const classes: { [key in ListVariant]: string } = {
+		none: `ml-3 ${condensed ? 'py-0' : 'py-1'}`,
+		styled: `border-b-1 last-of-type:border-b-0 flex flex-row justify-between border-brand-subtle-10 ${condensed ? 'py-1.5' : 'py-2.5'} px-1`
 	};
 </script>
 
