@@ -6,8 +6,8 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {shortenWithMiddleEllipsis} from "$lib/utils/format.utils";
 
 	interface Props {
 		onCancel: () => void;

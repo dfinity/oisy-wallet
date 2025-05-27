@@ -2,20 +2,20 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
 	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import DeleteAddressConfirmBottomSheet from "$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte";
-	import Responsive from "$lib/components/ui/Responsive.svelte";
 
 	const steps: WizardSteps = [
 		{
@@ -43,10 +43,10 @@
 			name: AddressBookSteps.EDIT_ADDRESS,
 			title: $i18n.address_book.edit_contact.title
 		},
-        {
-            name: AddressBookSteps.DELETE_ADDRESS,
-            title: $i18n.address.delete.title
-        }
+		{
+			name: AddressBookSteps.DELETE_ADDRESS,
+			title: $i18n.address.delete.title
+		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
 	let currentStep: WizardStep | undefined = $state();
@@ -279,7 +279,7 @@
 		<DeleteAddressConfirmContent
 			onCancel={() => {
 				currentAddressIndex = undefined;
-				gotoStep(AddressBookSteps.EDIT_CONTACT)
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
 			}}
 			onDelete={() => nonNullish(currentAddressIndex) && deleteAddress(currentAddressIndex)}
 			address={currentContact.addresses[currentAddressIndex]}
@@ -290,7 +290,7 @@
 
 {#if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
 	<DeleteAddressConfirmBottomSheet
-		onCancel={() => currentAddressIndex = undefined}
+		onCancel={() => (currentAddressIndex = undefined)}
 		onDelete={() => nonNullish(currentAddressIndex) && deleteAddress(currentAddressIndex)}
 		address={currentContact.addresses[currentAddressIndex]}
 		contact={currentContact}
