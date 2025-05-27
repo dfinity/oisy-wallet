@@ -40,6 +40,12 @@ fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> R
     Ok(())
 }
 
+fn validate_string_not_empty(value: &str, field_name: &str) -> Result<(), Error> {
+    if value.trim().is_empty() {
+        return Err(Error::msg(format!("{field_name} cannot be empty")));
+    }
+    Ok(())
+}
 fn validate_collection_size<T>(
     collection: &[T],
     max_size: usize,
@@ -504,14 +510,39 @@ impl Validate for ContactAddressData {
 
 impl Validate for CreateContactRequest {
     fn validate(&self) -> Result<(), Error> {
-        // Nothing to validate here
+        // Validate that string length is not greater than the max allowed
+        validate_string_not_empty(&self.name, "CreateContactRequest.name")?;
+
+        // Validate that the name is not an empty string
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "CreateContactRequest.name",
+        )?;
+
         Ok(())
     }
 }
 
 impl Validate for UpdateContactRequest {
     fn validate(&self) -> Result<(), Error> {
-        // Nothing to validate here
+        // Validate that string length is not greater than the max allowed
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "UpdateContactRequest.name",
+        )?;
+
+        // Validate that the name is not an empty string
+        validate_string_not_empty(&self.name, "UpdateContactRequest.name")?;
+
+        // Validate that the number of addresses is not greater than the max allowed
+        validate_collection_size(
+            &self.addresses,
+            CONTACT_MAX_ADDRESSES,
+            "UpdateContactRequest.addresses",
+        )?;
+
         Ok(())
     }
 }

@@ -22,7 +22,7 @@ pub async fn generate_random_u64() -> Result<u64, String> {
     // Check if we have at least 8 bytes that is required for u64
     assert!(
         (random_bytes.len() >= 8),
-        "Not enough random bytes returned: expected 8, got {}",
+        "Not enough random bytes returned: Need at least 8, the IC spec promises 32, got {}. See: https://internetcomputer.org/docs/references/ic-interface-spec#ic-raw_rand",
         random_bytes.len()
     );
 
@@ -30,11 +30,9 @@ pub async fn generate_random_u64() -> Result<u64, String> {
     let (int_bytes, _rest) = random_bytes.split_at(size_of::<u64>());
 
     // Convert bytes to u64
-    let random_id = u64::from_le_bytes(
-        int_bytes
-            .try_into()
-            .map_err(|_| "Failed to convert bytes to u64".to_string())?,
-    );
+    let random_id = u64::from_le_bytes(int_bytes.try_into().unwrap_or_else(|_| {
+        unreachable!("We checked we have 8 bytes above, so this cannot fail.")
+    }));
 
     Ok(random_id)
 }
