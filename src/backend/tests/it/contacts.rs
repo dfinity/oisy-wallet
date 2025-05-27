@@ -1,4 +1,5 @@
 use candid::Principal;
+use pretty_assertions::assert_eq;
 use shared::types::{
     contact::{Contact, ContactError, CreateContactRequest},
     user_profile::OisyUser,
@@ -8,6 +9,7 @@ use crate::utils::{
     mock::CALLER,
     pocketic::{setup, PicBackend, PicCanisterTrait},
 };
+
 // -------------------------------------------------------------------------------------------------
 // - Helper methods for contact testing
 // -------------------------------------------------------------------------------------------------
@@ -60,9 +62,8 @@ fn test_create_contact_should_succeed_with_valid_name() {
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
     let result = call_create_contact(&pic_setup, caller, "John Doe".to_string());
-    assert!(result.is_ok());
+    let contact = result.expect("");
 
-    let contact = result.unwrap();
     assert_eq!(contact.name, "John Doe");
     assert!(contact.id > 0); // Should have a valid ID
     assert!(contact.addresses.is_empty()); // Should start with empty addresses
@@ -73,14 +74,24 @@ fn test_create_contact_should_fail_with_empty_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
-    let result = call_create_contact(&pic_setup, caller, "".to_string());
-    assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), ContactError::InvalidContactData);
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: String::new(),
+        },
+    );
+    assert!(wrapped_result.is_err());
 
     // Also test with just whitespace
-    let result = call_create_contact(&pic_setup, caller, "   ".to_string());
-    assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), ContactError::InvalidContactData);
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "  ".to_string(),
+        },
+    );
+    assert!(wrapped_result.is_err());
 }
 
 #[test]
@@ -262,27 +273,26 @@ fn test_update_contact_should_fail_with_empty_name() {
     };
 
     // Try to update with empty name
-    let update_result = call_update_contact(&pic_setup, caller, updated_contact_data);
-    assert!(update_result.is_err());
-    assert_eq!(
-        update_result.unwrap_err(),
-        ContactError::InvalidContactData("replace".to_string())
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        updated_contact_data,
     );
+    assert!(wrapped_result.is_err());
 
-    // Also test with just whitespace
+    // Also test with multiple whitespaces
     let whitespace_contact_data = Contact {
         id: created_contact.id,
         name: "   ".to_string(), // Whitespace name should fail
         addresses: vec![],
         update_timestamp_ns: created_contact.update_timestamp_ns,
     };
-
-    let whitespace_result = call_update_contact(&pic_setup, caller, whitespace_contact_data);
-    assert!(whitespace_result.is_err());
-    assert_eq!(
-        whitespace_result.unwrap_err(),
-        ContactError::InvalidContactData("replace".to_string())
+    let whitespace_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        whitespace_contact_data,
     );
+    assert!(whitespace_result.is_err());
 }
 
 #[test]

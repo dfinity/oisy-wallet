@@ -7,9 +7,7 @@ use serde::{de, Deserializer};
 use crate::{
     types::{
         backend_config::{Config, InitArg},
-        contact::{
-            Contact, ContactAddressData, ContactError, CreateContactRequest, UpdateContactRequest,
-        },
+        contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
@@ -42,18 +40,12 @@ fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> R
     Ok(())
 }
 
-fn validate_string_not_empty(
-    value: &str,
-    error_constructor: impl FnOnce(String) -> ContactError,
-    field_name: &str,
-) -> Result<(), candid::Error> {
-    if value.is_empty() {
-        let error = error_constructor(format!("{field_name} cannot be empty"));
-        return Err(candid::Error::msg(format!("{error:?}")));
+fn validate_string_not_empty(value: &str, field_name: &str) -> Result<(), Error> {
+    if value.trim().is_empty() {
+        return Err(Error::msg(format!("{field_name} cannot be empty")));
     }
     Ok(())
 }
-
 fn validate_collection_size<T>(
     collection: &[T],
     max_size: usize,
@@ -516,13 +508,10 @@ impl Validate for ContactAddressData {
     }
 }
 
-impl Validate<ContactError> for CreateContactRequest {
-    fn validate(&self) -> Result<(), ContactError> {
+impl Validate for CreateContactRequest {
+    fn validate(&self) -> Result<(), Error> {
         // Validate that the name is not an empty string
-
-        if self.name.is_empty() {
-            return Err(ContactError::InvalidContactData("Test".to_string()));
-        }
+        validate_string_not_empty(&self.name, "CreateContactRequest.name")?;
 
         // Validate name length
         validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
@@ -536,11 +525,7 @@ impl Validate for UpdateContactRequest {
         // Validate name length
         validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
 
-        validate_string_not_empty(
-            &self.name,
-            ContactError::InvalidContactData,
-            "UpdateContactRequest.name",
-        )?;
+        validate_string_not_empty(&self.name, "UpdateContactRequest.name")?;
 
         // Validate number of addresses
         validate_collection_size(&self.addresses, CONTACT_MAX_ADDRESSES, "Contact.addresses")?;
