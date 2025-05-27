@@ -208,7 +208,7 @@
 		<Responsive down="sm">
 			<EditContactStep
 				contact={currentContact}
-				onClose={handleClose}
+				onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 				onEdit={(contact) => {
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
@@ -230,7 +230,7 @@
 		<Responsive up="md">
 			<EditContactStep
 				contact={currentContact}
-				onClose={handleClose}
+				onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 				onEdit={(contact) => {
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
