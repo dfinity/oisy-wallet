@@ -1,5 +1,6 @@
-use shared::types::contact::{Contact, ContactError, StoredContacts};
 use std::collections::BTreeMap;
+
+use shared::types::contact::{Contact, ContactError, StoredContacts};
 
 use crate::{
     mutate_state, random::generate_random_u64, read_state, time, types::StoredPrincipal, Candid,
@@ -133,7 +134,7 @@ pub fn update_contact(contact: Contact) -> Result<Contact, ContactError> {
             id: contact.id,
             name: contact.name,
             addresses: contact.addresses,
-            update_timestamp_ns: current_time, // Use the current time instead of client-provided timestamp
+            update_timestamp_ns: current_time,
         };
 
         // Update the contact in the stored contacts
