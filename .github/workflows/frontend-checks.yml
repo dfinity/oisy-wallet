@@ -175,7 +175,7 @@ jobs:
 
   config-build:
     runs-on: ubuntu-24.04
-    needs: config-preparation
+    needs: [config-preparation]
     permissions:
       contents: read
     strategy:
@@ -205,7 +205,7 @@ jobs:
 
   config:
     runs-on: ubuntu-24.04
-    needs: config-build
+    needs: [config-build]
     permissions:
       contents: read
 
