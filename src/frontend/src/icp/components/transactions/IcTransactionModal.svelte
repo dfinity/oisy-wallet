@@ -10,8 +10,6 @@
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
@@ -20,6 +18,7 @@
 		formatToken,
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
+	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
 
 	export let transaction: IcTransactionUi;
 	export let token: OptionToken;
@@ -86,16 +85,12 @@
 					<span>{$i18n.transaction.text.to}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: to })}</output>
-						<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
-						{#if nonNullish(toExplorerUrl)}
-							<ExternalLink
-								iconSize="18"
-								href={toExplorerUrl}
-								ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
-								inline
-								color="blue"
-							/>
-						{/if}
+						<TransactionAddressActions
+							copyAddress={to}
+							copyAddressText={$i18n.transaction.text.to_copied}
+							explorerUrl={toExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+						/>
 					</output>
 				</ListItem>
 			{/if}
@@ -104,16 +99,12 @@
 					<span>{$i18n.transaction.text.from}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
-						<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
-						{#if nonNullish(fromExplorerUrl)}
-							<ExternalLink
-								iconSize="18"
-								href={fromExplorerUrl}
-								ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
-								inline
-								color="blue"
-							/>
-						{/if}
+						<TransactionAddressActions
+							copyAddress={from}
+							copyAddressText={$i18n.transaction.text.from_copied}
+							explorerUrl={fromExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
+						/>
 					</output>
 				</ListItem>
 			{/if}
@@ -136,85 +127,17 @@
 				<span>{$i18n.transaction.text.id}</span>
 				<span>
 					<output>{id}</output>
-					<Copy value={`${id}`} text={$i18n.transaction.text.id_copied} inline />
-					{#if nonNullish(txExplorerUrl)}
-						<ExternalLink
-							iconSize="18"
-							href={txExplorerUrl}
-							ariaLabel={$i18n.transaction.alt.open_block_explorer}
-							inline
-							color="blue"
-						/>
-					{/if}
+
+					<TransactionAddressActions
+						copyAddress={`${id}`}
+						copyAddressText={$i18n.transaction.text.id_copied}
+						explorerUrl={txExplorerUrl}
+						explorerUrlAriaLabel={$i18n.transaction.alt.open_block_explorer}
+					/>
 				</span>
 			</ListItem>
 		</List>
 
-		<!--
-		{#if nonNullish(from) || nonNullish(fromLabel)}
-			<Value ref="from" element="div">
-				{#snippet label()}
-					{$i18n.transaction.text.from}
-				{/snippet}
-
-				{#snippet content()}
-					{#if nonNullish(fromLabel)}
-						<p class="mb-0.5 first-letter:capitalize">
-							<IcTransactionLabel label={fromLabel} {token} />
-						</p>
-					{/if}
-
-					{#if nonNullish(from)}
-						<p>
-							<output>{from}</output>
-							<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
-							{#if nonNullish(fromExplorerUrl)}
-								<ExternalLink
-									iconSize="18"
-									href={fromExplorerUrl}
-									ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
-									inline
-									color="blue"
-								/>
-							{/if}
-						</p>
-					{/if}
-				{/snippet}
-			</Value>
-		{/if}
-
-		{#if nonNullish(to) || nonNullish(toLabel)}
-			<Value ref="to" element="div">
-				{#snippet label()}
-					{$i18n.transaction.text.to}
-				{/snippet}
-
-				{#snippet content()}
-					{#if nonNullish(toLabel)}
-						<p class="mb-0.5 first-letter:capitalize">
-							<IcTransactionLabel label={toLabel} {token} />
-						</p>
-					{/if}
-
-					{#if nonNullish(to)}
-						<p>
-							<output>{to}</output>
-							<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
-							{#if nonNullish(toExplorerUrl)}
-								<ExternalLink
-									iconSize="18"
-									href={toExplorerUrl}
-									ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
-									inline
-									color="blue"
-								/>
-							{/if}
-						</p>
-					{/if}
-				{/snippet}
-			</Value>
-		{/if}
--->
 		<ButtonCloseModal slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>

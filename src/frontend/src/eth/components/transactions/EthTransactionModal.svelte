@@ -16,8 +16,6 @@
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionString } from '$lib/types/string';
@@ -27,8 +25,9 @@
 		formatToken,
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
+	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let transaction: EthTransactionUi;
 	export let token: OptionToken;
@@ -126,16 +125,13 @@
 					<span>{$i18n.transaction.text.to}</span>
 					<span class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: to })}</output>
-						<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
-						{#if nonNullish(toExplorerUrl)}
-							<ExternalLink
-								iconSize="18"
-								href={toExplorerUrl}
-								ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
-								inline
-								color="blue"
-							/>
-						{/if}
+
+						<TransactionAddressActions
+							copyAddress={to}
+							copyAddressText={$i18n.transaction.text.to_copied}
+							explorerUrl={toExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+						/>
 					</span>
 				</ListItem>
 			{/if}
@@ -144,16 +140,13 @@
 					<span>{$i18n.transaction.text.from}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
-						<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
-						{#if nonNullish(fromExplorerUrl)}
-							<ExternalLink
-								iconSize="18"
-								href={fromExplorerUrl}
-								ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
-								inline
-								color="blue"
-							/>
-						{/if}
+
+						<TransactionAddressActions
+							copyAddress={from}
+							copyAddressText={$i18n.transaction.text.from_copied}
+							explorerUrl={fromExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
+						/>
 					</output>
 				</ListItem>
 			{/if}
@@ -163,22 +156,15 @@
 					<span>{$i18n.transaction.text.hash}</span>
 					<span>
 						<output>{shortenWithMiddleEllipsis({ text: hash })}</output>
-						<Copy
-							value={hash}
-							text={replacePlaceholders($i18n.transaction.text.hash_copied, {
+
+						<TransactionAddressActions
+							copyAddress={hash}
+							copyAddressText={replacePlaceholders($i18n.transaction.text.hash_copied, {
 								$hash: hash
 							})}
-							inline
+							{explorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_block_explorer}
 						/>
-						{#if nonNullish(explorerUrl)}
-							<ExternalLink
-								iconSize="18"
-								href={explorerUrl}
-								ariaLabel={$i18n.transaction.alt.open_block_explorer}
-								inline
-								color="blue"
-							/>
-						{/if}
 					</span>
 				</ListItem>
 			{/if}
@@ -208,16 +194,13 @@
 					<span>{$i18n.transaction.text.from}</span>
 					<span class="flex max-w-[50%] flex-row break-all">
 						<output>{fromDisplay}</output>
-						<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
-						{#if nonNullish(fromExplorerUrl)}
-							<ExternalLink
-								iconSize="18"
-								href={fromExplorerUrl}
-								ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
-								inline
-								color="blue"
-							/>
-						{/if}
+
+						<TransactionAddressActions
+							copyAddress={fromDisplay}
+							copyAddressText={$i18n.transaction.text.from_copied}
+							explorerUrl={fromExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
+						/>
 					</span>
 				</ListItem>
 			{/if}
@@ -228,16 +211,13 @@
 
 					<span class="flex max-w-[50%] flex-row break-all">
 						<output>{toDisplay}</output>
-						<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
-						{#if nonNullish(toExplorerUrl)}
-							<ExternalLink
-								iconSize="18"
-								href={toExplorerUrl}
-								ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
-								inline
-								color="blue"
-							/>
-						{/if}
+
+						<TransactionAddressActions
+							copyAddress={toDisplay}
+							copyAddressText={$i18n.transaction.text.to_copied}
+							explorerUrl={toExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+						/>
 					</span>
 				</ListItem>
 			{/if}
