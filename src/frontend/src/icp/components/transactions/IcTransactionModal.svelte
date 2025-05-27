@@ -4,6 +4,8 @@
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -27,8 +29,6 @@
 		formatToken,
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
-	import ListItem from '$lib/components/common/ListItem.svelte';
-	import List from '$lib/components/common/List.svelte';
 
 	export let transaction: IcTransactionUi;
 	export let token: OptionToken;
