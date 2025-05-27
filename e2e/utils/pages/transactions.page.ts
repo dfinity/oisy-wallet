@@ -38,6 +38,10 @@ export const TransactionCases: TransactionsConfig[] = [
 	{
 		tokenSymbol: 'BNB',
 		networkId: 'BSC'
+	},
+	{
+		tokenSymbol: 'POL',
+		networkId: 'POL'
 	}
 ];
 

@@ -41,6 +41,10 @@ export const TestnetCases: TestnetConfig[] = [
 	{
 		networkSymbol: 'BSC (Testnet)',
 		tokenSymbol: 'BNB (Testnet)'
+	},
+	{
+		networkSymbol: 'POL (Amoy Testnet)',
+		tokenSymbol: 'POL (Amoy Testnet)'
 	}
 ];
 
