@@ -71,10 +71,11 @@ fn test_create_contact_should_succeed_with_valid_name() {
 }
 
 #[test]
-fn test_create_contact_should_fail_with_empty_name() {
+fn test_create_contact_should_fail_with_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
+    // Test empty string
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
         caller,
         "create_contact",
@@ -82,9 +83,9 @@ fn test_create_contact_should_fail_with_empty_name() {
             name: String::new(),
         },
     );
-    assert!(wrapped_result.is_err());
+    assert!(wrapped_result.is_err(), "Empty string should be rejected");
 
-    // Also test with just whitespace
+    // Test with two whitespaces
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
         caller,
         "create_contact",
@@ -92,7 +93,94 @@ fn test_create_contact_should_fail_with_empty_name() {
             name: "  ".to_string(),
         },
     );
-    assert!(wrapped_result.is_err());
+    assert!(
+        wrapped_result.is_err(),
+        "String with only whitespace should be rejected"
+    );
+
+    // Test with three whitespaces
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "   ".to_string(),
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "String with only multiple whitespace should be rejected"
+    );
+}
+
+#[test]
+fn test_create_contact_should_fail_with_leading_and_trailing_whitespace_name() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact with a name that has leading whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "   Leading Whitespace".to_string(),
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Leading whitespace should be rejected"
+    );
+
+    // Create a contact with a name that has trailing whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "Trailing Whitespace   ".to_string(),
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Trailing whitespace should be rejected"
+    );
+
+    // Create a contact with a name that has both leading and trailing whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "   Leading and Trailing Whitespace   ".to_string(),
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Leading and trailing whitespace should be rejected"
+    );
+
+    // Verify that a name with internal whitespace is accepted
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "Valid Name With Spaces".to_string(),
+        },
+    );
+    assert!(
+        wrapped_result.is_ok(),
+        "Internal whitespace should be accepted"
+    );
+
+    // Verify that a name with multiple internal whitespaces is accepted
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "Valid Name  With  Multiple  Spaces".to_string(),
+        },
+    );
+    assert!(
+        wrapped_result.is_ok(),
+        "Multiple internal whitespaces should be accepted"
+    );
 }
 
 #[test]
@@ -258,7 +346,7 @@ fn test_update_contact_should_succeed_with_valid_data() {
 }
 
 #[test]
-fn test_update_contact_should_fail_with_empty_name() {
+fn test_update_contact_should_fail_with_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -281,9 +369,9 @@ fn test_update_contact_should_fail_with_empty_name() {
         "update_contact",
         updated_contact_data,
     );
-    assert!(wrapped_result.is_err());
+    assert!(wrapped_result.is_err(), "Empty name should be rejected");
 
-    // Also test with multiple whitespaces
+    // Test with multiple whitespaces
     let whitespace_contact_data = Contact {
         id: created_contact.id,
         name: "   ".to_string(), // Whitespace name should fail
@@ -295,7 +383,93 @@ fn test_update_contact_should_fail_with_empty_name() {
         "update_contact",
         whitespace_contact_data,
     );
-    assert!(whitespace_result.is_err());
+    assert!(
+        whitespace_result.is_err(),
+        "Name with only whitespace should be rejected"
+    );
+}
+
+#[test]
+fn test_update_contact_should_fail_with_leading_and_trailing_whitespace_name() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // First, create a contact with a valid name
+    let result = call_create_contact(&pic_setup, caller, "Valid Name".to_string());
+    assert!(result.is_ok());
+    let created_contact = result.unwrap();
+
+    // Prepare updated contact data with a name that has leading whitespace
+    let leading_whitespace_data = Contact {
+        id: created_contact.id,
+        name: "   Leading Whitespace".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: created_contact.update_timestamp_ns,
+    };
+
+    // Try to update with a name that has leading whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        leading_whitespace_data,
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Leading whitespace should be rejected"
+    );
+
+    // Prepare updated contact data with a name that has trailing whitespace
+    let trailing_whitespace_data = Contact {
+        id: created_contact.id,
+        name: "Trailing Whitespace   ".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: created_contact.update_timestamp_ns,
+    };
+
+    // Try to update with a name that has trailing whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        trailing_whitespace_data,
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Trailing whitespace should be rejected"
+    );
+
+    // Prepare updated contact data with a name that has both leading and trailing whitespace
+    let both_whitespace_data = Contact {
+        id: created_contact.id,
+        name: "   Both Leading and Trailing   ".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: created_contact.update_timestamp_ns,
+    };
+
+    // Try to update with a name that has both leading and trailing whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        both_whitespace_data,
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Leading and trailing whitespace should be rejected"
+    );
+
+    // Verify a valid update works
+    let valid_data = Contact {
+        id: created_contact.id,
+        name: "Valid Name With Internal Spaces".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: created_contact.update_timestamp_ns,
+    };
+
+    let valid_result =
+        pic_setup.update::<Result<Contact, ContactError>>(caller, "update_contact", valid_data);
+    assert!(
+        valid_result.is_ok(),
+        "Name with internal spaces should be accepted"
+    );
 }
 
 #[test]
