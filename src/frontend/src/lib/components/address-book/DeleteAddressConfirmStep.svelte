@@ -17,12 +17,12 @@
 
 	let { onCancel, onDelete, address, contact }: Props = $props();
 
-    const truncateAddress = (address: string) => {
-        if (!address || address.length <= 10) {
-            return address;
-        }
-        return `${address.slice(0, 5)}...${address.slice(-5)}`;
-    }
+	const truncateAddress = (address: string) => {
+		if (!address || address.length <= 10) {
+			return address;
+		}
+		return `${address.slice(0, 5)}...${address.slice(-5)}`;
+	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center pb-5">
