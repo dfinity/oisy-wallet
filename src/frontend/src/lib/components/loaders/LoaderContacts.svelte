@@ -18,19 +18,7 @@
 			return;
 		}
 
-		//loadContacts(identity);
-		contactsStore.addContact({
-			id: 0n,
-			name: 'Dave myself',
-			updateTimestampNs: 0n,
-			addresses: [
-				{
-					label: 'my',
-					addressType: 'Icrcv2',
-					address: 'ca0b4e6b21f6ced815fcd14a4742411c3dbda1320a98f29aac756d0a020b4c42'
-				}
-			]
-		});
+		loadContacts(identity);
 	};
 
 	$effect(() => {
