@@ -31,7 +31,7 @@ describe('IcTransactionModal', () => {
 		expect(getByText(formattedAmount)).toBeInTheDocument();
 	});
 
-	it('should display correct to and from addresses for receive', () => {
+	it('should display correct to and from addresses for send', () => {
 		const { getByText } = render(IcTransactionModal, {
 			transaction: mockIcTransactionUi,
 			token: ICP_TOKEN
