@@ -1,57 +1,77 @@
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
+import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
+import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
+import { capitalizeFirstLetter } from '$tests/utils/string-utils';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
-const mockIcTransactionUi = createMockIcTransactionsUi(1)[0];
+const [mockSolTransactionUi] = createMockSolTransactionsUi(1);
 
-describe('IcTransactionModal', () => {
-	it('should render the IC transaction modal', () => {
-		const { getByText } = render(IcTransactionModal, {
-			transaction: mockIcTransactionUi,
-			token: ICP_TOKEN
+describe('SolTransactionModal', () => {
+	it('should render the SOL transaction modal', () => {
+		const { getByText } = render(SolTransactionModal, {
+			transaction: mockSolTransactionUi,
+			token: SOLANA_TOKEN
 		});
 
 		expect(getByText('send')).toBeInTheDocument();
 	});
 
 	it('should display correct amount and currency', () => {
-		const { getByText } = render(IcTransactionModal, {
-			transaction: mockIcTransactionUi,
-			token: ICP_TOKEN
+		const { getAllByText } = render(SolTransactionModal, {
+			transaction: mockSolTransactionUi,
+			token: SOLANA_TOKEN
 		});
 
 		const formattedAmount = `${formatToken({
-			value: mockIcTransactionUi.value ?? 0n,
-			unitName: ICP_TOKEN.decimals,
-			displayDecimals: ICP_TOKEN.decimals
-		})} ${ICP_TOKEN.symbol}`;
+			value: mockSolTransactionUi.value ?? 0n,
+			unitName: SOLANA_TOKEN.decimals,
+			displayDecimals: SOLANA_TOKEN.decimals
+		})} ${SOLANA_TOKEN.symbol}`;
 
-		expect(getByText(formattedAmount)).toBeInTheDocument();
+		expect(getAllByText(formattedAmount)[0]).toBeInTheDocument();
 	});
 
-	it('should display correct to and from addresses for receive', () => {
-		const { getByText } = render(IcTransactionModal, {
-			transaction: mockIcTransactionUi,
-			token: ICP_TOKEN
+	it('should display correct to and from addresses for send', () => {
+		const { getByText } = render(SolTransactionModal, {
+			transaction: mockSolTransactionUi,
+			token: SOLANA_TOKEN
 		});
 
 		expect(
-			getByText(shortenWithMiddleEllipsis({ text: mockIcTransactionUi.from as string }))
+			getByText(shortenWithMiddleEllipsis({ text: mockSolTransactionUi.from as string }))
 		).toBeInTheDocument();
 
-		expect(getByText(mockIcTransactionUi.to as string)).toBeInTheDocument();
+		expect(getByText(mockSolTransactionUi.to as string)).toBeInTheDocument();
 	});
 
-	it('should display tx id', () => {
-		const { getByText } = render(IcTransactionModal, {
-			transaction: mockIcTransactionUi,
-			token: ICP_TOKEN
+	it('should display tx status', () => {
+		const { getByText } = render(SolTransactionModal, {
+			transaction: mockSolTransactionUi,
+			token: SOLANA_TOKEN
+		});
+
+		const statusTranslation = get(i18n).transaction.status;
+
+		expect(
+			getByText(
+				capitalizeFirstLetter(
+					statusTranslation[mockSolTransactionUi.status as keyof typeof statusTranslation]
+				)
+			)
+		).toBeInTheDocument();
+	});
+
+	it('should display tx hash', () => {
+		const { getByText } = render(SolTransactionModal, {
+			transaction: mockSolTransactionUi,
+			token: SOLANA_TOKEN
 		});
 
 		expect(
-			getByText(shortenWithMiddleEllipsis({ text: mockIcTransactionUi.id }))
+			getByText(shortenWithMiddleEllipsis({ text: mockSolTransactionUi.signature }))
 		).toBeInTheDocument();
 	});
 });
