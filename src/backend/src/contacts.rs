@@ -6,10 +6,6 @@ use crate::{
 };
 
 pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
-    if request.name.trim().is_empty() {
-        return Err(ContactError::InvalidContactData);
-    }
-
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     let current_time = time();
 

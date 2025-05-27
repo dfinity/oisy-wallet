@@ -2,17 +2,18 @@
 #[cfg(test)]
 mod tests;
 
-pub trait Validate {
+pub trait Validate<E = candid::Error> {
     /// Verifies that an object is semantically valid.
     ///
     /// # Errors
     /// - If the object is invalid.
-    fn validate(&self) -> Result<(), candid::Error>;
+    fn validate(&self) -> Result<(), E>;
+
     /// Returns the object if it is semantically valid.
     ///
     /// # Errors
     /// - If the object is invalid.
-    fn validated(self) -> Result<Self, candid::Error>
+    fn validated(self) -> Result<Self, E>
     where
         Self: Sized,
     {

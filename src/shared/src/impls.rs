@@ -4,11 +4,12 @@ use candid::{Deserialize, Error, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use serde::{de, Deserializer};
 
-use crate::types::contact::ContactError;
 use crate::{
     types::{
         backend_config::{Config, InitArg},
-        contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
+        contact::{
+            Contact, ContactAddressData, ContactError, CreateContactRequest, UpdateContactRequest,
+        },
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
@@ -41,17 +42,14 @@ fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> R
     Ok(())
 }
 
-fn validate_string_not_empty<E, F>(
+fn validate_string_not_empty(
     value: &str,
-    error_constructor: F,
+    error_constructor: impl FnOnce(String) -> ContactError,
     field_name: &str,
-) -> Result<(), candid::Error>
-where
-    F: FnOnce(String) -> E,
-    E: Into<candid::Error>,
-{
+) -> Result<(), candid::Error> {
     if value.is_empty() {
-        return Err(error_constructor(format!("{field_name} cannot be empty")).into());
+        let error = error_constructor(format!("{field_name} cannot be empty"));
+        return Err(candid::Error::msg(format!("{error:?}")));
     }
     Ok(())
 }
@@ -518,9 +516,17 @@ impl Validate for ContactAddressData {
     }
 }
 
-impl Validate for CreateContactRequest {
-    fn validate(&self) -> Result<(), Error> {
-        // Nothing to validate here
+impl Validate<ContactError> for CreateContactRequest {
+    fn validate(&self) -> Result<(), ContactError> {
+        // Validate that the name is not an empty string
+
+        if self.name.is_empty() {
+            return Err(ContactError::InvalidContactData("Test".to_string()));
+        }
+
+        // Validate name length
+        validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
+
         Ok(())
     }
 }

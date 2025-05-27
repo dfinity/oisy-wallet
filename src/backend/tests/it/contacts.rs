@@ -1,4 +1,5 @@
 use candid::Principal;
+use pretty_assertions::assert_eq;
 use shared::types::{
     contact::{Contact, ContactError, CreateContactRequest},
     user_profile::OisyUser,
@@ -8,6 +9,7 @@ use crate::utils::{
     mock::CALLER,
     pocketic::{setup, PicBackend, PicCanisterTrait},
 };
+
 // -------------------------------------------------------------------------------------------------
 // - Helper methods for contact testing
 // -------------------------------------------------------------------------------------------------
@@ -28,8 +30,9 @@ pub fn call_get_contacts(pic_setup: &PicBackend, caller: Principal) -> Vec<Conta
         pic_setup.query::<Result<Vec<Contact>, ContactError>>(caller, "get_contacts", ());
     wrapped_result
         .expect("that get_contacts succeeds")
-        .expect("affe")
+        .expect("failed to get contacts")
 }
+
 pub fn call_get_contact(
     pic_setup: &PicBackend,
     caller: Principal,
@@ -73,14 +76,33 @@ fn test_create_contact_should_fail_with_empty_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
-    let result = call_create_contact(&pic_setup, caller, "".to_string());
-    assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), ContactError::InvalidContactData);
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: String::new(),
+        },
+    );
+
+    assert!(wrapped_result.is_err());
+    assert_eq!(
+        wrapped_result.unwrap().unwrap_err(),
+        ContactError::InvalidContactData("ss".to_string())
+    );
 
     // Also test with just whitespace
-    let result = call_create_contact(&pic_setup, caller, "   ".to_string());
-    assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), ContactError::InvalidContactData);
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "   ".to_string(),
+        },
+    );
+    assert!(wrapped_result.is_err());
+    assert_eq!(
+        wrapped_result.unwrap().unwrap_err(),
+        ContactError::InvalidContactData(String::new())
+    );
 }
 
 #[test]
@@ -130,7 +152,7 @@ fn test_get_contact_should_fail_with_nonexistent_id() {
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
     // Try to get a contact with a non-existent ID
-    let nonexistent_id = 999999;
+    let nonexistent_id = 999_999;
     let result = call_get_contact(&pic_setup, caller, nonexistent_id);
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
@@ -176,21 +198,20 @@ fn test_contacts_are_isolated_between_users() {
     // Create a contact for each user with a dynamically generated name
     for (index, test_user) in test_users.iter().enumerate() {
         let user_number = index + 1;
-        let contact_name = format!("Contact of user {}", user_number);
+        let contact_name = format!("Contact of user {user_number}");
 
         let result = call_create_contact(&pic_setup, test_user.principal, contact_name);
 
         assert!(
             result.is_ok(),
-            "Failed to create contact for user {}",
-            user_number
+            "Failed to create contact for user {user_number}"
         );
     }
 
     // Each user should now only see their own contact
     for (index, test_user) in test_users.iter().enumerate() {
         let user_number = index + 1;
-        let expected_contact_name = format!("Contact of user {}", user_number);
+        let expected_contact_name = format!("Contact of user {user_number}");
 
         let contacts = call_get_contacts(&pic_setup, test_user.principal);
 
@@ -257,7 +278,7 @@ fn test_update_contact_should_fail_with_empty_name() {
     // Prepare updated contact data with empty name
     let updated_contact_data = Contact {
         id: created_contact.id,
-        name: "".to_string(), // Empty name should fail
+        name: String::new(), // Empty name should fail
         addresses: vec![],
         update_timestamp_ns: created_contact.update_timestamp_ns,
     };
@@ -265,7 +286,10 @@ fn test_update_contact_should_fail_with_empty_name() {
     // Try to update with empty name
     let update_result = call_update_contact(&pic_setup, caller, updated_contact_data);
     assert!(update_result.is_err());
-    assert_eq!(update_result.unwrap_err(), ContactError::InvalidContactData);
+    assert_eq!(
+        update_result.unwrap_err(),
+        ContactError::InvalidContactData("replace".to_string())
+    );
 
     // Also test with just whitespace
     let whitespace_contact_data = Contact {
@@ -279,7 +303,7 @@ fn test_update_contact_should_fail_with_empty_name() {
     assert!(whitespace_result.is_err());
     assert_eq!(
         whitespace_result.unwrap_err(),
-        ContactError::InvalidContactData
+        ContactError::InvalidContactData("replace".to_string())
     );
 }
 
@@ -294,7 +318,7 @@ fn test_update_contact_should_fail_with_nonexistent_id() {
 
     // Prepare contact data with non-existent ID
     let nonexistent_contact_data = Contact {
-        id: 999999, // This ID should not exist
+        id: 999_999, // This ID should not exist
         name: "New Name".to_string(),
         addresses: vec![],
         update_timestamp_ns: 0,
@@ -336,13 +360,22 @@ fn test_update_contact_preserves_other_contacts() {
     assert!(update_result.is_ok());
 
     // Get all contacts after update
-    let contacts = call_get_contacts(&pic_setup, caller);
-    assert_eq!(contacts.len(), 3); // Should still have 3 contacts
+    let updated_contacts = call_get_contacts(&pic_setup, caller);
+    assert_eq!(updated_contacts.len(), 3); // Should still have 3 contacts
 
     // Find each contact by ID and verify
-    let updated_contact1 = contacts.iter().find(|c| c.id == contact1.id).unwrap();
-    let updated_contact2 = contacts.iter().find(|c| c.id == contact2.id).unwrap();
-    let updated_contact3 = contacts.iter().find(|c| c.id == contact3.id).unwrap();
+    let updated_contact1 = updated_contacts
+        .iter()
+        .find(|c| c.id == contact1.id)
+        .unwrap();
+    let updated_contact2 = updated_contacts
+        .iter()
+        .find(|c| c.id == contact2.id)
+        .unwrap();
+    let updated_contact3 = updated_contacts
+        .iter()
+        .find(|c| c.id == contact3.id)
+        .unwrap();
 
     // Verify only contact2 was changed
     assert_eq!(updated_contact1.name, "Contact 1");
