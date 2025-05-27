@@ -18,7 +18,7 @@ updates:
     schedule:
       interval: weekly
     allow:
-      - dependency-type: development
+      - dependency-type: all
     ignore:
       - dependency-name: '@dfinity/*'
       - dependency-name: '@types/*'
