@@ -5,17 +5,19 @@ import type { SetIdbTokensParams } from '$lib/types/idb-tokens';
 import type { OptionIdentity } from '$lib/types/identity';
 import { get } from 'svelte/store';
 
+interface LoadCustomTokensParams {
+	identity: OptionIdentity;
+	certified: boolean;
+	filterTokens: (token: CustomToken) => boolean;
+	setIdbTokens: (params: SetIdbTokensParams) => Promise<void>;
+}
+
 const loadCustomTokensFromBackend = async ({
 	identity,
 	certified,
 	filterTokens,
 	setIdbTokens
-}: {
-	identity: OptionIdentity;
-	certified: boolean;
-	filterTokens: (token: CustomToken) => boolean;
-	setIdbTokens: (params: SetIdbTokensParams) => Promise<void>;
-}): Promise<CustomToken[]> => {
+}: LoadCustomTokensParams): Promise<CustomToken[]> => {
 	const tokens = await listCustomTokens({
 		identity,
 		certified,
@@ -38,12 +40,7 @@ export const loadNetworkCustomTokens = async ({
 	certified,
 	filterTokens,
 	setIdbTokens
-}: {
-	identity: OptionIdentity;
-	certified: boolean;
-	filterTokens: (token: CustomToken) => boolean;
-	setIdbTokens: (params: SetIdbTokensParams) => Promise<void>;
-}): Promise<CustomToken[]> =>
+}: LoadCustomTokensParams): Promise<CustomToken[]> =>
 	// TODO: load cached tokens from IDB if available
 	await loadCustomTokensFromBackend({
 		identity,
