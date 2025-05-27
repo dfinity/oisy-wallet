@@ -6,6 +6,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
 import type { IcToken } from '$icp/types/ic-token';
@@ -52,14 +53,19 @@ export const tokens: Readable<Token[]> = derived(
 	]
 );
 
+export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
+	$tokens.filter((token) => isDefaultEthereumToken(token))
+);
+
 export const tokensToPin: Readable<TokenToPin[]> = derived(
-	[icrcChainFusionDefaultTokens],
-	([$icrcChainFusionDefaultTokens]) => [
+	[icrcChainFusionDefaultTokens, defaultEthereumTokens],
+	([$icrcChainFusionDefaultTokens, $defaultEthereumTokens]) => [
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
 		SOLANA_TOKEN,
-		...$icrcChainFusionDefaultTokens
+		...$icrcChainFusionDefaultTokens,
+		...$defaultEthereumTokens.filter((token) => token !== ETHEREUM_TOKEN)
 	]
 );
 
