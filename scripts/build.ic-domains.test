@@ -6,7 +6,7 @@ set -euxo pipefail
 # - Networks listed in dfx.json
 dfx_networks() {
   echo ic
-  echo local
+  # echo local - Already listed in dfx.json
   jq -r '.networks|keys[]' dfx.json
 }
 
