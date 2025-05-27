@@ -17,19 +17,17 @@
 </script>
 
 <BottomSheet transition>
-    {#snippet header()}
-        <div class="w-full p-4">
-            <ButtonIcon
-                onclick={onCancel}
-                styleClass="text-disabled float-right"
-                ariaLabel={$i18n.core.alt.close_details}
-            >
-                {#snippet icon()}
-                    <IconClose size="24" />
-                {/snippet}
-            </ButtonIcon>
-        </div>
-    {/snippet}
+    <div slot="header" class="w-full p-4">
+        <ButtonIcon
+            onclick={onCancel}
+            styleClass="text-disabled float-right"
+            ariaLabel={$i18n.core.alt.close_details}
+        >
+            {#snippet icon()}
+                <IconClose size="24" />
+            {/snippet}
+        </ButtonIcon>
+    </div>
 
     <h3 class="text-center mt-12 mb-2">{$i18n.address.delete.title}</h3>
 
