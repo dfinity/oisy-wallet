@@ -9,7 +9,7 @@
 
 	interface Props {
 		onCancel: () => void;
-		onDelete: () => void;
+		onDelete: (id: bigint) => void;
 		contact: ContactUi;
 	}
 
