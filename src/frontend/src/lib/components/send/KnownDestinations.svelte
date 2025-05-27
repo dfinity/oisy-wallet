@@ -31,12 +31,8 @@
 	);
 </script>
 
-{#if nonNullish(knownDestinations) && filteredKnownDestinations.length > 0}
-	<div class="mb-2 mt-8" in:fade>
-		<div class="mb-2 font-bold">
-			{$i18n.send.text.recently_used}
-		</div>
-
+<div in:fade>
+	{#if nonNullish(knownDestinations) && filteredKnownDestinations.length > 0}
 		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
 			<ul class="list-none overflow-y-auto overscroll-contain">
 				{#each filteredKnownDestinations as { address, ...rest } (address)}
@@ -53,10 +49,10 @@
 				{/each}
 			</ul>
 		</div>
-	</div>
-{:else}
-	<EmptyState
-		title={$i18n.send.text.recently_used_empty_state_title}
-		description={$i18n.send.text.recently_used_empty_state_description}
-	/>
-{/if}
+	{:else}
+		<EmptyState
+			title={$i18n.send.text.recently_used_empty_state_title}
+			description={$i18n.send.text.recently_used_empty_state_description}
+		/>
+	{/if}
+</div>

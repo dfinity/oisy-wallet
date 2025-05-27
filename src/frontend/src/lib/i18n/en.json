@@ -463,9 +463,12 @@
 			"select_token": "Select token to send",
 			"select_network_filter": "Select network filter",
 			"send_again": "Send again",
-			"recently_used": "Recently used",
+			"recently_used_tab": "Recently Used",
+			"contacts_tab": "Contacts",
 			"recently_used_empty_state_title": "Recently used addresses will appear here",
-			"recently_used_empty_state_description": "Make your first send now!"
+			"recently_used_empty_state_description": "Make your first send now!",
+			"contacts_empty_state_title": "Your contacts will appear here",
+			"contacts_empty_state_description": "It looks like you haven’t added contacts yet"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
