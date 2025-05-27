@@ -37,6 +37,34 @@ describe('token-account-id.utils', () => {
 			expect(result).toEqual(solAddressStr);
 		});
 
+		it('should extract address string from Icrcv2 token account ID with ICP account identifier', () => {
+			const icpAccountId = '6c04faf793b42b156206f805d13ba1b3b697ec18f519e6a11484eed091859d5a';
+			const tokenAccountId = TokenAccountIdSchema.parse(icpAccountId);
+
+			const result = getTokenAccountIdAddressString(tokenAccountId);
+
+			expect(result).toEqual(icpAccountId);
+		});
+
+		it('should extract address string from Icrcv2 token account ID with principal only', () => {
+			const principal = 'rrkah-fqaaa-aaaaa-aaaaq-cai';
+			const tokenAccountId = TokenAccountIdSchema.parse(principal);
+
+			const result = getTokenAccountIdAddressString(tokenAccountId);
+
+			expect(result).toEqual(principal);
+		});
+
+		it('should extract address string from Icrcv2 token account ID with principal and subaccount', () => {
+			const icrcAccount =
+				'k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae-6cc627i.1';
+			const tokenAccountId = TokenAccountIdSchema.parse(icrcAccount);
+
+			const result = getTokenAccountIdAddressString(tokenAccountId);
+
+			expect(result).toEqual(icrcAccount);
+		});
+
 		it('should throw an error for invalid token account ID types', () => {
 			// Create an empty object that doesn't match any valid TokenAccountId type
 			const invalidTokenAccountId = {} as TokenAccountId;
@@ -71,6 +99,34 @@ describe('token-account-id.utils', () => {
 			const result = getTokenAccountIdAddressString(tokenAccountId);
 
 			expect(result).toEqual(solAddressStr);
+		});
+
+		it('should handle Icrcv2 token account ID with ICP account identifier in a roundtrip conversion', () => {
+			const icpAccountId = '6c04faf793b42b156206f805d13ba1b3b697ec18f519e6a11484eed091859d5a';
+			const tokenAccountId = TokenAccountIdSchema.parse(icpAccountId);
+
+			const result = getTokenAccountIdAddressString(tokenAccountId);
+
+			expect(result).toEqual(icpAccountId);
+		});
+
+		it('should handle Icrcv2 token account ID with principal only in a roundtrip conversion', () => {
+			const principal = 'rrkah-fqaaa-aaaaa-aaaaq-cai';
+			const tokenAccountId = TokenAccountIdSchema.parse(principal);
+
+			const result = getTokenAccountIdAddressString(tokenAccountId);
+
+			expect(result).toEqual(principal);
+		});
+
+		it('should handle Icrcv2 token account ID with principal and subaccount in a roundtrip conversion', () => {
+			const icrcAccount =
+				'k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae-6cc627i.1';
+			const tokenAccountId = TokenAccountIdSchema.parse(icrcAccount);
+
+			const result = getTokenAccountIdAddressString(tokenAccountId);
+
+			expect(result).toEqual(icrcAccount);
 		});
 	});
 
