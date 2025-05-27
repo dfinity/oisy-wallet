@@ -151,7 +151,6 @@ jobs:
           path: coverage/
           retention-days: 3
 
-
   config-preparation:
     runs-on: ubuntu-24.04
     permissions:
@@ -228,7 +227,6 @@ jobs:
           cat ic-domains/*.txt > combined.ic-domains.txt
       - name: Run Domain Validation
         run: scripts/build.ic-domains.test combined.ic-domains.txt
-
 
   frontend-checks-pass:
     if: always()
