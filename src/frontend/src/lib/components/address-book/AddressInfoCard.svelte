@@ -6,7 +6,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
-	export let address: ContactAddressUi;
+	interface Props {
+		address: ContactAddressUi;
+	}
+
+	const { address }: Props = $props();
 </script>
 
 <Value ref="address-info" element="div">

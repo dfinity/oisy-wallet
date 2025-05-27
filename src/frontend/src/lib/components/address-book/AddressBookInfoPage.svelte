@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import ReceiveQrCode from '$lib/components/receive/ReceiveQrCode.svelte';
 	import AddressBookQrCode from '$lib/components/address-book/AddressBookQrCode.svelte';
 	import AddressInfoCard from '$lib/components/address-book/AddressInfoCard.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -6,30 +8,33 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ADDRESS_EDIT_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 	import type { AddressBookSteps } from '$lib/enums/progress-steps';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
-	export let address: ContactAddressUi;
-	export let onClose: (step?: AddressBookSteps) => void;
+	interface Props {
+		address: ContactAddressUi;
+		onClose: (step?: AddressBookSteps) => void;
+	}
 
-	const onCloseHandler = () => onClose();
+	const { address, onClose }: Props = $props();
 </script>
 
 <ContentWithToolbar styleClass="mb-10 flex flex-col items-stretch">
-	{#if address?.address}
-		<AddressBookQrCode {address} />
-
+	{#if nonNullish(address)}
+	    <AddressBookQrCode {address} />
+		
 		<AddressInfoCard {address} />
 	{:else}
 		<!-- Display a fallback message if no address is available. 
-			TODO:
-			Add i18n support for the message.
-			Styling is minimal and could be enhanced. -->
+		   TODO: Styling is minimal and could be enhanced. -->
 		<div class="flex items-center justify-center py-4">
-			<p class="text-center text-sm font-medium text-brand-primary"> No address available. </p>
+			<p class="text-center text-sm font-medium text-brand-primary"
+				>{$i18n.address_book.text.no_address_found}</p
+			>
 		</div>
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={onCloseHandler} testId={ADDRESS_EDIT_CANCEL_BUTTON} />
+		<ButtonBack onclick={onClose} testId={ADDRESS_EDIT_CANCEL_BUTTON} />
 	</ButtonGroup>
 </ContentWithToolbar>

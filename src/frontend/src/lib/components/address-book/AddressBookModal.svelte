@@ -59,7 +59,7 @@
 	let currentAddressIndex: number | undefined = $state();
 
 	const handleClose = (step?: AddressBookSteps) => {
-		if (step) {
+		if (nonNullish(step)) {
 			return gotoStep(step);
 		}
 
@@ -69,6 +69,7 @@
 		) {
 			return gotoStep(AddressBookSteps.SHOW_CONTACT);
 		}
+
 		return gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
 
@@ -159,7 +160,7 @@
 	on:nnsClose={close}
 >
 	<svelte:fragment slot="title">
-		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS}
+		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentContact?.name)}
 			<div class="flex flex-wrap items-center gap-2">
 				<Avatar
 					name={currentContact?.name}
@@ -170,8 +171,8 @@
 					{currentContact?.name}
 				</div>
 			</div>
-		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
-			{editContactNameStep.title}
+		{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
+			{currentStep.title}
 		{:else}
 			{currentStep?.title ?? ''}
 		{/if}
@@ -253,7 +254,7 @@
 			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
-		{#if nonNullish(currentAddressIndex) && currentContact?.addresses[currentAddressIndex]}
+		{#if nonNullish(currentAddressIndex) && nonNullish(currentContact?.addresses?.[currentAddressIndex])}
 			<AddressBookInfoPage
 				address={currentContact.addresses[currentAddressIndex]}
 				onClose={handleClose}
