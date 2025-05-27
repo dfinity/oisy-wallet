@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
-	import type { ListVariant } from '$lib/types/style';
 	import type { ListContext } from '$lib/components/common/List.svelte';
+	import type { ListVariant } from '$lib/types/style';
 
 	interface Props {
 		children?: Snippet;

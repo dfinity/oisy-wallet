@@ -8,6 +8,8 @@
 	} from '$env/networks/networks.env';
 	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import { setUserShowTestnets, updateUserNetworkSettings } from '$lib/api/backend.api';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ManageNetworkToggle from '$lib/components/networks/ManageNetworkToggle.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -32,8 +34,6 @@
 	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 	import { emit } from '$lib/utils/events.utils';
-	import List from '$lib/components/common/List.svelte';
-	import ListItem from '$lib/components/common/ListItem.svelte';
 
 	const enabledNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...enabledNetworks };
