@@ -6,15 +6,6 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import oneInch from '$eth/assets/1inch.svg';
-import dai from '$eth/assets/dai.svg';
-import dmail from '$eth/assets/dmail.svg';
-import floki from '$eth/assets/floki.svg';
-import jasmy from '$eth/assets/jasmy.svg';
-import matic from '$eth/assets/matic.svg';
-import rndr from '$eth/assets/rndr.svg';
-import weeth from '$eth/assets/weeth.svg';
-import weth from '$eth/assets/weth.svg';
 import type { EthereumNetwork } from '$eth/types/network';
 import {
 	isTokenErc20,
@@ -29,15 +20,6 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 
 describe('erc20.utils', () => {
 	const iconCases = [
-		['dai', dai],
-		['dmail', dmail],
-		['floki', floki],
-		['jasmy', jasmy],
-		['matic', matic],
-		['rndr', rndr],
-		['weeth', weeth],
-		['weth', weth],
-		['1inch', oneInch],
 		['icp', icpDark],
 		['ckicp', icpDark],
 		['unknown', undefined],
@@ -50,7 +32,7 @@ describe('erc20.utils', () => {
 		const mockParams = {
 			id: mockId,
 			name: 'TokenName',
-			symbol: 'DAI',
+			symbol: 'ckICP',
 			address: mockValidErc20Token.address,
 			exchange: mockValidErc20Token.exchange,
 			decimals: mockValidErc20Token.decimals,
@@ -64,15 +46,15 @@ describe('erc20.utils', () => {
 				id: mockId,
 				standard: 'erc20',
 				name: 'TokenName',
-				symbol: 'DAI',
-				icon: dai
+				symbol: 'ckICP',
+				icon: icpDark
 			});
 		});
 
 		it('should map an ERC20 token correctly when the id is not provided', () => {
 			const { id: _, ...params } = mockParams;
 
-			expect(mapErc20Token(params).id.description).toBe('DAI');
+			expect(mapErc20Token(params).id.description).toBe('ckICP');
 		});
 
 		it.each(iconCases)(
@@ -102,7 +84,7 @@ describe('erc20.utils', () => {
 		const mockParams = {
 			id: mockId,
 			name: 'TokenName',
-			symbol: 'DAI',
+			symbol: 'ckICP',
 			enabled: true,
 			address: mockValidErc20Token.address,
 			exchange: mockValidErc20Token.exchange,
@@ -117,9 +99,9 @@ describe('erc20.utils', () => {
 				id: mockId,
 				standard: 'erc20',
 				name: 'TokenName',
-				symbol: 'DAI',
+				symbol: 'ckICP',
 				enabled: true,
-				icon: dai
+				icon: icpDark
 			});
 		});
 
@@ -127,7 +109,7 @@ describe('erc20.utils', () => {
 			const { id: _, ...params } = mockParams;
 
 			expect(mapErc20UserToken(params).id.description).toBe(
-				`user-token#DAI#${params.network.chainId}`
+				`user-token#ckICP#${params.network.chainId}`
 			);
 		});
 

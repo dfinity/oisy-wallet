@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component } from 'svelte';
+	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 
 	export let amount: bigint | undefined;
@@ -41,7 +44,16 @@
 
 			<svelte:fragment slot="amount">
 				{#if nonNullish(amount)}
-					<Amount {amount} decimals={token.decimals} symbol={token.symbol} formatPositiveAmount />
+					{#if $isPrivacyMode}
+						<IconDots />
+					{:else}
+						<Amount
+							{amount}
+							decimals={token.decimals}
+							symbol={getTokenDisplaySymbol(token)}
+							formatPositiveAmount
+						/>
+					{/if}
 				{/if}
 			</svelte:fragment>
 

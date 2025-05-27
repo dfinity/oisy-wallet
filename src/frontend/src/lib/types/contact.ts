@@ -1,11 +1,13 @@
-export interface Address {
-	id: string;
+import type { Contact } from '$declarations/backend/backend.did';
+import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
+
+export interface ContactAddressUi {
 	address: string;
-	alias?: string;
+	label?: string;
+	addressType: TokenAccountIdTypes;
 }
 
-export interface Contact {
-	id: string;
-	name: string;
-	addresses: Address[];
+export interface ContactUi extends Omit<Contact, 'addresses' | 'update_timestamp_ns'> {
+	addresses: ContactAddressUi[];
+	updateTimestampNs: bigint;
 }

@@ -1,26 +1,39 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
-# Prints all known dfx networks:
-# - Built-in networks (local & ic)
-# - Networks listed in dfx.json
-dfx_networks() {
-  echo ic
-  echo local
-  jq -r '.networks|keys[]' dfx.json
+print_help() {
+  cat <<-"EOF"
+
+  Usage: $0 [--help] [<actual-domains-file>]
+
+	EOF
 }
+
+if [[ "${1:-}" == "--help" ]]; then
+  print_help
+  exit 0
+fi
 
 # Prints the Oisy domain name for every network.
 # - The URL is the one in .well-known/ic-domains, used by the Internet Computer.
 dfx_network_domains() {
-  dfx_networks | while read -r i; do dfx build frontend --network "$i" >/dev/null 2>/dev/null && cat build/.well-known/ic-domains && echo " $i"; done
+  scripts/build.ic-domains.test.list | while read -r i; do
+    if [[ -d build ]]; then
+      rm -rf build
+    fi
+    dfx build frontend --network "$i" >/dev/null 2>/dev/null && cat build/.well-known/ic-domains && echo " $i"
+  done
 }
 
 (
   echo Checking domains for all known networks...
   EXPECTED_DOMAINS="$0.expected"
-  ACTUAL_DOMAINS="$(mktemp "$0.actual.XXXXXXXXXX")"
-  dfx_network_domains >"$ACTUAL_DOMAINS"
+  if [[ -n "${1:-}" ]]; then
+    ACTUAL_DOMAINS="$1"
+  else
+    ACTUAL_DOMAINS="$(mktemp "$0.actual.XXXXXXXXXX")"
+    dfx_network_domains >"$ACTUAL_DOMAINS"
+  fi
   if diff --ignore-all-space --ignore-blank-lines <(sort <"$EXPECTED_DOMAINS") <(sort <"$ACTUAL_DOMAINS"); then
     echo OK: ic-domains
     rm "$ACTUAL_DOMAINS"

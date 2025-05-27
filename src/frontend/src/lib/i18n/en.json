@@ -20,6 +20,7 @@
 			"approve": "Approve",
 			"view": "View",
 			"copy": "Copy",
+			"delete": "Delete",
 			"clear_filter": "Clear filter",
 			"not_available": "n/a",
 			"new": "New",
@@ -346,6 +347,9 @@
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
 	},
+	"shortcuts": {
+		"privacy_mode": "P"
+	},
 	"networks": {
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
@@ -459,7 +463,12 @@
 			"select_token": "Select token to send",
 			"select_network_filter": "Select network filter",
 			"send_again": "Send again",
-			"recently_used": "Recently used"
+			"recently_used_tab": "Recently Used",
+			"contacts_tab": "Contacts",
+			"recently_used_empty_state_title": "Recently used addresses will appear here",
+			"recently_used_empty_state_description": "Make your first send now!",
+			"contacts_empty_state_title": "Your contacts will appear here",
+			"contacts_empty_state_description": "It looks like you haven’t added contacts yet"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
@@ -1035,6 +1044,15 @@
 			"search_contact": "Search contact",
 			"no_contact_found": "No contacts found"
 		},
+		"alt": {
+			"show_addresses_of_contact": "Show all addresses for contact",
+			"hide_addresses": "Hide addresses of contact"
+		},
+		"edit_contact": {
+			"title": "Edit contact",
+			"add_address": "Add address",
+			"delete_contact": "Delete contact"
+		},
 		"show_contact": {
 			"title": "Contact",
 			"add_address": "Add address",
@@ -1044,10 +1062,35 @@
 	},
 	"contact": {
 		"form": {
+			"edit_contact": "Edit contact",
 			"add_new_contact": "Add new contact"
 		},
 		"fields": {
 			"name": "Name"
+		}
+	},
+	"address": {
+		"types": {
+			"Icrcv2": "Internet Computer",
+			"Btc": "Bitcoin",
+			"Eth": "Ethereum",
+			"Sol": "Solana"
+		},
+		"form": {
+			"new_address": "New address",
+			"address_placeholder": "Enter or paste address",
+			"label_placeholder": "E.g., “Mom’s wallet“",
+			"invalid_address": "Invalid address",
+			"valid_for_networks": "Valid for networks:"
+		},
+		"fields": {
+			"label": "Alias",
+			"address": "Address"
+		},
+		"delete": {
+			"title": "Delete address?",
+			"delete_address": "Delete address",
+			"content_text": "This will delete <strong>$address</strong> address from $contact's contact.<br>This action cannot be undone."
 		}
 	},
 	"signer": {

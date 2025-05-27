@@ -18,6 +18,8 @@ export const TRACK_COUNT_WC_ETH_SEND_SUCCESS = 'wc_eth_send_success_count';
 export const TRACK_COUNT_WC_ETH_SEND_ERROR = 'wc_eth_send_error_count';
 export const TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS = 'eth_to_cketh_convert_success_count';
 export const TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR = 'eth_to_cketh_convert_error_count';
+export const TRACK_COUNT_ETH_LOADING_BALANCE_ERROR = 'eth_loading_balance_error_count';
+export const TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR = 'eth_loading_transactions_error_count';
 
 // Internet Computer
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS = 'ic_ckbtc_to_btc_success_count';
@@ -30,6 +32,7 @@ export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS = 'ic_ckerc20_to_erc20
 export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR = 'ic_ckerc20_to_erc20_error_count';
 export const TRACK_COUNT_IC_SEND_SUCCESS = 'ic_send_success_count';
 export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';
+export const TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR = 'ic_loading_transactions_error_count';
 
 // Solana
 export const TRACK_COUNT_SOL_SEND_SUCCESS = 'sol_send_success_count';
@@ -54,3 +57,8 @@ export const TRACK_COUNT_CAROUSEL_OPEN = 'carousel_open_count';
 // Swap
 export const TRACK_COUNT_SWAP_SUCCESS = 'swap_success_count';
 export const TRACK_COUNT_SWAP_ERROR = 'swap_error_count';
+
+// Manage Tokens
+export const TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS = 'manage_tokens_enable_success_count';
+export const TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS = 'manage_tokens_disable_success_count';
+export const TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR = 'manage_tokens_save_error_count';
