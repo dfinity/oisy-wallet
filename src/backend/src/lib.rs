@@ -892,18 +892,18 @@ pub async fn create_contact(request: CreateContactRequest) -> CreateContactResul
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    // TODO replace mock data with data from contact service
     let contact = Contact {
         id: request.id,
         name: request.name,
         addresses: request.addresses,
-        update_timestamp_ns: time(),
+        update_timestamp_ns: request.update_timestamp_ns,
     };
 
-    Ok(contact).into()
+    let result = contacts::update_contact(contact);
+    result.into()
 }
 
 /// Deletes a contact for the caller.
