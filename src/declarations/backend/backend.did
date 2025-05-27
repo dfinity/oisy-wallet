@@ -191,7 +191,7 @@ type ContactAddressData = record {
 	token_account_id : TokenAccountId
 };
 type ContactError = variant {
-	InvalidContactData;
+	InvalidContactData : text;
 	ContactNotFound;
 	RandomnessError
 };

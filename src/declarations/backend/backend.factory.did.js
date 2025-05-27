@@ -200,7 +200,7 @@ export const idlFactory = ({ IDL }) => {
 		addresses: IDL.Vec(ContactAddressData)
 	});
 	const ContactError = IDL.Variant({
-		InvalidContactData: IDL.Null,
+		InvalidContactData: IDL.Text,
 		ContactNotFound: IDL.Null,
 		RandomnessError: IDL.Null
 	});
