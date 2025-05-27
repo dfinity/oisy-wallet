@@ -57,3 +57,8 @@ export const TRACK_COUNT_CAROUSEL_OPEN = 'carousel_open_count';
 // Swap
 export const TRACK_COUNT_SWAP_SUCCESS = 'swap_success_count';
 export const TRACK_COUNT_SWAP_ERROR = 'swap_error_count';
+
+// Manage Tokens
+export const TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS = 'manage_tokens_enable_success_count';
+export const TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS = 'manage_tokens_disable_success_count';
+export const TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR = 'manage_tokens_save_error_count';

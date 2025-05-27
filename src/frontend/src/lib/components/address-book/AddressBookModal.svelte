@@ -25,8 +25,7 @@
 		},
 		{
 			name: AddressBookSteps.EDIT_CONTACT,
-			// TODO: Add i18n
-			title: 'Edit Contact'
+			title: $i18n.address_book.edit_contact.title
 		},
 		{
 			name: AddressBookSteps.EDIT_CONTACT_NAME,
@@ -34,13 +33,12 @@
 		},
 		{
 			name: AddressBookSteps.SHOW_ADDRESS,
-			// TODO: Add i18n
-			title: 'Show address'
+			// The title will be replaced with the name. No title is needed here.
+			title: ''
 		},
 		{
 			name: AddressBookSteps.EDIT_ADDRESS,
-			// TODO: Add i18n
-			title: 'Edit address'
+			title: $i18n.address_book.edit_contact.title
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
@@ -60,11 +58,8 @@
 	let currentAddressIndex: number | undefined = $state();
 
 	const handleClose = () => {
-		if (
-			currentStepName === AddressBookSteps.SHOW_ADDRESS &&
-			previousStepName === AddressBookSteps.SHOW_CONTACT
-		) {
-			return gotoStep(AddressBookSteps.SHOW_CONTACT);
+		if (nonNullish(previousStepName)) {
+			return gotoStep(previousStepName);
 		}
 		return gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
@@ -178,9 +173,8 @@
 			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
-		<!-- TODO Remove ! from currentContact -->
 		<ShowContactStep
-			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			onClose={handleClose}
 			contact={currentContact}
 			onEdit={(contact) => {
 				currentContact = contact;
@@ -198,7 +192,7 @@
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact)}
 		<EditContactStep
 			contact={currentContact}
-			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+			onClose={handleClose}
 			onEdit={(contact) => {
 				currentContact = contact;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
@@ -237,7 +231,7 @@
 			onSaveAddress={saveAddress}
 			onAddAddress={addAddress}
 			isNewAddress={isNullish(currentAddressIndex)}
-			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+			onClose={handleClose}
 		/>
 	{/if}
 </WizardModal>
