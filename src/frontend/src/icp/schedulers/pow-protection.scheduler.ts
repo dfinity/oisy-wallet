@@ -3,7 +3,11 @@ import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { CreateChallengeEnum, PowCreateChallengeError } from '$lib/canisters/backend.errors';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
-import type { PostMessageDataRequest } from '$lib/types/post-message';
+import type {
+	PostMessageDataRequest,
+	PostMessageDataResponsePowProtectorNextAllowance,
+	PostMessageDataResponsePowProtectorProgress
+} from '$lib/types/post-message';
 import { isNullish } from '@dfinity/utils';
 
 export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest> {
@@ -41,8 +45,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	 */
 	private requestSignerCycles = async ({ identity }: SchedulerJobData<PostMessageDataRequest>) => {
 		// Step 1: Request creation of the Proof-of-Work (PoW) challenge (throws when unsuccessful).
-		// TODO provide functionality to post and receive the a post message to indicate the progress
-		// this.postMessagePowProgress({ progress: 'REQUEST_CHALLENGE' });
+		this.postMessagePowProgress({ progress: 'REQUEST_CHALLENGE' });
 		try {
 			const createChallengeResponse = await createPowChallenge({
 				identity
@@ -54,23 +57,26 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 			}
 
 			// Step 2: Solve the PoW challenge.
-			// TODO provide functionality to post and receive the a post message to indicate the progress
-			// this.postMessagePowProgress({ progress: 'SOLVE_CHALLENGE' });
+			this.postMessagePowProgress({ progress: 'SOLVE_CHALLENGE' });
 			const nonce = await solvePowChallenge({
 				timestamp: createChallengeResponse.start_timestamp_ms,
 				difficulty: createChallengeResponse.difficulty
 			});
 
 			// Step 3: Request allowance for signing operations with solved nonce.
-			// TODO provide functionality to post and receive the a post message to indicate the progress
-			// this.postMessagePowProgress({ progress: 'GRANT_CYCLES'});
-
-			await allowSigning({
+			this.postMessagePowProgress({
+				progress: 'GRANT_CYCLES'
+			});
+			const allowSigningResponse = await allowSigning({
 				identity,
 				request: { nonce }
 			});
-			// TODO provide functionality to post and receive the a post message to indicate when the next challenge starts
-			// if (_allowSigningResponse?.challenge_completion[0]?.next_allowance_ms !== undefined) {this.postMessagePowNextAllowance({ nextAllowanceMs: allowSigningResponse.challenge_completion[0].next_allowance_ms });
+
+			if (allowSigningResponse?.challenge_completion[0]?.next_allowance_ms !== undefined) {
+				this.postMessagePowNextAllowance({
+					nextAllowanceMs: allowSigningResponse.challenge_completion[0].next_allowance_ms
+				});
+			}
 		} catch (err: unknown) {
 			// We can skip the "Challenge already in progress" since we are already in the middle of a challenge. This
 			// usually happens when:
@@ -82,6 +88,33 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 			throw err;
 		}
 	};
+
 	private isChallengeInProgressError = (err: unknown): boolean =>
 		err instanceof PowCreateChallengeError && err.code === CreateChallengeEnum.ChallengeInProgress;
+
+	private postMessagePowProgress({
+		progress
+	}: {
+		progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES';
+	}) {
+		const data: PostMessageDataResponsePowProtectorProgress = {
+			progress
+		};
+
+		this.timer.postMsg<PostMessageDataResponsePowProtectorProgress>({
+			msg: 'syncPowProgress',
+			data
+		});
+	}
+
+	private postMessagePowNextAllowance({ nextAllowanceMs }: { nextAllowanceMs: bigint }) {
+		const data: PostMessageDataResponsePowProtectorNextAllowance = {
+			nextAllowanceMs
+		};
+
+		this.timer.postMsg<PostMessageDataResponsePowProtectorNextAllowance>({
+			msg: 'syncPowNextAllowance',
+			data
+		});
+	}
 }
