@@ -18,7 +18,7 @@ fi
 # - The URL is the one in .well-known/ic-domains, used by the Internet Computer.
 dfx_network_domains() {
   scripts/build.ic-domains.test.list | while read -r i; do
-    dfx build frontend --network "$i" >/dev/null 2>/dev/null && cat build/.well-known/ic-domains && echo " $i";
+    dfx build frontend --network "$i" >/dev/null 2>/dev/null && cat build/.well-known/ic-domains && echo " $i"
   done
 }
 
