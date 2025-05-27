@@ -18,10 +18,10 @@
 		children
 	}: Props = $props();
 
-	export type ListContext = {
+	export interface ListContext {
 		variant: ListVariant;
 		condensed?: boolean;
-	};
+	}
 
 	setContext<ListContext>('list-context', { variant, condensed });
 </script>
