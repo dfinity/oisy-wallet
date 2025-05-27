@@ -2,25 +2,31 @@
 	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { formatToken } from '$lib/utils/format.utils';
 
-	export let amount: bigint;
-	export let decimals: number;
-	export let symbol: string;
-	export let formatPositiveAmount = false;
+	interface Props {
+		amount: bigint;
+		decimals: number;
+		symbol: string;
+		formatPositiveAmount?: boolean;
+	}
 
-	let detailedValue: string;
-	$: detailedValue = formatToken({
-		value: amount,
-		unitName: decimals,
-		displayDecimals: decimals
-	});
+	let { amount, decimals, symbol, formatPositiveAmount = false }: Props = $props();
 
-	let displayValue: string;
-	$: displayValue = formatToken({
-		value: amount,
-		unitName: decimals,
-		displayDecimals: EIGHT_DECIMALS,
-		showPlusSign: formatPositiveAmount
-	});
+	const detailedValue = $derived(
+		formatToken({
+			value: amount,
+			unitName: decimals,
+			displayDecimals: decimals
+		})
+	);
+
+	const displayValue = $derived(
+		formatToken({
+			value: amount,
+			unitName: decimals,
+			displayDecimals: EIGHT_DECIMALS,
+			showPlusSign: formatPositiveAmount
+		})
+	);
 </script>
 
 <span class:text-success-primary={formatPositiveAmount && amount > ZERO}>
