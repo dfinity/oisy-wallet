@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import ReceiveQrCode from '$lib/components/receive/ReceiveQrCode.svelte';
 	import AddressBookQrCode from '$lib/components/address-book/AddressBookQrCode.svelte';
 	import AddressInfoCard from '$lib/components/address-book/AddressInfoCard.svelte';
+	import ReceiveQrCode from '$lib/components/receive/ReceiveQrCode.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
