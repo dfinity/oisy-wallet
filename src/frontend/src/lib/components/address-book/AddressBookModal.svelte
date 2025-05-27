@@ -1,24 +1,24 @@
 <script lang="ts">
-	import {WizardModal, type WizardStep, type WizardSteps} from '@dfinity/gix-components';
-	import {isNullish, nonNullish} from '@dfinity/utils';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
+	import DeleteContactConfirmBottomSheet from '$lib/components/address-book/DeleteContactConfirmBottomSheet.svelte';
+	import DeleteContactConfirmContent from '$lib/components/address-book/DeleteContactConfirmContent.svelte';
 	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import {ADDRESS_BOOK_MODAL} from '$lib/constants/test-ids.constants';
-	import {AddressBookSteps} from '$lib/enums/progress-steps';
-	import {i18n} from '$lib/stores/i18n.store';
-	import {modalStore} from '$lib/stores/modal.store';
-	import type {ContactAddressUi, ContactUi} from '$lib/types/contact';
-	import {goToWizardStep} from '$lib/utils/wizard-modal.utils';
-	import DeleteContactConfirmContent from "$lib/components/address-book/DeleteContactConfirmContent.svelte";
-	import {replacePlaceholders} from "$lib/utils/i18n.utils";
-	import DeleteContactConfirmBottomSheet from "$lib/components/address-book/DeleteContactConfirmBottomSheet.svelte";
+	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
+	import { AddressBookSteps } from '$lib/enums/progress-steps';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	const steps: WizardSteps = $derived([
 		{
@@ -113,9 +113,9 @@
 
 	const confirmDeleteContact = () => {
 		if (nonNullish(currentContact)) {
-			gotoStep(AddressBookSteps.DELETE_CONTACT)
+			gotoStep(AddressBookSteps.DELETE_CONTACT);
 		}
-	}
+	};
 
 	// TODO Use contact store and remove
 	const deleteContact = (id: bigint) => {
@@ -239,7 +239,9 @@
 					currentAddressIndex = undefined;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
-				onDeleteContact={() => {isDeletingContact = true}}
+				onDeleteContact={() => {
+					isDeletingContact = true;
+				}}
 				onDeleteAddress={(index) => {
 					currentAddressIndex = index;
 				}}
@@ -305,7 +307,9 @@
 		/>
 	{:else if currentStep?.name === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
 		<DeleteContactConfirmContent
-			onCancel={() => {gotoStep(AddressBookSteps.EDIT_CONTACT);}}
+			onCancel={() => {
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
+			}}
 			onDelete={deleteContact}
 			contact={currentContact}
 		/>
@@ -321,7 +325,9 @@
 	/>
 {:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact) && isDeletingContact}
 	<DeleteContactConfirmBottomSheet
-		onCancel={() => {isDeletingContact = false}}
+		onCancel={() => {
+			isDeletingContact = false;
+		}}
 		onDelete={() => {
 			isDeletingContact = false;
 			deleteContact(currentContact.id);
