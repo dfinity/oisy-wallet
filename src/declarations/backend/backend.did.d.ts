@@ -186,7 +186,7 @@ export interface ContactAddressData {
 	token_account_id: TokenAccountId;
 }
 export type ContactError =
-	| { InvalidContactData: string }
+	| { InvalidContactData: null }
 	| { ContactNotFound: null }
 	| { RandomnessError: null };
 export type CreateChallengeError =

@@ -44,6 +44,6 @@ pub struct UpdateContactRequest {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum ContactError {
     ContactNotFound,
-    InvalidContactData(String),
+    InvalidContactData,
     RandomnessError,
 }
