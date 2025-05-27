@@ -4,6 +4,7 @@ use shared::types::{
     contact::{Contact, ContactError, CreateContactRequest},
     user_profile::OisyUser,
 };
+use std::time::Duration;
 
 use crate::utils::{
     mock::CALLER,
@@ -241,6 +242,8 @@ fn test_update_contact_should_succeed_with_valid_data() {
         addresses: vec![], // Keep empty for simplicity
         update_timestamp_ns: created_contact.update_timestamp_ns, // Will be overwritten by service
     };
+
+    pic_setup.pic.advance_time(Duration::from_secs(5));
 
     // Update the contact
     let update_result = call_update_contact(&pic_setup, caller, updated_contact_data);
