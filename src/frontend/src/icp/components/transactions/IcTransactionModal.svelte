@@ -104,7 +104,7 @@
 
 		<List styleClass="mt-5">
 			{#if type === 'receive' && nonNullish(to)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.transaction.text.to}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: to })}</output>
@@ -122,7 +122,7 @@
 				</ListItem>
 			{/if}
 			{#if type === 'send' && nonNullish(from)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.transaction.text.from}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
@@ -141,20 +141,20 @@
 			{/if}
 
 			{#if nonNullish(timestamp)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>
 					<output>{formatNanosecondsToDate(timestamp)}</output>
 				</ListItem>
 			{/if}
 
 			{#if nonNullish(token)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.networks.network}</span>
 					<span><NetworkWithLogo network={token.network} logo="start" /></span>
 				</ListItem>
 			{/if}
 
-			<ListItem variant="styled">
+			<ListItem>
 				<span>{$i18n.transaction.text.id}</span>
 				<span>
 					<output>{id}</output>

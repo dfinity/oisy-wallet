@@ -125,7 +125,7 @@
 
 		<List styleClass="mt-5">
 			{#if type === 'receive' && nonNullish(to)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.transaction.text.to}</span>
 					<span class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: to })}</output>
@@ -143,7 +143,7 @@
 				</ListItem>
 			{/if}
 			{#if type === 'send' && nonNullish(from)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.transaction.text.from}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
@@ -162,7 +162,7 @@
 			{/if}
 
 			{#if nonNullish(hash)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.transaction.text.hash}</span>
 					<span>
 						<output>{shortenWithMiddleEllipsis({ text: hash })}</output>
@@ -187,20 +187,20 @@
 			{/if}
 
 			{#if nonNullish(blockNumber)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.transaction.text.block}</span>
 					<span>
 						<output>{blockNumber}</output>
 					</span>
 				</ListItem>
 
-				<ListItem variant="styled">
+				<ListItem>
 					<EthTransactionStatus {blockNumber} />
 				</ListItem>
 			{/if}
 
 			{#if nonNullish(timestamp)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>
 					<output>{formatSecondsToDate(timestamp)}</output>
 				</ListItem>
@@ -228,7 +228,7 @@
 			-->
 
 			{#if nonNullish(to) && nonNullish(toDisplay)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.transaction.text.interacted_with}</span>
 
 					<span class="flex max-w-[50%] flex-row break-all">
@@ -248,7 +248,7 @@
 			{/if}
 
 			{#if nonNullish(token)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.core.text.amount}</span>
 					<output>
 						{formatToken({

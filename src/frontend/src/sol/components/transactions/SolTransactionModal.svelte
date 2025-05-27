@@ -99,7 +99,7 @@
 
 		<List styleClass="mt-5">
 			{#if type === 'receive' && nonNullish(to)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.transaction.text.to}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: to })}</output>
@@ -117,7 +117,7 @@
 				</ListItem>
 			{/if}
 			{#if type === 'send' && nonNullish(from)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.transaction.text.from}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
@@ -136,7 +136,7 @@
 			{/if}
 
 			{#if nonNullish(id)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>
 						{$i18n.transaction.text.hash}
 					</span>
@@ -164,7 +164,7 @@
 			{/if}
 
 			{#if nonNullish(blockNumber)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>
 						{$i18n.transaction.text.block}
 					</span>
@@ -174,7 +174,7 @@
 			{/if}
 
 			{#if nonNullish(status)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>
 						{$i18n.transaction.text.status}
 					</span>
@@ -185,7 +185,7 @@
 			{/if}
 
 			{#if nonNullish(timestamp)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>
 						{$i18n.transaction.text.timestamp}
 					</span>
@@ -195,7 +195,7 @@
 			{/if}
 
 			{#if nonNullish(value) && nonNullish(token)}
-				<ListItem variant="styled">
+				<ListItem>
 					<span>{$i18n.core.text.amount}</span>
 
 					<output>
