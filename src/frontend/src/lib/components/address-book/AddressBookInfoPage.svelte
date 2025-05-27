@@ -21,8 +21,9 @@
 
 <ContentWithToolbar styleClass="mb-10 flex flex-col items-stretch">
 	{#if nonNullish(address)}
-	    <AddressBookQrCode {address} />
-		
+		<!-- TODO: Change it with ReceivedQRCode. -->
+		<AddressBookQrCode {address} />
+
 		<AddressInfoCard {address} />
 	{:else}
 		<!-- Display a fallback message if no address is available. 
