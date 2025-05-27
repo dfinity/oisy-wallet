@@ -76,7 +76,7 @@
 		"@dfinity/verifiable-credentials": "^0.0.4",
 		"@dfinity/zod-schemas": "^0.0.2",
 		"@metamask/detect-provider": "^2.0.0",
-		"@reown/walletkit": "^1.2.2",
+		"@reown/walletkit": "^1.2.5",
 		"@solana-program/compute-budget": "^0.7.0",
 		"@solana-program/system": "^0.7.0",
 		"@solana-program/token": "^0.5.1",
