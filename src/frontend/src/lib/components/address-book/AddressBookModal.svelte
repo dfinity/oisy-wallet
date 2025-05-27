@@ -254,7 +254,7 @@
 	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
 		<DeleteAddressConfirmStep
 			onCancel={() => gotoStep(AddressBookSteps.EDIT_CONTACT)}
-			onDelete={() => deleteAddress(currentAddressIndex)}
+			onDelete={() => nonNullish(currentAddressIndex) && deleteAddress(currentAddressIndex)}
 			address={currentContact.addresses[currentAddressIndex]}
 			contact={currentContact}
 		/>
