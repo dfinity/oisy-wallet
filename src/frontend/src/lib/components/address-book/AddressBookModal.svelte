@@ -272,7 +272,7 @@
 			isNewAddress={isNullish(currentAddressIndex)}
 			onClose={() => {
 				currentAddressIndex = undefined;
-				gotoStep(AddressBookSteps.SHOW_CONTACT)
+				handleClose();
 			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
