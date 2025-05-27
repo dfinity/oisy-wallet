@@ -510,11 +510,15 @@ impl Validate for ContactAddressData {
 
 impl Validate for CreateContactRequest {
     fn validate(&self) -> Result<(), Error> {
-        // Validate that the name is not an empty string
+        // Validate that string length is not greater than the max allowed
         validate_string_not_empty(&self.name, "CreateContactRequest.name")?;
 
-        // Validate name length
-        validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
+        // Validate that the name is not an empty string
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "CreateContactRequest.name",
+        )?;
 
         Ok(())
     }
@@ -522,13 +526,22 @@ impl Validate for CreateContactRequest {
 
 impl Validate for UpdateContactRequest {
     fn validate(&self) -> Result<(), Error> {
-        // Validate name length
-        validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
+        // Validate that string length is not greater than the max allowed
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "UpdateContactRequest.name",
+        )?;
 
+        // Validate that the name is not an empty string
         validate_string_not_empty(&self.name, "UpdateContactRequest.name")?;
 
-        // Validate number of addresses
-        validate_collection_size(&self.addresses, CONTACT_MAX_ADDRESSES, "Contact.addresses")?;
+        // Validate that the number of addresses is not greater than the max allowed
+        validate_collection_size(
+            &self.addresses,
+            CONTACT_MAX_ADDRESSES,
+            "UpdateContactRequest.addresses",
+        )?;
 
         Ok(())
     }
