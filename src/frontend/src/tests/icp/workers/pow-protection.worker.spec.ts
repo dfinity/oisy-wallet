@@ -185,20 +185,40 @@ describe('pow-protector.worker', () => {
 				it('should post messages for status updates', async () => {
 					await scheduler.start(startData);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(2);
-					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageStatusIdle);
+					// For each execution cycle, we expect:
+					// 1. 'syncPowProtectionStatus' with state 'in_progress' from SchedulerTimer
+					// 2. 'syncPowProgress' with progress 'REQUEST_CHALLENGE'
+					// 3. 'syncPowProgress' with progress 'SOLVE_CHALLENGE'
+					// 4. 'syncPowProgress' with progress 'GRANT_CYCLES'
+					// 5. 'syncPowNextAllowance' with nextAllowanceMs value
+					// 6. 'syncPowProtectionStatus' with state 'idle' from SchedulerTimer
 
-					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
-
-					expect(postMessageMock).toHaveBeenCalledTimes(4);
-					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
-
-					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
-
+					// Verify the first round of messages
 					expect(postMessageMock).toHaveBeenCalledTimes(6);
-					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
+
+					// First two calls should be status updates
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+
+					// Reset mock to simplify subsequent tests
+					postMessageMock.mockClear();
+
+					// Advance timer to trigger next cycle
+					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
+
+					// Second round of messages should have same pattern
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+
+					postMessageMock.mockClear();
+
+					// Advance timer to trigger third cycle
+					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
+
+					// Third round of messages should have same pattern
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
 				});
 			}
