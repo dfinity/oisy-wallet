@@ -38,19 +38,19 @@
 	<IconAddressType addressType={address.addressType} size="32" />
 
 	<div class="text-xs md:text-sm">
-			<div class="flex items-center gap-1 text-tertiary">
-				<span class="pr-1 text-sm font-bold text-primary md:text-base">
-					{$i18n.address.types[address.addressType]}
-				</span>
-			</div>
+		<div class="flex items-center gap-1 text-tertiary">
+			<span class="pr-1 text-sm font-bold text-primary md:text-base">
+				{$i18n.address.types[address.addressType]}
+			</span>
+		</div>
 
 		<div class="text-xs md:text-sm">
-				<div class="flex items-center gap-1 text-tertiary">
-					{#if notEmptyString(address.label)}
-						<span class="font-bold">{address.label}</span>
-						<span class="text-[0.5rem]">•</span>
-					{/if}
-				</div>
+			<div class="flex items-center gap-1 text-tertiary">
+				{#if notEmptyString(address.label)}
+					<span class="font-bold">{address.label}</span>
+					<span class="text-[0.5rem]">•</span>
+				{/if}
+			</div>
 			<div class="flex items-center gap-1 break-all text-sm">
 				<span>{displayAddress}</span>
 			</div>
