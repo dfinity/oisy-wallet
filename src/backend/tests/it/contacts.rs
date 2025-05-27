@@ -28,7 +28,7 @@ pub fn call_get_contacts(pic_setup: &PicBackend, caller: Principal) -> Vec<Conta
         pic_setup.query::<Result<Vec<Contact>, ContactError>>(caller, "get_contacts", ());
     wrapped_result
         .expect("that get_contacts succeeds")
-        .expect("affe")
+        .expect("that the result is not empty")
 }
 pub fn call_get_contact(
     pic_setup: &PicBackend,
@@ -120,7 +120,7 @@ fn test_get_contact_should_fail_with_nonexistent_id() {
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
     // Try to get a contact with a non-existent ID
-    let nonexistent_id = 999999;
+    let nonexistent_id = 999_999;
     let result = call_get_contact(&pic_setup, caller, nonexistent_id);
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
