@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { BtcTransactionStatus, BtcTransactionUi } from '$btc/types/btc';
-	import type { BtcTransactionType } from '$btc/types/btc-transaction';
+	import type { BtcTransactionUi } from '$btc/types/btc';
 	import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -23,34 +22,31 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
 
-	export let transaction: BtcTransactionUi;
-	export let token: OptionToken;
+	interface Props {
+		transaction: BtcTransactionUi;
+		token: OptionToken;
+	}
 
-	let from: string;
-	let to: string[] | undefined;
-	let type: BtcTransactionType;
-	let value: bigint | undefined;
-	let timestamp: bigint | undefined;
-	let id: string;
-	let blockNumber: number | undefined;
-	let confirmations: number | undefined;
-	let status: BtcTransactionStatus;
+	const { transaction, token }: Props = $props();
 
-	let explorerUrl: string | undefined;
-	$: explorerUrl = isNetworkIdBTCTestnet(token?.network.id)
-		? BTC_TESTNET_EXPLORER_URL
-		: isNetworkIdBTCRegtest(token?.network.id)
-			? undefined
-			: BTC_MAINNET_EXPLORER_URL;
+	let { from, value, timestamp, id, blockNumber, to, type, status, confirmations } =
+		$derived(transaction);
 
-	$: ({ from, value, timestamp, id, blockNumber, to, type, status, confirmations } = transaction);
+	let explorerUrl: string | undefined = $derived(
+		isNetworkIdBTCTestnet(token?.network.id)
+			? BTC_TESTNET_EXPLORER_URL
+			: isNetworkIdBTCRegtest(token?.network.id)
+				? undefined
+				: BTC_MAINNET_EXPLORER_URL
+	);
 
-	let txExplorerUrl: string | undefined;
-	$: txExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/tx/${id}` : undefined;
+	let txExplorerUrl: string | undefined = $derived(
+		nonNullish(explorerUrl) ? `${explorerUrl}/tx/${id}` : undefined
+	);
 
-	let fromExplorerUrl: string | undefined;
-	$: fromExplorerUrl =
-		nonNullish(explorerUrl) && nonNullish(from) ? `${explorerUrl}/address/${from}` : undefined;
+	let fromExplorerUrl: string | undefined = $derived(
+		nonNullish(explorerUrl) && nonNullish(from) ? `${explorerUrl}/address/${from}` : undefined
+	);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -60,9 +56,7 @@
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
-					<div class="relative block flex">
-						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
-					</div>
+					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
