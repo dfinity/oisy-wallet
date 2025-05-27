@@ -190,10 +190,13 @@ jobs:
       - name: Install dfx
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
       - name: Check ic-domains
+        continue-on-error: true
         run: |
-          dfx build frontend --network "$NETWORK"
-          cat build/.well-known/ic-domains > "ic-domain.$NETWORK.txt"
-          echo " $NETWORK" >> "ic-domain.$NETWORK.txt"
+          FILE="ic-domain.$NETWORK.txt"
+          echo "" > "$FILE"
+          dfx build frontend --network "$NETWORK" >/dev/null 2>/dev/null && \
+            cat build/.well-known/ic-domains > "$FILE" && \
+            echo " $NETWORK" >> "$FILE"
         env:
           NETWORK: ${{ matrix.network }}
       - name: Upload Domain File

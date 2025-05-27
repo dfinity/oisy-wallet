@@ -14,19 +14,12 @@ if [[ "${1:-}" == "--help" ]]; then
   exit 0
 fi
 
-# Prints all known dfx networks:
-# - Built-in networks (local & ic)
-# - Networks listed in dfx.json
-dfx_networks() {
-  echo ic
-  echo local
-  jq -r '.networks|keys[]' dfx.json
-}
-
 # Prints the Oisy domain name for every network.
 # - The URL is the one in .well-known/ic-domains, used by the Internet Computer.
 dfx_network_domains() {
-  scripts/build.ic-domains.test.list | while read -r i; do dfx build frontend --network "$i" >/dev/null 2>/dev/null && cat build/.well-known/ic-domains && echo " $i"; done
+  scripts/build.ic-domains.test.list | while read -r i; do
+    dfx build frontend --network "$i" >/dev/null 2>/dev/null && cat build/.well-known/ic-domains && echo " $i";
+  done
 }
 
 (
