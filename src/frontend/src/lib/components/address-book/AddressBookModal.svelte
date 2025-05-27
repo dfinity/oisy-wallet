@@ -20,23 +20,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	let currentStep: WizardStep | undefined = $state();
-	let modal: WizardModal | undefined = $state();
-	const close = () => modalStore.close();
-
-	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
-	let previousStepName = $state<AddressBookSteps | undefined>();
-	let editContactNameStep = $state<EditContactNameStep>();
-
-	let isDeletingContact = $state<boolean>(false);
-
-	// TODO Use contact store and remove
-	let contacts: ContactUi[] = $state([]);
-	// TODO Use contact store and remove
-	let currentContact: ContactUi | undefined = $state();
-	// TODO Use contact store and remove
-	let currentAddressIndex: number | undefined = $state();
-
+	// TODO find out how to set dynamic title
 	const steps: WizardSteps = [
 		{
 			name: AddressBookSteps.ADDRESS_BOOK,
@@ -74,6 +58,23 @@
 			title: $i18n.address.delete.title
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
+
+	let currentStep: WizardStep | undefined = $state();
+	let modal: WizardModal | undefined = $state();
+	const close = () => modalStore.close();
+
+	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
+	let previousStepName = $state<AddressBookSteps | undefined>();
+	let editContactNameStep = $state<EditContactNameStep>();
+
+	let isDeletingContact = $state<boolean>(false);
+
+	// TODO Use contact store and remove
+	let contacts: ContactUi[] = $state([]);
+	// TODO Use contact store and remove
+	let currentContact: ContactUi | undefined = $state();
+	// TODO Use contact store and remove
+	let currentAddressIndex: number | undefined = $state();
 
 	const handleClose = () => {
 		if (nonNullish(previousStepName)) {
