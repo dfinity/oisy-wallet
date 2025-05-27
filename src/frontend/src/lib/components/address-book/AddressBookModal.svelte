@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import {WizardModal, type WizardStep, type WizardSteps} from '@dfinity/gix-components';
+	import {isNullish, nonNullish} from '@dfinity/utils';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
-	import { AddressBookSteps } from '$lib/enums/progress-steps';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
-	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import {ADDRESS_BOOK_MODAL} from '$lib/constants/test-ids.constants';
+	import {AddressBookSteps} from '$lib/enums/progress-steps';
+	import {i18n} from '$lib/stores/i18n.store';
+	import {modalStore} from '$lib/stores/modal.store';
+	import type {ContactAddressUi, ContactUi} from '$lib/types/contact';
+	import {goToWizardStep} from '$lib/utils/wizard-modal.utils';
+	import DeleteAddressConfirmStep from "$lib/components/address-book/DeleteAddressConfirmStep.svelte";
 
 	const steps: WizardSteps = [
 		{
@@ -41,6 +42,10 @@
 			name: AddressBookSteps.EDIT_ADDRESS,
 			// TODO: Add i18n
 			title: 'Edit address'
+		},
+		{
+			name: AddressBookSteps.DELETE_ADDRESS,
+			title: $i18n.address.delete.title
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
@@ -96,7 +101,6 @@
 	const saveContact = (contact: ContactUi) => {
 		const index = contacts.findIndex((c) => contact.id === c.id);
 		contacts[index] = contact;
-		gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
 
 	// TODO Use contact store and remove
@@ -133,6 +137,13 @@
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
+	const confirmDeleteAddress = (index: number) => {
+		if (nonNullish(currentContact)) {
+			currentAddressIndex = index;
+			gotoStep(AddressBookSteps.DELETE_ADDRESS);
+		}
+	}
+
 	// TODO Use contact store and remove
 	const deleteAddress = (index: number) => {
 		if (nonNullish(currentContact)) {
@@ -141,8 +152,9 @@
 				...currentContact,
 				addresses
 			};
+			currentAddressIndex = undefined;
 			saveContact(currentContact);
-			gotoStep(AddressBookSteps.SHOW_CONTACT);
+			gotoStep(AddressBookSteps.EDIT_CONTACT);
 		}
 	};
 </script>
@@ -212,7 +224,7 @@
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
 			onDeleteContact={deleteContact}
-			onDeleteAddress={deleteAddress}
+			onDeleteAddress={confirmDeleteAddress}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
 		<EditContactNameStep
@@ -238,6 +250,13 @@
 			onAddAddress={addAddress}
 			isNewAddress={isNullish(currentAddressIndex)}
 			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
+		<DeleteAddressConfirmStep
+			onCancel={() => gotoStep(AddressBookSteps.EDIT_CONTACT)}
+			onDelete={() => deleteAddress(currentAddressIndex)}
+			address={currentContact.addresses[currentAddressIndex]}
+			contact={currentContact}
 		/>
 	{/if}
 </WizardModal>

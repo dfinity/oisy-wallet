@@ -1075,6 +1075,11 @@
 		"form": {
 			"invalid_address": "Invalid address",
 			"valid_for_networks": "Valid for networks:"
+		},
+		"delete": {
+			"title": "Delete address?",
+			"delete_address": "Delete address",
+			"content_text": "This will delete <strong>$address</strong> address from $contact's contact.<br>This action cannot be undone."
 		}
 	},
 	"signer": {
