@@ -18,7 +18,7 @@
 
 <div class="fixed inset-0 z-50">
 	<BottomSheet transition>
-		<div class="flex flex-col w-full">
+		<div class="flex w-full flex-col">
 			<div class="w-full p-4">
 				<ButtonIcon
 					onclick={onCancel}
