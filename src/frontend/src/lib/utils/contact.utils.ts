@@ -1,11 +1,15 @@
 import type { Contact } from '$declarations/backend/backend.did';
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
-import type { ContactUi } from '$lib/types/contact';
+import type { Address } from '$lib/types/address';
+import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import type { NonEmptyArray } from '$lib/types/utils';
+import { isEthAddress } from '$lib/utils/account.utils';
+import { isBtcAddress } from '$lib/utils/address.utils';
 import {
 	getAddressString,
 	getDiscriminatorForTokenAccountId
 } from '$lib/utils/token-account-id.utils';
+import { isSolAddress } from '$sol/utils/sol-address.utils';
 import { fromNullable, isEmptyString, toNullable } from '@dfinity/utils';
 
 export const selectColorForName = <T>({
@@ -63,3 +67,14 @@ export const getContactForAddress = ({
 	contactList.find((c) =>
 		c.addresses.find((address) => address.address.toLowerCase() === addressString.toLowerCase())
 	);
+
+export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi => ({
+	address,
+	addressType: isBtcAddress({ address })
+		? 'Btc'
+		: isSolAddress(address)
+			? 'Sol'
+			: isEthAddress(address)
+				? 'Eth'
+				: 'Icrcv2'
+});
