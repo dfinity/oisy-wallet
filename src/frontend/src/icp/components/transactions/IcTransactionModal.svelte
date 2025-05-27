@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -20,21 +20,15 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 
-	export let transaction: IcTransactionUi;
-	export let token: OptionToken;
+	interface Props {
+		transaction: IcTransactionUi;
+		token: OptionToken;
+	}
 
-	let id: bigint | string;
-	let from: string | undefined;
-	let to: string | undefined;
-	let value: bigint | undefined;
-	let timestamp: bigint | undefined;
-	let type: IcTransactionType;
-	let txExplorerUrl: string | undefined;
-	let fromExplorerUrl: string | undefined;
-	let toExplorerUrl: string | undefined;
+	const { transaction, token }: Props = $props();
 
-	$: ({ id, from, to, value, timestamp, type, txExplorerUrl, fromExplorerUrl, toExplorerUrl } =
-		transaction);
+	let { id, from, to, value, timestamp, type, txExplorerUrl, fromExplorerUrl, toExplorerUrl } =
+		$derived(transaction);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -44,9 +38,7 @@
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
-					<div class="relative block flex">
-						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
-					</div>
+					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
