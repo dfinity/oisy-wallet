@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+# Prints all known dfx networks:
+# - Built-in networks (local & ic)
+# - Networks listed in dfx.json
+echo ic
+# echo local - Already listed in dfx.json
+jq -r '.networks|keys[]' dfx.json
