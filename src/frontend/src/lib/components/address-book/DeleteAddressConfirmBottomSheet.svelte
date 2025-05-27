@@ -4,12 +4,13 @@
     import IconClose from "$lib/components/icons/lucide/IconClose.svelte";
     import ButtonIcon from "$lib/components/ui/ButtonIcon.svelte";
     import {i18n} from "$lib/stores/i18n.store";
+    import type {ContactAddressUi, ContactUi} from "$lib/types/contact";
 
     interface Props {
         onCancel: () => void;
         onDelete: () => void;
-        address: string;
-        contact: Contact;
+        address: ContactAddressUi;
+        contact: ContactUi;
     }
 
     let {onCancel, onDelete, address, contact}: Props = $props();
