@@ -56,7 +56,7 @@
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
-					<div class="relative block flex">
+					<div class="relative flex">
 						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
 					</div>
 				{/if}
