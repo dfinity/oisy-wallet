@@ -58,11 +58,8 @@
 	let currentAddressIndex: number | undefined = $state();
 
 	const handleClose = () => {
-		if (
-			currentStepName === AddressBookSteps.SHOW_ADDRESS &&
-			previousStepName === AddressBookSteps.SHOW_CONTACT
-		) {
-			return gotoStep(AddressBookSteps.SHOW_CONTACT);
+		if (nonNullish(previousStepName)) {
+			return gotoStep(previousStepName);
 		}
 		return gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
@@ -177,7 +174,7 @@
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
 		<ShowContactStep
-			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			onClose={handleClose}
 			contact={currentContact}
 			onEdit={(contact) => {
 				currentContact = contact;
@@ -195,7 +192,7 @@
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact)}
 		<EditContactStep
 			contact={currentContact}
-			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+			onClose={handleClose}
 			onEdit={(contact) => {
 				currentContact = contact;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
@@ -234,7 +231,7 @@
 			onSaveAddress={saveAddress}
 			onAddAddress={addAddress}
 			isNewAddress={isNullish(currentAddressIndex)}
-			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+			onClose={handleClose}
 		/>
 	{/if}
 </WizardModal>
