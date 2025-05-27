@@ -977,6 +977,7 @@ interface I18nContact {
 interface I18nAddress {
 	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
 	form: {
+		new_address: string;
 		address_placeholder: string;
 		label_placeholder: string;
 		invalid_address: string;

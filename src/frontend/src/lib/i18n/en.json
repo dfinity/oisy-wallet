@@ -1074,6 +1074,7 @@
 			"Sol": "Solana"
 		},
 		"form": {
+			"new_address": "New address",
 			"address_placeholder": "Enter or paste address",
 			"label_placeholder": "E.g., “Mom’s wallet“",
 			"invalid_address": "Invalid address",
