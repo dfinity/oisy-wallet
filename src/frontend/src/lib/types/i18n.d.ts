@@ -435,9 +435,12 @@ interface I18nSend {
 		select_token: string;
 		select_network_filter: string;
 		send_again: string;
-		recently_used: string;
+		recently_used_tab: string;
+		contacts_tab: string;
 		recently_used_empty_state_title: string;
 		recently_used_empty_state_description: string;
+		contacts_empty_state_title: string;
+		contacts_empty_state_description: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -985,6 +988,7 @@ interface I18nAddress {
 		valid_for_networks: string;
 	};
 	fields: { label: string; address: string };
+	delete: { title: string; delete_address: string; content_text: string };
 }
 
 interface I18nSigner {
