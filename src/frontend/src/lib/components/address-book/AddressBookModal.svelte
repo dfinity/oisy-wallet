@@ -28,8 +28,7 @@
 		},
 		{
 			name: AddressBookSteps.EDIT_CONTACT,
-			// TODO: Add i18n
-			title: 'Edit Contact'
+			title: $i18n.address_book.edit_contact.title
 		},
 		{
 			name: AddressBookSteps.EDIT_CONTACT_NAME,
@@ -37,18 +36,17 @@
 		},
 		{
 			name: AddressBookSteps.SHOW_ADDRESS,
-			// TODO: Add i18n
-			title: 'Show address'
+			// The title will be replaced with the name. No title is needed here.
+			title: ''
 		},
 		{
 			name: AddressBookSteps.EDIT_ADDRESS,
-			// TODO: Add i18n
-			title: 'Edit address'
+			title: $i18n.address_book.edit_contact.title
 		},
-		{
-			name: AddressBookSteps.DELETE_ADDRESS,
-			title: $i18n.address.delete.title
-		}
+        {
+            name: AddressBookSteps.DELETE_ADDRESS,
+            title: $i18n.address.delete.title
+        }
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
 	let currentStep: WizardStep | undefined = $state();
@@ -193,7 +191,6 @@
 			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
-		<!-- TODO Remove ! from currentContact -->
 		<ShowContactStep
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 			contact={currentContact}
