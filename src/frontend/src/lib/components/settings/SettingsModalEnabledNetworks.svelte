@@ -108,9 +108,9 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="flex w-full flex-row justify-between">
+	<div class="flex w-full justify-between">
 		<h5 class="mb-4 flex">{$i18n.settings.text.networks}</h5>
-		<div class="font-bold">
+		<div class="flex font-bold">
 			<Checkbox
 				testId={SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX}
 				text="inline"
@@ -126,7 +126,7 @@
 	<List variant="styled" condensed={false} styleClass="mb-8">
 		{#each SUPPORTED_MAINNET_NETWORKS as network (network.id)}
 			<ListItem>
-				<span class="flex flex-row">
+				<span class="flex">
 					<NetworkLogo {network} size="xxs" />
 					<span class="ml-2 flex">{network.name}</span>
 				</span>
@@ -141,17 +141,14 @@
 	</List>
 
 	{#if enabledTestnet}
-		<div
-			class="flex w-full flex-row justify-between"
-			data-tid={SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER}
-		>
-			<h5 class="mb-4 flex">{$i18n.networks.test_networks}</h5>
+		<div class="w-full justify-between" data-tid={SETTINGS_NETWORKS_MODAL_TESTNETS_CONTAINER}>
+			<h5 class="mb-4">{$i18n.networks.test_networks}</h5>
 		</div>
 
 		<List variant="styled" condensed={false}>
 			{#each SUPPORTED_TESTNET_NETWORKS as network (network.id)}
 				<ListItem>
-					<span class="flex flex-row">
+					<span class="flex">
 						<NetworkLogo {network} size="xxs" />
 						<span class="ml-2 flex">{network.name}</span>
 					</span>
