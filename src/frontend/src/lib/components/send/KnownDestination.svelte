@@ -2,10 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
-	import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
+	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/address';
@@ -35,7 +34,7 @@
 
 <LogoButton styleClass="group" onClick={() => dispatch('click')}>
 	{#snippet logo()}
-		<div class="mr-2"><RoundedIcon icon={IconConvertTo} /></div>
+		<div class="mr-2"><AvatarWithBadge address={destination} variant="sm" /></div>
 	{/snippet}
 
 	{#snippet title()}
