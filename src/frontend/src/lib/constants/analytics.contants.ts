@@ -62,3 +62,11 @@ export const TRACK_COUNT_SWAP_ERROR = 'swap_error_count';
 export const TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS = 'manage_tokens_enable_success_count';
 export const TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS = 'manage_tokens_disable_success_count';
 export const TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR = 'manage_tokens_save_error_count';
+
+// Contacts
+export const TRACK_CONTACT_CREATE_SUCCESS = 'contact_create_success_count';
+export const TRACK_CONTACT_CREATE_ERROR = 'contact_create_error_count';
+export const TRACK_CONTACT_UPDATE_SUCCESS = 'contact_update_success_count';
+export const TRACK_CONTACT_UPDATE_ERROR = 'contact_update_error_count';
+export const TRACK_CONTACT_DELETE_SUCCESS = 'contact_delete_success_count';
+export const TRACK_CONTACT_DELETE_ERROR = 'contact_delete_error_count';
