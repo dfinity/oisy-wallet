@@ -134,33 +134,33 @@
 
 		<List styleClass="mt-5">
 			{#if type === 'receive' && nonNullish(from) && nonNullish(fromAddress) && from !== fromAddress}
-					<ListItem>
-						<span>{$i18n.transaction.text.from_ata}</span>
-						<output class="flex max-w-[50%] flex-row">
-							<output>{shortenWithMiddleEllipsis({ text: fromAddress })}</output>
+				<ListItem>
+					<span>{$i18n.transaction.text.from_ata}</span>
+					<output class="flex max-w-[50%] flex-row">
+						<output>{shortenWithMiddleEllipsis({ text: fromAddress })}</output>
 
-							<TransactionAddressActions
-								copyAddress={fromAddress}
-								copyAddressText={$i18n.transaction.text.from_ata_copied}
-								explorerUrl={fromExplorerUrl}
-								explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
-							/>
-						</output>
-					</ListItem>
+						<TransactionAddressActions
+							copyAddress={fromAddress}
+							copyAddressText={$i18n.transaction.text.from_ata_copied}
+							explorerUrl={fromExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+						/>
+					</output>
+				</ListItem>
 			{/if}
 			{#if type === 'send' && nonNullish(to) && nonNullish(toAddress) && to !== toAddress}
-					<ListItem >
-						<span>{$i18n.transaction.text.to_ata}</span>
-						<output class="flex max-w-[50%] flex-row">
-							<output>{shortenWithMiddleEllipsis({ text: toAddress })}</output>
-							<TransactionAddressActions
-								copyAddress={toAddress}
-								copyAddressText={$i18n.transaction.text.to_ata_copied}
-								explorerUrl={toExplorerUrl}
-								explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
-							/>
-						</output>
-					</ListItem>
+				<ListItem>
+					<span>{$i18n.transaction.text.to_ata}</span>
+					<output class="flex max-w-[50%] flex-row">
+						<output>{shortenWithMiddleEllipsis({ text: toAddress })}</output>
+						<TransactionAddressActions
+							copyAddress={toAddress}
+							copyAddressText={$i18n.transaction.text.to_ata_copied}
+							explorerUrl={toExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
+						/>
+					</output>
+				</ListItem>
 			{/if}
 
 			{#if nonNullish(id)}
