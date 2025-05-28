@@ -368,7 +368,7 @@ abstract class Homepage {
 		const urlRegex = new RegExp(`${expectedPath}(\\?.*|#.*|$)`);
 		await this.#page.waitForURL(urlRegex);
 
-		await new Promise(resolve => setTimeout(resolve, 1000));
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 	}
 
 	private async toggleAllTestnets(): Promise<void> {
