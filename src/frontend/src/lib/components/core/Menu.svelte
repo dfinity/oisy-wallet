@@ -117,7 +117,7 @@
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.address_book}
 				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
-				onclick={() => modalStore.openAddressBook(addressModalId)}
+				onclick={() => modalStore.openAddressBook({ id: addressModalId })}
 			>
 				<IconUserSquare size="20" />
 				{$i18n.navigation.text.address_book}

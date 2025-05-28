@@ -4,6 +4,7 @@ import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
+import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { VipRewardStateData } from '$lib/types/reward';
@@ -113,7 +114,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAboutWhyOisy: (id: symbol) => void;
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
 	openReferralCode: (id: symbol) => void;
-	openAddressBook: (id: symbol) => void;
+	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
 	openReferralState: (id: symbol) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
@@ -183,7 +184,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: <(params: SetWithDataParams<QrCodeType>) => void>setTypeWithData('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
-		openAddressBook: setType('address-book'),
+		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
+			setTypeWithData('address-book')
+		),
 		openReferralState: setType('referral-state'),
 		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
 			setTypeWithData('dapp-details')
