@@ -2,11 +2,14 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
+	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
 	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -25,8 +28,7 @@
 		},
 		{
 			name: AddressBookSteps.EDIT_CONTACT,
-			// TODO: Add i18n
-			title: 'Edit Contact'
+			title: $i18n.address_book.edit_contact.title
 		},
 		{
 			name: AddressBookSteps.EDIT_CONTACT_NAME,
@@ -34,13 +36,16 @@
 		},
 		{
 			name: AddressBookSteps.SHOW_ADDRESS,
-			// TODO: Add i18n
-			title: 'Show address'
+			// The title will be replaced with the name. No title is needed here.
+			title: ''
 		},
 		{
 			name: AddressBookSteps.EDIT_ADDRESS,
-			// TODO: Add i18n
-			title: 'Edit address'
+			title: $i18n.address_book.edit_contact.title
+		},
+		{
+			name: AddressBookSteps.DELETE_ADDRESS,
+			title: $i18n.address.delete.title
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
@@ -49,6 +54,7 @@
 	const close = () => modalStore.close();
 
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
+	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
 
 	// TODO Use contact store and remove
@@ -58,8 +64,16 @@
 	// TODO Use contact store and remove
 	let currentAddressIndex: number | undefined = $state();
 
+	const handleClose = () => {
+		if (nonNullish(previousStepName)) {
+			return gotoStep(previousStepName);
+		}
+		return gotoStep(AddressBookSteps.ADDRESS_BOOK);
+	};
+
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
+			previousStepName = currentStepName;
 			goToWizardStep({
 				modal,
 				steps,
@@ -84,7 +98,6 @@
 	const saveContact = (contact: ContactUi) => {
 		const index = contacts.findIndex((c) => contact.id === c.id);
 		contacts[index] = contact;
-		gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
 
 	// TODO Use contact store and remove
@@ -118,7 +131,15 @@
 
 		const { addresses } = currentContact;
 		addresses[currentAddressIndex] = { ...address };
+		currentAddressIndex = undefined;
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
+	};
+
+	const confirmDeleteAddress = (index: number) => {
+		if (nonNullish(currentContact)) {
+			currentAddressIndex = index;
+			gotoStep(AddressBookSteps.DELETE_ADDRESS);
+		}
 	};
 
 	// TODO Use contact store and remove
@@ -129,8 +150,9 @@
 				...currentContact,
 				addresses
 			};
+			currentAddressIndex = undefined;
 			saveContact(currentContact);
-			gotoStep(AddressBookSteps.SHOW_CONTACT);
+			gotoStep(AddressBookSteps.EDIT_CONTACT);
 		}
 	};
 </script>
@@ -159,11 +181,15 @@
 				currentContact = undefined;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
+			onShowAddress={({ contact, addressIndex }) => {
+				currentContact = contact;
+				currentAddressIndex = addressIndex;
+				gotoStep(AddressBookSteps.SHOW_ADDRESS);
+			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
-		<!-- TODO Remove ! from currentContact -->
 		<ShowContactStep
-			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			onClose={handleClose}
 			contact={currentContact}
 			onEdit={(contact) => {
 				currentContact = contact;
@@ -179,24 +205,49 @@
 			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact)}
-		<EditContactStep
-			contact={currentContact}
-			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
-			onEdit={(contact) => {
-				currentContact = contact;
-				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
-			}}
-			onEditAddress={(index: number) => {
-				currentAddressIndex = index;
-				gotoStep(AddressBookSteps.EDIT_ADDRESS);
-			}}
-			onAddAddress={() => {
-				currentAddressIndex = undefined;
-				gotoStep(AddressBookSteps.EDIT_ADDRESS);
-			}}
-			onDeleteContact={deleteContact}
-			onDeleteAddress={deleteAddress}
-		/>
+		<!-- TODO find a better way to render EditContactStep with different onDeleteAddress functions -->
+		<Responsive down="sm">
+			<EditContactStep
+				contact={currentContact}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+				onEdit={(contact) => {
+					currentContact = contact;
+					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				}}
+				onEditAddress={(index: number) => {
+					currentAddressIndex = index;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onAddAddress={() => {
+					currentAddressIndex = undefined;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onDeleteContact={deleteContact}
+				onDeleteAddress={(index) => {
+					currentAddressIndex = index;
+				}}
+			/>
+		</Responsive>
+		<Responsive up="md">
+			<EditContactStep
+				contact={currentContact}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+				onEdit={(contact) => {
+					currentContact = contact;
+					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				}}
+				onEditAddress={(index: number) => {
+					currentAddressIndex = index;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onAddAddress={() => {
+					currentAddressIndex = undefined;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onDeleteContact={deleteContact}
+				onDeleteAddress={confirmDeleteAddress}
+			/>
+		</Responsive>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
 		<EditContactNameStep
 			bind:this={editContactNameStep}
@@ -210,11 +261,7 @@
 		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
 		{JSON.stringify(currentContact?.addresses[currentAddressIndex])}
 		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
-		<Button
-			on:click={() => {
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
-			}}>BACK</Button
-		>
+		<Button on:click={() => handleClose()}>BACK</Button>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep
 			contact={currentContact}
@@ -224,7 +271,29 @@
 			onSaveAddress={saveAddress}
 			onAddAddress={addAddress}
 			isNewAddress={isNullish(currentAddressIndex)}
-			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+			onClose={() => {
+				currentAddressIndex = undefined;
+				handleClose();
+			}}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
+		<DeleteAddressConfirmContent
+			onCancel={() => {
+				currentAddressIndex = undefined;
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
+			}}
+			onDelete={() => nonNullish(currentAddressIndex) && deleteAddress(currentAddressIndex)}
+			address={currentContact.addresses[currentAddressIndex]}
+			contact={currentContact}
 		/>
 	{/if}
 </WizardModal>
+
+{#if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
+	<DeleteAddressConfirmBottomSheet
+		onCancel={() => (currentAddressIndex = undefined)}
+		onDelete={() => nonNullish(currentAddressIndex) && deleteAddress(currentAddressIndex)}
+		address={currentContact.addresses[currentAddressIndex]}
+		contact={currentContact}
+	/>
+{/if}

@@ -23,6 +23,7 @@ interface I18nCore {
 		approve: string;
 		view: string;
 		copy: string;
+		delete: string;
 		clear_filter: string;
 		not_available: string;
 		new: string;
@@ -434,7 +435,12 @@ interface I18nSend {
 		select_token: string;
 		select_network_filter: string;
 		send_again: string;
-		recently_used: string;
+		recently_used_tab: string;
+		contacts_tab: string;
+		recently_used_empty_state_title: string;
+		recently_used_empty_state_description: string;
+		contacts_empty_state_title: string;
+		contacts_empty_state_description: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -956,6 +962,8 @@ interface I18nAddress_book {
 		search_contact: string;
 		no_contact_found: string;
 	};
+	alt: { show_addresses_of_contact: string; hide_addresses: string };
+	edit_contact: { title: string; add_address: string; delete_contact: string };
 	show_contact: {
 		title: string;
 		add_address: string;
@@ -965,12 +973,21 @@ interface I18nAddress_book {
 }
 
 interface I18nContact {
-	form: { add_new_contact: string };
+	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
 }
 
 interface I18nAddress {
 	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
+	form: {
+		new_address: string;
+		address_placeholder: string;
+		label_placeholder: string;
+		invalid_address: string;
+		valid_for_networks: string;
+	};
+	fields: { label: string; address: string };
+	delete: { title: string; delete_address: string; content_text: string };
 }
 
 interface I18nSigner {
