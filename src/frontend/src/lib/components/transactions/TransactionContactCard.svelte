@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
@@ -10,7 +11,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
-	import { isNullish } from '@dfinity/utils';
 
 	interface Props {
 		type: 'send' | 'receive';
