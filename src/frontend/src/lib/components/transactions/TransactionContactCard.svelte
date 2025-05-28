@@ -6,6 +6,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import Button from '$lib/components/ui/Button.svelte';
+	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { AddressBookSteps } from '$lib/enums/progress-steps';
 
 	interface Props {
 		type: 'send' | 'receive';
@@ -38,9 +42,18 @@
 				>{type === 'send' ? $i18n.transaction.text.to : $i18n.transaction.text.from}: {contact?.name}</span
 			>
 			<span class="w-full truncate">{type === 'send' ? to : from}</span>
-			<!-- Todo: enable button once the save flow is implemented
-			<Button link styleClass="mt-3 text-sm"><IconUserSquare size="20px" /> Save address</Button>
-			-->
+
+			<Button
+				on:click={() =>
+					modalStore.openAddressBook({
+						id: Symbol(),
+						data: {
+							step: { type: AddressBookSteps.SAVE_ADDRESS, address: type === 'send' ? to : from }
+						}
+					})}
+				link
+				styleClass="mt-3 text-sm"><IconUserSquare size="20px" /> Save address</Button
+			>
 		</span>
 	{/snippet}
 	{#snippet actions()}

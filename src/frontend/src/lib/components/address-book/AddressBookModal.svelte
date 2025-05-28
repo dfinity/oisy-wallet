@@ -16,6 +16,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import type { AddressBookModalParams } from '$lib/types/address-book';
+	import SaveAddressStep from '$lib/components/address-book/SaveAddressStep.svelte';
 
 	const steps: WizardSteps = [
 		{
@@ -46,10 +48,23 @@
 		{
 			name: AddressBookSteps.DELETE_ADDRESS,
 			title: $i18n.address.delete.title
+		},
+		{
+			name: AddressBookSteps.SAVE_ADDRESS,
+			title: $i18n.address.save.title
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
 	let currentStep: WizardStep | undefined = $state();
+
+	$effect(() => {
+		const data = ($modalStore?.data as AddressBookModalParams)?.step?.type;
+
+		if (nonNullish(data) && currentStep?.name !== data) {
+			gotoStep(data);
+		}
+	});
+
 	let modal: WizardModal | undefined = $state();
 	const close = () => modalStore.close();
 
@@ -286,6 +301,8 @@
 			address={currentContact.addresses[currentAddressIndex]}
 			contact={currentContact}
 		/>
+	{:else if currentStep?.name === AddressBookSteps.SAVE_ADDRESS}
+		<SaveAddressStep />
 	{/if}
 </WizardModal>
 
