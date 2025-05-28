@@ -9,7 +9,7 @@
 		<SkeletonLogo size="small" />
 	{/snippet}
 	{#snippet content()}
-		<span class="mx-1 inline-block flex w-[120px] max-w-full items-center text-left sm:w-[200px]"
+		<span class="mx-1 inline-block w-[120px] max-w-full items-center sm:w-[200px]"
 			><SkeletonText /></span
 		>
 	{/snippet}
