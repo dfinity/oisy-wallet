@@ -17,6 +17,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactUi } from '$lib/types/contact';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 
 	interface Props {
 		onCreateContact?: () => void;
@@ -32,6 +33,10 @@
 		modalData.entrypoint && modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
 			? modalData.entrypoint.address
 			: undefined
+	);
+
+	let filteredContacts = $derived(
+		$contacts.filter((c) => c.name.toLowerCase().includes(inputValue.toLowerCase()))
 	);
 </script>
 
@@ -63,27 +68,29 @@
 		<!-- https://stackoverflow.com/a/68260636/2244209 -->
 		<!-- Additionally, we have to avoid placeholders with word "name" as that can bring autofill as well -->
 		<InputTextWithAction
-			name="search_slidingInput"
+			name="search_contacts"
 			placeholder={$i18n.address_book.text.search_contact}
 			bind:value={inputValue}
 			autofocus
 		/>
 	</div>
 
-	<List styleClass="mt-5">
-		{#each $contacts.filter((c) => c.name
-				.toLowerCase()
-				.includes(inputValue.toLowerCase())) as contact, index (contact.id)}
-			<ListItem>
-				<ContactCard
-					{contact}
-					onClick={() => {}}
-					onInfo={() => {}}
-					onSelect={() => onSelectContact(contact)}
-				/>
-			</ListItem>
-		{/each}
-	</List>
+	{#if filteredContacts.length > 0}
+		<List styleClass="mt-5">
+			{#each filteredContacts as contact, index (contact.id)}
+				<ListItem>
+					<ContactCard
+						{contact}
+						onClick={() => {}}
+						onInfo={() => {}}
+						onSelect={() => onSelectContact(contact)}
+					/>
+				</ListItem>
+			{/each}
+		</List>
+	{:else}
+		<EmptyState title={$i18n.address_book.text.no_contact_found} />
+	{/if}
 
 	<ButtonGroup slot="toolbar">
 		<ButtonCloseModal />
