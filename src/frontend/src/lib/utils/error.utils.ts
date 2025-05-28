@@ -19,7 +19,7 @@ export const errorDetailToString = (err: unknown): string | undefined =>
 const buildJsonKeyPattern = (key: string): RegExp => {
 	const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 	return new RegExp(`"\\s*${escapedKey}\\s*"\\s*:\\s*".+?"(,)?`, 'g');
-}
+};
 
 /**
  * Normalizes an error by removing specific keys from its structure.
