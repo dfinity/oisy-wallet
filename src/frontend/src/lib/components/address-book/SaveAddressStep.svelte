@@ -85,7 +85,7 @@
 				<ListItem>
 					<ContactCard
 						{contact}
-						onClick={() => onInfo(contact)}
+						onClick={() => {}}
 						onInfo={() => onInfo(contact)}
 						onSelect={() => onSelectContact(contact)}
 					/>
