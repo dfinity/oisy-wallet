@@ -39,27 +39,38 @@
 
 	let loading = $state(false);
 
+	export const callWithState = <T, R>(methodToCall: (params: T) => Promise<R>) => {
+		return async (params: T) => {
+			loading = true;
+			try {
+				return await methodToCall(params);
+			} finally {
+				loading = false;
+			}
+		};
+	};
+
 	const callCreateContact = $derived(
-		wrapCallWith({
-			methodToCall: async (...args) => {
-				loading = true;
-				try {
-					return await createContact(...args);
-				} finally {
-					loading = false;
-				}
-			},
-			toastErrorMessage: $i18n.contact.error.create,
-			trackEventNames: {
-				success: TRACK_CONTACT_CREATE_SUCCESS,
-				error: TRACK_CONTACT_CREATE_ERROR
-			},
-			identity: $authIdentity
-		})
+		callWithState(wrapCallWith({
+				methodToCall: async (...args) => {
+					loading = true;
+					try {
+						return await createContact(...args);
+					} finally {
+						loading = false;
+					}
+				},
+				toastErrorMessage: $i18n.contact.error.create,
+				trackEventNames: {
+					success: TRACK_CONTACT_CREATE_SUCCESS,
+					error: TRACK_CONTACT_CREATE_ERROR
+				},
+				identity: $authIdentity
+			}))
 	);
 
 	const callUpdateContact = $derived(
-		wrapCallWith({
+		callWithState(wrapCallWith({
 			methodToCall: async (...args) => {
 				loading = true;
 				try {
@@ -74,11 +85,11 @@
 				error: TRACK_CONTACT_UPDATE_ERROR
 			},
 			identity: $authIdentity
-		})
+		}))
 	);
 
 	const callDeleteContact = $derived(
-		wrapCallWith({
+		callWithState(wrapCallWith({
 			methodToCall: async (...args) => {
 				loading = true;
 				try {
@@ -93,7 +104,7 @@
 				error: TRACK_CONTACT_DELETE_ERROR
 			},
 			identity: $authIdentity
-		})
+		}))
 	);
 
 	const steps: WizardSteps = [
@@ -362,6 +373,7 @@
 			}}
 			isNewContact={isNullish(currentContact)}
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			{loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep

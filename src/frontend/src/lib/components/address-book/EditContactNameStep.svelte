@@ -19,6 +19,7 @@
 		onSaveContact: (contact: ContactUi) => void;
 		onClose: () => void;
 		isNewContact: boolean;
+		loading?: boolean;
 	}
 
 	let {
@@ -26,7 +27,8 @@
 		onSaveContact,
 		onClose,
 		isNewContact,
-		contact = $bindable({})
+		contact = $bindable({}),
+		loading = false
 	}: Props = $props();
 
 	let form: ContactForm | undefined = $state();
@@ -57,11 +59,12 @@
 	<!-- TODO Add address list here -->
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
+		<ButtonCancel disabled={loading} onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
 		<Button
 			colorStyle="primary"
 			on:click={handleSave}
 			disabled={!form?.isValid}
+			{loading}
 			testId={ADDRESS_BOOK_SAVE_BUTTON}
 		>
 			{$i18n.core.text.save}
