@@ -110,6 +110,10 @@ export class FlowPage extends HomepageLoggedIn {
 		tokenSymbol: string;
 		networkSymbol: string;
 	}): Promise<void> {
-		await this.clickByTestId({ testId: this.getTokenCardTestId({ tokenSymbol, networkSymbol }) });
+		await this.navigateTo({ testId: this.getTokenCardTestId({tokenSymbol, networkSymbol}), expectedPath: AppPath.Transactions });
+
+		await this.mockSelectorAll({
+			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'
+		});
 	}
 }
