@@ -18,6 +18,8 @@
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import SaveAddressStep from '$lib/components/address-book/SaveAddressStep.svelte';
+	import { onMount } from 'svelte';
+	import { contactsStore } from '$lib/stores/contacts.store';
 
 	const steps: WizardSteps = [
 		{
@@ -57,8 +59,10 @@
 
 	let currentStep: WizardStep | undefined = $state();
 
-	$effect(() => {
-		const data = ($modalStore?.data as AddressBookModalParams)?.step?.type;
+	let modalData = $derived($modalStore?.data as AddressBookModalParams);
+
+	onMount(() => {
+		const data = modalData?.step?.type;
 
 		if (nonNullish(data) && currentStep?.name !== data) {
 			gotoStep(data);
@@ -106,7 +110,13 @@
 			addresses: []
 		};
 		contacts = [...contacts, currentContact];
-		gotoStep(AddressBookSteps.ADDRESS_BOOK);
+		contactsStore.addContact(currentContact);
+
+		if (nonNullish(modalData) && nonNullish(modalData.step)) {
+			gotoStep(modalData.step.type);
+		} else {
+			gotoStep(AddressBookSteps.ADDRESS_BOOK);
+		}
 	};
 
 	// TODO Use contact store and remove
@@ -270,7 +280,13 @@
 			onAddContact={addContact}
 			onSaveContact={saveContact}
 			isNewContact={isNullish(currentContact)}
-			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			onClose={() => {
+				if (nonNullish(modalData) && nonNullish(modalData.step)) {
+					gotoStep(modalData.step.type);
+				} else {
+					gotoStep(AddressBookSteps.ADDRESS_BOOK);
+				}
+			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentAddressIndex)}
 		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
@@ -302,7 +318,17 @@
 			contact={currentContact}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SAVE_ADDRESS}
-		<SaveAddressStep />
+		<SaveAddressStep
+			onCreateContact={() => {
+				currentContact = undefined;
+				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+			}}
+			onSelectContact={(contact: ContactUi) => {
+				currentContact = contact;
+				currentAddressIndex = undefined;
+				gotoStep(AddressBookSteps.EDIT_ADDRESS);
+			}}
+		/>
 	{/if}
 </WizardModal>
 

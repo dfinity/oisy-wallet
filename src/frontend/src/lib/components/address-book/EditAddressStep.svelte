@@ -12,6 +12,10 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { AddressBookModalParams } from '$lib/types/address-book';
+	import { AddressBookSteps } from '$lib/enums/progress-steps';
+	import { mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
 
 	interface Props {
 		contact: ContactUi;
@@ -30,6 +34,11 @@
 		onClose,
 		isNewAddress
 	}: Props = $props();
+
+	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
+	let modalDataAddress: string | undefined = $derived(
+		modalData?.step?.type === AddressBookSteps.SAVE_ADDRESS ? modalData.step.address : undefined
+	);
 
 	const handleSave = () => {
 		if (isNewAddress) {
@@ -60,7 +69,14 @@
 		class="mt-2 w-full rounded-lg bg-brand-light px-3 py-4 text-sm md:px-5 md:text-base md:font-bold"
 	>
 		<div class="pb-4 text-xl font-bold">{title}</div>
-		<AddressForm {isNewAddress} {address} bind:isInvalid></AddressForm>
+		<AddressForm
+			{isNewAddress}
+			address={nonNullish(modalDataAddress)
+				? (mapAddressToContactAddressUi(modalDataAddress) ?? address)
+				: address}
+			bind:isInvalid
+			disabled={nonNullish(modalDataAddress)}
+		></AddressForm>
 	</div>
 
 	<ButtonGroup slot="toolbar">

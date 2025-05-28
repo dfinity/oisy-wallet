@@ -14,7 +14,7 @@
 
 	const classes: { [key in ListVariant]: string } = {
 		none: `ml-3 ${condensed ? 'py-0' : 'py-1'}`,
-		styled: `border-b-1 last-of-type:border-b-0 flex flex-row justify-between border-brand-subtle-10 ${condensed ? 'py-1.5' : 'py-2.5'} px-1`
+		styled: `border-b-1 last-of-type:border-b-0 flex flex-row justify-between border-brand-subtle-10 ${condensed ? 'p-0' : 'py-2.5 px-1'} `
 	};
 </script>
 
