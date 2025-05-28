@@ -28,7 +28,6 @@
 	const { onCreateContact, onInfo, onSelectContact }: Props = $props();
 
 	let inputValue: string = $state('');
-
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
 	let address: string | undefined = $derived(
 		modalData.entrypoint && modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
