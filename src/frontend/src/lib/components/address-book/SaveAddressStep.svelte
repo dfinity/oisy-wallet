@@ -42,12 +42,12 @@
 
 <ContentWithToolbar>
 	{#if nonNullish(address)}
-		<AddressCard>
+		<AddressCard variant="info" items="center">
 			{#snippet logo()}
-				<AvatarWithBadge {address} badge={{ type: 'addressType', address }} />
+				<AvatarWithBadge {address} badge={{ type: 'addressType', address }} variant="sm" />
 			{/snippet}
 			{#snippet content()}
-				{address}
+				<span class="truncate">{address}</span>
 			{/snippet}
 		</AddressCard>
 	{/if}
