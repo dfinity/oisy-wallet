@@ -4,6 +4,7 @@ use shared::types::{
     contact::{Contact, ContactError, CreateContactRequest},
     user_profile::OisyUser,
 };
+use std::time::Duration;
 
 use crate::utils::{
     mock::CALLER,
@@ -416,7 +417,6 @@ fn test_updated_contact_can_be_retrieved_directly() {
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for the delete contact functionality
 // -------------------------------------------------------------------------------------------------
-#[test]
 #[test]
 fn test_delete_contact_should_succeed_with_valid_id() {
     let pic_setup = setup();
