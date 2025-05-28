@@ -21,10 +21,11 @@
 
 	interface Props {
 		onCreateContact?: () => void;
+		onInfo: (contact: ContactUi) => void;
 		onSelectContact: (contact: ContactUi) => void;
 	}
 
-	const { onCreateContact, onSelectContact }: Props = $props();
+	const { onCreateContact, onInfo, onSelectContact }: Props = $props();
 
 	let inputValue: string = $state('');
 
@@ -82,7 +83,7 @@
 					<ContactCard
 						{contact}
 						onClick={() => {}}
-						onInfo={() => {}}
+						onInfo={() => onInfo(contact)}
 						onSelect={() => onSelectContact(contact)}
 					/>
 				</ListItem>

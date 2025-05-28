@@ -267,7 +267,13 @@
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
 		<ShowContactStep
-			onClose={handleClose}
+			onClose={() => {
+				if (nonNullish(modalData) && nonNullish(modalData.entrypoint)) {
+					gotoStep(modalData.entrypoint.type);
+				} else {
+					handleClose();
+				}
+			}}
 			contact={currentContact}
 			onEdit={(contact) => {
 				currentContactId = contact.id;
@@ -400,6 +406,10 @@
 			onCreateContact={() => {
 				currentContact = undefined;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+			}}
+			onInfo={(contact) => {
+				currentContact = contact;
+				gotoStep(AddressBookSteps.SHOW_CONTACT);
 			}}
 			onSelectContact={(contact: ContactUi) => {
 				currentContact = contact;

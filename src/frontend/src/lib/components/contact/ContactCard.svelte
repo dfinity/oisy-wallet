@@ -62,9 +62,6 @@
 		{/snippet}
 
 		{#snippet action()}
-			{#if nonNullish(onSelect)}
-				<Button link on:click={onSelect}>{$i18n.core.text.select}</Button>
-			{/if}
 			{#if singleAddress}
 				<AddressItemActions
 					styleClass="ml-auto"
@@ -89,6 +86,9 @@
 						<IconExpand {expanded} />
 					{/snippet}
 				</ButtonIcon>
+			{/if}
+			{#if nonNullish(onSelect)}
+				<Button link on:click={onSelect}>{$i18n.core.text.select}</Button>
 			{/if}
 		{/snippet}
 	</LogoButton>
