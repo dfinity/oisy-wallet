@@ -54,7 +54,7 @@ const nonAppleProjects = [
 	{
 		name: 'Google Chrome',
 		use: devices['Desktop Chrome']
-	}
+	},
 	{
 		name: 'Firefox',
 		use: devices['Desktop Firefox']
