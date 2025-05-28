@@ -80,7 +80,7 @@
 	</div>
 
 	{#if filteredContacts.length > 0}
-		<List styleClass="mt-5">
+		<List styleClass="mt-5" noPadding>
 			{#each filteredContacts as contact, index (`${index}-${contact.id}`)}
 				<ListItem>
 					<ContactCard
