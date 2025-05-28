@@ -120,6 +120,7 @@
 
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
 
+	// Allow to define an entrypoint when opening the modal. Here we listen to the modal data and go to the entrypoint step if were not already on it.
 	onMount(() => {
 		const data = modalData?.entrypoint?.type;
 
