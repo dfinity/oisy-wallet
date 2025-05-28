@@ -373,6 +373,7 @@
 				currentAddressIndex = undefined;
 				handleClose();
 			}}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
 		<DeleteAddressConfirmContent
