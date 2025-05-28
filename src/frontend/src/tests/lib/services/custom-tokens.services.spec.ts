@@ -69,6 +69,8 @@ describe('custom-tokens.services', () => {
 			vi.clearAllMocks();
 
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
+
+			mockGetIdbTokens.mockImplementation(vi.fn());
 		});
 
 		it('should load the custom tokens from the backend', async () => {
@@ -90,9 +92,7 @@ describe('custom-tokens.services', () => {
 				filterTokens: ({ token }) => 'Icrc' in token
 			});
 
-			const expectedTokens = mockCustomTokens.splice(0, 2);
-
-			expect(result).toStrictEqual(expectedTokens);
+			expect(result).toStrictEqual(mockCustomTokens.slice(0, 2));
 		});
 
 		it('should handle empty token list from the backend', async () => {
