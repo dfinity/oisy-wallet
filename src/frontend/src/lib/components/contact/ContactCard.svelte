@@ -88,7 +88,9 @@
 				</ButtonIcon>
 			{/if}
 			{#if nonNullish(onSelect)}
-				<Button link on:click={onSelect}>{$i18n.core.text.select}</Button>
+				<Button link on:click={onSelect} ariaLabel={$i18n.core.text.select}
+					>{$i18n.core.text.select}</Button
+				>
 			{/if}
 		{/snippet}
 	</LogoButton>
