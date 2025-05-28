@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { Collapsible } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import AddressItemActions from '$lib/components/contact/AddressItemActions.svelte';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import {
@@ -14,8 +16,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { nonNullish } from '@dfinity/utils';
-	import Button from '$lib/components/ui/Button.svelte';
 
 	interface Props {
 		contact: ContactUi;
