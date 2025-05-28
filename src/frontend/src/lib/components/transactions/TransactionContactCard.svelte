@@ -10,6 +10,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
+	import { isNullish } from '@dfinity/utils';
 
 	interface Props {
 		type: 'send' | 'receive';
@@ -43,22 +44,24 @@
 			>
 			<span class="w-full truncate">{type === 'send' ? to : from}</span>
 
-			<Button
-				on:click={() =>
-					modalStore.openAddressBook({
-						id: Symbol(),
-						data: {
-							entrypoint: {
-								type: AddressBookSteps.SAVE_ADDRESS,
-								address: type === 'send' ? to : from
+			{#if isNullish(contact)}
+				<Button
+					on:click={() =>
+						modalStore.openAddressBook({
+							id: Symbol(),
+							data: {
+								entrypoint: {
+									type: AddressBookSteps.SAVE_ADDRESS,
+									address: type === 'send' ? to : from
+								}
 							}
-						}
-					})}
-				link
-				styleClass="mt-3 text-sm"
-				ariaLabel={$i18n.address.save.title}
-				><IconUserSquare size="20px" /> {$i18n.address.save.title}</Button
-			>
+						})}
+					link
+					styleClass="mt-3 text-sm"
+					ariaLabel={$i18n.address.save.title}
+					><IconUserSquare size="20px" /> {$i18n.address.save.title}</Button
+				>
+			{/if}
 		</span>
 	{/snippet}
 	{#snippet actions()}
