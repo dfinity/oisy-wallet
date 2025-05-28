@@ -227,7 +227,7 @@
 					styleClass="rounded-full flex items-center justify-center"
 				/>
 				<div class="text-center text-lg font-semibold text-primary">
-					{currentContact?.name}
+					{currentContact.name}
 				</div>
 			</div>
 		{:else if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
