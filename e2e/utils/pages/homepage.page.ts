@@ -429,9 +429,13 @@ abstract class Homepage {
 		await this.waitForByTestId({ testId: MANAGE_TOKENS_MODAL, options });
 	}
 
-	async toggleNetworkSelector({ networkSymbol }: { networkSymbol: string }): Promise<void> {
+	async openNetworkSelector(): Promise<void> {
 		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
 		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
+	}
+
+	async toggleNetworkSelector({ networkSymbol }: { networkSymbol: string }): Promise<void> {
+		await this.openNetworkSelector()
 		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
 	}
 

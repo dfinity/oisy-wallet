@@ -14,6 +14,18 @@ testWithII('should display privacy mode on homepage', async ({ page, iiPage, isM
     await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
 });
 
+testWithII('should display privacy mode on network selector', async ({ page, iiPage, isMobile }) => {
+	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage, isMobile });
+
+	await homepageLoggedIn.waitForReady();
+
+	await homepageLoggedIn.activatePrivacyMode();
+
+	await homepageLoggedIn.openNetworkSelector();
+
+	await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
+});
+
 testWithII('should display privacy mode on transactions page', async ({ page, iiPage, isMobile }) => {
 	const flowPage = new FlowPage({ page, iiPage, isMobile });
 
