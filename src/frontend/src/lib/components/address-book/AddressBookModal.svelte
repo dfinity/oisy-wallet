@@ -135,7 +135,7 @@
 	};
 
 	let currentContact = $derived($contactsStore?.find((c) => c.id === currentContactId));
-	let contacts = $derived($contactsStore);
+	let contacts = $derived($contactsStore || []);
 
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
