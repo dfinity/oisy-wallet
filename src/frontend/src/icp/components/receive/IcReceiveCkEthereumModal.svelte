@@ -13,6 +13,7 @@
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import {
+		type WizardStepsSend,
 		WizardStepsConvert,
 		WizardStepsHowToConvert,
 		WizardStepsReceive
@@ -36,7 +37,9 @@
 	let currentStep: WizardStep | undefined = $state();
 	let modal: WizardModal | undefined = $state();
 
-	let steps: WizardSteps = $derived(
+	let steps: WizardSteps<
+		WizardStepsReceive | WizardStepsHowToConvert | WizardStepsConvert | WizardStepsSend
+	> = $derived(
 		receiveWizardSteps({
 			i18n: $i18n,
 			sourceToken: sourceToken.symbol,
