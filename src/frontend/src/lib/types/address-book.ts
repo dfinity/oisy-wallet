@@ -1,6 +1,6 @@
 import type { AddressBookSteps } from '$lib/enums/progress-steps';
 
-export type AddressBookModalParams = {
+export interface AddressBookModalParams {
 	// note: to add a different entrypoint, add another object type def as uniontype, e.g.
 	// {
 	// 		type: AddressBookSteps.SAVE_ADDRESS;
@@ -13,4 +13,4 @@ export type AddressBookModalParams = {
 		type: AddressBookSteps.SAVE_ADDRESS;
 		address: string;
 	};
-};
+}

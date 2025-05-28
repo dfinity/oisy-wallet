@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
-	import AddressCard from '$lib/components/address/AddressCard.svelte';
-	import type { AddressBookModalParams } from '$lib/types/address-book';
-	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
-	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { nonNullish } from '@dfinity/utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import Button from '$lib/components/ui/Button.svelte';
-	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
-	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
+	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import { contacts } from '$lib/derived/contacts.derived';
+	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import ContactCard from '$lib/components/contact/ContactCard.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
+	import { contacts } from '$lib/derived/contacts.derived';
+	import { AddressBookSteps } from '$lib/enums/progress-steps';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactUi } from '$lib/types/contact';
 
 	interface Props {

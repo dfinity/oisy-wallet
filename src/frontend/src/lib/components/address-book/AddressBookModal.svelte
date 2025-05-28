@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
@@ -9,20 +10,19 @@
 	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
+	import SaveAddressStep from '$lib/components/address-book/SaveAddressStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
+	import { contactsStore } from '$lib/stores/contacts.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import type { AddressBookModalParams } from '$lib/types/address-book';
-	import SaveAddressStep from '$lib/components/address-book/SaveAddressStep.svelte';
-	import { onMount } from 'svelte';
-	import { contactsStore } from '$lib/stores/contacts.store';
 
 	const steps: WizardSteps = [
 		{
