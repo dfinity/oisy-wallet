@@ -7,6 +7,7 @@
 		element?: 'ul' | 'ol';
 		styleClass?: string;
 		condensed?: boolean;
+		noPadding?: boolean;
 		children?: Snippet;
 	}
 
@@ -15,15 +16,17 @@
 		element = 'ul',
 		styleClass = '',
 		condensed = true,
+		noPadding = false,
 		children
 	}: Props = $props();
 
 	export interface ListContext {
 		variant: ListVariant;
 		condensed?: boolean;
+		noPadding?: boolean;
 	}
 
-	setContext<ListContext>('list-context', { variant, condensed });
+	setContext<ListContext>('list-context', { variant, condensed, noPadding });
 </script>
 
 {#if element === 'ul'}
