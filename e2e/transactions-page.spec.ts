@@ -11,6 +11,7 @@ TransactionCases.forEach(({ tokenSymbol, networkId, ...rest }) => {
 			});
 			await transactionsPage.waitForReady();
 			await transactionsPage.showTransactions({ tokenSymbol, networkId, ...rest });
+
 		}
 	);
 });
