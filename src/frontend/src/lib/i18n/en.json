@@ -1042,8 +1042,9 @@
 			"add_new_contact": "Add new contact",
 			"add_contact": "Add contact",
 			"search_contact": "Search contact",
-			"no_contact_found": "No contacts found",
-			"no_address_found": "No address available."
+			"loading_contacts": "Loading contacts...",
+			"no_address_found": "No address available.",
+			"no_contact_found": "No contacts found"
 		},
 		"alt": {
 			"show_addresses_of_contact": "Show all addresses for contact",
@@ -1073,6 +1074,11 @@
 			"title": "Delete $contact contact?",
 			"delete_contact": "Delete contact",
 			"content_text": "This will delete $contact and all associated addresses from your Address Book. This action cannot be undone."
+		},
+		"error": {
+			"create": "Failed to create the contact",
+			"update": "Failed to update the contact",
+			"delete": "Failed to delete the contact"
 		}
 	},
 	"address": {
