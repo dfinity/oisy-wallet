@@ -14,8 +14,14 @@
 		address: Partial<ContactAddressUi>;
 		isNewAddress: boolean;
 		isInvalid: boolean;
+		disabled?: boolean;
 	}
-	let { address = $bindable(), isNewAddress, isInvalid = $bindable() }: Props = $props();
+	let {
+		address = $bindable(),
+		isNewAddress,
+		isInvalid = $bindable(),
+		disabled = false
+	}: Props = $props();
 
 	let addressParseError = $state<ZodError | undefined>();
 
@@ -34,9 +40,9 @@
 		name="address"
 		placeholder={$i18n.address.form.address_placeholder}
 		testId={ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT}
-		showPasteButton={isNewAddress}
-		showResetButton={isNewAddress}
-		disabled={!isNewAddress}
+		showPasteButton={isNewAddress && !disabled}
+		showResetButton={isNewAddress && !disabled}
+		disabled={!isNewAddress || disabled}
 	/>
 
 	<label for="label" class="font-bold">{$i18n.address.fields.label}</label>
