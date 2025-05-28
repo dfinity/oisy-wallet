@@ -93,5 +93,6 @@ export enum AddressBookSteps {
 	DELETE_CONTACT = 'delete_contact',
 	DELETE_ADDRESS = 'delete_address',
 	EDIT_ADDRESS = 'edit_address',
-	SHOW_ADDRESS = 'show_address'
+	SHOW_ADDRESS = 'show_address',
+	SAVE_ADDRESS = 'save_address'
 }
