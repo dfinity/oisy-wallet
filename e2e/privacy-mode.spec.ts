@@ -14,6 +14,24 @@ testWithII('should display privacy mode on homepage', async ({ page, iiPage, isM
     await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
 });
 
+testWithII('should display privacy mode on transactions page', async ({ page, iiPage, isMobile }) => {
+	const flowPage = new FlowPage({ page, iiPage, isMobile });
+
+	await flowPage.waitForReady();
+
+	await flowPage.receiveTokens();
+
+	await flowPage.sendTokens();
+
+	await flowPage.navigateToAssets();
+
+	await flowPage.activatePrivacyMode();
+
+	await flowPage.navigateToTransactionsPage({tokenSymbol: 'ICP', networkSymbol: 'ICP'});
+
+	await flowPage.takeScreenshot();
+});
+
 testWithII('should display privacy mode on activity page', async ({ page, iiPage, isMobile }) => {
 	const flowPage = new FlowPage({ page, iiPage, isMobile });
 
@@ -24,6 +42,8 @@ testWithII('should display privacy mode on activity page', async ({ page, iiPage
 	await flowPage.sendTokens();
 
 	await flowPage.navigateToActivity();
+
+	await flowPage.activatePrivacyMode();
 
 	await flowPage.takeScreenshot();
 });

@@ -612,7 +612,7 @@ export class HomepageLoggedIn extends Homepage {
 		tokenSymbol: string;
 		networkSymbol: string;
 	}): Promise<void> {
-		await this.clickByTestId({ testId: `token-group-${tokenSymbol}-${networkSymbol}` });
+		await this.clickByTestId({ testId: `${TOKEN_GROUP}-${tokenSymbol}-${networkSymbol}` });
 	}
 
 	async testReceiveModalQrCode({
