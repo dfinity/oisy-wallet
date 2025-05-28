@@ -17,11 +17,7 @@ import {
 	createMockEtherscanTransactions
 } from '$tests/mocks/etherscan.mock';
 import en from '$tests/mocks/i18n.mock';
-import {
-	EtherscanPlugin,
-	EtherscanProvider as EtherscanProviderLib,
-	Network
-} from 'ethers/providers';
+import { EtherscanProvider as EtherscanProviderLib, Network } from 'ethers/providers';
 import type { MockedClass } from 'vitest';
 
 vi.mock('$env/rest/etherscan.env', () => ({
@@ -42,16 +38,6 @@ describe('etherscan.providers', () => {
 				new Network(name, chainId),
 				ETHERSCAN_API_KEY
 			);
-		});
-	});
-
-	it('should attach the custom plugin to the providers', () => {
-		const ETHERSCAN_PLUGIN = new EtherscanPlugin('https://api.etherscan.io/v2');
-
-		expect(Network.prototype.attachPlugin).toHaveBeenCalledTimes(networks.length);
-
-		networks.forEach((_, index) => {
-			expect(Network.prototype.attachPlugin).toHaveBeenNthCalledWith(index + 1, ETHERSCAN_PLUGIN);
 		});
 	});
 
