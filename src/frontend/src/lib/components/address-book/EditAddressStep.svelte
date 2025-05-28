@@ -30,7 +30,7 @@
 		onAddAddress,
 		onClose,
 		isNewAddress,
-		disabled
+		disabled = false
 	}: Props = $props();
 
 	const handleSave = () => {

@@ -384,6 +384,7 @@
 			onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
 			address={currentContact.addresses[currentAddressIndex]}
 			contact={currentContact}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
 		{#if nonNullish(currentAddressIndex) && nonNullish(currentContact?.addresses?.[currentAddressIndex])}
@@ -412,6 +413,7 @@
 		onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
 		address={currentContact.addresses[currentAddressIndex]}
 		contact={currentContact}
+		disabled={loading}
 	/>
 {:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact) && isDeletingContact}
 	<DeleteContactConfirmBottomSheet
