@@ -49,7 +49,7 @@ pub fn call_delete_contact(
 ) -> Result<u64, ContactError> {
     let wrapped_result =
         pic_setup.update::<Result<u64, ContactError>>(caller, "delete_contact", contact_id);
-    wrapped_result.expect("that delete_contact succeeds")
+    wrapped_result.expect("that delete_contact call completes")
 }
 
 pub fn call_update_contact(
@@ -447,7 +447,7 @@ fn test_delete_contact_should_succeed_with_valid_id() {
 }
 
 #[test]
-fn test_delete_contact_should_succeed_with_nonexistent_id() {
+fn test_delete_contact_should_fail_with_nonexistent_id() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -455,9 +455,9 @@ fn test_delete_contact_should_succeed_with_nonexistent_id() {
     let nonexistent_id = 999999;
     let result = call_delete_contact(&pic_setup, caller, nonexistent_id);
 
-    // Verify the operation succeeds (idempotent behavior)
-    assert!(result.is_ok());
-    assert_eq!(result.unwrap(), nonexistent_id);
+    // Verify the operation fails with ContactNotFound
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
 }
 
 #[test]
@@ -539,7 +539,7 @@ fn test_delete_all_contacts() {
 }
 
 #[test]
-fn test_delete_contact_is_idempotent() {
+fn test_delete_contact_returns_error_for_already_deleted_contact() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -563,9 +563,9 @@ fn test_delete_contact_is_idempotent() {
     // Delete the same contact again
     let second_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
 
-    // Verify the second delete also succeeds (idempotent behavior)
-    assert!(second_delete_result.is_ok());
-    assert_eq!(second_delete_result.unwrap(), contact.id);
+    // Verify the second delete fails with ContactNotFound
+    assert!(second_delete_result.is_err());
+    assert_eq!(second_delete_result.unwrap_err(), ContactError::ContactNotFound);
 
     // Verify contacts are still empty
     let contacts_after_second_delete = call_get_contacts(&pic_setup, caller);

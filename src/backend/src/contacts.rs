@@ -191,39 +191,32 @@ fn get_stored_contacts_safely(stored_principal: &StoredPrincipal) -> StoredConta
 ///
 /// # Returns
 /// * `Ok(u64)` - The ID of the deleted contact if found and deleted
-/// * `Ok(u64)` - The ID of the contact if it was already deleted (idempotent operation)
+/// * `Err(ContactError::ContactNotFound)` - If the contact does not exist or the contacts store has not been initialized
 pub fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     let current_time = time();
 
     mutate_state(|s| {
-        // Check if the user has any contacts
-        if let Some(candid_stored_contacts) = s.contact.get(&stored_principal) {
-            let mut stored_contacts = candid_stored_contacts.clone();
-            let original_len = stored_contacts.contacts.len();
-
-            // Remove the contact with the specified ID
-            stored_contacts
-                .contacts
-                .retain(|contact| contact.id != contact_id);
-
-            // If no contact was removed, the contact was already deleted or never existed
-            // For idempotent behavior, we return Ok with the contact_id in both cases
-            if stored_contacts.contacts.len() == original_len {
-                return Ok(contact_id);
-            }
-
-            // Update the timestamp
-            stored_contacts.update_timestamp_ns = current_time;
-
-            // Update the storage
-            s.contact.insert(stored_principal, Candid(stored_contacts));
-
-            Ok(contact_id)
+        // Get the user's contacts directly from the state
+        let mut stored_contacts = if let Some(stored_contacts) = s.contact.get(&stored_principal) {
+            stored_contacts.clone()
         } else {
-            // No contacts exist for this user, so the specified contact doesn't exist either
-            // For idempotent behavior, we return Ok with the contact_id
-            Ok(contact_id)
+            // If the user has no contacts, return ContactNotFound
+            return Err(ContactError::ContactNotFound);
+        };
+
+        // Check if the contact exists
+        if !stored_contacts.contacts.contains_key(&contact_id) {
+            return Err(ContactError::ContactNotFound);
         }
+
+        // Remove the contact using the BTreeMap's remove method
+        stored_contacts.contacts.remove(&contact_id);
+        stored_contacts.update_timestamp_ns = current_time;
+
+        // Update the storage
+        s.contact.insert(stored_principal, Candid(stored_contacts));
+
+        Ok(contact_id)
     })
 }
