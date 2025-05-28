@@ -1,9 +1,9 @@
 import {
-	ACTIVITY_TRANSACTION_SKELETON_PREFIX,
-	AMOUNT_DATA, CAROUSEL_SLIDE_NAVIGATION,
+	AMOUNT_DATA,
 	DESTINATION_INPUT,
 	IN_PROGRESS_MODAL,
-	MAX_BUTTON, NAVIGATION_ITEM_ACTIVITY, NO_TRANSACTIONS_PLACEHOLDER,
+	MAX_BUTTON,
+	NAVIGATION_ITEM_ACTIVITY,
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_DONE_BUTTON,
 	RECEIVE_TOKENS_MODAL_ICP_SECTION,
@@ -16,10 +16,11 @@ import {
 	TOKEN_CARD,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
-import { expect } from '@playwright/test';
-import { LedgerTransferCommand } from '../commands/ledger-transfer.command';
-import { createCommandRunner } from '../commands/runner';
-import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
+import {expect} from '@playwright/test';
+import {LedgerTransferCommand} from '../commands/ledger-transfer.command';
+import {createCommandRunner} from '../commands/runner';
+import {HomepageLoggedIn, type HomepageLoggedInParams} from './homepage.page';
+import {AppPath} from "$lib/constants/routes.constants";
 
 const commandRunner = createCommandRunner();
 
@@ -88,7 +89,7 @@ export class FlowPage extends HomepageLoggedIn {
 	}
 
 	async navigateToActivity(): Promise<void> {
-		await this.navigateTo(NAVIGATION_ITEM_ACTIVITY);
+		await this.navigateTo({testId: NAVIGATION_ITEM_ACTIVITY, expectedPath: AppPath.Activity});
 
 		await this.mockSelectorAll({
 			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'
