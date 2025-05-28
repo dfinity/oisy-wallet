@@ -78,12 +78,12 @@
 
 	const steps: WizardSteps = [
 		{
-			name: AddressBookSteps.SAVE_ADDRESS,
-			title: $i18n.address.save.title
-		},
-		{
 			name: AddressBookSteps.ADDRESS_BOOK,
 			title: $i18n.address_book.text.title
+		},
+		{
+			name: AddressBookSteps.SAVE_ADDRESS,
+			title: $i18n.address.save.title
 		},
 		{
 			name: AddressBookSteps.SHOW_CONTACT,
