@@ -57,7 +57,11 @@
 		<h5>{$i18n.address.save.add_to_existing_contact}</h5>
 		{#if nonNullish(onCreateContact)}
 			<span class="flex">
-				<Button link paddingSmall on:click={onCreateContact}
+				<Button
+					link
+					paddingSmall
+					on:click={onCreateContact}
+					ariaLabel={$i18n.address.save.create_contact}
 					><IconPlus /> {$i18n.address.save.create_contact}</Button
 				>
 			</span>
@@ -78,7 +82,7 @@
 
 	{#if filteredContacts.length > 0}
 		<List styleClass="mt-5" noPadding>
-			{#each filteredContacts as contact, index (contact.id)}
+			{#each filteredContacts as contact, index (`${index}-${contact.id}`)}
 				<ListItem>
 					<ContactCard
 						{contact}
