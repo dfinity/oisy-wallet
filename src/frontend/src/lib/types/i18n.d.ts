@@ -33,6 +33,7 @@ interface I18nCore {
 		to: string;
 		add: string;
 		more_items: string;
+		select: string;
 	};
 	info: { test_banner: string };
 	alt: {
@@ -992,6 +993,7 @@ interface I18nAddress {
 	};
 	fields: { label: string; address: string };
 	delete: { title: string; delete_address: string; content_text: string };
+	save: { title: string; add_to_existing_contact: string; create_contact: string };
 }
 
 interface I18nSigner {
