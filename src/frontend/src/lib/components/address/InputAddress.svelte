@@ -19,6 +19,7 @@
 		value?: string;
 		addressType?: TokenAccountIdTypes;
 		parseError?: ZodError;
+		disabled?: boolean;
 	}
 
 	let {
@@ -26,6 +27,7 @@
 		value = $bindable(),
 		addressType = $bindable(),
 		parseError = $bindable(),
+		disabled,
 		...props
 	}: InputAddressProps & ComponentProps<Input> = $props();
 
@@ -64,8 +66,10 @@
 	{/if}
 {/snippet}
 
-<div style={`--input-custom-border-color: ${borderColor}; --input-padding-inner-end: 100px`}>
-	<Input inputType="text" bind:value innerEnd={qrButton} {...props}></Input>
+<div
+	style={`--input-custom-border-color: ${borderColor}; --input-padding-inner-end: 100px; ${disabled ? '--input-background: var(--color-background-disabled);' : ''}`}
+>
+	<Input {disabled} inputType="text" bind:value innerEnd={qrButton} {...props}></Input>
 
 	<div class="text-md pt-2">
 		{#if error}
