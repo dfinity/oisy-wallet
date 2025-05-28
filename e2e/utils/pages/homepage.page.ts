@@ -513,6 +513,13 @@ abstract class Homepage {
 			await this.#page.emulateMedia({ colorScheme: scheme });
 			await this.#page.waitForTimeout(1000);
 
+			if (isNullish(element)) {
+				console.log(1111111111, screenshotTarget, this.#page);
+				throw new Error(
+					`Element to take screenshot is not defined. Please provide a valid element. ${screenshotTarget} ${this.#page}`
+				);
+			}
+
 			await expect(element).toHaveScreenshot();
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
