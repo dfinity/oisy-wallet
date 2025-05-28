@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
+	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import { SEND_DESTINATION_SECTION } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
 		destination: string;
@@ -15,8 +15,6 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
 	const onIcSendDestinationStep = () => dispatch('icSendDestinationStep');
 </script>
 
@@ -25,11 +23,11 @@
 
 	<AddressCard hasError={invalidDestination} items="center">
 		{#snippet logo()}
-			<NetworkLogo network={$sendToken.network} />
+			<div class="mr-2"><AvatarWithBadge address={destination} /></div>
 		{/snippet}
 
 		{#snippet content()}
-			{destination}
+			{shortenWithMiddleEllipsis({ text: destination })}
 		{/snippet}
 
 		{#snippet actions()}
