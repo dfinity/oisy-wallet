@@ -4,8 +4,8 @@ import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { SetIdbTokensParams } from '$lib/types/idb-tokens';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Principal } from '@dfinity/principal';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { Principal } from '@dfinity/principal';
+import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 interface LoadCustomTokensFromBackendParams {
@@ -58,8 +58,33 @@ export const loadNetworkCustomTokens = async ({
 
 	if (useCache && !certified) {
 		const cachedTokens = await getIdbTokens(identity.getPrincipal());
+
 		if (nonNullish(cachedTokens)) {
-			return cachedTokens;
+			// Principals are saved as Uint8Array in the IDB, so we need to parse them back to Principal
+			const parsePrincipal = (token: CustomToken): CustomToken => {
+				if (!('Icrc' in token.token)) {
+					return token;
+				}
+
+				const { ledger_id: rawLedgerId, index_id: rawIndexId } = token.token.Icrc;
+
+				const ledgerId = Principal.from(rawLedgerId);
+				const indexId = nonNullish(fromNullable(rawIndexId))
+					? Principal.from(fromNullable(rawIndexId))
+					: undefined;
+
+				return {
+					...token,
+					token: {
+						Icrc: {
+							ledger_id: ledgerId,
+							index_id: toNullable(indexId)
+						}
+					}
+				};
+			};
+
+			return cachedTokens.map(parsePrincipal);
 		}
 	}
 

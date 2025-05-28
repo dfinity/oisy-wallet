@@ -69,6 +69,8 @@ describe('custom-tokens.services', () => {
 			vi.clearAllMocks();
 
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
+
+			mockGetIdbTokens.mockImplementation(vi.fn());
 		});
 
 		it('should load the custom tokens from the backend', async () => {
@@ -90,9 +92,7 @@ describe('custom-tokens.services', () => {
 				filterTokens: ({ token }) => 'Icrc' in token
 			});
 
-			const expectedTokens = mockCustomTokens.splice(0, 2);
-
-			expect(result).toStrictEqual(expectedTokens);
+			expect(result).toStrictEqual(mockCustomTokens.slice(0, 2));
 		});
 
 		it('should handle empty token list from the backend', async () => {
@@ -209,6 +209,34 @@ describe('custom-tokens.services', () => {
 				identity: mockIdentity,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
+		});
+
+		it('should parse correctly the cached ledger and index canister IDs from the custom tokens', async () => {
+			mockGetIdbTokens.mockResolvedValue([
+				{
+					token: {
+						Icrc: {
+							ledger_id: Principal.fromText(mockLedgerCanisterId).toUint8Array(),
+							index_id: toNullable(Principal.fromText(mockIndexCanisterId).toUint8Array())
+						}
+					},
+					version: toNullable(2n),
+					enabled: true
+				}
+			]);
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(mockCustomTokens.slice(0, 1));
+
+			expect(mockGetIdbTokens).toHaveBeenCalledOnce();
+			expect(mockGetIdbTokens).toHaveBeenNthCalledWith(1, mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).not.toHaveBeenCalled();
 		});
 	});
 });
