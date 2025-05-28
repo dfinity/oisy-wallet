@@ -85,4 +85,44 @@ describe('replaceErrorFields', () => {
 		expect(replaceErrorFields({ err: true, keysToRemove: [] })).toBe('true');
 		expect(replaceErrorFields({ err: false, keysToRemove: [] })).toBe('false');
 	});
+
+	it('removes key from Error.message', () => {
+		const error = new Error('Test error, Request ID: 123');
+		const result = replaceErrorFields({
+			err: error,
+			keysToRemove: ['Request ID']
+		});
+
+		expect(result).toBe('Test error');
+	});
+
+	it('removes multiple keys from Error.message', () => {
+		const error = new Error('Test error, Request ID: 123, status: failed');
+		const result = replaceErrorFields({
+			err: error,
+			keysToRemove: ['Request ID', 'status']
+		});
+
+		expect(result).toBe('Test error');
+	});
+
+	it('cleans up dangling commas after removal from Error.message', () => {
+		const error = new Error('Test error, Request ID: 123, status: failed');
+		const result = replaceErrorFields({
+			err: error,
+			keysToRemove: ['Request ID']
+		});
+
+		expect(result).toBe('Test error, status: failed');
+	});
+
+	it('returns Error.message as-is if no matching keys found', () => {
+		const error = new Error('Some unknown issue');
+		const result = replaceErrorFields({
+			err: error,
+			keysToRemove: ['token']
+		});
+
+		expect(result).toBe('Some unknown issue');
+	});
 });
