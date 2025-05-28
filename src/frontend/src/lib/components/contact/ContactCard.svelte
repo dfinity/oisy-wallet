@@ -14,15 +14,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { nonNullish } from '@dfinity/utils';
+	import Button from '$lib/components/ui/Button.svelte';
 
 	interface Props {
 		contact: ContactUi;
 		onClick: () => void;
 		onInfo: (addressIndex: number) => void;
+		onSelect?: () => void;
 		initiallyExpanded?: boolean;
 	}
 
-	let { contact, onInfo, onClick, initiallyExpanded = false }: Props = $props();
+	let { contact, onInfo, onClick, onSelect, initiallyExpanded = false }: Props = $props();
 
 	let toggleContent = $state<() => void | undefined>();
 
@@ -83,6 +86,9 @@
 						<IconExpand {expanded} />
 					{/snippet}
 				</ButtonIcon>
+			{/if}
+			{#if nonNullish(onSelect)}
+				<Button link on:click={onSelect}>{$i18n.core.text.select}</Button>
 			{/if}
 		{/snippet}
 	</LogoButton>
