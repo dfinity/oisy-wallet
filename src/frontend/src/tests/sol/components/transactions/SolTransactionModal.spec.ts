@@ -1,15 +1,28 @@
+import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { getAccountOwner } from '$sol/api/solana.api';
 import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
+import en from '$tests/mocks/i18n.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { capitalizeFirstLetter } from '$tests/utils/string-utils';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-const [mockSolTransactionUi] = createMockSolTransactionsUi(1);
+vi.mock('$sol/api/solana.api', () => ({
+	getAccountOwner: vi.fn()
+}));
 
 describe('SolTransactionModal', () => {
+	const [mockSolTransactionUi] = createMockSolTransactionsUi(1);
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		vi.mocked(getAccountOwner).mockResolvedValue(undefined);
+	});
+
 	it('should render the SOL transaction modal', () => {
 		const { getByText } = render(SolTransactionModal, {
 			transaction: mockSolTransactionUi,
@@ -73,5 +86,36 @@ describe('SolTransactionModal', () => {
 		expect(
 			getByText(shortenWithMiddleEllipsis({ text: mockSolTransactionUi.signature }))
 		).toBeInTheDocument();
+	});
+
+	it('should not display ATA address if is not SPL token', () => {
+		vi.mocked(getAccountOwner).mockResolvedValue('mock-owner-address');
+
+		const { queryByText } = render(SolTransactionModal, {
+			transaction: mockSolTransactionUi,
+			token: SOLANA_TOKEN
+		});
+
+		expect(queryByText(en.transaction.text.from_ata)).not.toBeInTheDocument();
+		expect(queryByText(en.transaction.text.to_ata)).not.toBeInTheDocument();
+
+		expect(queryByText('mock-owner-address')).not.toBeInTheDocument();
+	});
+
+	it('should display ATA address if is SPL token', async () => {
+		vi.mocked(getAccountOwner).mockResolvedValue('mock-owner-address');
+
+		const { getByText } = render(SolTransactionModal, {
+			transaction: mockSolTransactionUi,
+			token: BONK_TOKEN
+		});
+
+		await waitFor(() => {
+			expect(getByText(en.transaction.text.from_ata)).toBeInTheDocument();
+
+			expect(
+				getByText(shortenWithMiddleEllipsis({ text: 'mock-owner-address' }))
+			).toBeInTheDocument();
+		});
 	});
 });

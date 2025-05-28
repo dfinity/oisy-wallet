@@ -19,7 +19,9 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
+	import { getAccountOwner } from '$sol/api/solana.api';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -29,15 +31,45 @@
 	const { transaction, token }: Props = $props();
 
 	let {
-		from,
+		from: fromAddress,
 		value,
 		timestamp,
 		signature: id,
 		blockNumber,
-		to,
+		to: toAddress,
 		type,
 		status
 	} = $derived(transaction);
+
+	let solanaNetwork = $derived(
+		nonNullish(token?.network.id) ? mapNetworkIdToNetwork(token?.network.id) : undefined
+	);
+
+	let from = $state<SolTransactionUi['from']>();
+	let to = $state<SolTransactionUi['to']>();
+
+	const updateFromAddress = async () => {
+		from = nonNullish(solanaNetwork)
+			? ((await getAccountOwner({ address: fromAddress, network: solanaNetwork })) ?? fromAddress)
+			: fromAddress;
+	};
+
+	const updateToAddress = async () => {
+		to =
+			nonNullish(solanaNetwork) && nonNullish(toAddress)
+				? ((await getAccountOwner({ address: toAddress, network: solanaNetwork })) ?? toAddress)
+				: toAddress;
+	};
+
+	$effect(() => {
+		[fromAddress];
+		updateFromAddress();
+	});
+
+	$effect(() => {
+		[toAddress];
+		updateToAddress();
+	});
 
 	let explorerUrl: string | undefined = $derived(
 		isNetworkSolana(token?.network) ? token.network.explorerUrl : undefined
@@ -90,7 +122,7 @@
 			{/snippet}
 		</ModalHero>
 
-		{#if nonNullish(to) && nonNullish(from)}
+		{#if nonNullish(toAddress) && nonNullish(fromAddress)}
 			<TransactionContactCard
 				type={type === 'receive' ? 'receive' : 'send'}
 				{to}
@@ -101,34 +133,34 @@
 		{/if}
 
 		<List styleClass="mt-5">
-			{#if type === 'receive' && nonNullish(to)}
-				<ListItem>
-					<span>{$i18n.transaction.text.to}</span>
-					<output class="flex max-w-[50%] flex-row">
-						<output>{shortenWithMiddleEllipsis({ text: to })}</output>
+			{#if type === 'receive' && nonNullish(from) && nonNullish(fromAddress) && from !== fromAddress}
+					<ListItem>
+						<span>{$i18n.transaction.text.from_ata}</span>
+						<output class="flex max-w-[50%] flex-row">
+							<output>{shortenWithMiddleEllipsis({ text: fromAddress })}</output>
 
-						<TransactionAddressActions
-							copyAddress={to}
-							copyAddressText={$i18n.transaction.text.to_copied}
-							explorerUrl={toExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
-						/>
-					</output>
-				</ListItem>
+							<TransactionAddressActions
+								copyAddress={fromAddress}
+								copyAddressText={$i18n.transaction.text.from_ata_copied}
+								explorerUrl={fromExplorerUrl}
+								explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+							/>
+						</output>
+					</ListItem>
 			{/if}
-			{#if type === 'send' && nonNullish(from)}
-				<ListItem>
-					<span>{$i18n.transaction.text.from}</span>
-					<output class="flex max-w-[50%] flex-row">
-						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
-						<TransactionAddressActions
-							copyAddress={from}
-							copyAddressText={$i18n.transaction.text.from_copied}
-							explorerUrl={fromExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
-						/>
-					</output>
-				</ListItem>
+			{#if type === 'send' && nonNullish(to) && nonNullish(toAddress) && to !== toAddress}
+					<ListItem >
+						<span>{$i18n.transaction.text.to_ata}</span>
+						<output class="flex max-w-[50%] flex-row">
+							<output>{shortenWithMiddleEllipsis({ text: toAddress })}</output>
+							<TransactionAddressActions
+								copyAddress={toAddress}
+								copyAddressText={$i18n.transaction.text.to_ata_copied}
+								explorerUrl={toExplorerUrl}
+								explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
+							/>
+						</output>
+					</ListItem>
 			{/if}
 
 			{#if nonNullish(id)}
