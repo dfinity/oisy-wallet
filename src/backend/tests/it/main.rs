@@ -1,5 +1,6 @@
 mod bitcoin;
 mod config;
+mod contacts;
 mod custom_token;
 mod pow;
 mod settings;

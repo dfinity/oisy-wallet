@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher } from 'svelte';
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 	import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
@@ -28,16 +29,20 @@
 	let restAmountsNumber = $derived(amounts.length - amountsToDisplay.length);
 
 	let currentDate = $state(new Date());
+
+	const dispatch = createEventDispatcher();
 </script>
 
-<LogoButton styleClass="group" on:click>
-	<div class="mr-2" slot="logo"><RoundedIcon icon={IconConvertTo} /></div>
+<LogoButton styleClass="group" onClick={() => dispatch('click')}>
+	{#snippet logo()}
+		<div class="mr-2"><RoundedIcon icon={IconConvertTo} /></div>
+	{/snippet}
 
-	<svelte:fragment slot="title">
+	{#snippet title()}
 		<span class="text-base">{shortenWithMiddleEllipsis({ text: destination })}</span>
-	</svelte:fragment>
+	{/snippet}
 
-	<svelte:fragment slot="description">
+	{#snippet description()}
 		{#each amountsToDisplay as { token, value }, index (index)}
 			<Amount amount={value} decimals={token.decimals} symbol={token.symbol} />
 			{#if index < amounts.length - 1}
@@ -48,9 +53,9 @@
 		{#if restAmountsNumber > 0}
 			{replacePlaceholders($i18n.core.text.more_items, { $items: `${restAmountsNumber}` })}
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 
-	<svelte:fragment slot="description-end">
+	{#snippet descriptionEnd()}
 		<div class="block group-hover:hidden">
 			{#if nonNullish(timestamp)}
 				{formatSecondsToNormalizedDate({
@@ -61,5 +66,5 @@
 		</div>
 
 		<div class="hidden text-brand-primary group-hover:block">{$i18n.send.text.send_again}</div>
-	</svelte:fragment>
+	{/snippet}
 </LogoButton>

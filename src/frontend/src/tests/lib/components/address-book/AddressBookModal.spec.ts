@@ -5,6 +5,11 @@ import {
 	ADDRESS_BOOK_CONTACT_NAME_INPUT,
 	ADDRESS_BOOK_MODAL,
 	ADDRESS_BOOK_SAVE_BUTTON,
+	CONTACT_CARD,
+	CONTACT_CARD_BUTTON,
+	CONTACT_HEADER_EDIT_BUTTON,
+	CONTACT_SHOW_ADD_ADDRESS_BUTTON,
+	CONTACT_SHOW_CLOSE_BUTTON,
 	MODAL_TITLE
 } from '$lib/constants/test-ids.constants';
 import en from '$tests/mocks/i18n.mock';
@@ -106,5 +111,115 @@ describe('AddressBookModal', () => {
 		// Both contacts should be displayed
 		expect(getByText('Contact 1', { exact: false })).toBeInTheDocument();
 		expect(getByText('Contact 2', { exact: false })).toBeInTheDocument();
+	});
+
+	it('should display contacts using ContactCard components', async () => {
+		const { getByTestId, getAllByTestId } = render(AddressBookModal);
+
+		// Add first contact
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
+		await fireEvent.input(getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT), {
+			target: { value: 'Contact 1' }
+		});
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		// Should display the contact using ContactCard
+		const contactCards = getAllByTestId(CONTACT_CARD);
+
+		expect(contactCards).toHaveLength(1);
+		expect(contactCards[0]).toBeInTheDocument();
+	});
+
+	it('should navigate to show contact step when ContactCard is clicked', async () => {
+		const { getByTestId, getAllByTestId } = render(AddressBookModal);
+
+		// Add a contact
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
+		await fireEvent.input(getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT), {
+			target: { value: 'Test Contact' }
+		});
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		// Click on the contact card
+		const contactButtons = getAllByTestId(CONTACT_CARD_BUTTON);
+		await fireEvent.click(contactButtons[0]);
+
+		// Should navigate to show contact step
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
+	});
+
+	it('should navigate from show contact step to address book when close button is clicked', async () => {
+		const { getByTestId, getAllByTestId } = render(AddressBookModal);
+
+		// Add a contact
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
+		await fireEvent.input(getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT), {
+			target: { value: 'Test Contact' }
+		});
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		// Navigate to show contact step
+		const contactButtons = getAllByTestId(CONTACT_CARD_BUTTON);
+		await fireEvent.click(contactButtons[0]);
+
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
+
+		// Click close button
+		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
+
+		// Should be back on address book step
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.text.title);
+	});
+
+	it('should navigate from edit contact step to show contact when close button is clicked', async () => {
+		const { getByTestId, getAllByTestId } = render(AddressBookModal);
+
+		// Add a contact
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
+		await fireEvent.input(getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT), {
+			target: { value: 'Test Contact' }
+		});
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		// Navigate to show contact step
+		const contactButtons = getAllByTestId(CONTACT_CARD_BUTTON);
+		await fireEvent.click(contactButtons[0]);
+
+		// Navigate to edit contact step
+		await fireEvent.click(getByTestId(CONTACT_HEADER_EDIT_BUTTON));
+
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent('Edit contact');
+
+		// Click close button
+		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
+
+		// Should be back on show contact step
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
+	});
+
+	it('should navigate from edit address step to show contact when close button is clicked', async () => {
+		const { getByTestId, getAllByTestId } = render(AddressBookModal);
+
+		// Add a contact
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
+		await fireEvent.input(getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT), {
+			target: { value: 'Test Contact' }
+		});
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		// Navigate to show contact step
+		const contactButtons = getAllByTestId(CONTACT_CARD_BUTTON);
+		await fireEvent.click(contactButtons[0]);
+
+		// Navigate to add address step
+		await fireEvent.click(getByTestId(CONTACT_SHOW_ADD_ADDRESS_BUTTON));
+
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent('Edit contact');
+
+		// Click close button
+		await fireEvent.click(getByTestId(ADDRESS_BOOK_CANCEL_BUTTON));
+
+		// Should be back on show contact step
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
 	});
 });

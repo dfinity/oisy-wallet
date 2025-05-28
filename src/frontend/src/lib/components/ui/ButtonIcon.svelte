@@ -1,9 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import type { MouseEventHandler } from 'svelte/elements';
 	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
-		onclick: () => void;
+		onclick: MouseEventHandler<HTMLButtonElement>;
 		icon: Snippet;
 		children?: Snippet;
 		button?: HTMLButtonElement;

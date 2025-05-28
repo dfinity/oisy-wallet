@@ -127,7 +127,7 @@ export const idlFactory = ({ IDL }) => {
 		network: AnyNetwork,
 		counterparty: AccountId_Any,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
+		amount: IDL.Nat
 	});
 	const AccountSnapshot_Any = IDL.Record({
 		decimals: IDL.Nat8,
@@ -137,14 +137,14 @@ export const idlFactory = ({ IDL }) => {
 		last_transactions: IDL.Vec(Transaction_Any),
 		account: AccountId_Any,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
+		amount: IDL.Nat
 	});
 	const Transaction_Icrc = IDL.Record({
 		transaction_type: TransactionType,
 		network: IDL.Record({}),
 		counterparty: IDL.Principal,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
+		amount: IDL.Nat
 	});
 	const AccountSnapshot_Icrc = IDL.Record({
 		decimals: IDL.Nat8,
@@ -154,14 +154,14 @@ export const idlFactory = ({ IDL }) => {
 		last_transactions: IDL.Vec(Transaction_Icrc),
 		account: IDL.Principal,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
+		amount: IDL.Nat
 	});
 	const Transaction_Spl = IDL.Record({
 		transaction_type: TransactionType,
 		network: IDL.Record({}),
 		counterparty: IDL.Text,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
+		amount: IDL.Nat
 	});
 	const AccountSnapshot_Spl = IDL.Record({
 		decimals: IDL.Nat8,
@@ -171,7 +171,7 @@ export const idlFactory = ({ IDL }) => {
 		last_transactions: IDL.Vec(Transaction_Spl),
 		account: IDL.Text,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
+		amount: IDL.Nat
 	});
 	const AccountSnapshotFor = IDL.Variant({
 		Any: AccountSnapshot_Any,
@@ -244,6 +244,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const UsageAwardState = IDL.Record({
 		first_activity_ns: IDL.Opt(IDL.Nat64),
+		snapshot_timestamps: IDL.Vec(IDL.Nat64),
 		snapshots: IDL.Vec(UserSnapshot),
 		referred_by: IDL.Opt(IDL.Nat32),
 		last_activity_ns: IDL.Opt(IDL.Nat64),
