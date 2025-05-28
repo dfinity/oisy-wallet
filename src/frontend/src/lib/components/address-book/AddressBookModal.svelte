@@ -23,6 +23,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { contactsNotInitialized, sortedContacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import {
 		createContact,
@@ -35,7 +36,6 @@
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import { contactsNotInitialized, sortedContacts } from '$lib/derived/contacts.derived';
 
 	const callCreateContact = $derived(
 		wrapCallWith({
