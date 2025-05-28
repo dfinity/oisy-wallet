@@ -222,7 +222,7 @@
 		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentContact?.name)}
 			<div class="flex flex-wrap items-center gap-2">
 				<Avatar
-					name={currentContact?.name}
+					name={currentContact.name}
 					variant="xs"
 					styleClass="rounded-full flex items-center justify-center"
 				/>
