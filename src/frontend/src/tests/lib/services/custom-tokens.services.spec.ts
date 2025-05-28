@@ -2,12 +2,17 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { listCustomTokens } from '$lib/api/backend.api';
+import { nullishSignOut } from '$lib/services/auth.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
@@ -50,12 +55,14 @@ describe('custom-tokens.services', () => {
 		];
 
 		const mockSetIdbTokens = vi.fn();
+		const mockGetIdbTokens = vi.fn();
 
 		const mockParams = {
 			identity: mockIdentity,
 			certified: true,
 			filterTokens: () => true,
-			setIdbTokens: mockSetIdbTokens
+			setIdbTokens: mockSetIdbTokens,
+			getIdbTokens: mockGetIdbTokens
 		};
 
 		beforeEach(() => {
@@ -151,6 +158,57 @@ describe('custom-tokens.services', () => {
 			mockSetIdbTokens.mockRejectedValue(new Error('IDB error'));
 
 			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrow('IDB error');
+		});
+
+		it('should sign out if the identity is nullish', async () => {
+			await expect(loadNetworkCustomTokens({ ...mockParams, identity: null })).resolves.toEqual([]);
+
+			expect(nullishSignOut).toHaveBeenCalledOnce();
+
+			await expect(
+				loadNetworkCustomTokens({ ...mockParams, identity: undefined })
+			).resolves.toEqual([]);
+
+			expect(nullishSignOut).toHaveBeenCalledTimes(2);
+		});
+
+		it('should fetch the cached tokens if useCache is true and certified is false', async () => {
+			mockGetIdbTokens.mockResolvedValue(mockCustomTokens.slice(0, 2));
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(mockCustomTokens.slice(0, 2));
+
+			expect(mockGetIdbTokens).toHaveBeenCalledOnce();
+			expect(mockGetIdbTokens).toHaveBeenNthCalledWith(1, mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should load the tokens from backend if there are no cached tokens', async () => {
+			mockGetIdbTokens.mockResolvedValue(undefined);
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(mockCustomTokens);
+
+			expect(mockGetIdbTokens).toHaveBeenCalledOnce();
+			expect(mockGetIdbTokens).toHaveBeenNthCalledWith(1, mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).toHaveBeenCalledOnce();
+			expect(listCustomTokens).toHaveBeenNthCalledWith(1, {
+				certified: false,
+				identity: mockIdentity,
+				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
+			});
 		});
 	});
 });
