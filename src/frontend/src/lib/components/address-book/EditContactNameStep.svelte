@@ -54,7 +54,7 @@
 
 <ContentWithToolbar styleClass="flex flex-col gap-6 items-center">
 	<Avatar name={contact?.name} variant="xl"></Avatar>
-	<ContactForm bind:contact bind:this={form}></ContactForm>
+	<ContactForm bind:contact bind:this={form} {loading}></ContactForm>
 
 	<!-- TODO Add address list here -->
 

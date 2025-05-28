@@ -52,14 +52,7 @@
 
 	const callCreateContact = $derived(
 		callWithState(wrapCallWith({
-				methodToCall: async (...args) => {
-					loading = true;
-					try {
-						return await createContact(...args);
-					} finally {
-						loading = false;
-					}
-				},
+				methodToCall: createContact,
 				toastErrorMessage: $i18n.contact.error.create,
 				trackEventNames: {
 					success: TRACK_CONTACT_CREATE_SUCCESS,
@@ -71,14 +64,7 @@
 
 	const callUpdateContact = $derived(
 		callWithState(wrapCallWith({
-			methodToCall: async (...args) => {
-				loading = true;
-				try {
-					return await updateContact(...args);
-				} finally {
-					loading = false;
-				}
-			},
+			methodToCall: updateContact,
 			toastErrorMessage: $i18n.contact.error.update,
 			trackEventNames: {
 				success: TRACK_CONTACT_UPDATE_SUCCESS,
@@ -90,14 +76,7 @@
 
 	const callDeleteContact = $derived(
 		callWithState(wrapCallWith({
-			methodToCall: async (...args) => {
-				loading = true;
-				try {
-					return await deleteContact(...args);
-				} finally {
-					loading = false;
-				}
-			},
+			methodToCall: deleteContact,
 			toastErrorMessage: $i18n.contact.error.delete,
 			trackEventNames: {
 				success: TRACK_CONTACT_DELETE_SUCCESS,
