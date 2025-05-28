@@ -52,11 +52,6 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 		{:else}
 			<AllNetworksLogo />
 		{/if}
-		{#if nonNullish(network)}
-			<NetworkLogo {network} />
-		{:else}
-			<AllNetworksLogo />
-		{/if}
 	{/snippet}
 
 	{#snippet title()}

@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { ComponentProps } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import type { ZodError } from 'zod';
 	import QrButton from '$lib/components/common/QrButton.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -17,12 +18,16 @@
 		onQRCodeScan?: () => void;
 		value?: string;
 		addressType?: TokenAccountIdTypes;
+		parseError?: ZodError;
+		disabled?: boolean;
 	}
 
 	let {
 		onQRCodeScan,
 		value = $bindable(),
 		addressType = $bindable(),
+		parseError = $bindable(),
+		disabled,
 		...props
 	}: InputAddressProps & ComponentProps<Input> = $props();
 
@@ -51,6 +56,7 @@
 	$effect(() => {
 		// Because bindable props may not be derrived, set it manually in an effect
 		addressType = currentAddressType;
+		parseError = tokenAccountIdParseResult?.error;
 	});
 </script>
 
@@ -60,8 +66,10 @@
 	{/if}
 {/snippet}
 
-<div style={`--input-custom-border-color: ${borderColor}; --input-padding-inner-end: 100px`}>
-	<Input inputType="text" bind:value innerEnd={qrButton} {...props}></Input>
+<div
+	style={`--input-custom-border-color: ${borderColor}; --input-padding-inner-end: 100px; ${disabled ? '--input-background: var(--color-background-disabled);' : ''}`}
+>
+	<Input {disabled} inputType="text" bind:value innerEnd={qrButton} {...props}></Input>
 
 	<div class="text-md pt-2">
 		{#if error}

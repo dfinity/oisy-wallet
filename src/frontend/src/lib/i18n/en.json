@@ -29,7 +29,8 @@
 			"paste": "Paste",
 			"to": "To",
 			"add": "Add",
-			"more_items": "+$items more"
+			"more_items": "+$items more",
+			"select": "Select"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -463,7 +464,12 @@
 			"select_token": "Select token to send",
 			"select_network_filter": "Select network filter",
 			"send_again": "Send again",
-			"recently_used": "Recently used"
+			"recently_used_tab": "Recently Used",
+			"contacts_tab": "Contacts",
+			"recently_used_empty_state_title": "Recently used addresses will appear here",
+			"recently_used_empty_state_description": "Make your first send now!",
+			"contacts_empty_state_title": "Your contacts will appear here",
+			"contacts_empty_state_description": "It looks like you haven’t added contacts yet"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
@@ -1037,11 +1043,18 @@
 			"add_new_contact": "Add new contact",
 			"add_contact": "Add contact",
 			"search_contact": "Search contact",
+			"loading_contacts": "Loading contacts...",
+			"no_address_found": "No address available.",
 			"no_contact_found": "No contacts found"
 		},
 		"alt": {
 			"show_addresses_of_contact": "Show all addresses for contact",
 			"hide_addresses": "Hide addresses of contact"
+		},
+		"edit_contact": {
+			"title": "Edit contact",
+			"add_address": "Add address",
+			"delete_contact": "Delete contact"
 		},
 		"show_contact": {
 			"title": "Contact",
@@ -1052,10 +1065,21 @@
 	},
 	"contact": {
 		"form": {
+			"edit_contact": "Edit contact",
 			"add_new_contact": "Add new contact"
 		},
 		"fields": {
 			"name": "Name"
+		},
+		"delete": {
+			"title": "Delete $contact contact?",
+			"delete_contact": "Delete contact",
+			"content_text": "This will delete $contact and all associated addresses from your Address Book. This action cannot be undone."
+		},
+		"error": {
+			"create": "Failed to create the contact",
+			"update": "Failed to update the contact",
+			"delete": "Failed to delete the contact"
 		}
 	},
 	"address": {
@@ -1066,8 +1090,25 @@
 			"Sol": "Solana"
 		},
 		"form": {
+			"new_address": "New address",
+			"address_placeholder": "Enter or paste address",
+			"label_placeholder": "E.g., “Mom’s wallet“",
 			"invalid_address": "Invalid address",
 			"valid_for_networks": "Valid for networks:"
+		},
+		"fields": {
+			"label": "Alias",
+			"address": "Address"
+		},
+		"delete": {
+			"title": "Delete address?",
+			"delete_address": "Delete address",
+			"content_text": "This will delete <strong>$address</strong> address from $contact's contact.<br>This action cannot be undone."
+		},
+		"save": {
+			"title": "Save address",
+			"add_to_existing_contact": "Add to existing contact",
+			"create_contact": "Create contact"
 		}
 	},
 	"signer": {

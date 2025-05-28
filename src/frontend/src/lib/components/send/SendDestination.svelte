@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
+	import AddressCard from '$lib/components/address/AddressCard.svelte';
+	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import { SEND_DESTINATION_SECTION } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
 		destination: string;
@@ -14,29 +15,29 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
 	const onIcSendDestinationStep = () => dispatch('icSendDestinationStep');
 </script>
 
 <div class="mb-10 mt-6" data-tid={SEND_DESTINATION_SECTION}>
 	<div class="font-bold">{$i18n.core.text.to}</div>
 
-	<div
-		class="flex items-center rounded-lg border bg-secondary px-2 py-3"
-		class:border-tertiary={!invalidDestination}
-		class:border-error-solid={invalidDestination}
-	>
-		<NetworkLogo network={$sendToken.network} />
+	<AddressCard hasError={invalidDestination} items="center">
+		{#snippet logo()}
+			<div class="mr-2"><AvatarWithBadge address={destination} /></div>
+		{/snippet}
 
-		<div class="w-full truncate pl-2 pr-4 text-sm sm:text-base">{destination}</div>
+		{#snippet content()}
+			{shortenWithMiddleEllipsis({ text: destination })}
+		{/snippet}
 
-		<button
-			class="text-brand-primary"
-			onclick={onIcSendDestinationStep}
-			aria-label={$i18n.core.text.back}
-		>
-			<IconPenLine />
-		</button>
-	</div>
+		{#snippet actions()}
+			<button
+				class="text-brand-primary"
+				onclick={onIcSendDestinationStep}
+				aria-label={$i18n.core.text.back}
+			>
+				<IconPenLine />
+			</button>
+		{/snippet}
+	</AddressCard>
 </div>
