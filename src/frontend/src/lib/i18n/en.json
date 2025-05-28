@@ -1042,6 +1042,7 @@
 			"add_new_contact": "Add new contact",
 			"add_contact": "Add contact",
 			"search_contact": "Search contact",
+			"loading_contacts": "Loading contacts...",
 			"no_contact_found": "No contacts found"
 		},
 		"alt": {
@@ -1072,6 +1073,11 @@
 			"title": "Delete $contact contact?",
 			"delete_contact": "Delete contact",
 			"content_text": "This will delete $contact and all associated addresses from your Address Book. This action cannot be undone."
+		},
+		"error": {
+			"create": "Failed to create the contact",
+			"update": "Failed to update the contact",
+			"delete": "Failed to delete the contact"
 		}
 	},
 	"address": {
