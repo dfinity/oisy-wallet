@@ -39,7 +39,9 @@
 
 	let loading = $state(false);
 
-	export const callWithState = <T, R>(methodToCall: (params: T) => Promise<R>) => async (params: T) => {
+	export const callWithState =
+		<T, R>(methodToCall: (params: T) => Promise<R>) =>
+		async (params: T) => {
 			loading = true;
 			try {
 				return await methodToCall(params);
