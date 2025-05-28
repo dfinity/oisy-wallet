@@ -1067,6 +1067,11 @@
 		},
 		"fields": {
 			"name": "Name"
+		},
+		"delete": {
+			"title": "Delete $contact contact?",
+			"delete_contact": "Delete contact",
+			"content_text": "This will delete $contact and all associated addresses from your Address Book. This action cannot be undone."
 		}
 	},
 	"address": {
