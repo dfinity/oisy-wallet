@@ -10,7 +10,6 @@ dfx deploy icp_index
 ./scripts/download.ckbtc.sh
 ./scripts/deploy.ckbtc.sh
 
-dfx deploy cycles_ledger
 dfx deploy cketh_minter
 dfx deploy cketh_ledger
 dfx deploy cketh_index

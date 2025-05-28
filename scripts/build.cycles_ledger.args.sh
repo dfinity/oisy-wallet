@@ -21,6 +21,7 @@ ARG_FILE="$(jq -r .canisters.cycles_ledger.init_arg_file dfx.json)"
 # Computes the install args, overwriting any existing args file.
 
 CANISTER_ID_CYCLES_LEDGER="${CANISTER_ID_CYCLES_LEDGER:-$(dfx canister id cycles_ledger --network "$DFX_NETWORK")}"
+PRINCIPAL="$(dfx identity get-principal)"
 
 # .. Creates the init args file
 rm -f "$ARG_FILE"
