@@ -11,9 +11,10 @@
 		onCancel: () => void;
 		onDelete: (id: bigint) => void;
 		contact: ContactUi;
+		disabled?: boolean;
 	}
 
-	let { onCancel, onDelete, contact }: Props = $props();
+	let { onCancel, onDelete, contact, disabled = false }: Props = $props();
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center pb-5">
@@ -24,8 +25,8 @@
 	</span>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={onCancel}></ButtonCancel>
-		<Button colorStyle="error" on:click={() => onDelete(contact.id)}>
+		<ButtonCancel {disabled} onclick={onCancel}></ButtonCancel>
+		<Button loading={disabled} colorStyle="error" on:click={() => onDelete(contact.id)}>
 			{$i18n.contact.delete.delete_contact}
 		</Button>
 	</ButtonGroup>

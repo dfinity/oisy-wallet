@@ -403,6 +403,7 @@
 			}}
 			onDelete={handleDeleteContact}
 			contact={currentContact}
+			disabled={loading}
 		/>
 	{/if}
 </WizardModal>
@@ -427,5 +428,6 @@
 			}
 		}}
 		contact={currentContact}
+		disabled={loading}
 	/>
 {/if}
