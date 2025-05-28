@@ -35,6 +35,9 @@
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import SkeletonCards from "$lib/components/ui/SkeletonCards.svelte";
+	import ContentWithToolbar from "$lib/components/ui/ContentWithToolbar.svelte";
+	import ButtonCloseModal from "$lib/components/ui/ButtonCloseModal.svelte";
 
 	const callCreateContact = $derived(
 		wrapCallWith({
@@ -228,7 +231,10 @@
 	</svelte:fragment>
 
 	{#if isNullish(contacts)}
-		{$i18n.address_book.text.loading_contacts}
+		<ContentWithToolbar styleClass="mx-2 flex flex-col">
+			<SkeletonCards rows={3} />
+			<ButtonCloseModal slot="toolbar" />
+		</ContentWithToolbar>
 	{:else if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
 			{contacts}
