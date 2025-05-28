@@ -59,7 +59,8 @@
 	<!-- TODO Add address list here -->
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel disabled={loading} onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
+		<ButtonCancel disabled={loading} onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}
+		></ButtonCancel>
 		<Button
 			colorStyle="primary"
 			on:click={handleSave}

@@ -39,8 +39,7 @@
 
 	let loading = $state(false);
 
-	export const callWithState = <T, R>(methodToCall: (params: T) => Promise<R>) => {
-		return async (params: T) => {
+	export const callWithState = <T, R>(methodToCall: (params: T) => Promise<R>) => async (params: T) => {
 			loading = true;
 			try {
 				return await methodToCall(params);
@@ -48,10 +47,10 @@
 				loading = false;
 			}
 		};
-	};
 
 	const callCreateContact = $derived(
-		callWithState(wrapCallWith({
+		callWithState(
+			wrapCallWith({
 				methodToCall: createContact,
 				toastErrorMessage: $i18n.contact.error.create,
 				trackEventNames: {
@@ -59,31 +58,36 @@
 					error: TRACK_CONTACT_CREATE_ERROR
 				},
 				identity: $authIdentity
-			}))
+			})
+		)
 	);
 
 	const callUpdateContact = $derived(
-		callWithState(wrapCallWith({
-			methodToCall: updateContact,
-			toastErrorMessage: $i18n.contact.error.update,
-			trackEventNames: {
-				success: TRACK_CONTACT_UPDATE_SUCCESS,
-				error: TRACK_CONTACT_UPDATE_ERROR
-			},
-			identity: $authIdentity
-		}))
+		callWithState(
+			wrapCallWith({
+				methodToCall: updateContact,
+				toastErrorMessage: $i18n.contact.error.update,
+				trackEventNames: {
+					success: TRACK_CONTACT_UPDATE_SUCCESS,
+					error: TRACK_CONTACT_UPDATE_ERROR
+				},
+				identity: $authIdentity
+			})
+		)
 	);
 
 	const callDeleteContact = $derived(
-		callWithState(wrapCallWith({
-			methodToCall: deleteContact,
-			toastErrorMessage: $i18n.contact.error.delete,
-			trackEventNames: {
-				success: TRACK_CONTACT_DELETE_SUCCESS,
-				error: TRACK_CONTACT_DELETE_ERROR
-			},
-			identity: $authIdentity
-		}))
+		callWithState(
+			wrapCallWith({
+				methodToCall: deleteContact,
+				toastErrorMessage: $i18n.contact.error.delete,
+				trackEventNames: {
+					success: TRACK_CONTACT_DELETE_SUCCESS,
+					error: TRACK_CONTACT_DELETE_ERROR
+				},
+				identity: $authIdentity
+			})
+		)
 	);
 
 	const steps: WizardSteps = [

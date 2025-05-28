@@ -5,7 +5,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 
-	let { contact = $bindable(), loading = false }: { contact: Partial<ContactUi>, loading: boolean } = $props();
+	let {
+		contact = $bindable(),
+		loading = false
+	}: { contact: Partial<ContactUi>; loading: boolean } = $props();
 
 	let isValid = $derived(notEmptyString(contact?.name?.trim?.()));
 
