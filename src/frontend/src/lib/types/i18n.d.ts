@@ -33,6 +33,7 @@ interface I18nCore {
 		to: string;
 		add: string;
 		more_items: string;
+		select: string;
 	};
 	info: { test_banner: string };
 	alt: {

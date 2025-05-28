@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { Collapsible } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import AddressItemActions from '$lib/components/contact/AddressItemActions.svelte';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import {
@@ -19,10 +21,11 @@
 		contact: ContactUi;
 		onClick: () => void;
 		onInfo: (addressIndex: number) => void;
+		onSelect?: () => void;
 		initiallyExpanded?: boolean;
 	}
 
-	let { contact, onInfo, onClick, initiallyExpanded = false }: Props = $props();
+	let { contact, onInfo, onClick, onSelect, initiallyExpanded = false }: Props = $props();
 
 	let toggleContent = $state<() => void | undefined>();
 
@@ -83,6 +86,11 @@
 						<IconExpand {expanded} />
 					{/snippet}
 				</ButtonIcon>
+			{/if}
+			{#if nonNullish(onSelect)}
+				<Button link on:click={onSelect} ariaLabel={$i18n.core.text.select}
+					>{$i18n.core.text.select}</Button
+				>
 			{/if}
 		{/snippet}
 	</LogoButton>
