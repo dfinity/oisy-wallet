@@ -33,6 +33,8 @@ export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR = 'ic_ckerc20_to_erc20_e
 export const TRACK_COUNT_IC_SEND_SUCCESS = 'ic_send_success_count';
 export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';
 export const TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR = 'ic_loading_transactions_error_count';
+export const TRACK_COUNT_CKETH_LOADING_MINTER_INFO_ERROR = 'ic_cketh_load_minter_info_error_count';
+export const TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR = 'ic_ckbtc_load_minter_info_error_count';
 
 // Solana
 export const TRACK_COUNT_SOL_SEND_SUCCESS = 'sol_send_success_count';
