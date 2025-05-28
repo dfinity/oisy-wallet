@@ -66,9 +66,7 @@ export const replaceErrorFields = ({
 
 	if (err instanceof Error) {
 		return cleanTrailingCommasAndLines(
-			keysToRemove
-				.map(buildTextPattern)
-				.reduce((acc, pattern) => acc.replace(pattern, ''), err.message)
+			keysToRemove.reduce((acc, key) => acc.replace(buildTextPattern(key), ''), err.message)
 		);
 	}
 
@@ -86,10 +84,7 @@ export const replaceErrorFields = ({
 	}
 
 	if (typeof err === 'string') {
-		return keysToRemove
-			.map(buildJsonKeyPattern)
-			.reduce((acc, pattern) => acc.replace(pattern, ''), err)
-			.trim();
+		return keysToRemove.reduce((acc, key) => acc.replace(buildJsonKeyPattern(key), ''), err).trim();
 	}
 
 	return String(err);
