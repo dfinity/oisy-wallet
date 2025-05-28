@@ -18,8 +18,8 @@ const initBusyStore = (): BusyStore => {
 	return {
 		subscribe,
 
-		start: ({spinner = true, close = false, msg}: Busy = {}) => {
-			set({ spinner, close, msg });
+		start: (params?: Busy) => {
+			set({ spinner: true, close: false, ...params });
 		},
 
 		show: () => {
