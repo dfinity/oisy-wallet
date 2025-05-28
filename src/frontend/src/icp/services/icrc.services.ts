@@ -16,7 +16,7 @@ import {
 	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { setIdbIcTokens } from '$lib/api/idb-tokens.api';
+import { getIdbIcTokens, setIdbIcTokens } from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -120,7 +120,8 @@ const loadIcrcCustomTokens = async ({
 		identity,
 		certified,
 		filterTokens: ({ token }) => 'Icrc' in token,
-		setIdbTokens: setIdbIcTokens
+		setIdbTokens: setIdbIcTokens,
+		getIdbTokens: getIdbIcTokens
 	});
 
 	return await loadCustomIcrcTokensData({
