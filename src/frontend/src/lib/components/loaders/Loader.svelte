@@ -88,15 +88,9 @@
 	const loadData = async () => {
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
 		await Promise.all([
-			loadErc20Tokens({
-				identity: $authIdentity
-			}),
-			loadIcrcTokens({
-				identity: $authIdentity
-			}),
-			loadSplTokens({
-				identity: $authIdentity
-			})
+			loadErc20Tokens({ identity: $authIdentity }),
+			loadIcrcTokens({ identity: $authIdentity }),
+			loadSplTokens({ identity: $authIdentity })
 		]);
 	};
 
