@@ -178,7 +178,10 @@ const loadData: LoadData = async <T>({
 			store.reset(id);
 
 			trackEvent({
-				name: TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR
+				name: TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR,
+				metadata: {
+					error: `${err}`
+				}
 			});
 
 			// We print the error to console just for debugging purposes
