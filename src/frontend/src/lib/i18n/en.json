@@ -1104,6 +1104,11 @@
 			"title": "Delete address?",
 			"delete_address": "Delete address",
 			"content_text": "This will delete <strong>$address</strong> address from $contact's contact.<br>This action cannot be undone."
+		},
+		"save": {
+			"title": "Save address",
+			"add_to_existing_contact": "Add to existing contact",
+			"create_contact": "Create contact"
 		}
 	},
 	"signer": {
