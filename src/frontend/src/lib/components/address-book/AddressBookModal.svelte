@@ -37,9 +37,18 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
+	let loading = $state(false);
+
 	const callCreateContact = $derived(
 		wrapCallWith({
-			methodToCall: createContact,
+			methodToCall: async (...args) => {
+				loading = true;
+				try {
+					return await createContact(...args);
+				} finally {
+					loading = false;
+				}
+			},
 			toastErrorMessage: $i18n.contact.error.create,
 			trackEventNames: {
 				success: TRACK_CONTACT_CREATE_SUCCESS,
@@ -51,7 +60,14 @@
 
 	const callUpdateContact = $derived(
 		wrapCallWith({
-			methodToCall: updateContact,
+			methodToCall: async (...args) => {
+				loading = true;
+				try {
+					return await updateContact(...args);
+				} finally {
+					loading = false;
+				}
+			},
 			toastErrorMessage: $i18n.contact.error.update,
 			trackEventNames: {
 				success: TRACK_CONTACT_UPDATE_SUCCESS,
@@ -63,7 +79,14 @@
 
 	const callDeleteContact = $derived(
 		wrapCallWith({
-			methodToCall: deleteContact,
+			methodToCall: async (...args) => {
+				loading = true;
+				try {
+					return await deleteContact(...args);
+				} finally {
+					loading = false;
+				}
+			},
 			toastErrorMessage: $i18n.contact.error.delete,
 			trackEventNames: {
 				success: TRACK_CONTACT_DELETE_SUCCESS,
