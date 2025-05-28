@@ -63,6 +63,23 @@ describe('replaceErrorFields', () => {
 		expect(result).toContain('"message": "fail"');
 	});
 
+	it('removes keys from stringified JSON even if keys have whitespaces', () => {
+		const input = `
+    {
+      "message": "fail"
+      " requestId ": "abc123"
+    }
+    `;
+
+		const result = replaceErrorFields({
+			err: input,
+			keysToRemove: ['requestId']
+		});
+
+		expect(result).not.toContain('"requestId"');
+		expect(result).toContain('"message": "fail"');
+	});
+
 	it('returns string as-is for number, boolean', () => {
 		expect(replaceErrorFields({ err: 123, keysToRemove: [] })).toBe('123');
 		expect(replaceErrorFields({ err: true, keysToRemove: [] })).toBe('true');

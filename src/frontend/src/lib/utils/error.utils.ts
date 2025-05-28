@@ -16,7 +16,10 @@ export const errorDetailToString = (err: unknown): string | undefined =>
  * @param key - The key to build a removal pattern for.
  * @returns A RegExp that matches the `"key": "value"` pattern in a JSON string.
  */
-const buildJsonKeyPattern = (key: string): RegExp => new RegExp(`"${key}"\\s*:\\s*".+?"(,)?`, 'g');
+const buildJsonKeyPattern = (key: string): RegExp => {
+	const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return new RegExp(`"\\s*${escapedKey}\\s*"\\s*:\\s*".+?"(,)?`, 'g');
+}
 
 /**
  * Normalizes an error by removing specific keys from its structure.
