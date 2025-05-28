@@ -151,7 +151,6 @@ describe('etherscan.providers', () => {
 
 				expect(mockFetch).toHaveBeenCalledTimes(2);
 				expect(mockFetch).toHaveBeenNthCalledWith(1, 'account', {
-					chainId,
 					action: 'txlist',
 					address,
 					startblock: 0,
@@ -169,7 +168,6 @@ describe('etherscan.providers', () => {
 
 				expect(mockFetch).toHaveBeenCalledTimes(2);
 				expect(mockFetch).toHaveBeenNthCalledWith(2, 'account', {
-					chainId,
 					action: 'txlistinternal',
 					address,
 					startblock: 0,

@@ -47,7 +47,6 @@ export class EtherscanProvider {
 		endBlock
 	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
-			chainId: this.chainId,
 			action: 'txlist',
 			address,
 			startblock: startBlock ?? 0,
@@ -90,7 +89,6 @@ export class EtherscanProvider {
 		endBlock
 	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
-			chainId: this.chainId,
 			action: 'txlistinternal',
 			address,
 			startblock: startBlock ?? 0,
@@ -141,7 +139,6 @@ export class EtherscanProvider {
 		contract: Erc20Token;
 	}): Promise<Transaction[]> => {
 		const params = {
-			chainId: this.chainId,
 			action: 'tokentx',
 			contractAddress,
 			address,
