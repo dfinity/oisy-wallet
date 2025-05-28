@@ -12,6 +12,7 @@ import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -82,7 +83,9 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	private loadTransactions = async ({
 		solanaNetwork: network,
 		...rest
-	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
+	}: LoadSolWalletParams & Pick<GetSolTransactionsParams, 'before'>): Promise<
+		SolCertifiedTransaction[]
+	> => {
 		const transactions = await getSolTransactions({
 			network,
 			...rest
@@ -102,6 +105,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		try {
 			const {
 				address: { data: address },
+				beforeSignature,
 				...rest
 			} = data;
 
@@ -112,6 +116,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 				}),
 				this.loadTransactions({
 					address,
+					before: beforeSignature,
 					...rest
 				})
 			]);

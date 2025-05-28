@@ -11,12 +11,14 @@ import type {
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
+import { last } from '$lib/utils/array.utils';
 import {
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
 	isNetworkIdSOLTestnet
 } from '$lib/utils/network.utils';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
+import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -72,6 +74,9 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	const network = mapNetworkIdToNetwork(token.network.id);
 	assertNonNullish(network, 'No Solana network provided to start Solana wallet worker.');
 
+	// To spare calls to the Solana RPC we get the last signature fetched by the wallet
+	const beforeSignature = last(get(solTransactionsStore)?.[tokenId] ?? [])?.data.signature;
+
 	// If the token is an SPL token, we need to pass the token address and the owner address to the worker.
 	// Otherwise, we pass undefined, which will be considered as the native SOLANA token.
 	const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
@@ -81,6 +86,7 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	const data: PostMessageDataRequestSol = {
 		address,
 		solanaNetwork: network,
+		beforeSignature,
 		tokenAddress,
 		tokenOwnerAddress
 	};
