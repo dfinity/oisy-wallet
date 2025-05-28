@@ -960,6 +960,7 @@ interface I18nAddress_book {
 		add_new_contact: string;
 		add_contact: string;
 		search_contact: string;
+		loading_contacts: string;
 		no_contact_found: string;
 	};
 	alt: { show_addresses_of_contact: string; hide_addresses: string };
@@ -976,6 +977,7 @@ interface I18nContact {
 	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
 	delete: { title: string; delete_contact: string; content_text: string };
+	error: { create: string; update: string; delete: string };
 }
 
 interface I18nAddress {
