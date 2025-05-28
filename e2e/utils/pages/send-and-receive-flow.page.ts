@@ -4,7 +4,8 @@ import {
 	DESTINATION_INPUT,
 	IN_PROGRESS_MODAL,
 	MAX_BUTTON,
-	NAVIGATION_ITEM_ACTIVITY, NAVIGATION_ITEM_TOKENS,
+	NAVIGATION_ITEM_ACTIVITY,
+	NAVIGATION_ITEM_TOKENS,
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_DONE_BUTTON,
 	RECEIVE_TOKENS_MODAL_ICP_SECTION,
@@ -103,12 +104,12 @@ export class FlowPage extends HomepageLoggedIn {
 	}
 
 	async navigateToTransactionsPage({
-		 tokenSymbol,
-		 networkSymbol
-	 }: {
+		tokenSymbol,
+		networkSymbol
+	}: {
 		tokenSymbol: string;
 		networkSymbol: string;
 	}): Promise<void> {
-		await this.clickByTestId({ testId: this.getTokenCardTestId({tokenSymbol, networkSymbol}) });
+		await this.clickByTestId({ testId: this.getTokenCardTestId({ tokenSymbol, networkSymbol }) });
 	}
 }

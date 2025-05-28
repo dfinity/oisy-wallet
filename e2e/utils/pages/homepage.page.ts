@@ -435,7 +435,7 @@ abstract class Homepage {
 	}
 
 	async toggleNetworkSelector({ networkSymbol }: { networkSymbol: string }): Promise<void> {
-		await this.openNetworkSelector()
+		await this.openNetworkSelector();
 		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
 	}
 
