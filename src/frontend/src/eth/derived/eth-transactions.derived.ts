@@ -4,11 +4,12 @@ import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { ethAddress } from '$lib/derived/address.derived';
+import { contacts } from '$lib/derived/contacts.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';
 import type { AnyTransactionUiWithToken, Transaction } from '$lib/types/transaction';
-import type { KnownDestinations } from '$lib/types/transactions';
+import type { KnownDestinations, NetworkContacts } from '$lib/types/transactions';
 import { getKnownDestinations } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -98,3 +99,20 @@ export const ethKnownDestinations: Readable<KnownDestinations> = derived(
 		return getKnownDestinations(mappedTransactions);
 	}
 );
+
+export const ethNetworkContacts: Readable<NetworkContacts> = derived([contacts], ([$contacts]) => {
+	if (isNullish($contacts)) {
+		return {};
+	}
+
+	console.log({ $contacts });
+	return $contacts.reduce<NetworkContacts>((acc, contact) => {
+		contact.addresses.forEach((addressUi) => {
+			if (addressUi.addressType === 'Eth' && isNullish(acc[addressUi.address])) {
+				acc[addressUi.address] = contact;
+			}
+		});
+
+		return acc;
+	}, {});
+});

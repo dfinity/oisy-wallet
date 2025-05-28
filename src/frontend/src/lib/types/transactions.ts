@@ -4,6 +4,7 @@ import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { Address } from '$lib/types/address';
+import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
@@ -22,3 +23,5 @@ export interface KnownDestination {
 }
 
 export type KnownDestinations = Record<Address, KnownDestination>;
+
+export type NetworkContacts = Record<Address, ContactUi>;

@@ -4,7 +4,7 @@
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
 	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
-	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
+	import { ethKnownDestinations, ethNetworkContacts } from '$eth/derived/eth-transactions.derived';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
@@ -21,6 +21,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBitcoin,
@@ -34,9 +35,14 @@
 
 	interface Props {
 		destination: string;
+		contact?: ContactUi;
 		formCancelAction?: 'back' | 'close';
 	}
-	let { destination = $bindable(), formCancelAction = 'back' }: Props = $props();
+	let {
+		destination = $bindable(),
+		contact = $bindable(),
+		formCancelAction = 'back'
+	}: Props = $props();
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -67,7 +73,9 @@
 					/>
 					<SendDestinationTabs
 						knownDestinations={$ethKnownDestinations}
+						networkContacts={$ethNetworkContacts}
 						bind:destination
+						bind:contact
 						on:icNext={next}
 					/>
 				</LoaderMultipleEthTransactions>
@@ -84,6 +92,7 @@
 			/>
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
+				networkContacts={$ethNetworkContacts}
 				bind:destination
 				on:icNext={next}
 			/>
@@ -98,6 +107,7 @@
 			/>
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
+				networkContacts={$ethNetworkContacts}
 				bind:destination
 				on:icNext={next}
 			/>
@@ -112,6 +122,7 @@
 			/>
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
+				networkContacts={$ethNetworkContacts}
 				bind:destination
 				on:icNext={next}
 			/>

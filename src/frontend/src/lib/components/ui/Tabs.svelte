@@ -16,6 +16,7 @@
 	{#each tabs as { label, id }, index (id)}
 		<button
 			onclick={() => (activeTab = id)}
+			data-tid={`tab-${id}`}
 			aria-label={label}
 			class="w-full justify-center rounded-none border-0 border-b-2 p-2 text-sm font-semibold transition hover:border-brand-primary hover:text-brand-primary sm:text-base"
 			class:ml-4={index !== 0}
