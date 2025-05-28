@@ -10,6 +10,7 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
@@ -17,7 +18,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactUi } from '$lib/types/contact';
-	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 
 	interface Props {
 		onCreateContact?: () => void;
