@@ -1,3 +1,4 @@
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	ACTIVITY_TRANSACTION_SKELETON_PREFIX,
 	CAROUSEL_SLIDE_NAVIGATION,
@@ -14,7 +15,7 @@ export class ActivityPage extends HomepageLoggedIn {
 	}
 
 	override async extendWaitForReady(): Promise<void> {
-		await this.navigateTo(NAVIGATION_ITEM_ACTIVITY);
+		await this.navigateTo({ testId: NAVIGATION_ITEM_ACTIVITY, expectedPath: AppPath.Activity });
 		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({
 			state: 'hidden'
 		});
