@@ -10,11 +10,11 @@
 		ADDRESS_BOOK_CANCEL_BUTTON,
 		ADDRESS_BOOK_SAVE_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
-	import { AddressBookSteps } from '$lib/enums/progress-steps';
+	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
 
 	interface Props {
