@@ -961,6 +961,7 @@ interface I18nAddress_book {
 		add_contact: string;
 		search_contact: string;
 		loading_contacts: string;
+		no_address_found: string;
 		no_contact_found: string;
 	};
 	alt: { show_addresses_of_contact: string; hide_addresses: string };

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
@@ -10,7 +11,7 @@
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import {
 		TRACK_CONTACT_CREATE_ERROR,
@@ -218,12 +219,23 @@
 	on:nnsClose={close}
 >
 	<svelte:fragment slot="title">
-		{#if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
+		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentContact?.name)}
+			<div class="flex flex-wrap items-center gap-2">
+				<Avatar
+					name={currentContact.name}
+					variant="xs"
+					styleClass="rounded-full flex items-center justify-center"
+				/>
+				<div class="text-center text-lg font-semibold text-primary">
+					{currentContact.name}
+				</div>
+			</div>
+		{:else if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
 			{replacePlaceholders($i18n.contact.delete.title, { $contact: currentContact.name })}
 		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
 			{editContactNameStep.title}
 		{:else}
-			{currentStep?.title ?? ''}
+			{currentStep?.title}
 		{/if}
 	</svelte:fragment>
 
@@ -244,6 +256,7 @@
 			onShowAddress={({ contact, addressIndex }) => {
 				currentContact = contact;
 				currentAddressIndex = addressIndex;
+				previousStepName = AddressBookSteps.ADDRESS_BOOK;
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
@@ -259,8 +272,9 @@
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
-			onShowAddress={(address) => {
-				currentAddressIndex = address;
+			onShowAddress={(addressIndex) => {
+				currentAddressIndex = addressIndex;
+				previousStepName = AddressBookSteps.SHOW_CONTACT;
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
@@ -280,6 +294,7 @@
 				}}
 				onAddAddress={() => {
 					currentAddressIndex = undefined;
+					previousStepName = AddressBookSteps.SHOW_CONTACT;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
 				onDeleteContact={() => {
@@ -325,16 +340,6 @@
 			isNewContact={isNullish(currentContact)}
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		/>
-	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentAddressIndex)}
-		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
-		{JSON.stringify(currentContact?.addresses[currentAddressIndex])}
-		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
-		<Button
-			on:click={() => {
-				currentAddressIndex = undefined;
-				handleClose();
-			}}>BACK</Button
-		>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep
 			contact={currentContact}
@@ -359,6 +364,16 @@
 			address={currentContact.addresses[currentAddressIndex]}
 			contact={currentContact}
 		/>
+	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
+		{#if nonNullish(currentAddressIndex) && nonNullish(currentContact?.addresses?.[currentAddressIndex])}
+			<AddressBookInfoPage
+				address={currentContact.addresses[currentAddressIndex]}
+				onClose={() => {
+					currentAddressIndex = undefined;
+					handleClose();
+				}}
+			/>
+		{/if}
 	{:else if currentStep?.name === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
 		<DeleteContactConfirmContent
 			onCancel={() => {
