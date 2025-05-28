@@ -1,8 +1,8 @@
 import { writable, type Readable } from 'svelte/store';
 
 export interface Busy {
-	spinner: boolean;
-	close: boolean;
+	spinner?: boolean;
+	close?: boolean;
 	msg?: string;
 }
 
