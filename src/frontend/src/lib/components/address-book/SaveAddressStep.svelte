@@ -27,7 +27,7 @@
 
 	const { onCreateContact, onInfo, onSelectContact }: Props = $props();
 
-	let inputValue = $state('');
+	let inputValue: string = $state('');
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
 	let address: string | undefined = $derived(
 		modalData.entrypoint && modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
@@ -85,7 +85,7 @@
 				<ListItem>
 					<ContactCard
 						{contact}
-						onClick={() => onInfo(contact)}
+						onClick={() => {}}
 						onInfo={() => onInfo(contact)}
 						onSelect={() => onSelectContact(contact)}
 					/>
