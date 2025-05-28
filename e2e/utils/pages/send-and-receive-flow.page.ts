@@ -115,6 +115,8 @@ export class FlowPage extends HomepageLoggedIn {
 			expectedPath: AppPath.Transactions
 		});
 
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
 		await this.mockSelectorAll({
 			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'
 		});
