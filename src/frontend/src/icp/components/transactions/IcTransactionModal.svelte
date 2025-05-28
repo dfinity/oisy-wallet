@@ -17,7 +17,6 @@
 	import {
 		formatNanosecondsToDate,
 		formatToken,
-		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 
 	interface Props {
