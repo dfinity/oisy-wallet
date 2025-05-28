@@ -975,6 +975,7 @@ interface I18nAddress_book {
 interface I18nContact {
 	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
+	delete: { title: string; delete_contact: string; content_text: string };
 }
 
 interface I18nAddress {

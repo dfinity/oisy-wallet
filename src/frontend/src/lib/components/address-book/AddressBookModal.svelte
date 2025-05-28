@@ -4,6 +4,8 @@
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
+	import DeleteContactConfirmBottomSheet from '$lib/components/address-book/DeleteContactConfirmBottomSheet.svelte';
+	import DeleteContactConfirmContent from '$lib/components/address-book/DeleteContactConfirmContent.svelte';
 	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
@@ -15,6 +17,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	const steps: WizardSteps = [
@@ -33,6 +36,10 @@
 		{
 			name: AddressBookSteps.EDIT_CONTACT_NAME,
 			title: $i18n.contact.form.add_new_contact
+		},
+		{
+			name: AddressBookSteps.DELETE_CONTACT,
+			title: $i18n.contact.delete.title
 		},
 		{
 			name: AddressBookSteps.SHOW_ADDRESS,
@@ -56,6 +63,8 @@
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
 	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
+
+	let isDeletingContact = $state<boolean>(false);
 
 	// TODO Use contact store and remove
 	let contacts: ContactUi[] = $state([]);
@@ -98,6 +107,12 @@
 	const saveContact = (contact: ContactUi) => {
 		const index = contacts.findIndex((c) => contact.id === c.id);
 		contacts[index] = contact;
+	};
+
+	const confirmDeleteContact = () => {
+		if (nonNullish(currentContact)) {
+			gotoStep(AddressBookSteps.DELETE_CONTACT);
+		}
 	};
 
 	// TODO Use contact store and remove
@@ -165,11 +180,15 @@
 	testId={ADDRESS_BOOK_MODAL}
 	on:nnsClose={close}
 >
-	<svelte:fragment slot="title"
-		>{currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)
-			? editContactNameStep.title
-			: (currentStep?.title ?? '')}</svelte:fragment
-	>
+	<svelte:fragment slot="title">
+		{#if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
+			{replacePlaceholders($i18n.contact.delete.title, { $contact: currentContact.name })}
+		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
+			{editContactNameStep.title}
+		{:else}
+			{currentStep?.title ?? ''}
+		{/if}
+	</svelte:fragment>
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
 			{contacts}
@@ -222,7 +241,9 @@
 					currentAddressIndex = undefined;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
-				onDeleteContact={deleteContact}
+				onDeleteContact={() => {
+					isDeletingContact = true;
+				}}
 				onDeleteAddress={(index) => {
 					currentAddressIndex = index;
 				}}
@@ -244,7 +265,7 @@
 					currentAddressIndex = undefined;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
-				onDeleteContact={deleteContact}
+				onDeleteContact={confirmDeleteContact}
 				onDeleteAddress={confirmDeleteAddress}
 			/>
 		</Responsive>
@@ -286,6 +307,14 @@
 			address={currentContact.addresses[currentAddressIndex]}
 			contact={currentContact}
 		/>
+	{:else if currentStep?.name === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
+		<DeleteContactConfirmContent
+			onCancel={() => {
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
+			}}
+			onDelete={deleteContact}
+			contact={currentContact}
+		/>
 	{/if}
 </WizardModal>
 
@@ -294,6 +323,19 @@
 		onCancel={() => (currentAddressIndex = undefined)}
 		onDelete={() => nonNullish(currentAddressIndex) && deleteAddress(currentAddressIndex)}
 		address={currentContact.addresses[currentAddressIndex]}
+		contact={currentContact}
+	/>
+{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact) && isDeletingContact}
+	<DeleteContactConfirmBottomSheet
+		onCancel={() => {
+			isDeletingContact = false;
+		}}
+		onDelete={() => {
+			isDeletingContact = false;
+			if (nonNullish(currentContact)) {
+				deleteContact(currentContact.id);
+			}
+		}}
 		contact={currentContact}
 	/>
 {/if}
