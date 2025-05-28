@@ -28,7 +28,7 @@
 		on:click={close}
 		on:keydown={keyboardClose}
 		class:close={$busy.close}
-		class="busy"
+		class={$busy.spinner ? "busy" : ''}
 		role="button"
 		tabindex="-1"
 	>

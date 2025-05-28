@@ -7,7 +7,7 @@ export interface Busy {
 }
 
 export interface BusyStore extends Readable<Busy | undefined> {
-	start: (params?: Pick<Busy, 'msg'>) => void;
+	start: (params?: Busy) => void;
 	show: () => void;
 	stop: () => void;
 }
@@ -18,8 +18,8 @@ const initBusyStore = (): BusyStore => {
 	return {
 		subscribe,
 
-		start: ({ msg } = {}) => {
-			set({ spinner: true, close: false, msg });
+		start: ({ spinner = true, close = false, msg } = {}) => {
+			set({ spinner, close, msg });
 		},
 
 		show: () => {
