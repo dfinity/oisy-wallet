@@ -56,7 +56,11 @@
 		<h5>{$i18n.address.save.add_to_existing_contact}</h5>
 		{#if nonNullish(onCreateContact)}
 			<span class="flex">
-				<Button link paddingSmall on:click={onCreateContact}
+				<Button
+					link
+					paddingSmall
+					on:click={onCreateContact}
+					ariaLabel={$i18n.address.save.create_contact}
 					><IconPlus /> {$i18n.address.save.create_contact}</Button
 				>
 			</span>
@@ -81,7 +85,7 @@
 				<ListItem>
 					<ContactCard
 						{contact}
-						onClick={() => {}}
+						onClick={() => onInfo(contact)}
 						onInfo={() => onInfo(contact)}
 						onSelect={() => onSelectContact(contact)}
 					/>
