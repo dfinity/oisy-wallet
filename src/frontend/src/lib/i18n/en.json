@@ -29,7 +29,8 @@
 			"paste": "Paste",
 			"to": "To",
 			"add": "Add",
-			"more_items": "+$items more"
+			"more_items": "+$items more",
+			"select": "Select"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
