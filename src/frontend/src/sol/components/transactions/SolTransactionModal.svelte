@@ -101,8 +101,6 @@
 		{/if}
 
 		<List styleClass="mt-5">
-
-
 			{#if nonNullish(id)}
 				<ListItem>
 					<span>

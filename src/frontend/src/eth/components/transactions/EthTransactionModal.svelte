@@ -116,7 +116,6 @@
 		{/if}
 
 		<List styleClass="mt-5">
-
 			{#if nonNullish(hash)}
 				<ListItem>
 					<span>{$i18n.transaction.text.hash}</span>

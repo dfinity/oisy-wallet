@@ -72,7 +72,6 @@
 		{/if}
 
 		<List styleClass="mt-5">
-
 			{#if nonNullish(timestamp)}
 				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>
