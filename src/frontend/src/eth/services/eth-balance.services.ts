@@ -61,8 +61,8 @@ const loadEthBalance = async ({
 		trackEvent({
 			name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
 			metadata: {
-				tokenId: tokenId.description ?? '',
-				networkId: networkId.description ?? '',
+				tokenId: `${tokenId.description}`,
+				networkId: `${networkId.description}`,
 				error: `${err}`
 			}
 		});
@@ -115,8 +115,8 @@ const loadErc20Balance = async ({
 		trackEvent({
 			name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
 			metadata: {
-				tokenId: contract.symbol,
-				networkId: contract.network.name,
+				tokenId: `${contract.id.description}`,
+				networkId: `${contract.network.id.description}`,
 				error: `${err}`
 			}
 		});
