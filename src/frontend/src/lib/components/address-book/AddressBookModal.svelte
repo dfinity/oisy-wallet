@@ -189,24 +189,27 @@
 	testId={ADDRESS_BOOK_MODAL}
 	on:nnsClose={close}
 >
-	<svelte:fragment slot="title">
-		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentContact?.name)}
-			<div class="flex flex-wrap items-center gap-2">
-				<Avatar
-					name={currentContact?.name}
-					variant="xs"
-					styleClass="rounded-full flex items-center justify-center"
-				/>
-				<div class="text-center text-lg font-semibold text-primary">
-					{currentContact?.name}
-				</div>
+<svelte:fragment slot="title">
+	{#if currentStepName === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentContact?.name)}
+		<div class="flex flex-wrap items-center gap-2">
+			<Avatar
+				name={currentContact?.name}
+				variant="xs"
+				styleClass="rounded-full flex items-center justify-center"
+			/>
+			<div class="text-center text-lg font-semibold text-primary">
+				{currentContact?.name}
 			</div>
-		{:else if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
-			{replacePlaceholders($i18n.contact.delete.title, { $contact: currentContact.name })}
-		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
-			{editContactNameStep.title}
-		{/if}
-	</svelte:fragment>
+		</div>
+	{:else if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
+		{replacePlaceholders($i18n.contact.delete.title, { $contact: currentContact.name })}
+	{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
+		{editContactNameStep.title}
+	{:else}
+		{currentStep?.title}
+	{/if}
+</svelte:fragment>
+
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
 			{contacts}
@@ -259,6 +262,7 @@
 				}}
 				onAddAddress={() => {
 					currentAddressIndex = undefined;
+					previousStepName = AddressBookSteps.SHOW_CONTACT;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
 				onDeleteContact={() => {

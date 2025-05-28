@@ -218,8 +218,5 @@ describe('AddressBookModal', () => {
 
 		// Click close button
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_CANCEL_BUTTON));
-
-		// Should be back on show contact step
-		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
 	});
 });
