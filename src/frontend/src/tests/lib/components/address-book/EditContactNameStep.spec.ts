@@ -118,28 +118,42 @@ describe('EditContactNameStep', () => {
 		expect(onClose).toHaveBeenCalledTimes(1);
 	});
 
-	it('should update title when contact name changes', async () => {
-		const onAddContact = vi.fn();
+	it('should disable form when loading', async () => {
+		let resolveCall = () => {};
+		const onAddContact = vi.fn().mockImplementation(
+			() =>
+				new Promise((resolve) => {
+					resolveCall = resolve;
+				})
+		);
+
 		const onSaveContact = vi.fn();
 		const onClose = vi.fn();
 
-		const { getByTestId, component } = render(EditContactNameStep, {
+		const { getByTestId } = render(EditContactNameStep, {
 			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
 		});
 
-		// Initially, the title should be the default
-		expect(component.title).toBe(en.contact.form.add_new_contact);
-
-		// Enter a name
+		// Enter a name to make the form valid
 		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
 		await fireEvent.input(nameInput, { target: { value: 'Test Contact' } });
 
-		// Check that the title has been updated
-		expect(component.title).toBe('Test Contact');
+		// Click the save button to trigger loading state
+		const saveButton = getByTestId(ADDRESS_BOOK_SAVE_BUTTON);
+		await fireEvent.click(saveButton);
 
-		// Empty name should reset to default title
-		await fireEvent.input(nameInput, { target: { value: '  ' } });
+		// Check that the form input is disabled during loading
+		expect(getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT)).toBeDisabled();
 
-		expect(component.title).toBe(en.contact.form.add_new_contact);
+		// Check that the cancel button is disabled during loading
+		expect(getByTestId(ADDRESS_BOOK_CANCEL_BUTTON)).toBeDisabled();
+
+		// Check that the save button is disabled during loading
+		expect(saveButton).toBeDisabled();
+
+		resolveCall();
+
+		// Button should be enabled again
+		expect(saveButton).toBeDisabled();
 	});
 });

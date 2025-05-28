@@ -15,8 +15,8 @@
 
 	interface Props {
 		contact?: Partial<ContactUi>;
-		onAddContact: (contact: Pick<ContactUi, 'name'>) => void;
-		onSaveContact: (contact: ContactUi) => void;
+		onAddContact: (contact: Pick<ContactUi, 'name'>) => Promise<void>;
+		onSaveContact: (contact: ContactUi) => Promise<void>;
 		onClose: () => void;
 		isNewContact: boolean;
 	}
@@ -29,40 +29,41 @@
 		contact = $bindable({})
 	}: Props = $props();
 
+	let loading = $state(false);
 	let form: ContactForm | undefined = $state();
 
-	const handleSave = () => {
+	const handleSave = async () => {
 		if (!form?.isValid) {
 			return;
 		}
 
-		if (isNewContact && nonNullish(contact.name)) {
-			onAddContact({ name: contact.name });
-		} else {
-			onSaveContact(contact as ContactUi);
+		try {
+			loading = true;
+			if (isNewContact && nonNullish(contact.name)) {
+				await onAddContact({ name: contact.name });
+			} else {
+				await onSaveContact(contact as ContactUi);
+			}
+		} finally {
+			loading = false;
 		}
 	};
-
-	let title = $derived(
-		notEmptyString(contact?.name?.trim?.()) ? contact?.name : $i18n.contact.form.add_new_contact
-	);
-
-	export { title };
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-6 items-center">
 	<Avatar name={contact?.name} variant="xl"></Avatar>
-	<ContactForm bind:contact bind:this={form}></ContactForm>
+	<ContactForm bind:contact bind:this={form} disabled={loading} />
 
 	<!-- TODO Add address list here -->
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
+		<ButtonCancel onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON} disabled={loading} />
 		<Button
 			colorStyle="primary"
 			on:click={handleSave}
 			disabled={!form?.isValid}
 			testId={ADDRESS_BOOK_SAVE_BUTTON}
+			{loading}
 		>
 			{$i18n.core.text.save}
 		</Button>

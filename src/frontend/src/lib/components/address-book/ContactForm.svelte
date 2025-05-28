@@ -5,7 +5,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 
-	let { contact = $bindable() }: { contact: Partial<ContactUi> } = $props();
+	interface Props {
+		contact: Partial<ContactUi>;
+		disabled?: boolean;
+	}
+	let { contact = $bindable(), disabled = false }: Props = $props();
 
 	let isValid = $derived(notEmptyString(contact?.name?.trim?.()));
 
@@ -22,6 +26,7 @@
 			showResetButton
 			testId={ADDRESS_BOOK_CONTACT_NAME_INPUT}
 			autofocus={true}
+			{disabled}
 		/>
 	</div>
 </form>
