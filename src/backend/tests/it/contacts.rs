@@ -44,6 +44,16 @@ pub fn call_get_contact(
     wrapped_result.expect("that get_contact succeeds")
 }
 
+pub fn call_delete_contact(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    contact_id: u64,
+) -> Result<u64, ContactError> {
+    let wrapped_result =
+        pic_setup.update::<Result<u64, ContactError>>(caller, "delete_contact", contact_id);
+    wrapped_result.expect("that delete_contact call completes")
+}
+
 pub fn call_update_contact(
     pic_setup: &PicBackend,
     caller: Principal,
@@ -593,4 +603,164 @@ fn test_updated_contact_can_be_retrieved_directly() {
     assert_eq!(retrieved_contact.name, "New Name After Update");
     assert_eq!(retrieved_contact.id, created_contact.id);
     assert!(retrieved_contact.update_timestamp_ns > created_contact.update_timestamp_ns);
+}
+// -------------------------------------------------------------------------------------------------
+// - Integration tests for the delete contact functionality
+// -------------------------------------------------------------------------------------------------
+#[test]
+fn test_delete_contact_should_succeed_with_valid_id() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact
+    let result = call_create_contact(&pic_setup, caller, "Contact to Delete".to_string());
+    assert!(result.is_ok());
+    let contact = result.unwrap();
+
+    // Verify the contact exists
+    let contacts_before = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_before.len(), 1);
+
+    // Delete the contact
+    let delete_result = call_delete_contact(&pic_setup, caller, contact.id);
+    assert!(delete_result.is_ok());
+    assert_eq!(delete_result.unwrap(), contact.id);
+
+    // Verify the contact no longer exists
+    let contacts_after = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after.len(), 0);
+
+    // Verify get_contact also fails
+    let get_result = call_get_contact(&pic_setup, caller, contact.id);
+    assert!(get_result.is_err());
+    assert_eq!(get_result.unwrap_err(), ContactError::ContactNotFound);
+}
+
+#[test]
+fn test_delete_contact_should_fail_with_nonexistent_id() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Try to delete a contact with a non-existent ID
+    let nonexistent_id = 999999;
+    let result = call_delete_contact(&pic_setup, caller, nonexistent_id);
+
+    // Verify the operation fails with ContactNotFound
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
+}
+
+#[test]
+fn test_delete_specific_contact_from_multiple() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create multiple contacts
+    let contact1 = call_create_contact(&pic_setup, caller, "Contact 1".to_string()).unwrap();
+    let contact2 = call_create_contact(&pic_setup, caller, "Contact 2".to_string()).unwrap();
+    let contact3 = call_create_contact(&pic_setup, caller, "Contact 3".to_string()).unwrap();
+
+    // Verify all contacts exist
+    let contacts_before = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_before.len(), 3);
+
+    // Delete the middle contact
+    let delete_result = call_delete_contact(&pic_setup, caller, contact2.id);
+    assert!(delete_result.is_ok());
+    assert_eq!(delete_result.unwrap(), contact2.id);
+
+    // Verify only the specific contact was deleted
+    let contacts_after = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after.len(), 2);
+
+    // Check that the correct contacts remain
+    let remaining_ids: Vec<u64> = contacts_after.iter().map(|c| c.id).collect();
+    assert!(remaining_ids.contains(&contact1.id));
+    assert!(!remaining_ids.contains(&contact2.id));
+    assert!(remaining_ids.contains(&contact3.id));
+
+    // Verify we can still get the remaining contacts by ID
+    let get_result1 = call_get_contact(&pic_setup, caller, contact1.id);
+    assert!(get_result1.is_ok());
+
+    let get_result3 = call_get_contact(&pic_setup, caller, contact3.id);
+    assert!(get_result3.is_ok());
+
+    // Verify we cannot get the deleted contact
+    let get_result2 = call_get_contact(&pic_setup, caller, contact2.id);
+    assert!(get_result2.is_err());
+    assert_eq!(get_result2.unwrap_err(), ContactError::ContactNotFound);
+}
+
+#[test]
+fn test_delete_all_contacts() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create multiple contacts
+    let contact1 = call_create_contact(&pic_setup, caller, "Contact 1".to_string()).unwrap();
+    let contact2 = call_create_contact(&pic_setup, caller, "Contact 2".to_string()).unwrap();
+    let contact3 = call_create_contact(&pic_setup, caller, "Contact 3".to_string()).unwrap();
+
+    // Verify all contacts exist
+    let contacts_before = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_before.len(), 3);
+
+    // Delete all contacts one by one
+    call_delete_contact(&pic_setup, caller, contact1.id).expect("Failed to delete contact 1");
+    call_delete_contact(&pic_setup, caller, contact2.id).expect("Failed to delete contact 2");
+    call_delete_contact(&pic_setup, caller, contact3.id).expect("Failed to delete contact 3");
+
+    // Verify all contacts are deleted
+    let contacts_after = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after.len(), 0);
+
+    // Create a new contact after deleting all
+    let new_contact = call_create_contact(&pic_setup, caller, "New Contact".to_string()).unwrap();
+
+    // Verify the new contact exists
+    let contacts_final = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_final.len(), 1);
+    assert_eq!(contacts_final[0].name, "New Contact");
+
+    // Verify we can get the new contact by ID
+    let get_result = call_get_contact(&pic_setup, caller, new_contact.id);
+    assert!(get_result.is_ok());
+}
+
+#[test]
+fn test_delete_contact_returns_error_for_already_deleted_contact() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact
+    let contact =
+        call_create_contact(&pic_setup, caller, "Contact to Delete Twice".to_string()).unwrap();
+
+    // Verify the contact exists
+    let contacts_before = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_before.len(), 1);
+
+    // Delete the contact first time
+    let first_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
+    assert!(first_delete_result.is_ok());
+    assert_eq!(first_delete_result.unwrap(), contact.id);
+
+    // Verify the contact is deleted
+    let contacts_after_first_delete = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after_first_delete.len(), 0);
+
+    // Delete the same contact again
+    let second_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
+
+    // Verify the second delete fails with ContactNotFound
+    assert!(second_delete_result.is_err());
+    assert_eq!(
+        second_delete_result.unwrap_err(),
+        ContactError::ContactNotFound
+    );
+
+    // Verify contacts are still empty
+    let contacts_after_second_delete = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after_second_delete.len(), 0);
 }

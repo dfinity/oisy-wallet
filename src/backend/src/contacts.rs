@@ -183,3 +183,41 @@ fn get_stored_contacts_safely(stored_principal: &StoredPrincipal) -> StoredConta
         }
     })
 }
+
+/// Deletes a specific contact by ID for the current user.
+///
+/// # Arguments
+/// * `contact_id` - The unique identifier of the contact to delete
+///
+/// # Returns
+/// * `Ok(u64)` - The ID of the deleted contact if found and deleted
+/// * `Err(ContactError::ContactNotFound)` - If the contact does not exist or the contacts store has
+///   not been initialized
+pub fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let current_time = time();
+
+    mutate_state(|s| {
+        // Get the user's contacts directly from the state
+        let mut stored_contacts = if let Some(stored_contacts) = s.contact.get(&stored_principal) {
+            stored_contacts.clone()
+        } else {
+            // If the user has no contacts, return ContactNotFound
+            return Err(ContactError::ContactNotFound);
+        };
+
+        // Check if the contact exists
+        if !stored_contacts.contacts.contains_key(&contact_id) {
+            return Err(ContactError::ContactNotFound);
+        }
+
+        // Remove the contact using the BTreeMap's remove method
+        stored_contacts.contacts.remove(&contact_id);
+        stored_contacts.update_timestamp_ns = current_time;
+
+        // Update the storage
+        s.contact.insert(stored_principal, Candid(stored_contacts));
+
+        Ok(contact_id)
+    })
+}
