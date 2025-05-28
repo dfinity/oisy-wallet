@@ -37,7 +37,9 @@
 
 	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
 	let modalDataAddress: string | undefined = $derived(
-		modalData?.step?.type === AddressBookSteps.SAVE_ADDRESS ? modalData.step.address : undefined
+		modalData?.entrypoint?.type === AddressBookSteps.SAVE_ADDRESS
+			? modalData.entrypoint.address
+			: undefined
 	);
 
 	const handleSave = () => {

@@ -48,7 +48,10 @@
 					modalStore.openAddressBook({
 						id: Symbol(),
 						data: {
-							step: { type: AddressBookSteps.SAVE_ADDRESS, address: type === 'send' ? to : from }
+							entrypoint: {
+								type: AddressBookSteps.SAVE_ADDRESS,
+								address: type === 'send' ? to : from
+							}
 						}
 					})}
 				link

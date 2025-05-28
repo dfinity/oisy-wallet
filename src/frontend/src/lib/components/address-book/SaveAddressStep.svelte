@@ -4,21 +4,16 @@
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Button from '$lib/components/ui/Button.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
-	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
-	import SlidingInput from '$lib/components/ui/SlidingInput.svelte';
-	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import ContactCard from '$lib/components/contact/ContactCard.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { CONTACT_SHOW_CLOSE_BUTTON } from '$lib/constants/test-ids.constants';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import type { ContactUi } from '$lib/types/contact';
@@ -34,8 +29,8 @@
 
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
 	let address: string | undefined = $derived(
-		modalData.step && modalData.step.type === AddressBookSteps.SAVE_ADDRESS
-			? modalData.step.address
+		modalData.entrypoint && modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
+			? modalData.entrypoint.address
 			: undefined
 	);
 </script>

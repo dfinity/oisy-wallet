@@ -1,10 +1,16 @@
 import type { AddressBookSteps } from '$lib/enums/progress-steps';
 
 export type AddressBookModalParams = {
-	step?:
-		| {
-				type: AddressBookSteps.SAVE_ADDRESS;
-				address: string;
-		  }
-		| { type: AddressBookSteps.ADD_CONTACT };
+	// note: to add a different entrypoint, add another object type def as uniontype, e.g.
+	// {
+	// 		type: AddressBookSteps.SAVE_ADDRESS;
+	// 		address: string;
+	// } | {
+	// 		type: AddressBookSteps.ANOTHER_ENTRYPOINT,
+	//		someAddtionalData: string;
+	// };
+	entrypoint?: {
+		type: AddressBookSteps.SAVE_ADDRESS;
+		address: string;
+	};
 };

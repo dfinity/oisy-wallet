@@ -69,7 +69,7 @@
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
 
 	onMount(() => {
-		const data = modalData?.step?.type;
+		const data = modalData?.entrypoint?.type;
 
 		if (nonNullish(data) && currentStep?.name !== data) {
 			gotoStep(data);
@@ -121,8 +121,8 @@
 		contacts = [...contacts, currentContact];
 		contactsStore.addContact(currentContact);
 
-		if (nonNullish(modalData) && nonNullish(modalData.step)) {
-			gotoStep(modalData.step.type);
+		if (nonNullish(modalData) && nonNullish(modalData.entrypoint)) {
+			gotoStep(modalData.entrypoint.type);
 		} else {
 			gotoStep(AddressBookSteps.ADDRESS_BOOK);
 		}
@@ -302,8 +302,8 @@
 			onSaveContact={saveContact}
 			isNewContact={isNullish(currentContact)}
 			onClose={() => {
-				if (nonNullish(modalData) && nonNullish(modalData.step)) {
-					gotoStep(modalData.step.type);
+				if (nonNullish(modalData) && nonNullish(modalData.entrypoint)) {
+					gotoStep(modalData.entrypoint.type);
 				} else {
 					gotoStep(AddressBookSteps.ADDRESS_BOOK);
 				}
