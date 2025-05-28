@@ -2,17 +2,75 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
+	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
+	import DeleteContactConfirmBottomSheet from '$lib/components/address-book/DeleteContactConfirmBottomSheet.svelte';
+	import DeleteContactConfirmContent from '$lib/components/address-book/DeleteContactConfirmContent.svelte';
 	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import {
+		TRACK_CONTACT_CREATE_ERROR,
+		TRACK_CONTACT_CREATE_SUCCESS,
+		TRACK_CONTACT_DELETE_ERROR,
+		TRACK_CONTACT_DELETE_SUCCESS,
+		TRACK_CONTACT_UPDATE_ERROR,
+		TRACK_CONTACT_UPDATE_SUCCESS
+	} from '$lib/constants/analytics.contants';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
+	import {
+		createContact,
+		deleteContact,
+		updateContact
+	} from '$lib/services/manage-contacts.service';
+	import { wrapCallWith } from '$lib/services/utils.services';
+	import { contactsStore } from '$lib/stores/contacts.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+
+	const callCreateContact = $derived(
+		wrapCallWith({
+			methodToCall: createContact,
+			toastErrorMessage: $i18n.contact.error.create,
+			trackEventNames: {
+				success: TRACK_CONTACT_CREATE_SUCCESS,
+				error: TRACK_CONTACT_CREATE_ERROR
+			},
+			identity: $authIdentity
+		})
+	);
+
+	const callUpdateContact = $derived(
+		wrapCallWith({
+			methodToCall: updateContact,
+			toastErrorMessage: $i18n.contact.error.update,
+			trackEventNames: {
+				success: TRACK_CONTACT_UPDATE_SUCCESS,
+				error: TRACK_CONTACT_UPDATE_ERROR
+			},
+			identity: $authIdentity
+		})
+	);
+
+	const callDeleteContact = $derived(
+		wrapCallWith({
+			methodToCall: deleteContact,
+			toastErrorMessage: $i18n.contact.error.delete,
+			trackEventNames: {
+				success: TRACK_CONTACT_DELETE_SUCCESS,
+				error: TRACK_CONTACT_DELETE_ERROR
+			},
+			identity: $authIdentity
+		})
+	);
 
 	const steps: WizardSteps = [
 		{
@@ -25,22 +83,28 @@
 		},
 		{
 			name: AddressBookSteps.EDIT_CONTACT,
-			// TODO: Add i18n
-			title: 'Edit Contact'
+			title: $i18n.address_book.edit_contact.title
 		},
 		{
 			name: AddressBookSteps.EDIT_CONTACT_NAME,
 			title: $i18n.contact.form.add_new_contact
 		},
 		{
+			name: AddressBookSteps.DELETE_CONTACT,
+			title: $i18n.contact.delete.title
+		},
+		{
 			name: AddressBookSteps.SHOW_ADDRESS,
-			// TODO: Add i18n
-			title: 'Show address'
+			// The title will be replaced with the name. No title is needed here.
+			title: ''
 		},
 		{
 			name: AddressBookSteps.EDIT_ADDRESS,
-			// TODO: Add i18n
-			title: 'Edit address'
+			title: $i18n.address_book.edit_contact.title
+		},
+		{
+			name: AddressBookSteps.DELETE_ADDRESS,
+			title: $i18n.address.delete.title
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
@@ -49,17 +113,29 @@
 	const close = () => modalStore.close();
 
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
+	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
 
-	// TODO Use contact store and remove
-	let contacts: ContactUi[] = $state([]);
-	// TODO Use contact store and remove
-	let currentContact: ContactUi | undefined = $state();
-	// TODO Use contact store and remove
+	let isDeletingContact = $state<boolean>(false);
+
+	let currentContactId: bigint | undefined = $state();
 	let currentAddressIndex: number | undefined = $state();
+
+	const handleClose = () => {
+		if (nonNullish(previousStepName)) {
+			gotoStep(previousStepName);
+		} else {
+			gotoStep(AddressBookSteps.ADDRESS_BOOK);
+		}
+		previousStepName = undefined;
+	};
+
+	let currentContact = $derived($contactsStore?.find((c) => c.id === currentContactId));
+	let contacts = $derived($contactsStore);
 
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
+			previousStepName = currentStepName;
 			goToWizardStep({
 				modal,
 				steps,
@@ -68,69 +144,67 @@
 		}
 	};
 
-	// TODO Use contact store and remove
-	const addContact = (contact: Pick<ContactUi, 'name'>) => {
-		currentContact = {
-			id: BigInt(Date.now()),
-			...contact,
-			updateTimestampNs: BigInt(Date.now()),
-			addresses: []
-		};
-		contacts = [...contacts, currentContact];
-		gotoStep(AddressBookSteps.ADDRESS_BOOK);
+	const confirmDeleteContact = () => {
+		if (nonNullish(currentContact)) {
+			gotoStep(AddressBookSteps.DELETE_CONTACT);
+		}
 	};
 
-	// TODO Use contact store and remove
-	const saveContact = (contact: ContactUi) => {
-		const index = contacts.findIndex((c) => contact.id === c.id);
-		contacts[index] = contact;
-		gotoStep(AddressBookSteps.ADDRESS_BOOK);
-	};
-
-	// TODO Use contact store and remove
-	const deleteContact = (id: bigint) => {
-		contacts = contacts.filter((contact) => contact.id !== id);
+	const handleDeleteContact = async (id: bigint) => {
+		await callDeleteContact({ id });
 		currentContact = undefined;
+		currentAddressIndex = undefined;
 		gotoStep(AddressBookSteps.ADDRESS_BOOK);
 	};
 
-	// TODO Use contact store and remove
-	const addAddress = (address: ContactAddressUi) => {
+	const handleAddAddress = async (address: ContactAddressUi) => {
 		if (isNullish(currentContact)) {
 			return;
 		}
 
 		const addresses = [...currentContact.addresses, address];
 		currentAddressIndex = undefined;
-		currentContact = {
+		const contact = {
 			...currentContact,
 			addresses
 		};
-		saveContact(currentContact);
+		await callUpdateContact({ contact });
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
-	// TODO Use contact store and remove
-	const saveAddress = (address: ContactAddressUi) => {
+	const handleSaveAddress = async (address: ContactAddressUi) => {
 		if (isNullish(currentContact) || isNullish(currentAddressIndex)) {
 			return;
 		}
 
-		const { addresses } = currentContact;
+		const addresses = [...currentContact.addresses];
 		addresses[currentAddressIndex] = { ...address };
+		const contact = {
+			...currentContact,
+			addresses
+		};
+		await callUpdateContact({ contact });
+		currentAddressIndex = undefined;
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
-	// TODO Use contact store and remove
-	const deleteAddress = (index: number) => {
+	const confirmDeleteAddress = (index: number) => {
+		if (nonNullish(currentContact)) {
+			currentAddressIndex = index;
+			gotoStep(AddressBookSteps.DELETE_ADDRESS);
+		}
+	};
+
+	const handleDeleteAddress = async (index: number) => {
 		if (nonNullish(currentContact)) {
 			const addresses = currentContact.addresses.filter((a, i) => i !== index);
-			currentContact = {
+			const contact = {
 				...currentContact,
 				addresses
 			};
-			saveContact(currentContact);
-			gotoStep(AddressBookSteps.SHOW_CONTACT);
+			await callUpdateContact({ contact });
+			currentAddressIndex = undefined;
+			gotoStep(AddressBookSteps.EDIT_CONTACT);
 		}
 	};
 </script>
@@ -143,30 +217,42 @@
 	testId={ADDRESS_BOOK_MODAL}
 	on:nnsClose={close}
 >
-	<svelte:fragment slot="title"
-		>{currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)
-			? editContactNameStep.title
-			: (currentStep?.title ?? '')}</svelte:fragment
-	>
-	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
+	<svelte:fragment slot="title">
+		{#if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
+			{replacePlaceholders($i18n.contact.delete.title, { $contact: currentContact.name })}
+		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
+			{editContactNameStep.title}
+		{:else}
+			{currentStep?.title ?? ''}
+		{/if}
+	</svelte:fragment>
+
+	{#if isNullish(contacts)}
+		{$i18n.address_book.text.loading_contacts}
+	{:else if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
 			{contacts}
 			onShowContact={(contact) => {
-				currentContact = contact;
+				currentContactId = contact.id;
 				gotoStep(AddressBookSteps.SHOW_CONTACT);
 			}}
 			onAddContact={() => {
-				currentContact = undefined;
+				currentContactId = undefined;
+				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+			}}
+			onShowAddress={({ contact, addressIndex }) => {
+				currentContact = contact;
+				currentAddressIndex = addressIndex;
+				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
-		<!-- TODO Remove ! from currentContact -->
 		<ShowContactStep
-			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			onClose={handleClose}
 			contact={currentContact}
 			onEdit={(contact) => {
-				currentContact = contact;
+				currentContactId = contact.id;
 				gotoStep(AddressBookSteps.EDIT_CONTACT);
 			}}
 			onAddAddress={() => {
@@ -179,30 +265,63 @@
 			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact)}
-		<EditContactStep
-			contact={currentContact}
-			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
-			onEdit={(contact) => {
-				currentContact = contact;
-				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
-			}}
-			onEditAddress={(index: number) => {
-				currentAddressIndex = index;
-				gotoStep(AddressBookSteps.EDIT_ADDRESS);
-			}}
-			onAddAddress={() => {
-				currentAddressIndex = undefined;
-				gotoStep(AddressBookSteps.EDIT_ADDRESS);
-			}}
-			onDeleteContact={deleteContact}
-			onDeleteAddress={deleteAddress}
-		/>
+		<!-- TODO find a better way to render EditContactStep with different onDeleteAddress functions -->
+		<Responsive down="sm">
+			<EditContactStep
+				contact={currentContact}
+				onClose={handleClose}
+				onEdit={(contact) => {
+					currentContact = contact;
+					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				}}
+				onEditAddress={(index: number) => {
+					currentAddressIndex = index;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onAddAddress={() => {
+					currentAddressIndex = undefined;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onDeleteContact={() => {
+					isDeletingContact = true;
+				}}
+				onDeleteAddress={(index) => {
+					currentAddressIndex = index;
+				}}
+			/>
+		</Responsive>
+		<Responsive up="md">
+			<EditContactStep
+				contact={currentContact}
+				onClose={handleClose}
+				onEdit={(contact) => {
+					currentContact = contact;
+					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				}}
+				onEditAddress={(index: number) => {
+					currentAddressIndex = index;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onAddAddress={() => {
+					currentAddressIndex = undefined;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
+				onDeleteContact={confirmDeleteContact}
+				onDeleteAddress={confirmDeleteAddress}
+			/>
+		</Responsive>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
 		<EditContactNameStep
 			bind:this={editContactNameStep}
 			contact={currentContact}
-			onAddContact={addContact}
-			onSaveContact={saveContact}
+			onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
+				await callCreateContact({ name: contact.name });
+				gotoStep(AddressBookSteps.ADDRESS_BOOK);
+			}}
+			onSaveContact={async (contact: ContactUi) => {
+				await callUpdateContact({ contact });
+				gotoStep(AddressBookSteps.SHOW_CONTACT);
+			}}
 			isNewContact={isNullish(currentContact)}
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 		/>
@@ -212,7 +331,8 @@
 		<!-- TODO replace in https://github.com/dfinity/oisy-wallet/pull/6548 -->
 		<Button
 			on:click={() => {
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
+				currentAddressIndex = undefined;
+				handleClose();
 			}}>BACK</Button
 		>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
@@ -221,10 +341,53 @@
 			address={nonNullish(currentAddressIndex)
 				? currentContact?.addresses[currentAddressIndex]
 				: undefined}
-			onSaveAddress={saveAddress}
-			onAddAddress={addAddress}
+			onSaveAddress={handleSaveAddress}
+			onAddAddress={handleAddAddress}
 			isNewAddress={isNullish(currentAddressIndex)}
-			onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+			onClose={() => {
+				currentAddressIndex = undefined;
+				handleClose();
+			}}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
+		<DeleteAddressConfirmContent
+			onCancel={() => {
+				currentAddressIndex = undefined;
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
+			}}
+			onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
+			address={currentContact.addresses[currentAddressIndex]}
+			contact={currentContact}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
+		<DeleteContactConfirmContent
+			onCancel={() => {
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
+			}}
+			onDelete={handleDeleteContact}
+			contact={currentContact}
 		/>
 	{/if}
 </WizardModal>
+
+{#if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
+	<DeleteAddressConfirmBottomSheet
+		onCancel={() => (currentAddressIndex = undefined)}
+		onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
+		address={currentContact.addresses[currentAddressIndex]}
+		contact={currentContact}
+	/>
+{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact) && isDeletingContact}
+	<DeleteContactConfirmBottomSheet
+		onCancel={() => {
+			isDeletingContact = false;
+		}}
+		onDelete={() => {
+			isDeletingContact = false;
+			if (nonNullish(currentContact)) {
+				handleDeleteContact(currentContact.id);
+			}
+		}}
+		contact={currentContact}
+	/>
+{/if}

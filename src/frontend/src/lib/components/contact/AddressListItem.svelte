@@ -1,25 +1,28 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
-	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import {
-		ADDRESS_LIST_ITEM_COPY_BUTTON,
-		ADDRESS_LIST_ITEM_INFO_BUTTON
-	} from '$lib/constants/test-ids.constants';
+	import AddressItemActions, {
+		type Props as AddressItemActionsProps
+	} from '$lib/components/contact/AddressItemActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
 		address: ContactAddressUi;
-		onInfo?: () => void;
 		onClick?: () => void;
 		styleClass?: string;
 		showFullAddress?: boolean;
+		addressItemActionsProps?: Omit<AddressItemActionsProps, 'address'>;
 	}
-	let { address, onClick, onInfo, styleClass = '', showFullAddress = false }: Props = $props();
+
+	let {
+		address,
+		onClick,
+		styleClass = '',
+		showFullAddress = false,
+		addressItemActionsProps
+	}: Props = $props();
 
 	let displayAddress = $derived(
 		showFullAddress ? address.address : shortenWithMiddleEllipsis({ text: address.address })
@@ -47,23 +50,5 @@
 			<span>{displayAddress}</span>
 		</div>
 	</div>
-	<div class="ml-auto flex items-center">
-		<Copy
-			testId={ADDRESS_LIST_ITEM_COPY_BUTTON}
-			text={$i18n.wallet.text.address_copied}
-			value={address.address}
-		/>
-		{#if nonNullish(onInfo)}
-			<ButtonIcon
-				styleClass="-m-1 md:m-0 hover:text-inherit"
-				ariaLabel={$i18n.core.text.view}
-				testId={ADDRESS_LIST_ITEM_INFO_BUTTON}
-				onclick={onInfo}
-			>
-				{#snippet icon()}
-					<IconInfo />
-				{/snippet}
-			</ButtonIcon>
-		{/if}
-	</div>
+	<AddressItemActions {address} styleClass="ml-auto items-center" {...addressItemActionsProps} />
 </button>

@@ -40,6 +40,22 @@ fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> R
     Ok(())
 }
 
+fn validate_string_whitespace_padding(value: &str, field_name: &str) -> Result<(), Error> {
+    // Check if string is empty or contains only whitespace (this handles cases like "  ")
+    if value.trim().is_empty() {
+        return Err(Error::msg(format!("{field_name} cannot be empty")));
+    }
+
+    // Check for leading or trailing whitespace
+    if value != value.trim() {
+        return Err(Error::msg(format!(
+            "{field_name} cannot have leading or trailing whitespace"
+        )));
+    }
+
+    Ok(())
+}
+
 fn validate_collection_size<T>(
     collection: &[T],
     max_size: usize,
@@ -504,14 +520,46 @@ impl Validate for ContactAddressData {
 
 impl Validate for CreateContactRequest {
     fn validate(&self) -> Result<(), Error> {
-        // Nothing to validate here
+        // Validate that string length is not greater than the max allowed
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "CreateContactRequest.name",
+        )?;
+
+        // Validate that string does not contain leading, trailing or empty whitespaces
+        validate_string_whitespace_padding(&self.name, "CreateContactRequest.name")?;
+
+        // Validate that the name is not an empty string
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "CreateContactRequest.name",
+        )?;
+
         Ok(())
     }
 }
 
 impl Validate for UpdateContactRequest {
     fn validate(&self) -> Result<(), Error> {
-        // Nothing to validate here
+        // Validate that string length is not greater than the max allowed
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "UpdateContactRequest.name",
+        )?;
+
+        // Validate that string does not contain leading, trailing or empty whitespaces
+        validate_string_whitespace_padding(&self.name, "UpdateContactRequest.name")?;
+
+        // Validate that the number of addresses is not greater than the max allowed
+        validate_collection_size(
+            &self.addresses,
+            CONTACT_MAX_ADDRESSES,
+            "UpdateContactRequest.addresses",
+        )?;
+
         Ok(())
     }
 }
@@ -520,10 +568,10 @@ impl Validate for UpdateContactRequest {
 validate_on_deserialize!(Contact);
 validate_on_deserialize!(ContactAddressData);
 validate_on_deserialize!(CreateContactRequest);
+validate_on_deserialize!(UpdateContactRequest);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
-validate_on_deserialize!(UpdateContactRequest);
 validate_on_deserialize!(UserToken);
