@@ -29,7 +29,7 @@
 		});
 	};
 
-	const debounceSyncTimer = debounce(syncTimer);
+	const debounceSyncTimer = debounce(syncTimer, 1000);
 
 	$: worker,
 		$enabledMergedErc20TokensAddresses,
