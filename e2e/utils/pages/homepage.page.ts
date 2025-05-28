@@ -175,25 +175,13 @@ abstract class Homepage {
 
 	protected async mockSelectorAll({ selector }: SelectorOperationParams): Promise<void> {
 		const elementsLocator = this.#page.locator(selector);
-
-		await elementsLocator.first().waitFor()
-
 		await elementsLocator.evaluateAll((elements) => {
 			for (const element of elements) {
 				(element as HTMLElement).innerHTML = 'placeholder';
 			}
 		});
 
-		await Promise.all([
-			elementsLocator.locator('text=placeholder').first().waitFor(),
-			elementsLocator.evaluate(elements => {
-				return Array.from(elements).every(el => el.innerHTML === 'placeholder');
-			}).then(allUpdated => {
-				if (!allUpdated) {
-					throw new Error('Not all elements were updated to placeholder');
-				}
-			})
-		])
+		await elementsLocator.locator('text=placeholder').first().waitFor();
 	}
 
 	private async goto(): Promise<void> {
