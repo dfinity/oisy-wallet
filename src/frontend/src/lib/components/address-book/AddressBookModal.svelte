@@ -368,10 +368,10 @@
 		{#if nonNullish(currentAddressIndex) && nonNullish(currentContact?.addresses?.[currentAddressIndex])}
 			<AddressBookInfoPage
 				address={currentContact.addresses[currentAddressIndex]}
-			onClose={() => {
-				currentAddressIndex = undefined;
-				handleClose();
-			}}
+				onClose={() => {
+					currentAddressIndex = undefined;
+					handleClose();
+				}}
 			/>
 		{/if}
 	{:else if currentStep?.name === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
