@@ -51,5 +51,6 @@
 		placeholder={$i18n.address.form.label_placeholder}
 		bind:value={address.label}
 		testId={ADDRESS_BOOK_ADDRESS_ALIAS_INPUT}
+		{disabled}
 	/>
 </form>

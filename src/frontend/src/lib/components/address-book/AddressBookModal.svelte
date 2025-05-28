@@ -356,7 +356,7 @@
 			}}
 			isNewContact={isNullish(currentContact)}
 			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
-			{loading}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep

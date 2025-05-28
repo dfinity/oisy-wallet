@@ -20,6 +20,7 @@
 		onAddAddress: (address: ContactAddressUi) => void;
 		onClose: () => void;
 		isNewAddress: boolean;
+		disabled?: boolean;
 	}
 
 	let {
@@ -28,7 +29,8 @@
 		onSaveAddress,
 		onAddAddress,
 		onClose,
-		isNewAddress
+		isNewAddress,
+		disabled
 	}: Props = $props();
 
 	const handleSave = () => {
@@ -60,16 +62,17 @@
 		class="mt-2 w-full rounded-lg bg-brand-light px-3 py-4 text-sm md:px-5 md:text-base md:font-bold"
 	>
 		<div class="pb-4 text-xl font-bold">{title}</div>
-		<AddressForm {isNewAddress} {address} bind:isInvalid></AddressForm>
+		<AddressForm {isNewAddress} {address} bind:isInvalid {disabled}></AddressForm>
 	</div>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
+		<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
 		<Button
 			colorStyle="primary"
 			disabled={isInvalid}
 			on:click={handleSave}
 			testId={ADDRESS_BOOK_SAVE_BUTTON}
+			loading={disabled}
 		>
 			{$i18n.core.text.save}
 		</Button>

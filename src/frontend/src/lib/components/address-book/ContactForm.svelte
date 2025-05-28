@@ -7,8 +7,8 @@
 
 	let {
 		contact = $bindable(),
-		loading = false
-	}: { contact: Partial<ContactUi>; loading: boolean } = $props();
+		disabled = false
+	}: { contact: Partial<ContactUi>; disabled?: boolean } = $props();
 
 	let isValid = $derived(notEmptyString(contact?.name?.trim?.()));
 
@@ -22,10 +22,10 @@
 			name="name"
 			placeholder=""
 			bind:value={contact.name}
-			showResetButton={!loading}
+			showResetButton={!disabled}
 			testId={ADDRESS_BOOK_CONTACT_NAME_INPUT}
 			autofocus={true}
-			disabled={loading}
+			{disabled}
 		/>
 	</div>
 </form>
