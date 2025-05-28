@@ -565,7 +565,10 @@ fn test_delete_contact_returns_error_for_already_deleted_contact() {
 
     // Verify the second delete fails with ContactNotFound
     assert!(second_delete_result.is_err());
-    assert_eq!(second_delete_result.unwrap_err(), ContactError::ContactNotFound);
+    assert_eq!(
+        second_delete_result.unwrap_err(),
+        ContactError::ContactNotFound
+    );
 
     // Verify contacts are still empty
     let contacts_after_second_delete = call_get_contacts(&pic_setup, caller);
