@@ -242,12 +242,7 @@
 		{/if}
 	</svelte:fragment>
 
-	{#if isNullish(contacts)}
-		<ContentWithToolbar styleClass="mx-2 flex flex-col">
-			<SkeletonCards rows={3} />
-			<ButtonCloseModal slot="toolbar" />
-		</ContentWithToolbar>
-	{:else if currentStepName === AddressBookSteps.ADDRESS_BOOK}
+	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
 			{contacts}
 			onShowContact={(contact) => {
