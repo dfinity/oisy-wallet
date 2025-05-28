@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -40,35 +38,21 @@
 				>{type === 'send' ? $i18n.transaction.text.to : $i18n.transaction.text.from}: {contact?.name}</span
 			>
 			<span class="w-full truncate">{type === 'send' ? to : from}</span>
-			<!--
-			Todo: add action to button to navigate to add contact modal
+			<!-- Todo: enable button once the save flow is implemented
 			<Button link styleClass="mt-3 text-sm"><IconUserSquare size="20px" /> Save address</Button>
 			-->
 		</span>
 	{/snippet}
 	{#snippet actions()}
-		<Copy
-			value={type === 'send' ? to : from}
-			text={type === 'send' ? $i18n.transaction.text.to_copied : $i18n.transaction.text.from_copied}
-			inline
+		<TransactionAddressActions
+			copyAddress={type === 'send' ? to : from}
+			copyAddressText={type === 'send'
+				? $i18n.transaction.text.to_copied
+				: $i18n.transaction.text.from_copied}
+			explorerUrl={type === 'send' ? toExplorerUrl : fromExplorerUrl}
+			explorerUrlAriaLabel={type === 'send'
+				? $i18n.transaction.alt.open_to_block_explorer
+				: $i18n.transaction.alt.open_from_block_explorer}
 		/>
-		{#if nonNullish(toExplorerUrl) && type === 'send'}
-			<ExternalLink
-				iconSize="18"
-				href={toExplorerUrl}
-				ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
-				inline
-				color="blue"
-			/>
-		{/if}
-		{#if nonNullish(fromExplorerUrl) && type === 'receive'}
-			<ExternalLink
-				iconSize="18"
-				href={fromExplorerUrl}
-				ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
-				inline
-				color="blue"
-			/>
-		{/if}
 	{/snippet}
 </AddressCard>
