@@ -1,9 +1,14 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
+	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
+	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
 
@@ -38,9 +43,25 @@
 				>{type === 'send' ? $i18n.transaction.text.to : $i18n.transaction.text.from}: {contact?.name}</span
 			>
 			<span class="w-full truncate">{type === 'send' ? to : from}</span>
-			<!-- Todo: enable button once the save flow is implemented
-			<Button link styleClass="mt-3 text-sm"><IconUserSquare size="20px" /> Save address</Button>
-			-->
+
+			{#if isNullish(contact)}
+				<Button
+					on:click={() =>
+						modalStore.openAddressBook({
+							id: Symbol(),
+							data: {
+								entrypoint: {
+									type: AddressBookSteps.SAVE_ADDRESS,
+									address: type === 'send' ? to : from
+								}
+							}
+						})}
+					link
+					styleClass="mt-3 text-sm"
+					ariaLabel={$i18n.address.save.title}
+					><IconUserSquare size="20px" /> {$i18n.address.save.title}</Button
+				>
+			{/if}
 		</span>
 	{/snippet}
 	{#snippet actions()}
