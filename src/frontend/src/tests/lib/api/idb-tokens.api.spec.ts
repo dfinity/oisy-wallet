@@ -1,7 +1,13 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
-import { deleteIdbIcTokens, deleteIdbSolTokens, setIdbTokensStore } from '$lib/api/idb-tokens.api';
+import {
+	deleteIdbIcTokens,
+	deleteIdbSolTokens,
+	getIdbIcTokens,
+	getIdbSolTokens,
+	setIdbTokensStore
+} from '$lib/api/idb-tokens.api';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { Principal } from '@dfinity/principal';
@@ -111,6 +117,28 @@ describe('idb-tokens.api', () => {
 				[],
 				mockIdbTokensStore
 			);
+		});
+	});
+
+	describe('getIdbIcTokens', () => {
+		it('should get IC tokens', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbIcTokens(mockPrincipal);
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
+	describe('getIdbSolTokens', () => {
+		it('should get SOL tokens', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbSolTokens(mockPrincipal);
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
 		});
 	});
 
