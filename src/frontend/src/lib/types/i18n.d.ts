@@ -960,6 +960,7 @@ interface I18nAddress_book {
 		add_new_contact: string;
 		add_contact: string;
 		search_contact: string;
+		no_address_found: string;
 		no_contact_found: string;
 	};
 	alt: { show_addresses_of_contact: string; hide_addresses: string };
