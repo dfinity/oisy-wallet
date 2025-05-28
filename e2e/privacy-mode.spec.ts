@@ -1,7 +1,5 @@
-import {testWithII} from "@dfinity/internet-identity-playwright";
-import {FlowPage} from "./utils/pages/send-and-receive-flow.page";
-import {HomepageLoggedIn} from "./utils/pages/homepage.page";
-import {NAVIGATION_ITEM_ACTIVITY} from "$lib/constants/test-ids.constants";
+import { testWithII } from '@dfinity/internet-identity-playwright';
+import { FlowPage } from './utils/pages/send-and-receive-flow.page';
 
 // testWithII('should display privacy mode on homepage', async ({ page, iiPage, isMobile }) => {
 //     const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage, isMobile });
@@ -16,15 +14,15 @@ import {NAVIGATION_ITEM_ACTIVITY} from "$lib/constants/test-ids.constants";
 // });
 
 testWithII('should display privacy mode on activity page', async ({ page, iiPage, isMobile }) => {
-    const flowPage = new FlowPage({ page, iiPage, isMobile });
+	const flowPage = new FlowPage({ page, iiPage, isMobile });
 
-    await flowPage.waitForReady();
+	await flowPage.waitForReady();
 
-    await flowPage.receiveTokens();
+	await flowPage.receiveTokens();
 
-    // await flowPage.sendTokens();
+	// await flowPage.sendTokens();
 
-    await flowPage.navigateToActivity();
+	await flowPage.navigateToActivity();
 
-    await flowPage.takeScreenshot();
+	await flowPage.takeScreenshot();
 });

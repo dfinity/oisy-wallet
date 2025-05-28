@@ -1,3 +1,4 @@
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	AMOUNT_DATA,
 	DESTINATION_INPUT,
@@ -16,11 +17,10 @@ import {
 	TOKEN_CARD,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
-import {expect} from '@playwright/test';
-import {LedgerTransferCommand} from '../commands/ledger-transfer.command';
-import {createCommandRunner} from '../commands/runner';
-import {HomepageLoggedIn, type HomepageLoggedInParams} from './homepage.page';
-import {AppPath} from "$lib/constants/routes.constants";
+import { expect } from '@playwright/test';
+import { LedgerTransferCommand } from '../commands/ledger-transfer.command';
+import { createCommandRunner } from '../commands/runner';
+import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
 const commandRunner = createCommandRunner();
 
@@ -89,7 +89,7 @@ export class FlowPage extends HomepageLoggedIn {
 	}
 
 	async navigateToActivity(): Promise<void> {
-		await this.navigateTo({testId: NAVIGATION_ITEM_ACTIVITY, expectedPath: AppPath.Activity});
+		await this.navigateTo({ testId: NAVIGATION_ITEM_ACTIVITY, expectedPath: AppPath.Activity });
 
 		await this.mockSelectorAll({
 			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'

@@ -13,6 +13,7 @@ import {
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
+	NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
 	NETWORKS_SWITCHER_DROPDOWN,
 	NETWORKS_SWITCHER_SELECTOR,
 	RECEIVE_TOKENS_MODAL,
@@ -27,7 +28,7 @@ import {
 	SIDEBAR_NAVIGATION_MENU,
 	TOKEN_BALANCE,
 	TOKEN_CARD,
-	TOKEN_GROUP, NAVIGATION_MENU_PRIVACY_MODE_BUTTON
+	TOKEN_GROUP
 } from '$lib/constants/test-ids.constants';
 import type { InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -599,17 +600,17 @@ export class HomepageLoggedIn extends Homepage {
 	}
 
 	async activatePrivacyMode(): Promise<void> {
-		await this.clickMenuItem({menuItemTestId: NAVIGATION_MENU_PRIVACY_MODE_BUTTON })
+		await this.clickMenuItem({ menuItemTestId: NAVIGATION_MENU_PRIVACY_MODE_BUTTON });
 	}
 
-    async clickTokenGroupCard({
-	  	tokenSymbol,
-	 	networkSymbol
-  	}: {
+	async clickTokenGroupCard({
+		tokenSymbol,
+		networkSymbol
+	}: {
 		tokenSymbol: string;
 		networkSymbol: string;
 	}): Promise<void> {
-		await this.clickByTestId({testId: `token-group-${tokenSymbol}-${networkSymbol}`})
+		await this.clickByTestId({ testId: `token-group-${tokenSymbol}-${networkSymbol}` });
 	}
 
 	async testReceiveModalQrCode({
