@@ -42,9 +42,15 @@
 			: undefined
 	);
 
+	let addressModel = $derived(
+		nonNullish(modalDataAddress)
+			? (mapAddressToContactAddressUi(modalDataAddress) ?? address)
+			: address
+	);
+
 	const handleSave = () => {
 		if (isNewAddress) {
-			onAddAddress({ ...address } as ContactAddressUi);
+			onAddAddress({ ...addressModel } as ContactAddressUi);
 		} else {
 			onSaveAddress(address as ContactAddressUi);
 		}
@@ -73,9 +79,7 @@
 		<div class="pb-4 text-xl font-bold">{title}</div>
 		<AddressForm
 			{isNewAddress}
-			address={nonNullish(modalDataAddress)
-				? (mapAddressToContactAddressUi(modalDataAddress) ?? address)
-				: address}
+			address={addressModel}
 			bind:isInvalid
 			disabled={nonNullish(modalDataAddress)}
 		></AddressForm>
