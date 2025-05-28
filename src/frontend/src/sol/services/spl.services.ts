@@ -81,7 +81,7 @@ const loadSplCustomTokens = async ({
 		setIdbTokens: setIdbSolTokens
 	});
 
-export const loadCustomTokensWithMetadata = async ({
+const loadCustomTokensWithMetadata = async ({
 	identity
 }: {
 	identity: OptionIdentity;
