@@ -77,7 +77,7 @@
 
 	{#if filteredContacts.length > 0}
 		<List styleClass="mt-5">
-			{#each filteredContacts as contact, index (contact.id)}
+			{#each filteredContacts as contact, index (`${index}-${contact.id}`)}
 				<ListItem>
 					<ContactCard
 						{contact}
