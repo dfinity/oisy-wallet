@@ -22,6 +22,26 @@ const buildJsonKeyPattern = (key: string): RegExp => {
 };
 
 /**
+ * Builds a RegExp to match a key-value pair in plain text format like:
+ * "Request ID: 123", "status: failed", etc.
+ *
+ * This pattern is designed for non-JSON strings, such as `Error.message`,
+ * and looks for patterns in the form of: key: value (excluding newlines or commas).
+ *
+ * @param key - The key to match and remove from a plain text string.
+ * @returns A case-insensitive global RegExp that matches `key: value` pairs.
+ */
+const buildTextPattern = (key: string): RegExp => new RegExp(`${key}\\s*:\\s*[^\\n,]+`, 'gi');
+
+const cleanTrailingCommasAndLines = (text: string): string =>
+	text
+		.replace(/,\s*,/g, ',') // ", ,"
+		.replace(/,\s*$/g, '') // ", \n"
+		.replace(/,\s*\n/g, '\n') // ",\n"
+		.replace(/\n{2,}/g, '\n') // extra line breaks
+		.trim();
+
+/**
  * Normalizes an error by removing specific keys from its structure.
  * Supports objects and JSON-formatted strings. Always returns a string result.
  *
@@ -44,6 +64,12 @@ export const replaceErrorFields = ({
 		return;
 	}
 
+	if (err instanceof Error) {
+		return cleanTrailingCommasAndLines(
+			keysToRemove.reduce((acc, key) => acc.replace(buildTextPattern(key), ''), err.message)
+		);
+	}
+
 	if (typeof err === 'object') {
 		const source = err as Record<string, unknown>;
 		const result: Record<string, unknown> = {};
@@ -58,10 +84,7 @@ export const replaceErrorFields = ({
 	}
 
 	if (typeof err === 'string') {
-		return keysToRemove
-			.map(buildJsonKeyPattern)
-			.reduce((acc, pattern) => acc.replace(pattern, ''), err)
-			.trim();
+		return keysToRemove.reduce((acc, key) => acc.replace(buildJsonKeyPattern(key), ''), err).trim();
 	}
 
 	return String(err);
