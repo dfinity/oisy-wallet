@@ -20,7 +20,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	// TODO find out how to set dynamic title
 	const steps: WizardSteps = [
 		{
 			name: AddressBookSteps.ADDRESS_BOOK,
@@ -40,9 +39,7 @@
 		},
 		{
 			name: AddressBookSteps.DELETE_CONTACT,
-			title: replacePlaceholders($i18n.contact.delete.title, {
-				$contact: currentContact?.name ?? ''
-			})
+			title: $i18n.contact.delete.title
 		},
 		{
 			name: AddressBookSteps.SHOW_ADDRESS,
@@ -183,11 +180,15 @@
 	testId={ADDRESS_BOOK_MODAL}
 	on:nnsClose={close}
 >
-	<svelte:fragment slot="title"
-		>{currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)
-			? editContactNameStep.title
-			: (currentStep?.title ?? '')}</svelte:fragment
-	>
+	<svelte:fragment slot="title">
+		{#if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
+			{replacePlaceholders($i18n.contact.delete.title, { $contact: currentContact.name })}
+		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
+			{editContactNameStep.title}
+		{:else}
+			{currentStep?.title ?? ''}
+		{/if}
+	</svelte:fragment>
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
 			{contacts}
