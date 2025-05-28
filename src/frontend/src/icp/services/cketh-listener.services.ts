@@ -28,11 +28,9 @@ export const syncCkEthMinterError = ({ tokenId, error: err }: SyncCkMinterInfoEr
 		name: TRACK_COUNT_CKETH_LOADING_MINTER_INFO_ERROR,
 		metadata: {
 			error: `${err}`
-		}
+		},
+		warning: `${get(i18n).init.error.minter_cketh_loading_info}, ${err}`
 	});
-
-	// We print the error to console just for debugging purposes
-	console.warn(get(i18n).init.error.minter_cketh_loading_info, err);
 };
 
 export const syncCkEthMinterStatus = (state: SyncState) =>

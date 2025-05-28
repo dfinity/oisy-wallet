@@ -181,11 +181,9 @@ const loadData: LoadData = async <T>({
 				name: TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR,
 				metadata: {
 					error: `${err}`
-				}
+				},
+				warning: `${get(i18n).init.error.minter_ckbtc_loading_info}, ${err}`
 			});
-
-			// We print the error to console just for debugging purposes
-			console.warn(get(i18n).init.error.minter_ckbtc_loading_info, err);
 		},
 		identity
 	});
