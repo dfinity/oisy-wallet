@@ -10,6 +10,7 @@ TransactionCases.forEach(({ tokenSymbol, networkId, ...rest }) => {
 				iiPage
 			});
 			await transactionsPage.waitForReady();
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 			await transactionsPage.showTransactions({ tokenSymbol, networkId, ...rest });
 		}
 	);
