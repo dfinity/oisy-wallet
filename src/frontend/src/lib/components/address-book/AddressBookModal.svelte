@@ -334,7 +334,11 @@
 			contact={currentContact}
 			onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
 				await callCreateContact({ name: contact.name });
-				gotoStep(AddressBookSteps.ADDRESS_BOOK);
+				if (nonNullish(modalData) && nonNullish(modalData.entrypoint)) {
+					gotoStep(modalData.entrypoint.type);
+				} else {
+					gotoStep(AddressBookSteps.ADDRESS_BOOK);
+				}
 			}}
 			onSaveContact={async (contact: ContactUi) => {
 				await callUpdateContact({ contact });
