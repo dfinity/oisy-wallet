@@ -191,7 +191,8 @@ fn get_stored_contacts_safely(stored_principal: &StoredPrincipal) -> StoredConta
 ///
 /// # Returns
 /// * `Ok(u64)` - The ID of the deleted contact if found and deleted
-/// * `Err(ContactError::ContactNotFound)` - If the contact does not exist or the contacts store has not been initialized
+/// * `Err(ContactError::ContactNotFound)` - If the contact does not exist or the contacts store has
+///   not been initialized
 pub fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     let current_time = time();
