@@ -12,7 +12,10 @@
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import {
 		TRACK_CONTACT_CREATE_ERROR,
 		TRACK_CONTACT_CREATE_SUCCESS,
@@ -36,9 +39,6 @@
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import SkeletonCards from "$lib/components/ui/SkeletonCards.svelte";
-	import ContentWithToolbar from "$lib/components/ui/ContentWithToolbar.svelte";
-	import ButtonCloseModal from "$lib/components/ui/ButtonCloseModal.svelte";
 
 	const callCreateContact = $derived(
 		wrapCallWith({
