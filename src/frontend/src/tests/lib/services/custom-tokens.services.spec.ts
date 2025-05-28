@@ -210,5 +210,33 @@ describe('custom-tokens.services', () => {
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
 			});
 		});
+
+		it('should parse correctly the cached ledger and index canister IDs from the custom tokens', async () => {
+			mockGetIdbTokens.mockResolvedValue([
+				{
+					token: {
+						Icrc: {
+							ledger_id: Principal.fromText(mockLedgerCanisterId).toUint8Array(),
+							index_id: toNullable(Principal.fromText(mockIndexCanisterId).toUint8Array())
+						}
+					},
+					version: toNullable(2n),
+					enabled: true
+				}
+			]);
+
+			const result = await loadNetworkCustomTokens({
+				...mockParams,
+				certified: false,
+				useCache: true
+			});
+
+			expect(result).toStrictEqual(mockCustomTokens.slice(0, 1));
+
+			expect(mockGetIdbTokens).toHaveBeenCalledOnce();
+			expect(mockGetIdbTokens).toHaveBeenNthCalledWith(1, mockIdentity.getPrincipal());
+
+			expect(listCustomTokens).not.toHaveBeenCalled();
+		});
 	});
 });
