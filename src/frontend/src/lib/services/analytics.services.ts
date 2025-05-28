@@ -24,7 +24,7 @@ export const initPlausibleAnalytics = () => {
 	}
 };
 
-export const trackEvent = ({ name, metadata }: TrackEventParams) => {
+export const trackEvent = ({ name, metadata, warning }: TrackEventParams) => {
 	/**
 	 * We use the `PLAUSIBLE_ENABLED` feature flag to allow flexibility in enabling or disabling
 	 * analytics in specific builds. This ensures that analytics
@@ -35,5 +35,10 @@ export const trackEvent = ({ name, metadata }: TrackEventParams) => {
 	 */
 	if (PLAUSIBLE_ENABLED && nonNullish(plausibleTracker)) {
 		plausibleTracker.trackEvent(name, { props: metadata });
+
+		if (nonNullish(warning)) {
+			// We print the error to console just for debugging purposes
+			console.warn(warning);
+		}
 	}
 };
