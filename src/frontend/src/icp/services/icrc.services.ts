@@ -37,7 +37,7 @@ import {
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
-	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity })]);
+	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
 const loadDefaultIcrcTokens = async () => {
@@ -48,9 +48,15 @@ const loadDefaultIcrcTokens = async () => {
 	);
 };
 
-export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+export const loadCustomTokens = ({
+	identity,
+	useCache = false
+}: {
+	identity: OptionIdentity;
+	useCache?: boolean;
+}): Promise<void> =>
 	queryAndUpdate<IcrcCustomToken[]>({
-		request: (params) => loadIcrcCustomTokens(params),
+		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
 		onLoad: loadIcrcCustomData,
 		onUpdateError: ({ error: err }) => {
 			icrcCustomTokensStore.resetAll();
@@ -111,17 +117,20 @@ const loadIcrcData = ({
 
 const loadIcrcCustomTokens = async ({
 	identity,
-	certified
+	certified,
+	useCache = false
 }: {
 	identity: OptionIdentity;
 	certified: boolean;
+	useCache?: boolean;
 }): Promise<IcrcCustomToken[]> => {
 	const tokens = await loadNetworkCustomTokens({
 		identity,
 		certified,
 		filterTokens: ({ token }) => 'Icrc' in token,
 		setIdbTokens: setIdbIcTokens,
-		getIdbTokens: getIdbIcTokens
+		getIdbTokens: getIdbIcTokens,
+		useCache
 	});
 
 	return await loadCustomIcrcTokensData({
