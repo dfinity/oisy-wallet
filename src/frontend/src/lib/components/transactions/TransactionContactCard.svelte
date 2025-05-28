@@ -10,10 +10,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { AddressBookSteps } from '$lib/enums/progress-steps';
-	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import { isNullish } from '@dfinity/utils';
 
 	interface Props {
