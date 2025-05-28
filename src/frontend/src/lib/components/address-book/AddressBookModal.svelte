@@ -26,6 +26,10 @@
 
 	const steps: WizardSteps = [
 		{
+			name: AddressBookSteps.SAVE_ADDRESS,
+			title: $i18n.address.save.title
+		},
+		{
 			name: AddressBookSteps.ADDRESS_BOOK,
 			title: $i18n.address_book.text.title
 		},
@@ -57,10 +61,6 @@
 		{
 			name: AddressBookSteps.DELETE_ADDRESS,
 			title: $i18n.address.delete.title
-		},
-		{
-			name: AddressBookSteps.SAVE_ADDRESS,
-			title: $i18n.address.save.title
 		}
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
