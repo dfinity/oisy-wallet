@@ -29,7 +29,7 @@
 				<SendContact
 					contact={networkContacts[address]}
 					{address}
-					on:click={() => {
+					onClick={() => {
 						selectedContact = networkContacts[address];
 						destination = address;
 						dispatch('icNext');

@@ -10,19 +10,13 @@
 	interface Props {
 		address: Address;
 		contact: ContactUi;
+		onClick: () => void;
 	}
 
-	let { contact, address }: Props = $props();
-
-	const dispatch = createEventDispatcher();
+	let { contact, address, onClick }: Props = $props();
 </script>
 
-<LogoButton
-	styleClass="group"
-	onClick={() => {
-		dispatch('click');
-	}}
->
+<LogoButton styleClass="group" {onClick}>
 	{#snippet logo()}
 		<AvatarWithBadge {contact} badge={{ type: 'addressType', address }} variant="sm" />
 	{/snippet}

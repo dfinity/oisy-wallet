@@ -12,6 +12,7 @@ describe('SendContact', () => {
 	}) as unknown as ContactUi[];
 	const props = {
 		contact,
+		onClick: () => {},
 		address: mockContactBtcAddressUi.address
 	};
 
