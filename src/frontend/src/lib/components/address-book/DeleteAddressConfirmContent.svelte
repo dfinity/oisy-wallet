@@ -14,9 +14,10 @@
 		onDelete: () => void;
 		address: ContactAddressUi;
 		contact: ContactUi;
+		disabled?: boolean;
 	}
 
-	let { onCancel, onDelete, address, contact }: Props = $props();
+	let { onCancel, onDelete, address, contact, disabled = false }: Props = $props();
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center pb-5">
@@ -30,8 +31,8 @@
 	</span>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={onCancel}></ButtonCancel>
-		<Button colorStyle="error" on:click={onDelete}>
+		<ButtonCancel {disabled} onclick={onCancel}></ButtonCancel>
+		<Button loading={disabled} colorStyle="error" on:click={onDelete}>
 			{$i18n.address.delete.delete_address}
 		</Button>
 	</ButtonGroup>
