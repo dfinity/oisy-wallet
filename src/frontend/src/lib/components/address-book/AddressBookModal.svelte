@@ -40,40 +40,59 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
+	let loading = $state(false);
+
+	export const callWithState =
+		<T, R>(methodToCall: (params: T) => Promise<R>) =>
+		async (params: T) => {
+			loading = true;
+			try {
+				return await methodToCall(params);
+			} finally {
+				loading = false;
+			}
+		};
+
 	const callCreateContact = $derived(
-		wrapCallWith({
-			methodToCall: createContact,
-			toastErrorMessage: $i18n.contact.error.create,
-			trackEventNames: {
-				success: TRACK_CONTACT_CREATE_SUCCESS,
-				error: TRACK_CONTACT_CREATE_ERROR
-			},
-			identity: $authIdentity
-		})
+		callWithState(
+			wrapCallWith({
+				methodToCall: createContact,
+				toastErrorMessage: $i18n.contact.error.create,
+				trackEventNames: {
+					success: TRACK_CONTACT_CREATE_SUCCESS,
+					error: TRACK_CONTACT_CREATE_ERROR
+				},
+				identity: $authIdentity
+			})
+		)
 	);
 
 	const callUpdateContact = $derived(
-		wrapCallWith({
-			methodToCall: updateContact,
-			toastErrorMessage: $i18n.contact.error.update,
-			trackEventNames: {
-				success: TRACK_CONTACT_UPDATE_SUCCESS,
-				error: TRACK_CONTACT_UPDATE_ERROR
-			},
-			identity: $authIdentity
-		})
+		callWithState(
+			wrapCallWith({
+				methodToCall: updateContact,
+				toastErrorMessage: $i18n.contact.error.update,
+				trackEventNames: {
+					success: TRACK_CONTACT_UPDATE_SUCCESS,
+					error: TRACK_CONTACT_UPDATE_ERROR
+				},
+				identity: $authIdentity
+			})
+		)
 	);
 
 	const callDeleteContact = $derived(
-		wrapCallWith({
-			methodToCall: deleteContact,
-			toastErrorMessage: $i18n.contact.error.delete,
-			trackEventNames: {
-				success: TRACK_CONTACT_DELETE_SUCCESS,
-				error: TRACK_CONTACT_DELETE_ERROR
-			},
-			identity: $authIdentity
-		})
+		callWithState(
+			wrapCallWith({
+				methodToCall: deleteContact,
+				toastErrorMessage: $i18n.contact.error.delete,
+				trackEventNames: {
+					success: TRACK_CONTACT_DELETE_SUCCESS,
+					error: TRACK_CONTACT_DELETE_ERROR
+				},
+				identity: $authIdentity
+			})
+		)
 	);
 
 	const steps: WizardSteps = [
@@ -189,6 +208,14 @@
 			addresses
 		};
 		await callUpdateContact({ contact });
+		// if the entrypoint was SAVE_ADDRESS this is the last step of the flow, so we close the address book modal
+		if (
+			nonNullish(modalData?.entrypoint) &&
+			modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
+		) {
+			modalStore.close();
+			return;
+		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
@@ -205,7 +232,7 @@
 		};
 		await callUpdateContact({ contact });
 		currentAddressIndex = undefined;
-		gotoStep(AddressBookSteps.SHOW_CONTACT);
+		gotoStep(AddressBookSteps.EDIT_CONTACT);
 	};
 
 	const confirmDeleteAddress = (index: number) => {
@@ -276,6 +303,7 @@
 			onAddContact={() => {
 				currentContactId = undefined;
 				currentAddressIndex = undefined;
+				previousStepName = AddressBookSteps.ADDRESS_BOOK;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
 			onShowAddress={({ contact, addressIndex }) => {
@@ -288,7 +316,7 @@
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
 		<ShowContactStep
 			onClose={() => {
-				navigateToEntrypointOrCallback(handleClose);
+				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
 			}}
 			contact={currentContact}
 			onEdit={(contact) => {
@@ -310,7 +338,7 @@
 		<Responsive down="sm">
 			<EditContactStep
 				contact={currentContact}
-				onClose={handleClose}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 				onEdit={(contact) => {
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
@@ -335,7 +363,7 @@
 		<Responsive up="md">
 			<EditContactStep
 				contact={currentContact}
-				onClose={handleClose}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 				onEdit={(contact) => {
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
@@ -364,17 +392,23 @@
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 					previousStepName = AddressBookSteps.SAVE_ADDRESS;
 				} else {
-					gotoStep(AddressBookSteps.ADDRESS_BOOK);
+					if (nonNullish(createdContact)) {
+						currentContactId = createdContact.id;
+						gotoStep(AddressBookSteps.SHOW_CONTACT);
+					} else {
+						gotoStep(AddressBookSteps.ADDRESS_BOOK);
+					}
 				}
 			}}
 			onSaveContact={async (contact: ContactUi) => {
 				await callUpdateContact({ contact });
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
 			}}
 			isNewContact={isNullish(currentContact)}
 			onClose={() => {
-				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
+				navigateToEntrypointOrCallback(handleClose);
 			}}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep
@@ -389,6 +423,7 @@
 				currentAddressIndex = undefined;
 				handleClose();
 			}}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
 		<DeleteAddressConfirmContent
@@ -399,6 +434,7 @@
 			onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
 			address={currentContact.addresses[currentAddressIndex]}
 			contact={currentContact}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
 		{#if nonNullish(currentAddressIndex) && nonNullish(currentContact?.addresses?.[currentAddressIndex])}
@@ -417,6 +453,7 @@
 			}}
 			onDelete={handleDeleteContact}
 			contact={currentContact}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SAVE_ADDRESS}
 		<SaveAddressStep
@@ -443,6 +480,7 @@
 		onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
 		address={currentContact.addresses[currentAddressIndex]}
 		contact={currentContact}
+		disabled={loading}
 	/>
 {:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact) && isDeletingContact}
 	<DeleteContactConfirmBottomSheet
@@ -456,5 +494,6 @@
 			}
 		}}
 		contact={currentContact}
+		disabled={loading}
 	/>
 {/if}
