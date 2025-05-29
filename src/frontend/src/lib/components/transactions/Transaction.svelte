@@ -7,16 +7,16 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import { contacts } from '$lib/derived/contacts.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
-	import type { ContactUi } from '$lib/types/contact';
-	import { getContactForAddress } from '$lib/utils/contact.utils';
-	import { contacts } from '$lib/derived/contacts.derived';
-	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		amount?: bigint;
