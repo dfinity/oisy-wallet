@@ -23,11 +23,7 @@
 	const { type, to, from, toExplorerUrl, fromExplorerUrl }: Props = $props();
 
 	let address: string | undefined = $derived(
-		type === 'send' && nonNullish(to)
-			? (to)
-			: type !== 'send' && nonNullish(from)
-				? (from)
-				: undefined
+		type === 'send' && nonNullish(to) ? to : type !== 'send' && nonNullish(from) ? from : undefined
 	);
 
 	let contact: ContactUi | undefined = $derived(
