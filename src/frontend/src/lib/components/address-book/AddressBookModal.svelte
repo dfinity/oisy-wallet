@@ -331,8 +331,12 @@
 			contact={currentContact}
 			onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
 				const newContact = await callCreateContact({ name: contact.name });
-				currentContactId = newContact.id;
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
+				if (nonNullish(newContact)) {
+					currentContactId = newContact.id;
+					gotoStep(AddressBookSteps.SHOW_CONTACT);
+				} else {
+					gotoStep(AddressBookSteps.ADDRESS_BOOK);
+				}
 			}}
 			onSaveContact={async (contact: ContactUi) => {
 				await callUpdateContact({ contact });
