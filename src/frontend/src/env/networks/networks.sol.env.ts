@@ -110,6 +110,10 @@ export const SUPPORTED_SOLANA_NETWORK_IDS: NetworkId[] = SUPPORTED_SOLANA_NETWOR
 	({ id }) => id
 );
 
+export const SUPPORTED_SOLANA_MAINNET_NETWORKS: Network[] = SUPPORTED_SOLANA_NETWORKS.filter(
+	({ env }) => env === 'mainnet'
+);
+
 export const SOLANA_KEY_ID: SchnorrKeyId = {
 	algorithm: { ed25519: null },
 	name: SIGNER_ROOT_KEY_NAME
