@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
+	import SkeletonAddressCard from '$lib/components/address/SkeletonAddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
@@ -14,19 +15,21 @@
 
 	interface Props {
 		type: 'send' | 'receive';
-		to: string;
+		to: string | undefined;
 		toExplorerUrl?: string;
-		from: string;
+		from: string | undefined;
 		fromExplorerUrl?: string;
 	}
 
 	const { type, to, from, toExplorerUrl, fromExplorerUrl }: Props = $props();
 
 	let contact: ContactUi | undefined = $derived(
-		getContactForAddress({
-			contactList: $contacts,
-			addressString: type === 'send' ? to : from
-		})
+		nonNullish(to) && nonNullish(from)
+			? getContactForAddress({
+					contactList: $contacts,
+					addressString: type === 'send' ? to : from
+				})
+			: undefined
 	);
 </script>
 
