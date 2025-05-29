@@ -820,8 +820,10 @@ interface I18nTransaction {
 		type: string;
 		from: string;
 		from_copied: string;
+		received_from: string;
 		to: string;
 		to_copied: string;
+		sent_to: string;
 		block: string;
 		interacted_with: string;
 		status: string;
