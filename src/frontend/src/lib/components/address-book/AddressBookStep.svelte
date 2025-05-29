@@ -14,6 +14,8 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import {contactsNotInitialized} from "$lib/derived/contacts.derived";
+	import SkeletonCards from "$lib/components/ui/SkeletonCards.svelte";
 
 	interface Props {
 		contacts: ContactUi[];
@@ -42,7 +44,9 @@
 </script>
 
 <ContentWithToolbar styleClass="mx-2 flex flex-col items-stretch">
-	{#if contacts.length === 0}
+	{#if $contactsNotInitialized}
+		<SkeletonCards rows={3} />
+	{:else if contacts.length === 0}
 		<EmptyAddressBook {onAddContact}></EmptyAddressBook>
 	{:else}
 		<div class="flex w-full gap-2">
