@@ -48,7 +48,9 @@
 	};
 
 	let title = $derived(
-		notEmptyString(editingContact?.name?.trim?.()) ? editingContact?.name : $i18n.contact.form.add_new_contact
+		notEmptyString(editingContact?.name?.trim?.())
+			? editingContact?.name
+			: $i18n.contact.form.add_new_contact
 	);
 
 	export { title };
@@ -56,7 +58,8 @@
 
 <ContentWithToolbar styleClass="flex flex-col gap-6 items-center">
 	<Avatar name={editingContact?.name} variant="xl"></Avatar>
-	<ContactForm bind:contact={editingContact} bind:this={form} {disabled} onSubmit={handleSave}></ContactForm>
+	<ContactForm bind:contact={editingContact} bind:this={form} {disabled} onSubmit={handleSave}
+	></ContactForm>
 
 	<!-- TODO Add address list here -->
 
