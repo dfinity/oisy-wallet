@@ -128,7 +128,7 @@ describe('ContactCard', () => {
 		expect(expandButton).not.toBeNull();
 
 		// Check that the addresses are not expanded by default
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).toBe('0px');
+		expect(queryByTestId('collapsible-content')).not.toBeInTheDocument();
 	});
 
 	it('should expand and collapse addresses when the expand button is clicked', async () => {
@@ -151,13 +151,13 @@ describe('ContactCard', () => {
 		expect(expandButton).not.toBeNull();
 
 		// The collapsible should be collapsed
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).toBe('0px');
+		expect(queryByTestId('collapsible-content')).not.toBeInTheDocument();
 
 		// Click the expand button
 		await fireEvent.click(expandButton as HTMLElement);
 
 		// Collapsible should be expanded
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).not.toBe('0px');
+		expect(queryByTestId('collapsible-content')).toBeInTheDocument();
 
 		// The button should now be for hiding addresses
 		expect(
@@ -169,8 +169,11 @@ describe('ContactCard', () => {
 			container.querySelector(`[aria-label="${en.address_book.alt.hide_addresses}"]`) as HTMLElement
 		);
 
+		// wait for animation to end
+		await new Promise((resolve) => setTimeout(resolve, 500));
+
 		// The collapsible should be collapsed again
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).toBe('0px');
+		expect(queryByTestId('collapsible-content')).not.toBeInTheDocument();
 	});
 
 	it('should call onInfo when info button is clicked on an expanded address', async () => {

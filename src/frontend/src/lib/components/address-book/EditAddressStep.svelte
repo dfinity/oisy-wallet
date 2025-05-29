@@ -24,16 +24,20 @@
 		onAddAddress: (address: ContactAddressUi) => void;
 		onClose: () => void;
 		isNewAddress: boolean;
+		disabled?: boolean;
 	}
 
 	let {
 		contact,
-		address = $bindable({}),
+		address = {},
 		onSaveAddress,
 		onAddAddress,
 		onClose,
-		isNewAddress
+		isNewAddress,
+		disabled = false
 	}: Props = $props();
+
+	let editingAddress = $state(address ? { ...address } : {});
 
 	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
 	let modalDataAddress: string | undefined = $derived(
@@ -44,23 +48,23 @@
 
 	let addressModel = $derived(
 		nonNullish(modalDataAddress)
-			? (mapAddressToContactAddressUi(modalDataAddress) ?? address)
-			: address
+			? (mapAddressToContactAddressUi(modalDataAddress) ?? editingAddress)
+			: editingAddress
 	);
 
 	const handleSave = () => {
 		if (isNewAddress) {
 			onAddAddress({ ...addressModel } as ContactAddressUi);
 		} else {
-			onSaveAddress(address as ContactAddressUi);
+			onSaveAddress(editingAddress as ContactAddressUi);
 		}
 	};
 
 	let title = $derived(
 		isNewAddress
 			? $i18n.address.form.new_address
-			: nonNullish(address.addressType)
-				? $i18n.address.types[address.addressType]
+			: nonNullish(editingAddress.addressType)
+				? $i18n.address.types[editingAddress.addressType]
 				: ''
 	);
 
@@ -81,17 +85,18 @@
 			{isNewAddress}
 			address={addressModel}
 			bind:isInvalid
-			disabled={nonNullish(modalDataAddress)}
+			disabled={nonNullish(modalDataAddress) || disabled}
 		></AddressForm>
 	</div>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
+		<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
 		<Button
 			colorStyle="primary"
 			disabled={isInvalid}
 			on:click={handleSave}
 			testId={ADDRESS_BOOK_SAVE_BUTTON}
+			loading={disabled}
 		>
 			{$i18n.core.text.save}
 		</Button>

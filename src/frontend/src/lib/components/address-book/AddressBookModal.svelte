@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
@@ -10,6 +11,7 @@
 	import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
 	import EditContactNameStep from '$lib/components/address-book/EditContactNameStep.svelte';
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
+	import SaveAddressStep from '$lib/components/address-book/SaveAddressStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
@@ -33,50 +35,74 @@
 	import { wrapCallWith } from '$lib/services/utils.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
+	let loading = $state(false);
+
+	export const callWithState =
+		<T, R>(methodToCall: (params: T) => Promise<R>) =>
+		async (params: T) => {
+			loading = true;
+			try {
+				return await methodToCall(params);
+			} finally {
+				loading = false;
+			}
+		};
+
 	const callCreateContact = $derived(
-		wrapCallWith({
-			methodToCall: createContact,
-			toastErrorMessage: $i18n.contact.error.create,
-			trackEventNames: {
-				success: TRACK_CONTACT_CREATE_SUCCESS,
-				error: TRACK_CONTACT_CREATE_ERROR
-			},
-			identity: $authIdentity
-		})
+		callWithState(
+			wrapCallWith({
+				methodToCall: createContact,
+				toastErrorMessage: $i18n.contact.error.create,
+				trackEventNames: {
+					success: TRACK_CONTACT_CREATE_SUCCESS,
+					error: TRACK_CONTACT_CREATE_ERROR
+				},
+				identity: $authIdentity
+			})
+		)
 	);
 
 	const callUpdateContact = $derived(
-		wrapCallWith({
-			methodToCall: updateContact,
-			toastErrorMessage: $i18n.contact.error.update,
-			trackEventNames: {
-				success: TRACK_CONTACT_UPDATE_SUCCESS,
-				error: TRACK_CONTACT_UPDATE_ERROR
-			},
-			identity: $authIdentity
-		})
+		callWithState(
+			wrapCallWith({
+				methodToCall: updateContact,
+				toastErrorMessage: $i18n.contact.error.update,
+				trackEventNames: {
+					success: TRACK_CONTACT_UPDATE_SUCCESS,
+					error: TRACK_CONTACT_UPDATE_ERROR
+				},
+				identity: $authIdentity
+			})
+		)
 	);
 
 	const callDeleteContact = $derived(
-		wrapCallWith({
-			methodToCall: deleteContact,
-			toastErrorMessage: $i18n.contact.error.delete,
-			trackEventNames: {
-				success: TRACK_CONTACT_DELETE_SUCCESS,
-				error: TRACK_CONTACT_DELETE_ERROR
-			},
-			identity: $authIdentity
-		})
+		callWithState(
+			wrapCallWith({
+				methodToCall: deleteContact,
+				toastErrorMessage: $i18n.contact.error.delete,
+				trackEventNames: {
+					success: TRACK_CONTACT_DELETE_SUCCESS,
+					error: TRACK_CONTACT_DELETE_ERROR
+				},
+				identity: $authIdentity
+			})
+		)
 	);
 
 	const steps: WizardSteps = [
 		{
 			name: AddressBookSteps.ADDRESS_BOOK,
 			title: $i18n.address_book.text.title
+		},
+		{
+			name: AddressBookSteps.SAVE_ADDRESS,
+			title: $i18n.address.save.title
 		},
 		{
 			name: AddressBookSteps.SHOW_CONTACT,
@@ -110,6 +136,18 @@
 	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
 
 	let currentStep: WizardStep | undefined = $state();
+
+	let modalData = $derived($modalStore?.data as AddressBookModalParams);
+
+	// Allow to define an entrypoint when opening the modal. Here we listen to the modal data and go to the entrypoint step if were not already on it.
+	onMount(() => {
+		const data = modalData?.entrypoint?.type;
+
+		if (nonNullish(data) && currentStep?.name !== data) {
+			gotoStep(data);
+		}
+	});
+
 	let modal: WizardModal | undefined = $state();
 	const close = () => modalStore.close();
 
@@ -170,6 +208,14 @@
 			addresses
 		};
 		await callUpdateContact({ contact });
+		// if the entrypoint was SAVE_ADDRESS this is the last step of the flow, so we close the address book modal
+		if (
+			nonNullish(modalData?.entrypoint) &&
+			modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
+		) {
+			modalStore.close();
+			return;
+		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
@@ -186,7 +232,7 @@
 		};
 		await callUpdateContact({ contact });
 		currentAddressIndex = undefined;
-		gotoStep(AddressBookSteps.SHOW_CONTACT);
+		gotoStep(AddressBookSteps.EDIT_CONTACT);
 	};
 
 	const confirmDeleteAddress = (index: number) => {
@@ -206,6 +252,14 @@
 			await callUpdateContact({ contact });
 			currentAddressIndex = undefined;
 			gotoStep(AddressBookSteps.EDIT_CONTACT);
+		}
+	};
+
+	const navigateToEntrypointOrCallback = (callback: () => void) => {
+		if (nonNullish(modalData?.entrypoint)) {
+			gotoStep(modalData.entrypoint.type);
+		} else {
+			callback();
 		}
 	};
 </script>
@@ -251,6 +305,7 @@
 			onAddContact={() => {
 				currentContactId = undefined;
 				currentAddressIndex = undefined;
+				previousStepName = AddressBookSteps.ADDRESS_BOOK;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
 			onShowAddress={({ contact, addressIndex }) => {
@@ -262,7 +317,9 @@
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
 		<ShowContactStep
-			onClose={handleClose}
+			onClose={() => {
+				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
+			}}
 			contact={currentContact}
 			onEdit={(contact) => {
 				currentContactId = contact.id;
@@ -283,7 +340,7 @@
 		<Responsive down="sm">
 			<EditContactStep
 				contact={currentContact}
-				onClose={handleClose}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 				onEdit={(contact) => {
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
@@ -308,7 +365,7 @@
 		<Responsive up="md">
 			<EditContactStep
 				contact={currentContact}
-				onClose={handleClose}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 				onEdit={(contact) => {
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
@@ -330,15 +387,30 @@
 			bind:this={editContactNameStep}
 			contact={currentContact}
 			onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
-				await callCreateContact({ name: contact.name });
-				gotoStep(AddressBookSteps.ADDRESS_BOOK);
+				const createdContact = await callCreateContact({ name: contact.name });
+				if (modalData?.entrypoint) {
+					currentAddressIndex = undefined;
+					currentContact = createdContact;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+					previousStepName = AddressBookSteps.SAVE_ADDRESS;
+				} else {
+					if (nonNullish(createdContact)) {
+						currentContactId = createdContact.id;
+						gotoStep(AddressBookSteps.SHOW_CONTACT);
+					} else {
+						gotoStep(AddressBookSteps.ADDRESS_BOOK);
+					}
+				}
 			}}
 			onSaveContact={async (contact: ContactUi) => {
 				await callUpdateContact({ contact });
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
 			}}
 			isNewContact={isNullish(currentContact)}
-			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
+			onClose={() => {
+				navigateToEntrypointOrCallback(handleClose);
+			}}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep
@@ -353,6 +425,7 @@
 				currentAddressIndex = undefined;
 				handleClose();
 			}}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
 		<DeleteAddressConfirmContent
@@ -363,6 +436,7 @@
 			onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
 			address={currentContact.addresses[currentAddressIndex]}
 			contact={currentContact}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
 		{#if nonNullish(currentAddressIndex) && nonNullish(currentContact?.addresses?.[currentAddressIndex])}
@@ -381,6 +455,23 @@
 			}}
 			onDelete={handleDeleteContact}
 			contact={currentContact}
+			disabled={loading}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.SAVE_ADDRESS}
+		<SaveAddressStep
+			onCreateContact={() => {
+				currentContact = undefined;
+				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+			}}
+			onInfo={(contact) => {
+				currentContact = contact;
+				gotoStep(AddressBookSteps.SHOW_CONTACT);
+			}}
+			onSelectContact={(contact: ContactUi) => {
+				currentContact = contact;
+				currentAddressIndex = undefined;
+				gotoStep(AddressBookSteps.EDIT_ADDRESS);
+			}}
 		/>
 	{/if}
 </WizardModal>
@@ -391,6 +482,7 @@
 		onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
 		address={currentContact.addresses[currentAddressIndex]}
 		contact={currentContact}
+		disabled={loading}
 	/>
 {:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact) && isDeletingContact}
 	<DeleteContactConfirmBottomSheet
@@ -404,5 +496,6 @@
 			}
 		}}
 		contact={currentContact}
+		disabled={loading}
 	/>
 {/if}
