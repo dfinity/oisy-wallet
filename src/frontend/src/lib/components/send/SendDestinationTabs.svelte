@@ -26,7 +26,7 @@
 		{#if activeTab === 'recentlyUsed'}
 			<KnownDestinationsComponent {knownDestinations} bind:destination on:icNext />
 		{:else if activeTab === 'contacts'}
-			<SendContacts />
+			<SendContacts bind:destination on:icNext />
 		{/if}
 	</Tabs>
 </div>
