@@ -8,7 +8,8 @@ describe('SendDestinationTabs', () => {
 		const { getByText } = render(SendDestinationTabs, {
 			props: {
 				destination: '',
-				knownDestinations
+				knownDestinations,
+				activeSendDestinationTab: 'recentlyUsed'
 			}
 		});
 
