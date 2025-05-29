@@ -29,13 +29,15 @@
 
 	let {
 		contact,
-		address = $bindable({}),
+		address = {},
 		onSaveAddress,
 		onAddAddress,
 		onClose,
 		isNewAddress,
 		disabled = false
 	}: Props = $props();
+
+	let editingAddress = $state(address ? { ...address } : {});
 
 	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
 	let modalDataAddress: string | undefined = $derived(
@@ -46,23 +48,23 @@
 
 	let addressModel = $derived(
 		nonNullish(modalDataAddress)
-			? (mapAddressToContactAddressUi(modalDataAddress) ?? address)
-			: address
+			? (mapAddressToContactAddressUi(modalDataAddress) ?? editingAddress)
+			: editingAddress
 	);
 
 	const handleSave = () => {
 		if (isNewAddress) {
 			onAddAddress({ ...addressModel } as ContactAddressUi);
 		} else {
-			onSaveAddress(address as ContactAddressUi);
+			onSaveAddress(editingAddress as ContactAddressUi);
 		}
 	};
 
 	let title = $derived(
 		isNewAddress
 			? $i18n.address.form.new_address
-			: nonNullish(address.addressType)
-				? $i18n.address.types[address.addressType]
+			: nonNullish(editingAddress.addressType)
+				? $i18n.address.types[editingAddress.addressType]
 				: ''
 	);
 

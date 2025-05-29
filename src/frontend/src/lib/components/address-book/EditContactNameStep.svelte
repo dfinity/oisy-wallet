@@ -27,9 +27,11 @@
 		onSaveContact,
 		onClose,
 		isNewContact,
-		contact = $bindable({}),
+		contact = {},
 		disabled = false
 	}: Props = $props();
+
+	let editingContact = $state(contact ? { ...contact } : {});
 
 	let form: ContactForm | undefined = $state();
 
@@ -38,23 +40,26 @@
 			return;
 		}
 
-		if (isNewContact && nonNullish(contact.name)) {
-			onAddContact({ name: contact.name });
+		if (isNewContact && nonNullish(editingContact.name)) {
+			onAddContact({ name: editingContact.name });
 		} else {
-			onSaveContact(contact as ContactUi);
+			onSaveContact(editingContact as ContactUi);
 		}
 	};
 
 	let title = $derived(
-		notEmptyString(contact?.name?.trim?.()) ? contact?.name : $i18n.contact.form.add_new_contact
+		notEmptyString(editingContact?.name?.trim?.())
+			? editingContact?.name
+			: $i18n.contact.form.add_new_contact
 	);
 
 	export { title };
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-6 items-center">
-	<Avatar name={contact?.name} variant="xl"></Avatar>
-	<ContactForm bind:contact bind:this={form} {disabled} onSubmit={handleSave}></ContactForm>
+	<Avatar name={editingContact?.name} variant="xl"></Avatar>
+	<ContactForm bind:contact={editingContact} bind:this={form} {disabled} onSubmit={handleSave}
+	></ContactForm>
 
 	<!-- TODO Add address list here -->
 
