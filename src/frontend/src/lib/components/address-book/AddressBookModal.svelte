@@ -309,7 +309,7 @@
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
 		<ShowContactStep
 			onClose={() => {
-				navigateToEntrypointOrCallback(handleClose);
+				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
 			}}
 			contact={currentContact}
 			onEdit={(contact) => {
@@ -385,7 +385,12 @@
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 					previousStepName = AddressBookSteps.SAVE_ADDRESS;
 				} else {
-					gotoStep(AddressBookSteps.ADDRESS_BOOK);
+					if (nonNullish(createdContact)) {
+						currentContactId = createdContact.id;
+						gotoStep(AddressBookSteps.SHOW_CONTACT);
+					} else {
+						gotoStep(AddressBookSteps.ADDRESS_BOOK);
+					}
 				}
 			}}
 			onSaveContact={async (contact: ContactUi) => {
