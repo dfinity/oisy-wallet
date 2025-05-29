@@ -6,6 +6,7 @@ import { getAccountOwner } from '$sol/api/solana.api';
 import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
+import { mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { capitalizeFirstLetter } from '$tests/utils/string-utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -47,13 +48,15 @@ describe('SolTransactionModal', () => {
 		expect(getAllByText(formattedAmount)[0]).toBeInTheDocument();
 	});
 
-	it('should display correct to and from addresses for send', () => {
+	it('should display correct to and from addresses for send', async () => {
 		const { getByText } = render(SolTransactionModal, {
 			transaction: mockSolTransactionUi,
 			token: SOLANA_TOKEN
 		});
 
-		expect(getByText(mockSolTransactionUi.to as string)).toBeInTheDocument();
+		await waitFor(() => {
+			expect(getByText(mockSolTransactionUi.to as string)).toBeInTheDocument();
+		});
 	});
 
 	it('should display tx status', () => {
@@ -99,7 +102,7 @@ describe('SolTransactionModal', () => {
 	});
 
 	it('should display ATA address if is SPL token', async () => {
-		vi.mocked(getAccountOwner).mockResolvedValue('mock-owner-address');
+		vi.mocked(getAccountOwner).mockResolvedValue(mockSolAddress2);
 
 		const { getByText } = render(SolTransactionModal, {
 			transaction: mockSolTransactionUi,
@@ -107,10 +110,12 @@ describe('SolTransactionModal', () => {
 		});
 
 		await waitFor(() => {
-			expect(getByText(en.transaction.text.from_ata)).toBeInTheDocument();
+			expect(getByText(en.transaction.text.to_ata)).toBeInTheDocument();
+
+			expect(getByText(mockSolAddress2)).toBeInTheDocument();
 
 			expect(
-				getByText(shortenWithMiddleEllipsis({ text: 'mock-owner-address' }))
+				getByText(shortenWithMiddleEllipsis({ text: mockSolTransactionUi.to as string }))
 			).toBeInTheDocument();
 		});
 	});
