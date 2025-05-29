@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
-	import SkeletonAddressCard from '$lib/components/address/SkeletonAddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
@@ -23,60 +22,67 @@
 
 	const { type, to, from, toExplorerUrl, fromExplorerUrl }: Props = $props();
 
+	let address: string | undefined = $derived(
+		type === 'send' && nonNullish(to)
+			? (to as string)
+			: type !== 'send' && nonNullish(from)
+				? (from as string)
+				: undefined
+	);
+
 	let contact: ContactUi | undefined = $derived(
-		nonNullish(to) && nonNullish(from)
+		nonNullish(address)
 			? getContactForAddress({
 					contactList: $contacts,
-					addressString: type === 'send' ? to : from
+					addressString: address
 				})
 			: undefined
 	);
 </script>
 
-<AddressCard>
-	{#snippet logo()}
-		<AvatarWithBadge
-			{contact}
-			badge={{ type: 'addressType', address: type === 'send' ? to : from }}
-		/>
-	{/snippet}
-	{#snippet content()}
-		<span class="mx-1 flex flex-col items-start text-left">
-			<span class="font-bold"
-				>{type === 'send' ? $i18n.transaction.text.to : $i18n.transaction.text.from}: {contact?.name}</span
-			>
-			<span class="w-full truncate">{type === 'send' ? to : from}</span>
-
-			{#if isNullish(contact)}
-				<Button
-					on:click={() =>
-						modalStore.openAddressBook({
-							id: Symbol(),
-							data: {
-								entrypoint: {
-									type: AddressBookSteps.SAVE_ADDRESS,
-									address: type === 'send' ? to : from
-								}
-							}
-						})}
-					link
-					styleClass="mt-3 text-sm"
-					ariaLabel={$i18n.address.save.title}
-					><IconUserSquare size="20px" /> {$i18n.address.save.title}</Button
+{#if nonNullish(address)}
+	<AddressCard>
+		{#snippet logo()}
+			<AvatarWithBadge {contact} badge={{ type: 'addressType', address }} />
+		{/snippet}
+		{#snippet content()}
+			<span class="mx-1 flex flex-col items-start text-left">
+				<span class="font-bold"
+					>{type === 'send' ? $i18n.transaction.text.to : $i18n.transaction.text.from}: {contact?.name}</span
 				>
-			{/if}
-		</span>
-	{/snippet}
-	{#snippet actions()}
-		<TransactionAddressActions
-			copyAddress={type === 'send' ? to : from}
-			copyAddressText={type === 'send'
-				? $i18n.transaction.text.to_copied
-				: $i18n.transaction.text.from_copied}
-			explorerUrl={type === 'send' ? toExplorerUrl : fromExplorerUrl}
-			explorerUrlAriaLabel={type === 'send'
-				? $i18n.transaction.alt.open_to_block_explorer
-				: $i18n.transaction.alt.open_from_block_explorer}
-		/>
-	{/snippet}
-</AddressCard>
+				<span class="w-full truncate">{address}</span>
+
+				{#if isNullish(contact)}
+					<Button
+						on:click={() =>
+							modalStore.openAddressBook({
+								id: Symbol(),
+								data: {
+									entrypoint: {
+										type: AddressBookSteps.SAVE_ADDRESS,
+										address
+									}
+								}
+							})}
+						link
+						styleClass="mt-3 text-sm"
+						ariaLabel={$i18n.address.save.title}
+						><IconUserSquare size="20px" /> {$i18n.address.save.title}</Button
+					>
+				{/if}
+			</span>
+		{/snippet}
+		{#snippet actions()}
+			<TransactionAddressActions
+				copyAddress={address}
+				copyAddressText={type === 'send'
+					? $i18n.transaction.text.to_copied
+					: $i18n.transaction.text.from_copied}
+				explorerUrl={type === 'send' ? toExplorerUrl : fromExplorerUrl}
+				explorerUrlAriaLabel={type === 'send'
+					? $i18n.transaction.alt.open_to_block_explorer
+					: $i18n.transaction.alt.open_from_block_explorer}
+			/>
+		{/snippet}
+	</AddressCard>
+{/if}
