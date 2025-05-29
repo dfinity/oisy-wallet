@@ -396,7 +396,7 @@
 			onClose={() => {
 				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
 			}}
-            disabled={loading}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep
