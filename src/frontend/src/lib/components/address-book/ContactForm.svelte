@@ -7,15 +7,24 @@
 
 	let {
 		contact = $bindable(),
-		disabled = false
-	}: { contact: Partial<ContactUi>; disabled?: boolean } = $props();
+		disabled = false,
+		onSubmit = () => {}
+	}: { contact: Partial<ContactUi>; disabled?: boolean; onSubmit?: () => void } = $props();
 
-	let isValid = $derived(notEmptyString(contact?.name?.trim?.()));
+	let isValid = $derived(() => notEmptyString(contact?.name?.trim?.()));
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			onSubmit();
+		}
+	}
 
 	export { isValid };
 </script>
 
-<form class="w-full">
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<form class="w-full" onkeydown={handleKeydown}>
 	<div class="rounded-lg bg-brand-light p-4 pb-6 pt-4 text-sm md:p-6 md:text-base md:font-bold">
 		{$i18n.contact.fields.name}
 		<InputText
