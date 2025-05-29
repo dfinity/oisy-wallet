@@ -305,6 +305,7 @@
 			onAddContact={() => {
 				currentContactId = undefined;
 				currentAddressIndex = undefined;
+				previousStepName = AddressBookSteps.ADDRESS_BOOK;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
 			onShowAddress={({ contact, addressIndex }) => {
@@ -403,11 +404,11 @@
 			}}
 			onSaveContact={async (contact: ContactUi) => {
 				await callUpdateContact({ contact });
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
 			}}
 			isNewContact={isNullish(currentContact)}
 			onClose={() => {
-				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
+				navigateToEntrypointOrCallback(handleClose);
 			}}
 			disabled={loading}
 		/>
