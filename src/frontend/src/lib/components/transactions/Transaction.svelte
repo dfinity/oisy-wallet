@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Component } from 'svelte';
+	import type { Component, Snippet } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
@@ -13,26 +13,62 @@
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
+	import type { ContactUi } from '$lib/types/contact';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import { contacts } from '$lib/derived/contacts.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
-	export let amount: bigint | undefined;
-	export let type: TransactionType;
-	export let status: TransactionStatus;
-	export let timestamp: number | undefined;
-	export let styleClass: string | undefined = undefined;
-	export let token: Token;
-	export let iconType: 'token' | 'transaction' = 'transaction';
+	interface Props {
+		amount?: bigint;
+		type: TransactionType;
+		status: TransactionStatus;
+		timestamp?: number;
+		styleClass?: string;
+		token: Token;
+		iconType: 'token' | 'transaction';
+		to?: string;
+		from?: string;
+		children?: Snippet;
+		onClick?: () => void;
+	}
 
-	let icon: Component;
-	$: icon = mapTransactionIcon({ type, status });
+	const {
+		amount,
+		type,
+		status,
+		timestamp,
+		styleClass = undefined,
+		token,
+		iconType = 'transaction',
+		to,
+		from,
+		children,
+		onClick
+	}: Props = $props();
 
-	let iconWithOpacity: boolean;
-	$: iconWithOpacity = status === 'pending' || status === 'unconfirmed';
+	let icon: Component = $derived(mapTransactionIcon({ type, status }));
+
+	let iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
+
+	let contact: ContactUi | undefined = $derived(
+		type === 'send' && to
+			? getContactForAddress({ addressString: to, contactList: $contacts })
+			: type === 'receive' && from
+				? getContactForAddress({ addressString: from, contactList: $contacts })
+				: undefined
+	);
 </script>
 
-<button class={`contents ${styleClass ?? ''}`} on:click>
-	<div class="rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
+<button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
+	<span class="block w-full rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin>
-			<span class="inline-block"><slot /></span>
+			<span class="inline-block first-letter:capitalize">
+				{#if nonNullish(contact)}
+					{type === 'send' ? $i18n.transaction.text.to : $i18n.transaction.text.from}: {contact.name}
+				{:else}
+					{@render children?.()}
+				{/if}
+			</span>
 
 			<div slot="icon">
 				{#if iconType === 'token'}
@@ -66,5 +102,5 @@
 				<TransactionStatusComponent {status} />
 			</svelte:fragment>
 		</Card>
-	</div>
+	</span>
 </button>
