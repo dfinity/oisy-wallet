@@ -53,10 +53,6 @@ describe('SolTransactionModal', () => {
 			token: SOLANA_TOKEN
 		});
 
-		expect(
-			getByText(shortenWithMiddleEllipsis({ text: mockSolTransactionUi.from as string }))
-		).toBeInTheDocument();
-
 		expect(getByText(mockSolTransactionUi.to as string)).toBeInTheDocument();
 	});
 

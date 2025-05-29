@@ -16,7 +16,7 @@ export const SUPPORTED_EVM_NETWORKS_CHAIN_IDS: EthereumChainId[] = SUPPORTED_EVM
 	({ chainId }) => chainId
 );
 
-const SUPPORTED_EVM_MAINNET_NETWORKS: Network[] = SUPPORTED_EVM_NETWORKS.filter(
+export const SUPPORTED_EVM_MAINNET_NETWORKS: Network[] = SUPPORTED_EVM_NETWORKS.filter(
 	({ env }) => env === 'mainnet'
 );
 

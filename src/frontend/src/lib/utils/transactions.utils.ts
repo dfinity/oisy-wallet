@@ -307,25 +307,26 @@ export const getKnownDestinations = (
 			nonNullish(to) && type === 'send' && nonNullish(value) && value > ZERO
 				? {
 						...acc,
-						...(Array.isArray(to) ? to : [to]).reduce(
-							(innerAcc, address) => ({
+						...(Array.isArray(to) ? to : [to]).reduce((innerAcc, address) => {
+							const parsedAddress = address.toLowerCase();
+
+							return {
 								...innerAcc,
-								[address]: {
+								[parsedAddress]: {
 									amounts: [
-										...(nonNullish(acc[address]) ? acc[address].amounts : []),
+										...(nonNullish(acc[parsedAddress]) ? acc[parsedAddress].amounts : []),
 										{ value, token }
 									],
 									timestamp:
-										nonNullish(acc[address]?.timestamp) && nonNullish(timestamp)
-											? Math.max(Number(acc[address].timestamp), Number(timestamp))
+										nonNullish(acc[parsedAddress]?.timestamp) && nonNullish(timestamp)
+											? Math.max(Number(acc[parsedAddress].timestamp), Number(timestamp))
 											: nonNullish(timestamp)
 												? Number(timestamp)
-												: acc[address].timestamp,
-									address
+												: acc[parsedAddress].timestamp,
+									address: parsedAddress
 								}
-							}),
-							{}
-						)
+							};
+						}, {})
 					}
 				: acc,
 		{}

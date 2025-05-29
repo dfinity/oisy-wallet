@@ -826,6 +826,10 @@ interface I18nTransaction {
 		to_copied: string;
 		to_ata: string;
 		to_ata_copied: string;
+		received_from: string;
+		to: string;
+		to_copied: string;
+		sent_to: string;
 		block: string;
 		interacted_with: string;
 		status: string;
