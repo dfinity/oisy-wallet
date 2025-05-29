@@ -11,6 +11,7 @@ import { expect } from 'vitest';
 describe('KnownDestination', () => {
 	const props = {
 		destination: mockBtcAddress,
+		onClick: () => {},
 		amounts: [
 			{ value: 10000000n, token: BTC_MAINNET_TOKEN },
 			{ value: 20000000n, token: BTC_MAINNET_TOKEN },

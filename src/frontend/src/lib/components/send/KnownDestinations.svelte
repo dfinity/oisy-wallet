@@ -40,7 +40,7 @@
 						<KnownDestination
 							destination={address}
 							{...rest}
-							on:click={() => {
+							onClick={() => {
 								destination = address;
 								dispatch('icNext');
 							}}
