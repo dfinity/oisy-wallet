@@ -27,9 +27,7 @@
 		initiallyExpanded?: boolean;
 	}
 
-	let { contact: c, onInfo, onClick, onSelect, initiallyExpanded = false }: Props = $props();
-
-	let contact = $derived({ ...c, addresses: [...c.addresses, ...c.addresses] });
+	let { contact, onInfo, onClick, onSelect, initiallyExpanded = false }: Props = $props();
 
 	let toggleContent = $state<() => void | undefined>();
 
