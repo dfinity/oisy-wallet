@@ -16,9 +16,9 @@
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
 	interface Props {
 		amount?: bigint;
