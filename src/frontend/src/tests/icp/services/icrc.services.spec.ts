@@ -246,6 +246,17 @@ describe('icrc.services', () => {
 					expect.any(Object)
 				);
 			});
+
+			it('should fetch the cached custom tokens in IDB on query call', async () => {
+				await loadCustomTokens({ identity: mockIdentity, useCache: true });
+
+				expect(idbKeyval.get).toHaveBeenCalledOnce();
+				expect(idbKeyval.get).toHaveBeenNthCalledWith(
+					1,
+					mockIdentity.getPrincipal().toText(),
+					expect.any(Object)
+				);
+			});
 		});
 
 		describe('error', () => {
@@ -339,6 +350,19 @@ describe('icrc.services', () => {
 				expect(console.error).toHaveBeenCalledTimes(2);
 				expect(console.error).toHaveBeenNthCalledWith(1, err);
 				expect(console.error).toHaveBeenNthCalledWith(2, err);
+			});
+
+			it('should not cache the custom tokens in IDB', async () => {
+				const tokens = get(icrcCustomTokensStore);
+
+				expect(tokens).toHaveLength(1);
+
+				const err = new Error('test');
+				backendCanisterMock.listCustomTokens.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(idbKeyval.set).not.toHaveBeenCalled();
 			});
 		});
 	});
