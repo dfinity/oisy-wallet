@@ -11,6 +11,8 @@ import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { vi } from 'vitest';
+import {contactsStore, initContactsStore} from "$lib/stores/contacts.store";
+import {mockManageContactsService} from "$tests/mocks/manage-contacts.service.mock";
 
 describe('AddressBookStep', () => {
 	const baseContacts: ContactUi[] = [
@@ -39,6 +41,7 @@ describe('AddressBookStep', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		contactsStore.set([])
 	});
 
 	it('should render empty state when there are no contacts', () => {
