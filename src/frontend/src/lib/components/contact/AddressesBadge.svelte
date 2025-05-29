@@ -17,7 +17,7 @@
 </script>
 
 {#if addresses.length > 0}
-	<span class="md:size-5.5 z-3 absolute -bottom-1 -right-1 size-5 rounded-full bg-primary">
+	<span class="md:size-5.5 absolute -bottom-1 -right-1 z-0 size-5 rounded-full bg-primary">
 		{#if nonNullish(selectedAddress) && nonNullish(selectedAddressType)}
 			<IconAddressType addressType={selectedAddressType} />
 		{:else if addresses.length === 1}
