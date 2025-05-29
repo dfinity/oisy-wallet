@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Collapsible } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
+	import Divider from '$lib/components/common/Divider.svelte';
 	import AddressItemActions from '$lib/components/contact/AddressItemActions.svelte';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
@@ -13,6 +14,7 @@
 		CONTACT_CARD_BUTTON,
 		CONTACT_CARD_EXPAND_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -46,10 +48,10 @@
 		{/snippet}
 
 		{#snippet description()}
-			<span class="flex items-center">
+			<span class="block w-full items-center truncate">
 				{#each contact.addresses as address, index (index)}
 					{#if index !== 0}
-						&nbsp;<span class="text-[0.5rem]">•</span>&nbsp;
+						<Divider />
 					{/if}
 					<span class:font-bold={singleAddress} class:text-primary={singleAddress}
 						>{$i18n.address.types[address.addressType]}</span
@@ -101,24 +103,19 @@
 	data-tid={CONTACT_CARD}
 >
 	{#if multipleAddresses}
-		<Collapsible
-			iconSize="medium"
-			{expanded}
-			{initiallyExpanded}
-			externalToggle={true}
-			expandButton={false}
-			bind:toggleContent
-		>
-			<div slot="header" class="flex-grow">
-				{@render header()}
-			</div>
-			<div class="flex flex-col gap-1.5 md:pl-20">
+		{@render header()}
+		{#if expanded}
+			<div
+				class="mt-1 flex flex-col gap-1.5 md:pl-20"
+				transition:slide={SLIDE_DURATION}
+				data-tid="collapsible-content"
+			>
 				{#each contact.addresses as address, index (index)}
 					<AddressListItem {address} addressItemActionsProps={{ onInfo: () => onInfo(index) }}
 					></AddressListItem>
 				{/each}
 			</div>
-		</Collapsible>
+		{/if}
 	{:else}
 		{@render header()}
 	{/if}
