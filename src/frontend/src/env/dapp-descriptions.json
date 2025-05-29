@@ -196,21 +196,6 @@
 		"screenshots": ["/images/dapps/zkpoker.webp"]
 	},
 	{
-		"id": "icdex",
-		"name": "ICDex",
-		"oneLiner": "The world's first order book DEX - made possible by advanced ICP smart contracts. 100% onchain.",
-		"callToAction": "Get enlightend",
-		"website": "https://icdex.io/",
-		"twitter": "https://twitter.com/ICLighthouse",
-		"github": "https://github.com/iclighthouse",
-		"tags": ["DeFi"],
-		"stats": "",
-		"usesInternetIdentity": true,
-		"description": "ICDex is a dApp within the ICLighthouse DAO. It's a fully on-chain order book DEX project built on the IC blockchain, with core code contributed by ICLighthouse and its development driven by the community. Governance is conducted through the ICLighthouse DAO SNS. The Exchange Mode of ICDex includes Tunnel Mode and Pool Mode, offering advanced functions like Strategic Orders.",
-		"logo": "/images/dapps/icdex-logo.svg",
-		"screenshots": ["/images/dapps/icdex.webp"]
-	},
-	{
 		"id": "sonic",
 		"name": "Sonic",
 		"oneLiner": "Unlock the full potential of DeFi and streamlined trading. Swap tokens, earn as a liquidity provider and harness Bitfinity EVM's leading AMM.",
