@@ -12,10 +12,7 @@
 	import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
-	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import {
 		TRACK_CONTACT_CREATE_ERROR,
 		TRACK_CONTACT_CREATE_SUCCESS,
@@ -26,6 +23,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { contactsNotInitialized, sortedContacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import {
 		createContact,
@@ -33,7 +31,6 @@
 		updateContact
 	} from '$lib/services/manage-contacts.service';
 	import { wrapCallWith } from '$lib/services/utils.services';
-	import { contactsStore } from '$lib/stores/contacts.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
@@ -134,8 +131,8 @@
 		previousStepName = undefined;
 	};
 
-	let currentContact = $derived($contactsStore?.find((c) => c.id === currentContactId));
-	let contacts = $derived($contactsStore || []);
+	let currentContact = $derived($sortedContacts.find((c) => c.id === currentContactId));
+	let contacts = $derived($sortedContacts);
 
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
