@@ -933,8 +933,8 @@
 			"open_transactions": "Open the list of $token transactions",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
-			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
-			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
+			"missing_index_canister_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer hasn’t provided the tracking feature yet. It should be added soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",
+			"index_canister_not_working_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer's tracking feature is currently not responding. It should be resolved soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",
 			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history."
 		},
 		"error": {
