@@ -100,6 +100,12 @@ describe('AddressBookModal', () => {
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
 
 		await waitFor(() => {
+			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
+		});
+
+		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
+
+		await waitFor(() => {
 			// Should be back on address book step
 			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.text.title);
 			// Contact should be displayed in the list
@@ -137,8 +143,11 @@ describe('AddressBookModal', () => {
 
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
 
-		// Wait a bit for the store to update and UI to reflect changes
-		await new Promise((resolve) => setTimeout(resolve, 100));
+		await waitFor(() => {
+			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
+		});
+
+		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
 
 		await waitFor(() => {
 			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.text.title);
@@ -152,8 +161,11 @@ describe('AddressBookModal', () => {
 		});
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
 
-		// Wait a bit for the store to update and UI to reflect changes
-		await new Promise((resolve) => setTimeout(resolve, 100));
+		await waitFor(() => {
+			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
+		});
+
+		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
 
 		await waitFor(() => {
 			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.text.title);
@@ -171,6 +183,12 @@ describe('AddressBookModal', () => {
 			target: { value: 'Contact 1' }
 		});
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+
+		await waitFor(() => {
+			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
+		});
+
+		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
 
 		// Wait for the contact card to be displayed
 		const contactCards = await findAllByTestId(CONTACT_CARD);
@@ -190,6 +208,12 @@ describe('AddressBookModal', () => {
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
 
 		await waitFor(() => {
+			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
+		});
+
+		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
+
+		await waitFor(() => {
 			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.text.title);
 		});
 
@@ -202,7 +226,7 @@ describe('AddressBookModal', () => {
 	});
 
 	it('should navigate from show contact step to address book when close button is clicked', async () => {
-		const { getByTestId, getAllByTestId } = render(AddressBookModal);
+		const { getByTestId } = render(AddressBookModal);
 
 		// Add a contact
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
@@ -212,14 +236,8 @@ describe('AddressBookModal', () => {
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
 
 		await waitFor(() => {
-			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.text.title);
+			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
 		});
-
-		// Navigate to show contact step
-		const contactButtons = getAllByTestId(CONTACT_CARD_BUTTON);
-		await fireEvent.click(contactButtons[0]);
-
-		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
 
 		// Click close button
 		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
@@ -229,7 +247,7 @@ describe('AddressBookModal', () => {
 	});
 
 	it('should navigate from edit contact step to show contact when close button is clicked', async () => {
-		const { getByTestId, getAllByTestId } = render(AddressBookModal);
+		const { getByTestId } = render(AddressBookModal);
 
 		// Add a contact
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
@@ -239,19 +257,13 @@ describe('AddressBookModal', () => {
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
 
 		await waitFor(() => {
-			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.text.title);
+			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
 		});
-
-		// Navigate to show contact step
-		const contactButtons = getAllByTestId(CONTACT_CARD_BUTTON);
-		await fireEvent.click(contactButtons[0]);
-
-		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.show_contact.title);
 
 		// Navigate to edit contact step
 		await fireEvent.click(getByTestId(CONTACT_HEADER_EDIT_BUTTON));
 
-		expect(getByTestId(MODAL_TITLE)).toHaveTextContent('Edit contact');
+		expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.edit_contact.title);
 
 		// Click close button
 		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
@@ -261,7 +273,7 @@ describe('AddressBookModal', () => {
 	});
 
 	it('should navigate from edit address step to show contact when close button is clicked', async () => {
-		const { getByTestId, findAllByTestId } = render(AddressBookModal);
+		const { getByTestId } = render(AddressBookModal);
 
 		// Add a contact
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
@@ -269,10 +281,6 @@ describe('AddressBookModal', () => {
 			target: { value: 'Test Contact' }
 		});
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
-
-		// Wait for the contact card button to be displayed
-		const contactButtons = await findAllByTestId(CONTACT_CARD_BUTTON);
-		await fireEvent.click(contactButtons[0]);
 
 		// Wait for navigation to show contact step
 		await waitFor(() => {
@@ -284,7 +292,7 @@ describe('AddressBookModal', () => {
 
 		// Wait for navigation to edit address step
 		await waitFor(() => {
-			expect(getByTestId(MODAL_TITLE)).toHaveTextContent('Edit contact');
+			expect(getByTestId(MODAL_TITLE)).toHaveTextContent(en.address_book.edit_contact.title);
 		});
 
 		// Click close button
