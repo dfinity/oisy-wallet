@@ -82,7 +82,7 @@ export const ethKnownDestinations: Readable<KnownDestinations> = derived(
 			const token = $tokens.find(({ id }) => id === tokenId);
 
 			if (nonNullish(token) && token.network.id === $tokenWithFallback.network.id) {
-				$ethTransactionsStore[tokenId as TokenId].forEach((transaction) => {
+				($ethTransactionsStore[tokenId as TokenId] ?? []).forEach((transaction) => {
 					mappedTransactions.push({
 						...mapEthTransactionUi({
 							transaction,
