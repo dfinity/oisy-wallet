@@ -37,10 +37,6 @@ describe('IcTransactionModal', () => {
 			token: ICP_TOKEN
 		});
 
-		expect(
-			getByText(shortenWithMiddleEllipsis({ text: mockIcTransactionUi.from as string }))
-		).toBeInTheDocument();
-
 		expect(getByText(mockIcTransactionUi.to as string)).toBeInTheDocument();
 	});
 

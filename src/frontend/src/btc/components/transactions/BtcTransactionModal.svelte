@@ -92,41 +92,6 @@
 		{/if}
 
 		<List styleClass="mt-5">
-			{#if type === 'receive' && nonNullish(to)}
-				<ListItem>
-					<span>{$i18n.transaction.text.to}</span>
-					<output class="flex max-w-[50%] flex-row">
-						{#each to as address, index (`${address}-${index}`)}
-							<span>
-								<output>{shortenWithMiddleEllipsis({ text: address })}</output>
-
-								<TransactionAddressActions
-									copyAddress={address}
-									copyAddressText={$i18n.transaction.text.to_copied}
-									explorerUrl={`${explorerUrl}/address/${address}`}
-									explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
-								/>
-							</span>
-						{/each}
-					</output>
-				</ListItem>
-			{/if}
-			{#if type === 'send' && nonNullish(from)}
-				<ListItem>
-					<span>{$i18n.transaction.text.from}</span>
-					<output class="flex max-w-[50%] flex-row">
-						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
-
-						<TransactionAddressActions
-							copyAddress={from}
-							copyAddressText={$i18n.transaction.text.from_copied}
-							explorerUrl={fromExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
-						/>
-					</output>
-				</ListItem>
-			{/if}
-
 			{#if nonNullish(id)}
 				<ListItem>
 					<span>
