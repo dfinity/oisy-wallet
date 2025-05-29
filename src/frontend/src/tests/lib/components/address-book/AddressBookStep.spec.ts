@@ -4,14 +4,15 @@ import {
 	ADDRESS_BOOK_SEARCH_CONTACT_INPUT,
 	ADDRESS_LIST_ITEM_INFO_BUTTON,
 	CONTACT_CARD,
-	CONTACT_CARD_BUTTON, TOKEN_SKELETON_TEXT
+	CONTACT_CARD_BUTTON,
+	TOKEN_SKELETON_TEXT
 } from '$lib/constants/test-ids.constants';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import {vi} from 'vitest';
+import { vi } from 'vitest';
 
 describe('AddressBookStep', () => {
 	const baseContacts: ContactUi[] = [
@@ -57,7 +58,7 @@ describe('AddressBookStep', () => {
 
 		const skeletonTexts = getAllByTestId(TOKEN_SKELETON_TEXT);
 
-		expect(skeletonTexts).toHaveLength(6)
+		expect(skeletonTexts).toHaveLength(6);
 	});
 
 	it('should render empty state when there are no contacts', () => {
