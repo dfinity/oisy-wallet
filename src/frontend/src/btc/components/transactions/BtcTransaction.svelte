@@ -15,7 +15,7 @@
 	let timestamp: bigint | undefined;
 	let status: BtcTransactionStatus;
 	let type: BtcTransactionType;
-	let to: string | undefined;
+	let to: string[] | undefined;
 	let from: string | undefined;
 
 	$: ({ type, status, value, timestamp, to, from } = transaction);
@@ -37,7 +37,7 @@
 	{status}
 	{token}
 	{iconType}
-	{to}
+	to={nonNullish(to?.[0]) ? to[0] : undefined}
 	{from}
 >
 	{label}
