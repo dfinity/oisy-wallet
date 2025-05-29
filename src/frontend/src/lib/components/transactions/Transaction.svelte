@@ -17,6 +17,7 @@
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
+	import Divider from '$lib/components/common/Divider.svelte';
 
 	interface Props {
 		amount?: bigint;
@@ -50,12 +51,18 @@
 
 	let iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
+	let contactAddress: string | undefined = $derived(
+		type === 'send' ? to : type === 'receive' ? from : undefined
+	);
+
 	let contact: ContactUi | undefined = $derived(
-		type === 'send' && to
-			? getContactForAddress({ addressString: to, contactList: $contacts })
-			: type === 'receive' && from
-				? getContactForAddress({ addressString: from, contactList: $contacts })
-				: undefined
+		nonNullish(contactAddress)
+			? getContactForAddress({ addressString: contactAddress, contactList: $contacts })
+			: undefined
+	);
+
+	let addressAlias: string | undefined = $derived(
+		contact?.addresses.find((a) => a.address === contactAddress)?.label
 	);
 </script>
 
@@ -65,6 +72,9 @@
 			<span class="inline-block first-letter:capitalize">
 				{#if nonNullish(contact)}
 					{type === 'send' ? $i18n.transaction.text.to : $i18n.transaction.text.from}: {contact.name}
+					{#if nonNullish(addressAlias) && addressAlias !== ''}
+						<span class="text-tertiary"><Divider />{addressAlias}</span>
+					{/if}
 				{:else}
 					{@render children?.()}
 				{/if}
