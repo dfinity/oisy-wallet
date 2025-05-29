@@ -56,7 +56,7 @@
 
 <ContentWithToolbar styleClass="flex flex-col gap-6 items-center">
 	<Avatar name={editingContact?.name} variant="xl"></Avatar>
-	<ContactForm bind:contact={editingContact} bind:this={form} {disabled}></ContactForm>
+	<ContactForm bind:contact={editingContact} bind:this={form} {disabled} onSubmit={handleSave}></ContactForm>
 
 	<!-- TODO Add address list here -->
 
