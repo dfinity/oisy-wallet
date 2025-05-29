@@ -226,7 +226,7 @@ describe('AddressBookModal', () => {
 	});
 
 	it('should navigate from show contact step to address book when close button is clicked', async () => {
-		const { getByTestId, getAllByTestId } = render(AddressBookModal);
+		const { getByTestId } = render(AddressBookModal);
 
 		// Add a contact
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
@@ -247,7 +247,7 @@ describe('AddressBookModal', () => {
 	});
 
 	it('should navigate from edit contact step to show contact when close button is clicked', async () => {
-		const { getByTestId, getAllByTestId } = render(AddressBookModal);
+		const { getByTestId } = render(AddressBookModal);
 
 		// Add a contact
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
@@ -273,7 +273,7 @@ describe('AddressBookModal', () => {
 	});
 
 	it('should navigate from edit address step to show contact when close button is clicked', async () => {
-		const { getByTestId, findAllByTestId } = render(AddressBookModal);
+		const { getByTestId } = render(AddressBookModal);
 
 		// Add a contact
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON));
