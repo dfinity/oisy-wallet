@@ -9,8 +9,10 @@
 		name?: string;
 		variant?: AvatarVariants;
 		styleClass?: string;
+		alt?: string;
 	}
-	const { name, variant = 'md', styleClass }: AvatarProps = $props();
+
+	const { name, variant = 'md', styleClass, alt = 'Default avatar' }: AvatarProps = $props();
 
 	const font = $derived(
 		{
@@ -21,11 +23,11 @@
 			xs: 'text-[12.8px]' // size: 32px
 		}[variant]
 	);
+
 	let size = $derived(variant === 'xl' ? 'size-25' : 'size-[2.5em]');
-
 	let bgColor = $derived(selectColorForName({ name, colors: CONTACT_BACKGROUND_COLORS }));
-
 	let commonClasses = $derived(`${font} ${size} ${bgColor} relative z-0 rounded-full`);
+	let ariaLabel = $derived(name ? `Avatar for ${name}` : alt);
 
 	const initials = $derived(
 		(nonNullish(name) ? name : '')
@@ -38,12 +40,19 @@
 </script>
 
 {#if !initials}
-	<div class={`${commonClasses} text-brand-primary ${styleClass}`}>
-		<IconAvatar size={`${size}`}></IconAvatar>
+	<div
+		class={`${commonClasses} text-brand-primary ${styleClass}`}
+		role="img"
+		aria-label={ariaLabel}
+	>
+		<IconAvatar {size} />
 	</div>
 {:else}
 	<span
 		class={`${commonClasses} inline-block inline-flex items-center justify-center font-bold text-white transition-colors duration-1000 ${styleClass}`}
-		>{initials}</span
+		role="img"
+		aria-label={ariaLabel}
 	>
+		{initials}
+	</span>
 {/if}
