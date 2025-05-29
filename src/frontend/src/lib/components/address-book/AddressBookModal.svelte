@@ -232,7 +232,7 @@
 		};
 		await callUpdateContact({ contact });
 		currentAddressIndex = undefined;
-		gotoStep(AddressBookSteps.SHOW_CONTACT);
+		gotoStep(AddressBookSteps.EDIT_CONTACT);
 	};
 
 	const confirmDeleteAddress = (index: number) => {
