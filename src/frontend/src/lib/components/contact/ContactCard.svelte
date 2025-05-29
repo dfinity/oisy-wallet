@@ -105,7 +105,11 @@
 	{#if multipleAddresses}
 		{@render header()}
 		{#if expanded}
-			<div class="mt-1 flex flex-col gap-1.5 md:pl-20" transition:slide={SLIDE_DURATION}>
+			<div
+				class="mt-1 flex flex-col gap-1.5 md:pl-20"
+				transition:slide={SLIDE_DURATION}
+				data-tid="collapsible-content"
+			>
 				{#each contact.addresses as address, index (index)}
 					<AddressListItem {address} addressItemActionsProps={{ onInfo: () => onInfo(index) }}
 					></AddressListItem>
