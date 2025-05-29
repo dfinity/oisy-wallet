@@ -171,6 +171,7 @@ describe('ContactCard', () => {
 
 		// wait for animation to end
 		await new Promise((resolve) => setTimeout(resolve, 500));
+
 		// The collapsible should be collapsed again
 		expect(queryByTestId('collapsible-content')).not.toBeInTheDocument();
 	});
