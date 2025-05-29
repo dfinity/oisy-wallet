@@ -297,6 +297,7 @@
 			onAddContact={() => {
 				currentContactId = undefined;
 				currentAddressIndex = undefined;
+				previousStepName = AddressBookSteps.ADDRESS_BOOK;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
 			onShowAddress={({ contact, addressIndex }) => {
@@ -399,7 +400,8 @@
 			}}
 			isNewContact={isNullish(currentContact)}
 			onClose={() => {
-				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.EDIT_CONTACT));
+				console.log(previousStepName);
+				navigateToEntrypointOrCallback(handleClose);
 			}}
 			disabled={loading}
 		/>
