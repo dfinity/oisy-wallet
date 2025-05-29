@@ -65,14 +65,16 @@
 			: from
 	);
 
-	const toDisplay: OptionString = nonNullish(token)
-		? (mapAddressToName({
-				address: to,
-				networkId: token.network.id,
-				erc20Tokens: $erc20Tokens,
-				ckMinterInfo
-			}) ?? to)
-		: to;
+	const toDisplay: OptionString = $derived(
+		nonNullish(token)
+			? (mapAddressToName({
+					address: to,
+					networkId: token.network.id,
+					erc20Tokens: $erc20Tokens,
+					ckMinterInfo
+				}) ?? to)
+			: to
+	);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
