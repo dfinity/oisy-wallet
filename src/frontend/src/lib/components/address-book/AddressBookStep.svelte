@@ -8,14 +8,14 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import {
 		ADDRESS_BOOK_ADD_CONTACT_BUTTON,
 		ADDRESS_BOOK_SEARCH_CONTACT_INPUT
 	} from '$lib/constants/test-ids.constants';
+	import { contactsNotInitialized } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import {contactsNotInitialized} from "$lib/derived/contacts.derived";
-	import SkeletonCards from "$lib/components/ui/SkeletonCards.svelte";
 
 	interface Props {
 		contacts: ContactUi[];
