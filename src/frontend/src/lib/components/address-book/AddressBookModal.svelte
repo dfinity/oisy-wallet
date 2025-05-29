@@ -359,8 +359,15 @@
 			bind:this={editContactNameStep}
 			contact={currentContact}
 			onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
-				await callCreateContact({ name: contact.name });
-				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
+				const createdContact = await callCreateContact({ name: contact.name });
+				if (modalData?.entrypoint) {
+					currentAddressIndex = undefined;
+					currentContact = createdContact;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+					previousStepName = AddressBookSteps.SAVE_ADDRESS;
+				} else {
+					gotoStep(AddressBookSteps.ADDRESS_BOOK);
+				}
 			}}
 			onSaveContact={async (contact: ContactUi) => {
 				await callUpdateContact({ contact });
