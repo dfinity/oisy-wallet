@@ -262,7 +262,7 @@
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
 		<ShowContactStep
-			onClose={handleClose}
+			onClose={() => gotoStep(AddressBookSteps.ADDRESS_BOOK)}
 			contact={currentContact}
 			onEdit={(contact) => {
 				currentContactId = contact.id;
@@ -330,8 +330,9 @@
 			bind:this={editContactNameStep}
 			contact={currentContact}
 			onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
-				await callCreateContact({ name: contact.name });
-				gotoStep(AddressBookSteps.ADDRESS_BOOK);
+				const newContact = await callCreateContact({ name: contact.name });
+				currentContactId = newContact.id;
+				gotoStep(AddressBookSteps.SHOW_CONTACT);
 			}}
 			onSaveContact={async (contact: ContactUi) => {
 				await callUpdateContact({ contact });
