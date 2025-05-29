@@ -29,7 +29,7 @@
 
 	let {
 		contact,
-		address = $bindable({}),
+		address = {},
 		onSaveAddress,
 		onAddAddress,
 		onClose,

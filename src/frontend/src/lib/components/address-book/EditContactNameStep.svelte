@@ -27,7 +27,7 @@
 		onSaveContact,
 		onClose,
 		isNewContact,
-		contact = $bindable({}),
+		contact = {},
 		disabled = false
 	}: Props = $props();
 
