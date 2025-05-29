@@ -208,6 +208,14 @@
 			addresses
 		};
 		await callUpdateContact({ contact });
+		// if the entrypoint was SAVE_ADDRESS this is the last step of the flow, so we close the address book modal
+		if (
+			nonNullish(modalData?.entrypoint) &&
+			modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
+		) {
+			modalStore.close();
+			return;
+		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
