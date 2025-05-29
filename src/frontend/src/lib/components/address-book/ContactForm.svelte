@@ -11,14 +11,14 @@
 		onSubmit = () => {}
 	}: { contact: Partial<ContactUi>; disabled?: boolean; onSubmit?: () => void } = $props();
 
-	let isValid = $derived(() => notEmptyString(contact?.name?.trim?.()));
+	let isValid = $derived(notEmptyString(contact?.name?.trim?.()));
 
-	function handleKeydown(event: KeyboardEvent) {
+	const handleKeydown = (event: KeyboardEvent): void => {
 		if (event.key === 'Enter') {
 			event.preventDefault();
 			onSubmit();
 		}
-	}
+	};
 
 	export { isValid };
 </script>
