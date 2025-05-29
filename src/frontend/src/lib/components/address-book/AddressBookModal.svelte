@@ -227,6 +227,14 @@
 			gotoStep(AddressBookSteps.EDIT_CONTACT);
 		}
 	};
+
+	const navigateToEntrypointOrCallback = (callback: () => void) => {
+		if (nonNullish(modalData?.entrypoint)) {
+			gotoStep(modalData.entrypoint.type);
+		} else {
+			callback();
+		}
+	};
 </script>
 
 <WizardModal
@@ -282,11 +290,7 @@
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
 		<ShowContactStep
 			onClose={() => {
-				if (nonNullish(modalData) && nonNullish(modalData.entrypoint)) {
-					gotoStep(modalData.entrypoint.type);
-				} else {
-					handleClose();
-				}
+				navigateToEntrypointOrCallback(handleClose);
 			}}
 			contact={currentContact}
 			onEdit={(contact) => {
@@ -356,11 +360,7 @@
 			contact={currentContact}
 			onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
 				await callCreateContact({ name: contact.name });
-				if (nonNullish(modalData) && nonNullish(modalData.entrypoint)) {
-					gotoStep(modalData.entrypoint.type);
-				} else {
-					gotoStep(AddressBookSteps.ADDRESS_BOOK);
-				}
+				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
 			}}
 			onSaveContact={async (contact: ContactUi) => {
 				await callUpdateContact({ contact });
@@ -368,11 +368,7 @@
 			}}
 			isNewContact={isNullish(currentContact)}
 			onClose={() => {
-				if (nonNullish(modalData) && nonNullish(modalData.entrypoint)) {
-					gotoStep(modalData.entrypoint.type);
-				} else {
-					gotoStep(AddressBookSteps.ADDRESS_BOOK);
-				}
+				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
 			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
