@@ -24,9 +24,9 @@
 
 	let address: string | undefined = $derived(
 		type === 'send' && nonNullish(to)
-			? (to as string)
+			? (to)
 			: type !== 'send' && nonNullish(from)
-				? (from as string)
+				? (from)
 				: undefined
 	);
 
