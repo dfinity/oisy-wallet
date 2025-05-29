@@ -48,7 +48,7 @@
 		{/snippet}
 
 		{#snippet description()}
-			<span class="block w-full items-center truncate">
+			<span class="block w-full truncate">
 				{#each contact.addresses as address, index (index)}
 					{#if index !== 0}
 						<Divider />
