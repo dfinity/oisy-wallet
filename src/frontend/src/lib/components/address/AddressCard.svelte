@@ -28,11 +28,15 @@
 	class:bg-brand-subtle-10={variant === 'info'}
 	class:border-brand-subtle-10={variant === 'info'}
 >
-	{@render logo?.()}
+	<div class="flex flex-shrink-0">
+		{@render logo?.()}
+	</div>
 
-	<div class="flex w-full flex-col truncate pl-2 pr-4 text-sm sm:text-base">
+	<div class="flex flex-col truncate pl-2 pr-4 text-sm sm:text-base">
 		{@render content()}
 	</div>
 
-	{@render actions?.()}
+	<div class="flex">
+		{@render actions?.()}
+	</div>
 </div>
