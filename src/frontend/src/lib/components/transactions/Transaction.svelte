@@ -18,6 +18,7 @@
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
 	interface Props {
 		amount?: bigint;
@@ -71,7 +72,9 @@
 		<Card noMargin>
 			<span class="inline-block first-letter:capitalize">
 				{#if nonNullish(contact)}
-					{type === 'send' ? $i18n.transaction.text.to : $i18n.transaction.text.from}: {contact.name}
+					{type === 'send'
+						? replacePlaceholders($i18n.transaction.text.sent_to, { $name: contact.name })
+						: replacePlaceholders($i18n.transaction.text.received_from, { $name: contact.name })}
 					{#if nonNullish(addressAlias) && addressAlias !== ''}
 						<span class="text-tertiary"><Divider />{addressAlias}</span>
 					{/if}
