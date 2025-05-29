@@ -1,11 +1,14 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
-	import SkeletonAddressCard from '$lib/components/address/SkeletonAddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
+	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
+	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
 
@@ -19,38 +22,55 @@
 
 	const { type, to, from, toExplorerUrl, fromExplorerUrl }: Props = $props();
 
+	let address: string | undefined = $derived(
+		type === 'send' && nonNullish(to) ? to : type !== 'send' && nonNullish(from) ? from : undefined
+	);
+
 	let contact: ContactUi | undefined = $derived(
-		nonNullish(to) && nonNullish(from)
+		nonNullish(address)
 			? getContactForAddress({
 					contactList: $contacts,
-					addressString: type === 'send' ? to : from
+					addressString: address
 				})
 			: undefined
 	);
 </script>
 
-{#if nonNullish(from) && nonNullish(to)}
+{#if nonNullish(address)}
 	<AddressCard>
 		{#snippet logo()}
-			<AvatarWithBadge
-				{contact}
-				badge={{ type: 'addressType', address: type === 'send' ? to : from }}
-			/>
+			<AvatarWithBadge {contact} badge={{ type: 'addressType', address }} />
 		{/snippet}
 		{#snippet content()}
 			<span class="mx-1 flex flex-col items-start text-left">
 				<span class="font-bold"
 					>{type === 'send' ? $i18n.transaction.text.to : $i18n.transaction.text.from}: {contact?.name}</span
 				>
-				<span class="w-full truncate">{type === 'send' ? to : from}</span>
-				<!-- Todo: enable button once the save flow is implemented
-			<Button link styleClass="mt-3 text-sm"><IconUserSquare size="20px" /> Save address</Button>
-			-->
+				<span class="w-full truncate">{address}</span>
+
+				{#if isNullish(contact)}
+					<Button
+						on:click={() =>
+							modalStore.openAddressBook({
+								id: Symbol(),
+								data: {
+									entrypoint: {
+										type: AddressBookSteps.SAVE_ADDRESS,
+										address
+									}
+								}
+							})}
+						link
+						styleClass="mt-3 text-sm"
+						ariaLabel={$i18n.address.save.title}
+						><IconUserSquare size="20px" /> {$i18n.address.save.title}</Button
+					>
+				{/if}
 			</span>
 		{/snippet}
 		{#snippet actions()}
 			<TransactionAddressActions
-				copyAddress={type === 'send' ? to : from}
+				copyAddress={address}
 				copyAddressText={type === 'send'
 					? $i18n.transaction.text.to_copied
 					: $i18n.transaction.text.from_copied}
@@ -61,6 +81,4 @@
 			/>
 		{/snippet}
 	</AddressCard>
-{:else}
-	<SkeletonAddressCard />
 {/if}
