@@ -6,7 +6,7 @@
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -112,6 +112,6 @@
 	<div class="flex-grow"></div>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={onClose} testId={CONTACT_SHOW_CLOSE_BUTTON}></ButtonCancel>
+		<ButtonBack onclick={onClose} testId={CONTACT_SHOW_CLOSE_BUTTON} />
 	</ButtonGroup>
 </ContentWithToolbar>
