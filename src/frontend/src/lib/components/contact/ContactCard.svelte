@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
+	import Divider from '$lib/components/common/Divider.svelte';
 	import AddressItemActions from '$lib/components/contact/AddressItemActions.svelte';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
@@ -13,11 +14,10 @@
 		CONTACT_CARD_BUTTON,
 		CONTACT_CARD_EXPAND_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import Divider from '$lib/components/common/Divider.svelte';
 
 	interface Props {
 		contact: ContactUi;
