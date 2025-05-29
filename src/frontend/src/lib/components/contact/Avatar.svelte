@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import IconAvatar from '$lib/components/icons/IconAvatar.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { AvatarVariants } from '$lib/types/style';
 	import { selectColorForName } from '$lib/utils/contact.utils';
 
@@ -9,10 +10,9 @@
 		name?: string;
 		variant?: AvatarVariants;
 		styleClass?: string;
-		alt?: string;
 	}
 
-	const { name, variant = 'md', styleClass, alt = 'Default avatar' }: AvatarProps = $props();
+	const { name, variant = 'md', styleClass }: AvatarProps = $props();
 
 	const font = $derived(
 		{
@@ -27,7 +27,9 @@
 	let size = $derived(variant === 'xl' ? 'size-25' : 'size-[2.5em]');
 	let bgColor = $derived(selectColorForName({ name, colors: CONTACT_BACKGROUND_COLORS }));
 	let commonClasses = $derived(`${font} ${size} ${bgColor} relative z-0 rounded-full`);
-	let ariaLabel = $derived(name ? `Avatar for ${name}` : alt);
+	let ariaLabel = $derived(
+		name ? `${$i18n.address_book.avatar.avatar_for} ${name}` : $i18n.address_book.avatar.default
+	);
 
 	const initials = $derived(
 		(nonNullish(name) ? name : '')
