@@ -408,7 +408,6 @@
 			}}
 			isNewContact={isNullish(currentContact)}
 			onClose={() => {
-				console.log(previousStepName);
 				navigateToEntrypointOrCallback(handleClose);
 			}}
 			disabled={loading}
