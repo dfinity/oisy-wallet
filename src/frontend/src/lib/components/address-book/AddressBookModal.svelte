@@ -208,6 +208,14 @@
 			addresses
 		};
 		await callUpdateContact({ contact });
+		// if the entrypoint was SAVE_ADDRESS this is the last step of the flow, so we close the address book modal
+		if (
+			nonNullish(modalData?.entrypoint) &&
+			modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
+		) {
+			modalStore.close();
+			return;
+		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
@@ -224,7 +232,7 @@
 		};
 		await callUpdateContact({ contact });
 		currentAddressIndex = undefined;
-		gotoStep(AddressBookSteps.SHOW_CONTACT);
+		gotoStep(AddressBookSteps.EDIT_CONTACT);
 	};
 
 	const confirmDeleteAddress = (index: number) => {
@@ -297,6 +305,7 @@
 			onAddContact={() => {
 				currentContactId = undefined;
 				currentAddressIndex = undefined;
+				previousStepName = AddressBookSteps.ADDRESS_BOOK;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
 			onShowAddress={({ contact, addressIndex }) => {
@@ -331,7 +340,7 @@
 		<Responsive down="sm">
 			<EditContactStep
 				contact={currentContact}
-				onClose={handleClose}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 				onEdit={(contact) => {
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
@@ -356,7 +365,7 @@
 		<Responsive up="md">
 			<EditContactStep
 				contact={currentContact}
-				onClose={handleClose}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 				onEdit={(contact) => {
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
@@ -395,11 +404,11 @@
 			}}
 			onSaveContact={async (contact: ContactUi) => {
 				await callUpdateContact({ contact });
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
 			}}
 			isNewContact={isNullish(currentContact)}
 			onClose={() => {
-				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
+				navigateToEntrypointOrCallback(handleClose);
 			}}
 			disabled={loading}
 		/>

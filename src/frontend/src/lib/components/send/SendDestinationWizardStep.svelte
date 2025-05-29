@@ -95,6 +95,7 @@
 				bind:invalidDestination
 				on:icQRCodeScan
 				knownDestinations={$btcKnownDestinations}
+				networkId={$sendTokenNetworkId}
 			/>
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
