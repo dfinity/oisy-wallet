@@ -21,7 +21,6 @@
 
 	interface Props {
 		onCreateContact?: () => void;
-		onInfo?: (contact: ContactUi) => void;
 		onSelectContact: (contact: ContactUi) => void;
 	}
 
