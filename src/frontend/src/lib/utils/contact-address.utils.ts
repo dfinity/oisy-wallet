@@ -1,5 +1,6 @@
 import type { ContactAddressUi } from '$lib/types/contact';
 import { compareTokenAccountIdTypes } from '$lib/utils/token-account-id.utils';
+import { isEmptyString, notEmptyString } from '@dfinity/utils';
 
 // This is a comparator that will be used for eg. Array.sort. The parameters need to be this way.
 // eslint-disable-next-line local-rules/prefer-object-params
@@ -15,10 +16,10 @@ export const compareContactAddresses = (a: ContactAddressUi, b: ContactAddressUi
 	const aliasB = b.label ?? '';
 
 	// Special handling for empty aliases (they should come last)
-	if (aliasA === '' && aliasB !== '') {
+	if (isEmptyString(aliasA) && notEmptyString(aliasB)) {
 		return 1;
 	}
-	if (aliasA !== '' && aliasB === '') {
+	if (notEmptyString(aliasA) && isEmptyString(aliasB)) {
 		return -1;
 	}
 

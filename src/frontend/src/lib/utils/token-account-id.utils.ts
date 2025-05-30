@@ -54,7 +54,7 @@ export const compareTokenAccountIdTypes = (
 	a: TokenAccountIdTypes,
 	b: TokenAccountIdTypes
 ): number => {
-	const orderA = TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER[a] || 999;
-	const orderB = TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER[b] || 999;
+	const orderA = TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER[a];
+	const orderB = TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER[b];
 	return orderA - orderB;
 };
