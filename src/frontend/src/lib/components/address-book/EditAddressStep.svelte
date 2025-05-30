@@ -59,6 +59,15 @@
 			onSaveAddress(editingAddress as ContactAddressUi);
 		}
 	};
+	const handleKeydown = (event: KeyboardEvent): void => {
+		const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName ?? '');
+		if (event.key === 'Enter' && isInput) {
+			event.preventDefault();
+			if (!isInvalid) {
+				handleSave();
+			}
+		}
+	};
 
 	let title = $derived(
 		isNewAddress
@@ -71,16 +80,20 @@
 	let isInvalid = $state(false);
 </script>
 
+<svelte:window on:keydown={handleKeydown} />
+
 <ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
 	<Avatar variant="xl" name={contact.name} />
 
 	<div class="text-2xl font-bold text-primary md:text-3xl">
 		{contact.name}
 	</div>
+
 	<div
 		class="mt-2 w-full rounded-lg bg-brand-light px-3 py-4 text-sm md:px-5 md:text-base md:font-bold"
 	>
 		<div class="pb-4 text-xl font-bold">{title}</div>
+
 		<AddressForm
 			disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
 			address={addressModel}
