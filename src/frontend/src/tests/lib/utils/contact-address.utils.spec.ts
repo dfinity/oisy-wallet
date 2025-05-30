@@ -30,20 +30,20 @@ describe('contact-address.utils', () => {
 			};
 
 			// Btc comes before Eth
-			expect(compareContactAddresses(btcAddress, ethAddress)).toBeLessThan(0);
-			expect(compareContactAddresses(ethAddress, btcAddress)).toBeGreaterThan(0);
+			expect(compareContactAddresses({ a: btcAddress, b: ethAddress })).toBeLessThan(0);
+			expect(compareContactAddresses({ a: ethAddress, b: btcAddress })).toBeGreaterThan(0);
 
 			// Eth comes before Icrcv2
-			expect(compareContactAddresses(ethAddress, icpAddress)).toBeLessThan(0);
-			expect(compareContactAddresses(icpAddress, ethAddress)).toBeGreaterThan(0);
+			expect(compareContactAddresses({ a: ethAddress, b: icpAddress })).toBeLessThan(0);
+			expect(compareContactAddresses({ a: icpAddress, b: ethAddress })).toBeGreaterThan(0);
 
 			// Icrcv2 comes before Sol
-			expect(compareContactAddresses(icpAddress, solAddress)).toBeLessThan(0);
-			expect(compareContactAddresses(solAddress, icpAddress)).toBeGreaterThan(0);
+			expect(compareContactAddresses({ a: icpAddress, b: solAddress })).toBeLessThan(0);
+			expect(compareContactAddresses({ a: solAddress, b: icpAddress })).toBeGreaterThan(0);
 
 			// Btc comes before Sol (transitive property)
-			expect(compareContactAddresses(btcAddress, solAddress)).toBeLessThan(0);
-			expect(compareContactAddresses(solAddress, btcAddress)).toBeGreaterThan(0);
+			expect(compareContactAddresses({ a: btcAddress, b: solAddress })).toBeLessThan(0);
+			expect(compareContactAddresses({ a: solAddress, b: btcAddress })).toBeGreaterThan(0);
 		});
 
 		// Test comparing addresses with the same network type but different aliases
@@ -58,10 +58,10 @@ describe('contact-address.utils', () => {
 			const address2 = createAddress('Bob');
 			const address3 = createAddress('Charlie');
 
-			expect(compareContactAddresses(address1, address2)).toBeLessThan(0);
-			expect(compareContactAddresses(address2, address1)).toBeGreaterThan(0);
-			expect(compareContactAddresses(address2, address3)).toBeLessThan(0);
-			expect(compareContactAddresses(address3, address2)).toBeGreaterThan(0);
+			expect(compareContactAddresses({ a: address1, b: address2 })).toBeLessThan(0);
+			expect(compareContactAddresses({ a: address2, b: address1 })).toBeGreaterThan(0);
+			expect(compareContactAddresses({ a: address2, b: address3 })).toBeLessThan(0);
+			expect(compareContactAddresses({ a: address3, b: address2 })).toBeGreaterThan(0);
 		});
 
 		// Test comparing addresses with empty aliases
@@ -83,15 +83,23 @@ describe('contact-address.utils', () => {
 				addressType: 'Eth'
 			};
 
-			expect(compareContactAddresses(addressWithAlias, addressWithEmptyAlias)).toBeLessThan(0);
-			expect(compareContactAddresses(addressWithEmptyAlias, addressWithAlias)).toBeGreaterThan(0);
+			expect(
+				compareContactAddresses({ a: addressWithAlias, b: addressWithEmptyAlias })
+			).toBeLessThan(0);
+			expect(
+				compareContactAddresses({ a: addressWithEmptyAlias, b: addressWithAlias })
+			).toBeGreaterThan(0);
 
-			expect(compareContactAddresses(addressWithAlias, addressWithoutAlias)).toBeLessThan(0);
-			expect(compareContactAddresses(addressWithoutAlias, addressWithAlias)).toBeGreaterThan(0);
+			expect(compareContactAddresses({ a: addressWithAlias, b: addressWithoutAlias })).toBeLessThan(
+				0
+			);
+			expect(
+				compareContactAddresses({ a: addressWithoutAlias, b: addressWithAlias })
+			).toBeGreaterThan(0);
 
 			// Both have empty aliases, should be equal in terms of alias comparison
-			expect(compareContactAddresses(addressWithEmptyAlias, addressWithoutAlias)).toBe(0);
-			expect(compareContactAddresses(addressWithoutAlias, addressWithEmptyAlias)).toBe(0);
+			expect(compareContactAddresses({ a: addressWithEmptyAlias, b: addressWithoutAlias })).toBe(0);
+			expect(compareContactAddresses({ a: addressWithoutAlias, b: addressWithEmptyAlias })).toBe(0);
 		});
 
 		// Test comparing addresses with the same network type and alias but different addresses
@@ -108,8 +116,8 @@ describe('contact-address.utils', () => {
 				addressType: 'Eth'
 			};
 
-			expect(compareContactAddresses(address1, address2)).toBeLessThan(0);
-			expect(compareContactAddresses(address2, address1)).toBeGreaterThan(0);
+			expect(compareContactAddresses({ a: address1, b: address2 })).toBeLessThan(0);
+			expect(compareContactAddresses({ a: address2, b: address1 })).toBeGreaterThan(0);
 		});
 
 		// Test comparing identical addresses
@@ -122,8 +130,8 @@ describe('contact-address.utils', () => {
 
 			const sameCopy: ContactAddressUi = { ...address };
 
-			expect(compareContactAddresses(address, sameCopy)).toBe(0);
-			expect(compareContactAddresses(sameCopy, address)).toBe(0);
+			expect(compareContactAddresses({ a: address, b: sameCopy })).toBe(0);
+			expect(compareContactAddresses({ a: sameCopy, b: address })).toBe(0);
 		});
 
 		// Test network type priority overrides other factors
@@ -141,8 +149,8 @@ describe('contact-address.utils', () => {
 			};
 
 			// Btc should still come before Eth despite the lexicographical ordering of address and label
-			expect(compareContactAddresses(btcAddress, ethAddress)).toBeLessThan(0);
-			expect(compareContactAddresses(ethAddress, btcAddress)).toBeGreaterThan(0);
+			expect(compareContactAddresses({ a: btcAddress, b: ethAddress })).toBeLessThan(0);
+			expect(compareContactAddresses({ a: ethAddress, b: btcAddress })).toBeGreaterThan(0);
 		});
 	});
 });

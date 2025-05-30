@@ -48,12 +48,13 @@ export const getDiscriminatorForTokenAccountId = (
 export const getNetworksForTokenAccountIdType = (addressType: TokenAccountIdTypes): Network[] =>
 	TOKEN_ACCOUNT_ID_TO_NETWORKS[addressType];
 
-// This is a comparator that will be used for eg. Array.sort. The parameters need to be this way.
-// eslint-disable-next-line local-rules/prefer-object-params
-export const compareTokenAccountIdTypes = (
-	a: TokenAccountIdTypes,
-	b: TokenAccountIdTypes
-): number => {
+export const compareTokenAccountIdTypes = ({
+	a,
+	b
+}: {
+	a: TokenAccountIdTypes;
+	b: TokenAccountIdTypes;
+}): number => {
 	const orderA = TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER[a];
 	const orderB = TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER[b];
 	return orderA - orderB;

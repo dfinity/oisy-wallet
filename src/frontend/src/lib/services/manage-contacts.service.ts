@@ -17,7 +17,7 @@ export const loadContacts = async (identity: Identity): Promise<void> => {
 		const contactUi = mapToFrontendContact(contact);
 		return {
 			...contactUi,
-			addresses: [...contactUi.addresses].sort(compareContactAddresses)
+			addresses: contactUi.addresses.sort((a, b) => compareContactAddresses({ a, b }))
 		};
 	});
 	contactsStore.set(contactsWithSortedAddresses);
@@ -45,7 +45,7 @@ export const updateContact = async ({
 }): Promise<ContactUi> => {
 	const contactWithSortedAddresses = {
 		...contact,
-		addresses: [...contact.addresses].sort(compareContactAddresses)
+		addresses: contact.addresses.sort((a, b) => compareContactAddresses({ a, b }))
 	};
 	const result = await updateContactApi({
 		contact: mapToBackendContact(contactWithSortedAddresses),

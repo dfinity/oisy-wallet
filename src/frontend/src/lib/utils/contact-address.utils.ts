@@ -2,11 +2,15 @@ import type { ContactAddressUi } from '$lib/types/contact';
 import { compareTokenAccountIdTypes } from '$lib/utils/token-account-id.utils';
 import { isEmptyString, notEmptyString } from '@dfinity/utils';
 
-// This is a comparator that will be used for eg. Array.sort. The parameters need to be this way.
-// eslint-disable-next-line local-rules/prefer-object-params
-export const compareContactAddresses = (a: ContactAddressUi, b: ContactAddressUi): number => {
+export const compareContactAddresses = ({
+	a,
+	b
+}: {
+	a: ContactAddressUi;
+	b: ContactAddressUi;
+}): number => {
 	// First compare by network
-	const networkCompare = compareTokenAccountIdTypes(a.addressType, b.addressType);
+	const networkCompare = compareTokenAccountIdTypes({ a: a.addressType, b: b.addressType });
 	if (networkCompare !== 0) {
 		return networkCompare;
 	}
