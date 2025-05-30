@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import Divider from '$lib/components/common/Divider.svelte';
@@ -45,7 +45,7 @@
 				<span>
 					{selectedContact.name}
 
-					{#if nonNullish(selectedContactLabel)}
+					{#if notEmptyString(selectedContactLabel)}
 						<Divider />
 						{selectedContactLabel}
 					{/if}

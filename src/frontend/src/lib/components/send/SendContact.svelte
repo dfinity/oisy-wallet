@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -33,7 +33,7 @@
 	{#snippet title()}
 		{contact.name}
 
-		{#if nonNullish(contactLabel)}
+		{#if notEmptyString(contactLabel)}
 			<Divider />
 			{contactLabel}
 		{/if}
