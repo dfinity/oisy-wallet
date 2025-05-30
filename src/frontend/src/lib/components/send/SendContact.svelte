@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import Divider from '$lib/components/common/Divider.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -13,6 +15,12 @@
 	}
 
 	let { contact, address, onClick }: Props = $props();
+
+	let contactLabel = $derived(
+		nonNullish(contact)
+			? contact.addresses.find(({ address }) => address === address)?.label
+			: undefined
+	);
 </script>
 
 <LogoButton styleClass="group" {onClick}>
@@ -24,6 +32,11 @@
 
 	{#snippet title()}
 		{contact.name}
+
+		{#if nonNullish(contactLabel)}
+			<Divider />
+			{contactLabel}
+		{/if}
 	{/snippet}
 
 	{#snippet description()}
