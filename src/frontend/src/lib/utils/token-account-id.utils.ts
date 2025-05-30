@@ -1,7 +1,10 @@
 import { getBtcAddressString } from '$btc/utils/btc-address.utils';
 import type { TokenAccountId } from '$declarations/backend/backend.did';
 import { getIcrcv2AccountIdString } from '$icp/utils/icp-account.utils';
-import { TOKEN_ACCOUNT_ID_TO_NETWORKS } from '$lib/constants/token-account-id.constants';
+import {
+	TOKEN_ACCOUNT_ID_TO_NETWORKS,
+	TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER
+} from '$lib/constants/token-account-id.constants';
 import type { Network } from '$lib/types/network';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 import { assertNever } from '$lib/types/utils';
@@ -44,3 +47,14 @@ export const getDiscriminatorForTokenAccountId = (
 
 export const getNetworksForTokenAccountIdType = (addressType: TokenAccountIdTypes): Network[] =>
 	TOKEN_ACCOUNT_ID_TO_NETWORKS[addressType];
+
+// This is a comparator that will be used for eg. Array.sort. The parameters need to be this way.
+// eslint-disable-next-line local-rules/prefer-object-params
+export const compareTokenAccountIdTypes = (
+	a: TokenAccountIdTypes,
+	b: TokenAccountIdTypes
+): number => {
+	const orderA = TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER[a] || 999;
+	const orderB = TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER[b] || 999;
+	return orderA - orderB;
+};
