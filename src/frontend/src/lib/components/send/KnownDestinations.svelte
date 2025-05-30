@@ -25,9 +25,7 @@
 	);
 
 	let filteredKnownDestinations = $derived(
-		sortedKnownDestinations.filter(({ address }) =>
-			address.toLowerCase().includes(destination.toLowerCase())
-		)
+		sortedKnownDestinations.filter(({ address }) => address.includes(destination))
 	);
 </script>
 

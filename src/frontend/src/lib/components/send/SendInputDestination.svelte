@@ -67,7 +67,7 @@
 	</div>
 </div>
 
-{#if !invalidDestination && notEmptyString(destination) && nonNullish(knownDestinations) && isNullish(knownDestinations[destination.toLowerCase()])}
+{#if !invalidDestination && notEmptyString(destination) && nonNullish(knownDestinations) && isNullish(knownDestinations[destination])}
 	<div transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning" styleClass="mt-4">
 			{$i18n.send.info.unknown_destination}
