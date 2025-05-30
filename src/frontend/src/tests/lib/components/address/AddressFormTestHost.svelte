@@ -4,16 +4,17 @@
 
 	let {
 		address = $bindable(),
-		isNewAddress,
+		disableAddressField,
 		isInvalid = $bindable()
 	}: {
 		address: Partial<ContactAddressUi>;
-		isNewAddress: boolean;
+		disableAddressField?: boolean;
 		isInvalid: boolean;
 	} = $props();
 
 	// Expose the isInvalid value for testing
 	export const getIsInvalid = () => isInvalid;
+	export const getAddress = () => address;
 </script>
 
-<AddressForm bind:address bind:isInvalid {isNewAddress} />
+<AddressForm bind:address bind:isInvalid {disableAddressField} />
