@@ -82,10 +82,10 @@
 	>
 		<div class="pb-4 text-xl font-bold">{title}</div>
 		<AddressForm
-			{isNewAddress}
+			disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
 			address={addressModel}
 			bind:isInvalid
-			disabled={nonNullish(modalDataAddress) || disabled}
+			{disabled}
 		></AddressForm>
 	</div>
 
