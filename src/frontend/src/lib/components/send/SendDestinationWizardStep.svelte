@@ -21,6 +21,8 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ContactUi } from '$lib/types/contact';
+	import type { SendDestinationTab } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBitcoin,
@@ -34,9 +36,16 @@
 
 	interface Props {
 		destination: string;
+		activeSendDestinationTab: SendDestinationTab;
+		selectedContact?: ContactUi;
 		formCancelAction?: 'back' | 'close';
 	}
-	let { destination = $bindable(), formCancelAction = 'back' }: Props = $props();
+	let {
+		destination = $bindable(),
+		activeSendDestinationTab = $bindable(),
+		selectedContact = $bindable(),
+		formCancelAction = 'back'
+	}: Props = $props();
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -68,6 +77,8 @@
 					<SendDestinationTabs
 						knownDestinations={$ethKnownDestinations}
 						bind:destination
+						bind:activeSendDestinationTab
+						bind:selectedContact
 						on:icNext={next}
 					/>
 				</LoaderMultipleEthTransactions>
@@ -85,6 +96,8 @@
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
 				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>
@@ -100,6 +113,8 @@
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
 				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>
@@ -114,6 +129,8 @@
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
 				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>
