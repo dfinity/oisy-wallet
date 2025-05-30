@@ -20,12 +20,26 @@
 	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
+
+	let filteredNetworkContacts = $derived(
+		nonNullish(networkContacts)
+			? Object.keys(networkContacts).reduce<NetworkContacts>(
+					(acc, address) => ({
+						...acc,
+						...(address.includes(destination) ? { [address]: networkContacts[address] } : {})
+					}),
+					{}
+				)
+			: {}
+	);
+
+	let filteredNetworkContactsKeys = $derived(Object.keys(filteredNetworkContacts));
 </script>
 
-{#if nonNullish(networkContacts) && Object.keys(networkContacts).length > 0}
+{#if nonNullish(networkContacts) && filteredNetworkContactsKeys.length > 0}
 	<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
 		<ul class="list-none overflow-y-auto overscroll-contain">
-			{#each Object.keys(networkContacts) as address, index (index)}
+			{#each filteredNetworkContactsKeys as address, index (index)}
 				<SendContact
 					contact={networkContacts[address]}
 					{address}

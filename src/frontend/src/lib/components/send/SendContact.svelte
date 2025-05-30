@@ -17,7 +17,9 @@
 
 <LogoButton styleClass="group" {onClick}>
 	{#snippet logo()}
-		<AvatarWithBadge {contact} badge={{ type: 'addressType', address }} variant="sm" />
+		<div class="mr-2">
+			<AvatarWithBadge {contact} badge={{ type: 'addressType', address }} variant="sm" />
+		</div>
 	{/snippet}
 
 	{#snippet title()}
