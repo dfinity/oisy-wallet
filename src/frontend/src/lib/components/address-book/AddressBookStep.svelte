@@ -33,10 +33,15 @@
 	let searchTerm = $state('');
 
 	let filteredContacts = $derived(
-		contacts.filter(({ name: contactName }) => {
+		contacts.filter(({ name: contactName, addresses }) => {
 			const name = contactName.toLowerCase();
+			const addressText = addresses
+				.map(({ address, label }) => `${address.toLowerCase()} ${label?.toLowerCase() ?? ''}`)
+				.join(' ');
+
+			const searchableText = `${name} ${addressText}`;
 			const terms = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
-			return terms.every((term) => name.includes(term));
+			return terms.every((term) => searchableText.includes(term));
 		})
 	);
 </script>

@@ -293,4 +293,55 @@ describe('AddressBookStep', () => {
 
 		expect(getByText(en.address_book.text.no_contact_found)).toBeInTheDocument();
 	});
+
+	it('should match contact by address', async () => {
+		const { getByTestId, queryByText } = render(AddressBookStep, {
+			props: {
+				contacts: baseContacts,
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
+			}
+		});
+
+		const input = getByTestId(ADDRESS_BOOK_SEARCH_CONTACT_INPUT);
+		await fireEvent.input(input, { target: { value: mockEthAddress.slice(0, 6) } });
+
+		expect(queryByText('Test Contact 1')).toBeInTheDocument();
+		expect(queryByText('Test Contact 2')).not.toBeInTheDocument();
+	});
+
+	it('should match contact by address label', async () => {
+		const { getByTestId, queryByText } = render(AddressBookStep, {
+			props: {
+				contacts: baseContacts,
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
+			}
+		});
+
+		const input = getByTestId(ADDRESS_BOOK_SEARCH_CONTACT_INPUT);
+		await fireEvent.input(input, { target: { value: 'My ETH' } });
+
+		expect(queryByText('Test Contact 1')).toBeInTheDocument();
+		expect(queryByText('Test Contact 2')).not.toBeInTheDocument();
+	});
+
+	it('should match contact by combined name and alias terms', async () => {
+		const { getByTestId, queryByText } = render(AddressBookStep, {
+			props: {
+				contacts: baseContacts,
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
+			}
+		});
+
+		const input = getByTestId(ADDRESS_BOOK_SEARCH_CONTACT_INPUT);
+		await fireEvent.input(input, { target: { value: 'Contact ETH' } });
+
+		expect(queryByText('Test Contact 1')).toBeInTheDocument();
+		expect(queryByText('Test Contact 2')).not.toBeInTheDocument();
+	});
 });
