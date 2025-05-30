@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
+	import { btcNetworkContacts } from '$btc/derived/btc-contacts.derived';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
 	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
+	import { ethNetworkContacts } from '$eth/derived/eth-contacts.derived';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
+	import { icNetworkContacts } from '$icp/derived/ic-contacts.derived';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import SendDestinationTabs from '$lib/components/send/SendDestinationTabs.svelte';
@@ -21,6 +24,8 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ContactUi } from '$lib/types/contact';
+	import type { SendDestinationTab } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBitcoin,
@@ -30,13 +35,21 @@
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
+	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
 
 	interface Props {
 		destination: string;
+		activeSendDestinationTab: SendDestinationTab;
+		selectedContact?: ContactUi;
 		formCancelAction?: 'back' | 'close';
 	}
-	let { destination = $bindable(), formCancelAction = 'back' }: Props = $props();
+	let {
+		destination = $bindable(),
+		activeSendDestinationTab = $bindable(),
+		selectedContact = $bindable(),
+		formCancelAction = 'back'
+	}: Props = $props();
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -67,7 +80,10 @@
 					/>
 					<SendDestinationTabs
 						knownDestinations={$ethKnownDestinations}
+						networkContacts={$ethNetworkContacts}
 						bind:destination
+						bind:activeSendDestinationTab
+						bind:selectedContact
 						on:icNext={next}
 					/>
 				</LoaderMultipleEthTransactions>
@@ -84,7 +100,10 @@
 			/>
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
+				networkContacts={$icNetworkContacts}
 				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>
@@ -99,7 +118,10 @@
 			/>
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
+				networkContacts={$btcNetworkContacts}
 				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>
@@ -113,7 +135,10 @@
 			/>
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
+				networkContacts={$solNetworkContacts}
 				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>
