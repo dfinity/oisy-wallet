@@ -18,7 +18,7 @@
 
 	let contactLabel = $derived(
 		nonNullish(contact)
-			? contact.addresses.find(({ address }) => address === address)?.label
+			? contact.addresses.find(({ address: innerAddress }) => address === innerAddress)?.label
 			: undefined
 	);
 </script>
