@@ -131,4 +131,25 @@ describe('AddressFormTestHost', () => {
 		expect(component.getAddress().address).toBe(validEthAddress);
 		expect(component.getAddress().addressType).toBe('Eth');
 	});
+
+	it('should show error when label exceeds 50 characters', async () => {
+		const address: Partial<ContactAddressUi> = {};
+		const { getByTestId, getByText } = render(AddressFormTestHost, {
+			props: {
+				address,
+				isNewAddress: true,
+				isInvalid: false
+			}
+		});
+
+		const labelInput = getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT);
+		const longLabel = 'This is a very long label that exceeds fifty characters limit';
+
+		await fireEvent.input(labelInput, { target: { value: longLabel } });
+
+		waitFor(() => {
+			// Check that isInvalid is now true
+			expect(getByText(en.address.form.error.label_too_long)).toBeInTheDocument();
+		});
+	});
 });

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import type { ZodError } from 'zod';
 	import InputAddress from '$lib/components/address/InputAddress.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
@@ -7,6 +8,8 @@
 		ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT,
 		ADDRESS_BOOK_ADDRESS_ALIAS_INPUT
 	} from '$lib/constants/test-ids.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { ContactAddressUiSchema } from '$lib/schema/contact.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
@@ -24,9 +27,10 @@
 	}: Props = $props();
 
 	let addressParseError = $state<ZodError | undefined>();
+	let labelError = $derived(ContactAddressUiSchema.shape.label.safeParse(address.label)?.error);
 
 	$effect(() => {
-		isInvalid = nonNullish(addressParseError);
+		isInvalid = nonNullish(addressParseError) || nonNullish(labelError);
 	});
 </script>
 
@@ -53,4 +57,9 @@
 		testId={ADDRESS_BOOK_ADDRESS_ALIAS_INPUT}
 		{disabled}
 	/>
+	{#if nonNullish(labelError)}
+		<p transition:slide={SLIDE_DURATION} class="pt-2 text-error-primary">
+			{$i18n.address.form.error.label_too_long}
+		</p>
+	{/if}
 </form>
