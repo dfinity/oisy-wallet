@@ -27,7 +27,7 @@ describe('SendDestinationTabs', () => {
 	});
 
 	it('renders contacts tab', () => {
-		const { getByText } = render(SendDestinationTabs, {
+		const { getByText, container } = render(SendDestinationTabs, {
 			props: {
 				destination: '',
 				knownDestinations,
@@ -41,6 +41,7 @@ describe('SendDestinationTabs', () => {
 		expect(
 			getByText(shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address }))
 		).toBeInTheDocument();
-		expect(getByText(contact.name)).toBeInTheDocument();
+		expect(container).toHaveTextContent(contact.name);
+		expect(container).toHaveTextContent(mockContactBtcAddressUi.label as string);
 	});
 });
