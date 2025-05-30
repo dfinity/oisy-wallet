@@ -268,7 +268,7 @@
 	{steps}
 	bind:currentStep
 	bind:this={modal}
-	disablePointerEvents={true}
+	disablePointerEvents={loading}
 	testId={ADDRESS_BOOK_MODAL}
 	on:nnsClose={close}
 >
