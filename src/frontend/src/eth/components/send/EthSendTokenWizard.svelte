@@ -36,6 +36,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -57,6 +58,7 @@
 	export let sourceNetwork: EthereumNetwork;
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
+	export let selectedContact: ContactUi | undefined = undefined;
 	// Required for the fee and also to retrieve ck minter information.
 	// i.e. Ethereum or Sepolia "main" token.
 	export let nativeEthereumToken: Token;
@@ -231,6 +233,7 @@
 			on:icClose={close}
 			on:icBack
 			on:icTokensList
+			{selectedContact}
 			bind:destination
 			bind:amount
 			{nativeEthereumToken}

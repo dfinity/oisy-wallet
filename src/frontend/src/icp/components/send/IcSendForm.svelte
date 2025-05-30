@@ -7,11 +7,13 @@
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -29,7 +31,14 @@
 	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
 </script>
 
-<SendForm on:icNext on:icBack {destination} {invalidDestination} disabled={invalid}>
+<SendForm
+	on:icNext
+	on:icBack
+	{destination}
+	{selectedContact}
+	{invalidDestination}
+	disabled={invalid}
+>
 	<IcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 
 	<IcTokenFee slot="fee" />

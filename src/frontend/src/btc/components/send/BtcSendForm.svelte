@@ -7,6 +7,7 @@
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
@@ -14,6 +15,7 @@
 	export let amount: OptionAmount = undefined;
 	export let destination = '';
 	export let source: string;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	let amountError: BtcAmountAssertionError | undefined;
 
@@ -41,7 +43,14 @@
 	});
 </script>
 
-<SendForm on:icNext on:icBack {destination} {invalidDestination} disabled={invalid}>
+<SendForm
+	on:icNext
+	on:icBack
+	{destination}
+	{selectedContact}
+	{invalidDestination}
+	disabled={invalid}
+>
 	<BtcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 
 	<!--	TODO: calculate and display transaction fee	-->

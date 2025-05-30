@@ -211,6 +211,7 @@
 			<SendWizard
 				{currentStep}
 				{destination}
+				{selectedContact}
 				bind:amount
 				bind:sendProgressStep
 				on:icBack={modal.back}
