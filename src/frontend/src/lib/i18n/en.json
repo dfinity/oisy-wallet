@@ -472,9 +472,9 @@
 			"contacts_empty_state_description": "It looks like you haven’t added contacts yet"
 		},
 		"placeholder": {
-			"enter_eth_address": "Enter public address (0x)",
-			"enter_recipient_address": "Enter recipient address",
-			"enter_wallet_address": "Enter wallet address",
+			"enter_eth_address": "Enter public address (0x), name or alias",
+			"enter_recipient_address": "Enter recipient address, name or alias",
+			"enter_wallet_address": "Enter wallet address, name or alias",
 			"select_network": "Select network"
 		},
 		"info": {
