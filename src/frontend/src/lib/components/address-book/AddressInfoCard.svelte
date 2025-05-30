@@ -15,7 +15,7 @@
 
 <Value ref="address-info" element="div">
 	{#snippet label()}
-		<div class="mb-3 text-md font-bold text-primary">
+		<div class="text-md mb-3 font-bold text-primary">
 			{$i18n.address.types[address.addressType]}
 		</div>
 	{/snippet}
