@@ -61,7 +61,8 @@
 				ariaLabel={$i18n.address_book.text.add_contact}
 			>
 				<IconPlus />
-				<span class="hidden whitespace-nowrap xs:block">{$i18n.address_book.text.add_contact}</span></Button
+				<span class="hidden whitespace-nowrap xs:block">{$i18n.address_book.text.add_contact}</span
+				></Button
 			>
 		</div>
 
