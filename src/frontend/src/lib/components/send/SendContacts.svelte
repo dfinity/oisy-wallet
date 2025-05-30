@@ -26,7 +26,14 @@
 			? Object.keys(networkContacts).reduce<NetworkContacts>(
 					(acc, address) => ({
 						...acc,
-						...(address.includes(destination) ? { [address]: networkContacts[address] } : {})
+						...(address.includes(destination) ||
+						networkContacts[address].name.toLowerCase().includes(destination.toLowerCase()) ||
+						networkContacts[address].addresses.some(
+							({ label, address: innerAddress }) =>
+								address === innerAddress && label?.toLowerCase().includes(destination.toLowerCase())
+						)
+							? { [address]: networkContacts[address] }
+							: {})
 					}),
 					{}
 				)
