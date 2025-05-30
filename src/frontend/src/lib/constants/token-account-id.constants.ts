@@ -12,3 +12,10 @@ export const TOKEN_ACCOUNT_ID_TO_NETWORKS: { [key in TokenAccountIdTypes]: Netwo
 	Eth: [...SUPPORTED_ETHEREUM_MAINNET_NETWORKS, ...SUPPORTED_EVM_MAINNET_NETWORKS],
 	Sol: SUPPORTED_SOLANA_MAINNET_NETWORKS
 };
+
+export const TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER: { [key in TokenAccountIdTypes]: number } = {
+	Btc: 1,
+	Eth: 2,
+	Icrcv2: 3,
+	Sol: 4
+};
