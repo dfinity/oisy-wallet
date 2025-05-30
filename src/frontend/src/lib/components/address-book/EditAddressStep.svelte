@@ -60,7 +60,8 @@
 		}
 	};
 	const handleKeydown = (event: KeyboardEvent): void => {
-		if (event.key === 'Enter') {
+		const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName ?? '');
+		if (event.key === 'Enter' && isInput) {
 			event.preventDefault();
 			if (!isInvalid) {
 				handleSave();
