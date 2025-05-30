@@ -993,6 +993,7 @@ interface I18nAddress {
 		label_placeholder: string;
 		invalid_address: string;
 		valid_for_networks: string;
+		error: { label_too_long: string };
 	};
 	fields: { label: string; address: string };
 	delete: { title: string; delete_address: string; content_text: string };
