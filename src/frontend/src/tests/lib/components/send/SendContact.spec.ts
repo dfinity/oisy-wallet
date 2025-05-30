@@ -17,11 +17,12 @@ describe('SendContact', () => {
 	};
 
 	it('renders expected data', () => {
-		const { getByText } = render(SendContact, {
+		const { getByText, container } = render(SendContact, {
 			props
 		});
 
-		expect(getByText(contact.name)).toBeInTheDocument();
+		expect(container).toHaveTextContent(contact.name);
+		expect(container).toHaveTextContent(mockContactBtcAddressUi.label as string);
 		expect(getByText(shortenWithMiddleEllipsis({ text: props.address }))).toBeInTheDocument();
 	});
 });
