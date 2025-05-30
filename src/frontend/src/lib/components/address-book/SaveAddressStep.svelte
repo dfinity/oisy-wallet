@@ -21,11 +21,11 @@
 
 	interface Props {
 		onCreateContact?: () => void;
-		onInfo: (contact: ContactUi) => void;
+		onInfo?: (contact: ContactUi) => void;
 		onSelectContact: (contact: ContactUi) => void;
 	}
 
-	const { onCreateContact, onInfo, onSelectContact }: Props = $props();
+	const { onCreateContact, onSelectContact }: Props = $props();
 
 	let inputValue: string = $state('');
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
@@ -85,8 +85,8 @@
 				<ListItem>
 					<ContactCard
 						{contact}
-						onClick={() => {}}
-						onInfo={() => onInfo(contact)}
+						onClick={() => onSelectContact(contact)}
+						hideCopyButton
 						onSelect={() => onSelectContact(contact)}
 					/>
 				</ListItem>
