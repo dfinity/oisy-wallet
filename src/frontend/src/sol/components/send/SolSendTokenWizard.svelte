@@ -32,6 +32,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionSolAddress } from '$lib/types/address';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
@@ -59,6 +60,7 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -205,7 +207,15 @@
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<SolSendForm on:icNext on:icClose on:icTokensList on:icBack bind:destination bind:amount>
+		<SolSendForm
+			on:icNext
+			on:icClose
+			on:icTokensList
+			on:icBack
+			{selectedContact}
+			bind:destination
+			bind:amount
+		>
 			<ButtonBack onclick={back} slot="cancel" />
 		</SolSendForm>
 	{:else}

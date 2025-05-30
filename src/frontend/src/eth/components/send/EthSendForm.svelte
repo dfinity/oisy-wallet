@@ -8,6 +8,7 @@
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isEthAddress } from '$lib/utils/account.utils';
@@ -16,6 +17,7 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let nativeEthereumToken: Token;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	let insufficientFunds: boolean;
 
@@ -29,7 +31,14 @@
 		getContext<FeeContext>(FEE_CONTEXT_KEY);
 </script>
 
-<SendForm on:icNext on:icBack {destination} {invalidDestination} disabled={invalid}>
+<SendForm
+	on:icNext
+	on:icBack
+	{destination}
+	{selectedContact}
+	{invalidDestination}
+	disabled={invalid}
+>
 	<EthSendAmount
 		slot="amount"
 		{nativeEthereumToken}

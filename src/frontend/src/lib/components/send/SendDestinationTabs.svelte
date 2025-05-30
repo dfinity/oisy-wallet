@@ -4,6 +4,7 @@
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { SendDestinationTab } from '$lib/types/send';
 	import type { KnownDestinations } from '$lib/types/transactions';
 
@@ -11,6 +12,7 @@
 		destination: string;
 		activeSendDestinationTab: SendDestinationTab;
 		knownDestinations?: KnownDestinations;
+		networkContacts?: NetworkContacts;
 		selectedContact?: ContactUi;
 	}
 
@@ -18,7 +20,8 @@
 		knownDestinations,
 		destination = $bindable(),
 		activeSendDestinationTab = $bindable(),
-		selectedContact = $bindable()
+		selectedContact = $bindable(),
+		networkContacts
 	}: Props = $props();
 </script>
 
@@ -33,7 +36,7 @@
 		{#if activeSendDestinationTab === 'recentlyUsed'}
 			<KnownDestinationsComponent {knownDestinations} bind:destination on:icNext />
 		{:else if activeSendDestinationTab === 'contacts'}
-			<SendContacts bind:destination bind:selectedContact on:icNext />
+			<SendContacts {networkContacts} bind:destination bind:selectedContact on:icNext />
 		{/if}
 	</Tabs>
 </div>
