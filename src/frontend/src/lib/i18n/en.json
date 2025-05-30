@@ -1058,6 +1058,10 @@
 			"add_address": "Add address",
 			"delete_contact": "Delete contact"
 		},
+		"avatar": {
+			"default": "Default avatar",
+			"avatar_for": "Avatar for"
+		},
 		"show_contact": {
 			"title": "Contact",
 			"add_address": "Add address",
