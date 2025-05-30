@@ -463,10 +463,6 @@
 				currentContact = undefined;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 			}}
-			onInfo={(contact) => {
-				currentContact = contact;
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
-			}}
 			onSelectContact={(contact: ContactUi) => {
 				currentContact = contact;
 				currentAddressIndex = undefined;

@@ -22,12 +22,20 @@
 	interface Props {
 		contact: ContactUi;
 		onClick: () => void;
-		onInfo: (addressIndex: number) => void;
+		onInfo?: (addressIndex: number) => void;
 		onSelect?: () => void;
 		initiallyExpanded?: boolean;
+		hideCopyButton?: boolean;
 	}
 
-	let { contact, onInfo, onClick, onSelect, initiallyExpanded = false }: Props = $props();
+	let {
+		contact,
+		onInfo,
+		onClick,
+		onSelect,
+		initiallyExpanded = false,
+		hideCopyButton = false
+	}: Props = $props();
 
 	let toggleContent = $state<() => void | undefined>();
 
@@ -38,7 +46,7 @@
 </script>
 
 {#snippet header()}
-	<LogoButton {onClick} hover={false} condensed testId={CONTACT_CARD_BUTTON}>
+	<LogoButton {onClick} hover={false} condensed testId={CONTACT_CARD_BUTTON} styleClass="group">
 		{#snippet logo()}
 			<AvatarWithBadge {contact} badge={{ type: 'addressTypeOrCount' }} variant="sm" />
 		{/snippet}
@@ -64,7 +72,15 @@
 		{/snippet}
 
 		{#snippet action()}
-			{#if singleAddress}
+			{#if nonNullish(onSelect)}
+				<Button
+					link
+					on:click={onSelect}
+					ariaLabel={$i18n.core.text.select}
+					styleClass="hidden group-hover:block">{$i18n.core.text.select}</Button
+				>
+			{/if}
+			{#if singleAddress && nonNullish(onInfo)}
 				<AddressItemActions
 					styleClass="ml-auto"
 					address={contact.addresses[0]}
@@ -89,17 +105,12 @@
 					{/snippet}
 				</ButtonIcon>
 			{/if}
-			{#if nonNullish(onSelect)}
-				<Button link on:click={onSelect} ariaLabel={$i18n.core.text.select}
-					>{$i18n.core.text.select}</Button
-				>
-			{/if}
 		{/snippet}
 	</LogoButton>
 {/snippet}
 
 <div
-	class="flex w-full flex-col rounded-xl bg-primary p-2 hover:bg-brand-subtle-20 dark:hover:bg-brand-tertiary"
+	class="flex w-full flex-col rounded-xl bg-primary p-2 hover:bg-brand-subtle-20"
 	data-tid={CONTACT_CARD}
 >
 	{#if multipleAddresses}
@@ -111,7 +122,10 @@
 				data-tid="collapsible-content"
 			>
 				{#each contact.addresses as address, index (index)}
-					<AddressListItem {address} addressItemActionsProps={{ onInfo: () => onInfo(index) }}
+					<AddressListItem
+						{address}
+						addressItemActionsProps={nonNullish(onInfo) ? { onInfo: () => onInfo(index) } : {}}
+						{hideCopyButton}
 					></AddressListItem>
 				{/each}
 			</div>
