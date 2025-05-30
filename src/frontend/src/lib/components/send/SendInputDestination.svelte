@@ -4,6 +4,7 @@
 	import QrButton from '$lib/components/common/QrButton.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -30,6 +31,10 @@
 	const onBlur = () => (focused = false);
 
 	$: destination, networkId, isInvalidDestination, debounceValidate();
+
+	let isErrorState = false;
+	$: isErrorState =
+		invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE;
 </script>
 
 <div
@@ -43,7 +48,7 @@
 		{$i18n.core.text.to}
 	</label>
 
-	<div class="send-input-destination" class:error={invalidDestination}>
+	<div class="send-input-destination" class:error={isErrorState}>
 		<InputTextWithAction
 			name="destination"
 			bind:value={destination}
@@ -61,7 +66,7 @@
 			</svelte:fragment>
 		</InputTextWithAction>
 
-		{#if invalidDestination}
+		{#if isErrorState}
 			<p transition:slide={SLIDE_DURATION} class="mb-0 mt-4 text-error-primary">
 				{$i18n.send.assertion.invalid_destination_address}
 			</p>

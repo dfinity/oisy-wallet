@@ -31,7 +31,7 @@
 
 <div in:fade>
 	{#if nonNullish(knownDestinations) && filteredKnownDestinations.length > 0}
-		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
+		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
 			<ul class="list-none overflow-y-auto overscroll-contain">
 				{#each filteredKnownDestinations as { address, ...rest } (address)}
 					<li>
