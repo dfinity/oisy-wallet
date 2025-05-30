@@ -1,4 +1,5 @@
 import AddressForm from '$lib/components/address/AddressForm.svelte';
+import { CONTACT_MAX_LABEL_LENGTH } from '$lib/constants/app.constants';
 import {
 	ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT,
 	ADDRESS_BOOK_ADDRESS_ALIAS_INPUT
@@ -130,5 +131,25 @@ describe('AddressFormTestHost', () => {
 
 		expect(component.getAddress().address).toBe(validEthAddress);
 		expect(component.getAddress().addressType).toBe('Eth');
+	});
+
+	it('should show error when label exceeds 50 characters', async () => {
+		const address: Partial<ContactAddressUi> = {};
+		const { getByTestId, getByText, component } = render(AddressFormTestHost, {
+			props: {
+				address,
+				isInvalid: false
+			}
+		});
+
+		const labelInput = getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT);
+		const longLabel = 'This is a very long label that exceeds fifty characters limit';
+
+		await fireEvent.input(labelInput, { target: { value: longLabel } });
+
+		expect(
+			getByText(`Label may not exceed ${CONTACT_MAX_LABEL_LENGTH} characters`)
+		).toBeInTheDocument();
+		expect(component.getIsInvalid).toBeTruthy();
 	});
 });
