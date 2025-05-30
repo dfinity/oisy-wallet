@@ -12,6 +12,8 @@
 	import { ContactAddressUiSchema } from '$lib/schema/contact.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi } from '$lib/types/contact';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { CONTACT_MAX_LABEL_LENGTH } from '$lib/constants/app.constants';
 
 	interface Props {
 		address: Partial<ContactAddressUi>;
@@ -59,7 +61,9 @@
 	/>
 	{#if nonNullish(labelError)}
 		<p transition:slide={SLIDE_DURATION} class="pt-2 text-error-primary">
-			{$i18n.address.form.error.label_too_long}
+			{replacePlaceholders($i18n.address.form.error.label_too_long, {
+				$maxCharacters: `${CONTACT_MAX_LABEL_LENGTH}`
+			})}
 		</p>
 	{/if}
 </form>

@@ -14,7 +14,7 @@ export const TOKEN_ACCOUNT_ID_TO_NETWORKS: { [key in TokenAccountIdTypes]: Netwo
 	Sol: SUPPORTED_SOLANA_MAINNET_NETWORKS
 };
 
-// The type definition '[key in ToeknAccountIdType]' of TOKEN_ACCOUNT_ID_TO_NETWORKS ensures
+// The type definition '[key in TokenAccountIdType]' of TOKEN_ACCOUNT_ID_TO_NETWORKS ensures
 // that this array contains all possible values of TokenAccountIdType
 export const TOKEN_ACCOUNT_ID_TYPES = Object.keys(
 	TOKEN_ACCOUNT_ID_TO_NETWORKS

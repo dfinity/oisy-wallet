@@ -1102,7 +1102,7 @@
 			"invalid_address": "Invalid address",
 			"valid_for_networks": "Valid for networks:",
 			"error": {
-				"label_too_long": "Label may not exceed 50 characters"
+				"label_too_long": "Label may not exceed $maxCharacters characters"
 			}
 		},
 		"fields": {
