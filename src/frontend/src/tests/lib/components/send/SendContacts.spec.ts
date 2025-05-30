@@ -37,13 +37,61 @@ describe('SendContacts', () => {
 		).toBeInTheDocument();
 	});
 
-	it('renders filtered content if data is provided', () => {
+	it('renders filtered by address content if data is provided', () => {
 		const { getByText } = render(SendContacts, {
 			props: {
 				destination: mockContactEthAddressUi.address,
 				networkContacts: {
 					[mockContactBtcAddressUi.address]: contact1,
 					[mockContactEthAddressUi.address]: contact2
+				}
+			}
+		});
+
+		expect(() =>
+			getByText(shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address }))
+		).toThrow();
+		expect(
+			getByText(shortenWithMiddleEllipsis({ text: mockContactEthAddressUi.address }))
+		).toBeInTheDocument();
+	});
+
+	it('renders filtered by contact name content if data is provided', () => {
+		const { getByText } = render(SendContacts, {
+			props: {
+				destination: contact2.name.toUpperCase(),
+				networkContacts: {
+					[mockContactBtcAddressUi.address]: contact1,
+					[mockContactEthAddressUi.address]: contact2
+				}
+			}
+		});
+
+		expect(() =>
+			getByText(shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address }))
+		).toThrow();
+		expect(
+			getByText(shortenWithMiddleEllipsis({ text: mockContactEthAddressUi.address }))
+		).toBeInTheDocument();
+	});
+
+	it('renders filtered by contact address label content if data is provided', () => {
+		const contactWithLabel = {
+			...contact2,
+			addresses: [
+				{
+					...contact2.addresses[0],
+					label: 'LABEL'
+				}
+			]
+		};
+
+		const { getByText } = render(SendContacts, {
+			props: {
+				destination: contactWithLabel.addresses[0].label,
+				networkContacts: {
+					[mockContactBtcAddressUi.address]: contact1,
+					[mockContactEthAddressUi.address]: contactWithLabel
 				}
 			}
 		});

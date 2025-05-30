@@ -12,13 +12,13 @@
 
 	interface Props {
 		address: Partial<ContactAddressUi>;
-		isNewAddress: boolean;
+		disableAddressField?: boolean;
 		isInvalid: boolean;
 		disabled?: boolean;
 	}
 	let {
 		address = $bindable(),
-		isNewAddress,
+		disableAddressField = false,
 		isInvalid = $bindable(),
 		disabled = false
 	}: Props = $props();
@@ -40,9 +40,9 @@
 		name="address"
 		placeholder={$i18n.address.form.address_placeholder}
 		testId={ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT}
-		showPasteButton={isNewAddress && !disabled}
-		showResetButton={isNewAddress && !disabled}
-		disabled={!isNewAddress || disabled}
+		showPasteButton={!disableAddressField && !disabled}
+		showResetButton={!disableAddressField && !disabled}
+		disabled={disableAddressField || disabled}
 	/>
 
 	<label for="label" class="font-bold">{$i18n.address.fields.label}</label>

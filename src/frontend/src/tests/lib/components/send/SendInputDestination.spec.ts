@@ -43,6 +43,18 @@ describe('SendInputDestination', () => {
 		expect(getByText(en.send.assertion.invalid_destination_address)).toBeInTheDocument();
 	});
 
+	it('does not render invalid destination error message if destination length is less than required limit', () => {
+		const { getByText } = render(SendInputDestination, {
+			props: {
+				...props,
+				destination: 'Test',
+				invalidDestination: true
+			}
+		});
+
+		expect(() => getByText(en.send.assertion.invalid_destination_address)).toThrow();
+	});
+
 	it('does not render unknown destination warning message if there is a contact with the provided address', () => {
 		const [contact] = getMockContactsUi({
 			n: 1,
