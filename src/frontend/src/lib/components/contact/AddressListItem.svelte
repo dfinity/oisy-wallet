@@ -14,6 +14,7 @@
 		styleClass?: string;
 		showFullAddress?: boolean;
 		addressItemActionsProps?: Omit<AddressItemActionsProps, 'address'>;
+		hideCopyButton?: boolean;
 	}
 
 	let {
@@ -21,7 +22,8 @@
 		onClick,
 		styleClass = '',
 		showFullAddress = false,
-		addressItemActionsProps
+		addressItemActionsProps,
+		hideCopyButton = false
 	}: Props = $props();
 
 	let displayAddress = $derived(
@@ -50,5 +52,10 @@
 			<span>{displayAddress}</span>
 		</div>
 	</div>
-	<AddressItemActions {address} styleClass="ml-auto items-center" {...addressItemActionsProps} />
+	<AddressItemActions
+		{address}
+		{hideCopyButton}
+		styleClass="ml-auto items-center"
+		{...addressItemActionsProps}
+	/>
 </button>
