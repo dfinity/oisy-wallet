@@ -69,6 +69,32 @@ pub fn call_update_contact(
 // -------------------------------------------------------------------------------------------------
 
 #[test]
+fn test_create_contact_requires_authenticated_user() {
+    let pic_setup = setup();
+
+    // Try to create a contact as anonymous user
+    let request = CreateContactRequest {
+        name: "Test Contact".to_string(),
+    };
+    let result = pic_setup.update::<Result<Contact, ContactError>>(
+        Principal::anonymous(),
+        "create_contact",
+        request,
+    );
+
+    // Verify that the call is rejected for anonymous users
+    assert!(
+        result.is_err(),
+        "Anonymous user should not be able to create contacts"
+    );
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Anonymous caller not authorized"),
+        "Error should indicate unauthorized anonymous caller"
+    );
+}
+#[test]
 fn test_create_contact_should_succeed_with_valid_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
@@ -223,6 +249,31 @@ fn test_create_contact_should_be_retrievable_by_get_contact() {
 }
 
 #[test]
+fn test_get_contact_requires_authenticated_user() {
+    let pic_setup = setup();
+
+    // Try to get a specific contact as anonymous user
+    let contact_id = 123; // Any ID will do as we expect rejection before ID is processed
+    let result = pic_setup.query::<Result<Contact, ContactError>>(
+        Principal::anonymous(),
+        "get_contact",
+        contact_id,
+    );
+
+    // Verify that the call is rejected for anonymous users
+    assert!(
+        result.is_err(),
+        "Anonymous user should not be able to get a specific contact"
+    );
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Anonymous caller not authorized"),
+        "Error should indicate unauthorized anonymous caller"
+    );
+}
+
+#[test]
 fn test_get_contact_should_fail_with_nonexistent_id() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
@@ -232,6 +283,30 @@ fn test_get_contact_should_fail_with_nonexistent_id() {
     let result = call_get_contact(&pic_setup, caller, nonexistent_id);
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
+}
+
+#[test]
+fn test_get_contacts_requires_authenticated_user() {
+    let pic_setup = setup();
+
+    // Try to get contacts as anonymous user
+    let result = pic_setup.query::<Result<Vec<Contact>, ContactError>>(
+        Principal::anonymous(),
+        "get_contacts",
+        (),
+    );
+
+    // Verify that the call is rejected for anonymous users
+    assert!(
+        result.is_err(),
+        "Anonymous user should not be able to get contacts"
+    );
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Anonymous caller not authorized"),
+        "Error should indicate unauthorized anonymous caller"
+    );
 }
 
 #[test]
@@ -311,6 +386,37 @@ fn test_contacts_are_isolated_between_users() {
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for the update contact functionality
 // -------------------------------------------------------------------------------------------------
+#[test]
+fn test_update_contact_requires_authenticated_user() {
+    let pic_setup = setup();
+
+    // Create a dummy contact to attempt to update
+    let contact = Contact {
+        id: 123,
+        name: "Test Contact".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: 0,
+    };
+
+    // Try to update a contact as anonymous user
+    let result = pic_setup.update::<Result<Contact, ContactError>>(
+        Principal::anonymous(),
+        "update_contact",
+        contact,
+    );
+
+    // Verify that the call is rejected for anonymous users
+    assert!(
+        result.is_err(),
+        "Anonymous user should not be able to update contacts"
+    );
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Anonymous caller not authorized"),
+        "Error should indicate unauthorized anonymous caller"
+    );
+}
 
 #[test]
 fn test_update_contact_should_succeed_with_valid_name_only() {
@@ -607,6 +713,31 @@ fn test_updated_contact_can_be_retrieved_directly() {
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for the delete contact functionality
 // -------------------------------------------------------------------------------------------------
+#[test]
+fn test_delete_contact_requires_authenticated_user() {
+    let pic_setup = setup();
+
+    // Try to delete a contact as anonymous user
+    let contact_id = 123; // Any ID will do as we expect rejection before ID is processed
+    let result = pic_setup.update::<Result<u64, ContactError>>(
+        Principal::anonymous(),
+        "delete_contact",
+        contact_id,
+    );
+
+    // Verify that the call is rejected for anonymous users
+    assert!(
+        result.is_err(),
+        "Anonymous user should not be able to delete contacts"
+    );
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Anonymous caller not authorized"),
+        "Error should indicate unauthorized anonymous caller"
+    );
+}
+
 #[test]
 fn test_delete_contact_should_succeed_with_valid_id() {
     let pic_setup = setup();
