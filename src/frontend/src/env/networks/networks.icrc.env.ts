@@ -41,7 +41,8 @@ import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
-import { nonNullish } from '@dfinity/utils';
+import { last } from '$lib/utils/array.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const IC_CKBTC_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
@@ -416,34 +417,6 @@ const CKXAUT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 
 const ADDITIONAL_ICRC_PRODUCTION_DATA = mapIcrcData(additionalIcrcTokens);
 
-const BURN_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.BURN)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.BURN,
-			position: 12
-		}
-	: undefined;
-
-const POPEYE_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.POPEYE)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.POPEYE,
-			position: 13
-		}
-	: undefined;
-
-const CLOUD_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.CLOUD)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.CLOUD,
-			position: 14
-		}
-	: undefined;
-
-const AAA_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.AAA)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.AAA,
-			position: 15
-		}
-	: undefined;
-
 export const GLDT_IC_DATA: IcInterface | undefined = nonNullish(
 	ADDITIONAL_ICRC_PRODUCTION_DATA?.GLDT
 )
@@ -453,61 +426,12 @@ export const GLDT_IC_DATA: IcInterface | undefined = nonNullish(
 		}
 	: undefined;
 
-const nICP_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.nICP)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.nICP,
-			position: 17
-		}
-	: undefined;
-
-const RUGGY_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.RUGGY)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.RUGGY,
-			position: 18
-		}
-	: undefined;
-
-const NAK_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.NAK)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.NAK,
-			position: 19
-		}
-	: undefined;
-
-const VCHF_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VCHF)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.VCHF,
-			position: 20
-		}
-	: undefined;
-
-const VEUR_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VEUR)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.VEUR,
-			position: 21
-		}
-	: undefined;
-
 const GHOSTNODE_IC_DATA: IcInterface | undefined = nonNullish(
 	ADDITIONAL_ICRC_PRODUCTION_DATA?.GHOSTNODE
 )
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.GHOSTNODE,
 			position: 23
-		}
-	: undefined;
-
-const XP_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.XP)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.XP,
-			position: 24
-		}
-	: undefined;
-
-const EXE_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.EXE)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.EXE,
-			position: 25
 		}
 	: undefined;
 
@@ -575,21 +499,17 @@ const ICRC_CK_TOKENS: IcInterface[] = [
 	...(nonNullish(CKXAUT_IC_DATA) ? [CKXAUT_IC_DATA] : [])
 ];
 
-const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [
-	...(nonNullish(BURN_IC_DATA) ? [BURN_IC_DATA] : []),
-	...(nonNullish(POPEYE_IC_DATA) ? [POPEYE_IC_DATA] : []),
-	...(nonNullish(CLOUD_IC_DATA) ? [CLOUD_IC_DATA] : []),
-	...(nonNullish(AAA_IC_DATA) ? [AAA_IC_DATA] : []),
-	...(nonNullish(GLDT_IC_DATA) ? [GLDT_IC_DATA] : []),
-	...(nonNullish(nICP_IC_DATA) ? [nICP_IC_DATA] : []),
-	...(nonNullish(RUGGY_IC_DATA) ? [RUGGY_IC_DATA] : []),
-	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : []),
-	...(nonNullish(VCHF_IC_DATA) ? [VCHF_IC_DATA] : []),
-	...(nonNullish(VEUR_IC_DATA) ? [VEUR_IC_DATA] : []),
-	...(nonNullish(GHOSTNODE_IC_DATA) ? [GHOSTNODE_IC_DATA] : []),
-	...(nonNullish(XP_IC_DATA) ? [XP_IC_DATA] : []),
-	...(nonNullish(EXE_IC_DATA) ? [EXE_IC_DATA] : [])
-];
+const POSITION_OFFSET = (last(ICRC_CK_TOKENS) ?? { position: 0 }).position;
+
+const ADDITIONAL_ICRC_TOKENS: IcInterface[] = Object.entries(
+	ADDITIONAL_ICRC_PRODUCTION_DATA ?? {}
+).reduce<IcInterface[]>((acc, [_, data]) => {
+	if (isNullish(data)) {
+		return acc;
+	}
+
+	return [...acc, { ...data, position: POSITION_OFFSET + acc.length + 1 }];
+}, []);
 
 export const ICRC_TOKENS: IcInterface[] = [
 	...PUBLIC_ICRC_TOKENS,
