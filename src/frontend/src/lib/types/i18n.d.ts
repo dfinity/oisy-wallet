@@ -973,6 +973,7 @@ interface I18nAddress_book {
 	};
 	alt: { show_addresses_of_contact: string; hide_addresses: string };
 	edit_contact: { title: string; add_address: string; delete_contact: string };
+	avatar: { default: string; avatar_for: string };
 	show_contact: {
 		title: string;
 		add_address: string;
@@ -996,6 +997,7 @@ interface I18nAddress {
 		label_placeholder: string;
 		invalid_address: string;
 		valid_for_networks: string;
+		error: { label_too_long: string };
 	};
 	fields: { label: string; address: string };
 	delete: { title: string; delete_address: string; content_text: string };
