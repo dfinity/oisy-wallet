@@ -15,7 +15,6 @@ import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import {
-	EtherscanPlugin,
 	EtherscanProvider as EtherscanProviderLib,
 	Network,
 	type BlockTag
@@ -48,7 +47,6 @@ export class EtherscanProvider {
 		endBlock
 	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
-			chainId: this.chainId,
 			action: 'txlist',
 			address,
 			startblock: startBlock ?? 0,
@@ -91,7 +89,6 @@ export class EtherscanProvider {
 		endBlock
 	}: TransactionsParams): Promise<Transaction[]> {
 		const params = {
-			chainId: this.chainId,
 			action: 'txlistinternal',
 			address,
 			startblock: startBlock ?? 0,
@@ -142,7 +139,6 @@ export class EtherscanProvider {
 		contract: Erc20Token;
 	}): Promise<Transaction[]> => {
 		const params = {
-			chainId: this.chainId,
 			action: 'tokentx',
 			contractAddress,
 			address,
@@ -192,10 +188,6 @@ const providers: Record<NetworkId, EtherscanProvider> = [
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, EtherscanProvider>>((acc, { id, name, chainId }) => {
 	const network = new Network(name, chainId);
-
-	const plugin = new EtherscanPlugin('https://api.etherscan.io/v2');
-
-	network.attachPlugin(plugin);
 
 	return { ...acc, [id]: new EtherscanProvider(network, chainId) };
 }, {});
