@@ -35,14 +35,20 @@
 
 	<AddressCard hasError={invalidDestination} items="center">
 		{#snippet logo()}
-			<div class="mr-2"><AvatarWithBadge contact={selectedContact} address={destination} /></div>
+			<div class="mr-2">
+				<AvatarWithBadge
+					contact={selectedContact}
+					address={destination}
+					badge={{ type: 'addressType', address: destination }}
+				/>
+			</div>
 		{/snippet}
 
 		{#snippet content()}
 			{#if isNullish(selectedContact)}
 				{addressToDisplay}
 			{:else}
-				<span>
+				<span class="font-bold">
 					{selectedContact.name}
 
 					{#if notEmptyString(selectedContactLabel)}
