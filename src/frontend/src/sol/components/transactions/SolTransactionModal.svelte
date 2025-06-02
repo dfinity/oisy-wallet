@@ -90,14 +90,6 @@
 			? replacePlaceholders(explorerUrl, { $args: `account/${from}/` })
 			: undefined
 	);
-
-$effect(() => {
-		console.log('Transaction details:', {
-			fromAddress,
-			from,
-			fromExplorerUrl,
-		});
-	});
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
