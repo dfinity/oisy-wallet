@@ -1,13 +1,13 @@
 <script lang="ts">
-	import {isNullish, notEmptyString} from '@dfinity/utils';
+	import { isNullish, notEmptyString } from '@dfinity/utils';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
 	import AddressItemActions, {
 		type Props as AddressItemActionsProps
 	} from '$lib/components/contact/AddressItemActions.svelte';
+	import { ADDRESS_LIST_ITEM_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import {ADDRESS_LIST_ITEM_BUTTON} from "$lib/constants/test-ids.constants";
 
 	interface Props {
 		address: ContactAddressUi;

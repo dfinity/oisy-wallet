@@ -17,8 +17,8 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import {copyToClipboard} from "$lib/utils/clipboard.utils";
 
 	interface Props {
 		contact: ContactUi;
@@ -127,7 +127,7 @@
 						{address}
 						addressItemActionsProps={nonNullish(onInfo) ? { onInfo: () => onInfo(index) } : {}}
 						{hideCopyButton}
-                        onClick={async () =>
+						onClick={async () =>
 							await copyToClipboard({
 								value: address.address,
 								text: $i18n.wallet.text.address_copied
