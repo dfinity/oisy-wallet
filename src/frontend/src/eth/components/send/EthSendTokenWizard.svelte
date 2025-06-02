@@ -221,7 +221,7 @@
 	{nativeEthereumToken}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<EthSendReview on:icBack on:icSend={send} {destination} {amount} />
+		<EthSendReview on:icBack on:icSend={send} {destination} {selectedContact} {amount} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
 			progressStep={sendProgressStep}

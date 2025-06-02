@@ -13,6 +13,7 @@
 	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -22,6 +23,7 @@
 	export let amount: OptionAmount = undefined;
 	export let source: string;
 	export let utxosFee: UtxosFee | undefined = undefined;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendBalance, sendTokenDecimals, sendTokenNetworkId } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -59,7 +61,7 @@
 		}) || invalidAmount(amount);
 </script>
 
-<SendReview on:icBack on:icSend {amount} {destination} disabled={disableSend}>
+<SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
 	<BtcReviewNetwork networkId={$sendTokenNetworkId} slot="network" />
 
 	<BtcUtxosFee slot="fee" bind:utxosFee networkId={$sendTokenNetworkId} {amount} />
