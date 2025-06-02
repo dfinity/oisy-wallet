@@ -78,11 +78,7 @@
 	let isInvalid = $state(false);
 </script>
 
-<form
-	onsubmit={handleSubmit}
-	method="POST"
-	class="flex w-full flex-col items-center"
->
+<form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
 		<Avatar variant="xl" name={contact.name} />
 
