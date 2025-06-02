@@ -17,13 +17,17 @@
 	let value: bigint | undefined;
 	let timestampNanoseconds: bigint | undefined;
 	let incoming: boolean | undefined;
+	let to: string | undefined;
+	let from: string | undefined;
 
 	$: ({
 		type,
 		typeLabel: transactionTypeLabel,
 		value,
 		timestamp: timestampNanoseconds,
-		incoming
+		incoming,
+		to,
+		from
 	} = transaction);
 
 	let pending = false;
@@ -44,7 +48,7 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}
+	onClick={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}
 	styleClass="block w-full border-0"
 	{amount}
 	{type}
@@ -52,6 +56,8 @@
 	{status}
 	{token}
 	{iconType}
+	{to}
+	{from}
 >
 	<IcTransactionLabel label={transactionTypeLabel} fallback={type} {token} />
 </Transaction>

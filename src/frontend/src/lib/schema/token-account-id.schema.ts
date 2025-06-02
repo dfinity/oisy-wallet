@@ -1,3 +1,4 @@
+import { TOKEN_ACCOUNT_ID_TYPES } from '$lib/constants/token-account-id.constants';
 import {
 	BtcAddressObjectSchema,
 	EthAddressObjectSchema,
@@ -12,3 +13,5 @@ export const TokenAccountIdSchema = z.union([
 	EthAddressObjectSchema.transform((data) => ({ Eth: data })),
 	SolAddressSchema.transform((data) => ({ Sol: data }))
 ]);
+
+export const TokenAccountIdTypesSchema = z.enum(TOKEN_ACCOUNT_ID_TYPES);

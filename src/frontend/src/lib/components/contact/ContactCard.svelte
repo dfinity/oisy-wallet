@@ -1,9 +1,12 @@
 <script lang="ts">
-	import { Collapsible } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
+	import Divider from '$lib/components/common/Divider.svelte';
 	import AddressItemActions from '$lib/components/contact/AddressItemActions.svelte';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import {
@@ -11,6 +14,7 @@
 		CONTACT_CARD_BUTTON,
 		CONTACT_CARD_EXPAND_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -18,11 +22,20 @@
 	interface Props {
 		contact: ContactUi;
 		onClick: () => void;
-		onInfo: (addressIndex: number) => void;
+		onInfo?: (addressIndex: number) => void;
+		onSelect?: () => void;
 		initiallyExpanded?: boolean;
+		hideCopyButton?: boolean;
 	}
 
-	let { contact, onInfo, onClick, initiallyExpanded = false }: Props = $props();
+	let {
+		contact,
+		onInfo,
+		onClick,
+		onSelect,
+		initiallyExpanded = false,
+		hideCopyButton = false
+	}: Props = $props();
 
 	let toggleContent = $state<() => void | undefined>();
 
@@ -33,7 +46,7 @@
 </script>
 
 {#snippet header()}
-	<LogoButton {onClick} hover={false} condensed testId={CONTACT_CARD_BUTTON}>
+	<LogoButton {onClick} hover={false} condensed testId={CONTACT_CARD_BUTTON} styleClass="group">
 		{#snippet logo()}
 			<AvatarWithBadge {contact} badge={{ type: 'addressTypeOrCount' }} variant="sm" />
 		{/snippet}
@@ -43,10 +56,10 @@
 		{/snippet}
 
 		{#snippet description()}
-			<span class="flex items-center">
+			<span class="block w-full truncate">
 				{#each contact.addresses as address, index (index)}
 					{#if index !== 0}
-						&nbsp;<span class="text-[0.5rem]">•</span>&nbsp;
+						<Divider />
 					{/if}
 					<span class:font-bold={singleAddress} class:text-primary={singleAddress}
 						>{$i18n.address.types[address.addressType]}</span
@@ -59,7 +72,15 @@
 		{/snippet}
 
 		{#snippet action()}
-			{#if singleAddress}
+			{#if nonNullish(onSelect)}
+				<Button
+					link
+					on:click={onSelect}
+					ariaLabel={$i18n.core.text.select}
+					styleClass="hidden group-hover:block">{$i18n.core.text.select}</Button
+				>
+			{/if}
+			{#if singleAddress && nonNullish(onInfo)}
 				<AddressItemActions
 					styleClass="ml-auto"
 					address={contact.addresses[0]}
@@ -89,28 +110,26 @@
 {/snippet}
 
 <div
-	class="flex w-full flex-col rounded-xl bg-primary p-2 hover:bg-brand-subtle-20 dark:hover:bg-brand-tertiary"
+	class="flex w-full flex-col rounded-xl bg-primary p-2 hover:bg-brand-subtle-20"
 	data-tid={CONTACT_CARD}
 >
 	{#if multipleAddresses}
-		<Collapsible
-			iconSize="medium"
-			{expanded}
-			{initiallyExpanded}
-			externalToggle={true}
-			expandButton={false}
-			bind:toggleContent
-		>
-			<div slot="header" class="flex-grow">
-				{@render header()}
-			</div>
-			<div class="flex flex-col gap-1.5 md:pl-20">
+		{@render header()}
+		{#if expanded}
+			<div
+				class="mt-1 flex flex-col gap-1.5 md:pl-20"
+				transition:slide={SLIDE_DURATION}
+				data-tid="collapsible-content"
+			>
 				{#each contact.addresses as address, index (index)}
-					<AddressListItem {address} addressItemActionsProps={{ onInfo: () => onInfo(index) }}
+					<AddressListItem
+						{address}
+						addressItemActionsProps={nonNullish(onInfo) ? { onInfo: () => onInfo(index) } : {}}
+						{hideCopyButton}
 					></AddressListItem>
 				{/each}
 			</div>
-		</Collapsible>
+		{/if}
 	{:else}
 		{@render header()}
 	{/if}

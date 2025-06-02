@@ -33,6 +33,7 @@ interface I18nCore {
 		to: string;
 		add: string;
 		more_items: string;
+		select: string;
 	};
 	info: { test_banner: string };
 	alt: {
@@ -819,8 +820,10 @@ interface I18nTransaction {
 		type: string;
 		from: string;
 		from_copied: string;
+		received_from: string;
 		to: string;
 		to_copied: string;
+		sent_to: string;
 		block: string;
 		interacted_with: string;
 		status: string;
@@ -960,11 +963,12 @@ interface I18nAddress_book {
 		add_new_contact: string;
 		add_contact: string;
 		search_contact: string;
-		loading_contacts: string;
+		no_address_found: string;
 		no_contact_found: string;
 	};
 	alt: { show_addresses_of_contact: string; hide_addresses: string };
 	edit_contact: { title: string; add_address: string; delete_contact: string };
+	avatar: { default: string; avatar_for: string };
 	show_contact: {
 		title: string;
 		add_address: string;
@@ -988,9 +992,11 @@ interface I18nAddress {
 		label_placeholder: string;
 		invalid_address: string;
 		valid_for_networks: string;
+		error: { label_too_long: string };
 	};
 	fields: { label: string; address: string };
 	delete: { title: string; delete_address: string; content_text: string };
+	save: { title: string; add_to_existing_contact: string; create_contact: string };
 }
 
 interface I18nSigner {
