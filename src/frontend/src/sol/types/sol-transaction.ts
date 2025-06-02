@@ -23,7 +23,7 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	status: Commitment | null;
 	value?: bigint;
 	fee?: bigint;
-	// For Solana transactions, we want to show the owner instead of the ATA address, if it refers to a token
+	// For Solana transactions, we want to show the owner instead of the ATA address
 	fromOwner?: SolAddress;
 	toOwner?: SolAddress;
 }
