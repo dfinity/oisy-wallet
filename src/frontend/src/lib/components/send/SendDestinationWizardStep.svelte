@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher, getContext, onMount } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { btcNetworkContacts } from '$btc/derived/btc-contacts.derived';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
@@ -18,6 +18,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import {
 		SEND_DESTINATION_WIZARD_STEP,
 		SEND_FORM_DESTINATION_NEXT_BUTTON
@@ -26,7 +27,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { SendDestinationTab } from '$lib/types/send';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
@@ -51,6 +51,10 @@
 		formCancelAction = 'back'
 	}: Props = $props();
 
+	onMount(() => {
+		selectedContact = undefined;
+	});
+
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
@@ -61,7 +65,9 @@
 
 	let invalidDestination = $state(false);
 
-	let disabled = $derived(invalidDestination || isNullishOrEmpty(destination));
+	let disabled = $derived(
+		invalidDestination || destination.length <= MIN_DESTINATION_LENGTH_FOR_ERROR_STATE
+	);
 
 	let testId = $derived(`${SEND_DESTINATION_WIZARD_STEP}-${$sendToken.network.name}`);
 </script>
@@ -95,7 +101,7 @@
 			<IcSendDestination
 				tokenStandard={$sendToken.standard}
 				knownDestinations={$icKnownDestinations}
-				networkContacts={$ethNetworkContacts}
+				networkContacts={$icNetworkContacts}
 				bind:destination
 				bind:invalidDestination
 				on:icQRCodeScan
@@ -116,7 +122,7 @@
 				bind:invalidDestination
 				on:icQRCodeScan
 				knownDestinations={$btcKnownDestinations}
-				networkContacts={$ethNetworkContacts}
+				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
 			/>
 			<SendDestinationTabs
@@ -135,7 +141,7 @@
 				bind:invalidDestination
 				on:icQRCodeScan
 				knownDestinations={$solKnownDestinations}
-				networkContacts={$ethNetworkContacts}
+				networkContacts={$solNetworkContacts}
 			/>
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
