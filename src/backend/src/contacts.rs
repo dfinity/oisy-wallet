@@ -201,15 +201,15 @@ pub fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
     mutate_state(|s| {
         // Get the user's contacts directly from the state
         let stored_contacts_opt = s.contact.get(&stored_principal);
-        
+
         // If the user has no contacts at all, the desired state is already achieved
         // (the contact with the given ID is already absent)
         if stored_contacts_opt.is_none() {
             return Ok(contact_id);
         }
-        
+
         let mut stored_contacts = stored_contacts_opt.unwrap().clone();
-        
+
         // If the contact doesn't exist, the desired state is already achieved
         if !stored_contacts.contacts.contains_key(&contact_id) {
             return Ok(contact_id);
