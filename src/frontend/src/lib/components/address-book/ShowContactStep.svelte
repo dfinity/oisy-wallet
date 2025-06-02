@@ -13,8 +13,8 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {copyToClipboard} from "$lib/utils/clipboard.utils";
 
 	interface Props {
 		contact: ContactUi;
@@ -40,7 +40,11 @@
 					addressItemActionsProps={{
 						onInfo: () => onShowAddress(index)
 					}}
-					onClick={async () => await copyToClipboard({ value: address.address, text: $i18n.wallet.text.address_copied })}
+					onClick={async () =>
+						await copyToClipboard({
+							value: address.address,
+							text: $i18n.wallet.text.address_copied
+						})}
 				/>
 			{/each}
 		</div>
