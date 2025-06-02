@@ -69,7 +69,7 @@ pub fn call_update_contact(
 // - Integration tests for the contact management functionality
 // -------------------------------------------------------------------------------------------------
 #[test]
-fn test_create_contact_requires_authenticated_user() {
+fn test_create_contact_authorization_by_principal_type() {
     let pic_setup = setup();
 
     // Define test cases with different principals and expected outcomes
