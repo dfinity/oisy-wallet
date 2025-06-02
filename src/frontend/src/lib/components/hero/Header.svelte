@@ -8,6 +8,7 @@
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
+	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.contants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
@@ -37,8 +38,8 @@
 			<Menu />
 		{:else}
 			<div class="mr-2 flex justify-end gap-3 sm:gap-5 md:mr-0">
-				<AboutWhyOisy />
-				<DocumentationLink shortTextOnMobile />
+				<AboutWhyOisy trackEventSource={LANDING_PAGE_ROUTE} />
+				<DocumentationLink shortTextOnMobile trackEventSource={LANDING_PAGE_ROUTE} />
 				<ThemeSwitchButton />
 			</div>
 		{/if}

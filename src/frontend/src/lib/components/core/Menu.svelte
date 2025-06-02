@@ -21,6 +21,7 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { USER_MENU_ROUTE } from '$lib/constants/analytics.contants';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
@@ -159,9 +160,14 @@
 
 		<Hr />
 
-		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
+		<AboutWhyOisy
+			asMenuItem
+			asMenuItemCondensed
+			on:icOpenAboutModal={hidePopover}
+			trackEventSource={USER_MENU_ROUTE}
+		/>
 
-		<DocumentationLink asMenuItem asMenuItemCondensed />
+		<DocumentationLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
 
 		<SupportLink asMenuItem asMenuItemCondensed />
 
@@ -178,7 +184,7 @@
 			{$i18n.navigation.text.source_code}
 		</a>
 
-		<ChangelogLink asMenuItem asMenuItemCondensed />
+		<ChangelogLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
 
 		<Hr />
 
