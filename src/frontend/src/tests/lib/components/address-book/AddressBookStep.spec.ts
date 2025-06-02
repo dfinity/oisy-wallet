@@ -246,12 +246,12 @@ describe('AddressBookStep', () => {
 		expect(queryByText('Test Contact 1')).not.toBeInTheDocument();
 	});
 
-	it('should support case-insensitive and trimmed matching', async () => {
+	it('should support case-insensitive and trimmed matching for contact names and address labels', async () => {
 		const contacts = [
 			...baseContacts,
 			{
 				id: 4n,
-				name: 'Case Sensitive',
+				name: 'Case Insensitive',
 				addresses: [],
 				updateTimestampNs: BigInt(Date.now())
 			}
@@ -267,7 +267,39 @@ describe('AddressBookStep', () => {
 		});
 
 		const input = getByTestId(ADDRESS_BOOK_SEARCH_CONTACT_INPUT);
-		await fireEvent.input(input, { target: { value: '   case   senSITive  ' } });
+		await fireEvent.input(input, { target: { value: '   case   iNsenSITive  ' } });
+
+		expect(queryByText('Case Insensitive')).toBeInTheDocument();
+	});
+
+	it('should support case-sensitive matching for addresses', async () => {
+		const contacts = [
+			...baseContacts,
+			{
+				id: 4n,
+				name: 'Case Sensitive',
+				addresses: [
+					{ address: 'F5Zrs17FG5R8rcTmujgVknGqTgGB6HMkNPtt43bw4RhJ', addressType: 'Sol' }
+				],
+				updateTimestampNs: BigInt(Date.now())
+			}
+		];
+
+		const { getByTestId, queryByText } = render(AddressBookStep, {
+			props: {
+				contacts,
+				onAddContact: mockAddContact,
+				onShowContact: mockShowContact,
+				onShowAddress: mockShowAddress
+			}
+		});
+
+		const input = getByTestId(ADDRESS_BOOK_SEARCH_CONTACT_INPUT);
+		await fireEvent.input(input, { target: { value: '   zrs' } });
+
+		expect(queryByText('Case Sensitive')).not.toBeInTheDocument();
+
+		await fireEvent.input(input, { target: { value: '   Zrs' } });
 
 		expect(queryByText('Case Sensitive')).toBeInTheDocument();
 	});
