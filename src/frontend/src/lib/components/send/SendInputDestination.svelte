@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import QrButton from '$lib/components/common/QrButton.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
