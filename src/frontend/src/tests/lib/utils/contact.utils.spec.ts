@@ -1,6 +1,7 @@
 import type { ContactUi } from '$lib/types/contact';
 import {
 	getContactForAddress,
+	isContactMatchingFilter,
 	mapAddressToContactAddressUi,
 	mapToBackendContact,
 	mapToFrontendContact,
@@ -9,9 +10,11 @@ import {
 import { mockBtcAddress, mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
 import {
 	getMockContacts,
+	getMockContactsUi,
 	mockBackendContactAddressBtc,
 	mockBackendContactAddressEth,
-	mockBackendContactAddressSol
+	mockBackendContactAddressSol,
+	mockContactBtcAddressUi
 } from '$tests/mocks/contacts.mock';
 import { mockEthAddress3 } from '$tests/mocks/eth.mocks';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
@@ -203,6 +206,54 @@ describe('contact.utils', () => {
 				address: mockPrincipalText,
 				addressType: 'Icrcv2'
 			});
+		});
+	});
+
+	describe('isContactMatchingFilter', () => {
+		const [contact] = getMockContactsUi({
+			n: 1,
+			name: 'Johny',
+			addresses: [mockContactBtcAddressUi]
+		}) as unknown as ContactUi[];
+
+		it('should return true if contact name matches filter', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: 'Joh'
+				})
+			).toBeTruthy();
+		});
+
+		it('should return true if contact label matches filter', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: 'Bitcoin'
+				})
+			).toBeTruthy();
+		});
+
+		it('should return true if contact address matches filter', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: 'bc1qt0nkp9'
+				})
+			).toBeTruthy();
+		});
+
+		it('should return false if contact address does not match filter', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: 'Test1'
+				})
+			).toBeFalsy();
 		});
 	});
 });

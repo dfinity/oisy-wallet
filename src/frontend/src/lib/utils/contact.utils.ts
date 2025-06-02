@@ -78,3 +78,19 @@ export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi
 		addressType: currentAddressType
 	};
 };
+
+export const isContactMatchingFilter = ({
+	address,
+	contact,
+	filterValue
+}: {
+	address: Address;
+	contact: ContactUi;
+	filterValue: string;
+}): boolean =>
+	address.includes(filterValue) ||
+	contact.name.toLowerCase().includes(filterValue.toLowerCase()) ||
+	contact.addresses.some(
+		({ label, address: innerAddress }) =>
+			address === innerAddress && label?.toLowerCase().includes(filterValue.toLowerCase())
+	);
