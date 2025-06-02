@@ -8,12 +8,15 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import {
 		ADDRESS_BOOK_ADD_CONTACT_BUTTON,
 		ADDRESS_BOOK_SEARCH_CONTACT_INPUT
 	} from '$lib/constants/test-ids.constants';
+	import { contactsNotInitialized } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { isDesktop } from '$lib/utils/device.utils';
 
 	interface Props {
 		contacts: ContactUi[];
@@ -47,7 +50,9 @@
 </script>
 
 <ContentWithToolbar styleClass="mx-2 flex flex-col items-stretch">
-	{#if contacts.length === 0}
+	{#if $contactsNotInitialized}
+		<SkeletonCards rows={3} />
+	{:else if contacts.length === 0}
 		<EmptyAddressBook {onAddContact}></EmptyAddressBook>
 	{:else}
 		<div class="flex w-full items-end gap-2">
@@ -55,7 +60,7 @@
 				bind:filter={searchTerm}
 				showResetButton={notEmptyString(searchTerm)}
 				placeholder={$i18n.address_book.text.search_contact}
-				autofocus={true}
+				autofocus={isDesktop()}
 				testId={ADDRESS_BOOK_SEARCH_CONTACT_INPUT}
 			/>
 			<Button
