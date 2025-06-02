@@ -13,7 +13,6 @@ import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { vi } from 'vitest';
-import type {TokenAccountIdTypes} from "$lib/types/token-account-id";
 
 describe('AddressBookStep', () => {
 	const baseContacts: ContactUi[] = [
@@ -279,7 +278,9 @@ describe('AddressBookStep', () => {
 			{
 				id: 4n,
 				name: 'Case Sensitive',
-				addresses: [{address: 'F5Zrs17FG5R8rcTmujgVknGqTgGB6HMkNPtt43bw4RhJ', addressType: 'Sol'}],
+				addresses: [
+					{ address: 'F5Zrs17FG5R8rcTmujgVknGqTgGB6HMkNPtt43bw4RhJ', addressType: 'Sol' }
+				],
 				updateTimestampNs: BigInt(Date.now())
 			}
 		];
@@ -299,6 +300,7 @@ describe('AddressBookStep', () => {
 		expect(queryByText('Case Sensitive')).not.toBeInTheDocument();
 
 		await fireEvent.input(input, { target: { value: '   Zrs' } });
+
 		expect(queryByText('Case Sensitive')).toBeInTheDocument();
 	});
 
