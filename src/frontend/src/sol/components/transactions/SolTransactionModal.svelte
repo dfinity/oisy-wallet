@@ -45,8 +45,8 @@
 		nonNullish(token?.network.id) ? mapNetworkIdToNetwork(token?.network.id) : undefined
 	);
 
-	let from = $state<SolTransactionUi['from']>();
-	let to = $state<SolTransactionUi['to']>();
+	let from = $derived<SolTransactionUi['from'] | undefined>(undefined);
+	let to = $derived<SolTransactionUi['to'] | undefined>(undefined);
 
 	const updateFromAddress = async () => {
 		from = nonNullish(solanaNetwork)
@@ -90,6 +90,14 @@
 			? replacePlaceholders(explorerUrl, { $args: `account/${from}/` })
 			: undefined
 	);
+
+$effect(() => {
+		console.log('Transaction details:', {
+			fromAddress,
+			from,
+			fromExplorerUrl,
+		});
+	});
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
