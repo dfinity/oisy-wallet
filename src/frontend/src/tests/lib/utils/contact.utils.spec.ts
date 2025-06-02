@@ -165,14 +165,14 @@ describe('contact.utils', () => {
 			expect(result).toBeUndefined();
 		});
 
-		it('should match address regardless of case (case-insensitive match)', () => {
+		it('should match address only case sensitive', () => {
 			const upperCasedAddress = mockEthAddress3.toUpperCase();
 			const result = getContactForAddress({
 				addressString: upperCasedAddress,
 				contactList: mockContacts
 			});
 
-			expect(result?.addresses?.[0]?.address).toEqual(mockEthAddress3);
+			expect(result?.addresses?.[0]?.address).not.toEqual(mockEthAddress3);
 		});
 	});
 
