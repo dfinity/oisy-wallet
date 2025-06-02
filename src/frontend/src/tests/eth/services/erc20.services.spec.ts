@@ -444,5 +444,16 @@ describe('erc20.services', () => {
 				expect.any(Object)
 			);
 		});
+
+		it('should fetch the cached custom tokens in IDB on query call', async () => {
+			await loadErc20UserTokens({ identity: mockIdentity, useCache: true });
+
+			expect(idbKeyval.get).toHaveBeenCalledOnce();
+			expect(idbKeyval.get).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				expect.any(Object)
+			);
+		});
 	});
 });
