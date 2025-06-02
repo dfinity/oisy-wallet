@@ -26,7 +26,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { SendDestinationTab } from '$lib/types/send';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
@@ -37,6 +36,7 @@
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
+	import {MIN_DESTINATION_LENGTH_FOR_ERROR_STATE} from "$lib/constants/app.constants";
 
 	interface Props {
 		destination: string;
@@ -61,7 +61,7 @@
 
 	let invalidDestination = $state(false);
 
-	let disabled = $derived(invalidDestination || isNullishOrEmpty(destination));
+	let disabled = $derived(invalidDestination || destination.length <= MIN_DESTINATION_LENGTH_FOR_ERROR_STATE);
 
 	let testId = $derived(`${SEND_DESTINATION_WIZARD_STEP}-${$sendToken.network.name}`);
 </script>
