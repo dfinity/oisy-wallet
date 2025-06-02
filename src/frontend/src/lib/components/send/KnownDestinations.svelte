@@ -7,6 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { KnownDestinations } from '$lib/types/transactions';
+	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
 
 	interface Props {
 		destination: string;
@@ -27,7 +28,15 @@
 	);
 
 	let filteredKnownDestinations = $derived(
-		sortedKnownDestinations.filter(({ address }) => address.includes(destination))
+		sortedKnownDestinations.filter(({ address }) =>
+			nonNullish(networkContacts?.[address])
+				? isContactMatchingFilter({
+						address,
+						contact: networkContacts[address],
+						filterValue: destination
+					})
+				: address.includes(destination)
+		)
 	);
 </script>
 
