@@ -62,7 +62,7 @@ DFX_NETWORK=ic ./scripts/build.cycles_depositor.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
-# scripts/bind/rust.sh cycles_ledger
+scripts/bind/rust.sh cycles_ledger
 # Generate javascript & typescript bindings for canisters with directories in `declarations`:
 mapfile -t canisters < <(ls src/declarations/)
 for canister in "${canisters[@]}"; do
