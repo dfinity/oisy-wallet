@@ -5,11 +5,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let asMenuItem = false;
-	export let asMenuItemCondensed = false;
+	interface Props {
+		asMenuItem?: boolean;
+		asMenuItemCondensed?: boolean;
+		shortTextOnMobile?: boolean;
+	}
 
 	// We display an alternative "Docs" text instead of "Documentation" to avoid design breaks on small screens
-	export let shortTextOnMobile = false;
+	let {
+		asMenuItem = false,
+		asMenuItemCondensed = false,
+		shortTextOnMobile = false
+	}: Props = $props();
 </script>
 
 <ExternalLink
