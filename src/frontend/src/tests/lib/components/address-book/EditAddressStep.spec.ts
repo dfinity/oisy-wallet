@@ -262,7 +262,7 @@ describe('EditAddressStep', () => {
 		expect(onAddAddress).toHaveBeenCalled();
 	});
 
-	it('should autofocus address input when adding a new address on desktop', async () => {
+	it('should autofocus address input when adding a new address on desktop', () => {
 		const onSaveAddress = vi.fn();
 		const onAddAddress = vi.fn();
 		const onClose = vi.fn();
@@ -286,7 +286,7 @@ describe('EditAddressStep', () => {
 		expect(document.activeElement).toBe(addressInput);
 	});
 
-	it('should autofocus label input when editing an address on desktop', async () => {
+	it('should autofocus label input when editing an address on desktop', () => {
 		const onSaveAddress = vi.fn();
 		const onAddAddress = vi.fn();
 		const onClose = vi.fn();
