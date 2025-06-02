@@ -101,7 +101,7 @@
 			<IcSendDestination
 				tokenStandard={$sendToken.standard}
 				knownDestinations={$icKnownDestinations}
-				networkContacts={$ethNetworkContacts}
+				networkContacts={$icNetworkContacts}
 				bind:destination
 				bind:invalidDestination
 				on:icQRCodeScan
@@ -122,7 +122,7 @@
 				bind:invalidDestination
 				on:icQRCodeScan
 				knownDestinations={$btcKnownDestinations}
-				networkContacts={$ethNetworkContacts}
+				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
 			/>
 			<SendDestinationTabs
@@ -141,7 +141,7 @@
 				bind:invalidDestination
 				on:icQRCodeScan
 				knownDestinations={$solKnownDestinations}
-				networkContacts={$ethNetworkContacts}
+				networkContacts={$solNetworkContacts}
 			/>
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
