@@ -1,3 +1,4 @@
+use crate::utils::mock::USER_1;
 use std::time::Duration;
 
 use candid::Principal;
@@ -67,33 +68,49 @@ pub fn call_update_contact(
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for the contact management functionality
 // -------------------------------------------------------------------------------------------------
-
 #[test]
 fn test_create_contact_requires_authenticated_user() {
     let pic_setup = setup();
 
-    // Try to create a contact as anonymous user
-    let request = CreateContactRequest {
-        name: "Test Contact".to_string(),
-    };
-    let result = pic_setup.update::<Result<Contact, ContactError>>(
-        Principal::anonymous(),
-        "create_contact",
-        request,
-    );
+    // Define test cases with different principals and expected outcomes
+    let test_cases = vec![
+        // (principle, principle_description, should_succeed)
+        (Principal::anonymous(), "anonymous user", false),
+        (Principal::from_text(CALLER).unwrap(), "mock::CALLER", true),
+        (Principal::from_text(USER_1).unwrap(), "mock::USER_1", true),
+    ];
 
-    // Verify that the call is rejected for anonymous users
-    assert!(
-        result.is_err(),
-        "Anonymous user should not be able to create contacts"
-    );
-    assert!(
-        result
-            .unwrap_err()
-            .contains("Anonymous caller not authorized"),
-        "Error should indicate unauthorized anonymous caller"
-    );
+    for (principal, description, should_succeed) in test_cases {
+        // Create a contact request
+        let request = CreateContactRequest {
+            name: "Test Contact".to_string(),
+        };
+
+        // Attempt to create a contact with the current principal
+        let result =
+            pic_setup.update::<Result<Contact, ContactError>>(principal, "create_contact", request);
+
+        // Verify the expected outcome based on principal type
+        if should_succeed {
+            assert!(
+                result.is_ok(),
+                "{description} should be able to create contacts"
+            );
+        } else {
+            assert!(
+                result.is_err(),
+                "{description} should not be able to create contacts",
+            );
+            assert!(
+                result
+                    .unwrap_err()
+                    .contains("Anonymous caller not authorized"),
+                "Error for {description} should indicate unauthorized anonymous caller"
+            );
+        }
+    }
 }
+
 #[test]
 fn test_create_contact_should_succeed_with_valid_name() {
     let pic_setup = setup();
