@@ -5,6 +5,7 @@
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
@@ -13,8 +14,14 @@
 		destination: string;
 		knownDestinations?: KnownDestinations;
 		networkContacts?: NetworkContacts;
+		selectedContact?: ContactUi;
 	}
-	let { knownDestinations, destination = $bindable(), networkContacts }: Props = $props();
+	let {
+		knownDestinations,
+		destination = $bindable(),
+		selectedContact = $bindable(),
+		networkContacts
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -52,6 +59,11 @@
 							{...rest}
 							onClick={() => {
 								destination = address;
+
+								if (nonNullish(networkContacts?.[address])) {
+									selectedContact = networkContacts[address];
+								}
+
 								dispatch('icNext');
 							}}
 						/>
