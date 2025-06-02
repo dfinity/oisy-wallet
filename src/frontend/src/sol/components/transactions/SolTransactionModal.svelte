@@ -41,8 +41,12 @@
 		status
 	} = $derived(transaction);
 
-	let from = $derived<SolTransactionUi['from'] | SolTransactionUi['fromOwner'] |undefined>(fromOwner ?? fromAddress);
-	let to = $derived<SolTransactionUi['to'] | SolTransactionUi['toOwner'] | undefined>(toOwner ?? toAddress);
+	let from = $derived<SolTransactionUi['from'] | SolTransactionUi['fromOwner'] | undefined>(
+		fromOwner ?? fromAddress
+	);
+	let to = $derived<SolTransactionUi['to'] | SolTransactionUi['toOwner'] | undefined>(
+		toOwner ?? toAddress
+	);
 
 	let explorerUrl: string | undefined = $derived(
 		isNetworkSolana(token?.network) ? token.network.explorerUrl : undefined
