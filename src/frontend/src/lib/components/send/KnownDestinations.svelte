@@ -25,22 +25,20 @@
 	);
 
 	let filteredKnownDestinations = $derived(
-		sortedKnownDestinations.filter(({ address }) =>
-			address.toLowerCase().includes(destination.toLowerCase())
-		)
+		sortedKnownDestinations.filter(({ address }) => address.includes(destination))
 	);
 </script>
 
 <div in:fade>
 	{#if nonNullish(knownDestinations) && filteredKnownDestinations.length > 0}
-		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
+		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
 			<ul class="list-none overflow-y-auto overscroll-contain">
 				{#each filteredKnownDestinations as { address, ...rest } (address)}
 					<li>
 						<KnownDestination
 							destination={address}
 							{...rest}
-							on:click={() => {
+							onClick={() => {
 								destination = address;
 								dispatch('icNext');
 							}}
