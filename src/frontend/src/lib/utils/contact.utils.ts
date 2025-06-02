@@ -62,7 +62,7 @@ export const getContactForAddress = ({
 	contactList: ContactUi[];
 }): ContactUi | undefined =>
 	contactList.find((c) =>
-		c.addresses.find((address) => address.address.toLowerCase() === addressString.toLowerCase())
+		c.addresses.find((address) => address.address === addressString)
 	);
 
 export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi | undefined => {
