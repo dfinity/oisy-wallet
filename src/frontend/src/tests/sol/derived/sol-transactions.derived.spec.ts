@@ -165,10 +165,10 @@ describe('sol-transactions.derived', () => {
 			const maxTimestamp = Math.max(...mockTransactions.map(({ data }) => Number(data.timestamp)));
 
 			expect(get(solKnownDestinations)).toEqual({
-				[transactions[0].data.to as string]: {
+				[mockTransactions[0].data.toOwner as string]: {
 					amounts: mockTransactions.map(({ data }) => ({ value: data.value, token: SOLANA_TOKEN })),
 					timestamp: maxTimestamp,
-					address: mockTransactions[0].data.to
+					address: mockTransactions[0].data.toOwner
 				}
 			});
 		});
