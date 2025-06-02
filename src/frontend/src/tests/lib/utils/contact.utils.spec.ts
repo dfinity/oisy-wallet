@@ -1,4 +1,22 @@
-import { selectColorForName } from '$lib/utils/contact.utils';
+import type { ContactUi } from '$lib/types/contact';
+import {
+	getContactForAddress,
+	mapAddressToContactAddressUi,
+	mapToBackendContact,
+	mapToFrontendContact,
+	selectColorForName
+} from '$lib/utils/contact.utils';
+import { mockBtcAddress, mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
+import {
+	getMockContacts,
+	mockBackendContactAddressBtc,
+	mockBackendContactAddressEth,
+	mockBackendContactAddressSol
+} from '$tests/mocks/contacts.mock';
+import { mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockPrincipalText } from '$tests/mocks/identity.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { fromNullable } from '@dfinity/utils';
 import type { NonEmptyArray } from 'alchemy-sdk';
 
 describe('contact.utils', () => {
@@ -29,6 +47,162 @@ describe('contact.utils', () => {
 			expect(selectColorForName({ colors, name: '' })).toBeUndefined();
 			expect(selectColorForName({ colors, name: '   ' })).toBeUndefined();
 			expect(selectColorForName({ colors, name: undefined })).toBeUndefined();
+		});
+	});
+
+	describe('mapToFrontendContact', () => {
+		const [mockContact] = getMockContacts({
+			n: 1,
+			names: ['Johnny'],
+			addresses: [
+				[mockBackendContactAddressSol, mockBackendContactAddressBtc, mockBackendContactAddressEth]
+			]
+		});
+		const expectedContactUi: ContactUi = {
+			name: mockContact.name,
+			id: mockContact.id,
+			updateTimestampNs: mockContact.update_timestamp_ns,
+			addresses: [
+				{
+					label: fromNullable(mockBackendContactAddressSol.label),
+					address: mockSolAddress,
+					addressType: 'Sol'
+				},
+
+				{
+					label: fromNullable(mockBackendContactAddressBtc.label),
+					address: mockBtcP2SHAddress,
+					addressType: 'Btc'
+				},
+
+				{
+					label: fromNullable(mockBackendContactAddressEth.label),
+					address: mockEthAddress3,
+					addressType: 'Eth'
+				}
+			]
+		};
+
+		it('should map backend contact to frontend contact', () => {
+			const result = mapToFrontendContact(mockContact);
+
+			expect(result).toEqual(expectedContactUi);
+		});
+
+		it('should map frontend contact to backend contact', () => {
+			const contactUi = mapToFrontendContact(mockContact);
+
+			const result = mapToBackendContact(contactUi);
+
+			expect(result).toEqual(mockContact);
+		});
+	});
+
+	describe('getContactForAddress', () => {
+		const mockContacts = getMockContacts({
+			n: 3,
+			names: ['Johnny', 'Bob', 'Lisa'],
+			addresses: [
+				[mockBackendContactAddressSol, mockBackendContactAddressBtc],
+				[mockBackendContactAddressEth],
+				[mockBackendContactAddressBtc]
+			]
+		}).map((c) => mapToFrontendContact(c));
+
+		it('should return the correct contact for a SOL address', () => {
+			const result = getContactForAddress({
+				contactList: mockContacts,
+				addressString: mockSolAddress
+			});
+
+			expect(result?.name).toBe('Johnny');
+		});
+
+		it('should return the correct contact for address if multiple match - return only first match', () => {
+			const result = getContactForAddress({
+				contactList: mockContacts,
+				addressString: mockBtcP2SHAddress
+			});
+
+			expect(result?.name).toBe('Johnny');
+		});
+
+		it('should return the correct contact for an ETH address', () => {
+			const result = getContactForAddress({
+				contactList: mockContacts,
+				addressString: mockEthAddress3
+			});
+
+			expect(result?.name).toBe('Bob');
+		});
+
+		it('should return undefined if address is not found', () => {
+			const result = getContactForAddress({
+				contactList: mockContacts,
+				addressString: '0xINEXISTENTADDRESS'
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should handle empty contact list', () => {
+			const result = getContactForAddress({ contactList: [], addressString: mockEthAddress3 });
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should handle contacts with empty addresses array', () => {
+			const contactsWithNoAddresses = getMockContacts({
+				n: 2,
+				names: ['Empty1', 'Empty2'],
+				addresses: [[], []]
+			}).map((c) => mapToFrontendContact(c));
+			const result = getContactForAddress({
+				contactList: contactsWithNoAddresses,
+				addressString: mockEthAddress3
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should match address only case sensitive', () => {
+			const upperCasedAddress = mockEthAddress3.toUpperCase();
+			const result = getContactForAddress({
+				addressString: upperCasedAddress,
+				contactList: mockContacts
+			});
+
+			expect(result?.addresses?.[0]?.address).not.toEqual(mockEthAddress3);
+		});
+	});
+
+	describe('mapAddressToContactAddressUi', () => {
+		it('should map BTC address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockBtcAddress)).toStrictEqual({
+				address: mockBtcAddress,
+				addressType: 'Btc'
+			});
+		});
+
+		it('should map ETH address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockEthAddress3)).toStrictEqual({
+				address: mockEthAddress3,
+				addressType: 'Eth'
+			});
+		});
+
+		it('should map SOL address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockSolAddress)).toStrictEqual({
+				address: mockSolAddress,
+				addressType: 'Sol'
+			});
+		});
+
+		it('should map IC address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockPrincipalText)).toStrictEqual({
+				address: mockPrincipalText,
+				addressType: 'Icrcv2'
+			});
 		});
 	});
 });

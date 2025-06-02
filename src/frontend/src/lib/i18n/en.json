@@ -20,6 +20,7 @@
 			"approve": "Approve",
 			"view": "View",
 			"copy": "Copy",
+			"delete": "Delete",
 			"clear_filter": "Clear filter",
 			"not_available": "n/a",
 			"new": "New",
@@ -27,7 +28,9 @@
 			"no_results": "No results",
 			"paste": "Paste",
 			"to": "To",
-			"more_items": "+$items more"
+			"add": "Add",
+			"more_items": "+$items more",
+			"select": "Select"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -60,12 +63,14 @@
 			"vip_qr_code": "VIP QR codes",
 			"binance_qr_code": "Binance Clubhouse QR",
 			"refer_a_friend": "Refer your friends",
-			"address_book": "Address book"
+			"address_book": "Address book",
+			"hide_balances": "Hide balances",
+			"show_balances": "Show balances"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
 			"settings": "Open your settings",
-			"dapp_explorer": "Open dapp explorer",
+			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",
 			"airdrops": "Open the Rewards view",
 			"more_settings": "More settings",
@@ -77,7 +82,9 @@
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
-			"address_book": "Open address book"
+			"address_book": "Open address book",
+			"hide_balances": "Hide the displayed balances",
+			"show_balances": "Show the hidden balances"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -148,24 +155,24 @@
 	},
 	"dapps": {
 		"text": {
-			"all_dapps": "All dapps",
+			"all_dapps": "All apps",
 			"featured": "Featured",
 			"sign_in": "Sign-in to explore the ecosystem.",
 			"title": "Explore Apps",
 			"open_dapp": "Open $dAppName",
-			"submit_your_dapp": "Submit your dapp"
+			"submit_your_dapp": "Submit your app"
 		},
 		"alt": {
 			"learn_more": "Learn more about $dAppName",
 			"logo": "Logo of $dAppName",
-			"show_all": "Show all decentralised applications",
-			"show_tag": "Show decentralised applications with the tag $tag",
+			"show_all": "Show all applications",
+			"show_tag": "Show applications with the tag $tag",
 			"open_dapp": "Open the app $dAppName",
 			"open_telegram": "Open $dAppName on Telegram",
 			"open_open_chat": "Open $dAppName on OpenChat",
 			"open_twitter": "Open the $dAppName X/Twitter feed",
 			"source_code_on_github": "View source code of $dAppName on github",
-			"submit_your_dapp": "Submit your dapp to be shown in the dapp-explorer",
+			"submit_your_dapp": "Submit your app to be shown in the app-explorer",
 			"tags": "Tags related to $dAppName",
 			"website": "Image of $dAppName"
 		}
@@ -242,7 +249,7 @@
 		"text": {
 			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base and BNB",
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon and BNB",
 			"done": "Enjoy $oisy_short"
 		},
 		"alt": {
@@ -294,7 +301,7 @@
 	},
 	"hero": {
 		"text": {
-			"available_balance": "Available balance",
+			"available_balance": "Your balance",
 			"unavailable_balance": "$ value is not available",
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
@@ -341,6 +348,9 @@
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
+	},
+	"shortcuts": {
+		"privacy_mode": "P"
 	},
 	"networks": {
 		"title": "Current network. Access to selection.",
@@ -455,12 +465,18 @@
 			"select_token": "Select token to send",
 			"select_network_filter": "Select network filter",
 			"send_again": "Send again",
-			"recently_used": "Recently used"
+			"recently_used_tab": "Recently Used",
+			"contacts_tab": "Contacts",
+			"recently_used_empty_state_title": "Recently used addresses will appear here",
+			"recently_used_empty_state_description": "Make your first send now!",
+			"contacts_empty_state_title": "Your contacts will appear here",
+			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
+			"send_review_subtitle": "You send"
 		},
 		"placeholder": {
-			"enter_eth_address": "Enter public address (0x)",
-			"enter_recipient_address": "Enter recipient address",
-			"enter_wallet_address": "Enter wallet address",
+			"enter_eth_address": "Enter public address (0x), name or alias",
+			"enter_recipient_address": "Enter recipient address, name or alias",
+			"enter_wallet_address": "Enter wallet address, name or alias",
 			"select_network": "Select network"
 		},
 		"info": {
@@ -640,6 +656,7 @@
 			"hide_token": "Hide token",
 			"select_token": "Select token",
 			"exchange_is_not_available": "USD value is currently not available.",
+			"exchange_is_not_available_short": "USD value not available",
 			"source_token_title": "You pay",
 			"destination_token_title": "You receive",
 			"chain_key": "Chain Key",
@@ -868,8 +885,14 @@
 			"type": "Type",
 			"from": "From",
 			"from_copied": "From address copied to clipboard.",
+			"received_from": "Received from $name",
+			"from_ata": "Sender token account (ATA)",
+			"from_ata_copied": "Sender token account (ATA) copied to clipboard.",
 			"to": "To",
 			"to_copied": "To address copied to clipboard.",
+			"sent_to": "Sent to $name",
+			"to_ata": "Recipient token account (ATA)",
+			"to_ata_copied": "Recipient token account (ATA) copied to clipboard.",
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
 			"status": "Status",
@@ -918,8 +941,8 @@
 			"open_transactions": "Open the list of $token transactions",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
-			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
-			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
+			"missing_index_canister_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer hasn’t provided the tracking feature yet. It should be added soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",
+			"index_canister_not_working_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer's tracking feature is currently not responding. It should be resolved soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",
 			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history."
 		},
 		"error": {
@@ -1026,7 +1049,23 @@
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
 			"add_new_contact": "Add new contact",
-			"add_contact": "Add contact"
+			"add_contact": "Add contact",
+			"search_contact": "Search contact",
+			"no_address_found": "No address available.",
+			"no_contact_found": "No contacts found"
+		},
+		"alt": {
+			"show_addresses_of_contact": "Show all addresses for contact",
+			"hide_addresses": "Hide addresses of contact"
+		},
+		"edit_contact": {
+			"title": "Edit contact",
+			"add_address": "Add address",
+			"delete_contact": "Delete contact"
+		},
+		"avatar": {
+			"default": "Default avatar",
+			"avatar_for": "Avatar for"
 		},
 		"show_contact": {
 			"title": "Contact",
@@ -1037,10 +1076,53 @@
 	},
 	"contact": {
 		"form": {
+			"edit_contact": "Edit contact",
 			"add_new_contact": "Add new contact"
 		},
 		"fields": {
 			"name": "Name"
+		},
+		"delete": {
+			"title": "Delete $contact contact?",
+			"delete_contact": "Delete contact",
+			"content_text": "This will delete $contact and all associated addresses from your Address Book. This action cannot be undone."
+		},
+		"error": {
+			"create": "Failed to create the contact",
+			"update": "Failed to update the contact",
+			"delete": "Failed to delete the contact"
+		}
+	},
+	"address": {
+		"types": {
+			"Icrcv2": "Internet Computer",
+			"Btc": "Bitcoin",
+			"Eth": "Ethereum",
+			"Sol": "Solana"
+		},
+		"form": {
+			"new_address": "New address",
+			"address_placeholder": "Enter or paste address",
+			"label_placeholder": "E.g., “Mom’s wallet“",
+			"invalid_address": "Invalid address",
+			"valid_for_networks": "Valid for networks:",
+			"error": {
+				"label_too_long": "Label may not exceed $maxCharacters characters"
+			}
+		},
+		"fields": {
+			"label": "Alias",
+			"address": "Address"
+		},
+		"delete": {
+			"title": "Delete address?",
+			"delete_address": "Delete address",
+			"content_text": "This will delete <strong>$address</strong> address from $contact's contact.<br>This action cannot be undone."
+		},
+		"save": {
+			"title": "Save address",
+			"add_to_existing_contact": "Add to existing contact",
+			"create_contact": "Create contact"
 		}
 	},
 	"pow_protector": {

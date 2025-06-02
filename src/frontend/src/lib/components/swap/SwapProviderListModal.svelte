@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapProviderListItem from './SwapProviderListItem.svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
@@ -32,17 +32,20 @@
 		amount: bigint;
 		token: IcTokenToggleable | undefined;
 		exchangeRate?: number;
-	}): string =>
-		formatUSD({
-			value:
-				nonNullish(amount) && nonNullish(token) && nonNullish(exchangeRate)
-					? formatTokenBigintToNumber({
-							value: amount,
-							unitName: token.decimals,
-							displayDecimals: token.decimals
-						}) * exchangeRate
-					: 0
-		});
+	}): string | undefined => {
+		if (isNullish(amount) || isNullish(token) || isNullish(exchangeRate)) {
+			return;
+		}
+
+		const usdValue =
+			formatTokenBigintToNumber({
+				value: amount,
+				unitName: token.decimals,
+				displayDecimals: token.decimals
+			}) * exchangeRate;
+
+		return formatUSD({ value: usdValue });
+	};
 </script>
 
 <div class=" mb-4 overflow-y-auto overscroll-contain">

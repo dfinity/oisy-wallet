@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
@@ -15,6 +16,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let testId: string | undefined = undefined;
 
@@ -48,7 +50,7 @@
 
 	let hideTokenLabel: string;
 	$: hideTokenLabel = replacePlaceholders($i18n.tokens.hide.token, {
-		$token: $token?.name ?? ''
+		$token: nonNullish($token) ? getTokenDisplaySymbol($token) : ''
 	});
 </script>
 
@@ -66,14 +68,14 @@
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
 	<div class="flex flex-col gap-1">
 		{#if $tokenToggleable}
-			<ButtonMenu ariaLabel={hideTokenLabel} on:click={hideToken}>
+			<ButtonMenu ariaLabel={hideTokenLabel} onclick={hideToken}>
 				{hideTokenLabel}
 			</ButtonMenu>
 		{/if}
 
 		<slot />
 
-		<ButtonMenu ariaLabel={$i18n.tokens.details.title} on:click={openToken}>
+		<ButtonMenu ariaLabel={$i18n.tokens.details.title} onclick={openToken}>
 			{$i18n.tokens.details.title}
 		</ButtonMenu>
 	</div>

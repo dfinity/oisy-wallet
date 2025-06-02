@@ -3,6 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { KnownDestinations } from '$lib/types/transactions';
 
@@ -24,26 +25,20 @@
 	);
 
 	let filteredKnownDestinations = $derived(
-		sortedKnownDestinations.filter(({ address }) =>
-			address.toLowerCase().includes(destination.toLowerCase())
-		)
+		sortedKnownDestinations.filter(({ address }) => address.includes(destination))
 	);
 </script>
 
-{#if nonNullish(knownDestinations) && filteredKnownDestinations.length > 0}
-	<div class="mb-2 mt-8" in:fade>
-		<div class="mb-2 font-bold">
-			{$i18n.send.text.recently_used}
-		</div>
-
-		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
+<div in:fade>
+	{#if nonNullish(knownDestinations) && filteredKnownDestinations.length > 0}
+		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
 			<ul class="list-none overflow-y-auto overscroll-contain">
 				{#each filteredKnownDestinations as { address, ...rest } (address)}
 					<li>
 						<KnownDestination
 							destination={address}
 							{...rest}
-							on:click={() => {
+							onClick={() => {
 								destination = address;
 								dispatch('icNext');
 							}}
@@ -52,5 +47,10 @@
 				{/each}
 			</ul>
 		</div>
-	</div>
-{/if}
+	{:else}
+		<EmptyState
+			title={$i18n.send.text.recently_used_empty_state_title}
+			description={$i18n.send.text.recently_used_empty_state_description}
+		/>
+	{/if}
+</div>

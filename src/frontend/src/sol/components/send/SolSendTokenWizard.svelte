@@ -32,6 +32,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionSolAddress } from '$lib/types/address';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
@@ -59,6 +60,7 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -201,7 +203,7 @@
 
 <SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING} {destination}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview on:icBack on:icSend={send} {destination} {amount} {network} />
+		<SolSendReview on:icBack on:icSend={send} {destination} {selectedContact} {amount} {network} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
@@ -210,9 +212,9 @@
 			on:icClose
 			on:icTokensList
 			on:icBack
+			{selectedContact}
 			bind:destination
 			bind:amount
-			source={source ?? ''}
 		>
 			<ButtonBack onclick={back} slot="cancel" />
 		</SolSendForm>

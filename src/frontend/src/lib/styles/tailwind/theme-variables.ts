@@ -169,6 +169,8 @@ export const themeVariables = {
 		'base-100': '#0066FF',
 		'bsc-0': '#FB8202',
 		'bsc-100': '#FEBE38',
+		'polygon-0': '#6C00F6',
+		'polygon-100': '#4301A9',
 		'sol-0': '#904EFA',
 		'sol-100': '#1DE59D',
 		'trump-0': '#232BCC',

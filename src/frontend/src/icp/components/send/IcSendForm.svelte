@@ -7,16 +7,15 @@
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { NetworkId } from '$lib/types/network';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
-	export let networkId: NetworkId | undefined = undefined;
-	export let source: string;
+	export let selectedContact: ContactUi | undefined = undefined;
 
-	const { sendToken, sendBalance, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
 
@@ -25,8 +24,7 @@
 		isNullishOrEmpty(destination) ||
 		isInvalidDestinationIc({
 			destination,
-			tokenStandard: $sendTokenStandard,
-			networkId
+			tokenStandard: $sendTokenStandard
 		});
 
 	let invalid = true;
@@ -36,15 +34,12 @@
 <SendForm
 	on:icNext
 	on:icBack
-	{source}
 	{destination}
+	{selectedContact}
 	{invalidDestination}
-	token={$sendToken}
-	balance={$sendBalance}
 	disabled={invalid}
-	hideSource
 >
-	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} on:icTokensList />
+	<IcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 
 	<IcTokenFee slot="fee" />
 

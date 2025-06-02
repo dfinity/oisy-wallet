@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
-	import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
+	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/address';
@@ -18,9 +17,10 @@
 	interface Props {
 		destination: Address;
 		amounts: KnownDestination['amounts'];
+		onClick: () => void;
 		timestamp?: number;
 	}
-	let { destination, amounts, timestamp }: Props = $props();
+	let { destination, amounts, timestamp, onClick }: Props = $props();
 
 	// we only display the first 3 amounts, and the rest is displayed as "+N more"
 	let amountsToDisplay = $derived(amounts.slice(0, MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS));
@@ -30,14 +30,16 @@
 	let currentDate = $state(new Date());
 </script>
 
-<LogoButton styleClass="group" on:click>
-	<div class="mr-2" slot="logo"><RoundedIcon icon={IconConvertTo} /></div>
+<LogoButton styleClass="group" {onClick}>
+	{#snippet logo()}
+		<div class="mr-2"><AvatarWithBadge address={destination} variant="sm" /></div>
+	{/snippet}
 
-	<svelte:fragment slot="title">
+	{#snippet title()}
 		<span class="text-base">{shortenWithMiddleEllipsis({ text: destination })}</span>
-	</svelte:fragment>
+	{/snippet}
 
-	<svelte:fragment slot="description">
+	{#snippet description()}
 		{#each amountsToDisplay as { token, value }, index (index)}
 			<Amount amount={value} decimals={token.decimals} symbol={token.symbol} />
 			{#if index < amounts.length - 1}
@@ -48,9 +50,9 @@
 		{#if restAmountsNumber > 0}
 			{replacePlaceholders($i18n.core.text.more_items, { $items: `${restAmountsNumber}` })}
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 
-	<svelte:fragment slot="description-end">
+	{#snippet descriptionEnd()}
 		<div class="block group-hover:hidden">
 			{#if nonNullish(timestamp)}
 				{formatSecondsToNormalizedDate({
@@ -61,5 +63,5 @@
 		</div>
 
 		<div class="hidden text-brand-primary group-hover:block">{$i18n.send.text.send_again}</div>
-	</svelte:fragment>
+	{/snippet}
 </LogoButton>

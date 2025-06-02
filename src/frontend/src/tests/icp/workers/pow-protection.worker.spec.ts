@@ -319,7 +319,6 @@ describe('pow-protector.worker', () => {
 
 		return {
 			setup: () => {
-				// Initialize the scheduler here
 				scheduler = new PowProtectionScheduler();
 				// Use a general error that isn't specially handled
 				const err = new Error('Unhandled error');

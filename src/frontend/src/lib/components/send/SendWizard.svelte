@@ -14,7 +14,7 @@
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { Network, NetworkId } from '$lib/types/network';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { Token } from '$lib/types/token';
 	import {
 		isNetworkIdEthereum,
@@ -25,13 +25,11 @@
 	} from '$lib/utils/network.utils';
 	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
 
-	export let source: string;
 	export let destination: string;
-	export let targetNetwork: Network | undefined;
-	export let networkId: NetworkId | undefined;
 	export let amount: number | undefined;
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -51,7 +49,7 @@
 			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			nativeEthereumToken={$ethereumToken}
 			{destination}
-			bind:targetNetwork
+			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
@@ -66,7 +64,7 @@
 			sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
 			nativeEthereumToken={evmNativeEthereumToken}
 			{destination}
-			bind:targetNetwork
+			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
@@ -77,10 +75,9 @@
 		/>
 	{:else if isNetworkIdICP($sendToken.network.id)}
 		<IcSendTokenWizard
-			{source}
 			{currentStep}
 			{destination}
-			bind:networkId
+			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
 			on:icSendBack
@@ -93,6 +90,7 @@
 		<BtcSendTokenWizard
 			{currentStep}
 			{destination}
+			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
@@ -105,6 +103,7 @@
 		<SolSendTokenWizard
 			{currentStep}
 			{destination}
+			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
