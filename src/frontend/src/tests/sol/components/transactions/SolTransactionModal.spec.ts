@@ -2,7 +2,6 @@ import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import { getAccountOwner } from '$sol/api/solana.api';
 import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
@@ -11,18 +10,8 @@ import { capitalizeFirstLetter } from '$tests/utils/string-utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-vi.mock('$sol/api/solana.api', () => ({
-	getAccountOwner: vi.fn()
-}));
-
 describe('SolTransactionModal', () => {
 	const [mockSolTransactionUi] = createMockSolTransactionsUi(1);
-
-	beforeEach(() => {
-		vi.clearAllMocks();
-
-		vi.mocked(getAccountOwner).mockResolvedValue(undefined);
-	});
 
 	it('should render the SOL transaction modal', () => {
 		const { getByText } = render(SolTransactionModal, {
@@ -87,11 +76,9 @@ describe('SolTransactionModal', () => {
 		).toBeInTheDocument();
 	});
 
-	it('should not display ATA address if is not SPL token', () => {
-		vi.mocked(getAccountOwner).mockResolvedValue('mock-owner-address');
-
+	it('should not display ATA address if there is no owner address', () => {
 		const { queryByText } = render(SolTransactionModal, {
-			transaction: mockSolTransactionUi,
+			transaction: { ...mockSolTransactionUi, fromOwner: undefined, toOwner: undefined },
 			token: SOLANA_TOKEN
 		});
 
@@ -101,11 +88,22 @@ describe('SolTransactionModal', () => {
 		expect(queryByText('mock-owner-address')).not.toBeInTheDocument();
 	});
 
-	it('should display ATA address if is SPL token', async () => {
-		vi.mocked(getAccountOwner).mockResolvedValue(mockSolAddress2);
+	it('should display ATA address if there is the owner address even if it is not SPL token', () => {
+		const { queryByText } = render(SolTransactionModal, {
+			transaction: { ...mockSolTransactionUi, toOwner: 'mock-owner-address' },
+			token: SOLANA_TOKEN
+		});
 
+		expect(queryByText(en.transaction.text.from_ata)).not.toBeInTheDocument();
+
+		expect(queryByText(en.transaction.text.to_ata)).toBeInTheDocument();
+
+		expect(queryByText('mock-owner-address')).toBeInTheDocument();
+	});
+
+	it('should display ATA address if is SPL token', async () => {
 		const { getByText } = render(SolTransactionModal, {
-			transaction: mockSolTransactionUi,
+			transaction: { ...mockSolTransactionUi, toOwner: mockSolAddress2 },
 			token: BONK_TOKEN
 		});
 
