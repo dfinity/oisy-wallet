@@ -1111,8 +1111,8 @@ interface I18n {
 	referral: I18nReferral;
 	address_book: I18nAddress_book;
 	contact: I18nContact;
-	pow_protector: I18nPow_protector;
 	address: I18nAddress;
+	pow_protector: I18nPow_protector;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
