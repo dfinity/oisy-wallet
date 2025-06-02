@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {notEmptyString} from '@dfinity/utils';
+	import { notEmptyString } from '@dfinity/utils';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
 	import AddressItemActions, {
 		type Props as AddressItemActionsProps
