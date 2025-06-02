@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import IconAvatar from '$lib/components/icons/IconAvatar.svelte';
+	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
+	import Img from '$lib/components/ui/Img.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { AvatarVariants } from '$lib/types/style';
@@ -47,7 +48,7 @@
 		role="img"
 		aria-label={ariaLabel}
 	>
-		<IconAvatar {size} />
+		<Img styleClass={size} src={emptyOisyLogo} alt={ariaLabel} />
 	</div>
 {:else}
 	<span
