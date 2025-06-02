@@ -6,7 +6,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { trackEvent } from '$lib/services/analytics.services';
 
 	interface Props {
 		asMenuItem?: boolean;
