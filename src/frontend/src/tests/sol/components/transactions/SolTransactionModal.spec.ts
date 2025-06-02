@@ -76,9 +76,9 @@ describe('SolTransactionModal', () => {
 		).toBeInTheDocument();
 	});
 
-	it('should not display ATA address if is not SPL token', () => {
+	it('should not display ATA address if there is no owner address', () => {
 		const { queryByText } = render(SolTransactionModal, {
-			transaction: { ...mockSolTransactionUi, to: 'mock-owner-address' },
+			transaction: { ...mockSolTransactionUi, fromOwner: undefined, toOwner: undefined },
 			token: SOLANA_TOKEN
 		});
 
@@ -88,9 +88,22 @@ describe('SolTransactionModal', () => {
 		expect(queryByText('mock-owner-address')).not.toBeInTheDocument();
 	});
 
+	it('should display ATA address if there is the owner address even if it is not SPL token', () => {
+		const { queryByText } = render(SolTransactionModal, {
+			transaction: { ...mockSolTransactionUi, toOwner: 'mock-owner-address' },
+			token: SOLANA_TOKEN
+		});
+
+		expect(queryByText(en.transaction.text.from_ata)).not.toBeInTheDocument();
+
+		expect(queryByText(en.transaction.text.to_ata)).toBeInTheDocument();
+
+		expect(queryByText('mock-owner-address')).toBeInTheDocument();
+	});
+
 	it('should display ATA address if is SPL token', async () => {
 		const { getByText } = render(SolTransactionModal, {
-			transaction: { ...mockSolTransactionUi, to: 'mock-owner-address' },
+			transaction: { ...mockSolTransactionUi, toOwner: mockSolAddress2 },
 			token: BONK_TOKEN
 		});
 
