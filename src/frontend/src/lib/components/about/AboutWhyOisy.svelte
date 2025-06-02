@@ -22,12 +22,6 @@
 	const openModal = () => {
 		dispatch('icOpenAboutModal');
 		modalStore.openAboutWhyOisy(modalId);
-		trackEvent({
-			name: 'about_why_oisy',
-			metadata: {
-				source: 'landing_page'
-			}
-		});
 	};
 </script>
 
