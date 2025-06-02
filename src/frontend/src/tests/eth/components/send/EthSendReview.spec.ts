@@ -41,7 +41,7 @@ describe('EthSendReview', () => {
 
 		expect(getByText(en.send.text.network)).toBeInTheDocument();
 
-		expect(getByText(en.send.text.destination)).toBeInTheDocument();
+		expect(getByText(props.destination)).toBeInTheDocument();
 
 		// en.fee.text.max_fee_eth contains HTML, so for simplicity we just search for a hardcoded string
 		expect(getByText('Max fee')).toBeInTheDocument();
