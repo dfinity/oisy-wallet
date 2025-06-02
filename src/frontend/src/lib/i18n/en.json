@@ -469,7 +469,8 @@
 			"recently_used_empty_state_title": "Recently used addresses will appear here",
 			"recently_used_empty_state_description": "Make your first send now!",
 			"contacts_empty_state_title": "Your contacts will appear here",
-			"contacts_empty_state_description": "It looks like you haven’t added contacts yet"
+			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
+			"send_review_subtitle": "You send"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
