@@ -7,14 +7,14 @@ import {
 	CONTACT_SHOW_CLOSE_BUTTON
 } from '$lib/constants/test-ids.constants';
 import type { ContactUi } from '$lib/types/contact';
+import * as clipboardUtils from '$lib/utils/clipboard.utils';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import {vi} from "vitest";
-import * as clipboardUtils from "$lib/utils/clipboard.utils";
+import { vi } from 'vitest';
 
 describe('ShowContactStep', () => {
 	const mockContact: ContactUi = {
@@ -214,10 +214,11 @@ describe('ShowContactStep', () => {
 			}
 		});
 
-		const addressListItems = getAllByTestId(ADDRESS_LIST_ITEM_BUTTON)
-		expect(addressListItems.length).toEqual(2)
+		const addressListItems = getAllByTestId(ADDRESS_LIST_ITEM_BUTTON);
 
-		await fireEvent.click(addressListItems[0])
+		expect(addressListItems).toHaveLength(2);
+
+		await fireEvent.click(addressListItems[0]);
 
 		expect(spyCopy).toHaveBeenCalled();
 	});
