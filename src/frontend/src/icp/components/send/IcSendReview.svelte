@@ -6,11 +6,13 @@
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -25,7 +27,7 @@
 		invalidAmount(amount);
 </script>
 
-<SendReview on:icBack on:icSend {amount} {destination} disabled={invalid}>
+<SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={invalid}>
 	<IcTokenFee slot="fee" />
 
 	<IcReviewNetwork slot="network" />
