@@ -44,7 +44,7 @@ describe('SendInputDestination', () => {
 	});
 
 	it('does not render invalid destination error message if destination length is less than required limit', () => {
-		const { getByText } = render(SendInputDestination, {
+		const { queryByText } = render(SendInputDestination, {
 			props: {
 				...props,
 				destination: 'Test',
@@ -52,7 +52,7 @@ describe('SendInputDestination', () => {
 			}
 		});
 
-		expect(() => getByText(en.send.assertion.invalid_destination_address)).toThrow();
+		expect(queryByText(en.send.assertion.invalid_destination_address)).not.toBeInTheDocument();
 	});
 
 	it('does not render unknown destination warning message if there is a contact with the provided address', () => {
@@ -62,7 +62,7 @@ describe('SendInputDestination', () => {
 			addresses: [mockContactEthAddressUi]
 		}) as unknown as ContactUi[];
 
-		const { getByText } = render(SendInputDestination, {
+		const { queryByText } = render(SendInputDestination, {
 			props: {
 				...props,
 				invalidDestination: false,
@@ -73,7 +73,20 @@ describe('SendInputDestination', () => {
 			}
 		});
 
-		expect(() => getByText(en.send.info.unknown_destination)).toThrow();
+		expect(queryByText(en.send.info.unknown_destination)).not.toBeInTheDocument();
+	});
+
+	it('does not render unknown destination warning message if inserted destination is less than 10 characters', () => {
+		const { queryByText } = render(SendInputDestination, {
+			props: {
+				...props,
+				destination: '0x1d63841',
+				invalidDestination: false,
+				knownDestinations: {}
+			}
+		});
+
+		expect(queryByText(en.send.info.unknown_destination)).not.toBeInTheDocument();
 	});
 
 	it('renders unknown destination warning message', () => {
