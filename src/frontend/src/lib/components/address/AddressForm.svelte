@@ -36,7 +36,7 @@
 	});
 </script>
 
-<form class="w-full">
+<div class="w-full">
 	<label for="address" class="font-bold">{$i18n.address.fields.address}</label>
 
 	<InputAddress
@@ -66,4 +66,4 @@
 			})}
 		</p>
 	{/if}
-</form>
+</div>

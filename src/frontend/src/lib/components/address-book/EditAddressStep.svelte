@@ -59,13 +59,11 @@
 			onSaveAddress(editingAddress as ContactAddressUi);
 		}
 	};
-	const handleKeydown = (event: KeyboardEvent): void => {
-		const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName ?? '');
-		if (event.key === 'Enter' && isInput) {
-			event.preventDefault();
-			if (!isInvalid) {
-				handleSave();
-			}
+
+	const handleSubmit = (event: Event) => {
+		event.preventDefault();
+		if (!isInvalid) {
+			handleSave();
 		}
 	};
 
@@ -80,38 +78,41 @@
 	let isInvalid = $state(false);
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<form
+	onsubmit={handleSubmit}
+	method="POST"
+	class="flex w-full flex-col items-center"
+>
+	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
+		<Avatar variant="xl" name={contact.name} />
 
-<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-	<Avatar variant="xl" name={contact.name} />
+		<div class="text-2xl font-bold text-primary md:text-3xl">
+			{contact.name}
+		</div>
 
-	<div class="text-2xl font-bold text-primary md:text-3xl">
-		{contact.name}
-	</div>
-
-	<div
-		class="mt-2 w-full rounded-lg bg-brand-light px-3 py-4 text-sm md:px-5 md:text-base md:font-bold"
-	>
-		<div class="pb-4 text-xl font-bold">{title}</div>
-
-		<AddressForm
-			disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
-			address={addressModel}
-			bind:isInvalid
-			{disabled}
-		></AddressForm>
-	</div>
-
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
-		<Button
-			colorStyle="primary"
-			disabled={isInvalid}
-			on:click={handleSave}
-			testId={ADDRESS_BOOK_SAVE_BUTTON}
-			loading={disabled}
+		<div
+			class="mt-2 w-full rounded-lg bg-brand-light px-3 py-4 text-sm md:px-5 md:text-base md:font-bold"
 		>
-			{$i18n.core.text.save}
-		</Button>
-	</ButtonGroup>
-</ContentWithToolbar>
+			<div class="pb-4 text-xl font-bold">{title}</div>
+
+			<AddressForm
+				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
+				address={addressModel}
+				bind:isInvalid
+				{disabled}
+			/>
+		</div>
+		<ButtonGroup slot="toolbar">
+			<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
+			<Button
+				colorStyle="primary"
+				disabled={isInvalid}
+				on:click={handleSave}
+				testId={ADDRESS_BOOK_SAVE_BUTTON}
+				loading={disabled}
+			>
+				{$i18n.core.text.save}
+			</Button>
+		</ButtonGroup>
+	</ContentWithToolbar>
+</form>
