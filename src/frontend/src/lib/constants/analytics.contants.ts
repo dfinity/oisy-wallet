@@ -72,3 +72,13 @@ export const TRACK_CONTACT_UPDATE_SUCCESS = 'contact_update_success_count';
 export const TRACK_CONTACT_UPDATE_ERROR = 'contact_update_error_count';
 export const TRACK_CONTACT_DELETE_SUCCESS = 'contact_delete_success_count';
 export const TRACK_CONTACT_DELETE_ERROR = 'contact_delete_error_count';
+
+// Navigation
+export const TRACK_COUNT_OPEN_WHY_OISY = 'open_why_oisy_count';
+export const TRACK_COUNT_OPEN_DOCUMENTATION = 'open_documentation_count';
+export const TRACK_COUNT_OPEN_CHANGELOG = 'open_changelog_count';
+
+// Analytics event source routes
+export const LANDING_PAGE_ROUTE = 'landing-page';
+export const HOME_PAGE_ROUTE = 'home-page';
+export const USER_MENU_ROUTE = 'user-menu';
