@@ -58,6 +58,7 @@
 		bind:value={address.label}
 		testId={ADDRESS_BOOK_ADDRESS_ALIAS_INPUT}
 		{disabled}
+		showResetButton={!disabled}
 		required={false}
 	/>
 	{#if nonNullish(labelError)}
