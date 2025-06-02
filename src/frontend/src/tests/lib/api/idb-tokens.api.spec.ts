@@ -2,8 +2,10 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import {
+	deleteIdbEthTokens,
 	deleteIdbIcTokens,
 	deleteIdbSolTokens,
+	getIdbEthTokens,
 	getIdbIcTokens,
 	getIdbSolTokens,
 	setIdbTokensStore
@@ -131,6 +133,17 @@ describe('idb-tokens.api', () => {
 		});
 	});
 
+	describe('getIdbEthTokens', () => {
+		it('should get ETH tokens', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbEthTokens(mockPrincipal);
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
 	describe('getIdbSolTokens', () => {
 		it('should get SOL tokens', async () => {
 			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
@@ -145,6 +158,15 @@ describe('idb-tokens.api', () => {
 	describe('deleteIdbIcTokens', () => {
 		it('should delete IC tokens', async () => {
 			await deleteIdbIcTokens(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledOnce();
+			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
+	describe('deleteIdbEthTokens', () => {
+		it('should delete ETH tokens', async () => {
+			await deleteIdbEthTokens(mockPrincipal);
 
 			expect(idbKeyval.del).toHaveBeenCalledOnce();
 			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
