@@ -215,7 +215,7 @@ describe('ShowContactStep', () => {
 		});
 
 		const addressListItems = getAllByTestId(ADDRESS_LIST_ITEM_BUTTON)
-		expect(addressListItems.length === 2)
+		expect(addressListItems.length).toEqual(2)
 
 		await fireEvent.click(addressListItems[0])
 
