@@ -18,15 +18,18 @@
 			({ featured, screenshots }) => featured && nonNullish(screenshots) && screenshots.length
 		) as FeaturedOisyDappDescription | undefined;
 
-	const featuredDapp = selectFirstFeaturedDapp();
+	let featuredDapp = $state<FeaturedOisyDappDescription | undefined>(selectFirstFeaturedDapp());
 
-	let selectedTag: string | undefined = undefined;
-	const uniqueTags = new Set(
-		dAppDescriptions.flatMap((dapp) => dapp.tags).sort((tagA, tagB) => tagA.localeCompare(tagB))
+	let selectedTag = $state<string | undefined>();
+
+	let uniqueTags = $state(
+		new Set(
+			dAppDescriptions.flatMap((dapp) => dapp.tags).sort((tagA, tagB) => tagA.localeCompare(tagB))
+		)
 	);
 
-	$: filteredDapps = dAppDescriptions.filter(
-		({ tags }) => isNullish(selectedTag) || tags.includes(selectedTag)
+	let filteredDapps = $derived(
+		dAppDescriptions.filter(({ tags }) => isNullish(selectedTag) || tags.includes(selectedTag))
 	);
 
 	const modalId = Symbol();
