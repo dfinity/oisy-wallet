@@ -202,6 +202,7 @@ export const CONTACT_HEADER_EDITING_EDIT_BUTTON = 'contact-header-editing-edit-b
 export const CONTACT_EDIT_ADD_ADDRESS_BUTTON = 'contact-edit-add-address-button';
 export const CONTACT_EDIT_DELETE_CONTACT_BUTTON = 'contact-edit-delete-contact-button';
 
+export const ADDRESS_LIST_ITEM_BUTTON = 'address-list-item-button';
 export const ADDRESS_LIST_ITEM_COPY_BUTTON = 'address-list-item-copy-button';
 export const ADDRESS_LIST_ITEM_INFO_BUTTON = 'address-list-item-info-button';
 export const ADDRESS_LIST_ITEM_EDIT_BUTTON = 'address-list-item-edit-button';
