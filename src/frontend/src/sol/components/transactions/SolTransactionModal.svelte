@@ -19,9 +19,7 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
-	import { getAccountOwner } from '$sol/api/solana.api';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
-	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -32,44 +30,23 @@
 
 	let {
 		from: fromAddress,
+		fromOwner,
 		value,
 		timestamp,
 		signature: id,
 		blockNumber,
 		to: toAddress,
+		toOwner,
 		type,
 		status
 	} = $derived(transaction);
 
-	let solanaNetwork = $derived(
-		nonNullish(token?.network.id) ? mapNetworkIdToNetwork(token?.network.id) : undefined
+	let from = $derived<SolTransactionUi['from'] | SolTransactionUi['fromOwner'] | undefined>(
+		fromOwner ?? fromAddress
 	);
-
-	let from = $derived<SolTransactionUi['from'] | undefined>(undefined);
-	let to = $derived<SolTransactionUi['to'] | undefined>(undefined);
-
-	const updateFromAddress = async () => {
-		from = nonNullish(solanaNetwork)
-			? ((await getAccountOwner({ address: fromAddress, network: solanaNetwork })) ?? fromAddress)
-			: fromAddress;
-	};
-
-	const updateToAddress = async () => {
-		to =
-			nonNullish(solanaNetwork) && nonNullish(toAddress)
-				? ((await getAccountOwner({ address: toAddress, network: solanaNetwork })) ?? toAddress)
-				: toAddress;
-	};
-
-	$effect(() => {
-		[fromAddress];
-		updateFromAddress();
-	});
-
-	$effect(() => {
-		[toAddress];
-		updateToAddress();
-	});
+	let to = $derived<SolTransactionUi['to'] | SolTransactionUi['toOwner'] | undefined>(
+		toOwner ?? toAddress
+	);
 
 	let explorerUrl: string | undefined = $derived(
 		isNetworkSolana(token?.network) ? token.network.explorerUrl : undefined
