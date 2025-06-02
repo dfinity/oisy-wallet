@@ -1,4 +1,6 @@
 import { browser } from '$app/environment';
+import type { CustomToken, UserToken } from '$declarations/backend/backend.did';
+import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
 import { nullishSignOut } from '$lib/services/auth.services';
@@ -14,13 +16,14 @@ const idbTokensStore = (key: string): UseStore =>
 		: ({} as unknown as UseStore);
 
 const idbIcTokensStore = idbTokensStore(ICP_NETWORK_SYMBOL.toLowerCase());
+const idbEthTokensStore = idbTokensStore(ETHEREUM_NETWORK_SYMBOL.toLowerCase());
 const idbSolTokensStore = idbTokensStore(SOLANA_MAINNET_NETWORK_SYMBOL.toLowerCase());
 
-export const setIdbTokensStore = async ({
+export const setIdbTokensStore = async <T extends CustomToken | UserToken>({
 	identity,
 	tokens,
 	idbTokensStore
-}: SetIdbTokensParams & {
+}: SetIdbTokensParams<T> & {
 	idbTokensStore: UseStore;
 }) => {
 	if (isNullish(identity)) {
@@ -31,22 +34,30 @@ export const setIdbTokensStore = async ({
 	await idbSet(identity.getPrincipal().toText(), tokens, idbTokensStore);
 };
 
-export const setIdbIcTokens = (params: SetIdbTokensParams): Promise<void> =>
+export const setIdbIcTokens = (params: SetIdbTokensParams<CustomToken>): Promise<void> =>
 	setIdbTokensStore({ ...params, idbTokensStore: idbIcTokensStore });
 
-export const setIdbSolTokens = (params: SetIdbTokensParams): Promise<void> =>
+export const setIdbEthTokens = (params: SetIdbTokensParams<UserToken>): Promise<void> =>
+	setIdbTokensStore({ ...params, idbTokensStore: idbEthTokensStore });
+
+export const setIdbSolTokens = (params: SetIdbTokensParams<CustomToken>): Promise<void> =>
 	setIdbTokensStore({ ...params, idbTokensStore: idbSolTokensStore });
 
 export const getIdbIcTokens = (
 	principal: Principal
-): Promise<SetIdbTokensParams['tokens'] | undefined> => get(principal.toText(), idbIcTokensStore);
+): Promise<SetIdbTokensParams<CustomToken>['tokens'] | undefined> =>
+	get(principal.toText(), idbIcTokensStore);
 
 export const getIdbSolTokens = (
 	principal: Principal
-): Promise<SetIdbTokensParams['tokens'] | undefined> => get(principal.toText(), idbSolTokensStore);
+): Promise<SetIdbTokensParams<CustomToken>['tokens'] | undefined> =>
+	get(principal.toText(), idbSolTokensStore);
 
 export const deleteIdbIcTokens = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbIcTokensStore);
+
+export const deleteIdbEthTokens = (principal: Principal): Promise<void> =>
+	del(principal.toText(), idbEthTokensStore);
 
 export const deleteIdbSolTokens = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbSolTokensStore);

@@ -3,7 +3,7 @@ import {
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
-import { deleteIdbIcTokens, deleteIdbSolTokens } from '$lib/api/idb-tokens.api';
+import { deleteIdbEthTokens, deleteIdbIcTokens, deleteIdbSolTokens } from '$lib/api/idb-tokens.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -118,6 +118,8 @@ const emptyIdbSolAddress = (): Promise<void> => emptyIdbStore(deleteIdbSolAddres
 
 const emptyIdbIcTokens = (): Promise<void> => emptyIdbStore(deleteIdbIcTokens);
 
+const emptyIdbEthTokens = (): Promise<void> => emptyIdbStore(deleteIdbEthTokens);
+
 const emptyIdbSolTokens = (): Promise<void> => emptyIdbStore(deleteIdbSolTokens);
 
 // eslint-disable-next-line require-await
@@ -143,6 +145,7 @@ const logout = async ({
 			emptyIdbEthAddress(),
 			emptyIdbSolAddress(),
 			emptyIdbIcTokens(),
+			emptyIdbEthTokens(),
 			emptyIdbSolTokens()
 		]);
 	}

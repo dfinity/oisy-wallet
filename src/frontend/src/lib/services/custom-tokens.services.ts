@@ -12,7 +12,7 @@ interface LoadCustomTokensFromBackendParams {
 	identity: OptionIdentity;
 	certified: boolean;
 	filterTokens: (token: CustomToken) => boolean;
-	setIdbTokens: (params: SetIdbTokensParams) => Promise<void>;
+	setIdbTokens: (params: SetIdbTokensParams<CustomToken>) => Promise<void>;
 }
 
 type LoadCustomTokensParams = LoadCustomTokensFromBackendParams & {

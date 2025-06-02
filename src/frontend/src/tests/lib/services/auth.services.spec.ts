@@ -1,5 +1,17 @@
 import { signOut } from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import * as idbKeyval from 'idb-keyval';
+
+vi.mock('idb-keyval', () => ({
+	createStore: vi.fn(() => ({
+		/* mock store implementation */
+	})),
+	set: vi.fn(),
+	get: vi.fn(),
+	del: vi.fn(),
+	update: vi.fn()
+}));
 
 const rootLocation = 'https://oisy.com/';
 const activityLocation = 'https://oisy.com/activity';
@@ -16,6 +28,10 @@ const mockLocation = (url: string) => {
 
 describe('auth.services', () => {
 	describe('signOut', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
 		it('should call the signOut function of the authStore without resetting the url', async () => {
 			const signOutSpy = vi.spyOn(authStore, 'signOut');
 
@@ -55,6 +71,18 @@ describe('auth.services', () => {
 
 			expect(signOutSpy).toHaveBeenCalled();
 			expect(sessionStorage.getItem('key')).toBeNull();
+		});
+
+		it('should clean the IDB storage', async () => {
+			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
+				fn({ identity: mockIdentity });
+				return () => {};
+			});
+
+			await signOut({});
+
+			// addresses + tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(6);
 		});
 	});
 });
