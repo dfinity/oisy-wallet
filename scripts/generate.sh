@@ -57,6 +57,8 @@ DFX_NETWORK=ic ./scripts/build.icp_swap_factory.sh
 DFX_NETWORK=ic ./scripts/build.xtc_ledger.sh
 # .. downloads candid for the cycles_ledger
 DFX_NETWORK=ic ./scripts/build.cycles_ledger.sh
+# .. downloads candid for the cycles_depositor
+DFX_NETWORK=ic ./scripts/build.cycles_depositor.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
