@@ -38,13 +38,16 @@
 	let filteredContacts = $derived(
 		contacts.filter(({ name: contactName, addresses }) => {
 			const name = contactName.toLowerCase();
-			const addressText = addresses
-				.map(({ address, label }) => `${address.toLowerCase()} ${label?.toLowerCase() ?? ''}`)
-				.join(' ');
+			const addressString = addresses.map(({ address }) => address).join(' ');
+			const addressLabels = addresses.map(({ label }) => label?.toLowerCase()).join(' ');
 
-			const searchableText = `${name} ${addressText}`;
-			const terms = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
-			return terms.every((term) => searchableText.includes(term));
+			const terms = searchTerm.split(/\s+/).filter(Boolean);
+			return terms.every(
+				(term) =>
+					name.includes(term.toLowerCase()) ||
+					addressString.includes(term) ||
+					addressLabels.includes(term.toLowerCase())
+			);
 		})
 	);
 </script>
