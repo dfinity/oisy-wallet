@@ -37,6 +37,7 @@
 			<KnownDestinationsComponent
 				{knownDestinations}
 				{networkContacts}
+				bind:selectedContact
 				bind:destination
 				on:icNext
 			/>
