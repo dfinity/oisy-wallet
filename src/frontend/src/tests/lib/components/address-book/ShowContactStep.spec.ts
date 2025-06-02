@@ -1,17 +1,20 @@
 import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 import {
+	ADDRESS_LIST_ITEM_BUTTON,
 	ADDRESS_LIST_ITEM_INFO_BUTTON,
 	CONTACT_HEADER_EDIT_BUTTON,
 	CONTACT_SHOW_ADD_ADDRESS_BUTTON,
 	CONTACT_SHOW_CLOSE_BUTTON
 } from '$lib/constants/test-ids.constants';
 import type { ContactUi } from '$lib/types/contact';
+import * as clipboardUtils from '$lib/utils/clipboard.utils';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
+import { vi } from 'vitest';
 
 describe('ShowContactStep', () => {
 	const mockContact: ContactUi = {
@@ -196,5 +199,27 @@ describe('ShowContactStep', () => {
 
 		expect(mockEdit).toHaveBeenCalledTimes(1);
 		expect(mockEdit).toHaveBeenCalledWith(mockContact);
+	});
+
+	it('should call copyToClipboard function when address button is clicked', async () => {
+		const spyCopy = vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(undefined);
+
+		const { getAllByTestId } = render(ShowContactStep, {
+			props: {
+				contact: mockContactWithAddresses,
+				onClose: mockClose,
+				onAddAddress: vi.fn(),
+				onShowAddress: vi.fn(),
+				onEdit: mockEdit
+			}
+		});
+
+		const addressListItems = getAllByTestId(ADDRESS_LIST_ITEM_BUTTON);
+
+		expect(addressListItems).toHaveLength(2);
+
+		await fireEvent.click(addressListItems[0]);
+
+		expect(spyCopy).toHaveBeenCalled();
 	});
 });
