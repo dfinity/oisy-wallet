@@ -36,6 +36,15 @@ describe('AddressBookModal', () => {
 
 		// Load contacts (this will set an empty array in the store)
 		await loadContacts(mockIdentity);
+
+		Object.defineProperty(window, 'navigator', {
+			writable: true,
+			value: {
+				userAgentData: {
+					mobile: true
+				}
+			}
+		});
 	});
 
 	afterEach(() => {

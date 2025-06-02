@@ -469,7 +469,8 @@
 			"recently_used_empty_state_title": "Recently used addresses will appear here",
 			"recently_used_empty_state_description": "Make your first send now!",
 			"contacts_empty_state_title": "Your contacts will appear here",
-			"contacts_empty_state_description": "It looks like you haven’t added contacts yet"
+			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
+			"send_review_subtitle": "You send"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
@@ -884,9 +885,13 @@
 			"from": "From",
 			"from_copied": "From address copied to clipboard.",
 			"received_from": "Received from $name",
+			"from_ata": "Sender token account (ATA)",
+			"from_ata_copied": "Sender token account (ATA) copied to clipboard.",
 			"to": "To",
 			"to_copied": "To address copied to clipboard.",
 			"sent_to": "Sent to $name",
+			"to_ata": "Recipient token account (ATA)",
+			"to_ata_copied": "Recipient token account (ATA) copied to clipboard.",
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
 			"status": "Status",
@@ -1045,7 +1050,6 @@
 			"add_new_contact": "Add new contact",
 			"add_contact": "Add contact",
 			"search_contact": "Search contact",
-			"loading_contacts": "Loading contacts...",
 			"no_address_found": "No address available.",
 			"no_contact_found": "No contacts found"
 		},
