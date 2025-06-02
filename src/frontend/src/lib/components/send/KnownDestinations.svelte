@@ -5,13 +5,15 @@
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { KnownDestinations } from '$lib/types/transactions';
 
 	interface Props {
-		knownDestinations?: KnownDestinations;
 		destination: string;
+		knownDestinations?: KnownDestinations;
+		networkContacts?: NetworkContacts;
 	}
-	let { knownDestinations, destination = $bindable() }: Props = $props();
+	let { knownDestinations, destination = $bindable(), networkContacts }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -37,6 +39,7 @@
 					<li>
 						<KnownDestination
 							destination={address}
+							contact={networkContacts?.[address]}
 							{...rest}
 							onClick={() => {
 								destination = address;
