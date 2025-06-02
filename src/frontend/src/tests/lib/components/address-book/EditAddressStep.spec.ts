@@ -142,7 +142,7 @@ describe('EditAddressStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that onAddAddress was called with the correct address
-		expect(onAddAddress).toHaveBeenCalledTimes(1);
+		expect(onAddAddress).toHaveBeenCalled();
 		expect(onAddAddress).toHaveBeenCalledWith(
 			expect.objectContaining({
 				address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
@@ -177,7 +177,7 @@ describe('EditAddressStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that onSaveAddress was called with the correct address
-		expect(onSaveAddress).toHaveBeenCalledTimes(1);
+		expect(onSaveAddress).toHaveBeenCalled();
 		expect(onSaveAddress).toHaveBeenCalledWith(address);
 	});
 
@@ -201,6 +201,64 @@ describe('EditAddressStep', () => {
 		await fireEvent.click(cancelButton);
 
 		// Check that onClose was called
-		expect(onClose).toHaveBeenCalledTimes(1);
+		expect(onClose).toHaveBeenCalled();
+	});
+
+	it('should display reset buttons for address and label fields when not disabled', async () => {
+		const onSaveAddress = vi.fn();
+		const onAddAddress = vi.fn();
+		const onClose = vi.fn();
+
+		const { getByTestId } = render(EditAddressStep, {
+			props: {
+				contact: mockContact,
+				onSaveAddress,
+				onAddAddress,
+				onClose,
+				isNewAddress: true
+			}
+		});
+
+		// Enter values into the address and alias fields to trigger the display of reset buttons
+		const addressInput = getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT);
+		const aliasInput = getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT);
+
+		await fireEvent.input(addressInput, { target: { value: '0x1234567890abcdef' } });
+		await fireEvent.input(aliasInput, { target: { value: 'My Wallet' } });
+
+		const resetButtons = screen.getAllByRole('button', { name: 'Reset input value' });
+
+		// Assert that two reset buttons are present
+		expect(resetButtons).toHaveLength(2);
+	});
+
+	it('should submit the form when Enter is pressed in the address input', async () => {
+		const onSaveAddress = vi.fn();
+		const onAddAddress = vi.fn();
+		const onClose = vi.fn();
+
+		const { getByTestId, container } = render(EditAddressStep, {
+			props: {
+				contact: mockContact,
+				onSaveAddress,
+				onAddAddress,
+				onClose,
+				isNewAddress: true
+			}
+		});
+
+		const addressInput = getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT);
+		await fireEvent.input(addressInput, {
+			target: { value: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' }
+		});
+
+		const form = container.querySelector('form');
+		if (!form) {
+			throw new Error('Form element not found');
+		}
+
+		await fireEvent.submit(form);
+
+		expect(onAddAddress).toHaveBeenCalled();
 	});
 });

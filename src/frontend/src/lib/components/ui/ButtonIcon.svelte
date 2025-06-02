@@ -33,6 +33,7 @@
 </script>
 
 <button
+	type="button"
 	class={`${colorStyle} icon flex h-10 flex-col text-center text-xs font-normal ${styleClass} ${width}`}
 	class:link
 	bind:this={button}
