@@ -442,6 +442,7 @@ interface I18nSend {
 		recently_used_empty_state_description: string;
 		contacts_empty_state_title: string;
 		contacts_empty_state_description: string;
+		send_review_subtitle: string;
 	};
 	placeholder: {
 		enter_eth_address: string;

@@ -88,7 +88,7 @@
 		"idb-keyval": "^6.2.2",
 		"plausible-tracker": "^0.3.9",
 		"svelte-confetti": "^2.3.1",
-		"zod": "^3.25.30"
+		"zod": "^3.25.47"
 	},
 	"devDependencies": {
 		"@dfinity/eslint-config-oisy-wallet": "^0.1.13",
@@ -112,7 +112,7 @@
 		"jsdom": "^26.1.0",
 		"jsqr": "^1.4.0",
 		"pem-file": "^1.0.1",
-		"postcss": "^8.5.3",
+		"postcss": "^8.5.4",
 		"prettier": "^3.5.3",
 		"prettier-plugin-motoko": "^0.11.0",
 		"prettier-plugin-organize-imports": "^4.1.0",
@@ -121,7 +121,7 @@
 		"sass": "^1.89.0",
 		"svelte": "^5.28.2",
 		"svelte-check": "^4.2.1",
-		"tailwindcss": "4.1.7",
+		"tailwindcss": "4.1.8",
 		"tslib": "^2.8.1",
 		"typescript": "^5.4.5",
 		"vite": "^6.3.5",

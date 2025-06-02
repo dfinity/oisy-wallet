@@ -21,6 +21,7 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
 import { listUserTokens } from '$lib/api/backend.api';
+import { setIdbEthTokens } from '$lib/api/idb-tokens.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -106,6 +107,11 @@ const loadUserTokens = async (params: {
 			...params,
 			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 		});
+
+		// Caching the custom tokens in the IDB if update call
+		if (params.certified && contracts.length > 0) {
+			await setIdbEthTokens({ identity: params.identity, tokens: contracts });
+		}
 
 		return contracts
 			.filter(({ chain_id }) =>
