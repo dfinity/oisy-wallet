@@ -6,9 +6,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { trackEvent } from '$lib/services/analytics.services';
 
-	export let asMenuItem = false;
-	export let asMenuItemCondensed = false;
+	interface Props {
+		asMenuItem?: boolean;
+		asMenuItemCondensed?: boolean;
+	}
+
+	let { asMenuItem = false, asMenuItemCondensed = false }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -17,6 +22,12 @@
 	const openModal = () => {
 		dispatch('icOpenAboutModal');
 		modalStore.openAboutWhyOisy(modalId);
+		trackEvent({
+			name: 'about_why_oisy',
+			metadata: {
+				source: 'landing_page'
+			}
+		});
 	};
 </script>
 
