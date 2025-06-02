@@ -11,6 +11,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import SkeletonAddressCard from '$lib/components/address/SkeletonAddressCard.svelte';
 
 	interface Props {
 		type: 'send' | 'receive';
@@ -81,4 +82,6 @@
 			/>
 		{/snippet}
 	</AddressCard>
+{:else}
+	<SkeletonAddressCard />
 {/if}
