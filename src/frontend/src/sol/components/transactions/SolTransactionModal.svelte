@@ -90,6 +90,18 @@
 			? replacePlaceholders(explorerUrl, { $args: `account/${from}/` })
 			: undefined
 	);
+
+	let toAtaExplorerUrl: string | undefined = $derived(
+		nonNullish(explorerUrl)
+			? replacePlaceholders(explorerUrl, { $args: `account/${toAddress}/` })
+			: undefined
+	);
+
+	let fromAtaExplorerUrl: string | undefined = $derived(
+		nonNullish(explorerUrl)
+			? replacePlaceholders(explorerUrl, { $args: `account/${fromAddress}/` })
+			: undefined
+	);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -142,7 +154,7 @@
 						<TransactionAddressActions
 							copyAddress={fromAddress}
 							copyAddressText={$i18n.transaction.text.from_ata_copied}
-							explorerUrl={fromExplorerUrl}
+							explorerUrl={fromAtaExplorerUrl}
 							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
 						/>
 					</output>
@@ -156,7 +168,7 @@
 						<TransactionAddressActions
 							copyAddress={toAddress}
 							copyAddressText={$i18n.transaction.text.to_ata_copied}
-							explorerUrl={toExplorerUrl}
+							explorerUrl={toAtaExplorerUrl}
 							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
 						/>
 					</output>
