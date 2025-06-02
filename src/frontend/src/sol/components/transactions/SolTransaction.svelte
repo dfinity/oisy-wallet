@@ -18,8 +18,10 @@
 	let status: Commitment | null;
 	let to: string | undefined;
 	let from: string | undefined;
+	let toOwner: string | undefined;
+	let fromOwner: string | undefined;
 
-	$: ({ type, value, timestamp, status, to, from } = transaction);
+	$: ({ type, value, timestamp, status, to, from, toOwner, fromOwner } = transaction);
 
 	let label: string;
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
@@ -44,8 +46,8 @@
 	status={transactionStatus}
 	{token}
 	{iconType}
-	{to}
-	{from}
+	to={toOwner ?? to}
+	from={fromOwner ?? from}
 >
 	{label}
 </Transaction>
