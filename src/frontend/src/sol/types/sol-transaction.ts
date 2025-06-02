@@ -23,6 +23,9 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	status: Commitment | null;
 	value?: bigint;
 	fee?: bigint;
+	// For Solana transactions, we want to show the owner instead of the ATA address, if it refers to a token
+	fromOwner?: SolAddress;
+	toOwner?: SolAddress;
 }
 
 export type SolRpcTransactionRaw = NonNullable<Awaited<ReturnType<typeof getRpcTransaction>>>;
