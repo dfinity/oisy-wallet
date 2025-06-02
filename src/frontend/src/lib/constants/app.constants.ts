@@ -167,3 +167,9 @@ export const MICRO_TRANSACTION_USD_THRESHOLD = 0.01;
 
 // Known destinations
 export const MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS = 3;
+
+// Send destination
+export const MIN_DESTINATION_LENGTH_FOR_ERROR_STATE = 10;
+
+// Contact validation
+export const CONTACT_MAX_LABEL_LENGTH = 50;

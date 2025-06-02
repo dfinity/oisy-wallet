@@ -11,9 +11,10 @@
 		onCancel: () => void;
 		onDelete: () => void;
 		contact: ContactUi;
+		disabled?: boolean;
 	}
 
-	let { onCancel, onDelete, contact }: Props = $props();
+	let { onCancel, onDelete, contact, disabled = false }: Props = $props();
 </script>
 
 <div class="fixed inset-0 z-50">
@@ -24,6 +25,7 @@
 					onclick={onCancel}
 					styleClass="text-disabled float-right"
 					ariaLabel={$i18n.core.alt.close_details}
+					{disabled}
 				>
 					{#snippet icon()}
 						<IconClose size="24" />
@@ -37,7 +39,7 @@
 				})}</h3
 			>
 
-			<DeleteContactConfirmContent {onCancel} {onDelete} {contact} />
+			<DeleteContactConfirmContent {onCancel} {onDelete} {contact} {disabled} />
 		</div>
 	</BottomSheet>
 
