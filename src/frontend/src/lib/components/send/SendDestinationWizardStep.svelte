@@ -1,12 +1,15 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher, getContext, onMount } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
+	import { btcNetworkContacts } from '$btc/derived/btc-contacts.derived';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
 	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
+	import { ethNetworkContacts } from '$eth/derived/eth-contacts.derived';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
+	import { icNetworkContacts } from '$icp/derived/ic-contacts.derived';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import SendDestinationTabs from '$lib/components/send/SendDestinationTabs.svelte';
@@ -15,13 +18,15 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import {
 		SEND_DESTINATION_WIZARD_STEP,
 		SEND_FORM_DESTINATION_NEXT_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import type { ContactUi } from '$lib/types/contact';
+	import type { SendDestinationTab } from '$lib/types/send';
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
@@ -30,13 +35,25 @@
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
+	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
 
 	interface Props {
 		destination: string;
+		activeSendDestinationTab: SendDestinationTab;
+		selectedContact?: ContactUi;
 		formCancelAction?: 'back' | 'close';
 	}
-	let { destination = $bindable(), formCancelAction = 'back' }: Props = $props();
+	let {
+		destination = $bindable(),
+		activeSendDestinationTab = $bindable(),
+		selectedContact = $bindable(),
+		formCancelAction = 'back'
+	}: Props = $props();
+
+	onMount(() => {
+		selectedContact = undefined;
+	});
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -48,7 +65,9 @@
 
 	let invalidDestination = $state(false);
 
-	let disabled = $derived(invalidDestination || isNullishOrEmpty(destination));
+	let disabled = $derived(
+		invalidDestination || destination.length <= MIN_DESTINATION_LENGTH_FOR_ERROR_STATE
+	);
 
 	let testId = $derived(`${SEND_DESTINATION_WIZARD_STEP}-${$sendToken.network.name}`);
 </script>
@@ -61,13 +80,17 @@
 					<EthSendDestination
 						token={$sendToken}
 						knownDestinations={$ethKnownDestinations}
+						networkContacts={$ethNetworkContacts}
 						bind:destination
 						bind:invalidDestination
 						on:icQRCodeScan
 					/>
 					<SendDestinationTabs
 						knownDestinations={$ethKnownDestinations}
+						networkContacts={$ethNetworkContacts}
 						bind:destination
+						bind:activeSendDestinationTab
+						bind:selectedContact
 						on:icNext={next}
 					/>
 				</LoaderMultipleEthTransactions>
@@ -78,13 +101,17 @@
 			<IcSendDestination
 				tokenStandard={$sendToken.standard}
 				knownDestinations={$icKnownDestinations}
+				networkContacts={$ethNetworkContacts}
 				bind:destination
 				bind:invalidDestination
 				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
+				networkContacts={$icNetworkContacts}
 				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>
@@ -95,11 +122,15 @@
 				bind:invalidDestination
 				on:icQRCodeScan
 				knownDestinations={$btcKnownDestinations}
+				networkContacts={$ethNetworkContacts}
 				networkId={$sendTokenNetworkId}
 			/>
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
+				networkContacts={$btcNetworkContacts}
 				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>
@@ -110,10 +141,14 @@
 				bind:invalidDestination
 				on:icQRCodeScan
 				knownDestinations={$solKnownDestinations}
+				networkContacts={$ethNetworkContacts}
 			/>
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
+				networkContacts={$solNetworkContacts}
 				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>

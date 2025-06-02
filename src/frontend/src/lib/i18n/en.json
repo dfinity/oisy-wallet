@@ -300,7 +300,7 @@
 	},
 	"hero": {
 		"text": {
-			"available_balance": "Available balance",
+			"available_balance": "Your balance",
 			"unavailable_balance": "$ value is not available",
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
@@ -469,12 +469,13 @@
 			"recently_used_empty_state_title": "Recently used addresses will appear here",
 			"recently_used_empty_state_description": "Make your first send now!",
 			"contacts_empty_state_title": "Your contacts will appear here",
-			"contacts_empty_state_description": "It looks like you haven’t added contacts yet"
+			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
+			"send_review_subtitle": "You send"
 		},
 		"placeholder": {
-			"enter_eth_address": "Enter public address (0x)",
-			"enter_recipient_address": "Enter recipient address",
-			"enter_wallet_address": "Enter wallet address",
+			"enter_eth_address": "Enter public address (0x), name or alias",
+			"enter_recipient_address": "Enter recipient address, name or alias",
+			"enter_wallet_address": "Enter wallet address, name or alias",
 			"select_network": "Select network"
 		},
 		"info": {
@@ -884,9 +885,13 @@
 			"from": "From",
 			"from_copied": "From address copied to clipboard.",
 			"received_from": "Received from $name",
+			"from_ata": "Sender token account (ATA)",
+			"from_ata_copied": "Sender token account (ATA) copied to clipboard.",
 			"to": "To",
 			"to_copied": "To address copied to clipboard.",
 			"sent_to": "Sent to $name",
+			"to_ata": "Recipient token account (ATA)",
+			"to_ata_copied": "Recipient token account (ATA) copied to clipboard.",
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
 			"status": "Status",
@@ -1045,7 +1050,6 @@
 			"add_new_contact": "Add new contact",
 			"add_contact": "Add contact",
 			"search_contact": "Search contact",
-			"loading_contacts": "Loading contacts...",
 			"no_address_found": "No address available.",
 			"no_contact_found": "No contacts found"
 		},
@@ -1057,6 +1061,10 @@
 			"title": "Edit contact",
 			"add_address": "Add address",
 			"delete_contact": "Delete contact"
+		},
+		"avatar": {
+			"default": "Default avatar",
+			"avatar_for": "Avatar for"
 		},
 		"show_contact": {
 			"title": "Contact",
@@ -1096,7 +1104,10 @@
 			"address_placeholder": "Enter or paste address",
 			"label_placeholder": "E.g., “Mom’s wallet“",
 			"invalid_address": "Invalid address",
-			"valid_for_networks": "Valid for networks:"
+			"valid_for_networks": "Valid for networks:",
+			"error": {
+				"label_too_long": "Label may not exceed $maxCharacters characters"
+			}
 		},
 		"fields": {
 			"label": "Alias",

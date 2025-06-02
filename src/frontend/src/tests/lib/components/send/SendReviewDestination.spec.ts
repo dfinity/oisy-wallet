@@ -1,28 +1,26 @@
-import SendContact from '$lib/components/send/SendContact.svelte';
+import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 import type { ContactUi } from '$lib/types/contact';
-import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { getMockContactsUi, mockContactBtcAddressUi } from '$tests/mocks/contacts.mock';
 import { render } from '@testing-library/svelte';
 
-describe('SendContact', () => {
+describe('SendReviewDestination', () => {
 	const [contact] = getMockContactsUi({
 		n: 1,
 		name: 'Multiple Addresses Contact',
 		addresses: [mockContactBtcAddressUi]
 	}) as unknown as ContactUi[];
 	const props = {
-		contact,
-		onClick: () => {},
-		address: mockContactBtcAddressUi.address
+		selectedContact: contact,
+		destination: mockContactBtcAddressUi.address
 	};
 
 	it('renders expected data', () => {
-		const { getByText, container } = render(SendContact, {
+		const { getByText, container } = render(SendReviewDestination, {
 			props
 		});
 
 		expect(container).toHaveTextContent(contact.name);
 		expect(container).toHaveTextContent(mockContactBtcAddressUi.label as string);
-		expect(getByText(shortenWithMiddleEllipsis({ text: props.address }))).toBeInTheDocument();
+		expect(getByText(props.destination)).toBeInTheDocument();
 	});
 });
