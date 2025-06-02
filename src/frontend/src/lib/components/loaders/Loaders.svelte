@@ -17,29 +17,29 @@
 
 <LoaderUserProfile>
 	<PowProtector>
-	<AddressGuard>
-		<Loader>
-			<UrlGuard>
-				<ShortcutGuard>
-					<RewardGuard>
-						<LoaderEthBalances>
-							<LoaderWallets>
-								<ExchangeWorker>
-									<LoaderMetamask>
-										<UserSnapshotWorker>
-											<LoaderContacts>
-												<slot />
-											</LoaderContacts>
-										</UserSnapshotWorker>
-									</LoaderMetamask>
-								</ExchangeWorker>
-							</LoaderWallets>
-						</LoaderEthBalances>
-					</RewardGuard>
-				</ShortcutGuard>
-			</UrlGuard>
-		</Loader>
-	</AddressGuard>
+		<AddressGuard>
+			<Loader>
+				<UrlGuard>
+					<ShortcutGuard>
+						<RewardGuard>
+							<LoaderEthBalances>
+								<LoaderWallets>
+									<ExchangeWorker>
+										<LoaderMetamask>
+											<UserSnapshotWorker>
+												<LoaderContacts>
+													<slot />
+												</LoaderContacts>
+											</UserSnapshotWorker>
+										</LoaderMetamask>
+									</ExchangeWorker>
+								</LoaderWallets>
+							</LoaderEthBalances>
+						</RewardGuard>
+					</ShortcutGuard>
+				</UrlGuard>
+			</Loader>
+		</AddressGuard>
 	</PowProtector>
 </LoaderUserProfile>
 
