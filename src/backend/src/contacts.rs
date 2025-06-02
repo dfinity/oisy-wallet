@@ -186,29 +186,33 @@ fn get_stored_contacts_safely(stored_principal: &StoredPrincipal) -> StoredConta
 
 /// Deletes a specific contact by ID for the current user.
 ///
+/// This function is idempotent - it ensures the contact with the given ID is absent,
+/// regardless of whether it existed before or not.
+///
 /// # Arguments
 /// * `contact_id` - The unique identifier of the contact to delete
 ///
 /// # Returns
-/// * `Ok(u64)` - The ID of the deleted contact if found and deleted
-/// * `Err(ContactError::ContactNotFound)` - If the contact does not exist or the contacts store has
-///   not been initialized
+/// * `Ok(u64)` - The ID of the contact that is now absent (either deleted or was already absent)
 pub fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     let current_time = time();
 
     mutate_state(|s| {
         // Get the user's contacts directly from the state
-        let mut stored_contacts = if let Some(stored_contacts) = s.contact.get(&stored_principal) {
-            stored_contacts.clone()
-        } else {
-            // If the user has no contacts, return ContactNotFound
-            return Err(ContactError::ContactNotFound);
-        };
-
-        // Check if the contact exists
+        let stored_contacts_opt = s.contact.get(&stored_principal);
+        
+        // If the user has no contacts at all, the desired state is already achieved
+        // (the contact with the given ID is already absent)
+        if stored_contacts_opt.is_none() {
+            return Ok(contact_id);
+        }
+        
+        let mut stored_contacts = stored_contacts_opt.unwrap().clone();
+        
+        // If the contact doesn't exist, the desired state is already achieved
         if !stored_contacts.contacts.contains_key(&contact_id) {
-            return Err(ContactError::ContactNotFound);
+            return Ok(contact_id);
         }
 
         // Remove the contact using the BTreeMap's remove method

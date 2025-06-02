@@ -768,7 +768,7 @@ fn test_delete_contact_should_succeed_with_valid_id() {
 }
 
 #[test]
-fn test_delete_contact_should_fail_with_nonexistent_id() {
+fn test_delete_contact_succeeds_with_nonexistent_id() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -776,9 +776,17 @@ fn test_delete_contact_should_fail_with_nonexistent_id() {
     let nonexistent_id = 999999;
     let result = call_delete_contact(&pic_setup, caller, nonexistent_id);
 
-    // Verify the operation fails with ContactNotFound
-    assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
+    // Verify the operation succeeds (idempotent behavior)
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap(), nonexistent_id);
+    
+    // Create a contact after attempting to delete a non-existent one
+    let contact = call_create_contact(&pic_setup, caller, "New Contact".to_string()).unwrap();
+    
+    // Verify the contact was created successfully
+    let contacts = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts.len(), 1);
+    assert_eq!(contacts[0].name, "New Contact");
 }
 
 #[test]
@@ -860,7 +868,29 @@ fn test_delete_all_contacts() {
 }
 
 #[test]
-fn test_delete_contact_returns_error_for_already_deleted_contact() {
+fn test_delete_contact_succeeds_for_user_with_no_contacts() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+    
+    // Verify user has no contacts initially
+    let contacts_before = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_before.len(), 0);
+    
+    // Try to delete a contact when user has no contacts
+    let nonexistent_id = 123456;
+    let result = call_delete_contact(&pic_setup, caller, nonexistent_id);
+    
+    // Verify the operation succeeds (idempotent behavior)
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap(), nonexistent_id);
+    
+    // Verify user still has no contacts
+    let contacts_after = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after.len(), 0);
+}
+
+#[test]
+fn test_delete_contact_is_idempotent() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -884,12 +914,9 @@ fn test_delete_contact_returns_error_for_already_deleted_contact() {
     // Delete the same contact again
     let second_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
 
-    // Verify the second delete fails with ContactNotFound
-    assert!(second_delete_result.is_err());
-    assert_eq!(
-        second_delete_result.unwrap_err(),
-        ContactError::ContactNotFound
-    );
+    // Verify the second delete succeeds (idempotent behavior)
+    assert!(second_delete_result.is_ok());
+    assert_eq!(second_delete_result.unwrap(), contact.id);
 
     // Verify contacts are still empty
     let contacts_after_second_delete = call_get_contacts(&pic_setup, caller);
