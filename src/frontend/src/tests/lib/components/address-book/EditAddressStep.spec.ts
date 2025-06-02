@@ -261,4 +261,52 @@ describe('EditAddressStep', () => {
 
 		expect(onAddAddress).toHaveBeenCalled();
 	});
+
+	it('should autofocus address input when adding a new address on desktop', async () => {
+		const onSaveAddress = vi.fn();
+		const onAddAddress = vi.fn();
+		const onClose = vi.fn();
+
+		vi.mock('$lib/utils/device.utils', () => ({
+			isDesktop: () => true
+		}));
+
+		const { getByTestId } = render(EditAddressStep, {
+			props: {
+				contact: mockContact,
+				onSaveAddress,
+				onAddAddress,
+				onClose,
+				isNewAddress: true
+			}
+		});
+
+		const addressInput = getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT);
+
+		expect(document.activeElement).toBe(addressInput);
+	});
+
+	it('should autofocus label input when editing an address on desktop', async () => {
+		const onSaveAddress = vi.fn();
+		const onAddAddress = vi.fn();
+		const onClose = vi.fn();
+
+		vi.mock('$lib/utils/device.utils', () => ({
+			isDesktop: () => true
+		}));
+
+		const { getByTestId } = render(EditAddressStep, {
+			props: {
+				contact: mockContact,
+				onSaveAddress,
+				onAddAddress,
+				onClose,
+				isNewAddress: false
+			}
+		});
+
+		const labelInput = getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT);
+
+		expect(document.activeElement).toBe(labelInput);
+	});
 });

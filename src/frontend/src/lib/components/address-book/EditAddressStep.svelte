@@ -76,6 +76,7 @@
 	);
 
 	let isInvalid = $state(false);
+	const focusField = isNewAddress ? 'address' : 'label';
 </script>
 
 <form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
@@ -96,6 +97,7 @@
 				address={addressModel}
 				bind:isInvalid
 				{disabled}
+				{focusField}
 			/>
 		</div>
 		<ButtonGroup slot="toolbar">
