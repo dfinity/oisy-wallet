@@ -18,6 +18,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import {
 		SEND_DESTINATION_WIZARD_STEP,
 		SEND_FORM_DESTINATION_NEXT_BUTTON
@@ -36,7 +37,6 @@
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
-	import {MIN_DESTINATION_LENGTH_FOR_ERROR_STATE} from "$lib/constants/app.constants";
 
 	interface Props {
 		destination: string;
@@ -61,7 +61,9 @@
 
 	let invalidDestination = $state(false);
 
-	let disabled = $derived(invalidDestination || destination.length <= MIN_DESTINATION_LENGTH_FOR_ERROR_STATE);
+	let disabled = $derived(
+		invalidDestination || destination.length <= MIN_DESTINATION_LENGTH_FOR_ERROR_STATE
+	);
 
 	let testId = $derived(`${SEND_DESTINATION_WIZARD_STEP}-${$sendToken.network.name}`);
 </script>

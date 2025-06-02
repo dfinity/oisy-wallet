@@ -74,12 +74,7 @@
 	</div>
 </div>
 
-{#if !invalidDestination &&
-		destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE &&
-		nonNullish(knownDestinations) &&
-		isNullish(knownDestinations[destination]) &&
-		nonNullish(networkContacts) &&
-		isNullish(networkContacts[destination])}
+{#if !invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && nonNullish(knownDestinations) && isNullish(knownDestinations[destination]) && nonNullish(networkContacts) && isNullish(networkContacts[destination])}
 	<div transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning" styleClass="mt-4">
 			{$i18n.send.info.unknown_destination}
