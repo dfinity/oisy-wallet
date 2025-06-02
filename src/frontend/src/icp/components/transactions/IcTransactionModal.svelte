@@ -14,11 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import {
-		formatNanosecondsToDate,
-		formatToken,
-		shortenWithMiddleEllipsis
-	} from '$lib/utils/format.utils';
+	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		transaction: IcTransactionUi;
@@ -72,35 +68,6 @@
 		{/if}
 
 		<List styleClass="mt-5">
-			{#if type === 'receive' && nonNullish(to)}
-				<ListItem>
-					<span>{$i18n.transaction.text.to}</span>
-					<output class="flex max-w-[50%] flex-row">
-						<output>{shortenWithMiddleEllipsis({ text: to })}</output>
-						<TransactionAddressActions
-							copyAddress={to}
-							copyAddressText={$i18n.transaction.text.to_copied}
-							explorerUrl={toExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
-						/>
-					</output>
-				</ListItem>
-			{/if}
-			{#if type === 'send' && nonNullish(from)}
-				<ListItem>
-					<span>{$i18n.transaction.text.from}</span>
-					<output class="flex max-w-[50%] flex-row">
-						<output>{shortenWithMiddleEllipsis({ text: from })}</output>
-						<TransactionAddressActions
-							copyAddress={from}
-							copyAddressText={$i18n.transaction.text.from_copied}
-							explorerUrl={fromExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
-						/>
-					</output>
-				</ListItem>
-			{/if}
-
 			{#if nonNullish(timestamp)}
 				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>

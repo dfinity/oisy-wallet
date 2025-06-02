@@ -70,7 +70,7 @@
 		"alt": {
 			"tokens": "Go to the assets view",
 			"settings": "Open your settings",
-			"dapp_explorer": "Open dapp explorer",
+			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",
 			"airdrops": "Open the Rewards view",
 			"more_settings": "More settings",
@@ -155,24 +155,24 @@
 	},
 	"dapps": {
 		"text": {
-			"all_dapps": "All dapps",
+			"all_dapps": "All apps",
 			"featured": "Featured",
 			"sign_in": "Sign-in to explore the ecosystem.",
 			"title": "Explore Apps",
 			"open_dapp": "Open $dAppName",
-			"submit_your_dapp": "Submit your dapp"
+			"submit_your_dapp": "Submit your app"
 		},
 		"alt": {
 			"learn_more": "Learn more about $dAppName",
 			"logo": "Logo of $dAppName",
-			"show_all": "Show all decentralised applications",
-			"show_tag": "Show decentralised applications with the tag $tag",
+			"show_all": "Show all applications",
+			"show_tag": "Show applications with the tag $tag",
 			"open_dapp": "Open the app $dAppName",
 			"open_telegram": "Open $dAppName on Telegram",
 			"open_open_chat": "Open $dAppName on OpenChat",
 			"open_twitter": "Open the $dAppName X/Twitter feed",
 			"source_code_on_github": "View source code of $dAppName on github",
-			"submit_your_dapp": "Submit your dapp to be shown in the dapp-explorer",
+			"submit_your_dapp": "Submit your app to be shown in the app-explorer",
 			"tags": "Tags related to $dAppName",
 			"website": "Image of $dAppName"
 		}
@@ -300,7 +300,7 @@
 	},
 	"hero": {
 		"text": {
-			"available_balance": "Available balance",
+			"available_balance": "Your balance",
 			"unavailable_balance": "$ value is not available",
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
@@ -472,9 +472,9 @@
 			"contacts_empty_state_description": "It looks like you haven’t added contacts yet"
 		},
 		"placeholder": {
-			"enter_eth_address": "Enter public address (0x)",
-			"enter_recipient_address": "Enter recipient address",
-			"enter_wallet_address": "Enter wallet address",
+			"enter_eth_address": "Enter public address (0x), name or alias",
+			"enter_recipient_address": "Enter recipient address, name or alias",
+			"enter_wallet_address": "Enter wallet address, name or alias",
 			"select_network": "Select network"
 		},
 		"info": {
@@ -883,8 +883,14 @@
 			"type": "Type",
 			"from": "From",
 			"from_copied": "From address copied to clipboard.",
+			"received_from": "Received from $name",
+			"from_ata": "Sender token account (ATA)",
+			"from_ata_copied": "Sender token account (ATA) copied to clipboard.",
 			"to": "To",
 			"to_copied": "To address copied to clipboard.",
+			"sent_to": "Sent to $name",
+			"to_ata": "Recipient token account (ATA)",
+			"to_ata_copied": "Recipient token account (ATA) copied to clipboard.",
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
 			"status": "Status",
@@ -933,8 +939,8 @@
 			"open_transactions": "Open the list of $token transactions",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
-			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
-			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
+			"missing_index_canister_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer hasn’t provided the tracking feature yet. It should be added soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",
+			"index_canister_not_working_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer's tracking feature is currently not responding. It should be resolved soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",
 			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history."
 		},
 		"error": {
@@ -1043,7 +1049,6 @@
 			"add_new_contact": "Add new contact",
 			"add_contact": "Add contact",
 			"search_contact": "Search contact",
-			"loading_contacts": "Loading contacts...",
 			"no_address_found": "No address available.",
 			"no_contact_found": "No contacts found"
 		},
@@ -1055,6 +1060,10 @@
 			"title": "Edit contact",
 			"add_address": "Add address",
 			"delete_contact": "Delete contact"
+		},
+		"avatar": {
+			"default": "Default avatar",
+			"avatar_for": "Avatar for"
 		},
 		"show_contact": {
 			"title": "Contact",
@@ -1094,7 +1103,10 @@
 			"address_placeholder": "Enter or paste address",
 			"label_placeholder": "E.g., “Mom’s wallet“",
 			"invalid_address": "Invalid address",
-			"valid_for_networks": "Valid for networks:"
+			"valid_for_networks": "Valid for networks:",
+			"error": {
+				"label_too_long": "Label may not exceed $maxCharacters characters"
+			}
 		},
 		"fields": {
 			"label": "Alias",
