@@ -268,7 +268,7 @@
 	{steps}
 	bind:currentStep
 	bind:this={modal}
-	disablePointerEvents={true}
+	disablePointerEvents={loading}
 	testId={ADDRESS_BOOK_MODAL}
 	on:nnsClose={close}
 >
@@ -462,10 +462,6 @@
 			onCreateContact={() => {
 				currentContact = undefined;
 				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
-			}}
-			onInfo={(contact) => {
-				currentContact = contact;
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
 			}}
 			onSelectContact={(contact: ContactUi) => {
 				currentContact = contact;
