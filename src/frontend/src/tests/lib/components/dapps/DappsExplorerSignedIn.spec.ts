@@ -5,7 +5,6 @@ import * as analytics from '$lib/services/analytics.services';
 import { mockDappsDescriptions } from '$tests/mocks/dapps.mock';
 import { nonNullish } from '@dfinity/utils';
 import { fireEvent, render, screen } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('DappsExplorerSignedIn', () => {
 	it('calls trackEvent when a DappCard is clicked', async () => {
