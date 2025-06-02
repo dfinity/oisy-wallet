@@ -2,7 +2,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import KnownDestination from '$lib/components/send/KnownDestination.svelte';
 import { MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS } from '$lib/constants/app.constants';
 import type { ContactUi } from '$lib/types/contact';
-import { formatToken } from '$lib/utils/format.utils';
+import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContactsUi, mockContactBtcAddressUi } from '$tests/mocks/contacts.mock';
@@ -72,7 +72,7 @@ describe('KnownDestination', () => {
 			props
 		});
 
-		expect(getByText(props.destination)).toBeInTheDocument();
+		expect(getByText(shortenWithMiddleEllipsis({ text: props.destination }))).toBeInTheDocument();
 	});
 
 	it('renders contact data if contact is provided', () => {
