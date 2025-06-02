@@ -16,6 +16,7 @@
 	import { contactsNotInitialized } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { isDesktop } from '$lib/utils/device.utils';
 
 	interface Props {
 		contacts: ContactUi[];
@@ -59,7 +60,7 @@
 				bind:filter={searchTerm}
 				showResetButton={notEmptyString(searchTerm)}
 				placeholder={$i18n.address_book.text.search_contact}
-				autofocus={true}
+				autofocus={isDesktop()}
 				testId={ADDRESS_BOOK_SEARCH_CONTACT_INPUT}
 			/>
 			<Button
