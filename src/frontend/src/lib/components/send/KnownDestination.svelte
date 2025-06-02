@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
@@ -18,9 +17,10 @@
 	interface Props {
 		destination: Address;
 		amounts: KnownDestination['amounts'];
+		onClick: () => void;
 		timestamp?: number;
 	}
-	let { destination, amounts, timestamp }: Props = $props();
+	let { destination, amounts, timestamp, onClick }: Props = $props();
 
 	// we only display the first 3 amounts, and the rest is displayed as "+N more"
 	let amountsToDisplay = $derived(amounts.slice(0, MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS));
@@ -28,11 +28,9 @@
 	let restAmountsNumber = $derived(amounts.length - amountsToDisplay.length);
 
 	let currentDate = $state(new Date());
-
-	const dispatch = createEventDispatcher();
 </script>
 
-<LogoButton styleClass="group" onClick={() => dispatch('click')}>
+<LogoButton styleClass="group" {onClick}>
 	{#snippet logo()}
 		<div class="mr-2"><AvatarWithBadge address={destination} variant="sm" /></div>
 	{/snippet}
