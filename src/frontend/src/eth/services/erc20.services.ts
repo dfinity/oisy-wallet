@@ -21,13 +21,20 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
 import { listUserTokens } from '$lib/api/backend.api';
-import { setIdbEthTokens } from '$lib/api/idb-tokens.api';
+import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
+import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { UserTokenState } from '$lib/types/token-toggleable';
 import type { ResultSuccess } from '$lib/types/utils';
-import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	fromNullable,
+	isNullish,
+	nonNullish,
+	queryAndUpdate
+} from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadErc20Tokens = async ({
@@ -35,7 +42,7 @@ export const loadErc20Tokens = async ({
 }: {
 	identity: OptionIdentity;
 }): Promise<void> => {
-	await Promise.all([loadDefaultErc20Tokens(), loadErc20UserTokens({ identity })]);
+	await Promise.all([loadDefaultErc20Tokens(), loadErc20UserTokens({ identity, useCache: true })]);
 };
 
 const ALL_DEFAULT_ERC20_TOKENS = [
@@ -77,9 +84,15 @@ const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 	return { success: true };
 };
 
-export const loadErc20UserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+export const loadErc20UserTokens = ({
+	identity,
+	useCache = false
+}: {
+	identity: OptionIdentity;
+	useCache?: boolean;
+}): Promise<void> =>
 	queryAndUpdate<Erc20UserToken[]>({
-		request: (params) => loadUserTokens(params),
+		request: (params) => loadUserTokens({ ...params, useCache }),
 		onLoad: loadUserTokenData,
 		onUpdateError: ({ error: err }) => {
 			erc20UserTokensStore.resetAll();
@@ -92,9 +105,59 @@ export const loadErc20UserTokens = ({ identity }: { identity: OptionIdentity }):
 		identity
 	});
 
+const loadUserTokensFromBackend = async ({
+	identity,
+	certified
+}: {
+	identity: OptionIdentity;
+	certified: boolean;
+}): Promise<UserToken[]> => {
+	const contracts = await listUserTokens({
+		identity,
+		certified,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+	// Caching the custom tokens in the IDB if update call
+	if (certified && contracts.length > 0) {
+		await setIdbEthTokens({ identity, tokens: contracts });
+	}
+
+	return contracts;
+};
+
+const loadNetworkUserTokens = async ({
+	identity,
+	certified,
+	useCache = false
+}: {
+	identity: OptionIdentity;
+	certified: boolean;
+	useCache?: boolean;
+}): Promise<UserToken[]> => {
+	if (isNullish(identity)) {
+		await nullishSignOut();
+		return [];
+	}
+
+	if (useCache && !certified) {
+		const cachedTokens = await getIdbEthTokens(identity.getPrincipal());
+
+		if (nonNullish(cachedTokens)) {
+			return cachedTokens;
+		}
+	}
+
+	return await loadUserTokensFromBackend({
+		identity,
+		certified
+	});
+};
+
 const loadUserTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
+	useCache?: boolean;
 }): Promise<Erc20UserToken[]> => {
 	type ContractData = Erc20Contract &
 		Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
@@ -103,15 +166,7 @@ const loadUserTokens = async (params: {
 	type ContractDataWithCustomToken = ContractData & UserTokenState;
 
 	const loadUserContracts = async (): Promise<Promise<ContractDataWithCustomToken>[]> => {
-		const contracts = await listUserTokens({
-			...params,
-			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-		});
-
-		// Caching the custom tokens in the IDB if update call
-		if (params.certified && contracts.length > 0) {
-			await setIdbEthTokens({ identity: params.identity, tokens: contracts });
-		}
+		const contracts = await loadNetworkUserTokens(params);
 
 		return contracts
 			.filter(({ chain_id }) =>

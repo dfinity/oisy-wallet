@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { isNullish, notEmptyString } from '@dfinity/utils';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
 	import AddressItemActions, {
 		type Props as AddressItemActionsProps
 	} from '$lib/components/contact/AddressItemActions.svelte';
+	import { ADDRESS_LIST_ITEM_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -33,8 +34,9 @@
 
 <button
 	onclick={() => onClick?.()}
-	disabled={nonNullish(onClick)}
+	disabled={isNullish(onClick)}
 	class={`flex w-full items-center gap-3 rounded-xl bg-primary p-2 text-left hover:bg-brand-subtle-10 ${styleClass}`}
+	data-tid={ADDRESS_LIST_ITEM_BUTTON}
 >
 	<IconAddressType addressType={address.addressType} size="32" />
 
