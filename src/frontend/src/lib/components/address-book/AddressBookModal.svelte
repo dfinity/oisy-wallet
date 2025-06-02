@@ -25,7 +25,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { contactsNotInitialized, sortedContacts } from '$lib/derived/contacts.derived';
+	import { sortedContacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import {
 		createContact,
@@ -293,9 +293,7 @@
 		{/if}
 	</svelte:fragment>
 
-	{#if $contactsNotInitialized}
-		{$i18n.address_book.text.loading_contacts}
-	{:else if currentStepName === AddressBookSteps.ADDRESS_BOOK}
+	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
 			{contacts}
 			onShowContact={(contact) => {
