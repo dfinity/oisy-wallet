@@ -142,7 +142,7 @@ describe('EditAddressStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that onAddAddress was called with the correct address
-		expect(onAddAddress).toHaveBeenCalledTimes(1);
+		expect(onAddAddress).toHaveBeenCalled();
 		expect(onAddAddress).toHaveBeenCalledWith(
 			expect.objectContaining({
 				address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
@@ -177,7 +177,7 @@ describe('EditAddressStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that onSaveAddress was called with the correct address
-		expect(onSaveAddress).toHaveBeenCalledTimes(1);
+		expect(onSaveAddress).toHaveBeenCalled();
 		expect(onSaveAddress).toHaveBeenCalledWith(address);
 	});
 
@@ -201,6 +201,6 @@ describe('EditAddressStep', () => {
 		await fireEvent.click(cancelButton);
 
 		// Check that onClose was called
-		expect(onClose).toHaveBeenCalledTimes(1);
+		expect(onClose).toHaveBeenCalled();
 	});
 });

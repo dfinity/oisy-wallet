@@ -58,6 +58,7 @@
 		bind:value={address.label}
 		testId={ADDRESS_BOOK_ADDRESS_ALIAS_INPUT}
 		{disabled}
+		required={false}
 	/>
 	{#if nonNullish(labelError)}
 		<p transition:slide={SLIDE_DURATION} class="pt-2 text-error-primary">
