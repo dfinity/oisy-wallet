@@ -7,8 +7,12 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let asMenuItem = false;
-	export let asMenuItemCondensed = false;
+	interface Props {
+		asMenuItem?: boolean;
+		asMenuItemCondensed?: boolean;
+	}
+
+	let { asMenuItem = false, asMenuItemCondensed = false }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
