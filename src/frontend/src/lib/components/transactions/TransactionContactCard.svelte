@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
+	import SkeletonAddressCard from '$lib/components/address/SkeletonAddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
@@ -11,7 +12,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
-	import SkeletonAddressCard from '$lib/components/address/SkeletonAddressCard.svelte';
 
 	interface Props {
 		type: 'send' | 'receive';
