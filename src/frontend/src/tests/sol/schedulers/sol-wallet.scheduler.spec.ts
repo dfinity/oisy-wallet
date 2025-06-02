@@ -202,9 +202,9 @@ describe('sol-wallet.scheduler', () => {
 
 					await scheduler.start(startData);
 
-					// first time + 3 retries
-					expect(spyLoadBalance).toHaveBeenCalledTimes(4);
-					expect(spyLoadTransactions).toHaveBeenCalledTimes(4);
+					// first time + 10 retries
+					expect(spyLoadBalance).toHaveBeenCalledTimes(11);
+					expect(spyLoadTransactions).toHaveBeenCalledTimes(11);
 
 					// idle and in_progress
 					// error
