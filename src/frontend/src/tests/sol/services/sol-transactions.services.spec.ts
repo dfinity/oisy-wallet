@@ -4,6 +4,7 @@ import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/
 import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnetStore, solAddressMainnetStore } from '$lib/stores/address.store';
 import * as solanaApi from '$sol/api/solana.api';
+import { getAccountOwner } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import {
@@ -35,11 +36,19 @@ import {
 } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
 import { get } from 'svelte/store';
-import type { MockInstance } from 'vitest';
+import { vi, type MockInstance } from 'vitest';
 
 vi.mock('@solana-program/token', () => ({
 	findAssociatedTokenPda: vi.fn()
 }));
+
+vi.mock(import('$sol/api/solana.api'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		getAccountOwner: vi.fn()
+	};
+});
 
 describe('sol-transactions.services', () => {
 	let spyGetTransactions: MockInstance;
@@ -361,6 +370,18 @@ describe('sol-transactions.services', () => {
 							: {}
 				});
 			});
+		});
+
+		it('should map the owner address if it exists', async () => {
+			vi.mocked(getAccountOwner).mockResolvedValue('mock-owner-address');
+
+			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(
+				expectedResults.map((transaction) => ({
+					...transaction,
+					fromOwner: 'mock-owner-address',
+					toOwner: 'mock-owner-address'
+				}))
+			);
 		});
 	});
 

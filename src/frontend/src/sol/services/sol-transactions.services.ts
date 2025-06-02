@@ -16,7 +16,7 @@ import {
 	isNetworkIdSOLTestnet
 } from '$lib/utils/network.utils';
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
-import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import { fetchTransactionDetailForSignature, getAccountOwner } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
 	solTransactionsStore,
@@ -169,6 +169,15 @@ export const fetchSolTransactionsForSignature = async ({
 				return { parsedTransactions, cumulativeBalances, addressToToken };
 			}
 
+			const fromOwner: SolTransactionUi['fromOwner'] = await getAccountOwner({
+				address: from,
+				network
+			});
+
+			const toOwner: SolTransactionUi['toOwner'] = nonNullish(to)
+				? await getAccountOwner({ address: to, network })
+				: undefined;
+
 			const newTransaction: SolTransactionUi = {
 				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
@@ -176,7 +185,9 @@ export const fetchSolTransactionsForSignature = async ({
 				value,
 				type: address === from || ataAddress === from ? 'send' : 'receive',
 				from,
+				...(nonNullish(fromOwner) && { fromOwner }),
 				to,
+				...(nonNullish(toOwner) && { toOwner }),
 				status,
 				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
 				// Particularly, we are repeating the same fee for each instruction in the transaction.
