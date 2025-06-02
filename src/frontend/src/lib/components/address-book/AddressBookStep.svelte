@@ -14,7 +14,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import {isDesktop} from "$lib/utils/device.utils";
+	import { isDesktop } from '$lib/utils/device.utils';
 
 	interface Props {
 		contacts: ContactUi[];
