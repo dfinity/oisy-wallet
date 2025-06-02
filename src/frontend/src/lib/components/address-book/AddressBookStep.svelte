@@ -42,7 +42,12 @@
 			const addressLabels = addresses.map(({ label }) => label?.toLowerCase()).join(' ');
 
 			const terms = searchTerm.split(/\s+/).filter(Boolean);
-			return terms.every((term) => name.includes(term.toLowerCase()) || addressString.includes(term) || addressLabels.includes(term.toLowerCase()));
+			return terms.every(
+				(term) =>
+					name.includes(term.toLowerCase()) ||
+					addressString.includes(term) ||
+					addressLabels.includes(term.toLowerCase())
+			);
 		})
 	);
 </script>
