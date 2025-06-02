@@ -48,6 +48,11 @@ export const getIdbIcTokens = (
 ): Promise<SetIdbTokensParams<CustomToken>['tokens'] | undefined> =>
 	get(principal.toText(), idbIcTokensStore);
 
+export const getIdbEthTokens = (
+	principal: Principal
+): Promise<SetIdbTokensParams<UserToken>['tokens'] | undefined> =>
+	get(principal.toText(), idbEthTokensStore);
+
 export const getIdbSolTokens = (
 	principal: Principal
 ): Promise<SetIdbTokensParams<CustomToken>['tokens'] | undefined> =>
