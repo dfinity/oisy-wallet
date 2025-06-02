@@ -7,6 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
+	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
 
 	interface Props {
 		destination: string;
@@ -27,12 +28,11 @@
 			? Object.keys(networkContacts).reduce<NetworkContacts>(
 					(acc, address) => ({
 						...acc,
-						...(address.includes(destination) ||
-						networkContacts[address].name.toLowerCase().includes(destination.toLowerCase()) ||
-						networkContacts[address].addresses.some(
-							({ label, address: innerAddress }) =>
-								address === innerAddress && label?.toLowerCase().includes(destination.toLowerCase())
-						)
+						...(isContactMatchingFilter({
+							filterValue: destination,
+							contact: networkContacts[address],
+							address
+						})
 							? { [address]: networkContacts[address] }
 							: {})
 					}),
