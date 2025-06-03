@@ -52,7 +52,6 @@
 	/>
 
 	<label for="label" class="font-bold">{$i18n.address.fields.label}</label>
-
 	<InputText
 		name="label"
 		placeholder={$i18n.address.form.label_placeholder}
