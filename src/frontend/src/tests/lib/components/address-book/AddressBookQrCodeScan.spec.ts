@@ -32,7 +32,7 @@ describe('AddressBookQrCodeScan', () => {
 		expect(qrCodeContainer).toBeInTheDocument();
 	});
 
-	it('should trigger onClose when cancel button is clicked', async () => {
+	it('should trigger onClose when cancel button is clicked', () => {
 		const onClose = vi.fn();
 		const { container } = render(AddressBookQrCodeScan, {
 			props: {
