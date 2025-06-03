@@ -18,7 +18,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { addressBookStore, toggleContact } from '$lib/stores/address-book.store';
+	import { addressBookStore } from '$lib/stores/address-book.store';
 
 	interface Props {
 		contact: ContactUi;
@@ -90,7 +90,7 @@
 						e.preventDefault();
 						e.stopPropagation();
 						toggleContent?.();
-						toggleContact(contact.id);
+						addressBookStore.toggleContact(contact.id);
 					}}
 					ariaLabel={expanded
 						? $i18n.address_book.alt.hide_addresses
