@@ -77,9 +77,9 @@
 			</div>
 
 			<Button
-				styleClass="py-0"
+				styleClass="py-1.5"
 				ariaLabel={$i18n.address_book.show_contact.add_address}
-				colorStyle="tertiary-main-card"
+				colorStyle="secondary-light"
 				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
 				on:click={onAddAddress}
 			>
