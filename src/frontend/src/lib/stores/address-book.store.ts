@@ -1,9 +1,9 @@
 import type { ContactUi } from '$lib/types/contact';
 import { writable } from 'svelte/store';
 
-export type AddressBookStoreData = {
+export interface AddressBookStoreData {
 	expandedContacts: ContactUi['id'][];
-};
+}
 
 export const addressBookStore = writable<AddressBookStoreData>({ expandedContacts: [] });
 
