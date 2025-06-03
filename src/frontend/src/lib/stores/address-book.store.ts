@@ -1,9 +1,9 @@
 import type { ContactUi } from '$lib/types/contact';
 import { writable, type Writable } from 'svelte/store';
 
-export type AddressBookStoreData = {
+export interface AddressBookStoreData {
 	expandedContacts: ContactUi['id'][];
-};
+}
 
 export interface AddressBookStore extends Writable<AddressBookStoreData> {
 	reset: () => void;
