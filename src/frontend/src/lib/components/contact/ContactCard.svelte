@@ -18,31 +18,24 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { addressBookStore, toggleContact } from '$lib/stores/address-book.store';
 
 	interface Props {
 		contact: ContactUi;
 		onClick: () => void;
 		onInfo?: (addressIndex: number) => void;
 		onSelect?: () => void;
-		initiallyExpanded?: boolean;
 		hideCopyButton?: boolean;
 	}
 
-	let {
-		contact,
-		onInfo,
-		onClick,
-		onSelect,
-		initiallyExpanded = false,
-		hideCopyButton = false
-	}: Props = $props();
+	let { contact, onInfo, onClick, onSelect, hideCopyButton = false }: Props = $props();
 
 	let toggleContent = $state<() => void | undefined>();
 
 	let singleAddress = $derived(contact.addresses.length === 1);
 	let multipleAddresses = $derived(contact.addresses.length > 1);
 
-	let expanded = $state(initiallyExpanded);
+	let expanded = $derived($addressBookStore.expandedContacts.includes(contact.id));
 </script>
 
 {#snippet header()}
@@ -93,7 +86,7 @@
 						e.preventDefault();
 						e.stopPropagation();
 						toggleContent?.();
-						expanded = !expanded;
+						toggleContact(contact.id);
 					}}
 					ariaLabel={expanded
 						? $i18n.address_book.alt.hide_addresses
