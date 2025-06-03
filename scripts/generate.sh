@@ -70,7 +70,6 @@ for canister in "${canisters[@]}"; do
   dfx generate "$canister"
 done
 
-
 # Clean up..
 node scripts/did.update.types.mjs
 node scripts/did.delete.types.mjs
