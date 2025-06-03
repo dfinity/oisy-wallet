@@ -45,10 +45,9 @@ export const hasRequiredCycles = async (): Promise<boolean> => {
 		assertNonNullish(identity);
 		assertNonNullish(SIGNER_CANISTER_ID);
 
-		// const { allowed_cycles } = await getAllowedCycles({ identity });
-
 		const { allowance } = await icrc2Allowance({
 			identity,
+			certified: false,
 			owner: {
 				owner: BACKEND_CANISTER_PRINCIPAL
 			},

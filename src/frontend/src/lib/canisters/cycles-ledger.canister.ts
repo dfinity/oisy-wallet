@@ -1,9 +1,9 @@
 import type {
+	_SERVICE as CyclesLedgerService,
 	Account,
 	Allowance,
 	AllowanceArgs,
 	CreateCanisterArgs,
-	_SERVICE as CyclesLedgerService,
 	DataCertificate,
 	DepositArgs,
 	DepositResult,
@@ -118,7 +118,7 @@ export class CyclesLedgerCanister extends Canister<CyclesLedgerService> {
 
 	icrc2Allowance = ({
 		args,
-		certified = false
+		certified
 	}: {
 		args: AllowanceArgs;
 	} & QueryParams): Promise<Allowance> => {

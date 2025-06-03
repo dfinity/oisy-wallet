@@ -28,7 +28,7 @@ import { CyclesLedgerCanister } from '$lib/canisters/cycles-ledger.canister';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { IcrcAccount } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish, toNullable, type QueryParams } from '@dfinity/utils';
+import { assertNonNullish, isNullish, type QueryParams, toNullable } from '@dfinity/utils';
 
 // Assuming we'll add this to constants
 const CYCLES_LEDGER_CANISTER_ID: LedgerCanisterIdText = 'um5iw-rqaaa-aaaaq-qaaba-cai';
@@ -125,17 +125,18 @@ export const icrc1Transfer = async ({
 
 export const icrc2Allowance = async ({
 	identity,
+	certified,
 	owner,
 	spender
 }: CanisterApiFunctionParams<
 	{
+		certified: boolean;
 		owner: IcrcAccount;
 		spender: IcrcAccount;
 	} & QueryParams
 >): Promise<Allowance> => {
 	const { icrc2Allowance } = await cyclesLedgerCanister({ identity });
 
-	// should the API call simplifed by moving the args to the icrc2Allowance?
 	const args: AllowanceArgs = {
 		account: {
 			owner: owner.owner,
@@ -146,8 +147,8 @@ export const icrc2Allowance = async ({
 			subaccount: toNullable(spender.subaccount)
 		}
 	};
-
-	return icrc2Allowance({ args });
+	// since no user assets are involved we can retrieve uncertified data to improve query time
+	return icrc2Allowance({ args, certified });
 };
 
 export const icrc2Approve = async ({
