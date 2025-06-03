@@ -5,6 +5,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import type { QrStatus } from '$lib/types/qr-code';
+	import { ADDRESS_BOOK_CANCEL_BUTTON, ADDRESS_BOOK_QR_CODE_SCAN } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		onClose: () => void;
@@ -47,12 +48,12 @@
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-	<div class="qr-code-wrapper h-full w-full md:min-h-[300px]">
+	<div class="qr-code-wrapper h-full w-full md:min-h-[300px]" data-tid={ADDRESS_BOOK_QR_CODE_SCAN}>
 		<QRCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
 	</div>
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={onClose} />
+		<ButtonCancel onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
 	</ButtonGroup>
 </ContentWithToolbar>
 
