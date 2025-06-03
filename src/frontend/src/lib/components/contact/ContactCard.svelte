@@ -15,10 +15,10 @@
 		CONTACT_CARD_EXPAND_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { addressBookStore } from '$lib/stores/address-book.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { addressBookStore } from '$lib/stores/address-book.store';
 
 	interface Props {
 		contact: ContactUi;
