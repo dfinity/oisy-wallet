@@ -61,7 +61,7 @@
 </script>
 
 {#snippet qrButton()}
-	{#if nonNullish(onQRCodeScan)}
+	{#if nonNullish(onQRCodeScan) && !disabled}
 		<QrButton on:click={onQRCodeScan} />
 	{/if}
 {/snippet}
