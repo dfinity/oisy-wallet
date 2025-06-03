@@ -42,7 +42,7 @@
 	{/if}
 	{#if nonNullish(onInfo)}
 		<ButtonIcon
-			styleClass="-m-1 md:m-0 hover:text-inherit"
+			styleClass="-m-1 md:m-0 text-brand-primary-alt hover:text-inherit"
 			ariaLabel={$i18n.core.text.view}
 			testId={ADDRESS_LIST_ITEM_INFO_BUTTON}
 			onclick={(e) => {
@@ -58,7 +58,7 @@
 	{/if}
 	{#if nonNullish(onEdit)}
 		<ButtonIcon
-			styleClass="-m-1 md:m-0 hover:text-inherit"
+			styleClass="-m-1 md:m-0 text-primary hover:text-inherit"
 			ariaLabel={$i18n.core.text.edit}
 			testId={ADDRESS_LIST_ITEM_EDIT_BUTTON}
 			onclick={onEdit}

@@ -90,7 +90,7 @@
 				/>
 			{:else if multipleAddresses}
 				<ButtonIcon
-					styleClass="text-primary hover:bg-brand-subtle-20 rounded-md"
+					styleClass="text-primary hover:text-brand-subtle-10 hover:bg-brand-subtle-20 rounded-md"
 					width="w-6"
 					height="h-6"
 					onclick={(e) => {
