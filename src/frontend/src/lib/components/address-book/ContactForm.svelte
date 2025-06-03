@@ -26,7 +26,7 @@
 <svelte:window on:keydown={handleKeydown} />
 
 <form class="w-full">
-	<div class="rounded-lg bg-brand-light p-4 pb-6 pt-4 text-sm md:p-6 md:text-base md:font-bold">
+	<div class="rounded-lg bg-brand-subtle-10 p-4 pb-6 pt-4 text-sm md:p-6 md:text-base md:font-bold">
 		{$i18n.contact.fields.name}
 		<InputText
 			name="name"
