@@ -92,7 +92,9 @@
 					</ListItem>
 				{/each}
 			{:else}
-				<span class="text-brand-secondary">{$i18n.address_book.text.no_contact_found}</span>
+				<ListItem>
+					<span class="text-secondary">{$i18n.address_book.text.no_contact_found}</span>
+				</ListItem>
 			{/if}
 		</List>
 	{/if}
