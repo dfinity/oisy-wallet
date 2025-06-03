@@ -12,25 +12,24 @@ import type {
 	GetArchivesResult,
 	GetBlocksArgs,
 	GetBlocksResult,
-	HttpRequest,
-	HttpResponse,
 	MetadataValue,
 	SupportedBlockType,
 	SupportedStandard,
 	TransferArgs,
-	TransferError,
 	TransferFromArgs,
-	TransferFromError,
-	WithdrawArgs
+	WithdrawArgs,
+	WithdrawFromArgs
 } from '$declarations/cycles_ledger/cycles_ledger.did';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
+import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { CyclesLedgerCanister } from '$lib/canisters/cycles-ledger.canister';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
+import type { IcrcAccount } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
+import { assertNonNullish, isNullish, toNullable, type QueryParams } from '@dfinity/utils';
 
-// Assuming we'll add this to constants
-const CYCLES_LEDGER_CANISTER_ID: LedgerCanisterIdText = 'rkp4c-7iaaa-aaaaa-aaaca-cai'; // This is a placeholder and should be replaced
+// Cycles Ledger canister ID
+const CYCLES_LEDGER_CANISTER_ID: LedgerCanisterIdText = 'um5iw-rqaaa-aaaaq-qaaba-cai';
 
 let canister: CyclesLedgerCanister | undefined = undefined;
 
@@ -40,12 +39,17 @@ export const icrc1BalanceOf = async ({
 	certified
 }: CanisterApiFunctionParams<
 	{
-		account: Account;
+		account: IcrcAccount;
 	} & QueryParams
 >): Promise<bigint> => {
 	const { icrc1BalanceOf } = await cyclesLedgerCanister({ identity });
 
-	return icrc1BalanceOf({ account, certified });
+	const accountArgs: Account = {
+		owner: account.owner,
+		subaccount: toNullable(account.subaccount)
+	};
+
+	return icrc1BalanceOf({ account: accountArgs, certified });
 };
 
 export const icrc1Decimals = async ({
@@ -111,119 +115,287 @@ export const icrc1TotalSupply = async ({
 	return icrc1TotalSupply({ certified });
 };
 
+export const icrc1SupportedStandards = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<Array<SupportedStandard>> => {
+	const { icrc1SupportedStandards } = await cyclesLedgerCanister({ identity });
+
+	return icrc1SupportedStandards({ certified });
+};
+
 export const icrc1Transfer = async ({
 	identity,
-	args
+	fromSubaccount,
+	to,
+	amount,
+	fee,
+	memo,
+	createdAtTime
 }: CanisterApiFunctionParams<{
-	args: TransferArgs;
-}>): Promise<{ Ok: BlockIndex } | { Err: TransferError }> => {
+	fromSubaccount?: Uint8Array | number[];
+	to: IcrcAccount;
+	amount: bigint;
+	fee?: bigint;
+	memo?: Uint8Array | number[];
+	createdAtTime?: bigint;
+}>): Promise<BlockIndex> => {
 	const { icrc1Transfer } = await cyclesLedgerCanister({ identity });
+
+	const args: TransferArgs = {
+		from_subaccount: toNullable(fromSubaccount),
+		to: {
+			owner: to.owner,
+			subaccount: toNullable(to.subaccount)
+		},
+		amount,
+		fee: toNullable(fee),
+		memo: toNullable(memo),
+		created_at_time: toNullable(createdAtTime ?? nowInBigIntNanoSeconds())
+	};
 
 	return icrc1Transfer(args);
 };
 
 export const icrc2Allowance = async ({
 	identity,
-	args,
+	owner,
+	spender,
 	certified
 }: CanisterApiFunctionParams<
 	{
-		args: AllowanceArgs;
+		owner: IcrcAccount;
+		spender: IcrcAccount;
 	} & QueryParams
 >): Promise<Allowance> => {
 	const { icrc2Allowance } = await cyclesLedgerCanister({ identity });
+
+	const args: AllowanceArgs = {
+		account: {
+			owner: owner.owner,
+			subaccount: toNullable(owner.subaccount)
+		},
+		spender: {
+			owner: spender.owner,
+			subaccount: toNullable(spender.subaccount)
+		}
+	};
 
 	return icrc2Allowance({ args, certified });
 };
 
 export const icrc2Approve = async ({
 	identity,
-	args
+	fromSubaccount,
+	spender,
+	amount,
+	expectedAllowance,
+	expiresAt,
+	fee,
+	memo,
+	createdAtTime
 }: CanisterApiFunctionParams<{
-	args: {
-		fee: [] | [bigint];
-		memo: [] | [Uint8Array | number[]];
-		from_subaccount: [] | [Uint8Array | number[]];
-		created_at_time: [] | [bigint];
-		amount: bigint;
-		expected_allowance: [] | [bigint];
-		expires_at: [] | [bigint];
-		spender: Account;
-	};
-}>): Promise<{ Ok: bigint } | { Err: unknown }> => {
+	fromSubaccount?: Uint8Array | number[];
+	spender: IcrcAccount;
+	amount: bigint;
+	expectedAllowance?: bigint;
+	expiresAt?: bigint;
+	fee?: bigint;
+	memo?: Uint8Array | number[];
+	createdAtTime?: bigint;
+}>): Promise<bigint> => {
 	const { icrc2Approve } = await cyclesLedgerCanister({ identity });
+
+	const args = {
+		from_subaccount: toNullable(fromSubaccount),
+		spender: {
+			owner: spender.owner,
+			subaccount: toNullable(spender.subaccount)
+		},
+		amount,
+		expected_allowance: toNullable(expectedAllowance),
+		expires_at: toNullable(expiresAt),
+		fee: toNullable(fee),
+		memo: toNullable(memo),
+		created_at_time: toNullable(createdAtTime)
+	};
 
 	return icrc2Approve(args);
 };
 
 export const icrc2TransferFrom = async ({
 	identity,
-	args
+	spenderSubaccount,
+	from,
+	to,
+	amount,
+	fee,
+	memo,
+	createdAtTime
 }: CanisterApiFunctionParams<{
-	args: TransferFromArgs;
-}>): Promise<{ Ok: bigint } | { Err: TransferFromError }> => {
+	spenderSubaccount?: Uint8Array | number[];
+	from: IcrcAccount;
+	to: IcrcAccount;
+	amount: bigint;
+	fee?: bigint;
+	memo?: Uint8Array | number[];
+	createdAtTime?: bigint;
+}>): Promise<bigint> => {
 	const { icrc2TransferFrom } = await cyclesLedgerCanister({ identity });
+
+	const args: TransferFromArgs = {
+		spender_subaccount: toNullable(spenderSubaccount),
+		from: {
+			owner: from.owner,
+			subaccount: toNullable(from.subaccount)
+		},
+		to: {
+			owner: to.owner,
+			subaccount: toNullable(to.subaccount)
+		},
+		amount,
+		fee: toNullable(fee),
+		memo: toNullable(memo),
+		created_at_time: toNullable(createdAtTime)
+	};
 
 	return icrc2TransferFrom(args);
 };
 
 export const createCanister = async ({
 	identity,
-	args
+	fromSubaccount,
+	amount,
+	createdAtTime
 }: CanisterApiFunctionParams<{
-	args: CreateCanisterArgs;
-}>): Promise<{ Ok: CreateCanisterSuccess } | { Err: unknown }> => {
+	fromSubaccount?: Uint8Array | number[];
+	amount: bigint;
+	createdAtTime?: bigint;
+}>): Promise<CreateCanisterSuccess> => {
 	const { createCanister } = await cyclesLedgerCanister({ identity });
+
+	const args: CreateCanisterArgs = {
+		from_subaccount: toNullable(fromSubaccount),
+		amount,
+		created_at_time: toNullable(createdAtTime),
+		creation_args: []
+	};
 
 	return createCanister(args);
 };
 
 export const deposit = async ({
 	identity,
-	args
+	to,
+	memo
 }: CanisterApiFunctionParams<{
-	args: DepositArgs;
+	to: IcrcAccount;
+	memo?: Uint8Array | number[];
 }>): Promise<DepositResult> => {
 	const { deposit } = await cyclesLedgerCanister({ identity });
+
+	const args: DepositArgs = {
+		to: {
+			owner: to.owner,
+			subaccount: toNullable(to.subaccount)
+		},
+		memo: toNullable(memo)
+	};
 
 	return deposit(args);
 };
 
 export const withdraw = async ({
 	identity,
-	args
+	fromSubaccount,
+	amount,
+	to,
+	createdAtTime
 }: CanisterApiFunctionParams<{
-	args: WithdrawArgs;
-}>): Promise<{ Ok: BlockIndex } | { Err: unknown }> => {
+	fromSubaccount?: Uint8Array | number[];
+	amount: bigint;
+	to: Principal;
+	createdAtTime?: bigint;
+}>): Promise<bigint> => {
 	const { withdraw } = await cyclesLedgerCanister({ identity });
+
+	const args: WithdrawArgs = {
+		from_subaccount: toNullable(fromSubaccount),
+		amount,
+		to,
+		created_at_time: toNullable(createdAtTime)
+	};
 
 	return withdraw(args);
 };
 
+export const withdrawFrom = async ({
+	identity,
+	spenderSubaccount,
+	fromAccount,
+	amount,
+	to,
+	createdAtTime
+}: CanisterApiFunctionParams<{
+	spenderSubaccount?: Uint8Array | number[];
+	fromAccount: IcrcAccount;
+	amount: bigint;
+	to: Principal;
+	createdAtTime?: bigint;
+}>): Promise<bigint> => {
+	const { withdrawFrom } = await cyclesLedgerCanister({ identity });
+
+	const args: WithdrawFromArgs = {
+		spender_subaccount: toNullable(spenderSubaccount),
+		from: {
+			owner: fromAccount.owner,
+			subaccount: toNullable(fromAccount.subaccount)
+		},
+		amount,
+		to,
+		created_at_time: toNullable(createdAtTime)
+	};
+
+	return withdrawFrom(args);
+};
+
 export const icrc3GetArchives = async ({
 	identity,
-	args,
+	from,
 	certified
 }: CanisterApiFunctionParams<
 	{
-		args: GetArchivesArgs;
+		from?: Principal;
 	} & QueryParams
 >): Promise<GetArchivesResult> => {
 	const { icrc3GetArchives } = await cyclesLedgerCanister({ identity });
+
+	const args: GetArchivesArgs = {
+		from: toNullable(from)
+	};
 
 	return icrc3GetArchives({ args, certified });
 };
 
 export const icrc3GetBlocks = async ({
 	identity,
-	args,
+	start,
+	length,
 	certified
 }: CanisterApiFunctionParams<
 	{
-		args: GetBlocksArgs;
+		start: bigint;
+		length: bigint;
 	} & QueryParams
 >): Promise<GetBlocksResult> => {
 	const { icrc3GetBlocks } = await cyclesLedgerCanister({ identity });
+
+	const args: GetBlocksArgs = [
+		{
+			start,
+			length
+		}
+	];
 
 	return icrc3GetBlocks({ args, certified });
 };
@@ -244,26 +416,6 @@ export const icrc3SupportedBlockTypes = async ({
 	const { icrc3SupportedBlockTypes } = await cyclesLedgerCanister({ identity });
 
 	return icrc3SupportedBlockTypes({ certified });
-};
-
-export const icrc1SupportedStandards = async ({
-	identity,
-	certified
-}: CanisterApiFunctionParams<QueryParams>): Promise<Array<SupportedStandard>> => {
-	const { icrc1SupportedStandards } = await cyclesLedgerCanister({ identity });
-
-	return icrc1SupportedStandards({ certified });
-};
-
-export const httpRequest = async ({
-	identity,
-	request
-}: CanisterApiFunctionParams<{
-	request: HttpRequest;
-}>): Promise<HttpResponse> => {
-	const { httpRequest } = await cyclesLedgerCanister({ identity });
-
-	return httpRequest(request);
 };
 
 const cyclesLedgerCanister = async ({

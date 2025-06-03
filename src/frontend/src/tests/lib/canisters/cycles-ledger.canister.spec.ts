@@ -385,7 +385,7 @@ describe('cycles-ledger.canister', () => {
 
 			const res = await icrc1Transfer(transferArgs);
 
-			expect(res).toEqual(expectedResult);
+			expect(res).toEqual(BigInt(1));
 			expect(service.icrc1_transfer).toHaveBeenCalledWith(transferArgs);
 		});
 
@@ -460,7 +460,7 @@ describe('cycles-ledger.canister', () => {
 
 			const res = await icrc2Approve(approveArgs);
 
-			expect(res).toEqual(expectedResult);
+			expect(res).toEqual(BigInt(1));
 			expect(service.icrc2_approve).toHaveBeenCalledWith(approveArgs);
 		});
 
@@ -511,7 +511,7 @@ describe('cycles-ledger.canister', () => {
 
 			const res = await icrc2TransferFrom(_transferFromArgs);
 
-			expect(res).toEqual(expectedResult);
+			expect(res).toEqual(BigInt(1));
 			expect(service.icrc2_transfer_from).toHaveBeenCalledWith(_transferFromArgs);
 		});
 
@@ -585,7 +585,10 @@ describe('cycles-ledger.canister', () => {
 
 			const res = await createCanister(_createCanisterArgs);
 
-			expect(res).toEqual(expectedResult);
+			expect(res).toEqual({
+				block_id: BigInt(1),
+				canister_id: expectedCanisterId
+			});
 			expect(service.create_canister).toHaveBeenCalledWith(_createCanisterArgs);
 		});
 
@@ -691,7 +694,7 @@ describe('cycles-ledger.canister', () => {
 
 			const res = await withdraw(withdrawArgs);
 
-			expect(res).toEqual(expectedResult);
+			expect(res).toEqual(BigInt(1));
 			expect(service.withdraw).toHaveBeenCalledWith(withdrawArgs);
 		});
 
@@ -754,7 +757,7 @@ describe('cycles-ledger.canister', () => {
 
 			const res = await withdrawFrom(_withdrawFromArgs);
 
-			expect(res).toEqual(expectedResult);
+			expect(res).toEqual(BigInt(1));
 			expect(service.withdraw_from).toHaveBeenCalledWith(_withdrawFromArgs);
 		});
 

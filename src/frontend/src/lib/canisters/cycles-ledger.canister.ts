@@ -2,7 +2,9 @@ import type {
 	Account,
 	Allowance,
 	AllowanceArgs,
+	BlockIndex,
 	CreateCanisterArgs,
+	CreateCanisterSuccess,
 	_SERVICE as CyclesLedgerService,
 	DataCertificate,
 	DepositArgs,
@@ -11,8 +13,6 @@ import type {
 	GetArchivesResult,
 	GetBlocksArgs,
 	GetBlocksResult,
-	HttpRequest,
-	HttpResponse,
 	MetadataValue,
 	SupportedBlockType,
 	SupportedStandard,
@@ -56,7 +56,7 @@ export class CyclesLedgerCanister extends Canister<CyclesLedgerService> {
 
 	icrc1BalanceOf = ({
 		account,
-		certified = true
+		certified
 	}: { account: Account } & QueryParams): Promise<bigint> => {
 		const { icrc1_balance_of } = this.caller({ certified });
 		return icrc1_balance_of(account);
@@ -104,21 +104,20 @@ export class CyclesLedgerCanister extends Canister<CyclesLedgerService> {
 		return icrc1_supported_standards();
 	};
 
-	icrc1Transfer = async (args: TransferArgs) => {
+	icrc1Transfer = async (args: TransferArgs): Promise<BlockIndex> => {
 		const { icrc1_transfer } = this.caller({ certified: true });
 		const result = await icrc1_transfer(args);
 
 		if ('Ok' in result) {
-			return result;
+			return result.Ok;
 		}
 
-		// Map the error using the error mapping function
 		throw mapTransferError(result.Err);
 	};
 
 	icrc2Allowance = ({
 		args,
-		certified = true
+		certified
 	}: {
 		args: AllowanceArgs;
 	} & QueryParams): Promise<Allowance> => {
@@ -127,45 +126,34 @@ export class CyclesLedgerCanister extends Canister<CyclesLedgerService> {
 	};
 
 	icrc2Approve = async (args: {
-		fee: [] | [bigint];
-		memo: [] | [Uint8Array | number[]];
 		from_subaccount: [] | [Uint8Array | number[]];
-		created_at_time: [] | [bigint];
+		spender: Account;
 		amount: bigint;
 		expected_allowance: [] | [bigint];
 		expires_at: [] | [bigint];
-		spender: Account;
-	}) => {
+		fee: [] | [bigint];
+		memo: [] | [Uint8Array | number[]];
+		created_at_time: [] | [bigint];
+	}): Promise<bigint> => {
 		const { icrc2_approve } = this.caller({ certified: true });
 		const result = await icrc2_approve(args);
 
 		if ('Ok' in result) {
-			return result;
+			return result.Ok;
 		}
 
 		throw mapApproveError(result.Err);
 	};
 
-	icrc2TransferFrom = async (args: TransferFromArgs) => {
+	icrc2TransferFrom = async (args: TransferFromArgs): Promise<bigint> => {
 		const { icrc2_transfer_from } = this.caller({ certified: true });
 		const result = await icrc2_transfer_from(args);
 
 		if ('Ok' in result) {
-			return result;
+			return result.Ok;
 		}
 
 		throw mapTransferFromError(result.Err);
-	};
-
-	createCanister = async (args: CreateCanisterArgs) => {
-		const { create_canister } = this.caller({ certified: true });
-		const result = await create_canister(args);
-
-		if ('Ok' in result) {
-			return result;
-		}
-
-		throw mapCreateCanisterError(result.Err);
 	};
 
 	deposit = async (args: DepositArgs): Promise<DepositResult> => {
@@ -173,23 +161,23 @@ export class CyclesLedgerCanister extends Canister<CyclesLedgerService> {
 		return await deposit(args);
 	};
 
-	withdraw = async (args: WithdrawArgs) => {
+	withdraw = async (args: WithdrawArgs): Promise<bigint> => {
 		const { withdraw } = this.caller({ certified: true });
 		const result = await withdraw(args);
 
 		if ('Ok' in result) {
-			return result;
+			return result.Ok;
 		}
 
 		throw mapWithdrawError(result.Err);
 	};
 
-	withdrawFrom = async (args: WithdrawFromArgs) => {
+	withdrawFrom = async (args: WithdrawFromArgs): Promise<bigint> => {
 		const { withdraw_from } = this.caller({ certified: true });
 		const result = await withdraw_from(args);
 
 		if ('Ok' in result) {
-			return result;
+			return result.Ok;
 		}
 
 		throw mapWithdrawFromError(result.Err);
@@ -225,8 +213,14 @@ export class CyclesLedgerCanister extends Canister<CyclesLedgerService> {
 		return icrc3_supported_block_types();
 	};
 
-	httpRequest = (request: HttpRequest): Promise<HttpResponse> => {
-		const { http_request } = this.caller({ certified: false });
-		return http_request(request);
+	createCanister = async (args: CreateCanisterArgs): Promise<CreateCanisterSuccess> => {
+		const { create_canister } = this.caller({ certified: true });
+		const result = await create_canister(args);
+
+		if ('Ok' in result) {
+			return result.Ok;
+		}
+
+		throw mapCreateCanisterError(result.Err);
 	};
 }
