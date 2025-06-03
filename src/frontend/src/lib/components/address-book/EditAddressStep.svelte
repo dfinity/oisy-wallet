@@ -86,9 +86,7 @@
 			{contact.name}
 		</div>
 
-		<div
-			class="mt-2 w-full rounded-lg bg-brand-light px-3 py-4 text-sm md:px-5 md:text-base md:font-bold"
-		>
+		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
 			<div class="pb-4 text-xl font-bold">{title}</div>
 
 			<AddressForm
