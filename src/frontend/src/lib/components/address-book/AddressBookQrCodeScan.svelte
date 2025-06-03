@@ -4,8 +4,11 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import {
+		ADDRESS_BOOK_CANCEL_BUTTON,
+		ADDRESS_BOOK_QR_CODE_SCAN
+	} from '$lib/constants/test-ids.constants';
 	import type { QrStatus } from '$lib/types/qr-code';
-	import { ADDRESS_BOOK_CANCEL_BUTTON, ADDRESS_BOOK_QR_CODE_SCAN } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		onClose: () => void;

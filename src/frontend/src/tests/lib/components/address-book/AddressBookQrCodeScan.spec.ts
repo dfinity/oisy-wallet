@@ -1,7 +1,9 @@
 import AddressBookQrCodeScan from '$lib/components/address-book/AddressBookQrCodeScan.svelte';
+import {
+	ADDRESS_BOOK_CANCEL_BUTTON,
+	ADDRESS_BOOK_QR_CODE_SCAN
+} from '$lib/constants/test-ids.constants';
 import { render } from '@testing-library/svelte';
-import { ADDRESS_BOOK_CANCEL_BUTTON, ADDRESS_BOOK_QR_CODE_SCAN } from '$lib/constants/test-ids.constants';
-
 
 describe('AddressBookQrCodeScan', () => {
 	const qrCodeContainerSelector = `div[data-tid="${ADDRESS_BOOK_QR_CODE_SCAN}"]`;
@@ -17,8 +19,7 @@ describe('AddressBookQrCodeScan', () => {
 				$$scope: {}
 			}))
 		}));
-	})
-
+	});
 
 	it('should initialize and start scanning on mount', () => {
 		const { container } = render(AddressBookQrCodeScan, {
@@ -29,6 +30,7 @@ describe('AddressBookQrCodeScan', () => {
 		});
 
 		const qrCodeContainer: HTMLDivElement | null = container.querySelector(qrCodeContainerSelector);
+
 		expect(qrCodeContainer).toBeInTheDocument();
 	});
 
@@ -42,9 +44,11 @@ describe('AddressBookQrCodeScan', () => {
 		});
 
 		const cancelButton: HTMLButtonElement | null = container.querySelector(cancelButtonSelector);
+
 		expect(cancelButton).toBeInTheDocument();
 
-		cancelButton?.click()
+		cancelButton?.click();
+
 		expect(onClose).toHaveBeenCalled();
 	});
 });
