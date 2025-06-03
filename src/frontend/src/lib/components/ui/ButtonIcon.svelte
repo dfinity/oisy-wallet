@@ -15,6 +15,7 @@
 		link?: boolean;
 		styleClass?: string;
 		width?: 'w-6' | 'w-8' | 'w-10';
+		height?: 'h-6' | 'h-8' | 'h-10';
 	}
 
 	let {
@@ -28,13 +29,14 @@
 		disabled = false,
 		link = true,
 		styleClass = '',
-		width = 'w-10'
+		width = 'w-10',
+		height = 'h-10'
 	}: Props = $props();
 </script>
 
 <button
 	type="button"
-	class={`${colorStyle} icon flex h-10 flex-col text-center text-xs font-normal ${styleClass} ${width}`}
+	class={`${colorStyle} icon flex flex-col text-center text-xs font-normal ${styleClass} ${width} ${height}`}
 	class:link
 	bind:this={button}
 	{onclick}
