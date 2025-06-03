@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
 	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ContactCard from '$lib/components/contact/ContactCard.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -16,8 +18,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { isDesktop } from '$lib/utils/device.utils';
-	import ListItem from '$lib/components/common/ListItem.svelte';
-	import List from '$lib/components/common/List.svelte';
 
 	interface Props {
 		contacts: ContactUi[];
