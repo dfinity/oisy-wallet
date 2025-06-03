@@ -69,9 +69,7 @@
 <div
 	style={`--input-custom-border-color: ${borderColor}; --input-padding-inner-end: 100px; ${disabled ? '--input-background: var(--color-background-disabled);' : ''}`}
 >
-	<span class="font-normal">
-		<Input {disabled} inputType="text" bind:value innerEnd={qrButton} {...props}></Input>
-	</span>
+	<Input {disabled} inputType="text" bind:value innerEnd={qrButton} {...props}></Input>
 
 	<div class="text-md pt-2">
 		{#if error}
