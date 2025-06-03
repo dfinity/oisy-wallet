@@ -52,15 +52,18 @@
 	/>
 
 	<label for="label" class="font-bold">{$i18n.address.fields.label}</label>
-	<InputText
-		name="label"
-		placeholder={$i18n.address.form.label_placeholder}
-		bind:value={address.label}
-		testId={ADDRESS_BOOK_ADDRESS_ALIAS_INPUT}
-		{disabled}
-		showResetButton={!disabled}
-		required={false}
-	/>
+
+	<span class="font-normal">
+		<InputText
+			name="label"
+			placeholder={$i18n.address.form.label_placeholder}
+			bind:value={address.label}
+			testId={ADDRESS_BOOK_ADDRESS_ALIAS_INPUT}
+			{disabled}
+			showResetButton={!disabled}
+			required={false}
+		/>
+	</span>
 	{#if nonNullish(labelError)}
 		<p transition:slide={SLIDE_DURATION} class="pt-2 text-error-primary">
 			{replacePlaceholders($i18n.address.form.error.label_too_long, {
