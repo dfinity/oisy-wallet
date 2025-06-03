@@ -2,7 +2,10 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { POW_FEATURE_ENABLED } from '$env/pow.env';
-import { allowSigning, getAllowedCycles } from '$lib/api/backend.api';
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { allowSigning } from '$lib/api/backend.api';
+import { icrc2Allowance } from '$lib/api/cycles-ledger.api';
+import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import { POW_MIN_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import {
 	networkBitcoinMainnetEnabled,
@@ -19,7 +22,8 @@ import { loading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { isNullish } from '@dfinity/utils';
+import { Principal } from '@dfinity/principal';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -38,15 +42,28 @@ export const hasRequiredCycles = async (): Promise<boolean> => {
 	try {
 		const { identity } = get(authStore);
 
-		const { allowed_cycles } = await getAllowedCycles({ identity });
+		assertNonNullish(identity);
+		assertNonNullish(SIGNER_CANISTER_ID);
 
-		if (allowed_cycles >= POW_MIN_CYCLES_THRESHOLD) {
+		// const { allowed_cycles } = await getAllowedCycles({ identity });
+
+		const { allowance } = await icrc2Allowance({
+			identity,
+			owner: {
+				owner: BACKEND_CANISTER_PRINCIPAL
+			},
+			spender: {
+				owner: Principal.fromText(SIGNER_CANISTER_ID),
+				subaccount: getAccountIdentifier(identity.getPrincipal()).toAccountIdentifierHash().hash
+			}
+		});
+
+		if (allowance >= POW_MIN_CYCLES_THRESHOLD) {
 			// The user has enough cycles to continue
 			return true;
 		}
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, since do not know whether the user has enough cycles to continue.
-		console.error('Error -> hasRequiredCycles: ', _err);
 		await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
 	}
 	return false;

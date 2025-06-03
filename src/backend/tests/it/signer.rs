@@ -71,8 +71,6 @@ fn setup_with_cycles_ledger() -> crate::utils::pocketic::PicBackend {
     let pic_setup = crate::utils::pocketic::BackendBuilder::default()
         .with_cycles_ledger(true)
         .deploy();
-
-    pic_setup
 }
 
 fn call_get_allowed_cycles(
