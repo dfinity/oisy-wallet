@@ -13,6 +13,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -39,6 +40,11 @@
 					addressItemActionsProps={{
 						onInfo: () => onShowAddress(index)
 					}}
+					onClick={async () =>
+						await copyToClipboard({
+							value: address.address,
+							text: $i18n.wallet.text.address_copied
+						})}
 				/>
 			{/each}
 		</div>
@@ -71,9 +77,9 @@
 			</div>
 
 			<Button
-				styleClass="py-0"
+				styleClass="py-1.5"
 				ariaLabel={$i18n.address_book.show_contact.add_address}
-				colorStyle="tertiary-main-card"
+				colorStyle="secondary-light"
 				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
 				on:click={onAddAddress}
 			>

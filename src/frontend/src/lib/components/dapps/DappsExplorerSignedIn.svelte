@@ -7,6 +7,8 @@
 	import SubmitDappButton from '$lib/components/dapps/SubmitDappButton.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
+	import { TRACK_COUNT_DAPP_OPEN_INFO_MODAL } from '$lib/constants/analytics.contants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { FeaturedOisyDappDescription } from '$lib/types/dapp-description';
@@ -18,15 +20,18 @@
 			({ featured, screenshots }) => featured && nonNullish(screenshots) && screenshots.length
 		) as FeaturedOisyDappDescription | undefined;
 
-	const featuredDapp = selectFirstFeaturedDapp();
+	let featuredDapp = $state<FeaturedOisyDappDescription | undefined>(selectFirstFeaturedDapp());
 
-	let selectedTag: string | undefined = undefined;
-	const uniqueTags = new Set(
-		dAppDescriptions.flatMap((dapp) => dapp.tags).sort((tagA, tagB) => tagA.localeCompare(tagB))
+	let selectedTag = $state<string | undefined>();
+
+	let uniqueTags = $state(
+		new Set(
+			dAppDescriptions.flatMap((dapp) => dapp.tags).sort((tagA, tagB) => tagA.localeCompare(tagB))
+		)
 	);
 
-	$: filteredDapps = dAppDescriptions.filter(
-		({ tags }) => isNullish(selectedTag) || tags.includes(selectedTag)
+	let filteredDapps = $derived(
+		dAppDescriptions.filter(({ tags }) => isNullish(selectedTag) || tags.includes(selectedTag))
 	);
 
 	const modalId = Symbol();
@@ -70,6 +75,10 @@
 			<DappCard
 				on:click={() => {
 					modalStore.openDappDetails({ id: modalId, data: dApp });
+					trackEvent({
+						name: TRACK_COUNT_DAPP_OPEN_INFO_MODAL,
+						metadata: { dappId: dApp.id }
+					});
 				}}
 				dAppDescription={dApp}
 			/>

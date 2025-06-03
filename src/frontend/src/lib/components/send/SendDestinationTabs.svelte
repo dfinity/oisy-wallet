@@ -34,7 +34,13 @@
 		]}
 	>
 		{#if activeSendDestinationTab === 'recentlyUsed'}
-			<KnownDestinationsComponent {knownDestinations} bind:destination on:icNext />
+			<KnownDestinationsComponent
+				{knownDestinations}
+				{networkContacts}
+				bind:selectedContact
+				bind:destination
+				on:icNext
+			/>
 		{:else if activeSendDestinationTab === 'contacts'}
 			<SendContacts {networkContacts} bind:destination bind:selectedContact on:icNext />
 		{/if}
