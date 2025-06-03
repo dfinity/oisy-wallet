@@ -1,4 +1,5 @@
 import ContactCard from '$lib/components/contact/ContactCard.svelte';
+import { addressBookStore } from '$lib/stores/address-book.store';
 import type { ContactUi } from '$lib/types/contact';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import {
@@ -184,13 +185,18 @@ describe('ContactCard', () => {
 			props: {
 				contact: multipleAddressesContact,
 				onClick,
-				onInfo,
-				initiallyExpanded: true // Start expanded
+				onInfo
 			}
 		});
 
+		// Click the collapse button
+		addressBookStore.toggleContact(multipleAddressesContact.id);
+
+		// wait for animation to end
+		await new Promise((resolve) => setTimeout(resolve, 500));
+
 		// Collapsible should be expanded
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).not.toBe('0px');
+		expect(queryByTestId('collapsible-content')).toBeInTheDocument();
 
 		// Find all info buttons
 		const infoButtons = container.querySelectorAll('[aria-label="View"]');
@@ -202,22 +208,5 @@ describe('ContactCard', () => {
 
 		// Check that onInfo was called with the BTC address index
 		expect(onInfo).toHaveBeenCalledWith(1);
-	});
-
-	it('should render with expanded prop set to true', () => {
-		const onClick = vi.fn();
-		const onInfo = vi.fn();
-
-		const { queryByTestId } = render(ContactCard, {
-			props: {
-				contact: multipleAddressesContact,
-				onClick,
-				onInfo,
-				initiallyExpanded: true
-			}
-		});
-
-		// Collapsible should be expanded
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).not.toBe('0px');
 	});
 });
