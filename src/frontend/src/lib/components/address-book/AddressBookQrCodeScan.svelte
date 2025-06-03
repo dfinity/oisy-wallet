@@ -8,7 +8,7 @@
 
     interface Props {
         onClose: () => void;
-        address: string;
+        address: string | undefined;
     }
 
     let {onClose, address = $bindable()}: Props = $props();
