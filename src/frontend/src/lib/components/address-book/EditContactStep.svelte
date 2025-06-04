@@ -85,7 +85,7 @@
 			ariaLabel={$i18n.address_book.edit_contact.add_address}
 			colorStyle="tertiary-main-card"
 			disabled={isNullish(onAddAddress)}
-			on:click={() => onAddAddress?.()}
+			onclick={() => onAddAddress?.()}
 			testId={CONTACT_EDIT_ADD_ADDRESS_BUTTON}
 		>
 			<IconPlus />
@@ -101,7 +101,7 @@
 			styleClass="text-error-primary hover:bg-error-light"
 			ariaLabel={$i18n.address_book.edit_contact.delete_contact}
 			colorStyle="tertiary-main-card"
-			on:click={() => onDeleteContact?.(contact.id)}
+			onclick={() => onDeleteContact?.(contact.id)}
 			testId={CONTACT_EDIT_DELETE_CONTACT_BUTTON}
 		>
 			<IconTrash />

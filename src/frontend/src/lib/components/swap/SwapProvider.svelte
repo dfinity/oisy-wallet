@@ -58,18 +58,18 @@
 	<CollapsibleBottomSheet showContentHeader>
 		{#snippet contentHeader({ isInBottomSheet })}
 			<ModalValue>
-				<svelte:fragment slot="label">
+				{#snippet label()}
 					<div class="flex justify-center gap-2">
 						{$i18n.swap.text.swap_provider}
 						{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1 && !isInBottomSheet && showSelectButton}
-							<Button link on:click={() => dispatch('icShowProviderList')}
+							<Button link onclick={() => dispatch('icShowProviderList')}
 								>{$i18n.swap.text.select}</Button
 							>
 						{/if}
 					</div>
-				</svelte:fragment>
+				{/snippet}
 
-				<svelte:fragment slot="main-value">
+				{#snippet mainValue()}
 					<div class="flex items-start gap-3">
 						{#if isBestRate && $swapAmountsStore.swaps.length > 1}
 							<SwapBestRateBadge />
@@ -86,17 +86,19 @@
 							</div>
 						</div>
 					</div>
-				</svelte:fragment>
+				{/snippet}
 			</ModalValue>
 		{/snippet}
 		{#snippet content()}
 			{#if displayURL}
 				<ModalValue>
-					<svelte:fragment slot="label">Website</svelte:fragment>
+					{#snippet label()}
+						Website
+					{/snippet}
 
-					<svelte:fragment slot="main-value">
+					{#snippet mainValue()}
 						<div class="text-sm">{displayURL}</div>
-					</svelte:fragment>
+					{/snippet}
 				</ModalValue>
 			{/if}
 			{#if selectedProvider.provider === SwapProvider.KONG_SWAP}
@@ -106,7 +108,7 @@
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}
-			<Button fullWidth on:click={closeFn}>Done</Button>
+			<Button fullWidth onclick={closeFn}>Done</Button>
 		{/snippet}
 	</CollapsibleBottomSheet>
 {/if}

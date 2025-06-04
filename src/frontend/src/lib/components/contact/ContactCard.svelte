@@ -71,7 +71,7 @@
 			{#if nonNullish(onSelect)}
 				<Button
 					link
-					on:click={onSelect}
+					onclick={onSelect}
 					ariaLabel={$i18n.core.text.select}
 					styleClass="hidden group-hover:block">{$i18n.core.text.select}</Button
 				>
