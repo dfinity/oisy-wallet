@@ -18,7 +18,7 @@
 		ariaLabel?: string;
 		styleClass?: string;
 		transparent?: boolean;
-		onclick: MouseEventHandler<HTMLButtonElement>;
+		onclick?: MouseEventHandler<HTMLButtonElement>;
 		children: Snippet;
 	}
 
