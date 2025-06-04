@@ -261,6 +261,30 @@ describe('EditAddressStep', () => {
 
 		expect(onAddAddress).toHaveBeenCalled();
 	});
+	it('should disable save button when alias is unchanged in edit mode', () => {
+		const onSaveAddress = vi.fn();
+		const onAddAddress = vi.fn();
+		const onClose = vi.fn();
+
+		const initialAddress: Partial<ContactAddressUi> = {
+			address: 'icp:abcdefghijklmnopqrstuvwxyz',
+			label: 'Original Label'
+		};
+
+		const { getByTestId } = render(EditAddressStep, {
+			props: {
+				contact: mockContact,
+				onSaveAddress,
+				onAddAddress,
+				onClose,
+				isNewAddress: false,
+				address: initialAddress
+			}
+		});
+
+		const saveButton = getByTestId(ADDRESS_BOOK_SAVE_BUTTON);
+		expect(saveButton).toBeDisabled();
+	});
 
 	it('should autofocus address input when adding a new address on desktop', () => {
 		const onSaveAddress = vi.fn();
@@ -282,7 +306,6 @@ describe('EditAddressStep', () => {
 		});
 
 		const addressInput = getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT);
-
 		expect(document.activeElement).toBe(addressInput);
 	});
 
@@ -306,7 +329,7 @@ describe('EditAddressStep', () => {
 		});
 
 		const labelInput = getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT);
-
 		expect(document.activeElement).toBe(labelInput);
 	});
+
 });
