@@ -9,7 +9,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
 import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
-import VipRewardStateModal from '$lib/components/qr/VipRewardStateModal.svelte';
+import VipRewardStateModal from '$lib/components/vip/VipRewardStateModal.svelte';
 import { VIP_STATE_BUTTON, VIP_STATE_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import { autoLoadSingleToken } from '$lib/services/token.services';
