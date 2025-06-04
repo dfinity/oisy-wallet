@@ -4,7 +4,6 @@
 	import { GLDT_IC_DATA } from '$env/networks/networks.icrc.env';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
-	import type { IcToken } from '$icp/types/ic-token';
 	import { setCustomToken } from '$icp-eth/services/custom-token.services';
 	import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 	import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
@@ -23,12 +22,15 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let isSuccessful: boolean;
-	export let codeType: QrCodeType = QrCodeType.VIP;
+	interface Props {
+		isSuccessful: boolean;
+		codeType?: QrCodeType;
+	}
 
-	let goldToken: IcToken | undefined;
-	$: goldToken = $enabledIcTokens.find(
-		(token) => token.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId
+	let { isSuccessful, codeType = QrCodeType.VIP }: Props = $props();
+
+	const goldToken = $derived(
+		$enabledIcTokens.find((token) => token.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId)
 	);
 
 	const enableGldtToken = async () => {
