@@ -26,7 +26,7 @@
 >
 	<div class="flex items-center gap-2">
 		{#if asMenuItem}
-			{@render icon()}
+			{@render icon?.()}
 		{/if}
 		{@render label()}
 	</div>
