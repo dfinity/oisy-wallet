@@ -23,13 +23,16 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let isSuccessful: boolean;
-	export let codeType: QrCodeType = QrCodeType.VIP;
+	interface Props {
+		isSuccessful: boolean;
+		codeType?: QrCodeType;
+	}
 
-	let goldToken: IcToken | undefined;
-	$: goldToken = $enabledIcTokens.find(
+	let {isSuccessful, codeType = QrCodeType.VIP}: Props = $props();
+
+	const goldToken = $derived($enabledIcTokens.find(
 		(token) => token.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId
-	);
+	))
 
 	const enableGldtToken = async () => {
 		if (isNullish($authIdentity)) {
@@ -64,13 +67,13 @@
 {/if}
 
 <Modal on:nnsClose={close}>
-	<svelte:fragment slot="title">
-		<span class="text-xl"
+		{#snippet title()}
+			<span class="text-xl"
 			>{isSuccessful
 				? $i18n.vip.reward.text.title_successful
 				: $i18n.vip.reward.text.title_failed}</span
-		>
-	</svelte:fragment>
+			>
+		{/snippet}
 
 	<ContentWithToolbar>
 		<ImgBanner
@@ -94,16 +97,17 @@
 				: $i18n.vip.reward.text.reward_failed_description}</span
 		>
 
-		<Button
-			paddingSmall
-			colorStyle="secondary-light"
-			type="button"
-			fullWidth
-			on:click={close}
-			testId={VIP_STATE_BUTTON}
-			slot="toolbar"
-		>
-			{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
-		</Button>
+		{#snippet toolbar()}
+			<Button
+				paddingSmall
+				colorStyle="secondary-light"
+				type="button"
+				fullWidth
+				on:click={close}
+				testId={VIP_STATE_BUTTON}
+			>
+				{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
+			</Button>
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>
