@@ -8,7 +8,7 @@
 		testId?: string;
 	}
 
-	let {src, alt = '', styleClass, testId}: Props = $props();
+	let { src, alt = '', styleClass, testId }: Props = $props();
 </script>
 
 <Img {src} {alt} {testId} styleClass="w-full h-auto aspect-video {styleClass ?? ''}" />
