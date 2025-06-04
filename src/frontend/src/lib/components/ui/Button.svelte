@@ -1,19 +1,43 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
+	import type { MouseEventHandler } from 'svelte/elements';
 	import type { ButtonColorStyle } from '$lib/types/style';
 
-	export let colorStyle: ButtonColorStyle = 'primary';
-	export let type: 'submit' | 'reset' | 'button' = 'submit';
-	export let disabled = false;
-	export let loading = false;
-	export let loadingAsSkeleton = true;
-	export let fullWidth = false;
-	export let alignLeft = false;
-	export let link = false;
-	export let inlineLink = false;
-	export let paddingSmall = false;
-	export let testId: string | undefined = undefined;
-	export let ariaLabel: string | undefined = undefined;
-	export let styleClass = '';
+	interface Props {
+		colorStyle?: ButtonColorStyle;
+		type?: 'submit' | 'reset' | 'button';
+		disabled?: boolean;
+		loading?: boolean;
+		loadingAsSkeleton?: boolean;
+		fullWidth?: boolean;
+		alignLeft?: boolean;
+		link?: boolean;
+		inlineLink?: boolean;
+		paddingSmall?: boolean;
+		testId?: string;
+		ariaLabel?: string;
+		styleClass?: string;
+		onclick?: MouseEventHandler<HTMLButtonElement>;
+		children: Snippet;
+	}
+
+	const {
+		colorStyle = 'primary',
+		type = 'submit',
+		disabled,
+		loading = false,
+		loadingAsSkeleton = true,
+		fullWidth = false,
+		alignLeft = false,
+		link = false,
+		inlineLink = false,
+		paddingSmall = false,
+		testId,
+		ariaLabel,
+		styleClass = '',
+		onclick,
+		children
+	}: Props = $props();
 </script>
 
 <button
@@ -28,13 +52,13 @@
 	class:link
 	{type}
 	class:justify-start={alignLeft}
-	disabled={disabled || loading}
+	disabled={disabled ?? loading}
 	class:loading
 	class:transition={loading}
 	class:duration-500={loading}
 	class:ease-in-out={loading}
 	class:animate-pulse={loading}
-	on:click
+	{onclick}
 	data-tid={testId}
 	aria-label={ariaLabel}
 >
@@ -46,6 +70,6 @@
 		class:invisible={loading && loadingAsSkeleton}
 		aria-hidden={loading && loadingAsSkeleton}
 	>
-		<slot />
+		{@render children()}
 	</span>
 </button>
