@@ -79,6 +79,8 @@
 
 	let isInvalid = $state(false);
 
+	const focusField = isNewAddress ? 'address' : 'label';
+
 	let originalLabel = $derived(!isNewAddress && nonNullish(address?.label) ? address.label : '');
 	let labelChanged = $derived(isNewAddress ? true : editingAddress.label !== originalLabel);
 </script>
@@ -100,6 +102,7 @@
 				address={addressModel}
 				bind:isInvalid
 				{disabled}
+				{focusField}
 			/>
 		</div>
 		<ButtonGroup slot="toolbar">
