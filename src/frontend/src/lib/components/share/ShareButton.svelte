@@ -8,7 +8,7 @@
 		testId?: string;
 	}
 
-	let {shareAriaLabel, testId}: Props = $props();
+	let { shareAriaLabel, testId }: Props = $props();
 </script>
 
 {#if canShare()}
