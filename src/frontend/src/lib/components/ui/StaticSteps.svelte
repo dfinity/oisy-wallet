@@ -2,8 +2,9 @@
 	import { IconCheckCircle, IconInfo } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { StaticStep } from '$lib/types/steps';
+	import type { NonEmptyArray } from '$lib/types/utils';
 
-	export let steps: [StaticStep, ...StaticStep[]];
+	export let steps: NonEmptyArray<StaticStep>;
 </script>
 
 {#each steps as { text, state, progressLabel, step }, i (step)}

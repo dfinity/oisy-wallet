@@ -76,6 +76,22 @@ export const KONG_BACKEND_CANISTER_ID = LOCAL
 			? import.meta.env.VITE_BETA_KONG_BACKEND_CANISTER_ID
 			: import.meta.env.VITE_IC_KONG_BACKEND_CANISTER_ID;
 
+export const ICP_SWAP_FACTORY_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_ICP_SWAP_FACTORY_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_ICP_SWAP_FACTORY_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_ICP_SWAP_FACTORY_CANISTER_ID
+			: import.meta.env.VITE_IC_ICP_SWAP_FACTORY_CANISTER_ID;
+
+export const XTC_LEDGER_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_XTC_LEDGER_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_XTC_LEDGER_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_XTC_LEDGER_CANISTER_ID
+			: import.meta.env.VITE_IC_XTC_LEDGER_CANISTER_ID;
+
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
@@ -148,3 +164,12 @@ export const FAILURE_THRESHOLD = 3;
 
 // Micro transaction
 export const MICRO_TRANSACTION_USD_THRESHOLD = 0.01;
+
+// Known destinations
+export const MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS = 3;
+
+// Send destination
+export const MIN_DESTINATION_LENGTH_FOR_ERROR_STATE = 10;
+
+// Contact validation
+export const CONTACT_MAX_LABEL_LENGTH = 50;

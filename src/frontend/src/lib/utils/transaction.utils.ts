@@ -58,9 +58,16 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 ): TransactionsUiDateGroup<T> => {
 	const currentDate = new Date();
 	const undefinedKey = get(i18n).transaction.label.no_date_available;
+	const pendingKey = get(i18n).transaction.label.pending;
 
 	return transactions.reduce<TransactionsUiDateGroup<T>>((acc, transaction) => {
 		if (isNullish(transaction.transaction.timestamp)) {
+			if ('status' in transaction.transaction && transaction.transaction.status === 'pending') {
+				// since we want pending txs on top, we have to add it before the spread of acc. But that will overwrite the existing
+				// pending property so we destructure pending and the rest so that restAcc doesnt have the pending property and can therefor not overwrite it
+				const { [pendingKey]: currPending, ...restAcc } = acc;
+				return { [pendingKey]: [...(currPending ?? []), transaction], ...restAcc };
+			}
 			return { ...acc, [undefinedKey]: [...(acc['undefined'] ?? []), transaction] };
 		}
 

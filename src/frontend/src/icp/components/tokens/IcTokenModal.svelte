@@ -29,55 +29,67 @@
 			<Token token={$token}>
 				{#if nonNullish(twinToken)}
 					<Value ref="name">
-						<svelte:fragment slot="label">{$i18n.tokens.details.twin_token}</svelte:fragment>
-						<span class="flex items-center gap-1">
-							<output>{twinToken.name}</output>
-							<Logo
-								src={twinToken.icon}
-								alt={replacePlaceholders($i18n.core.alt.logo, { $name: twinToken.name })}
-								color="white"
-							/>
-						</span>
+						{#snippet label()}
+							{$i18n.tokens.details.twin_token}
+						{/snippet}
+						{#snippet content()}
+							<span class="flex items-center gap-1">
+								<output>{twinToken.name}</output>
+								<Logo
+									src={twinToken.icon}
+									alt={replacePlaceholders($i18n.core.alt.logo, { $name: twinToken.name })}
+									color="white"
+								/>
+							</span>
+						{/snippet}
 					</Value>
 				{/if}
 
 				{#if nonNullish(ckToken)}
 					{#if nonNullish(ckToken.ledgerCanisterId)}
 						<Value ref="name">
-							<svelte:fragment slot="label"
-								>{$i18n.tokens.import.text.ledger_canister_id}</svelte:fragment
-							>
-							<output class="break-all">{ckToken.ledgerCanisterId}</output><Copy
-								value={ckToken.ledgerCanisterId}
-								text={$i18n.tokens.import.text.ledger_canister_id_copied}
-								inline
-							/>
+							{#snippet label()}
+								{$i18n.tokens.import.text.ledger_canister_id}
+							{/snippet}
+							{#snippet content()}
+								<output class="break-all">{ckToken.ledgerCanisterId}</output><Copy
+									value={ckToken.ledgerCanisterId}
+									text={$i18n.tokens.import.text.ledger_canister_id_copied}
+									inline
+								/>
+							{/snippet}
 						</Value>
 					{/if}
 
 					{#if nonNullish(ckToken.indexCanisterId)}
+						{@const { indexCanisterId: safeIndexCanisterId } = ckToken}
 						<Value ref="name">
-							<svelte:fragment slot="label"
-								>{$i18n.tokens.import.text.index_canister_id}</svelte:fragment
-							>
-							<output>{ckToken.indexCanisterId}</output><Copy
-								value={ckToken.indexCanisterId}
-								text={$i18n.tokens.import.text.index_canister_id_copied}
-								inline
-							/>
+							{#snippet label()}
+								{$i18n.tokens.import.text.index_canister_id}
+							{/snippet}
+							{#snippet content()}
+								<output>{safeIndexCanisterId}</output><Copy
+									value={safeIndexCanisterId}
+									text={$i18n.tokens.import.text.index_canister_id_copied}
+									inline
+								/>
+							{/snippet}
 						</Value>
 					{/if}
 
 					{#if nonNullish(ckToken.minterCanisterId)}
+						{@const { minterCanisterId: safeMinterCanisterId } = ckToken}
 						<Value ref="name">
-							<svelte:fragment slot="label"
-								>{$i18n.tokens.import.text.minter_canister_id}</svelte:fragment
-							>
-							<output>{ckToken.minterCanisterId}</output><Copy
-								value={ckToken.minterCanisterId}
-								text={$i18n.tokens.import.text.minter_canister_id_copied}
-								inline
-							/>
+							{#snippet label()}
+								{$i18n.tokens.import.text.minter_canister_id}
+							{/snippet}
+							{#snippet content()}
+								<output>{safeMinterCanisterId}</output><Copy
+									value={safeMinterCanisterId}
+									text={$i18n.tokens.import.text.minter_canister_id_copied}
+									inline
+								/>
+							{/snippet}
 						</Value>
 					{/if}
 				{/if}

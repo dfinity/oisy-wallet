@@ -38,10 +38,6 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 				throw new Error(`Ledger canister ID is missing for token symbol ${key}.`);
 			}
 
-			if (isNullish(savedIndexCanisterId)) {
-				throw new Error(`Index canister ID is missing for token symbol ${key}.`);
-			}
-
 			const { tokens: accTokens, icons: accIcons } = await acc;
 
 			const { ledgerCanisterId, ...rest } = token;
@@ -99,12 +95,7 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 		return;
 	}
 
-	if (!logoData.includes(';') || !logoData.includes(',')) {
-		console.error(`Invalid logoData format for ${name}: ${logoData}`);
-		return;
-	}
-
-	saveLogo({ logoData, file });
+	saveLogo({ logoData, file, name });
 };
 
 const findAdditionalIcrc = async () => {

@@ -1,24 +1,25 @@
+/* eslint-disable vitest/require-top-level-describe */
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 
 type LogType = 'log' | 'debug' | 'warn' | 'error';
 
 const logTypes: LogType[] = ['log', 'debug', 'warn', 'error'];
 
-for (const logType of logTypes) {
-	replaceRealLogger(logType);
-}
-
 let gotLogs = false;
 let isLoggingAllowed = false;
 
-function replaceRealLogger(logType: LogType) {
+const replaceRealLogger = (logType: LogType) => {
 	// eslint-disable-next-line no-console
 	const realLogger = console[logType];
 	// eslint-disable-next-line no-console
-	console[logType] = function (...args) {
+	console[logType] = (...args) => {
 		gotLogs = true;
 		realLogger(...args);
 	};
+};
+
+for (const logType of logTypes) {
+	replaceRealLogger(logType);
 }
 
 export const failTestsThatLogToConsole = () => {

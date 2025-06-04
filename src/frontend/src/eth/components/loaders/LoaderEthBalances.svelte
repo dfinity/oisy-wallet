@@ -4,6 +4,8 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 
@@ -13,7 +15,14 @@
 
 	let { children }: Props = $props();
 
-	const load = async () => {
+	let loading = false;
+
+	const onLoad = async () => {
+		if (loading) {
+			return;
+		}
+		loading = true;
+
 		if (isNullish($ethAddress)) {
 			return;
 		}
@@ -26,9 +35,11 @@
 				erc20Tokens: $enabledErc20Tokens
 			})
 		]);
+
+		loading = false;
 	};
 
-	const debounceLoad = debounce(load, 500);
+	const debounceLoad = debounce(onLoad, 1000);
 
 	$effect(() => {
 		// To trigger the load function when any of the dependencies change.
@@ -37,4 +48,6 @@
 	});
 </script>
 
-{@render children?.()}
+<IntervalLoader {onLoad} interval={WALLET_TIMER_INTERVAL_MILLIS}>
+	{@render children?.()}
+</IntervalLoader>

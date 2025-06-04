@@ -1,39 +1,50 @@
-import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { OptionAmount } from '$lib/types/send';
-import type { ProviderFee } from '$lib/types/swap';
+import type { SwapMappedResult } from '$lib/types/swap';
 import type { Option } from '$lib/types/utils';
+import { isNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
-export type SwapAmountsStoreData = Option<{
-	swapAmounts?: {
-		slippage: SwapAmountsReply['slippage'];
-		receiveAmount: SwapAmountsReply['receive_amount'];
-		route: string[];
-		liquidityFees: ProviderFee[];
-		networkFee: ProviderFee | undefined;
-	} | null;
-	// We need to save the inputted amount for which swap-amounts have been already fetched.
-	// It allows us to compare it with the new value to prevent a re-fetch on consumer component re-render.
-	amountForSwap?: OptionAmount;
-}>;
+export interface SwapAmountsStoreData {
+	swaps: SwapMappedResult[];
+	amountForSwap: OptionAmount;
+	selectedProvider?: SwapMappedResult;
+}
 
-export interface SwapAmountsStore extends Readable<SwapAmountsStoreData> {
-	setSwapAmounts: (data: SwapAmountsStoreData) => void;
+export interface SwapAmountsStore extends Readable<Option<SwapAmountsStoreData>> {
+	setSwaps: (params: {
+		swaps: SwapMappedResult[];
+		amountForSwap: OptionAmount;
+		selectedProvider?: SwapMappedResult;
+	}) => void;
 	reset: () => void;
+	setSelectedProvider: (provider: SwapMappedResult | undefined) => void;
 }
 
 export const initSwapAmountsStore = (): SwapAmountsStore => {
-	const { subscribe, set } = writable<SwapAmountsStoreData>(undefined);
+	const { subscribe, set, update } = writable<Option<SwapAmountsStoreData>>(undefined);
 
 	return {
 		subscribe,
 
-		reset() {
+		reset: () => {
 			set(null);
 		},
 
-		setSwapAmounts(data: SwapAmountsStoreData) {
-			set(data);
+		setSwaps: ({ swaps, amountForSwap, selectedProvider }) => {
+			set({
+				swaps,
+				amountForSwap,
+				selectedProvider
+			});
+		},
+
+		setSelectedProvider: (provider) => {
+			update((data) => {
+				if (isNullish(data)) {
+					return data;
+				}
+				return { ...data, selectedProvider: provider };
+			});
 		}
 	};
 };

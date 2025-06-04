@@ -6,10 +6,22 @@ export interface Account {
 	owner: Principal;
 	subaccount: [] | [Uint8Array | number[]];
 }
+export type AccountId_Any = string;
 export type AccountSnapshotFor =
+	| { Any: AccountSnapshot_Any }
 	| { Icrc: AccountSnapshot_Icrc }
 	| { SplDevnet: AccountSnapshot_Spl }
 	| { SplMainnet: AccountSnapshot_Spl };
+export interface AccountSnapshot_Any {
+	decimals: number;
+	token_address: AnyToken;
+	network: AnyNetwork;
+	approx_usd_per_token: number;
+	last_transactions: Array<Transaction_Any>;
+	account: AccountId_Any;
+	timestamp: bigint;
+	amount: bigint;
+}
 export interface AccountSnapshot_Icrc {
 	decimals: number;
 	token_address: Principal;
@@ -30,17 +42,18 @@ export interface AccountSnapshot_Spl {
 	timestamp: bigint;
 	amount: bigint;
 }
-export interface AirDropConfig {
-	number_of_participants: bigint;
-	start_timestamp_ns: bigint;
-	token_configs: Array<TokenConfig>;
+export interface AnyNetwork {
+	testnet_for: [] | [string];
+	network_id: string;
 }
-export interface BatchSizes {
-	user_fetching: number;
-	sprinkle: number;
-	block_processing: number;
-	airdrop: number;
-	block_fetching: number;
+export interface AnyToken {
+	token_symbol: string;
+	wraps: [] | [string];
+}
+export interface CampaignEligibility {
+	available: boolean;
+	eligible: boolean;
+	criteria: Array<CriterionEligibility>;
 }
 export type CandidDuration =
 	| { Minutes: bigint }
@@ -58,14 +71,34 @@ export interface ClaimedVipReward {
 }
 export interface Config {
 	usage_awards_config: [] | [UsageAwardConfig];
-	batch_sizes: [] | [BatchSizes];
-	airdrop_config: [] | [AirDropConfig];
-	index_canisters: Array<Principal>;
 	vip_config: [] | [VipConfig];
-	processing_interval_s: [] | [number];
+	vip_campaigns: [] | [Array<[string, VipConfig]>];
 	readonly_admins: Array<Principal>;
 	oisy_canister: [] | [Principal];
 }
+export type Criterion =
+	| {
+			MinTransactions: { duration: CandidDuration; count: number };
+	  }
+	| { MinReferrals: { count: number } }
+	| {
+			MinLogins: {
+				duration: CandidDuration;
+				count: number;
+				session_duration: [] | [CandidDuration];
+			};
+	  }
+	| { MinTotalAssetsUsd: { usd: number } }
+	| { MinTokens: { count: number } };
+export interface CriterionEligibility {
+	satisfied: boolean;
+	criterion: Criterion;
+}
+export type EligibilityError = { NotAuthorized: null };
+export interface EligibilityReport {
+	campaigns: Array<[string, CampaignEligibility]>;
+}
+export type EligibilityResponse = { Ok: EligibilityReport } | { Err: EligibilityError };
 export interface LastActivityHistogram {
 	older: number;
 	unknown: number;
@@ -92,6 +125,7 @@ export interface LedgerConfig {
 export type NewVipRewardResponse =
 	| { Anonymous: null }
 	| { NotImportantPerson: null }
+	| { UnknownCampaign: null }
 	| { VipReward: VipReward };
 export type PublicAirdropStatus =
 	| {
@@ -99,10 +133,6 @@ export type PublicAirdropStatus =
 	  }
 	| { Completed: { total_airdrops: bigint } }
 	| { Upcoming: null };
-export interface PublicRewardsInfo {
-	airdrop: [] | [PublicAirdropStatus];
-	last_sprinkle: [] | [PublicSprinkleInfo];
-}
 export interface PublicSprinkleInfo {
 	timestamp_ns: bigint;
 	total_amount: bigint;
@@ -118,6 +148,7 @@ export interface RewardInfo {
 	ledger: Principal;
 	timestamp: bigint;
 	amount: bigint;
+	campaign_id: string;
 	campaign_name: [] | [string];
 }
 export type SetReferrerError =
@@ -157,6 +188,13 @@ export interface TokenConfig {
 	ledger_canister: Principal;
 }
 export type TransactionType = { Send: null } | { Receive: null };
+export interface Transaction_Any {
+	transaction_type: TransactionType;
+	network: AnyNetwork;
+	counterparty: AccountId_Any;
+	timestamp: bigint;
+	amount: bigint;
+}
 export interface Transaction_Icrc {
 	transaction_type: TransactionType;
 	network: {};
@@ -191,6 +229,7 @@ export interface UsageAwardEvent {
 }
 export interface UsageAwardState {
 	first_activity_ns: [] | [bigint];
+	snapshot_timestamps: BigUint64Array | bigint[];
 	snapshots: Array<UserSnapshot>;
 	referred_by: [] | [number];
 	last_activity_ns: [] | [bigint];
@@ -206,10 +245,7 @@ export interface UsageAwardStats {
 	eligible_snapshots: bigint;
 }
 export interface UsageCriteria {
-	measurement_duration: CandidDuration;
-	min_transactions: number;
-	min_logins: number;
-	min_valuation_usd: bigint;
+	criteria: Array<Criterion>;
 }
 export interface UsageVsHoldingStats {
 	holdings: Array<UsageAndHolding>;
@@ -260,27 +296,26 @@ export interface _SERVICE {
 	config: ActorMethod<[], Config>;
 	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
 	configure_vip: ActorMethod<[VipConfig], undefined>;
+	configure_vips: ActorMethod<[Array<[string, VipConfig]>], undefined>;
+	eligible: ActorMethod<[[] | [Principal]], EligibilityResponse>;
 	last_activity_histogram: ActorMethod<
 		[LastActivityHistogramRequest],
 		LastActivityHistogramResponse
 	>;
 	new_vip_reward: ActorMethod<[[] | [ClaimedVipReward]], NewVipRewardResponse>;
-	public_rewards_info: ActorMethod<[], PublicRewardsInfo>;
 	referrer_info: ActorMethod<[], ReferrerInfo>;
 	referrer_info_for: ActorMethod<[Principal], [] | [ReferrerInfo]>;
 	register_airdrop_recipient: ActorMethod<[UserSnapshot], undefined>;
 	register_snapshot_for: ActorMethod<[Principal, UserSnapshot], undefined>;
 	set_referrer: ActorMethod<[number], SetReferrerResponse>;
 	stats_usage_vs_holding: ActorMethod<[], UsageVsHoldingStats>;
-	status: ActorMethod<[], StatusResponse>;
 	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
-	usage_eligible: ActorMethod<[Principal], [boolean, boolean]>;
 	usage_stats: ActorMethod<[], UsageAwardStats>;
 	usage_winners: ActorMethod<[[] | [UsageWinnersRequest]], UsageWinnersResponse>;
 	user_info: ActorMethod<[], UserData>;
 	user_info_for: ActorMethod<[Principal], UserData>;
 	user_stats: ActorMethod<[Principal], UsageAwardState>;
-	vip_stats: ActorMethod<[], VipStats>;
+	vip_stats: ActorMethod<[[] | [string]], VipStats>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

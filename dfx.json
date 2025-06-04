@@ -1,5 +1,5 @@
 {
-	"dfx": "0.23.0",
+	"dfx": "0.26.1",
 	"canisters": {
 		"signer": {
 			"type": "custom",
@@ -50,6 +50,48 @@
 				}
 			}
 		},
+		"icp_swap_pool": {
+			"type": "custom",
+			"build": "scripts/build.icp_swap_pool.sh",
+			"candid": "target/icp_swap_pool.did",
+			"wasm": "target/icp_swap_pool.wasm.gz",
+			"init_arg_file": "target/icp_swap_pool.arg.did",
+			"shrink": false,
+			"specified_id": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+			"remote": {
+				"id": {
+					"ic": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"beta": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_be_1": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_1": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_2": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_3": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_4": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"staging": "xmiu5-jqaaa-aaaag-qbz7q-cai"
+				}
+			}
+		},
+		"icp_swap_factory": {
+			"type": "custom",
+			"build": "scripts/build.icp_swap_factory.sh",
+			"candid": "target/icp_swap_factory.did",
+			"wasm": "target/icp_swap_factory.wasm.gz",
+			"init_arg_file": "target/icp_swap_factory.arg.did",
+			"shrink": false,
+			"specified_id": "4mmnk-kiaaa-aaaag-qbllq-cai",
+			"remote": {
+				"id": {
+					"ic": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"beta": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_be_1": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_1": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_2": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_3": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_4": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"staging": "4mmnk-kiaaa-aaaag-qbllq-cai"
+				}
+			}
+		},
 		"backend": {
 			"candid": "src/backend/backend.did",
 			"package": "backend",
@@ -77,7 +119,6 @@
 			},
 			"source": ["build/"],
 			"type": "assets",
-			"gzip": true,
 			"remote": {
 				"id": {
 					"test_be_1": "tewsx-xaaaa-aaaad-aadia-cai"
@@ -308,8 +349,10 @@
 		},
 		"ckbtc_kyt": {
 			"type": "custom",
+			"build": "scripts/build.ckbtc_kyt.sh",
 			"candid": "target/ic/ckbtc_kyt.did",
 			"wasm": "target/ic/ckbtc_kyt.wasm",
+			"init_arg_file": "target/ic/ckbtc_kyt.args.did",
 			"specified_id": "pvm5g-xaaaa-aaaar-qaaia-cai",
 			"remote": {
 				"id": {
@@ -446,10 +489,33 @@
 				}
 			}
 		},
+		"xtc_ledger": {
+			"type": "custom",
+			"build": "scripts/build.xtc_ledger.sh",
+			"candid": "target/xtc_ledger.did",
+			"wasm": "target/xtc_ledger.wasm.gz",
+			"specified_id": "aanaa-xaaaa-aaaah-aaeiq-cai",
+			"remote": {
+				"id": {
+					"test_be_1": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_1": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_2": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_3": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_4": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_5": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_6": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"audit": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"staging": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"beta": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"ic": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"e2e": "aanaa-xaaaa-aaaah-aaeiq-cai"
+				}
+			}
+		},
 		"rewards": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.4.0-api.1/rewards.did",
-			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.4.0-api.1/rewards.wasm.gz",
+			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.4/rewards.did",
+			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.4/rewards.wasm.gz",
 			"remote": {
 				"id": {
 					"ic": "nynz6-haaaa-aaaan-qzqda-cai",

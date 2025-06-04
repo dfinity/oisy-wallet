@@ -1,6 +1,15 @@
-import { ZERO } from '$lib/constants/app.constants';
+import type { CriterionEligibility, EligibilityReport } from '$declarations/rewards/rewards.did';
+import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { getRewards } from '$lib/services/reward.services';
-import type { RewardResponseInfo, RewardResult } from '$lib/types/reward';
+import type {
+	CampaignCriterion,
+	CampaignEligibility,
+	MinLoginsCriterion,
+	MinTotalAssetsUsdCriterion,
+	MinTransactionsCriterion,
+	RewardResponseInfo,
+	RewardResult
+} from '$lib/types/reward';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 
@@ -53,5 +62,54 @@ export const isEndedCampaign = (endDate: Date) => {
 	return endDiff <= 0;
 };
 
-export const getRewardsBalance = (rewards: RewardResponseInfo[]): bigint =>
-	rewards.reduce<bigint>((total, { amount }) => total + amount, ZERO);
+export const mapEligibilityReport = (eligibilityReport: EligibilityReport): CampaignEligibility[] =>
+	eligibilityReport.campaigns.map(([campaignId, eligibility]) => {
+		const criteria = eligibility.criteria.map((criterion) => mapCriterion(criterion));
+
+		return {
+			campaignId,
+			available: eligibility.available,
+			eligible: eligibility.eligible,
+			criteria
+		};
+	});
+
+const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
+	if ('MinLogins' in criterion.criterion) {
+		const { duration, count } = criterion.criterion.MinLogins;
+		if ('Days' in duration) {
+			const days = duration.Days;
+			return {
+				satisfied: criterion.satisfied,
+				type: RewardCriterionType.MIN_LOGINS,
+				days,
+				count
+			} as MinLoginsCriterion;
+		}
+		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
+	}
+	if ('MinTransactions' in criterion.criterion) {
+		const { duration, count } = criterion.criterion.MinTransactions;
+		if ('Days' in duration) {
+			const days = duration.Days;
+			return {
+				satisfied: criterion.satisfied,
+				type: RewardCriterionType.MIN_TRANSACTIONS,
+				days,
+				count
+			} as MinTransactionsCriterion;
+		}
+		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
+	}
+	if ('MinTotalAssetsUsd' in criterion.criterion) {
+		const { usd } = criterion.criterion.MinTotalAssetsUsd;
+
+		return {
+			satisfied: criterion.satisfied,
+			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+			usd
+		} as MinTotalAssetsUsdCriterion;
+	}
+
+	return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
+};

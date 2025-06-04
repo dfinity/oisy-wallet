@@ -11,7 +11,6 @@
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		TRACK_COUNT_SOL_SEND_ERROR,
@@ -33,9 +32,10 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionSolAddress } from '$lib/types/address';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdSolana,
@@ -60,15 +60,15 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
-	export let formCancelAction: 'back' | 'close' = 'close';
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let network: Network | undefined = undefined;
-	$: network = $sendToken.network;
+	$: ({ network } = $sendToken);
 
 	let networkId: NetworkId | undefined = undefined;
-	$: networkId = $sendToken.network.id;
+	$: ({ id: networkId } = network);
 
 	let source: OptionSolAddress;
 	let solanaNativeToken: Token;
@@ -84,14 +84,17 @@
 	 * Fee context store
 	 */
 
-	let feeStore = initFeeStore();
-	let prioritizationFeeStore = initFeeStore();
-	let ataFeeStore = initFeeStore();
+	const feeStore = initFeeStore();
+	const prioritizationFeeStore = initFeeStore();
+	const ataFeeStore = initFeeStore();
 
-	let feeSymbolStore = writable<string | undefined>(undefined);
+	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(solanaNativeToken.symbol);
 
-	let feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	$: feeTokenIdStore.set(solanaNativeToken.id);
+
+	const feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set(solanaNativeToken.decimals);
 
 	setContext<FeeContextType>(
@@ -101,7 +104,8 @@
 			prioritizationFeeStore,
 			ataFeeStore,
 			feeSymbolStore,
-			feeDecimalsStore
+			feeDecimalsStore,
+			feeTokenIdStore
 		})
 	);
 
@@ -199,14 +203,7 @@
 
 <SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING} {destination}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview
-			on:icBack
-			on:icSend={send}
-			{destination}
-			{amount}
-			{network}
-			source={source ?? ''}
-		/>
+		<SolSendReview on:icBack on:icSend={send} {destination} {selectedContact} {amount} {network} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
@@ -214,18 +211,12 @@
 			on:icNext
 			on:icClose
 			on:icTokensList
+			on:icBack
+			{selectedContact}
 			bind:destination
 			bind:amount
-			on:icQRCodeScan
-			source={source ?? ''}
 		>
-			<svelte:fragment slot="cancel">
-				{#if formCancelAction === 'back'}
-					<ButtonBack onclick={back} />
-				{:else}
-					<ButtonCancel onclick={close} />
-				{/if}
-			</svelte:fragment>
+			<ButtonBack onclick={back} slot="cancel" />
 		</SolSendForm>
 	{:else}
 		<slot />

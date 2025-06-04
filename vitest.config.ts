@@ -1,7 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
-import { type UserConfig } from 'vite';
+import type { UserConfig } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
 
@@ -73,14 +73,14 @@ export default defineConfig(
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
-				include: ['src/frontend', 'e2e', 'scripts'],
+				include: ['src/frontend'],
 				// TODO: increase the thresholds slowly up to an acceptable 80% at least
 				thresholds: {
 					autoUpdate: true,
-					statements: 63,
-					branches: 83,
-					functions: 73,
-					lines: 63
+					statements: 73,
+					branches: 85,
+					functions: 76,
+					lines: 73
 				}
 			}
 		}

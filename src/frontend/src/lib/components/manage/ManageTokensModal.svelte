@@ -4,7 +4,7 @@
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
-	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
+	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';

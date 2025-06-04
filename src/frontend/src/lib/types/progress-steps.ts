@@ -1,3 +1,4 @@
+import type { NonEmptyArray } from '$lib/types/utils';
 import type { ProgressStep } from '@dfinity/gix-components';
 
-export type ProgressSteps = [ProgressStep, ...ProgressStep[]];
+export type ProgressSteps = NonEmptyArray<ProgressStep>;

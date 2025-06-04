@@ -1,6 +1,6 @@
-import {
-	type CarouselSlideOisyDappDescription,
-	type OisyDappDescription
+import type {
+	CarouselSlideOisyDappDescription,
+	OisyDappDescription
 } from '$lib/types/dapp-description';
 import { nonNullish } from '@dfinity/utils';
 

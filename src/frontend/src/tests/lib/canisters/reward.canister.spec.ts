@@ -1,6 +1,7 @@
 import type {
 	ClaimVipRewardResponse,
 	ClaimedVipReward,
+	EligibilityResponse,
 	NewVipRewardResponse,
 	ReferrerInfo,
 	_SERVICE as RewardService,
@@ -10,7 +11,7 @@ import type {
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import type { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
@@ -30,6 +31,37 @@ describe('reward.canister', () => {
 	const queryParams = {
 		certified: false
 	};
+
+	describe('isEligible', () => {
+		it('should return new eligibility report', async () => {
+			const mockEligibilityResponse: EligibilityResponse = { Ok: { campaigns: [] } };
+			service.eligible.mockResolvedValue(mockEligibilityResponse);
+
+			const { isEligible } = await createRewardCanister({
+				serviceOverride: service
+			});
+
+			const eligibilityReport = await isEligible(queryParams);
+
+			expect(service.eligible).toHaveBeenCalledWith([]);
+			expect(eligibilityReport).toEqual(mockEligibilityResponse.Ok);
+		});
+
+		it('should throw an error if eligible throws', async () => {
+			service.eligible.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { isEligible } = await createRewardCanister({
+				serviceOverride: service
+			});
+
+			const result = isEligible(queryParams);
+
+			await expect(result).rejects.toThrow(mockResponseError);
+		});
+	});
 
 	describe('getUserInfo', () => {
 		describe('VIP', () => {

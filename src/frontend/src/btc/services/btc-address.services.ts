@@ -8,7 +8,7 @@ import {
 	setIdbBtcAddressMainnet,
 	setIdbBtcAddressTestnet,
 	updateIdbBtcAddressMainnetLastUsage
-} from '$lib/api/idb.api';
+} from '$lib/api/idb-addresses.api';
 import { getBtcAddress } from '$lib/api/signer.api';
 import {
 	certifyAddress,

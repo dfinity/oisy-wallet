@@ -5,16 +5,15 @@
 	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+	import { isTokenErc20UserToken, isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+	import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
@@ -78,7 +77,7 @@
 		setTokens(allTokensSorted);
 	});
 
-	let loading = $erc20UserTokensNotInitialized;
+	let loading = $derived($erc20UserTokensNotInitialized);
 
 	let showNetworks = $state(false);
 
@@ -112,11 +111,11 @@
 			spl: SplTokenToggleable[];
 		}>(
 			({ icrc, erc20, spl }, token) => ({
-				icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
-				erc20: [
-					...erc20,
-					...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
+				icrc: [
+					...icrc,
+					...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
 				],
+				erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 				spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
 			}),
 			{ icrc: [], erc20: [], spl: [] }
@@ -142,25 +141,37 @@
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
-				<TokenName slot="title" data={token} />
+				{#snippet title()}
+					{nonNullish(token.oisySymbol) ? token.oisySymbol.oisySymbol : token.symbol}
+				{/snippet}
 
-				<TokenLogo slot="logo" color="white" data={token} badge={{ type: 'network' }} />
+				{#snippet subtitle()}
+					{token.name}
+				{/snippet}
 
-				<span class="break-all" slot="description">
-					{token.symbol}
-				</span>
+				{#snippet logo()}
+					<span class="mr-2">
+						<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
+					</span>
+				{/snippet}
 
-				<svelte:fragment slot="action">
+				{#snippet description()}
+					<span class="break-all">
+						{token.network.name}
+					</span>
+				{/snippet}
+
+				{#snippet action()}
 					{#if icTokenIcrcCustomToken(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
-					{:else if icTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
+					{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
 						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
 					{:else if isBitcoinToken(token)}
 						<BtcManageTokenToggle />
 					{:else if isSolanaToken(token)}
 						<SolManageTokenToggle />
 					{/if}
-				</svelte:fragment>
+				{/snippet}
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}

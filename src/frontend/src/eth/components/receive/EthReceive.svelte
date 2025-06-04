@@ -36,10 +36,10 @@
 		network={token.network}
 		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
 	>
-		<svelte:fragment slot="content">
+		{#snippet content()}
 			{#if $networkEthereum}
 				<EthReceiveMetamask />
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</ReceiveModal>
 </ReceiveButtonWithModal>

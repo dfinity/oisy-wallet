@@ -68,11 +68,9 @@ on:
         required: true
       VITE_POW_FEATURE_ENABLED_STAGING:
         required: true
-      VITE_USER_SNAPSHOT_ENABLED_STAGING:
-        required: true
-      VITE_AIRDROPS_ENABLED_STAGING:
-        required: true
       VITE_PLAUSIBLE_ENABLED_STAGING:
+        required: true
+      VITE_ICP_SWAP_ENABLED_STAGING:
         required: true
       VITE_ADDRESS_BOOK_ENABLED_STAGING:
         required: true
@@ -106,11 +104,9 @@ on:
         required: true
       VITE_POW_FEATURE_ENABLED_BETA:
         required: true
-      VITE_USER_SNAPSHOT_ENABLED_BETA:
-        required: true
-      VITE_AIRDROPS_ENABLED_BETA:
-        required: true
       VITE_PLAUSIBLE_ENABLED_BETA:
+        required: true
+      VITE_ICP_SWAP_ENABLED_BETA:
         required: true
       VITE_ADDRESS_BOOK_ENABLED_BETA:
         required: true
@@ -131,6 +127,9 @@ concurrency:
   cancel-in-progress: false
 
 permissions: {}
+
+env:
+  DFX_WARNING: '-mainnet_plaintext_identity'
 
 jobs:
   deployment:
@@ -226,11 +225,10 @@ jobs:
               echo "VITE_POUH_ENABLED=$VITE_POUH_ENABLED_STAGING"
               echo "VITE_SWAP_ACTION_ENABLED=$VITE_SWAP_ACTION_ENABLED_STAGING"
               echo "VITE_POW_FEATURE_ENABLED=$VITE_POW_FEATURE_ENABLED_STAGING"
-              echo "VITE_USER_SNAPSHOT_ENABLED=$VITE_USER_SNAPSHOT_ENABLED_STAGING"
-              echo "VITE_AIRDROPS_ENABLED=$VITE_AIRDROPS_ENABLED_STAGING"
               echo "VITE_ONRAMPER_API_KEY_DEV=$VITE_ONRAMPER_API_KEY_DEV_STAGING"
               echo "VITE_ONRAMPER_API_KEY_PROD=$VITE_ONRAMPER_API_KEY_PROD_STAGING"
               echo "VITE_PLAUSIBLE_ENABLED=$VITE_PLAUSIBLE_ENABLED_STAGING"
+              echo "VITE_ICP_SWAP_ENABLED=$VITE_ICP_SWAP_ENABLED_STAGING"
               echo "VITE_ADDRESS_BOOK_ENABLED=$VITE_ADDRESS_BOOK_ENABLED_STAGING"
             } >> $GITHUB_OUTPUT
             if [[ "$NETWORK" == "staging" ]]; then
@@ -257,10 +255,9 @@ jobs:
               echo "VITE_ONRAMPER_API_KEY_DEV=$VITE_ONRAMPER_API_KEY_DEV_BETA"
               echo "VITE_SWAP_ACTION_ENABLED=$VITE_SWAP_ACTION_ENABLED_BETA"
               echo "VITE_POW_FEATURE_ENABLED=$VITE_POW_FEATURE_ENABLED_BETA"
-              echo "VITE_USER_SNAPSHOT_ENABLED=$VITE_USER_SNAPSHOT_ENABLED_BETA"
-              echo "VITE_AIRDROPS_ENABLED=$VITE_AIRDROPS_ENABLED_BETA"
               echo "VITE_ONRAMPER_API_KEY_PROD=$VITE_ONRAMPER_API_KEY_PROD_BETA"
               echo "VITE_PLAUSIBLE_ENABLED=$VITE_PLAUSIBLE_ENABLED_BETA"
+              echo "VITE_ICP_SWAP_ENABLED=$VITE_ICP_SWAP_ENABLED_BETA"
               echo "VITE_ADDRESS_BOOK_ENABLED=$VITE_ADDRESS_BOOK_ENABLED_BETA"
             } >> $GITHUB_OUTPUT
             {
@@ -279,9 +276,8 @@ jobs:
           VITE_POUH_ENABLED_STAGING: ${{ secrets.VITE_POUH_ENABLED_STAGING }}
           VITE_SWAP_ACTION_ENABLED_STAGING: ${{ secrets.VITE_SWAP_ACTION_ENABLED_STAGING }}
           VITE_POW_FEATURE_ENABLED_STAGING: ${{ secrets.VITE_POW_FEATURE_ENABLED_STAGING }}
-          VITE_USER_SNAPSHOT_ENABLED_STAGING: ${{ secrets.VITE_USER_SNAPSHOT_ENABLED_STAGING }}
-          VITE_AIRDROPS_ENABLED_STAGING: ${{ secrets.VITE_AIRDROPS_ENABLED_STAGING }}
           VITE_PLAUSIBLE_ENABLED_STAGING: ${{ secrets.VITE_PLAUSIBLE_ENABLED_STAGING }}
+          VITE_ICP_SWAP_ENABLED_STAGING: ${{ secrets.VITE_ICP_SWAP_ENABLED_STAGING }}
           VITE_ONRAMPER_API_KEY_DEV_STAGING: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}
           VITE_ONRAMPER_API_KEY_PROD_STAGING: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}
           VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING: ${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}
@@ -299,9 +295,8 @@ jobs:
           VITE_ONRAMPER_API_KEY_DEV_BETA: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}
           VITE_SWAP_ACTION_ENABLED_BETA: ${{ secrets.VITE_SWAP_ACTION_ENABLED_BETA }}
           VITE_POW_FEATURE_ENABLED_BETA: ${{ secrets.VITE_POW_FEATURE_ENABLED_BETA }}
-          VITE_USER_SNAPSHOT_ENABLED_BETA: ${{ secrets.VITE_USER_SNAPSHOT_ENABLED_BETA }}
-          VITE_AIRDROPS_ENABLED_BETA: ${{ secrets.VITE_AIRDROPS_ENABLED_BETA }}
           VITE_PLAUSIBLE_ENABLED_BETA: ${{ secrets.VITE_PLAUSIBLE_ENABLED_BETA }}
+          VITE_ICP_SWAP_ENABLED_BETA: ${{ secrets.VITE_ICP_SWAP_ENABLED_BETA }}
           VITE_ONRAMPER_API_KEY_PROD_BETA: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}
           VITE_ADDRESS_BOOK_ENABLED_BETA: ${{ secrets.VITE_ADDRESS_BOOK_ENABLED_BETA }}
           DFX_DEPLOY_KEY_BETA: ${{ secrets.DFX_DEPLOY_KEY_BETA }}
@@ -339,7 +334,7 @@ jobs:
         run: |
           key_pem=$(mktemp)
           printenv "DFX_DEPLOY_KEY" > "$key_pem"
-          dfx identity import --disable-encryption --force default "$key_pem"
+          dfx identity import --storage-mode=plaintext --force default "$key_pem"
           rm "$key_pem"
           dfx identity use default
           dfx identity get-principal
@@ -358,9 +353,8 @@ jobs:
           VITE_POUH_ENABLED: ${{ steps.set-outputs.outputs.VITE_POUH_ENABLED }}
           VITE_SWAP_ACTION_ENABLED: ${{ steps.set-outputs.outputs.VITE_SWAP_ACTION_ENABLED }}
           VITE_POW_FEATURE_ENABLED: ${{ steps.set-outputs.outputs.VITE_POW_FEATURE_ENABLED }}
-          VITE_USER_SNAPSHOT_ENABLED: ${{ steps.set-outputs.outputs.VITE_USER_SNAPSHOT_ENABLED }}
-          VITE_AIRDROPS_ENABLED: ${{ steps.set-outputs.outputs.VITE_AIRDROPS_ENABLED }}
           VITE_PLAUSIBLE_ENABLED: ${{ steps.set-outputs.outputs.VITE_PLAUSIBLE_ENABLED }}
+          VITE_ICP_SWAP_ENABLED: ${{ steps.set-outputs.outputs.VITE_ICP_SWAP_ENABLED }}
           VITE_ONRAMPER_API_KEY_DEV: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_DEV }}
           VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
           VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}
@@ -369,7 +363,7 @@ jobs:
       - name: Deploy Frontend to Environment
         run: |
           if [ "$deploy_frontend" == "true" ] ; then
-            dfx deploy frontend --network $NETWORK
+            dfx deploy frontend --network "$NETWORK" --no-asset-upgrade
           fi
         env:
           VITE_ETHERSCAN_API_KEY: ${{ steps.set-outputs.outputs.VITE_ETHERSCAN_API_KEY }}
@@ -381,9 +375,8 @@ jobs:
           VITE_POUH_ENABLED: ${{ steps.set-outputs.outputs.VITE_POUH_ENABLED }}
           VITE_SWAP_ACTION_ENABLED: ${{ steps.set-outputs.outputs.VITE_SWAP_ACTION_ENABLED }}
           VITE_POW_FEATURE_ENABLED: ${{ steps.set-outputs.outputs.VITE_POW_FEATURE_ENABLED }}
-          VITE_USER_SNAPSHOT_ENABLED: ${{ steps.set-outputs.outputs.VITE_USER_SNAPSHOT_ENABLED }}
-          VITE_AIRDROPS_ENABLED: ${{ steps.set-outputs.outputs.VITE_AIRDROPS_ENABLED }}
           VITE_PLAUSIBLE_ENABLED: ${{ steps.set-outputs.outputs.VITE_PLAUSIBLE_ENABLED }}
+          VITE_ICP_SWAP_ENABLED: ${{ steps.set-outputs.outputs.VITE_ICP_SWAP_ENABLED }}
           VITE_ONRAMPER_API_KEY_DEV: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_DEV }}
           VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
           VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}

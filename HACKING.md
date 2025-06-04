@@ -101,6 +101,7 @@ A list of useful faucets:
 - Ethereum and EVM networks:
   - ETH: [Alchemy mixed faucets](https://www.alchemy.com/faucets/)
   - BNB: [BNB Testnet Faucet](https://www.bnbchain.org/en/testnet-faucet)
+  - Polygon: [Polygon Testnet Faucet](https://faucet.polygon.technology/)
   - USDC and EURC: [Circle faucet](https://faucet.circle.com/)
   - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
   - Others:

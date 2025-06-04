@@ -6,7 +6,6 @@ import {
 	isIcCkToken,
 	isIcToken,
 	isIcTokenCanistersStrict,
-	isNotIcCkToken,
 	isNotIcToken,
 	isNotIcTokenCanistersStrict
 } from '$icp/validation/ic-token.validation';
@@ -78,20 +77,6 @@ describe('ic-token.validation', () => {
 
 		it('should return false for an invalid IcToken', () => {
 			expect(isIcCkToken(mockValidToken)).toBeFalsy();
-		});
-	});
-
-	describe('isNotIcCkToken', () => {
-		it('should return false for a valid IcCkToken', () => {
-			expect(isNotIcCkToken(mockValidIcCkToken)).toBeFalsy();
-		});
-
-		it('should return false for a valid IcCkToken that does not have optional props', () => {
-			expect(isNotIcCkToken(mockValidIcCkToken)).toBeFalsy();
-		});
-
-		it('should return true for an invalid IcToken', () => {
-			expect(isNotIcCkToken(mockValidToken)).toBeTruthy();
 		});
 	});
 

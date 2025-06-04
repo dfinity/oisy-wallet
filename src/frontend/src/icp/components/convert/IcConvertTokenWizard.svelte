@@ -26,7 +26,7 @@
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
 	import DestinationWizardStep from '$lib/components/address/DestinationWizardStep.svelte';
-	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
@@ -228,7 +228,7 @@
 				<svelte:fragment slot="title">{$i18n.convert.text.send_to}</svelte:fragment>
 			</DestinationWizardStep>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-			<SendQRCodeScan
+			<SendQrCodeScan
 				expectedToken={$destinationToken}
 				bind:destination={customDestination}
 				bind:amount={sendAmount}

@@ -1,11 +1,15 @@
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
+import {
+	SEND_DESTINATION_SECTION,
+	TOKEN_INPUT_CURRENCY_TOKEN
+} from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import * as solanaApi from '$sol/api/solana.api';
 import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
 import * as solAddressUtils from '$sol/utils/sol-address.utils';
+import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
@@ -24,10 +28,6 @@ describe('SolSendForm', () => {
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
-	const destinationSelector = 'input[data-tid="destination-input"]';
-	const networkSelector = 'div[id="network"]';
-	const feeSelector = 'p[id="fee"]';
-	const ataFeeSelector = 'p[id="ataFee"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	beforeEach(() => {
@@ -47,7 +47,8 @@ describe('SolSendForm', () => {
 				prioritizationFeeStore: mockPrioritizationFeeStore,
 				ataFeeStore: mockAtaFeeStore,
 				feeSymbolStore: writable(SOLANA_TOKEN.symbol),
-				feeDecimalsStore: writable(SOLANA_TOKEN.decimals)
+				feeDecimalsStore: writable(SOLANA_TOKEN.decimals),
+				feeTokenIdStore: writable(SOLANA_TOKEN.id)
 			})
 		);
 	});
@@ -60,7 +61,7 @@ describe('SolSendForm', () => {
 			})
 		);
 
-		const { container } = render(SolSendForm, {
+		const { container, getByTestId, getByText } = render(SolSendForm, {
 			props,
 			context: mockContext
 		});
@@ -69,17 +70,9 @@ describe('SolSendForm', () => {
 
 		expect(amount).not.toBeNull();
 
-		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
+		expect(getByTestId(SEND_DESTINATION_SECTION)).toBeInTheDocument();
 
-		expect(destination).not.toBeNull();
-
-		const network: HTMLDivElement | null = container.querySelector(networkSelector);
-
-		expect(network).not.toBeNull();
-
-		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
-
-		expect(fee).not.toBeNull();
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 
@@ -102,18 +95,16 @@ describe('SolSendForm', () => {
 		});
 
 		it('should not render ATA creation fee if the destination is empty', () => {
-			const { container } = render(SolSendForm, {
+			const { getByText } = render(SolSendForm, {
 				props: { ...props, destination: '' },
 				context: mockContext
 			});
 
-			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
-
-			expect(ataFee).toBeNull();
+			expect(() => getByText(en.fee.text.ata_fee)).toThrow();
 		});
 
 		it('should render ATA creation fee if it is not nullish', async () => {
-			const { container } = render(SolSendForm, {
+			const { getByText } = render(SolSendForm, {
 				props,
 				context: mockContext
 			});
@@ -123,15 +114,13 @@ describe('SolSendForm', () => {
 			// Wait for the fee to be loaded
 			await new Promise((resolve) => setTimeout(resolve, 100));
 
-			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
-
-			expect(ataFee).not.toBeNull();
+			expect(getByText(en.fee.text.ata_fee)).toBeInTheDocument();
 		});
 
 		it('should not render ATA creation fee if it is nullish', async () => {
 			mockAtaFeeStore.setFee(123n);
 
-			const { container } = render(SolSendForm, {
+			const { getByText } = render(SolSendForm, {
 				props,
 				context: mockContext
 			});
@@ -141,9 +130,7 @@ describe('SolSendForm', () => {
 			// Wait for the fee to be loaded
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 
-			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
-
-			expect(ataFee).toBeNull();
+			expect(() => getByText(en.fee.text.ata_fee)).toThrow();
 		}, 60000);
 	});
 });

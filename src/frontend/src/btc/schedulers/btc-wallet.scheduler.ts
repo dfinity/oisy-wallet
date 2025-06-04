@@ -18,7 +18,7 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
-import { type BitcoinNetwork } from '@dfinity/ckbtc';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import {
 	assertNonNullish,
 	isNullish,

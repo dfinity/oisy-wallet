@@ -4,8 +4,8 @@
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
+	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
@@ -35,8 +35,9 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { token } from '$lib/stores/token.store';
-	import type { Network, NetworkId } from '$lib/types/network';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
+	import type { SendDestinationTab } from '$lib/types/send';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import {
@@ -53,13 +54,11 @@
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let destination = '';
-	export let targetNetwork: Network | undefined = undefined;
 	export let isTransactionsPage: boolean;
 
-	let networkId: NetworkId | undefined = undefined;
-	$: networkId = targetNetwork?.id;
-
+	let destination = '';
+	let activeSendDestinationTab: SendDestinationTab = 'recentlyUsed';
+	let selectedContact: ContactUi | undefined = undefined;
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
@@ -82,15 +81,20 @@
 		})
 	);
 
+	const reset = () => {
+		destination = '';
+		activeSendDestinationTab = 'recentlyUsed';
+		selectedContact = undefined;
+		amount = undefined;
+
+		sendProgressStep = ProgressStepsSend.INITIALIZATION;
+
+		currentStep = undefined;
+	};
+
 	const close = () =>
 		closeModal(() => {
-			destination = '';
-			amount = undefined;
-			targetNetwork = undefined;
-
-			sendProgressStep = ProgressStepsSend.INITIALIZATION;
-
-			currentStep = undefined;
+			reset();
 
 			dispatch('nnsClose');
 		});
@@ -114,7 +118,7 @@
 										? $solAddressTestnetNotLoaded
 										: false;
 
-	const nextStep = async ({ detail: token }: CustomEvent<Token>) => {
+	const onIcSendToken = async ({ detail: token }: CustomEvent<Token>) => {
 		if (isDisabled(token)) {
 			const status = await waitWalletReady(() => isDisabled(token));
 
@@ -125,8 +129,11 @@
 
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			goToStep(WizardStepsSend.SEND);
+			reset();
+
+			goToStep(WizardStepsSend.DESTINATION);
 		};
+
 		await loadTokenAndRun({ token, callback });
 	};
 
@@ -151,6 +158,7 @@
 			code,
 			expectedToken
 		};
+
 		return isNetworkIdEthereum($token?.network.id)
 			? decodeQrCodeETH({
 					...params,
@@ -159,10 +167,6 @@
 				})
 			: decodeQrCode(params);
 	};
-
-	// TODO: Use network id to get the address to support bitcoin.
-	let source: string;
-	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
 <SendTokenContext token={$token}>
@@ -179,45 +183,42 @@
 
 		{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 			<SendTokensList
-				on:icSendToken={nextStep}
+				on:icSendToken={onIcSendToken}
 				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
+		{:else if currentStep?.name === WizardStepsSend.DESTINATION}
+			<SendDestinationWizardStep
+				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
+				formCancelAction={isTransactionsPage ? 'close' : 'back'}
+				on:icBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+				on:icNext={modal.next}
+				on:icClose={close}
+				on:icQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
+			/>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-			<SendQRCodeScan
+			<SendQrCodeScan
 				expectedToken={$token}
 				bind:destination
 				bind:amount
 				decodeQrCode={onDecodeQrCode}
-				on:icQRCodeBack={() =>
-					goToWizardStep({
-						modal,
-						steps,
-						stepName: WizardStepsSend.SEND
-					})}
+				on:icQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
 			/>
 		{:else}
 			<SendWizard
-				{source}
 				{currentStep}
-				bind:destination
-				bind:networkId
-				bind:targetNetwork
+				{destination}
+				{selectedContact}
 				bind:amount
 				bind:sendProgressStep
-				formCancelAction={isTransactionsPage ? 'close' : 'back'}
 				on:icBack={modal.back}
-				on:icSendBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+				on:icSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				on:icTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				on:icNext={modal.next}
 				on:icClose={close}
-				on:icTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-				on:icQRCodeScan={() =>
-					goToWizardStep({
-						modal,
-						steps,
-						stepName: WizardStepsSend.QR_CODE_SCAN
-					})}
 			/>
 		{/if}
 	</WizardModal>

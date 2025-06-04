@@ -1,13 +1,21 @@
 <script lang="ts">
 	import DateBadge from '$lib/components/ui/DateBadge.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		date: Date;
-		testId?: string | undefined;
+		testId?: string;
 	}
 
-	let { date, testId = undefined }: Props = $props();
+	let { date, testId }: Props = $props();
+
+	const hasEnded = $derived(isEndedCampaign(date));
 </script>
 
-<DateBadge variant="warning" {date} {testId} prefix={$i18n.rewards.text.active_date}></DateBadge>
+<DateBadge
+	variant={hasEnded ? 'disabled' : 'warning'}
+	{date}
+	{testId}
+	prefix={hasEnded ? $i18n.rewards.text.ended_date : $i18n.rewards.text.active_date}
+></DateBadge>

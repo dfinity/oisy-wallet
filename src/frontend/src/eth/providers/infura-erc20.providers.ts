@@ -1,25 +1,10 @@
-import {
-	BASE_NETWORK_ID,
-	BASE_SEPOLIA_NETWORK_ID
-} from '$env/networks/networks-evm/networks.evm.base.env';
-import {
-	BSC_MAINNET_NETWORK_ID,
-	BSC_TESTNET_NETWORK_ID
-} from '$env/networks/networks-evm/networks.evm.bsc.env';
-import {
-	ETHEREUM_NETWORK_ID,
-	INFURA_NETWORK_BASE,
-	INFURA_NETWORK_BASE_SEPOLIA,
-	INFURA_NETWORK_BNB_MAINNET,
-	INFURA_NETWORK_BNB_TESTNET,
-	INFURA_NETWORK_HOMESTEAD,
-	INFURA_NETWORK_SEPOLIA,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Metadata } from '$eth/types/erc20';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -63,7 +48,7 @@ export class InfuraErc20Provider implements Erc20Provider {
 		return erc20Contract.balanceOf(address);
 	};
 
-	getFeeData = ({
+	getFeeData = async ({
 		contract: { address: contractAddress },
 		to,
 		from,
@@ -75,7 +60,18 @@ export class InfuraErc20Provider implements Erc20Provider {
 		amount: bigint;
 	}): Promise<bigint> => {
 		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
-		return erc20Contract.approve.estimateGas(to, amount, { from });
+
+		const results = await Promise.allSettled([
+			erc20Contract.approve.estimateGas(to, amount, { from }),
+			erc20Contract.transfer.estimateGas(to, amount, { from })
+		]);
+
+		return results.reduce((max, result) => {
+			if (result.status === 'fulfilled' && result.value > max) {
+				return result.value;
+			}
+			return max;
+		}, ZERO);
 	};
 
 	// Transaction send: https://ethereum.stackexchange.com/a/131944
@@ -120,18 +116,13 @@ export class InfuraErc20Provider implements Erc20Provider {
 	};
 }
 
-const providersMap: [NetworkId, Networkish][] = [
-	[ETHEREUM_NETWORK_ID, INFURA_NETWORK_HOMESTEAD],
-	[SEPOLIA_NETWORK_ID, INFURA_NETWORK_SEPOLIA],
-	[BASE_NETWORK_ID, INFURA_NETWORK_BASE],
-	[BASE_SEPOLIA_NETWORK_ID, INFURA_NETWORK_BASE_SEPOLIA],
-	[BSC_MAINNET_NETWORK_ID, INFURA_NETWORK_BNB_MAINNET],
-	[BSC_TESTNET_NETWORK_ID, INFURA_NETWORK_BNB_TESTNET]
-];
-
-const providers: Record<NetworkId, InfuraErc20Provider> = providersMap.reduce<
-	Record<NetworkId, InfuraErc20Provider>
->((acc, [id, name]) => ({ ...acc, [id]: new InfuraErc20Provider(name) }), {});
+const providers: Record<NetworkId, InfuraErc20Provider> = [
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_EVM_NETWORKS
+].reduce<Record<NetworkId, InfuraErc20Provider>>(
+	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraErc20Provider(infura) }),
+	{}
+);
 
 export const infuraErc20Providers = (networkId: NetworkId): InfuraErc20Provider => {
 	const provider = providers[networkId];

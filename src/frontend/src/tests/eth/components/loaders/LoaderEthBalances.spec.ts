@@ -1,12 +1,5 @@
-import {
-	BASE_ETH_TOKEN,
-	BASE_SEPOLIA_ETH_TOKEN
-} from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
-import {
-	BNB_MAINNET_TOKEN,
-	BNB_TESTNET_TOKEN
-} from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
+import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
 import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -19,6 +12,7 @@ import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 
 vi.mock('$eth/services/eth-balance.services', () => ({
 	loadEthBalances: vi.fn(),
@@ -31,16 +25,9 @@ describe('LoaderEthBalances', () => {
 		networkEnv: 'testnet'
 	});
 
-	const mainnetTokens: Token[] = [ETHEREUM_TOKEN, BASE_ETH_TOKEN, BNB_MAINNET_TOKEN];
+	const allTokens: Token[] = [...SUPPORTED_ETHEREUM_TOKENS, ...SUPPORTED_EVM_TOKENS];
 
-	const allTokens: Token[] = [
-		ETHEREUM_TOKEN,
-		SEPOLIA_TOKEN,
-		BASE_ETH_TOKEN,
-		BASE_SEPOLIA_ETH_TOKEN,
-		BNB_MAINNET_TOKEN,
-		BNB_TESTNET_TOKEN
-	];
+	const mainnetTokens: Token[] = allTokens.filter(({ network: { env } }) => env === 'mainnet');
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -65,7 +52,7 @@ describe('LoaderEthBalances', () => {
 	it('should call `loadEthBalances` on mount', async () => {
 		render(LoaderEthBalances);
 
-		await vi.advanceTimersByTimeAsync(1000);
+		await tick();
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
@@ -76,7 +63,7 @@ describe('LoaderEthBalances', () => {
 
 		render(LoaderEthBalances);
 
-		await vi.advanceTimersByTimeAsync(1000);
+		await tick();
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, allTokens);
@@ -85,7 +72,7 @@ describe('LoaderEthBalances', () => {
 	it('should call `loadErc20Balances` on mount', async () => {
 		render(LoaderEthBalances);
 
-		await vi.advanceTimersByTimeAsync(1000);
+		await tick();
 
 		expect(loadErc20Balances).toHaveBeenCalledOnce();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
@@ -106,9 +93,14 @@ describe('LoaderEthBalances', () => {
 	});
 
 	it('should re-trigger loading balances when address changes', async () => {
+		vi.stubGlobal(
+			'setInterval',
+			vi.fn(() => 123456789)
+		);
+
 		render(LoaderEthBalances);
 
-		await vi.advanceTimersByTimeAsync(1000);
+		await tick();
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
@@ -131,6 +123,8 @@ describe('LoaderEthBalances', () => {
 			address: mockEthAddress2,
 			erc20Tokens: mockErc20DefaultTokens
 		});
+
+		vi.unstubAllGlobals();
 	});
 
 	it('should not handle errors', async () => {
@@ -144,7 +138,7 @@ describe('LoaderEthBalances', () => {
 			}
 		});
 
-		await vi.advanceTimersByTimeAsync(1000);
+		await tick();
 
 		expect(getByTestId(testId)).toBeInTheDocument();
 

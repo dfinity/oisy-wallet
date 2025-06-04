@@ -1,0 +1,633 @@
+type WithdrawToSubaccountArgs = record {
+	amount : nat;
+	fee : nat;
+	subaccount : blob;
+	token : text
+};
+type WithdrawArgs = record {
+	amount : nat;
+	fee : nat;
+	token : text
+};
+type Value = variant {
+	Blob : blob;
+	Int : int;
+	Nat : nat;
+	Text : text
+};
+type UserPositionInfoWithTokenAmount = record {
+	feeGrowthInside0LastX128 : nat;
+	feeGrowthInside1LastX128 : nat;
+	id : nat;
+	liquidity : nat;
+	tickLower : int;
+	tickUpper : int;
+	token0Amount : nat;
+	token1Amount : nat;
+	tokensOwed0 : nat;
+	tokensOwed1 : nat
+};
+type UserPositionInfoWithId = record {
+	feeGrowthInside0LastX128 : nat;
+	feeGrowthInside1LastX128 : nat;
+	id : nat;
+	liquidity : nat;
+	tickLower : int;
+	tickUpper : int;
+	tokensOwed0 : nat;
+	tokensOwed1 : nat
+};
+type UserPositionInfo = record {
+	feeGrowthInside0LastX128 : nat;
+	feeGrowthInside1LastX128 : nat;
+	liquidity : nat;
+	tickLower : int;
+	tickUpper : int;
+	tokensOwed0 : nat;
+	tokensOwed1 : nat
+};
+type TransferLog = record {
+	action : text;
+	amount : nat;
+	daysFrom19700101 : nat;
+	errorMsg : text;
+	fee : nat;
+	from : principal;
+	fromSubaccount : opt blob;
+	index : nat;
+	owner : principal;
+	result : text;
+	timestamp : nat;
+	to : principal;
+	toSubaccount : opt blob;
+	token : Token
+};
+type TransactionType = variant {
+	addLiquidity;
+	claim;
+	decreaseLiquidity;
+	increaseLiquidity;
+	limitOrder : record {
+		positionId : nat;
+		tickLimit : int;
+		token0InAmount : nat;
+		token1InAmount : nat
+	};
+	swap;
+	transferPosition : nat
+};
+type Token = record {
+	address : text;
+	standard : text
+};
+type Time = int;
+type TickLiquidityInfo = record {
+	liquidityGross : nat;
+	liquidityNet : int;
+	price0 : nat;
+	price0Decimal : nat;
+	price1 : nat;
+	price1Decimal : nat;
+	tickIndex : int
+};
+type TickInfoWithId = record {
+	feeGrowthOutside0X128 : nat;
+	feeGrowthOutside1X128 : nat;
+	id : text;
+	initialized : bool;
+	liquidityGross : nat;
+	liquidityNet : int;
+	secondsOutside : nat;
+	secondsPerLiquidityOutsideX128 : nat;
+	tickCumulativeOutside : int
+};
+type SwapRecordInfo = record {
+	TVLToken0 : int;
+	TVLToken1 : int;
+	action : TransactionType;
+	feeAmount : int;
+	feeAmountTotal : int;
+	feeTire : nat;
+	from : text;
+	liquidityChange : nat;
+	liquidityTotal : nat;
+	poolId : text;
+	price : nat;
+	recipient : text;
+	tick : int;
+	timestamp : int;
+	to : text;
+	token0AmountTotal : nat;
+	token0ChangeAmount : nat;
+	token0Fee : nat;
+	token0Id : text;
+	token0Standard : text;
+	token1AmountTotal : nat;
+	token1ChangeAmount : nat;
+	token1Fee : nat;
+	token1Id : text;
+	token1Standard : text
+};
+type SwapPool = service {
+	activeJobs : () -> ();
+	addLimitOrder : (LimitOrderArgs) -> (Result_2);
+	allTokenBalance : (nat, nat) -> (Result_31) query;
+	approvePosition : (principal, nat) -> (Result_2);
+	batchRefreshIncome : (vec nat) -> (Result_30) query;
+	checkOwnerOfUserPosition : (principal, nat) -> (Result_2) query;
+	claim : (ClaimArgs) -> (Result_29);
+	decreaseLiquidity : (DecreaseLiquidityArgs) -> (Result_29);
+	deposit : (DepositArgs) -> (Result);
+	depositAllAndMint : (DepositAndMintArgs) -> (Result);
+	depositFrom : (DepositArgs) -> (Result);
+	getAdmins : () -> (vec principal) query;
+	getAvailabilityState : () -> (
+		record {
+			available : bool;
+			whiteList : vec principal
+		}
+	) query;
+	getClaimLog : () -> (vec text) query;
+	getCycleInfo : () -> (Result_28);
+	getFeeGrowthGlobal : () -> (Result_27) query;
+	getInitArgs : () -> (Result_26) query;
+	getJobs : () -> (
+		record {
+			jobs : vec JobInfo;
+			level : Level
+		}
+	) query;
+	getLimitOrderAvailabilityState : () -> (Result_2) query;
+	getLimitOrderStack : () -> (Result_25) query;
+	getLimitOrders : () -> (Result_24) query;
+	getMistransferBalance : (Token) -> (Result);
+	getPosition : (GetPositionArgs) -> (Result_23) query;
+	getPositions : (nat, nat) -> (Result_22) query;
+	getSortedUserLimitOrders : (principal) -> (Result_21) query;
+	getSwapRecordState : () -> (Result_20) query;
+	getTickBitmaps : () -> (Result_19) query;
+	getTickInfos : (nat, nat) -> (Result_18) query;
+	getTicks : (nat, nat) -> (Result_17) query;
+	getTokenAmountState : () -> (Result_16) query;
+	getTokenBalance : () -> (
+		record {
+			token0 : nat;
+			token1 : nat
+		}
+	);
+	getTokenMeta : () -> (
+		record {
+			token0 : vec record {
+				text;
+				Value
+			};
+			token0Fee : opt nat;
+			token1 : vec record {
+				text;
+				Value
+			};
+			token1Fee : opt nat
+		}
+	);
+	getTransferLogs : () -> (Result_15) query;
+	getUserByPositionId : (nat) -> (Result_1) query;
+	getUserLimitOrders : (principal) -> (Result_14) query;
+	getUserPosition : (nat) -> (Result_13) query;
+	getUserPositionIds : () -> (Result_12) query;
+	getUserPositionIdsByPrincipal : (principal) -> (Result_11) query;
+	getUserPositionWithTokenAmount : (nat, nat) -> (Result_10) query;
+	getUserPositions : (nat, nat) -> (Result_9) query;
+	getUserPositionsByPrincipal : (principal) -> (Result_8) query;
+	getUserUnusedBalance : (principal) -> (Result_7) query;
+	getVersion : () -> (text) query;
+	icrc10_supported_standards : () -> (
+		vec record {
+			name : text;
+			url : text
+		}
+	) query;
+	icrc21_canister_call_consent_message : (Icrc21ConsentMessageRequest) -> (Icrc21ConsentMessageResponse);
+	icrc28_trusted_origins : () -> (Icrc28TrustedOriginsResponse);
+	increaseLiquidity : (IncreaseLiquidityArgs) -> (Result);
+	init : (nat, int, nat) -> ();
+	metadata : () -> (Result_6) query;
+	mint : (MintArgs) -> (Result);
+	quote : (SwapArgs) -> (Result) query;
+	quoteForAll : (SwapArgs) -> (Result) query;
+	refreshIncome : (nat) -> (Result_5) query;
+	removeErrorTransferLog : (nat, bool) -> ();
+	removeLimitOrder : (nat) -> (Result_2);
+	restartJobs : (vec text) -> ();
+	setAdmins : (vec principal) -> ();
+	setAvailable : (bool) -> ();
+	setIcrc28TrustedOrigins : (vec text) -> (Result_4);
+	setLimitOrderAvailable : (bool) -> ();
+	setWhiteList : (vec principal) -> ();
+	stopJobs : (vec text) -> ();
+	sumTick : () -> (Result_3) query;
+	swap : (SwapArgs) -> (Result);
+	transferPosition : (principal, principal, nat) -> (Result_2);
+	upgradeTokenStandard : (principal) -> (Result_1);
+	withdraw : (WithdrawArgs) -> (Result);
+	withdrawMistransferBalance : (Token) -> (Result);
+	withdrawToSubaccount : (WithdrawToSubaccountArgs) -> (Result)
+};
+type SwapArgs = record {
+	amountIn : text;
+	amountOutMinimum : text;
+	zeroForOne : bool
+};
+type Result_9 = variant {
+	err : Error;
+	ok : Page
+};
+type Result_8 = variant {
+	err : Error;
+	ok : vec UserPositionInfoWithId
+};
+type Result_7 = variant {
+	err : Error;
+	ok : record {
+		balance0 : nat;
+		balance1 : nat
+	}
+};
+type Result_6 = variant {
+	err : Error;
+	ok : PoolMetadata
+};
+type Result_5 = variant {
+	err : Error;
+	ok : record {
+		tokensOwed0 : nat;
+		tokensOwed1 : nat
+	}
+};
+type Result_4 = variant {
+	err;
+	ok : bool
+};
+type Result_31 = variant {
+	err : Error;
+	ok : Page_5
+};
+type Result_30 = variant {
+	err : Error;
+	ok : record {
+		tokenIncome : vec record {
+			nat;
+			record {
+				tokensOwed0 : nat;
+				tokensOwed1 : nat
+			}
+		};
+		totalTokensOwed0 : nat;
+		totalTokensOwed1 : nat
+	}
+};
+type Result_3 = variant {
+	err : Error;
+	ok : int
+};
+type Result_29 = variant {
+	err : Error;
+	ok : record {
+		amount0 : nat;
+		amount1 : nat
+	}
+};
+type Result_28 = variant {
+	err : Error;
+	ok : CycleInfo
+};
+type Result_27 = variant {
+	err : Error;
+	ok : record {
+		feeGrowthGlobal0X128 : nat;
+		feeGrowthGlobal1X128 : nat
+	}
+};
+type Result_26 = variant {
+	err : Error;
+	ok : record {
+		feeReceiverCid : principal;
+		infoCid : principal;
+		token0 : Token;
+		token1 : Token;
+		trustedCanisterManagerCid : principal
+	}
+};
+type Result_25 = variant {
+	err : Error;
+	ok : vec record {
+		LimitOrderType;
+		LimitOrderKey;
+		LimitOrderValue
+	}
+};
+type Result_24 = variant {
+	err : Error;
+	ok : record {
+		lowerLimitOrders : vec record {
+			LimitOrderKey;
+			LimitOrderValue
+		};
+		upperLimitOrders : vec record {
+			LimitOrderKey;
+			LimitOrderValue
+		}
+	}
+};
+type Result_23 = variant {
+	err : Error;
+	ok : PositionInfo
+};
+type Result_22 = variant {
+	err : Error;
+	ok : Page_4
+};
+type Result_21 = variant {
+	err : Error;
+	ok : vec record {
+		tickLimit : int;
+		timestamp : nat;
+		token0InAmount : nat;
+		token1InAmount : nat;
+		userPositionId : nat
+	}
+};
+type Result_20 = variant {
+	err : Error;
+	ok : record {
+		errors : vec PushError;
+		infoCid : text;
+		records : vec SwapRecordInfo;
+		retryCount : nat
+	}
+};
+type Result_2 = variant {
+	err : Error;
+	ok : bool
+};
+type Result_19 = variant {
+	err : Error;
+	ok : vec record {
+		int;
+		nat
+	}
+};
+type Result_18 = variant {
+	err : Error;
+	ok : Page_3
+};
+type Result_17 = variant {
+	err : Error;
+	ok : Page_2
+};
+type Result_16 = variant {
+	err : Error;
+	ok : record {
+		swapFee0Repurchase : nat;
+		swapFee1Repurchase : nat;
+		swapFeeReceiver : text;
+		token0Amount : nat;
+		token1Amount : nat
+	}
+};
+type Result_15 = variant {
+	err : Error;
+	ok : vec TransferLog
+};
+type Result_14 = variant {
+	err : Error;
+	ok : record {
+		lowerLimitOrderIds : vec record {
+			timestamp : nat;
+			userPositionId : nat
+		};
+		upperLimitOrdersIds : vec record {
+			timestamp : nat;
+			userPositionId : nat
+		}
+	}
+};
+type Result_13 = variant {
+	err : Error;
+	ok : UserPositionInfo
+};
+type Result_12 = variant {
+	err : Error;
+	ok : vec record {
+		text;
+		vec nat
+	}
+};
+type Result_11 = variant {
+	err : Error;
+	ok : vec nat
+};
+type Result_10 = variant {
+	err : Error;
+	ok : Page_1
+};
+type Result_1 = variant {
+	err : Error;
+	ok : text
+};
+type Result = variant {
+	err : Error;
+	ok : nat
+};
+type PushError = record {
+	message : text;
+	time : int
+};
+type PositionInfoWithId = record {
+	feeGrowthInside0LastX128 : nat;
+	feeGrowthInside1LastX128 : nat;
+	id : text;
+	liquidity : nat;
+	tokensOwed0 : nat;
+	tokensOwed1 : nat
+};
+type PositionInfo = record {
+	feeGrowthInside0LastX128 : nat;
+	feeGrowthInside1LastX128 : nat;
+	liquidity : nat;
+	tokensOwed0 : nat;
+	tokensOwed1 : nat
+};
+type PoolMetadata = record {
+	fee : nat;
+	key : text;
+	liquidity : nat;
+	maxLiquidityPerTick : nat;
+	nextPositionId : nat;
+	sqrtPriceX96 : nat;
+	tick : int;
+	token0 : Token;
+	token1 : Token
+};
+type Page_5 = record {
+	content : vec record {
+		principal;
+		AccountBalance
+	};
+	limit : nat;
+	offset : nat;
+	totalElements : nat
+};
+type Page_4 = record {
+	content : vec PositionInfoWithId;
+	limit : nat;
+	offset : nat;
+	totalElements : nat
+};
+type Page_3 = record {
+	content : vec TickLiquidityInfo;
+	limit : nat;
+	offset : nat;
+	totalElements : nat
+};
+type Page_2 = record {
+	content : vec TickInfoWithId;
+	limit : nat;
+	offset : nat;
+	totalElements : nat
+};
+type Page_1 = record {
+	content : vec UserPositionInfoWithTokenAmount;
+	limit : nat;
+	offset : nat;
+	totalElements : nat
+};
+type Page = record {
+	content : vec UserPositionInfoWithId;
+	limit : nat;
+	offset : nat;
+	totalElements : nat
+};
+type MintArgs = record {
+	amount0Desired : text;
+	amount1Desired : text;
+	fee : nat;
+	tickLower : int;
+	tickUpper : int;
+	token0 : text;
+	token1 : text
+};
+type LimitOrderValue = record {
+	owner : principal;
+	token0InAmount : nat;
+	token1InAmount : nat;
+	userPositionId : nat
+};
+type LimitOrderType = variant {
+	Lower;
+	Upper
+};
+type LimitOrderKey = record {
+	tickLimit : int;
+	timestamp : nat
+};
+type LimitOrderArgs = record {
+	positionId : nat;
+	tickLimit : int
+};
+type Level = variant {
+	Active;
+	Inactive
+};
+type JobInfo = record {
+	interval : nat;
+	lastRun : Time;
+	name : text;
+	timerId : opt nat
+};
+type IncreaseLiquidityArgs = record {
+	amount0Desired : text;
+	amount1Desired : text;
+	positionId : nat
+};
+type Icrc28TrustedOriginsResponse = record { trusted_origins : vec text };
+type Icrc21ErrorInfo = record { description : text };
+type Icrc21Error = variant {
+	ConsentMessageUnavailable : Icrc21ErrorInfo;
+	GenericError : record {
+		description : text;
+		error_code : nat
+	};
+	InsufficientPayment : Icrc21ErrorInfo;
+	UnsupportedCanisterCall : Icrc21ErrorInfo
+};
+type Icrc21ConsentMessageSpec = record {
+	device_spec : opt variant {
+		GenericDisplay;
+		LineDisplay : record {
+			characters_per_line : nat16;
+			lines_per_page : nat16
+		}
+	};
+	metadata : Icrc21ConsentMessageMetadata
+};
+type Icrc21ConsentMessageResponse = variant {
+	Err : Icrc21Error;
+	Ok : Icrc21ConsentInfo
+};
+type Icrc21ConsentMessageRequest = record {
+	arg : blob;
+	method : text;
+	user_preferences : Icrc21ConsentMessageSpec
+};
+type Icrc21ConsentMessageMetadata = record {
+	language : text;
+	utc_offset_minutes : opt int16
+};
+type Icrc21ConsentMessage = variant {
+	GenericDisplayMessage : text;
+	LineDisplayMessage : record { pages : vec record { lines : vec text } }
+};
+type Icrc21ConsentInfo = record {
+	consent_message : Icrc21ConsentMessage;
+	metadata : Icrc21ConsentMessageMetadata
+};
+type GetPositionArgs = record {
+	tickLower : int;
+	tickUpper : int
+};
+type Error = variant {
+	CommonError;
+	InsufficientFunds;
+	InternalError : text;
+	UnsupportedToken : text
+};
+type DepositArgs = record {
+	amount : nat;
+	fee : nat;
+	token : text
+};
+type DepositAndMintArgs = record {
+	amount0 : nat;
+	amount0Desired : text;
+	amount1 : nat;
+	amount1Desired : text;
+	fee0 : nat;
+	fee1 : nat;
+	positionOwner : principal;
+	tickLower : int;
+	tickUpper : int
+};
+type DecreaseLiquidityArgs = record {
+	liquidity : text;
+	positionId : nat
+};
+type CycleInfo = record {
+	available : nat;
+	balance : nat
+};
+type ClaimArgs = record { positionId : nat };
+type AccountBalance = record {
+	balance0 : nat;
+	balance1 : nat
+};
+service : (Token, Token, principal, principal, principal) -> SwapPool

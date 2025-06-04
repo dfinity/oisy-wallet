@@ -8,6 +8,7 @@ import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
+import { Network } from 'alchemy-sdk';
 
 export const BASE_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_BASE_MAINNET_DISABLED
@@ -25,6 +26,11 @@ export const BASE_NETWORK: EthereumNetwork = {
 	iconLight: baseMainnetIconLight,
 	iconDark: baseMainnetIconDark,
 	explorerUrl: BASE_EXPLORER_URL,
+	providers: {
+		infura: 'base',
+		alchemy: Network.BASE_MAINNET,
+		alchemyJsonRpcUrl: 'https://base-mainnet.g.alchemy.com/v2'
+	},
 	exchange: { coingeckoId: 'base' },
 	buy: { onramperId: 'base' }
 };
@@ -40,7 +46,12 @@ export const BASE_SEPOLIA_NETWORK: EthereumNetwork = {
 	chainId: 84532n,
 	iconLight: baseSepoliaIconLight,
 	iconDark: baseSepoliaIconDark,
-	explorerUrl: BASE_SEPOLIA_EXPLORER_URL
+	explorerUrl: BASE_SEPOLIA_EXPLORER_URL,
+	providers: {
+		infura: 'base-sepolia',
+		alchemy: Network.BASE_SEPOLIA,
+		alchemyJsonRpcUrl: 'https://base-sepolia.g.alchemy.com/v2'
+	}
 };
 
 export const SUPPORTED_BASE_NETWORKS: EthereumNetwork[] = defineSupportedNetworks({

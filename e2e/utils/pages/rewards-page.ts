@@ -1,3 +1,4 @@
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	NAVIGATION_ITEM_REWARDS,
 	REWARDS_ACTIVE_CAMPAIGNS_CONTAINER
@@ -7,12 +8,12 @@ import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 export type RewardsPageParams = HomepageLoggedInParams;
 
 export class RewardsPage extends HomepageLoggedIn {
-	constructor({ page, iiPage, viewportSize }: RewardsPageParams) {
-		super({ page, iiPage, viewportSize });
+	constructor(params: RewardsPageParams) {
+		super(params);
 	}
 
 	override async extendWaitForReady(): Promise<void> {
-		await this.navigateTo(NAVIGATION_ITEM_REWARDS);
+		await this.navigateTo({ testId: NAVIGATION_ITEM_REWARDS, expectedPath: AppPath.Rewards });
 		await this.mockSelector({
 			selector: `[data-tid^="${REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}-"][data-tid$="-badge"]`
 		});

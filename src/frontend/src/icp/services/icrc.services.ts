@@ -2,19 +2,22 @@ import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { balance, metadata } from '$icp/api/icrc-ledger.api';
+import { buildIndexedDip20Tokens } from '$icp/services/dip20-tokens.services';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkToken, IcInterface, IcToken } from '$icp/types/ic-token';
-import type { IcrcCustomTokenWithoutId } from '$icp/types/icrc-custom-token';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	mapIcrcToken,
 	mapTokenOisyName,
+	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { listCustomTokens } from '$lib/api/backend.api';
+import { getIdbIcTokens, setIdbIcTokens } from '$lib/api/idb-tokens.api';
+import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -34,18 +37,26 @@ import {
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
-	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity })]);
+	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
 const loadDefaultIcrcTokens = async () => {
 	await Promise.all(
-		ICRC_TOKENS.map(mapTokenOisyName).map((token) => loadDefaultIcrc({ data: token }))
+		ICRC_TOKENS.map(mapTokenOisyName)
+			.map(mapTokenOisySymbol)
+			.map((token) => loadDefaultIcrc({ data: token }))
 	);
 };
 
-export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
-	queryAndUpdate<IcrcCustomTokenWithoutId[]>({
-		request: (params) => loadIcrcCustomTokens(params),
+export const loadCustomTokens = ({
+	identity,
+	useCache = false
+}: {
+	identity: OptionIdentity;
+	useCache?: boolean;
+}): Promise<void> =>
+	queryAndUpdate<IcrcCustomToken[]>({
+		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
 		onLoad: loadIcrcCustomData,
 		onUpdateError: ({ error: err }) => {
 			icrcCustomTokensStore.resetAll();
@@ -104,24 +115,28 @@ const loadIcrcData = ({
 	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
 };
 
-/**
- * @todo Add missing document and test for this function.
- */
-const loadIcrcCustomTokens = async (params: {
+const loadIcrcCustomTokens = async ({
+	identity,
+	certified,
+	useCache = false
+}: {
 	identity: OptionIdentity;
 	certified: boolean;
-}): Promise<IcrcCustomTokenWithoutId[]> => {
-	const tokens = await listCustomTokens({
-		...params,
-		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	useCache?: boolean;
+}): Promise<IcrcCustomToken[]> => {
+	const tokens = await loadNetworkCustomTokens({
+		identity,
+		certified,
+		filterTokens: ({ token }) => 'Icrc' in token,
+		setIdbTokens: setIdbIcTokens,
+		getIdbTokens: getIdbIcTokens,
+		useCache
 	});
 
-	// We filter the custom tokens that are Icrc (the backend "Custom Token" potentially supports other types).
-	const icrcTokens = tokens.filter(({ token }) => 'Icrc' in token);
-
 	return await loadCustomIcrcTokensData({
-		tokens: icrcTokens,
-		...params
+		tokens,
+		identity,
+		certified
 	});
 };
 
@@ -133,14 +148,17 @@ const loadCustomIcrcTokensData = async ({
 	tokens: CustomToken[];
 	certified: boolean;
 	identity: OptionIdentity;
-}): Promise<IcrcCustomTokenWithoutId[]> => {
-	const indexedIcrcCustomTokens = buildIndexedIcrcCustomTokens();
+}): Promise<IcrcCustomToken[]> => {
+	const indexedIcrcCustomTokens = {
+		...buildIndexedIcrcCustomTokens(),
+		...buildIndexedDip20Tokens()
+	};
 
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
 		custom_token: CustomToken,
 		index: number
-	): Promise<IcrcCustomTokenWithoutId | undefined> => {
+	): Promise<IcrcCustomToken | undefined> => {
 		const { enabled, version: v, token } = custom_token;
 
 		if (!('Icrc' in token)) {
@@ -187,7 +205,7 @@ const loadCustomIcrcTokensData = async ({
 
 	const results = await Promise.allSettled(tokens.map(requestIcrcCustomTokenMetadata));
 
-	return results.reduce<IcrcCustomTokenWithoutId[]>((acc, result, index) => {
+	return results.reduce<IcrcCustomToken[]>((acc, result, index) => {
 		if (result.status !== 'fulfilled') {
 			// For development purposes, we want to see the error in the console.
 			console.error(result.reason);
@@ -216,7 +234,7 @@ const loadIcrcCustomData = ({
 	certified
 }: {
 	certified: boolean;
-	response: IcrcCustomTokenWithoutId[];
+	response: IcrcCustomToken[];
 }) => {
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };

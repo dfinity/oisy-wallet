@@ -1,15 +1,10 @@
-import {
-	BASE_NETWORK,
-	BASE_SEPOLIA_NETWORK
-} from '$env/networks/networks-evm/networks.evm.base.env';
-import {
-	BSC_MAINNET_NETWORK,
-	BSC_TESTNET_NETWORK
-} from '$env/networks/networks-evm/networks.evm.bsc.env';
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
+import type { Erc20Token } from '$eth/types/erc20';
 import type {
 	EtherscanProviderInternalTransaction,
+	EtherscanProviderTokenTransferTransaction,
 	EtherscanProviderTransaction
 } from '$eth/types/etherscan-transaction';
 import type { EthereumChainId } from '$eth/types/network';
@@ -27,11 +22,11 @@ import {
 } from 'ethers/providers';
 import { get } from 'svelte/store';
 
-type TransactionsParams = {
+interface TransactionsParams {
 	address: EthAddress;
 	startBlock?: BlockTag;
 	endBlock?: BlockTag;
-};
+}
 
 export class EtherscanProvider {
 	private readonly provider: EtherscanProviderLib;
@@ -137,21 +132,70 @@ export class EtherscanProvider {
 
 		return results.flat();
 	};
+
+	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address
+	erc20Transactions = async ({
+		address,
+		contract: { address: contractAddress }
+	}: {
+		address: EthAddress;
+		contract: Erc20Token;
+	}): Promise<Transaction[]> => {
+		const params = {
+			chainId: this.chainId,
+			action: 'tokentx',
+			contractAddress,
+			address,
+			startblock: 0,
+			endblock: 99999999,
+			sort: 'desc'
+		};
+
+		const result: EtherscanProviderTokenTransferTransaction[] | string = await this.provider.fetch(
+			'account',
+			params
+		);
+
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(
+			({
+				nonce,
+				gas,
+				gasPrice,
+				hash,
+				blockNumber,
+				timeStamp,
+				from,
+				to,
+				value
+			}: EtherscanProviderTokenTransferTransaction): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				nonce: parseInt(nonce),
+				gasLimit: BigInt(gas),
+				gasPrice: BigInt(gasPrice),
+				value: BigInt(value),
+				chainId: this.chainId
+			})
+		);
+	};
 }
 
-const ETHERSCAN_PLUGIN = new EtherscanPlugin('https://api.etherscan.io/v2');
-
 const providers: Record<NetworkId, EtherscanProvider> = [
-	ETHEREUM_NETWORK,
-	SEPOLIA_NETWORK,
-	BASE_NETWORK,
-	BASE_SEPOLIA_NETWORK,
-	BSC_MAINNET_NETWORK,
-	BSC_TESTNET_NETWORK
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, EtherscanProvider>>((acc, { id, name, chainId }) => {
 	const network = new Network(name, chainId);
 
-	network.attachPlugin(ETHERSCAN_PLUGIN);
+	const plugin = new EtherscanPlugin('https://api.etherscan.io/v2');
+
+	network.attachPlugin(plugin);
 
 	return { ...acc, [id]: new EtherscanProvider(network, chainId) };
 }, {});

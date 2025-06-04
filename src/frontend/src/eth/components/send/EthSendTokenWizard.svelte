@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type WizardStep } from '@dfinity/gix-components';
+	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -22,7 +22,6 @@
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		TRACK_COUNT_ETH_SEND_ERROR,
@@ -37,14 +36,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Network } from '$lib/types/network';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let currentStep: WizardStep | undefined;
-	export let formCancelAction: 'back' | 'close' = 'close';
 
 	/**
 	 * Send context store
@@ -58,9 +56,9 @@
 
 	export let destination = '';
 	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
+	export let selectedContact: ContactUi | undefined = undefined;
 	// Required for the fee and also to retrieve ck minter information.
 	// i.e. Ethereum or Sepolia "main" token.
 	export let nativeEthereumToken: Token;
@@ -78,18 +76,18 @@
 	 * Fee context store
 	 */
 
-	let feeStore = initFeeStore();
+	const feeStore = initFeeStore();
 
-	let feeSymbolStore = writable<string | undefined>(undefined);
+	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(nativeEthereumToken.symbol);
 
-	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
 	$: feeTokenIdStore.set(nativeEthereumToken.id);
 
-	let feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set(nativeEthereumToken.decimals);
 
-	let feeExchangeRateStore = writable<number | undefined>(undefined);
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
 	$: feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
 
 	let feeContext: FeeContext | undefined;
@@ -136,8 +134,7 @@
 		}
 
 		const { valid } = assertCkEthMinterInfoLoaded({
-			minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
-			network: targetNetwork
+			minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 		});
 
 		if (!valid) {
@@ -180,7 +177,6 @@
 				maxPriorityFeePerGas,
 				gas,
 				sourceNetwork,
-				targetNetwork,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 			});
@@ -222,18 +218,10 @@
 	{destination}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}
 	{sourceNetwork}
-	{targetNetwork}
 	{nativeEthereumToken}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<EthSendReview
-			on:icBack
-			on:icSend={send}
-			{destination}
-			{amount}
-			{sourceNetwork}
-			{targetNetwork}
-		/>
+		<EthSendReview on:icBack on:icSend={send} {destination} {selectedContact} {amount} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
 			progressStep={sendProgressStep}
@@ -243,20 +231,14 @@
 		<EthSendForm
 			on:icNext
 			on:icClose={close}
-			on:icQRCodeScan
+			on:icBack
 			on:icTokensList
+			{selectedContact}
 			bind:destination
 			bind:amount
-			bind:network={targetNetwork}
 			{nativeEthereumToken}
 		>
-			<svelte:fragment slot="cancel">
-				{#if formCancelAction === 'back'}
-					<ButtonBack onclick={back} />
-				{:else}
-					<ButtonCancel onclick={close} />
-				{/if}
-			</svelte:fragment>
+			<ButtonBack onclick={back} slot="cancel" />
 		</EthSendForm>
 	{:else}
 		<slot />

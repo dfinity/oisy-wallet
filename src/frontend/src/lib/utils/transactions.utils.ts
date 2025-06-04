@@ -4,11 +4,12 @@ import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
-import { type BtcStatusesData } from '$icp/stores/btc.store';
-import { type CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
-import { type CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
-import { type IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
-import { type IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import type { BtcStatusesData } from '$icp/stores/btc.store';
+import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
+import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
+import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
+import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
@@ -17,14 +18,18 @@ import {
 	getAllIcTransactions,
 	getIcExtendedTransactions
 } from '$icp/utils/ic-transactions.utils';
-import { MICRO_TRANSACTION_USD_THRESHOLD } from '$lib/constants/app.constants';
+import { MICRO_TRANSACTION_USD_THRESHOLD, ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
-import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
-import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
+import type {
+	AllTransactionUiWithCmp,
+	AnyTransactionUi,
+	AnyTransactionUiWithToken
+} from '$lib/types/transaction';
+import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
@@ -285,3 +290,62 @@ export const areTransactionsStoresLoading = (
 
 	return (someNullish || someNotInitialized) && allEmpty;
 };
+
+export const areTransactionsStoresLoaded = (
+	transactionsStores: TransactionsStoreCheckParams[]
+): boolean =>
+	transactionsStores.length > 0 &&
+	transactionsStores.every((transactionsStore) =>
+		isTransactionsStoreInitialized(transactionsStore)
+	);
+
+export const getKnownDestinations = (
+	transactions: AnyTransactionUiWithToken[]
+): KnownDestinations =>
+	transactions.reduce<KnownDestinations>(
+		(acc, { timestamp, value, to, type, token }) =>
+			nonNullish(to) && type === 'send' && nonNullish(value) && value > ZERO
+				? {
+						...acc,
+						...(Array.isArray(to) ? to : [to]).reduce(
+							(innerAcc, address) => ({
+								...innerAcc,
+								[address]: {
+									amounts: [
+										...(nonNullish(acc[address]) ? acc[address].amounts : []),
+										{ value, token }
+									],
+									timestamp:
+										nonNullish(acc[address]?.timestamp) && nonNullish(timestamp)
+											? Math.max(Number(acc[address].timestamp), Number(timestamp))
+											: nonNullish(timestamp)
+												? Number(timestamp)
+												: acc[address].timestamp,
+									address
+								}
+							}),
+							{}
+						)
+					}
+				: acc,
+		{}
+	);
+
+/**
+ * Finds the oldest transaction by timestamp in a list of transactions.
+ *
+ * @param transactions - The list of transactions to search through.
+ * @returns The last transaction or undefined if no transactions are provided.
+ */
+export const findOldestTransaction = <T extends IcTransactionUi | SolTransactionUi>(
+	transactions: T[]
+): T | undefined =>
+	transactions.length >= 0
+		? transactions.reduce<T>(
+				(min, transaction) =>
+					(Number(transaction.timestamp) ?? Infinity) < (Number(min.timestamp) ?? Infinity)
+						? transaction
+						: min,
+				transactions[0]
+			)
+		: undefined;

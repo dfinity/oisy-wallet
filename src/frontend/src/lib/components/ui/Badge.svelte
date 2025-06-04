@@ -7,13 +7,15 @@
 		styleClass?: string | undefined;
 		testId?: string | undefined;
 		variant?: BadgeVariant;
+		width?: 'w-full' | 'w-fit';
 	}
 
 	let {
 		children,
 		styleClass = undefined,
 		testId = undefined,
-		variant = 'default'
+		variant = 'default',
+		width = 'w-full'
 	}: Props = $props();
 
 	const variantClassNames = {
@@ -29,9 +31,9 @@
 
 <span
 	data-tid={testId}
-	class="inline-flex h-fit w-full items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold {variantClassNames[
+	class="inline-flex h-fit items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold {variantClassNames[
 		variant
-	]} {styleClass ?? ''}"
+	]} {styleClass ?? ''} {width}"
 >
 	<span class="inline-block min-w-0 truncate">
 		{@render children?.()}

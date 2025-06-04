@@ -41,24 +41,24 @@ export interface EtherscanProviderInternalTransaction {
 }
 
 // https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address
-export interface EtherscanRestTransaction {
-	blockHash: string;
+export interface EtherscanProviderTokenTransferTransaction {
 	blockNumber: string;
-	confirmations: string;
-	contractAddress: string;
-	cumulativeGasUsed: string;
+	timeStamp: string;
+	hash: string;
+	nonce: string;
+	blockHash: string;
 	from: string;
+	contractAddress: string;
+	to: string;
+	value: string;
+	tokenName: string;
+	tokenSymbol: string;
+	tokenDecimal: string;
+	transactionIndex: string;
 	gas: string;
 	gasPrice: string;
 	gasUsed: string;
-	hash: string;
+	cumulativeGasUsed: string;
 	input: string;
-	nonce: string;
-	timeStamp: string;
-	to: string;
-	tokenDecimal: string;
-	tokenName: string;
-	tokenSymbol: string;
-	transactionIndex: string;
-	value: string;
+	confirmations: string;
 }

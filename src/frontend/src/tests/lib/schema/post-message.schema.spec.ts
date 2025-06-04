@@ -7,6 +7,7 @@ import {
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import {
 	JsonTransactionsTextSchema,
+	POST_MESSAGE_REQUESTS,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
@@ -39,34 +40,7 @@ import * as z from 'zod';
 
 describe('post-message.schema', () => {
 	describe('PostMessageRequestSchema', () => {
-		const validCases = [
-			'startIdleTimer',
-			'stopIdleTimer',
-			'startCodeTimer',
-			'stopCodeTimer',
-			'startExchangeTimer',
-			'stopExchangeTimer',
-			'stopIcpWalletTimer',
-			'startIcpWalletTimer',
-			'triggerIcpWalletTimer',
-			'stopIcrcWalletTimer',
-			'startIcrcWalletTimer',
-			'triggerIcrcWalletTimer',
-			'stopBtcWalletTimer',
-			'startBtcWalletTimer',
-			'triggerBtcWalletTimer',
-			'stopBtcStatusesTimer',
-			'startBtcStatusesTimer',
-			'triggerBtcStatusesTimer',
-			'stopCkBTCUpdateBalanceTimer',
-			'startCkBTCUpdateBalanceTimer',
-			'stopCkEthMinterInfoTimer',
-			'startCkEthMinterInfoTimer',
-			'triggerCkEthMinterInfoTimer',
-			'stopCkBtcMinterInfoTimer',
-			'startCkBtcMinterInfoTimer',
-			'triggerCkBtcMinterInfoTimer'
-		];
+		const validCases = POST_MESSAGE_REQUESTS;
 
 		const invalidCases = [
 			'invalidTimer',
@@ -377,12 +351,15 @@ describe('post-message.schema', () => {
 			'syncExchangeError',
 			'syncIcpWallet',
 			'syncIcrcWallet',
+			'syncDip20Wallet',
 			'syncBtcWallet',
 			'syncIcpWalletError',
 			'syncIcrcWalletError',
+			'syncDip20WalletError',
 			'syncBtcWalletError',
 			'syncIcpWalletCleanUp',
 			'syncIcrcWalletCleanUp',
+			'syncDip20WalletCleanUp',
 			'syncBtcStatuses',
 			'syncBtcStatusesError',
 			'syncCkMinterInfo',
@@ -743,8 +720,8 @@ describe('post-message.schema', () => {
 		});
 		const SchemaWithCustomData = inferPostMessageSchema(CustomDataSchema);
 
-		const validRequestMsg = PostMessageRequestSchema.options[0];
-		const validResponseMsg = PostMessageResponseSchema.options[0];
+		const [validRequestMsg] = PostMessageRequestSchema.options;
+		const [validResponseMsg] = PostMessageResponseSchema.options;
 		const validData = { additionalInfo: 'sample info' };
 
 		it('should validate with a valid request msg and data matching dataSchema', () => {

@@ -133,7 +133,7 @@ const updateCSP = (indexHtml) => {
 
 	let m;
 	while ((m = sw.exec(indexHtml))) {
-		const content = m[1];
+		const [_, content] = m;
 
 		indexHashes.push(`'sha256-${createHash('sha256').update(content).digest('base64')}'`);
 	}
@@ -151,7 +151,11 @@ const updateCSP = (indexHtml) => {
 		'wss://bnb-mainnet.g.alchemy.com https://bnb-mainnet.g.alchemy.com https://bsc-mainnet.infura.io';
 	const bnbTestnetConnectSrc =
 		'wss://bnb-testnet.g.alchemy.com https://bnb-testnet.g.alchemy.com https://bsc-testnet.infura.io';
-	const evmConnectSrc = `${baseMainnetConnectSrc} ${baseSepoliaConnectSrc} ${bnbMainnetConnectSrc} ${bnbTestnetConnectSrc}`;
+	const polygonMainnetConnectSrc =
+		'wss://polygon-mainnet.g.alchemy.com https://polygon-mainnet.g.alchemy.com https://polygon-mainnet.infura.io https://gasstation.polygon.technology';
+	const polygonAmoyConnectSrc =
+		'wss://polygon-amoy.g.alchemy.com https://polygon-amoy.g.alchemy.com https://polygon-amoy.infura.io';
+	const evmConnectSrc = `${baseMainnetConnectSrc} ${baseSepoliaConnectSrc} ${bnbMainnetConnectSrc} ${bnbTestnetConnectSrc} ${polygonMainnetConnectSrc} ${polygonAmoyConnectSrc}`;
 
 	const infuraConnectSrc = 'https://gas.api.infura.io';
 

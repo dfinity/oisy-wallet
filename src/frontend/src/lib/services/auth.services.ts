@@ -2,7 +2,8 @@ import {
 	deleteIdbBtcAddressMainnet,
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet
-} from '$lib/api/idb.api';
+} from '$lib/api/idb-addresses.api';
+import { deleteIdbEthTokens, deleteIdbIcTokens, deleteIdbSolTokens } from '$lib/api/idb-tokens.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -93,7 +94,7 @@ export const idleSignOut = (): Promise<void> =>
 		clearStorages: false
 	});
 
-const emptyIdbAddress = async (deleteIdbAddress: (principal: Principal) => Promise<void>) => {
+const emptyIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<void>) => {
 	const { identity } = get(authStore);
 
 	if (isNullish(identity)) {
@@ -101,7 +102,7 @@ const emptyIdbAddress = async (deleteIdbAddress: (principal: Principal) => Promi
 	}
 
 	try {
-		await deleteIdbAddress(identity.getPrincipal());
+		await deleteIdbStore(identity.getPrincipal());
 	} catch (err: unknown) {
 		// We silence the error.
 		// Effective logout is more important here.
@@ -109,11 +110,17 @@ const emptyIdbAddress = async (deleteIdbAddress: (principal: Principal) => Promi
 	}
 };
 
-const emptyIdbBtcAddressMainnet = (): Promise<void> => emptyIdbAddress(deleteIdbBtcAddressMainnet);
+const emptyIdbBtcAddressMainnet = (): Promise<void> => emptyIdbStore(deleteIdbBtcAddressMainnet);
 
-const emptyIdbEthAddress = (): Promise<void> => emptyIdbAddress(deleteIdbEthAddress);
+const emptyIdbEthAddress = (): Promise<void> => emptyIdbStore(deleteIdbEthAddress);
 
-const emptyIdbSolAddress = (): Promise<void> => emptyIdbAddress(deleteIdbSolAddressMainnet);
+const emptyIdbSolAddress = (): Promise<void> => emptyIdbStore(deleteIdbSolAddressMainnet);
+
+const emptyIdbIcTokens = (): Promise<void> => emptyIdbStore(deleteIdbIcTokens);
+
+const emptyIdbEthTokens = (): Promise<void> => emptyIdbStore(deleteIdbEthTokens);
+
+const emptyIdbSolTokens = (): Promise<void> => emptyIdbStore(deleteIdbSolTokens);
 
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
@@ -133,7 +140,14 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), emptyIdbSolAddress()]);
+		await Promise.all([
+			emptyIdbBtcAddressMainnet(),
+			emptyIdbEthAddress(),
+			emptyIdbSolAddress(),
+			emptyIdbIcTokens(),
+			emptyIdbEthTokens(),
+			emptyIdbSolTokens()
+		]);
 	}
 
 	await clearSessionStorage();

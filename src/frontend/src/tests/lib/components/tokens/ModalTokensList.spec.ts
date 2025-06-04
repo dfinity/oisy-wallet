@@ -10,17 +10,6 @@ export const MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS = 'modal-token-list-custom-no-re
 export const MODAL_TOKEN_LIST_ITEM_PREFIX = 'modal-token-list-item-';
 export const MODAL_TOKEN_LIST_TOOLBAR = 'modal-token-list-toolbar';
 
-window.matchMedia = vi.fn().mockImplementation((query) => ({
-	matches: false,
-	media: query,
-	onchange: null,
-	addListener: vi.fn(), // Deprecated
-	removeListener: vi.fn(), // Deprecated
-	addEventListener: vi.fn(),
-	removeEventListener: vi.fn(),
-	dispatchEvent: vi.fn()
-}));
-
 const mockTokens: Token[] = [BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
 
 describe('ModalTokensList', () => {
@@ -47,7 +36,7 @@ describe('ModalTokensList', () => {
 			}
 		});
 
-		expect(await findByTestId(MODAL_TOKEN_LIST_TOOLBAR)).toBeInTheDocument();
+		await expect(findByTestId(MODAL_TOKEN_LIST_TOOLBAR)).resolves.toBeInTheDocument();
 	});
 
 	it('shows default no-results message when snippet is not provided', () => {
@@ -92,7 +81,7 @@ describe('ModalTokensList', () => {
 
 		await fireEvent.input(searchInput, { target: { value: 'BTC' } });
 
-		expect(await findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}BTC`)).toBeInTheDocument();
+		await expect(findByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}BTC`)).resolves.toBeInTheDocument();
 		expect(queryByTestId('list-item-ETH')).not.toBeInTheDocument();
 	});
 

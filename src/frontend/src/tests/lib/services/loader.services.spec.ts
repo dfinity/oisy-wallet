@@ -22,7 +22,7 @@ import {
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/load-user-profile.services', () => ({
 	loadUserProfile: vi.fn(() => Promise.resolve({ success: true }))
@@ -195,6 +195,7 @@ describe('loader.services', () => {
 									[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ BaseMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ PolygonMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
 								]
 							}

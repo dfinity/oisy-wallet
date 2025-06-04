@@ -27,7 +27,7 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { address, lamports } from '@solana/kit';
-import { type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers');
 

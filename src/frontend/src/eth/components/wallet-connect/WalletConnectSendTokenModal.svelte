@@ -55,15 +55,15 @@
 	 * Fee context store
 	 */
 
-	let feeStore = initFeeStore();
+	const feeStore = initFeeStore();
 
-	let feeSymbolStore = writable<string | undefined>(undefined);
+	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set($sendToken.symbol);
 
-	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
 	$: feeTokenIdStore.set($sendToken.id);
 
-	let feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set($sendToken.decimals);
 
 	setContext<FeeContextType>(
@@ -162,7 +162,7 @@
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	{@const data = firstTransaction.data}
+	{@const { data } = firstTransaction}
 
 	<WalletConnectModalTitle slot="title"
 		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle

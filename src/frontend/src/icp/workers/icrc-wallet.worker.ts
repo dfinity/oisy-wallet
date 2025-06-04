@@ -19,10 +19,10 @@ import type {
 	PostMessageDataRequestIcrc,
 	PostMessageDataRequestIcrcStrict
 } from '$lib/types/post-message';
-import {
-	type IcrcIndexNgGetTransactions,
-	type IcrcTransaction,
-	type IcrcTransactionWithId
+import type {
+	IcrcIndexNgGetTransactions,
+	IcrcTransaction,
+	IcrcTransactionWithId
 } from '@dfinity/ledger-icrc';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 

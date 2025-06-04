@@ -6,6 +6,7 @@ import {
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 	NAVIGATION_MENU_BUTTON,
 	NAVIGATION_MENU_GOLD_BUTTON,
+	NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
 	NAVIGATION_MENU_REFERRAL_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -15,6 +16,7 @@ import { render, waitFor } from '@testing-library/svelte';
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
+	const menuItemPrivacyModeButtonSelector = `button[data-tid="${NAVIGATION_MENU_PRIVACY_MODE_BUTTON}"]`;
 	const menuItemVipButtonSelector = `button[data-tid="${NAVIGATION_MENU_VIP_BUTTON}"]`;
 	const menuItemGoldButtonSelector = `button[data-tid="${NAVIGATION_MENU_GOLD_BUTTON}"]`;
 	const menuItemAddressBookSelector = `button[data-tid="${NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}"]`;
@@ -39,7 +41,7 @@ describe('Menu', () => {
 	});
 
 	const openMenu = () => {
-		container = render(Menu).container;
+		({ container } = render(Menu));
 		const menuButton: HTMLButtonElement | null = container.querySelector(menuButtonSelector);
 
 		expect(menuButton).toBeInTheDocument();
@@ -47,14 +49,14 @@ describe('Menu', () => {
 		menuButton?.click();
 	};
 
-	async function waitForElement({
+	const waitForElement = async ({
 		selector,
 		shouldExist = true
 	}: {
 		selector: string;
 		shouldExist?: boolean;
-	}) {
-		return await waitFor(() => {
+	}) =>
+		await waitFor(() => {
 			const element = container.querySelector(selector);
 			if (shouldExist) {
 				if (element == null) {
@@ -67,7 +69,11 @@ describe('Menu', () => {
 			}
 			return element;
 		});
-	}
+
+	it('renders the privacy mode menu item', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemPrivacyModeButtonSelector });
+	});
 
 	it('renders the vip menu item', async () => {
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(['vip']));

@@ -96,18 +96,22 @@
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
 			<Value ref="network" element="div">
-				<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
+				{#snippet label()}
+					{$i18n.tokens.manage.text.network}
+				{/snippet}
 
-				<div id="network" class="network mt-1 pt-0.5">
-					<Dropdown name="network" bind:selectedValue={networkName}>
-						<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
-							>{$i18n.tokens.manage.placeholder.select_network}</option
-						>
-						{#each availableNetworks as network (network.id)}
-							<DropdownItem value={network.name}>{network.name}</DropdownItem>
-						{/each}
-					</Dropdown>
-				</div>
+				{#snippet content()}
+					<div id="network" class="network mt-1 pt-0.5">
+						<Dropdown name="network" bind:selectedValue={networkName}>
+							<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
+								>{$i18n.tokens.manage.placeholder.select_network}</option
+							>
+							{#each availableNetworks as network (network.id)}
+								<DropdownItem value={network.name}>{network.name}</DropdownItem>
+							{/each}
+						</Dropdown>
+					</div>
+				{/snippet}
 			</Value>
 		{/if}
 

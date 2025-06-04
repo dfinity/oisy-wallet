@@ -6,6 +6,7 @@ import {
 } from '$env/networks/networks.icrc.env';
 import type { IcToken } from '$icp/types/ic-token';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
+import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
@@ -40,12 +41,12 @@ export const isNetworkIdETH = (networkId: NetworkId | undefined): boolean =>
 
 export const isInvalidDestinationIc = ({
 	destination,
-	networkId,
-	tokenStandard
+	tokenStandard,
+	networkId
 }: {
 	destination: string;
-	networkId: NetworkId | undefined;
 	tokenStandard: TokenStandard;
+	networkId?: NetworkId;
 }): boolean => {
 	if (isNullishOrEmpty(destination)) {
 		return false;
@@ -59,7 +60,7 @@ export const isInvalidDestinationIc = ({
 		return !isEthAddress(destination);
 	}
 
-	if (tokenStandard === 'icrc') {
+	if (isTokenIcrc({ standard: tokenStandard })) {
 		return invalidIcrcAddress(destination);
 	}
 

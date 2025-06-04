@@ -3,14 +3,16 @@ import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
-import type { EtherscanRest } from '$eth/rest/etherscan.rest';
-import * as foo from '$eth/rest/etherscan.rest';
+import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
+import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
 import {
 	loadEthereumTransactions,
 	reloadEthereumTransactions
 } from '$eth/services/eth-transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -20,13 +22,16 @@ import en from '$tests/mocks/i18n.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
-vi.mock('$eth/rest/etherscan.rest', () => ({
-	etherscanRests: vi.fn()
+vi.mock('$eth/providers/etherscan.providers', () => ({
+	etherscanProviders: vi.fn()
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
 }));
 
 describe('eth-transactions.services', () => {
 	let spyToastsError: MockInstance;
-	let spyToastsErrorNoTrace: MockInstance;
 
 	const mockErc20UserTokens = [USDC_TOKEN, LINK_TOKEN, PEPE_TOKEN].map((token) => ({
 		data: { ...token, enabled: true },
@@ -37,7 +42,6 @@ describe('eth-transactions.services', () => {
 		vi.clearAllMocks();
 
 		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
-		spyToastsErrorNoTrace = vi.spyOn(toastsStore, 'toastsErrorNoTrace');
 
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 		erc20UserTokensStore.setAll(mockErc20UserTokens);
@@ -45,9 +49,9 @@ describe('eth-transactions.services', () => {
 
 	describe('loadEthereumTransactions', () => {
 		describe('when token is ERC20', () => {
-			let etherscanRestsSpy: MockInstance;
+			let etherscanProvidersSpy: MockInstance;
 
-			const mockTransactionsRest = vi.fn();
+			const mockErc20Transactions = vi.fn();
 
 			const {
 				id: mockTokenId,
@@ -58,11 +62,11 @@ describe('eth-transactions.services', () => {
 			const mockTransactions = createMockEthTransactions(3);
 
 			beforeEach(() => {
-				etherscanRestsSpy = vi.spyOn(foo, 'etherscanRests');
+				etherscanProvidersSpy = vi.spyOn(etherscanProvidersModule, 'etherscanProviders');
 
-				etherscanRestsSpy.mockReturnValue({
-					transactions: mockTransactionsRest
-				} as unknown as EtherscanRest);
+				etherscanProvidersSpy.mockReturnValue({
+					erc20Transactions: mockErc20Transactions
+				} as unknown as EtherscanProvider);
 			});
 
 			it('should raise an error if the Ethereum address store is empty', async () => {
@@ -91,22 +95,22 @@ describe('eth-transactions.services', () => {
 				expect(result).toEqual({ success: false });
 			});
 
-			it('should call the transaction rest function', async () => {
-				mockTransactionsRest.mockResolvedValueOnce([]);
+			it('should call the transaction function', async () => {
+				mockErc20Transactions.mockResolvedValueOnce([]);
 
 				await loadEthereumTransactions({
 					networkId: mockNetworkId,
 					tokenId: mockTokenId
 				});
 
-				expect(mockTransactionsRest).toHaveBeenCalledWith({
+				expect(mockErc20Transactions).toHaveBeenCalledWith({
 					contract: { ...USDC_TOKEN, enabled: true },
 					address: mockEthAddress
 				});
 			});
 
 			it('should handle ERC20 token transactions correctly', async () => {
-				mockTransactionsRest.mockResolvedValueOnce(mockTransactions);
+				mockErc20Transactions.mockResolvedValueOnce(mockTransactions);
 
 				const result = await loadEthereumTransactions({
 					networkId: mockNetworkId,
@@ -118,7 +122,7 @@ describe('eth-transactions.services', () => {
 			});
 
 			it('should handle ERC20 token transactions correctly when it is update only', async () => {
-				mockTransactionsRest.mockResolvedValueOnce(mockTransactions);
+				mockErc20Transactions.mockResolvedValueOnce(mockTransactions);
 
 				const existingTransactions = createMockEthTransactions(5);
 				ethTransactionsStore.set({
@@ -142,7 +146,7 @@ describe('eth-transactions.services', () => {
 				ethTransactionsStore.set({ tokenId: mockTokenId, transactions: mockTransactions });
 
 				const mockError = new Error('Mock Error');
-				mockTransactionsRest.mockRejectedValue(mockError);
+				mockErc20Transactions.mockRejectedValue(mockError);
 
 				const result = await loadEthereumTransactions({
 					networkId: mockNetworkId,
@@ -151,22 +155,30 @@ describe('eth-transactions.services', () => {
 
 				expect(result).toEqual({ success: false });
 				expect(get(ethTransactionsStore)).toEqual({ [mockTokenId]: null });
-				expect(spyToastsErrorNoTrace).toHaveBeenCalledWith({
-					err: mockError,
-					msg: {
-						text: replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
-							$symbol: mockSymbol
-						})
+
+				expect(trackEvent).toHaveBeenCalledWith({
+					name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
+					metadata: {
+						tokenId: mockTokenId.description,
+						networkId: mockNetworkId.description,
+						error: mockError.toString()
 					}
 				});
+
+				expect(console.warn).toHaveBeenCalledWith(
+					replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
+						$symbol: mockSymbol
+					}),
+					mockError
+				);
 			});
 		}, 60000);
 	});
 
 	describe('reloadEthereumTransactions', () => {
-		let etherscanRestsSpy: MockInstance;
+		let etherscanProvidersSpy: MockInstance;
 
-		const mockTransactionsRest = vi.fn();
+		const mockErc20Transactions = vi.fn();
 
 		const {
 			id: mockTokenId,
@@ -176,15 +188,15 @@ describe('eth-transactions.services', () => {
 		const mockTransactions = createMockEthTransactions(3);
 
 		beforeEach(() => {
-			etherscanRestsSpy = vi.spyOn(foo, 'etherscanRests');
+			etherscanProvidersSpy = vi.spyOn(etherscanProvidersModule, 'etherscanProviders');
 
-			etherscanRestsSpy.mockReturnValue({
-				transactions: mockTransactionsRest
-			} as unknown as EtherscanRest);
+			etherscanProvidersSpy.mockReturnValue({
+				erc20Transactions: mockErc20Transactions
+			} as unknown as EtherscanProvider);
 		});
 
 		it('should handle ERC20 token transactions correctly', async () => {
-			mockTransactionsRest.mockResolvedValueOnce(mockTransactions);
+			mockErc20Transactions.mockResolvedValueOnce(mockTransactions);
 
 			const existingTransactions = createMockEthTransactions(5);
 			ethTransactionsStore.set({

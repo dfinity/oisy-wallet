@@ -15,9 +15,9 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
-	import {
-		type CarouselSlideOisyDappDescription,
-		type OisyDappDescription
+	import type {
+		CarouselSlideOisyDappDescription,
+		OisyDappDescription
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';

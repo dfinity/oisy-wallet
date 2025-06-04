@@ -57,7 +57,7 @@ const addPouhCredential = async ({
 				});
 				return { success: false };
 			}
-			const errorKey = Object.keys(response.Err)[0];
+			const [errorKey] = Object.keys(response.Err);
 			toastsError({
 				msg: {
 					text: replacePlaceholders(
@@ -136,7 +136,7 @@ export const requestPouhCredential = ({
 				},
 				credentialSubject
 			},
-			onError() {
+			onError: () => {
 				toastsError({
 					msg: { text: authI18n.error.error_requesting_pouh_credential }
 				});

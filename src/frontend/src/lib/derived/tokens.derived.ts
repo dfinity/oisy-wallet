@@ -6,9 +6,11 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
 import type { IcToken } from '$icp/types/ic-token';
+import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenToPin } from '$lib/types/token';
@@ -51,14 +53,19 @@ export const tokens: Readable<Token[]> = derived(
 	]
 );
 
+export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
+	$tokens.filter((token) => isDefaultEthereumToken(token))
+);
+
 export const tokensToPin: Readable<TokenToPin[]> = derived(
-	[icrcChainFusionDefaultTokens],
-	([$icrcChainFusionDefaultTokens]) => [
+	[icrcChainFusionDefaultTokens, defaultEthereumTokens],
+	([$icrcChainFusionDefaultTokens, $defaultEthereumTokens]) => [
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
 		SOLANA_TOKEN,
-		...$icrcChainFusionDefaultTokens
+		...$icrcChainFusionDefaultTokens,
+		...$defaultEthereumTokens.filter((token) => token !== ETHEREUM_TOKEN)
 	]
 );
 
@@ -81,10 +88,8 @@ export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
  */
 // TODO: The several dependencies of enabledIcTokens are not strictly only IC tokens, but other tokens too.
 //  We should find a better way to handle this, improving the store.
-export const enabledIcTokens: Readable<IcToken[]> = derived(
-	[enabledTokens],
-	([$enabledTokens]) =>
-		$enabledTokens.filter(({ standard }) => standard === 'icp' || standard === 'icrc') as IcToken[]
+export const enabledIcTokens: Readable<IcToken[]> = derived([enabledTokens], ([$enabledTokens]) =>
+	$enabledTokens.filter(isTokenIc)
 );
 
 /**

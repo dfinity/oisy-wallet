@@ -1,19 +1,19 @@
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
-import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
+import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
-import { retry } from '$lib/services/rest.services';
+import { trackEvent } from '$lib/services/analytics.services';
+import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
+import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { randomWait } from '$lib/utils/time.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -89,14 +89,22 @@ const loadEthTransactions = async ({
 				}
 			} = get(i18n);
 
-			toastsErrorNoTrace({
-				msg: {
-					text: replacePlaceholders(loading_transactions_symbol, {
-						$symbol: ETHEREUM_NETWORK_SYMBOL
-					})
-				},
-				err
+			trackEvent({
+				name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
+				metadata: {
+					tokenId: `${tokenId.description}`,
+					networkId: `${networkId.description}`,
+					error: `${err}`
+				}
 			});
+
+			// We print the error to console just for debugging purposes
+			console.warn(
+				replacePlaceholders(loading_transactions_symbol, {
+					$symbol: ETHEREUM_NETWORK_SYMBOL
+				}),
+				err
+			);
 		}
 
 		return { success: false };
@@ -148,10 +156,9 @@ const loadErc20Transactions = async ({
 	}
 
 	try {
-		const { transactions: transactionsRest } = etherscanRests(networkId);
-		const transactions = await retry({
-			request: async () => await transactionsRest({ contract: token, address }),
-			onRetry: async () => await randomWait({})
+		const { erc20Transactions } = etherscanProviders(networkId);
+		const transactions = await retryWithDelay({
+			request: async () => await erc20Transactions({ contract: token, address })
 		});
 
 		if (updateOnly) {
@@ -168,14 +175,23 @@ const loadErc20Transactions = async ({
 			}
 		} = get(i18n);
 
-		toastsErrorNoTrace({
-			msg: {
-				text: replacePlaceholders(loading_transactions_symbol, {
-					$symbol: token.symbol
-				})
-			},
-			err
+		trackEvent({
+			name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
+			metadata: {
+				tokenId: `${tokenId.description}`,
+				networkId: `${networkId.description}`,
+				error: `${err}`
+			}
 		});
+
+		// We print the error to console just for debugging purposes
+		console.warn(
+			replacePlaceholders(loading_transactions_symbol, {
+				$symbol: token.symbol
+			}),
+			err
+		);
+
 		return { success: false };
 	}
 

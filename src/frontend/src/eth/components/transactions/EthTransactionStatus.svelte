@@ -75,12 +75,12 @@
 	})();
 </script>
 
-<label for="to" class="font-bold">{$i18n.transaction.text.status}:</label>
+<label for="to">{$i18n.transaction.text.status}</label>
 
-<p id="to" class="mb-4 break-all font-normal first-letter:capitalize">
+<span id="to" class="break-all font-normal first-letter:capitalize">
 	{#if nonNullish(status)}
 		<span in:fade>{$i18n.transaction.status[status]}</span>
 	{:else}
 		<span style="visibility: hidden; opacity: 0">&nbsp;</span>
 	{/if}
-</p>
+</span>

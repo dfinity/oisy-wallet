@@ -1,16 +1,16 @@
-import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
+import type { EligibilityReport, RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import { ZERO } from '$lib/constants/app.constants';
-import type { RewardResponseInfo } from '$lib/types/reward';
+import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import {
 	INITIAL_REWARD_RESULT,
-	getRewardsBalance,
 	isEndedCampaign,
 	isOngoingCampaign,
 	isUpcomingCampaign,
-	loadRewardResult
+	loadRewardResult,
+	mapEligibilityReport
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 
 describe('rewards.utils', () => {
 	describe('loadRewardResult', () => {
@@ -24,7 +24,8 @@ describe('rewards.utils', () => {
 			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: ['airdrop'],
-			campaign_name: []
+			campaign_name: ['deuteronomy'], // Note: This is no longer optional and will be superceded by campaign_id.
+			campaign_id: 'deuteronomy'
 		};
 
 		it('should return falsy reward result if result was already loaded', async () => {
@@ -222,43 +223,244 @@ describe('rewards.utils', () => {
 		});
 	});
 
-	describe('getRewardsBalance', () => {
-		const lastTimestamp = BigInt(Date.now());
+	describe('mapEligibilityReport', () => {
+		it('should map empty eligibility report', () => {
+			const report: EligibilityReport = {
+				campaigns: []
+			};
 
-		const mockedReward: RewardResponseInfo = {
-			amount: 100n,
-			timestamp: lastTimestamp,
-			name: 'airdrop',
-			campaignName: 'exodus',
-			ledger: mockIdentity.getPrincipal()
-		};
+			const result = mapEligibilityReport(report);
 
-		it('should return the correct rewards balance of multiple rewards', () => {
-			const mockedRewards: RewardResponseInfo[] = [
-				mockedReward,
-				{ ...mockedReward, amount: 200n },
-				{ ...mockedReward, amount: 300n }
-			];
-
-			const result = getRewardsBalance(mockedRewards);
-
-			expect(result).toEqual(600n);
+			expect(result).toEqual([]);
 		});
 
-		it('should return the correct rewards balance of a single airdrop', () => {
-			const mockedRewards: RewardResponseInfo[] = [mockedReward];
+		describe('MinLogins', () => {
+			it('should map MinLogins criterion with days duration', () => {
+				const report: EligibilityReport = {
+					campaigns: [
+						[
+							'campaign1',
+							{
+								available: true,
+								eligible: false,
+								criteria: [
+									{
+										satisfied: false,
+										criterion: {
+											MinLogins: {
+												duration: { Days: 7n },
+												count: 5,
+												session_duration: toNullable()
+											}
+										}
+									}
+								]
+							}
+						]
+					]
+				};
 
-			const result = getRewardsBalance(mockedRewards);
+				const result = mapEligibilityReport(report);
 
-			expect(result).toEqual(100n);
+				expect(result).toEqual([
+					{
+						campaignId: 'campaign1',
+						available: true,
+						eligible: false,
+						criteria: [
+							{
+								satisfied: false,
+								type: RewardCriterionType.MIN_LOGINS,
+								days: 7n,
+								count: 5
+							}
+						]
+					}
+				]);
+			});
 		});
 
-		it('should return zero for an empty list of rewards', () => {
-			const mockedRewards: RewardResponseInfo[] = [];
+		describe('MinTransactions', () => {
+			it('should map MinTransactions criterion', () => {
+				const report: EligibilityReport = {
+					campaigns: [
+						[
+							'campaign1',
+							{
+								available: true,
+								eligible: true,
+								criteria: [
+									{
+										satisfied: true,
+										criterion: {
+											MinTransactions: {
+												duration: { Days: 30n },
+												count: 10
+											}
+										}
+									}
+								]
+							}
+						]
+					]
+				};
 
-			const result = getRewardsBalance(mockedRewards);
+				const result = mapEligibilityReport(report);
 
-			expect(result).toEqual(ZERO);
+				expect(result).toEqual([
+					{
+						campaignId: 'campaign1',
+						available: true,
+						eligible: true,
+						criteria: [
+							{
+								satisfied: true,
+								type: RewardCriterionType.MIN_TRANSACTIONS,
+								days: 30n,
+								count: 10
+							}
+						]
+					}
+				]);
+			});
+		});
+
+		describe('MinTotalAssetsUsd', () => {
+			it('should map MinTotalAssetsUsd criterion', () => {
+				const report: EligibilityReport = {
+					campaigns: [
+						[
+							'campaign1',
+							{
+								available: true,
+								eligible: true,
+								criteria: [
+									{
+										satisfied: true,
+										criterion: {
+											MinTotalAssetsUsd: {
+												usd: 1000
+											}
+										}
+									}
+								]
+							}
+						]
+					]
+				};
+
+				const result = mapEligibilityReport(report);
+
+				expect(result).toEqual([
+					{
+						campaignId: 'campaign1',
+						available: true,
+						eligible: true,
+						criteria: [
+							{
+								satisfied: true,
+								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+								usd: 1000
+							}
+						]
+					}
+				]);
+			});
+		});
+
+		it('should map unknown criterion type', () => {
+			const report: EligibilityReport = {
+				campaigns: [
+					[
+						'campaign1',
+						{
+							available: true,
+							eligible: false,
+							criteria: [
+								{
+									satisfied: false,
+									criterion: {
+										MinReferrals: { count: 5 }
+									}
+								}
+							]
+						}
+					]
+				]
+			};
+
+			const result = mapEligibilityReport(report);
+
+			expect(result).toEqual([
+				{
+					campaignId: 'campaign1',
+					available: true,
+					eligible: false,
+					criteria: [
+						{
+							satisfied: false,
+							type: RewardCriterionType.UNKNOWN
+						}
+					]
+				}
+			]);
+		});
+
+		it('should map multiple criteria for a single campaign', () => {
+			const report: EligibilityReport = {
+				campaigns: [
+					[
+						'campaign1',
+						{
+							available: true,
+							eligible: true,
+							criteria: [
+								{
+									satisfied: true,
+									criterion: {
+										MinLogins: {
+											duration: { Days: 7n },
+											count: 5,
+											session_duration: toNullable()
+										}
+									}
+								},
+								{
+									satisfied: true,
+									criterion: {
+										MinTotalAssetsUsd: {
+											usd: 1000
+										}
+									}
+								}
+							]
+						}
+					]
+				]
+			};
+
+			const result = mapEligibilityReport(report);
+
+			expect(result).toEqual([
+				{
+					campaignId: 'campaign1',
+					available: true,
+					eligible: true,
+					criteria: [
+						{
+							satisfied: true,
+							type: RewardCriterionType.MIN_LOGINS,
+							days: 7n,
+							count: 5
+						},
+						{
+							satisfied: true,
+							type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+							usd: 1000
+						}
+					]
+				}
+			]);
 		});
 	});
 });

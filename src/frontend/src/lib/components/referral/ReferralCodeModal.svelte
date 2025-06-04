@@ -10,7 +10,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import SkeletonQRCode from '$lib/components/ui/SkeletonQRCode.svelte';
+	import SkeletonQrCode from '$lib/components/ui/SkeletonQrCode.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { OISY_REFERRAL_URL } from '$lib/constants/oisy.constants';
 	import {
@@ -25,11 +25,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let referralCode: number;
-	let numberOfReferrals: number;
+	let referralCode: number | undefined = $state();
+	let numberOfReferrals: number | undefined = $state();
 
-	let referralUrl;
-	$: referralUrl = `${window.location.origin}/?referrer=${referralCode}`;
+	const referralUrl = $derived(`${window.location.origin}/?referrer=${referralCode}`);
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
@@ -39,8 +38,7 @@
 
 		const referrerInfo = await getReferrerInfo({ identity: $authIdentity });
 		if (nonNullish(referrerInfo)) {
-			referralCode = referrerInfo.referralCode;
-			numberOfReferrals = referrerInfo.numberOfReferrals;
+			({ referralCode, numberOfReferrals } = referrerInfo);
 		}
 	});
 </script>
@@ -59,7 +57,7 @@
 					</div>
 				</QRCode>
 			{:else}
-				<SkeletonQRCode />
+				<SkeletonQrCode />
 			{/if}
 		</div>
 

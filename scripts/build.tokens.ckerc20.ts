@@ -114,7 +114,7 @@ const buildOrchestratorInfo = async (orchestratorId: Principal): Promise<TokensA
 		async (acc, [key, value]) => {
 			const { tokens: accTokens, icons: accIcons } = await acc;
 
-			const token = value[0];
+			const [token] = value;
 
 			const { ledgerCanisterId, ...rest } = token;
 
@@ -162,7 +162,7 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 		return;
 	}
 
-	saveLogo({ logoData, file });
+	saveLogo({ logoData, file, name });
 };
 
 const findCkErc20 = async () => {

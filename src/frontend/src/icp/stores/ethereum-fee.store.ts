@@ -15,7 +15,7 @@ export const initEthereumFeeStore = (): EthereumFeeStore => {
 	return {
 		subscribe,
 
-		setFee(data: EthereumFeeStoreData) {
+		setFee: (data: EthereumFeeStoreData) => {
 			set(data);
 		}
 	};
