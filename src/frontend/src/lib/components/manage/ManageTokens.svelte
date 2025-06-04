@@ -91,6 +91,15 @@
 		const { id: networkId } = network;
 		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
 
+		// we need to set the tokenlist for the ModalTokenListContext manually when we change the enabled prop,
+		// because the exposed prop from the context is a derived and on update of the data the "enabled" gets reset
+		const tokensList = [...allTokensSorted];
+		const token = tokensList.find((t) => t.id === id);
+		if (nonNullish(token) && 'enabled' in token) {
+			token.enabled = !token.enabled;
+			setTokens(tokensList);
+		}
+
 		if (nonNullish(current)) {
 			modifiedTokens = { ...tokens };
 			return;
