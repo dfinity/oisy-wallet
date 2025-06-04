@@ -54,7 +54,7 @@
 	class:link
 	{type}
 	class:justify-start={alignLeft}
-	disabled={disabled || loading}
+	disabled={disabled ?? loading}
 	class:loading
 	class:transition={loading}
 	class:duration-500={loading}

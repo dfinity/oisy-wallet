@@ -54,7 +54,7 @@
 				ariaLabel={$i18n.address_book.edit_contact.add_address}
 				colorStyle="secondary-light"
 				transparent
-				on:click={onAddAddress}
+				onclick={onAddAddress}
 			>
 				<IconPlus />
 				{$i18n.address_book.edit_contact.add_address}
@@ -82,7 +82,7 @@
 				colorStyle="secondary-light"
 				transparent
 				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
-				on:click={onAddAddress}
+				onclick={onAddAddress}
 			>
 				<IconPlus />
 				{$i18n.address_book.show_contact.add_address}

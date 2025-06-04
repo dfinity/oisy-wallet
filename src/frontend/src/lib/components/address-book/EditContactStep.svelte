@@ -89,7 +89,7 @@
 			transparent
 			colorStyle="secondary-light"
 			disabled={isNullish(onAddAddress)}
-			on:click={() => onAddAddress?.()}
+			onclick={() => onAddAddress?.()}
 			testId={CONTACT_EDIT_ADD_ADDRESS_BUTTON}
 		>
 			<IconPlus />
@@ -105,7 +105,7 @@
 			ariaLabel={$i18n.address_book.edit_contact.delete_contact}
 			transparent
 			colorStyle="error"
-			on:click={() => onDeleteContact?.(contact.id)}
+			onclick={() => onDeleteContact?.(contact.id)}
 			testId={CONTACT_EDIT_DELETE_CONTACT_BUTTON}
 		>
 			<IconTrash />
