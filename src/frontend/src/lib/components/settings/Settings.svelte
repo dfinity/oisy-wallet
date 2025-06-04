@@ -102,7 +102,7 @@
 			<Button
 				testId={SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON}
 				link
-				on:click={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
+				onclick={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
 			>
 				{$i18n.core.text.edit} >
 			</Button>
@@ -125,7 +125,7 @@
 						{$i18n.settings.text.pouh_credential_verified}
 					</output>
 				{:else}
-					<Button link on:click={getPouhCredential}>
+					<Button link onclick={getPouhCredential}>
 						{$i18n.settings.text.present_pouh_credential}&hellip;
 					</Button>
 				{/if}

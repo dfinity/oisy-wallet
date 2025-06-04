@@ -37,7 +37,7 @@
 
 	<ButtonGroup slot="toolbar" testId="toolbar">
 		<ButtonBack onclick={() => dispatch('icBack')} />
-		<Button {disabled} on:click={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
+		<Button {disabled} onclick={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
 			{$i18n.send.text.send}
 		</Button>
 	</ButtonGroup>
