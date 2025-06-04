@@ -10,18 +10,22 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionToken } from '$lib/types/token';
 
-	export let expectedToken: OptionToken;
-	export let destination: string | undefined;
-	export let amount: OptionAmount;
-	export let decodeQrCode: ({
-		status,
-		code,
-		expectedToken
-	}: {
-		status: QrStatus;
-		code?: string;
+	interface Props {
 		expectedToken: OptionToken;
-	}) => QrResponse;
+		destination: string | undefined;
+		amount: OptionAmount;
+		onDecodeQrCode: ({
+										 status,
+										 code,
+										 expectedToken
+									 }: {
+			status: QrStatus;
+			code?: string;
+			expectedToken: OptionToken;
+		}) => QrResponse;
+	}
+
+	let {expectedToken, destination = $bindable(), amount = $bindable(), onDecodeQrCode}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -40,7 +44,7 @@
 
 		const { status, code } = result;
 
-		const qrResponse = decodeQrCode({ status, code, expectedToken });
+		const qrResponse = onDecodeQrCode({ status, code, expectedToken });
 
 		if (qrResponse.status === 'token_incompatible') {
 			toastsError({ msg: { text: $i18n.send.error.incompatible_token } });

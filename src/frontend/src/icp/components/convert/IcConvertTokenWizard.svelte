@@ -232,7 +232,7 @@
 				expectedToken={$destinationToken}
 				bind:destination={customDestination}
 				bind:amount={sendAmount}
-				{decodeQrCode}
+				onDecodeQrCode={decodeQrCode}
 				on:icQRCodeBack
 			/>
 		{:else}
