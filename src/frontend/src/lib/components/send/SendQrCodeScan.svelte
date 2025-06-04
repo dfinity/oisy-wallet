@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { QRCodeReader } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -23,16 +23,16 @@
 			code?: string;
 			expectedToken: OptionToken;
 		}) => QrResponse;
+		onIcQrCodeBack: () => void;
 	}
 
 	let {
 		expectedToken,
 		destination = $bindable(),
 		amount = $bindable(),
-		onDecodeQrCode
+		onDecodeQrCode,
+		onIcQrCodeBack
 	}: Props = $props();
-
-	const dispatch = createEventDispatcher();
 
 	let resolveQrCodePromise:
 		| (({ status, code }: { status: QrStatus; code?: string }) => void)
@@ -53,7 +53,7 @@
 
 		if (qrResponse.status === 'token_incompatible') {
 			toastsError({ msg: { text: $i18n.send.error.incompatible_token } });
-			back();
+			onIcQrCodeBack();
 			return;
 		}
 
@@ -65,7 +65,7 @@
 			({ amount } = qrResponse);
 		}
 
-		back();
+		onIcQrCodeBack();
 	};
 
 	const onQRCode = ({ detail: code }: CustomEvent<string>) => {
@@ -77,10 +77,6 @@
 		resolveQrCodePromise?.({ status: 'cancelled' });
 		resolveQrCodePromise = undefined;
 	};
-
-	const back = () => {
-		dispatch('icQRCodeBack');
-	};
 </script>
 
 <div class="stretch qr-code-wrapper md:min-h-[300px]">
@@ -88,7 +84,7 @@
 </div>
 
 <ButtonGroup>
-	<ButtonBack onclick={back} />
+	<ButtonBack onclick={onIcQrCodeBack} />
 </ButtonGroup>
 
 <style lang="scss">

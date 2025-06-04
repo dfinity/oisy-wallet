@@ -205,7 +205,7 @@
 				bind:destination
 				bind:amount
 				{onDecodeQrCode}
-				on:icQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				onIcQrCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
 			/>
 		{:else}
 			<SendWizard
