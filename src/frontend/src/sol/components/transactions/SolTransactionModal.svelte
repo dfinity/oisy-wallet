@@ -29,15 +29,24 @@
 	const { transaction, token }: Props = $props();
 
 	let {
-		from,
+		from: fromAddress,
+		fromOwner,
 		value,
 		timestamp,
 		signature: id,
 		blockNumber,
-		to,
+		to: toAddress,
+		toOwner,
 		type,
 		status
 	} = $derived(transaction);
+
+	let from = $derived<SolTransactionUi['from'] | SolTransactionUi['fromOwner'] | undefined>(
+		fromOwner ?? fromAddress
+	);
+	let to = $derived<SolTransactionUi['to'] | SolTransactionUi['toOwner'] | undefined>(
+		toOwner ?? toAddress
+	);
 
 	let explorerUrl: string | undefined = $derived(
 		isNetworkSolana(token?.network) ? token.network.explorerUrl : undefined
@@ -56,6 +65,18 @@
 	let fromExplorerUrl: string | undefined = $derived(
 		nonNullish(explorerUrl)
 			? replacePlaceholders(explorerUrl, { $args: `account/${from}/` })
+			: undefined
+	);
+
+	let toAtaExplorerUrl: string | undefined = $derived(
+		nonNullish(explorerUrl)
+			? replacePlaceholders(explorerUrl, { $args: `account/${toAddress}/` })
+			: undefined
+	);
+
+	let fromAtaExplorerUrl: string | undefined = $derived(
+		nonNullish(explorerUrl)
+			? replacePlaceholders(explorerUrl, { $args: `account/${fromAddress}/` })
 			: undefined
 	);
 </script>
@@ -90,7 +111,7 @@
 			{/snippet}
 		</ModalHero>
 
-		{#if nonNullish(to) && nonNullish(from)}
+		{#if nonNullish(toAddress) && nonNullish(fromAddress)}
 			<TransactionContactCard
 				type={type === 'receive' ? 'receive' : 'send'}
 				{to}
@@ -101,6 +122,36 @@
 		{/if}
 
 		<List styleClass="mt-5">
+			{#if type === 'receive' && nonNullish(from) && nonNullish(fromAddress) && from !== fromAddress}
+				<ListItem>
+					<span>{$i18n.transaction.text.from_ata}</span>
+					<output class="flex max-w-[50%] flex-row">
+						<output>{shortenWithMiddleEllipsis({ text: fromAddress })}</output>
+
+						<TransactionAddressActions
+							copyAddress={fromAddress}
+							copyAddressText={$i18n.transaction.text.from_ata_copied}
+							explorerUrl={fromAtaExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+						/>
+					</output>
+				</ListItem>
+			{/if}
+			{#if type === 'send' && nonNullish(to) && nonNullish(toAddress) && to !== toAddress}
+				<ListItem>
+					<span>{$i18n.transaction.text.to_ata}</span>
+					<output class="flex max-w-[50%] flex-row">
+						<output>{shortenWithMiddleEllipsis({ text: toAddress })}</output>
+						<TransactionAddressActions
+							copyAddress={toAddress}
+							copyAddressText={$i18n.transaction.text.to_ata_copied}
+							explorerUrl={toAtaExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
+						/>
+					</output>
+				</ListItem>
+			{/if}
+
 			{#if nonNullish(id)}
 				<ListItem>
 					<span>

@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
 	import EmptyAddressBook from '$lib/components/address-book/EmptyAddressBook.svelte';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ContactCard from '$lib/components/contact/ContactCard.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import {
@@ -16,6 +17,7 @@
 	import { contactsNotInitialized } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { isDesktop } from '$lib/utils/device.utils';
 
 	interface Props {
 		contacts: ContactUi[];
@@ -37,13 +39,16 @@
 	let filteredContacts = $derived(
 		contacts.filter(({ name: contactName, addresses }) => {
 			const name = contactName.toLowerCase();
-			const addressText = addresses
-				.map(({ address, label }) => `${address.toLowerCase()} ${label?.toLowerCase() ?? ''}`)
-				.join(' ');
+			const addressString = addresses.map(({ address }) => address).join(' ');
+			const addressLabels = addresses.map(({ label }) => label?.toLowerCase()).join(' ');
 
-			const searchableText = `${name} ${addressText}`;
-			const terms = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
-			return terms.every((term) => searchableText.includes(term));
+			const terms = searchTerm.split(/\s+/).filter(Boolean);
+			return terms.every(
+				(term) =>
+					name.includes(term.toLowerCase()) ||
+					addressString.includes(term) ||
+					addressLabels.includes(term.toLowerCase())
+			);
 		})
 	);
 </script>
@@ -59,7 +64,7 @@
 				bind:filter={searchTerm}
 				showResetButton={notEmptyString(searchTerm)}
 				placeholder={$i18n.address_book.text.search_contact}
-				autofocus={true}
+				autofocus={isDesktop()}
 				testId={ADDRESS_BOOK_SEARCH_CONTACT_INPUT}
 			/>
 			<Button
@@ -75,22 +80,23 @@
 			>
 		</div>
 
-		<div class="flex flex-col gap-0.5 py-6">
+		<List styleClass="py-6" noPadding>
 			{#if filteredContacts.length > 0}
 				{#each filteredContacts as contact, index (index)}
-					{#if index > 0}
-						<Hr />
-					{/if}
-					<ContactCard
-						{contact}
-						onClick={() => onShowContact(contact)}
-						onInfo={(addressIndex) => onShowAddress({ contact, addressIndex })}
-					/>
+					<ListItem>
+						<ContactCard
+							{contact}
+							onClick={() => onShowContact(contact)}
+							onInfo={(addressIndex) => onShowAddress({ contact, addressIndex })}
+						/>
+					</ListItem>
 				{/each}
 			{:else}
-				<span class="text-brand-secondary">{$i18n.address_book.text.no_contact_found}</span>
+				<ListItem>
+					<span class="text-secondary">{$i18n.address_book.text.no_contact_found}</span>
+				</ListItem>
 			{/if}
-		</div>
+		</List>
 	{/if}
 
 	<ButtonCloseModal slot="toolbar" />

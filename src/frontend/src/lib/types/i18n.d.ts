@@ -442,6 +442,7 @@ interface I18nSend {
 		recently_used_empty_state_description: string;
 		contacts_empty_state_title: string;
 		contacts_empty_state_description: string;
+		send_review_subtitle: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -821,9 +822,13 @@ interface I18nTransaction {
 		from: string;
 		from_copied: string;
 		received_from: string;
+		from_ata: string;
+		from_ata_copied: string;
 		to: string;
 		to_copied: string;
 		sent_to: string;
+		to_ata: string;
+		to_ata_copied: string;
 		block: string;
 		interacted_with: string;
 		status: string;
@@ -997,6 +1002,7 @@ interface I18nAddress {
 	fields: { label: string; address: string };
 	delete: { title: string; delete_address: string; content_text: string };
 	save: { title: string; add_to_existing_contact: string; create_contact: string };
+	qr: { title: string };
 }
 
 interface I18nSigner {
