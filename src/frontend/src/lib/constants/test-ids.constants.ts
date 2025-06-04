@@ -190,6 +190,7 @@ export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
 export const ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT = 'address-book-address-address-input';
 export const ADDRESS_BOOK_ADDRESS_ALIAS_INPUT = 'address-book-address-alisas-input';
+export const ADDRESS_BOOK_QR_CODE_SCAN = 'address-book-qr-code-scan';
 export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-input';
 export const ADDRESS_EDIT_CANCEL_BUTTON = 'address-edit-cancel-button';
 export const ADDRESS_EDIT_SAVE_BUTTON = 'address-edit-save-button';
