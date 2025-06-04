@@ -62,7 +62,7 @@
 					<div class="flex justify-center gap-2">
 						{$i18n.swap.text.swap_provider}
 						{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1 && !isInBottomSheet && showSelectButton}
-							<Button link on:click={() => dispatch('icShowProviderList')}
+							<Button link onclick={() => dispatch('icShowProviderList')}
 								>{$i18n.swap.text.select}</Button
 							>
 						{/if}
@@ -106,7 +106,7 @@
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}
-			<Button fullWidth on:click={closeFn}>Done</Button>
+			<Button fullWidth onclick={closeFn}>Done</Button>
 		{/snippet}
 	</CollapsibleBottomSheet>
 {/if}

@@ -161,7 +161,7 @@
 			<ButtonCancel onclick={close} />
 		{/if}
 
-		<Button on:click={next} {disabled} testId={SEND_FORM_DESTINATION_NEXT_BUTTON}>
+		<Button onclick={next} {disabled} testId={SEND_FORM_DESTINATION_NEXT_BUTTON}>
 			{$i18n.core.text.next}
 		</Button>
 	</ButtonGroup>

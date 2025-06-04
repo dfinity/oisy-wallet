@@ -58,7 +58,7 @@
 				<Button
 					link
 					paddingSmall
-					on:click={onCreateContact}
+					onclick={onCreateContact}
 					ariaLabel={$i18n.address.save.create_contact}
 					><IconPlus /> {$i18n.address.save.create_contact}</Button
 				>

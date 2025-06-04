@@ -69,7 +69,7 @@
 			/>
 			<Button
 				colorStyle="secondary-light"
-				on:click={onAddContact}
+				onclick={onAddContact}
 				testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
 				styleClass="rounded-xl"
 				ariaLabel={$i18n.address_book.text.add_contact}

@@ -20,7 +20,7 @@
 	<Button
 		paddingSmall
 		ariaLabel={$i18n.rewards.text.ongoing}
-		on:click={() => (rewardState = RewardStates.ONGOING)}
+		onclick={() => (rewardState = RewardStates.ONGOING)}
 		styleClass="text-nowrap max-w-28 text-sm"
 		colorStyle={rewardState === RewardStates.ONGOING ? 'primary' : 'tertiary'}
 		testId={`${REWARDS_FILTER}-${RewardStates.ONGOING}-button`}
@@ -31,7 +31,7 @@
 	<Button
 		paddingSmall
 		ariaLabel={$i18n.rewards.text.ended}
-		on:click={() => (rewardState = RewardStates.ENDED)}
+		onclick={() => (rewardState = RewardStates.ENDED)}
 		styleClass="text-nowrap max-w-28 text-sm"
 		colorStyle={rewardState === RewardStates.ENDED ? 'primary' : 'tertiary'}
 		testId={`${REWARDS_FILTER}-${RewardStates.ENDED}-button`}

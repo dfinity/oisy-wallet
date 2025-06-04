@@ -48,7 +48,7 @@
 				{$i18n.auth.help.text.identity_legacy_description}
 			</p>
 			<p>
-				<Button link on:click={onLegacySignIn} testId={HELP_AUTH_LEGACY_SIGN_IN_BUTTON}
+				<Button link onclick={onLegacySignIn} testId={HELP_AUTH_LEGACY_SIGN_IN_BUTTON}
 					>{$i18n.auth.help.text.identity_legacy_sign_in}</Button
 				>
 			</p>

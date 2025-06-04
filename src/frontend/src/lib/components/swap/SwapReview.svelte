@@ -85,7 +85,7 @@
 	<ButtonGroup slot="toolbar">
 		<ButtonBack onclick={onClick} />
 
-		<Button on:click={() => dispatch('icSwap')}>
+		<Button onclick={() => dispatch('icSwap')}>
 			{$i18n.swap.text.swap_button}
 		</Button>
 	</ButtonGroup>

@@ -59,7 +59,7 @@
 		</div>
 
 		<ButtonGroup slot="toolbar">
-			<Button on:click={modalStore.close} colorStyle="primary"
+			<Button onclick={modalStore.close} colorStyle="primary"
 				>{$i18n.rewards.text.open_wallet}</Button
 			>
 		</ButtonGroup>

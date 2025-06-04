@@ -110,7 +110,7 @@
 				<Button
 					styleClass="font-normal text-sm justify-start py-2"
 					link
-					on:click={() => toggleHideZeros(!hideZeros)}
+					onclick={() => toggleHideZeros(!hideZeros)}
 				>
 					{hideZeros
 						? replacePlaceholders($i18n.tokens.text.show_more_networks, {

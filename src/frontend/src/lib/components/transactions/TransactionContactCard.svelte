@@ -51,7 +51,7 @@
 
 				{#if isNullish(contact)}
 					<Button
-						on:click={() =>
+						onclick={() =>
 							modalStore.openAddressBook({
 								id: Symbol(),
 								data: {

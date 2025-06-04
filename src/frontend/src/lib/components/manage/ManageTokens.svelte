@@ -184,10 +184,10 @@
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}
-			<Button colorStyle="secondary-light" on:click={() => dispatch('icAddToken')}
+			<Button colorStyle="secondary-light" onclick={() => dispatch('icAddToken')}
 				><IconPlus /> {$i18n.tokens.manage.text.import_token}</Button
 			>
-			<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} on:click={save}>
+			<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} onclick={save}>
 				{$i18n.core.text.save}
 			</Button>
 		{/snippet}

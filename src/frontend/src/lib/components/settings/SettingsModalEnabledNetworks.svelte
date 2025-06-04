@@ -168,7 +168,7 @@
 			loading={saveLoading}
 			loadingAsSkeleton={false}
 			colorStyle="primary"
-			on:click={save}
+			onclick={save}
 			disabled={!isModified || saveLoading || $isBusy}
 			testId={SETTINGS_NETWORKS_MODAL_SAVE_BUTTON}>{$i18n.core.text.save}</Button
 		>

@@ -11,12 +11,12 @@
 </script>
 
 <ButtonGroup>
-	<Button colorStyle="error" on:click={() => dispatch('icReject')} disabled={$isBusy}
+	<Button colorStyle="error" onclick={() => dispatch('icReject')} disabled={$isBusy}
 		>{$i18n.core.text.reject}</Button
 	>
 
 	{#if approve}
-		<Button colorStyle="success" disabled={$isBusy} on:click={() => dispatch('icApprove')}>
+		<Button colorStyle="success" disabled={$isBusy} onclick={() => dispatch('icApprove')}>
 			{$i18n.core.text.approve}
 		</Button>
 	{/if}
