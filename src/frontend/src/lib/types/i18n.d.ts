@@ -1002,6 +1002,7 @@ interface I18nAddress {
 	fields: { label: string; address: string };
 	delete: { title: string; delete_address: string; content_text: string };
 	save: { title: string; add_to_existing_contact: string; create_contact: string };
+	qr: { title: string };
 }
 
 interface I18nSigner {
