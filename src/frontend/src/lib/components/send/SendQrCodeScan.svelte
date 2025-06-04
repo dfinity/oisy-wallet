@@ -15,17 +15,22 @@
 		destination: string | undefined;
 		amount: OptionAmount;
 		onDecodeQrCode: ({
-										 status,
-										 code,
-										 expectedToken
-									 }: {
+			status,
+			code,
+			expectedToken
+		}: {
 			status: QrStatus;
 			code?: string;
 			expectedToken: OptionToken;
 		}) => QrResponse;
 	}
 
-	let {expectedToken, destination = $bindable(), amount = $bindable(), onDecodeQrCode}: Props = $props();
+	let {
+		expectedToken,
+		destination = $bindable(),
+		amount = $bindable(),
+		onDecodeQrCode
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
