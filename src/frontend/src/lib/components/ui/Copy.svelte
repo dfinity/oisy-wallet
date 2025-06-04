@@ -1,9 +1,9 @@
 <script lang="ts">
 	import IconCopy from '$lib/components/icons/IconCopy.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { ButtonColorStyle } from '$lib/types/style';
+	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 
 	interface Props {
 		text: string;
