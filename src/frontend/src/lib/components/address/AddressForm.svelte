@@ -16,12 +16,14 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
+		onQRCodeScan: () => void;
 		address: Partial<ContactAddressUi>;
 		disableAddressField?: boolean;
 		isInvalid: boolean;
 		disabled?: boolean;
 	}
 	let {
+		onQRCodeScan,
 		address = $bindable(),
 		disableAddressField = false,
 		isInvalid = $bindable(),
@@ -36,7 +38,7 @@
 	});
 </script>
 
-<form class="w-full">
+<div class="w-full">
 	<label for="address" class="font-bold">{$i18n.address.fields.address}</label>
 
 	<InputAddress
@@ -49,6 +51,7 @@
 		showPasteButton={!disableAddressField && !disabled}
 		showResetButton={!disableAddressField && !disabled}
 		disabled={disableAddressField || disabled}
+		{onQRCodeScan}
 	/>
 
 	<label for="label" class="font-bold">{$i18n.address.fields.label}</label>
@@ -58,6 +61,8 @@
 		bind:value={address.label}
 		testId={ADDRESS_BOOK_ADDRESS_ALIAS_INPUT}
 		{disabled}
+		showResetButton={!disabled}
+		required={false}
 	/>
 	{#if nonNullish(labelError)}
 		<p transition:slide={SLIDE_DURATION} class="pt-2 text-error-primary">
@@ -66,4 +71,4 @@
 			})}
 		</p>
 	{/if}
-</form>
+</div>

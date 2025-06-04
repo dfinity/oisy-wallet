@@ -23,6 +23,7 @@
 		onSaveAddress: (address: ContactAddressUi) => void;
 		onAddAddress: (address: ContactAddressUi) => void;
 		onClose: () => void;
+		onQRCodeScan: () => void;
 		isNewAddress: boolean;
 		disabled?: boolean;
 	}
@@ -33,6 +34,7 @@
 		onSaveAddress,
 		onAddAddress,
 		onClose,
+		onQRCodeScan,
 		isNewAddress,
 		disabled = false
 	}: Props = $props();
@@ -60,6 +62,13 @@
 		}
 	};
 
+	const handleSubmit = (event: Event) => {
+		event.preventDefault();
+		if (!isInvalid) {
+			handleSave();
+		}
+	};
+
 	let title = $derived(
 		isNewAddress
 			? $i18n.address.form.new_address
@@ -69,36 +78,41 @@
 	);
 
 	let isInvalid = $state(false);
+
+	let originalLabel = $derived(!isNewAddress && nonNullish(address?.label) ? address.label : '');
+	let labelChanged = $derived(isNewAddress ? true : editingAddress.label !== originalLabel);
 </script>
 
-<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-	<Avatar variant="xl" name={contact.name} />
+<form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
+	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
+		<Avatar variant="xl" name={contact.name} />
 
-	<div class="text-2xl font-bold text-primary md:text-3xl">
-		{contact.name}
-	</div>
-	<div
-		class="mt-2 w-full rounded-lg bg-brand-light px-3 py-4 text-sm md:px-5 md:text-base md:font-bold"
-	>
-		<div class="pb-4 text-xl font-bold">{title}</div>
-		<AddressForm
-			disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
-			address={addressModel}
-			bind:isInvalid
-			{disabled}
-		></AddressForm>
-	</div>
+		<div class="text-2xl font-bold text-primary md:text-3xl">
+			{contact.name}
+		</div>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
-		<Button
-			colorStyle="primary"
-			disabled={isInvalid}
-			on:click={handleSave}
-			testId={ADDRESS_BOOK_SAVE_BUTTON}
-			loading={disabled}
-		>
-			{$i18n.core.text.save}
-		</Button>
-	</ButtonGroup>
-</ContentWithToolbar>
+		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
+			<div class="pb-4 text-xl font-bold">{title}</div>
+
+			<AddressForm
+				{onQRCodeScan}
+				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
+				address={addressModel}
+				bind:isInvalid
+				{disabled}
+			/>
+		</div>
+		<ButtonGroup slot="toolbar">
+			<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
+			<Button
+				colorStyle="primary"
+				disabled={isInvalid || (!isNewAddress && !labelChanged)}
+				on:click={handleSave}
+				testId={ADDRESS_BOOK_SAVE_BUTTON}
+				loading={disabled}
+			>
+				{$i18n.core.text.save}
+			</Button>
+		</ButtonGroup>
+	</ContentWithToolbar>
+</form>

@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
+	import SendContactName from '$lib/components/send/SendContactName.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/address';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { KnownDestination } from '$lib/types/transactions';
 	import {
 		formatSecondsToNormalizedDate,
@@ -18,9 +20,10 @@
 		destination: Address;
 		amounts: KnownDestination['amounts'];
 		onClick: () => void;
+		contact?: ContactUi;
 		timestamp?: number;
 	}
-	let { destination, amounts, timestamp, onClick }: Props = $props();
+	let { destination, amounts, timestamp, contact, onClick }: Props = $props();
 
 	// we only display the first 3 amounts, and the rest is displayed as "+N more"
 	let amountsToDisplay = $derived(amounts.slice(0, MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS));
@@ -32,11 +35,24 @@
 
 <LogoButton styleClass="group" {onClick}>
 	{#snippet logo()}
-		<div class="mr-2"><AvatarWithBadge address={destination} variant="sm" /></div>
+		<div class="mr-2">
+			<AvatarWithBadge
+				{contact}
+				address={destination}
+				badge={{ type: 'addressType', address: destination }}
+				variant="sm"
+			/>
+		</div>
 	{/snippet}
 
 	{#snippet title()}
-		<span class="text-base">{shortenWithMiddleEllipsis({ text: destination })}</span>
+		<span class="text-base">
+			{#if isNullish(contact)}
+				{shortenWithMiddleEllipsis({ text: destination })}
+			{:else}
+				<SendContactName {contact} address={destination} />
+			{/if}
+		</span>
 	{/snippet}
 
 	{#snippet description()}
