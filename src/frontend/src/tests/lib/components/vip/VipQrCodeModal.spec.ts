@@ -1,6 +1,6 @@
 import type { NewVipRewardResponse } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
+import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 import {
 	VIP_CODE_REGENERATE_BUTTON,
 	VIP_QR_CODE_BINANCE_ICON,

@@ -4,9 +4,9 @@
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
-	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
+	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalDAppDetails,
