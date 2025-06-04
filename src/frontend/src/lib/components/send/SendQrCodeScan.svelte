@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionToken } from '$lib/types/token';
-	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 
 	export let expectedToken: OptionToken;
 	export let destination: string | undefined;
@@ -48,7 +48,7 @@
 		}
 
 		onBack();
-	}
+	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
