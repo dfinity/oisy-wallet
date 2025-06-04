@@ -95,7 +95,7 @@
 		// because the exposed prop from the context is a derived and on update of the data the "enabled" gets reset
 		const tokensList = [...allTokensSorted];
 		const token = tokensList.find((t) => t.id === id);
-		if (token && 'enabled' in token) {
+		if (nonNullish(token) && 'enabled' in token) {
 			token.enabled = !token.enabled;
 			setTokens(tokensList);
 		}
