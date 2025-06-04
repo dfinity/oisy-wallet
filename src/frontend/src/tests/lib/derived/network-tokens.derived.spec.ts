@@ -6,6 +6,10 @@ import {
 	BSC_MAINNET_NETWORK,
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
+	POLYGON_AMOY_NETWORK,
+	POLYGON_MAINNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.polygon.env';
 import * as btcEnv from '$env/networks/networks.btc.env';
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
@@ -27,6 +31,10 @@ import {
 	BNB_MAINNET_TOKEN,
 	BNB_TESTNET_TOKEN
 } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
+import {
+	POL_AMOY_TOKEN,
+	POL_MAINNET_TOKEN
+} from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -43,6 +51,8 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+import type { Network } from '$lib/types/network';
+import type { Token } from '$lib/types/token';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
@@ -85,7 +95,8 @@ describe('network-tokens.derived', () => {
 				ETHEREUM_TOKEN,
 				SOLANA_TOKEN,
 				BASE_ETH_TOKEN,
-				BNB_MAINNET_TOKEN
+				BNB_MAINNET_TOKEN,
+				POL_MAINNET_TOKEN
 			]);
 		});
 
@@ -110,7 +121,7 @@ describe('network-tokens.derived', () => {
 				...toggleProps
 			};
 
-			const networkMap = [
+			const networkMap: { network: Network; tokens: Token[] }[] = [
 				{
 					network: ICP_NETWORK,
 					tokens: [ICP_TOKEN]
@@ -154,6 +165,14 @@ describe('network-tokens.derived', () => {
 				{
 					network: BSC_TESTNET_NETWORK,
 					tokens: [BNB_TESTNET_TOKEN]
+				},
+				{
+					network: POLYGON_MAINNET_NETWORK,
+					tokens: [POL_MAINNET_TOKEN]
+				},
+				{
+					network: POLYGON_AMOY_NETWORK,
+					tokens: [POL_AMOY_TOKEN]
 				}
 			];
 
@@ -178,6 +197,7 @@ describe('network-tokens.derived', () => {
 					SOLANA_TOKEN,
 					BASE_ETH_TOKEN,
 					BNB_MAINNET_TOKEN,
+					POL_MAINNET_TOKEN,
 					mockErc20UserToken,
 					mockSplCustomToken
 				]);

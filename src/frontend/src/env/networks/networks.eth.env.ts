@@ -14,20 +14,6 @@ export const ETH_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
 	import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED
 );
 
-export const ALCHEMY_JSON_RPC_URL_MAINNET = 'https://eth-mainnet.g.alchemy.com/v2';
-export const ALCHEMY_JSON_RPC_URL_SEPOLIA = 'https://eth-sepolia.g.alchemy.com/v2';
-export const ALCHEMY_JSON_RPC_URL_BASE_MAINNET = 'https://base-mainnet.g.alchemy.com/v2';
-export const ALCHEMY_JSON_RPC_URL_BASE_SEPOLIA = 'https://base-sepolia.g.alchemy.com/v2';
-export const ALCHEMY_JSON_RPC_URL_BSC_MAINNET = 'https://bnb-mainnet.g.alchemy.com/v2';
-export const ALCHEMY_JSON_RPC_URL_BSC_TESTNET = 'https://bnb-testnet.g.alchemy.com/v2';
-
-export const ALCHEMY_NETWORK_MAINNET: Network = Network.ETH_MAINNET;
-export const ALCHEMY_NETWORK_SEPOLIA: Network = Network.ETH_SEPOLIA;
-export const ALCHEMY_NETWORK_BASE_MAINNET: Network = Network.BASE_MAINNET;
-export const ALCHEMY_NETWORK_BASE_SEPOLIA: Network = Network.BASE_SEPOLIA;
-export const ALCHEMY_NETWORK_BSC_MAINNET: Network = Network.BNB_MAINNET;
-export const ALCHEMY_NETWORK_BSC_TESTNET: Network = Network.BNB_TESTNET;
-
 /**
  * Ethereum
  */
@@ -43,7 +29,11 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	iconLight: ethereumIconLight,
 	iconDark: ethereumIconDark,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
-	providers: { infura: 'homestead' },
+	providers: {
+		infura: 'homestead',
+		alchemy: Network.ETH_MAINNET,
+		alchemyJsonRpcUrl: 'https://eth-mainnet.g.alchemy.com/v2'
+	},
 	exchange: { coingeckoId: 'ethereum' },
 	buy: { onramperId: 'ethereum' }
 };
@@ -60,7 +50,11 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	iconLight: sepoliaIconLight,
 	iconDark: sepoliaIconDark,
 	explorerUrl: SEPOLIA_EXPLORER_URL,
-	providers: { infura: 'sepolia' }
+	providers: {
+		infura: 'sepolia',
+		alchemy: Network.ETH_SEPOLIA,
+		alchemyJsonRpcUrl: 'https://eth-sepolia.g.alchemy.com/v2'
+	}
 };
 
 /**
@@ -77,6 +71,9 @@ export const SUPPORTED_ETHEREUM_NETWORKS: EthereumNetwork[] = defineSupportedNet
 export const SUPPORTED_ETHEREUM_NETWORK_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NETWORKS.map(
 	({ id }) => id
 );
+
+export const SUPPORTED_ETHEREUM_MAINNET_NETWORKS: EthereumNetwork[] =
+	SUPPORTED_ETHEREUM_NETWORKS.filter(({ env }) => env === 'mainnet');
 
 export const SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS: EthereumChainId[] =
 	SUPPORTED_ETHEREUM_NETWORKS.map(({ chainId }) => chainId);

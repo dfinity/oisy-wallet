@@ -2,8 +2,9 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { listCustomTokens } from '$lib/api/backend.api';
+import { getIdbSolTokens, setIdbSolTokens } from '$lib/api/idb-tokens.api';
 import { nullishSignOut } from '$lib/services/auth.services';
+import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { SolAddress } from '$lib/types/address';
@@ -30,7 +31,7 @@ import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 
 export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
-	await Promise.all([loadDefaultSplTokens(), loadCustomTokens({ identity })]);
+	await Promise.all([loadDefaultSplTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
 const loadDefaultSplTokens = (): ResultSuccess => {
@@ -50,9 +51,15 @@ const loadDefaultSplTokens = (): ResultSuccess => {
 	return { success: true };
 };
 
-export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+export const loadCustomTokens = ({
+	identity,
+	useCache = false
+}: {
+	identity: OptionIdentity;
+	useCache?: boolean;
+}): Promise<void> =>
 	queryAndUpdate<SplCustomToken[]>({
-		request: () => loadCustomTokensWithMetadata({ identity }),
+		request: () => loadCustomTokensWithMetadata({ identity, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
 			splCustomTokensStore.resetAll();
@@ -66,23 +73,30 @@ export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Pr
 		strategy: 'query'
 	});
 
-const loadSplCustomTokens = async (params: {
-	identity: OptionIdentity;
-	certified: boolean;
-}): Promise<CustomToken[]> => {
-	const tokens = await listCustomTokens({
-		...params,
-		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-	});
-
-	// We filter the custom tokens that are Spl (the backend "Custom Token" potentially supports other types).
-	return tokens.filter(({ token }) => 'SplMainnet' in token || 'SplDevnet' in token);
-};
-
-export const loadCustomTokensWithMetadata = async ({
-	identity
+const loadSplCustomTokens = async ({
+	identity,
+	certified,
+	useCache = false
 }: {
 	identity: OptionIdentity;
+	certified: boolean;
+	useCache?: boolean;
+}): Promise<CustomToken[]> =>
+	await loadNetworkCustomTokens({
+		identity,
+		certified,
+		filterTokens: ({ token }) => 'SplMainnet' in token || 'SplDevnet' in token,
+		setIdbTokens: setIdbSolTokens,
+		getIdbTokens: getIdbSolTokens,
+		useCache
+	});
+
+const loadCustomTokensWithMetadata = async ({
+	identity,
+	useCache = false
+}: {
+	identity: OptionIdentity;
+	useCache?: boolean;
 }): Promise<SplCustomToken[]> => {
 	const loadCustomContracts = async (): Promise<SplCustomToken[]> => {
 		if (isNullish(identity)) {
@@ -90,7 +104,7 @@ export const loadCustomTokensWithMetadata = async ({
 			return [];
 		}
 
-		const splCustomTokens = await loadSplCustomTokens({ identity, certified: true });
+		const splCustomTokens = await loadSplCustomTokens({ identity, certified: true, useCache });
 
 		const [existingTokens, nonExistingTokens] = splCustomTokens.reduce<
 			[SplCustomToken[], SplCustomToken[]]

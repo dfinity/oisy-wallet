@@ -458,11 +458,12 @@ impl PicBackend {
             let caller = Principal::self_authenticating(i.to_string());
             let response = self.update::<UserProfile>(caller, "create_user_profile", ());
             let timestamp = self.pic.get_time();
-            // Convert timestamp to nanos using the pocket_ic-specific API
-            let timestamp_nanos = timestamp.as_nanos_since_unix_epoch();
-
+            let timestamp_nanos = timestamp
+                .duration_since(UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_nanos();
             let expected_user = OisyUser {
-                updated_timestamp: timestamp_nanos,
+                updated_timestamp: timestamp_nanos as u64,
                 pouh_verified: false,
                 principal: caller,
             };
@@ -470,22 +471,5 @@ impl PicBackend {
             assert!(response.is_ok());
         }
         expected_users
-    }
-
-    /// Creates toy user profiles with the given range of principals.
-    pub fn create_user_profiles<R>(&self, range: R) -> Vec<UserProfile>
-    where
-        R: RangeBounds<u8> + Iterator<Item = u8>,
-    {
-        let mut expected_user_profiles: Vec<UserProfile> = Vec::new();
-        for i in range {
-            self.pic.advance_time(Duration::new(10, 0));
-            let caller = Principal::self_authenticating(i.to_string());
-            let response = self.update::<UserProfile>(caller, "create_user_profile", ());
-            let expected_user_profile = response.clone().expect("Failed to create user profile");
-            expected_user_profiles.push(expected_user_profile);
-            assert!(response.is_ok());
-        }
-        expected_user_profiles
     }
 }

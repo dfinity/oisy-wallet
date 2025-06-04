@@ -21,13 +21,15 @@ pub trait PicCanisterTrait {
     where
         T: for<'a> Deserialize<'a> + CandidType,
     {
-        match self
-            .pic()
+        self.pic()
             .update_call(self.canister_id(), caller, method, encode_one(arg).unwrap())
-        {
-            Ok(bytes) => decode_one(&bytes).map_err(|e| format!("Decoding failed: {e}")),
-            Err(err) => Err(format!("Update call error: {}", err)),
-        }
+            .map_err(|e| {
+                format!(
+                    "Update call error. RejectionCode: {:?}, Error: {}",
+                    e.reject_code, e.reject_message
+                )
+            })
+            .and_then(|reply| decode_one(&reply).map_err(|e| format!("Decoding failed: {e}")))
     }
 
     /// Makes a query call to the canister.
@@ -35,12 +37,14 @@ pub trait PicCanisterTrait {
     where
         T: for<'a> Deserialize<'a> + CandidType,
     {
-        match self
-            .pic()
+        self.pic()
             .query_call(self.canister_id(), caller, method, encode_one(arg).unwrap())
-        {
-            Ok(bytes) => decode_one(&bytes).map_err(|e| format!("Decoding failed: {e}")),
-            Err(err) => Err(format!("Query call error: {}", err)),
-        }
+            .map_err(|e| {
+                format!(
+                    "Query call error. RejectionCode: {:?}, Error: {}",
+                    e.reject_code, e.reject_message
+                )
+            })
+            .and_then(|reply| decode_one(&reply).map_err(|_| "Decoding failed".to_string()))
     }
 }

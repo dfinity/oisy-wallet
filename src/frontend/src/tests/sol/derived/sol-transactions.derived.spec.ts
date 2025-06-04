@@ -1,6 +1,7 @@
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { token } from '$lib/stores/token.store';
 import {
+	solKnownDestinations,
 	solTransactions,
 	solTransactionsInitialized,
 	solTransactionsNotInitialized
@@ -121,6 +122,59 @@ describe('sol-transactions.derived', () => {
 			const result = get(solTransactionsNotInitialized);
 
 			expect(result).toBeFalsy();
+		});
+	});
+
+	describe('solKnownDestinations', () => {
+		beforeEach(() => {
+			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+		});
+
+		it('should return known destinations if transactions store has some data', () => {
+			solTransactionsStore.append({
+				tokenId: SOLANA_TOKEN_ID,
+				transactions
+			});
+
+			const maxTimestamp = Math.max(...transactions.map(({ data }) => Number(data.timestamp)));
+
+			expect(get(solKnownDestinations)).toEqual({
+				[transactions[0].data.to as string]: {
+					amounts: transactions.map(({ data }) => ({ value: data.value, token: SOLANA_TOKEN })),
+					timestamp: maxTimestamp,
+					address: transactions[0].data.to
+				}
+			});
+		});
+
+		it('should return known destinations with owner addresses if exists', () => {
+			const mockTransactions = transactions.map((tx) => ({
+				...tx,
+				data: {
+					...tx.data,
+					toOwner: 'ownerAddress',
+					fromOwner: 'fromOwnerAddress'
+				}
+			}));
+
+			solTransactionsStore.append({
+				tokenId: SOLANA_TOKEN_ID,
+				transactions: mockTransactions
+			});
+
+			const maxTimestamp = Math.max(...mockTransactions.map(({ data }) => Number(data.timestamp)));
+
+			expect(get(solKnownDestinations)).toEqual({
+				[mockTransactions[0].data.toOwner as string]: {
+					amounts: mockTransactions.map(({ data }) => ({ value: data.value, token: SOLANA_TOKEN })),
+					timestamp: maxTimestamp,
+					address: mockTransactions[0].data.toOwner
+				}
+			});
+		});
+
+		it('should return empty object if transactions store does not have data', () => {
+			expect(get(solKnownDestinations)).toEqual({});
 		});
 	});
 });

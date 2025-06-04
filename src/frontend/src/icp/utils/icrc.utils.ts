@@ -1,9 +1,16 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { GHOSTNODE_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
-import type { IcTokenWithoutIdExtended, IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import type {
+	IcTokenExtended,
+	IcTokenWithoutIdExtended,
+	IcrcCustomToken
+} from '$icp/types/icrc-custom-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { UrlSchema } from '$lib/validation/url.validation';
 import {
 	IcrcMetadataResponseEntries,
 	mapTokenMetadata,
@@ -18,12 +25,16 @@ export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
 };
 
+const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
+	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE'
+};
+
 export const mapIcrcToken = ({
 	metadata,
 	icrcCustomTokens,
 	ledgerCanisterId,
 	...rest
-}: IcrcLoadData): IcTokenWithoutIdExtended | undefined => {
+}: IcrcLoadData): IcTokenExtended | undefined => {
 	const token = mapOptionalToken(metadata);
 
 	if (isNullish(token)) {
@@ -32,11 +43,19 @@ export const mapIcrcToken = ({
 
 	const { symbol, icon: tokenIcon, ...metadataToken } = token;
 
-	const icon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
+	const staticIcon = `/icons/icrc/${ledgerCanisterId}.png`;
+
+	const dynamicIcon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
+
+	const { success: dynamicIconIsUrl } = UrlSchema.safeParse(dynamicIcon);
+
+	// We do not allow external URLs anyway, so it is safe to use the static icon, even if it does not exist
+	const icon = nonNullish(dynamicIconIsUrl) && dynamicIconIsUrl ? staticIcon : dynamicIcon;
 
 	return {
+		id: parseTokenId(symbol),
 		network: ICP_NETWORK,
-		standard: 'icrc',
+		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? 'icrc',
 		symbol,
 		...(notEmptyString(icon) && { icon }),
 		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
@@ -97,12 +116,23 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	];
 };
 
+export const isTokenIcp = (token: Partial<IcToken>): token is IcToken => token.standard === 'icp';
+
+export const isTokenIcrc = (token: Partial<IcToken>): token is IcToken => token.standard === 'icrc';
+
+export const isTokenDip20 = (token: Partial<IcToken>): token is IcToken =>
+	token.standard === 'dip20';
+
+export const isTokenIc = (token: Partial<IcToken>): token is IcToken =>
+	isTokenIcp(token) || isTokenIcrc(token) || isTokenDip20(token);
+
 export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
-	(token.standard === 'icp' || token.standard === 'icrc') && 'enabled' in token;
+	isTokenIc(token) && 'enabled' in token;
 
 const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>
 	'minterCanisterId' in token && 'twinToken' in token;
 
+// TODO: create tests
 export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 	...token,
 	...(isIcCkInterface(token) && nonNullish(token.twinToken)
@@ -110,6 +140,18 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 				oisyName: {
 					prefix: 'ck',
 					oisyName: token.twinToken.name
+				}
+			}
+		: {})
+});
+
+// TODO: create tests
+export const mapTokenOisySymbol = (token: IcInterface): IcInterface => ({
+	...token,
+	...(nonNullish(CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId])
+		? {
+				oisySymbol: {
+					oisySymbol: CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId]
 				}
 			}
 		: {})

@@ -22,5 +22,8 @@ strum = { workspace = true }
 strum_macros = { workspace = true }
 pretty_assertions = "1.4.1"
 
+[dev-dependencies]
+paste = { workspace = true }
+
 [lints]
 workspace = true

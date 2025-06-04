@@ -7,6 +7,8 @@
 	export let showResetButton = false;
 	export let required = true;
 	export let testId: string | undefined = undefined;
+	export let autofocus = false;
+	export let disabled: boolean | undefined = undefined;
 </script>
 
 <Input
@@ -18,5 +20,7 @@
 	{showResetButton}
 	spellcheck={false}
 	autocomplete="off"
+	{autofocus}
 	{testId}
+	{disabled}
 />

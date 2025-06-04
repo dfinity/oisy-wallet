@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { rewardCampaigns } from '$env/reward-campaigns.env';
+	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
 	import rewardReceived from '$lib/assets/reward-received.svg';
@@ -27,7 +27,7 @@
 
 	// TODO At the moment the selected campaign is hardcoded. In the future this should be configurable from the outside.
 	const reward: RewardDescription | undefined = rewardCampaigns.find(
-		(campaign) => campaign.id === 'OISY Airdrop #1'
+		(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
 </script>
 

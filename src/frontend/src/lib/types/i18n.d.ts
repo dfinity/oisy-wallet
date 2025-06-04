@@ -23,15 +23,26 @@ interface I18nCore {
 		approve: string;
 		view: string;
 		copy: string;
+		delete: string;
 		clear_filter: string;
 		not_available: string;
 		new: string;
 		edit: string;
 		no_results: string;
+		paste: string;
 		to: string;
+		add: string;
+		more_items: string;
+		select: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string; go_to_home: string; back: string };
+	alt: {
+		logo: string;
+		go_to_home: string;
+		back: string;
+		open_details: string;
+		close_details: string;
+	};
 	warning: { do_not_close: string };
 }
 
@@ -53,6 +64,8 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	alt: {
 		tokens: string;
@@ -70,6 +83,8 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		hide_balances: string;
+		show_balances: string;
 	};
 	short: { documentation: string };
 }
@@ -169,7 +184,7 @@ interface I18nRewards {
 		share: string;
 		learn_more: string;
 		check_status: string;
-		requirements_title: string;
+		view_details: string;
 		modal_button_text: string;
 		activity_button_text: string;
 		activity_button_text_short: string;
@@ -186,7 +201,13 @@ interface I18nRewards {
 		ongoing: string;
 		ended: string;
 	};
-	alt: { upcoming_campaigns: string; reward_logo: string };
+	requirements: {
+		requirements_title: string;
+		min_logins: string;
+		min_transactions: string;
+		min_total_assets_usd: string;
+	};
+	alt: { upcoming_campaigns: string; coming_soon: string; reward_banner: string };
 }
 
 interface I18nFooter {
@@ -222,7 +243,6 @@ interface I18nInit {
 		no_alchemy_provider: string;
 		no_alchemy_erc20_provider: string;
 		no_etherscan_provider: string;
-		no_etherscan_rest_api: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
@@ -232,7 +252,6 @@ interface I18nInit {
 		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
-		loading_balance_symbol: string;
 		erc20_contracts: string;
 		spl_tokens: string;
 		minter_ckbtc_btc: string;
@@ -307,6 +326,10 @@ interface I18nSettings {
 		appearance_system: string;
 	};
 	error: { loading_profile: string };
+}
+
+interface I18nShortcuts {
+	privacy_mode: string;
 }
 
 interface I18nNetworks {
@@ -412,6 +435,14 @@ interface I18nSend {
 		scan_qr: string;
 		select_token: string;
 		select_network_filter: string;
+		send_again: string;
+		recently_used_tab: string;
+		contacts_tab: string;
+		recently_used_empty_state_title: string;
+		recently_used_empty_state_description: string;
+		contacts_empty_state_title: string;
+		contacts_empty_state_description: string;
+		send_review_subtitle: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -424,6 +455,8 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
+		unknown_destination: string;
+		fee_info: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -543,12 +576,22 @@ interface I18nSwap {
 		swap_route: string;
 		included_network_fees: string;
 		included_liquidity_fees: string;
+		best_rate: string;
+		expected_minimum: string;
+		you_receive: string;
+		select: string;
+		select_swap_provider: string;
+		open_icp_swap: string;
 	};
 	error: {
 		kong_not_available: string;
 		unexpected: string;
 		unexpected_missing_data: string;
 		slippage_exceeded: string;
+		pool_not_found: string;
+		deposit_error: string;
+		withdraw_failed: string;
+		swap_failed_withdraw_success: string;
 	};
 }
 
@@ -577,6 +620,7 @@ interface I18nTokens {
 		hide_token: string;
 		select_token: string;
 		exchange_is_not_available: string;
+		exchange_is_not_available_short: string;
 		source_token_title: string;
 		destination_token_title: string;
 		chain_key: string;
@@ -777,8 +821,14 @@ interface I18nTransaction {
 		type: string;
 		from: string;
 		from_copied: string;
+		received_from: string;
+		from_ata: string;
+		from_ata_copied: string;
 		to: string;
 		to_copied: string;
+		sent_to: string;
+		to_ata: string;
+		to_ata_copied: string;
 		block: string;
 		interacted_with: string;
 		status: string;
@@ -807,6 +857,7 @@ interface I18nTransaction {
 		converting_ck_token: string;
 		twin_network: string;
 		no_date_available: string;
+		pending: string;
 	};
 	alt: {
 		open_block_explorer: string;
@@ -867,7 +918,12 @@ interface I18nVip {
 			reward_received_description: string;
 			reward_failed_description: string;
 		};
-		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
+		error: {
+			loading_reward: string;
+			loading_user_data: string;
+			claiming_reward: string;
+			loading_eligibility: string;
+		};
 	};
 	invitation: {
 		text: {
@@ -911,12 +967,41 @@ interface I18nAddress_book {
 		empty_text: string;
 		add_new_contact: string;
 		add_contact: string;
+		search_contact: string;
+		no_address_found: string;
+		no_contact_found: string;
+	};
+	alt: { show_addresses_of_contact: string; hide_addresses: string };
+	edit_contact: { title: string; add_address: string; delete_contact: string };
+	avatar: { default: string; avatar_for: string };
+	show_contact: {
+		title: string;
+		add_address: string;
+		show_address_text: string;
+		add_first_address: string;
 	};
 }
 
 interface I18nContact {
-	form: { add_new_contact: string };
+	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
+	delete: { title: string; delete_contact: string; content_text: string };
+	error: { create: string; update: string; delete: string };
+}
+
+interface I18nAddress {
+	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
+	form: {
+		new_address: string;
+		address_placeholder: string;
+		label_placeholder: string;
+		invalid_address: string;
+		valid_for_networks: string;
+		error: { label_too_long: string };
+	};
+	fields: { label: string; address: string };
+	delete: { title: string; delete_address: string; content_text: string };
+	save: { title: string; add_to_existing_contact: string; create_contact: string };
 }
 
 interface I18nSigner {
@@ -997,6 +1082,7 @@ interface I18n {
 	init: I18nInit;
 	hero: I18nHero;
 	settings: I18nSettings;
+	shortcuts: I18nShortcuts;
 	networks: I18nNetworks;
 	receive: I18nReceive;
 	send: I18nSend;
@@ -1014,6 +1100,7 @@ interface I18n {
 	referral: I18nReferral;
 	address_book: I18nAddress_book;
 	contact: I18nContact;
+	address: I18nAddress;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;

@@ -1,3 +1,4 @@
+import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { ckBtcPendingUtxoTransactions } from '$icp/derived/ckbtc-transactions.derived';
 import { ckEthPendingTransactions } from '$icp/derived/cketh-transactions.derived';
 import { btcStatusesStore } from '$icp/stores/btc.store';
@@ -7,6 +8,12 @@ import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.
 import { icTransactionsStore, type IcTransactionsData } from '$icp/stores/ic-transactions.store';
 import { getAllIcTransactions, getIcExtendedTransactions } from '$icp/utils/ic-transactions.utils';
 import { tokenWithFallback } from '$lib/derived/token.derived';
+import { tokens } from '$lib/derived/tokens.derived';
+import type { TokenId } from '$lib/types/token';
+import type { AnyTransactionUiWithToken } from '$lib/types/transaction';
+import type { KnownDestinations } from '$lib/types/transactions';
+import { getKnownDestinations } from '$lib/utils/transactions.utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 const icExtendedTransactions: Readable<NonNullable<IcTransactionsData>> = derived(
@@ -53,4 +60,33 @@ export const icTransactions: Readable<NonNullable<IcTransactionsData>> = derived
 			icExtendedTransactions: $icExtendedTransactions,
 			icTransactionsStore: $icTransactionsStore
 		})
+);
+
+export const icKnownDestinations: Readable<KnownDestinations> = derived(
+	[icTransactionsStore, tokens, tokenWithFallback],
+	([$icTransactionsStore, $tokens, $tokenWithFallback]) => {
+		const isIcpToken = $tokenWithFallback.id === ICP_TOKEN_ID;
+		const { [ICP_TOKEN_ID]: icpTransactions, ...icCkTransactionsStore } =
+			$icTransactionsStore ?? {};
+		const icpTransactionsStore = { [ICP_TOKEN_ID]: icpTransactions ?? [] };
+
+		const mappedTransactions: AnyTransactionUiWithToken[] = [];
+
+		Object.getOwnPropertySymbols(isIcpToken ? icpTransactionsStore : icCkTransactionsStore).forEach(
+			(tokenId) => {
+				const token = $tokens.find(({ id }) => id === tokenId);
+
+				if (nonNullish(token)) {
+					($icTransactionsStore?.[tokenId as TokenId] ?? []).forEach(({ data }) => {
+						mappedTransactions.push({
+							...data,
+							token
+						});
+					});
+				}
+			}
+		);
+
+		return getKnownDestinations(mappedTransactions);
+	}
 );

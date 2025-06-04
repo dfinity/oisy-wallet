@@ -63,16 +63,27 @@ export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | n
 		vs_currencies: 'usd'
 	});
 
-export const exchangeRateERC20ToUsd = ({
+export const exchangeRatePOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'polygon-ecosystem-token',
+		vs_currencies: 'usd'
+	});
+
+export const exchangeRateERC20ToUsd = async ({
 	coingeckoPlatformId: id,
 	contractAddresses
-}: CoingeckoErc20PriceParams): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
-	simpleTokenPrice({
+}: CoingeckoErc20PriceParams): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
+	if (contractAddresses.length === 0) {
+		return null;
+	}
+
+	return await simpleTokenPrice({
 		id,
 		vs_currencies: 'usd',
 		contract_addresses: contractAddresses.map(({ address }) => address),
 		include_market_cap: true
 	});
+};
 
 export const exchangeRateICRCToUsd = async (
 	ledgerCanisterIds: LedgerCanisterIdText[]
@@ -97,15 +108,20 @@ export const exchangeRateICRCToUsd = async (
 	};
 };
 
-export const exchangeRateSPLToUsd = (
+export const exchangeRateSPLToUsd = async (
 	tokenAddresses: SplTokenAddress[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
-	simpleTokenPrice({
+): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
+	if (tokenAddresses.length === 0) {
+		return null;
+	}
+
+	return await simpleTokenPrice({
 		id: 'solana',
 		vs_currencies: 'usd',
 		contract_addresses: tokenAddresses,
 		include_market_cap: true
 	});
+};
 
 export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
 	exchangeStore.set([
@@ -114,6 +130,7 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 		...(nonNullish(data) ? [data.currentIcpPrice] : []),
 		...(nonNullish(data) ? [data.currentSolPrice] : []),
 		...(nonNullish(data) ? [data.currentBnbPrice] : []),
+		...(nonNullish(data) ? [data.currentPolPrice] : []),
 		...(nonNullish(data) ? [data.currentErc20Prices] : []),
 		...(nonNullish(data) ? [data.currentIcrcPrices] : []),
 		...(nonNullish(data) ? [data.currentSplPrices] : [])

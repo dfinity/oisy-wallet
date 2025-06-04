@@ -1,32 +1,44 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
-	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
+	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
+	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { Network } from '$lib/types/network';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import { isEthAddress } from '$lib/utils/account.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
-	export let network: Network | undefined = undefined;
 	export let amount: OptionAmount = undefined;
 	export let nativeEthereumToken: Token;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	let insufficientFunds: boolean;
-	let invalidDestination: boolean;
+
+	let invalidDestination = false;
+	$: invalidDestination = isNullishOrEmpty(destination) || !isEthAddress(destination);
 
 	let invalid = true;
-	$: invalid =
-		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount);
+	$: invalid = invalidDestination || insufficientFunds || isNullish(amount);
 
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { feeSymbolStore, feeDecimalsStore, feeTokenIdStore }: FeeContext =
+		getContext<FeeContext>(FEE_CONTEXT_KEY);
 </script>
 
-<SendForm on:icNext token={$sendToken} balance={$sendBalance} disabled={invalid} hideSource>
+<SendForm
+	on:icNext
+	on:icBack
+	{destination}
+	{selectedContact}
+	{invalidDestination}
+	disabled={invalid}
+>
 	<EthSendAmount
 		slot="amount"
 		{nativeEthereumToken}
@@ -35,16 +47,16 @@
 		on:icTokensList
 	/>
 
-	<EthSendDestination
-		slot="destination"
-		token={$sendToken}
-		{network}
-		bind:destination
-		bind:invalidDestination
-		on:icQRCodeScan
-	/>
+	<EthFeeDisplay slot="fee">
+		<Html slot="label" text={$i18n.fee.text.max_fee_eth} />
+	</EthFeeDisplay>
 
-	<FeeDisplay slot="fee" />
+	<SendFeeInfo
+		slot="info"
+		feeSymbol={$feeSymbolStore}
+		decimals={$feeDecimalsStore}
+		feeTokenId={$feeTokenIdStore}
+	/>
 
 	<slot name="cancel" slot="cancel" />
 </SendForm>

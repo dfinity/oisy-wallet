@@ -1,5 +1,6 @@
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import { retryWithDelay } from '$lib/services/rest.services';
 import type { SolAddress } from '$lib/types/address';
 import type {
 	PostMessageDataRequestSol,
@@ -96,27 +97,36 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		return transactionsUi.filter(({ data: { id } }) => isNullish(this.store.transactions[`${id}`]));
 	};
 
+	private loadAndSyncWalletData = async (
+		data: NonNullable<SchedulerJobData<PostMessageDataRequestSol>['data']>
+	) => {
+		const {
+			address: { data: address },
+			...rest
+		} = data;
+
+		const [balance, transactions] = await Promise.all([
+			this.loadBalance({
+				address,
+				...rest
+			}),
+			this.loadTransactions({
+				address,
+				...rest
+			})
+		]);
+
+		this.syncWalletData({ response: { balance, transactions } });
+	};
+
 	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestSol>) => {
 		assertNonNullish(data, 'No data provided to get Solana balance.');
 
 		try {
-			const {
-				address: { data: address },
-				...rest
-			} = data;
-
-			const [balance, transactions] = await Promise.all([
-				this.loadBalance({
-					address,
-					...rest
-				}),
-				this.loadTransactions({
-					address,
-					...rest
-				})
-			]);
-
-			this.syncWalletData({ response: { balance, transactions } });
+			await retryWithDelay({
+				request: async () => await this.loadAndSyncWalletData(data),
+				maxRetries: 10
+			});
 		} catch (error: unknown) {
 			this.postMessageWalletError({ error });
 		}

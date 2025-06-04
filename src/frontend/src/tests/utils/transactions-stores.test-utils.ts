@@ -16,3 +16,6 @@ export const createCertifiedIcTransactionUiMock = (id: string): CertifiedData<Ic
 	certified: true,
 	data: createIcTransactionUiMock(id)
 });
+
+export const createIcTransactionUiMockList = (n: number): IcTransactionUi[] =>
+	Array.from({ length: n }, (_, i) => createIcTransactionUiMock(`tx${i}`));

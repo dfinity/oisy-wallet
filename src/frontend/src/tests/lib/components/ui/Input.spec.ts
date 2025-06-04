@@ -1,5 +1,7 @@
 import Input from '$lib/components/ui/Input.svelte';
+import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
+import { vi } from 'vitest';
 
 describe('Input', () => {
 	const defaultProps = {
@@ -93,5 +95,60 @@ describe('Input', () => {
 		expect(input).toHaveAttribute('name', 'test-input');
 		expect(input).toHaveAttribute('required');
 		expect(input).toHaveAttribute('disabled');
+	});
+
+	describe('clipboard paste functionality', () => {
+		beforeEach(() => {
+			// Mock the Clipboard API
+			Object.defineProperty(navigator, 'clipboard', {
+				value: {
+					readText: vi.fn().mockResolvedValue('clipboard content')
+				},
+				configurable: true
+			});
+		});
+
+		it('shows paste button when showPasteButton is true', () => {
+			const props = {
+				...defaultProps,
+				showPasteButton: true
+			};
+
+			const { getByText } = render(Input, props);
+			const pasteButton = getByText(en.core.text.paste);
+
+			expect(pasteButton).toBeInTheDocument();
+		});
+
+		it('does not show paste button when showPasteButton is false', () => {
+			const props = {
+				...defaultProps,
+				showPasteButton: false
+			};
+
+			const { queryByText } = render(Input, props);
+			const pasteButton = queryByText(en.core.text.paste);
+
+			expect(pasteButton).not.toBeInTheDocument();
+		});
+
+		it('pastes clipboard content when paste button is clicked', async () => {
+			const props = {
+				...defaultProps,
+				showPasteButton: true
+			};
+
+			const { getByText, getByPlaceholderText } = render(Input, props);
+			const pasteButton = getByText(en.core.text.paste);
+			const input = getByPlaceholderText('Test placeholder');
+
+			await fireEvent.click(pasteButton);
+
+			// Wait for the clipboard promise to resolve
+			await new Promise(process.nextTick);
+
+			expect(navigator.clipboard.readText).toHaveBeenCalled();
+			expect(input).toHaveValue('clipboard content');
+		});
 	});
 });

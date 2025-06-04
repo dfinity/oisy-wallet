@@ -1,6 +1,6 @@
 #!/bin/bash
 
-POCKET_IC_SERVER_VERSION=6.0.0
+POCKET_IC_SERVER_VERSION=8.0.0
 OISY_UPGRADE_VERSIONS="v0.0.13,v0.0.19"
 BITCOIN_CANISTER_RELEASE="2024-08-30"
 BITCON_CANISTER_WASM="ic-btc-canister.wasm.gz"
@@ -18,21 +18,11 @@ else
   cargo build --locked --target wasm32-unknown-unknown --release -p backend
 fi
 
-if [ -f "./$BITCON_CANISTER_WASM" ]; then
-  echo "Use existing $BITCON_CANISTER_WASM canister."
-else
-  echo "Downloading bitcoin_canister canister."
-  curl -sSL "https://github.com/dfinity/bitcoin-canister/releases/download/release%2F$BITCOIN_CANISTER_RELEASE/ic-btc-canister.wasm.gz" -o $BITCON_CANISTER_WASM
-fi
+scripts/download-immutable.sh "https://github.com/dfinity/bitcoin-canister/releases/download/release%2F$BITCOIN_CANISTER_RELEASE/ic-btc-canister.wasm.gz" "$BITCON_CANISTER_WASM"
 # Setting the environment variable that will be used in the test to load that particular file relative to the cargo workspace.
 export BITCOIN_CANISTER_WASM_FILE="../../$BITCON_CANISTER_WASM"
 
-if [ -f "./${CYCLES_LEDGER_CANISTER_WASM}" ]; then
-  echo "Use existing ${CYCLES_LEDGER_CANISTER_WASM} canister."
-else
-  echo "Downloading cycles_ledger canister."
-  curl -sSL "${CYCLES_LEDGER_CANISTER_URL}" -o "${CYCLES_LEDGER_CANISTER_WASM}"
-fi
+scripts/download-immutable.sh "${CYCLES_LEDGER_CANISTER_URL}" "${CYCLES_LEDGER_CANISTER_WASM}"
 
 # Setting the environment variable that will be used in the test to load that particular file relative to the cargo workspace.
 export CYCLES_LEDGER_CANISTER_WASM_FILE="../../${CYCLES_LEDGER_CANISTER_WASM}"
@@ -43,9 +33,7 @@ IFS=',' read -r -a versions <<<"$OISY_UPGRADE_VERSIONS"
 for version in "${versions[@]}"; do
   OISY_UPGRADE_PATH="./backend-${version}.wasm.gz"
 
-  if [ ! -f "$OISY_UPGRADE_PATH" ]; then
-    curl -sSL "https://github.com/dfinity/oisy-wallet/releases/download/${version}/backend.wasm.gz" -o "$OISY_UPGRADE_PATH"
-  fi
+  scripts/download-immutable.sh "https://github.com/dfinity/oisy-wallet/releases/download/${version}/backend.wasm.gz" "$OISY_UPGRADE_PATH"
 done
 
 # Download PocketIC server
@@ -65,14 +53,7 @@ else
   exit 1
 fi
 
-if [ ! -f "$POCKET_IC_SERVER_PATH" ]; then
-  echo "Downloading PocketIC."
-  curl -sSL https://github.com/dfinity/pocketic/releases/download/${POCKET_IC_SERVER_VERSION}/pocket-ic-x86_64-${PLATFORM}.gz -o ${POCKET_IC_SERVER_PATH}.gz
-  gunzip ${POCKET_IC_SERVER_PATH}.gz
-  chmod +x ${POCKET_IC_SERVER_PATH}
-else
-  echo "PocketIC server already exists, skipping download."
-fi
+scripts/download-immutable.sh "https://github.com/dfinity/pocketic/releases/download/${POCKET_IC_SERVER_VERSION}/pocket-ic-x86_64-${PLATFORM}.gz" "${POCKET_IC_SERVER_PATH}.gz"
 
 export POCKET_IC_BIN="../../${POCKET_IC_SERVER_PATH}"
 export POCKET_IC_MUTE_SERVER=""

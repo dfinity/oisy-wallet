@@ -8,7 +8,6 @@
 	import { sendBtc } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
@@ -21,6 +20,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -34,7 +34,7 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
-	export let formCancelAction: 'back' | 'close' = 'close';
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -141,30 +141,24 @@
 		on:icSend={send}
 		bind:utxosFee
 		{destination}
+		{selectedContact}
 		{amount}
-		{networkId}
 		{source}
 	/>
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<BtcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
 	<BtcSendForm
+		{source}
+		{selectedContact}
 		on:icNext
 		on:icClose
+		on:icBack
 		on:icTokensList
 		bind:destination
 		bind:amount
-		on:icQRCodeScan
-		{source}
-		{networkId}
 	>
-		<svelte:fragment slot="cancel">
-			{#if formCancelAction === 'back'}
-				<ButtonBack onclick={back} />
-			{:else}
-				<ButtonCancel onclick={close} />
-			{/if}
-		</svelte:fragment>
+		<ButtonBack onclick={back} slot="cancel" />
 	</BtcSendForm>
 {:else}
 	<slot />

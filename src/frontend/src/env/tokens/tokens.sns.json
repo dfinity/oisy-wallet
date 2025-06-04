@@ -349,7 +349,7 @@
 		"indexCanisterId": "ldv2p-dqaaa-aaaaq-aadga-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "SWAMPDAO",
+			"name": "Swampies",
 			"symbol": "SWAMP",
 			"fee": {
 				"__bigint__": "10000"
@@ -565,6 +565,21 @@
 			},
 			"alternativeName": "ICPEx",
 			"url": "https://icpex.org/"
+		}
+	},
+	{
+		"ledgerCanisterId": "kknbx-zyaaa-aaaaq-aae4a-cai",
+		"rootCanisterId": "lacdn-3iaaa-aaaaq-aae3a-cai",
+		"indexCanisterId": "kepm7-ciaaa-aaaaq-aae5a-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "TACO DAO Token",
+			"symbol": "TACO",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "TACO DAO",
+			"url": "https://tacodao.com"
 		}
 	}
 ]

@@ -7,6 +7,7 @@ import IconReceive from '$lib/components/icons/IconReceive.svelte';
 import IconSend from '$lib/components/icons/IconSend.svelte';
 import { MILLISECONDS_IN_SECOND, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { TransactionStatusSchema, TransactionTypeSchema } from '$lib/schema/transaction.schema';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ModalData } from '$lib/stores/modal.store';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import {
@@ -17,6 +18,7 @@ import {
 import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createTransactionsUiWithCmp } from '$tests/mocks/transactions.mock';
+import { get } from 'svelte/store';
 
 describe('transaction.utils', () => {
 	describe('mapIcon', () => {
@@ -185,6 +187,33 @@ describe('transaction.utils', () => {
 				'1': [transactions[0]],
 				[nowInSeconds.toString()]: [transactions[1]]
 			});
+		});
+
+		it('should place pending transactions in its own category and on top', () => {
+			const expectedPendingTransactions = [
+				{
+					component: mockTransactions[0].component,
+					transaction: { ...mockTransactions[0].transaction, status: 'pending', timestamp: null }
+				},
+				{
+					component: mockTransactions[1].component,
+					transaction: { ...mockTransactions[1].transaction, status: 'pending', timestamp: null }
+				}
+			];
+			const transactions = [
+				...mockTransactions.map((t) => ({
+					...t,
+					transaction: { ...t.transaction, timestamp: new Date().getTime() }
+				})),
+				expectedPendingTransactions[0],
+				expectedPendingTransactions[1]
+			] as AnyTransactionUiWithCmp[];
+
+			const groupedList = groupTransactionsByDate(transactions);
+
+			expect(groupedList[get(i18n).transaction.label.pending]).toEqual(expectedPendingTransactions);
+
+			expect(Object.keys(groupedList).indexOf(get(i18n).transaction.label.pending)).toEqual(0);
 		});
 	});
 

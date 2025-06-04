@@ -1,8 +1,11 @@
 import type {
+	AddUserCredentialResult,
 	AllowSigningResponse,
 	_SERVICE as BackendService,
+	Contact,
 	CreateChallengeResponse,
 	CustomToken,
+	GetAllowedCyclesResponse,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
@@ -15,11 +18,11 @@ import {
 	mapAllowSigningError,
 	mapBtcPendingTransactionError,
 	mapBtcSelectUserUtxosFeeError,
-	mapCreateChallengeError
+	mapCreateChallengeError,
+	mapGetAllowedCyclesError
 } from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
-	AddUserCredentialResponse,
 	AddUserHiddenDappIdParams,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
@@ -105,7 +108,7 @@ export class BackendCanister extends Canister<BackendService> {
 		issuerCanisterId,
 		currentUserVersion,
 		credentialSpec
-	}: AddUserCredentialParams): Promise<AddUserCredentialResponse> => {
+	}: AddUserCredentialParams): Promise<AddUserCredentialResult> => {
 		const { add_user_credential } = this.caller({ certified: true });
 
 		return add_user_credential({
@@ -177,6 +180,19 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
+	getAllowedCycles = async (): Promise<GetAllowedCyclesResponse> => {
+		const { get_allowed_cycles } = this.caller({ certified: true });
+
+		const response = await get_allowed_cycles();
+
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
+		}
+
+		throw mapGetAllowedCyclesError(response.Err);
+	};
+
 	allowSigning = async ({ request }: AllowSigningParams = {}): Promise<AllowSigningResponse> => {
 		const { allow_signing } = this.caller({ certified: true });
 
@@ -236,5 +252,55 @@ export class BackendCanister extends Canister<BackendService> {
 			networks: mapUserNetworks(networks),
 			current_user_version: toNullable(currentUserVersion)
 		});
+	};
+
+	getContact = async (id: bigint): Promise<Contact> => {
+		const { get_contact } = this.caller({ certified: false });
+		const response = await get_contact(id);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getContacts = async (): Promise<Contact[]> => {
+		const { get_contacts } = this.caller({ certified: false });
+		const response = await get_contacts();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	createContact = async (name: string): Promise<Contact> => {
+		const { create_contact } = this.caller({ certified: true });
+		const response = await create_contact({ name });
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	deleteContact = async (id: bigint): Promise<bigint> => {
+		const { delete_contact } = this.caller({ certified: true });
+		const response = await delete_contact(id);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	updateContact = async (contact: Contact): Promise<Contact> => {
+		const { update_contact } = this.caller({ certified: true });
+		const response = await update_contact(contact);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
 	};
 }

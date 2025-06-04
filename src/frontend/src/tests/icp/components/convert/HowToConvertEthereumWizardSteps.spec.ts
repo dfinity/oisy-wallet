@@ -39,7 +39,7 @@ describe('HowToConvertEthereumWizardSteps', () => {
 		expect(getByTestId(HOW_TO_CONVERT_ETHEREUM_INFO)).toBeInTheDocument();
 	});
 
-	it('should render ReceiveAddressQRCode if current step is info', () => {
+	it('should render ReceiveAddressQrCode if current step is info', () => {
 		const { getByTestId } = render(HowToConvertEthereumWizardSteps, {
 			props: {
 				currentStep: {

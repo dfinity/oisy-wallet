@@ -1,18 +1,15 @@
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import type { RewardDescription } from '$env/types/env-reward';
 
 export const mockRewardCampaigns: RewardDescription[] = [
 	{
-		id: 'OISY Airdrop #1',
+		id: SPRINKLES_SEASON_1_EPISODE_3_ID,
 		title: 'OISY Airdrop',
 		cardTitle: 'OISY Rewards Season is Now Active!',
 		oneLiner: 'The one stop token shop - Trade tokens across all chains with ease using KongSwap.',
 		description: 'Some short description for the Airdrop. Some short description for the Airdrop.',
-		requirements: [
-			'Login 1x in last 7 days',
-			'Complete 2 transactions in last 7 days',
-			'Hold $20 USD at the time of issuance'
-		],
-		logo: '/images/rewards/oisy-episode-three-campaign.svg',
+		logo: '/images/rewards/oisy-reward-logo.svg',
+		cardBanner: '/images/rewards/oisy-episode-three-campaign.svg',
 		campaignHref:
 			'https://x.com/intent/post?text=Haven%E2%80%99t%20joined%20%40OISY%20Sprinkles%20yet%3F%0AThey%E2%80%99re%20dropping%20free%20%24BTC%20-%20all%20day%2C%20every%20day.%0AHead%20to%20OISY.com%20and%20try%20it%20for%20yourself.%20%F0%9F%9A%80%0A',
 		jackpotHref:
@@ -24,17 +21,13 @@ export const mockRewardCampaigns: RewardDescription[] = [
 		endDate: new Date('2030-03-04T00:00:00.000Z')
 	},
 	{
-		id: 'OISY Airdrop #2',
+		id: 'sprinkles_s1e4',
 		title: 'OISY Airdrop',
 		cardTitle: 'OISY Rewards Season is Now Active!',
 		oneLiner: 'The one stop token shop - Trade tokens across all chains with ease using KongSwap.',
 		description: 'Some short description for the Airdrop. Some short description for the Airdrop.',
-		requirements: [
-			'Login 1x in last 7 days',
-			'Complete 2 transactions in last 7 days',
-			'Hold $20 USD at the time of issuance'
-		],
-		logo: '/images/rewards/oisy-episode-three-campaign.svg',
+		logo: '/images/rewards/oisy-reward-logo.svg',
+		cardBanner: '/images/rewards/oisy-episode-three-campaign.svg',
 		campaignHref:
 			'https://x.com/intent/post?text=%F0%9F%8E%81%20Airdrop%20season%201%20started%20on%20%40oisy!%0A%0ASign-up%20and%20participate%20in%3A%20https%3A%2F%2Foisy.com',
 		jackpotHref:
@@ -46,17 +39,13 @@ export const mockRewardCampaigns: RewardDescription[] = [
 		endDate: new Date('2029-03-04T00:00:00.000Z')
 	},
 	{
-		id: 'OISY Airdrop #3',
+		id: 'sprinkles_s1e5',
 		title: 'OISY Airdrop',
 		cardTitle: 'OISY Rewards Season is Now Active!',
 		oneLiner: 'The one stop token shop - Trade tokens across all chains with ease using KongSwap.',
 		description: 'Some short description for the Airdrop. Some short description for the Airdrop.',
-		requirements: [
-			'Login 1x in last 7 days',
-			'Complete 2 transactions in last 7 days',
-			'Hold $20 USD at the time of issuance'
-		],
-		logo: '/images/rewards/oisy-episode-three-campaign.svg',
+		logo: '/images/rewards/oisy-reward-logo.svg',
+		cardBanner: '/images/rewards/oisy-episode-three-campaign.svg',
 		campaignHref:
 			'https://x.com/intent/post?text=%F0%9F%8E%81%20Airdrop%20season%201%20started%20on%20%40oisy!%0A%0ASign-up%20and%20participate%20in%3A%20https%3A%2F%2Foisy.com',
 		jackpotHref:

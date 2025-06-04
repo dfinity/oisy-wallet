@@ -73,14 +73,14 @@ export default defineConfig(
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
-				include: ['src/frontend', 'scripts'],
+				include: ['src/frontend'],
 				// TODO: increase the thresholds slowly up to an acceptable 80% at least
 				thresholds: {
 					autoUpdate: true,
-					statements: 65,
-					branches: 83,
-					functions: 74,
-					lines: 65
+					statements: 73,
+					branches: 85,
+					functions: 76,
+					lines: 73
 				}
 			}
 		}

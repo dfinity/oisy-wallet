@@ -1,12 +1,5 @@
-import {
-	BASE_NETWORK,
-	BASE_SEPOLIA_NETWORK
-} from '$env/networks/networks-evm/networks.evm.base.env';
-import {
-	BSC_MAINNET_NETWORK,
-	BSC_TESTNET_NETWORK
-} from '$env/networks/networks-evm/networks.evm.bsc.env';
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { InfuraProvider, infuraProviders } from '$eth/providers/infura.providers';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -21,14 +14,7 @@ vi.mock('$env/rest/infura.env', () => ({
 describe('infura.providers', () => {
 	const INFURA_API_KEY = 'test-api-key';
 
-	const networks: EthereumNetwork[] = [
-		ETHEREUM_NETWORK,
-		SEPOLIA_NETWORK,
-		BASE_NETWORK,
-		BASE_SEPOLIA_NETWORK,
-		BSC_MAINNET_NETWORK,
-		BSC_TESTNET_NETWORK
-	];
+	const networks: EthereumNetwork[] = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS];
 
 	it('should create the correct map of providers', () => {
 		expect(InfuraProviderLib).toHaveBeenCalledTimes(networks.length);

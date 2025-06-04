@@ -37,8 +37,12 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
-      - name: Lint
+      - name: Install rust
+        run: ./scripts/setup rust
+      - name: Lint rust
         run: ./scripts/lint.rust.sh
+      - name: Lint candid
+        run: ./scripts/lint.did.sh
 
   workspace-dependencies:
     runs-on: ubuntu-24.04
@@ -52,7 +56,7 @@ jobs:
       - name: Dependencies are defined in the workspace
         run: ./scripts/lint.cargo-workspace-dependencies.sh
 
-  may-merge:
+  backend-checks-pass:
     needs: ['lint', 'workspace-dependencies']
     if: ${{ always() }}
     runs-on: ubuntu-24.04
