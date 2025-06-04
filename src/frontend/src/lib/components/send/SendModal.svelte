@@ -204,8 +204,8 @@
 				expectedToken={$token}
 				bind:destination
 				bind:amount
-				decodeQrCode={onDecodeQrCode}
-				on:icQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				{onDecodeQrCode}
+				onIcQrCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
 			/>
 		{:else}
 			<SendWizard

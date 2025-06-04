@@ -20,6 +20,7 @@
 	export let convertProgressStep: string;
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'back';
+	export let onIcQrCodeBack: () => void;
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
@@ -59,8 +60,8 @@
 		on:icClose
 		on:icDestination
 		on:icDestinationBack
-		on:icQRCodeBack
 		on:icQRCodeScan
+		{onIcQrCodeBack}
 	/>
 {:else}
 	<div class="mt-6"><MessageBox>{$i18n.convert.text.unsupported_token_conversion}</MessageBox></div>
