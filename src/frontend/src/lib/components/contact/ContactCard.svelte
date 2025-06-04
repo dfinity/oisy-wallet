@@ -18,6 +18,7 @@
 	import { addressBookStore } from '$lib/stores/address-book.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -124,6 +125,11 @@
 						{address}
 						addressItemActionsProps={nonNullish(onInfo) ? { onInfo: () => onInfo(index) } : {}}
 						{hideCopyButton}
+						onClick={async () =>
+							await copyToClipboard({
+								value: address.address,
+								text: $i18n.wallet.text.address_copied
+							})}
 					></AddressListItem>
 				{/each}
 			</div>
