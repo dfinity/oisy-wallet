@@ -217,6 +217,7 @@ describe('EditAddressStep', () => {
 		const resetButtons = screen.getAllByRole('button', {
 			name: 'Reset input value'
 		});
+
 		expect(resetButtons).toHaveLength(2);
 	});
 
@@ -240,7 +241,12 @@ describe('EditAddressStep', () => {
 			target: { value: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' }
 		});
 
-		await fireEvent.submit(container.querySelector('form')!);
+		const form = container.querySelector('form');
+		if (!form) {
+			throw new Error('Form element not found');
+		}
+		await fireEvent.submit(form);
+
 		expect(onAddAddress).toHaveBeenCalled();
 	});
 
