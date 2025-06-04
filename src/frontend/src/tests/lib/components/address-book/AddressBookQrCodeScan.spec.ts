@@ -24,7 +24,7 @@ describe('AddressBookQrCodeStep', () => {
 	it('should initialize and start scanning on mount', () => {
 		const { container } = render(AddressBookQrCodeStep, {
 			props: {
-				onClose: vi.fn(),
+				onCancel: vi.fn(),
 				address: undefined
 			}
 		});
@@ -35,10 +35,10 @@ describe('AddressBookQrCodeStep', () => {
 	});
 
 	it('should trigger onClose when cancel button is clicked', () => {
-		const onClose = vi.fn();
+		const onCancel = vi.fn();
 		const { container } = render(AddressBookQrCodeStep, {
 			props: {
-				onClose,
+				onCancel,
 				address: undefined
 			}
 		});
@@ -49,6 +49,6 @@ describe('AddressBookQrCodeStep', () => {
 
 		cancelButton?.click();
 
-		expect(onClose).toHaveBeenCalled();
+		expect(onCancel).toHaveBeenCalled();
 	});
 });
