@@ -5,8 +5,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { MouseEventHandler } from 'svelte/elements';
 
-	export let dAppDescription: FeaturedOisyDappDescription;
+	interface Props {
+		dAppDescription: FeaturedOisyDappDescription;
+		onclick: MouseEventHandler<HTMLButtonElement>;
+	}
+
+	const { dAppDescription, onclick }: Props = $props();
 </script>
 
 <article class="relative flex items-end overflow-hidden rounded-2xl">
@@ -31,7 +37,7 @@
 				<h4 class="text-primary-inverted">{dAppDescription.name}</h4>
 			</div>
 
-			<Button paddingSmall styleClass="grow-0 text-sm" colorStyle="primary" on:click>
+			<Button paddingSmall styleClass="grow-0 text-sm" colorStyle="primary" {onclick}>
 				{$i18n.core.text.view}
 			</Button>
 		</div>

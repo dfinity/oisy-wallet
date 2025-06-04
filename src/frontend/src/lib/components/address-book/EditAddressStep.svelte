@@ -107,7 +107,7 @@
 			<Button
 				colorStyle="primary"
 				disabled={isInvalid || (!isNewAddress && !labelChanged)}
-				on:click={handleSave}
+				onclick={handleSave}
 				testId={ADDRESS_BOOK_SAVE_BUTTON}
 				loading={disabled}
 			>
