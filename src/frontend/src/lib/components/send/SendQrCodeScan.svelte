@@ -30,7 +30,7 @@
 		dispatch('icQRCodeBack');
 	};
 
-	const onScan = ({ status, code }) => {
+	const onScan = ({ status, code }: { status: QrStatus; code?: string }) => {
 		const qrResponse = decodeQrCode({ status, code, expectedToken });
 
 		if (qrResponse.status === 'token_incompatible') {
