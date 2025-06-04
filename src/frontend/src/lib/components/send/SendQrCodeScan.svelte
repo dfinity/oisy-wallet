@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { onMount } from 'svelte';
 	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -11,20 +11,29 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionToken } from '$lib/types/token';
 
-	export let expectedToken: OptionToken;
-	export let destination: string | undefined;
-	export let amount: OptionAmount;
-	export let decodeQrCode: ({
-		status,
-		code,
-		expectedToken
-	}: {
-		status: QrStatus;
-		code?: string;
+	interface Props {
 		expectedToken: OptionToken;
-	}) => QrResponse;
+		destination: string | undefined;
+		amount: OptionAmount;
+		onDecodeQrCode: ({
+			status,
+			code,
+			expectedToken
+		}: {
+			status: QrStatus;
+			code?: string;
+			expectedToken: OptionToken;
+		}) => QrResponse;
+		onIcQrCodeBack: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		expectedToken,
+		destination = $bindable(),
+		amount = $bindable(),
+		onDecodeQrCode,
+		onIcQrCodeBack
+	}: Props = $props();
 
 	const onBack = () => {
 		dispatch('icQRCodeBack');
