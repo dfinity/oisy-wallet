@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { ADDRESS_BOOK_CONTACT_NAME_INPUT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 
 	let {
 		contact = $bindable(),
@@ -11,10 +13,12 @@
 		onSubmit = () => {}
 	}: { contact: Partial<ContactUi>; disabled?: boolean; onSubmit?: () => void } = $props();
 
-	let isValid = $derived(notEmptyString(contact?.name?.trim?.()));
+	const trimmedName = $derived(contact?.name?.trim?.() ?? '');
+	const isNameTooLong = $derived(trimmedName.length > 100);
+	const isValid = $derived(notEmptyString(trimmedName) && !isNameTooLong);
 
 	const handleKeydown = (event: KeyboardEvent): void => {
-		if (event.key === 'Enter') {
+		if (event.key === 'Enter' && isValid) {
 			event.preventDefault();
 			onSubmit();
 		}
@@ -37,5 +41,10 @@
 			autofocus={true}
 			{disabled}
 		/>
+		{#if isNameTooLong}
+			<p transition:slide={SLIDE_DURATION} class="pt-2 text-error-primary">
+				{$i18n.contact.error.name_too_long}</p
+			>
+		{/if}
 	</div>
 </form>
