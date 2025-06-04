@@ -164,10 +164,11 @@
 		},
 		"cycles_ledger": {
 			"type": "custom",
+			"candid": "out/cycles_ledger.did",
+			"wasm": "out/cycles_ledger.wasm",
 			"build": "scripts/build.cycles_ledger.sh",
 			"init_arg_file": "out/cycles_ledger.args.did",
-			"wasm": "out/cycles_ledger.wasm",
-			"candid": "out/cycles_ledger.did",
+			"specified_id": "um5iw-rqaaa-aaaaq-qaaba-cai",
 			"remote": {
 				"id": {
 					"test_be_1": "um5iw-rqaaa-aaaaq-qaaba-cai",
