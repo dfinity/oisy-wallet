@@ -1,11 +1,11 @@
 <script lang="ts">
+	import type { MouseEventHandler } from 'svelte/elements';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { MouseEventHandler } from 'svelte/elements';
 
 	interface Props {
 		dAppDescription: FeaturedOisyDappDescription;
