@@ -3,7 +3,7 @@
 	import type { MouseEventHandler } from 'svelte/elements';
 	import type { ButtonColorStyle } from '$lib/types/style';
 
-	interface Props {
+	export interface Props {
 		onclick: MouseEventHandler<HTMLButtonElement>;
 		icon: Snippet;
 		children?: Snippet;
@@ -16,6 +16,7 @@
 		styleClass?: string;
 		width?: 'w-6' | 'w-8' | 'w-10';
 		height?: 'h-6' | 'h-8' | 'h-10';
+		transparent?: boolean;
 	}
 
 	let {
@@ -30,7 +31,8 @@
 		link = true,
 		styleClass = '',
 		width = 'w-10',
-		height = 'h-10'
+		height = 'h-10',
+		transparent = false
 	}: Props = $props();
 </script>
 
@@ -38,6 +40,7 @@
 	type="button"
 	class={`${colorStyle} icon flex flex-col text-center text-xs font-normal ${styleClass} ${width} ${height}`}
 	class:link
+	class:transparent
 	bind:this={button}
 	{onclick}
 	aria-label={ariaLabel}

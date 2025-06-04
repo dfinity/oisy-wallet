@@ -39,7 +39,7 @@ a.as-button {
 
 		&.icon {
 			--button-border-radius: var(--border-radius-sm-1_5x);
-			--button-padding: var(--padding);
+			--button-padding: var(--padding-0_75x);
 		}
 
 		&.padding-sm {
@@ -95,6 +95,10 @@ a.as-button {
 		@apply text-primary-inverted;
 		@apply bg-brand-primary;
 
+		&.transparent {
+			@apply bg-transparent;
+		}
+
 		&:hover {
 			@apply text-primary-inverted;
 			@apply bg-brand-secondary;
@@ -126,6 +130,10 @@ a.as-button {
 	&.secondary:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-primary-inverted-alt;
 		@apply bg-primary-inverted;
+
+		&.transparent {
+			@apply bg-transparent;
+		}
 
 		&:hover {
 			@apply text-primary-inverted-alt;
@@ -159,6 +167,10 @@ a.as-button {
 		@apply text-brand-primary-alt;
 		@apply bg-brand-subtle-10;
 
+		&.transparent {
+			@apply bg-transparent;
+		}
+
 		&:hover {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-20;
@@ -190,6 +202,10 @@ a.as-button {
 	&.tertiary:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-primary;
 		@apply bg-primary;
+
+		&.transparent {
+			@apply bg-transparent;
+		}
 
 		&:hover {
 			@apply text-brand-primary-alt;
@@ -223,6 +239,10 @@ a.as-button {
 		@apply text-brand-primary-alt;
 		@apply bg-primary;
 
+		&.transparent {
+			@apply bg-transparent;
+		}
+
 		&:hover {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-10;
@@ -255,6 +275,10 @@ a.as-button {
 		@apply text-brand-primary-inverted;
 		@apply bg-primary-alt;
 
+		&.transparent {
+			@apply bg-transparent;
+		}
+
 		&:hover {
 			@apply text-brand-primary-inverted;
 			@apply bg-secondary-alt;
@@ -284,6 +308,10 @@ a.as-button {
 	// MUTED
 	&.muted:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-tertiary;
+
+		&.transparent {
+			@apply bg-transparent;
+		}
 
 		&:hover {
 			@apply text-secondary;
@@ -318,6 +346,26 @@ a.as-button {
 		@apply text-primary-inverted;
 		@apply bg-success-primary;
 
+		&.transparent {
+			@apply bg-transparent;
+			@apply text-success-primary;
+
+			&:hover {
+				@apply text-success-primary;
+				@apply bg-success-subtle-20;
+			}
+
+			&:active {
+				@apply text-success-primary;
+				@apply bg-success-subtle-20;
+			}
+
+			&:focus-visible {
+				@apply text-success-primary;
+				@apply bg-success-subtle-20;
+			}
+		}
+
 		&:hover {
 			@apply text-primary-inverted;
 			@apply bg-success-secondary;
@@ -349,6 +397,27 @@ a.as-button {
 	&.error {
 		@apply text-primary-inverted;
 		@apply bg-error-primary;
+
+
+		&.transparent {
+			@apply bg-transparent;
+			@apply text-error-primary;
+
+			&:hover {
+				@apply bg-error-subtle-20;
+				@apply text-error-primary;
+			}
+
+			&:active {
+				@apply text-error-primary;
+				@apply bg-error-subtle-20;
+			}
+
+			&:focus-visible {
+				@apply text-error-primary;
+				@apply bg-error-subtle-20;
+			}
+		}
 
 		&:hover {
 			@apply text-primary-inverted;
