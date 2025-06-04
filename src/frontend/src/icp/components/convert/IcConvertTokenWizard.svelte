@@ -59,6 +59,7 @@
 	export let customDestination = '';
 	export let convertProgressStep: string;
 	export let formCancelAction: 'back' | 'close' = 'close';
+	export let onIcQrCodeBack: () => void;
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
@@ -232,8 +233,8 @@
 				expectedToken={$destinationToken}
 				bind:destination={customDestination}
 				bind:amount={sendAmount}
-				{decodeQrCode}
-				on:icQRCodeBack
+				onDecodeQrCode={decodeQrCode}
+				{onIcQrCodeBack}
 			/>
 		{:else}
 			<slot />

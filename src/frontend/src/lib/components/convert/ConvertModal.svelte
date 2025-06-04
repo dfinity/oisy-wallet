@@ -74,7 +74,7 @@
 			on:icDestination={() => goToStep(WizardStepsConvert.DESTINATION)}
 			on:icDestinationBack={() => goToStep(WizardStepsConvert.CONVERT)}
 			on:icQRCodeScan={() => goToStep(WizardStepsConvert.QR_CODE_SCAN)}
-			on:icQRCodeBack={() => goToStep(WizardStepsConvert.DESTINATION)}
+			onIcQrCodeBack={() => goToStep(WizardStepsConvert.DESTINATION)}
 			on:icClose={close}
 		/>
 	</WizardModal>
