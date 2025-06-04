@@ -11,11 +11,11 @@
 </script>
 
 <ModalValue>
-	<svelte:fragment slot="label">
+	{#snippet label()}
 		{$i18n.send.text.destination}
-	</svelte:fragment>
+	{/snippet}
 
-	<svelte:fragment slot="main-value">
+	{#snippet mainValue()}
 		{shortenWithMiddleEllipsis({ text: destination })}
-	</svelte:fragment>
+	{/snippet}
 </ModalValue>
