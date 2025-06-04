@@ -78,6 +78,11 @@
 	);
 
 	let isInvalid = $state(false);
+
+	const focusField = isNewAddress ? 'address' : 'label';
+
+	let originalLabel = $derived(!isNewAddress && nonNullish(address?.label) ? address.label : '');
+	let labelChanged = $derived(isNewAddress ? true : editingAddress.label !== originalLabel);
 </script>
 
 <form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
@@ -97,13 +102,14 @@
 				address={addressModel}
 				bind:isInvalid
 				{disabled}
+				{focusField}
 			/>
 		</div>
 		<ButtonGroup slot="toolbar">
 			<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
 			<Button
 				colorStyle="primary"
-				disabled={isInvalid}
+				disabled={isInvalid || (!isNewAddress && !labelChanged)}
 				on:click={handleSave}
 				testId={ADDRESS_BOOK_SAVE_BUTTON}
 				loading={disabled}
