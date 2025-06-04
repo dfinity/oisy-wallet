@@ -1,4 +1,5 @@
 import { testWithII } from '@dfinity/internet-identity-playwright';
+import { assertNonNullish } from '@dfinity/utils';
 import { TRANSACTIONS_URL } from './utils/constants/e2e.constants';
 import { HomepageLoggedIn } from './utils/pages/homepage.page';
 import { TransactionsPage } from './utils/pages/transactions.page';
@@ -20,6 +21,8 @@ testWithII(
 
 		// We go to transactions without network
 		await page.goto(`${TRANSACTIONS_URL}?token=Internet%20Computer`);
+
+		assertNonNullish(page, 'page is not nullish');
 
 		// We should be redirected to the home screen.
 		const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage });
