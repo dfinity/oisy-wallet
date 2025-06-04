@@ -35,16 +35,12 @@
 		onIcQrCodeBack
 	}: Props = $props();
 
-	const onBack = () => {
-		dispatch('icQRCodeBack');
-	};
-
 	const onScan = ({ status, code }: { status: QrStatus; code?: string }) => {
-		const qrResponse = decodeQrCode({ status, code, expectedToken });
+		const qrResponse = onDecodeQrCode({ status, code, expectedToken });
 
 		if (qrResponse.status === 'token_incompatible') {
 			toastsError({ msg: { text: $i18n.send.error.incompatible_token } });
-			onBack();
+			onIcQrCodeBack();
 			return;
 		}
 
@@ -56,14 +52,14 @@
 			({ amount } = qrResponse);
 		}
 
-		onBack();
+		onIcQrCodeBack();
 	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-	<QrCodeScanner {onScan} {onBack} />
+	<QrCodeScanner {onScan} onBack={onIcQrCodeBack} />
 
 	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={onBack} />
+		<ButtonBack onclick={onIcQrCodeBack} />
 	</ButtonGroup>
 </ContentWithToolbar>
