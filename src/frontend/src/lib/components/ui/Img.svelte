@@ -13,7 +13,19 @@
 		testId?: string;
 	}
 
-	let {src, alt = '', role = 'presentation', loading = 'lazy', width, height, rounded = false, fitHeight = false, grayscale = false, styleClass, testId}: Props = $props();
+	let {
+		src,
+		alt = '',
+		role = 'presentation',
+		loading = 'lazy',
+		width,
+		height,
+		rounded = false,
+		fitHeight = false,
+		grayscale = false,
+		styleClass,
+		testId
+	}: Props = $props();
 </script>
 
 <img
