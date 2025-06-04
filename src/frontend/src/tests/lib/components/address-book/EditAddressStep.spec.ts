@@ -261,6 +261,7 @@ describe('EditAddressStep', () => {
 
 		expect(onAddAddress).toHaveBeenCalled();
 	});
+
 	it('should disable save button when alias is unchanged in edit mode', () => {
 		const onSaveAddress = vi.fn();
 		const onAddAddress = vi.fn();
@@ -283,6 +284,7 @@ describe('EditAddressStep', () => {
 		});
 
 		const saveButton = getByTestId(ADDRESS_BOOK_SAVE_BUTTON);
+
 		expect(saveButton).toBeDisabled();
 	});
 
@@ -306,6 +308,7 @@ describe('EditAddressStep', () => {
 		});
 
 		const addressInput = getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT);
+
 		expect(document.activeElement).toBe(addressInput);
 	});
 
@@ -329,7 +332,7 @@ describe('EditAddressStep', () => {
 		});
 
 		const labelInput = getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT);
+
 		expect(document.activeElement).toBe(labelInput);
 	});
-
 });
