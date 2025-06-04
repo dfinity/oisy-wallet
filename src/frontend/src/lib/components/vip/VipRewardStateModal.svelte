@@ -28,11 +28,11 @@
 		codeType?: QrCodeType;
 	}
 
-	let {isSuccessful, codeType = QrCodeType.VIP}: Props = $props();
+	let { isSuccessful, codeType = QrCodeType.VIP }: Props = $props();
 
-	const goldToken = $derived($enabledIcTokens.find(
-		(token) => token.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId
-	))
+	const goldToken = $derived(
+		$enabledIcTokens.find((token) => token.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId)
+	);
 
 	const enableGldtToken = async () => {
 		if (isNullish($authIdentity)) {
@@ -67,13 +67,13 @@
 {/if}
 
 <Modal on:nnsClose={close}>
-		{#snippet title()}
-			<span class="text-xl"
+	{#snippet title()}
+		<span class="text-xl"
 			>{isSuccessful
 				? $i18n.vip.reward.text.title_successful
 				: $i18n.vip.reward.text.title_failed}</span
-			>
-		{/snippet}
+		>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<ImgBanner
