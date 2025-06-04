@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { QRCodeReader } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -9,6 +8,8 @@
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionToken } from '$lib/types/token';
+	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 
 	export let expectedToken: OptionToken;
 	export let destination: string | undefined;
@@ -25,26 +26,16 @@
 
 	const dispatch = createEventDispatcher();
 
-	let resolveQrCodePromise:
-		| (({ status, code }: { status: QrStatus; code?: string }) => void)
-		| undefined = undefined;
+	const onBack = () => {
+		dispatch('icQRCodeBack');
+	};
 
-	onMount(async () => {
-		await scanQrCode();
-	});
-
-	const scanQrCode = async () => {
-		const result = await new Promise<{ status: QrStatus; code?: string | undefined }>((resolve) => {
-			resolveQrCodePromise = resolve;
-		});
-
-		const { status, code } = result;
-
+	const onScan = ({ status, code }) => {
 		const qrResponse = decodeQrCode({ status, code, expectedToken });
 
 		if (qrResponse.status === 'token_incompatible') {
 			toastsError({ msg: { text: $i18n.send.error.incompatible_token } });
-			back();
+			onBack();
 			return;
 		}
 
@@ -56,35 +47,14 @@
 			({ amount } = qrResponse);
 		}
 
-		back();
-	};
-
-	const onQRCode = ({ detail: code }: CustomEvent<string>) => {
-		resolveQrCodePromise?.({ status: 'success', code });
-		resolveQrCodePromise = undefined;
-	};
-
-	const onCancel = () => {
-		resolveQrCodePromise?.({ status: 'cancelled' });
-		resolveQrCodePromise = undefined;
-	};
-
-	const back = () => {
-		dispatch('icQRCodeBack');
-	};
+		onBack();
+	}
 </script>
 
-<div class="stretch qr-code-wrapper md:min-h-[300px]">
-	<QRCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
-</div>
+<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
+	<QrCodeScanner {onScan} {onBack} />
 
-<ButtonGroup>
-	<ButtonBack onclick={back} />
-</ButtonGroup>
-
-<style lang="scss">
-	.qr-code-wrapper {
-		--primary-rgb: 50, 20, 105;
-		color: rgba(var(--primary-rgb), 0.6);
-	}
-</style>
+	<ButtonGroup slot="toolbar">
+		<ButtonBack onclick={onBack} />
+	</ButtonGroup>
+</ContentWithToolbar>
