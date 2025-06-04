@@ -1090,7 +1090,7 @@
 			"create": "Failed to create the contact",
 			"update": "Failed to update the contact",
 			"delete": "Failed to delete the contact",
-			"name_too_long": "Name must be 100 characters or fewer."
+			"name_too_long": "Name must be $maxCharacters characters or fewer."
 		}
 	},
 	"address": {

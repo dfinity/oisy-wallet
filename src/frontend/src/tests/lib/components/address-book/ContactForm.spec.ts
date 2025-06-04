@@ -40,4 +40,18 @@ describe('ContactForm', () => {
 		// Check that validation failed
 		expect(component.isValid).toBeFalsy();
 	});
+
+	it('should show error when name exceeds max length', async () => {
+		const contact: Partial<ContactUi> = {};
+		const { getByTestId, getByText } = render(ContactForm, { props: { contact } });
+
+		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
+		const longName = 'A'.repeat(101);
+
+		await fireEvent.input(nameInput, { target: { value: longName } });
+
+		expect(
+			getByText(en.contact.error.name_too_long.replace('$maxCharacters', '100'))
+		).toBeInTheDocument();
+	});
 });

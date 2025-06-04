@@ -2,10 +2,12 @@
 	import { notEmptyString } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import InputText from '$lib/components/ui/InputText.svelte';
+	import { CONTACT_MAX_NAME_LENGTH } from '$lib/constants/app.constants';
 	import { ADDRESS_BOOK_CONTACT_NAME_INPUT } from '$lib/constants/test-ids.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let {
 		contact = $bindable(),
@@ -43,7 +45,9 @@
 		/>
 		{#if isNameTooLong}
 			<p transition:slide={SLIDE_DURATION} class="pt-2 text-error-primary">
-				{$i18n.contact.error.name_too_long}</p
+				{replacePlaceholders($i18n.contact.error.name_too_long, {
+					$maxCharacters: `${CONTACT_MAX_NAME_LENGTH}`
+				})}</p
 			>
 		{/if}
 	</div>
