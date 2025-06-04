@@ -261,4 +261,30 @@ describe('EditAddressStep', () => {
 
 		expect(onAddAddress).toHaveBeenCalled();
 	});
+
+	it('should disable save button when alias is unchanged in edit mode', () => {
+		const onSaveAddress = vi.fn();
+		const onAddAddress = vi.fn();
+		const onClose = vi.fn();
+
+		const initialAddress: Partial<ContactAddressUi> = {
+			address: 'icp:abcdefghijklmnopqrstuvwxyz',
+			label: 'Original Label'
+		};
+
+		const { getByTestId } = render(EditAddressStep, {
+			props: {
+				contact: mockContact,
+				onSaveAddress,
+				onAddAddress,
+				onClose,
+				isNewAddress: false,
+				address: initialAddress
+			}
+		});
+
+		const saveButton = getByTestId(ADDRESS_BOOK_SAVE_BUTTON);
+
+		expect(saveButton).toBeDisabled();
+	});
 });
