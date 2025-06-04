@@ -15,7 +15,12 @@
 		trackEventSource?: string;
 	}
 
-	let { onIcOpenAboutModal, asMenuItem = false, asMenuItemCondensed = false, trackEventSource }: Props = $props();
+	let {
+		onIcOpenAboutModal,
+		asMenuItem = false,
+		asMenuItemCondensed = false,
+		trackEventSource
+	}: Props = $props();
 
 	const modalId = Symbol();
 

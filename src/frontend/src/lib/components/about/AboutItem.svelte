@@ -10,7 +10,14 @@
 		testId?: string;
 	}
 
-	let {icon, label, onClick, asMenuItem = false, asMenuItemCondensed = false, testId}: Props = $props();
+	let {
+		icon,
+		label,
+		onClick,
+		asMenuItem = false,
+		asMenuItemCondensed = false,
+		testId
+	}: Props = $props();
 </script>
 
 <button
