@@ -1122,6 +1122,9 @@
 			"title": "Save address",
 			"add_to_existing_contact": "Add to existing contact",
 			"create_contact": "Create contact"
+		},
+		"qr": {
+			"title": "Scan QR code"
 		}
 	},
 	"signer": {

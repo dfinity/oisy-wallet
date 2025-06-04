@@ -23,6 +23,7 @@
 		onSaveAddress: (address: ContactAddressUi) => void;
 		onAddAddress: (address: ContactAddressUi) => void;
 		onClose: () => void;
+		onQRCodeScan: () => void;
 		isNewAddress: boolean;
 		disabled?: boolean;
 	}
@@ -33,6 +34,7 @@
 		onSaveAddress,
 		onAddAddress,
 		onClose,
+		onQRCodeScan,
 		isNewAddress,
 		disabled = false
 	}: Props = $props();
@@ -90,6 +92,7 @@
 			<div class="pb-4 text-xl font-bold">{title}</div>
 
 			<AddressForm
+				{onQRCodeScan}
 				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
 				address={addressModel}
 				bind:isInvalid
