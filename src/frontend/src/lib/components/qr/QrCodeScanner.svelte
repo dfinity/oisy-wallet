@@ -9,7 +9,7 @@
 		onBack: () => void;
 	}
 
-	let {onScan, onBack}: Props = $props();
+	let { onScan, onBack }: Props = $props();
 
 	let resolveQrCodePromise:
 		| (({ status, code }: { status: QrStatus; code?: string }) => void)
@@ -42,13 +42,16 @@
 	};
 </script>
 
-<div class="stretch qr-code-wrapper h-full w-full md:min-h-[300px]" data-tid={ADDRESS_BOOK_QR_CODE_SCAN}>
+<div
+	class="stretch qr-code-wrapper h-full w-full md:min-h-[300px]"
+	data-tid={ADDRESS_BOOK_QR_CODE_SCAN}
+>
 	<QRCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
 </div>
 
 <style lang="scss">
-  .qr-code-wrapper {
-    --primary-rgb: 50, 20, 105;
-    color: rgba(var(--primary-rgb), 0.6);
-  }
+	.qr-code-wrapper {
+		--primary-rgb: 50, 20, 105;
+		color: rgba(var(--primary-rgb), 0.6);
+	}
 </style>

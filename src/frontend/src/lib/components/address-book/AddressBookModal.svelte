@@ -485,7 +485,9 @@
 			onCancel={() =>
 				nonNullish(modal) &&
 				goToWizardStep({ modal, steps, stepName: AddressBookSteps.EDIT_ADDRESS })}
-			onScan={({ code }) => {qrCodeAddress = code}}
+			onScan={({ code }) => {
+				qrCodeAddress = code;
+			}}
 		/>
 	{/if}
 </WizardModal>
