@@ -68,11 +68,11 @@
 
 <Modal on:nnsClose={close}>
 	<svelte:fragment slot="title">
-			<span class="text-xl"
+		<span class="text-xl"
 			>{isSuccessful
 				? $i18n.vip.reward.text.title_successful
 				: $i18n.vip.reward.text.title_failed}</span
-			>
+		>
 	</svelte:fragment>
 
 	<ContentWithToolbar>
