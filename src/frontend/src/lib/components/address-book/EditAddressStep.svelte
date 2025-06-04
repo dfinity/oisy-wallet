@@ -23,6 +23,7 @@
 		onSaveAddress: (address: ContactAddressUi) => void;
 		onAddAddress: (address: ContactAddressUi) => void;
 		onClose: () => void;
+		onQRCodeScan: () => void;
 		isNewAddress: boolean;
 		disabled?: boolean;
 	}
@@ -33,6 +34,7 @@
 		onSaveAddress,
 		onAddAddress,
 		onClose,
+		onQRCodeScan,
 		isNewAddress,
 		disabled = false
 	}: Props = $props();
@@ -76,6 +78,11 @@
 	);
 
 	let isInvalid = $state(false);
+
+	const focusField = isNewAddress ? 'address' : 'label';
+
+	let originalLabel = $derived(!isNewAddress && nonNullish(address?.label) ? address.label : '');
+	let labelChanged = $derived(isNewAddress ? true : editingAddress.label !== originalLabel);
 </script>
 
 <form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
@@ -86,23 +93,23 @@
 			{contact.name}
 		</div>
 
-		<div
-			class="mt-2 w-full rounded-lg bg-brand-light px-3 py-4 text-sm md:px-5 md:text-base md:font-bold"
-		>
+		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
 			<div class="pb-4 text-xl font-bold">{title}</div>
 
 			<AddressForm
+				{onQRCodeScan}
 				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
 				address={addressModel}
 				bind:isInvalid
 				{disabled}
+				{focusField}
 			/>
 		</div>
 		<ButtonGroup slot="toolbar">
 			<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
 			<Button
 				colorStyle="primary"
-				disabled={isInvalid}
+				disabled={isInvalid || (!isNewAddress && !labelChanged)}
 				on:click={handleSave}
 				testId={ADDRESS_BOOK_SAVE_BUTTON}
 				loading={disabled}
