@@ -67,13 +67,13 @@
 {/if}
 
 <Modal on:nnsClose={close}>
-	{#snippet title()}
-		<span class="text-xl"
+	<svelte:fragment slot="title">
+			<span class="text-xl"
 			>{isSuccessful
 				? $i18n.vip.reward.text.title_successful
 				: $i18n.vip.reward.text.title_failed}</span
-		>
-	{/snippet}
+			>
+	</svelte:fragment>
 
 	<ContentWithToolbar>
 		<ImgBanner
@@ -97,17 +97,16 @@
 				: $i18n.vip.reward.text.reward_failed_description}</span
 		>
 
-		{#snippet toolbar()}
-			<Button
-				paddingSmall
-				colorStyle="secondary-light"
-				type="button"
-				fullWidth
-				on:click={close}
-				testId={VIP_STATE_BUTTON}
-			>
-				{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
-			</Button>
-		{/snippet}
+		<Button
+			paddingSmall
+			colorStyle="secondary-light"
+			type="button"
+			fullWidth
+			on:click={close}
+			testId={VIP_STATE_BUTTON}
+			slot="toolbar"
+		>
+			{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
+		</Button>
 	</ContentWithToolbar>
 </Modal>
