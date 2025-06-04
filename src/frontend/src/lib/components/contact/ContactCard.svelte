@@ -15,6 +15,7 @@
 		CONTACT_CARD_EXPAND_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { addressBookStore } from '$lib/stores/address-book.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -24,31 +25,25 @@
 		onClick: () => void;
 		onInfo?: (addressIndex: number) => void;
 		onSelect?: () => void;
-		initiallyExpanded?: boolean;
 		hideCopyButton?: boolean;
 	}
 
-	let {
-		contact,
-		onInfo,
-		onClick,
-		onSelect,
-		initiallyExpanded = false,
-		hideCopyButton = false
-	}: Props = $props();
+	let { contact, onInfo, onClick, onSelect, hideCopyButton = false }: Props = $props();
 
 	let toggleContent = $state<() => void | undefined>();
 
 	let singleAddress = $derived(contact.addresses.length === 1);
 	let multipleAddresses = $derived(contact.addresses.length > 1);
 
-	let expanded = $state(initiallyExpanded);
+	let expanded = $derived($addressBookStore.expandedContacts.includes(contact.id));
 </script>
 
 {#snippet header()}
 	<LogoButton {onClick} hover={false} condensed testId={CONTACT_CARD_BUTTON} styleClass="group">
 		{#snippet logo()}
-			<AvatarWithBadge {contact} badge={{ type: 'addressTypeOrCount' }} variant="sm" />
+			<span class="pr-2">
+				<AvatarWithBadge {contact} badge={{ type: 'addressTypeOrCount' }} variant="sm" />
+			</span>
 		{/snippet}
 
 		{#snippet title()}
@@ -88,12 +83,14 @@
 				/>
 			{:else if multipleAddresses}
 				<ButtonIcon
-					styleClass="text-primary"
+					styleClass="text-primary hover:bg-brand-subtle-20 rounded-md"
+					width="w-6"
+					height="h-6"
 					onclick={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
 						toggleContent?.();
-						expanded = !expanded;
+						addressBookStore.toggleContact(contact.id);
 					}}
 					ariaLabel={expanded
 						? $i18n.address_book.alt.hide_addresses
@@ -110,14 +107,15 @@
 {/snippet}
 
 <div
-	class="flex w-full flex-col rounded-xl bg-primary p-2 hover:bg-brand-subtle-20"
+	class="flex w-full flex-col rounded-xl p-2 hover:bg-brand-subtle-10"
+	class:bg-brand-subtle-10={expanded}
 	data-tid={CONTACT_CARD}
 >
 	{#if multipleAddresses}
 		{@render header()}
 		{#if expanded}
 			<div
-				class="mt-1 flex flex-col gap-1.5 md:pl-20"
+				class="mt-1 flex flex-col gap-1.5 md:pl-16"
 				transition:slide={SLIDE_DURATION}
 				data-tid="collapsible-content"
 			>

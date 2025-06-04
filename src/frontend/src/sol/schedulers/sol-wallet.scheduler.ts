@@ -123,7 +123,10 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		assertNonNullish(data, 'No data provided to get Solana balance.');
 
 		try {
-			await retryWithDelay({ request: async () => await this.loadAndSyncWalletData(data) });
+			await retryWithDelay({
+				request: async () => await this.loadAndSyncWalletData(data),
+				maxRetries: 10
+			});
 		} catch (error: unknown) {
 			this.postMessageWalletError({ error });
 		}

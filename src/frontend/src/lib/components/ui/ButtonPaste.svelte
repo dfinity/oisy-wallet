@@ -16,6 +16,7 @@
 </script>
 
 <Button
+	link
 	type="button"
 	styleClass="text-sm px-1 py-2 mx-1"
 	colorStyle="tertiary-alt"
