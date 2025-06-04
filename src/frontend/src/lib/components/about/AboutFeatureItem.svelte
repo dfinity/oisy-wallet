@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import type { Snippet } from 'svelte';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		icon: Snippet;
@@ -9,7 +9,7 @@
 		description: string;
 	}
 
-	let {icon, title, description}: Props = $props();
+	let { icon, title, description }: Props = $props();
 </script>
 
 <div>
