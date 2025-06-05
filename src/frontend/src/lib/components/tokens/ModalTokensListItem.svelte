@@ -7,16 +7,16 @@
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
-	import type { CardData } from '$lib/types/token-card';
+	import type { Token } from '$lib/types/token';
 
 	interface Props {
-		data: CardData;
+		token: Token;
 		logoSize?: LogoSize;
 	}
 
-	let { data, logoSize = 'lg' }: Props = $props();
+	let { token, logoSize = 'lg' }: Props = $props();
 
-	const { oisyName, oisySymbol, symbol, name, network } = data;
+	const { oisyName, oisySymbol, symbol, name, network } = token;
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -40,15 +40,15 @@
 
 	{#snippet logo()}
 		<div class="mr-2">
-			<TokenLogo {data} color="white" badge={{ type: 'network' }} {logoSize} />
+			<TokenLogo data={token} color="white" badge={{ type: 'network' }} {logoSize} />
 		</div>
 	{/snippet}
 
 	{#snippet titleEnd()}
-		<TokenBalance {data} />
+		<TokenBalance data={token} />
 	{/snippet}
 
 	{#snippet descriptionEnd()}
-		<ExchangeTokenValue {data} />
+		<ExchangeTokenValue data={token} />
 	{/snippet}
 </LogoButton>
