@@ -5,6 +5,7 @@
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import { mapAddressToName } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
@@ -27,7 +28,6 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
-	import { getExplorerUrl } from '$eth/utils/eth.utils';
 
 	interface Props {
 		transaction: EthTransactionUi;
