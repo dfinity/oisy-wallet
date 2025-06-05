@@ -15,7 +15,6 @@ describe('mapHeaderData', () => {
 	const tokenGroup: TokenUiGroup = {
 		id: mockGroup.id,
 		decimals: mockToken.decimals,
-		nativeToken: mockToken,
 		groupData: mockGroup,
 		tokens: [mockToken, ICP_TOKEN],
 		balance: bn1Bi,
