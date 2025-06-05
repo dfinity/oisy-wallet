@@ -190,40 +190,49 @@ describe('eth.utils', () => {
 
 		it('returns Base explorerUrl when Base network is provided', () => {
 			const result = getExplorerUrl({ network: mockNetworkBase });
+
 			expect(result).toBe(mockNetworkBase.explorerUrl);
 		});
 
 		it('returns Base explorerUrl when Base token is provided', () => {
 			const result = getExplorerUrl({ token: BASE_ETH_TOKEN });
+
 			expect(result).toBe(mockNetworkBase.explorerUrl);
 		});
 
 		it('returns Ethereum explorerUrl when ETH network is provided', () => {
 			const result = getExplorerUrl({ network: mockNetworkEth });
+
 			expect(result).toBe(mockNetworkEth.explorerUrl);
 		});
 
 		it('returns the explorerUrl for the provided network if both network and token are provided', () => {
 			const result = getExplorerUrl({ network: mockNetworkBase, token: ETHEREUM_TOKEN });
+
 			expect(result).toBe(mockNetworkBase.explorerUrl);
 		});
 
 		it('returns DEFAULT_ETHEREUM_NETWORK.explorerUrl if nothing provided', () => {
 			const result = getExplorerUrl({});
+
 			expect(result).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
 		});
 
 		it('returns DEFAULT_ETHEREUM_NETWORK.explorerUrl if wrong data is provided', () => {
 			const result1 = getExplorerUrl({ token: null as unknown as undefined });
+
 			expect(result1).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
 
 			const result2 = getExplorerUrl({ network: null as unknown as undefined });
+
 			expect(result2).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
 
 			const result3 = getExplorerUrl({ token: {} as unknown as Token });
+
 			expect(result3).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
 
 			const result4 = getExplorerUrl({ network: {} as unknown as EthereumNetwork });
+
 			expect(result4).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
 		});
 	});
