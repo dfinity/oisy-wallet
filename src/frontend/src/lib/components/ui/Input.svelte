@@ -26,7 +26,10 @@
 	}: InputProps & GixInputProps = $props();
 </script>
 
-<div style={`--input-padding-inner-end: calc(var(--padding-2x) + ${endWidth}px)`}>
+<div
+	style={`--input-padding-inner-end: calc(var(--padding-2x) + ${endWidth}px)`}
+	class="oisy-input"
+>
 	<GixInput {...props} bind:value on:nnsInput>
 		<svelte:fragment slot="inner-end">
 			<div bind:clientWidth={endWidth} class="flex items-center pl-2">
@@ -46,3 +49,9 @@
 		</svelte:fragment>
 	</GixInput>
 </div>
+
+<style lang="scss">
+	:global(div.oisy-input input) {
+		font-size: var(--no-zoom-input-font-size);
+	}
+</style>
