@@ -4,7 +4,6 @@
 	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { mapAddressToName } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -28,6 +27,7 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -39,13 +39,13 @@
 	let { from, value, timestamp, hash, blockNumber, to, type } = $derived(transaction);
 
 	let explorerUrl: string | undefined = $derived(
-		notEmptyString(hash) ? `${$explorerUrlStore}/tx/${hash}` : undefined
+		notEmptyString(hash) ? `${getExplorerUrl({ token })}/tx/${hash}` : undefined
 	);
 
-	let fromExplorerUrl: string = $derived(`${$explorerUrlStore}/address/${from}`);
+	let fromExplorerUrl: string = $derived(`${getExplorerUrl({ token })}/address/${from}`);
 
 	let toExplorerUrl: string | undefined = $derived(
-		notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined
+		notEmptyString(to) ? `${getExplorerUrl({ token })}/address/${to}` : undefined
 	);
 
 	let ckMinterInfo: OptionCertifiedMinterInfo = $derived(

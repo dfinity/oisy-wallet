@@ -2,7 +2,9 @@ import {
 	SUPPORTED_ETHEREUM_TOKEN_IDS,
 	type SUPPORTED_ETHEREUM_TOKENS
 } from '$env/tokens/tokens.eth.env';
-import type { OptionToken, TokenId } from '$lib/types/token';
+import type { EthereumNetwork } from '$eth/types/network';
+import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
+import type { OptionToken, Token, TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
 export const isDefaultEthereumToken = (token: OptionToken): boolean =>
@@ -21,3 +23,16 @@ export const isSupportedEthToken = (
 
 export const isNotSupportedEthTokenId = (tokenId: TokenId): boolean =>
 	!isSupportedEthTokenId(tokenId);
+
+export const getExplorerUrl = ({
+	token,
+	network
+}: {
+	token?: Token | OptionToken;
+	network?: EthereumNetwork;
+}): string =>
+	nonNullish(network?.explorerUrl)
+		? network.explorerUrl
+		: nonNullish((token?.network as EthereumNetwork)?.explorerUrl)
+			? (token?.network as EthereumNetwork).explorerUrl
+			: DEFAULT_ETHEREUM_NETWORK.explorerUrl;
