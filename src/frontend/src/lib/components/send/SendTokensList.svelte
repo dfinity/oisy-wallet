@@ -26,7 +26,7 @@
 	networkSelectorViewOnly={nonNullish($selectedNetwork)}
 >
 	{#snippet tokenListItem(token, onClick)}
-		<ModalTokensListItem {token} on:click={onClick} />
+		<ModalTokensListItem {token} {onClick} />
 	{/snippet}
 	{#snippet noResults()}
 		<p class="text-primary">
