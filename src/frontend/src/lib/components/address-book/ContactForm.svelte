@@ -17,10 +17,13 @@
 
 	const trimmedName = $derived((contact.name ?? '').trim());
 	const isNameTooLong = $derived(trimmedName.length > CONTACT_MAX_NAME_LENGTH);
-	const isValid = $derived(notEmptyString(trimmedName) && !isNameTooLong);
+
+	const assertValid = (): boolean => notEmptyString(trimmedName) && !isNameTooLong;
+
+	const isValid = $derived(assertValid());
 
 	const handleKeydown = (event: KeyboardEvent): void => {
-		if (event.key === 'Enter' && isValid) {
+		if (event.key === 'Enter' && assertValid()) {
 			event.preventDefault();
 			onSubmit();
 		}
