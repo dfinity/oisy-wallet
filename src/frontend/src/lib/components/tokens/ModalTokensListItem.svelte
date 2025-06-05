@@ -8,7 +8,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Token } from '$lib/types/token';
-	import type { CardData } from '$lib/types/token-card';
 
 	interface Props {
 		token: Token;
