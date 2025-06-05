@@ -14,7 +14,6 @@
 		onClick: () => void;
 	}
 
-
 	let { token, logoSize = 'lg', onClick }: Props = $props();
 
 	const { oisyName, oisySymbol, symbol, name, network } = token;
