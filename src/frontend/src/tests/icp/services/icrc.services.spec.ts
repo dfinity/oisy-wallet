@@ -7,6 +7,8 @@ import {
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { BackendCanister } from '$lib/canisters/backend.canister';
+import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import * as exchangeServices from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -38,6 +40,10 @@ vi.mock('idb-keyval', () => ({
 
 vi.mock('$app/environment', () => ({
 	browser: true
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
 }));
 
 describe('icrc.services', () => {
@@ -293,10 +299,32 @@ describe('icrc.services', () => {
 				const afterTokens = get(icrcCustomTokensStore);
 
 				expect(afterTokens).toBeNull();
+			});
+
+			it('should show a toast error on list custom tokens error', async () => {
+				const err = new Error('test');
+				backendCanisterMock.listCustomTokens.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
 
 				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
 					msg: { text: get(i18n).init.error.icrc_canisters },
 					err
+				});
+			});
+
+			it('should show track event on list custom tokens error', async () => {
+				const err = new Error('test');
+				backendCanisterMock.listCustomTokens.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(trackEvent).toHaveBeenCalledOnce();
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+					metadata: {
+						error: err.message
+					}
 				});
 			});
 
