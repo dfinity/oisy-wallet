@@ -20,9 +20,11 @@
 </script>
 
 <ModalValue>
-	<svelte:fragment slot="label">{$i18n.fee.text.total_fee}</svelte:fragment>
+	{#snippet label()}
+		{$i18n.fee.text.total_fee}
+	{/snippet}
 
-	<svelte:fragment slot="main-value">
+	{#snippet mainValue()}
 		<ConvertAmountExchange amount={formattedAmount} {exchangeRate} />
-	</svelte:fragment>
+	{/snippet}
 </ModalValue>
