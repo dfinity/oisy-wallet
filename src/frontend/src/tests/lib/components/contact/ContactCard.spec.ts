@@ -1,4 +1,5 @@
 import ContactCard from '$lib/components/contact/ContactCard.svelte';
+import { addressBookStore } from '$lib/stores/address-book.store';
 import type { ContactUi } from '$lib/types/contact';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import {
@@ -128,7 +129,7 @@ describe('ContactCard', () => {
 		expect(expandButton).not.toBeNull();
 
 		// Check that the addresses are not expanded by default
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).toBe('0px');
+		expect(queryByTestId('collapsible-content')).not.toBeInTheDocument();
 	});
 
 	it('should expand and collapse addresses when the expand button is clicked', async () => {
@@ -151,13 +152,13 @@ describe('ContactCard', () => {
 		expect(expandButton).not.toBeNull();
 
 		// The collapsible should be collapsed
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).toBe('0px');
+		expect(queryByTestId('collapsible-content')).not.toBeInTheDocument();
 
 		// Click the expand button
 		await fireEvent.click(expandButton as HTMLElement);
 
 		// Collapsible should be expanded
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).not.toBe('0px');
+		expect(queryByTestId('collapsible-content')).toBeInTheDocument();
 
 		// The button should now be for hiding addresses
 		expect(
@@ -169,8 +170,11 @@ describe('ContactCard', () => {
 			container.querySelector(`[aria-label="${en.address_book.alt.hide_addresses}"]`) as HTMLElement
 		);
 
+		// wait for animation to end
+		await new Promise((resolve) => setTimeout(resolve, 500));
+
 		// The collapsible should be collapsed again
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).toBe('0px');
+		expect(queryByTestId('collapsible-content')).not.toBeInTheDocument();
 	});
 
 	it('should call onInfo when info button is clicked on an expanded address', async () => {
@@ -181,13 +185,18 @@ describe('ContactCard', () => {
 			props: {
 				contact: multipleAddressesContact,
 				onClick,
-				onInfo,
-				initiallyExpanded: true // Start expanded
+				onInfo
 			}
 		});
 
+		// Click the collapse button
+		addressBookStore.toggleContact(multipleAddressesContact.id);
+
+		// wait for animation to end
+		await new Promise((resolve) => setTimeout(resolve, 500));
+
 		// Collapsible should be expanded
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).not.toBe('0px');
+		expect(queryByTestId('collapsible-content')).toBeInTheDocument();
 
 		// Find all info buttons
 		const infoButtons = container.querySelectorAll('[aria-label="View"]');
@@ -199,22 +208,5 @@ describe('ContactCard', () => {
 
 		// Check that onInfo was called with the BTC address index
 		expect(onInfo).toHaveBeenCalledWith(1);
-	});
-
-	it('should render with expanded prop set to true', () => {
-		const onClick = vi.fn();
-		const onInfo = vi.fn();
-
-		const { queryByTestId } = render(ContactCard, {
-			props: {
-				contact: multipleAddressesContact,
-				onClick,
-				onInfo,
-				initiallyExpanded: true
-			}
-		});
-
-		// Collapsible should be expanded
-		expect(queryByTestId('collapsible-content')?.style.maxHeight).not.toBe('0px');
 	});
 });

@@ -20,6 +20,7 @@ export const TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS = 'eth_to_cketh_convert_su
 export const TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR = 'eth_to_cketh_convert_error_count';
 export const TRACK_COUNT_ETH_LOADING_BALANCE_ERROR = 'eth_loading_balance_error_count';
 export const TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR = 'eth_loading_transactions_error_count';
+export const TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR = 'eth_pending_transactions_error_count';
 
 // Internet Computer
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS = 'ic_ckbtc_to_btc_success_count';
@@ -33,6 +34,9 @@ export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR = 'ic_ckerc20_to_erc20_e
 export const TRACK_COUNT_IC_SEND_SUCCESS = 'ic_send_success_count';
 export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';
 export const TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR = 'ic_loading_transactions_error_count';
+export const TRACK_COUNT_CKETH_LOADING_MINTER_INFO_ERROR = 'ic_cketh_load_minter_info_error_count';
+export const TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR = 'ic_ckbtc_load_minter_info_error_count';
+export const TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR = 'ic_loading_icrc_canister_error_count';
 
 // Solana
 export const TRACK_COUNT_SOL_SEND_SUCCESS = 'sol_send_success_count';
@@ -47,6 +51,7 @@ export const TRACK_COUNT_WALLET_CONNECT = 'wallet_connect_count';
 
 // dApps
 export const TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK = 'dapp_modal_open_hyperlink_count';
+export const TRACK_COUNT_DAPP_OPEN_INFO_MODAL = 'dapp_open_info_modal_count';
 
 // Carousel
 export const TRACK_COUNT_CAROUSEL_NEXT = 'carousel_next_count';
@@ -70,3 +75,13 @@ export const TRACK_CONTACT_UPDATE_SUCCESS = 'contact_update_success_count';
 export const TRACK_CONTACT_UPDATE_ERROR = 'contact_update_error_count';
 export const TRACK_CONTACT_DELETE_SUCCESS = 'contact_delete_success_count';
 export const TRACK_CONTACT_DELETE_ERROR = 'contact_delete_error_count';
+
+// Navigation
+export const TRACK_COUNT_OPEN_WHY_OISY = 'open_why_oisy_count';
+export const TRACK_COUNT_OPEN_DOCUMENTATION = 'open_documentation_count';
+export const TRACK_COUNT_OPEN_CHANGELOG = 'open_changelog_count';
+
+// Analytics event source routes
+export const LANDING_PAGE_ROUTE = 'landing-page';
+export const HOME_PAGE_ROUTE = 'home-page';
+export const USER_MENU_ROUTE = 'user-menu';

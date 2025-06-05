@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import QrButton from '$lib/components/common/QrButton.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { NetworkId } from '$lib/types/network';
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isDesktop } from '$lib/utils/device.utils';
@@ -18,6 +20,7 @@
 	export let isInvalidDestination: (() => boolean) | undefined;
 	export let onQRButtonClick: (() => void) | undefined = undefined;
 	export let knownDestinations: KnownDestinations | undefined = undefined;
+	export let networkContacts: NetworkContacts | undefined = undefined;
 
 	const validate = () => (invalidDestination = isInvalidDestination?.() ?? false);
 
@@ -28,6 +31,10 @@
 	const onBlur = () => (focused = false);
 
 	$: destination, networkId, isInvalidDestination, debounceValidate();
+
+	let isErrorState = false;
+	$: isErrorState =
+		invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE;
 </script>
 
 <div
@@ -41,7 +48,7 @@
 		{$i18n.core.text.to}
 	</label>
 
-	<div class="send-input-destination" class:error={invalidDestination}>
+	<div class="send-input-destination" class:error={isErrorState}>
 		<InputTextWithAction
 			name="destination"
 			bind:value={destination}
@@ -59,7 +66,7 @@
 			</svelte:fragment>
 		</InputTextWithAction>
 
-		{#if invalidDestination}
+		{#if isErrorState}
 			<p transition:slide={SLIDE_DURATION} class="mb-0 mt-4 text-error-primary">
 				{$i18n.send.assertion.invalid_destination_address}
 			</p>
@@ -67,7 +74,7 @@
 	</div>
 </div>
 
-{#if !invalidDestination && notEmptyString(destination) && nonNullish(knownDestinations) && isNullish(knownDestinations[destination.toLowerCase()])}
+{#if !invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && nonNullish(knownDestinations) && isNullish(knownDestinations[destination]) && nonNullish(networkContacts) && isNullish(networkContacts[destination])}
 	<div transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning" styleClass="mt-4">
 			{$i18n.send.info.unknown_destination}

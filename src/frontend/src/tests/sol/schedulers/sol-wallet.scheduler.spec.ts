@@ -15,6 +15,10 @@ import { jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
+vi.mock('$lib/utils/time.utils', () => ({
+	randomWait: vi.fn()
+}));
+
 describe('sol-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;
 	let spyLoadTransactions: MockInstance;
@@ -192,11 +196,15 @@ describe('sol-wallet.scheduler', () => {
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
 				});
 
-				it('should trigger postMessage with error', async () => {
+				it('should trigger postMessage with error after retrying', async () => {
 					const err = new Error('test');
 					spyLoadBalance.mockRejectedValue(err);
 
 					await scheduler.start(startData);
+
+					// first time + 10 retries
+					expect(spyLoadBalance).toHaveBeenCalledTimes(11);
+					expect(spyLoadTransactions).toHaveBeenCalledTimes(11);
 
 					// idle and in_progress
 					// error

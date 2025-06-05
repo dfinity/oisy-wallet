@@ -63,7 +63,7 @@
 	<ButtonGroup slot="toolbar">
 		<ButtonBack onclick={back} />
 
-		<Button on:click={apply} {disabled}>
+		<Button onclick={apply} {disabled}>
 			{$i18n.core.text.apply}
 		</Button>
 	</ButtonGroup>

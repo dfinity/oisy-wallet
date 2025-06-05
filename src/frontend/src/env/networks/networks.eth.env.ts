@@ -72,5 +72,8 @@ export const SUPPORTED_ETHEREUM_NETWORK_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NE
 	({ id }) => id
 );
 
+export const SUPPORTED_ETHEREUM_MAINNET_NETWORKS: EthereumNetwork[] =
+	SUPPORTED_ETHEREUM_NETWORKS.filter(({ env }) => env === 'mainnet');
+
 export const SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS: EthereumChainId[] =
 	SUPPORTED_ETHEREUM_NETWORKS.map(({ chainId }) => chainId);
