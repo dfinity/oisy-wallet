@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -8,7 +7,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Token } from '$lib/types/token';
-	import type { CardData } from '$lib/types/token-card';
 
 	interface Props {
 		token: Token;
