@@ -4,9 +4,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ButtonColorStyle } from '$lib/types/style';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import type { Props as ButtonIconProps } from '$lib/components/ui/ButtonIcon.svelte';
-	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
 		text: string;
