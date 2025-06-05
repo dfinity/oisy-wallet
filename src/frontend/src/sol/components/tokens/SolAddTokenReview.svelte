@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { assertNonNullish, isNullish } from '@dfinity/utils';
+	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -19,6 +19,7 @@
 	import { getSplMetadata } from '$sol/services/spl.services';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+	import { hardenMetadata } from '$lib/utils/metadata.utils';
 
 	export let tokenAddress: SplTokenAddress | undefined;
 	export let metadata: TokenMetadata | undefined;
@@ -65,7 +66,9 @@
 				})
 			);
 
-			metadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
+			const unsafeMetadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
+
+			 metadata =nonNullish((unsafeMetadata)) ? hardenMetadata(unsafeMetadata) : undefined;
 
 			if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
 				toastsError({
