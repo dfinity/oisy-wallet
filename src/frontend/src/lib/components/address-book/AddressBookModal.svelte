@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 	import AddressBookQrCodeScan from '$lib/components/address-book/AddressBookQrCodeScan.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
@@ -40,6 +40,7 @@
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import { addressBookStore } from '$lib/stores/address-book.store';
 
 	let loading = $state(false);
 
@@ -152,6 +153,11 @@
 			gotoStep(data);
 		}
 	});
+
+	// Reset address book store on modal exit so we can start fresh the next time its opened
+	onDestroy(() => {
+		addressBookStore.reset();
+	})
 
 	let modal: WizardModal | undefined = $state();
 	const close = () => modalStore.close();
