@@ -3,7 +3,7 @@
 	import type { MouseEventHandler } from 'svelte/elements';
 	import type { ButtonColorStyle } from '$lib/types/style';
 
-	export interface Props {
+	interface Props {
 		onclick: MouseEventHandler<HTMLButtonElement>;
 		icon: Snippet;
 		children?: Snippet;
