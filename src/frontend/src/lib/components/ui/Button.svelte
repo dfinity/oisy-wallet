@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { ButtonColorStyle } from '$lib/types/style';
-	import type { MouseEventHandler } from 'svelte/elements';
 	import type { Snippet } from 'svelte';
+	import type { MouseEventHandler } from 'svelte/elements';
+	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
 		colorStyle: ButtonColorStyle;
