@@ -394,7 +394,7 @@ a.as-button {
 	&.link {
 		@apply p-0;
 		@apply bg-transparent;
-		@apply text-brand-primary;
+		@apply text-brand-primary-alt;
 
 		&.disabled,
 		&[disabled] {
