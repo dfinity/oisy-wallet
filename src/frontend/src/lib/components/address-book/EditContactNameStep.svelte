@@ -68,7 +68,7 @@
 		></ButtonCancel>
 		<Button
 			colorStyle="primary"
-			on:click={handleSave}
+			onclick={handleSave}
 			disabled={!form?.isValid}
 			loading={disabled}
 			testId={ADDRESS_BOOK_SAVE_BUTTON}

@@ -40,7 +40,7 @@
 			/>
 		</div>
 
-		<Button on:click={modalStore.close} colorStyle="secondary-light" fullWidth slot="toolbar">
+		<Button onclick={modalStore.close} colorStyle="secondary-light" fullWidth slot="toolbar">
 			{$i18n.referral.reward.text.open_wallet}
 		</Button>
 	</ContentWithToolbar>

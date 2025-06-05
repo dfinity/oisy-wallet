@@ -574,6 +574,7 @@ interface I18nSwap {
 		swapping: string;
 		refreshing_ui: string;
 		swap_provider: string;
+		swap_provider_website: string;
 		swap_route: string;
 		included_network_fees: string;
 		included_liquidity_fees: string;
@@ -1003,6 +1004,7 @@ interface I18nAddress {
 	fields: { label: string; address: string };
 	delete: { title: string; delete_address: string; content_text: string };
 	save: { title: string; add_to_existing_contact: string; create_contact: string };
+	qr: { title: string };
 }
 
 interface I18nPow_protector {

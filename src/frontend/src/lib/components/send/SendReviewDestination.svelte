@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
-	import Divider from '$lib/components/common/Divider.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
+	import SendContactName from '$lib/components/send/SendContactName.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 
@@ -12,12 +12,6 @@
 	}
 
 	const { destination, selectedContact }: Props = $props();
-
-	let selectedContactLabel = $derived(
-		nonNullish(selectedContact)
-			? selectedContact.addresses.find(({ address }) => address === destination)?.label
-			: undefined
-	);
 </script>
 
 <AddressCard>
@@ -32,16 +26,13 @@
 	{/snippet}
 
 	{#snippet content()}
-		<span>
-			<span class="font-bold">
-				{$i18n.transaction.text.to}{nonNullish(selectedContact) ? `: ${selectedContact?.name}` : ''}
-			</span>
-
-			{#if notEmptyString(selectedContactLabel)}
-				<Divider />
-				{selectedContactLabel}
-			{/if}
-		</span>
+		{#if isNullish(selectedContact)}
+			<span class="font-bold">{$i18n.transaction.text.to}</span>
+		{:else}
+			<SendContactName contact={selectedContact} address={destination}>
+				{$i18n.transaction.text.to} :
+			</SendContactName>
+		{/if}
 
 		<span class="w-full whitespace-normal break-all">{destination}</span>
 	{/snippet}
