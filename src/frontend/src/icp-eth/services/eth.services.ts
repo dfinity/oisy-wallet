@@ -15,6 +15,8 @@ import {
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import type { IcCkLinkedAssets, IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -168,7 +170,8 @@ const loadPendingTransactions = async ({
 		});
 	} catch (err: unknown) {
 		const {
-			network: { name: networkName }
+			id: tokenId,
+			network: { name: networkName, id: networkId }
 		} = twinToken;
 
 		const {
@@ -177,14 +180,21 @@ const loadPendingTransactions = async ({
 			}
 		} = get(i18n);
 
-		toastsError({
-			msg: {
-				text: replacePlaceholders(loading_pending_ck_ethereum_transactions, {
-					$network: networkName
-				})
-			},
-			err
+		trackEvent({
+			name: TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR,
+			metadata: {
+				tokenId: `${tokenId.description}`,
+				networkId: `${networkId.description}`
+			}
 		});
+
+		// We print the error to console just for debugging purposes
+		console.warn(
+			replacePlaceholders(loading_pending_ck_ethereum_transactions, {
+				$network: networkName
+			}),
+			err
+		);
 	} finally {
 		emit({
 			message: 'oisyCkEthereumPendingTransactions',
