@@ -39,7 +39,7 @@ a.as-button {
 
 		&.icon {
 			--button-border-radius: var(--border-radius-sm-1_5x);
-			--button-padding: var(--padding-0_75x);
+			--button-padding: var(--padding);
 		}
 
 		&.padding-sm {
@@ -93,7 +93,10 @@ a.as-button {
 	// PRIMARY
 	&.primary:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-primary-inverted;
-		@apply bg-brand-primary;
+
+		&:not(.transparent) {
+			@apply bg-brand-primary;
+		}
 
 		&.transparent {
 			@apply bg-transparent;
@@ -129,7 +132,10 @@ a.as-button {
 	// SECONDARY
 	&.secondary:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-primary-inverted-alt;
-		@apply bg-primary-inverted;
+
+		&:not(.transparent) {
+			@apply bg-primary-inverted;
+		}
 
 		&.transparent {
 			@apply bg-transparent;
@@ -165,7 +171,10 @@ a.as-button {
 	// SECONDARY LIGHT
 	&.secondary-light:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-brand-primary-alt;
-		@apply bg-brand-subtle-10;
+
+		&:not(.transparent) {
+			@apply bg-brand-subtle-10;
+		}
 
 		&.transparent {
 			@apply bg-transparent;
@@ -201,7 +210,10 @@ a.as-button {
 	// TERTIARY
 	&.tertiary:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-primary;
-		@apply bg-primary;
+
+		&:not(.transparent) {
+			@apply bg-primary;
+		}
 
 		&.transparent {
 			@apply bg-transparent;
@@ -237,7 +249,10 @@ a.as-button {
 	// TERTIARY ALT
 	&.tertiary-alt:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-brand-primary-alt;
-		@apply bg-primary;
+
+		&:not(.transparent) {
+			@apply bg-primary;
+		}
 
 		&.transparent {
 			@apply bg-transparent;
@@ -273,7 +288,10 @@ a.as-button {
 	// TERTIARY MAIN CARD
 	&.tertiary-main-card:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-brand-primary-inverted;
-		@apply bg-primary-alt;
+
+		&:not(.transparent) {
+			@apply bg-primary-alt;
+		}
 
 		&.transparent {
 			@apply bg-transparent;
@@ -308,10 +326,7 @@ a.as-button {
 	// MUTED
 	&.muted:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-tertiary;
-
-		&.transparent {
-			@apply bg-transparent;
-		}
+		@apply bg-transparent;
 
 		&:hover {
 			@apply text-secondary;
@@ -343,8 +358,10 @@ a.as-button {
 
 	// SUCCESS
 	&.success {
-		@apply text-primary-inverted;
-		@apply bg-success-primary;
+		&:not(.transparent) {
+			@apply text-primary-inverted;
+			@apply bg-success-primary;
+		}
 
 		&.transparent {
 			@apply bg-transparent;
@@ -395,9 +412,10 @@ a.as-button {
 
 	// ERROR
 	&.error {
-		@apply text-primary-inverted;
-		@apply bg-error-primary;
-
+		&:not(.transparent) {
+			@apply text-primary-inverted;
+			@apply bg-error-primary;
+		}
 
 		&.transparent {
 			@apply bg-transparent;
