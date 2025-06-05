@@ -36,7 +36,7 @@
 		testId,
 		ariaLabel,
 		styleClass = '',
-		transparent = false,
+		transparent,
 		onclick,
 		children
 	}: Props = $props();
