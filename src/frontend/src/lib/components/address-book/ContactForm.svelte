@@ -15,12 +15,12 @@
 		onSubmit = () => {}
 	}: { contact: Partial<ContactUi>; disabled?: boolean; onSubmit?: () => void } = $props();
 
-	const trimmedName = $derived(contact?.name?.trim?.() ?? '');
-	const isNameTooLong = $derived(trimmedName.length > 100);
+	const trimmedName = $derived((contact.name ?? '').trim());
+	const isNameTooLong = $derived(trimmedName.length > CONTACT_MAX_NAME_LENGTH);
 	const isValid = $derived(notEmptyString(trimmedName) && !isNameTooLong);
 
 	const handleKeydown = (event: KeyboardEvent): void => {
-		if (event.key === 'Enter' && isValid) {
+		if (event.key === 'Enter') {
 			event.preventDefault();
 			onSubmit();
 		}
@@ -31,7 +31,7 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<form class="w-full" method="POST">
+<form class="w-full">
 	<div class="rounded-lg bg-brand-subtle-10 p-4 pb-6 pt-4 text-sm md:p-6 md:text-base md:font-bold">
 		{$i18n.contact.fields.name}
 		<InputText
