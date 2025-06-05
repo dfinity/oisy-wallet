@@ -147,8 +147,8 @@ const loadPendingTransactions = async ({
 
 		const { id: tokenId } = token;
 
-		// There are no pending ETH -> ckETH or Erc20 -> ckErc20, therefore we reset the store.
-		// This can be useful if there was a previous pending transactions displayed and the transaction has now been processed.
+		// There are no pending ETH -> ckETH or Erc20 -> ckErc20, therefore, we reset the store.
+		// This can be useful if there were previous pending transactions displayed and the transaction has now been processed.
 		if (pendingLogs.length === 0) {
 			icPendingTransactionsStore.reset(tokenId);
 			return;
