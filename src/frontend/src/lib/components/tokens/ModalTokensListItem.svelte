@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -12,16 +11,15 @@
 	interface Props {
 		token: Token;
 		logoSize?: LogoSize;
+		onClick: () => void;
 	}
 
-	let { token, logoSize = 'lg' }: Props = $props();
+	let { token, logoSize = 'lg', onClick }: Props = $props();
 
 	const { oisyName, oisySymbol, symbol, name, network } = token;
-
-	const dispatch = createEventDispatcher();
 </script>
 
-<LogoButton onClick={() => dispatch('click')} dividers={true}>
+<LogoButton {onClick} dividers={true}>
 	{#snippet title()}
 		{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
 	{/snippet}
