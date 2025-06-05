@@ -17,6 +17,7 @@
 		testId?: string;
 		ariaLabel?: string;
 		styleClass?: string;
+		transparent?: boolean;
 		onclick?: MouseEventHandler<HTMLButtonElement>;
 		children: Snippet;
 	}
@@ -35,6 +36,7 @@
 		testId,
 		ariaLabel,
 		styleClass = '',
+		transparent,
 		onclick,
 		children
 	}: Props = $props();
@@ -58,6 +60,7 @@
 	class:duration-500={loading}
 	class:ease-in-out={loading}
 	class:animate-pulse={loading}
+	class:transparent
 	{onclick}
 	data-tid={testId}
 	aria-label={ariaLabel}
