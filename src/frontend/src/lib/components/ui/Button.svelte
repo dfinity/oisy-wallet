@@ -4,8 +4,8 @@
 	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
-		colorStyle: ButtonColorStyle;
-		type: 'submit' | 'reset' | 'button';
+		colorStyle?: ButtonColorStyle;
+		type?: 'submit' | 'reset' | 'button';
 		disabled?: boolean;
 		loading?: boolean;
 		loadingAsSkeleton?: boolean;
