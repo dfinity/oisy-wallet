@@ -38,11 +38,17 @@
 			testId={ADDRESS_LIST_ITEM_COPY_BUTTON}
 			text={$i18n.wallet.text.address_copied}
 			value={address.address}
+			colorStyle="tertiary-alt"
+			transparent
+			link={false}
 		/>
 	{/if}
 	{#if nonNullish(onInfo)}
 		<ButtonIcon
-			styleClass="-m-1 md:m-0 hover:text-inherit"
+			styleClass="-m-1 md:m-0"
+			colorStyle="tertiary-alt"
+			link={false}
+			transparent
 			ariaLabel={$i18n.core.text.view}
 			testId={ADDRESS_LIST_ITEM_INFO_BUTTON}
 			onclick={(e) => {
@@ -58,7 +64,10 @@
 	{/if}
 	{#if nonNullish(onEdit)}
 		<ButtonIcon
-			styleClass="-m-1 md:m-0 hover:text-inherit"
+			styleClass="-m-1 md:m-0"
+			colorStyle="tertiary-alt"
+			link={false}
+			transparent
 			ariaLabel={$i18n.core.text.edit}
 			testId={ADDRESS_LIST_ITEM_EDIT_BUTTON}
 			onclick={onEdit}
@@ -70,7 +79,10 @@
 	{/if}
 	{#if nonNullish(onDelete)}
 		<ButtonIcon
-			styleClass="-m-1 md:m-0 text-error-primary hover:text-inherit"
+			styleClass="-m-1 md:m-0"
+			colorStyle="error"
+			link={false}
+			transparent
 			ariaLabel={$i18n.core.text.delete}
 			testId={ADDRESS_LIST_ITEM_DELETE_BUTTON}
 			onclick={onDelete}

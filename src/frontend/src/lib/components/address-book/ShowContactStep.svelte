@@ -33,7 +33,7 @@
 	<ContactHeader name={contact.name} onEdit={() => onEdit?.(contact)}></ContactHeader>
 
 	{#if hasAddresses}
-		<div>
+		<div class="flex flex-col gap-1">
 			{#each contact.addresses as address, index (index)}
 				<AddressListItem
 					{address}
@@ -52,7 +52,8 @@
 			<Button
 				alignLeft
 				ariaLabel={$i18n.address_book.edit_contact.add_address}
-				colorStyle="tertiary-main-card"
+				colorStyle="secondary-light"
+				transparent
 				onclick={onAddAddress}
 			>
 				<IconPlus />
@@ -77,9 +78,9 @@
 			</div>
 
 			<Button
-				styleClass="py-1.5"
 				ariaLabel={$i18n.address_book.show_contact.add_address}
 				colorStyle="secondary-light"
+				transparent
 				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
 				onclick={onAddAddress}
 			>
