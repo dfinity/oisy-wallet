@@ -34,10 +34,11 @@
 				{/snippet}
 
 				{#snippet mainValue()}
-					<span class="flex items-center gap-1">
-						<output>{token.network.name}</output>
-						<NetworkLogo network={token.network} />
-					</span>
+					<output>{token.network.name}</output>
+				{/snippet}
+
+				{#snippet secondaryValue()}
+					<NetworkLogo network={token.network} />
 				{/snippet}
 			</ModalValue>
 
@@ -47,14 +48,15 @@
 				{/snippet}
 
 				{#snippet mainValue()}
-					<span class="flex items-center gap-1">
-						<output>{token.name}</output>
-						<Logo
-							src={token.icon}
-							alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.name })}
-							color="white"
-						/>
-					</span>
+					<output>{token.name}</output>
+				{/snippet}
+
+				{#snippet secondaryValue()}
+					<Logo
+						src={token.icon}
+						alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.name })}
+						color="white"
+					/>
 				{/snippet}
 			</ModalValue>
 
@@ -67,7 +69,7 @@
 					{/snippet}
 
 					{#snippet mainValue()}
-						<output class="inline-block first-letter:capitalize">{token.standard}</output>
+						<output>{token.standard}</output>
 					{/snippet}
 				</ModalValue>
 			{/if}
