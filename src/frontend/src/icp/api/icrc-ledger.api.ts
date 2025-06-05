@@ -1,20 +1,20 @@
-import type { Allowance } from '$declarations/cycles_ledger/cycles_ledger.did';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterApiFunctionParams, CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
+import type { Allowance } from '@dfinity/ledger-icp/dist/candid/ledger';
 import {
-	IcrcLedgerCanister,
 	type IcrcAccount,
 	type IcrcBlockIndex,
+	IcrcLedgerCanister,
 	type IcrcSubaccount,
 	type IcrcTokenMetadataResponse,
 	type IcrcTokens
 } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
+import { assertNonNullish, type QueryParams, toNullable } from '@dfinity/utils';
 
 /**
  * Retrieves metadata for the ICRC token.
