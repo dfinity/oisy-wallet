@@ -46,9 +46,11 @@
 {#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 	<ModalExpandableValues>
 		<ModalValue slot="list-header">
-			<svelte:fragment slot="label">{$i18n.swap.text.total_fee}</svelte:fragment>
+			{#snippet label()}
+				{$i18n.swap.text.total_fee}
+			{/snippet}
 
-			<svelte:fragment slot="main-value">
+			{#snippet mainValue()}
 				{#if isNullish($icTokenFeeStore?.[$sourceToken.symbol])}
 					<div class="w-14 sm:w-16">
 						<SkeletonText />
@@ -64,7 +66,7 @@
 						value: sourceTokenTotalFeeUSD
 					})}
 				{/if}
-			</svelte:fragment>
+			{/snippet}
 		</ModalValue>
 
 		<svelte:fragment slot="list-items">
@@ -72,14 +74,14 @@
 				<SwapFee
 					fee={sourceTokenApproveFeeDisplay}
 					symbol={getTokenDisplaySymbol($sourceToken)}
-					label={$i18n.swap.text.approval_fee}
+					feeLabel={$i18n.swap.text.approval_fee}
 				/>
 			{/if}
 
 			<SwapFee
 				fee={sourceTokenTransferFeeDisplay}
 				symbol={getTokenDisplaySymbol($sourceToken)}
-				label={$i18n.swap.text.network_fee}
+				feeLabel={$i18n.swap.text.network_fee}
 			/>
 		</svelte:fragment>
 	</ModalExpandableValues>
