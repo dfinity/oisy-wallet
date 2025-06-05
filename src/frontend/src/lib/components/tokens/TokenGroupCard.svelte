@@ -35,7 +35,7 @@
 
 	const headerData: CardData = $derived(mapHeaderData(tokenGroup));
 
-	const showTokenInGroup = (token: TokenUi) =>token.alwaysShowInTokenGroup
+	const showTokenInGroup = (token: TokenUi) => token.alwaysShowInTokenGroup;
 	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix); // logic taken from old ck badge
 
 	// list of filtered tokens, filtered by string input
