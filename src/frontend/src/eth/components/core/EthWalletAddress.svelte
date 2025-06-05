@@ -20,7 +20,7 @@
 
 	<output class="break-all" id="eth-wallet-address"
 		>{shortenWithMiddleEllipsis({ text: $ethAddress ?? '' })}</output
-	><Copy inline color="inherit" value={$ethAddress ?? ''} text={$i18n.wallet.text.address_copied} />
+	><Copy inline value={$ethAddress ?? ''} text={$i18n.wallet.text.address_copied} />
 </div>
 
 {#if nonNullish(explorerUrl)}
