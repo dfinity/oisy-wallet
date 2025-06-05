@@ -6,15 +6,15 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import type { Allowance } from '@dfinity/ledger-icp/dist/candid/ledger';
 import {
+	IcrcLedgerCanister,
 	type IcrcAccount,
 	type IcrcBlockIndex,
-	IcrcLedgerCanister,
 	type IcrcSubaccount,
 	type IcrcTokenMetadataResponse,
 	type IcrcTokens
 } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, type QueryParams, toNullable } from '@dfinity/utils';
+import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
 
 /**
  * Retrieves metadata for the ICRC token.

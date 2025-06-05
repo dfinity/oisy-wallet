@@ -3,7 +3,7 @@ import { allowance, balance, transactionFee } from '$icp/api/icrc-ledger.api';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import type { Allowance } from '@dfinity/ledger-icp/dist/candid/ledger';
-import { type IcrcAccount, IcrcLedgerCanister } from '@dfinity/ledger-icrc';
+import { IcrcLedgerCanister, type IcrcAccount } from '@dfinity/ledger-icrc';
 import { mock } from 'vitest-mock-extended';
 
 describe('icrc-ledger.api', () => {
