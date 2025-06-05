@@ -5,7 +5,7 @@ import {
 import type { EthereumNetwork } from '$eth/types/network';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import type { Network } from '$lib/types/network';
-import type { OptionToken, Token, TokenId } from '$lib/types/token';
+import type { OptionToken, TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
 export const isDefaultEthereumToken = (token: OptionToken): boolean =>
@@ -29,7 +29,7 @@ export const getExplorerUrl = ({
 	token,
 	network
 }: {
-	token?: Token | OptionToken;
+	token?: OptionToken;
 	network?: Network;
 }): string =>
 	nonNullish((network as EthereumNetwork)?.explorerUrl)

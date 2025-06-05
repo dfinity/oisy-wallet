@@ -38,14 +38,16 @@
 
 	let { from, value, timestamp, hash, blockNumber, to, type } = $derived(transaction);
 
+	let explorerBaseUrl = $derived(getExplorerUrl({ token }));
+
 	let explorerUrl: string | undefined = $derived(
-		notEmptyString(hash) ? `${getExplorerUrl({ token })}/tx/${hash}` : undefined
+		notEmptyString(hash) ? `${explorerBaseUrl}/tx/${hash}` : undefined
 	);
 
-	let fromExplorerUrl: string = $derived(`${getExplorerUrl({ token })}/address/${from}`);
+	let fromExplorerUrl: string = $derived(`${explorerBaseUrl}/address/${from}`);
 
 	let toExplorerUrl: string | undefined = $derived(
-		notEmptyString(to) ? `${getExplorerUrl({ token })}/address/${to}` : undefined
+		notEmptyString(to) ? `${explorerBaseUrl}/address/${to}` : undefined
 	);
 
 	let ckMinterInfo: OptionCertifiedMinterInfo = $derived(
