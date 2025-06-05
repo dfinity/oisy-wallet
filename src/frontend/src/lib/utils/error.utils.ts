@@ -51,6 +51,7 @@ const cleanTrailingCommasAndLines = (text: string): string =>
  * - If it's a string, removes all matching `"key": "value"` pairs using RegExp.
  * - For all other types (number, boolean, etc.), it returns a string representation.
  *
+ * @param params - The parameters for the function.
  * @param params.err - The error to normalize. Unknown type.
  * @param params.keysToRemove - Keys that should be removed from the error object or string.
  * @returns A normalized string representation of the error, or undefined if input is nullish.
@@ -94,3 +95,6 @@ export const replaceErrorFields = ({
 
 	return String(err);
 };
+
+export const replaceIcErrorFields = (err: unknown): string | undefined =>
+	replaceErrorFields({ err, keysToRemove: ['Request ID'] });
