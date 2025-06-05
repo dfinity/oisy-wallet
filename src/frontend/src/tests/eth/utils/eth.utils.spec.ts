@@ -1,17 +1,24 @@
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
 import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { ADDITIONAL_ERC20_TOKENS, ERC20_TWIN_TOKENS } from '$env/tokens/tokens.erc20.env';
 import { ETHEREUM_TOKEN, SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
+import type { EthereumNetwork } from '$eth/types/network';
 import {
+	getExplorerUrl,
 	isDefaultEthereumToken,
 	isNotDefaultEthereumToken,
 	isNotSupportedEthTokenId,
 	isSupportedEthToken,
 	isSupportedEthTokenId
 } from '$eth/utils/eth.utils';
+import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
+import type { Token } from '$lib/types/token';
 
 describe('eth.utils', () => {
 	describe('isDefaultEthereumToken', () => {
@@ -175,5 +182,58 @@ describe('eth.utils', () => {
 				expect(isNotSupportedEthTokenId(id)).toBeTruthy();
 			}
 		);
+	});
+
+	describe('getExplorerUrl', () => {
+		const mockNetworkBase = BASE_NETWORK;
+		const mockNetworkEth = ETHEREUM_NETWORK;
+
+		it('returns Base explorerUrl when Base network is provided', () => {
+			const result = getExplorerUrl({ network: mockNetworkBase });
+
+			expect(result).toBe(mockNetworkBase.explorerUrl);
+		});
+
+		it('returns Base explorerUrl when Base token is provided', () => {
+			const result = getExplorerUrl({ token: BASE_ETH_TOKEN });
+
+			expect(result).toBe(mockNetworkBase.explorerUrl);
+		});
+
+		it('returns Ethereum explorerUrl when ETH network is provided', () => {
+			const result = getExplorerUrl({ network: mockNetworkEth });
+
+			expect(result).toBe(mockNetworkEth.explorerUrl);
+		});
+
+		it('returns the explorerUrl for the provided network if both network and token are provided', () => {
+			const result = getExplorerUrl({ network: mockNetworkBase, token: ETHEREUM_TOKEN });
+
+			expect(result).toBe(mockNetworkBase.explorerUrl);
+		});
+
+		it('returns DEFAULT_ETHEREUM_NETWORK.explorerUrl if nothing provided', () => {
+			const result = getExplorerUrl({});
+
+			expect(result).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
+		});
+
+		it('returns DEFAULT_ETHEREUM_NETWORK.explorerUrl if wrong data is provided', () => {
+			const result1 = getExplorerUrl({ token: null as unknown as undefined });
+
+			expect(result1).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
+
+			const result2 = getExplorerUrl({ network: null as unknown as undefined });
+
+			expect(result2).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
+
+			const result3 = getExplorerUrl({ token: {} as unknown as Token });
+
+			expect(result3).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
+
+			const result4 = getExplorerUrl({ network: {} as unknown as EthereumNetwork });
+
+			expect(result4).toBe(DEFAULT_ETHEREUM_NETWORK.explorerUrl);
+		});
 	});
 });
