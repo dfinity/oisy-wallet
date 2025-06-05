@@ -132,14 +132,14 @@ const initModalStore = <T>(): ModalStore<T> => {
 	const setType = (type: Modal<T>['type'], cb?: () => void) => (id: symbol) => {
 		set({ type, id });
 		cb?.();
-	}
+	};
 
 	const setTypeWithData =
 		(type: Modal<T>['type'], cb?: () => void) =>
 		<D extends T>({ id, data }: { id: symbol; data: D }) => {
 			set({ type, id, data });
 			cb?.();
-		}
+		};
 
 	return {
 		openEthReceive: setType('eth-receive'),
