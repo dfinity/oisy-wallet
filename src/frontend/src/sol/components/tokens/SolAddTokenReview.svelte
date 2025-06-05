@@ -15,11 +15,11 @@
 	import type { TokenMetadata } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { hardenMetadata } from '$lib/utils/metadata.utils';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { getSplMetadata } from '$sol/services/spl.services';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-	import { hardenMetadata } from '$lib/utils/metadata.utils';
 
 	export let tokenAddress: SplTokenAddress | undefined;
 	export let metadata: TokenMetadata | undefined;
@@ -68,7 +68,7 @@
 
 			const unsafeMetadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
 
-			 metadata =nonNullish((unsafeMetadata)) ? hardenMetadata(unsafeMetadata) : undefined;
+			metadata = nonNullish(unsafeMetadata) ? hardenMetadata(unsafeMetadata) : undefined;
 
 			if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
 				toastsError({
