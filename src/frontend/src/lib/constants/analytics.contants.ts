@@ -20,6 +20,7 @@ export const TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS = 'eth_to_cketh_convert_su
 export const TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR = 'eth_to_cketh_convert_error_count';
 export const TRACK_COUNT_ETH_LOADING_BALANCE_ERROR = 'eth_loading_balance_error_count';
 export const TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR = 'eth_loading_transactions_error_count';
+export const TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR = 'eth_pending_transactions_error_count';
 
 // Internet Computer
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS = 'ic_ckbtc_to_btc_success_count';
@@ -35,6 +36,7 @@ export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';
 export const TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR = 'ic_loading_transactions_error_count';
 export const TRACK_COUNT_CKETH_LOADING_MINTER_INFO_ERROR = 'ic_cketh_load_minter_info_error_count';
 export const TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR = 'ic_ckbtc_load_minter_info_error_count';
+export const TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR = 'ic_loading_icrc_canister_error_count';
 
 // Solana
 export const TRACK_COUNT_SOL_SEND_SUCCESS = 'sol_send_success_count';
