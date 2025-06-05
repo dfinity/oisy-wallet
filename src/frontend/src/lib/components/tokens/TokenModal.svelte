@@ -4,11 +4,12 @@
 	import type { Snippet } from 'svelte';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isTokenIcrc, isTokenDip20 } from '$icp/utils/icrc.utils';
+	import List from '$lib/components/common/List.svelte';
+	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
@@ -28,73 +29,67 @@
 
 	<ContentWithToolbar>
 		{#if nonNullish(token)}
-			<ModalValue ref="network">
-				{#snippet label()}
-					{$i18n.tokens.details.network}
-				{/snippet}
-
-				{#snippet mainValue()}
-					<output>{token.network.name}</output>
-				{/snippet}
-
-				{#snippet secondaryValue()}
-					<NetworkLogo network={token.network} />
-				{/snippet}
-			</ModalValue>
-
-			<ModalValue ref="name">
-				{#snippet label()}
-					{$i18n.tokens.details.token}
-				{/snippet}
-
-				{#snippet mainValue()}
-					<output>{token.name}</output>
-				{/snippet}
-
-				{#snippet secondaryValue()}
-					<Logo
-						src={token.icon}
-						alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.name })}
-						color="white"
-					/>
-				{/snippet}
-			</ModalValue>
-
-			{@render children?.()}
-
-			{#if isTokenIcrc(token) || isTokenErc20(token) || isTokenDip20(token)}
-				<ModalValue ref="symbol">
+			<List styleClass="text-sm" condensed={false}>
+				<ModalListItem>
 					{#snippet label()}
-						{$i18n.tokens.details.standard}
+						{$i18n.tokens.details.network}
 					{/snippet}
 
-					{#snippet mainValue()}
-						<output>{token.standard}</output>
+					{#snippet content()}
+						<output>{token.network.name}</output>
+						<NetworkLogo network={token.network} />
 					{/snippet}
-				</ModalValue>
-			{/if}
+				</ModalListItem>
 
-			<ModalValue ref="symbol">
-				{#snippet label()}
-					{$i18n.core.text.symbol}
-				{/snippet}
+				<ModalListItem>
+					{#snippet label()}
+						{$i18n.tokens.details.token}
+					{/snippet}
 
-				{#snippet mainValue()}
-					<output>
+					{#snippet content()}
+						<output>{token.name}</output>
+						<Logo
+							src={token.icon}
+							alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.name })}
+							color="white"
+						/>
+					{/snippet}
+				</ModalListItem>
+
+				{@render children?.()}
+
+				{#if isTokenIcrc(token) || isTokenErc20(token) || isTokenDip20(token)}
+					<ModalListItem>
+						{#snippet label()}
+							{$i18n.tokens.details.standard}
+						{/snippet}
+
+						{#snippet content()}
+							{token.standard}
+						{/snippet}
+					</ModalListItem>
+				{/if}
+
+				<ModalListItem>
+					{#snippet label()}
+						{$i18n.core.text.symbol}
+					{/snippet}
+
+					{#snippet content()}
 						{`${getTokenDisplaySymbol(token)}${nonNullish(token.oisySymbol) ? ` (${token.symbol})` : ''}`}
-					</output>
-				{/snippet}
-			</ModalValue>
+					{/snippet}
+				</ModalListItem>
 
-			<ModalValue ref="decimals">
-				{#snippet label()}
-					{$i18n.core.text.decimals}
-				{/snippet}
+				<ModalListItem>
+					{#snippet label()}
+						{$i18n.core.text.decimals}
+					{/snippet}
 
-				{#snippet mainValue()}
-					<output>{token.decimals}</output>
-				{/snippet}
-			</ModalValue>
+					{#snippet content()}
+						{token.decimals}
+					{/snippet}
+				</ModalListItem>
+			</List>
 		{/if}
 
 		<ButtonDone onclick={modalStore.close} slot="toolbar" />
