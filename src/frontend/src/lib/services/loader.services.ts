@@ -4,7 +4,6 @@ import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { POW_FEATURE_ENABLED } from '$env/pow.env';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { allowSigning } from '$lib/api/backend.api';
-import { icrc2Allowance } from '$lib/api/cycles-ledger.api';
 import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import { POW_MIN_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import {
@@ -45,7 +44,7 @@ export const hasRequiredCycles = async (): Promise<boolean> => {
 		assertNonNullish(identity);
 		assertNonNullish(SIGNER_CANISTER_ID);
 
-		const { allowance } = await icrc2Allowance({
+		const { test } = await allowance({
 			identity,
 			certified: false,
 			owner: {
