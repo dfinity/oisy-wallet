@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import Token from '$lib/components/tokens/Token.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
@@ -13,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
 
 	let contractAddress: string | undefined;
 	$: contractAddress =
@@ -37,7 +37,7 @@
 								inline
 							/><ExternalLink
 								iconSize="18"
-								href={`${$explorerUrlStore}/address/${contractAddress}`}
+								href={`${getExplorerUrl({ token: $token })}/address/${contractAddress}`}
 								ariaLabel={$i18n.tokens.alt.open_contract_address_block_explorer}
 								inline
 								color="blue"

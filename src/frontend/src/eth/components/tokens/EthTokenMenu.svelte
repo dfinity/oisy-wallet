@@ -2,7 +2,6 @@
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
-	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -11,13 +10,14 @@
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl =
 		$tokenStandard === 'erc20' && nonNullish($token)
-			? `${$explorerUrlStore}/token/${($token as Erc20Token).address}`
+			? `${getExplorerUrl({ token: $token })}/token/${($token as Erc20Token).address}`
 			: notEmptyString($ethAddress)
-				? `${$explorerUrlStore}/address/${$ethAddress}`
+				? `${getExplorerUrl({ token: $token })}/address/${$ethAddress}`
 				: undefined;
 </script>
 
