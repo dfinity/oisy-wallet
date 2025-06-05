@@ -10,8 +10,12 @@
 		ADDRESS_BOOK_CANCEL_BUTTON,
 		ADDRESS_BOOK_SAVE_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
 
 	interface Props {
 		contact: ContactUi;
@@ -19,59 +23,99 @@
 		onSaveAddress: (address: ContactAddressUi) => void;
 		onAddAddress: (address: ContactAddressUi) => void;
 		onClose: () => void;
+		onQRCodeScan: () => void;
 		isNewAddress: boolean;
+		disabled?: boolean;
 	}
 
 	let {
 		contact,
-		address = $bindable({}),
+		address = {},
 		onSaveAddress,
 		onAddAddress,
 		onClose,
-		isNewAddress
+		onQRCodeScan,
+		isNewAddress,
+		disabled = false
 	}: Props = $props();
+
+	let editingAddress = $state(address ? { ...address } : {});
+
+	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
+	let modalDataAddress: string | undefined = $derived(
+		modalData?.entrypoint?.type === AddressBookSteps.SAVE_ADDRESS
+			? modalData.entrypoint.address
+			: undefined
+	);
+
+	let addressModel = $derived(
+		nonNullish(modalDataAddress)
+			? (mapAddressToContactAddressUi(modalDataAddress) ?? editingAddress)
+			: editingAddress
+	);
 
 	const handleSave = () => {
 		if (isNewAddress) {
-			onAddAddress({ ...address } as ContactAddressUi);
+			onAddAddress({ ...addressModel } as ContactAddressUi);
 		} else {
-			onSaveAddress(address as ContactAddressUi);
+			onSaveAddress(editingAddress as ContactAddressUi);
+		}
+	};
+
+	const handleSubmit = (event: Event) => {
+		event.preventDefault();
+		if (!isInvalid) {
+			handleSave();
 		}
 	};
 
 	let title = $derived(
 		isNewAddress
 			? $i18n.address.form.new_address
-			: nonNullish(address.addressType)
-				? $i18n.address.types[address.addressType]
+			: nonNullish(editingAddress.addressType)
+				? $i18n.address.types[editingAddress.addressType]
 				: ''
 	);
 
 	let isInvalid = $state(false);
+
+	const focusField = isNewAddress ? 'address' : 'label';
+
+	let originalLabel = $derived(!isNewAddress && nonNullish(address?.label) ? address.label : '');
+	let labelChanged = $derived(isNewAddress ? true : editingAddress.label !== originalLabel);
 </script>
 
-<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-	<Avatar variant="xl" name={contact.name} />
+<form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
+	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
+		<Avatar variant="xl" name={contact.name} />
 
-	<div class="text-2xl font-bold text-primary md:text-3xl">
-		{contact.name}
-	</div>
-	<div
-		class="mt-2 w-full rounded-lg bg-brand-light px-3 py-4 text-sm md:px-5 md:text-base md:font-bold"
-	>
-		<div class="pb-4 text-xl font-bold">{title}</div>
-		<AddressForm {isNewAddress} {address} bind:isInvalid></AddressForm>
-	</div>
+		<div class="text-2xl font-bold text-primary md:text-3xl">
+			{contact.name}
+		</div>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
-		<Button
-			colorStyle="primary"
-			disabled={isInvalid}
-			on:click={handleSave}
-			testId={ADDRESS_BOOK_SAVE_BUTTON}
-		>
-			{$i18n.core.text.save}
-		</Button>
-	</ButtonGroup>
-</ContentWithToolbar>
+		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
+			<div class="pb-4 text-xl font-bold">{title}</div>
+
+			<AddressForm
+				{onQRCodeScan}
+				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
+				address={addressModel}
+				bind:isInvalid
+				{disabled}
+				{focusField}
+			/>
+		</div>
+		<ButtonGroup slot="toolbar">
+			<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
+			<Button
+				colorStyle="primary"
+				disabled={isInvalid || (!isNewAddress && !labelChanged)}
+				onclick={handleSave}
+				testId={ADDRESS_BOOK_SAVE_BUTTON}
+				loading={disabled}
+			>
+				{$i18n.core.text.save}
+			</Button>
+		</ButtonGroup>
+	</ContentWithToolbar>
+</form>

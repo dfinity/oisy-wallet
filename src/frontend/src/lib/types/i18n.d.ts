@@ -442,6 +442,7 @@ interface I18nSend {
 		recently_used_empty_state_description: string;
 		contacts_empty_state_title: string;
 		contacts_empty_state_description: string;
+		send_review_subtitle: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -572,6 +573,7 @@ interface I18nSwap {
 		swapping: string;
 		refreshing_ui: string;
 		swap_provider: string;
+		swap_provider_website: string;
 		swap_route: string;
 		included_network_fees: string;
 		included_liquidity_fees: string;
@@ -820,8 +822,14 @@ interface I18nTransaction {
 		type: string;
 		from: string;
 		from_copied: string;
+		received_from: string;
+		from_ata: string;
+		from_ata_copied: string;
 		to: string;
 		to_copied: string;
+		sent_to: string;
+		to_ata: string;
+		to_ata_copied: string;
 		block: string;
 		interacted_with: string;
 		status: string;
@@ -961,12 +969,12 @@ interface I18nAddress_book {
 		add_new_contact: string;
 		add_contact: string;
 		search_contact: string;
-		loading_contacts: string;
 		no_address_found: string;
 		no_contact_found: string;
 	};
 	alt: { show_addresses_of_contact: string; hide_addresses: string };
 	edit_contact: { title: string; add_address: string; delete_contact: string };
+	avatar: { default: string; avatar_for: string };
 	show_contact: {
 		title: string;
 		add_address: string;
@@ -979,7 +987,7 @@ interface I18nContact {
 	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
 	delete: { title: string; delete_contact: string; content_text: string };
-	error: { create: string; update: string; delete: string };
+	error: { create: string; update: string; delete: string; name_too_long: string };
 }
 
 interface I18nAddress {
@@ -990,10 +998,12 @@ interface I18nAddress {
 		label_placeholder: string;
 		invalid_address: string;
 		valid_for_networks: string;
+		error: { label_too_long: string };
 	};
 	fields: { label: string; address: string };
 	delete: { title: string; delete_address: string; content_text: string };
 	save: { title: string; add_to_existing_contact: string; create_contact: string };
+	qr: { title: string };
 }
 
 interface I18nSigner {

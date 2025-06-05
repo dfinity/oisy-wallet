@@ -4,7 +4,7 @@
 	import IconEmptyAddresses from '$lib/components/icons/IconEmptyAddresses.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import {
@@ -13,6 +13,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -32,13 +33,18 @@
 	<ContactHeader name={contact.name} onEdit={() => onEdit?.(contact)}></ContactHeader>
 
 	{#if hasAddresses}
-		<div>
+		<div class="flex flex-col gap-1">
 			{#each contact.addresses as address, index (index)}
 				<AddressListItem
 					{address}
 					addressItemActionsProps={{
 						onInfo: () => onShowAddress(index)
 					}}
+					onClick={async () =>
+						await copyToClipboard({
+							value: address.address,
+							text: $i18n.wallet.text.address_copied
+						})}
 				/>
 			{/each}
 		</div>
@@ -46,8 +52,9 @@
 			<Button
 				alignLeft
 				ariaLabel={$i18n.address_book.edit_contact.add_address}
-				colorStyle="tertiary-main-card"
-				on:click={onAddAddress}
+				colorStyle="secondary-light"
+				transparent
+				onclick={onAddAddress}
 			>
 				<IconPlus />
 				{$i18n.address_book.edit_contact.add_address}
@@ -71,11 +78,11 @@
 			</div>
 
 			<Button
-				styleClass="py-0"
 				ariaLabel={$i18n.address_book.show_contact.add_address}
-				colorStyle="tertiary-main-card"
+				colorStyle="secondary-light"
+				transparent
 				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
-				on:click={onAddAddress}
+				onclick={onAddAddress}
 			>
 				<IconPlus />
 				{$i18n.address_book.show_contact.add_address}
@@ -84,6 +91,6 @@
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => onClose()} testId={CONTACT_SHOW_CLOSE_BUTTON}></ButtonCancel>
+		<ButtonBack onclick={() => onClose()} testId={CONTACT_SHOW_CLOSE_BUTTON} />
 	</ButtonGroup>
 </ContentWithToolbar>

@@ -33,12 +33,16 @@ export const solKnownDestinations: Readable<KnownDestinations> = derived(
 			const token = $tokens.find(({ id }) => id === tokenId);
 
 			if (nonNullish(token)) {
-				($solTransactionsStore?.[tokenId as TokenId] ?? []).forEach(({ data }) => {
-					mappedTransactions.push({
-						...data,
-						token
-					});
-				});
+				($solTransactionsStore?.[tokenId as TokenId] ?? []).forEach(
+					({ data: { from, fromOwner, to, toOwner, ...rest } }) => {
+						mappedTransactions.push({
+							...rest,
+							from: fromOwner ?? from,
+							to: toOwner ?? to,
+							token
+						});
+					}
+				);
 			}
 		});
 

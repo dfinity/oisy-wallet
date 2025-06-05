@@ -61,9 +61,7 @@ export const getContactForAddress = ({
 	addressString: string;
 	contactList: ContactUi[];
 }): ContactUi | undefined =>
-	contactList.find((c) =>
-		c.addresses.find((address) => address.address.toLowerCase() === addressString.toLowerCase())
-	);
+	contactList.find((c) => c.addresses.find((address) => address.address === addressString));
 
 export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi | undefined => {
 	const tokenAccountIdParseResult = TokenAccountIdSchema.safeParse(address);
@@ -80,3 +78,19 @@ export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi
 		addressType: currentAddressType
 	};
 };
+
+export const isContactMatchingFilter = ({
+	address,
+	contact,
+	filterValue
+}: {
+	address: Address;
+	contact: ContactUi;
+	filterValue: string;
+}): boolean =>
+	address.includes(filterValue) ||
+	contact.name.toLowerCase().includes(filterValue.toLowerCase()) ||
+	contact.addresses.some(
+		({ label, address: innerAddress }) =>
+			address === innerAddress && label?.toLowerCase().includes(filterValue.toLowerCase())
+	);

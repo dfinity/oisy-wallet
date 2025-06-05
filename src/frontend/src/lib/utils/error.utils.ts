@@ -31,14 +31,16 @@ const buildJsonKeyPattern = (key: string): RegExp => {
  * @param key - The key to match and remove from a plain text string.
  * @returns A case-insensitive global RegExp that matches `key: value` pairs.
  */
-const buildTextPattern = (key: string): RegExp => new RegExp(`${key}\\s*:\\s*[^\\n,]+`, 'gi');
-
+const buildTextPattern = (key: string): RegExp => {
+	const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return new RegExp(`"?${escapedKey}"?\\s*:\\s*("?[^"\\n,]+"?)`, 'gi');
+};
 const cleanTrailingCommasAndLines = (text: string): string =>
 	text
 		.replace(/,\s*,/g, ',') // ", ,"
 		.replace(/,\s*$/g, '') // ", \n"
 		.replace(/,\s*\n/g, '\n') // ",\n"
-		.replace(/\n{2,}/g, '\n') // extra line breaks
+		.replace(/\n\s*\n+/g, '\n') // extra line breaks
 		.trim();
 
 /**
@@ -49,6 +51,7 @@ const cleanTrailingCommasAndLines = (text: string): string =>
  * - If it's a string, removes all matching `"key": "value"` pairs using RegExp.
  * - For all other types (number, boolean, etc.), it returns a string representation.
  *
+ * @param params - The parameters for the function.
  * @param params.err - The error to normalize. Unknown type.
  * @param params.keysToRemove - Keys that should be removed from the error object or string.
  * @returns A normalized string representation of the error, or undefined if input is nullish.
@@ -66,7 +69,10 @@ export const replaceErrorFields = ({
 
 	if (err instanceof Error) {
 		return cleanTrailingCommasAndLines(
-			keysToRemove.reduce((acc, key) => acc.replace(buildTextPattern(key), ''), err.message)
+			keysToRemove.reduce(
+				(acc, key) => acc.replace(buildJsonKeyPattern(key), '').replace(buildTextPattern(key), ''),
+				err.message
+			)
 		);
 	}
 
@@ -89,3 +95,6 @@ export const replaceErrorFields = ({
 
 	return String(err);
 };
+
+export const replaceIcErrorFields = (err: unknown): string | undefined =>
+	replaceErrorFields({ err, keysToRemove: ['Request ID'] });
