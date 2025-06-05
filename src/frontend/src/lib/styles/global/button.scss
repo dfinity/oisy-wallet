@@ -102,10 +102,6 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&.transparent {
-			@apply bg-transparent;
-		}
-
 		&:hover {
 			@apply text-primary-inverted;
 			@apply bg-brand-secondary;
@@ -139,10 +135,6 @@ a.as-button {
 
 		&:not(.transparent) {
 			@apply bg-primary-inverted;
-		}
-
-		&.transparent {
-			@apply bg-transparent;
 		}
 
 		&.transparent {
@@ -188,10 +180,6 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&.transparent {
-			@apply bg-transparent;
-		}
-
 		&:hover {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-20;
@@ -225,10 +213,6 @@ a.as-button {
 
 		&:not(.transparent) {
 			@apply bg-primary;
-		}
-
-		&.transparent {
-			@apply bg-transparent;
 		}
 
 		&.transparent {
@@ -274,10 +258,6 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&.transparent {
-			@apply bg-transparent;
-		}
-
 		&:hover {
 			@apply text-brand-primary-alt;
 			@apply bg-brand-subtle-10;
@@ -317,10 +297,6 @@ a.as-button {
 			@apply bg-transparent;
 		}
 
-		&.transparent {
-			@apply bg-transparent;
-		}
-
 		&:hover {
 			@apply text-brand-primary-inverted;
 			@apply bg-secondary-alt;
@@ -351,10 +327,6 @@ a.as-button {
 	&.muted:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-tertiary;
 		@apply bg-transparent;
-
-		&.transparent {
-			@apply bg-transparent;
-		}
 
 		&:hover {
 			@apply text-secondary;
@@ -411,26 +383,6 @@ a.as-button {
 			}
 		}
 
-		&.transparent {
-			@apply bg-transparent;
-			@apply text-success-primary;
-
-			&:hover {
-				@apply text-success-primary;
-				@apply bg-success-subtle-20;
-			}
-
-			&:active {
-				@apply text-success-primary;
-				@apply bg-success-subtle-20;
-			}
-
-			&:focus-visible {
-				@apply text-success-primary;
-				@apply bg-success-subtle-20;
-			}
-		}
-
 		&:hover {
 			@apply text-primary-inverted;
 			@apply bg-success-secondary;
@@ -463,26 +415,6 @@ a.as-button {
 		&:not(.transparent) {
 			@apply text-primary-inverted;
 			@apply bg-error-primary;
-		}
-
-		&.transparent {
-			@apply bg-transparent;
-			@apply text-error-primary;
-
-			&:hover {
-				@apply bg-error-subtle-20;
-				@apply text-error-primary;
-			}
-
-			&:active {
-				@apply text-error-primary;
-				@apply bg-error-subtle-20;
-			}
-
-			&:focus-visible {
-				@apply text-error-primary;
-				@apply bg-error-subtle-20;
-			}
 		}
 
 		&.transparent {
