@@ -2,6 +2,8 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
+	import { isTokenIcrc, isTokenDip20 } from '$icp/utils/icrc.utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -58,7 +60,7 @@
 
 			{@render children?.()}
 
-			{#if ['icrc', 'erc20'].includes(token.standard)}
+			{#if isTokenIcrc(token) || isTokenErc20(token) || isTokenDip20(token)}
 				<ModalValue ref="symbol">
 					{#snippet label()}
 						{$i18n.tokens.details.standard}
