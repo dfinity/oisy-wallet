@@ -41,7 +41,6 @@
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import { addressBookStore } from '$lib/stores/address-book.store';
 
 	let loading = $state(false);
 
