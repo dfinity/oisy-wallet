@@ -13,19 +13,25 @@
 	import { ContactAddressUiSchema } from '$lib/schema/contact.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi } from '$lib/types/contact';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
+		onQRCodeScan: () => void;
 		address: Partial<ContactAddressUi>;
 		disableAddressField?: boolean;
 		isInvalid: boolean;
 		disabled?: boolean;
+		focusField?: 'address' | 'label' | null;
 	}
+
 	let {
+		onQRCodeScan,
 		address = $bindable(),
 		disableAddressField = false,
 		isInvalid = $bindable(),
-		disabled = false
+		disabled = false,
+		focusField = null
 	}: Props = $props();
 
 	let addressParseError = $state<ZodError | undefined>();
@@ -49,6 +55,8 @@
 		showPasteButton={!disableAddressField && !disabled}
 		showResetButton={!disableAddressField && !disabled}
 		disabled={disableAddressField || disabled}
+		autofocus={isDesktop() && focusField === 'address'}
+		{onQRCodeScan}
 	/>
 
 	<label for="label" class="font-bold">{$i18n.address.fields.label}</label>
@@ -60,7 +68,9 @@
 		{disabled}
 		showResetButton={!disabled}
 		required={false}
+		autofocus={isDesktop() && focusField === 'label'}
 	/>
+
 	{#if nonNullish(labelError)}
 		<p transition:slide={SLIDE_DURATION} class="pt-2 text-error-primary">
 			{replacePlaceholders($i18n.address.form.error.label_too_long, {

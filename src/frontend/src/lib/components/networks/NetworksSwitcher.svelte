@@ -65,7 +65,7 @@
 			<span class="flex">
 				<Button
 					link
-					on:click={() => {
+					onclick={() => {
 						dropdown?.close();
 						modalStore.openSettings({ id: modalId, data: SettingsModalType.ENABLED_NETWORKS });
 					}}><IconManage />{$i18n.networks.manage}</Button

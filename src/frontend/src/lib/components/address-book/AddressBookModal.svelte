@@ -3,6 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
+	import AddressBookQrCodeScan from '$lib/components/address-book/AddressBookQrCodeScan.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
@@ -130,6 +131,10 @@
 			title: $i18n.address_book.edit_contact.title
 		},
 		{
+			name: AddressBookSteps.QR_CODE_SCAN,
+			title: $i18n.address.qr.title
+		},
+		{
 			name: AddressBookSteps.DELETE_ADDRESS,
 			title: $i18n.address.delete.title
 		}
@@ -156,6 +161,8 @@
 	let editContactNameStep = $state<EditContactNameStep>();
 
 	let isDeletingContact = $state<boolean>(false);
+
+	let qrCodeAddress = $state<string>();
 
 	let currentContactId: bigint | undefined = $state();
 	let currentAddressIndex: number | undefined = $state();
@@ -203,6 +210,7 @@
 
 		const addresses = [...currentContact.addresses, address];
 		currentAddressIndex = undefined;
+		qrCodeAddress = undefined;
 		const contact = {
 			...currentContact,
 			addresses
@@ -415,7 +423,9 @@
 			contact={currentContact}
 			address={nonNullish(currentAddressIndex)
 				? currentContact?.addresses[currentAddressIndex]
-				: undefined}
+				: nonNullish(qrCodeAddress)
+					? { address: qrCodeAddress }
+					: undefined}
 			onSaveAddress={handleSaveAddress}
 			onAddAddress={handleAddAddress}
 			isNewAddress={isNullish(currentAddressIndex)}
@@ -423,6 +433,9 @@
 				currentAddressIndex = undefined;
 				handleClose();
 			}}
+			onQRCodeScan={() =>
+				nonNullish(modal) &&
+				goToWizardStep({ modal, steps, stepName: AddressBookSteps.QR_CODE_SCAN })}
 			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
@@ -466,6 +479,13 @@
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.QR_CODE_SCAN}
+		<AddressBookQrCodeScan
+			onClose={() =>
+				nonNullish(modal) &&
+				goToWizardStep({ modal, steps, stepName: AddressBookSteps.EDIT_ADDRESS })}
+			bind:address={qrCodeAddress}
 		/>
 	{/if}
 </WizardModal>
