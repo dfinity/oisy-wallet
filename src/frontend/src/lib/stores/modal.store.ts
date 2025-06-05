@@ -129,87 +129,93 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
-	const setType = (type: Modal<T>['type'], cb?: () => void) => (id: symbol) => {
-		set({ type, id });
-		cb?.();
-	}
+	const setType =
+		({ type, cb }: { type: Modal<T>['type']; cb?: () => void }) =>
+		(id: symbol) => {
+			set({ type, id });
+			cb?.();
+		};
 
 	const setTypeWithData =
-		(type: Modal<T>['type'], cb?: () => void) =>
+		({ type, cb }: { type: Modal<T>['type']; cb?: () => void }) =>
 		<D extends T>({ id, data }: { id: symbol; data: D }) => {
 			set({ type, id, data });
 			cb?.();
-		}
+		};
 
 	return {
-		openEthReceive: setType('eth-receive'),
-		openIcpReceive: setType('icp-receive'),
-		openIcrcReceive: setType('icrc-receive'),
-		openCkBTCReceive: setType('ckbtc-receive'),
-		openCkETHReceive: setType('cketh-receive'),
-		openBtcReceive: setType('btc-receive'),
-		openSolReceive: setType('sol-receive'),
-		openReceive: setType('receive'),
-		openSend: setType('send'),
-		openBuy: setType('buy'),
-		openSwap: setType('swap'),
-		openConvertCkBTCToBTC: setType('convert-ckbtc-btc'),
-		openConvertBTCToCkBTC: setType('convert-btc-ckbtc'),
-		openConvertToTwinTokenCkEth: setType('convert-to-twin-token-cketh'),
-		openConvertToTwinTokenEth: setType('convert-to-twin-token-eth'),
-		openHowToConvertToTwinTokenEth: setType('how-to-convert-to-twin-token-eth'),
-		openWalletConnectAuth: setType('wallet-connect-auth'),
+		openEthReceive: setType({ type: 'eth-receive' }),
+		openIcpReceive: setType({ type: 'icp-receive' }),
+		openIcrcReceive: setType({ type: 'icrc-receive' }),
+		openCkBTCReceive: setType({ type: 'ckbtc-receive' }),
+		openCkETHReceive: setType({ type: 'cketh-receive' }),
+		openBtcReceive: setType({ type: 'btc-receive' }),
+		openSolReceive: setType({ type: 'sol-receive' }),
+		openReceive: setType({ type: 'receive' }),
+		openSend: setType({ type: 'send' }),
+		openBuy: setType({ type: 'buy' }),
+		openSwap: setType({ type: 'swap' }),
+		openConvertCkBTCToBTC: setType({ type: 'convert-ckbtc-btc' }),
+		openConvertBTCToCkBTC: setType({ type: 'convert-btc-ckbtc' }),
+		openConvertToTwinTokenCkEth: setType({ type: 'convert-to-twin-token-cketh' }),
+		openConvertToTwinTokenEth: setType({ type: 'convert-to-twin-token-eth' }),
+		openHowToConvertToTwinTokenEth: setType({ type: 'how-to-convert-to-twin-token-eth' }),
+		openWalletConnectAuth: setType({ type: 'wallet-connect-auth' }),
 		openWalletConnectSign: <(params: SetWithDataParams<WalletKitTypes.SessionRequest>) => void>(
-			setTypeWithData('wallet-connect-sign')
+			setTypeWithData({ type: 'wallet-connect-sign' })
 		),
 		openWalletConnectSend: <(params: SetWithDataParams<WalletKitTypes.SessionRequest>) => void>(
-			setTypeWithData('wallet-connect-send')
+			setTypeWithData({ type: 'wallet-connect-send' })
 		),
 		openEthTransaction: <
 			(params: SetWithDataParams<OpenTransactionParams<EthTransactionUi>>) => void
-		>setTypeWithData('eth-transaction'),
+		>setTypeWithData({ type: 'eth-transaction' }),
 		openIcTransaction: <
 			(params: SetWithDataParams<OpenTransactionParams<IcTransactionUi>>) => void
-		>setTypeWithData('ic-transaction'),
+		>setTypeWithData({ type: 'ic-transaction' }),
 		openBtcTransaction: <
 			(params: SetWithDataParams<OpenTransactionParams<BtcTransactionUi>>) => void
-		>setTypeWithData('btc-transaction'),
+		>setTypeWithData({ type: 'btc-transaction' }),
 		openSolTransaction: <
 			(params: SetWithDataParams<OpenTransactionParams<SolTransactionUi>>) => void
-		>setTypeWithData('sol-transaction'),
+		>setTypeWithData({ type: 'sol-transaction' }),
 		openManageTokens: <(params: SetWithOptionalDataParams<ManageTokensData>) => void>(
-			setTypeWithData('manage-tokens')
+			setTypeWithData({ type: 'manage-tokens' })
 		),
-		openHideToken: setType('hide-token'),
-		openIcHideToken: setType('ic-hide-token'),
-		openEthToken: setType('eth-token'),
-		openBtcToken: setType('btc-token'),
-		openIcToken: setType('ic-token'),
-		openSolToken: setType('sol-token'),
-		openReceiveBitcoin: setType('receive-bitcoin'),
-		openAboutWhyOisy: setType('about-why-oisy'),
-		openVipQrCode: <(params: SetWithDataParams<QrCodeType>) => void>setTypeWithData('vip-qr-code'),
-		openReferralCode: setType('referral-code'),
+		openHideToken: setType({ type: 'hide-token' }),
+		openIcHideToken: setType({ type: 'ic-hide-token' }),
+		openEthToken: setType({ type: 'eth-token' }),
+		openBtcToken: setType({ type: 'btc-token' }),
+		openIcToken: setType({ type: 'ic-token' }),
+		openSolToken: setType({ type: 'sol-token' }),
+		openReceiveBitcoin: setType({ type: 'receive-bitcoin' }),
+		openAboutWhyOisy: setType({ type: 'about-why-oisy' }),
+		openVipQrCode: <(params: SetWithDataParams<QrCodeType>) => void>(
+			setTypeWithData({ type: 'vip-qr-code' })
+		),
+		openReferralCode: setType({ type: 'referral-code' }),
 		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
-			setTypeWithData('address-book', () => {
-				addressBookStore.reset();
-			})
+			setTypeWithData({ type: 'address-book', cb: () => addressBookStore.reset() })
 		),
-		openReferralState: setType('referral-state'),
+		openReferralState: setType({ type: 'referral-state' }),
 		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
-			setTypeWithData('dapp-details')
+			setTypeWithData({ type: 'dapp-details' })
 		),
 		openVipRewardState: <(params: SetWithDataParams<VipRewardStateData>) => void>(
-			setTypeWithData('vip-reward-state')
+			setTypeWithData({ type: 'vip-reward-state' })
 		),
 		openRewardDetails: <(params: SetWithDataParams<RewardDescription>) => void>(
-			setTypeWithData('reward-details')
+			setTypeWithData({ type: 'reward-details' })
 		),
-		openRewardState: <(params: SetWithDataParams<boolean>) => void>setTypeWithData('reward-state'),
+		openRewardState: <(params: SetWithDataParams<boolean>) => void>(
+			setTypeWithData({ type: 'reward-state' })
+		),
 		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(
-			setTypeWithData('settings')
+			setTypeWithData({ type: 'settings' })
 		),
-		openAuthHelp: <(params: SetWithDataParams<boolean>) => void>setTypeWithData('auth-help'),
+		openAuthHelp: <(params: SetWithDataParams<boolean>) => void>(
+			setTypeWithData({ type: 'auth-help' })
+		),
 		close: () => set(null),
 		subscribe
 	};
