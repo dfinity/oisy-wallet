@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
+	import { selectedEvmNetwork } from '$evm/derived/network.derived';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { getExplorerUrl } from '$eth/utils/eth.utils';
-	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
-	import { selectedEvmNetwork } from '$evm/derived/network.derived';
-	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = notEmptyString($ethAddress)

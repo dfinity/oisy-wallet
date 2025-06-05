@@ -2,6 +2,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { OptionErc20Token } from '$eth/types/erc20';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import Token from '$lib/components/tokens/Token.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -12,7 +13,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
-	import { getExplorerUrl } from '$eth/utils/eth.utils';
 
 	let contractAddress: string | undefined;
 	$: contractAddress =
