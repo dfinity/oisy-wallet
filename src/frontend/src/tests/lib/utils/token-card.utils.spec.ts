@@ -27,7 +27,6 @@ describe('mapHeaderData', () => {
 			symbol: mockGroup.symbol,
 			decimals: mockToken.decimals,
 			icon: mockGroup.icon,
-			network: mockToken.network,
 			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
 			oisySymbol: { oisySymbol: mockGroup.symbol },
 			balance: bn1Bi,
@@ -46,7 +45,6 @@ describe('mapHeaderData', () => {
 			symbol: mockGroup.symbol,
 			decimals: mockToken.decimals,
 			icon: mockGroup.icon,
-			network: mockToken.network,
 			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
 			oisySymbol: { oisySymbol: mockGroup.symbol },
 			tokenCount: 2
