@@ -35,8 +35,9 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { token } from '$lib/stores/token.store';
-	import type { Network } from '$lib/types/network';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
+	import type { SendDestinationTab } from '$lib/types/send';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import {
@@ -53,10 +54,11 @@
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let destination = '';
-	export let targetNetwork: Network | undefined = undefined;
 	export let isTransactionsPage: boolean;
 
+	let destination = '';
+	let activeSendDestinationTab: SendDestinationTab = 'recentlyUsed';
+	let selectedContact: ContactUi | undefined = undefined;
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
@@ -81,8 +83,9 @@
 
 	const reset = () => {
 		destination = '';
+		activeSendDestinationTab = 'recentlyUsed';
+		selectedContact = undefined;
 		amount = undefined;
-		targetNetwork = undefined;
 
 		sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
@@ -188,6 +191,8 @@
 		{:else if currentStep?.name === WizardStepsSend.DESTINATION}
 			<SendDestinationWizardStep
 				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
 				formCancelAction={isTransactionsPage ? 'close' : 'back'}
 				on:icBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				on:icNext={modal.next}
@@ -199,14 +204,14 @@
 				expectedToken={$token}
 				bind:destination
 				bind:amount
-				decodeQrCode={onDecodeQrCode}
-				on:icQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				{onDecodeQrCode}
+				onIcQrCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
 			/>
 		{:else}
 			<SendWizard
 				{currentStep}
 				{destination}
-				bind:targetNetwork
+				{selectedContact}
 				bind:amount
 				bind:sendProgressStep
 				on:icBack={modal.back}

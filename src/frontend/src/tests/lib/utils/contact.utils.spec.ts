@@ -1,22 +1,26 @@
 import type { ContactUi } from '$lib/types/contact';
 import {
 	getContactForAddress,
+	isContactMatchingFilter,
+	mapAddressToContactAddressUi,
 	mapToBackendContact,
 	mapToFrontendContact,
 	selectColorForName
 } from '$lib/utils/contact.utils';
-import { mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
+import { mockBtcAddress, mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
 import {
 	getMockContacts,
+	getMockContactsUi,
 	mockBackendContactAddressBtc,
 	mockBackendContactAddressEth,
-	mockBackendContactAddressSol
+	mockBackendContactAddressSol,
+	mockContactBtcAddressUi
 } from '$tests/mocks/contacts.mock';
 import { mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
 import type { NonEmptyArray } from 'alchemy-sdk';
-import { describe } from 'vitest';
 
 describe('contact.utils', () => {
 	describe('selectColorForName', () => {
@@ -164,14 +168,92 @@ describe('contact.utils', () => {
 			expect(result).toBeUndefined();
 		});
 
-		it('should match address regardless of case (case-insensitive match)', () => {
+		it('should match address only case sensitive', () => {
 			const upperCasedAddress = mockEthAddress3.toUpperCase();
 			const result = getContactForAddress({
 				addressString: upperCasedAddress,
 				contactList: mockContacts
 			});
 
-			expect(result?.addresses?.[0]?.address).toEqual(mockEthAddress3);
+			expect(result?.addresses?.[0]?.address).not.toEqual(mockEthAddress3);
+		});
+	});
+
+	describe('mapAddressToContactAddressUi', () => {
+		it('should map BTC address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockBtcAddress)).toStrictEqual({
+				address: mockBtcAddress,
+				addressType: 'Btc'
+			});
+		});
+
+		it('should map ETH address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockEthAddress3)).toStrictEqual({
+				address: mockEthAddress3,
+				addressType: 'Eth'
+			});
+		});
+
+		it('should map SOL address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockSolAddress)).toStrictEqual({
+				address: mockSolAddress,
+				addressType: 'Sol'
+			});
+		});
+
+		it('should map IC address correctly', () => {
+			expect(mapAddressToContactAddressUi(mockPrincipalText)).toStrictEqual({
+				address: mockPrincipalText,
+				addressType: 'Icrcv2'
+			});
+		});
+	});
+
+	describe('isContactMatchingFilter', () => {
+		const [contact] = getMockContactsUi({
+			n: 1,
+			name: 'Johny',
+			addresses: [mockContactBtcAddressUi]
+		}) as unknown as ContactUi[];
+
+		it('should return true if contact name matches filter', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: 'Joh'
+				})
+			).toBeTruthy();
+		});
+
+		it('should return true if contact label matches filter', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: 'Bitcoin'
+				})
+			).toBeTruthy();
+		});
+
+		it('should return true if contact address matches filter', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: 'bc1qt0nkp9'
+				})
+			).toBeTruthy();
+		});
+
+		it('should return false if contact address does not match filter', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: 'Test1'
+				})
+			).toBeFalsy();
 		});
 	});
 });

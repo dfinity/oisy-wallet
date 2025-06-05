@@ -147,6 +147,32 @@ describe('sol-transactions.derived', () => {
 			});
 		});
 
+		it('should return known destinations with owner addresses if exists', () => {
+			const mockTransactions = transactions.map((tx) => ({
+				...tx,
+				data: {
+					...tx.data,
+					toOwner: 'ownerAddress',
+					fromOwner: 'fromOwnerAddress'
+				}
+			}));
+
+			solTransactionsStore.append({
+				tokenId: SOLANA_TOKEN_ID,
+				transactions: mockTransactions
+			});
+
+			const maxTimestamp = Math.max(...mockTransactions.map(({ data }) => Number(data.timestamp)));
+
+			expect(get(solKnownDestinations)).toEqual({
+				[mockTransactions[0].data.toOwner as string]: {
+					amounts: mockTransactions.map(({ data }) => ({ value: data.value, token: SOLANA_TOKEN })),
+					timestamp: maxTimestamp,
+					address: mockTransactions[0].data.toOwner
+				}
+			});
+		});
+
 		it('should return empty object if transactions store does not have data', () => {
 			expect(get(solKnownDestinations)).toEqual({});
 		});

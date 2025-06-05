@@ -91,6 +91,15 @@
 		const { id: networkId } = network;
 		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
 
+		// we need to set the tokenlist for the ModalTokenListContext manually when we change the enabled prop,
+		// because the exposed prop from the context is a derived and on update of the data the "enabled" gets reset
+		const tokensList = [...allTokensSorted];
+		const token = tokensList.find((t) => t.id === id);
+		if (nonNullish(token) && 'enabled' in token) {
+			token.enabled = !token.enabled;
+			setTokens(tokensList);
+		}
+
 		if (nonNullish(current)) {
 			modifiedTokens = { ...tokens };
 			return;
@@ -141,18 +150,27 @@
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
-				<span slot="title">{token.symbol}</span>
-				<span slot="subtitle">{token.name}</span>
+				{#snippet title()}
+					{nonNullish(token.oisySymbol) ? token.oisySymbol.oisySymbol : token.symbol}
+				{/snippet}
 
-				<span slot="logo" class="mr-2">
-					<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
-				</span>
+				{#snippet subtitle()}
+					{token.name}
+				{/snippet}
 
-				<span class="break-all" slot="description">
-					{token.network.name}
-				</span>
+				{#snippet logo()}
+					<span class="mr-2">
+						<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
+					</span>
+				{/snippet}
 
-				<svelte:fragment slot="action">
+				{#snippet description()}
+					<span class="break-all">
+						{token.network.name}
+					</span>
+				{/snippet}
+
+				{#snippet action()}
 					{#if icTokenIcrcCustomToken(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
 					{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
@@ -162,14 +180,14 @@
 					{:else if isSolanaToken(token)}
 						<SolManageTokenToggle />
 					{/if}
-				</svelte:fragment>
+				{/snippet}
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}
-			<Button colorStyle="secondary-light" on:click={() => dispatch('icAddToken')}
+			<Button colorStyle="secondary-light" onclick={() => dispatch('icAddToken')}
 				><IconPlus /> {$i18n.tokens.manage.text.import_token}</Button
 			>
-			<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} on:click={save}>
+			<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} onclick={save}>
 				{$i18n.core.text.save}
 			</Button>
 		{/snippet}

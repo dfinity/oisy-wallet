@@ -15,6 +15,8 @@
 		link?: boolean;
 		styleClass?: string;
 		width?: 'w-6' | 'w-8' | 'w-10';
+		height?: 'h-6' | 'h-8' | 'h-10';
+		transparent?: boolean;
 	}
 
 	let {
@@ -28,13 +30,17 @@
 		disabled = false,
 		link = true,
 		styleClass = '',
-		width = 'w-10'
+		width = 'w-10',
+		height = 'h-10',
+		transparent = false
 	}: Props = $props();
 </script>
 
 <button
-	class={`${colorStyle} icon flex h-10 flex-col text-center text-xs font-normal ${styleClass} ${width}`}
+	type="button"
+	class={`${colorStyle} icon flex flex-col text-center text-xs font-normal ${styleClass} ${width} ${height}`}
 	class:link
+	class:transparent
 	bind:this={button}
 	{onclick}
 	aria-label={ariaLabel}

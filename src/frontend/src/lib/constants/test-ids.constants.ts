@@ -188,15 +188,26 @@ export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
 export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
+export const ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT = 'address-book-address-address-input';
+export const ADDRESS_BOOK_ADDRESS_ALIAS_INPUT = 'address-book-address-alisas-input';
+export const ADDRESS_BOOK_QR_CODE_SCAN = 'address-book-qr-code-scan';
 export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-input';
+export const ADDRESS_EDIT_CANCEL_BUTTON = 'address-edit-cancel-button';
+export const ADDRESS_EDIT_SAVE_BUTTON = 'address-edit-save-button';
+export const ADDRESS_BOOK_FALLBACK_MESSAGE = 'address-book-fallback-message';
 
 export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button';
 export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';
 export const CONTACT_HEADER_EDIT_BUTTON = 'contact-header-edit-button';
 export const CONTACT_HEADER_EDITING_EDIT_BUTTON = 'contact-header-editing-edit-button';
+export const CONTACT_EDIT_ADD_ADDRESS_BUTTON = 'contact-edit-add-address-button';
+export const CONTACT_EDIT_DELETE_CONTACT_BUTTON = 'contact-edit-delete-contact-button';
 
+export const ADDRESS_LIST_ITEM_BUTTON = 'address-list-item-button';
 export const ADDRESS_LIST_ITEM_COPY_BUTTON = 'address-list-item-copy-button';
 export const ADDRESS_LIST_ITEM_INFO_BUTTON = 'address-list-item-info-button';
+export const ADDRESS_LIST_ITEM_EDIT_BUTTON = 'address-list-item-edit-button';
+export const ADDRESS_LIST_ITEM_DELETE_BUTTON = 'address-list-item-delete-button';
 
 export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
 
@@ -208,3 +219,10 @@ export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
 
 export const SEND_FEE_INFO = 'send-fee-info';
+
+export const AVATAR_WITH_BADGE_FALLBACK_IMAGE = 'avatar-with-badge-fallback-image';
+
+// Contact Card test IDs
+export const CONTACT_CARD = 'contact-card';
+export const CONTACT_CARD_BUTTON = 'contact-card-button';
+export const CONTACT_CARD_EXPAND_BUTTON = 'contact-card-expand-button';

@@ -38,7 +38,7 @@
 				type="button"
 				fullWidth
 				testId={HELP_AUTH_LOST_IDENTITY_BUTTON}
-				on:click={() => {
+				onclick={() => {
 					trackEvent({
 						name: TRACK_HELP_LOST_INTERNET_IDENTITY
 					});
@@ -54,7 +54,7 @@
 				type="button"
 				fullWidth
 				testId={HELP_AUTH_SECURITY_BUTTON}
-				on:click={() => {
+				onclick={() => {
 					trackEvent({
 						name: TRACK_HELP_CONCERNED_ABOUT_SECURITY
 					});
@@ -69,7 +69,7 @@
 				type="button"
 				fullWidth
 				testId={HELP_AUTH_GOT_CONFUSED_BUTTON}
-				on:click={() => {
+				onclick={() => {
 					trackEvent({
 						name: TRACK_HELP_GOT_CONFUSED
 					});
@@ -84,7 +84,7 @@
 				type="button"
 				fullWidth
 				testId={HELP_AUTH_OTHER_BUTTON}
-				on:click={() => {
+				onclick={() => {
 					trackEvent({
 						name: TRACK_HELP_OTHER
 					});

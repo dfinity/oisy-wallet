@@ -10,6 +10,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	$: enabledTokensWithoutTransaction = $enabledNetworkTokens
 		.filter((token) => $icTransactionsStore?.[token.id] === null)
@@ -27,8 +28,8 @@
 				curr
 			) => {
 				hasNoIndexCanister(curr)
-					? acc.enabledTokensWithoutCanister.push(`$${curr.symbol}`)
-					: acc.enabledTokensWithUnavailableCanister.push(`$${curr.symbol}`);
+					? acc.enabledTokensWithoutCanister.push(`$${getTokenDisplaySymbol(curr)}`)
+					: acc.enabledTokensWithUnavailableCanister.push(`$${getTokenDisplaySymbol(curr)}`);
 				return acc;
 			},
 			{

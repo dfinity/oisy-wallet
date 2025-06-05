@@ -8,8 +8,10 @@ import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkMetadata, IcCkToken, IcToken } from '$icp/types/ic-token';
+import { TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR } from '$lib/constants/analytics.contants';
 import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
 import { waitWalletReady } from '$lib/services/actions.services';
+import { trackEvent } from '$lib/services/analytics.services';
 import { busy } from '$lib/stores/busy.store';
 import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -175,9 +177,12 @@ const loadData: LoadData = async <T>({
 		onUpdateError: ({ error: err }) => {
 			store.reset(id);
 
-			toastsError({
-				msg: { text: get(i18n).init.error.minter_ckbtc_loading_info },
-				err
+			trackEvent({
+				name: TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR,
+				metadata: {
+					error: `${err}`
+				},
+				warning: `${get(i18n).init.error.minter_ckbtc_loading_info}, ${err}`
 			});
 		},
 		identity
