@@ -23,7 +23,8 @@ export const EURC_TOKEN: RequiredErc20Token = {
 	address: '0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckEURC',
-	groupData: EURC_TOKEN_GROUP
+	groupData: EURC_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true
 };
 
 export const SEPOLIA_EURC_SYMBOL = 'SepoliaEURC';
