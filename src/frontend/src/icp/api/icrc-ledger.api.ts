@@ -6,15 +6,15 @@ import type { CanisterApiFunctionParams, CanisterIdText } from '$lib/types/canis
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import {
-	IcrcLedgerCanister,
 	type IcrcAccount,
 	type IcrcBlockIndex,
+	IcrcLedgerCanister,
 	type IcrcSubaccount,
 	type IcrcTokenMetadataResponse,
 	type IcrcTokens
 } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
+import { assertNonNullish, type QueryParams, toNullable } from '@dfinity/utils';
 
 /**
  * Retrieves metadata for the ICRC token.
@@ -174,6 +174,17 @@ export const approve = async ({
 	});
 };
 
+/**
+ * Retrieves the allowance for a spender on behalf of an owner for ICRC tokens.
+ *
+ * @param {Object} params - The parameters for fetching the allowance.
+ * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
+ * @param {IcrcAccount} params.owner - The account owner.
+ * @param {IcrcAccount} params.spender - The account approved to spend on behalf of the owner.
+ * @returns {Promise<Allowance>} The allowance details including amount and expiration.
+ */
 export const allowance = async ({
 	certified = true,
 	identity,
