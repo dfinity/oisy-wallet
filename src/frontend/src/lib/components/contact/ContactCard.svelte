@@ -85,8 +85,8 @@
 			{:else if multipleAddresses}
 				<ButtonIcon
 					styleClass="text-primary hover:text-brand-subtle-10 hover:bg-brand-subtle-20 rounded-md"
-					width="w-6"
-					height="h-6"
+					width="w-8"
+					height="h-8"
 					onclick={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
