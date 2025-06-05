@@ -34,13 +34,13 @@
 		updateContact
 	} from '$lib/services/manage-contacts.service';
 	import { wrapCallWith } from '$lib/services/utils.services';
+	import { addressBookStore } from '$lib/stores/address-book.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import { addressBookStore } from '$lib/stores/address-book.store';
 
 	let loading = $state(false);
 
@@ -157,7 +157,7 @@
 	// Reset address book store on modal exit so we can start fresh the next time its opened
 	onDestroy(() => {
 		addressBookStore.reset();
-	})
+	});
 
 	let modal: WizardModal | undefined = $state();
 	const close = () => modalStore.close();
