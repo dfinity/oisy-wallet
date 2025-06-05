@@ -20,7 +20,7 @@
 	const isValid = $derived(notEmptyString(trimmedName) && !isNameTooLong);
 
 	const handleKeydown = (event: KeyboardEvent): void => {
-		if (event.key === 'Enter') {
+		if (event.key === 'Enter' && isValid) {
 			event.preventDefault();
 			onSubmit();
 		}
