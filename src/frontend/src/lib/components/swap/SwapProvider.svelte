@@ -93,7 +93,7 @@
 			{#if displayURL}
 				<ModalValue>
 					{#snippet label()}
-						Website
+						{$i18n.swap.text.swap_provider_website}
 					{/snippet}
 
 					{#snippet mainValue()}
