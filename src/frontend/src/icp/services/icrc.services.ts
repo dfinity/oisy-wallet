@@ -17,7 +17,7 @@ import {
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
 import { getIdbIcTokens, setIdbIcTokens } from '$lib/api/idb-tokens.api';
-import { TRACK_COUNT_IC_LOADING_INDEX_CANISTER_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
@@ -65,7 +65,7 @@ export const loadCustomTokens = ({
 			icrcCustomTokensStore.resetAll();
 
 			trackEvent({
-				name: TRACK_COUNT_IC_LOADING_INDEX_CANISTER_ERROR,
+				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
 				metadata: {
 					error: replaceIcErrorFields(err) ?? `${err}`
 				}
@@ -93,7 +93,7 @@ const loadDefaultIcrc = ({
 			icrcDefaultTokensStore.reset(data.ledgerCanisterId);
 
 			trackEvent({
-				name: TRACK_COUNT_IC_LOADING_INDEX_CANISTER_ERROR,
+				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
 				metadata: {
 					error: replaceIcErrorFields(err) ?? `${err}`
 				}

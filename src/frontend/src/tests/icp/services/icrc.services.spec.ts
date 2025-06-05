@@ -7,7 +7,7 @@ import {
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { BackendCanister } from '$lib/canisters/backend.canister';
-import { TRACK_COUNT_IC_LOADING_INDEX_CANISTER_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as exchangeServices from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -321,7 +321,7 @@ describe('icrc.services', () => {
 
 				expect(trackEvent).toHaveBeenCalledOnce();
 				expect(trackEvent).toHaveBeenNthCalledWith(1, {
-					name: TRACK_COUNT_IC_LOADING_INDEX_CANISTER_ERROR,
+					name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
 					metadata: {
 						error: err.message
 					}
