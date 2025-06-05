@@ -4,6 +4,7 @@ import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
+import { addressBookStore } from '$lib/stores/address-book.store';
 import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
@@ -128,12 +129,17 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
-	const setType = (type: Modal<T>['type']) => (id: symbol) => set({ type, id });
+	const setType = (type: Modal<T>['type'], cb?: () => void) => (id: symbol) => {
+		set({ type, id });
+		cb?.();
+	}
 
 	const setTypeWithData =
-		(type: Modal<T>['type']) =>
-		<D extends T>({ id, data }: { id: symbol; data: D }) =>
+		(type: Modal<T>['type'], cb?: () => void) =>
+		<D extends T>({ id, data }: { id: symbol; data: D }) => {
 			set({ type, id, data });
+			cb?.();
+		}
 
 	return {
 		openEthReceive: setType('eth-receive'),
@@ -185,7 +191,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openVipQrCode: <(params: SetWithDataParams<QrCodeType>) => void>setTypeWithData('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
 		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
-			setTypeWithData('address-book')
+			setTypeWithData('address-book', () => {
+				addressBookStore.reset();
+			})
 		),
 		openReferralState: setType('referral-state'),
 		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
