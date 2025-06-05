@@ -159,7 +159,7 @@
 		<div class="my-5 w-full justify-items-center text-center">
 			<Button
 				paddingSmall
-				on:click={gotoActivity}
+				onclick={gotoActivity}
 				styleClass="font-semibold bg-transparent text-brand-primary-alt"
 				testId={REWARDS_EARNINGS_ACTIVITY_BUTTON}
 			>

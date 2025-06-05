@@ -31,9 +31,12 @@
 
 {#if nonNullish(formattedMinimum) && nonNullish($destinationToken?.symbol)}
 	<ModalValue>
-		<svelte:fragment slot="label">{$i18n.swap.text.expected_minimum}</svelte:fragment>
-		<svelte:fragment slot="main-value"
-			>{formattedMinimum} {$destinationToken.symbol}</svelte:fragment
-		>
+		{#snippet label()}
+			{$i18n.swap.text.expected_minimum}
+		{/snippet}
+
+		{#snippet mainValue()}
+			{formattedMinimum} {$destinationToken.symbol}
+		{/snippet}
 	</ModalValue>
 {/if}
