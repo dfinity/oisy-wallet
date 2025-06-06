@@ -93,7 +93,7 @@ jobs:
   e2e:
     runs-on: ${{ matrix.os }}
     permissions:
-      contents: read
+      contents: write
     needs: ['oisy-backend-wasm', 'check-e2e-changes', 'define-matrix']
     strategy:
       matrix:
