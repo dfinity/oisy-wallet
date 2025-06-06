@@ -351,7 +351,6 @@ jobs:
           VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
           VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}
 
-
       - name: Deploy Frontend to Environment
         run: |
           if [ "$deploy_frontend" == "true" ] ; then
