@@ -9,15 +9,15 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { token } from '$lib/stores/token.store';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
+	import { pageToken } from '$lib/derived/page-token.derived';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl =
-		$tokenStandard === 'erc20' && nonNullish($token)
-			? `${getExplorerUrl({ token: $token })}/token/${($token as Erc20Token).address}`
+		$tokenStandard === 'erc20' && nonNullish($pageToken)
+			? `${getExplorerUrl({ token: $pageToken })}/token/${($pageToken as Erc20Token).address}`
 			: notEmptyString($ethAddress)
-				? `${getExplorerUrl({ token: $token })}/address/${$ethAddress}`
+				? `${getExplorerUrl({ token: $pageToken })}/address/${$ethAddress}`
 				: undefined;
 </script>
 
