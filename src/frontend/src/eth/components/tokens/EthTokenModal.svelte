@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
 	import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -29,7 +29,7 @@
 
 				<ExternalLink
 					iconSize="18"
-					href={`${$explorerUrlStore}/address/${contractAddress}`}
+					href={`${getExplorerUrl({ token: $pageToken })}/address/${contractAddress}`}
 					ariaLabel={$i18n.tokens.alt.open_contract_address_block_explorer}
 					inline
 					color="blue"
