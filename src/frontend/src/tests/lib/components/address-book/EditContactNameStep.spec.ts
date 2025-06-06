@@ -142,4 +142,23 @@ describe('EditContactNameStep', () => {
 
 		expect(component.title).toBe(en.contact.form.add_new_contact);
 	});
+
+	it('should trim leading spaces before calling onAddContact', async () => {
+		const onAddContact = vi.fn();
+		const onSaveContact = vi.fn();
+		const onClose = vi.fn();
+
+		const { getByTestId } = render(EditContactNameStep, {
+			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
+		});
+
+		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
+		await fireEvent.input(nameInput, { target: { value: '   Test Name' } });
+
+		const saveButton = getByTestId(ADDRESS_BOOK_SAVE_BUTTON);
+		await fireEvent.click(saveButton);
+
+		expect(onAddContact).toHaveBeenCalledTimes(1);
+		expect(onAddContact).toHaveBeenCalledWith({ name: 'Test Name' }); // No leading space
+	});
 });
