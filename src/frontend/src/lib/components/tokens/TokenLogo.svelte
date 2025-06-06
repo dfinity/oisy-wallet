@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import type { Component } from 'svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -43,7 +44,7 @@
 		>
 			{badge.count}
 		</span>
-	{:else if badge?.type === 'network'}
+	{:else if badge?.type === 'network' && nonNullish(network)}
 		<div
 			class="absolute"
 			class:scale-60={logoSize === 'xs'}
