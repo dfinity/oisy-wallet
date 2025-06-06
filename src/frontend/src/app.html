@@ -20,13 +20,19 @@
 			} catch (error) {
 				console.error('Error initializing theme', error);
 			}
+
+			setTimeout(() => {
+				const currentTheme =
+					localStorage.nnsTheme === null ||
+					localStorage.nnsTheme === undefined ||
+					localStorage.nnsTheme === ''
+						? undefined
+						: JSON.parse(localStorage.nnsTheme);
+				document.getElementsByTagName("header")[0].children[0].innerHTML = "DEBUG: dark prefered=" + window.matchMedia('(prefers-color-scheme: dark)').matches + " - currentTheme=" + currentTheme;
+			}, 5000)
 		</script>
 
 		<style>
-				html {
-            color-scheme: only light;
-        }
-
 			:root {
 				&, html,
 				#app-background-container {
