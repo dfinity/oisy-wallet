@@ -38,7 +38,8 @@ const TokenOisyNameSchema = z.object({
 
 export const TokenAppearanceSchema = z.object({
 	oisySymbol: TokenOisySymbolSchema.optional(),
-	oisyName: TokenOisyNameSchema.optional()
+	oisyName: TokenOisyNameSchema.optional(),
+	alwaysShowInTokenGroup: z.boolean().optional()
 });
 
 // TODO: use Zod to validate the OnramperId
