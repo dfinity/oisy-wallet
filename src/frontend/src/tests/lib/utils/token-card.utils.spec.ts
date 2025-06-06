@@ -15,7 +15,6 @@ describe('mapHeaderData', () => {
 	const tokenGroup: TokenUiGroup = {
 		id: mockGroup.id,
 		decimals: mockToken.decimals,
-		nativeToken: mockToken,
 		groupData: mockGroup,
 		tokens: [mockToken, ICP_TOKEN],
 		balance: bn1Bi,
@@ -28,7 +27,6 @@ describe('mapHeaderData', () => {
 			symbol: mockGroup.symbol,
 			decimals: mockToken.decimals,
 			icon: mockGroup.icon,
-			network: mockToken.network,
 			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
 			oisySymbol: { oisySymbol: mockGroup.symbol },
 			balance: bn1Bi,
@@ -47,7 +45,6 @@ describe('mapHeaderData', () => {
 			symbol: mockGroup.symbol,
 			decimals: mockToken.decimals,
 			icon: mockGroup.icon,
-			network: mockToken.network,
 			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
 			oisySymbol: { oisySymbol: mockGroup.symbol },
 			tokenCount: 2

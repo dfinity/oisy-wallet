@@ -16,8 +16,6 @@ export type TokenGroup = z.infer<typeof TokenGroupPropSchema>;
 export type TokenUiGroup = {
 	id: TokenGroupId;
 	decimals: number;
-	// TODO: remove deprecated field when groupData is completely integrated
-	nativeToken: TokenUi;
 	groupData: TokenGroupData;
 	tokens: NonEmptyArray<TokenUi>;
 } & TokenFinancialData;

@@ -17,7 +17,6 @@ const token3: TokenUi = SOLANA_TOKEN;
 const tokenGroup: TokenUiGroup = {
 	id: ETH_TOKEN_GROUP_ID,
 	decimals: token1.decimals,
-	nativeToken: token1,
 	groupData: ETH_TOKEN_GROUP,
 	tokens: [token2, token3]
 };

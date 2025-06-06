@@ -8,8 +8,6 @@ import type { TokenUiGroup } from '$lib/types/token-group';
  */
 export const mapHeaderData = ({
 	groupData: { name, symbol, icon },
-	// TODO: check if we still need network prop
-	nativeToken: { network },
 	tokens,
 	decimals,
 	balance,
@@ -19,7 +17,6 @@ export const mapHeaderData = ({
 	symbol,
 	decimals,
 	icon,
-	network,
 	oisyName: { oisyName: tokens.map((token) => token.symbol).join(', ') },
 	oisySymbol: { oisySymbol: symbol },
 	balance,
