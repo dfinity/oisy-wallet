@@ -5,7 +5,6 @@
 	import { selectedEvmNetwork } from '$evm/derived/network.derived';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -13,9 +12,7 @@
 	let explorerUrl: string | undefined;
 	$: explorerUrl = notEmptyString($ethAddress)
 		? `${getExplorerUrl({
-				network: nonNullish($selectedEvmNetwork)
-					? $selectedEvmNetwork
-					: ($selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK)
+				network: nonNullish($selectedEvmNetwork) ? $selectedEvmNetwork : $selectedEthereumNetwork
 			})}/address/${$ethAddress}`
 		: undefined;
 </script>

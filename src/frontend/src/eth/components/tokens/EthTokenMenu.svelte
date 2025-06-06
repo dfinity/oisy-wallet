@@ -13,12 +13,13 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 
 	let explorerUrl: string | undefined;
-	$: explorerUrl =
-		$tokenStandard === 'erc20' && nonNullish($pageToken)
+	$: explorerUrl = nonNullish($pageToken)
+		? $tokenStandard === 'erc20'
 			? `${getExplorerUrl({ token: $pageToken })}/token/${($pageToken as Erc20Token).address}`
 			: notEmptyString($ethAddress)
 				? `${getExplorerUrl({ token: $pageToken })}/address/${$ethAddress}`
-				: undefined;
+				: undefined
+		: undefined;
 </script>
 
 <TokenMenu testId={TOKEN_MENU_ETH}>
