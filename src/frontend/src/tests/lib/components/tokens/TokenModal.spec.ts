@@ -1,16 +1,19 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import TokenModal from '$lib/components/tokens/TokenModal.svelte';
+import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
 describe('TokenModal', () => {
 	it('renders all values correctly for ICP token', () => {
-		const { getByText, getAllByText } = render(TokenModal, {
+		const { getByText, getAllByText, container } = render(TokenModal, {
 			props: {
 				token: ICP_TOKEN
 			}
 		});
+
+		expect(container).toHaveTextContent(getTokenDisplaySymbol(ICP_TOKEN));
 
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
 
@@ -27,11 +30,13 @@ describe('TokenModal', () => {
 	});
 
 	it('renders all values correctly for ICRC token', () => {
-		const { getByText } = render(TokenModal, {
+		const { getByText, container } = render(TokenModal, {
 			props: {
 				token: mockValidIcrcToken
 			}
 		});
+
+		expect(container).toHaveTextContent(getTokenDisplaySymbol(mockValidIcrcToken));
 
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
 
