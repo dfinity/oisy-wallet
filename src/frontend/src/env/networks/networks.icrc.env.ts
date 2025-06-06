@@ -43,6 +43,11 @@ import type { NetworkEnvironment } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { nonNullish } from '@dfinity/utils';
 
+export const CYCLES_LEDGER_CANISTER_ID =
+	(LOCAL
+		? (import.meta.env.LOCAL_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText)
+		: (import.meta.env.VITE_IC_ICP_LEDGER_CANISTER_ID as OptionCanisterIdText)) ?? '';
+
 export const IC_CYCLES_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
 	'um5iw-rqaaa-aaaaq-qaaba-cai';

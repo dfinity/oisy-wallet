@@ -1,8 +1,10 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { POW_FEATURE_ENABLED } from '$env/pow.env';
-import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { allowance } from '$icp/api/icrc-ledger.api';
+import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { allowSigning } from '$lib/api/backend.api';
 import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import { POW_MIN_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
@@ -44,19 +46,20 @@ export const hasRequiredCycles = async (): Promise<boolean> => {
 		assertNonNullish(identity);
 		assertNonNullish(SIGNER_CANISTER_ID);
 
-		const { test } = await allowance({
+		const allowanceResult = await allowance({
 			identity,
 			certified: false,
+			ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
 			owner: {
 				owner: BACKEND_CANISTER_PRINCIPAL
 			},
 			spender: {
 				owner: Principal.fromText(SIGNER_CANISTER_ID),
-				subaccount: getAccountIdentifier(identity.getPrincipal()).toAccountIdentifierHash().hash
+				subaccount: getIcrcSubaccount(identity.getPrincipal()) // Use ICRC subaccount instead of ICP account identifier
 			}
 		});
 
-		if (allowance >= POW_MIN_CYCLES_THRESHOLD) {
+		if (allowanceResult.allowance >= POW_MIN_CYCLES_THRESHOLD) {
 			// The user has enough cycles to continue
 			return true;
 		}
