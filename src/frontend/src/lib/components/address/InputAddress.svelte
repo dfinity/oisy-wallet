@@ -67,7 +67,7 @@
 {/snippet}
 
 <div
-	style={`--no-zoom-input-font-size: 16px; --input-custom-border-color: ${borderColor}; --input-padding-inner-end: 100px; ${disabled ? '--input-background: var(--color-background-disabled);' : ''}`}
+	style={`--input-custom-border-color: ${borderColor}; --input-padding-inner-end: 100px; ${disabled ? '--input-background: var(--color-background-disabled);' : ''}`}
 >
 	<Input {disabled} inputType="text" bind:value innerEnd={qrButton} {...props}></Input>
 

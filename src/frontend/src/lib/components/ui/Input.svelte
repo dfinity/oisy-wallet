@@ -28,7 +28,7 @@
 
 <div
 	style={`--input-padding-inner-end: calc(var(--padding-2x) + ${endWidth}px)`}
-	class="oisy-input"
+	class="base-input"
 >
 	<GixInput {...props} bind:value on:nnsInput>
 		<svelte:fragment slot="inner-end">
@@ -51,7 +51,7 @@
 </div>
 
 <style lang="scss">
-	:global(div.oisy-input input) {
-		font-size: var(--no-zoom-input-font-size);
+	:global(div.base-input input) {
+		font-size: var(--input-font-size);
 	}
 </style>
