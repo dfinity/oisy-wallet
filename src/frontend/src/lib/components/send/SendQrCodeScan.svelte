@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { QRCodeReader } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -10,20 +10,29 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionToken } from '$lib/types/token';
 
-	export let expectedToken: OptionToken;
-	export let destination: string | undefined;
-	export let amount: OptionAmount;
-	export let decodeQrCode: ({
-		status,
-		code,
-		expectedToken
-	}: {
-		status: QrStatus;
-		code?: string;
+	interface Props {
 		expectedToken: OptionToken;
-	}) => QrResponse;
+		destination: string | undefined;
+		amount: OptionAmount;
+		onDecodeQrCode: ({
+			status,
+			code,
+			expectedToken
+		}: {
+			status: QrStatus;
+			code?: string;
+			expectedToken: OptionToken;
+		}) => QrResponse;
+		onIcQrCodeBack: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		expectedToken,
+		destination = $bindable(),
+		amount = $bindable(),
+		onDecodeQrCode,
+		onIcQrCodeBack
+	}: Props = $props();
 
 	let resolveQrCodePromise:
 		| (({ status, code }: { status: QrStatus; code?: string }) => void)
@@ -40,11 +49,11 @@
 
 		const { status, code } = result;
 
-		const qrResponse = decodeQrCode({ status, code, expectedToken });
+		const qrResponse = onDecodeQrCode({ status, code, expectedToken });
 
 		if (qrResponse.status === 'token_incompatible') {
 			toastsError({ msg: { text: $i18n.send.error.incompatible_token } });
-			back();
+			onIcQrCodeBack();
 			return;
 		}
 
@@ -56,7 +65,7 @@
 			({ amount } = qrResponse);
 		}
 
-		back();
+		onIcQrCodeBack();
 	};
 
 	const onQRCode = ({ detail: code }: CustomEvent<string>) => {
@@ -68,10 +77,6 @@
 		resolveQrCodePromise?.({ status: 'cancelled' });
 		resolveQrCodePromise = undefined;
 	};
-
-	const back = () => {
-		dispatch('icQRCodeBack');
-	};
 </script>
 
 <div class="stretch qr-code-wrapper md:min-h-[300px]">
@@ -79,7 +84,7 @@
 </div>
 
 <ButtonGroup>
-	<ButtonBack onclick={back} />
+	<ButtonBack onclick={onIcQrCodeBack} />
 </ButtonGroup>
 
 <style lang="scss">

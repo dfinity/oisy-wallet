@@ -39,7 +39,9 @@
 		if (!form?.isValid) {
 			return;
 		}
-
+		if (nonNullish(editingContact.name)) {
+			editingContact.name = editingContact.name.trim();
+		}
 		if (isNewContact && nonNullish(editingContact.name)) {
 			onAddContact({ name: editingContact.name });
 		} else {
@@ -68,7 +70,7 @@
 		></ButtonCancel>
 		<Button
 			colorStyle="primary"
-			on:click={handleSave}
+			onclick={handleSave}
 			disabled={!form?.isValid}
 			loading={disabled}
 			testId={ADDRESS_BOOK_SAVE_BUTTON}
