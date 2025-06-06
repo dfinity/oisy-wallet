@@ -28,8 +28,8 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Remove unused files
-        run: ./scripts/check.unused.sh --remove-files
+      - name: Remove unused Svelte files
+        run: ./scripts/check.unused.svelte.sh --remove-files
         continue-on-error: true
 
       - name: Stage Changes
