@@ -301,7 +301,7 @@
 		{:else if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
 			{replacePlaceholders($i18n.contact.delete.title, { $contact: currentContact.name })}
 		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
-			{editContactNameStep.title}
+			{editContactNameStep.getTitle()}
 		{:else}
 			{currentStep?.title}
 		{/if}
