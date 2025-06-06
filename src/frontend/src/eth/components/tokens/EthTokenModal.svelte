@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { OptionErc20Token } from '$eth/types/erc20';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
 	import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -8,7 +9,6 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { getExplorerUrl } from '$eth/utils/eth.utils';
 
 	let contractAddress: string | undefined;
 	$: contractAddress =
