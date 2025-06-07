@@ -4,7 +4,6 @@ import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-import type { EthereumNetwork } from '$eth/types/network';
 import { enabledEvmNetworksIds } from '$evm/derived/networks.derived';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
@@ -48,8 +47,7 @@ const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
 		$erc20DefaultTokens.map(({ address, network, ...rest }) => {
 			const userToken = $erc20UserTokens.find(
 				({ address: contractAddress, network: contractNetwork }) =>
-					contractAddress === address &&
-					(network as EthereumNetwork).chainId === (contractNetwork as EthereumNetwork).chainId
+					contractAddress === address && network.chainId === contractNetwork.chainId
 			);
 
 			return mapDefaultTokenToToggleable({
@@ -85,7 +83,7 @@ const erc20UserTokensToggleable: Readable<Erc20UserToken[]> = derived(
 					({ address: defaultAddress, network: defaultNetwork }) =>
 						mapAddressStartsWith0x(defaultAddress).toLowerCase() ===
 							mapAddressStartsWith0x(address).toLowerCase() &&
-						(defaultNetwork as EthereumNetwork).chainId === (network as EthereumNetwork).chainId
+						defaultNetwork.chainId === network.chainId
 				)
 			)
 		)

@@ -45,7 +45,7 @@
 			$erc20Tokens?.find(
 				({ address, network: tokenNetwork }) =>
 					address.toLowerCase() === contractAddress?.toLowerCase() &&
-					(tokenNetwork as EthereumNetwork).chainId === (network as EthereumNetwork).chainId
+					tokenNetwork.chainId === (network as EthereumNetwork).chainId
 			) !== undefined
 		) {
 			toastsError({
@@ -74,7 +74,7 @@
 					({ symbol, name, network: tokenNetwork }) =>
 						(symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
 							name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')) &&
-						(tokenNetwork as EthereumNetwork).chainId === (network as EthereumNetwork).chainId
+						tokenNetwork.chainId === (network as EthereumNetwork).chainId
 				) !== undefined
 			) {
 				toastsError({
