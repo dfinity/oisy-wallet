@@ -1,5 +1,4 @@
 import type { UserData } from '$declarations/rewards/rewards.did';
-import * as addressBookEnv from '$env/address-book.env';
 import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
@@ -99,18 +98,9 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemGoldButtonSelector, shouldExist: false });
 	});
 
-	it('renders the address book button when ADDRESS_BOOK_ENABLED is true', async () => {
-		vi.spyOn(addressBookEnv, 'ADDRESS_BOOK_ENABLED', 'get').mockReturnValue(true);
-
+	it('renders the address book button in the menu', async () => {
 		await openMenu();
 		await waitForElement({ selector: menuItemAddressBookSelector });
-	});
-
-	it('does not render the address book button when ADDRESS_BOOK_ENABLED is false', async () => {
-		vi.spyOn(addressBookEnv, 'ADDRESS_BOOK_ENABLED', 'get').mockReturnValue(false);
-
-		await openMenu();
-		await waitForElement({ selector: menuItemAddressBookSelector, shouldExist: false });
 	});
 
 	it('always renders the referral button', async () => {
