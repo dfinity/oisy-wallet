@@ -51,6 +51,7 @@
 
 	let isVip = $state(false);
 	let isGold = $state(false);
+
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
 			({ isVip, isGold } = await getUserRoles({ identity: $authIdentity }));
@@ -163,7 +164,7 @@
 		<AboutWhyOisy
 			asMenuItem
 			asMenuItemCondensed
-			on:icOpenAboutModal={hidePopover}
+			onIcOpenAboutModal={hidePopover}
 			trackEventSource={USER_MENU_ROUTE}
 		/>
 
