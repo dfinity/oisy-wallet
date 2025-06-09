@@ -34,14 +34,9 @@
 	let editingContact = $state(contact ? { ...contact } : {});
 
 	let form: ContactForm | undefined = $state();
-	const title = $derived(
-		notEmptyString(editingContact.name?.trim())
-			? editingContact.name
-			: $i18n.contact.form.add_new_contact
-	);
 
 	const handleSave = () => {
-		if (!form?.isValid()) {
+		if (!form?.isValid) {
 			return;
 		}
 		if (nonNullish(editingContact.name)) {
@@ -53,13 +48,18 @@
 			onSaveContact(editingContact as ContactUi);
 		}
 	};
-	export function getTitle() {
-		return title;
-	}
+
+	let title = $derived(
+		notEmptyString(editingContact?.name?.trim?.())
+			? editingContact?.name
+			: $i18n.contact.form.add_new_contact
+	);
+
+	export { title };
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-6 items-center">
-	<Avatar name={editingContact.name} variant="xl"></Avatar>
+	<Avatar name={editingContact?.name} variant="xl"></Avatar>
 	<ContactForm bind:contact={editingContact} bind:this={form} {disabled} onSubmit={handleSave}
 	></ContactForm>
 
@@ -71,7 +71,7 @@
 		<Button
 			colorStyle="primary"
 			onclick={handleSave}
-			disabled={!form?.isValid()}
+			disabled={!form?.isValid}
 			loading={disabled}
 			testId={ADDRESS_BOOK_SAVE_BUTTON}
 		>
