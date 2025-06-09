@@ -8,6 +8,7 @@ describe('ContactForm', () => {
 	it('should render the contact form with name field', () => {
 		const { getByTestId, getByText } = render(ContactForm, { props: { contact: {} } });
 
+		// Check that the name field is rendered
 		expect(getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT)).toBeInTheDocument();
 		expect(getByText(en.contact.fields.name)).toBeInTheDocument();
 	});
@@ -16,6 +17,7 @@ describe('ContactForm', () => {
 		const contact: Partial<ContactUi> = {};
 		const { getByTestId, queryByText } = render(ContactForm, { props: { contact } });
 
+		// Enter a name
 		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
 		await fireEvent.input(nameInput, { target: { value: 'Test Contact' } });
 
@@ -81,14 +83,17 @@ describe('ContactForm', () => {
 		const longName = 'A'.repeat(101);
 		const shortName = 'Valid';
 
+		// Trigger error
 		fireEvent.input(nameInput, { target: { value: longName } });
 
 		expect(
 			getByText(en.contact.error.name_too_long.replace('$maxCharacters', '100'))
 		).toBeInTheDocument();
 
+		// Correct name
 		await fireEvent.input(nameInput, { target: { value: shortName } });
 
+		// Wait for error message to be removed after input becomes valid
 		await waitFor(() =>
 			expect(
 				queryByText(en.contact.error.name_too_long.replace('$maxCharacters', '100'))

@@ -127,20 +127,19 @@ describe('EditContactNameStep', () => {
 			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
 		});
 
-		// Initially, the title should be the default
-		expect(component.title).toBe(en.contact.form.add_new_contact);
+		// Check initial title via getTitle()
+		expect(component.getTitle()).toBe(en.contact.form.add_new_contact);
 
 		// Enter a name
 		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
 		await fireEvent.input(nameInput, { target: { value: 'Test Contact' } });
 
-		// Check that the title has been updated
-		expect(component.title).toBe('Test Contact');
+		expect(component.getTitle()).toBe('Test Contact');
 
-		// Empty name should reset to default title
-		await fireEvent.input(nameInput, { target: { value: '  ' } });
+		// Clear the name to trigger fallback
+		await fireEvent.input(nameInput, { target: { value: '   ' } });
 
-		expect(component.title).toBe(en.contact.form.add_new_contact);
+		expect(component.getTitle()).toBe(en.contact.form.add_new_contact);
 	});
 
 	it('should trim leading spaces before calling onAddContact', async () => {
