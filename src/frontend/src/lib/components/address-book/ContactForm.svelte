@@ -20,7 +20,9 @@
 
 	const assertValid = (): boolean => notEmptyString(trimmedName) && !isNameTooLong;
 
-	const isValid = $derived(assertValid());
+	export function isValid() {
+		return assertValid();
+	}
 
 	const handleKeydown = (event: KeyboardEvent): void => {
 		if (event.key === 'Enter' && assertValid()) {
@@ -28,8 +30,6 @@
 			onSubmit();
 		}
 	};
-
-	export { isValid };
 </script>
 
 <svelte:window on:keydown={handleKeydown} />

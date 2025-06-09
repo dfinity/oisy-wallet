@@ -1,277 +1,209 @@
-import EditAddressStep from '$lib/components/address-book/EditAddressStep.svelte';
+import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
 import {
-	ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT,
-	ADDRESS_BOOK_ADDRESS_ALIAS_INPUT,
-	ADDRESS_BOOK_CANCEL_BUTTON,
-	ADDRESS_BOOK_SAVE_BUTTON
+	ADDRESS_LIST_ITEM_DELETE_BUTTON,
+	ADDRESS_LIST_ITEM_EDIT_BUTTON,
+	CONTACT_EDIT_ADD_ADDRESS_BUTTON,
+	CONTACT_EDIT_DELETE_CONTACT_BUTTON,
+	CONTACT_HEADER_EDITING_EDIT_BUTTON,
+	CONTACT_SHOW_CLOSE_BUTTON
 } from '$lib/constants/test-ids.constants';
-import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+import type { ContactUi } from '$lib/types/contact';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
-import { fireEvent, render, screen } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import { vi } from 'vitest';
 
-describe('EditAddressStep', () => {
+describe('EditContactStep', () => {
 	const mockContact: ContactUi = {
 		id: 1n,
 		name: 'Test Contact',
-		addresses: [],
+		addresses: [
+			{
+				address: mockEthAddress,
+				label: 'My ETH Address',
+				addressType: 'Eth'
+			},
+			{
+				address: mockBtcAddress,
+				label: 'My BTC Address',
+				addressType: 'Btc'
+			}
+		],
 		updateTimestampNs: BigInt(Date.now())
 	};
 
-	const onQRCodeScan = vi.fn(); // ✅ NEW SHARED MOCK
+	const mockClose = vi.fn();
+	const mockEdit = vi.fn();
+	const mockEditAddress = vi.fn();
+	const mockAddAddress = vi.fn();
+	const mockDeleteContact = vi.fn();
+	const mockDeleteAddress = vi.fn();
 
-	it('should render the edit address step with form and buttons', () => {
-		const onSaveAddress = vi.fn();
-		const onAddAddress = vi.fn();
-		const onClose = vi.fn();
-
-		const { getByTestId } = render(EditAddressStep, {
-			props: {
-				contact: mockContact,
-				onSaveAddress,
-				onAddAddress,
-				onQRCodeScan,
-				onClose,
-				isNewAddress: true
-			}
-		});
-
-		expect(getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT)).toBeInTheDocument();
-		expect(getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT)).toBeInTheDocument();
-		expect(getByTestId(ADDRESS_BOOK_SAVE_BUTTON)).toBeInTheDocument();
-		expect(getByTestId(ADDRESS_BOOK_CANCEL_BUTTON)).toBeInTheDocument();
-		expect(getByTestId(ADDRESS_BOOK_SAVE_BUTTON)).toHaveTextContent(en.core.text.save);
+	beforeEach(() => {
+		vi.clearAllMocks();
 	});
 
-	it('should display the contact name', () => {
-		const onSaveAddress = vi.fn();
-		const onAddAddress = vi.fn();
-		const onClose = vi.fn();
-
-		render(EditAddressStep, {
+	it('should render the contact name and addresses', () => {
+		const { getByText } = render(EditContactStep, {
 			props: {
 				contact: mockContact,
-				onSaveAddress,
-				onAddAddress,
-				onQRCodeScan,
-				onClose,
-				isNewAddress: true
+				onClose: mockClose,
+				onEdit: mockEdit,
+				onEditAddress: mockEditAddress,
+				onAddAddress: mockAddAddress,
+				onDeleteContact: mockDeleteContact,
+				onDeleteAddress: mockDeleteAddress
 			}
 		});
 
-		expect(screen.getByText(mockContact.name)).toBeInTheDocument();
+		// Check that the contact name is displayed
+		expect(getByText(mockContact.name)).toBeInTheDocument();
+
+		// Check that addresses are displayed
+		expect(getByText(en.address.types.Eth)).toBeInTheDocument();
+		expect(getByText('My ETH Address')).toBeInTheDocument();
+		expect(getByText(en.address.types.Btc)).toBeInTheDocument();
+		expect(getByText('My BTC Address')).toBeInTheDocument();
 	});
 
-	it('should disable save button when form is invalid', () => {
-		const onSaveAddress = vi.fn();
-		const onAddAddress = vi.fn();
-		const onClose = vi.fn();
-
-		const { getByTestId } = render(EditAddressStep, {
+	it('should call edit function when edit button is clicked', async () => {
+		const { getByTestId } = render(EditContactStep, {
 			props: {
 				contact: mockContact,
-				onSaveAddress,
-				onAddAddress,
-				onQRCodeScan,
-				onClose,
-				isNewAddress: true
+				onClose: mockClose,
+				onEdit: mockEdit,
+				onEditAddress: mockEditAddress,
+				onAddAddress: mockAddAddress,
+				onDeleteContact: mockDeleteContact,
+				onDeleteAddress: mockDeleteAddress
 			}
 		});
 
-		expect(getByTestId(ADDRESS_BOOK_SAVE_BUTTON)).toBeDisabled();
+		const editButton = getByTestId(CONTACT_HEADER_EDITING_EDIT_BUTTON);
+		await fireEvent.click(editButton);
+
+		expect(mockEdit).toHaveBeenCalledTimes(1);
+		expect(mockEdit).toHaveBeenCalledWith(mockContact);
 	});
 
-	it('should enable save button when form is valid', async () => {
-		const onSaveAddress = vi.fn();
-		const onAddAddress = vi.fn();
-		const onClose = vi.fn();
-		const address: Partial<ContactAddressUi> = {};
-
-		const { getByTestId } = render(EditAddressStep, {
+	it('should call addAddress function when add address button is clicked', async () => {
+		const { getByTestId } = render(EditContactStep, {
 			props: {
 				contact: mockContact,
-				onSaveAddress,
-				onAddAddress,
-				onQRCodeScan,
-				onClose,
-				isNewAddress: true,
-				address
+				onClose: mockClose,
+				onEdit: mockEdit,
+				onEditAddress: mockEditAddress,
+				onAddAddress: mockAddAddress,
+				onDeleteContact: mockDeleteContact,
+				onDeleteAddress: mockDeleteAddress
 			}
 		});
 
-		const addressInput = getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT);
-		await fireEvent.input(addressInput, {
-			target: { value: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' }
-		});
+		const addAddressButton = getByTestId(CONTACT_EDIT_ADD_ADDRESS_BUTTON);
+		await fireEvent.click(addAddressButton);
 
-		expect(getByTestId(ADDRESS_BOOK_SAVE_BUTTON)).not.toBeDisabled();
+		expect(mockAddAddress).toHaveBeenCalledTimes(1);
 	});
 
-	it('should call onAddAddress when save is clicked with isNewAddress=true', async () => {
-		const onSaveAddress = vi.fn();
-		const onAddAddress = vi.fn();
-		const onClose = vi.fn();
-		const address: Partial<ContactAddressUi> = {};
-
-		const { getByTestId } = render(EditAddressStep, {
+	it('should call deleteContact function when delete contact button is clicked', async () => {
+		const { getByTestId } = render(EditContactStep, {
 			props: {
 				contact: mockContact,
-				onSaveAddress,
-				onAddAddress,
-				onQRCodeScan,
-				onClose,
-				isNewAddress: true,
-				address
+				onClose: mockClose,
+				onEdit: mockEdit,
+				onEditAddress: mockEditAddress,
+				onAddAddress: mockAddAddress,
+				onDeleteContact: mockDeleteContact,
+				onDeleteAddress: mockDeleteAddress
 			}
 		});
 
-		await fireEvent.input(getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT), {
-			target: { value: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' }
-		});
+		const deleteContactButton = getByTestId(CONTACT_EDIT_DELETE_CONTACT_BUTTON);
+		await fireEvent.click(deleteContactButton);
 
-		await fireEvent.input(getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT), {
-			target: { value: 'Test Address' }
-		});
-
-		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
-
-		expect(onAddAddress).toHaveBeenCalledWith(
-			expect.objectContaining({
-				address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
-				addressType: 'Eth',
-				label: 'Test Address'
-			})
-		);
+		expect(mockDeleteContact).toHaveBeenCalledTimes(1);
+		expect(mockDeleteContact).toHaveBeenCalledWith(mockContact.id);
 	});
 
-	it('should call onSaveAddress when save is clicked with isNewAddress=false', async () => {
-		const onSaveAddress = vi.fn();
-		const onAddAddress = vi.fn();
-		const onClose = vi.fn();
-		const address: Partial<ContactAddressUi> = {
-			address: 'icp:abcdefghijklmnopqrstuvwxyz',
-			label: 'Test Address'
-		};
-
-		const { getByTestId } = render(EditAddressStep, {
+	it('should call close function when close button is clicked', async () => {
+		const { getByTestId } = render(EditContactStep, {
 			props: {
 				contact: mockContact,
-				onSaveAddress,
-				onAddAddress,
-				onQRCodeScan,
-				onClose,
-				isNewAddress: false,
-				address
+				onClose: mockClose,
+				onEdit: mockEdit,
+				onEditAddress: mockEditAddress,
+				onAddAddress: mockAddAddress,
+				onDeleteContact: mockDeleteContact,
+				onDeleteAddress: mockDeleteAddress
 			}
 		});
 
-		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
+		const closeButton = getByTestId(CONTACT_SHOW_CLOSE_BUTTON);
+		await fireEvent.click(closeButton);
 
-		expect(onSaveAddress).toHaveBeenCalledWith(address);
+		expect(mockClose).toHaveBeenCalledTimes(1);
 	});
 
-	it('should call onClose when cancel is clicked', async () => {
-		const onSaveAddress = vi.fn();
-		const onAddAddress = vi.fn();
-		const onClose = vi.fn();
-
-		const { getByTestId } = render(EditAddressStep, {
+	it('should call editAddress function when edit address button is clicked', async () => {
+		const { getAllByTestId } = render(EditContactStep, {
 			props: {
 				contact: mockContact,
-				onSaveAddress,
-				onAddAddress,
-				onQRCodeScan,
-				onClose,
-				isNewAddress: true
+				onClose: mockClose,
+				onEdit: mockEdit,
+				onEditAddress: mockEditAddress,
+				onAddAddress: mockAddAddress,
+				onDeleteContact: mockDeleteContact,
+				onDeleteAddress: mockDeleteAddress
 			}
 		});
 
-		await fireEvent.click(getByTestId(ADDRESS_BOOK_CANCEL_BUTTON));
+		const editAddressButtons = getAllByTestId(ADDRESS_LIST_ITEM_EDIT_BUTTON);
 
-		expect(onClose).toHaveBeenCalled();
+		// Click the first edit address button
+		await fireEvent.click(editAddressButtons[0]);
+
+		expect(mockEditAddress).toHaveBeenCalledTimes(1);
+		expect(mockEditAddress).toHaveBeenCalledWith(0);
 	});
 
-	it('should show reset buttons for inputs when filled and not disabled', async () => {
-		const onSaveAddress = vi.fn();
-		const onAddAddress = vi.fn();
-		const onClose = vi.fn();
-
-		const { getByTestId } = render(EditAddressStep, {
+	it('should call deleteAddress function when delete address button is clicked', async () => {
+		const { getAllByTestId } = render(EditContactStep, {
 			props: {
 				contact: mockContact,
-				onSaveAddress,
-				onAddAddress,
-				onQRCodeScan,
-				onClose,
-				isNewAddress: true
+				onClose: mockClose,
+				onEdit: mockEdit,
+				onEditAddress: mockEditAddress,
+				onAddAddress: mockAddAddress,
+				onDeleteContact: mockDeleteContact,
+				onDeleteAddress: mockDeleteAddress
 			}
 		});
 
-		await fireEvent.input(getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT), {
-			target: { value: '0x1234567890abcdef' }
-		});
-		await fireEvent.input(getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT), {
-			target: { value: 'My Wallet' }
-		});
+		const deleteAddressButtons = getAllByTestId(ADDRESS_LIST_ITEM_DELETE_BUTTON);
 
-		const resetButtons = screen.getAllByRole('button', {
-			name: 'Reset input value'
-		});
+		// Click the first delete address button
+		await fireEvent.click(deleteAddressButtons[0]);
 
-		expect(resetButtons).toHaveLength(2);
+		expect(mockDeleteAddress).toHaveBeenCalledTimes(1);
+		expect(mockDeleteAddress).toHaveBeenCalledWith(0);
 	});
 
-	it('should submit form on Enter key', async () => {
-		const onSaveAddress = vi.fn();
-		const onAddAddress = vi.fn();
-		const onClose = vi.fn();
-
-		const { getByTestId, container } = render(EditAddressStep, {
+	it('should disable add address button when onAddAddress is not provided', () => {
+		const { getByTestId } = render(EditContactStep, {
 			props: {
 				contact: mockContact,
-				onSaveAddress,
-				onAddAddress,
-				onQRCodeScan,
-				onClose,
-				isNewAddress: true
+				onClose: mockClose,
+				onEdit: mockEdit,
+				onEditAddress: mockEditAddress,
+				onAddAddress: null as unknown as () => void,
+				onDeleteContact: mockDeleteContact,
+				onDeleteAddress: mockDeleteAddress
 			}
 		});
 
-		await fireEvent.input(getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT), {
-			target: { value: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' }
-		});
+		const addAddressButton = getByTestId(CONTACT_EDIT_ADD_ADDRESS_BUTTON);
 
-		const form = container.querySelector('form');
-		if (!form) {
-			throw new Error('Form element not found');
-		}
-		await fireEvent.submit(form);
-
-		expect(onAddAddress).toHaveBeenCalled();
-	});
-
-	it('should disable save button when alias is unchanged in edit mode', () => {
-		const onSaveAddress = vi.fn();
-		const onAddAddress = vi.fn();
-		const onClose = vi.fn();
-
-		const initialAddress: Partial<ContactAddressUi> = {
-			address: 'icp:abcdefghijklmnopqrstuvwxyz',
-			label: 'Original Label'
-		};
-
-		const { getByTestId } = render(EditAddressStep, {
-			props: {
-				contact: mockContact,
-				onSaveAddress,
-				onAddAddress,
-				onQRCodeScan,
-				onClose,
-				isNewAddress: false,
-				address: initialAddress
-			}
-		});
-
-		expect(getByTestId(ADDRESS_BOOK_SAVE_BUTTON)).toBeDisabled();
+		expect(addAddressButton).toBeDisabled();
 	});
 });
