@@ -20,9 +20,7 @@
 
 	const assertValid = (): boolean => notEmptyString(trimmedName) && !isNameTooLong;
 
-	export function isValid() {
-		return assertValid();
-	}
+	export const isValid = () => assertValid();
 
 	const handleKeydown = (event: KeyboardEvent): void => {
 		if (event.key === 'Enter' && assertValid()) {

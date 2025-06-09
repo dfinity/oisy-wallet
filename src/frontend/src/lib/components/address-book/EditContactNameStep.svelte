@@ -53,9 +53,7 @@
 			onSaveContact(editingContact as ContactUi);
 		}
 	};
-	export function getTitle() {
-		return title;
-	}
+	export const getTitle = () => title;
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-6 items-center">
