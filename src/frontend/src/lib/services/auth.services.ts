@@ -124,7 +124,9 @@ const emptyIdbSolTokens = (): Promise<void> => emptyIdbStore(deleteIdbSolTokens)
 
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
-	sessionStorage.clear();
+	if (typeof sessionStorage !== 'undefined') {
+		sessionStorage.clear();
+	}
 };
 
 const logout = async ({
