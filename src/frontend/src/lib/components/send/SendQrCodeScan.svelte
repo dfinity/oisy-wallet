@@ -59,8 +59,8 @@
 	<QrCodeScanner {onScan} onBack={onIcQrCodeBack} />
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<ButtonBack onclick={onIcQrCodeBack} />
-	</ButtonGroup>
+		<ButtonGroup>
+			<ButtonBack onclick={onIcQrCodeBack} />
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

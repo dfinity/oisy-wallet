@@ -18,8 +18,8 @@
 	<QrCodeScanner {onScan} onBack={onCancel} />
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<ButtonCancel onclick={onCancel} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
-	</ButtonGroup>
+		<ButtonGroup>
+			<ButtonCancel onclick={onCancel} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
