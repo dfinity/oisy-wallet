@@ -1265,7 +1265,10 @@ describe('backend.canister', () => {
 
 			const res = await removeUserToken(params);
 
-			expect(service.remove_user_token).toHaveBeenCalledWith(params.token);
+			expect(service.remove_user_token).toHaveBeenCalledWith({
+				chain_id: params.token.chain_id,
+				contract_address: params.token.contract_address
+			});
 			expect(res).toEqual(response);
 		});
 
