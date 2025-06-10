@@ -83,9 +83,11 @@
 			{/each}
 		{/each}
 
-		<div in:fade slot="toolbar">
-			<WalletConnectActions {approve} on:icApprove on:icReject />
-		</div>
+		{#snippet toolbar()}
+			<div in:fade>
+				<WalletConnectActions {approve} on:icApprove on:icReject />
+			</div>
+		{/snippet}
 	</ContentWithToolbar>
 {:else}
 	<ContentWithToolbar>
@@ -98,7 +100,7 @@
 			</div>
 		</div>
 
-		<svelte:fragment slot="toolbar">
+		{#snippet toolbar()}
 			{#if displayCancel}
 				<div in:fade>
 					<ButtonGroup>
@@ -109,6 +111,6 @@
 					</ButtonGroup>
 				</div>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</ContentWithToolbar>
 {/if}
