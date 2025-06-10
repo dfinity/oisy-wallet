@@ -1,4 +1,5 @@
 import type { CriterionEligibility, EligibilityReport } from '$declarations/rewards/rewards.did';
+import type { RewardDescription } from '$env/types/env-reward';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { getRewards } from '$lib/services/reward.services';
 import type {
@@ -12,7 +13,6 @@ import type {
 } from '$lib/types/reward';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
-import type { RewardDescription } from '$env/types/env-reward';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
 
@@ -64,7 +64,11 @@ export const isEndedCampaign = (endDate: Date) => {
 };
 
 export const getCampaignState = (reward: RewardDescription) =>
-	isOngoingCampaign({startDate: reward.startDate, endDate: reward.endDate}) ? 'ongoing' : isEndedCampaign(reward.endDate) ? 'ended' : 'upcoming'
+	isOngoingCampaign({ startDate: reward.startDate, endDate: reward.endDate })
+		? 'ongoing'
+		: isEndedCampaign(reward.endDate)
+			? 'ended'
+			: 'upcoming';
 
 export const mapEligibilityReport = (eligibilityReport: EligibilityReport): CampaignEligibility[] =>
 	eligibilityReport.campaigns.map(([campaignId, eligibility]) => {

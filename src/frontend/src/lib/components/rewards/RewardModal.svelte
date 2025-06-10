@@ -11,7 +11,13 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
+	import {
+		TRACK_REWARD_CAMPAIGN_OPEN,
+		TRACK_REWARD_CAMPAIGN_LEARN_MORE,
+		TRACK_REWARD_CAMPAIGN_SHARE
+	} from '$lib/constants/analytics.contants';
 	import { REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE } from '$lib/constants/test-ids.constants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -19,12 +25,6 @@
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
 	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import {
-		TRACK_REWARD_CAMPAIGN_OPEN,
-		TRACK_REWARD_CAMPAIGN_LEARN_MORE,
-		TRACK_REWARD_CAMPAIGN_SHARE
-	} from '$lib/constants/analytics.contants';
 
 	interface Props {
 		reward: RewardDescription;
@@ -34,12 +34,12 @@
 
 	onMount(() =>
 		trackEvent({
-				name: TRACK_REWARD_CAMPAIGN_OPEN,
-				metadata: {
-					campaignId: `${reward.id}`,
-					state: getCampaignState(reward)
-				}
-			})
+			name: TRACK_REWARD_CAMPAIGN_OPEN,
+			metadata: {
+				campaignId: `${reward.id}`,
+				state: getCampaignState(reward)
+			}
+		})
 	);
 
 	const { getCampaignEligibility } = getContext<RewardEligibilityContext>(
@@ -80,13 +80,22 @@
 				iconVisible={false}
 				asButton
 				styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
-				trackEvent={{name: TRACK_REWARD_CAMPAIGN_LEARN_MORE, metadata: {campaignId: `${reward.id}`, state: getCampaignState(reward)}}}
+				trackEvent={{
+					name: TRACK_REWARD_CAMPAIGN_LEARN_MORE,
+					metadata: { campaignId: `${reward.id}`, state: getCampaignState(reward) }
+				}}
 			>
 				{$i18n.rewards.text.learn_more}
 			</ExternalLink>
 
-			<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2"
-						 trackEvent={{name: TRACK_REWARD_CAMPAIGN_SHARE, metadata: {campaignId: `${reward.id}`, state: getCampaignState(reward)}}}
+			<Share
+				text={$i18n.rewards.text.share}
+				href={reward.campaignHref}
+				styleClass="my-2"
+				trackEvent={{
+					name: TRACK_REWARD_CAMPAIGN_SHARE,
+					metadata: { campaignId: `${reward.id}`, state: getCampaignState(reward) }
+				}}
 			/>
 
 			{#if criteria.length > 0}
