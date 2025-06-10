@@ -45,9 +45,9 @@
 		}
 
 		if (
-			$splTokens?.find(({ address }) =>areAddressesEqual({ address1: address, address2: tokenAddress, addressType: 'Sol' })) !== undefined
-
-
+			$splTokens?.find(({ address }) =>
+				areAddressesEqual({ address1: address, address2: tokenAddress, addressType: 'Sol' })
+			) !== undefined
 		) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.already_available }
