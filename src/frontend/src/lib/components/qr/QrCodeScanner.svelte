@@ -1,21 +1,15 @@
 <script lang="ts">
 	import { QRCodeReader } from '@dfinity/gix-components';
 	import { onMount } from 'svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import {
-		ADDRESS_BOOK_CANCEL_BUTTON,
-		ADDRESS_BOOK_QR_CODE_SCAN
-	} from '$lib/constants/test-ids.constants';
+	import { ADDRESS_BOOK_QR_CODE_SCAN } from '$lib/constants/test-ids.constants';
 	import type { QrStatus } from '$lib/types/qr-code';
 
 	interface Props {
-		onClose: () => void;
-		address: string | undefined;
+		onScan: ({ status, code }: { status: QrStatus; code?: string }) => void;
+		onBack: () => void;
 	}
 
-	let { onClose, address = $bindable() }: Props = $props();
+	let { onScan, onBack }: Props = $props();
 
 	let resolveQrCodePromise:
 		| (({ status, code }: { status: QrStatus; code?: string }) => void)
@@ -30,13 +24,11 @@
 			resolveQrCodePromise = resolve;
 		});
 
-		const { status, code } = result;
-
-		if (status === 'success') {
-			address = code;
+		if (result.status === 'success') {
+			onScan(result);
 		}
 
-		onClose();
+		onBack();
 	};
 
 	const onQRCode = ({ detail: code }: CustomEvent<string>) => {
@@ -50,15 +42,12 @@
 	};
 </script>
 
-<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-	<div class="qr-code-wrapper h-full w-full md:min-h-[300px]" data-tid={ADDRESS_BOOK_QR_CODE_SCAN}>
-		<QRCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
-	</div>
-
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
-	</ButtonGroup>
-</ContentWithToolbar>
+<div
+	class="stretch qr-code-wrapper h-full w-full md:min-h-[300px]"
+	data-tid={ADDRESS_BOOK_QR_CODE_SCAN}
+>
+	<QRCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
+</div>
 
 <style lang="scss">
 	.qr-code-wrapper {
