@@ -13,6 +13,25 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
+	import type { RewardDescription } from '$env/types/env-reward';
+	import { onMount } from 'svelte';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_REWARD_CAMPAIGN_WIN_SHARE } from '$lib/constants/analytics.contants';
+
+	// TODO At the moment the selected campaign is hardcoded. In the future this should be configurable from the outside.
+	const reward: RewardDescription | undefined = rewardCampaigns.find(
+		(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
+	);
+
+	onMount(
+		() =>
+			reward &&
+			trackEvent({
+				name: TRACK_REWARD_CAMPAIGN_WIN,
+				metadata: { campaignId: `${reward.id}`, type: 'referral' }
+			})
+	);
 </script>
 
 <Sprinkles />
@@ -37,6 +56,10 @@
 				testId={REFERRAL_STATE_MODAL_SHARE_ANCHOR}
 				text={$i18n.referral.reward.text.share}
 				href={OISY_REFERRAL_TWITTER_URL}
+				trackEvent={{
+						name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
+						metadata: { campaignId: `${reward.id}`, type: 'referral' }
+					}}
 			/>
 		</div>
 
