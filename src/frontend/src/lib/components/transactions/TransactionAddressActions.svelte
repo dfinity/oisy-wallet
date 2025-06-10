@@ -22,16 +22,16 @@
 	}: Props = $props();
 </script>
 
-{#if nonNullish(copyAddress) && nonNullish(copyAddressText)}
-	<Copy value={copyAddress} text={copyAddressText} inline testId={copyAddressTestId} />
-{/if}
-{#if nonNullish(explorerUrl) && nonNullish(explorerUrlAriaLabel)}
-	<ExternalLink
-		iconSize="18"
-		href={explorerUrl}
-		ariaLabel={explorerUrlAriaLabel}
-		inline
-		color="blue"
-		testId={explorerUrlTestId}
-	/>
-{/if}
+<span class="float-right flex pl-1.5 align-top">
+	{#if nonNullish(copyAddress) && nonNullish(copyAddressText)}
+		<Copy value={copyAddress} text={copyAddressText} inline testId={copyAddressTestId} />
+	{/if}
+	{#if nonNullish(explorerUrl) && nonNullish(explorerUrlAriaLabel)}
+		<ExternalLink
+			iconSize="18"
+			href={explorerUrl}
+			ariaLabel={explorerUrlAriaLabel}
+			testId={explorerUrlTestId}
+		/>
+	{/if}
+</span>

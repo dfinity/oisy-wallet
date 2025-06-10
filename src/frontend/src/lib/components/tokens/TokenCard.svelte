@@ -27,13 +27,17 @@
 	} = $props();
 
 	const dispatch = createEventDispatcher();
+
+	let testId = $derived(
+		`${testIdPrefix}-${data.symbol}${nonNullish(data.network) ? `-${data.network.id.description}` : ''}`
+	);
 </script>
 
 <div class="flex w-full flex-col">
 	<LogoButton
 		dividers={false}
 		rounded={false}
-		testId={`${testIdPrefix}-${data.symbol}-${data.network.id.description}`}
+		{testId}
 		onClick={() => dispatch('click')}
 		condensed={asNetwork}
 		{hover}
@@ -54,7 +58,7 @@
 		{#snippet title()}
 			<span class:text-sm={asNetwork}>
 				{getTokenDisplaySymbol(data)}
-				{#if asNetwork}
+				{#if asNetwork && nonNullish(data.network)}
 					<span class="font-normal">
 						{replacePlaceholders($i18n.tokens.text.on_network, { $network: data.network.name })}
 					</span>
@@ -91,7 +95,7 @@
 							<Divider />
 						{/if}{network}
 					{/each}
-				{:else if !asNetwork}
+				{:else if !asNetwork && nonNullish(data.network)}
 					{data.network.name}
 				{/if}
 			</span>
