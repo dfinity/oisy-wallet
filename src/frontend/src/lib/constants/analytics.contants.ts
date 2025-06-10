@@ -77,6 +77,7 @@ export const TRACK_CONTACT_DELETE_SUCCESS = 'contact_delete_success';
 export const TRACK_CONTACT_DELETE_ERROR = 'contact_delete_error';
 
 // Rewards
+export const TRACK_REWARD_LEARN_MORE = 'reward_learn_more';
 export const TRACK_REWARD_FILTER_CHANGE = 'reward_filter_change';
 
 // Navigation
