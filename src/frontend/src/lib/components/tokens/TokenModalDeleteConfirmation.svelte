@@ -34,11 +34,13 @@
 		</div>
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={onCancel} />
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCancel onclick={onCancel} />
 
-		<Button colorStyle="error" onclick={onConfirm}>
-			{$i18n.core.text.delete}
-		</Button>
-	</ButtonGroup>
+			<Button colorStyle="error" onclick={onConfirm}>
+				{$i18n.core.text.delete}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
