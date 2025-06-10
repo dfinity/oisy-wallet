@@ -95,7 +95,9 @@
 		<EmptyState title={$i18n.address_book.text.no_contact_found} />
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCloseModal />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCloseModal />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
