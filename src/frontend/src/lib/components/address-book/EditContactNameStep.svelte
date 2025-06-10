@@ -39,7 +39,9 @@
 		if (!form?.isValid) {
 			return;
 		}
-
+		if (nonNullish(editingContact.name)) {
+			editingContact.name = editingContact.name.trim();
+		}
 		if (isNewContact && nonNullish(editingContact.name)) {
 			onAddContact({ name: editingContact.name });
 		} else {

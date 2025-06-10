@@ -5,8 +5,10 @@
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isTokenIcrc, isTokenDip20 } from '$icp/utils/icrc.utils';
 	import List from '$lib/components/common/List.svelte';
+	import ModalHero from '$lib/components/common/ModalHero.svelte';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -29,6 +31,16 @@
 
 	<ContentWithToolbar>
 		{#if nonNullish(token)}
+			<ModalHero>
+				{#snippet logo()}
+					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+				{/snippet}
+
+				{#snippet title()}
+					{getTokenDisplaySymbol(token)}
+				{/snippet}
+			</ModalHero>
+
 			<List styleClass="text-sm" condensed={false}>
 				<ModalListItem>
 					{#snippet label()}

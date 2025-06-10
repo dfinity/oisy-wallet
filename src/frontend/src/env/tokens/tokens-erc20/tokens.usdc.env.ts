@@ -24,6 +24,7 @@ export const USDC_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckUSDC',
 	groupData: USDC_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true,
 	buy: {
 		onramperId: 'usdc_ethereum'
 	}
