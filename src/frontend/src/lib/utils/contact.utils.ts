@@ -89,7 +89,7 @@ export const isContactMatchingFilter = ({
 	filterValue: string;
 }): boolean =>
 	notEmptyString(filterValue) &&
-	(address === filterValue ||
+	(address.includes(filterValue) ||
 		contact.name.toLowerCase().includes(filterValue.toLowerCase()) ||
 		contact.addresses.some(
 			({ label, address: innerAddress }) =>

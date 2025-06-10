@@ -246,14 +246,14 @@ describe('contact.utils', () => {
 			).toBeTruthy();
 		});
 
-		it('should return false if contact address partially matches filter', () => {
+		it('should return true if contact address partially matches filter', () => {
 			expect(
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
 					filterValue: mockContactBtcAddressUi.address.slice(0, 6)
 				})
-			).toBeFalsy();
+			).toBeTruthy();
 		});
 
 		it('should return false if filter is empty string', () => {

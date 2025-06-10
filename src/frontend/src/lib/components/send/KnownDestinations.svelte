@@ -44,7 +44,7 @@
 								contact: networkContacts[address],
 								filterValue: destination
 							})
-						: address === destination
+						: address.includes(destination)
 				)
 	);
 </script>
