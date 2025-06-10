@@ -188,7 +188,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 			setTypeWithData('address-book')
 		),
 		openReferralState: <(params: SetWithDataParams<RewardDescription>) => void>(
-			setType('referral-state')
+			setTypeWithData('referral-state')
 		),
 		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
 			setTypeWithData('dapp-details')
