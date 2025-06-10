@@ -84,9 +84,9 @@
 		{/each}
 
 		{#snippet toolbar()}
-		<div in:fade>
-			<WalletConnectActions {approve} on:icApprove on:icReject />
-		</div>
+			<div in:fade>
+				<WalletConnectActions {approve} on:icApprove on:icReject />
+			</div>
 		{/snippet}
 	</ContentWithToolbar>
 {:else}
@@ -100,7 +100,7 @@
 			</div>
 		</div>
 
-			{#snippet toolbar()}
+		{#snippet toolbar()}
 			{#if displayCancel}
 				<div in:fade>
 					<ButtonGroup>
@@ -111,6 +111,6 @@
 					</ButtonGroup>
 				</div>
 			{/if}
-			{/snippet}
+		{/snippet}
 	</ContentWithToolbar>
 {/if}

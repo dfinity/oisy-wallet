@@ -151,6 +151,6 @@
 						})}</ExternalLink
 				>
 			{/if}
-			{/snippet}
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

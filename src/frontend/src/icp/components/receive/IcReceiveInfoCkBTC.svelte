@@ -77,6 +77,6 @@
 	{/if}
 
 	{#snippet toolbar()}
-	<ButtonDone onclick={close} />
+		<ButtonDone onclick={close} />
 	{/snippet}
 </ContentWithToolbar>

@@ -100,6 +100,6 @@
 	{/if}
 
 	{#snippet toolbar()}
-	<ButtonCloseModal />
+		<ButtonCloseModal />
 	{/snippet}
 </ContentWithToolbar>

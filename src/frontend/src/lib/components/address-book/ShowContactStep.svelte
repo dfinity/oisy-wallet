@@ -91,8 +91,8 @@
 	{/if}
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<ButtonBack onclick={() => onClose()} testId={CONTACT_SHOW_CLOSE_BUTTON} />
-	</ButtonGroup>
+		<ButtonGroup>
+			<ButtonBack onclick={() => onClose()} testId={CONTACT_SHOW_CLOSE_BUTTON} />
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

@@ -314,6 +314,6 @@
 	</div>
 
 	{#snippet toolbar()}
-	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} onclick={modalStore.close} />
+		<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} onclick={modalStore.close} />
 	{/snippet}
 </ContentWithToolbar>

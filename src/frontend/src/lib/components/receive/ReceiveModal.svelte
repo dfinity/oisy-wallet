@@ -42,7 +42,7 @@
 		{@render content?.()}
 
 		{#snippet toolbar()}
-		<ButtonDone onclick={modalStore.close} />
+			<ButtonDone onclick={modalStore.close} />
 		{/snippet}
 	</ContentWithToolbar>
 </Modal>

@@ -38,8 +38,8 @@
 	{/if}
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<ButtonBack onclick={onClose} testId={ADDRESS_EDIT_CANCEL_BUTTON} />
-	</ButtonGroup>
+		<ButtonGroup>
+			<ButtonBack onclick={onClose} testId={ADDRESS_EDIT_CANCEL_BUTTON} />
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

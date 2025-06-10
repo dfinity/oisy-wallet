@@ -37,8 +37,8 @@
 	/>
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<ButtonBack onclick={back} />
-	</ButtonGroup>
+		<ButtonGroup>
+			<ButtonBack onclick={back} />
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

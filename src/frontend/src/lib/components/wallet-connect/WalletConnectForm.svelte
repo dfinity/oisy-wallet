@@ -90,11 +90,11 @@
 	</div>
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<Button disabled={invalid} onclick={onClick}>
-			{$i18n.wallet_connect.text.connect}
-		</Button>
-	</ButtonGroup>
+		<ButtonGroup>
+			<Button disabled={invalid} onclick={onClick}>
+				{$i18n.wallet_connect.text.connect}
+			</Button>
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
 

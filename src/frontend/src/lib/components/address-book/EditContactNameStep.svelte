@@ -66,18 +66,18 @@
 	<!-- TODO Add address list here -->
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<ButtonCancel {disabled} onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}
-		></ButtonCancel>
-		<Button
-			colorStyle="primary"
-			onclick={handleSave}
-			disabled={!form?.isValid}
-			loading={disabled}
-			testId={ADDRESS_BOOK_SAVE_BUTTON}
-		>
-			{$i18n.core.text.save}
-		</Button>
-	</ButtonGroup>
+		<ButtonGroup>
+			<ButtonCancel {disabled} onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}
+			></ButtonCancel>
+			<Button
+				colorStyle="primary"
+				onclick={handleSave}
+				disabled={!form?.isValid}
+				loading={disabled}
+				testId={ADDRESS_BOOK_SAVE_BUTTON}
+			>
+				{$i18n.core.text.save}
+			</Button>
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

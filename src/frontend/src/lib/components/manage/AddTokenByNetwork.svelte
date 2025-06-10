@@ -126,7 +126,7 @@
 		{/if}
 
 		{#snippet toolbar()}
-		<AddTokenByNetworkToolbar {invalid} on:icBack />
+			<AddTokenByNetworkToolbar {invalid} on:icBack />
 		{/snippet}
 	</ContentWithToolbar>
 </form>

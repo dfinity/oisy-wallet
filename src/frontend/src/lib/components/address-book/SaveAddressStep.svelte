@@ -96,8 +96,8 @@
 	{/if}
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<ButtonCloseModal />
-	</ButtonGroup>
+		<ButtonGroup>
+			<ButtonCloseModal />
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

@@ -25,11 +25,11 @@
 	</span>
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<ButtonCancel {disabled} onclick={onCancel}></ButtonCancel>
-		<Button loading={disabled} colorStyle="error" onclick={() => onDelete(contact.id)}>
-			{$i18n.contact.delete.delete_contact}
-		</Button>
-	</ButtonGroup>
+		<ButtonGroup>
+			<ButtonCancel {disabled} onclick={onCancel}></ButtonCancel>
+			<Button loading={disabled} colorStyle="error" onclick={() => onDelete(contact.id)}>
+				{$i18n.contact.delete.delete_contact}
+			</Button>
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

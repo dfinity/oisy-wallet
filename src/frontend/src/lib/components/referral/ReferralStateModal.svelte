@@ -41,9 +41,9 @@
 		</div>
 
 		{#snippet toolbar()}
-		<Button onclick={modalStore.close} colorStyle="secondary-light" fullWidth>
-			{$i18n.referral.reward.text.open_wallet}
-		</Button>
+			<Button onclick={modalStore.close} colorStyle="secondary-light" fullWidth>
+				{$i18n.referral.reward.text.open_wallet}
+			</Button>
 		{/snippet}
 	</ContentWithToolbar>
 </Modal>

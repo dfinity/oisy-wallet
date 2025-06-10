@@ -38,12 +38,12 @@
 	</p>
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<ButtonCancel onclick={() => dispatch('icCancel')} />
-		<Button onclick={() => dispatch('icHide')}>
-			{$i18n.tokens.hide.confirm}
-		</Button>
-	</ButtonGroup>
+		<ButtonGroup>
+			<ButtonCancel onclick={() => dispatch('icCancel')} />
+			<Button onclick={() => dispatch('icHide')}>
+				{$i18n.tokens.hide.confirm}
+			</Button>
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
 

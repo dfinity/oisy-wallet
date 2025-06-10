@@ -163,11 +163,11 @@
 		</div>
 	</div>
 
-		{#snippet toolbar()}
-			{#if formCancelAction === 'back'}
-				<ButtonBack fullWidth onclick={() => dispatch('icBack')} />
-			{:else}
-				<ButtonDone onclick={modalStore.close} />
-			{/if}
-		{/snippet}
+	{#snippet toolbar()}
+		{#if formCancelAction === 'back'}
+			<ButtonBack fullWidth onclick={() => dispatch('icBack')} />
+		{:else}
+			<ButtonDone onclick={modalStore.close} />
+		{/if}
+	{/snippet}
 </ContentWithToolbar>

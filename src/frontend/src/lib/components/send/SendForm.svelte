@@ -33,11 +33,11 @@
 		<slot name="info" />
 
 		{#snippet toolbar()}
-		<ButtonGroup testId="toolbar">
-			<slot name="cancel" />
+			<ButtonGroup testId="toolbar">
+				<slot name="cancel" />
 
-			<ButtonNext {disabled} testId={SEND_FORM_NEXT_BUTTON} />
-		</ButtonGroup>
+				<ButtonNext {disabled} testId={SEND_FORM_NEXT_BUTTON} />
+			</ButtonGroup>
 		{/snippet}
 	</ContentWithToolbar>
 </form>

@@ -97,16 +97,16 @@
 		>
 
 		{#snippet toolbar()}
-		<Button
-			paddingSmall
-			colorStyle="secondary-light"
-			type="button"
-			fullWidth
-			onclick={close}
-			testId={VIP_STATE_BUTTON}
-		>
-			{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
-		</Button>
+			<Button
+				paddingSmall
+				colorStyle="secondary-light"
+				type="button"
+				fullWidth
+				onclick={close}
+				testId={VIP_STATE_BUTTON}
+			>
+				{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
+			</Button>
 		{/snippet}
 	</ContentWithToolbar>
 </Modal>

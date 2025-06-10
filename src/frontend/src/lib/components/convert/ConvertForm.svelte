@@ -45,9 +45,9 @@
 		<ButtonGroup>
 			<slot name="cancel" />
 
-		<Button {disabled} onclick={() => dispatch('icNext')} testId="convert-form-button-next">
-			{$i18n.convert.text.review_button}
-		</Button>
-	</ButtonGroup>
+			<Button {disabled} onclick={() => dispatch('icNext')} testId="convert-form-button-next">
+				{$i18n.convert.text.review_button}
+			</Button>
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

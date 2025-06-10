@@ -56,9 +56,9 @@
 	</div>
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<ButtonCancel onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
-	</ButtonGroup>
+		<ButtonGroup>
+			<ButtonCancel onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
 

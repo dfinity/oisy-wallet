@@ -98,7 +98,7 @@
 		</List>
 
 		{#snippet toolbar()}
-		<ButtonCloseModal />
+			<ButtonCloseModal />
 		{/snippet}
 	</ContentWithToolbar>
 </Modal>

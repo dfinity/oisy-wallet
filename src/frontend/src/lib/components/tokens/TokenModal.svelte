@@ -105,7 +105,7 @@
 		{/if}
 
 		{#snippet toolbar()}
-		<ButtonDone onclick={modalStore.close} />
-			{/snippet}
+			<ButtonDone onclick={modalStore.close} />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

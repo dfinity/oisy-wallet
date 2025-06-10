@@ -61,12 +61,12 @@
 	</DestinationWizardStepSection>
 
 	{#snippet toolbar()}
-	<ButtonGroup>
-		<ButtonBack onclick={back} />
+		<ButtonGroup>
+			<ButtonBack onclick={back} />
 
-		<Button onclick={apply} {disabled}>
-			{$i18n.core.text.apply}
-		</Button>
-	</ButtonGroup>
+			<Button onclick={apply} {disabled}>
+				{$i18n.core.text.apply}
+			</Button>
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
