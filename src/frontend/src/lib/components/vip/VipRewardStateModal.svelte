@@ -101,7 +101,7 @@
 			colorStyle="secondary-light"
 			type="button"
 			fullWidth
-			on:click={close}
+			onclick={close}
 			testId={VIP_STATE_BUTTON}
 			slot="toolbar"
 		>

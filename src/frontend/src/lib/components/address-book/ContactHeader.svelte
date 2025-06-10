@@ -31,7 +31,7 @@
 		ariaLabel={$i18n.core.text.edit}
 		colorStyle="secondary"
 		testId={CONTACT_HEADER_EDIT_BUTTON}
-		on:click={onEdit}
+		onclick={onEdit}
 	>
 		<span class="flex items-center">
 			<IconPencil />
