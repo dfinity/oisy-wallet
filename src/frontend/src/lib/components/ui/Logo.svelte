@@ -37,8 +37,8 @@
 			{alt}
 			fitHeight
 			height={sizePx}
-			on:load={() => (loadingError = false)}
-			on:error={() => (loadingError = true)}
+			onLoad={() => (loadingError = false)}
+			onError={() => (loadingError = true)}
 			rounded
 		/>
 	{:else}
