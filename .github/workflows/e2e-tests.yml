@@ -98,8 +98,9 @@ jobs:
     strategy:
       matrix:
         os: ${{ fromJson(needs.define-matrix.outputs.os-matrix) }}
-        shardIndex: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        shardTotal: [10]
+        # TODO: Re-instate 10 shards when the issue with playwright is fixed - https://github.com/microsoft/playwright/issues/36228
+        shardIndex: [1]
+        shardTotal: [1]
     if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.shardIndex }}
