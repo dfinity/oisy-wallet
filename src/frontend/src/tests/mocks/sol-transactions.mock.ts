@@ -93,12 +93,12 @@ export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 			addressTableLookups: [
 				{
 					accountKey: address('8GU6nusbxwVrwkAkcQCnLfJj1cE4sGH5xCLmss5WEuP4'),
-					readableIndexes: [146],
+					readonlyIndexes: [146],
 					writableIndexes: [148, 149, 156, 152]
 				},
 				{
 					accountKey: address('9W6BH3BLditrazBMnT87jc5ZdKRLtUFmWqkLviWtdzXm'),
-					readableIndexes: [69, 67, 10, 70, 68, 73],
+					readonlyIndexes: [69, 67, 10, 70, 68, 73],
 					writableIndexes: [66, 63, 71, 72]
 				}
 			],
@@ -179,12 +179,12 @@ export const mockSolRpcSendTransaction: SolRpcTransaction = {
 			addressTableLookups: [
 				{
 					accountKey: address('8GU6nusbxwVrwkAkcQCnLfJj1cE4sGH5xCLmss5WEuP4'),
-					readableIndexes: [146],
+					readonlyIndexes: [146],
 					writableIndexes: [148, 149, 156, 152]
 				},
 				{
 					accountKey: address('9W6BH3BLditrazBMnT87jc5ZdKRLtUFmWqkLviWtdzXm'),
-					readableIndexes: [69, 67, 10, 70, 68, 73],
+					readonlyIndexes: [69, 67, 10, 70, 68, 73],
 					writableIndexes: [66, 63, 71, 72]
 				}
 			],
@@ -1076,12 +1076,12 @@ export const mockSolTransactionDetail: SolRpcTransaction = {
 			addressTableLookups: [
 				{
 					accountKey: address('8GU6nusbxwVrwkAkcQCnLfJj1cE4sGH5xCLmss5WEuP4'),
-					readableIndexes: [146],
+					readonlyIndexes: [146],
 					writableIndexes: [148, 149, 156, 152]
 				},
 				{
 					accountKey: address('9W6BH3BLditrazBMnT87jc5ZdKRLtUFmWqkLviWtdzXm'),
-					readableIndexes: [69, 67, 10, 70, 68, 73],
+					readonlyIndexes: [69, 67, 10, 70, 68, 73],
 					writableIndexes: [66, 63, 71, 72]
 				}
 			],
