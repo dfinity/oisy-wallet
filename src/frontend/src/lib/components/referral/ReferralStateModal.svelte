@@ -7,9 +7,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
-	import {
-		TRACK_REWARD_CAMPAIGN_WIN_SHARE
-	} from '$lib/constants/analytics.contants';
+	import { TRACK_REWARD_CAMPAIGN_WIN_SHARE } from '$lib/constants/analytics.contants';
 	import { OISY_REFERRAL_TWITTER_URL } from '$lib/constants/oisy.constants';
 	import {
 		REFERRAL_STATE_MODAL_IMAGE_BANNER,
@@ -22,7 +20,7 @@
 		reward: RewardDescription;
 	}
 
-	let {reward}: Props = $props()
+	let { reward }: Props = $props();
 </script>
 
 <Sprinkles />

@@ -8,7 +8,8 @@
 	import { TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
-		modalReferralState, modalReferralStateData,
+		modalReferralState,
+		modalReferralStateData,
 		modalRewardState,
 		modalRewardStateData
 	} from '$lib/derived/modal.derived';
@@ -51,7 +52,7 @@
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
 					metadata: { campaignId: `${reward.id}`, type: 'referral' }
-				})
+				});
 				modalStore.openReferralState({ id: referralModalId, data: reward });
 			} else {
 				trackEvent({
