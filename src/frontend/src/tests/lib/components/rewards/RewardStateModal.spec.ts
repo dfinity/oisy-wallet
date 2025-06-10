@@ -26,6 +26,7 @@ describe('RewardStateModal', () => {
 
 		const { container, getByText } = render(RewardStateModal, {
 			props: {
+				reward: mockedReward,
 				jackpot: false
 			}
 		});
@@ -54,6 +55,7 @@ describe('RewardStateModal', () => {
 
 		const { container, getByText } = render(RewardStateModal, {
 			props: {
+				reward: mockedReward,
 				jackpot: true
 			}
 		});
