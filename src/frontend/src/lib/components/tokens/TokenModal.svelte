@@ -104,6 +104,8 @@
 			</List>
 		{/if}
 
-		<ButtonDone onclick={modalStore.close} slot="toolbar" />
+		{#snippet toolbar()}
+			<ButtonDone onclick={modalStore.close} />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

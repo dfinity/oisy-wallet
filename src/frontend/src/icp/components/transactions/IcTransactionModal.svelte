@@ -97,6 +97,8 @@
 			</ListItem>
 		</List>
 
-		<ButtonCloseModal slot="toolbar" />
+		{#snippet toolbar()}
+			<ButtonCloseModal />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

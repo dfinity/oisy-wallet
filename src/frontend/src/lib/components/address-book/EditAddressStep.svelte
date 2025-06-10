@@ -105,17 +105,21 @@
 				{focusField}
 			/>
 		</div>
-		<ButtonGroup slot="toolbar">
-			<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
-			<Button
-				colorStyle="primary"
-				disabled={isInvalid || (!isNewAddress && !labelChanged)}
-				onclick={handleSave}
-				testId={ADDRESS_BOOK_SAVE_BUTTON}
-				loading={disabled}
-			>
-				{$i18n.core.text.save}
-			</Button>
-		</ButtonGroup>
+
+		{#snippet toolbar()}
+			<ButtonGroup>
+				<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}
+				></ButtonCancel>
+				<Button
+					colorStyle="primary"
+					disabled={isInvalid || (!isNewAddress && !labelChanged)}
+					onclick={handleSave}
+					testId={ADDRESS_BOOK_SAVE_BUTTON}
+					loading={disabled}
+				>
+					{$i18n.core.text.save}
+				</Button>
+			</ButtonGroup>
+		{/snippet}
 	</ContentWithToolbar>
 </form>

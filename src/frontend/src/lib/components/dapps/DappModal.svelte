@@ -133,7 +133,7 @@
 			</article>
 		</div>
 
-		<svelte:fragment slot="toolbar">
+		{#snippet toolbar()}
 			{#if nonNullish(websiteURL)}
 				<ExternalLink
 					ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
@@ -151,6 +151,6 @@
 						})}</ExternalLink
 				>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

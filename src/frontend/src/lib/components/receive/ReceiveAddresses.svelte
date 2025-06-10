@@ -313,5 +313,7 @@
 		{/each}
 	</div>
 
-	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} onclick={modalStore.close} slot="toolbar" />
+	{#snippet toolbar()}
+		<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} onclick={modalStore.close} />
+	{/snippet}
 </ContentWithToolbar>

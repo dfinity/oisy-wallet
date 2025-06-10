@@ -17,7 +17,9 @@
 <ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
 	<QrCodeScanner {onScan} onBack={onCancel} />
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={onCancel} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCancel onclick={onCancel} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

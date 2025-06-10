@@ -66,10 +66,12 @@
 		</div>
 	</div>
 
-	<ButtonGroup slot="toolbar">
-		{#if !hideBack}
-			<ButtonBack onclick={onBack} testId={HELP_AUTH_BACK_BUTTON} />
-		{/if}
-		<ButtonDone onclick={onDone} testId={HELP_AUTH_DONE_BUTTON} />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			{#if !hideBack}
+				<ButtonBack onclick={onBack} testId={HELP_AUTH_BACK_BUTTON} />
+			{/if}
+			<ButtonDone onclick={onDone} testId={HELP_AUTH_DONE_BUTTON} />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

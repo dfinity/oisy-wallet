@@ -162,15 +162,17 @@
 		</List>
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCloseModal />
-		<Button
-			loading={saveLoading}
-			loadingAsSkeleton={false}
-			colorStyle="primary"
-			onclick={save}
-			disabled={!isModified || saveLoading || $isBusy}
-			testId={SETTINGS_NETWORKS_MODAL_SAVE_BUTTON}>{$i18n.core.text.save}</Button
-		>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCloseModal />
+			<Button
+				loading={saveLoading}
+				loadingAsSkeleton={false}
+				colorStyle="primary"
+				onclick={save}
+				disabled={!isModified || saveLoading || $isBusy}
+				testId={SETTINGS_NETWORKS_MODAL_SAVE_BUTTON}>{$i18n.core.text.save}</Button
+			>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

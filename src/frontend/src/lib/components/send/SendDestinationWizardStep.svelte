@@ -150,15 +150,17 @@
 		</div>
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		{#if formCancelAction === 'back'}
-			<ButtonBack onclick={back} />
-		{:else}
-			<ButtonCancel onclick={close} />
-		{/if}
+	{#snippet toolbar()}
+		<ButtonGroup>
+			{#if formCancelAction === 'back'}
+				<ButtonBack onclick={back} />
+			{:else}
+				<ButtonCancel onclick={close} />
+			{/if}
 
-		<Button onclick={next} {disabled} testId={SEND_FORM_DESTINATION_NEXT_BUTTON}>
-			{$i18n.core.text.next}
-		</Button>
-	</ButtonGroup>
+			<Button onclick={next} {disabled} testId={SEND_FORM_DESTINATION_NEXT_BUTTON}>
+				{$i18n.core.text.next}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
