@@ -184,14 +184,13 @@ const loadUserTokens = async (params: {
 					// Check it the user token is actually a match in the environment static metadata
 					const existingToken = ALL_DEFAULT_ERC20_TOKENS.find(
 						({ address: tokenAddress, network }) =>
-							tokenAddress.toLowerCase() === address.toLowerCase() &&
-							(network as EthereumNetwork).chainId === chain_id
+							tokenAddress.toLowerCase() === address.toLowerCase() && network.chainId === chain_id
 					);
 
 					if (nonNullish(existingToken)) {
 						return {
 							...existingToken,
-							network: existingToken.network as EthereumNetwork,
+							network: existingToken.network,
 							category: 'custom' as const,
 							version: fromNullable(version),
 							enabled: fromNullable(enabled) ?? true
