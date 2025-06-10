@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/Button.svelte';
+	import { TRACK_REWARD_FILTER_CHANGE } from '$lib/constants/analytics.contants';
 	import { REWARDS_FILTER } from '$lib/constants/test-ids.constants';
 	import { RewardStates } from '$lib/enums/reward-states';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import { TRACK_REWARD_FILTER_CHANGE } from '$lib/constants/analytics.contants';
 
 	interface Props {
 		rewardState: RewardStates;
@@ -16,11 +16,14 @@
 
 	const changeFilter = (toState: RewardStates) => {
 		if (rewardState !== toState) {
-			trackEvent({name: TRACK_REWARD_FILTER_CHANGE, metadata: { fromState: rewardState, toState }})
+			trackEvent({
+				name: TRACK_REWARD_FILTER_CHANGE,
+				metadata: { fromState: rewardState, toState }
+			});
 		}
 
 		rewardState = toState;
-	}
+	};
 </script>
 
 <div
