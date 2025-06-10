@@ -73,6 +73,17 @@ export const setCustomToken = async ({
 	return setCustomToken({ token });
 };
 
+export const removeUserToken = async ({
+	token,
+	identity
+}: CanisterApiFunctionParams<{
+	token: UserToken;
+}>): Promise<void> => {
+	const { removeUserToken } = await backendCanister({ identity });
+
+	return removeUserToken({ token });
+};
+
 export const setManyUserTokens = async ({
 	identity,
 	tokens
