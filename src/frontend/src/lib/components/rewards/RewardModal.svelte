@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
-	import { getContext } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
@@ -18,13 +18,29 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
-	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import {
+		TRACK_REWARD_CAMPAIGN_OPEN,
+		TRACK_REWARD_CAMPAIGN_LEARN_MORE,
+		TRACK_REWARD_CAMPAIGN_SHARE
+	} from '$lib/constants/analytics.contants';
 
 	interface Props {
 		reward: RewardDescription;
 	}
 
 	let { reward }: Props = $props();
+
+	onMount(() =>
+		trackEvent({
+				name: TRACK_REWARD_CAMPAIGN_OPEN,
+				metadata: {
+					campaignId: `${reward.id}`,
+					state: getCampaignState(reward)
+				}
+			})
+	);
 
 	const { getCampaignEligibility } = getContext<RewardEligibilityContext>(
 		REWARD_ELIGIBILITY_CONTEXT_KEY
@@ -64,11 +80,14 @@
 				iconVisible={false}
 				asButton
 				styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
+				trackEvent={{name: TRACK_REWARD_CAMPAIGN_LEARN_MORE, metadata: {campaignId: `${reward.id}`, state: getCampaignState(reward)}}}
 			>
 				{$i18n.rewards.text.learn_more}
 			</ExternalLink>
 
-			<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2" />
+			<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2"
+						 trackEvent={{name: TRACK_REWARD_CAMPAIGN_SHARE, metadata: {campaignId: `${reward.id}`, state: getCampaignState(reward)}}}
+			/>
 
 			{#if criteria.length > 0}
 				<Hr spacing="md" />
