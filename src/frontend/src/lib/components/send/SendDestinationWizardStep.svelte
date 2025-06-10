@@ -154,7 +154,8 @@
 		</div>
 	{/if}
 
-	<ButtonGroup slot="toolbar">
+	{#snippet toolbar()}
+	<ButtonGroup>
 		{#if formCancelAction === 'back'}
 			<ButtonBack onclick={back} />
 		{:else}
@@ -165,4 +166,5 @@
 			{$i18n.core.text.next}
 		</Button>
 	</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

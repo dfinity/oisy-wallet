@@ -66,6 +66,8 @@
 			{/each}
 		</div>
 
-		<ButtonCloseModal slot="toolbar" />
+		{#snippet toolbar()}
+		<ButtonCloseModal />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

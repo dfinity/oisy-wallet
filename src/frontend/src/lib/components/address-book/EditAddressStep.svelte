@@ -105,7 +105,9 @@
 				{focusField}
 			/>
 		</div>
-		<ButtonGroup slot="toolbar">
+
+		{#snippet toolbar()}
+		<ButtonGroup>
 			<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
 			<Button
 				colorStyle="primary"
@@ -117,5 +119,6 @@
 				{$i18n.core.text.save}
 			</Button>
 		</ButtonGroup>
+		{/snippet}
 	</ContentWithToolbar>
 </form>

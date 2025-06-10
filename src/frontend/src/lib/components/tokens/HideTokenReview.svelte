@@ -37,12 +37,14 @@
 		<Html text={$i18n.tokens.hide.info} />
 	</p>
 
-	<ButtonGroup slot="toolbar">
+	{#snippet toolbar()}
+	<ButtonGroup>
 		<ButtonCancel onclick={() => dispatch('icCancel')} />
 		<Button on:click={() => dispatch('icHide')}>
 			{$i18n.tokens.hide.confirm}
 		</Button>
 	</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
 
 <style lang="scss">

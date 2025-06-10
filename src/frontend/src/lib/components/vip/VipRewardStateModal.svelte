@@ -96,6 +96,7 @@
 				: $i18n.vip.reward.text.reward_failed_description}</span
 		>
 
+		{#snippet toolbar()}
 		<Button
 			paddingSmall
 			colorStyle="secondary-light"
@@ -103,9 +104,9 @@
 			fullWidth
 			on:click={close}
 			testId={VIP_STATE_BUTTON}
-			slot="toolbar"
 		>
 			{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
 		</Button>
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

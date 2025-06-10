@@ -30,10 +30,12 @@
 		/>
 	</span>
 
-	<ButtonGroup slot="toolbar">
+	{#snippet toolbar()}
+	<ButtonGroup>
 		<ButtonCancel {disabled} onclick={onCancel}></ButtonCancel>
 		<Button loading={disabled} colorStyle="error" on:click={onDelete}>
 			{$i18n.address.delete.delete_address}
 		</Button>
 	</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

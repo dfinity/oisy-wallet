@@ -60,11 +60,13 @@
 		/>
 	</DestinationWizardStepSection>
 
-	<ButtonGroup slot="toolbar">
+	{#snippet toolbar()}
+	<ButtonGroup>
 		<ButtonBack onclick={back} />
 
 		<Button on:click={apply} {disabled}>
 			{$i18n.core.text.apply}
 		</Button>
 	</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

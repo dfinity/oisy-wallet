@@ -162,7 +162,8 @@
 		</List>
 	{/if}
 
-	<ButtonGroup slot="toolbar">
+	{#snippet toolbar()}
+	<ButtonGroup>
 		<ButtonCloseModal />
 		<Button
 			loading={saveLoading}
@@ -173,4 +174,5 @@
 			testId={SETTINGS_NETWORKS_MODAL_SAVE_BUTTON}>{$i18n.core.text.save}</Button
 		>
 	</ButtonGroup>
+		{/snippet}
 </ContentWithToolbar>

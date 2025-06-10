@@ -112,7 +112,8 @@
 		</div>
 	{/if}
 
-	<div slot="toolbar" in:fade>
+	{#snippet toolbar()}
+	<div in:fade>
 		{#if nonNullish(token)}
 			<ButtonGroup>
 				<ButtonBack onclick={back} />
@@ -122,4 +123,5 @@
 			</ButtonGroup>
 		{/if}
 	</div>
+	{/snippet}
 </ContentWithToolbar>

@@ -82,11 +82,13 @@
 		</div>
 	{/if}
 
-	<ButtonGroup slot="toolbar">
+	{#snippet toolbar()}
+	<ButtonGroup>
 		<ButtonBack onclick={onClick} />
 
 		<Button on:click={() => dispatch('icSwap')}>
 			{$i18n.swap.text.swap_button}
 		</Button>
 	</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

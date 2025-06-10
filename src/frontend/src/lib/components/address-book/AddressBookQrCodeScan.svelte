@@ -55,9 +55,11 @@
 		<QRCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
 	</div>
 
-	<ButtonGroup slot="toolbar">
+	{#snippet toolbar()}
+	<ButtonGroup>
 		<ButtonCancel onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
 	</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
 
 <style lang="scss">

@@ -35,10 +35,12 @@
 
 	<slot name="info" />
 
-	<ButtonGroup slot="toolbar" testId="toolbar">
+	{#snippet toolbar()}
+	<ButtonGroup testId="toolbar">
 		<ButtonBack onclick={() => dispatch('icBack')} />
 		<Button {disabled} on:click={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
 			{$i18n.send.text.send}
 		</Button>
 	</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

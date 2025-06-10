@@ -89,11 +89,13 @@
 		<InputText name="uri" placeholder={$i18n.wallet_connect.alt.connect_input} bind:value={uri} />
 	</div>
 
-	<ButtonGroup slot="toolbar">
+	{#snippet toolbar()}
+	<ButtonGroup>
 		<Button disabled={invalid} on:click={onClick}>
 			{$i18n.wallet_connect.text.connect}
 		</Button>
 	</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
 
 <style lang="scss">
