@@ -3,7 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
-	import AddressBookQrCodeScan from '$lib/components/address-book/AddressBookQrCodeScan.svelte';
+	import AddressBookQrCodeStep from '$lib/components/address-book/AddressBookQrCodeStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
@@ -487,11 +487,13 @@
 			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.QR_CODE_SCAN}
-		<AddressBookQrCodeScan
-			onClose={() =>
+		<AddressBookQrCodeStep
+			onCancel={() =>
 				nonNullish(modal) &&
 				goToWizardStep({ modal, steps, stepName: AddressBookSteps.EDIT_ADDRESS })}
-			bind:address={qrCodeAddress}
+			onScan={({ code }) => {
+				qrCodeAddress = code;
+			}}
 		/>
 	{/if}
 </WizardModal>
