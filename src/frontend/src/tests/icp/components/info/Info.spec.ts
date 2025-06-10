@@ -18,7 +18,7 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
-import { render, waitFor } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 
 describe('Info', () => {
 	const mockCkBtcToken = {
@@ -152,9 +152,7 @@ describe('Info', () => {
 
 			const { getByText } = render(Info);
 
-			await waitFor(() => {
-				expect(() => getByText(en.info.ethereum.title)).toThrow();
-			});
+			expect(() => getByText(en.info.ethereum.title)).toThrow();
 		});
 	});
 
