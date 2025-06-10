@@ -7,7 +7,7 @@ import {
 	getDiscriminatorForTokenAccountId,
 	getTokenAccountIdAddressString
 } from '$lib/utils/token-account-id.utils';
-import { fromNullable, isEmptyString, isNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, isEmptyString, isNullish, notEmptyString, toNullable } from '@dfinity/utils';
 
 export const selectColorForName = <T>({
 	colors,
@@ -88,9 +88,10 @@ export const isContactMatchingFilter = ({
 	contact: ContactUi;
 	filterValue: string;
 }): boolean =>
-	address.includes(filterValue) ||
-	contact.name.toLowerCase().includes(filterValue.toLowerCase()) ||
-	contact.addresses.some(
-		({ label, address: innerAddress }) =>
-			address === innerAddress && label?.toLowerCase().includes(filterValue.toLowerCase())
-	);
+	notEmptyString(filterValue) &&
+	(address.includes(filterValue) ||
+		contact.name.toLowerCase().includes(filterValue.toLowerCase()) ||
+		contact.addresses.some(
+			({ label, address: innerAddress }) =>
+				address === innerAddress && label?.toLowerCase().includes(filterValue.toLowerCase())
+		));
