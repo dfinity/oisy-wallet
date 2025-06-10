@@ -52,9 +52,9 @@
 			} else {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${reward.id}`, type: 'airdrop'}
-				})
-				modalStore.openRewardState({ id: rewardModalId, data: {reward, jackpot: false} });
+					metadata: { campaignId: `${reward.id}`, type: 'airdrop' }
+				});
+				modalStore.openRewardState({ id: rewardModalId, data: { reward, jackpot: false } });
 			}
 		}
 	});
