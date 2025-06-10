@@ -18,6 +18,7 @@
 	import { onMount } from 'svelte';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_REWARD_CAMPAIGN_WIN_SHARE } from '$lib/constants/analytics.contants';
+	import { nonNullish } from '@dfinity/utils';
 
 	// TODO At the moment the selected campaign is hardcoded. In the future this should be configurable from the outside.
 	const reward: RewardDescription | undefined = rewardCampaigns.find(
@@ -52,15 +53,17 @@
 				{$i18n.referral.reward.text.content_text}
 			</span>
 
-			<Share
-				testId={REFERRAL_STATE_MODAL_SHARE_ANCHOR}
-				text={$i18n.referral.reward.text.share}
-				href={OISY_REFERRAL_TWITTER_URL}
-				trackEvent={{
-						name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
-						metadata: { campaignId: `${reward.id}`, type: 'referral' }
-					}}
-			/>
+			{#if nonNullish(reward)}
+				<Share
+					testId={REFERRAL_STATE_MODAL_SHARE_ANCHOR}
+					text={$i18n.referral.reward.text.share}
+					href={OISY_REFERRAL_TWITTER_URL}
+					trackEvent={{
+							name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
+							metadata: { campaignId: `${reward.id}`, type: 'referral' }
+						}}
+				/>
+			{/if}
 		</div>
 
 		<Button onclick={modalStore.close} colorStyle="secondary-light" fullWidth slot="toolbar">
