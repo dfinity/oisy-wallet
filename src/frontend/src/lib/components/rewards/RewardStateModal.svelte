@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
-	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
 	import rewardReceived from '$lib/assets/reward-received.svg';
@@ -11,6 +9,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
+	import { TRACK_REWARD_CAMPAIGN_WIN_SHARE } from '$lib/constants/analytics.contants';
 	import {
 		REWARDS_STATE_MODAL_IMAGE_BANNER,
 		REWARDS_STATE_MODAL_SHARE_BUTTON
@@ -20,15 +19,11 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
+		reward: RewardDescription;
 		jackpot?: boolean;
 	}
 
-	let { jackpot = false }: Props = $props();
-
-	// TODO At the moment the selected campaign is hardcoded. In the future this should be configurable from the outside.
-	const reward: RewardDescription | undefined = rewardCampaigns.find(
-		(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
-	);
+	let { reward, jackpot = false }: Props = $props();
 </script>
 
 <Sprinkles type={jackpot ? 'page-jackpot' : 'page'} />
@@ -49,13 +44,15 @@
 			>
 			<span class="block w-full">{$i18n.rewards.text.state_modal_content_text}</span>
 
-			{#if nonNullish(reward)}
-				<Share
-					testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
-					text={$i18n.rewards.text.share}
-					href={jackpot ? reward.jackpotHref : reward.airdropHref}
-				/>
-			{/if}
+			<Share
+				testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
+				text={$i18n.rewards.text.share}
+				href={jackpot ? reward.jackpotHref : reward.airdropHref}
+				trackEvent={{
+					name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
+					metadata: { campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}` }
+				}}
+			/>
 		</div>
 
 		{#snippet toolbar()}
