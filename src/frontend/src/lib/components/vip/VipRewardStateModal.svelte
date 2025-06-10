@@ -96,16 +96,17 @@
 				: $i18n.vip.reward.text.reward_failed_description}</span
 		>
 
-		<Button
-			paddingSmall
-			colorStyle="secondary-light"
-			type="button"
-			fullWidth
-			onclick={close}
-			testId={VIP_STATE_BUTTON}
-			slot="toolbar"
-		>
-			{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
-		</Button>
+		{#snippet toolbar()}
+			<Button
+				paddingSmall
+				colorStyle="secondary-light"
+				type="button"
+				fullWidth
+				onclick={close}
+				testId={VIP_STATE_BUTTON}
+			>
+				{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
+			</Button>
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

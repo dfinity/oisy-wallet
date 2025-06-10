@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { QRCodeReader } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
@@ -34,21 +34,7 @@
 		onIcQrCodeBack
 	}: Props = $props();
 
-	let resolveQrCodePromise:
-		| (({ status, code }: { status: QrStatus; code?: string }) => void)
-		| undefined = undefined;
-
-	onMount(async () => {
-		await scanQrCode();
-	});
-
-	const scanQrCode = async () => {
-		const result = await new Promise<{ status: QrStatus; code?: string | undefined }>((resolve) => {
-			resolveQrCodePromise = resolve;
-		});
-
-		const { status, code } = result;
-
+	const onScan = ({ status, code }: { status: QrStatus; code?: string }) => {
 		const qrResponse = onDecodeQrCode({ status, code, expectedToken });
 
 		if (qrResponse.status === 'token_incompatible') {
@@ -67,29 +53,14 @@
 
 		onIcQrCodeBack();
 	};
-
-	const onQRCode = ({ detail: code }: CustomEvent<string>) => {
-		resolveQrCodePromise?.({ status: 'success', code });
-		resolveQrCodePromise = undefined;
-	};
-
-	const onCancel = () => {
-		resolveQrCodePromise?.({ status: 'cancelled' });
-		resolveQrCodePromise = undefined;
-	};
 </script>
 
-<div class="stretch qr-code-wrapper md:min-h-[300px]">
-	<QRCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
-</div>
+<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
+	<QrCodeScanner {onScan} onBack={onIcQrCodeBack} />
 
-<ButtonGroup>
-	<ButtonBack onclick={onIcQrCodeBack} />
-</ButtonGroup>
-
-<style lang="scss">
-	.qr-code-wrapper {
-		--primary-rgb: 50, 20, 105;
-		color: rgba(var(--primary-rgb), 0.6);
-	}
-</style>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={onIcQrCodeBack} />
+		</ButtonGroup>
+	{/snippet}
+</ContentWithToolbar>
