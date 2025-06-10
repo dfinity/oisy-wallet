@@ -106,6 +106,8 @@
 			</div>
 		</MessageBox>
 
-		<ButtonCloseModal isPrimary slot="toolbar" />
+		{#snippet toolbar()}
+			<ButtonCloseModal isPrimary />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

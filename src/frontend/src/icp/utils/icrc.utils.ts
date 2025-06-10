@@ -50,7 +50,7 @@ export const mapIcrcToken = ({
 	const { success: dynamicIconIsUrl } = UrlSchema.safeParse(dynamicIcon);
 
 	// We do not allow external URLs anyway, so it is safe to use the static icon, even if it does not exist
-	const icon = nonNullish(dynamicIconIsUrl) && dynamicIconIsUrl ? staticIcon : dynamicIcon;
+	const icon = dynamicIconIsUrl ? staticIcon : dynamicIcon;
 
 	return {
 		id: parseTokenId(symbol),

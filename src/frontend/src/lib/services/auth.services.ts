@@ -178,6 +178,10 @@ const PARAM_LEVEL = 'level';
  * If a message was provided to the logout process - e.g. a message informing the logout happened because the session timed-out - append the information to the url as query params
  */
 const appendMsgToUrl = (msg: ToastMsg) => {
+	if (typeof window === 'undefined') {
+		return;
+	}
+
 	const { text, level } = msg;
 
 	const url: URL = new URL(window.location.href);
