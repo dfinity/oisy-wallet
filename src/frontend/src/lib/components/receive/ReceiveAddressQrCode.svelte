@@ -34,7 +34,7 @@
 	/>
 
 	{#snippet toolbar()}
-	<Button colorStyle="secondary-light" fullWidth on:click={() => dispatch('icBack')}>
+	<Button colorStyle="secondary-light" fullWidth onclick={() => dispatch('icBack')}>
 		{$i18n.core.text.back}
 	</Button>
 	{/snippet}

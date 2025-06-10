@@ -59,11 +59,11 @@
 		</div>
 
 		{#snippet toolbar()}
-			<ButtonGroup>
-				<Button on:click={modalStore.close} colorStyle="primary"
-					>{$i18n.rewards.text.open_wallet}</Button
-				>
-			</ButtonGroup>
+		<ButtonGroup>
+			<Button onclick={modalStore.close} colorStyle="primary"
+				>{$i18n.rewards.text.open_wallet}</Button
+			>
+		</ButtonGroup>
 		{/snippet}
 	</ContentWithToolbar>
 </Modal>

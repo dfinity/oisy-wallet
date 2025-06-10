@@ -15,7 +15,8 @@ describe('AddressForm', () => {
 		const { getByTestId, getByText } = render(AddressForm, {
 			props: {
 				address,
-				isInvalid: false
+				isInvalid: false,
+				onQRCodeScan: () => {}
 			}
 		});
 
@@ -38,7 +39,8 @@ describe('AddressForm', () => {
 			props: {
 				address,
 				disableAddressField: true,
-				isInvalid: false
+				isInvalid: false,
+				onQRCodeScan: () => {}
 			}
 		});
 
@@ -54,7 +56,8 @@ describe('AddressForm', () => {
 			props: {
 				address,
 				disableAddressField: false,
-				isInvalid: false
+				isInvalid: false,
+				onQRCodeScan: () => {}
 			}
 		});
 
@@ -84,6 +87,55 @@ describe('AddressFormTestHost', () => {
 
 		expect(component.getAddress().address).toBe(testAddress);
 		expect(component.getAddress().label).toBe(testLabel);
+	});
+
+	it('should trim whitespace from label input', async () => {
+		const address: Partial<ContactAddressUi> = {};
+		const { getByTestId, component } = render(AddressFormTestHost, {
+			props: {
+				address,
+				isInvalid: false
+			}
+		});
+
+		const labelInput = getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT);
+
+		// Test leading spaces
+		await fireEvent.input(labelInput, { target: { value: '  test label' } });
+
+		expect(component.getAddress().label).toBe('test label');
+
+		// Test trailing spaces
+		await fireEvent.input(labelInput, { target: { value: 'test label  ' } });
+
+		expect(component.getAddress().label).toBe('test label');
+
+		// Test both leading and trailing spaces
+		await fireEvent.input(labelInput, { target: { value: '  test label  ' } });
+
+		expect(component.getAddress().label).toBe('test label');
+	});
+
+	it('should handle empty string label', async () => {
+		const address: Partial<ContactAddressUi> = { label: 'initial' };
+		const { getByTestId, component } = render(AddressFormTestHost, {
+			props: {
+				address,
+				isInvalid: false
+			}
+		});
+
+		const labelInput = getByTestId(ADDRESS_BOOK_ADDRESS_ALIAS_INPUT);
+
+		// Test empty string
+		await fireEvent.input(labelInput, { target: { value: '' } });
+
+		expect(component.getAddress().label).toBe('');
+
+		// Test whitespace-only string
+		await fireEvent.input(labelInput, { target: { value: '   ' } });
+
+		expect(component.getAddress().label).toBe('');
 	});
 
 	it('should update isInvalid when address is invalid or valid', async () => {

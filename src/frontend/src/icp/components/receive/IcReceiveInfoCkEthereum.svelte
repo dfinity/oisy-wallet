@@ -46,18 +46,18 @@
 	</Value>
 
 	{#snippet toolbar()}
-		<div class="flex w-full flex-col gap-3">
-			<Button paddingSmall colorStyle="secondary" on:click={() => dispatch('icHowToConvert')}>
-				<span class="text-dark-slate-blue font-bold"
-					>{replacePlaceholders(
-						replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
-						{
-							$token: $ckEthereumTwinToken.symbol,
-							$ckToken: $token.symbol
-						}
-					)}</span
-				>
-			</Button>
+	<div class="flex w-full flex-col gap-3">
+		<Button paddingSmall colorStyle="secondary" onclick={() => dispatch('icHowToConvert')}>
+			<span class="text-dark-slate-blue font-bold"
+				>{replacePlaceholders(
+					replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
+					{
+						$token: $ckEthereumTwinToken.symbol,
+						$ckToken: $token.symbol
+					}
+				)}</span
+			>
+		</Button>
 
 			<ButtonDone onclick={close} />
 		</div>

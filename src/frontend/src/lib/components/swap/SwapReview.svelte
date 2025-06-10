@@ -48,20 +48,24 @@
 
 	{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
 		<ModalValue>
-			<svelte:fragment slot="label">{$i18n.swap.text.value_difference}</svelte:fragment>
+			{#snippet label()}
+				{$i18n.swap.text.value_difference}
+			{/snippet}
 
-			<svelte:fragment slot="main-value">
+			{#snippet mainValue()}
 				<SwapImpact {swapAmount} {receiveAmount} />
-			</svelte:fragment>
+			{/snippet}
 		</ModalValue>
 	{/if}
 
 	<ModalValue>
-		<svelte:fragment slot="label">{$i18n.swap.text.max_slippage}</svelte:fragment>
+		{#snippet label()}
+			{$i18n.swap.text.max_slippage}
+		{/snippet}
 
-		<svelte:fragment slot="main-value">
+		{#snippet mainValue()}
 			{slippageValue}%
-		</svelte:fragment>
+		{/snippet}
 	</ModalValue>
 
 	<div class="flex flex-col gap-3">
@@ -86,7 +90,7 @@
 	<ButtonGroup>
 		<ButtonBack onclick={onClick} />
 
-		<Button on:click={() => dispatch('icSwap')}>
+		<Button onclick={() => dispatch('icSwap')}>
 			{$i18n.swap.text.swap_button}
 		</Button>
 	</ButtonGroup>

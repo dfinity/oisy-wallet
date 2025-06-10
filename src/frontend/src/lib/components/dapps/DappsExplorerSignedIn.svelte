@@ -42,7 +42,7 @@
 {#if nonNullish(featuredDapp) && nonNullish(featuredDapp.screenshots)}
 	<div class="mb-6 md:mb-10">
 		<DappPromoBanner
-			on:click={() => modalStore.openDappDetails({ id: modalId, data: featuredDapp })}
+			onclick={() => modalStore.openDappDetails({ id: modalId, data: featuredDapp })}
 			dAppDescription={featuredDapp}
 		/>
 	</div>
@@ -52,7 +52,7 @@
 	<Button
 		paddingSmall
 		ariaLabel={$i18n.dapps.alt.show_all}
-		on:click={() => (selectedTag = undefined)}
+		onclick={() => (selectedTag = undefined)}
 		styleClass="text-nowrap max-w-fit text-sm"
 		colorStyle={selectedTag === undefined ? 'primary' : 'tertiary'}
 	>
@@ -62,7 +62,7 @@
 		<Button
 			paddingSmall
 			ariaLabel={replacePlaceholders($i18n.dapps.alt.show_tag, { $tag: tag })}
-			on:click={() => (selectedTag = tag)}
+			onclick={() => (selectedTag = tag)}
 			styleClass="text-nowrap max-w-fit text-sm"
 			colorStyle={selectedTag === tag ? 'primary' : 'tertiary'}>{tag}</Button
 		>

@@ -33,7 +33,7 @@
 	{#snippet toolbar()}
 	<ButtonGroup>
 		<ButtonCancel {disabled} onclick={onCancel}></ButtonCancel>
-		<Button loading={disabled} colorStyle="error" on:click={onDelete}>
+		<Button loading={disabled} colorStyle="error" onclick={onDelete}>
 			{$i18n.address.delete.delete_address}
 		</Button>
 	</ButtonGroup>

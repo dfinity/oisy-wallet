@@ -102,7 +102,7 @@
 			colorStyle="secondary-light"
 			type="button"
 			fullWidth
-			on:click={close}
+			onclick={close}
 			testId={VIP_STATE_BUTTON}
 		>
 			{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}

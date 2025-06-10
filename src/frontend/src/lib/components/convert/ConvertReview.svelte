@@ -40,7 +40,7 @@
 	<ButtonGroup>
 		<slot name="cancel" />
 
-		<Button on:click={() => dispatch('icConvert')} testId="convert-review-button-next">
+		<Button onclick={() => dispatch('icConvert')} testId="convert-review-button-next">
 			{$i18n.convert.text.convert_button}
 		</Button>
 	</ButtonGroup>

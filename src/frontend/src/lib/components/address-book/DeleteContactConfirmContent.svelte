@@ -27,7 +27,7 @@
 	{#snippet toolbar()}
 	<ButtonGroup>
 		<ButtonCancel {disabled} onclick={onCancel}></ButtonCancel>
-		<Button loading={disabled} colorStyle="error" on:click={() => onDelete(contact.id)}>
+		<Button loading={disabled} colorStyle="error" onclick={() => onDelete(contact.id)}>
 			{$i18n.contact.delete.delete_contact}
 		</Button>
 	</ButtonGroup>

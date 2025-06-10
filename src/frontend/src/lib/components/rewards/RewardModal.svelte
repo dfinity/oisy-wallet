@@ -78,9 +78,9 @@
 		{/if}
 
 		{#snippet toolbar()}
-			<Button paddingSmall type="button" fullWidth on:click={modalStore.close}>
-				{$i18n.rewards.text.modal_button_text}
-			</Button>
+		<Button paddingSmall type="button" fullWidth onclick={modalStore.close}>
+			{$i18n.rewards.text.modal_button_text}
+		</Button>
 		{/snippet}
 	</ContentWithToolbar>
 </Modal>
