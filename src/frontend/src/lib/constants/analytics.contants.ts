@@ -76,6 +76,9 @@ export const TRACK_CONTACT_UPDATE_ERROR = 'contact_update_error';
 export const TRACK_CONTACT_DELETE_SUCCESS = 'contact_delete_success';
 export const TRACK_CONTACT_DELETE_ERROR = 'contact_delete_error';
 
+// Rewards
+export const TRACK_REWARD_LEARN_MORE = 'reward_learn_more';
+
 // Navigation
 export const TRACK_COUNT_OPEN_WHY_OISY = 'open_why_oisy';
 export const TRACK_COUNT_OPEN_DOCUMENTATION = 'open_documentation';
