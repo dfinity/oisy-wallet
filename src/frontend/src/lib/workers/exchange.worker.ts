@@ -74,7 +74,7 @@ const syncExchange = async ({
 	icrcLedgerCanisterIds: LedgerCanisterIdText[];
 	splTokenAddresses: SplTokenAddress[];
 }) => {
-	// Avoid to duplicate the sync if already in progress and not yet finished
+	// Avoid duplicating the sync if already in progress and not yet finished
 	if (syncInProgress) {
 		return;
 	}
