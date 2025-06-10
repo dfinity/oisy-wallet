@@ -85,5 +85,7 @@
 		{/snippet}
 	</ReceiveAddress>
 
-	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} onclick={close} slot="toolbar" />
+	{#snippet toolbar()}
+		<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} onclick={close} />
+	{/snippet}
 </ContentWithToolbar>
