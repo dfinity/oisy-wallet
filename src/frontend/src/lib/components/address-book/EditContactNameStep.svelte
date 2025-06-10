@@ -20,15 +20,17 @@
 		onClose: () => void;
 		isNewContact: boolean;
 		disabled?: boolean;
+		title?: string;
 	}
 
 	let {
+		contact = {},
+		isNewContact,
+		disabled = false,
 		onAddContact,
 		onSaveContact,
 		onClose,
-		isNewContact,
-		contact = {},
-		disabled = false
+		title = $bindable<string>()
 	}: Props = $props();
 
 	let editingContact = $state(contact ? { ...contact } : {});
@@ -49,13 +51,11 @@
 		}
 	};
 
-	let title = $derived(
-		notEmptyString(editingContact?.name?.trim?.())
-			? editingContact?.name
-			: $i18n.contact.form.add_new_contact
-	);
-
-	export { title };
+	$effect(() => {
+		title = notEmptyString(editingContact.name?.trim())
+			? editingContact.name
+			: $i18n.contact.form.add_new_contact;
+	});
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-6 items-center">
