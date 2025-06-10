@@ -163,11 +163,11 @@
 		</div>
 	</div>
 
-	<svelte:fragment slot="toolbar">
+	{#snippet toolbar()}
 		{#if formCancelAction === 'back'}
 			<ButtonBack fullWidth onclick={() => dispatch('icBack')} />
 		{:else}
 			<ButtonDone onclick={modalStore.close} />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </ContentWithToolbar>
