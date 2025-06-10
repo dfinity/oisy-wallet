@@ -1,7 +1,58 @@
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_BITCOIN_NETWORKS } from '$env/networks/networks.btc.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { SUPPORTED_SOLANA_NETWORKS } from '$env/networks/networks.sol.env';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
-import { areAddressesEqual } from '$lib/utils/address.utils';
+import { areAddressesEqual, getCaseSensitiveness } from '$lib/utils/address.utils';
+import { parseNetworkId } from '$lib/validation/network.validation';
 
 describe('address.utils', () => {
+	describe('getCaseSensitiveness', () => {
+		it.each(['Btc', 'Eth', 'Icrcv2', 'unknown'])(
+			'should return false for %s address type',
+			(rawAddressType) => {
+				const addressType = rawAddressType as TokenAccountIdTypes;
+
+				expect(getCaseSensitiveness({ addressType })).toBeFalsy();
+			}
+		);
+
+		it('should return true for Sol address type', () => {
+			const addressType = 'Sol' as TokenAccountIdTypes;
+
+			expect(getCaseSensitiveness({ addressType })).toBeTruthy();
+		});
+
+		it.each([
+			ICP_NETWORK,
+			...SUPPORTED_BITCOIN_NETWORKS,
+			...SUPPORTED_ETHEREUM_NETWORKS,
+			...SUPPORTED_EVM_NETWORKS
+		])('should return false for network $name', ({ id: networkId }) => {
+			expect(getCaseSensitiveness({ networkId })).toBeFalsy();
+		});
+
+		it.each(SUPPORTED_SOLANA_NETWORKS)(
+			'should return true for network $name',
+			({ id: networkId }) => {
+				expect(getCaseSensitiveness({ networkId })).toBeTruthy();
+			}
+		);
+
+		it('should return false for unknown network', () => {
+			expect(
+				getCaseSensitiveness({
+					networkId: parseNetworkId('mock-network')
+				})
+			).toBeFalsy();
+		});
+
+		it('should return false for undefined network', () => {
+			expect(getCaseSensitiveness({ networkId: undefined })).toBeFalsy();
+		});
+	});
+
 	describe('areAddressesEqual', () => {
 		const address1 = 'address123';
 		const address2 = 'address456';
