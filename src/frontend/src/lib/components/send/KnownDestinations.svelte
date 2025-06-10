@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
@@ -35,15 +35,17 @@
 	);
 
 	let filteredKnownDestinations = $derived(
-		sortedKnownDestinations.filter(({ address }) =>
-			nonNullish(networkContacts?.[address])
-				? isContactMatchingFilter({
-						address,
-						contact: networkContacts[address],
-						filterValue: destination
-					})
-				: address.includes(destination)
-		)
+		isEmptyString(destination)
+			? sortedKnownDestinations
+			: sortedKnownDestinations.filter(({ address }) =>
+					nonNullish(networkContacts?.[address])
+						? isContactMatchingFilter({
+								address,
+								contact: networkContacts[address],
+								filterValue: destination
+							})
+						: address.includes(destination)
+				)
 	);
 </script>
 

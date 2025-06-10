@@ -69,8 +69,10 @@
 			{/if}
 		</div>
 
-		<Button onclick={modalStore.close} colorStyle="secondary-light" fullWidth slot="toolbar">
-			{$i18n.referral.reward.text.open_wallet}
-		</Button>
+		{#snippet toolbar()}
+			<Button onclick={modalStore.close} colorStyle="secondary-light" fullWidth>
+				{$i18n.referral.reward.text.open_wallet}
+			</Button>
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

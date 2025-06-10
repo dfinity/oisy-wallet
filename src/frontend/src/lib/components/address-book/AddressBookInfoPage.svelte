@@ -37,7 +37,9 @@
 		</div>
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={onClose} testId={ADDRESS_EDIT_CANCEL_BUTTON} />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={onClose} testId={ADDRESS_EDIT_CANCEL_BUTTON} />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
