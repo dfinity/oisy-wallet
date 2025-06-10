@@ -125,7 +125,9 @@
 			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 		{/if}
 
-		<AddTokenByNetworkToolbar slot="toolbar" {invalid} on:icBack />
+		{#snippet toolbar()}
+			<AddTokenByNetworkToolbar {invalid} on:icBack />
+		{/snippet}
 	</ContentWithToolbar>
 </form>
 

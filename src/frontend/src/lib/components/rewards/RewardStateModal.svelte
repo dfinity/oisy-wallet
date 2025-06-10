@@ -55,10 +55,12 @@
 			/>
 		</div>
 
-		<ButtonGroup slot="toolbar">
-			<Button onclick={modalStore.close} colorStyle="primary"
-				>{$i18n.rewards.text.open_wallet}</Button
-			>
-		</ButtonGroup>
+		{#snippet toolbar()}
+			<ButtonGroup>
+				<Button onclick={modalStore.close} colorStyle="primary"
+					>{$i18n.rewards.text.open_wallet}</Button
+				>
+			</ButtonGroup>
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>
