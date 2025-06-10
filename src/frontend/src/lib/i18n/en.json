@@ -605,6 +605,7 @@
 			"swapping": "Swapping...",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
+			"swap_provider_website": "Website",
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",
 			"included_liquidity_fees": "Included liquidity pool fees",
@@ -1089,7 +1090,8 @@
 		"error": {
 			"create": "Failed to create the contact",
 			"update": "Failed to update the contact",
-			"delete": "Failed to delete the contact"
+			"delete": "Failed to delete the contact",
+			"name_too_long": "Please keep the name to $maxCharacters characters or fewer."
 		}
 	},
 	"address": {
