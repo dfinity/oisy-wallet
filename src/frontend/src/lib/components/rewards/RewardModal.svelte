@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
-	import { getContext, onMount } from 'svelte';
+	import { getContext } from 'svelte';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
@@ -12,12 +12,10 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import {
-		TRACK_REWARD_CAMPAIGN_OPEN,
 		TRACK_REWARD_CAMPAIGN_LEARN_MORE,
 		TRACK_REWARD_CAMPAIGN_SHARE
 	} from '$lib/constants/analytics.contants';
 	import { REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE } from '$lib/constants/test-ids.constants';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -31,16 +29,6 @@
 	}
 
 	let { reward }: Props = $props();
-
-	onMount(() =>
-		trackEvent({
-			name: TRACK_REWARD_CAMPAIGN_OPEN,
-			metadata: {
-				campaignId: `${reward.id}`,
-				state: getCampaignState(reward)
-			}
-		})
-	);
 
 	const { getCampaignEligibility } = getContext<RewardEligibilityContext>(
 		REWARD_ELIGIBILITY_CONTEXT_KEY
