@@ -1,11 +1,11 @@
-import AddressBookQrCodeScan from '$lib/components/address-book/AddressBookQrCodeScan.svelte';
+import AddressBookQrCodeStep from '$lib/components/address-book/AddressBookQrCodeStep.svelte';
 import {
 	ADDRESS_BOOK_CANCEL_BUTTON,
 	ADDRESS_BOOK_QR_CODE_SCAN
 } from '$lib/constants/test-ids.constants';
 import { render } from '@testing-library/svelte';
 
-describe('AddressBookQrCodeScan', () => {
+describe('AddressBookQrCodeStep', () => {
 	const qrCodeContainerSelector = `div[data-tid="${ADDRESS_BOOK_QR_CODE_SCAN}"]`;
 	const cancelButtonSelector = `button[data-tid="${ADDRESS_BOOK_CANCEL_BUTTON}"]`;
 
@@ -22,9 +22,9 @@ describe('AddressBookQrCodeScan', () => {
 	});
 
 	it('should initialize and start scanning on mount', () => {
-		const { container } = render(AddressBookQrCodeScan, {
+		const { container } = render(AddressBookQrCodeStep, {
 			props: {
-				onClose: vi.fn(),
+				onCancel: vi.fn(),
 				address: undefined
 			}
 		});
@@ -35,10 +35,10 @@ describe('AddressBookQrCodeScan', () => {
 	});
 
 	it('should trigger onClose when cancel button is clicked', () => {
-		const onClose = vi.fn();
-		const { container } = render(AddressBookQrCodeScan, {
+		const onCancel = vi.fn();
+		const { container } = render(AddressBookQrCodeStep, {
 			props: {
-				onClose,
+				onCancel,
 				address: undefined
 			}
 		});
@@ -49,6 +49,6 @@ describe('AddressBookQrCodeScan', () => {
 
 		cancelButton?.click();
 
-		expect(onClose).toHaveBeenCalled();
+		expect(onCancel).toHaveBeenCalled();
 	});
 });
