@@ -33,7 +33,7 @@
 		(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
 
-	onMount(() => trackEvent({name: TRACK_REWARD_CAMPAIGN_WIN, metadata: {campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}`}}))
+	onMount(() => reward && trackEvent({name: TRACK_REWARD_CAMPAIGN_WIN, metadata: {campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}`}}))
 </script>
 
 <Sprinkles type={jackpot ? 'page-jackpot' : 'page'} />
