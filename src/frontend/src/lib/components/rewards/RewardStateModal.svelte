@@ -12,9 +12,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
-	import {
-		TRACK_REWARD_CAMPAIGN_WIN_SHARE
-	} from '$lib/constants/analytics.contants';
+	import { TRACK_REWARD_CAMPAIGN_WIN_SHARE } from '$lib/constants/analytics.contants';
 	import {
 		REWARDS_STATE_MODAL_IMAGE_BANNER,
 		REWARDS_STATE_MODAL_SHARE_BUTTON

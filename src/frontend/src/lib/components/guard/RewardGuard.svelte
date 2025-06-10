@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
+	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
+	import type { RewardDescription } from '$env/types/env-reward';
 	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
+	import { TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		modalReferralState,
 		modalRewardState,
 		modalRewardStateData
 	} from '$lib/derived/modal.derived';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
-	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { loadRewardResult } from '$lib/utils/rewards.utils';
 
 	interface Props {
@@ -41,9 +41,12 @@
 			if (receivedJackpot) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${reward.id}`, type: 'jackpot'}
-				})
-				modalStore.openRewardState({ id: rewardModalId, data: {reward, jackpot: receivedJackpot} });
+					metadata: { campaignId: `${reward.id}`, type: 'jackpot' }
+				});
+				modalStore.openRewardState({
+					id: rewardModalId,
+					data: { reward, jackpot: receivedJackpot }
+				});
 			} else if (receivedReferral) {
 				modalStore.openReferralState(referralModalId);
 			} else {

@@ -197,7 +197,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openRewardDetails: <(params: SetWithDataParams<RewardDescription>) => void>(
 			setTypeWithData('reward-details')
 		),
-		openRewardState: <(params: SetWithDataParams<RewardStateData>) => void>setTypeWithData('reward-state'),
+		openRewardState: <(params: SetWithDataParams<RewardStateData>) => void>(
+			setTypeWithData('reward-state')
+		),
 		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(
 			setTypeWithData('settings')
 		),
