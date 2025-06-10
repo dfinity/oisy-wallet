@@ -4,6 +4,8 @@
 	import { RewardStates } from '$lib/enums/reward-states';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_REWARD_FILTER_CHANGE } from '$lib/constants/analytics.contants';
 
 	interface Props {
 		rewardState: RewardStates;
@@ -11,6 +13,14 @@
 	}
 
 	let { rewardState = $bindable(), endedCampaignsAmount = 0 }: Props = $props();
+
+	const changeFilter = (toState: RewardStates) => {
+		if (rewardState !== toState) {
+			trackEvent({name: TRACK_REWARD_FILTER_CHANGE, metadata: { fromState: rewardState, toState }})
+		}
+
+		rewardState = toState;
+	}
 </script>
 
 <div
@@ -20,7 +30,7 @@
 	<Button
 		paddingSmall
 		ariaLabel={$i18n.rewards.text.ongoing}
-		onclick={() => (rewardState = RewardStates.ONGOING)}
+		onclick={() => changeFilter(RewardStates.ONGOING)}
 		styleClass="text-nowrap max-w-28 text-sm"
 		colorStyle={rewardState === RewardStates.ONGOING ? 'primary' : 'tertiary'}
 		testId={`${REWARDS_FILTER}-${RewardStates.ONGOING}-button`}
@@ -31,7 +41,7 @@
 	<Button
 		paddingSmall
 		ariaLabel={$i18n.rewards.text.ended}
-		onclick={() => (rewardState = RewardStates.ENDED)}
+		onclick={() => changeFilter(RewardStates.ENDED)}
 		styleClass="text-nowrap max-w-28 text-sm"
 		colorStyle={rewardState === RewardStates.ENDED ? 'primary' : 'tertiary'}
 		testId={`${REWARDS_FILTER}-${RewardStates.ENDED}-button`}
