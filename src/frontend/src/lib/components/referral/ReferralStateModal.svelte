@@ -1,8 +1,5 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
-	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import referralReward from '$lib/assets/referral-reward.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
@@ -11,7 +8,6 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import {
-		TRACK_REWARD_CAMPAIGN_WIN,
 		TRACK_REWARD_CAMPAIGN_WIN_SHARE
 	} from '$lib/constants/analytics.contants';
 	import { OISY_REFERRAL_TWITTER_URL } from '$lib/constants/oisy.constants';
@@ -19,23 +15,14 @@
 		REFERRAL_STATE_MODAL_IMAGE_BANNER,
 		REFERRAL_STATE_MODAL_SHARE_ANCHOR
 	} from '$lib/constants/test-ids.constants';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	// TODO At the moment the selected campaign is hardcoded. In the future this should be configurable from the outside.
-	const reward: RewardDescription | undefined = rewardCampaigns.find(
-		(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
-	);
+	interface Props {
+		reward: RewardDescription;
+	}
 
-	onMount(
-		() =>
-			reward &&
-			trackEvent({
-				name: TRACK_REWARD_CAMPAIGN_WIN,
-				metadata: { campaignId: `${reward.id}`, type: 'referral' }
-			})
-	);
+	let {reward}: Props = $props()
 </script>
 
 <Sprinkles />
@@ -56,17 +43,15 @@
 				{$i18n.referral.reward.text.content_text}
 			</span>
 
-			{#if nonNullish(reward)}
-				<Share
-					testId={REFERRAL_STATE_MODAL_SHARE_ANCHOR}
-					text={$i18n.referral.reward.text.share}
-					href={OISY_REFERRAL_TWITTER_URL}
-					trackEvent={{
-						name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
-						metadata: { campaignId: `${reward.id}`, type: 'referral' }
-					}}
-				/>
-			{/if}
+			<Share
+				testId={REFERRAL_STATE_MODAL_SHARE_ANCHOR}
+				text={$i18n.referral.reward.text.share}
+				href={OISY_REFERRAL_TWITTER_URL}
+				trackEvent={{
+					name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
+					metadata: { campaignId: `${reward.id}`, type: 'referral' }
+				}}
+			/>
 		</div>
 
 		{#snippet toolbar()}
