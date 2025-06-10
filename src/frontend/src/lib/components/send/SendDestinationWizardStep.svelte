@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { btcNetworkContacts } from '$btc/derived/btc-contacts.derived';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
@@ -50,10 +50,6 @@
 		selectedContact = $bindable(),
 		formCancelAction = 'back'
 	}: Props = $props();
-
-	onMount(() => {
-		selectedContact = undefined;
-	});
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
