@@ -5,10 +5,10 @@
 	import type { RewardDescription } from '$env/types/env-reward';
 	import RewardCard from '$lib/components/rewards/RewardCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { TRACK_REWARD_CAMPAIGN_OPEN } from '$lib/constants/analytics.contants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { getCampaignState } from '$lib/utils/rewards.utils';
 
 	interface Props {
@@ -33,12 +33,13 @@
 		<div in:slide={SLIDE_DURATION} class="mt-4">
 			<RewardCard
 				onclick={() => {
-					trackEvent({name: TRACK_REWARD_CAMPAIGN_OPEN,
-			metadata: {
-				campaignId: `${reward.id}`,
-				state: getCampaignState(reward)
-			}
-		});
+					trackEvent({
+						name: TRACK_REWARD_CAMPAIGN_OPEN,
+						metadata: {
+							campaignId: `${reward.id}`,
+							state: getCampaignState(reward)
+						}
+					});
 					modalStore.openRewardDetails({ id: modalId, data: reward });
 				}}
 				{reward}
