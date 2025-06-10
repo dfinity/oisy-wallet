@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
@@ -11,10 +12,12 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
+	import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_REWARD_CAMPAIGN_WIN_SHARE } from '$lib/constants/analytics.contants';
 	import {
 		REWARDS_STATE_MODAL_IMAGE_BANNER,
 		REWARDS_STATE_MODAL_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -29,6 +32,8 @@
 	const reward: RewardDescription | undefined = rewardCampaigns.find(
 		(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
+
+	onMount(() => trackEvent({name: TRACK_REWARD_CAMPAIGN_WIN, metadata: {campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}`}}))
 </script>
 
 <Sprinkles type={jackpot ? 'page-jackpot' : 'page'} />
@@ -54,6 +59,7 @@
 					testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
 					text={$i18n.rewards.text.share}
 					href={jackpot ? reward.jackpotHref : reward.airdropHref}
+					trackEvent={{name: TRACK_REWARD_CAMPAIGN_WIN_SHARE, metadata: {campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}`}}}
 				/>
 			{/if}
 		</div>
