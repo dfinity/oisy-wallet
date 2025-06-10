@@ -12,7 +12,10 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
-	import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_REWARD_CAMPAIGN_WIN_SHARE } from '$lib/constants/analytics.contants';
+	import {
+		TRACK_REWARD_CAMPAIGN_WIN,
+		TRACK_REWARD_CAMPAIGN_WIN_SHARE
+	} from '$lib/constants/analytics.contants';
 	import {
 		REWARDS_STATE_MODAL_IMAGE_BANNER,
 		REWARDS_STATE_MODAL_SHARE_BUTTON
@@ -33,7 +36,14 @@
 		(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
 
-	onMount(() => reward && trackEvent({name: TRACK_REWARD_CAMPAIGN_WIN, metadata: {campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}`}}))
+	onMount(
+		() =>
+			reward &&
+			trackEvent({
+				name: TRACK_REWARD_CAMPAIGN_WIN,
+				metadata: { campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}` }
+			})
+	);
 </script>
 
 <Sprinkles type={jackpot ? 'page-jackpot' : 'page'} />
@@ -59,7 +69,10 @@
 					testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
 					text={$i18n.rewards.text.share}
 					href={jackpot ? reward.jackpotHref : reward.airdropHref}
-					trackEvent={{name: TRACK_REWARD_CAMPAIGN_WIN_SHARE, metadata: {campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}`}}}
+					trackEvent={{
+						name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
+						metadata: { campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}` }
+					}}
 				/>
 			{/if}
 		</div>
