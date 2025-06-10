@@ -39,11 +39,14 @@
 
 	let isNotKnownDestination = false;
 	$: isNotKnownDestination =
-		nonNullish(knownDestinations) && isNullish(getKnownDestination({
-			knownDestinations,
-			address:destination,
-			networkId
-		}))
+		nonNullish(knownDestinations) &&
+		isNullish(
+			getKnownDestination({
+				knownDestinations,
+				address: destination,
+				networkId
+			})
+		);
 </script>
 
 <div
