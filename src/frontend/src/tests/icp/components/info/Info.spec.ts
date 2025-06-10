@@ -8,14 +8,17 @@ import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import Info from '$icp/components/info/Info.svelte';
-import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { token } from '$lib/stores/token.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { render, waitFor } from '@testing-library/svelte';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
+import { render } from '@testing-library/svelte';
 
 describe('Info', () => {
 	const mockCkBtcToken = {
@@ -40,19 +43,26 @@ describe('Info', () => {
 		twinToken: USDC_TOKEN
 	} as IcCkToken;
 
-	const mockEnabledToken = (token?: IcCkToken) =>
-		vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
-			fn(token ? [token] : []);
-			return () => {};
-		});
+	const mockEnabledToken = (token: IcCkToken) => {
+		icrcDefaultTokensStore.set({ data: token, certified: false });
+		icrcCustomTokensStore.set({ data: { ...token, enabled: true }, certified: false });
+	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
+		setupUserNetworksStore('allEnabled');
+		setupTestnetsStore('enabled');
+
 		mockPage.reset();
+		token.reset();
+
+		icrcDefaultTokensStore.resetAll();
+		icrcCustomTokensStore.resetAll();
 	});
 
-	it('should not render any info components if sourceToken is not a mainnet token', async () => {
+	it('should not render any info components if sourceToken is not a mainnet token', () => {
 		mockEnabledToken(mockValidIcCkToken);
-		const { getByText } = render(Info);
 
 		mockPage.mock({
 			token: mockValidIcCkToken.name,
@@ -60,57 +70,54 @@ describe('Info', () => {
 		});
 		token.set(mockValidIcCkToken);
 
-		await waitFor(() => {
-			expect(() => getByText(en.info.ethereum.title)).toThrow();
+		const { getByText } = render(Info);
+
+		expect(() => getByText(en.info.ethereum.title)).toThrow();
+		expect(() => getByText(en.info.bitcoin.title)).toThrow();
+	});
+
+	describe('ckBTC', () => {
+		it('should render bitcoin info if all conditions are met', () => {
+			mockEnabledToken(mockCkBtcToken);
+
+			mockPage.mock({
+				token: mockCkBtcToken.name,
+				network: ICP_NETWORK_SYMBOL
+			});
+			token.set(mockCkBtcToken);
+
+			const { getByText } = render(Info);
+
+			expect(getByText(en.info.bitcoin.title)).toBeInTheDocument();
+		});
+
+		it('should not render bitcoin info if network is not enabled', () => {
+			mockEnabledToken(mockCkBtcToken);
+			setupUserNetworksStore('allDisabled');
+
+			mockPage.mock({
+				token: mockCkBtcToken.name,
+				network: ICP_NETWORK_SYMBOL
+			});
+			token.set(mockCkBtcToken);
+
+			const { getByText } = render(Info);
+
+			expect(() => getByText(en.info.bitcoin.title)).toThrow();
+		});
+
+		it('should not render bitcoin info if page token is not set', () => {
+			mockEnabledToken(mockCkBtcToken);
+
+			const { getByText } = render(Info);
+
 			expect(() => getByText(en.info.bitcoin.title)).toThrow();
 		});
 	});
 
-	describe('ckBTC', () => {
-		it('should render bitcoin info if all conditions are met', async () => {
-			mockEnabledToken(mockCkBtcToken);
-			const { getByText } = render(Info);
-
-			mockPage.mock({
-				token: mockCkBtcToken.name,
-				network: ICP_NETWORK_SYMBOL
-			});
-			token.set(mockCkBtcToken);
-
-			await waitFor(() => {
-				expect(getByText(en.info.bitcoin.title)).toBeInTheDocument();
-			});
-		});
-
-		it('should not render bitcoin info if network is not enabled', async () => {
-			mockEnabledToken();
-			const { getByText } = render(Info);
-
-			mockPage.mock({
-				token: mockCkBtcToken.name,
-				network: ICP_NETWORK_SYMBOL
-			});
-			token.set(mockCkBtcToken);
-
-			await waitFor(() => {
-				expect(() => getByText(en.info.bitcoin.title)).toThrow();
-			});
-		});
-
-		it('should not render bitcoin info if page token is not set', async () => {
-			mockEnabledToken(mockCkBtcToken);
-			const { getByText } = render(Info);
-
-			await waitFor(() => {
-				expect(() => getByText(en.info.bitcoin.title)).toThrow();
-			});
-		});
-	});
-
 	describe('ckETH', () => {
-		it('should render ethereum info if all conditions are met', async () => {
+		it('should render ethereum info if all conditions are met', () => {
 			mockEnabledToken(mockCkEthToken);
-			const { getByText } = render(Info);
 
 			mockPage.mock({
 				token: mockCkEthToken.name,
@@ -118,18 +125,16 @@ describe('Info', () => {
 			});
 			token.set(mockCkEthToken);
 
-			await waitFor(() => {
-				expect(
-					getByText(
-						replacePlaceholders(en.info.ethereum.title, { $ckToken: mockCkEthToken.symbol })
-					)
-				).toBeInTheDocument();
-			});
+			const { getByText } = render(Info);
+
+			expect(
+				getByText(replacePlaceholders(en.info.ethereum.title, { $ckToken: mockCkEthToken.symbol }))
+			).toBeInTheDocument();
 		});
 
-		it('should not render ethereum info if network is not enabled', async () => {
-			mockEnabledToken();
-			const { getByText } = render(Info);
+		it('should not render ethereum info if network is not enabled', () => {
+			mockEnabledToken(mockCkEthToken);
+			setupUserNetworksStore('allDisabled');
 
 			mockPage.mock({
 				token: mockCkEthToken.name,
@@ -137,25 +142,23 @@ describe('Info', () => {
 			});
 			token.set(mockCkEthToken);
 
-			await waitFor(() => {
-				expect(() => getByText(en.info.ethereum.title)).toThrow();
-			});
-		});
-
-		it('should not render ethereum info if page token is not set', async () => {
-			mockEnabledToken(mockCkBtcToken);
 			const { getByText } = render(Info);
 
-			await waitFor(() => {
-				expect(() => getByText(en.info.ethereum.title)).toThrow();
-			});
+			expect(() => getByText(en.info.ethereum.title)).toThrow();
+		});
+
+		it('should not render ethereum info if page token is not set', () => {
+			mockEnabledToken(mockCkEthToken);
+
+			const { getByText } = render(Info);
+
+			expect(() => getByText(en.info.ethereum.title)).toThrow();
 		});
 	});
 
 	describe('ckERC20', () => {
-		it('should render ethereum info if all conditions are met', async () => {
+		it('should render ethereum info if all conditions are met', () => {
 			mockEnabledToken(mockCkUsdcToken);
-			const { getByText } = render(Info);
 
 			mockPage.mock({
 				token: mockCkUsdcToken.name,
@@ -163,18 +166,16 @@ describe('Info', () => {
 			});
 			token.set(mockCkUsdcToken);
 
-			await waitFor(() => {
-				expect(
-					getByText(
-						replacePlaceholders(en.info.ethereum.title, { $ckToken: mockCkUsdcToken.symbol })
-					)
-				).toBeInTheDocument();
-			});
+			const { getByText } = render(Info);
+
+			expect(
+				getByText(replacePlaceholders(en.info.ethereum.title, { $ckToken: mockCkUsdcToken.symbol }))
+			).toBeInTheDocument();
 		});
 
-		it('should not render ethereum info if network is not enabled', async () => {
-			mockEnabledToken();
-			const { getByText } = render(Info);
+		it('should not render ethereum info if network is not enabled', () => {
+			mockEnabledToken(mockCkUsdcToken);
+			setupUserNetworksStore('allDisabled');
 
 			mockPage.mock({
 				token: mockCkUsdcToken.name,
@@ -182,18 +183,17 @@ describe('Info', () => {
 			});
 			token.set(mockCkUsdcToken);
 
-			await waitFor(() => {
-				expect(() => getByText(en.info.ethereum.title)).toThrow();
-			});
-		});
-
-		it('should not render ethereum info if page token is not set', async () => {
-			mockEnabledToken(mockCkUsdcToken);
 			const { getByText } = render(Info);
 
-			await waitFor(() => {
-				expect(() => getByText(en.info.ethereum.title)).toThrow();
-			});
+			expect(() => getByText(en.info.ethereum.title)).toThrow();
+		});
+
+		it('should not render ethereum info if page token is not set', () => {
+			mockEnabledToken(mockCkUsdcToken);
+
+			const { getByText } = render(Info);
+
+			expect(() => getByText(en.info.ethereum.title)).toThrow();
 		});
 	});
 });
