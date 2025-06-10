@@ -573,6 +573,7 @@ interface I18nSwap {
 		swapping: string;
 		refreshing_ui: string;
 		swap_provider: string;
+		swap_provider_website: string;
 		swap_route: string;
 		included_network_fees: string;
 		included_liquidity_fees: string;
@@ -986,7 +987,7 @@ interface I18nContact {
 	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
 	delete: { title: string; delete_contact: string; content_text: string };
-	error: { create: string; update: string; delete: string };
+	error: { create: string; update: string; delete: string; name_too_long: string };
 }
 
 interface I18nAddress {

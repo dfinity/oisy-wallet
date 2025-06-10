@@ -23,5 +23,6 @@ export const XAUT_TOKEN: RequiredErc20Token = {
 	address: '0x68749665FF8D2d112Fa859AA293F07A622782F38',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckXAUT',
-	groupData: XAUT_TOKEN_GROUP
+	groupData: XAUT_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true
 };
