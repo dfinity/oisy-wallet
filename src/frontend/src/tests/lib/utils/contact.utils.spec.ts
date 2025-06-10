@@ -241,9 +241,29 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: 'bc1qt0nkp9'
+					filterValue: mockContactBtcAddressUi.address
 				})
 			).toBeTruthy();
+		});
+
+		it('should return true if contact address partially matches filter', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: mockContactBtcAddressUi.address.slice(0, 6)
+				})
+			).toBeTruthy();
+		});
+
+		it('should return false if filter is empty string', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: ''
+				})
+			).toBeFalsy();
 		});
 
 		it('should return false if contact address does not match filter', () => {
