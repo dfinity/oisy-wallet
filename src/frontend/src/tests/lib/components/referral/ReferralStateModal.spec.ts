@@ -1,15 +1,15 @@
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
+import type { RewardDescription } from '$env/types/env-reward';
 import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 import {
 	REFERRAL_STATE_MODAL_IMAGE_BANNER,
 	REFERRAL_STATE_MODAL_SHARE_ANCHOR
 } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
+import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import type { RewardDescription } from '$env/types/env-reward';
-import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
-import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
-import { assertNonNullish } from '@dfinity/utils';
 
 describe('ReferralStateModal', () => {
 	const imageBannerSelector = `img[data-tid="${REFERRAL_STATE_MODAL_IMAGE_BANNER}"]`;
