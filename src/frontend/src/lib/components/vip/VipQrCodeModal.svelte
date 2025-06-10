@@ -141,7 +141,7 @@
 				colorStyle="primary"
 				type="button"
 				fullWidth
-				on:click={regenerateCode}
+				onclick={regenerateCode}
 				testId={VIP_CODE_REGENERATE_BUTTON}
 			>
 				{$i18n.vip.invitation.text.generate_new_link}
