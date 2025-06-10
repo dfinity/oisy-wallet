@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import SendContact from '$lib/components/send/SendContact.svelte';
@@ -25,19 +25,21 @@
 
 	let filteredNetworkContacts = $derived(
 		nonNullish(networkContacts)
-			? Object.keys(networkContacts).reduce<NetworkContacts>(
-					(acc, address) => ({
-						...acc,
-						...(isContactMatchingFilter({
-							filterValue: destination,
-							contact: networkContacts[address],
-							address
-						})
-							? { [address]: networkContacts[address] }
-							: {})
-					}),
-					{}
-				)
+			? isEmptyString(destination)
+				? networkContacts
+				: Object.keys(networkContacts).reduce<NetworkContacts>(
+						(acc, address) => ({
+							...acc,
+							...(isContactMatchingFilter({
+								filterValue: destination,
+								contact: networkContacts[address],
+								address
+							})
+								? { [address]: networkContacts[address] }
+								: {})
+						}),
+						{}
+					)
 			: {}
 	);
 
