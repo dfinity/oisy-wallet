@@ -124,6 +124,10 @@ export const parseIcErrorMessage = (err: unknown): Record<string, string> | unde
 			// The first part is just the "Call failed" initial text, we skip it
 			.slice(1);
 
+		if (messageParts.length === 0) {
+			return;
+		}
+
 		const cleanRegex = /^\s*['"]?([^'":]+)['"]?\s*:\s*['"]?(.+?)['"]?\s*$/;
 
 		const errObj: Record<string, string> = messageParts.reduce<Record<string, string>>(

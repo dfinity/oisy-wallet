@@ -285,7 +285,7 @@ describe('error.utils', () => {
 
 			const result = parseIcErrorMessage(error);
 
-			expect(result).toEqual({});
+			expect(result).toBeUndefined();
 		});
 
 		it('should ignore empty error details', () => {
