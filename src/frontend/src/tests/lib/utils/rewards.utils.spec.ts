@@ -2,6 +2,7 @@ import type { EligibilityReport, RewardInfo, UserData } from '$declarations/rewa
 import * as rewardApi from '$lib/api/reward.api';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import {
+	getCampaignState,
 	INITIAL_REWARD_RESULT,
 	isEndedCampaign,
 	isOngoingCampaign,
@@ -10,7 +11,10 @@ import {
 	mapEligibilityReport
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { toNullable } from '@dfinity/utils';
+import { assertNonNullish, toNullable } from '@dfinity/utils';
+import type { RewardDescription } from '$env/types/env-reward';
+import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 
 describe('rewards.utils', () => {
 	describe('loadRewardResult', () => {
@@ -221,6 +225,42 @@ describe('rewards.utils', () => {
 
 			expect(result).toBeTruthy();
 		});
+	});
+
+	describe('getCampaignState', () => {
+		const mockedRewardCampaign = mockRewardCampaigns.find(({ id }) => id === SPRINKLES_SEASON_1_EPISODE_3_ID);
+		assertNonNullish(mockedRewardCampaign);
+
+		it('should return state ongoing for ongoing campaigns', () => {
+			const startDate = new Date(Date.now() - 86400000);
+			const endDate = new Date(Date.now() + 86400000);
+
+			const mockedOngoingRewardCampaign = {...mockedRewardCampaign, startDate, endDate};
+
+			const result = getCampaignState(mockedOngoingRewardCampaign);
+
+			expect(result).toBe('ongoing');
+		})
+
+		it('should return state ended for ended campaigns', () => {
+			const endDate = new Date(Date.now() - 86400000);
+
+			const mockedEndedRewardCampaign = {...mockedRewardCampaign, endDate};
+
+			const result = getCampaignState(mockedEndedRewardCampaign);
+
+			expect(result).toBe('ended');
+		})
+
+		it('should return state upcoming for upcoming campaigns', () => {
+			const startDate = new Date(Date.now() + 86400000);
+
+			const mockedUpcomingRewardCampaign = {...mockedRewardCampaign, startDate};
+
+			const result = getCampaignState(mockedUpcomingRewardCampaign);
+
+			expect(result).toBe('upcoming');
+		})
 	});
 
 	describe('mapEligibilityReport', () => {
