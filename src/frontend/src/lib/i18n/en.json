@@ -671,7 +671,9 @@
 			"contract_address_copied": "Contract address copied to clipboard.",
 			"token_address_copied": "Token address copied to clipboard.",
 			"twin_token": "Twin token",
-			"standard": "Standard"
+			"standard": "Standard",
+			"confirm_deletion_title": "Delete from the list of your tokens?",
+			"confirm_deletion_description": "This will remove the <span class=\"font-bold\">$token</span> from your $oisy_short token list. Your funds will remain untouched — you can re-add the token at any time."
 		},
 		"balance": {
 			"error": {
