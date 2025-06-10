@@ -2,6 +2,7 @@ import type { ClaimedVipReward, ClaimVipRewardResponse } from '$declarations/rew
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import type { Principal } from '@dfinity/principal';
+import type { RewardDescription } from '$env/types/env-reward';
 
 export interface RewardsResponse {
 	rewards: RewardResponseInfo[];
@@ -32,6 +33,11 @@ export interface RewardClaimResponse<T = unknown> {
 	success: boolean;
 	campaignId?: QrCodeType;
 	err?: T;
+}
+
+export interface RewardStateData {
+	reward: RewardDescription;
+	jackpot?: boolean;
 }
 
 export interface UserRoleResult {

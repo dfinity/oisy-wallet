@@ -13,37 +13,22 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import {
-		TRACK_REWARD_CAMPAIGN_WIN,
 		TRACK_REWARD_CAMPAIGN_WIN_SHARE
 	} from '$lib/constants/analytics.contants';
 	import {
 		REWARDS_STATE_MODAL_IMAGE_BANNER,
 		REWARDS_STATE_MODAL_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
+		reward: RewardDescription;
 		jackpot?: boolean;
 	}
 
-	let { jackpot = false }: Props = $props();
-
-	// TODO At the moment the selected campaign is hardcoded. In the future this should be configurable from the outside.
-	const reward: RewardDescription | undefined = rewardCampaigns.find(
-		(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
-	);
-
-	onMount(
-		() =>
-			reward &&
-			trackEvent({
-				name: TRACK_REWARD_CAMPAIGN_WIN,
-				metadata: { campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}` }
-			})
-	);
+	let { reward, jackpot = false }: Props = $props();
 </script>
 
 <Sprinkles type={jackpot ? 'page-jackpot' : 'page'} />
@@ -64,17 +49,15 @@
 			>
 			<span class="block w-full">{$i18n.rewards.text.state_modal_content_text}</span>
 
-			{#if nonNullish(reward)}
-				<Share
-					testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
-					text={$i18n.rewards.text.share}
-					href={jackpot ? reward.jackpotHref : reward.airdropHref}
-					trackEvent={{
-						name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
-						metadata: { campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}` }
-					}}
-				/>
-			{/if}
+			<Share
+				testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
+				text={$i18n.rewards.text.share}
+				href={jackpot ? reward.jackpotHref : reward.airdropHref}
+				trackEvent={{
+					name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
+					metadata: { campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}` }
+				}}
+			/>
 		</div>
 
 		<ButtonGroup slot="toolbar">
