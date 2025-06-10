@@ -17,6 +17,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;
@@ -44,7 +45,7 @@
 		if (
 			$erc20Tokens?.find(
 				({ address, network: tokenNetwork }) =>
-					address.toLowerCase() === contractAddress?.toLowerCase() &&
+					areAddressesEqual({ address1: address, address2: contractAddress, addressType: 'Eth' })&&
 					tokenNetwork.chainId === (network as EthereumNetwork).chainId
 			) !== undefined
 		) {
