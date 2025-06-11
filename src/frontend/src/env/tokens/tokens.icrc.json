@@ -128,6 +128,12 @@
 		"decimals": 8
 	},
 	"BOB": {
-		"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai"
+		"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai",
+		"decimals": 8,
+		"name": "BOB",
+		"symbol": "BOB",
+		"fee": {
+			"__bigint__": "1000000"
+		}
 	}
 }
