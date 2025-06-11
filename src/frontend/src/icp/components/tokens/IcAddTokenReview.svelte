@@ -59,18 +59,18 @@
 					{token.token.name}
 
 					{#snippet icon()}
-					<Logo
-						src={token.token.icon}
-						alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
-						size="lg"
-						color="white"
-					/>
+						<Logo
+							src={token.token.icon}
+							alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
+							size="lg"
+							color="white"
+						/>
 					{/snippet}
 
 					{#snippet description()}
-					<span class="break-all">
-						{token.token.symbol}
-					</span>
+						<span class="break-all">
+							{token.token.symbol}
+						</span>
 					{/snippet}
 				</Card>
 			</div>
