@@ -5,6 +5,7 @@ import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { areAddressesEqual } from '$lib/utils/address.utils';
+import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import {
 	getDiscriminatorForTokenAccountId,
 	getTokenAccountIdAddressString
