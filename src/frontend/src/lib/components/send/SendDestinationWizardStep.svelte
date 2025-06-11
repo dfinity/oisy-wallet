@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { btcNetworkContacts } from '$btc/derived/btc-contacts.derived';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
@@ -50,10 +50,6 @@
 		selectedContact = $bindable(),
 		formCancelAction = 'back'
 	}: Props = $props();
-
-	onMount(() => {
-		selectedContact = undefined;
-	});
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -154,15 +150,17 @@
 		</div>
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		{#if formCancelAction === 'back'}
-			<ButtonBack onclick={back} />
-		{:else}
-			<ButtonCancel onclick={close} />
-		{/if}
+	{#snippet toolbar()}
+		<ButtonGroup>
+			{#if formCancelAction === 'back'}
+				<ButtonBack onclick={back} />
+			{:else}
+				<ButtonCancel onclick={close} />
+			{/if}
 
-		<Button onclick={next} {disabled} testId={SEND_FORM_DESTINATION_NEXT_BUTTON}>
-			{$i18n.core.text.next}
-		</Button>
-	</ButtonGroup>
+			<Button onclick={next} {disabled} testId={SEND_FORM_DESTINATION_NEXT_BUTTON}>
+				{$i18n.core.text.next}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

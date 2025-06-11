@@ -302,6 +302,7 @@
 		"text": {
 			"available_balance": "Your balance",
 			"unavailable_balance": "$ value is not available",
+			"hidden_balance": "Your balance is hidden",
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
@@ -662,7 +663,8 @@
 			"chain_key": "Chain Key",
 			"show_more_networks": "Show $number more networks",
 			"hide_more_networks": "Hide more networks",
-			"on_network": " on $network"
+			"on_network": " on $network",
+			"delete_token": "Delete token"
 		},
 		"details": {
 			"title": "Token details",
@@ -671,7 +673,10 @@
 			"contract_address_copied": "Contract address copied to clipboard.",
 			"token_address_copied": "Token address copied to clipboard.",
 			"twin_token": "Twin token",
-			"standard": "Standard"
+			"standard": "Standard",
+			"confirm_deletion_title": "Delete from the list of your tokens?",
+			"confirm_deletion_description": "This will remove the <span class=\"font-bold\">$token</span> from your $oisy_short token list. Your funds will remain untouched — you can re-add the token at any time.",
+			"deletion_confirmation": "$token has been successfully removed from your $oisy_short token list."
 		},
 		"balance": {
 			"error": {

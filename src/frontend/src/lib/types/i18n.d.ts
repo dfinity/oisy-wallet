@@ -282,6 +282,7 @@ interface I18nHero {
 	text: {
 		available_balance: string;
 		unavailable_balance: string;
+		hidden_balance: string;
 		top_up: string;
 		learn_more_about_erc20_icp: string;
 	};
@@ -628,6 +629,7 @@ interface I18nTokens {
 		show_more_networks: string;
 		hide_more_networks: string;
 		on_network: string;
+		delete_token: string;
 	};
 	details: {
 		title: string;
@@ -637,6 +639,9 @@ interface I18nTokens {
 		token_address_copied: string;
 		twin_token: string;
 		standard: string;
+		confirm_deletion_title: string;
+		confirm_deletion_description: string;
+		deletion_confirmation: string;
 	};
 	balance: { error: { not_applicable: string } };
 	import: {

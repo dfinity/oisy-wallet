@@ -76,5 +76,7 @@
 		</ReceiveAddress>
 	{/if}
 
-	<ButtonDone onclick={close} slot="toolbar" />
+	{#snippet toolbar()}
+		<ButtonDone onclick={close} />
+	{/snippet}
 </ContentWithToolbar>
