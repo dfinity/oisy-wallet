@@ -7,7 +7,7 @@
 		isPrimary?: boolean;
 	}
 
-	let {isPrimary = false}: Props = $props();
+	let { isPrimary = false }: Props = $props();
 </script>
 
 <Button
