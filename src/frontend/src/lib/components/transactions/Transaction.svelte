@@ -84,14 +84,14 @@
 			</span>
 
 			{#snippet icon()}
-			<div>
-				{#if iconType === 'token'}
-					<TokenLogo data={token} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
-				{:else}
-					<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
-				{/if}
-			</div>
-				{/snippet}
+				<div>
+					{#if iconType === 'token'}
+						<TokenLogo data={token} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
+					{:else}
+						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
+					{/if}
+				</div>
+			{/snippet}
 
 			{#snippet amount()}
 				{#if nonNullish(cardAmount)}
