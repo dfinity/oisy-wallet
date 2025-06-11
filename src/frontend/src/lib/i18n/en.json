@@ -247,17 +247,17 @@
 	},
 	"init": {
 		"text": {
-			"initializing_wallet": "Preparing your wallet...",
-			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon and BNB",
-			"done": "Enjoy $oisy_short"
+			"initializing_wallet": "正在准备你的钱包...",
+			"securing_session": "正在通过 Internet Identity 保护会话",
+			"retrieving_public_keys": "正在获取你在 Bitcoin、Ethereum、Solana、Base、Polygon 和 BNB 上的公钥",
+			"done": "尽情享受 $oisy_short 吧"
 		},
 		"alt": {
 			"loader_banner": "Loading initial data for $oisy_name (theme $theme)"
 		},
 		"info": {
-			"hold_loading": "Hold tight, we are loading some information...",
-			"hold_loading_wallet": "Hold tight, we are loading some initial data for your wallet..."
+			"hold_loading": "请稍等，我们正在加载部分信息……",
+			"hold_loading_wallet": "请稍等，我们正在加载你钱包的初始数据……"
 		},
 		"error": {
 			"no_alchemy_config": "No Alchemy config for network $network",
@@ -353,15 +353,15 @@
 		"privacy_mode": "P"
 	},
 	"networks": {
-		"title": "Current network. Access to selection.",
-		"test_networks": "Test networks",
-		"more": "More networks coming soon...",
-		"chain_fusion": "All networks",
-		"network": "Network",
-		"testnet": "Testnet",
-		"number_of_enabled": "$numNetworksEnabled of $numNetworksTotal enabled",
-		"filter": "Filter networks",
-		"manage": "Manage networks"
+		"title": "当前网络。点击可更换选择。",
+		"test_networks": "测试网络",
+		"more": "更多网络即将上线……",
+		"chain_fusion": "所有网络",
+		"network": "网络",
+		"testnet": "测试网",
+		"number_of_enabled": "$numNetworksTotal 个网络中已启用 $numNetworksEnabled 个",
+		"filter": "筛选网络",
+		"manage": "管理网络"
 	},
 	"receive": {
 		"text": {
@@ -439,39 +439,39 @@
 	},
 	"send": {
 		"text": {
-			"send": "Send",
-			"destination": "Destination",
-			"source": "Source",
-			"balance": "Balance",
-			"review": "Review",
-			"signing_approval": "Signing approval...",
-			"approving": "Approving...",
-			"approving_fees": "Approving fees...",
-			"approving_transfer": "Approving transfer...",
-			"approving_wallet_connect": "Approving WalletConnect request...",
-			"refreshing_ui": "Refreshing UI",
-			"initializing": "Initializing transaction...",
-			"signing_transaction": "Signing transaction...",
-			"sending": "Sending...",
-			"signing": "Signing...",
-			"signing_message": "Signing message...",
-			"network": "Network",
-			"source_network": "Source network",
-			"destination_network": "Destination network",
-			"initializing_transaction": "Initializing transaction",
-			"convert_to_native_icp": "Convert to native ICP",
-			"open_qr_modal": "Start QR Code scan for transaction details",
-			"scan_qr": "Scan QR Code",
-			"select_token": "Select token to send",
-			"select_network_filter": "Select network filter",
-			"send_again": "Send again",
-			"recently_used_tab": "Recently Used",
-			"contacts_tab": "Contacts",
-			"recently_used_empty_state_title": "Recently used addresses will appear here",
-			"recently_used_empty_state_description": "Make your first send now!",
-			"contacts_empty_state_title": "Your contacts will appear here",
-			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
-			"send_review_subtitle": "You send"
+			"send": "发送",
+			"destination": "目标地址",
+			"source": "来源地址",
+			"balance": "余额",
+			"review": "预览",
+			"signing_approval": "正在签署批准...",
+			"approving": "正在批准...",
+			"approving_fees": "正在批准手续费...",
+			"approving_transfer": "正在批准转账...",
+			"approving_wallet_connect": "正在批准 WalletConnect 请求...",
+			"refreshing_ui": "正在刷新界面",
+			"initializing": "正在初始化交易...",
+			"signing_transaction": "正在签署交易...",
+			"sending": "发送中...",
+			"signing": "签署中...",
+			"signing_message": "正在签署消息...",
+			"network": "网络",
+			"source_network": "来源网络",
+			"destination_network": "目标网络",
+			"initializing_transaction": "正在初始化交易",
+			"convert_to_native_icp": "转换为原生 ICP",
+			"open_qr_modal": "开始扫描二维码以获取交易详情",
+			"scan_qr": "扫描二维码",
+			"select_token": "选择要发送的代币",
+			"select_network_filter": "选择网络筛选器",
+			"send_again": "再次发送",
+			"recently_used_tab": "最近使用",
+			"contacts_tab": "联系人",
+			"recently_used_empty_state_title": "最近使用的地址将显示在此处",
+			"recently_used_empty_state_description": "现在就开始你的第一次发送吧！",
+			"contacts_empty_state_title": "你的联系人将显示在此处",
+			"contacts_empty_state_description": "你似乎还没有添加联系人",
+			"send_review_subtitle": "你将发送"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
