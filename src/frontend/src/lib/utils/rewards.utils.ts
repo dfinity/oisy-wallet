@@ -49,7 +49,7 @@ const getFirstReward = ({
 	rewards: RewardResponseInfo[];
 	containsJackpot: boolean;
 	containsReferral: boolean;
-}) => {
+}): RewardResponseInfo | undefined => {
 	if (containsJackpot) {
 		return rewards.find(({ name }) => name === 'jackpot');
 	}
