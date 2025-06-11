@@ -227,6 +227,10 @@
 			nonNullish(modalData?.entrypoint) &&
 			modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
 		) {
+			if (nonNullish(modalData.entrypoint.onComplete)) {
+				modalData.entrypoint.onComplete();
+				return;
+			}
 			modalStore.close();
 			return;
 		}

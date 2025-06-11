@@ -9,9 +9,17 @@
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import type { IcTransaction, IcTransactionUi } from '$icp/types/ic-transaction';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import type { BtcTransactionUi } from '$btc/types/btc';
+	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import { isIcToken } from '$icp/validation/ic-token.validation.js';
+	import { isSupportedEthToken } from '$eth/utils/eth.utils';
+	import { isSolanaToken } from '$sol/utils/token.utils';
 
 	interface Props {
 		type: 'send' | 'receive';
@@ -35,6 +43,32 @@
 				})
 			: undefined
 	);
+
+	let modalStoreData = $derived($modalStore?.data as OpenTransactionParams<AnyTransactionUi>);
+
+	let getOnComplete = (modalStoreDataClosure: OpenTransactionParams<AnyTransactionUi>) => () => {
+		if (isIcToken(modalStoreDataClosure.token)) {
+			modalStore.openIcTransaction({
+				id: Symbol(),
+				data: modalStoreDataClosure as OpenTransactionParams<IcTransactionUi>
+			});
+		} else if (modalStoreDataClosure.token) {
+			modalStore.openEthTransaction({
+				id: Symbol(),
+				data: modalStoreDataClosure as OpenTransactionParams<EthTransactionUi>
+			});
+		} else if (modalStoreDataClosure.token) {
+			modalStore.openSolTransaction({
+				id: Symbol(),
+				data: modalStoreDataClosure as OpenTransactionParams<SolTransactionUi>
+			});
+		} else {
+			modalStore.openBtcTransaction({
+				id: Symbol(),
+				data: modalStoreData as OpenTransactionParams<BtcTransactionUi>
+			});
+		}
+	};
 </script>
 
 {#if nonNullish(address)}
@@ -57,7 +91,8 @@
 								data: {
 									entrypoint: {
 										type: AddressBookSteps.SAVE_ADDRESS,
-										address
+										address,
+										onComplete: getOnComplete(modalStoreData)
 									}
 								}
 							})}

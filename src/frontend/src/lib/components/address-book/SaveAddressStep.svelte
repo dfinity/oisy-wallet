@@ -34,6 +34,8 @@
 			: undefined
 	);
 
+	let onComplete = $derived(modalData.entrypoint?.onComplete);
+
 	let filteredContacts = $derived(
 		$contacts.filter((c) => c.name.toLowerCase().includes(inputValue.toLowerCase()))
 	);
@@ -50,6 +52,8 @@
 			{/snippet}
 		</AddressCard>
 	{/if}
+
+	<Button onclick={() => onComplete?.()}>Test complete</Button>
 
 	<div class="mt-8 flex justify-between">
 		<h5>{$i18n.address.save.add_to_existing_contact}</h5>
