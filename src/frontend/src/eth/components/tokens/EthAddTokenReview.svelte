@@ -45,7 +45,7 @@
 		if (
 			$erc20Tokens?.find(
 				({ address, network: tokenNetwork }) =>
-					areAddressesEqual({ address1: address, address2: contractAddress, addressType: 'Eth' }) &&
+					areAddressesEqual({ address1: address, address2: contractAddress, networkId: network.id }) &&
 					tokenNetwork.chainId === (network as EthereumNetwork).chainId
 			) !== undefined
 		) {
