@@ -27,7 +27,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
-import { replaceIcErrorFields } from '$lib/utils/error.utils';
+import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { AnonymousIdentity, type Identity } from '@dfinity/agent';
 import {
 	fromNullable,
@@ -66,9 +66,7 @@ export const loadCustomTokens = ({
 
 			trackEvent({
 				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
-				metadata: {
-					error: replaceIcErrorFields(err) ?? `${err}`
-				}
+				metadata: mapIcErrorMetadata(err)
 			});
 
 			toastsError({
@@ -94,9 +92,7 @@ const loadDefaultIcrc = ({
 
 			trackEvent({
 				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
-				metadata: {
-					error: replaceIcErrorFields(err) ?? `${err}`
-				}
+				metadata: mapIcErrorMetadata(err)
 			});
 
 			toastsError({
