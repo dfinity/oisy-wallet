@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isEmptyString, nonNullish } from '@dfinity/utils';
+	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import SendContact from '$lib/components/send/SendContact.svelte';
@@ -27,35 +27,38 @@
 		nonNullish(networkContacts)
 			? isEmptyString(destination)
 				? networkContacts
-				: Object.keys(networkContacts).reduce<NetworkContacts>(
-						(acc, address) => ({
+				: Object.keys(networkContacts).reduce<NetworkContacts>((acc, address) => {
+						const networkContact = networkContacts[address];
+
+						if (isNullish(networkContact)) {
+							return acc;
+						}
+
+						return {
 							...acc,
 							...(isContactMatchingFilter({
 								filterValue: destination,
-								contact: networkContacts[address],
+								contact: networkContact,
 								address
 							})
-								? { [address]: networkContacts[address] }
+								? { [address]: networkContact }
 								: {})
-						}),
-						{}
-					)
+						};
+					}, {})
 			: {}
 	);
-
-	let filteredNetworkContactsKeys = $derived(Object.keys(filteredNetworkContacts));
 </script>
 
 <div in:fade>
-	{#if nonNullish(networkContacts) && filteredNetworkContactsKeys.length > 0}
+	{#if nonNullish(networkContacts) && Object.keys(filteredNetworkContacts).length > 0}
 		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
 			<ul class="list-none overflow-y-auto overscroll-contain">
-				{#each filteredNetworkContactsKeys as address, index (index)}
+				{#each Object.entries(filteredNetworkContacts) as [address, contact], index (index)}
 					<SendContact
-						contact={networkContacts[address]}
+						{contact}
 						{address}
 						onClick={() => {
-							selectedContact = networkContacts[address];
+							selectedContact = contact;
 							destination = address;
 							dispatch('icNext');
 						}}
