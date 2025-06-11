@@ -1,57 +1,157 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import * as backendApi from '$lib/api/backend.api';
 import TokenModal from '$lib/components/tokens/TokenModal.svelte';
-import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+import {
+	TOKEN_MODAL_CONTENT_DELETE_BUTTON,
+	TOKEN_MODAL_DELETE_BUTTON
+} from '$lib/constants/test-ids.constants';
+import * as authServices from '$lib/services/auth.services';
+import { modalStore } from '$lib/stores/modal.store';
+import * as toastsStore from '$lib/stores/toasts.store';
+import type { Token } from '$lib/types/token';
+import * as navUtils from '$lib/utils/nav.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
-import { render } from '@testing-library/svelte';
+import { mockPage } from '$tests/mocks/page.store.mock';
+import { fireEvent, render } from '@testing-library/svelte';
+import { vi } from 'vitest';
 
 describe('TokenModal', () => {
-	it('renders all values correctly for ICP token', () => {
-		const { getByText, getAllByText, container } = render(TokenModal, {
+	const mockBackendApi = () => vi.spyOn(backendApi, 'removeUserToken').mockResolvedValue(undefined);
+	const mockToastsShow = () => vi.spyOn(toastsStore, 'toastsShow').mockImplementation(vi.fn());
+	const mockToastsError = () => vi.spyOn(toastsStore, 'toastsError').mockImplementation(vi.fn());
+	const mockGoToRoot = () => vi.spyOn(navUtils, 'gotoReplaceRoot').mockImplementation(vi.fn());
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+		modalStore.close();
+		mockPage.reset();
+	});
+
+	it('deletes token after all required steps', async () => {
+		const { getByTestId, getByText } = render(TokenModal, {
+			props: {
+				token: {
+					...mockValidErc20Token,
+					enabled: true
+				} as Token,
+				isDeletable: true
+			}
+		});
+
+		const removeUserTokenMock = mockBackendApi();
+		const toasts = mockToastsShow();
+		const gotoReplaceRoot = mockGoToRoot();
+		mockAuthStore();
+
+		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
+
+		expect(getByText(en.tokens.details.confirm_deletion_title)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
+
+		expect(removeUserTokenMock).toHaveBeenCalledOnce();
+		expect(toasts).toHaveBeenCalledOnce();
+		expect(gotoReplaceRoot).toHaveBeenCalledOnce();
+	});
+
+	it('does not delete token if it is not erc20', async () => {
+		const { getByTestId, getByText } = render(TokenModal, {
+			props: {
+				token: ICP_TOKEN,
+				isDeletable: true
+			}
+		});
+
+		const removeUserTokenMock = mockBackendApi();
+		const toasts = mockToastsShow();
+		const gotoReplaceRoot = mockGoToRoot();
+		mockAuthStore();
+
+		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
+
+		expect(getByText(en.tokens.details.confirm_deletion_title)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
+
+		expect(removeUserTokenMock).not.toHaveBeenCalledOnce();
+		expect(toasts).not.toHaveBeenCalledOnce();
+		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
+	});
+
+	it('does not delete token if authIdentity is not available', async () => {
+		const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
+		const { getByTestId, getByText } = render(TokenModal, {
+			props: {
+				token: {
+					...mockValidErc20Token,
+					enabled: true
+				} as Token,
+				isDeletable: true
+			}
+		});
+
+		const removeUserTokenMock = mockBackendApi();
+		const toasts = mockToastsShow();
+		const gotoReplaceRoot = mockGoToRoot();
+
+		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
+
+		expect(getByText(en.tokens.details.confirm_deletion_title)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
+
+		expect(removeUserTokenMock).not.toHaveBeenCalledOnce();
+		expect(toasts).not.toHaveBeenCalledOnce();
+		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
+		expect(signOutSpy).toHaveBeenCalledOnce();
+	});
+
+	it('does not find delete button if token is not deletable', () => {
+		const { getByTestId } = render(TokenModal, {
 			props: {
 				token: ICP_TOKEN
 			}
 		});
 
-		expect(container).toHaveTextContent(getTokenDisplaySymbol(ICP_TOKEN));
-
-		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
-
-		expect(getByText(en.tokens.details.network)).toBeInTheDocument();
-		expect(getAllByText(ICP_TOKEN.network.name)[0]).toBeInTheDocument();
-
-		expect(getByText(en.tokens.details.token)).toBeInTheDocument();
-		expect(getAllByText(ICP_TOKEN.name)[1]).toBeInTheDocument();
-
-		expect(getByText(en.core.text.symbol)).toBeInTheDocument();
-
-		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
-		expect(getByText(ICP_TOKEN.decimals)).toBeInTheDocument();
+		expect(() => getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON)).toThrow();
 	});
 
-	it('renders all values correctly for ICRC token', () => {
-		const { getByText, container } = render(TokenModal, {
+	it('handles an error on token delete correctly', async () => {
+		const { getByTestId, getByText } = render(TokenModal, {
 			props: {
-				token: mockValidIcrcToken
+				token: {
+					...mockValidErc20Token,
+					enabled: true
+				} as Token,
+				isDeletable: true
 			}
 		});
 
-		expect(container).toHaveTextContent(getTokenDisplaySymbol(mockValidIcrcToken));
+		const removeUserTokenMock = vi
+			.spyOn(backendApi, 'removeUserToken')
+			.mockRejectedValue(new Error('test'));
+		const toastsError = mockToastsError();
+		const gotoReplaceRoot = mockGoToRoot();
+		mockAuthStore();
 
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
 
-		expect(getByText(en.tokens.details.network)).toBeInTheDocument();
-		expect(getByText(mockValidIcrcToken.network.name)).toBeInTheDocument();
+		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
 
-		expect(getByText(en.tokens.details.token)).toBeInTheDocument();
-		expect(getByText(mockValidIcrcToken.name)).toBeInTheDocument();
+		expect(getByText(en.tokens.details.confirm_deletion_title)).toBeInTheDocument();
 
-		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
-		expect(getByText(mockValidIcrcToken.standard)).toBeInTheDocument();
+		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
-		expect(getByText(en.core.text.symbol)).toBeInTheDocument();
-
-		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
-		expect(getByText(mockValidIcrcToken.decimals)).toBeInTheDocument();
+		expect(removeUserTokenMock).toHaveBeenCalledOnce();
+		expect(toastsError).toHaveBeenCalledOnce();
+		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
 	});
 });
