@@ -23,6 +23,7 @@
 	<PageTitle>{$i18n.earning.text.title}</PageTitle>
 
 	<!-- Todo: refactor this once the design is clear -->
+	<!-- we know we want to show these 3 cards, thats why the translations have been added already -->
 
 	<div class="grid grid-cols-3 gap-3">
 		<div class="flex flex-col items-center rounded-2xl bg-disabled-alt p-3 text-center">
