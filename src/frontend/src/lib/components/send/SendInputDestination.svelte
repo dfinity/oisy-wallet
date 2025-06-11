@@ -11,7 +11,9 @@
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { NetworkId } from '$lib/types/network';
 	import type { KnownDestinations } from '$lib/types/transactions';
+	import { getNetworkContact } from '$lib/utils/contacts.utils';
 	import { isDesktop } from '$lib/utils/device.utils';
+	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -35,6 +37,28 @@
 	let isErrorState = false;
 	$: isErrorState =
 		invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE;
+
+	let isNotKnownDestination = false;
+	$: isNotKnownDestination =
+		nonNullish(knownDestinations) &&
+		isNullish(
+			getKnownDestination({
+				knownDestinations,
+				address: destination,
+				networkId
+			})
+		);
+
+	let isNotNetworkContact = false;
+	$: isNotNetworkContact =
+		nonNullish(networkContacts) &&
+		isNullish(
+			getNetworkContact({
+				networkContacts,
+				address: destination,
+				networkId
+			})
+		);
 </script>
 
 <div
@@ -74,7 +98,7 @@
 	</div>
 </div>
 
-{#if !invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && nonNullish(knownDestinations) && isNullish(knownDestinations[destination]) && nonNullish(networkContacts) && isNullish(networkContacts[destination])}
+{#if !invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && isNotKnownDestination && isNotNetworkContact}
 	<div transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning" styleClass="mt-4">
 			{$i18n.send.info.unknown_destination}
