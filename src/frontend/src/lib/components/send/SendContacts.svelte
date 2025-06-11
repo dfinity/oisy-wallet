@@ -28,7 +28,7 @@
 			? isEmptyString(destination)
 				? networkContacts
 				: Object.keys(networkContacts).reduce<NetworkContacts>((acc, address) => {
-					const networkContact = networkContacts[address];
+						const networkContact = networkContacts[address];
 
 						if (isNullish(networkContact)) {
 							return acc;
