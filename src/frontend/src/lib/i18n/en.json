@@ -675,7 +675,7 @@
 			"twin_token": "Twin token",
 			"standard": "Standard",
 			"confirm_deletion_title": "Delete from the list of your tokens?",
-			"confirm_deletion_description": "This will remove the <span class=\"font-bold\">$token</span> from your $oisy_short token list. Your funds will remain untouched — you can re-add the token at any time.",
+			"confirm_deletion_description": "This will remove <span class=\"font-bold\">$token</span> from your $oisy_short token list. Your funds will remain untouched — you can re-add the token at any time.",
 			"deletion_confirmation": "$token has been successfully removed from your $oisy_short token list."
 		},
 		"balance": {
@@ -777,7 +777,8 @@
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
-			"unexpected_undefined": "Token is undefined. This is unexpected."
+			"unexpected_undefined": "Token is undefined. This is unexpected.",
+			"unexpected_error_on_token_delete": "Something went wrong while removing the token."
 		}
 	},
 	"fee": {
