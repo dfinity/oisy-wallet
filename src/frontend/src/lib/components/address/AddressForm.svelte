@@ -51,7 +51,7 @@
 	});
 </script>
 
-<div class="w-full" style="--input-font-size: var(text-base)">
+<div class="w-full" style="--input-font-size: var(--text-base)">
 	<label for="address" class="font-bold">{$i18n.address.fields.address}</label>
 
 	<InputAddress

@@ -144,14 +144,11 @@ describe('token.derived', () => {
 				setupUserNetworksStore('allDisabled');
 			});
 
-			it.each(SUPPORTED_NETWORK_IDS)(
-				`should return default token for Bitcoin network %s`,
-				(networkId) => {
-					mockPage.mock({ network: networkId.description });
+			it.each(SUPPORTED_NETWORK_IDS)(`should return default token for network %s`, (networkId) => {
+				mockPage.mock({ network: networkId.description });
 
-					expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
-				}
-			);
+				expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
+			});
 		});
 	});
 
