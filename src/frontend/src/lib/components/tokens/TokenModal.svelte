@@ -12,7 +12,7 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsShow } from '$lib/stores/toasts.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
@@ -65,15 +65,25 @@
 
 			const { chain_id, contract_address } = toUserToken(token);
 
-			await removeUserToken({
-				chain_id,
-				contract_address,
-				identity: $authIdentity
-			});
+			try {
+				await removeUserToken({
+					chain_id,
+					contract_address,
+					identity: $authIdentity
+				});
 
-			erc20UserTokensStore.reset(token.id);
+				erc20UserTokensStore.reset(token.id);
 
-			await onTokenDeleteSuccess();
+				await onTokenDeleteSuccess();
+			} catch (err: unknown) {
+				toastsError({
+					msg: { text: $i18n.tokens.error.unexpected_error_on_token_delete },
+					err
+				});
+
+				loading = false;
+				showDeleteConfirmation = false;
+			}
 		}
 	};
 </script>

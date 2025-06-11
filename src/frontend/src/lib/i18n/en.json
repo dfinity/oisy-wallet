@@ -777,7 +777,8 @@
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
-			"unexpected_undefined": "Token is undefined. This is unexpected."
+			"unexpected_undefined": "Token is undefined. This is unexpected.",
+			"unexpected_error_on_token_delete": "Something went wrong while removing the token."
 		}
 	},
 	"fee": {

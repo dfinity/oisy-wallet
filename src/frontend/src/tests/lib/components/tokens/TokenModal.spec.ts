@@ -5,21 +5,28 @@ import {
 	TOKEN_MODAL_CONTENT_DELETE_BUTTON,
 	TOKEN_MODAL_DELETE_BUTTON
 } from '$lib/constants/test-ids.constants';
+import * as authServices from '$lib/services/auth.services';
+import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
 import * as navUtils from '$lib/utils/nav.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render } from '@testing-library/svelte';
+import { vi } from 'vitest';
 
 describe('TokenModal', () => {
 	const mockBackendApi = () => vi.spyOn(backendApi, 'removeUserToken').mockResolvedValue(undefined);
-	const mockToasts = () => vi.spyOn(toastsStore, 'toastsShow');
+	const mockToastsShow = () => vi.spyOn(toastsStore, 'toastsShow').mockImplementation(vi.fn());
+	const mockToastsError = () => vi.spyOn(toastsStore, 'toastsError').mockImplementation(vi.fn());
 	const mockGoToRoot = () => vi.spyOn(navUtils, 'gotoReplaceRoot').mockImplementation(vi.fn());
 
 	beforeEach(() => {
 		vi.resetAllMocks();
+		modalStore.close();
+		mockPage.reset();
 	});
 
 	it('deletes token after all required steps', async () => {
@@ -34,7 +41,7 @@ describe('TokenModal', () => {
 		});
 
 		const removeUserTokenMock = mockBackendApi();
-		const toasts = mockToasts();
+		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
 		mockAuthStore();
 
@@ -60,7 +67,7 @@ describe('TokenModal', () => {
 		});
 
 		const removeUserTokenMock = mockBackendApi();
-		const toasts = mockToasts();
+		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
 		mockAuthStore();
 
@@ -78,6 +85,7 @@ describe('TokenModal', () => {
 	});
 
 	it('does not delete token if authIdentity is not available', async () => {
+		const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
 		const { getByTestId, getByText } = render(TokenModal, {
 			props: {
 				token: {
@@ -89,7 +97,7 @@ describe('TokenModal', () => {
 		});
 
 		const removeUserTokenMock = mockBackendApi();
-		const toasts = mockToasts();
+		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
 
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
@@ -103,6 +111,7 @@ describe('TokenModal', () => {
 		expect(removeUserTokenMock).not.toHaveBeenCalledOnce();
 		expect(toasts).not.toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
+		expect(signOutSpy).toHaveBeenCalledOnce();
 	});
 
 	it('does not find delete button if token is not deletable', () => {
@@ -113,5 +122,36 @@ describe('TokenModal', () => {
 		});
 
 		expect(() => getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON)).toThrow();
+	});
+
+	it('handles an error on token delete correctly', async () => {
+		const { getByTestId, getByText } = render(TokenModal, {
+			props: {
+				token: {
+					...mockValidErc20Token,
+					enabled: true
+				} as Token,
+				isDeletable: true
+			}
+		});
+
+		const removeUserTokenMock = vi
+			.spyOn(backendApi, 'removeUserToken')
+			.mockRejectedValue(new Error('test'));
+		const toastsError = mockToastsError();
+		const gotoReplaceRoot = mockGoToRoot();
+		mockAuthStore();
+
+		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
+
+		expect(getByText(en.tokens.details.confirm_deletion_title)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
+
+		expect(removeUserTokenMock).toHaveBeenCalledOnce();
+		expect(toastsError).toHaveBeenCalledOnce();
+		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
 	});
 });
