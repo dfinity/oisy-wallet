@@ -18,7 +18,7 @@
 	let {
 		networkContacts,
 		selectedContact = $bindable(),
-		destination = $bindable(),
+		destination = $bindable()
 	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
@@ -27,16 +27,14 @@
 		nonNullish(networkContacts)
 			? isEmptyString(destination)
 				? networkContacts
-				: Object.keys(networkContacts).reduce<NetworkContacts>(
-						(acc, address) =>{
-							const networkContact = 		 networkContacts[address]
+				: Object.keys(networkContacts).reduce<NetworkContacts>((acc, address) => {
+						const networkContact = networkContacts[address];
 
-							if (isNullish((networkContact))) {
-								return acc;
-							}
+						if (isNullish(networkContact)) {
+							return acc;
+						}
 
-
-							return ({
+						return {
 							...acc,
 							...(isContactMatchingFilter({
 								filterValue: destination,
@@ -45,9 +43,8 @@
 							})
 								? { [address]: networkContact }
 								: {})
-						})},
-						{}
-					)
+						};
+					}, {})
 			: {}
 	);
 </script>
