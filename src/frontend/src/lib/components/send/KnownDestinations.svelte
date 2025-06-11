@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
+	import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
@@ -58,7 +59,11 @@
 						});
 					}
 
-					return address.includes(destination);
+					return areAddressesPartiallyEqual({
+						address1: address,
+						address2: destination,
+						networkId: $sendTokenNetworkId
+					})
 				})
 	);
 </script>
