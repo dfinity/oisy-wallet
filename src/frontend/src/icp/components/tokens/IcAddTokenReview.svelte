@@ -59,7 +59,7 @@
 					{token.token.name}
 
 					{#snippet icon()}
-						{#if isNullish(token)}
+						{#if nonNullish(token)}
 							<Logo
 								src={token.token.icon}
 								alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
