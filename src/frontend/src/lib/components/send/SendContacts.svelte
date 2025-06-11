@@ -1,20 +1,18 @@
 <script lang="ts">
 	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import SendContact from '$lib/components/send/SendContact.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
-	import type { NetworkId } from '$lib/types/network';
-	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
 	interface Props {
 		destination: string;
-		networkId: NetworkId;
 		networkContacts?: NetworkContacts;
 		selectedContact?: ContactUi;
 	}
@@ -23,10 +21,11 @@
 		networkContacts,
 		selectedContact = $bindable(),
 		destination = $bindable(),
-		networkId
 	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
+
+	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let filteredNetworkContacts = $derived(
 		nonNullish(networkContacts)
@@ -36,7 +35,7 @@
 						const networkContact = getNetworkContact({
 							networkContacts,
 							address: destination,
-							networkId
+							networkId: $sendTokenNetworkId
 						});
 
 						if (isNullish(networkContact)) {

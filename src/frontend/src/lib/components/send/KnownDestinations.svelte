@@ -1,20 +1,19 @@
 <script lang="ts">
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
-	import type { NetworkId } from '$lib/types/network';
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
 	interface Props {
 		destination: string;
-		networkId: NetworkId;
 		knownDestinations?: KnownDestinations;
 		networkContacts?: NetworkContacts;
 		selectedContact?: ContactUi;
@@ -22,12 +21,13 @@
 	let {
 		knownDestinations,
 		destination = $bindable(),
-		networkId,
 		selectedContact = $bindable(),
 		networkContacts
 	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
+
+	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let sortedKnownDestinations = $derived(
 		nonNullish(knownDestinations)
@@ -46,7 +46,7 @@
 						? getNetworkContact({
 								networkContacts,
 								address: destination,
-								networkId
+								networkId: $sendTokenNetworkId
 							})
 						: undefined;
 
