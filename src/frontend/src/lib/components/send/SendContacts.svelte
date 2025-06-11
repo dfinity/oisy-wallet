@@ -5,10 +5,10 @@
 	import SendContact from '$lib/components/send/SendContact.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
 	interface Props {
 		destination: string;
@@ -30,7 +30,8 @@
 		nonNullish(networkContacts)
 			? isEmptyString(destination)
 				? networkContacts
-				: Object.entries(networkContacts).reduce<NetworkContacts>((acc, [address, contact]) => ({
+				: Object.entries(networkContacts).reduce<NetworkContacts>(
+						(acc, [address, contact]) => ({
 							...acc,
 							...(isContactMatchingFilter({
 								filterValue: destination,
@@ -40,7 +41,9 @@
 							})
 								? { [address]: contact }
 								: {})
-						}), {})
+						}),
+						{}
+					)
 			: {}
 	);
 </script>
