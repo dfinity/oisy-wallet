@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isEmptyString, nonNullish } from '@dfinity/utils';
+	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import SendContact from '$lib/components/send/SendContact.svelte';
@@ -7,10 +7,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
+	import type { NetworkId } from '$lib/types/network';
+	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
+	import { getNetworkContact } from '$lib/utils/contacts.utils';
 
 	interface Props {
 		destination: string;
+		networkId: NetworkId;
 		networkContacts?: NetworkContacts;
 		selectedContact?: ContactUi;
 	}
@@ -18,7 +22,8 @@
 	let {
 		networkContacts,
 		selectedContact = $bindable(),
-		destination = $bindable()
+		destination = $bindable(),
+		networkId
 	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
@@ -28,16 +33,28 @@
 			? isEmptyString(destination)
 				? networkContacts
 				: Object.keys(networkContacts).reduce<NetworkContacts>(
-						(acc, address) => ({
+						(acc, address) =>{
+							const networkContact = 		getNetworkContact({
+								networkContacts,
+								address: destination,
+								networkId
+							})
+
+							if (isNullish((networkContact))) {
+								return acc;
+							}
+
+
+							return ({
 							...acc,
 							...(isContactMatchingFilter({
 								filterValue: destination,
-								contact: networkContacts[address],
+								contact: networkContact,
 								address
 							})
-								? { [address]: networkContacts[address] }
+								? { [address]: networkContact }
 								: {})
-						}),
+						})},
 						{}
 					)
 			: {}

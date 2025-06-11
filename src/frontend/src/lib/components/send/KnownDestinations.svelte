@@ -9,9 +9,12 @@
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
+	import { getNetworkContact } from '$lib/utils/contacts.utils';
+	import type { NetworkId } from '$lib/types/network';
 
 	interface Props {
 		destination: string;
+		networkId: NetworkId;
 		knownDestinations?: KnownDestinations;
 		networkContacts?: NetworkContacts;
 		selectedContact?: ContactUi;
@@ -19,6 +22,7 @@
 	let {
 		knownDestinations,
 		destination = $bindable(),
+		networkId,
 		selectedContact = $bindable(),
 		networkContacts
 	}: Props = $props();
@@ -37,15 +41,25 @@
 	let filteredKnownDestinations = $derived(
 		isEmptyString(destination)
 			? sortedKnownDestinations
-			: sortedKnownDestinations.filter(({ address }) =>
-					nonNullish(networkContacts?.[address])
-						? isContactMatchingFilter({
-								address,
-								contact: networkContacts[address],
-								filterValue: destination
-							})
-						: address.includes(destination)
-				)
+			: sortedKnownDestinations.filter(({ address }) => {
+					const networkContact = nonNullish(networkContacts)
+						? 	getNetworkContact({
+							networkContacts,
+							address: destination,
+							networkId
+						})
+						: undefined;
+
+					if (nonNullish(networkContact)) {
+						return isContactMatchingFilter({
+							address,
+							contact: networkContact,
+							filterValue: destination
+						});
+					}
+
+					return address.includes(destination);
+				})
 	);
 </script>
 

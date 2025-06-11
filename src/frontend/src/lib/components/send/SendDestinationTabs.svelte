@@ -5,12 +5,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
+	import type { NetworkId } from '$lib/types/network';
 	import type { SendDestinationTab } from '$lib/types/send';
+	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import type { KnownDestinations } from '$lib/types/transactions';
 
 	interface Props {
 		destination: string;
 		activeSendDestinationTab: SendDestinationTab;
+		networkId: NetworkId;
 		knownDestinations?: KnownDestinations;
 		networkContacts?: NetworkContacts;
 		selectedContact?: ContactUi;
@@ -20,6 +23,7 @@
 		knownDestinations,
 		destination = $bindable(),
 		activeSendDestinationTab = $bindable(),
+		networkId,
 		selectedContact = $bindable(),
 		networkContacts
 	}: Props = $props();
@@ -37,12 +41,13 @@
 			<KnownDestinationsComponent
 				{knownDestinations}
 				{networkContacts}
+				{networkId}
 				bind:selectedContact
 				bind:destination
 				on:icNext
 			/>
 		{:else if activeSendDestinationTab === 'contacts'}
-			<SendContacts {networkContacts} bind:destination bind:selectedContact on:icNext />
+			<SendContacts {networkContacts} {networkId} bind:destination bind:selectedContact on:icNext />
 		{/if}
 	</Tabs>
 </div>
