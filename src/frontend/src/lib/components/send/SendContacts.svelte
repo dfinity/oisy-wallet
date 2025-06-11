@@ -27,7 +27,8 @@
 		nonNullish(networkContacts)
 			? isEmptyString(destination)
 				? networkContacts
-				: Object.entries(networkContacts).reduce<NetworkContacts>((acc, [address, contact]) => ({
+				: Object.entries(networkContacts).reduce<NetworkContacts>(
+						(acc, [address, contact]) => ({
 							...acc,
 							...(isContactMatchingFilter({
 								filterValue: destination,
@@ -36,7 +37,9 @@
 							})
 								? { [address]: contact }
 								: {})
-						}), {})
+						}),
+						{}
+					)
 			: {}
 	);
 </script>
