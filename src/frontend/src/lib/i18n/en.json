@@ -1241,5 +1241,18 @@
 			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
 			"unavailable_index_canister": "Transactions for $token_list can not be displayed. Index canister is currently unavailable."
 		}
+	},
+	"earning": {
+		"text": {
+			"title": "Earn"
+		},
+		"cards": {
+			"gold_title": "Gold",
+			"gold_description": "Coming soon",
+			"stablecoins_title": "Stablecoins",
+			"stablecoins_description": "Coming soon",
+			"sprinkles_title": "Sprinkles",
+			"sprinkles_description": "OISY Rewards"
+		}
 	}
 }
