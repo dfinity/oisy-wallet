@@ -128,6 +128,7 @@ describe('EditContactNameStep', () => {
 		});
 
 		const defaultLabel = en.address_book.avatar.default;
+
 		expect(getByLabelText(defaultLabel)).toBeInTheDocument();
 
 		// Type name
@@ -140,7 +141,7 @@ describe('EditContactNameStep', () => {
 				getByLabelText(`${en.address_book.avatar.avatar_for} Test Contact`)
 			).toBeInTheDocument();
 		});
-		
+
 		// Clear the name by actually removing all characters
 		await fireEvent.input(nameInput, { target: { value: '' } });
 
