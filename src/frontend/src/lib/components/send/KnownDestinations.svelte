@@ -7,10 +7,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
+	import type { NetworkId } from '$lib/types/network';
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
-	import type { NetworkId } from '$lib/types/network';
 
 	interface Props {
 		destination: string;
@@ -43,11 +43,11 @@
 			? sortedKnownDestinations
 			: sortedKnownDestinations.filter(({ address }) => {
 					const networkContact = nonNullish(networkContacts)
-						? 	getNetworkContact({
-							networkContacts,
-							address: destination,
-							networkId
-						})
+						? getNetworkContact({
+								networkContacts,
+								address: destination,
+								networkId
+							})
 						: undefined;
 
 					if (nonNullish(networkContact)) {

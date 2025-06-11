@@ -32,20 +32,18 @@
 		nonNullish(networkContacts)
 			? isEmptyString(destination)
 				? networkContacts
-				: Object.keys(networkContacts).reduce<NetworkContacts>(
-						(acc, address) =>{
-							const networkContact = 		getNetworkContact({
-								networkContacts,
-								address: destination,
-								networkId
-							})
+				: Object.keys(networkContacts).reduce<NetworkContacts>((acc, address) => {
+						const networkContact = getNetworkContact({
+							networkContacts,
+							address: destination,
+							networkId
+						});
 
-							if (isNullish((networkContact))) {
-								return acc;
-							}
+						if (isNullish(networkContact)) {
+							return acc;
+						}
 
-
-							return ({
+						return {
 							...acc,
 							...(isContactMatchingFilter({
 								filterValue: destination,
@@ -54,9 +52,8 @@
 							})
 								? { [address]: networkContact }
 								: {})
-						})},
-						{}
-					)
+						};
+					}, {})
 			: {}
 	);
 </script>
