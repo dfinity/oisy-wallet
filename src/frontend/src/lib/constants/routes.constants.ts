@@ -5,7 +5,7 @@ export enum AppPath {
 	Transactions = '/transactions/',
 	Activity = '/activity/',
 	WalletConnect = '/wc/',
-	Rewards = '/rewards/',
+	Rewards = '/rewards/', // Todo: remove when feature is completed
 	Earning = '/earning/',
 	EarningRewards = '/earning/rewards/'
 }

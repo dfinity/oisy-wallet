@@ -722,6 +722,7 @@ interface I18nTokens {
 		incomplete_metadata: string;
 		duplicate_metadata: string;
 		unexpected_undefined: string;
+		unexpected_error_on_token_delete: string;
 	};
 }
 
@@ -1077,6 +1078,18 @@ interface I18nActivity {
 	warning: { no_index_canister: string; unavailable_index_canister: string };
 }
 
+interface I18nEarning {
+	text: { title: string };
+	cards: {
+		gold_title: string;
+		gold_description: string;
+		stablecoins_title: string;
+		stablecoins_description: string;
+		sprinkles_title: string;
+		sprinkles_description: string;
+	};
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -1112,4 +1125,5 @@ interface I18n {
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
 	activity: I18nActivity;
+	earning: I18nEarning;
 }
