@@ -54,7 +54,8 @@
 						return isContactMatchingFilter({
 							address,
 							contact: networkContact,
-							filterValue: destination
+							filterValue: destination,
+							networkId: $sendTokenNetworkId
 						});
 					}
 

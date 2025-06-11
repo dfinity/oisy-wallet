@@ -1,3 +1,4 @@
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import type { ContactUi } from '$lib/types/contact';
 import {
 	getContactForAddress,
@@ -221,7 +222,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: 'Joh'
+					filterValue: 'Joh',
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeTruthy();
 		});
@@ -231,7 +233,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: 'Bitcoin'
+					filterValue: 'Bitcoin',
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeTruthy();
 		});
@@ -241,7 +244,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: mockContactBtcAddressUi.address
+					filterValue: mockContactBtcAddressUi.address,
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeTruthy();
 		});
@@ -251,7 +255,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: mockContactBtcAddressUi.address.slice(0, 6)
+					filterValue: mockContactBtcAddressUi.address.slice(0, 6),
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeTruthy();
 		});
@@ -261,7 +266,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: ''
+					filterValue: '',
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeFalsy();
 		});
@@ -271,7 +277,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: 'Test1'
+					filterValue: 'Test1',
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeFalsy();
 		});
