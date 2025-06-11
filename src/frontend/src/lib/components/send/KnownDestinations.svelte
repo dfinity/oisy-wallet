@@ -38,9 +38,7 @@
 		isEmptyString(destination)
 			? sortedKnownDestinations
 			: sortedKnownDestinations.filter(({ address }) => {
-					const networkContact = nonNullish(networkContacts)
-						? networkContacts[address]
-						: undefined;
+					const networkContact = nonNullish(networkContacts) ? networkContacts[address] : undefined;
 
 					if (nonNullish(networkContact)) {
 						return isContactMatchingFilter({
