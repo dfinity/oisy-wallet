@@ -384,8 +384,12 @@ describe('nav.utils', () => {
 			});
 
 			it('should return true when route id is any subroute of the Earning path', () => {
-				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}/${AppPath.EarningRewards}`)));
-				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}/${AppPath.Earning}/subroute`)));
+				expect(
+					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}/${AppPath.EarningRewards}`))
+				).toBeTruthy();
+				expect(
+					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}/${AppPath.Earning}/subroute`))
+				).toBeTruthy();
 			});
 
 			it('should return false when route id does not match Earning path', () => {
