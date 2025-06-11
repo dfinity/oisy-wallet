@@ -51,9 +51,9 @@
 			} else if (receivedReferral) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${reward.id}`, type: 'referral' }
+					metadata: { campaignId: `${campaign.id}`, type: 'referral' }
 				});
-				modalStore.openReferralState({ id: referralModalId, data: reward });
+				modalStore.openReferralState({ id: referralModalId, data: campaign });
 			} else {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,

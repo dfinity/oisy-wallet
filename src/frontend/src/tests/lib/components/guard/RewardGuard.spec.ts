@@ -123,10 +123,17 @@ describe('RewardGuard', () => {
 		await waitFor(() => {
 			expect(get(modalStore)).toEqual({
 				id: get(modalStore)?.id,
+				data: mockRewardCampaign,
 				type: 'referral-state'
 			});
 
-			// TODO add trackEvent check as soon as https://github.com/dfinity/oisy-wallet/pull/7209 is merged
+			expect(trackEvent).toHaveBeenNthCalledWith(1, {
+				name: TRACK_REWARD_CAMPAIGN_WIN,
+				metadata: {
+					campaignId: mockRewardCampaign.id,
+					type: 'referral'
+				}
+			});
 		});
 	});
 });
