@@ -53,6 +53,7 @@ interface I18nNavigation {
 		dapp_explorer: string;
 		activity: string;
 		airdrops: string;
+		earning: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
