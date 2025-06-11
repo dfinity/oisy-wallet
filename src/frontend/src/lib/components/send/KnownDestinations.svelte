@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
@@ -9,6 +9,7 @@
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
 	interface Props {
 		destination: string;
@@ -24,6 +25,8 @@
 	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
+
+	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let sortedKnownDestinations = $derived(
 		nonNullish(knownDestinations)
@@ -44,7 +47,8 @@
 						return isContactMatchingFilter({
 							address,
 							contact: networkContact,
-							filterValue: destination
+							filterValue: destination,
+							networkId: $sendTokenNetworkId
 						});
 					}
 

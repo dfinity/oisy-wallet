@@ -2,7 +2,9 @@ import type { Contact } from '$declarations/backend/backend.did';
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
 import type { Address } from '$lib/types/address';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+import type { NetworkId } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
+import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import {
 	getDiscriminatorForTokenAccountId,
 	getTokenAccountIdAddressString
@@ -82,14 +84,20 @@ export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi
 export const isContactMatchingFilter = ({
 	address,
 	contact,
-	filterValue
+	filterValue,
+	networkId
 }: {
 	address: Address;
 	contact: ContactUi;
 	filterValue: string;
+	networkId: NetworkId;
 }): boolean =>
 	notEmptyString(filterValue) &&
-	(address.includes(filterValue) ||
+	(areAddressesPartiallyEqual({
+		address1: address,
+		address2: filterValue,
+		networkId
+	}) ||
 		contact.name.toLowerCase().includes(filterValue.toLowerCase()) ||
 		contact.addresses.some(
 			({ label, address: innerAddress }) =>
