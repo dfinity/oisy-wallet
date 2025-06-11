@@ -7,7 +7,7 @@
 		testId?: string;
 	}
 
-	let {disabled = false, testId}: Props = $props();
+	let { disabled = false, testId }: Props = $props();
 </script>
 
 <Button {disabled} {testId}>
