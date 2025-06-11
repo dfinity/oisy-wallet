@@ -1050,88 +1050,88 @@
 	},
 	"address_book": {
 		"text": {
-			"title": "Address book",
-			"empty_title": "Your contacts are empty",
-			"empty_text": "All your contacts will be shown here",
-			"add_new_contact": "Add new contact",
-			"add_contact": "Add contact",
-			"search_contact": "Search contact",
-			"no_address_found": "No address available.",
-			"no_contact_found": "No contacts found"
+			"title": "地址簿",
+			"empty_title": "你的联系人列表为空",
+			"empty_text": "你所有的联系人将显示在此处",
+			"add_new_contact": "添加新联系人",
+			"add_contact": "添加联系人",
+			"search_contact": "搜索联系人",
+			"no_address_found": "没有可用地址。",
+			"no_contact_found": "未找到联系人"
 		},
 		"alt": {
 			"show_addresses_of_contact": "Show all addresses for contact",
 			"hide_addresses": "Hide addresses of contact"
 		},
 		"edit_contact": {
-			"title": "Edit contact",
-			"add_address": "Add address",
-			"delete_contact": "Delete contact"
+			"title": "编辑联系人",
+			"add_address": "添加地址",
+			"delete_contact": "删除联系人"
 		},
 		"avatar": {
 			"default": "Default avatar",
 			"avatar_for": "Avatar for"
 		},
 		"show_contact": {
-			"title": "Contact",
-			"add_address": "Add address",
-			"show_address_text": "Associated addresses will appear here",
-			"add_first_address": "Add first address to contactName!"
+			"title": "联系人",
+			"add_address": "添加地址",
+			"show_address_text": "关联地址将在此处显示",
+			"add_first_address": "为 $contactName 添加第一个地址！"
 		}
 	},
 	"contact": {
 		"form": {
-			"edit_contact": "Edit contact",
-			"add_new_contact": "Add new contact"
+			"edit_contact": "编辑联系人",
+			"add_new_contact": "添加新联系人"
 		},
 		"fields": {
-			"name": "Name"
+			"name": "名称"
 		},
 		"delete": {
-			"title": "Delete $contact contact?",
-			"delete_contact": "Delete contact",
-			"content_text": "This will delete $contact and all associated addresses from your Address Book. This action cannot be undone."
+			"title": "删除联系人 $contact？",
+			"delete_contact": "删除联系人",
+			"content_text": "这将从你的地址簿中删除 $contact 以及其所有关联地址。此操作不可撤销。"
 		},
 		"error": {
-			"create": "Failed to create the contact",
-			"update": "Failed to update the contact",
-			"delete": "Failed to delete the contact",
-			"name_too_long": "Please keep the name to $maxCharacters characters or fewer."
+			"create": "创建联系人失败",
+			"update": "更新联系人失败",
+			"delete": "删除联系人失败",
+			"name_too_long": "请将名称控制在 $maxCharacters 个字符以内。"
 		}
 	},
 	"address": {
 		"types": {
 			"Icrcv2": "Internet Computer",
-			"Btc": "Bitcoin",
-			"Eth": "Ethereum",
+			"Btc": "比特币",
+			"Eth": "以太坊",
 			"Sol": "Solana"
 		},
 		"form": {
-			"new_address": "New address",
-			"address_placeholder": "Enter or paste address",
-			"label_placeholder": "E.g., “Mom’s wallet“",
-			"invalid_address": "Invalid address",
-			"valid_for_networks": "Valid for networks:",
+			"new_address": "新地址",
+			"address_placeholder": "输入或粘贴地址",
+			"label_placeholder": "例如：“妈妈的钱包”",
+			"invalid_address": "地址无效",
+			"valid_for_networks": "适用于网络：",
 			"error": {
-				"label_too_long": "Label may not exceed $maxCharacters characters"
+				"label_too_long": "标签不能超过 $maxCharacters 个字符"
 			}
 		},
 		"fields": {
-			"label": "Alias",
-			"address": "Address"
+			"label": "别名",
+			"address": "地址"
 		},
 		"delete": {
-			"title": "Delete address?",
-			"delete_address": "Delete address",
-			"content_text": "This will delete <strong>$address</strong> address from $contact's contact.<br>This action cannot be undone."
+			"title": "删除地址？",
+			"delete_address": "删除地址",
+			"content_text": "这将从联系人 $contact 的联系人中删除地址 <strong>$address</strong>。<br>此操作不可撤销。"
 		},
 		"save": {
-			"title": "Save address",
-			"add_to_existing_contact": "Add to existing contact",
-			"create_contact": "Create contact"
+			"title": "保存地址",
+			"add_to_existing_contact": "添加到现有联系人",
+			"create_contact": "创建联系人"
 		},
 		"qr": {
-			"title": "Scan QR code"
+			"title": "扫描二维码"
 		}
 	},
 	"signer": {
