@@ -14,7 +14,15 @@
 		testId?: string;
 	}
 
-	let {children, title, items, disabled = false, asModalOnMobile = false, ariaLabel, testId}: Props = $props();
+	let {
+		children,
+		title,
+		items,
+		disabled = false,
+		asModalOnMobile = false,
+		ariaLabel,
+		testId
+	}: Props = $props();
 
 	let visible = $state(false);
 	let button: HTMLButtonElement | undefined = $state();
