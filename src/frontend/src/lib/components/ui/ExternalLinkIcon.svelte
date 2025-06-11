@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { ButtonColorStyle } from '$lib/types/style';
 	import type { Snippet } from 'svelte';
+	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
 		children?: Snippet;
@@ -10,7 +10,7 @@
 		colorStyle?: ButtonColorStyle;
 	}
 
-	let {children, onclick, href, ariaLabel, colorStyle = 'tertiary'}: Props = $props();
+	let { children, onclick, href, ariaLabel, colorStyle = 'tertiary' }: Props = $props();
 </script>
 
 <a
