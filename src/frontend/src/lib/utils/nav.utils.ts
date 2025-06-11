@@ -30,6 +30,8 @@ export const isTokensPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`;
 export const isRewardsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
+export const isEarningPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}`) ?? false;
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
@@ -46,6 +48,8 @@ export const isRouteActivity = ({ route: { id } }: Page): boolean => isActivityP
 export const isRouteTokens = ({ route: { id } }: Page): boolean => isTokensPath(id);
 
 export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
+
+export const isRouteEarning = ({ route: { id } }: Page): boolean => isEarningPath(id);
 
 const tokenUrl = ({
 	token: {
