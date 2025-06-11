@@ -965,31 +965,31 @@
 	"about": {
 		"why_oisy": {
 			"text": {
-				"label": "Why $oisy_short",
-				"title": "Why $oisy_short",
+				"label": "为什么选择 $oisy_short",
+				"title": "为什么选择 $oisy_short",
 				"hold_crypto": {
-					"title": "Unified Management of All Your Digital Assets",
-					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Solana, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
+					"title": "统一管理您的所有数字资产",
+					"description": "$oisy_short 让您能够在一个统一的钱包中管理所有数字资产，包括比特币、Solana、以太坊、ICP 等。无需再为不同加密货币使用多个钱包，实现跨平台无缝高效体验。"
 				},
 				"network_custody": {
-					"title": "No more private key anxiety with Network Custody",
-					"description": "$oisy_name implements network custody, an innovative approach that leverages the Internet Computer's advanced cryptography to eliminate the need for you to handle private keys directly. This provides a secure and user-friendly alternative to traditional methods, aligning with the “Onchain is the New Online“ movement — a shift toward solutions that enhance security and resilience against cyber attacks by running on a distributed network."
+					"title": "使用网络托管再无私钥焦虑",
+					"description": "$oisy_name 引入网络托管机制，利用 Internet Computer 的先进密码学技术，无需直接管理私钥，提供一种更安全、用户友好的替代方案。这种方式符合“链上即在线”的理念，旨在通过去中心化网络增强安全性与抵御网络攻击的能力。"
 				},
 				"fully_on_chain": {
-					"title": "Tamper-Proof Security with a Fully On-Chain Wallet",
-					"description": "Not only are your keys secured, but the entire wallet application is stored <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">fully on-chain</a> and served directly into your browser from the Internet Computer. This means the entire wallet benefits from a decentralized trust model, making it tamper-proof and highly secure."
+					"title": "完全链上钱包保障篡改防护",
+					"description": "不仅您的密钥受到保护，整个钱包应用也 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">完全部署在链上</a>，直接通过浏览器从 Internet Computer 加载。这意味着钱包整体受益于去中心化信任模型，具备防篡改和高度安全性。"
 				},
 				"cross_device": {
-					"title": "Access your wallet anytime from anywhere",
-					"description": "Using <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.internetcomputer.org/\">Internet Identity</a>, $oisy_short can easily be used across all devices you have linked to your private decentralized identity. This ensures seamless and secure access to your wallet whether you're on a smartphone, tablet, or desktop."
+					"title": "随时随地访问您的钱包",
+					"description": "通过 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.internetcomputer.org/\">Internet Identity</a>，您可以在所有与去中心化身份关联的设备上轻松使用 $oisy_short，无论是手机、平板还是桌面设备，确保无缝且安全的访问体验。"
 				},
 				"verifiable_credentials": {
-					"title": "Unlock Extra Features with Verifiable Credentials",
-					"description": "$oisy_short integrates with the Internet Computer's <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials</a> platform. Access additional features like airdrops and exclusive functionalities by acquiring certain types of credentials, enhancing your overall experience."
+					"title": "通过可验证凭证解锁额外功能",
+					"description": "$oisy_short 集成了 Internet Computer 的 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">可验证凭证</a>平台。通过获得特定类型的凭证，可解锁空投和专属功能，全面提升使用体验。"
 				},
 				"open_source": {
-					"title": "Trust in Transparency with Open Source",
-					"description": "$oisy_short is an <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">open-source</a> project led by a dedicated team within the <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a>, supported by over 200 world-leading cryptographers and engineers. Open sourcing ensures transparency, allowing the community to audit, contribute, and trust in the wallet's integrity."
+					"title": "开源透明值得信赖",
+					"description": "$oisy_short 是一个 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">开源项目</a>，由 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY 基金会</a>的专业团队维护，获得超过 200 位世界领先密码学家与工程师的支持。开源确保透明度，让社区能够审查、参与并信任钱包的完整性。"
 				}
 			}
 		}
