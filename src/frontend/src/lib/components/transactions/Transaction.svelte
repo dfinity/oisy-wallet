@@ -48,7 +48,7 @@
 		onClick
 	}: Props = $props();
 
-	let icon: Component = $derived(mapTransactionIcon({ type, status }));
+	let cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
 	let iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
@@ -86,9 +86,9 @@
 			{#snippet icon()}
 			<div>
 				{#if iconType === 'token'}
-					<TokenLogo data={token} badge={{ type: 'icon', icon, ariaLabel: type }} />
+					<TokenLogo data={token} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
 				{:else}
-					<RoundedIcon {icon} opacity={iconWithOpacity} />
+					<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
 				{/if}
 			</div>
 				{/snippet}
