@@ -1,6 +1,7 @@
 import type { EligibilityReport, RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
+import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
 	isEndedCampaign,
@@ -11,7 +12,6 @@ import {
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fromNullable, toNullable } from '@dfinity/utils';
-import type { RewardResponseInfo } from '$lib/types/reward';
 
 describe('rewards.utils', () => {
 	describe('loadRewardResult', () => {
@@ -36,7 +36,7 @@ describe('rewards.utils', () => {
 			name: fromNullable(mockedReward.name),
 			campaignName: fromNullable(mockedReward.campaign_name),
 			campaignId: mockedReward.campaign_id
-		}
+		};
 
 		it('should return falsy reward result if result was already loaded', async () => {
 			sessionStorage.setItem(INITIAL_REWARD_RESULT, 'true');
@@ -94,7 +94,7 @@ describe('rewards.utils', () => {
 			expect(receivedReward).toBeTruthy();
 			expect(receivedJackpot).toBeFalsy();
 			expect(receivedReferral).toBeFalsy();
-			expect(reward).toEqual(mappedMockedReward)
+			expect(reward).toEqual(mappedMockedReward);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
