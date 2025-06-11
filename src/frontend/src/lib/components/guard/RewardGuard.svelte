@@ -9,6 +9,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		modalReferralState,
+		modalReferralStateData,
 		modalRewardState,
 		modalRewardStateData
 	} from '$lib/derived/modal.derived';
@@ -48,7 +49,11 @@
 					data: { reward, jackpot: receivedJackpot }
 				});
 			} else if (receivedReferral) {
-				modalStore.openReferralState(referralModalId);
+				trackEvent({
+					name: TRACK_REWARD_CAMPAIGN_WIN,
+					metadata: { campaignId: `${reward.id}`, type: 'referral' }
+				});
+				modalStore.openReferralState({ id: referralModalId, data: reward });
 			} else {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
@@ -64,6 +69,6 @@
 
 {#if $modalRewardState && nonNullish($modalRewardStateData)}
 	<RewardStateModal reward={$modalRewardStateData.reward} jackpot={$modalRewardStateData.jackpot} />
-{:else if $modalReferralState}
-	<ReferralStateModal />
+{:else if $modalReferralState && nonNullish($modalReferralStateData)}
+	<ReferralStateModal reward={$modalReferralStateData} />
 {/if}
