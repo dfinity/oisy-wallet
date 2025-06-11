@@ -5,9 +5,45 @@
 	import { TRACK_REWARD_LEARN_MORE } from '$lib/constants/analytics.contants';
 	import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { EARNING_ENABLED } from '$env/earning';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import { afterNavigate, goto } from '$app/navigation';
+	import { networkUrl } from '$lib/utils/nav.utils';
+	import { networkId } from '$lib/derived/network.derived';
+	import { AppPath } from '$lib/constants/routes.constants';
+	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
+	import type { NavigationTarget } from '@sveltejs/kit';
+
+	let fromRoute = $state<NavigationTarget | null>(null);
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
 </script>
 
 <div class="flex flex-row items-center">
+	{#if EARNING_ENABLED}
+		<ButtonIcon
+			styleClass="mr-3"
+			colorStyle="secondary-light"
+			link={false}
+			ariaLabel="icon"
+			onclick={() =>
+				goto(
+					networkUrl({
+						path: AppPath.Earning,
+						networkId: $networkId,
+						usePreviousRoute: true,
+						fromRoute
+					})
+				)}
+		>
+			{#snippet icon()}
+				<IconBackArrow />
+			{/snippet}
+		</ButtonIcon>
+	{/if}
+
 	<PageTitle>{$i18n.rewards.text.title}</PageTitle>
 
 	<ExternalLink
