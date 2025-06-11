@@ -4,7 +4,7 @@ import type { Address } from '$lib/types/address';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
-import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
+import { areAddressesEqual, areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import {
 	getDiscriminatorForTokenAccountId,
 	getTokenAccountIdAddressString
@@ -101,5 +101,9 @@ export const isContactMatchingFilter = ({
 		contact.name.toLowerCase().includes(filterValue.toLowerCase()) ||
 		contact.addresses.some(
 			({ label, address: innerAddress }) =>
-				address === innerAddress && label?.toLowerCase().includes(filterValue.toLowerCase())
+				areAddressesEqual({
+					address1: address,
+					address2: innerAddress,
+					networkId
+				}) && label?.toLowerCase().includes(filterValue.toLowerCase())
 		));
