@@ -1,3 +1,5 @@
+import { randomWait } from '$lib/utils/time.utils';
+
 export interface RetryParams<Response, Error = unknown> {
 	request: () => Promise<Response>;
 	onRetry?: (options: { error: Error; retryCount: number }) => Promise<void>;
@@ -35,3 +37,9 @@ export const retry = async <Response, Error>({
 
 	return await executeRequest(0);
 };
+
+export const retryWithDelay = <Response, Error>({
+	request,
+	maxRetries = 3
+}: RetryParams<Response, Error>): Promise<Response> =>
+	retry({ request, onRetry: async () => await randomWait({}), maxRetries });

@@ -48,7 +48,7 @@
 				{$i18n.auth.help.text.identity_legacy_description}
 			</p>
 			<p>
-				<Button link on:click={onLegacySignIn} testId={HELP_AUTH_LEGACY_SIGN_IN_BUTTON}
+				<Button link onclick={onLegacySignIn} testId={HELP_AUTH_LEGACY_SIGN_IN_BUTTON}
 					>{$i18n.auth.help.text.identity_legacy_sign_in}</Button
 				>
 			</p>
@@ -66,10 +66,12 @@
 		</div>
 	</div>
 
-	<ButtonGroup slot="toolbar">
-		{#if !hideBack}
-			<ButtonBack onclick={onBack} testId={HELP_AUTH_BACK_BUTTON} />
-		{/if}
-		<ButtonDone onclick={onDone} testId={HELP_AUTH_DONE_BUTTON} />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			{#if !hideBack}
+				<ButtonBack onclick={onBack} testId={HELP_AUTH_BACK_BUTTON} />
+			{/if}
+			<ButtonDone onclick={onDone} testId={HELP_AUTH_DONE_BUTTON} />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

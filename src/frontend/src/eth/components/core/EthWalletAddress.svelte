@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
+	import { selectedEvmNetwork } from '$evm/derived/network.derived';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -9,7 +11,9 @@
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = notEmptyString($ethAddress)
-		? `${$explorerUrlStore}/address/${$ethAddress}`
+		? `${getExplorerUrl({
+				network: nonNullish($selectedEvmNetwork) ? $selectedEvmNetwork : $selectedEthereumNetwork
+			})}/address/${$ethAddress}`
 		: undefined;
 </script>
 
@@ -20,7 +24,7 @@
 
 	<output class="break-all" id="eth-wallet-address"
 		>{shortenWithMiddleEllipsis({ text: $ethAddress ?? '' })}</output
-	><Copy inline color="inherit" value={$ethAddress ?? ''} text={$i18n.wallet.text.address_copied} />
+	><Copy inline value={$ethAddress ?? ''} text={$i18n.wallet.text.address_copied} />
 </div>
 
 {#if nonNullish(explorerUrl)}

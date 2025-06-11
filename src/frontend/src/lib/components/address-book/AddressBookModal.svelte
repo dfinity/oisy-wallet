@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
+	import AddressBookQrCodeStep from '$lib/components/address-book/AddressBookQrCodeStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
 	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
@@ -33,6 +34,7 @@
 		updateContact
 	} from '$lib/services/manage-contacts.service';
 	import { wrapCallWith } from '$lib/services/utils.services';
+	import { addressBookStore } from '$lib/stores/address-book.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
@@ -130,6 +132,10 @@
 			title: $i18n.address_book.edit_contact.title
 		},
 		{
+			name: AddressBookSteps.QR_CODE_SCAN,
+			title: $i18n.address.qr.title
+		},
+		{
 			name: AddressBookSteps.DELETE_ADDRESS,
 			title: $i18n.address.delete.title
 		}
@@ -148,6 +154,11 @@
 		}
 	});
 
+	// Reset address book store on modal exit so we can start fresh the next time its opened
+	onDestroy(() => {
+		addressBookStore.reset();
+	});
+
 	let modal: WizardModal | undefined = $state();
 	const close = () => modalStore.close();
 
@@ -156,6 +167,8 @@
 	let editContactNameStep = $state<EditContactNameStep>();
 
 	let isDeletingContact = $state<boolean>(false);
+
+	let qrCodeAddress = $state<string>();
 
 	let currentContactId: bigint | undefined = $state();
 	let currentAddressIndex: number | undefined = $state();
@@ -203,6 +216,7 @@
 
 		const addresses = [...currentContact.addresses, address];
 		currentAddressIndex = undefined;
+		qrCodeAddress = undefined;
 		const contact = {
 			...currentContact,
 			addresses
@@ -415,7 +429,9 @@
 			contact={currentContact}
 			address={nonNullish(currentAddressIndex)
 				? currentContact?.addresses[currentAddressIndex]
-				: undefined}
+				: nonNullish(qrCodeAddress)
+					? { address: qrCodeAddress }
+					: undefined}
 			onSaveAddress={handleSaveAddress}
 			onAddAddress={handleAddAddress}
 			isNewAddress={isNullish(currentAddressIndex)}
@@ -423,6 +439,9 @@
 				currentAddressIndex = undefined;
 				handleClose();
 			}}
+			onQRCodeScan={() =>
+				nonNullish(modal) &&
+				goToWizardStep({ modal, steps, stepName: AddressBookSteps.QR_CODE_SCAN })}
 			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
@@ -465,6 +484,15 @@
 				currentContact = contact;
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
+			}}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.QR_CODE_SCAN}
+		<AddressBookQrCodeStep
+			onCancel={() =>
+				nonNullish(modal) &&
+				goToWizardStep({ modal, steps, stepName: AddressBookSteps.EDIT_ADDRESS })}
+			onScan={({ code }) => {
+				qrCodeAddress = code;
 			}}
 		/>
 	{/if}

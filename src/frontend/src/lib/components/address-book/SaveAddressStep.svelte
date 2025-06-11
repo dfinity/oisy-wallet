@@ -58,7 +58,7 @@
 				<Button
 					link
 					paddingSmall
-					on:click={onCreateContact}
+					onclick={onCreateContact}
 					ariaLabel={$i18n.address.save.create_contact}
 					><IconPlus /> {$i18n.address.save.create_contact}</Button
 				>
@@ -95,7 +95,9 @@
 		<EmptyState title={$i18n.address_book.text.no_contact_found} />
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCloseModal />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCloseModal />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

@@ -469,7 +469,8 @@
 			"recently_used_empty_state_title": "Recently used addresses will appear here",
 			"recently_used_empty_state_description": "Make your first send now!",
 			"contacts_empty_state_title": "Your contacts will appear here",
-			"contacts_empty_state_description": "It looks like you haven’t added contacts yet"
+			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
+			"send_review_subtitle": "You send"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
@@ -604,6 +605,7 @@
 			"swapping": "Swapping...",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
+			"swap_provider_website": "Website",
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",
 			"included_liquidity_fees": "Included liquidity pool fees",
@@ -660,7 +662,8 @@
 			"chain_key": "Chain Key",
 			"show_more_networks": "Show $number more networks",
 			"hide_more_networks": "Hide more networks",
-			"on_network": " on $network"
+			"on_network": " on $network",
+			"delete_token": "Delete token"
 		},
 		"details": {
 			"title": "Token details",
@@ -669,7 +672,10 @@
 			"contract_address_copied": "Contract address copied to clipboard.",
 			"token_address_copied": "Token address copied to clipboard.",
 			"twin_token": "Twin token",
-			"standard": "Standard"
+			"standard": "Standard",
+			"confirm_deletion_title": "Delete from the list of your tokens?",
+			"confirm_deletion_description": "This will remove the <span class=\"font-bold\">$token</span> from your $oisy_short token list. Your funds will remain untouched — you can re-add the token at any time.",
+			"deletion_confirmation": "$token has been successfully removed from your $oisy_short token list."
 		},
 		"balance": {
 			"error": {
@@ -884,9 +890,13 @@
 			"from": "From",
 			"from_copied": "From address copied to clipboard.",
 			"received_from": "Received from $name",
+			"from_ata": "Sender token account (ATA)",
+			"from_ata_copied": "Sender token account (ATA) copied to clipboard.",
 			"to": "To",
 			"to_copied": "To address copied to clipboard.",
 			"sent_to": "Sent to $name",
+			"to_ata": "Recipient token account (ATA)",
+			"to_ata_copied": "Recipient token account (ATA) copied to clipboard.",
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
 			"status": "Status",
@@ -1084,7 +1094,8 @@
 		"error": {
 			"create": "Failed to create the contact",
 			"update": "Failed to update the contact",
-			"delete": "Failed to delete the contact"
+			"delete": "Failed to delete the contact",
+			"name_too_long": "Please keep the name to $maxCharacters characters or fewer."
 		}
 	},
 	"address": {
@@ -1117,6 +1128,9 @@
 			"title": "Save address",
 			"add_to_existing_contact": "Add to existing contact",
 			"create_contact": "Create contact"
+		},
+		"qr": {
+			"title": "Scan QR code"
 		}
 	},
 	"signer": {

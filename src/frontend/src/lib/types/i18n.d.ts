@@ -442,6 +442,7 @@ interface I18nSend {
 		recently_used_empty_state_description: string;
 		contacts_empty_state_title: string;
 		contacts_empty_state_description: string;
+		send_review_subtitle: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -572,6 +573,7 @@ interface I18nSwap {
 		swapping: string;
 		refreshing_ui: string;
 		swap_provider: string;
+		swap_provider_website: string;
 		swap_route: string;
 		included_network_fees: string;
 		included_liquidity_fees: string;
@@ -626,6 +628,7 @@ interface I18nTokens {
 		show_more_networks: string;
 		hide_more_networks: string;
 		on_network: string;
+		delete_token: string;
 	};
 	details: {
 		title: string;
@@ -635,6 +638,9 @@ interface I18nTokens {
 		token_address_copied: string;
 		twin_token: string;
 		standard: string;
+		confirm_deletion_title: string;
+		confirm_deletion_description: string;
+		deletion_confirmation: string;
 	};
 	balance: { error: { not_applicable: string } };
 	import: {
@@ -821,9 +827,13 @@ interface I18nTransaction {
 		from: string;
 		from_copied: string;
 		received_from: string;
+		from_ata: string;
+		from_ata_copied: string;
 		to: string;
 		to_copied: string;
 		sent_to: string;
+		to_ata: string;
+		to_ata_copied: string;
 		block: string;
 		interacted_with: string;
 		status: string;
@@ -981,7 +991,7 @@ interface I18nContact {
 	form: { edit_contact: string; add_new_contact: string };
 	fields: { name: string };
 	delete: { title: string; delete_contact: string; content_text: string };
-	error: { create: string; update: string; delete: string };
+	error: { create: string; update: string; delete: string; name_too_long: string };
 }
 
 interface I18nAddress {
@@ -997,6 +1007,7 @@ interface I18nAddress {
 	fields: { label: string; address: string };
 	delete: { title: string; delete_address: string; content_text: string };
 	save: { title: string; add_to_existing_contact: string; create_contact: string };
+	qr: { title: string };
 }
 
 interface I18nSigner {

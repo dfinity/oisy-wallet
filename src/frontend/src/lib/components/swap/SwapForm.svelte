@@ -236,11 +236,13 @@
 		{/if}
 	</div>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => dispatch('icClose')} />
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCancel onclick={() => dispatch('icClose')} />
 
-		<Button disabled={invalid} on:click={() => dispatch('icNext')}>
-			{$i18n.swap.text.review_button}
-		</Button>
-	</ButtonGroup>
+			<Button disabled={invalid} onclick={() => dispatch('icNext')}>
+				{$i18n.swap.text.review_button}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
