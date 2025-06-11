@@ -13,9 +13,11 @@ import {
 	gotoReplaceRoot,
 	isActivityPath,
 	isDappExplorerPath,
+	isEarningPath,
 	isRewardsPath,
 	isRouteActivity,
 	isRouteDappExplorer,
+	isRouteEarning,
 	isRouteRewards,
 	isRouteSettings,
 	isRouteTokens,
@@ -31,6 +33,7 @@ import {
 	type RouteParams
 } from '$lib/utils/nav.utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
+import { expect } from 'vitest';
 
 describe('nav.utils', () => {
 	const mockGoTo = vi.fn();
@@ -372,6 +375,30 @@ describe('nav.utils', () => {
 				expect(isRouteRewards(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
 			});
 		});
+
+		describe('isRouteEarning', () => {
+			it('should return true when route id matches Earning path', () => {
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Earning}`;
+
+				expect(isRouteEarning(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteEarning(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
+			});
+
+			it('should return true when route id is any subroute of the Earning path', () => {
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}/${AppPath.EarningRewards}`)));
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}/${AppPath.Earning}/subroute`)));
+			});
+
+			it('should return false when route id does not match Earning path', () => {
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
+			});
+		});
 	});
 
 	describe('Path Matching Functions', () => {
@@ -419,6 +446,13 @@ describe('nav.utils', () => {
 			expect(isRewardsPath('/(app)/rewards')).toBeTruthy();
 			expect(isRewardsPath('/(app)/rewards/bonus')).toBeFalsy();
 			expect(isRewardsPath(null)).toBeFalsy();
+		});
+
+		it('isEarningPath', () => {
+			expect(isEarningPath(withAppPrefix(AppPath.Earning))).toBeTruthy();
+			expect(isEarningPath(withAppPrefix(AppPath.EarningRewards))).toBeTruthy();
+			expect(isEarningPath('/(app)/earning/whatever')).toBeTruthy();
+			expect(isEarningPath(null)).toBeFalsy();
 		});
 	});
 });
