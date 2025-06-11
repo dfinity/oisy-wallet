@@ -32,12 +32,32 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 			return {
 				receivedReward: true,
 				receivedJackpot: containsJackpot,
-				receivedReferral: containsReferral
+				receivedReferral: containsReferral,
+				reward: getFirstReward({ rewards, containsJackpot, containsReferral })
 			};
 		}
 	}
 
 	return { receivedReward: false, receivedJackpot: false, receivedReferral: false };
+};
+
+const getFirstReward = ({
+	rewards,
+	containsJackpot,
+	containsReferral
+}: {
+	rewards: RewardResponseInfo[];
+	containsJackpot: boolean;
+	containsReferral: boolean;
+}): RewardResponseInfo | undefined => {
+	if (containsJackpot) {
+		return rewards.find(({ name }) => name === 'jackpot');
+	}
+	if (containsReferral) {
+		return rewards.find(({ name }) => name === 'referral');
+	}
+
+	return rewards.at(0);
 };
 
 export const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
