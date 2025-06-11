@@ -45,7 +45,7 @@
 					const networkContact = nonNullish(networkContacts)
 						? getNetworkContact({
 								networkContacts,
-								address: destination,
+								address,
 								networkId: $sendTokenNetworkId
 							})
 						: undefined;

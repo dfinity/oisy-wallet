@@ -34,7 +34,7 @@
 				: Object.keys(networkContacts).reduce<NetworkContacts>((acc, address) => {
 						const networkContact = getNetworkContact({
 							networkContacts,
-							address: destination,
+							address,
 							networkId: $sendTokenNetworkId
 						});
 
