@@ -10,7 +10,7 @@
 	import { networkUrl } from '$lib/utils/nav.utils.js';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
-  
+
 	afterNavigate(({ from }) => {
 		fromRoute = from;
 	});
