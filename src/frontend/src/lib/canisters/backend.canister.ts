@@ -9,7 +9,8 @@ import type {
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
-	UserToken
+	UserToken,
+	UserTokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
@@ -91,10 +92,10 @@ export class BackendCanister extends Canister<BackendService> {
 		return set_user_token(token);
 	};
 
-	removeUserToken = ({ token }: { token: UserToken }): Promise<void> => {
+	removeUserToken = (params: UserTokenId): Promise<void> => {
 		const { remove_user_token } = this.caller({ certified: true });
 
-		return remove_user_token(token);
+		return remove_user_token(params);
 	};
 
 	createUserProfile = (): Promise<UserProfile> => {

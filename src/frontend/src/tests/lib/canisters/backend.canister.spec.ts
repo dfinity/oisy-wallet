@@ -1254,7 +1254,10 @@ describe('backend.canister', () => {
 
 	describe('removeUserToken', () => {
 		it('should call remove_user_token method', async () => {
-			const params = { token: mockedUserToken };
+			const params = {
+				chain_id: mockedUserToken.chain_id,
+				contract_address: mockedUserToken.contract_address
+			};
 			const response = undefined;
 
 			service.remove_user_token.mockResolvedValue(response);
@@ -1265,7 +1268,7 @@ describe('backend.canister', () => {
 
 			const res = await removeUserToken(params);
 
-			expect(service.remove_user_token).toHaveBeenCalledWith(params.token);
+			expect(service.remove_user_token).toHaveBeenCalledWith(params);
 			expect(res).toEqual(response);
 		});
 
@@ -1279,7 +1282,10 @@ describe('backend.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = removeUserToken({ token: mockedUserToken });
+			const res = removeUserToken({
+				chain_id: mockedUserToken.chain_id,
+				contract_address: mockedUserToken.contract_address
+			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});

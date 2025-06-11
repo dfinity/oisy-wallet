@@ -8,7 +8,8 @@ import type {
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
-	UserToken
+	UserToken,
+	UserTokenId
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
@@ -74,14 +75,12 @@ export const setCustomToken = async ({
 };
 
 export const removeUserToken = async ({
-	token,
-	identity
-}: CanisterApiFunctionParams<{
-	token: UserToken;
-}>): Promise<void> => {
+	identity,
+	...restParams
+}: CanisterApiFunctionParams<UserTokenId>): Promise<void> => {
 	const { removeUserToken } = await backendCanister({ identity });
 
-	return removeUserToken({ token });
+	return removeUserToken(restParams);
 };
 
 export const setManyUserTokens = async ({
