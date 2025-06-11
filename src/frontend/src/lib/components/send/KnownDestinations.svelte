@@ -37,15 +37,19 @@
 	let filteredKnownDestinations = $derived(
 		isEmptyString(destination)
 			? sortedKnownDestinations
-			: sortedKnownDestinations.filter(({ address }) =>
-					nonNullish(networkContacts?.[address])
-						? isContactMatchingFilter({
-								address,
-								contact: networkContacts[address],
-								filterValue: destination
-							})
-						: address.includes(destination)
-				)
+			: sortedKnownDestinations.filter(({ address }) => {
+					const networkContact = nonNullish(networkContacts) ? networkContacts[address] : undefined;
+
+					if (nonNullish(networkContact)) {
+						return isContactMatchingFilter({
+							address,
+							contact: networkContact,
+							filterValue: destination
+						});
+					}
+
+					return address.includes(destination);
+				})
 	);
 </script>
 
