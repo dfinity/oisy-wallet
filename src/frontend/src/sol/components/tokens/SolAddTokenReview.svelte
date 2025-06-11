@@ -13,6 +13,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import type { TokenMetadata } from '$lib/types/token';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { splTokens } from '$sol/derived/spl.derived';
@@ -44,8 +45,9 @@
 		}
 
 		if (
-			$splTokens?.find(({ address }) => address.toLowerCase() === tokenAddress?.toLowerCase()) !==
-			undefined
+			$splTokens?.find(({ address }) =>
+				areAddressesEqual({ address1: address, address2: tokenAddress, addressType: 'Sol' })
+			) !== undefined
 		) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.already_available }
