@@ -98,7 +98,6 @@
 				tokenStandard={$sendToken.standard}
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
-				networkId={$sendTokenNetworkId}
 				bind:destination
 				bind:invalidDestination
 				on:icQRCodeScan
