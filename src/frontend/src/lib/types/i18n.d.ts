@@ -282,6 +282,7 @@ interface I18nHero {
 	text: {
 		available_balance: string;
 		unavailable_balance: string;
+		hidden_balance: string;
 		top_up: string;
 		learn_more_about_erc20_icp: string;
 	};
