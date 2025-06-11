@@ -10,6 +10,7 @@
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { EARNING_ENABLED } from '$env/earning';
 	import {
 		NAVIGATION_ITEM_ACTIVITY,
 		NAVIGATION_ITEM_REWARDS,
@@ -26,7 +27,8 @@
 		isRouteSettings,
 		isRouteTokens,
 		isRouteTransactions,
-		networkUrl
+		networkUrl,
+		isRouteEarning
 	} from '$lib/utils/nav.utils';
 
 	interface Props {
@@ -92,20 +94,37 @@
 	{$i18n.navigation.text.dapp_explorer}
 </NavigationItem>
 
-<NavigationItem
-	href={networkUrl({
-		path: AppPath.Rewards,
-		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute,
-		fromRoute
-	})}
-	ariaLabel={$i18n.navigation.alt.airdrops}
-	selected={isRouteRewards(page)}
-	testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
->
-	<IconGift />
-	{$i18n.navigation.text.airdrops}
-</NavigationItem>
+{#if EARNING_ENABLED}
+	<NavigationItem
+		href={networkUrl({
+			path: AppPath.Earning,
+			networkId: $networkId,
+			usePreviousRoute: isTransactionsRoute,
+			fromRoute
+		})}
+		ariaLabel={$i18n.navigation.alt.airdrops}
+		selected={isRouteEarning(page)}
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+	>
+		<IconGift />
+		{$i18n.navigation.text.earning}
+	</NavigationItem>
+{:else}
+	<NavigationItem
+		href={networkUrl({
+			path: AppPath.Rewards,
+			networkId: $networkId,
+			usePreviousRoute: isTransactionsRoute,
+			fromRoute
+		})}
+		ariaLabel={$i18n.navigation.alt.airdrops}
+		selected={isRouteRewards(page)}
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+	>
+		<IconGift />
+		{$i18n.navigation.text.airdrops}
+	</NavigationItem>
+{/if}
 
 <NavigationItem
 	href={networkUrl({

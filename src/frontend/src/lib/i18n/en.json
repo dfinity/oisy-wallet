@@ -53,6 +53,7 @@
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
 			"airdrops": "Rewards",
+			"earning": "Earn & Rewards",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -1239,6 +1240,11 @@
 		"warning": {
 			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
 			"unavailable_index_canister": "Transactions for $token_list can not be displayed. Index canister is currently unavailable."
+		}
+	},
+	"earning": {
+		"text": {
+			"title": "Earning & Rewards"
 		}
 	}
 }
