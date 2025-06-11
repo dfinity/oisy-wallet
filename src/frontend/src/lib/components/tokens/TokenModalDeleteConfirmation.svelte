@@ -5,6 +5,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { TOKEN_MODAL_DELETE_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -13,11 +14,12 @@
 
 	interface Props {
 		token: OptionToken;
+		loading?: boolean;
 		onCancel: () => void;
 		onConfirm: () => void;
 	}
 
-	let { token, onCancel, onConfirm }: Props = $props();
+	let { token, loading = false, onCancel, onConfirm }: Props = $props();
 </script>
 
 <ContentWithToolbar>
@@ -36,9 +38,14 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonCancel onclick={onCancel} />
+			<ButtonCancel onclick={onCancel} disabled={loading} />
 
-			<Button colorStyle="error" onclick={onConfirm}>
+			<Button
+				colorStyle="error"
+				onclick={onConfirm}
+				disabled={loading}
+				testId={TOKEN_MODAL_DELETE_BUTTON}
+			>
 				{$i18n.core.text.delete}
 			</Button>
 		</ButtonGroup>
