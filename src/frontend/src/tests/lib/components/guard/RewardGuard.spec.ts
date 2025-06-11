@@ -1,22 +1,18 @@
-import * as rewardCampaigns from '$env/reward-campaigns.env';
-import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { render, waitFor } from '@testing-library/svelte';
-import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
-import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import * as rewardApi from '$lib/api/reward.api';
+import * as rewardCampaigns from '$env/reward-campaigns.env';
 import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
-import { get } from 'svelte/store';
-import { modalStore } from '$lib/stores/modal.store';
-import { QrCodeType } from '$lib/enums/qr-code-types';
-import type { RewardResponseInfo } from '$lib/types/reward';
-import { assertNonNullish, fromNullable } from '@dfinity/utils';
 import type { RewardDescription } from '$env/types/env-reward';
+import * as rewardApi from '$lib/api/reward.api';
+import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
+import { TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
-import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR, TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
-import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { modalStore } from '$lib/stores/modal.store';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
+import { assertNonNullish } from '@dfinity/utils';
+import { render, waitFor } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('RewardGuard', () => {
 	beforeEach(() => {
@@ -27,8 +23,8 @@ describe('RewardGuard', () => {
 		);
 
 		sessionStorage.clear();
-		mockAuthStore()
-	})
+		mockAuthStore();
+	});
 
 	const lastTimestamp = BigInt(Date.now());
 	const mockedReward: RewardInfo = {
@@ -61,7 +57,7 @@ describe('RewardGuard', () => {
 		};
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-		render(RewardGuard)
+		render(RewardGuard);
 
 		await waitFor(() => {
 			expect(get(modalStore)).toEqual({
@@ -77,8 +73,8 @@ describe('RewardGuard', () => {
 					type: 'jackpot'
 				}
 			});
-		})
-	})
+		});
+	});
 
 	it('should open reward state modal for normal airdrop', async () => {
 		const mockedUserData: UserData = {
@@ -91,7 +87,7 @@ describe('RewardGuard', () => {
 		};
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-		render(RewardGuard)
+		render(RewardGuard);
 
 		await waitFor(() => {
 			expect(get(modalStore)).toEqual({
@@ -107,8 +103,8 @@ describe('RewardGuard', () => {
 					type: 'airdrop'
 				}
 			});
-		})
-	})
+		});
+	});
 
 	it('should open reward state modal for referral', async () => {
 		const customMockedReward: RewardInfo = { ...mockedReward, name: ['referral'] };
@@ -122,7 +118,7 @@ describe('RewardGuard', () => {
 		};
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-		render(RewardGuard)
+		render(RewardGuard);
 
 		await waitFor(() => {
 			expect(get(modalStore)).toEqual({
@@ -131,6 +127,6 @@ describe('RewardGuard', () => {
 			});
 
 			// TODO add trackEvent check as soon as https://github.com/dfinity/oisy-wallet/pull/7209 is merged
-		})
-	})
-})
+		});
+	});
+});
