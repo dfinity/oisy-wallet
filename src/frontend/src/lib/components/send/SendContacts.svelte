@@ -42,20 +42,18 @@
 					)
 			: {}
 	);
-
-	let filteredNetworkContactsKeys = $derived(Object.keys(filteredNetworkContacts));
 </script>
 
 <div in:fade>
-	{#if nonNullish(networkContacts) && filteredNetworkContactsKeys.length > 0}
+	{#if nonNullish(networkContacts) && Object.keys(filteredNetworkContacts).length > 0}
 		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
 			<ul class="list-none overflow-y-auto overscroll-contain">
-				{#each filteredNetworkContactsKeys as address, index (index)}
+				{#each Object.entries(filteredNetworkContacts) as [address, contact], index (index)}
 					<SendContact
-						contact={networkContacts[address]}
+						{contact}
 						{address}
 						onClick={() => {
-							selectedContact = networkContacts[address];
+							selectedContact = contact;
 							destination = address;
 							dispatch('icNext');
 						}}
