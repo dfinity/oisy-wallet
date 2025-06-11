@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
@@ -13,7 +13,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import type { OptionToken } from '$lib/types/token';
+	import type { OptionToken, Token } from '$lib/types/token';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -29,61 +29,59 @@
 	let showDeleteConfirmation = $state(false);
 	let loading = $state(false);
 
-	const onTokenDeleteSuccess = async () => {
+	const onTokenDeleteSuccess = async (deletedToken: Token) => {
 		loading = false;
 
 		modalStore.close();
 
 		await gotoReplaceRoot();
 
-		if (nonNullish(token)) {
-			toastsShow({
-				text: replacePlaceholders(
-					replaceOisyPlaceholders($i18n.tokens.details.deletion_confirmation),
-					{
-						$token: getTokenDisplaySymbol(token)
-					}
-				),
-				level: 'success'
-			});
-		}
+		toastsShow({
+			text: replacePlaceholders(
+				replaceOisyPlaceholders($i18n.tokens.details.deletion_confirmation),
+				{
+					$token: getTokenDisplaySymbol(deletedToken)
+				}
+			),
+			level: 'success'
+		});
 	};
 
-	const onTokenDelete = async () => {
+	const onTokenDelete = async (tokenToDelete: OptionToken) => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
 		}
 
-		if (isNullish(token)) {
+		if (isNullish(tokenToDelete)) {
 			return;
 		}
 
-		// TODO: update this function to handle ICRC/SPL when BE supports removing custom tokens
-		if (isTokenErc20UserToken(token)) {
-			loading = true;
+		try {
+			// TODO: update this function to handle ICRC/SPL when BE supports removing custom tokens
+			if (isTokenErc20UserToken(tokenToDelete)) {
+				loading = true;
 
-			const { chain_id, contract_address } = toUserToken(token);
+				const { chain_id, contract_address } = toUserToken(tokenToDelete);
 
-			try {
 				await removeUserToken({
 					chain_id,
 					contract_address,
 					identity: $authIdentity
 				});
 
-				erc20UserTokensStore.reset(token.id);
+				erc20UserTokensStore.reset(tokenToDelete.id);
 
-				await onTokenDeleteSuccess();
-			} catch (err: unknown) {
-				toastsError({
-					msg: { text: $i18n.tokens.error.unexpected_error_on_token_delete },
-					err
-				});
-
-				loading = false;
-				showDeleteConfirmation = false;
+				await onTokenDeleteSuccess(tokenToDelete);
 			}
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.unexpected_error_on_token_delete },
+				err
+			});
+
+			loading = false;
+			showDeleteConfirmation = false;
 		}
 	};
 </script>
@@ -100,7 +98,7 @@
 			{token}
 			{loading}
 			onCancel={() => (showDeleteConfirmation = false)}
-			onConfirm={onTokenDelete}
+			onConfirm={() => onTokenDelete(token)}
 		/>
 	{:else}
 		<TokenModalContent
