@@ -3,7 +3,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let isPrimary = false;
+	interface Props {
+		isPrimary?: boolean;
+	}
+
+	let { isPrimary = false }: Props = $props();
 </script>
 
 <Button
