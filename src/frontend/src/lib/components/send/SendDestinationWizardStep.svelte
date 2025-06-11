@@ -84,6 +84,7 @@
 					<SendDestinationTabs
 						knownDestinations={$ethKnownDestinations}
 						networkContacts={$ethNetworkContacts}
+						networkId={$sendTokenNetworkId}
 						bind:destination
 						bind:activeSendDestinationTab
 						bind:selectedContact
@@ -98,6 +99,7 @@
 				tokenStandard={$sendToken.standard}
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
+				networkId={$sendTokenNetworkId}
 				bind:destination
 				bind:invalidDestination
 				on:icQRCodeScan
@@ -105,6 +107,7 @@
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
+				networkId={$sendTokenNetworkId}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
@@ -124,6 +127,7 @@
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
+				networkId={$sendTokenNetworkId}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
@@ -142,6 +146,7 @@
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				networkId={$sendTokenNetworkId}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
