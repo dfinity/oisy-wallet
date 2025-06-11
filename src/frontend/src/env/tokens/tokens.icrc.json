@@ -126,5 +126,8 @@
 		"name": "Windoge98",
 		"symbol": "EXE",
 		"decimals": 8
+	},
+	"BOB": {
+		"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai"
 	}
 }
