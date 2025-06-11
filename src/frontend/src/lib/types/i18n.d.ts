@@ -638,6 +638,8 @@ interface I18nTokens {
 		token_address_copied: string;
 		twin_token: string;
 		standard: string;
+		confirm_deletion_title: string;
+		confirm_deletion_description: string;
 	};
 	balance: { error: { not_applicable: string } };
 	import: {
