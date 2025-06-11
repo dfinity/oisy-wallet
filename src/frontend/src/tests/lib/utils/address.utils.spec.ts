@@ -4,7 +4,11 @@ import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_NETWORKS } from '$env/networks/networks.sol.env';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
-import { areAddressesEqual, getCaseSensitiveness } from '$lib/utils/address.utils';
+import {
+	areAddressesEqual,
+	areAddressesPartiallyEqual,
+	getCaseSensitiveness
+} from '$lib/utils/address.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 
 describe('address.utils', () => {
@@ -114,6 +118,116 @@ describe('address.utils', () => {
 			it('should return false for case-insensitive equal addresses', () => {
 				expect(
 					areAddressesEqual({ address1, address2: address1.toUpperCase(), networkId })
+				).toBeFalsy();
+			});
+		});
+	});
+
+	describe('areAddressesPartiallyEqual', () => {
+		const address1 = 'address123';
+		const address2 = 'address456';
+
+		it('should return false for nullish addresses', () => {
+			const mockNetworkId = parseNetworkId('mock-network-id');
+
+			expect(
+				areAddressesPartiallyEqual({ address1: null, address2, networkId: mockNetworkId })
+			).toBeFalsy();
+
+			expect(
+				areAddressesPartiallyEqual({ address1, address2: null, networkId: mockNetworkId })
+			).toBeFalsy();
+
+			expect(
+				areAddressesPartiallyEqual({ address1: null, address2: null, networkId: mockNetworkId })
+			).toBeFalsy();
+
+			expect(
+				areAddressesPartiallyEqual({ address1: undefined, address2, networkId: mockNetworkId })
+			).toBeFalsy();
+
+			expect(
+				areAddressesPartiallyEqual({ address1, address2: undefined, networkId: mockNetworkId })
+			).toBeFalsy();
+
+			expect(
+				areAddressesPartiallyEqual({
+					address1: undefined,
+					address2: undefined,
+					networkId: mockNetworkId
+				})
+			).toBeFalsy();
+		});
+
+		describe.each([
+			ICP_NETWORK,
+			...SUPPORTED_BITCOIN_NETWORKS,
+			...SUPPORTED_ETHEREUM_NETWORKS,
+			...SUPPORTED_EVM_NETWORKS
+		])('for network $name', ({ id: networkId }) => {
+			it('should return true for equal addresses', () => {
+				expect(
+					areAddressesPartiallyEqual({ address1, address2: address1, networkId })
+				).toBeTruthy();
+			});
+
+			it('should return true for partially equal addresses', () => {
+				expect(
+					areAddressesPartiallyEqual({ address1, address2: address1.slice(0, 3), networkId })
+				).toBeTruthy();
+			});
+
+			it('should return false for different addresses', () => {
+				expect(areAddressesPartiallyEqual({ address1, address2, networkId })).toBeFalsy();
+			});
+
+			it('should return true for case-insensitive equal addresses', () => {
+				expect(
+					areAddressesPartiallyEqual({ address1, address2: address1.toUpperCase(), networkId })
+				).toBeTruthy();
+			});
+
+			it('should return true for case-insensitive partially equal addresses', () => {
+				expect(
+					areAddressesPartiallyEqual({
+						address1,
+						address2: address1.toUpperCase().slice(0, 3),
+						networkId
+					})
+				).toBeTruthy();
+			});
+		});
+
+		describe.each(SUPPORTED_SOLANA_NETWORKS)('for network $name', ({ id: networkId }) => {
+			it('should return true for equal addresses', () => {
+				expect(
+					areAddressesPartiallyEqual({ address1, address2: address1, networkId })
+				).toBeTruthy();
+			});
+
+			it('should return true for partially equal addresses', () => {
+				expect(
+					areAddressesPartiallyEqual({ address1, address2: address1.slice(0, 3), networkId })
+				).toBeTruthy();
+			});
+
+			it('should return false for different addresses', () => {
+				expect(areAddressesPartiallyEqual({ address1, address2, networkId })).toBeFalsy();
+			});
+
+			it('should return false for case-insensitive equal addresses', () => {
+				expect(
+					areAddressesPartiallyEqual({ address1, address2: address1.toUpperCase(), networkId })
+				).toBeFalsy();
+			});
+
+			it('should return false for case-insensitive partially equal addresses', () => {
+				expect(
+					areAddressesPartiallyEqual({
+						address1,
+						address2: address1.toUpperCase().slice(0, 3),
+						networkId
+					})
 				).toBeFalsy();
 			});
 		});

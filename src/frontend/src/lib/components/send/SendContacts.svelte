@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import SendContact from '$lib/components/send/SendContact.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
@@ -23,6 +24,8 @@
 
 	const dispatch = createEventDispatcher();
 
+	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	let filteredNetworkContacts = $derived(
 		nonNullish(networkContacts)
 			? isEmptyString(destination)
@@ -33,7 +36,8 @@
 							...(isContactMatchingFilter({
 								filterValue: destination,
 								contact,
-								address
+								address,
+								networkId: $sendTokenNetworkId
 							})
 								? { [address]: contact }
 								: {})
