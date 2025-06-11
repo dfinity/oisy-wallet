@@ -94,6 +94,7 @@
 	{$i18n.navigation.text.dapp_explorer}
 </NavigationItem>
 
+<!-- Todo: remove condition once the feature is completed -->
 {#if EARNING_ENABLED}
 	<NavigationItem
 		href={networkUrl({
