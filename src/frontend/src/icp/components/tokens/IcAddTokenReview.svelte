@@ -51,22 +51,18 @@
 
 <ContentWithToolbar>
 	<div class="mb-4 rounded-lg bg-brand-subtle-20 p-4">
-		{#if isNullish(token)}
-			<SkeletonCardWithoutAmount>{$i18n.tokens.import.text.verifying}</SkeletonCardWithoutAmount>
-		{:else}
+		{#if nonNullish(token)}
 			<div in:blur>
 				<Card noMargin>
 					{token.token.name}
 
 					{#snippet icon()}
-						{#if nonNullish(token)}
-							<Logo
-								src={token.token.icon}
-								alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
-								size="lg"
-								color="white"
-							/>
-						{/if}
+						<Logo
+							src={token.token.icon}
+							alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
+							size="lg"
+							color="white"
+						/>
 					{/snippet}
 
 					{#snippet description()}
@@ -76,6 +72,8 @@
 					{/snippet}
 				</Card>
 			</div>
+		{:else}
+			<SkeletonCardWithoutAmount>{$i18n.tokens.import.text.verifying}</SkeletonCardWithoutAmount>
 		{/if}
 	</div>
 
