@@ -94,7 +94,7 @@
 				{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(amount)}
+				{#if nonNullish(cardAmount)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
