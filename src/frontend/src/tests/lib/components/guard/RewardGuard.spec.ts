@@ -1,0 +1,136 @@
+import * as rewardCampaigns from '$env/reward-campaigns.env';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { render, waitFor } from '@testing-library/svelte';
+import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
+import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
+import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import * as rewardApi from '$lib/api/reward.api';
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
+import { get } from 'svelte/store';
+import { modalStore } from '$lib/stores/modal.store';
+import { QrCodeType } from '$lib/enums/qr-code-types';
+import type { RewardResponseInfo } from '$lib/types/reward';
+import { assertNonNullish, fromNullable } from '@dfinity/utils';
+import type { RewardDescription } from '$env/types/env-reward';
+import { trackEvent } from '$lib/services/analytics.services';
+import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR, TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
+import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+
+describe('RewardGuard', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		vi.spyOn(rewardCampaigns, 'rewardCampaigns', 'get').mockImplementation(
+			() => mockRewardCampaigns
+		);
+
+		sessionStorage.clear();
+		mockAuthStore()
+	})
+
+	const lastTimestamp = BigInt(Date.now());
+	const mockedReward: RewardInfo = {
+		timestamp: lastTimestamp,
+		amount: 1000000n,
+		ledger: mockIdentity.getPrincipal(),
+		name: ['airdrop'],
+		campaign_name: ['deuteronomy'], // Note: This is no longer optional and will be superceded by campaign_id.
+		campaign_id: SPRINKLES_SEASON_1_EPISODE_3_ID
+	};
+
+	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
+		({ id }) => id === SPRINKLES_SEASON_1_EPISODE_3_ID
+	);
+	assertNonNullish(mockRewardCampaign);
+
+	vi.mock('$lib/services/analytics.services', () => ({
+		trackEvent: vi.fn()
+	}));
+
+	it('should open reward state modal for jackpot', async () => {
+		const customMockedReward: RewardInfo = { ...mockedReward, name: ['jackpot'] };
+		const mockedUserData: UserData = {
+			is_vip: [false],
+			superpowers: [],
+			airdrops: [],
+			usage_awards: [[mockedReward, customMockedReward]],
+			last_snapshot_timestamp: [lastTimestamp],
+			sprinkles: []
+		};
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+		render(RewardGuard)
+
+		await waitFor(() => {
+			expect(get(modalStore)).toEqual({
+				id: get(modalStore)?.id,
+				data: { reward: mockRewardCampaign, jackpot: true },
+				type: 'reward-state'
+			});
+
+			expect(trackEvent).toHaveBeenNthCalledWith(1, {
+				name: TRACK_REWARD_CAMPAIGN_WIN,
+				metadata: {
+					campaignId: mockRewardCampaign.id,
+					type: 'jackpot'
+				}
+			});
+		})
+	})
+
+	it('should open reward state modal for normal airdrop', async () => {
+		const mockedUserData: UserData = {
+			is_vip: [false],
+			superpowers: [],
+			airdrops: [],
+			usage_awards: [[mockedReward]],
+			last_snapshot_timestamp: [lastTimestamp],
+			sprinkles: []
+		};
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+		render(RewardGuard)
+
+		await waitFor(() => {
+			expect(get(modalStore)).toEqual({
+				id: get(modalStore)?.id,
+				data: { reward: mockRewardCampaign, jackpot: false },
+				type: 'reward-state'
+			});
+
+			expect(trackEvent).toHaveBeenNthCalledWith(1, {
+				name: TRACK_REWARD_CAMPAIGN_WIN,
+				metadata: {
+					campaignId: mockRewardCampaign.id,
+					type: 'airdrop'
+				}
+			});
+		})
+	})
+
+	it('should open reward state modal for referral', async () => {
+		const customMockedReward: RewardInfo = { ...mockedReward, name: ['referral'] };
+		const mockedUserData: UserData = {
+			is_vip: [false],
+			superpowers: [],
+			airdrops: [],
+			usage_awards: [[mockedReward, customMockedReward]],
+			last_snapshot_timestamp: [lastTimestamp],
+			sprinkles: []
+		};
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+		render(RewardGuard)
+
+		await waitFor(() => {
+			expect(get(modalStore)).toEqual({
+				id: get(modalStore)?.id,
+				type: 'referral-state'
+			});
+
+			// TODO add trackEvent check as soon as https://github.com/dfinity/oisy-wallet/pull/7209 is merged
+		})
+	})
+})
