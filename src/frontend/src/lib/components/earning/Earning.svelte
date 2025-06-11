@@ -1,14 +1,13 @@
 <script lang="ts">
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
-	import { page } from '$app/state';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { networkId } from '$lib/derived/network.derived.js';
 	import { i18n } from '$lib/stores/i18n.store.js';
-	import { isRouteTransactions, networkUrl } from '$lib/utils/nav.utils.js';
+	import { networkUrl } from '$lib/utils/nav.utils.js';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
