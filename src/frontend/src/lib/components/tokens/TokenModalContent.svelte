@@ -13,6 +13,7 @@
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import { TOKEN_MODAL_CONTENT_DELETE_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
@@ -110,6 +111,7 @@
 					styleClass="mx-auto"
 					colorStyle="error"
 					onclick={onDeleteClick}
+					testId={TOKEN_MODAL_CONTENT_DELETE_BUTTON}
 				>
 					<IconTrash />
 					{$i18n.tokens.text.delete_token}
