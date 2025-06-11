@@ -35,7 +35,7 @@
 	}
 
 	const {
-		amount,
+		amount: cardAmount,
 		type,
 		status,
 		timestamp,
@@ -99,7 +99,7 @@
 						<IconDots />
 					{:else}
 						<Amount
-							{amount}
+							amount={cardAmount}
 							decimals={token.decimals}
 							symbol={getTokenDisplaySymbol(token)}
 							formatPositiveAmount
