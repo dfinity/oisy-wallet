@@ -10,6 +10,7 @@
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
+	import { getNetworkContact } from '$lib/utils/contacts.utils';
 
 	interface Props {
 		destination: string;
@@ -41,7 +42,13 @@
 		isEmptyString(destination)
 			? sortedKnownDestinations
 			: sortedKnownDestinations.filter(({ address }) => {
-					const networkContact = nonNullish(networkContacts) ? networkContacts[address] : undefined;
+					const networkContact = nonNullish(networkContacts)
+						? getNetworkContact({
+								networkContacts,
+								address,
+								networkId: $sendTokenNetworkId
+							})
+						: undefined;
 
 					if (nonNullish(networkContact)) {
 						return isContactMatchingFilter({
