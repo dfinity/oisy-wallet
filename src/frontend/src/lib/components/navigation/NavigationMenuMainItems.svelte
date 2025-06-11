@@ -3,6 +3,7 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
+	import { EARNING_ENABLED } from '$env/earning';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
@@ -10,7 +11,6 @@
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import { EARNING_ENABLED } from '$env/earning';
 	import {
 		NAVIGATION_ITEM_ACTIVITY,
 		NAVIGATION_ITEM_REWARDS,
