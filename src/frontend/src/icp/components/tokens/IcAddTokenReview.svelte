@@ -53,7 +53,7 @@
 	<div class="mb-4 rounded-lg bg-brand-subtle-20 p-4">
 		{#if isNullish(token)}
 			<SkeletonCardWithoutAmount>{$i18n.tokens.import.text.verifying}</SkeletonCardWithoutAmount>
-		{:else}
+		{:else if nonNullish(token)}
 			<div in:blur>
 				<Card noMargin>
 					{token.token.name}
