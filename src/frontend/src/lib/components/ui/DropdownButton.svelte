@@ -12,7 +12,7 @@
 		testId?: string;
 	}
 
-	let {children, onclick, disabled = false, button, ariaLabel, opened = false, testId}: Props = $props();
+	let {children, onclick, disabled = false, button = $bindable(), ariaLabel, opened = false, testId}: Props = $props();
 </script>
 
 <button
