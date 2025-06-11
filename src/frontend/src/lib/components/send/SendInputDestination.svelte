@@ -11,9 +11,9 @@
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { NetworkId } from '$lib/types/network';
 	import type { KnownDestinations } from '$lib/types/transactions';
+	import { getNetworkContact } from '$lib/utils/contacts.utils';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
-	import { getNetworkContact } from '$lib/utils/contacts.utils';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
