@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
@@ -10,6 +9,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { KnownDestinations } from '$lib/types/transactions';
+	import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
 
@@ -63,7 +63,7 @@
 						address1: address,
 						address2: destination,
 						networkId: $sendTokenNetworkId
-					})
+					});
 				})
 	);
 </script>
