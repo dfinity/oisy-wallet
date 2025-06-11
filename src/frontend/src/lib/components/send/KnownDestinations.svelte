@@ -9,6 +9,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { KnownDestinations } from '$lib/types/transactions';
+	import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
 
@@ -59,7 +60,11 @@
 						});
 					}
 
-					return address.includes(destination);
+					return areAddressesPartiallyEqual({
+						address1: address,
+						address2: destination,
+						networkId: $sendTokenNetworkId
+					});
 				})
 	);
 </script>
