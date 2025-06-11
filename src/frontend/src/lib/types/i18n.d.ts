@@ -722,6 +722,7 @@ interface I18nTokens {
 		incomplete_metadata: string;
 		duplicate_metadata: string;
 		unexpected_undefined: string;
+		unexpected_error_on_token_delete: string;
 	};
 }
 
