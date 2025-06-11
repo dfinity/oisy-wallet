@@ -54,18 +54,19 @@
 		{#if isNullish(token)}
 			<SkeletonCardWithoutAmount>{$i18n.tokens.import.text.verifying}</SkeletonCardWithoutAmount>
 		{:else}
-			{#if nonNullish(token)}
 			<div in:blur>
 				<Card noMargin>
 					{token.token.name}
 
 					{#snippet icon()}
-						<Logo
-							src={token.token.icon}
-							alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
-							size="lg"
-							color="white"
-						/>
+						{#if isNullish(token)}
+							<Logo
+								src={token.token.icon}
+								alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
+								size="lg"
+								color="white"
+							/>
+						{/if}
 					{/snippet}
 
 					{#snippet description()}
@@ -75,7 +76,6 @@
 					{/snippet}
 				</Card>
 			</div>
-			{/if}
 		{/if}
 	</div>
 
