@@ -33,7 +33,9 @@
 		const { receivedReward, receivedJackpot, receivedReferral, reward } =
 			await loadRewardResult($authIdentity);
 
-		const campaign: RewardDescription | undefined = rewardCampaigns.find(({ id }) => id === reward?.campaignId)
+		const campaign: RewardDescription | undefined = rewardCampaigns.find(
+			({ id }) => id === reward?.campaignId
+		);
 
 		if (receivedReward && nonNullish(campaign)) {
 			if (receivedJackpot) {
@@ -52,7 +54,10 @@
 					name: TRACK_REWARD_CAMPAIGN_WIN,
 					metadata: { campaignId: `${campaign.id}`, type: 'airdrop' }
 				});
-				modalStore.openRewardState({ id: rewardModalId, data: { reward: campaign, jackpot: false } });
+				modalStore.openRewardState({
+					id: rewardModalId,
+					data: { reward: campaign, jackpot: false }
+				});
 			}
 		}
 	});

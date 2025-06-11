@@ -33,7 +33,7 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 				receivedReward: true,
 				receivedJackpot: containsJackpot,
 				receivedReferral: containsReferral,
-				reward: getFirstReward({rewards, containsJackpot, containsReferral})
+				reward: getFirstReward({ rewards, containsJackpot, containsReferral })
 			};
 		}
 	}
@@ -41,7 +41,15 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 	return { receivedReward: false, receivedJackpot: false, receivedReferral: false };
 };
 
-const getFirstReward = ({ rewards, containsJackpot, containsReferral }: {rewards: RewardResponseInfo[], containsJackpot: boolean, containsReferral: boolean}) => {
+const getFirstReward = ({
+	rewards,
+	containsJackpot,
+	containsReferral
+}: {
+	rewards: RewardResponseInfo[];
+	containsJackpot: boolean;
+	containsReferral: boolean;
+}) => {
 	if (containsJackpot) {
 		return rewards.find(({ name }) => name === 'jackpot');
 	}
