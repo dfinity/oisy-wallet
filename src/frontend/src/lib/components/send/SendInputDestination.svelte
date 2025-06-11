@@ -13,6 +13,7 @@
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
+	import { getNetworkContact } from '$lib/utils/contacts.utils';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -43,6 +44,17 @@
 		isNullish(
 			getKnownDestination({
 				knownDestinations,
+				address: destination,
+				networkId
+			})
+		);
+
+	let isNotNetworkContact = false;
+	$: isNotNetworkContact =
+		nonNullish(networkContacts) &&
+		isNullish(
+			getNetworkContact({
+				networkContacts,
 				address: destination,
 				networkId
 			})
@@ -86,7 +98,7 @@
 	</div>
 </div>
 
-{#if !invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && isNotKnownDestination && nonNullish(networkContacts) && isNullish(networkContacts[destination])}
+{#if !invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && isNotKnownDestination && isNotNetworkContact}
 	<div transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning" styleClass="mt-4">
 			{$i18n.send.info.unknown_destination}
