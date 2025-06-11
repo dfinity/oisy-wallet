@@ -78,6 +78,7 @@ export const TRACK_CONTACT_DELETE_ERROR = 'contact_delete_error';
 
 // Rewards
 export const TRACK_REWARD_LEARN_MORE = 'reward_learn_more';
+export const TRACK_REWARD_FILTER_CHANGE = 'reward_filter_change';
 export const TRACK_REWARD_CAMPAIGN_WIN = 'reward_campaign_win';
 export const TRACK_REWARD_CAMPAIGN_WIN_SHARE = 'reward_campaign_win_share';
 
