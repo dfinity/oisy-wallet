@@ -156,6 +156,10 @@ export const modalReferralState: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'referral-state'
 );
+export const modalReferralStateData: Readable<RewardDescription> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.data as RewardDescription
+);
 export const modalAddressBook: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'address-book'

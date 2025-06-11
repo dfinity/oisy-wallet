@@ -26,3 +26,11 @@ export const TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER: { [key in TokenAccountIdTypes]: 
 	Icrcv2: 3,
 	Sol: 4
 };
+
+export const TOKEN_ACCOUNT_ID_TYPES_CASE_SENSITIVE: { [key in TokenAccountIdTypes]: boolean } = {
+	Btc: false,
+	Eth: false,
+	Icrcv2: false,
+	// Solana is case-sensitive for the addresses
+	Sol: true
+};
