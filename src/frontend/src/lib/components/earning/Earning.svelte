@@ -29,8 +29,8 @@
 			<span class="py-2">
 				<IconCrypto />
 			</span>
-			<span class="inline-flex font-bold">Gold</span>
-			<span class="inline-flex text-tertiary">Coming soon </span>
+			<span class="inline-flex font-bold">{$i18n.earning.cards.gold_title}</span>
+			<span class="inline-flex text-tertiary">{$i18n.earning.cards.gold_description}</span>
 		</div>
 		<a
 			class="flex flex-col items-center rounded-2xl bg-brand-subtle-20 p-3 text-center no-underline hover:bg-brand-subtle-30 hover:text-primary hover:shadow"
@@ -44,15 +44,15 @@
 			<span class="py-2">
 				<IconGift />
 			</span>
-			<span class="inline-flex font-bold">Sprinkles</span>
-			<span class="inline-flex text-tertiary">OISY Rewards</span>
+			<span class="inline-flex font-bold">{$i18n.earning.cards.sprinkles_title}</span>
+			<span class="inline-flex text-tertiary">{$i18n.earning.cards.sprinkles_description}</span>
 		</a>
 		<div class="flex flex-col items-center rounded-2xl bg-disabled-alt p-3 text-center">
 			<span class="py-2">
 				<IconCrypto />
 			</span>
-			<span class="inline-flex font-bold">Stablecoins</span>
-			<span class="inline-flex text-tertiary">Coming soon</span>
+			<span class="inline-flex font-bold">{$i18n.earning.cards.stablecoins_title}</span>
+			<span class="inline-flex text-tertiary">{$i18n.earning.cards.stablecoins_description}</span>
 		</div>
 	</div>
 </div>
