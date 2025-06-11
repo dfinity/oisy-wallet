@@ -12,8 +12,6 @@
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
-	const isTransactionsRoute = $derived(isRouteTransactions(page));
-
 	afterNavigate(({ from }) => {
 		fromRoute = from;
 	});
@@ -38,7 +36,7 @@
 			href={networkUrl({
 				path: AppPath.EarningRewards,
 				networkId: $networkId,
-				usePreviousRoute: isTransactionsRoute,
+				usePreviousRoute: false,
 				fromRoute
 			})}
 		>
