@@ -11,6 +11,10 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
+	import {
+		TRACK_REWARD_CAMPAIGN_LEARN_MORE,
+		TRACK_REWARD_CAMPAIGN_SHARE
+	} from '$lib/constants/analytics.contants';
 	import { REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -18,7 +22,7 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
-	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		reward: RewardDescription;
@@ -64,11 +68,23 @@
 				iconVisible={false}
 				asButton
 				styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
+				trackEvent={{
+					name: TRACK_REWARD_CAMPAIGN_LEARN_MORE,
+					metadata: { campaignId: `${reward.id}`, state: getCampaignState(reward) }
+				}}
 			>
 				{$i18n.rewards.text.learn_more}
 			</ExternalLink>
 
-			<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2" />
+			<Share
+				text={$i18n.rewards.text.share}
+				href={reward.campaignHref}
+				styleClass="my-2"
+				trackEvent={{
+					name: TRACK_REWARD_CAMPAIGN_SHARE,
+					metadata: { campaignId: `${reward.id}`, state: getCampaignState(reward) }
+				}}
+			/>
 
 			{#if criteria.length > 0}
 				<Hr spacing="md" />
