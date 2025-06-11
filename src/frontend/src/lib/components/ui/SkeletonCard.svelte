@@ -10,10 +10,10 @@
 	<span class="inline-block w-[120px] max-w-full sm:w-[200px]"><slot><SkeletonText /></slot></span>
 
 	{#snippet amount()}
-	<span class="inline-block w-full max-w-[100px]"><SkeletonText /></span>
+		<span class="inline-block w-full max-w-[100px]"><SkeletonText /></span>
 	{/snippet}
 
 	{#snippet icon()}
-	<SkeletonLogo />
-		{/snippet}
+		<SkeletonLogo />
+	{/snippet}
 </Card>

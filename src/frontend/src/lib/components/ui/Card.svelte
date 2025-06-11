@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 	import CardAmountDescription from '$lib/components/ui/CardAmountDescription.svelte';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		icon: Snippet;
@@ -15,7 +15,16 @@
 		testId?: string;
 	}
 
-	let {icon, description, amount, amountDescription, action, children, noMargin = false, testId}: Props = $props();
+	let {
+		icon,
+		description,
+		amount,
+		amountDescription,
+		action,
+		children,
+		noMargin = false,
+		testId
+	}: Props = $props();
 </script>
 
 <div class="flex items-center gap-4" class:mb-6={!noMargin} data-tid={testId}>

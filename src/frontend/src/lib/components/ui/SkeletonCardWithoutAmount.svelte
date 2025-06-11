@@ -8,12 +8,10 @@
 	<span class="inline-block w-[120px] max-w-full sm:w-[200px]"><slot><SkeletonText /></slot></span>
 
 	{#snippet description()}
-	<span class="mt-1 inline-block w-[120px] max-w-full sm:w-[200px]"
-		><SkeletonText /></span
-	>
+		<span class="mt-1 inline-block w-[120px] max-w-full sm:w-[200px]"><SkeletonText /></span>
 	{/snippet}
 
 	{#snippet icon()}
-	<SkeletonLogo />
+		<SkeletonLogo />
 	{/snippet}
 </Card>
