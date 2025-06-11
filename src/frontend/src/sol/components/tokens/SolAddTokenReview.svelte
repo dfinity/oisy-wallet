@@ -46,7 +46,7 @@
 
 		if (
 			$splTokens?.find(({ address }) =>
-				areAddressesEqual({ address1: address, address2: tokenAddress, addressType: 'Sol' })
+				areAddressesEqual({ address1: address, address2: tokenAddress, networkId: network.id })
 			) !== undefined
 		) {
 			toastsError({

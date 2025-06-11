@@ -58,69 +58,62 @@ describe('address.utils', () => {
 		const address2 = 'address456';
 
 		it('should return false for nullish addresses', () => {
-			const mockAddressType = 'mock-address-type' as TokenAccountIdTypes;
+			const mockNetworkId = parseNetworkId('mock-network-id');
+
+			expect(areAddressesEqual({ address1: null, address2, networkId: mockNetworkId })).toBeFalsy();
+
+			expect(areAddressesEqual({ address1, address2: null, networkId: mockNetworkId })).toBeFalsy();
 
 			expect(
-				areAddressesEqual({ address1: null, address2, addressType: mockAddressType })
+				areAddressesEqual({ address1: null, address2: null, networkId: mockNetworkId })
 			).toBeFalsy();
 
 			expect(
-				areAddressesEqual({ address1, address2: null, addressType: mockAddressType })
+				areAddressesEqual({ address1: undefined, address2, networkId: mockNetworkId })
 			).toBeFalsy();
 
 			expect(
-				areAddressesEqual({ address1: null, address2: null, addressType: mockAddressType })
+				areAddressesEqual({ address1, address2: undefined, networkId: mockNetworkId })
 			).toBeFalsy();
 
 			expect(
-				areAddressesEqual({ address1: undefined, address2, addressType: mockAddressType })
-			).toBeFalsy();
-
-			expect(
-				areAddressesEqual({ address1, address2: undefined, addressType: mockAddressType })
-			).toBeFalsy();
-
-			expect(
-				areAddressesEqual({
-					address1: undefined,
-					address2: undefined,
-					addressType: mockAddressType
-				})
+				areAddressesEqual({ address1: undefined, address2: undefined, networkId: mockNetworkId })
 			).toBeFalsy();
 		});
 
-		describe.each(['Btc', 'Eth', 'Icrcv2', 'unknown'])('for %s address type', (rawAddressType) => {
-			const addressType = rawAddressType as TokenAccountIdTypes;
-
+		describe.each([
+			ICP_NETWORK,
+			...SUPPORTED_BITCOIN_NETWORKS,
+			...SUPPORTED_ETHEREUM_NETWORKS,
+			...SUPPORTED_EVM_NETWORKS
+		])('for network $name', ({ id: networkId }) => {
 			it('should return true for equal addresses', () => {
-				expect(areAddressesEqual({ address1, address2: address1, addressType })).toBeTruthy();
+				expect(areAddressesEqual({ address1, address2: address1, networkId })).toBeTruthy();
 			});
 
 			it('should return false for different addresses', () => {
-				expect(areAddressesEqual({ address1, address2, addressType })).toBeFalsy();
+				expect(areAddressesEqual({ address1, address2, networkId })).toBeFalsy();
 			});
 
 			it('should return true for case-insensitive equal addresses', () => {
 				expect(
-					areAddressesEqual({ address1, address2: address1.toUpperCase(), addressType })
+					areAddressesEqual({ address1, address2: address1.toUpperCase(), networkId })
 				).toBeTruthy();
 			});
 		});
 
-		describe('for Sol address type', () => {
-			const addressType = 'Sol' as TokenAccountIdTypes;
-
+		describe.each(SUPPORTED_SOLANA_NETWORKS)('for network $name', ({ id: networkId }) => {
 			it('should return true for equal addresses', () => {
-				expect(areAddressesEqual({ address1, address2: address1, addressType })).toBeTruthy();
+				expect(areAddressesEqual({ address1, address2: address1, networkId })).toBeTruthy();
 			});
 
 			it('should return false for different addresses', () => {
-				expect(areAddressesEqual({ address1, address2, addressType })).toBeFalsy();
+				expect(areAddressesEqual({ address1, address2, networkId })).toBeFalsy();
 			});
 
-			it('should return true for case-insensitive equal addresses', () => {
+			it('should return false for case-insensitive equal addresses', () => {
 				expect(
-					areAddressesEqual({ address1, address2: address1.toUpperCase(), addressType })
+					areAddressesEqual({ address1, address2: address1.toUpperCase(), networkId })
 				).toBeFalsy();
 			});
 		});
