@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import { AMOUNT_DATA } from '$lib/constants/test-ids.constants';
@@ -27,7 +28,7 @@
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol)}
 			{#if $isPrivacyMode}
-				<IconDots variant="lg" times={6} styleClass="h-12.5 my-4.25" />
+				<IconDots variant="lg" times={6} styleClass="my-4.25" />
 			{:else}
 				<Amount
 					amount={token.balance}
@@ -38,21 +39,25 @@
 		{:else}
 			<span class:animate-pulse={$loading}>
 				{#if $isPrivacyMode}
-					<IconDots variant="lg" times={6} styleClass="h-12.5 my-4.25" />
+					<IconDots variant="lg" times={6} styleClass="my-4.25" />
 				{:else}
 					0.00
 				{/if}
 			</span>
 		{/if}
 	</output>
-
-	{#if !$isPrivacyMode}
-		<span class="text-xl font-bold opacity-50">
+	<span class="text-xl font-bold opacity-50">
+		{#if !$isPrivacyMode}
 			<TokenExchangeBalance
 				balance={token?.balance}
 				usdBalance={token?.usdBalance}
 				nullishBalanceMessage={$i18n.hero.text.unavailable_balance}
 			/>
-		</span>
-	{/if}
+		{:else}
+			<span class="flex items-center justify-center gap-2">
+				<IconEyeOff />
+				{$i18n.hero.text.hidden_balance}
+			</span>
+		{/if}
+	</span>
 </span>
