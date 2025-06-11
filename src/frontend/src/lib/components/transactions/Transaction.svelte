@@ -83,15 +83,17 @@
 				{/if}
 			</span>
 
-			<div slot="icon">
+			{#snippet icon()}
+			<div>
 				{#if iconType === 'token'}
 					<TokenLogo data={token} badge={{ type: 'icon', icon, ariaLabel: type }} />
 				{:else}
 					<RoundedIcon {icon} opacity={iconWithOpacity} />
 				{/if}
 			</div>
+				{/snippet}
 
-			<svelte:fragment slot="amount">
+			{#snippet amount()}
 				{#if nonNullish(amount)}
 					{#if $isPrivacyMode}
 						<IconDots />
@@ -104,16 +106,16 @@
 						/>
 					{/if}
 				{/if}
-			</svelte:fragment>
+			{/snippet}
 
-			<svelte:fragment slot="description">
+			{#snippet description()}
 				<span data-tid="receive-tokens-modal-transaction-timestamp">
 					{#if nonNullish(timestamp)}
 						{formatSecondsToDate(timestamp)}
 					{/if}
 				</span>
 				<TransactionStatusComponent {status} />
-			</svelte:fragment>
+			{/snippet}
 		</Card>
 	</span>
 </button>

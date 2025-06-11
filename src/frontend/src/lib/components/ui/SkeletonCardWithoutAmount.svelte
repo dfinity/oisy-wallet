@@ -7,9 +7,13 @@
 <Card noMargin>
 	<span class="inline-block w-[120px] max-w-full sm:w-[200px]"><slot><SkeletonText /></slot></span>
 
-	<span class="mt-1 inline-block w-[120px] max-w-full sm:w-[200px]" slot="description"
+	{#snippet description()}
+	<span class="mt-1 inline-block w-[120px] max-w-full sm:w-[200px]"
 		><SkeletonText /></span
 	>
+	{/snippet}
 
-	<SkeletonLogo slot="icon" />
+	{#snippet icon()}
+	<SkeletonLogo />
+	{/snippet}
 </Card>
