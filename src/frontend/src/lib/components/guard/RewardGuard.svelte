@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
-	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
+	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
@@ -31,35 +31,38 @@
 			return;
 		}
 
-		// TODO At the moment the selected campaign is hardcoded. In the future this should be loaded dynamically.
-		const reward: RewardDescription | undefined = rewardCampaigns.find(
-			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
+		const { receivedReward, receivedJackpot, receivedReferral, reward } =
+			await loadRewardResult($authIdentity);
+
+		const campaign: RewardDescription | undefined = rewardCampaigns.find(
+			({ id }) => id === reward?.campaignId
 		);
 
-		const { receivedReward, receivedJackpot, receivedReferral } =
-			await loadRewardResult($authIdentity);
-		if (receivedReward && nonNullish(reward)) {
+		if (receivedReward && nonNullish(campaign)) {
 			if (receivedJackpot) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${reward.id}`, type: 'jackpot' }
+					metadata: { campaignId: `${campaign.id}`, type: 'jackpot' }
 				});
 				modalStore.openRewardState({
 					id: rewardModalId,
-					data: { reward, jackpot: receivedJackpot }
+					data: { reward: campaign, jackpot: receivedJackpot }
 				});
 			} else if (receivedReferral) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${reward.id}`, type: 'referral' }
+					metadata: { campaignId: `${campaign.id}`, type: 'referral' }
 				});
-				modalStore.openReferralState({ id: referralModalId, data: reward });
+				modalStore.openReferralState({ id: referralModalId, data: campaign });
 			} else {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${reward.id}`, type: 'airdrop' }
+					metadata: { campaignId: `${campaign.id}`, type: 'airdrop' }
 				});
-				modalStore.openRewardState({ id: rewardModalId, data: { reward, jackpot: false } });
+				modalStore.openRewardState({
+					id: rewardModalId,
+					data: { reward: campaign, jackpot: false }
+				});
 			}
 		}
 	});

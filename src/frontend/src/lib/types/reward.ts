@@ -22,6 +22,7 @@ export interface RewardResult {
 	receivedReward: boolean;
 	receivedJackpot: boolean;
 	receivedReferral: boolean;
+	reward?: RewardResponseInfo;
 }
 
 export interface RewardClaimApiResponse {
