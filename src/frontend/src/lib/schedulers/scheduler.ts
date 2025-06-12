@@ -58,6 +58,10 @@ export class SchedulerTimer {
 			return;
 		}
 
+		if (nonNullish(this.timer)) {
+			this.stopTimer();
+		}
+
 		this.timer = setInterval(execute, interval);
 
 		if (
