@@ -15,11 +15,13 @@
 	let { contact, address, children }: Props = $props();
 
 	let contactLabel = $derived(
-		contact?.addresses.find(({ address: innerAddress, addressType }) => areAddressesEqual({
-			address1: innerAddress,
-			address2: address,
-			addressType
-		}))?.label
+		contact?.addresses.find(({ address: innerAddress, addressType }) =>
+			areAddressesEqual({
+				address1: innerAddress,
+				address2: address,
+				addressType
+			})
+		)?.label
 	);
 </script>
 
