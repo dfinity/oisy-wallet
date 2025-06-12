@@ -7,14 +7,14 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import {
-		ADDRESS_BOOK_CANCEL_BUTTON,
+		ADDRESS_BOOK_BACK_BUTTON,
 		ADDRESS_BOOK_SAVE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
-	import type { ContactUi } from '$lib/types/contact';
+	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
 
 	interface Props {
@@ -31,8 +31,10 @@
 			? modalData.entrypoint.address
 			: undefined
 	);
-	let modalDataAddressUi = $derived(
-		nonNullish(modalDataAddress) ? mapAddressToContactAddressUi(modalDataAddress) : undefined
+	let modalDataAddressUi = $state(
+		(nonNullish(modalDataAddress)
+			? mapAddressToContactAddressUi(modalDataAddress)
+			: {}) as ContactAddressUi
 	);
 
 	let editingContact = $state<Partial<ContactUi>>({
@@ -46,8 +48,8 @@
 		}
 	};
 
-	let validName = $state(true);
-	let validAddress = $state(true);
+	let validName = $state(false);
+	let validAddress = $state(false);
 
 	let isFormValid = $derived(validName && validAddress);
 </script>
@@ -60,15 +62,16 @@
 
 		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
 			<AddressForm
-				disableAddressField
-				address={modalDataAddressUi ?? {}}
+				disableAddressField={nonNullish(modalDataAddress)}
+				address={modalDataAddressUi}
 				bind:isValid={validAddress}
+				{disabled}
 			/>
 		</div>
 
 		{#snippet toolbar()}
 			<ButtonGroup>
-				<ButtonBack {disabled} onclick={onBack} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonBack>
+				<ButtonBack {disabled} onclick={onBack} testId={ADDRESS_BOOK_BACK_BUTTON}></ButtonBack>
 				<Button
 					type="submit"
 					colorStyle="primary"
