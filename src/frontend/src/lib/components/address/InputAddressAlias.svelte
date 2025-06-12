@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import type { ZodError } from 'zod';
 	import InputAddress from '$lib/components/address/InputAddress.svelte';
@@ -17,10 +17,10 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		onQRCodeScan: () => void;
+		onQRCodeScan?: () => void;
 		address: Partial<ContactAddressUi>;
 		disableAddressField?: boolean;
-		isInvalid: boolean;
+		isValid: boolean;
 		disabled?: boolean;
 		focusField?: 'address' | 'label' | null;
 	}
@@ -29,7 +29,7 @@
 		onQRCodeScan,
 		address = $bindable(),
 		disableAddressField = false,
-		isInvalid = $bindable(),
+		isValid = $bindable(),
 		disabled = false,
 		focusField = null
 	}: Props = $props();
@@ -47,7 +47,7 @@
 	});
 
 	$effect(() => {
-		isInvalid = nonNullish(addressParseError) || nonNullish(labelError);
+		isValid = isNullish(addressParseError) && isNullish(labelError);
 	});
 </script>
 

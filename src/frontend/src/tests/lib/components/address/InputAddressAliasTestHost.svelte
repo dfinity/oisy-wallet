@@ -1,20 +1,20 @@
 <script lang="ts">
-	import AddressForm from '$lib/components/address/AddressForm.svelte';
+	import InputAddressAlias from '$lib/components/address/InputAddressAlias.svelte';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
 	let {
 		address = $bindable(),
 		disableAddressField,
-		isInvalid = $bindable()
+		isValid = $bindable()
 	}: {
 		address: Partial<ContactAddressUi>;
 		disableAddressField?: boolean;
-		isInvalid: boolean;
+		isValid: boolean;
 	} = $props();
 
-	// Expose the isInvalid value for testing
-	export const getIsInvalid = () => isInvalid;
+	// Expose the isValid value for testing
+	export const getIsValid = () => isValid;
 	export const getAddress = () => address;
 </script>
 
-<AddressForm bind:address bind:isInvalid {disableAddressField} />
+<InputAddressAlias bind:address bind:isValid {disableAddressField} />
