@@ -10,7 +10,7 @@ export const getKnownDestination = ({
 }: {
 	knownDestinations: KnownDestinations;
 	address: Address;
-	networkId: NetworkId | undefined;
+	networkId: NetworkId;
 }): KnownDestination | undefined =>
 	getRecordValueByCaseSensitivity({
 		record: knownDestinations,

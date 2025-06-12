@@ -32,7 +32,7 @@ export const getNetworkContact = ({
 }: {
 	networkContacts: NetworkContacts;
 	address: Address;
-	networkId: NetworkId | undefined;
+	networkId: NetworkId;
 }): ContactUi | undefined =>
 	getRecordValueByCaseSensitivity({
 		record: networkContacts,
