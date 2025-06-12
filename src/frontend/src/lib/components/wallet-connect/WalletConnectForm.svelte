@@ -78,7 +78,7 @@
 				styleClass="inset-center"
 				colorStyle="primary"
 				paddingSmall
-				on:click={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</Button
+				onclick={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</Button
 			>
 		{/if}
 	</div>
@@ -89,11 +89,13 @@
 		<InputText name="uri" placeholder={$i18n.wallet_connect.alt.connect_input} bind:value={uri} />
 	</div>
 
-	<ButtonGroup slot="toolbar">
-		<Button disabled={invalid} on:click={onClick}>
-			{$i18n.wallet_connect.text.connect}
-		</Button>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<Button disabled={invalid} onclick={onClick}>
+				{$i18n.wallet_connect.text.connect}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
 
 <style lang="scss">

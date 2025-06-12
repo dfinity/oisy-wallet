@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
-	import Divider from '$lib/components/common/Divider.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
+	import SendContactName from '$lib/components/send/SendContactName.svelte';
 	import { SEND_DESTINATION_SECTION } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -22,12 +22,6 @@
 	const onIcSendDestinationStep = () => dispatch('icSendDestinationStep');
 
 	let addressToDisplay = $derived(shortenWithMiddleEllipsis({ text: destination }));
-
-	let selectedContactLabel = $derived(
-		nonNullish(selectedContact)
-			? selectedContact.addresses.find(({ address }) => address === destination)?.label
-			: undefined
-	);
 </script>
 
 <div class="mb-10 mt-6" data-tid={SEND_DESTINATION_SECTION}>
@@ -48,14 +42,8 @@
 			{#if isNullish(selectedContact)}
 				{addressToDisplay}
 			{:else}
-				<span class="font-bold">
-					{selectedContact.name}
+				<SendContactName contact={selectedContact} address={destination} />
 
-					{#if notEmptyString(selectedContactLabel)}
-						<Divider />
-						{selectedContactLabel}
-					{/if}
-				</span>
 				<span class="text-sm text-tertiary">{addressToDisplay}</span>
 			{/if}
 		{/snippet}

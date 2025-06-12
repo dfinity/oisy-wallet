@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import AddressForm from '$lib/components/address/AddressForm.svelte';
+	import AddressForm from '$lib/components/address/InputAddressAlias.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -64,7 +64,7 @@
 
 	const handleSubmit = (event: Event) => {
 		event.preventDefault();
-		if (!isInvalid) {
+		if (isFormValid && !disabled) {
 			handleSave();
 		}
 	};
@@ -77,7 +77,9 @@
 				: ''
 	);
 
-	let isInvalid = $state(false);
+	let isFormValid = $state(false);
+
+	const focusField = isNewAddress ? 'address' : 'label';
 
 	let originalLabel = $derived(!isNewAddress && nonNullish(address?.label) ? address.label : '');
 	let labelChanged = $derived(isNewAddress ? true : editingAddress.label !== originalLabel);
@@ -98,21 +100,26 @@
 				{onQRCodeScan}
 				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
 				address={addressModel}
-				bind:isInvalid
+				bind:isValid={isFormValid}
 				{disabled}
+				{focusField}
 			/>
 		</div>
-		<ButtonGroup slot="toolbar">
-			<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
-			<Button
-				colorStyle="primary"
-				disabled={isInvalid || (!isNewAddress && !labelChanged)}
-				on:click={handleSave}
-				testId={ADDRESS_BOOK_SAVE_BUTTON}
-				loading={disabled}
-			>
-				{$i18n.core.text.save}
-			</Button>
-		</ButtonGroup>
+
+		{#snippet toolbar()}
+			<ButtonGroup>
+				<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}
+				></ButtonCancel>
+				<Button
+					colorStyle="primary"
+					disabled={!isFormValid || (!isNewAddress && !labelChanged)}
+					onclick={handleSave}
+					testId={ADDRESS_BOOK_SAVE_BUTTON}
+					loading={disabled}
+				>
+					{$i18n.core.text.save}
+				</Button>
+			</ButtonGroup>
+		{/snippet}
 	</ContentWithToolbar>
 </form>

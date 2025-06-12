@@ -21,5 +21,5 @@
 	styleClass="text-sm px-1 py-2 mx-1"
 	colorStyle="tertiary-alt"
 	ariaLabel={$i18n.core.text.paste}
-	on:click={handlePaste}>{$i18n.core.text.paste}</Button
+	onclick={handlePaste}>{$i18n.core.text.paste}</Button
 >

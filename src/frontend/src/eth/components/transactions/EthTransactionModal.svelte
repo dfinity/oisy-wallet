@@ -4,8 +4,8 @@
 	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import { mapAddressToName } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
@@ -38,14 +38,16 @@
 
 	let { from, value, timestamp, hash, blockNumber, to, type } = $derived(transaction);
 
+	let explorerBaseUrl = $derived(getExplorerUrl({ token }));
+
 	let explorerUrl: string | undefined = $derived(
-		notEmptyString(hash) ? `${$explorerUrlStore}/tx/${hash}` : undefined
+		notEmptyString(hash) ? `${explorerBaseUrl}/tx/${hash}` : undefined
 	);
 
-	let fromExplorerUrl: string = $derived(`${$explorerUrlStore}/address/${from}`);
+	let fromExplorerUrl: string = $derived(`${explorerBaseUrl}/address/${from}`);
 
 	let toExplorerUrl: string | undefined = $derived(
-		notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined
+		notEmptyString(to) ? `${explorerBaseUrl}/address/${to}` : undefined
 	);
 
 	let ckMinterInfo: OptionCertifiedMinterInfo = $derived(
@@ -136,7 +138,7 @@
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(blockNumber)}
+			{#if nonNullish(blockNumber) && nonNullish(token)}
 				<ListItem>
 					<span>{$i18n.transaction.text.block}</span>
 					<span>
@@ -145,7 +147,7 @@
 				</ListItem>
 
 				<ListItem>
-					<EthTransactionStatus {blockNumber} />
+					<EthTransactionStatus {blockNumber} {token} />
 				</ListItem>
 			{/if}
 
@@ -204,6 +206,8 @@
 			{/if}
 		</List>
 
-		<ButtonCloseModal slot="toolbar" />
+		{#snippet toolbar()}
+			<ButtonCloseModal />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>
