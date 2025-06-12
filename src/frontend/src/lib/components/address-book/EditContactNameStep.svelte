@@ -20,6 +20,7 @@
 		onClose: () => void;
 		isNewContact: boolean;
 		disabled?: boolean;
+		title?: string;
 	}
 
 	let {
@@ -28,7 +29,8 @@
 		onClose,
 		isNewContact,
 		contact = {},
-		disabled = false
+		disabled = false,
+		title = $bindable<string | undefined>()
 	}: Props = $props();
 
 	let editingContact = $state(contact ? { ...contact } : {});
@@ -49,15 +51,17 @@
 		}
 	};
 
-	let isFormValid = $state(false);
-
-	let title = $derived(
-		notEmptyString(editingContact?.name?.trim?.())
-			? editingContact?.name
+	const trimedTitle = $derived(
+		notEmptyString(editingContact.name?.trim())
+			? editingContact.name
 			: $i18n.contact.form.add_new_contact
 	);
 
-	export { title };
+	let isFormValid = $state(false);
+
+	$effect(() => {
+		title = trimedTitle;
+	});
 </script>
 
 <form onsubmit={handleSave} method="POST" class="flex w-full flex-col items-center">
