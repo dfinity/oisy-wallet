@@ -526,8 +526,10 @@ abstract class Homepage {
 			// There is a race condition with playwright: it can happen that there is a bad error about
 			// screenshot existence, even if the screenshot is created/overwritten.
 			// Issue: https://github.com/microsoft/playwright/issues/36228
-			// TODO: remove the try-catch block when the issue is fixed in playwright
+			// TODO: remove the try-catch block (and the pause) when the issue is fixed in playwright
 			try {
+				await this.#page.waitForTimeout(5000);
+
 				await expect(element).toHaveScreenshot();
 			} catch (error: unknown) {
 				console.warn(error);
@@ -540,8 +542,10 @@ abstract class Homepage {
 				// There is a race condition with playwright: it can happen that there is an error about
 				// screenshot existence, even if the screenshot is created/overwritten.
 				// Issue: https://github.com/microsoft/playwright/issues/36228
-				// TODO: remove the try-catch block when the issue is fixed in playwright
+				// TODO: remove the try-catch block (and the pause) when the issue is fixed in playwright
 				try {
+					await this.#page.waitForTimeout(5000);
+
 					await expect(element).toHaveScreenshot({ fullPage: true });
 				} catch (error: unknown) {
 					console.warn(error);
