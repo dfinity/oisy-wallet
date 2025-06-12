@@ -41,6 +41,7 @@
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import CreateContactStep from '$lib/components/address-book/CreateContactStep.svelte';
 
 	let loading = $state(false);
 
@@ -105,6 +106,10 @@
 		{
 			name: AddressBookSteps.SAVE_ADDRESS,
 			title: $i18n.address.save.title
+		},
+		{
+			name: AddressBookSteps.CREATE_CONTACT,
+			title: $i18n.address_book.create_contact.title
 		},
 		{
 			name: AddressBookSteps.SHOW_CONTACT,
@@ -478,13 +483,26 @@
 		<SaveAddressStep
 			onCreateContact={() => {
 				currentContact = undefined;
-				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				gotoStep(AddressBookSteps.CREATE_CONTACT);
 			}}
 			onSelectContact={(contact: ContactUi) => {
 				currentContact = contact;
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.CREATE_CONTACT}
+		<CreateContactStep
+			onSave={async (contact: ContactUi) => {
+				currentContact = contact;
+				currentAddressIndex = undefined;
+				const createdContact = await callCreateContact({ name: contact.name });
+				await callUpdateContact({ contact });
+			}}
+			onClose={() => {
+				modalStore.close();
+			}}
+			onBack={() => gotoStep(AddressBookSteps.SAVE_ADDRESS)}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.QR_CODE_SCAN}
 		<AddressBookQrCodeStep

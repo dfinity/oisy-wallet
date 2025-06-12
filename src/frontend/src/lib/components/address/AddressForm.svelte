@@ -17,7 +17,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		onQRCodeScan: () => void;
+		onQRCodeScan?: () => void;
 		address: Partial<ContactAddressUi>;
 		disableAddressField?: boolean;
 		isInvalid: boolean;
