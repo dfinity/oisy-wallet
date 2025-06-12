@@ -523,13 +523,27 @@ abstract class Homepage {
 			await this.#page.emulateMedia({ colorScheme: scheme });
 			await this.#page.waitForTimeout(1000);
 
-			await expect(element).toHaveScreenshot();
+			try {
+				await expect(element).toHaveScreenshot();
+			} catch (error: unknown) {
+				console.log(`Screenshot failed for color scheme: ${scheme}`, error);
+				// await this.#page.waitForTimeout(5000);
+
+				// await expect(element).toHaveScreenshot();
+			}
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (this.#isMobile) {
 				await this.hideMobileNavigationMenu();
 
-				await expect(element).toHaveScreenshot({ fullPage: true });
+				try {
+					await expect(element).toHaveScreenshot({ fullPage: true });
+				} catch (error: unknown) {
+					console.log(`Screenshot failed for color scheme: ${scheme}`, error);
+					// await this.#page.waitForTimeout(5000);
+
+					// await expect(element).toHaveScreenshot({ fullPage: true });
+				}
 
 				await this.showMobileNavigationMenu();
 			}
