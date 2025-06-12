@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import QrButton from '$lib/components/common/QrButton.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
@@ -8,10 +9,13 @@
 	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { NetworkId } from '$lib/types/network';
 	import type { KnownDestinations } from '$lib/types/transactions';
+	import { getNetworkContact } from '$lib/utils/contacts.utils';
 	import { isDesktop } from '$lib/utils/device.utils';
+	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -26,6 +30,8 @@
 
 	const debounceValidate = debounce(validate);
 
+	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	let focused: boolean;
 	const onFocus = () => (focused = true);
 	const onBlur = () => (focused = false);
@@ -35,6 +41,28 @@
 	let isErrorState = false;
 	$: isErrorState =
 		invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE;
+
+	let isNotKnownDestination = false;
+	$: isNotKnownDestination =
+		nonNullish(knownDestinations) &&
+		isNullish(
+			getKnownDestination({
+				knownDestinations,
+				address: destination,
+				networkId: $sendTokenNetworkId
+			})
+		);
+
+	let isNotNetworkContact = false;
+	$: isNotNetworkContact =
+		nonNullish(networkContacts) &&
+		isNullish(
+			getNetworkContact({
+				networkContacts,
+				address: destination,
+				networkId: $sendTokenNetworkId
+			})
+		);
 </script>
 
 <div
@@ -74,7 +102,7 @@
 	</div>
 </div>
 
-{#if !invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && nonNullish(knownDestinations) && isNullish(knownDestinations[destination]) && nonNullish(networkContacts) && isNullish(networkContacts[destination])}
+{#if !invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && isNotKnownDestination && isNotNetworkContact}
 	<div transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning" styleClass="mt-4">
 			{$i18n.send.info.unknown_destination}

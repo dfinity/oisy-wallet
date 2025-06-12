@@ -226,3 +226,7 @@ export const AVATAR_WITH_BADGE_FALLBACK_IMAGE = 'avatar-with-badge-fallback-imag
 export const CONTACT_CARD = 'contact-card';
 export const CONTACT_CARD_BUTTON = 'contact-card-button';
 export const CONTACT_CARD_EXPAND_BUTTON = 'contact-card-expand-button';
+
+// token modal
+export const TOKEN_MODAL_CONTENT_DELETE_BUTTON = 'token-modal-content-delete-button';
+export const TOKEN_MODAL_DELETE_BUTTON = 'token-modal-delete-button';

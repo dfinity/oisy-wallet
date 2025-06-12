@@ -1,14 +1,19 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
+	import { rewardCampaigns } from '$env/reward-campaigns.env';
+	import type { RewardDescription } from '$env/types/env-reward';
 	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
+	import { TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		modalReferralState,
+		modalReferralStateData,
 		modalRewardState,
 		modalRewardStateData
 	} from '$lib/derived/modal.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { loadRewardResult } from '$lib/utils/rewards.utils';
 
@@ -26,15 +31,38 @@
 			return;
 		}
 
-		const { receivedReward, receivedJackpot, receivedReferral } =
+		const { receivedReward, receivedJackpot, receivedReferral, reward } =
 			await loadRewardResult($authIdentity);
-		if (receivedReward) {
+
+		const campaign: RewardDescription | undefined = rewardCampaigns.find(
+			({ id }) => id === reward?.campaignId
+		);
+
+		if (receivedReward && nonNullish(campaign)) {
 			if (receivedJackpot) {
-				modalStore.openRewardState({ id: rewardModalId, data: receivedJackpot });
+				trackEvent({
+					name: TRACK_REWARD_CAMPAIGN_WIN,
+					metadata: { campaignId: `${campaign.id}`, type: 'jackpot' }
+				});
+				modalStore.openRewardState({
+					id: rewardModalId,
+					data: { reward: campaign, jackpot: receivedJackpot }
+				});
 			} else if (receivedReferral) {
-				modalStore.openReferralState(referralModalId);
+				trackEvent({
+					name: TRACK_REWARD_CAMPAIGN_WIN,
+					metadata: { campaignId: `${campaign.id}`, type: 'referral' }
+				});
+				modalStore.openReferralState({ id: referralModalId, data: campaign });
 			} else {
-				modalStore.openRewardState({ id: rewardModalId, data: false });
+				trackEvent({
+					name: TRACK_REWARD_CAMPAIGN_WIN,
+					metadata: { campaignId: `${campaign.id}`, type: 'airdrop' }
+				});
+				modalStore.openRewardState({
+					id: rewardModalId,
+					data: { reward: campaign, jackpot: false }
+				});
 			}
 		}
 	});
@@ -43,7 +71,7 @@
 {@render children?.()}
 
 {#if $modalRewardState && nonNullish($modalRewardStateData)}
-	<RewardStateModal jackpot={$modalRewardStateData} />
-{:else if $modalReferralState}
-	<ReferralStateModal />
+	<RewardStateModal reward={$modalRewardStateData.reward} jackpot={$modalRewardStateData.jackpot} />
+{:else if $modalReferralState && nonNullish($modalReferralStateData)}
+	<ReferralStateModal reward={$modalReferralStateData} />
 {/if}

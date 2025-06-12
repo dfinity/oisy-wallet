@@ -53,6 +53,7 @@
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
 			"airdrops": "Rewards",
+			"earning": "Earn & Rewards",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -302,6 +303,7 @@
 		"text": {
 			"available_balance": "Your balance",
 			"unavailable_balance": "$ value is not available",
+			"hidden_balance": "Your balance is hidden",
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
@@ -662,7 +664,8 @@
 			"chain_key": "Chain Key",
 			"show_more_networks": "Show $number more networks",
 			"hide_more_networks": "Hide more networks",
-			"on_network": " on $network"
+			"on_network": " on $network",
+			"delete_token": "Delete token"
 		},
 		"details": {
 			"title": "Token details",
@@ -671,7 +674,9 @@
 			"contract_address_copied": "Contract address copied to clipboard.",
 			"token_address_copied": "Token address copied to clipboard.",
 			"twin_token": "Twin token",
-			"standard": "Standard"
+			"standard": "Standard",
+			"confirm_deletion_description": "This will remove <span class=\"font-bold\">$token</span> from your $oisy_short token list. Your funds will remain untouched — you can re-add the token at any time.",
+			"deletion_confirmation": "$token has been successfully removed from your $oisy_short token list."
 		},
 		"balance": {
 			"error": {
@@ -772,7 +777,8 @@
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
-			"unexpected_undefined": "Token is undefined. This is unexpected."
+			"unexpected_undefined": "Token is undefined. This is unexpected.",
+			"unexpected_error_on_token_delete": "Something went wrong while removing the token."
 		}
 	},
 	"fee": {
@@ -1234,6 +1240,19 @@
 		"warning": {
 			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
 			"unavailable_index_canister": "Transactions for $token_list can not be displayed. Index canister is currently unavailable."
+		}
+	},
+	"earning": {
+		"text": {
+			"title": "Earn"
+		},
+		"cards": {
+			"gold_title": "Gold",
+			"gold_description": "Coming soon",
+			"stablecoins_title": "Stablecoins",
+			"stablecoins_description": "Coming soon",
+			"sprinkles_title": "Sprinkles",
+			"sprinkles_description": "OISY Rewards"
 		}
 	}
 }

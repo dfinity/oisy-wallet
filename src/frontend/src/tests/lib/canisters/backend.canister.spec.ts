@@ -1251,4 +1251,43 @@ describe('backend.canister', () => {
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
+
+	describe('removeUserToken', () => {
+		it('should call remove_user_token method', async () => {
+			const params = {
+				chain_id: mockedUserToken.chain_id,
+				contract_address: mockedUserToken.contract_address
+			};
+			const response = undefined;
+
+			service.remove_user_token.mockResolvedValue(response);
+
+			const { removeUserToken } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await removeUserToken(params);
+
+			expect(service.remove_user_token).toHaveBeenCalledWith(params);
+			expect(res).toEqual(response);
+		});
+
+		it('should throw an error if remove_user_token throws', async () => {
+			service.remove_user_token.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { removeUserToken } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = removeUserToken({
+				chain_id: mockedUserToken.chain_id,
+				contract_address: mockedUserToken.contract_address
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
 });
