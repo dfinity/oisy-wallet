@@ -6,7 +6,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import type { ContactUi } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { vi } from 'vitest';
 
 describe('EditContactNameStep', () => {
@@ -123,24 +123,31 @@ describe('EditContactNameStep', () => {
 		const onSaveContact = vi.fn();
 		const onClose = vi.fn();
 
-		const { getByTestId, component } = render(EditContactNameStep, {
+		const { getByTestId, getByLabelText } = render(EditContactNameStep, {
 			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
 		});
 
-		// Initially, the title should be the default
-		expect(component.title).toBe(en.contact.form.add_new_contact);
+		const defaultLabel = en.address_book.avatar.default;
 
-		// Enter a name
+		expect(getByLabelText(defaultLabel)).toBeInTheDocument();
+
+		// Type name
 		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
 		await fireEvent.input(nameInput, { target: { value: 'Test Contact' } });
 
-		// Check that the title has been updated
-		expect(component.title).toBe('Test Contact');
+		// Expect aria-label to update
+		await waitFor(() => {
+			expect(
+				getByLabelText(`${en.address_book.avatar.avatar_for} Test Contact`)
+			).toBeInTheDocument();
+		});
 
-		// Empty name should reset to default title
-		await fireEvent.input(nameInput, { target: { value: '  ' } });
+		// Clear the name by actually removing all characters
+		await fireEvent.input(nameInput, { target: { value: '' } });
 
-		expect(component.title).toBe(en.contact.form.add_new_contact);
+		await waitFor(() => {
+			expect(getByLabelText(defaultLabel)).toBeInTheDocument();
+		});
 	});
 
 	it('should trim leading spaces before calling onAddContact', async () => {
