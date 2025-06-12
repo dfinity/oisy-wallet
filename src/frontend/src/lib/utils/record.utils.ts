@@ -9,7 +9,7 @@ export const getRecordValueByCaseSensitivity = <T extends Address, R>({
 }: {
 	record: Record<T, R>;
 	address: T;
-	networkId: NetworkId | undefined;
+	networkId: NetworkId;
 }): R | undefined => {
 	const isCaseSensitive = getCaseSensitiveness({ networkId });
 

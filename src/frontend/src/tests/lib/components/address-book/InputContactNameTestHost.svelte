@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { ContactUi } from '$lib/types/contact';
 	import InputContactName from '$lib/components/address-book/InputContactName.svelte';
+	import type { ContactUi } from '$lib/types/contact';
 
 	let {
 		contact = $bindable(),
@@ -14,7 +14,6 @@
 
 	// Expose the isValid value for testing
 	export const getIsValid = () => isValid;
-	export const getContact = () => contact;
 </script>
 
 <InputContactName bind:contact bind:isValid {disabled} />

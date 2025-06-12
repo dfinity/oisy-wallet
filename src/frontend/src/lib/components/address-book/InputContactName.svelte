@@ -14,7 +14,6 @@
 		disabled?: boolean;
 		isValid: boolean;
 	}
-
 	let { contact = $bindable(), disabled = false, isValid = $bindable() }: Props = $props();
 
 	const trimmedName = $derived((contact.name ?? '').trim());
