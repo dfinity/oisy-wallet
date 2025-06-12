@@ -53,7 +53,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
 
-		expect(getByText(en.tokens.details.confirm_deletion_title)).toBeInTheDocument();
+		expect(getByText(en.tokens.text.delete_token)).toBeInTheDocument();
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
@@ -81,7 +81,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
 
-		expect(getByText(en.tokens.details.confirm_deletion_title)).toBeInTheDocument();
+		expect(getByText(en.tokens.text.delete_token)).toBeInTheDocument();
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
@@ -112,7 +112,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
 
-		expect(getByText(en.tokens.details.confirm_deletion_title)).toBeInTheDocument();
+		expect(getByText(en.tokens.text.delete_token)).toBeInTheDocument();
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
@@ -156,7 +156,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
 
-		expect(getByText(en.tokens.details.confirm_deletion_title)).toBeInTheDocument();
+		expect(getByText(en.tokens.text.delete_token)).toBeInTheDocument();
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
