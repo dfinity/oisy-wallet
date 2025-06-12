@@ -33,7 +33,7 @@ describe('TokenModal', () => {
 	});
 
 	it('deletes token after all required steps', async () => {
-		const { getByTestId, getByText } = render(TokenModal, {
+		const { getByTestId, getByText, getAllByText } = render(TokenModal, {
 			props: {
 				token: {
 					...mockValidErc20Token,
@@ -53,7 +53,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
 
-		expect(getByText(en.tokens.text.delete_token)).toBeInTheDocument();
+		expect(getAllByText(en.tokens.text.delete_token)[0]).toBeInTheDocument();
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
@@ -64,7 +64,7 @@ describe('TokenModal', () => {
 	});
 
 	it('does not delete token if it is not erc20', async () => {
-		const { getByTestId, getByText } = render(TokenModal, {
+		const { getByTestId, getByText, getAllByText } = render(TokenModal, {
 			props: {
 				token: ICP_TOKEN,
 				isDeletable: true
@@ -81,7 +81,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
 
-		expect(getByText(en.tokens.text.delete_token)).toBeInTheDocument();
+		expect(getAllByText(en.tokens.text.delete_token)[0]).toBeInTheDocument();
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
@@ -93,7 +93,7 @@ describe('TokenModal', () => {
 
 	it('does not delete token if authIdentity is not available', async () => {
 		const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
-		const { getByTestId, getByText } = render(TokenModal, {
+		const { getByTestId, getByText, getAllByText } = render(TokenModal, {
 			props: {
 				token: {
 					...mockValidErc20Token,
@@ -112,7 +112,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
 
-		expect(getByText(en.tokens.text.delete_token)).toBeInTheDocument();
+		expect(getAllByText(en.tokens.text.delete_token)[0]).toBeInTheDocument();
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
@@ -134,7 +134,7 @@ describe('TokenModal', () => {
 	});
 
 	it('handles an error on token delete correctly', async () => {
-		const { getByTestId, getByText } = render(TokenModal, {
+		const { getByTestId, getByText, getAllByText } = render(TokenModal, {
 			props: {
 				token: {
 					...mockValidErc20Token,
@@ -156,7 +156,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_CONTENT_DELETE_BUTTON));
 
-		expect(getByText(en.tokens.text.delete_token)).toBeInTheDocument();
+		expect(getAllByText(en.tokens.text.delete_token)[0]).toBeInTheDocument();
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
