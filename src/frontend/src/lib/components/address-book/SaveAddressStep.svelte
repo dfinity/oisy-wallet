@@ -34,8 +34,6 @@
 			: undefined
 	);
 
-	let onComplete = $derived(modalData.entrypoint?.onComplete);
-
 	let filteredContacts = $derived(
 		$contacts.filter((c) => c.name.toLowerCase().includes(inputValue.toLowerCase()))
 	);
