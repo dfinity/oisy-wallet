@@ -10,7 +10,7 @@
 	import type { Token } from '$lib/types/token';
 
 	export let blockNumber: number;
-	export let token: Token
+	export let token: Token;
 
 	let listener: WebSocketListener | undefined = undefined;
 
