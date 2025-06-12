@@ -165,6 +165,7 @@
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
 	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
+	let editContactNameTitle = $state($i18n.contact.form.add_new_contact);
 
 	let isDeletingContact = $state<boolean>(false);
 
@@ -301,7 +302,7 @@
 		{:else if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
 			{replacePlaceholders($i18n.contact.delete.title, { $contact: currentContact.name })}
 		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
-			{editContactNameStep.title}
+			{editContactNameTitle}
 		{:else}
 			{currentStep?.title}
 		{/if}
@@ -397,6 +398,7 @@
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
 		<EditContactNameStep
 			bind:this={editContactNameStep}
+			bind:title={editContactNameTitle}
 			contact={currentContact}
 			onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
 				const createdContact = await callCreateContact({ name: contact.name });
