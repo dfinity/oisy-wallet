@@ -8,7 +8,7 @@ import { fireEvent, render, waitFor } from '@testing-library/svelte';
 describe('InputContactName', () => {
 	it('should render the contact form with name field', () => {
 		const { getByTestId, getByText } = render(InputContactName, {
-			props: { contact: {}, isValid: true }
+			props: { contact: {}, isValid: false }
 		});
 
 		// Check that the name field is rendered
@@ -19,7 +19,7 @@ describe('InputContactName', () => {
 	it('should validate successfully when name is provided', async () => {
 		const contact: Partial<ContactUi> = {};
 		const { component, getByTestId } = render(InputContactNameTestHost, {
-			props: { contact, isValid: true }
+			props: { contact, isValid: false }
 		});
 
 		// Enter a name
@@ -32,7 +32,7 @@ describe('InputContactName', () => {
 
 	it('should fail validation when name is empty', () => {
 		const contact: Partial<ContactUi> = {};
-		const { component } = render(InputContactNameTestHost, { props: { contact, isValid: true } });
+		const { component } = render(InputContactNameTestHost, { props: { contact, isValid: false } });
 
 		// Check that validation failed
 		expect(component.getIsValid()).toBeFalsy();
@@ -40,7 +40,7 @@ describe('InputContactName', () => {
 
 	it('should fail validation when name is only spaces', () => {
 		const contact: Partial<ContactUi> = { name: '   ' };
-		const { component } = render(InputContactNameTestHost, { props: { contact, isValid: true } });
+		const { component } = render(InputContactNameTestHost, { props: { contact, isValid: false } });
 
 		// Check that validation failed
 		expect(component.getIsValid()).toBeFalsy();
@@ -49,7 +49,7 @@ describe('InputContactName', () => {
 	it('should show error when name exceeds max length', async () => {
 		const contact: Partial<ContactUi> = {};
 		const { getByTestId, getByText } = render(InputContactName, {
-			props: { contact, isValid: true }
+			props: { contact, isValid: false }
 		});
 
 		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
@@ -64,7 +64,7 @@ describe('InputContactName', () => {
 
 	it('should not show error message on load', () => {
 		const contact: Partial<ContactUi> = {};
-		const { queryByText } = render(InputContactName, { props: { contact, isValid: true } });
+		const { queryByText } = render(InputContactName, { props: { contact, isValid: false } });
 
 		expect(
 			queryByText(en.contact.error.name_too_long.replace('$maxCharacters', '100'))
@@ -74,7 +74,7 @@ describe('InputContactName', () => {
 	it('should not show error when name is valid and within max length', async () => {
 		const contact: Partial<ContactUi> = {};
 		const { getByTestId, queryByText } = render(InputContactName, {
-			props: { contact, isValid: true }
+			props: { contact, isValid: false }
 		});
 
 		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
@@ -88,7 +88,7 @@ describe('InputContactName', () => {
 	it('should show and then hide error when name is corrected', async () => {
 		const contact: Partial<ContactUi> = {};
 		const { getByTestId, queryByText, getByText } = render(InputContactName, {
-			props: { contact, isValid: true }
+			props: { contact, isValid: false }
 		});
 
 		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
