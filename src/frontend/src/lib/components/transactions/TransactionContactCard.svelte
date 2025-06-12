@@ -1,5 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { BtcTransactionUi } from '$btc/types/btc';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { isSupportedEthToken } from '$eth/utils/eth.utils';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import { isIcToken } from '$icp/validation/ic-token.validation.js';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import SkeletonAddressCard from '$lib/components/address/SkeletonAddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
@@ -11,14 +16,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import { getContactForAddress } from '$lib/utils/contact.utils';
-	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import type { AnyTransactionUi } from '$lib/types/transaction';
-	import type { EthTransactionUi } from '$eth/types/eth-transaction';
-	import type { BtcTransactionUi } from '$btc/types/btc';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
-	import { isIcToken } from '$icp/validation/ic-token.validation.js';
-	import { isSupportedEthToken } from '$eth/utils/eth.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
 
 	interface Props {
@@ -46,7 +46,7 @@
 
 	let modalStoreData = $derived($modalStore?.data as OpenTransactionParams<AnyTransactionUi>);
 
-	let getOnComplete = (modalStoreDataClosure: OpenTransactionParams<AnyTransactionUi>) => () => {
+	const getOnComplete = (modalStoreDataClosure: OpenTransactionParams<AnyTransactionUi>) => () => {
 		if (isIcToken(modalStoreDataClosure.token)) {
 			modalStore.openIcTransaction({
 				id: Symbol(),
