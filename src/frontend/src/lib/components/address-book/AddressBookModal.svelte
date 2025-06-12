@@ -505,6 +505,10 @@
 				currentAddressIndex = undefined;
 				const createdContact = await callCreateContact({ name: contact.name });
 				await callUpdateContact({ contact: { ...createdContact, ...contact } });
+				if (nonNullish(modalData?.entrypoint?.onComplete)) {
+					modalData.entrypoint.onComplete();
+					return;
+				}
 				modalStore.close();
 			}}
 			onBack={() => gotoStep(AddressBookSteps.SAVE_ADDRESS)}
