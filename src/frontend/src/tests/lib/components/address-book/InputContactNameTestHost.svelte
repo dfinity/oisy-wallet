@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { ContactUi } from '$lib/types/contact';
 	import InputContactName from '$lib/components/address-book/InputContactName.svelte';
+	import type { ContactUi } from '$lib/types/contact';
 
 	let {
 		contact = $bindable(),
