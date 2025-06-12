@@ -538,7 +538,7 @@ abstract class Homepage {
 
 				try {
 					await this.#page.waitForTimeout(5000);
-					
+
 					await expect(element).toHaveScreenshot({ fullPage: true });
 				} catch (error: unknown) {
 					console.log(`Screenshot failed for color scheme: ${scheme}`, error);
