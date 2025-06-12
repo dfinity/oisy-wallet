@@ -52,12 +52,12 @@
 				id: Symbol(),
 				data: modalStoreDataClosure as OpenTransactionParams<IcTransactionUi>
 			});
-		} else if (modalStoreDataClosure.token) {
+		} else if (isSupportedEthToken(modalStoreDataClosure.token)) {
 			modalStore.openEthTransaction({
 				id: Symbol(),
 				data: modalStoreDataClosure as OpenTransactionParams<EthTransactionUi>
 			});
-		} else if (modalStoreDataClosure.token) {
+		} else if (isSolanaToken(modalStoreDataClosure.token)) {
 			modalStore.openSolTransaction({
 				id: Symbol(),
 				data: modalStoreDataClosure as OpenTransactionParams<SolTransactionUi>
