@@ -9,6 +9,8 @@
 	import { deleteIdbEthToken } from '$lib/api/idb-tokens.api';
 	import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
+	import BottomSheetConfirmationPopup from '$lib/components/ui/BottomSheetConfirmationPopup.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { TokenModalSteps } from '$lib/enums/wizard-steps';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -30,6 +32,7 @@
 	let { children, token, isDeletable = false }: BaseTokenModalProps = $props();
 
 	let loading = $state(false);
+	let showBottomSheetDeleteConfirmation = $state(false);
 
 	let modal: WizardModal | undefined = $state();
 	const close = () => modalStore.close();
@@ -111,6 +114,7 @@
 			});
 
 			gotoStep(TokenModalSteps.CONTENT);
+			showBottomSheetDeleteConfirmation = false;
 			loading = false;
 		}
 	};
@@ -126,12 +130,22 @@
 	<svelte:fragment slot="title">{currentStep?.title}</svelte:fragment>
 
 	{#if currentStepName === TokenModalSteps.CONTENT}
-		<TokenModalContent
-			{token}
-			{...isDeletable && { onDeleteClick: () => gotoStep(TokenModalSteps.DELETE_CONFIRMATION) }}
-		>
-			{@render children?.()}
-		</TokenModalContent>
+		<Responsive up="md">
+			<TokenModalContent
+				{token}
+				{...isDeletable && { onDeleteClick: () => gotoStep(TokenModalSteps.DELETE_CONFIRMATION) }}
+			>
+				{@render children?.()}
+			</TokenModalContent>
+		</Responsive>
+		<Responsive down="sm">
+			<TokenModalContent
+				{token}
+				{...isDeletable && { onDeleteClick: () => (showBottomSheetDeleteConfirmation = true) }}
+			>
+				{@render children?.()}
+			</TokenModalContent>
+		</Responsive>
 	{:else if currentStepName === TokenModalSteps.DELETE_CONFIRMATION}
 		<TokenModalDeleteConfirmation
 			{token}
@@ -141,3 +155,23 @@
 		/>
 	{/if}
 </WizardModal>
+
+{#if currentStep?.name === TokenModalSteps.CONTENT && showBottomSheetDeleteConfirmation}
+	<BottomSheetConfirmationPopup
+		onCancel={() => (showBottomSheetDeleteConfirmation = false)}
+		disabled={loading}
+	>
+		{#snippet title()}
+			{$i18n.tokens.text.delete_token}
+		{/snippet}
+
+		{#snippet content()}
+			<TokenModalDeleteConfirmation
+				{token}
+				{loading}
+				onCancel={() => (showBottomSheetDeleteConfirmation = false)}
+				onConfirm={() => onTokenDelete(token)}
+			/>
+		{/snippet}
+	</BottomSheetConfirmationPopup>
+{/if}
