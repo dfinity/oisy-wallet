@@ -64,7 +64,7 @@
 	);
 
 	let addressAlias: string | undefined = $derived(
-		filterAddressFromContact({contact,address:contactAddress})?.label
+		filterAddressFromContact({ contact, address: contactAddress })?.label
 	);
 </script>
 

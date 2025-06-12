@@ -14,7 +14,7 @@
 
 	let { contact, address, children }: Props = $props();
 
-	let contactLabel = $derived(filterAddressFromContact({contact,address})?.label);
+	let contactLabel = $derived(filterAddressFromContact({ contact, address })?.label);
 </script>
 
 <span class="font-bold">
