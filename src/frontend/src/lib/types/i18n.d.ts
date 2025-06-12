@@ -53,6 +53,7 @@ interface I18nNavigation {
 		dapp_explorer: string;
 		activity: string;
 		airdrops: string;
+		earning: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -639,7 +640,6 @@ interface I18nTokens {
 		token_address_copied: string;
 		twin_token: string;
 		standard: string;
-		confirm_deletion_title: string;
 		confirm_deletion_description: string;
 		deletion_confirmation: string;
 	};
@@ -987,6 +987,7 @@ interface I18nAddress_book {
 		show_address_text: string;
 		add_first_address: string;
 	};
+	create_contact: { title: string };
 }
 
 interface I18nContact {

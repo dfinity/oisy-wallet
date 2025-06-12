@@ -9,6 +9,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { KnownDestinations } from '$lib/types/transactions';
+	import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
 
@@ -54,11 +55,16 @@
 						return isContactMatchingFilter({
 							address,
 							contact: networkContact,
-							filterValue: destination
+							filterValue: destination,
+							networkId: $sendTokenNetworkId
 						});
 					}
 
-					return address.includes(destination);
+					return areAddressesPartiallyEqual({
+						address1: address,
+						address2: destination,
+						networkId: $sendTokenNetworkId
+					});
 				})
 	);
 </script>
@@ -68,16 +74,24 @@
 		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
 			<ul class="list-none overflow-y-auto overscroll-contain">
 				{#each filteredKnownDestinations as { address, ...rest } (address)}
+					{@const networkContact = nonNullish(networkContacts)
+						? getNetworkContact({
+								networkContacts,
+								address,
+								networkId: $sendTokenNetworkId
+							})
+						: undefined}
+
 					<li>
 						<KnownDestination
 							destination={address}
-							contact={networkContacts?.[address]}
+							contact={networkContact}
 							{...rest}
 							onClick={() => {
 								destination = address;
 
-								if (nonNullish(networkContacts?.[address])) {
-									selectedContact = networkContacts[address];
+								if (nonNullish(networkContact)) {
+									selectedContact = networkContact;
 								}
 
 								dispatch('icNext');
