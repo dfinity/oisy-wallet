@@ -37,6 +37,10 @@ const getTransactions = ({
 	certified,
 	data
 }: SchedulerJobParams<PostMessageDataRequestIcrcStrict>): Promise<GetTransactions> => {
+	// if (data?.ledgerCanisterId === 'l67es-4iaaa-aaaag-atvda-cai') {
+	// 	throw new Error('mock error'); // TODO: Remove this line when the mock is removed
+	// }
+
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
 
 	return getTransactionsApi({
@@ -149,6 +153,9 @@ export const onIcrcWalletMessage = async ({
 	switch (msg) {
 		case 'startIcrcWalletTimer':
 		case 'stopIcrcWalletTimer':
+			if (data?.ledgerCanisterId === 'l67es-4iaaa-aaaag-atvda-cai') {
+				console.log('Stopping timer', msg, data);
+			}
 			scheduler?.stop();
 	}
 

@@ -29,6 +29,8 @@ export const initIcrcWalletWorker = async ({
 			return;
 		}
 
+		console.log('Restarted with ledger only', ledgerCanisterId);
+
 		restartedWithLedgerOnly = true;
 
 		worker.postMessage({
@@ -53,12 +55,18 @@ export const initIcrcWalletWorker = async ({
 
 		switch (msg) {
 			case 'syncIcrcWallet':
+				if (tokenId.description === 'AAA') {
+					console.log('syncIcrcWallet', tokenId, data);
+				}
+
 				syncWallet({
 					tokenId,
 					data: data.data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncIcrcWalletError':
+				console.log('syncIcrcWalletError');
+
 				onLoadTransactionsError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error
