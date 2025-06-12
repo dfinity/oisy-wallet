@@ -23,7 +23,7 @@
 		disabled?: boolean;
 	}
 
-	let { onSave, onBack, disabled }: Props = $props();
+	let { onSave, onBack, disabled = false }: Props = $props();
 
 	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
 	let modalDataAddress: string | undefined = $derived(
