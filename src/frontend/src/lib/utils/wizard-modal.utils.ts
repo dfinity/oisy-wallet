@@ -1,5 +1,6 @@
 import type { AddressBookSteps } from '$lib/enums/progress-steps';
 import type {
+	TokenModalSteps,
 	WizardStepsAuthHelp,
 	WizardStepsConvert,
 	WizardStepsHowToConvert,
@@ -21,7 +22,8 @@ export const goToWizardStep = ({
 		| WizardStepsAuthHelp
 		| WizardStepsHowToConvert
 		| WizardStepsReceive
-		| AddressBookSteps;
+		| AddressBookSteps
+		| TokenModalSteps;
 }) => {
 	const stepNumber = steps.findIndex(({ name }) => name === stepName);
 	modal.set(Math.max(stepNumber, 0));
