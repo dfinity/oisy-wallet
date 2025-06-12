@@ -4,12 +4,13 @@
 	import { fade } from 'svelte/transition';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { WebSocketListener } from '$lib/types/listener';
+	import type { Token } from '$lib/types/token';
 
 	export let blockNumber: number;
+	export let token: Token;
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -17,7 +18,7 @@
 
 	const loadCurrentBlockNumber = async () => {
 		try {
-			const { getBlockNumber } = infuraProviders($tokenWithFallback.network.id);
+			const { getBlockNumber } = infuraProviders(token.network.id);
 			currentBlockNumber = await getBlockNumber();
 		} catch (err: unknown) {
 			disconnect();
@@ -43,7 +44,7 @@
 		listener = initMinedTransactionsListener({
 			// eslint-disable-next-line require-await
 			callback: async () => debounceLoadCurrentBlockNumber(),
-			networkId: $tokenWithFallback.network.id
+			networkId: token.network.id
 		});
 	});
 
