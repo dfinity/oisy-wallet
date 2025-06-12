@@ -494,15 +494,15 @@
 	{:else if currentStep?.name === AddressBookSteps.CREATE_CONTACT}
 		<CreateContactStep
 			onSave={async (contact: ContactUi) => {
+				loading = true;
 				currentContact = contact;
 				currentAddressIndex = undefined;
 				const createdContact = await callCreateContact({ name: contact.name });
-				await callUpdateContact({ contact });
-			}}
-			onClose={() => {
+				await callUpdateContact({ contact: { ...createdContact, ...contact } });
 				modalStore.close();
 			}}
 			onBack={() => gotoStep(AddressBookSteps.SAVE_ADDRESS)}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.QR_CODE_SCAN}
 		<AddressBookQrCodeStep

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import AddressForm from '$lib/components/address/AddressForm.svelte';
+	import AddressForm from '$lib/components/address/InputAddressAlias.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -12,18 +12,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
-	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import type { ContactUi } from '$lib/types/contact';
 	import { mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
-	import ContactForm from '$lib/components/address-book/ContactForm.svelte';
+	import ContactForm from '$lib/components/address-book/InputContactName.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 
 	interface Props {
 		onSave: (contact: ContactUi) => void;
 		onBack: () => void;
-		onClose: () => void;
+		disabled?: boolean;
 	}
 
-	let { onSave, onBack, onClose }: Props = $props();
+	let { onSave, onBack, disabled }: Props = $props();
 
 	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
 	let modalDataAddress: string | undefined = $derived(
@@ -39,40 +39,42 @@
 		addresses: nonNullish(modalDataAddressUi) ? [modalDataAddressUi] : []
 	});
 
-	const handleSave = () => {
-		onSave(editingContact as ContactUi);
-	};
-
 	const handleSubmit = (event: Event) => {
 		event.preventDefault();
-		if (!isInvalid) {
-			handleSave();
+		if (isFormValid && !disabled) {
+			onSave(editingContact as ContactUi);
 		}
 	};
 
-	let isInvalid = $state(false);
+	let validName = $state(true);
+	let validAddress = $state(true);
+
+	let isFormValid = $derived(validName && validAddress);
 </script>
 
 <form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
 		<div class="w-full text-2xl font-bold text-primary md:text-3xl">
-			<ContactForm bind:contact={editingContact} />
+			<ContactForm bind:contact={editingContact} bind:isValid={validName} />
 		</div>
 
 		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
-			<AddressForm disableAddressField address={modalDataAddressUi ?? {}} bind:isInvalid />
+			<AddressForm
+				disableAddressField
+				address={modalDataAddressUi ?? {}}
+				bind:isValid={validAddress}
+			/>
 		</div>
 
 		{#snippet toolbar()}
 			<ButtonGroup>
-				<ButtonBack disabled={false} onclick={onBack} testId={ADDRESS_BOOK_CANCEL_BUTTON}
-				></ButtonBack>
+				<ButtonBack {disabled} onclick={onBack} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonBack>
 				<Button
+					type="submit"
 					colorStyle="primary"
-					disabled={isInvalid}
-					onclick={handleSave}
+					disabled={!isFormValid}
 					testId={ADDRESS_BOOK_SAVE_BUTTON}
-					loading={false}
+					loading={disabled}
 				>
 					{$i18n.core.text.save}
 				</Button>
