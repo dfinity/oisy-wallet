@@ -4,6 +4,7 @@
 	import Divider from '$lib/components/common/Divider.svelte';
 	import type { Address } from '$lib/types/address';
 	import type { ContactUi } from '$lib/types/contact';
+	import { filterAddressFromContact } from '$lib/utils/contact.utils';
 
 	interface Props {
 		address: Address;
@@ -13,9 +14,7 @@
 
 	let { contact, address, children }: Props = $props();
 
-	let contactLabel = $derived(
-		contact?.addresses.find(({ address: innerAddress }) => address === innerAddress)?.label
-	);
+	let contactLabel = $derived(filterAddressFromContact({ contact, address })?.label);
 </script>
 
 <span class="font-bold">

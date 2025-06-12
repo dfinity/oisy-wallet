@@ -44,6 +44,10 @@ import type { NonEmptyArray } from '$lib/types/utils';
 import { last } from '$lib/utils/array.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
+export const IC_CYCLES_LEDGER_CANISTER_ID =
+	(import.meta.env.VITE_IC_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
+	'um5iw-rqaaa-aaaaq-qaaba-cai';
+
 export const IC_CKBTC_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
 	'mxzaz-hqaaa-aaaar-qaada-cai';
@@ -56,12 +60,18 @@ export const IC_CKBTC_MINTER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText) ??
 	'mqygn-kiaaa-aaaar-qaadq-cai';
 
+export const STAGING_CYCLES_LEDGER_CANISTER_ID = import.meta.env
+	.VITE_STAGING_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText;
+
 export const STAGING_CKBTC_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_STAGING_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText;
 export const STAGING_CKBTC_INDEX_CANISTER_ID = import.meta.env
 	.VITE_STAGING_CKBTC_INDEX_CANISTER_ID as OptionCanisterIdText;
 export const STAGING_CKBTC_MINTER_CANISTER_ID = import.meta.env
 	.VITE_STAGING_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText;
+
+export const LOCAL_CYCLES_LEDGER_CANISTER_ID = import.meta.env
+	.VITE_LOCAL_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText;
 
 export const LOCAL_CKBTC_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText;

@@ -1,8 +1,10 @@
 import type { Contact } from '$declarations/backend/backend.did';
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
-import type { Address } from '$lib/types/address';
+import type { Address, OptionAddress } from '$lib/types/address';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+import type { NetworkId } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
+import { areAddressesEqual, areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import {
 	getDiscriminatorForTokenAccountId,
 	getTokenAccountIdAddressString
@@ -61,7 +63,7 @@ export const getContactForAddress = ({
 	addressString: string;
 	contactList: ContactUi[];
 }): ContactUi | undefined =>
-	contactList.find((c) => c.addresses.find((address) => address.address === addressString));
+	contactList.find((c) => filterAddressFromContact({ contact: c, address: addressString }));
 
 export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi | undefined => {
 	const tokenAccountIdParseResult = TokenAccountIdSchema.safeParse(address);
@@ -82,16 +84,41 @@ export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi
 export const isContactMatchingFilter = ({
 	address,
 	contact,
-	filterValue
+	filterValue,
+	networkId
 }: {
 	address: Address;
 	contact: ContactUi;
 	filterValue: string;
+	networkId: NetworkId;
 }): boolean =>
 	notEmptyString(filterValue) &&
-	(address.includes(filterValue) ||
+	(areAddressesPartiallyEqual({
+		address1: address,
+		address2: filterValue,
+		networkId
+	}) ||
 		contact.name.toLowerCase().includes(filterValue.toLowerCase()) ||
 		contact.addresses.some(
 			({ label, address: innerAddress }) =>
-				address === innerAddress && label?.toLowerCase().includes(filterValue.toLowerCase())
+				areAddressesEqual({
+					address1: address,
+					address2: innerAddress,
+					networkId
+				}) && label?.toLowerCase().includes(filterValue.toLowerCase())
 		));
+
+export const filterAddressFromContact = <T extends Address>({
+	contact,
+	address: filterAddress
+}: {
+	contact: ContactUi | undefined;
+	address: OptionAddress<T>;
+}): ContactAddressUi | undefined =>
+	contact?.addresses.find(({ address, addressType }) =>
+		areAddressesEqual({
+			address1: address,
+			address2: filterAddress,
+			addressType
+		})
+	);
