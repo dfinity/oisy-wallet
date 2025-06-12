@@ -169,11 +169,27 @@ describe('contact.utils', () => {
 			expect(result).toBeUndefined();
 		});
 
-		it('should match address only case sensitive', () => {
+		it('should not match address only case-sensitive for a case-insensitive network', () => {
 			const upperCasedAddress = mockEthAddress3.toUpperCase();
 			const result = getContactForAddress({
 				addressString: upperCasedAddress,
 				contactList: mockContacts
+			});
+
+			expect(result?.addresses?.[0]?.address).toEqual(mockEthAddress3);
+		});
+
+		it('should match address only case-sensitive for a case-sensitive network', () => {
+			const upperCasedAddress = mockEthAddress3.toUpperCase();
+			const result = getContactForAddress({
+				addressString: upperCasedAddress,
+				contactList: mockContacts.map((c) => ({
+					...c,
+					addresses: c.addresses.map((a) => ({
+						...a,
+						addressType: 'Sol'
+					}))
+				}))
 			});
 
 			expect(result?.addresses?.[0]?.address).not.toEqual(mockEthAddress3);
