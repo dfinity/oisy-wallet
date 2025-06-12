@@ -21,7 +21,7 @@
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center pb-5">
-	<span class="mb-5 text-center">
+	<span class="mb-5 px-1 text-center sm:px-0">
 		<Html
 			text={replacePlaceholders($i18n.address.delete.content_text, {
 				$address: shortenWithMiddleEllipsis({ text: address.address }),
