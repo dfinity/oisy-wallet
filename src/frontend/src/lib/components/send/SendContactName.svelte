@@ -4,7 +4,6 @@
 	import Divider from '$lib/components/common/Divider.svelte';
 	import type { Address } from '$lib/types/address';
 	import type { ContactUi } from '$lib/types/contact';
-	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { filterAddressFromContact } from '$lib/utils/contact.utils';
 
 	interface Props {

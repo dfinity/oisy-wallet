@@ -14,7 +14,6 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
