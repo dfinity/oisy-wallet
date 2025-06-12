@@ -14,7 +14,6 @@
 
 	// Expose the isValid value for testing
 	export const getIsValid = () => isValid;
-	export const getContact = () => contact;
 </script>
 
 <InputContactName bind:contact bind:isValid {disabled} />
