@@ -1078,6 +1078,9 @@
 			"add_address": "Add address",
 			"show_address_text": "Associated addresses will appear here",
 			"add_first_address": "Add first address to contactName!"
+		},
+		"create_contact": {
+			"title": "Create Contact"
 		}
 	},
 	"contact": {

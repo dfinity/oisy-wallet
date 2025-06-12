@@ -5,6 +5,7 @@
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 	import AddressBookQrCodeStep from '$lib/components/address-book/AddressBookQrCodeStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import CreateContactStep from '$lib/components/address-book/CreateContactStep.svelte';
 	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
 	import DeleteContactConfirmBottomSheet from '$lib/components/address-book/DeleteContactConfirmBottomSheet.svelte';
@@ -105,6 +106,10 @@
 		{
 			name: AddressBookSteps.SAVE_ADDRESS,
 			title: $i18n.address.save.title
+		},
+		{
+			name: AddressBookSteps.CREATE_CONTACT,
+			title: $i18n.address_book.create_contact.title
 		},
 		{
 			name: AddressBookSteps.SHOW_CONTACT,
@@ -358,7 +363,7 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
-				onEditAddress={(index: number) => {
+				onEditAddress={(index) => {
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
@@ -383,7 +388,7 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
-				onEditAddress={(index: number) => {
+				onEditAddress={(index) => {
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
@@ -480,13 +485,26 @@
 		<SaveAddressStep
 			onCreateContact={() => {
 				currentContact = undefined;
-				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				gotoStep(AddressBookSteps.CREATE_CONTACT);
 			}}
 			onSelectContact={(contact: ContactUi) => {
 				currentContact = contact;
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.CREATE_CONTACT}
+		<CreateContactStep
+			onSave={async (contact: ContactUi) => {
+				loading = true;
+				currentContact = contact;
+				currentAddressIndex = undefined;
+				const createdContact = await callCreateContact({ name: contact.name });
+				await callUpdateContact({ contact: { ...createdContact, ...contact } });
+				modalStore.close();
+			}}
+			onBack={() => gotoStep(AddressBookSteps.SAVE_ADDRESS)}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.QR_CODE_SCAN}
 		<AddressBookQrCodeStep
