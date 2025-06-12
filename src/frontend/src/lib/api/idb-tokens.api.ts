@@ -4,9 +4,9 @@ import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
 import { nullishSignOut } from '$lib/services/auth.services';
-import type { SetIdbTokensParams } from '$lib/types/idb-tokens';
+import type { DeleteIdbTokenParams, SetIdbTokensParams } from '$lib/types/idb-tokens';
 import type { Principal } from '@dfinity/principal';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { createStore, del, get, set as idbSet, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.
@@ -66,3 +66,24 @@ export const deleteIdbEthTokens = (principal: Principal): Promise<void> =>
 
 export const deleteIdbSolTokens = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbSolTokensStore);
+
+export const deleteIdbEthToken = async ({
+	identity,
+	token
+}: DeleteIdbTokenParams<UserToken>): Promise<void> => {
+	if (isNullish(identity)) {
+		await nullishSignOut();
+		return;
+	}
+
+	const currentTokens = await getIdbEthTokens(identity.getPrincipal());
+
+	if (nonNullish(currentTokens)) {
+		await setIdbEthTokens({
+			identity,
+			tokens: currentTokens.filter(({ contract_address, chain_id }) =>
+				token.chain_id === chain_id ? token.contract_address !== contract_address : true
+			)
+		});
+	}
+};

@@ -14,7 +14,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -63,7 +63,7 @@
 	);
 
 	let addressAlias: string | undefined = $derived(
-		contact?.addresses.find((a) => a.address === contactAddress)?.label
+		filterAddressFromContact({ contact, address: contactAddress })?.label
 	);
 </script>
 
