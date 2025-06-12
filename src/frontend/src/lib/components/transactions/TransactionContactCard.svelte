@@ -12,7 +12,7 @@
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
-	import type { IcTransaction, IcTransactionUi } from '$icp/types/ic-transaction';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import type { BtcTransactionUi } from '$btc/types/btc';
