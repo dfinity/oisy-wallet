@@ -57,7 +57,7 @@
 			: $i18n.contact.form.add_new_contact
 	);
 
-	let isFormValid = $state(true);
+	let isFormValid = $state(false);
 
 	$effect(() => {
 		title = trimedTitle;
