@@ -50,13 +50,12 @@
 			onSaveContact(editingContact as ContactUi);
 		}
 	};
-	
+
 	const trimedTitle = $derived(
 		notEmptyString(editingContact.name?.trim())
 			? editingContact.name
 			: $i18n.contact.form.add_new_contact
-		);
-
+	);
 
 	let isFormValid = $state(true);
 
