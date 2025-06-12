@@ -1,5 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as backendApi from '$lib/api/backend.api';
+import * as idbTokensApi from '$lib/api/idb-tokens.api';
 import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 import {
 	TOKEN_MODAL_CONTENT_DELETE_BUTTON,
@@ -19,6 +20,8 @@ import { vi } from 'vitest';
 
 describe('TokenModal', () => {
 	const mockBackendApi = () => vi.spyOn(backendApi, 'removeUserToken').mockResolvedValue(undefined);
+	const mockIdbTokensApi = () =>
+		vi.spyOn(idbTokensApi, 'deleteIdbEthToken').mockResolvedValue(undefined);
 	const mockToastsShow = () => vi.spyOn(toastsStore, 'toastsShow').mockImplementation(vi.fn());
 	const mockToastsError = () => vi.spyOn(toastsStore, 'toastsError').mockImplementation(vi.fn());
 	const mockGoToRoot = () => vi.spyOn(navUtils, 'gotoReplaceRoot').mockImplementation(vi.fn());
@@ -43,6 +46,7 @@ describe('TokenModal', () => {
 		const removeUserTokenMock = mockBackendApi();
 		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
+		const idbTokensApi = mockIdbTokensApi();
 		mockAuthStore();
 
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
@@ -55,6 +59,7 @@ describe('TokenModal', () => {
 
 		expect(removeUserTokenMock).toHaveBeenCalledOnce();
 		expect(toasts).toHaveBeenCalledOnce();
+		expect(idbTokensApi).toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).toHaveBeenCalledOnce();
 	});
 
@@ -69,6 +74,7 @@ describe('TokenModal', () => {
 		const removeUserTokenMock = mockBackendApi();
 		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
+		const idbTokensApi = mockIdbTokensApi();
 		mockAuthStore();
 
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
@@ -81,6 +87,7 @@ describe('TokenModal', () => {
 
 		expect(removeUserTokenMock).not.toHaveBeenCalledOnce();
 		expect(toasts).not.toHaveBeenCalledOnce();
+		expect(idbTokensApi).not.toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
 	});
 
@@ -99,6 +106,7 @@ describe('TokenModal', () => {
 		const removeUserTokenMock = mockBackendApi();
 		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
+		const idbTokensApi = mockIdbTokensApi();
 
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
 
@@ -111,6 +119,7 @@ describe('TokenModal', () => {
 		expect(removeUserTokenMock).not.toHaveBeenCalledOnce();
 		expect(toasts).not.toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
+		expect(idbTokensApi).not.toHaveBeenCalledOnce();
 		expect(signOutSpy).toHaveBeenCalledOnce();
 	});
 
@@ -140,6 +149,7 @@ describe('TokenModal', () => {
 			.mockRejectedValue(new Error('test'));
 		const toastsError = mockToastsError();
 		const gotoReplaceRoot = mockGoToRoot();
+		const idbTokensApi = mockIdbTokensApi();
 		mockAuthStore();
 
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
@@ -153,5 +163,6 @@ describe('TokenModal', () => {
 		expect(removeUserTokenMock).toHaveBeenCalledOnce();
 		expect(toastsError).toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
+		expect(idbTokensApi).not.toHaveBeenCalledOnce();
 	});
 });
