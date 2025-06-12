@@ -24,7 +24,7 @@
 
 <ContentWithToolbar>
 	{#if nonNullish(token)}
-		<div class="my-5 text-center">
+		<div class="my-5 px-5 text-center sm:px-0">
 			<Html
 				text={replacePlaceholders(
 					replaceOisyPlaceholders($i18n.tokens.details.confirm_deletion_description),

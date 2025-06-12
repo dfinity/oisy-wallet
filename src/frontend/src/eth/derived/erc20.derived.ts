@@ -13,7 +13,7 @@ import { derived, type Readable } from 'svelte/store';
 /**
  * The list of ERC20 default tokens - i.e. the statically configured ERC20 tokens of Oisy + their metadata, unique ids etc. fetched at runtime.
  */
-const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
+export const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
 	[erc20DefaultTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
 	([$erc20TokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) =>
 		($erc20TokensStore ?? []).filter(({ network: { id: networkId } }) =>
