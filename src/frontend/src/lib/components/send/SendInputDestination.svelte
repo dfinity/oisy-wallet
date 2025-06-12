@@ -14,6 +14,8 @@
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
+	import { getContext } from 'svelte';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -27,6 +29,8 @@
 	const validate = () => (invalidDestination = isInvalidDestination?.() ?? false);
 
 	const debounceValidate = debounce(validate);
+
+	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let focused: boolean;
 	const onFocus = () => (focused = true);
@@ -45,7 +49,7 @@
 			getKnownDestination({
 				knownDestinations,
 				address: destination,
-				networkId
+				networkId: $sendTokenNetworkId
 			})
 		);
 
@@ -56,7 +60,7 @@
 			getNetworkContact({
 				networkContacts,
 				address: destination,
-				networkId
+				networkId: $sendTokenNetworkId
 			})
 		);
 </script>
