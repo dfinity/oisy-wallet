@@ -74,16 +74,24 @@
 		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
 			<ul class="list-none overflow-y-auto overscroll-contain">
 				{#each filteredKnownDestinations as { address, ...rest } (address)}
+					{@const networkContact = nonNullish(networkContacts)
+						? getNetworkContact({
+								networkContacts,
+								address,
+								networkId: $sendTokenNetworkId
+							})
+						: undefined}
+
 					<li>
 						<KnownDestination
 							destination={address}
-							contact={networkContacts?.[address]}
+							contact={networkContact}
 							{...rest}
 							onClick={() => {
 								destination = address;
 
-								if (nonNullish(networkContacts?.[address])) {
-									selectedContact = networkContacts[address];
+								if (nonNullish(networkContact)) {
+									selectedContact = networkContact;
 								}
 
 								dispatch('icNext');
