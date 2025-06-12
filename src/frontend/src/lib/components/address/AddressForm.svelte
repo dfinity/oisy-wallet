@@ -38,11 +38,20 @@
 	let labelError = $derived(ContactAddressUiSchema.shape.label.safeParse(address.label)?.error);
 
 	$effect(() => {
+		if (nonNullish(address.label)) {
+			const trimmed = address.label.trim();
+			if (trimmed !== address.label) {
+				address.label = trimmed;
+			}
+		}
+	});
+
+	$effect(() => {
 		isInvalid = nonNullish(addressParseError) || nonNullish(labelError);
 	});
 </script>
 
-<div class="w-full">
+<div class="w-full" style="--input-font-size: var(text-base)">
 	<label for="address" class="font-bold">{$i18n.address.fields.address}</label>
 
 	<InputAddress
