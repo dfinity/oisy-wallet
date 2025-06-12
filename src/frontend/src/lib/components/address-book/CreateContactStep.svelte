@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import AddressForm from '$lib/components/address/InputAddressAlias.svelte';
+	import ContactForm from '$lib/components/address-book/InputContactName.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import {
@@ -14,8 +16,6 @@
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactUi } from '$lib/types/contact';
 	import { mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
-	import ContactForm from '$lib/components/address-book/InputContactName.svelte';
-	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 
 	interface Props {
 		onSave: (contact: ContactUi) => void;
