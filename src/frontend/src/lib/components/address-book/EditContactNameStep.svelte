@@ -49,7 +49,7 @@
 		}
 	};
 
-	let isFormValid = $state(true);
+	let isFormValid = $state(false);
 
 	let title = $derived(
 		notEmptyString(editingContact?.name?.trim?.())
