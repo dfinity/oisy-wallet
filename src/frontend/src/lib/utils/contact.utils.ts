@@ -1,6 +1,6 @@
 import type { Contact } from '$declarations/backend/backend.did';
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
-import type { Address } from '$lib/types/address';
+import type { Address, OptionAddress } from '$lib/types/address';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
@@ -63,15 +63,7 @@ export const getContactForAddress = ({
 	addressString: string;
 	contactList: ContactUi[];
 }): ContactUi | undefined =>
-	contactList.find((c) =>
-		c.addresses.find((address) =>
-			areAddressesEqual({
-				address1: address.address,
-				address2: addressString,
-				addressType: address.addressType
-			})
-		)
-	);
+	contactList.find((c) => filterAddressFromContact({ contact: c, address: addressString }));
 
 export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi | undefined => {
 	const tokenAccountIdParseResult = TokenAccountIdSchema.safeParse(address);
@@ -115,3 +107,18 @@ export const isContactMatchingFilter = ({
 					networkId
 				}) && label?.toLowerCase().includes(filterValue.toLowerCase())
 		));
+
+export const filterAddressFromContact = <T extends Address>({
+	contact,
+	address: filterAddress
+}: {
+	contact: ContactUi | undefined;
+	address: OptionAddress<T>;
+}): ContactAddressUi | undefined =>
+	contact?.addresses.find(({ address, addressType }) =>
+		areAddressesEqual({
+			address1: address,
+			address2: filterAddress,
+			addressType
+		})
+	);
