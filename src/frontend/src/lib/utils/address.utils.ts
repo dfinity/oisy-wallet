@@ -68,17 +68,16 @@ export const getCaseSensitiveness = (
 export const areAddressesEqual = <T extends Address>({
 	address1,
 	address2,
-	networkId
-}: {
-	address1: OptionAddress<T>;
-	address2: OptionAddress<T>;
-	networkId: NetworkId;
-}): boolean => {
+	...rest
+}: { address1: OptionAddress<T>; address2: OptionAddress<T> } & (
+	| { networkId: NetworkId }
+	| { addressType: TokenAccountIdTypes }
+)): boolean => {
 	if (isNullish(address1) || isNullish(address2)) {
 		return false;
 	}
 
-	const isCaseSensitive = getCaseSensitiveness({ networkId });
+	const isCaseSensitive = getCaseSensitiveness(rest);
 
 	if (isCaseSensitive) {
 		return address1 === address2;

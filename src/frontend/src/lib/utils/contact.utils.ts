@@ -63,7 +63,15 @@ export const getContactForAddress = ({
 	addressString: string;
 	contactList: ContactUi[];
 }): ContactUi | undefined =>
-	contactList.find((c) => c.addresses.find((address) => address.address === addressString));
+	contactList.find((c) =>
+		c.addresses.find((address) =>
+			areAddressesEqual({
+				address1: address.address,
+				address2: addressString,
+				addressType: address.addressType
+			})
+		)
+	);
 
 export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi | undefined => {
 	const tokenAccountIdParseResult = TokenAccountIdSchema.safeParse(address);
