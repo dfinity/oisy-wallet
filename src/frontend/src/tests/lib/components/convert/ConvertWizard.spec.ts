@@ -33,11 +33,16 @@ import {
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
 import type { Token } from '$lib/types/token';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
+
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
 
 describe('ConvertWizard', () => {
 	const sendAmount = 20;
@@ -49,7 +54,8 @@ describe('ConvertWizard', () => {
 		currentStep: {
 			name: WizardStepsConvert.CONVERT,
 			title: 'title'
-		}
+		},
+		onIcQrCodeBack: () => {}
 	};
 
 	const mockContext = (sourceToken: Token) =>
@@ -76,6 +82,8 @@ describe('ConvertWizard', () => {
 		vi.clearAllMocks();
 
 		mockPage.reset();
+
+		mockAuthStore();
 	});
 
 	it('should display BTC convert wizard if sourceToken network is BTC', () => {
