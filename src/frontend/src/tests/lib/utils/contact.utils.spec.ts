@@ -1,6 +1,7 @@
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import type { ContactUi } from '$lib/types/contact';
+import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import {
+	filterAddressFromContact,
 	getContactForAddress,
 	isContactMatchingFilter,
 	mapAddressToContactAddressUi,
@@ -17,7 +18,7 @@ import {
 	mockBackendContactAddressSol,
 	mockContactBtcAddressUi
 } from '$tests/mocks/contacts.mock';
-import { mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mocks';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
@@ -297,6 +298,86 @@ describe('contact.utils', () => {
 					networkId: ICP_NETWORK_ID
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('filterAddressFromContact', () => {
+		const mockAddresses: ContactAddressUi[] = [
+			{
+				label: 'Mock Label',
+				address: mockBtcAddress,
+				addressType: 'Btc'
+			},
+			{
+				address: mockEthAddress,
+				addressType: 'Eth'
+			},
+			{
+				address: mockSolAddress,
+				addressType: 'Sol'
+			}
+		];
+
+		const mockContact: ContactUi = {
+			name: 'Mock Contact',
+			id: BigInt(1),
+			updateTimestampNs: 123456789n,
+			addresses: mockAddresses
+		};
+
+		it('should return undefined if contact is nullish', () => {
+			expect(
+				filterAddressFromContact({ contact: undefined, address: mockEthAddress })
+			).toBeUndefined();
+
+			expect(
+				filterAddressFromContact({ contact: undefined, address: mockSolAddress })
+			).toBeUndefined();
+		});
+
+		it('should return undefined if address is nullish', () => {
+			expect(
+				filterAddressFromContact({ contact: mockContact, address: undefined })
+			).toBeUndefined();
+
+			expect(filterAddressFromContact({ contact: mockContact, address: null })).toBeUndefined();
+		});
+
+		it('should return undefined if address is empty', () => {
+			expect(filterAddressFromContact({ contact: mockContact, address: '' })).toBeUndefined();
+		});
+
+		it('should return the matched contact address', () => {
+			mockAddresses.forEach((address) => {
+				expect(
+					filterAddressFromContact({ contact: mockContact, address: address.address })
+				).toStrictEqual(address);
+			});
+		});
+
+		it('should return undefined if address does not match any contact address', () => {
+			expect(
+				filterAddressFromContact({ contact: mockContact, address: '0xINEXISTENTADDRESS' })
+			).toBeUndefined();
+		});
+
+		it('should return undefined if contact has no addresses', () => {
+			expect(
+				filterAddressFromContact({
+					contact: { ...mockContact, addresses: [] },
+					address: mockEthAddress
+				})
+			).toBeUndefined();
+		});
+
+		it('should return undefined if it does no match for case-sensitive network', () => {
+			expect(
+				filterAddressFromContact({ contact: mockContact, address: mockSolAddress })
+			).toBeDefined();
+
+			expect(
+				filterAddressFromContact({ contact: mockContact, address: mockSolAddress.toUpperCase() })
+			).toBeUndefined();
 		});
 	});
 });
