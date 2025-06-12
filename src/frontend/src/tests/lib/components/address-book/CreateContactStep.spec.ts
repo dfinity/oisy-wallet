@@ -58,7 +58,9 @@ describe('CreateContactStep', () => {
 		await fireEvent.input(nameInput, { target: { value: 'Test Contact' } });
 
 		const addressInput = getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT);
+
 		expect(addressInput).not.toBeDisabled();
+
 		await fireEvent.input(addressInput, {
 			target: { value: mockSolAddress }
 		});
