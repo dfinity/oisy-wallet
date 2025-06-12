@@ -66,7 +66,7 @@ export class SchedulerTimer {
 			'ledgerCanisterId' in rest.data &&
 			rest.data?.ledgerCanisterId === 'l67es-4iaaa-aaaag-atvda-cai'
 		) {
-			console.log('New timer:', this.timer);
+			console.log('New timer:', this.timer, rest.data);
 		}
 	}
 
@@ -126,7 +126,7 @@ export class SchedulerTimer {
 		if (isNullish(this.timer)) {
 			return;
 		}
-		console.log('Stop timer:');
+		console.log('Stop timer:', this.timer);
 		clearInterval(this.timer);
 		// console.log('Stop timer:', this.timer);
 		this.timer = undefined;
