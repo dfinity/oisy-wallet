@@ -33,7 +33,6 @@ import {
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
 import type { Token } from '$lib/types/token';
-import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -82,8 +81,6 @@ describe('ConvertWizard', () => {
 		vi.clearAllMocks();
 
 		mockPage.reset();
-
-		mockAuthStore();
 	});
 
 	it('should display BTC convert wizard if sourceToken network is BTC', () => {
