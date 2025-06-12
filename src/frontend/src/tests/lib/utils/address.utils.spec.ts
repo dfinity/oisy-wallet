@@ -85,6 +85,42 @@ describe('address.utils', () => {
 			).toBeFalsy();
 		});
 
+		describe.each(['Btc', 'Eth', 'Icrcv2', 'unknown'])('for %s address type', (rawAddressType) => {
+			const addressType = rawAddressType as TokenAccountIdTypes;
+
+			it('should return true for equal addresses', () => {
+				expect(areAddressesEqual({ address1, address2: address1, addressType })).toBeTruthy();
+			});
+
+			it('should return false for different addresses', () => {
+				expect(areAddressesEqual({ address1, address2, addressType })).toBeFalsy();
+			});
+
+			it('should return true for case-insensitive equal addresses', () => {
+				expect(
+					areAddressesEqual({ address1, address2: address1.toUpperCase(), addressType })
+				).toBeTruthy();
+			});
+		});
+
+		describe('for Sol address type', () => {
+			const addressType = 'Sol' as TokenAccountIdTypes;
+
+			it('should return true for equal addresses', () => {
+				expect(areAddressesEqual({ address1, address2: address1, addressType })).toBeTruthy();
+			});
+
+			it('should return false for different addresses', () => {
+				expect(areAddressesEqual({ address1, address2, addressType })).toBeFalsy();
+			});
+
+			it('should return true for case-insensitive equal addresses', () => {
+				expect(
+					areAddressesEqual({ address1, address2: address1.toUpperCase(), addressType })
+				).toBeFalsy();
+			});
+		});
+
 		describe.each([
 			ICP_NETWORK,
 			...SUPPORTED_BITCOIN_NETWORKS,

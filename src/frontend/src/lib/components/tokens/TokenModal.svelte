@@ -90,9 +90,7 @@
 
 <Modal on:nnsClose={modalStore.close} disablePointerEvents={loading}>
 	<svelte:fragment slot="title">
-		{showDeleteConfirmation
-			? $i18n.tokens.details.confirm_deletion_title
-			: $i18n.tokens.details.title}
+		{showDeleteConfirmation ? $i18n.tokens.text.delete_token : $i18n.tokens.details.title}
 	</svelte:fragment>
 
 	{#if showDeleteConfirmation}
