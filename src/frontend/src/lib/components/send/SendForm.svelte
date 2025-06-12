@@ -5,12 +5,10 @@
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { SEND_FORM_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
-	import type { ContactUi } from '$lib/types/contact';
 
 	export let destination = '';
 	export let invalidDestination = false;
 	export let disabled: boolean | undefined = false;
-	export let selectedContact: ContactUi | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -21,12 +19,7 @@
 	<ContentWithToolbar>
 		<slot name="amount" />
 
-		<SendDestination
-			{destination}
-			{selectedContact}
-			{invalidDestination}
-			on:icSendDestinationStep={back}
-		/>
+		<SendDestination {destination} {invalidDestination} on:icSendDestinationStep={back} />
 
 		<slot name="fee" />
 

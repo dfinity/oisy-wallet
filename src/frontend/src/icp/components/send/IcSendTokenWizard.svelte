@@ -20,7 +20,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -33,7 +32,6 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
-	export let selectedContact: ContactUi | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -123,11 +121,11 @@
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}
-	<IcSendReview on:icBack on:icSend={send} {destination} {selectedContact} {amount} />
+	<IcSendReview on:icBack on:icSend={send} {destination} {amount} />
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<IcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
-	<IcSendForm on:icNext on:icBack on:icTokensList {selectedContact} bind:destination bind:amount>
+	<IcSendForm on:icNext on:icBack on:icTokensList bind:destination bind:amount>
 		<ButtonBack onclick={back} slot="cancel" />
 	</IcSendForm>
 {:else}

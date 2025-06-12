@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
@@ -9,19 +9,29 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import { contacts } from '$lib/derived/contacts.derived';
 
 	interface Props {
 		destination: string;
 		invalidDestination?: boolean;
-		selectedContact?: ContactUi;
 	}
-	let { destination, invalidDestination = false, selectedContact }: Props = $props();
+	let { destination, invalidDestination = false }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
 	const onIcSendDestinationStep = () => dispatch('icSendDestinationStep');
 
 	let addressToDisplay = $derived(shortenWithMiddleEllipsis({ text: destination }));
+
+	let contact: ContactUi | undefined = $derived(
+		nonNullish(destination)
+			? getContactForAddress({
+					contactList: $contacts,
+					addressString: destination
+				})
+			: undefined
+	);
 </script>
 
 <div class="mb-10 mt-6" data-tid={SEND_DESTINATION_SECTION}>
@@ -31,7 +41,7 @@
 		{#snippet logo()}
 			<div class="mr-2">
 				<AvatarWithBadge
-					contact={selectedContact}
+					{contact}
 					address={destination}
 					badge={{ type: 'addressType', address: destination }}
 				/>
@@ -39,10 +49,10 @@
 		{/snippet}
 
 		{#snippet content()}
-			{#if isNullish(selectedContact)}
+			{#if isNullish(contact)}
 				{addressToDisplay}
 			{:else}
-				<SendContactName contact={selectedContact} address={destination} />
+				<SendContactName {contact} address={destination} />
 
 				<span class="text-sm text-tertiary">{addressToDisplay}</span>
 			{/if}

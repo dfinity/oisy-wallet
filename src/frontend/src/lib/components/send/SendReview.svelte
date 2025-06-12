@@ -9,13 +9,11 @@
 	import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let disabled: boolean | undefined = false;
-	export let selectedContact: ContactUi | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -26,7 +24,7 @@
 	<SendTokenReview sendAmount={amount} token={$sendToken} exchangeRate={$sendTokenExchangeRate} />
 
 	<div class="mb-4">
-		<SendReviewDestination {destination} {selectedContact} />
+		<SendReviewDestination {destination} />
 	</div>
 
 	<slot name="network" />
