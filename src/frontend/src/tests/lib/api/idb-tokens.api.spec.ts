@@ -1,7 +1,9 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { toUserToken } from '$icp-eth/services/user-token.services';
 import {
+	deleteIdbEthToken,
 	deleteIdbEthTokens,
 	deleteIdbIcTokens,
 	deleteIdbSolTokens,
@@ -10,6 +12,7 @@ import {
 	getIdbSolTokens,
 	setIdbTokensStore
 } from '$lib/api/idb-tokens.api';
+import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { Principal } from '@dfinity/principal';
@@ -179,6 +182,50 @@ describe('idb-tokens.api', () => {
 
 			expect(idbKeyval.del).toHaveBeenCalledOnce();
 			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
+	describe('deleteIdbEthToken', () => {
+		it('should delete provided ETH token', async () => {
+			const [tokenToDelete, ...rest] = createMockErc20UserTokens({ n: 3, networkEnv: 'mainnet' });
+			const restUserTokens = rest.map(({ data }) => toUserToken(data));
+			const userTokenToDelete = toUserToken(tokenToDelete.data);
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([userTokenToDelete, ...restUserTokens]);
+
+			await deleteIdbEthToken({
+				identity: mockIdentity,
+				token: userTokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				restUserTokens,
+				mockIdbTokensStore
+			);
+		});
+
+		it('should not delete anything if provided ETH token is not in the IDB', async () => {
+			const [tokenToDelete, ...rest] = createMockErc20UserTokens({ n: 3, networkEnv: 'mainnet' });
+			const restUserTokens = rest.map(({ data }) => toUserToken(data));
+			const userTokenToDelete = toUserToken(tokenToDelete.data);
+
+			vi.mocked(idbKeyval.get).mockResolvedValue(restUserTokens);
+
+			await deleteIdbEthToken({
+				identity: mockIdentity,
+				token: userTokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				restUserTokens,
+				mockIdbTokensStore
+			);
 		});
 	});
 });

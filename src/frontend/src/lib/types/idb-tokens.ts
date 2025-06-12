@@ -5,3 +5,8 @@ export interface SetIdbTokensParams<T extends CustomToken | UserToken> {
 	identity: OptionIdentity;
 	tokens: T[];
 }
+
+export interface DeleteIdbTokenParams<T extends CustomToken | UserToken> {
+	identity: OptionIdentity;
+	token: T;
+}
