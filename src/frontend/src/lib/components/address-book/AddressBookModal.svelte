@@ -165,7 +165,7 @@
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
 	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
-	let editContactNameTitle = $state<string>($i18n.contact.form.add_new_contact);
+	let editContactNameTitle = $state($i18n.contact.form.add_new_contact);
 
 	let isDeletingContact = $state<boolean>(false);
 

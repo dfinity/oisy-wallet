@@ -24,13 +24,13 @@
 	}
 
 	let {
-		contact = {},
-		isNewContact,
-		disabled = false,
 		onAddContact,
 		onSaveContact,
 		onClose,
-		title = $bindable<string>()
+		isNewContact,
+		contact = {},
+		disabled = false,
+		title = $bindable<string | undefined>()
 	}: Props = $props();
 
 	let editingContact = $state(contact ? { ...contact } : {});
