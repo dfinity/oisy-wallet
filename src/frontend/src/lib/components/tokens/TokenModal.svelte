@@ -6,6 +6,7 @@
 	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 	import { toUserToken } from '$icp-eth/services/user-token.services';
 	import { removeUserToken } from '$lib/api/backend.api';
+	import { deleteIdbEthToken } from '$lib/api/idb-tokens.api.js';
 	import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -62,15 +63,16 @@
 			if (isTokenErc20UserToken(tokenToDelete)) {
 				loading = true;
 
-				const { chain_id, contract_address } = toUserToken(tokenToDelete);
+				const userToken = toUserToken(tokenToDelete);
 
 				await removeUserToken({
-					chain_id,
-					contract_address,
+					chain_id: userToken.chain_id,
+					contract_address: userToken.contract_address,
 					identity: $authIdentity
 				});
 
 				erc20UserTokensStore.reset(tokenToDelete.id);
+				await deleteIdbEthToken({ identity: $authIdentity, token: userToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
 			}
@@ -88,9 +90,7 @@
 
 <Modal on:nnsClose={modalStore.close} disablePointerEvents={loading}>
 	<svelte:fragment slot="title">
-		{showDeleteConfirmation
-			? $i18n.tokens.details.confirm_deletion_title
-			: $i18n.tokens.details.title}
+		{showDeleteConfirmation ? $i18n.tokens.text.delete_token : $i18n.tokens.details.title}
 	</svelte:fragment>
 
 	{#if showDeleteConfirmation}

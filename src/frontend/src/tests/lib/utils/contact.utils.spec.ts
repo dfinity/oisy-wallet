@@ -1,3 +1,4 @@
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import type { ContactUi } from '$lib/types/contact';
 import {
 	getContactForAddress,
@@ -168,11 +169,27 @@ describe('contact.utils', () => {
 			expect(result).toBeUndefined();
 		});
 
-		it('should match address only case sensitive', () => {
+		it('should not match address only case-sensitive for a case-insensitive network', () => {
 			const upperCasedAddress = mockEthAddress3.toUpperCase();
 			const result = getContactForAddress({
 				addressString: upperCasedAddress,
 				contactList: mockContacts
+			});
+
+			expect(result?.addresses?.[0]?.address).toEqual(mockEthAddress3);
+		});
+
+		it('should match address only case-sensitive for a case-sensitive network', () => {
+			const upperCasedAddress = mockEthAddress3.toUpperCase();
+			const result = getContactForAddress({
+				addressString: upperCasedAddress,
+				contactList: mockContacts.map((c) => ({
+					...c,
+					addresses: c.addresses.map((a) => ({
+						...a,
+						addressType: 'Sol'
+					}))
+				}))
 			});
 
 			expect(result?.addresses?.[0]?.address).not.toEqual(mockEthAddress3);
@@ -221,7 +238,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: 'Joh'
+					filterValue: 'Joh',
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeTruthy();
 		});
@@ -231,7 +249,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: 'Bitcoin'
+					filterValue: 'Bitcoin',
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeTruthy();
 		});
@@ -241,7 +260,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: mockContactBtcAddressUi.address
+					filterValue: mockContactBtcAddressUi.address,
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeTruthy();
 		});
@@ -251,7 +271,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: mockContactBtcAddressUi.address.slice(0, 6)
+					filterValue: mockContactBtcAddressUi.address.slice(0, 6),
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeTruthy();
 		});
@@ -261,7 +282,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: ''
+					filterValue: '',
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeFalsy();
 		});
@@ -271,7 +293,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: 'Test1'
+					filterValue: 'Test1',
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeFalsy();
 		});
