@@ -19,6 +19,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 
 	interface Props {
 		amount?: bigint;
@@ -63,7 +64,11 @@
 	);
 
 	let addressAlias: string | undefined = $derived(
-		contact?.addresses.find((a) => a.address === contactAddress)?.label
+		contact?.addresses.find((a) =>areAddressesEqual({
+			address1: a.address,
+			address2: contactAddress,
+			addressType: a.addressType
+		}))?.label
 	);
 </script>
 
