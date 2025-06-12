@@ -53,8 +53,6 @@
 		</AddressCard>
 	{/if}
 
-	<Button onclick={() => onComplete?.()}>Test complete</Button>
-
 	<div class="mt-8 flex justify-between">
 		<h5>{$i18n.address.save.add_to_existing_contact}</h5>
 		{#if nonNullish(onCreateContact)}
