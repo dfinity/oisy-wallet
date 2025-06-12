@@ -15,7 +15,7 @@ describe('InputAddressAlias', () => {
 		const { getByTestId, getByText } = render(InputAddressAlias, {
 			props: {
 				address,
-				isValid: true,
+				isValid: false,
 				onQRCodeScan: () => {}
 			}
 		});
@@ -39,7 +39,7 @@ describe('InputAddressAlias', () => {
 			props: {
 				address,
 				disableAddressField: true,
-				isValid: true,
+				isValid: false,
 				onQRCodeScan: () => {}
 			}
 		});
@@ -56,7 +56,7 @@ describe('InputAddressAlias', () => {
 			props: {
 				address,
 				disableAddressField: false,
-				isValid: true,
+				isValid: false,
 				onQRCodeScan: () => {}
 			}
 		});
@@ -73,7 +73,7 @@ describe('AddressFormTestHost', () => {
 		const { getByTestId, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isValid: true
+				isValid: false
 			}
 		});
 
@@ -94,7 +94,7 @@ describe('AddressFormTestHost', () => {
 		const { getByTestId, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isValid: true
+				isValid: false
 			}
 		});
 
@@ -121,7 +121,7 @@ describe('AddressFormTestHost', () => {
 		const { getByTestId, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isValid: true
+				isValid: false
 			}
 		});
 
@@ -144,7 +144,7 @@ describe('AddressFormTestHost', () => {
 		const { getByTestId, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isValid: true
+				isValid: false
 			}
 		});
 
@@ -170,7 +170,7 @@ describe('AddressFormTestHost', () => {
 		const { component, getByTestId } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isValid: true
+				isValid: false
 			}
 		});
 
@@ -190,7 +190,7 @@ describe('AddressFormTestHost', () => {
 		const { getByTestId, getByText, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isValid: true
+				isValid: false
 			}
 		});
 
