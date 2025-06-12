@@ -138,7 +138,7 @@
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(blockNumber)}
+			{#if nonNullish(blockNumber) && nonNullish(token)}
 				<ListItem>
 					<span>{$i18n.transaction.text.block}</span>
 					<span>
@@ -147,7 +147,7 @@
 				</ListItem>
 
 				<ListItem>
-					<EthTransactionStatus {blockNumber} />
+					<EthTransactionStatus {blockNumber} {token} />
 				</ListItem>
 			{/if}
 
