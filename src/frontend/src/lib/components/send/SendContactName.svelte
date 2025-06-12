@@ -5,6 +5,7 @@
 	import type { Address } from '$lib/types/address';
 	import type { ContactUi } from '$lib/types/contact';
 	import { filterAddressFromContact } from '$lib/utils/contact.utils';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 
 	interface Props {
 		address: Address;
