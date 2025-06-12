@@ -77,7 +77,7 @@
 				: ''
 	);
 
-	let isFormValid = $state(true);
+	let isFormValid = $state(false);
 
 	const focusField = isNewAddress ? 'address' : 'label';
 
