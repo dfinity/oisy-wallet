@@ -6,6 +6,7 @@ import { tokenWithFallback } from '$lib/derived/token.derived';
 import type { NetworkContacts } from '$lib/types/contacts';
 import { isIcpAccountIdentifier } from '$lib/utils/account.utils';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
+import { isPrincipal } from '$lib/utils/json.utils'; // ✅ ensure this is imported
 import { derived, type Readable } from 'svelte/store';
 
 export const icNetworkContacts: Readable<NetworkContacts> = derived(
@@ -14,17 +15,26 @@ export const icNetworkContacts: Readable<NetworkContacts> = derived(
 		const isIcpToken = $tokenWithFallback.id === ICP_TOKEN_ID;
 		const isIcrcToken = isTokenIcrc({ standard: $tokenWithFallback.standard });
 
-		const allIcNetworkContacts = getNetworkContacts({ addressType: 'Icrcv2', contacts: $contacts });
+		const allIcNetworkContacts = getNetworkContacts({
+			addressType: 'Icrcv2',
+			contacts: $contacts
+		});
 
-		return Object.keys(allIcNetworkContacts).reduce<NetworkContacts>(
-			(acc, address) => ({
-				...acc,
-				...((isIcpToken && isIcpAccountIdentifier(address)) ||
-				(isIcrcToken && isIcrcAddress(address))
-					? { [address]: allIcNetworkContacts[address] }
-					: {})
-			}),
+		const filteredContacts = Object.keys(allIcNetworkContacts).reduce<NetworkContacts>(
+			(acc, address) => {
+				const shouldInclude =
+					isIcpAccountIdentifier(address) ||
+					isIcrcAddress(address) ||
+					isPrincipal(address);
+
+				if (shouldInclude) {
+					acc[address] = allIcNetworkContacts[address];
+				}
+
+				return acc;
+			},
 			{}
 		);
+		return filteredContacts;
 	}
 );
