@@ -87,11 +87,11 @@
 			on:blur={onBlur}
 			on:nnsInput
 		>
-			<svelte:fragment slot="inner-end">
+			{#snippet innerEnd()}
 				{#if nonNullish(onQRButtonClick)}
 					<QrButton on:click={onQRButtonClick} />
 				{/if}
-			</svelte:fragment>
+			{/snippet}
 		</InputTextWithAction>
 
 		{#if isErrorState}
