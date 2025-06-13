@@ -6,17 +6,24 @@
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
+	import type { Snippet } from 'svelte';
 
-	export let level: 'plain' | 'info' | 'warning' | 'error' | 'success' = 'info';
-	export let closableKey: HideInfoKey | undefined = undefined;
-	export let styleClass: string | undefined = undefined;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		children: Snippet;
+		level?: 'plain' | 'info' | 'warning' | 'error' | 'success';
+		closableKey?: HideInfoKey;
+		styleClass?: string;
+		testId?: string;
+	}
 
-	let closable = false;
-	$: closable = nonNullish(closableKey);
+	let {children, level = 'info', closableKey, styleClass, testId}: Props = $props();
 
-	let visible = true;
-	$: visible = isNullish(closableKey) || !shouldHideInfo(closableKey);
+	const closable = $derived(nonNullish(closableKey));
+	let visible = $state(true);
+
+	$effect(() => {
+		visible = isNullish(closableKey) || !shouldHideInfo(closableKey);
+	});
 
 	const close = () => {
 		visible = false;
@@ -54,7 +61,7 @@
 			class:text-error-secondary={level === 'error'}
 			class:text-success-secondary={level === 'success'}
 		>
-			<slot />
+			{@render children()}
 		</div>
 		{#if closable}
 			<button
