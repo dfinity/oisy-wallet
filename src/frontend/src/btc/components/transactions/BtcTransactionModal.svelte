@@ -14,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -21,7 +22,6 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
-	import type { AnyTransactionUi } from '$lib/types/transaction';
 
 	interface Props {
 		transaction: BtcTransactionUi;

@@ -21,6 +21,7 @@
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -28,7 +29,6 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
-	import type { AnyTransactionUi } from '$lib/types/transaction';
 
 	interface Props {
 		transaction: EthTransactionUi;

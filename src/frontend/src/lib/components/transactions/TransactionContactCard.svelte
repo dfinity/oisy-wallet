@@ -11,8 +11,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import { getContactForAddress } from '$lib/utils/contact.utils';
 	import type { AnyTransactionUi } from '$lib/types/transaction';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
 
 	interface Props {
 		type: 'send' | 'receive';
