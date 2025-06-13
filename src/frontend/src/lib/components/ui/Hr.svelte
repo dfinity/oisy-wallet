@@ -5,7 +5,7 @@
 		spacing?: 'none' | Extract<Size, 'lg' | 'md'>;
 	}
 
-	let {spacing = 'none'}: Props = $props();
+	let { spacing = 'none' }: Props = $props();
 </script>
 
 <hr
