@@ -11,14 +11,16 @@
 		type?: 'progress' | 'static';
 	}
 
-	let {progressStep, steps, type = 'progress'}: Props = $props();
+	let { progressStep, steps, type = 'progress' }: Props = $props();
 
-	const cmp: typeof StaticSteps | typeof ProgressStepsCmp = $derived(type === 'static' ? StaticSteps : ProgressStepsCmp);
+	const cmp: typeof StaticSteps | typeof ProgressStepsCmp = $derived(
+		type === 'static' ? StaticSteps : ProgressStepsCmp
+	);
 
 	let dynamicSteps: ProgressSteps = $state([
 		// TODO: have a look if there is a better solution than casting
 		...(steps as ProgressSteps)
-	])
+	]);
 
 	$effect(() => {
 		const progressIndex = dynamicSteps.findIndex(({ step }) => step === progressStep);
@@ -26,15 +28,15 @@
 		dynamicSteps = dynamicSteps.map((step, index) =>
 			step.step === progressStep
 				? {
-					...step,
-					state: 'in_progress'
-				}
+						...step,
+						state: 'in_progress'
+					}
 				: {
-					...step,
-					state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next'
-				}
+						...step,
+						state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next'
+					}
 		) as ProgressSteps;
-	})
+	});
 </script>
 
 <div class="px-2 pb-3">
