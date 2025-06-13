@@ -12,7 +12,13 @@
 		testId?: string;
 	}
 
-	let {filter = $bindable(''), showResetButton = false, placeholder, autofocus = false, testId}: Props = $props();
+	let {
+		filter = $bindable(''),
+		showResetButton = false,
+		placeholder,
+		autofocus = false,
+		testId
+	}: Props = $props();
 </script>
 
 <InputTextWithAction
