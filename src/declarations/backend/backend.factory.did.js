@@ -550,6 +550,7 @@ export const idlFactory = ({ IDL }) => {
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)], ['query']),
+		remove_custom_token: IDL.Func([CustomToken], [], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),

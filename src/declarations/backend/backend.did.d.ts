@@ -485,6 +485,7 @@ export interface _SERVICE {
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
+	remove_custom_token: ActorMethod<[CustomToken], undefined>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
