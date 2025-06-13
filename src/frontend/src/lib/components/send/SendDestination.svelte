@@ -6,11 +6,11 @@
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
 	import SendContactName from '$lib/components/send/SendContactName.svelte';
 	import { SEND_DESTINATION_SECTION } from '$lib/constants/test-ids.constants';
+	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
-	import { contacts } from '$lib/derived/contacts.derived';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
 		destination: string;
