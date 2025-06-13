@@ -14,7 +14,6 @@
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { ContactUi } from '$lib/types/contact';
 	import type { Token } from '$lib/types/token';
 	import {
 		isNetworkIdEthereum,
@@ -29,7 +28,6 @@
 	export let amount: number | undefined;
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
-	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -49,7 +47,6 @@
 			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			nativeEthereumToken={$ethereumToken}
 			{destination}
-			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
@@ -64,7 +61,6 @@
 			sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
 			nativeEthereumToken={evmNativeEthereumToken}
 			{destination}
-			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
@@ -77,7 +73,6 @@
 		<IcSendTokenWizard
 			{currentStep}
 			{destination}
-			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
 			on:icSendBack
@@ -90,7 +85,6 @@
 		<BtcSendTokenWizard
 			{currentStep}
 			{destination}
-			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
@@ -103,7 +97,6 @@
 		<SolSendTokenWizard
 			{currentStep}
 			{destination}
-			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
