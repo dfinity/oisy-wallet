@@ -47,13 +47,8 @@
 	let {
 		destination = $bindable(),
 		activeSendDestinationTab = $bindable(),
-		selectedContact = $bindable(),
 		formCancelAction = 'back'
 	}: Props = $props();
-
-	onMount(() => {
-		selectedContact = undefined;
-	});
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -90,7 +85,6 @@
 						networkContacts={$ethNetworkContacts}
 						bind:destination
 						bind:activeSendDestinationTab
-						bind:selectedContact
 						on:icNext={next}
 					/>
 				</LoaderMultipleEthTransactions>
@@ -111,7 +105,6 @@
 				networkContacts={$icNetworkContacts}
 				bind:destination
 				bind:activeSendDestinationTab
-				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>
@@ -130,7 +123,6 @@
 				networkContacts={$btcNetworkContacts}
 				bind:destination
 				bind:activeSendDestinationTab
-				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>
@@ -148,7 +140,6 @@
 				networkContacts={$solNetworkContacts}
 				bind:destination
 				bind:activeSendDestinationTab
-				bind:selectedContact
 				on:icNext={next}
 			/>
 		</div>

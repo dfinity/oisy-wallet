@@ -35,7 +35,6 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { token } from '$lib/stores/token.store';
-	import type { ContactUi } from '$lib/types/contact';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
 	import type { OptionToken, Token } from '$lib/types/token';
@@ -58,7 +57,6 @@
 
 	let destination = '';
 	let activeSendDestinationTab: SendDestinationTab = 'recentlyUsed';
-	let selectedContact: ContactUi | undefined = undefined;
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
@@ -84,7 +82,6 @@
 	const reset = () => {
 		destination = '';
 		activeSendDestinationTab = 'recentlyUsed';
-		selectedContact = undefined;
 		amount = undefined;
 
 		sendProgressStep = ProgressStepsSend.INITIALIZATION;
@@ -192,7 +189,6 @@
 			<SendDestinationWizardStep
 				bind:destination
 				bind:activeSendDestinationTab
-				bind:selectedContact
 				formCancelAction={isTransactionsPage ? 'close' : 'back'}
 				on:icBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				on:icNext={modal.next}
