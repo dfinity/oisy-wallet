@@ -47,7 +47,6 @@
 
 		stopConfirmToClose();
 	});
-
 </script>
 
 <div class="stretch" data-tid={IN_PROGRESS_MODAL}>
