@@ -19,11 +19,7 @@
 	let {children, level = 'info', closableKey, styleClass, testId}: Props = $props();
 
 	const closable = $derived(nonNullish(closableKey));
-	let visible = $state(true);
-
-	$effect(() => {
-		visible = isNullish(closableKey) || !shouldHideInfo(closableKey);
-	});
+	let visible = $state(isNullish(closableKey) || !shouldHideInfo(closableKey));
 
 	const close = () => {
 		visible = false;
