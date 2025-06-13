@@ -8,6 +8,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
+	import { invalidIcpAddress } from '$lib/utils/account.utils';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
 
 	interface Props {
@@ -28,22 +29,41 @@
 
 	let filteredNetworkContacts = $derived(
 		nonNullish(networkContacts)
-			? isEmptyString(destination)
-				? networkContacts
-				: Object.entries(networkContacts).reduce<NetworkContacts>(
-						(acc, [address, contact]) => ({
-							...acc,
-							...(isContactMatchingFilter({
+			? (() => {
+					const expanded: NetworkContacts = {};
+
+					for (const [, contact] of Object.entries(networkContacts)) {
+						const hasPrincipal = contact.addresses.some((a) => invalidIcpAddress(a.address));
+
+						for (const { address } of contact.addresses) {
+							const isPrincipal = invalidIcpAddress(address);
+
+							if (isPrincipal || !hasPrincipal) {
+								const key = `${address}-${contact.name}`;
+								expanded[key] = contact;
+							}
+						}
+					}
+
+					if (isEmptyString(destination)) return expanded;
+
+					return Object.entries(expanded).reduce<NetworkContacts>((acc, [key, contact]) => {
+						const address = key.split('-')[0];
+
+						if (
+							isContactMatchingFilter({
 								filterValue: destination,
 								contact,
 								address,
 								networkId: $sendTokenNetworkId
 							})
-								? { [address]: contact }
-								: {})
-						}),
-						{}
-					)
+						) {
+							acc[address] = contact;
+						}
+
+						return acc;
+					}, {});
+				})()
 			: {}
 	);
 </script>
