@@ -80,7 +80,7 @@
 					testId={ADDRESS_BOOK_SAVE_BUTTON}
 					loading={disabled}
 				>
-					{$i18n.core.text.save}
+					{$i18n.core.text.create}
 				</Button>
 			</ButtonGroup>
 		{/snippet}
