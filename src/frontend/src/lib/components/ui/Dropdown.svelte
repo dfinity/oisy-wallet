@@ -5,9 +5,9 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	interface Props {
-		children?: Snippet;
+		children: Snippet;
 		title?: Snippet;
-		items?: Snippet;
+		items: Snippet;
 		disabled?: boolean;
 		asModalOnMobile?: boolean;
 		ariaLabel: string;
@@ -38,13 +38,13 @@
 	{disabled}
 	opened={visible}
 >
-	{@render children?.()}
+	{@render children()}
 </DropdownButton>
 
 {#if asModalOnMobile}
 	<Responsive up="1.5md">
 		<Popover bind:visible anchor={button} invisibleBackdrop>
-			{@render items?.()}
+			{@render items()}
 		</Popover>
 	</Responsive>
 
@@ -57,12 +57,12 @@
 					{@render title?.()}
 				</svelte:fragment>
 
-				{@render items?.()}
+				{@render items()}
 			</Modal>
 		{/if}
 	</Responsive>
 {:else}
 	<Popover bind:visible anchor={button} invisibleBackdrop>
-		{@render items?.()}
+		{@render items()}
 	</Popover>
 {/if}
