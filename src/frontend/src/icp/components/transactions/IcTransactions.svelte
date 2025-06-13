@@ -64,13 +64,13 @@
 <Header>
 	{$i18n.transactions.text.title}
 
-	<svelte:fragment slot="end">
+	{#snippet end()}
 		{#if $tokenCkBtcLedger}
 			<IcTransactionsBitcoinStatus />
 		{:else if ckEthereum}
 			<IcTransactionsEthereumStatus />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </Header>
 
 <IcTransactionsSkeletons>
